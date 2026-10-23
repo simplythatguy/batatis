@@ -7323,7 +7323,8 @@
           "default": "relevance-1",
           "enum": [
             "relevance-1",
-            "relevance-2"
+            "relevance-2",
+            "relevance-3"
           ],
           "title": "Model",
           "type": "string"

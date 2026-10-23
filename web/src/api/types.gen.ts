@@ -1145,7 +1145,7 @@ export interface RelevanceRecord {
   config_hash: string | null;
   description_sha256: string;
   display: Record<string, number>;
-  model: "relevance-1" | "relevance-2";
+  model: "relevance-1" | "relevance-2" | "relevance-3";
   model_ids: Record<string, string | null>;
   rerank: Record<string, number>;
   scored_at: string;
