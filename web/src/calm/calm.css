@@ -3509,10 +3509,40 @@ body {
   line-height: 1.4;
 }
 
-.cf-lib-edition {
-  margin: 2px 0 0;
-  font-size: 12.5px;
+.cf-lib-nav-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+
+/* The edition sits behind a small info control. */
+.cf-lib-info {
   color: var(--cf-text-3);
+  font-size: 12.5px;
+}
+
+.cf-lib-info summary {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.cf-lib-info summary::-webkit-details-marker {
+  display: none;
+}
+
+.cf-lib-info[open] {
+  flex-basis: 100%;
+  order: 3;
+}
+
+.cf-lib-info p {
+  margin: 2px 0 0;
 }
 
 /* The application the library reads for: one listbox button above the search. */
@@ -3968,46 +3998,6 @@ body {
 
 .cf-lib-back {
   display: none;
-}
-
-.cf-crumbs {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  margin-left: -4px;
-  font-size: 12.5px;
-  line-height: 1.5;
-  color: var(--cf-text-3);
-}
-
-.cf-crumb-item {
-  display: inline-flex;
-  align-items: center;
-}
-
-.cf-crumb-sep {
-  padding: 0 2px;
-  color: var(--cf-text-4);
-}
-
-.cf-crumb {
-  border: 0;
-  background: none;
-  padding: 2px 4px;
-  border-radius: 6px;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition-property: color;
-  transition-duration: 150ms;
-  transition-timing-function: ease-out;
-}
-
-@media (hover: hover) {
-  .cf-crumb:hover {
-    color: var(--cf-text);
-  }
 }
 
 .cf-read-title {

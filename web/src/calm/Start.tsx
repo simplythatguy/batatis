@@ -96,7 +96,7 @@ export function Start() {
   takeRef.current = take;
 
   // Batatis reads the description and the text layer of attached PDFs (intake).
-  const blocked = locked ? readOnlyStatus(app?.status, app?.authority).note : !text.trim() ? "Describe it in a sentence first. Batatis also reads the text of the PDFs you attach." : "";
+  const blocked = locked ? readOnlyStatus(app?.status, app?.authority).note : !text.trim() ? "Describe your project to start." : "";
 
   function start() {
     if (blocked) return;
@@ -231,13 +231,13 @@ export function Start() {
             </button>
             <span className="cf-faint cf-small cf-drop-hint">or drop files anywhere</span>
           </div>
-          <button type="button" className="cf-btn is-primary" disabled={Boolean(blocked)} onClick={start}>
+          <button type="button" className="cf-btn is-primary" disabled={Boolean(blocked)} title={blocked || undefined} onClick={start}>
             {inCase ? "Continue" : "Start"} <Kbd>{MOD_KEY} ↵</Kbd>
           </button>
         </div>
       </div>
       <div className="cf-start-notes">
-        {blocked && <p className="cf-faint cf-small" role="note">{blocked}</p>}
+        {locked && blocked && <p className="cf-faint cf-small" role="note">{blocked}</p>}
         {note && <p className="cf-faint cf-small" role="status">{note}</p>}
         {!inCase && resetNote && <p className="cf-faint cf-small" role="status">{resetNote}</p>}
       </div>

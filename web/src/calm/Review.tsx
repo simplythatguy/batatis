@@ -184,7 +184,6 @@ function CaseReview() {
     lede = checkNote;
   } else if (!checked) {
     headline = "Let’s check your application.";
-    lede = "Batatis saves your draft, looks for the code that applies and lists anything missing. Nothing is submitted.";
   } else if (blocking.length) {
     headline = `Almost there. ${plural(blocking.length, "thing")} ${blocking.length === 1 ? "stands" : "stand"} between you and the official PDF.`;
   } else if (warnings) {
@@ -221,11 +220,10 @@ function CaseReview() {
           </div>
         </div>
 
-        <div className="cf-list-label">Still needed</div>
-        {gapsSource !== "engine" && <p className="cf-faint cf-small cf-list-note">From this browser’s list. The online check can add more.</p>}
-        {gaps.length === 0 ? (
-          <p className="cf-faint cf-row-empty">Nothing on the list.</p>
-        ) : (
+        {gaps.length > 0 && (
+          <div className="cf-list-label" title={gapsSource !== "engine" ? "From this browser’s list. The online check can add more." : undefined}>Still needed</div>
+        )}
+        {gaps.length > 0 && (
           <ul className="cf-rows">
             {shown.map((g) => {
               const key = gapKey(c, g);

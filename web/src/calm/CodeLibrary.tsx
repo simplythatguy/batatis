@@ -47,11 +47,12 @@ export function ScoreStatus() {
   }
   if (rel.phase === "loading") return <span className="cf-score" role="status"><span className="cf-dot is-pending" aria-hidden="true" />Checking for scores…</span>;
   const scoreBtn = (label: string) => (
-    <button type="button" className="cf-btn is-xs" disabled={Boolean(rel.blocked) || wait > 0} onClick={() => void rel.score()}>
+    <button type="button" className="cf-btn is-xs" disabled={Boolean(rel.blocked) || wait > 0} title={rel.blocked || undefined} onClick={() => void rel.score()}>
       {label}
     </button>
   );
-  const why = wait > 0 ? `Try again in ${wait} s.` : rel.result && !rel.stale ? "" : rel.blocked;
+  // Why Score is off (no description yet) sits on the button as its title; only a wait is shown.
+  const why = wait > 0 ? `Try again in ${wait} s.` : "";
   return (
     <div className="cf-score-wrap">
       {rel.result ? (
@@ -187,7 +188,7 @@ function Tree({ toc, selected, filter, revealKey }: { toc: CodeToc; selected: st
     setOpen((o) => addAll(o, ancestorsOf(toc, selected)));
     setFocus(selected);
   }, [selected, toc]);
-  // Breadcrumbs reveal a branch.
+  // A palette pick reveals its branch.
   useEffect(() => {
     if (!revealKey) return;
     const k = revealKey.key;
@@ -418,7 +419,7 @@ export function AddToApplication({ id, record }: { id: string; record: CodeRecor
   );
 }
 
-function Reading({ id, filter, onReveal, index, narrow }: { id: string; filter: Filter; onReveal: (key: string) => void; index: ReturnType<typeof tocIndex>; narrow: boolean }) {
+function Reading({ id, filter, index, narrow }: { id: string; filter: Filter; index: ReturnType<typeof tocIndex>; narrow: boolean }) {
   const scope = useCodeScope();
   const text = useText(id);
   const ctx = useContext(id);
@@ -444,22 +445,11 @@ function Reading({ id, filter, onReveal, index, narrow }: { id: string; filter: 
     referenced_by: [...new Set(raw.referenced_by.map((r) => articleOf(r) ?? r))].filter((r) => canonicalProvision(r) !== canonicalProvision(id)),
   };
   const link = (r: string) => <a key={r} className="cf-code-chip is-link" href={codeHref(r, filter)}>{r}</a>;
-  const part = /^\d+\./.test(id) ? id.split(".")[0] : null;
-  const crumbs = (cx?.path ?? []).filter((p) => p.level !== "part" && canonicalProvision(p.id) !== canonicalProvision(id));
   const page = (cx?.pdf_page ?? (text.state === "ready" ? text.value.pdf_page : null)) || null;
 
   return (
     <article className="cf-read" aria-labelledby="cf-read-title">
       <a className="cf-lib-back" href={codeHref(null, filter === "all" ? "all" : filter)}><CIcon name="back" size={13} />Chapters</a>
-      <nav className="cf-crumbs" aria-label="Where this is">
-        {part && <button type="button" className="cf-crumb" onClick={() => onReveal(`part-${part}`)}>Part {part}</button>}
-        {crumbs.map((p) => (
-          <span key={p.id} className="cf-crumb-item">
-            <span className="cf-crumb-sep" aria-hidden="true">›</span>
-            <button type="button" className="cf-crumb" onClick={() => onReveal(p.id)}>{p.id} {p.title ?? ""}</button>
-          </span>
-        ))}
-      </nav>
       <h1 ref={heading} id="cf-read-title" className="cf-read-title" tabIndex={-1}>{title || id}</h1>
       <div className="cf-read-meta">
         <span className="cf-mono cf-read-id">Article {id}</span>
@@ -644,7 +634,7 @@ export function CodeLibrary({ route }: { route: CalmRoute }) {
   const toc = useToc();
   const root = useRef<HTMLDivElement>(null);
   const narrow = useNarrow(root, 760);
-  const [reveal, setReveal] = useState<{ key: string; n: number } | null>(() => {
+  const [reveal] = useState<{ key: string; n: number } | null>(() => {
     const k = takePendingReveal();
     return k ? { key: k, n: 1 } : null;
   });
@@ -682,7 +672,10 @@ export function CodeLibrary({ route }: { route: CalmRoute }) {
       <aside className="cf-lib-nav" aria-label="Code library">
         <div className="cf-lib-nav-head">
           <h1 className="cf-lib-name">Code library</h1>
-          <p className="cf-lib-edition">{edition} · Division B</p>
+          <details className="cf-lib-info">
+            <summary aria-label="Code edition"><CIcon name="info" size={14} /></summary>
+            <p>{edition} · Division B</p>
+          </details>
         </div>
         <ContextPicker />
         <button type="button" className="cf-lib-search" onClick={openPalette}>
@@ -722,11 +715,11 @@ export function CodeLibrary({ route }: { route: CalmRoute }) {
       </aside>
       <section className="cf-lib-reader" aria-label="Reading">
         {route.article ? (
-          <Reading key={`${none ? NO_APPLICATION : engineId ?? "this-visit"}:${route.article}`} id={route.article} filter={filter} index={index} narrow={narrow} onReveal={(key) => { if (narrow) location.hash = back; setReveal((r) => ({ key, n: (r?.n ?? 0) + 1 })); }} />
+          <Reading key={`${none ? NO_APPLICATION : engineId ?? "this-visit"}:${route.article}`} id={route.article} filter={filter} index={index} narrow={narrow} />
         ) : (
           <div className="cf-read-empty">
             <h2 className="cf-read-empty-title">Pick an article to read it.</h2>
-            <p className="cf-read-empty-text">Open a chapter, or search with <span className="cf-kbd is-dark">{MOD_KEY} ⇧ K</span>. The code stays out of your way until you want it.</p>
+            <p className="cf-read-empty-text">Open a chapter or search <span className="cf-kbd is-dark">{MOD_KEY} ⇧ K</span></p>
             {high.length + mid.length > 0 && (
               <>
                 <h3 className="cf-read-empty-label">Likely related to your project</h3>

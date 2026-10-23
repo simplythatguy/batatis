@@ -131,7 +131,7 @@ export function useRelevance(): Relevance {
   const mine = none ? EMPTY : s.caseId === engineId ? s : { ...EMPTY, caseId: engineId };
   const display = mine.result?.display;
   const blocked =
-    none ? "" : phase !== "case" ? "Start your application first." : !c.description.trim() ? "Describe your project first. Scores are estimated from your description." : "";
+    none ? "" : phase !== "case" ? "Start your application first." : !c.description.trim() ? "Describe your project to score it." : "";
   const refresh = useCallback(() => {
     if (!none && engineId) void loadRelevance(engineId);
   }, [none, engineId]);

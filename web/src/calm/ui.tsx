@@ -15,6 +15,7 @@ const PATHS: Record<string, ReactNode> = {
   external: <path d="M6.5 3.5h-3v9h9v-3M9 3.5h3.5V7M12.5 3.5 7.5 8.5" />,
   retry: <><path d="M13 8a5 5 0 1 1-1.5-3.5" /><path d="M13 2.5v3h-3" /></>,
   plus: <path d="M8 3.5v9M3.5 8h9" />,
+  info: <><circle cx="8" cy="8" r="6" /><path d="M8 7.2v3.6M8 5v.1" /></>,
 };
 
 export function CIcon({ name, size = 16 }: { name: keyof typeof PATHS; size?: number }) {
