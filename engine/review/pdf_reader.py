@@ -5,9 +5,10 @@ An uploaded PDF is one of: the SCC variance form with live AcroForm fields
 attachment, or unreadable (no text layer, encrypted, not a PDF).
 
 Field states:
-- present: text was read in the field (fillable /V, or text inside the field
-  rectangle of a flattened page).
-- blank: certain. Fillable: the field exists and has no value. Flattened: the
+- present: extracted text contributes visible pixels in the field. A fillable
+  value must also agree with its stored normal appearance.
+- blank: certain. Fillable: the field and its appearance are empty, with no
+  added page content in the box. Flattened: the
   page has a text layer that matches the blank form, the rectangle holds no
   text and nothing else (image, drawing) was added inside it.
 - not_found: Batatis could not tell. Ask the officer to look at the pointer.
@@ -156,7 +157,7 @@ def _annotation_boxes(page) -> frozenset:
 
     Compare normal rendering with annotations on/off: flags, appearance states and invisible
     drawing modes must not be guessed from /Contents or object counts. This detects ink only,
-    never OCRs or reads applicant text. Legacy flattened-field extraction remains unchanged.
+    never OCRs or reads applicant text.
     """
     import ctypes
     import pypdfium2.raw as raw
@@ -296,6 +297,180 @@ def _boundary_box(textpage, boundary: tuple[str, int]) -> tuple[float, float, fl
             max(b[2] for b in boxes), max(b[3] for b in boxes))
 
 
+def _device_box(page, rect, scale):
+    """Map PDF points through the actual page crop and rotation."""
+    import ctypes
+    import math
+    import pypdfium2.raw as raw
+    width, height = (math.ceil(v * scale) for v in page.get_size())
+    points = []
+    for x in (rect[0], rect[2]):
+        for y in (rect[1], rect[3]):
+            px, py = ctypes.c_int(), ctypes.c_int()
+            if not raw.FPDF_PageToDevice(page, 0, 0, width, height, 0, x, y,
+                                         ctypes.byref(px), ctypes.byref(py)):
+                raise ValueError('The field render coordinates could not be read.')
+            points.append((px.value, py.value))
+    xs, ys = zip(*points)
+    return min(xs), min(ys), max(xs), max(ys)
+
+
+def _region_render(page, rect, scale):
+    import math
+    x0, y0, x1, y1 = page.get_bbox()
+    if not (x0 <= rect[0] < rect[2] <= x1 and y0 <= rect[1] < rect[3] <= y1):
+        raise ValueError('The field is outside the visible page.')
+    width, height = (math.ceil(v * scale) for v in page.get_size())
+    left, top, right, bottom = _device_box(page, rect, scale)
+    distances = (max(0, left), max(0, height - bottom), max(0, width - right), max(0, top))
+    # render() rounds up: avoid a floating-point division moving an edge by one pixel.
+    crop = tuple(math.nextafter(v / scale, -math.inf) if v else 0 for v in distances)
+    bitmap = page.render(scale=scale, crop=crop, draw_annots=True, may_draw_forms=False)
+    try:
+        return bitmap.to_pil().convert('RGB')
+    finally:
+        bitmap.close()
+
+
+def _text_glyphs(page):
+    """Keep page-owned text-object handles with their transformed character boxes."""
+    import pypdfium2.raw as raw
+    text = page.get_textpage()
+    try:
+        if text.count_chars() > 65536:
+            raise ValueError('Too many characters for bounded field inspection.')
+        glyphs = []
+        for index in range(text.count_chars()):
+            char = text.get_text_range(index, 1)
+            if char.strip():
+                glyphs.append((char, text.get_charbox(index), raw.FPDFText_GetTextObject(text, index)))
+        return glyphs
+    finally:
+        text.close()
+
+
+def _text_is_visible(page, rect, value, glyphs=None):
+    """Every quoted glyph must affect the rendered field, not just text extraction.
+
+    Suppression is confined to this private inspection document and always restored.
+    Per-object differences exclude borders/other answers; per-character boxes prevent
+    a visible prefix from attesting an entirely covered suffix. No OCR is performed.
+    """
+    import ctypes
+    import math
+    import pypdfium2.raw as raw
+    from PIL import ImageChops
+    modes = []
+    try:
+        if len(value) > 8192:
+            return False
+        left, bottom, right, top = rect
+        scale = min(2, math.sqrt(250000 / ((right - left) * (top - bottom))))
+        original = _region_render(page, rect, scale)
+        objects, chars = {}, []
+        for char, box, obj in _text_glyphs(page) if glyphs is None else glyphs:
+            x0, y0, x1, y1 = box
+            if x0 >= right or x1 <= left or y0 >= top or y1 <= bottom:
+                continue
+            if (not obj or not all(math.isfinite(v) for v in box)
+                    or x0 < left or y0 < bottom or x1 > right or y1 > top or x0 >= x1 or y0 >= y1):
+                return False
+            key = ctypes.cast(obj, ctypes.c_void_p).value
+            objects.setdefault(key, (obj, []))[1].append(box)
+            chars.append(char)
+        if ''.join(chars) != re.sub(r'\s+', '', value) or len(objects) > 128:
+            return False
+        if not value:
+            # An empty logical value cannot conceal text, handwriting or a raster appearance.
+            return original.getextrema() == ((255, 255),) * 3
+        if not objects:
+            return False
+        crop_left, crop_top, _right, _bottom = _device_box(page, rect, scale)
+        for obj, boxes in objects.values():
+            mode = raw.FPDFTextObj_GetTextRenderMode(obj)
+            if mode not in (0, 1, 2):  # invisible and clip-only text do not attest an answer
+                return False
+            modes.append((obj, mode))
+            if not raw.FPDFTextObj_SetTextRenderMode(obj, 3):
+                return False
+            difference = ImageChops.difference(original, _region_render(page, rect, scale))
+            if not raw.FPDFTextObj_SetTextRenderMode(obj, mode):
+                return False
+            for box in boxes:
+                x0, y0, x1, y1 = _device_box(page, box, scale)
+                if not difference.crop((x0 - crop_left, y0 - crop_top,
+                                        x1 - crop_left + 1, y1 - crop_top + 1)).getbbox():
+                    return False
+        return True
+    except Exception:  # noqa: BLE001 - failed rendering cannot establish a readable answer
+        return False
+    finally:
+        for obj, mode in modes:
+            raw.FPDFTextObj_SetTextRenderMode(obj, mode)
+
+
+def _appearance_pdf(widget, appearance):
+    """Inspect the stored AP as an XObject, preserving its resources, matrix and clip."""
+    import math
+    from pypdf import PdfWriter
+    from pypdf.generic import DecodedStreamObject, DictionaryObject, NameObject
+    left, bottom, right, top = map(float, widget['/Rect'])
+    width, height = right - left, top - bottom
+    x0, y0, x1, y1 = map(float, appearance['/BBox'])
+    a, b, c, d, e, f = map(float, appearance.get('/Matrix', (1, 0, 0, 1, 0, 0)))
+    corners = [(a * x + c * y + e, b * x + d * y + f) for x in (x0, x1) for y in (y0, y1)]
+    xs, ys = zip(*corners)
+    if (not all(math.isfinite(v) for v in (width, height, *xs, *ys))
+            or not 0 < width <= 2000 or not 0 < height <= 2000
+            or min(xs) >= max(xs) or min(ys) >= max(ys)):
+        raise ValueError('The appearance bounds could not be read.')
+    sx, sy = width / (max(xs) - min(xs)), height / (max(ys) - min(ys))
+    writer = PdfWriter()
+    page = writer.add_blank_page(width=width, height=height)
+    page[NameObject('/Resources')] = DictionaryObject({NameObject('/XObject'): DictionaryObject({
+        NameObject('/Appearance'): writer._add_object(appearance.clone(writer))})})
+    content = DecodedStreamObject()
+    content.set_data(f'q {sx} 0 0 {sy} {-min(xs) * sx} {-min(ys) * sy} cm /Appearance Do Q'.encode())
+    page[NameObject('/Contents')] = writer._add_object(content)
+    output = io.BytesIO()
+    writer.write(output)
+    return output.getvalue()
+
+
+def _appearance_agrees(widget, value, *, checkbox=False):
+    import pypdfium2 as pdfium
+    from PIL import ImageChops
+    try:
+        if int(widget.get('/F', 0)) & (1 | 2 | 32):
+            return False
+        if '/AP' not in widget or '/N' not in widget['/AP']:
+            return not value
+        appearance = widget['/AP']['/N']
+        if checkbox:
+            state = widget.get('/AS', '/Off')
+            if state != (value or '/Off') or state not in appearance:
+                return False
+            selected = appearance[state]
+        else:
+            selected = appearance
+        with pdfium.PdfDocument(_appearance_pdf(widget, selected)) as doc:
+            page = doc[0]
+            if not checkbox:
+                return _text_is_visible(page, page.get_bbox(), value)
+            if not value:
+                return True
+            with pdfium.PdfDocument(_appearance_pdf(widget, appearance['/Off'])) as off:
+                return bool(ImageChops.difference(_region_render(page, page.get_bbox(), 2),
+                                                  _region_render(off[0], off[0].get_bbox(), 2)).getbbox())
+    except Exception:  # noqa: BLE001 - never regenerate a stale or unreadable AP from /V
+        return False
+
+
+def _overlaps(rect, boxes):
+    x0, y0, x1, y1 = rect
+    return any(bx0 < x1 and bx1 > x0 and by0 < y1 and by1 > y0 for bx0, by0, bx1, by1 in boxes)
+
+
 def _fillable(reader, data: bytes, name: str, fmaps: list[dict]) -> ReadFile | None:
     try:
         fields = reader.get_fields() or {}
@@ -314,10 +489,16 @@ def _fillable(reader, data: bytes, name: str, fmaps: list[dict]) -> ReadFile | N
     fmap = best[1]
     pages = {}
     rects = {}
+    widgets = {}
     for page_no, widget_name, widget in scc._widgets(reader.pages):
         pages.setdefault(widget_name, page_no)
         rects.setdefault(widget_name, tuple(round(float(v), 1) for v in widget['/Rect']))
+        widgets.setdefault(widget_name, widget)
     out = ReadFile(name, '', len(data), len(reader.pages), 'scc_form_fillable', fmap['version'], data=data)
+    import pypdfium2 as pdfium
+    version = _version(fmap['version'], str(scc.form_path()))
+    doc = pdfium.PdfDocument(data)
+    marks = {}
     for widget_name in sorted(mapped_widgets(fmap)):
         if widget_name not in fields:
             out.fields[widget_name] = FieldValue(widget_name, pages.get(widget_name, 0), None, 'not_found',
@@ -327,10 +508,36 @@ def _fillable(reader, data: bytes, name: str, fmaps: list[dict]) -> ReadFile | N
         value = '' if raw_value is None else str(raw_value)
         if widget_name in fmap['checkboxes']:
             value = '' if value in ('', '/Off', 'Off') else value
+        value = _norm(value)
         status = 'present' if _norm(value) else 'blank'
+        page_no, rect = pages.get(widget_name, 0), rects.get(widget_name)
+        try:
+            page = doc[page_no]
+            if version is None or rect is None or widget_name not in widgets:
+                raise ValueError('The field appearance cannot be verified.')
+            if page_no not in marks:
+                marks[page_no] = (_object_boxes(page) - version.template_objects[page_no]) | _annotation_boxes(page)
+            text = page.get_textpage()
+            try:
+                page_answer = _norm(text.get_text_bounded(*rect))
+            finally:
+                text.close()
+            widget_value = widgets[widget_name].get('/V', scc._field(widgets[widget_name]).get('/V'))
+            widget_value = '' if widget_value is None else _norm(str(widget_value))
+            if widget_name in fmap['checkboxes'] and widget_value in ('/Off', 'Off'):
+                widget_value = ''
+            if (page_answer or _overlaps(rect, marks[page_no])
+                    or widget_value != value
+                    or not _appearance_agrees(widgets[widget_name], value, checkbox=widget_name in fmap['checkboxes'])):
+                status = 'not_found'
+        except Exception:  # noqa: BLE001 - an unreadable box cannot establish presence or absence
+            status = 'not_found'
         out.fields[widget_name] = FieldValue(widget_name, pages.get(widget_name, 0), rects.get(widget_name),
-                                             status, _norm(value) if status == 'present' else '',
+                                             status, value if status == 'present' else '',
+                                             'The visible field and its stored value could not be verified. '
+                                             'Check the box on the page.' if status == 'not_found' else
                                              'The fillable field is empty.' if status == 'blank' else '')
+    doc.close()
     for widget_name in signature_widgets(fmap):
         signed = widget_name in fields and fields[widget_name].get('/V') is not None
         out.signatures[widget_name] = FieldValue(
@@ -368,22 +575,32 @@ def _flattened(data: bytes, name: str, versions: list[FormVersion], fmaps: list[
         if min(scores) < TEMPLATE_MATCH:
             continue
         out = ReadFile(name, '', len(data), len(doc), 'scc_form_flattened', version.version, data=data)
+        annotations, glyphs, pdf_pages = {}, {}, {}
         for widget_name in sorted(mapped_widgets(version.fmap)) + signature_widgets(version.fmap):
             page_no = version.pages.get(widget_name, 0)
             rect = version.rects[widget_name]
-            page = doc[page_no]
+            if page_no not in pdf_pages:
+                pdf_pages[page_no] = doc[page_no]
+            page = pdf_pages[page_no]  # retain the owner of cached raw text-object handles
             text = _norm(page.get_textpage().get_text_bounded(*rect))
             if widget_name in signature_widgets(version.fmap):
                 out.signatures[widget_name] = FieldValue(
                     widget_name, page_no, rect, 'not_found', '',
                     'A signature on a flattened form cannot be read. Check the signature box on the page.')
                 continue
+            if page_no not in annotations:
+                annotations[page_no] = _annotation_boxes(page)
             if text:
-                state = FieldValue(widget_name, page_no, rect, 'present', text)
+                if page_no not in glyphs:
+                    glyphs[page_no] = _text_glyphs(page)
+                state = (FieldValue(widget_name, page_no, rect, 'present', text)
+                         if not _overlaps(rect, annotations[page_no]) and _text_is_visible(page, rect, text, glyphs[page_no]) else
+                         FieldValue(widget_name, page_no, rect, 'not_found',
+                                    reason='The extracted text could not be verified as visible. Check the box on the page.'))
             elif page.get_textpage().count_chars() == 0:
                 state = FieldValue(widget_name, page_no, rect, 'not_found',
                                    reason='The page has no text layer (it may be scanned). Check the box on the page.')
-            elif _added_marks(page, rect, version.template_objects[page_no]):
+            elif _added_marks(page, rect, version.template_objects[page_no]) or _overlaps(rect, annotations[page_no]):
                 state = FieldValue(widget_name, page_no, rect, 'not_found',
                                    reason='Something other than text is drawn in this box (handwriting, an image '
                                           'or a stamp). Check the box on the page.')
