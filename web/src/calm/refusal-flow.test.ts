@@ -5,6 +5,7 @@ import { componentHarness, nodes, text } from "../../scripts/component-harness.m
 import type { ApplicationSummary, Message } from "../api/accounts.ts";
 import * as packageView from "./reviewer/packageView.ts";
 import * as queue from "./reviewer/queue.ts";
+import * as thread from "./comments/thread.ts";
 
 const app = (over: Partial<ApplicationSummary> = {}): ApplicationSummary => ({
   id: "c1", title: "Applicant's file", status: "refused", authority: "edmonton", updated_at: "2026-10-22T12:00:00Z",
@@ -23,22 +24,59 @@ const click = (tree, label: string) => {
   button.props.onClick();
 };
 
+/**
+ * The comments page for the open application (`#/comments`). `render({ app })` sets the account's
+ * summary for that application; `state` changes the open application, account, visibility or
+ * the shell's switch problem between renders.
+ */
 async function bannerHarness(initial: Message[]) {
   let messages = initial, reads = 0, loads = 0;
   const patches = [];
-  const harness = await componentHarness(new URL("./shell/ReturnedBanner.tsx", import.meta.url), "ReturnedBanner", {
+  const state = { app: null as ApplicationSummary | null, engineId: "c1", accountId: "applicant", hidden: false, problem: null as { id: string; text: string } | null };
+  const docListeners = new Set<() => void>();
+  const pending: { id: string; resolve: (m: Message[]) => void; reject: (e: unknown) => void }[] = [];
+  let mode: "auto" | "manual" | "fail" = "auto";
+  const harness = await componentHarness(new URL("./comments/Comments.tsx", import.meta.url), "Comments", {
     "../../api/accounts": { accounts: {
-      messages: async () => { loads++; return messages; },
+      messages: (id: string) => {
+        loads++;
+        if (mode === "manual") return new Promise<Message[]>((resolve, reject) => pending.push({ id, resolve, reject }));
+        if (mode === "fail") return Promise.reject(Object.assign(new Error("outage"), { detail: "The officer’s comments did not load." }));
+        return Promise.resolve(messages);
+      },
       markRead: async () => { reads++; },
-      postMessage: async (_id, body) => message("4", body, { author: applicantReply.author, read_by_me: true }),
+      postMessage: async () => { throw new Error("one-way: applicants never post"); },
     } },
     "../../api/client": { EngineError: Error },
-    "../../store": { useCase: () => ({ c: {}, gaps: [] }), hrefFor: () => "#/review" },
-    "../account": { initials: () => "MO", patchApplication: (...p) => patches.push(p) },
-    "../applications": { authorityName: () => "Edmonton" },
-    "../routes": { calmHref: (href) => href },
+    "../../api/packageReview": { packageReview: { sent: async () => ({ requests: [] }) } },
+    "../../store": { useCase: () => ({ c: {}, gaps: [], engineId: state.engineId }), hrefFor: () => "#/review" },
+    "../../model": { factLabel: (f: string) => f },
+    "../account": { initials: () => "MO", patchApplication: (...p) => patches.push(p), useAccount: () => ({ user: { id: state.accountId }, applications: state.app ? [state.app] : [] }) },
+    "../routes": { calmHref: (href) => href, lastStageHash: () => "#/questions" },
+    "./opening": { useOpenProblem: () => state.problem },
+    "./thread": thread,
+    "../ui": { CIcon: "CIcon", Dot: "Dot" },
+    "../icons": { Icon24: "Icon24" },
+  }, {
+    document: {
+      get visibilityState() { return state.hidden ? "hidden" : "visible"; },
+      addEventListener(_t: string, f: () => void) { docListeners.add(f); },
+      removeEventListener(_t: string, f: () => void) { docListeners.delete(f); },
+    },
   });
-  return { ...harness, setMessages: (next: Message[]) => { messages = next; }, get reads() { return reads; }, get loads() { return loads; }, patches };
+  return {
+    ...harness,
+    state,
+    pending,
+    render: (props?: { app?: ApplicationSummary; caseParam?: string | null }) => {
+      if (props?.app) { state.app = props.app; state.engineId = props.app.id; }
+      return harness.render({ caseParam: props?.caseParam ?? null });
+    },
+    setMode: (m: typeof mode) => { mode = m; },
+    setMessages: (next: Message[]) => { messages = next; },
+    setHidden: (hidden: boolean) => { state.hidden = hidden; for (const l of docListeners) l(); },
+    get reads() { return reads; }, get loads() { return loads; }, patches,
+  };
 }
 
 test("refusal keeps the decision and appeal notice, then both sides' correspondence in order", async () => {
@@ -50,18 +88,32 @@ test("refusal keeps the decision and appeal notice, then both sides' corresponde
   assert.ok(shown.includes(officerReply.body), "the later officer follow-up is visible");
   assert.ok(shown.indexOf(refusal.body) < shown.indexOf(applicantReply.body));
   assert.ok(shown.indexOf(applicantReply.body) < shown.indexOf(officerReply.body));
-  assert.doesNotMatch(shown, /See what’s missing|Fix \d|returned this/);
+  assert.doesNotMatch(shown, /See what’s missing|Fix \d|returned this/, "a refusal is final, never fix and resend");
+  assert.ok(shown.includes("Refused · read-only"));
   assert.equal(h.reads, 1, "the fully displayed unread messages can be marked read");
   h.unmount();
 });
 
-test("the banner leaves hidden earlier unread correspondence unread", async () => {
-  const hidden = message("0", "An earlier message before the decision.");
-  const h = await bannerHarness([hidden, refusal, applicantReply, officerReply]);
+test("an earlier unread message is on the page (Earlier), so clearing the thread never hides one", async () => {
+  const earlier = message("0", "An earlier message before the decision.");
+  const h = await bannerHarness([earlier, refusal, applicantReply, officerReply]);
   const tree = await h.render({ app: app() });
-  assert.equal(h.reads, 0, "the bulk-read endpoint must not clear a message the banner never displayed");
-  assert.equal(h.patches.length, 0, "the local unread count is not falsely cleared");
-  assert.ok(text(tree).includes(officerReply.body));
+  const shown = text(tree);
+  assert.ok(shown.includes(earlier.body), "the earlier unread message is displayed");
+  assert.ok(shown.indexOf(officerReply.body) < shown.indexOf(earlier.body), "after the newest decision and what followed it");
+  assert.equal(h.reads, 1);
+  h.unmount();
+});
+
+test("a hidden page marks nothing read until it is actually visible", async () => {
+  const h = await bannerHarness([refusal, officerReply]);
+  h.state.hidden = true;
+  await h.render({ app: app() });
+  assert.equal(h.reads, 0, "loaded in a background tab: still unread");
+  assert.equal(h.patches.length, 0);
+  h.setHidden(false);
+  await h.render();
+  assert.equal(h.reads, 1, "shown: now it is read");
   h.unmount();
 });
 
@@ -81,8 +133,10 @@ test("returned-for-information keeps its missing-item links and offers no reply"
   const returned = message("1", "Please provide the owner name.", { kind: "decision", items: [{ note: "Owner name", field: "owner_name" }] });
   const h = await bannerHarness([returned]);
   const tree = await h.render({ app: app({ status: "returned" }) });
-  assert.match(text(tree), /returned this/);
-  assert.ok(nodes(tree, (n) => n.type === "a" && text(n).includes("Fix 1 item")).length, "fixing the application is the answer");
+  assert.ok(text(tree).includes(returned.body));
+  const fix = nodes(tree, (n) => n.type === "a" && text(n).includes("Fix 1 item"))[0];
+  assert.ok(fix, "fixing the application is the answer");
+  assert.equal(fix.props.href, "#/review", "it opens the item's fix (the stubbed store href)");
   assert.equal(nodes(tree, (n) => n.type === "button" && text(n) === "Reply").length, 0);
   assert.equal(nodes(tree, (n) => n.type === "form").length, 0);
   h.unmount();
@@ -94,6 +148,7 @@ test("a notification for the open file refreshes only its summary and exposes th
   const account = { phase: "signed-in", user: { role: "applicant", applicant_type: "homebuilder" }, applications: [remote] };
   const route = { path: "/application", params: new URLSearchParams() };
   const h = await componentHarness(new URL("./Shell.tsx", import.meta.url), "Shell", {
+    "../api/sync": { engineGeneration: () => 0 },
     "../store": { useCase: () => ({ c: draft, gaps: [], engineGaps: [], phase: "case", engineId: "c1", saveStatus: "unsaved", openCase: async () => { reopened++; }, saveDraft: async () => { saved++; } }) },
     "../humanReview": { groupGaps: () => new Map() },
     "./account": { useAccount: () => account, bootAccount() {}, refreshApplications: async () => { refreshes++; account.applications = [remote]; } },
@@ -105,7 +160,7 @@ test("a notification for the open file refreshes only its summary and exposes th
     "./session": { useSession: () => ({ seen: [] }), getSession: () => ({ draft: "" }) },
     "./deck": { buildDeck: () => [], deckProgress: () => ({ done: 0, total: 0 }) },
     "./useDeckExtras": { useDeckExtras: () => ({ options: {} }) },
-    "./routes": { STAGES: [{ screen: "application" }] },
+    "./routes": { rememberStage() {}, STAGES: [{ screen: "application" }] },
     "./shell/AppLayout": { AppLayout: "AppLayout" },
     "./shell/ReturnedBanner": { ReturnedBanner: "ReturnedBanner" },
     "../router": { useRoute: () => route },
@@ -127,14 +182,14 @@ test("a notification for the open file refreshes only its summary and exposes th
   assert.equal(banner.type, "ReturnedBanner");
   assert.equal(banner.props.app.status, "refused");
   const b = await bannerHarness([refusal]);
-  assert.ok(text(await b.render(banner.props)).includes(refusal.body));
+  assert.ok(text(await b.render(banner.props)).includes(refusal.body), "its comments page shows the refusal");
   remote = app({ updated_at: officerReply.created_at });
   route.params = new URLSearchParams("case=c1");
   await h.render();
   tree = await h.render();
   banner = nodes(tree, (n) => n.type === "AppLayout")[0].props.banner;
   b.setMessages([refusal, applicantReply, officerReply]);
-  assert.ok(text(await b.render(banner.props)).includes(officerReply.body), "a later same-file notification also refreshes correspondence");
+  assert.ok(text(await b.render(banner.props)).includes(officerReply.body), "a later same-file notification also refreshes the comments");
   remote = app({ status: "returned", updated_at: "returned" });
   route.params = new URLSearchParams("case=c1");
   await h.render();
@@ -187,63 +242,77 @@ test("an unclaimed editable file keeps takeover guidance; standalone packages ke
   h.unmount();
 });
 
-test("a failed refusal-notice load offers a retry that shows the notice once it loads", async () => {
-  let fail = true, loads = 0, reads = 0;
-  const h = await componentHarness(new URL("./shell/ReturnedBanner.tsx", import.meta.url), "ReturnedBanner", {
-    "../../api/accounts": { accounts: {
-      messages: async () => { loads++; if (fail) throw Object.assign(new Error("outage"), { detail: "The officer’s message did not load." }); return [refusal]; },
-      markRead: async () => { reads++; },
-    } },
-    "../../api/client": { EngineError: Error },
-    "../../store": { useCase: () => ({ c: {}, gaps: [] }), hrefFor: () => "#/review" },
-    "../account": { initials: () => "MO", patchApplication() {} },
-    "../applications": { authorityName: () => "Edmonton" },
-    "../routes": { calmHref: (href) => href },
-  });
+test("a failed comments load offers a retry that shows the notice once it loads", async () => {
+  const h = await bannerHarness([refusal]);
+  h.setMode("fail");
   let tree = await h.render({ app: app() });
-  assert.equal(loads, 1);
+  assert.equal(h.loads, 1);
   assert.match(text(tree), /did not load/);
-  assert.doesNotMatch(text(tree), /A refusal was recorded/, "an unknown notice is not described as missing");
-  assert.equal(reads, 0, "nothing is marked read while the notice is not shown");
-  fail = false;
+  assert.doesNotMatch(text(tree), /No comments yet/, "an unknown thread is not described as empty");
+  assert.equal(h.reads, 0, "nothing is marked read while nothing is shown");
+  h.setMode("auto");
   click(tree, "Try again");
   tree = await h.render();
-  assert.equal(loads, 2);
+  assert.equal(h.loads, 2);
   assert.ok(text(tree).includes(refusal.body), "the final refusal reasons and appeal notice appear after the retry");
   assert.doesNotMatch(text(tree), /did not load/);
-  assert.equal(nodes(tree, (n) => n.type === "button" && text(n) === "Try again").length, 0);
   assert.equal(nodes(tree, (n) => n.type === "textarea").length, 0, "still no reply box");
   h.unmount();
 });
 
-test("a retry started for one file never shows its notice on another file", async () => {
-  const pending: { id: string; resolve: (m: Message[]) => void; reject: (e: unknown) => void }[] = [];
-  const h = await componentHarness(new URL("./shell/ReturnedBanner.tsx", import.meta.url), "ReturnedBanner", {
-    "../../api/accounts": { accounts: {
-      messages: (id: string) => new Promise<Message[]>((resolve, reject) => pending.push({ id, resolve, reject })),
-      markRead: async () => {},
-    } },
-    "../../api/client": { EngineError: Error },
-    "../../store": { useCase: () => ({ c: {}, gaps: [] }), hrefFor: () => "#/review" },
-    "../account": { initials: () => "MO", patchApplication() {} },
-    "../applications": { authorityName: () => "Edmonton" },
-    "../routes": { calmHref: (href) => href },
-  });
+test("a late answer for one application or account never shows (or clears) another's comments", async () => {
+  const h = await bannerHarness([]);
+  h.setMode("manual");
   await h.render({ app: app() });
-  pending[0].reject(Object.assign(new Error("outage"), { detail: "The officer’s message did not load." }));
-  let tree = await h.render();
-  click(tree, "Try again");
+  // The person opens another application before c1's thread arrives.
+  let tree = await h.render({ app: app({ id: "c2" }) });
+  assert.deepEqual(h.pending.map((p) => p.id), ["c1", "c2"]);
+  h.pending[0].resolve([refusal]);
   tree = await h.render();
-  assert.equal(pending.length, 2);
-  tree = await h.render({ app: app({ id: "c2" }) });
-  assert.equal(pending[2].id, "c2");
-  pending[1].resolve([refusal]);
-  tree = await h.render();
-  assert.ok(!text(tree).includes(refusal.body), "the first file's late answer is ignored");
-  pending[2].resolve([officerReply]);
+  assert.ok(!text(tree).includes(refusal.body), "c1's late thread is ignored");
+  assert.equal(h.reads, 0, "and nothing is marked read for it");
+  h.pending[1].resolve([officerReply]);
   tree = await h.render();
   assert.ok(text(tree).includes(officerReply.body));
+  assert.equal(h.reads, 1);
+  // Another account on the same application id: a fresh load, the old one's answer dropped.
+  h.state.accountId = "someone-else";
+  tree = await h.render();
+  assert.equal(h.pending.length, 3);
+  assert.ok(!text(tree).includes(officerReply.body), "the previous account's thread is not shown");
   h.unmount();
+});
+
+test("a comments link for another application waits for the guarded switch, and says why it failed", async () => {
+  const h = await bannerHarness([refusal]);
+  let tree = await h.render({ app: app(), caseParam: "c9" });
+  assert.match(text(tree), /Opening/);
+  assert.equal(h.loads, 0, "the open application's thread is not shown for another's link");
+  assert.equal(h.reads, 0);
+  h.state.problem = { id: "c9", text: "Couldn’t save your changes, so this application stays open." };
+  tree = await h.render({ caseParam: "c9" });
+  assert.match(text(tree), /Couldn’t save your changes/);
+  assert.equal(nodes(tree, (n) => n.type === "a" && n.props.href === "#/questions").length, 1, "Back returns to the open application");
+  assert.equal(h.reads, 0);
+  h.unmount();
+});
+
+test("the one-line notice links to comments, counts what is new, and reads nothing", async () => {
+  const h = await componentHarness(new URL("./shell/ReturnedBanner.tsx", import.meta.url), "ReturnedBanner", {
+    "../icons": { Icon24: "Icon24" }, "../comments/thread": thread,
+  });
+  const tree = await h.render({ app: app({ status: "returned", unread_messages: 2 }) });
+  assert.equal(tree.type.name, "NoticeLine");
+  const line = await componentHarness(new URL("./shell/ReturnedBanner.tsx", import.meta.url), "NoticeLine", { "../icons": { Icon24: "Icon24" }, "../comments/thread": thread });
+  const a = await line.render({ app: app({ status: "returned", unread_messages: 2 }) });
+  assert.equal(a.type, "a");
+  assert.equal(a.props.href, "#/comments");
+  assert.equal(a.props["aria-label"], "Returned for changes by Morgan, 2 new comments. Open comments");
+  assert.match(text(a), /^Returned for changes2Comments$/);
+  const refused = await line.render({ app: app({ unread_messages: 0 }) });
+  assert.equal(refused.props["aria-label"], "Refused · read-only by Morgan. Open comments");
+  assert.equal(await line.render({ app: app({ status: "accepted" }) }), null, "no line for accepted or draft files");
+  h.unmount(); line.unmount();
 });
 
 const reviewSession = (version: number) => ({ package_id: "c1", version, case_version: 1, findings: [], information_request: { items: [] } });
@@ -400,7 +469,7 @@ test("a return also lists the officer's unread messages from an earlier round, t
   const tree = await h.render({ app: app({ status: "returned", unread_messages: 2 }) });
   const shown = text(tree);
   assert.ok(shown.indexOf("Returned again.") < shown.indexOf(old.body), "the new return leads, the earlier unread note follows");
-  assert.equal(shown.includes(seen.body), false, "messages already read are not repeated");
+  assert.ok(shown.indexOf(old.body) < shown.indexOf(seen.body), "read history stays on the page, after the unread note");
   assert.equal(h.reads, 1);
   h.unmount();
 });
@@ -410,6 +479,7 @@ test("the sidebar offers Delete on every owned application; the server's DELETE 
   const owned = statuses.map((status, i) => app({ id: `c${i}`, status, archived: false, pinned: false }));
   const account = { phase: "signed-in", user: { role: "applicant", applicant_type: "homebuilder" }, applications: owned };
   const h = await componentHarness(new URL("./Shell.tsx", import.meta.url), "Shell", {
+    "../api/sync": { engineGeneration: () => 0 },
     "../store": { useCase: () => ({ c: { title: "", description: "", authority: "" }, gaps: [], engineGaps: [], phase: "who", engineId: null }) },
     "../humanReview": { groupGaps: () => new Map() },
     "./account": { useAccount: () => account, bootAccount() {}, refreshApplications: async () => {} },
@@ -421,7 +491,7 @@ test("the sidebar offers Delete on every owned application; the server's DELETE 
     "./session": { useSession: () => ({ seen: [] }), getSession: () => ({ draft: "" }) },
     "./deck": { buildDeck: () => [], deckProgress: () => ({ done: 0, total: 0 }) },
     "./useDeckExtras": { useDeckExtras: () => ({ options: {} }) },
-    "./routes": { STAGES: [{ screen: "start" }] },
+    "./routes": { rememberStage() {}, STAGES: [{ screen: "start" }] },
     "./shell/AppLayout": { AppLayout: "AppLayout" },
     "../router": { useRoute: () => ({ path: "/", params: new URLSearchParams() }) },
   }, {

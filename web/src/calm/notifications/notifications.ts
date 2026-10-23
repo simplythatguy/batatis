@@ -143,10 +143,10 @@ export function rowKeys(items: Pick<AppNotification, "id">[]): string[] {
   });
 }
 
-/** Where a row leads: the review page for reviewers, the application for applicants. */
+/** Where a row leads: the review page for reviewers; for applicants, that application's comments. */
 export function notificationHref(n: Pick<AppNotification, "case_id">, role: Role | null | undefined): string {
   const id = encodeURIComponent(n.case_id);
-  return role === "reviewer" ? `#/review/${id}` : `#/application?case=${id}`;
+  return role === "reviewer" ? `#/review/${id}` : `#/comments?case=${id}`;
 }
 
 /** "now", "5 min", "3 h", "Yesterday", "Oct 19". */

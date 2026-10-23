@@ -836,15 +836,16 @@ body {
   min-width: 0;
 }
 
-/* Stages: an icon in a progress ring, in order, joined by a hairline. No visible names (icons before
-   words); the name shows on hover or focus. No fills (user direction 2026-10-22): every stage is ink,
-   the current one at full opacity, the rest dimmed (0.6, 4.6:1 on the page), hover and keyboard focus
-   brighter (0.85), locked fainter still. Done keeps its green check badge at full strength. */
+/* Stages and review steps: no fill, pill or shadow in any state (user decision 2026-10-22, "Option
+   A+B"). The current one is its icon and its one-word name at full opacity; the rest are icons only,
+   dimmed (0.6, 4.6:1 on the page), brighter on hover and keyboard focus (0.85), locked fainter still.
+   Compact cues carry the state: a small green check mark once done, a thin line at the foot while part
+   of the way through, the open count as a quiet number. One neutral ink: no step hues. */
 
 .cf-stages {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 6px;
   height: 100%;
 }
 
@@ -853,26 +854,20 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
+  gap: 4px;
+  height: 34px;
+  min-width: 34px;
+  padding: 0 7px;
   border: 0;
-  border-radius: 999px;
+  border-radius: 8px;
   background: none;
+  box-shadow: none;
   color: var(--cf-text);
   font: inherit;
   text-decoration: none;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
   --stage-o: 0.6;
-}
-
-/* The hairline between two stages shows the order without numbers. */
-.cf-stage + .cf-stage::before {
-  content: "";
-  position: absolute;
-  right: calc(100% + 3px);
-  top: 50%;
-  width: 8px;
-  height: 1px;
-  background: var(--cf-line-2);
 }
 
 .cf-stage:focus-visible {
@@ -880,93 +875,86 @@ body {
   outline-offset: 2px;
 }
 
-.cf-stage-ring {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 999px;
-}
-
-/* Only the ring is absolute; the icon's own svg stays centred in the grid. */
-.cf-stage-ring > svg {
-  position: absolute;
-  inset: 0;
-}
-
-.cf-stage-track,
-.cf-stage-arc {
-  fill: none;
-  stroke-width: 2;
-}
-
-.cf-stage-track {
-  stroke: var(--cf-line-2);
-}
-
-.cf-stage-arc {
-  stroke: currentColor;
-  stroke-linecap: round;
-  transition-property: stroke-dasharray, opacity;
-  transition-duration: 300ms, 150ms;
-  transition-timing-function: ease-out;
-}
-
-/* The icon and the progress arc carry the dimming; the track and the badges stay as they are. */
+/* The icon, its count and its progress line carry the dimming; the done mark stays full strength. */
 .cf-stage-ico,
-.cf-stage-arc {
+.cf-stage-word,
+.cf-stage-count,
+.cf-stage-bar {
   opacity: var(--stage-o);
-}
-
-.cf-stage-ico {
-  display: inline-flex;
   transition-property: opacity;
   transition-duration: 150ms;
   transition-timing-function: ease-out;
 }
 
-.cf-stage:focus-visible {
-  --stage-o: 0.85;
+.cf-stage-glyph {
+  position: relative;
+  display: inline-flex;
 }
 
-.cf-stage[aria-current="step"] {
-  --stage-o: 1;
-}
-
-/* Neutral by default: the current stage is ink. An officer step with a hue (.is-rose …, matching
-   its heading icon) uses a shade of it. */
-.cf-stage[aria-current="step"] .cf-stage-ico {
-  color: var(--hue-s, var(--cf-text));
-}
-
-.cf-stage[aria-current="step"] .cf-stage-arc {
-  stroke: var(--hue-s, var(--cf-text));
-}
-
-.cf-stage-done,
-.cf-stage-count {
-  position: absolute;
-  top: -3px;
-  right: -4px;
-  display: grid;
-  place-items: center;
-  min-width: 14px;
-  height: 14px;
-  padding: 0 3px;
-  border-radius: 999px;
-  box-shadow: 0 0 0 2px var(--cf-surface);
-  font: 600 9.5px/1 var(--cf-font);
+.cf-stage-ico {
+  display: inline-flex;
 }
 
 .cf-stage-done {
+  position: absolute;
+  top: -5px;
+  right: -6px;
+  display: grid;
+  place-items: center;
+  width: 11px;
+  height: 11px;
+  border-radius: 999px;
   background: var(--cf-done);
   color: #fff;
+  box-shadow: 0 0 0 1.5px var(--cf-bg);
+}
+
+/* The current stage's name, one word beside its icon. */
+.cf-stage-word {
+  margin-left: 2px;
+  font-size: 13.5px;
+  font-weight: 550;
+  line-height: 1;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+}
+
+/* Clear of the done mark, which sits over the icon's top-right corner. */
+.cf-stage.is-done .cf-stage-word {
+  margin-left: 5px;
 }
 
 .cf-stage-count {
-  background: var(--hue-s, var(--cf-text-2));
-  color: #fff;
+  font: 500 11.5px var(--cf-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Beside the current stage's name the count reads as part of it ("Missing 9"). */
+.cf-stage[aria-current="step"] .cf-stage-count {
+  font: 500 13.5px/1 var(--cf-font);
+  font-variant-numeric: tabular-nums;
+}
+
+.cf-stage-bar {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 2px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--cf-line-2);
+  overflow: hidden;
+}
+
+.cf-stage-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: currentColor;
+}
+
+.cf-stage:focus-visible {
+  --stage-o: 0.85;
 }
 
 .cf-stage.is-disabled {
@@ -978,15 +966,31 @@ body {
   --stage-o: 0.45;
 }
 
+/* The current stage stays at full strength in every state, locked included. */
+.cf-stage[aria-current="step"],
+.cf-stage.is-disabled[aria-current="step"] {
+  --stage-o: 1;
+}
+
 @media (hover: hover) {
   .cf-stage:not(.is-disabled):not([aria-current="step"]):hover {
     --stage-o: 0.85;
   }
 }
 
+/* The smallest phones: narrower stage boxes keep the current name clear of the save status. */
+@media (max-width: 360px) {
+  .cf-stage {
+    min-width: 30px;
+    padding: 0 5px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cf-stage-ico,
-  .cf-stage-arc {
+  .cf-stage-word,
+  .cf-stage-count,
+  .cf-stage-bar {
     transition: none;
   }
 }
@@ -3118,11 +3122,7 @@ body {
   }
   .cf-stages {
     justify-self: center;
-    gap: 10px;
-  }
-  .cf-stage + .cf-stage::before {
-    width: 6px;
-    right: calc(100% + 2px);
+    gap: 0;
   }
   .cf-ask-label,
   .cf-save-label,
@@ -5467,7 +5467,7 @@ a.cf-save-check {
     gap: 4px;
   }
   .cf-app[data-assistant="open"] .cf-stages {
-    gap: 8px;
+    gap: 0;
   }
 }
 
@@ -5478,7 +5478,7 @@ a.cf-save-check {
 
 @container work (max-width: 940px) {
   .cf-stages {
-    gap: 10px;
+    gap: 0;
   }
 }
 

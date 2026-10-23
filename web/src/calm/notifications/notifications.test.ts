@@ -20,12 +20,12 @@ test("notification text reads naturally for status events and messages", () => {
 
 test("rows lead to the review page for reviewers and the application for applicants", () => {
   assert.equal(notificationHref({ case_id: "case_1" }, "reviewer"), "#/review/case_1");
-  assert.equal(notificationHref({ case_id: "case_1" }, "applicant"), "#/application?case=case_1");
+  assert.equal(notificationHref({ case_id: "case_1" }, "applicant"), "#/comments?case=case_1");
 });
 
 test("refusal notifications say refused and open the recorded decision", () => {
   assert.equal(notificationText({ kind: "status", status: "refused", actor, case_title: "Hempcrete walls", summary: "" }), "Dana Ross refused Hempcrete walls");
-  assert.equal(notificationHref({ case_id: "refused-case" }, "applicant"), "#/application?case=refused-case");
+  assert.equal(notificationHref({ case_id: "refused-case" }, "applicant"), "#/comments?case=refused-case");
 });
 
 test("duplicate ids still get unique keys; newest first", () => {

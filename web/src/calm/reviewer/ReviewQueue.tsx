@@ -14,14 +14,14 @@ export function StatusPill({ a }: { a: Pick<QueueApplication, "status" | "claim"
   return <span className={`ac-pill is-${hue}`}><span className={`ac-pill-dot is-${s.tone}`} aria-hidden="true" />{s.label}</span>;
 }
 
-/** Each filter's colour and icon. */
-const TAB_LOOK: Record<QueueTab, { hue: string; icon: AcIconName }> = {
-  all: { hue: "slate", icon: "inbox" },
-  new: { hue: "accent", icon: "inbox" },
-  mine: { hue: "blue", icon: "hand" },
-  returned: { hue: "amber", icon: "send" },
-  accepted: { hue: "green", icon: "check" },
-  refused: { hue: "rose", icon: "ban" },
+/** Each filter's icon. */
+const TAB_ICON: Record<QueueTab, AcIconName> = {
+  all: "inbox",
+  new: "inbox",
+  mine: "hand",
+  returned: "send",
+  accepted: "check",
+  refused: "ban",
 };
 
 /** The applicant's own checklist as an icon: green when nothing required is missing. */
@@ -108,15 +108,15 @@ export function ReviewQueue({ phoneTools }: { phoneTools?: ReactNode }) {
       />
       <div className="ac-page-body rq">
         <h2 className="cf-sr">Applications</h2>
-        <div className="rq-cards" role="group" aria-label="Filter applications">
-          {tabs.map((t) => (
-            <button key={t.id} type="button" aria-pressed={tab === t.id} className={`rq-card is-${TAB_LOOK[t.id].hue}`} onClick={() => setTab(t.id)}>
-              <span className="rq-card-ico" aria-hidden="true"><AcIcon name={TAB_LOOK[t.id].icon} size={16} /></span>
-              <b>{counts[t.id]}</b>
-              <span>{t.label}</span>
-            </button>
-          ))}
-        </div>
+        {tabs.length > 1 && (
+          <div className="ac-tabs rq-tabs" role="group" aria-label="Filter applications">
+            {tabs.map((t) => (
+              <button key={t.id} type="button" aria-pressed={tab === t.id} className="ac-tab" onClick={() => setTab(t.id)}>
+                <AcIcon name={TAB_ICON[t.id]} size={14} />{t.label}<span className="ac-tab-n">{counts[t.id]}</span>
+              </button>
+            ))}
+          </div>
+        )}
 
         {q.error && q.rows.length > 0 && (
           <p className="ac-empty" role="status">{q.error} These rows may be out of date. <button type="button" className="ac-link" onClick={() => void loadQueue()}>Try again</button></p>
@@ -160,7 +160,7 @@ export function ReviewQueue({ phoneTools }: { phoneTools?: ReactNode }) {
                     </span>
                     <span className="rq-side">
                       {who.name && <span className="rq-who" title={who.mine ? "You’re reviewing this" : `${who.name} is reviewing this`}><Avatar name={who.name} size="sm" /><span className="rq-who-name">{who.label}</span></span>}
-                      <StatusPill a={a} />
+                      {step !== "Pick up" && <StatusPill a={a} />}
                       <span className={`rq-go${step === "Pick up" ? " is-new" : ""}`}>{picking === a.id ? "Picking up…" : step}<AcIcon name="chev" size={14} /></span>
                     </span>
                   </a>

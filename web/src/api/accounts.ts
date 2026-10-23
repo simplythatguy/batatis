@@ -6,6 +6,7 @@
  */
 import { EngineError } from "./client";
 import { credentialsMode, ENGINE_BASE } from "./engineAuth";
+import type { AssistNavigation, VoiceCapability } from "./types.gen";
 
 export type Role = "applicant" | "reviewer";
 
@@ -59,10 +60,41 @@ export interface Message {
 
 export interface AssistRequest {
   case_id?: string;
+  case_version?: number;
+  context_id?: string;
+  revision?: number;
+  attachment_ids?: string[];
   screen: string;
   focus?: { kind: string; id: string };
   question: string;
   history?: { role: "user" | "assistant"; text: string }[];
+  /** Destination ids this browser can open right now (docs/api/assistant-navigation.md); never URLs. */
+  destinations?: (AssistNavigation["destination"] | "comments")[];
+}
+
+/** Additive typed-excerpt contract: docs/api/assistant-documents.md. No document body is sent. */
+export interface AssistContextBinding {
+  user_id: string;
+  context_id: string;
+  revision: number;
+  case_id: string | null;
+  case_version: number | null;
+  attachment_ids: string[];
+}
+export interface AssistAttachment {
+  case_id: string;
+  file_id: string;
+  name: string;
+  content_state: "not_read" | "text_excerpt";
+  pages: number[];
+  truncated: boolean;
+  reason?: string | null;
+}
+export interface AssistDocumentReference {
+  case_id: string;
+  file_id: string;
+  page: number;
+  quote: string;
 }
 
 export interface AssistResponse {
@@ -70,6 +102,11 @@ export interface AssistResponse {
   cited: string[];
   removed_citations: string[];
   notice: string | null;
+  /** A plan for an explicit "open …" request. The browser checks and applies it; it is not proof anything opened. */
+  navigation?: AssistNavigation | { destination: "comments" } | null;
+  context?: AssistContextBinding | null;
+  attachments?: AssistAttachment[];
+  document_references?: AssistDocumentReference[];
 }
 
 export class AccountsError extends EngineError {
@@ -162,6 +199,9 @@ export const accounts = {
   postMessage: (caseId: string, body: string, signal?: AbortSignal) => call<Message>("POST", `/cases/${enc(caseId)}/messages`, { body }, signal),
   markRead: (caseId: string, signal?: AbortSignal) => call<unknown>("POST", `/cases/${enc(caseId)}/messages/read`, {}, signal),
   assist: (req: AssistRequest, signal?: AbortSignal) => call<AssistResponse>("POST", "/assist", req, signal, 60000),
+  /** GET /voice/session: configuration only; opens no microphone or provider and reserves nothing. */
+  voiceSession: (caseId: string | null, signal?: AbortSignal) =>
+    call<VoiceCapability>("GET", `/voice/session${caseId ? `?case_id=${enc(caseId)}` : ""}`, undefined, signal),
 };
 
 /** Blocking gaps from a 409 submit body, whatever shape the engine settles on. */

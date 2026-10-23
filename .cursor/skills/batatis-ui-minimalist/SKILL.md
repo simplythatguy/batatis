@@ -41,8 +41,14 @@ Every icon-only control or icon metadata has an accessible name and a hover labe
 ## Example: stage navigation
 
 - Before: `1 Describe  2 Questions  3 Review  4 Application` with thin underlines.
-- After: four icons, each in a progress ring joined by a hairline: a quiet ring and green check badge when done, no fill: the current one at full opacity, the others dimmed and brighter on hover or focus, fainter when locked. "Questions, 40% done" is the accessible name and the hover/focus label. The officer's review steps use the same control, the current one in a shade of its step hue, with an open-count badge.
+- After: four icons, in order, never with a fill, pill or shadow (at rest, current, hover, pressed or focus). Only the current one shows its one-word name beside its icon, at full opacity (`Describe`, `Questions`, `Review`, `Application`); the others are the icon alone, dimmed and brighter on hover or keyboard focus, fainter when locked (user decision 2026-10-22, "Option A+B"; it replaces "never with words beside them"). Compact cues keep the state in one neutral ink: a small green check mark when done, a thin line at the foot while part of the way through. "Questions, 40% done" is the accessible name and the hover/focus label (one label open at a time). The officer's review steps use the same control: Changes (history icon), Request (document), Missing (alert), Checks (list), Decide (scales), the current one named with its real open count after the name (`Missing 9`), another step's count as a quiet number beside its icon.
 - Code: `StageButton` and `StageRings` in `web/src/calm/shell/AppHeader.tsx`, `StepTabs` in `web/src/calm/reviewer/PackageReview.tsx`.
+
+## Example: the officer's review
+
+- One step on screen, its title the task in a few words ("Read the request", "What to ask for", "Look over the checks", "Decide"), drawn in ink; only status dots keep colour. Where each item was read, its message and code chips open on demand.
+- Opening an application nobody has picked up picks it up; there is no second "Pick up" or "start review" button on a page you are already in. "Stop reviewing" (⋯) goes back to the queue.
+- Code: `web/src/calm/reviewer/ReviewDetail.tsx`, `PackageReview.tsx`, `ReviewQueue.tsx`.
 
 ## Example: an application title
 

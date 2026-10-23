@@ -9,15 +9,18 @@ import { RenameDialog } from "./shell/RenameDialog";
 import { DeleteDialog } from "./shell/DeleteDialog";
 import type { RowAction } from "./shell/RowMenu";
 import { AssistantPanel } from "./assistant/AssistantPanel";
+import { NativePanels } from "./assistant/NativePanels";
 import { AskButton, AskHost } from "./assistant/AskButton";
-import { setAssistantCase, setAssistantContext, toggleAssistant, useAssistant } from "./assistant/assistant";
+import { invalidateAssistantNavigation, setAssistantCase, setAssistantContext, toggleAssistant, useAssistant, type AssistBinding } from "./assistant/assistant";
+import { OPEN_APPLICATIONS } from "./assistant/destinations";
 import { roleOf, useCurrentApplication } from "./begin";
 import { CodePalette, OPEN_PALETTE, openPalette } from "./CodePalette";
 import { ApplicationSwitchContext, useCodeScope, type ApplicationSwitch } from "./codeScope";
 import { KEEP_OPEN_NOTE, switchApplication } from "./libraryContext";
 import { buildDeck, deckProgress } from "./deck";
 import { useDeckExtras } from "./useDeckExtras";
-import { STAGES, type Screen } from "./routes";
+import { rememberStage, STAGES, type Screen } from "./routes";
+import { setOpenProblem } from "./comments/opening";
 import { getSession, resetSession, useSession } from "./session";
 import { AppHeader, type StageRingItem } from "./shell/AppHeader";
 import { AppLayout } from "./shell/AppLayout";
@@ -28,6 +31,7 @@ import { RequestBanner } from "./shell/RequestBanner";
 import { ReturnedBanner } from "./shell/ReturnedBanner";
 import { AccountButton, NotificationsBell } from "./routes.extra";
 import { useRoute } from "../router";
+import { engineGeneration } from "../api/sync";
 import { resetRelevance } from "./useRelevance";
 import { CIcon, ConfirmDialog, Dot, MOD_KEY, type DotTone } from "./ui";
 
@@ -98,6 +102,23 @@ const OPEN_KEY = "batatis-open-application";
 const remembered = () => { try { return sessionStorage.getItem(OPEN_KEY); } catch { return null; } };
 const remember = (id: string | null) => { try { if (id) sessionStorage.setItem(OPEN_KEY, id); else sessionStorage.removeItem(OPEN_KEY); } catch { /* storage unavailable */ } };
 const isPhone = () => window.matchMedia(PHONE).matches;
+/** `#/review/<case id>` (not the PDF-package pages): the file a reviewer has open. */
+function reviewCaseOf(path: string): string | null {
+  const m = /^\/review\/(.+)$/.exec(path);
+  if (!m || /^package(\/|$)/.test(m[1])) return null;
+  try { return decodeURIComponent(m[1]) || null; } catch { return null; }
+}
+
+/** What an account page is, for the assistant's context line. */
+function accountPage(path: string): { screen: string; label: string } {
+  if (path === "/settings") return { screen: "settings", label: "settings" };
+  if (path === "/notifications") return { screen: "notifications", label: "notifications" };
+  if (path === "/accuracy") return { screen: "accuracy", label: "the accuracy report" };
+  if (path === "/review") return { screen: "queue", label: "the review queue" };
+  if (/^\/review\/package(\/|$)/.test(path)) return { screen: "package", label: "a PDF package" };
+  if (path.startsWith("/review/")) return { screen: "review", label: "this file" };
+  return { screen: "account", label: "your account" };
+}
 
 /**
  * `plain`: an account page (settings, notifications, the reviewer's queue and review) that draws its
@@ -116,6 +137,8 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
   const [palette, setPalette] = useState(false);
   const [listNote, setListNote] = useState("");
   const [opening, setOpening] = useState<string | null>(null);
+  /** Bumped by Start over / New application: a switch still saving or opening then leaves the new draft alone. */
+  const freshDraft = useRef(0);
   const [listCollapsed, setListCollapsed] = useState(false);
   const [sheet, setSheet] = useState(false);
   const listRef = useRef<ApplicationListHandle>(null);
@@ -133,10 +156,38 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
   /** The last stage page, so Applications in the rail returns to it from the code library. */
   const lastStage = useRef("#/");
   if (onStage) lastStage.current = location.hash || "#/";
+  useEffect(() => { if (onStage) rememberStage(location.hash || "#/"); });
 
   useEffect(() => { bootAccount(); }, []);
-  // Under None the assistant reads no application either.
-  useEffect(() => { setAssistantCase(scope === "none" ? null : engineId); }, [engineId, scope]);
+  // The assistant's binding: who asks, about which application (none under the library's None;
+  // a reviewer's is the file open in the review). Each binding keeps its own conversation.
+  const reviewerContext = useRef<{ principal: string; caseId: string | null }>({ principal: "", caseId: null });
+  const assistPrincipal = JSON.stringify([signedIn, account.user?.id, account.user?.role, account.user?.authority]);
+  if (reviewerContext.current.principal !== assistPrincipal) reviewerContext.current = { principal: assistPrincipal, caseId: null };
+  const routeReviewCase = reviewer ? reviewCaseOf(route.path) : null;
+  if (routeReviewCase) reviewerContext.current.caseId = routeReviewCase;
+  // Global reviewer pages keep the file selected in the assistant until another file is opened.
+  const assistCase = reviewer ? reviewerContext.current.caseId : scope === "none" ? null : engineId;
+  const assistMode: AssistBinding["mode"] = assistCase ? "case" : reviewer || scope === "none" ? "none" : "draft";
+  const assistRow = assistCase ? account.applications?.find((a) => a.id === assistCase) : undefined;
+  const assistName = reviewer || assistMode === "none" || !inCase ? "" : assistRow?.title || c.title || "";
+  const assistFiles = assistMode === "case" && !reviewer ? (c.files ?? []).filter((f) => f.engineId).map((f) => ({ id: f.engineId!, name: f.name })) : [];
+  const assistFilesKey = assistFiles.map((f) => f.id).join("|");
+  const assistUpload = !reviewer && assistMode === "case" && !readOnly(assistRow?.status ?? "draft");
+  const unsavedLifetime = `${engineGeneration()}:${c.id}`;
+  useEffect(() => {
+    setAssistantCase({
+      accountId: signedIn ? account.user?.id ?? null : null,
+      role: signedIn ? account.user?.role ?? null : null,
+      authority: signedIn ? account.user?.authority ?? null : null,
+      mode: signedIn ? assistMode : "none",
+      caseId: signedIn ? assistCase : null,
+      draftId: unsavedLifetime,
+      caseName: assistName,
+      canUpload: signedIn && assistUpload,
+      files: signedIn ? assistFiles : [],
+    });
+  }, [signedIn, account.user?.id, account.user?.role, account.user?.authority, assistMode, assistCase, unsavedLifetime, assistName, assistUpload, assistFilesKey]); // eslint-disable-line react-hooks/exhaustive-deps
   // A new owned case appears in the list once the engine has created it.
   useEffect(() => { if (signedIn && engineId) void refreshApplications(); }, [signedIn, engineId]);
   useEffect(() => { if (signedIn && engineId) remember(engineId); }, [signedIn, engineId]);
@@ -157,12 +208,13 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
       resetToWho("That application is no longer available.");
     });
   }, [account.phase]); // eslint-disable-line react-hooks/exhaustive-deps
-  // Screens without their own context: the assistant looks at the page.
+  // Screens without their own context: the assistant looks at the page (account pages by path).
   useEffect(() => {
-    if (active === "questions") return;
-    const label = active === "start" ? "your description" : active === "review" ? "your review" : active === "application" ? "your application" : active === "code" ? "the code library" : "your application";
-    setAssistantContext({ screen: active === "start" ? "describe" : active, label });
-  }, [active]);
+    if (active === "questions" && !plain) return;
+    const page = plain ? accountPage(route.path) : null;
+    const label = page?.label ?? (active === "start" ? "your description" : active === "review" ? "your review" : active === "application" ? "your application" : active === "code" ? "the code library" : active === "comments" ? "the officer’s comments" : "your application");
+    setAssistantContext({ screen: page?.screen ?? (active === "start" ? "describe" : active), label });
+  }, [active, plain, route.path]);
 
   // The code library needs the room: the list folds away while it is open (⌘B or the header
   // button brings it back) and returns to how it was when the library closes.
@@ -209,9 +261,12 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
       }
     };
     const open = () => setPalette(true);
+    // The assistant opens the application list the same way the rail does.
+    const list = () => showApplicationsNow.current();
     document.addEventListener("keydown", on);
     window.addEventListener(OPEN_PALETTE, open);
-    return () => { document.removeEventListener("keydown", on); window.removeEventListener(OPEN_PALETTE, open); };
+    window.addEventListener(OPEN_APPLICATIONS, list);
+    return () => { document.removeEventListener("keydown", on); window.removeEventListener(OPEN_PALETTE, open); window.removeEventListener(OPEN_APPLICATIONS, list); };
   }, []);
 
   const deckDone = Math.round(progress.questions);
@@ -234,6 +289,14 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
     { id: "application", label: "Application", icon: "file", href: "#/application", pct: current && ["submitted", "in_review", "accepted", "refused"].includes(current.status) ? 100 : progress.application, current: active === "application", hint: inCase ? undefined : "Nothing filled in yet" },
   ];
 
+  const showApplications = () => {
+    if (isPhone()) setSheet(true);
+    else { keepList(false); setListCollapsed(false); }
+    if (!onStage) location.hash = lastStage.current;
+  };
+  const showApplicationsNow = useRef(showApplications);
+  useLayoutEffect(() => { showApplicationsNow.current = showApplications; });
+
   const destinations: RailDestination[] = reviewer ? [
     { id: "queue", label: "Review queue", icon: "table", href: "#/review", current: route.path === "/review" || route.path.startsWith("/review/") },
     { id: "code", label: "Code library", icon: "book", href: "#/code", current: active === "code" && !plain },
@@ -242,11 +305,7 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
       id: "applications",
       label: "Applications",
       icon: "inbox",
-      onClick: () => {
-        if (isPhone()) setSheet(true);
-        else { keepList(false); setListCollapsed(false); }
-        if (!onStage) location.hash = lastStage.current;
-      },
+      onClick: showApplications,
       current: onStage,
       badge: items.some((a) => (a.status === "returned" || a.status === "refused") && a.unread_messages > 0),
     },
@@ -254,6 +313,7 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
   ];
 
   function startNew() {
+    freshDraft.current += 1;
     setListNote("");
     remember(null);
     resetSession();
@@ -265,13 +325,18 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
   async function switchTo(id: string): Promise<string | null> {
     if (!signedIn) return "Sign in to open a saved application.";
     if (opening) return "Another application is still opening.";
+    // Choosing another application retires what the assistant was about to open, even if the switch fails.
+    invalidateAssistantNavigation();
     setOpening(id);
     const role = roleOf(account.user) ?? (c.applicantType as Parameters<typeof openCase>[1]);
-    // Keep the open draft before switching; a failed save keeps it open and says so.
+    const mark = freshDraft.current;
+    const superseded = () => freshDraft.current !== mark;
+    // Keep the open draft before switching; a failed save keeps it open and says so. A new draft started
+    // meanwhile wins: nothing is opened over it and its description, files and role stay.
     const error = await switchApplication(id, {
       inCase, saveStatus, saveDraft,
-      openCase: (next) => openCase(next, role),
-      settle: () => { resetSession(); resetRelevance(); },
+      openCase: (next) => (superseded() ? Promise.resolve(null) : openCase(next, role)),
+      settle: () => { if (!superseded()) { resetSession(); resetRelevance(); } },
     });
     setOpening(null);
     // A deleted or expired application leaves the list; a refused save changed nothing on the server.
@@ -290,8 +355,16 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
     }
     if (!signedIn || opening) return;
     setListNote("");
+    setOpenProblem(null);
+    const mark = freshDraft.current;
     const error = await switchTo(id);
-    if (error) { setListNote(error); return; }
+    if (freshDraft.current !== mark) return; // Start over meanwhile: stay on the new draft
+    if (error) {
+      setListNote(error);
+      // A link (a notification's comments) says why on its page; the open application stays as it was.
+      if (to) setOpenProblem({ id, text: error });
+      return;
+    }
     location.hash = destination;
   }
 
@@ -400,6 +473,7 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
               { label: "Look up code", hint: `${MOD_KEY} ⇧ K`, onClick: openPalette },
               { label: "Code library", href: "#/code" },
               { label: "Accuracy report", href: "#/accuracy" },
+              ...(withCase && current && current.status !== "draft" ? [{ label: current.unread_messages > 0 ? `Comments (${current.unread_messages} new)` : "Comments", href: "#/comments" }] : []),
               ...(withCase && current?.status !== "refused" && checkStatus === "unavailable" ? [{ label: "Try the check again", onClick: () => void requestCheck(true), separator: true }] : []),
               ...(withCase
                 ? [
@@ -423,6 +497,8 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
 
   return (
     <AskHost.Provider value={true}>
+      {/* Nothing native is offered while another application is opening. */}
+      <NativePanels ownedCaseId={!reviewer && !opening && assistRow?.id === engineId ? engineId : null} />
     <ApplicationSwitchContext.Provider value={appSwitch}>
       <AppLayout
         rail={<Rail destinations={destinations} notificationsSlot={<NotificationsBell />} accountSlot={<AccountButton />} />}

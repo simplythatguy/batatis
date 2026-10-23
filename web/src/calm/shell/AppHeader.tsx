@@ -1,4 +1,4 @@
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Icon24, type IconName } from "../icons";
 import { Tip } from "../RelevanceRing";
 import { EditableTitle } from "./EditableTitle";
@@ -16,14 +16,17 @@ export interface StageRingItem {
   hint?: string;
 }
 
-const RING = { size: 34, r: 15 } as const;
+const STAGE_TIP = "cf-stage-tip";
 
 /**
- * One stage or review step as an icon in a progress ring: the ring fills with progress and a done
- * stage gets a check badge; the current one is at full opacity, the others dimmed (no fill). Its name
- * is the accessible name and a label on hover or keyboard focus, never visible text.
+ * One stage or review step (user decision 2026-10-22, "Option A+B"): no fill, pill or shadow in any
+ * state. The current one shows its one-word name beside its icon at full opacity; the others are the
+ * icon alone, dimmed and brighter on hover or keyboard focus, a locked one fainter still. Compact cues
+ * keep the state: a small check mark once done, a thin line at the foot while part of the way through,
+ * and the open count as a quiet number. Name and progress are also the accessible name and a label on
+ * hover or keyboard focus.
  */
-export function StageButton({ id, label, ariaLabel, icon, pct, current, done, disabled, count, hue, note, href, onClick }: {
+export function StageButton({ id, label, ariaLabel, icon, pct, current, done, disabled, count, note, href, onClick }: {
   id: string;
   label: string;
   ariaLabel: string;
@@ -33,10 +36,8 @@ export function StageButton({ id, label, ariaLabel, icon, pct, current, done, di
   done?: boolean;
   /** Why the stage cannot open yet; it renders as a non-link. */
   disabled?: string;
-  /** Items still open, as a small badge on the icon. */
+  /** Items still open, as a quiet number beside the icon. */
   count?: number;
-  /** A section hue for the current tint; the accent otherwise. */
-  hue?: string;
   /** One quiet line in the label (for example "Nothing here yet"). */
   note?: string;
   href?: string;
@@ -44,20 +45,26 @@ export function StageButton({ id, label, ariaLabel, icon, pct, current, done, di
 }) {
   const ref = useRef<HTMLAnchorElement & HTMLButtonElement & HTMLSpanElement>(null);
   const [tip, setTip] = useState(false);
+  // One stage label at a time: keyboard focus on one stage and the pointer on another would overlap.
+  useEffect(() => {
+    const other = (e: Event) => { if ((e as CustomEvent<string>).detail !== id) setTip(false); };
+    window.addEventListener(STAGE_TIP, other);
+    return () => window.removeEventListener(STAGE_TIP, other);
+  }, [id]);
+  const show = () => { window.dispatchEvent(new CustomEvent(STAGE_TIP, { detail: id })); setTip(true); };
   const p = Math.max(0, Math.min(100, Math.round(pct)));
-  const c = 2 * Math.PI * RING.r;
-  const mid = RING.size / 2;
-  const events = { onPointerEnter: () => setTip(true), onPointerLeave: () => setTip(false), onFocus: () => setTip(true), onBlur: () => setTip(false) };
-  const className = `cf-stage${hue ? ` is-${hue}` : ""}${done ? " is-done" : ""}${disabled ? " is-disabled" : ""}`;
+  const events = { onPointerEnter: show, onPointerLeave: () => setTip(false), onFocus: show, onBlur: () => setTip(false) };
+  const className = `cf-stage${done ? " is-done" : ""}${disabled ? " is-disabled" : ""}`;
   const body = (
-    <span className="cf-stage-ring" aria-hidden="true">
-      <svg width={RING.size} height={RING.size} viewBox={`0 0 ${RING.size} ${RING.size}`}>
-        <circle className="cf-stage-track" cx={mid} cy={mid} r={RING.r} />
-        {p > 0 && <circle className="cf-stage-arc" cx={mid} cy={mid} r={RING.r} strokeDasharray={`${(p / 100) * c} ${c}`} transform={`rotate(-90 ${mid} ${mid})`} />}
-      </svg>
-      <span className="cf-stage-ico">{icon}</span>
-      {done ? <span className="cf-stage-done"><Icon24 name="check" size={9} stroke={3.2} /></span> : count ? <span className="cf-stage-count">{count}</span> : null}
-    </span>
+    <>
+      <span className="cf-stage-glyph" aria-hidden="true">
+        <span className="cf-stage-ico">{icon}</span>
+        {done && <span className="cf-stage-done"><Icon24 name="check" size={8} stroke={3.4} /></span>}
+      </span>
+      {current && <span className="cf-stage-word">{label}</span>}
+      {count ? <span className="cf-stage-count" aria-hidden="true">{count}</span> : null}
+      {!done && p > 0 && p < 100 && <span className="cf-stage-bar" aria-hidden="true"><span style={{ width: `${p}%` }} /></span>}
+    </>
   );
   const common = { ref, className, "aria-label": ariaLabel, "aria-current": current ? ("step" as const) : undefined, ...events };
   return (
@@ -77,7 +84,7 @@ export function StageButton({ id, label, ariaLabel, icon, pct, current, done, di
   );
 }
 
-/** The four applicant stages as icons in progress rings, in order, joined by a hairline. */
+/** The four applicant stages as icons, in order. */
 export function StageRings({ stages }: { stages: StageRingItem[] }) {
   return (
     <nav className="cf-stages" aria-label="Stages">

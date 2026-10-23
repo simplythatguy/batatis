@@ -1,9 +1,10 @@
 /**
- * #/review/<caseId>: one path, one thing on screen at a time. "Pick up" in the queue claims the
- * application and lands here on the review; the review runs by itself. Its four steps (Overview,
- * Missing, Checks, Decide) sit in the header as the shell's stage tabs. An application nobody has
- * picked up shows the application itself with one "Pick up" bar. The application and the messages
- * open in drawers from the header; running the review again and releasing the claim live in ⋯.
+ * #/review/<caseId>: one path, one thing on screen at a time. Opening an application nobody has
+ * picked up picks it up (as "Pick up" in the queue does), so there is no second button to start the
+ * review; the review then runs by itself. Its steps (Request, Missing, Checks, Decide) sit in the
+ * header as the shell's stage tabs. The "Pick up" bar is only the fallback when that claim failed.
+ * The application and the messages open in drawers from the header; running the review again and
+ * releasing the claim ("Stop reviewing", back to the queue) live in ⋯.
  */
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { accounts, AccountsError, claimConflict, review, type Claim, type DecisionItemInput, type Message } from "../../api/accounts";
@@ -155,6 +156,8 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
   // The header slot the step tabs render into (state, so the review re-renders once it exists).
   const [stepSlot, setStepSlot] = useState<HTMLDivElement | null>(null);
   const autoRan = useRef("");
+  // One automatic pick-up per application opened; a failure shows the bar with its error instead.
+  const autoClaimed = useRef("");
 
   const row = q.rows.find((r) => r.id === caseId) ?? null;
 
@@ -243,6 +246,16 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
   const Applicant = applicant === "the applicant" ? "The applicant" : applicant;
   const title = c?.title?.trim() || row?.title?.trim() || "Application";
   const closeOut = index?.close_out ?? null;
+  const otherClaim = conflict ?? (claim && !mine && status === "in_review" ? claim : null);
+  const unclaimed = status === "submitted" && !claim && !otherClaim;
+
+  // Opening a file nobody has picked up picks it up: you are already in the review.
+  useEffect(() => {
+    if (!unclaimed || !c || !me || busy || autoClaimed.current === caseId) return;
+    autoClaimed.current = caseId;
+    void doClaim();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unclaimed, c, me, caseId]);
 
   // Yours and not reviewed yet (or changed since): run the review now instead of asking for a
   // click. Once per saved version, so a failure shows its retry rather than looping.
@@ -312,7 +325,8 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
     try {
       await review.release(caseId);
       patchRow(caseId, { claim: null, status: "submitted" });
-      await reload();
+      // Back to the queue: staying here would pick it straight up again.
+      window.location.hash = "#/review";
     } catch (e) {
       setActionError(e instanceof AccountsError ? e.detail : "That didn’t work. Try again.");
     } finally {
@@ -384,9 +398,7 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
   }
 
   const meta = [row ? applicantLine(row) : null, c?.submitted_at ? `sent ${sentPhrase(c.submitted_at)}` : null].filter(Boolean).join(" · ");
-  const otherClaim = conflict ?? (claim && !mine && status === "in_review" ? claim : null);
   const decidedRow = c?.decision ? `${c.decision.by_name} · ${sentLabel(c.decision.at)}` : "";
-  const unclaimed = status === "submitted" && !claim && !otherClaim;
   const unread = (messages ?? []).filter((m) => m.kind !== "status" && !m.read_by_me && m.author.id !== me).length;
   const requestSent = Boolean(latest?.information_request.sent_at);
   const suggestAsk = gate.canReturn && !gate.canAccept;
@@ -425,15 +437,18 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
     );
   }
 
-  /** Nobody has picked it up: the application itself, with one bar to pick it up. */
+  /** Nobody has picked it up: it is being picked up now, or that failed and one bar offers it again. */
   function pickUp() {
+    if (busy === "claim" || (autoClaimed.current !== caseId && !actionError)) {
+      return <p className="ac-empty rv-reading" role="status"><span className="rv-spin" aria-hidden="true" />Opening the review…</p>;
+    }
     return (
       <>
         <div className="rv-pick" role="region" aria-label="Not picked up">
           <span className="rv-chip is-accent"><span className="cf-dot" aria-hidden="true" />New</span>
           <span className="rv-pick-t">Not picked up yet</span>
           <button type="button" className="cf-btn is-sm is-primary" disabled={Boolean(busy)} onClick={() => void doClaim()}>
-            <AcIcon name="hand" size={15} />{busy === "claim" ? "Picking up…" : "Pick up"}
+            <AcIcon name="hand" size={15} />Pick up
           </button>
         </div>
         {c ? <Sheet c={c} /> : <p className="ac-empty">Loading the application…</p>}
@@ -457,7 +472,7 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
   function decide() {
     return (
       <section className="rv-decide" aria-labelledby="rv-decide-h">
-        <div id="rv-decide-h"><StepTitle step="final">Your decision</StepTitle></div>
+        <div id="rv-decide-h"><StepTitle step="final">Decide</StepTitle></div>
         <p className="rv-scope"><AcIcon name="clipboard" size={14} />Completeness only · not a design approval</p>
         <div className="rv-choices">
           <button type="button" className="rv-choice is-green" disabled={!gate.canAccept || Boolean(busy)} onClick={() => setConfirm("accept")} data-requires-no-blocking-gaps={gate.canAccept ? undefined : "true"}>
@@ -500,10 +515,12 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
         <section className="rv-decide" aria-labelledby="rv-outcome-h">
           <h2 id="rv-outcome-h" className="pr-title">{status === "returned" ? "Back with the applicant" : status === "in_review" ? "Someone else is deciding" : "Where this stands"}</h2>
           {gate.reason && <p className="pr-lede">{gate.reason}</p>}
-          <div className="rv-start-acts">
-            {otherClaim && <button type="button" className="cf-btn is-sm" disabled={Boolean(busy)} onClick={() => setConfirm("takeover")}>Take over</button>}
-            {requestSent && <button type="button" className="cf-btn is-sm is-ghost" onClick={() => setView("request")}>See the request that was sent</button>}
-          </div>
+          {/* Take over sits once, on the "… is reviewing this" line above. */}
+          {requestSent && (
+            <div className="rv-start-acts">
+              <button type="button" className="cf-btn is-sm is-ghost" onClick={() => setView("request")}>See the request that was sent</button>
+            </div>
+          )}
         </section>
       ),
     };
@@ -548,6 +565,9 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
         </div>
       );
     }
+    // Another officer has it and this page has no review of theirs to show: the line above says who
+    // and offers Take over; nothing below repeats it.
+    if (otherClaim && !shown) return null;
     if (indexState === "unavailable" || !shown) {
       const f = finalStep();
       return (

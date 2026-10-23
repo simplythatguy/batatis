@@ -591,3 +591,13 @@
   .rq-side { width: 100%; justify-content: space-between; }
   .rq-who-name { display: none; }
 }
+
+/* —— Review queue and review, monotone (user direction 2026-10-22): filters are quiet tabs, a status
+   is a word with its dot, the next step is plain ink. —— */
+.rq-tabs { margin-bottom: 16px; }
+.rq-tabs .ac-tab { display: inline-flex; align-items: center; gap: 7px; }
+.rq .ac-pill[class*="is-"],
+.rv .ac-pill[class*="is-"] { border-color: transparent; background: var(--cf-hover); color: var(--cf-text-2); font-weight: 500; }
+.rq-check { padding: 0; background: none; }
+.rq-go.is-new { color: var(--cf-text); }
+.rq-list { box-shadow: none; }

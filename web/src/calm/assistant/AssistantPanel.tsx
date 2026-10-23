@@ -1,10 +1,17 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { codeHref } from "../routes";
 import { articleOf } from "../useRelevance";
 import { Icon24 } from "../icons";
 import { MOD_KEY } from "../ui";
 import { useAccount } from "../account";
-import { answerBlocks, ask, closeAssistant, useAssistant } from "./assistant";
+import {
+  answerBlocks, ask, assistantKey, cancelQuestion, closeAssistant, endVoice, goBack, MAX_QUESTION, retry, setDraft, useAssistant,
+  type AssistantState, type Turn,
+} from "./assistant";
+import { AttachButton, Attachments, MicGlyph, VoiceBar, VoiceButton, VoiceNotice } from "./VoiceControls";
+import { ChatFollow, savedPosition, savePosition } from "./follow";
+import { ToolButton } from "./ToolButton";
+import "./assistant.css";
 
 const DISCLAIMER = "Plain-language explanation, not code text. It doesn’t say whether your design complies or is safe.";
 
@@ -14,34 +21,68 @@ export function AssistantPanel() {
   const account = useAccount();
   // The engine answers signed-in users only; anonymous visits never call it.
   const signedOut = account.phase !== "signed-in" && account.phase !== "probing";
-  const [draft, setDraft] = useState("");
+  const c = a.conv;
   const body = useRef<HTMLDivElement>(null);
+  const transcript = useRef<HTMLDivElement>(null);
+  const follow = useRef<ChatFollow | null>(null);
+  const conversationKey = assistantKey();
+  const [following, setFollowing] = useState(true);
+  const initialTurns = useRef({ key: conversationKey, ids: new Set(c.turns.map((t) => t.id)) });
+  if (initialTurns.current.key !== conversationKey) initialTurns.current = { key: conversationKey, ids: new Set(c.turns.map((t) => t.id)) };
   const input = useRef<HTMLTextAreaElement>(null);
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
-    if (!a.error?.retryAt) return;
+    if (!c.error?.retryAt) return;
     const t = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(t);
-  }, [a.error?.retryAt]);
+  }, [c.error?.retryAt]);
   useEffect(() => { input.current?.focus(); }, []);
-  useEffect(() => { body.current?.scrollTo({ top: body.current.scrollHeight }); }, [a.turns.length, a.pending]);
-  const wait = a.error?.retryAt ? Math.max(0, Math.ceil((a.error.retryAt - now) / 1000)) : 0;
-  const unavailable = a.error && (a.error.status === 503 || a.error.status === 404 || a.error.status === 0);
+  // Voice never runs unseen: the panel going away (closed, signed out, unmounted) ends it.
+  useEffect(() => () => endVoice(), []);
+  useLayoutEffect(() => {
+    const node = body.current;
+    if (!node) return;
+    const controller = new ChatFollow(node, {
+      raf: (fn) => requestAnimationFrame(fn), caf: (id) => cancelAnimationFrame(id), now: Date.now,
+      reduced: () => matchMedia("(prefers-reduced-motion: reduce)").matches,
+      onWindow: (type, fn) => { window.addEventListener(type, fn); return () => window.removeEventListener(type, fn); },
+    }, (pinned) => { setFollowing(pinned); savePosition(conversationKey, controller.position()); });
+    follow.current = controller;
+    controller.restore(savedPosition(conversationKey));
+    const detach = controller.attach();
+    const observer = new ResizeObserver(() => controller.grew());
+    if (transcript.current) observer.observe(transcript.current);
+    observer.observe(node);
+    return () => {
+      // Positions are captured as scrolling happens, before another application's DOM arrives.
+      observer.disconnect(); detach(); follow.current = null;
+    };
+  }, [conversationKey]);
+  useLayoutEffect(() => { follow.current?.grew(); }, [c.turns, c.pending, c.error]);
+  const wait = c.error?.retryAt ? Math.max(0, Math.ceil((c.error.retryAt - now) / 1000)) : 0;
+  const busy = c.pending || c.attachments.some((f) => f.status === "uploading") || wait > 0 || signedOut;
   const send = (q: string) => {
-    if (!q.trim() || a.pending || wait > 0 || signedOut) return;
-    setDraft("");
+    if (!q.trim() || busy) return;
     void ask(q);
   };
+  const onKey = (e: ReactKeyboardEvent) => {
+    if (e.key !== "Escape") return;
+    e.stopPropagation();
+    closeAssistant();
+  };
   return (
-    <aside className="cf-assist" aria-label="Assistant" onKeyDown={(e) => { if (e.key === "Escape") { e.stopPropagation(); closeAssistant(); } }}>
+    <aside className="cf-assist" aria-label="Assistant" onKeyDown={onKey}>
       <div className="cf-assist-head">
         <span className="cf-assist-title"><Icon24 name="spark" size={16} />Assistant</span>
-        <button type="button" className="cf-icon-btn is-plain" aria-label={`Close the assistant (${MOD_KEY} J)`} onClick={closeAssistant}>
+        <ToolButton type="button" className="cf-icon-btn is-plain" aria-label={`Close the assistant (${MOD_KEY} J)`} title="Close assistant" onClick={closeAssistant}>
           <Icon24 name="x" size={16} />
-        </button>
+        </ToolButton>
       </div>
-      <div ref={body} className="cf-assist-body" aria-live="polite">
-        <p className="cf-assist-ctx">Looking at <b>{a.context.label}</b></p>
+      {!signedOut && <ScopeLine a={a} />}
+      <p className="cf-av-boundary">Administrative help · not a compliance decision</p>
+      <div className="cf-av-scroll">
+      <div ref={body} className="cf-assist-body" role="log" tabIndex={0} aria-label="Conversation" aria-live="polite">
+      <div ref={transcript} className="cf-assist-transcript">
         {signedOut && account.phase === "anonymous" && (
           <div className="cf-assist-error" role="status">
             <p>The assistant isn’t available on this server.</p>
@@ -51,60 +92,148 @@ export function AssistantPanel() {
         {signedOut && account.phase === "signed-out" && (
           <div className="cf-assist-error" role="status">
             <p><a className="cf-inline-link" href="#/signin">Sign in</a> to use the assistant.</p>
-            <p className="cf-fine">It explains questions, code references and officer messages for your own applications. You can still read the code yourself in the code library.</p>
           </div>
         )}
-        {!signedOut && a.turns.length === 0 && !a.error && (
-          <p className="cf-assist-intro">Ask about this question, a code reference, a message from the officer, or what to do next. Answers explain; they never decide whether your design complies.</p>
+        {!signedOut && c.turns.length === 0 && !c.error && (
+          <p className="cf-assist-intro">{c.attachments.some((f) => f.status === "ready") ? "Ask for an excerpt from the selected PDFs. Only limited text is available; scans aren’t read." : "Ask about this question, a code reference, an officer’s message, or what to do next."}</p>
         )}
-        {a.turns.map((t, n) =>
-          t.role === "user" ? (
-            <div key={n} className="cf-msg-user">{t.text}</div>
-          ) : (
-            <div key={n} className="cf-msg-ai">
-              {answerBlocks(t.text).map((b, i) => (b.kind === "quote" ? <blockquote key={i} className="cf-code-text is-inline">{b.text}</blockquote> : <p key={i}>{b.text}</p>))}
-              {t.cited && t.cited.length > 0 && (
-                <div className="cf-chip-row">
-                  {t.cited.map((id) => <a key={id} className="cf-code-chip is-link" href={codeHref(articleOf(id) ?? id)}>{id}</a>)}
-                </div>
-              )}
-              {t.removed && t.removed.length > 0 && <p className="cf-fine">{t.removed.length === 1 ? "One reference" : `${t.removed.length} references`} could not be checked against the code and {t.removed.length === 1 ? "was" : "were"} left out.</p>}
-              <p className="cf-fine">{t.notice || DISCLAIMER}</p>
-            </div>
-          ),
+        {c.turns.map((t) => <div key={t.id} className="cf-av-turn" data-enter={!initialTurns.current.ids.has(t.id) || undefined}><TurnView t={t} /></div>)}
+        {c.pending && (
+          <div className="cf-av-pending" role="status">
+            <span className="cf-av-shimmer">Thinking…</span>
+            <button type="button" className="cf-btn is-xs is-ghost" onClick={cancelQuestion}>Stop</button>
+          </div>
         )}
-        {a.pending && <p className="cf-assist-pending" role="status"><span className="cf-dot is-pending cf-pulse" aria-hidden="true" />Thinking…</p>}
-        {a.error && (
+        {c.error && (
           <div className="cf-assist-error" role="status">
-            <p>{a.error.text}{wait > 0 ? ` Try again in ${wait} s.` : ""}</p>
-            {unavailable && <p className="cf-fine">Nothing is made up instead. You can still read the code yourself in the code library.</p>}
-            <details className="cf-tech"><summary>Technical detail</summary><p>{a.error.technical}</p></details>
+            <p>{c.error.text}{wait > 0 ? ` Try again in ${wait} s.` : ""}</p>
+            {c.failed && <button type="button" className="cf-btn is-xs" disabled={busy} onClick={retry}>Retry</button>}
+            {c.error.technical && <details className="cf-tech"><summary>Technical detail</summary><p>{c.error.technical}</p></details>}
           </div>
         )}
       </div>
-      <form className="cf-composer-box" onSubmit={(e) => { e.preventDefault(); send(draft); }}>
+      </div>
+      {!following && <button type="button" className="cf-btn is-xs cf-av-latest" onClick={() => follow.current?.toEnd(false, true)}>Latest message <Icon24 name="down" size={13} /></button>}
+      </div>
+      {a.noticeOpen && <VoiceNotice a={a} />}
+      <VoiceBar a={a} />
+      <form className="cf-composer-box" onSubmit={(e) => { e.preventDefault(); send(c.draft); }}>
+        <Attachments a={a} />
         <label className="cf-sr" htmlFor="cf-assist-input">Ask the assistant</label>
         <textarea
           id="cf-assist-input"
           ref={input}
           rows={2}
+          maxLength={MAX_QUESTION}
           disabled={signedOut}
-          value={draft}
+          value={c.draft}
           onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(draft); } }}
+          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); send(c.draft); } }}
           placeholder="Ask about this question, a code, or your application…"
         />
         <div className="cf-composer-box-foot">
           <div className="cf-chips">
-            {(a.context.suggestions ?? []).slice(0, 2).map((s) => (
-              <button key={s} type="button" className="cf-suggest" disabled={a.pending || wait > 0 || signedOut} onClick={() => send(s)}>{s}</button>
+            {c.turns.length === 0 && (a.context.suggestions ?? []).slice(0, 2).map((s) => (
+              <button key={s} type="button" className="cf-suggest" disabled={busy} onClick={() => send(s)}>{s}</button>
             ))}
           </div>
-          <button type="submit" className="cf-icon-btn is-plain" aria-label="Send" disabled={!draft.trim() || a.pending || wait > 0 || signedOut}>
-            <Icon24 name="send" size={16} />
-          </button>
+          <div className="cf-av-tools">
+            {!signedOut && <AttachButton a={a} />}
+            {!signedOut && <VoiceButton a={a} />}
+            <ToolButton type="submit" className="cf-icon-btn is-plain" aria-label="Send" disabled={!c.draft.trim() || busy}>
+              <Icon24 name="send" size={16} />
+            </ToolButton>
+          </div>
         </div>
       </form>
     </aside>
+  );
+}
+
+/** Which application (by its short name) and what on screen the assistant is reading. */
+function ScopeLine({ a }: { a: AssistantState }) {
+  const b = a.binding;
+  const name = b.mode === "case" ? b.caseName || "This application" : b.mode === "draft" ? b.caseName || "New application" : "No application";
+  return (
+    <p className="cf-av-scope" title={`${name} · ${a.context.label}`}>
+      <Icon24 name={b.mode === "none" ? "book" : "file"} size={14} />
+      <b>{name}</b>
+      <span aria-hidden="true">·</span>
+      <span className="cf-av-scope-at">{a.context.label}</span>
+    </p>
+  );
+}
+
+const NAV_TEXT: Record<NonNullable<Turn["nav"]>["state"], (label: string) => string> = {
+  opening: (l) => `Opening ${l}…`,
+  opened: (l) => `Opened ${l}`,
+  failed: (l) => `Couldn’t open ${l}`,
+  "moved-on": (l) => `Not opened · you moved on (${l})`,
+  "not-offered": (l) => `${l} isn’t available here`,
+};
+
+function TurnView({ t }: { t: Turn }) {
+  if (t.nav) {
+    const n = t.nav;
+    const ok = n.state === "opened";
+    return (
+      <div className={`cf-av-nav${ok ? "" : " is-quiet"}`} role="status">
+        <Icon24 name={ok ? "right" : n.state === "opening" ? "clock" : "x"} size={14} />
+        <span>{NAV_TEXT[n.state](n.label)}</span>
+        {ok && n.back && (
+          n.backState === "returned" ? <span className="cf-av-nav-note">Back at {n.back.label}</span>
+            : <button type="button" className="cf-btn is-xs is-ghost" disabled={n.backState === "returning"} onClick={() => void goBack(t.id)}>
+                {n.backState === "failed" ? "Try going back again" : `Back to ${n.back.label}`}
+              </button>
+        )}
+      </div>
+    );
+  }
+  if (t.role === "user") {
+    return (
+      <div className={`cf-msg-user${t.unanswered ? " is-unanswered" : ""}`}>
+        {t.via === "voice" && <span className="cf-av-said" aria-label="Said aloud"><MicGlyph /></span>}
+        {t.text}
+        {t.unanswered && <span className="cf-sr"> (not answered)</span>}
+      </div>
+    );
+  }
+  return (
+    <div className="cf-msg-ai">
+      {answerBlocks(t.text).map((b, i) => (b.kind === "quote" ? <blockquote key={i} className="cf-code-text is-inline">{b.text}</blockquote> : <p key={i}>{b.text}</p>))}
+      {t.cited && t.cited.length > 0 && (
+        <div className="cf-chip-row">
+          {t.cited.map((id) => <a key={id} className="cf-code-chip is-link" href={codeHref(articleOf(id) ?? id)}>{id}</a>)}
+        </div>
+      )}
+      {t.removed && t.removed.length > 0 && <p className="cf-fine">{t.removed.length === 1 ? "One reference" : `${t.removed.length} references`} couldn’t be checked against the code and {t.removed.length === 1 ? "was" : "were"} left out.</p>}
+      {t.documents && <DocumentSources documents={t.documents} />}
+      {/* The notice is one step away on every answer (never repeated as a paragraph). */}
+      <details className="cf-av-about">
+        <summary aria-label="About this answer" title="About this answer">
+          {t.via === "voice" && <MicGlyph />}
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><circle cx="8" cy="8" r="6.25" /><path d="M8 7.2v3.8M8 5.1v.1" strokeLinecap="round" /></svg>
+        </summary>
+        <p className="cf-fine">{t.notice || DISCLAIMER}{t.withheld ? " The spoken reply was held back; this text replaces it." : ""}</p>
+      </details>
+    </div>
+  );
+}
+
+function DocumentSources({ documents: { attachments, references } }: { documents: NonNullable<Turn["documents"]> }) {
+  return (
+    <details className="cf-av-sources">
+      <summary>PDF sources <span className="cf-fine">· {references.length ? `${new Set(references.map((r) => r.file_id)).size} referenced` : "no excerpt found"}</span></summary>
+      <ul>
+        {attachments.map((a) => {
+          const used = references.filter((r) => r.file_id === a.file_id);
+          return <li key={a.file_id}>
+            <b>{a.name}</b>
+            <p className="cf-fine" title={a.reason ?? undefined}>{a.content_state === "not_read" ? "Not read" : `Text excerpts · ${a.pages.length === 1 ? "page" : "pages"} ${a.pages.join(", ")}`}{a.truncated ? " · truncated" : ""}{a.content_state === "text_excerpt" && !used.length ? " · not referenced in this answer" : ""}</p>
+            {used.map((r, i) => <p className="cf-fine" key={i} title={r.quote}>Referenced: page {r.page}</p>)}
+          </li>;
+        })}
+      </ul>
+    </details>
   );
 }
