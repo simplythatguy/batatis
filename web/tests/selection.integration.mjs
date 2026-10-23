@@ -30,14 +30,18 @@ const account = (p, email, name) => p.evaluate(async ({ base, email, name }) => 
   return (await send('/auth/signup', { email, password: 'SYNTHETIC-password-1', name })).status;
 }, { base, email, name });
 
-/** Only the harness page and the test engine are reachable; anything else is aborted and fails the scenario. */
+/**
+ * Only the harness page and the test engine are reachable; anything else is aborted and fails the scenario.
+ * So is /api on the harness origin: Vite would proxy it to its own target (by default :8000), not the test engine.
+ */
 const owned = new Set([new URL(web).host, new URL(base).host]);
+const proxied = (u) => u.host === new URL(web).host && u.pathname.startsWith('/api/');
 async function page() {
   const ctx = await browser.newContext();
   const offsite = [];
   await ctx.route('**/*', route => {
     const u = new URL(route.request().url());
-    if (['http:', 'https:'].includes(u.protocol) && !owned.has(u.host)) { offsite.push(`${route.request().method()} ${u.href}`); return route.abort(); }
+    if (['http:', 'https:'].includes(u.protocol) && (!owned.has(u.host) || proxied(u))) { offsite.push(`${route.request().method()} ${u.href}`); return route.abort(); }
     return route.continue();
   });
   const p = await ctx.newPage();
