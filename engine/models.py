@@ -165,8 +165,8 @@ class SelectedArticle(BaseModel):
     @field_validator('id')
     @classmethod
     def _nonblank_id(cls, value):
-        if not value.strip():
-            raise ValueError('a selected article needs a stable card id')
+        if not value.strip() or '\x00' in value:
+            raise ValueError('a selected article needs a stable nonblank card id without NUL')
         return value
 
     @field_validator('provision')

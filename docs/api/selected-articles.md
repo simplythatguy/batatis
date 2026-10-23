@@ -36,7 +36,8 @@ is the complete saved `Case`, including the new acknowledged `version`. Use that
 for the next versioned write. Serialize this write with fact, jurisdiction and reference
 writes; do not treat an unacknowledged selection request as saved.
 
-Each card needs a stable nonblank `id` (up to 200 characters) and `provision` (up to 80).
+Each card needs a stable nonblank `id` (up to 200 characters, without U+0000) and
+`provision` (up to 80).
 An article or descendant is canonicalized using CodeDB's identifier parser and verified
 against Division B. Card ids and canonical provisions must each be unique; order is kept.
 The list accepts at most 500 cards. Overlapping article and sentence selections are not
