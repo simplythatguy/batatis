@@ -11,6 +11,7 @@ import uuid
 from contextlib import contextmanager
 from decimal import Decimal
 
+from psycopg.conninfo import conninfo_to_dict, make_conninfo
 from psycopg.types.json import Jsonb
 
 from .models import Case, Fact, now
@@ -47,8 +48,13 @@ def database_url() -> str:
         raise RuntimeError('DATABASE_URL is not set')
     if url.startswith('postgres://'):
         url = 'postgresql://' + url[len('postgres://'):]
-    if 'sslmode=' not in url:
-        url += ('&' if '?' in url else '?') + 'sslmode=require'
+    if not conninfo_to_dict(url).get('sslmode'):
+        if url.startswith('postgresql://'):
+            url += ('&' if '?' in url else '?') + 'sslmode=require'
+        else:
+            # make_conninfo() returns keyword form when adding a scoped search_path.
+            # URL punctuation would turn that valid DSN into an invalid option.
+            url = make_conninfo(url, sslmode='require')
     return url
 
 
