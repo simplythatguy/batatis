@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useReducer,
 import { engine, EngineError, failureText, isCaseConflict, isCaseGone, type EngineGap } from "./api/client";
 import type { IdentifyResult, IntakeResult, Question as PlanQuestion } from "./api/types.gen";
 import { type CompletenessRecord, isProfessionalHold, officerRoutedLabel } from "./humanReview";
-import { acknowledgedVersion, acknowledgeWrite, adoptEngineCase, clearEngineSession, CONFLICT_TEXT, engineCaseId, engineGeneration, evidenceFacts, isEngineGeneration, ensureEngineCase, needsReconcile, noteConflict, notePosted, pushDeletedEvidence, pushFacts, pushListedEvidence, pushSelectedArticles, reconcileEngineCase, refreshGaps, selectionKey, syncJurisdiction, type EvidenceOutcome } from "./api/sync";
+import { acknowledgedVersion, acknowledgeWrite, adoptEngineCase, clearEngineSession, CONFLICT_TEXT, engineCaseId, engineGeneration, evidenceFacts, isEngineGeneration, ensureEngineCase, isReadOnlyCase, needsReconcile, noteConflict, notePosted, pushDeletedEvidence, pushFacts, pushListedEvidence, pushSelectedArticles, reconcileEngineCase, refreshGaps, selectionKey, syncJurisdiction, type EvidenceOutcome } from "./api/sync";
 import { engineNotices, groupEvidenceGaps, missingFromEngine, uploadMessage } from "./rules";
 import { readDecisionBody, wireDecision } from "./identify";
 import { asLocal } from "./intakeFields";
@@ -275,7 +275,8 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const dispatch = useCallback((action: Action) => {
     // A lookup that only attaches Section C rows (or re-orders the same cards, as it does right
     // after a saved case is opened) is derived data, not an edit: the draft stays saved.
-    const derived = (action.type === "reconcileSectionC" && sameCards(reducer(latestCase.current, action).candidates, latestCase.current.candidates)) || [ "editEvidenceDraft", "addFiles", "removeFile", "setFileResult", "ackEvidence", "noteUnscopedEvidence", "notePractice", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions", "noteIntake", "restoreIntake", "noteIntakeRecord", "adoptFacts", "noteIdentify", "renameCase"].includes(action.type);
+    // On a read-only case the lookup's expansion of an article is display only: never an unsaved edit.
+    const derived = (action.type === "reconcileSectionC" && (isReadOnlyCase(engineCaseId()) || sameCards(reducer(latestCase.current, action).candidates, latestCase.current.candidates))) || [ "editEvidenceDraft", "addFiles", "removeFile", "setFileResult", "ackEvidence", "noteUnscopedEvidence", "notePractice", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions", "noteIntake", "restoreIntake", "noteIntakeRecord", "adoptFacts", "noteIdentify", "renameCase"].includes(action.type);
     if (!derived) {
       revision.current += 1;
       if (action.type !== "saveEvidence" && action.type !== "removeEvidence") planRevision.current += 1;
@@ -301,7 +302,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     latestCase.current = reducer(before, action);
     // Derived output that adds or removes a code card (an identification) is saved like an edit, so a
     // switch saves it first. A re-order alone is saved quietly by the next save.
-    if (derived && selectionSet(latestCase.current) !== selectionSet(before) && (!goneCase.current || goneCase.current !== engineCaseId())) setSaveStatus("unsaved");
+    if (derived && !isReadOnlyCase(engineCaseId()) && selectionSet(latestCase.current) !== selectionSet(before) && (!goneCase.current || goneCase.current !== engineCaseId())) setSaveStatus("unsaved");
     reduce(action);
   }, [publishCheck]);
 
@@ -435,7 +436,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       if (failure) throw new Error(failure);
       // A document staged after this snapshot is not saved yet; the next save sends it.
       const staged = latestCase.current.listedEvidence?.length || latestCase.current.deletedEvidence?.length
-        || selectionKey(selectedArticles(latestCase.current)) !== selectionKey(selectedArticles(snapshot));
+        || (!isReadOnlyCase(id) && selectionKey(selectedArticles(latestCase.current)) !== selectionKey(selectedArticles(snapshot)));
       if (staged && !goneCase.current) {
         setSaveStatus("unsaved");
         setSavedNote("");
@@ -755,8 +756,9 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         return null;
       } catch (e) {
         if (isCaseConflict(e)) noteConflict(id);
-        // Keep the answer on screen but not as done: until the engine stores it, a No or Not sure would be lost
-        // (Section D saves persist only Yes) and a Not sure would miss the officer's information request.
+        // Keep the answer on screen but not as done (pending, saved with the selection): until the engine stores the
+        // decision, it is not a confirmed reference (Section D sends only an acknowledged Yes) and a Not sure would
+        // miss the officer's information request. Answering again resends it.
         if (live()) derive({ type: "markDecisionPending", id: candidate.id, pending: true });
         return e instanceof EngineError && e.status === 0 ? "Not saved yet: Batatis could not be reached. Your answer is kept here; answer again to resend it." : failureText(e);
       }
