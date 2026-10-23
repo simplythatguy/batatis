@@ -119,7 +119,10 @@ interface Store {
   beginEmpty: (type: ApplicantType) => void;
   /** Back to an empty Start. `note` replaces "Cleared for this visit." (signed in, the old one stays in the list). */
   resetToWho: (note?: string) => void;
-  /** Open a saved application (list row) as this visit's case. Resolves to an error text, or null when open. */
+  /**
+   * Open a saved application (list row) as this visit's case. Resolves to an error text, or null when open.
+   * An open overtaken by a newer open, Start over or any other reset changes nothing and resolves to null.
+   */
   openCase: (id: string, type: ApplicantType) => Promise<string | null>;
   completenessRecord: CompletenessRecord | null;
   setCompletenessRecord: (record: CompletenessRecord | null) => void;
@@ -231,6 +234,8 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const sectionDHold = useRef<{ generation: number; id: string; error: SectionDRecoveryError } | null>(null);
   /** The saved case was deleted or expired. Nothing is written again until Reset starts a new case. */
   const goneCase = useRef<string | null>(null);
+  /** The latest open; an older one still reading the saved case is abandoned. */
+  const openAttempt = useRef(0);
   const [engineId, setEngineId] = useState<string | null>(null);
   const [factsEpoch, setFactsEpoch] = useState(0);
   const [engineGaps, setEngineGaps] = useState<EngineGap[]>([]);
@@ -968,18 +973,26 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       location.hash = "#/";
     },
     openCase: async (id, type) => {
+      // A newer open or a reset (Start over, New application) while this one is still
+      // reading wins: the late reads are dropped and the draft open now stays as it is.
+      const attempt = ++openAttempt.current;
+      const token = engineGeneration();
+      const live = () => openAttempt.current === attempt && isEngineGeneration(token);
       let saved;
       try {
         saved = await engine.getCase(id);
       } catch (e) {
+        if (!live()) return null;
         return e instanceof EngineError ? (isCaseGone(e) ? "That application was deleted or has expired." : e.detail) : "The application did not open.";
       }
+      if (!live()) return null;
       // What intake read and the last code identification come back as they were stored (no provider call),
       // read before the reset so the opened case, its code cards included, is built in one step.
       const [intake, identify] = await Promise.all([
         engine.storedIntake(saved.id).catch(() => null),
         engine.storedIdentify(saved.id).catch(() => null),
       ]);
+      if (!live()) return null;
       const opened = openedCase(saved, type, { intake, identify });
       // Same reset as Start over, then adopt the saved version, answers and code cards so the next
       // save sends only what the applicant changes.

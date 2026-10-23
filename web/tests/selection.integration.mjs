@@ -216,6 +216,76 @@ try {
     assert.deepEqual(await cards(p), A);
   });
 
+  for (const [what, path] of [['the case read', '$'], ['the stored intake read', '/intake$']]) {
+    await scenario(`starting over while ${what} of an opening application is held keeps the new draft`, async open => {
+      const p = await open();
+      const { a } = await twoApplications(p);
+      const before = await remote(a);
+      await begin(p);
+      await hold(p, `/cases/${a}${path}`, 'GET');
+      await p.evaluate(id => { window.opening = window.caseStore.openCase(id, 'homebuilder'); }, a);
+      await waitHeld(p);
+      await begin(p);                                                    // Start over / New application
+      await dispatch(p, { type: 'setDetail', field: 'owner', value: 'SYNTHETIC new draft owner', section: 'A' });
+      await dispatch(p, { type: 'addCandidate', candidate: card('9.36.2.6.(1)') });
+      const result = await p.evaluate(async () => { window.release(); return await window.opening; });
+      await settle(p);
+      assert.equal(result, null, 'a superseded open reports nothing to its caller');
+      const state = await p.evaluate(() => ({ engineId: window.caseStore.engineId, phase: window.caseStore.phase, owner: window.caseStore.c.facts.find(f => f.field === 'owner')?.value }));
+      assert.notEqual(state.engineId, a, 'the old application is not reattached');
+      assert.equal(state.owner, 'SYNTHETIC new draft owner');
+      assert.deepEqual((await cards(p)).map(x => x[0]), ['search-9.36.2.6.(1)'], 'the old cards never replace the new draft');
+      const id = await save(p);
+      assert.ok(id && id !== a, 'the new draft saves as its own application');
+      assert.deepEqual((await remote(id)).selected_articles, [pick('search-9.36.2.6.(1)', '9.36.2.6.(1)')]);
+      const after = await remote(a);
+      assert.deepEqual([after.version, after.selected_articles], [before.version, before.selected_articles], 'nothing was written to the old application');
+    });
+  }
+
+  await scenario('a newer open wins over an older one still reading', async open => {
+    const p = await open();
+    const { a, b } = await twoApplications(p);
+    await hold(p, `/cases/${a}/intake$`, 'GET');
+    await p.evaluate(id => { window.older = window.caseStore.openCase(id, 'homebuilder'); }, a);
+    await waitHeld(p);
+    assert.equal(await openCase(p, b), null);
+    await looked(p);
+    assert.equal(await p.evaluate(async () => { window.release(); return await window.older; }), null);
+    await settle(p);
+    assert.equal(await p.evaluate(() => window.caseStore.engineId), b);
+    assert.deepEqual(await cards(p), B, 'B stays open with its own cards');
+    await dispatch(p, { type: 'answerCandidate', id: 'search-9.36.2.6.(1)', answer: 'no' });
+    await save(p);
+    assert.equal((await status(p)).save, 'saved', 'B keeps its own acknowledged version');
+  });
+
+  await scenario('opening Section D never confirms a pending Yes; an acknowledged Yes is confirmed', async open => {
+    const p = await open();
+    const make = async (selected) => {
+      const created = await (await fetch(base + '/cases', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ title: 'SYNTHETIC Section D' }) })).json();
+      const r = await fetch(base + `/cases/${created.id}/selected-articles`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ expected_version: created.version, selected_articles: selected }) });
+      assert.equal(r.status, 200);
+      return created.id;
+    };
+    const sectionD = () => p.evaluate(() => window.caseStore.loadSectionD().then(() => null, e => e.message));
+    const waiting = await make([pick('search-9.27.3.4.(1)', '9.27.3.4.(1)', 'yes', true)]);
+    assert.equal(await openCase(p, waiting), null);
+    await p.waitForFunction(() => window.caseStore.sectionCLookup.source === 'live');
+    await settle(p);
+    await sectionD(p);
+    const held = await remote(waiting);
+    assert.deepEqual(held.provisions, [], 'the pending Yes is not a confirmed reference');
+    assert.deepEqual(held.selected_articles, [pick('search-9.27.3.4.(1)', '9.27.3.4.(1)', 'yes', true)], 'its saved answer and pending state stay');
+    assert.deepEqual(await cards(p), [['search-9.27.3.4.(1)', '9.27.3.4.(1)', 'yes', true, false]]);
+    const acked = await make([pick('search-9.27.3.4.(1)', '9.27.3.4.(1)', 'yes')]);
+    assert.equal(await openCase(p, acked), null);
+    await p.waitForFunction(() => window.caseStore.sectionCLookup.source === 'live');
+    await settle(p);
+    assert.equal(await sectionD(p), null);
+    assert.deepEqual((await remote(acked)).provisions, ['9.27.3.4.(1)'], 'an acknowledged Yes still becomes a confirmed reference');
+  });
+
   await scenario('rejected selection writes keep the cards and store nothing', async open => {
     const p = await open();
     const { a } = await twoApplications(p);
