@@ -10,6 +10,9 @@ set -uo pipefail
 
 WEB_PORT=3000
 ENGINE_PORT=8000
+for tool in lsof curl; do
+  command -v "$tool" >/dev/null 2>&1 || { echo "local-app: $tool is required (it detects which process holds a port / checks readiness)" >&2; exit 2; }
+done
 root=$(git rev-parse --show-toplevel)
 logs="$root/.data/local-app"
 

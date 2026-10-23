@@ -50,7 +50,7 @@ while :; do
   if git merge-base --is-ancestor origin/dev HEAD; then
     say "origin/dev ($(git rev-parse --short origin/dev)) is already an ancestor of HEAD: no rebase needed"
   elif [ $dry = 1 ]; then
-    say "dry run: HEAD is not on top of origin/dev; would run: git rebase --rebase-merges origin/dev"
+    say "dry run: HEAD is not on top of origin/dev; would run: git -c rebase.updateRefs=false rebase --rebase-merges origin/dev"
   else
     say "putting your work on top of origin/dev (merge commits preserved)"
     if ! git -c rebase.updateRefs=false rebase --rebase-merges origin/dev; then
@@ -67,7 +67,14 @@ while :; do
     break
   fi
   if g push "$URL" HEAD:refs/heads/dev; then break; fi
-  say "push rejected (dev moved while verifying); fetching again"
+  # A failed push is a race only if dev actually moved. Anything else (credentials, network, the
+  # pre-push hook) is not retryable and must not cost another full verification run.
+  g fetch --quiet "$URL" '+refs/heads/dev:refs/remotes/origin/dev'
+  if git merge-base --is-ancestor origin/dev HEAD; then
+    echo "land: the push failed but dev did not move; see the output above (credentials, network or the pre-push hook)" >&2
+    exit 1
+  fi
+  say "dev moved while verifying; starting over from the new origin/dev"
 done
 
 sha=$(git rev-parse --short HEAD)

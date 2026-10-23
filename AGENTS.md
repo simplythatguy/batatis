@@ -9,7 +9,7 @@ GitHub has exactly two branches: `dev` (the user's test site) and `main` (produc
 - Flow: **verify locally** (`scripts/verify.sh`) → **land on `dev`** (`scripts/land.sh`, fast-forward only) → the user tests the dev site → the user merges the single release PR `dev → main`.
 - Never push or open a PR from any other branch, never push or merge `main`, never force-push, never delete `dev`. Children never push; the parent lands. Run `scripts/install-git-hooks.sh` in a new clone.
 - Push only verified work (each push is a Vercel deployment; the Hobby plan allows about 100 a day). GitHub Actions is failing on account billing, so local verification is the gate.
-- Before rebasing run `git merge-base --is-ancestor origin/dev HEAD`; if true, do not rebase. Otherwise `git rebase --rebase-merges origin/dev`.
+- Before rebasing run `git merge-base --is-ancestor origin/dev HEAD`; if true, do not rebase. Otherwise `git -c rebase.updateRefs=false rebase --rebase-merges origin/dev`.
 - Ports: `scripts/local-app.sh status|start|stop|wait`. If 3000 or 8000 is busy, wait for the owner. Never pick another port; stop what you start.
 
 ## Agent skills

@@ -19,6 +19,7 @@ Locally the app runs on **one** port pair: web on `3000`, engine on `8000`. Noth
 ## Rules
 
 - **Only `dev` and `main` exist on GitHub.** No feature branches, no per-feature PRs, no tags. A `pre-push` hook (`scripts/install-git-hooks.sh`, once per clone) refuses anything but a fast-forward of `dev`.
+- **GitHub cannot enforce this for us.** Branch protection and rulesets return 403 on this private repo (free plan), and "Automatically delete head branches" is off (checked 2026-10-22). The local hook plus these rules are the guard; if the repo is upgraded or made public, protect `dev` and `main` against force-push and deletion and keep `main` PR-only. Bots can also commit to the release PR's branch (`dev`): CodeRabbit's "Auto-fix PRs" rule is a dashboard setting; keep it off for the release PR so nothing reaches `dev` outside `scripts/land.sh`.
 - **Never** push or merge to `main`, force-push, or delete `dev` or `main`. After the user merges the release PR, nobody clicks GitHub's "Delete branch": that would delete `dev`.
 - **One release PR, `dev → main`.** `scripts/land.sh` opens it when missing. After landing, comment on it: what changed, how you verified it, what the user should check on the dev site. Do not edit its description (parallel agents overwrite each other).
 - **Push verified work only.** Each push to `dev` is a Vercel deployment, and the Hobby plan allows about 100 a day. No WIP, no re-pushing an unchanged SHA, batch small fixes.
