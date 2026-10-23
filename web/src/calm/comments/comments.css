@@ -1,0 +1,336 @@
+/* Officer comments: the one-line notice at the top of the workflow, and the comments page. */
+
+.cf-notice-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 28px;
+  border-bottom: 1px solid var(--cf-line);
+  color: var(--cf-text);
+  font-size: 14px;
+  text-decoration: none;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  transition-property: background-color;
+  transition-duration: 150ms;
+}
+
+.cf-notice-line > svg {
+  flex: none;
+  color: var(--cf-text-2);
+}
+
+.cf-notice-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 550;
+}
+
+.cf-notice-count {
+  flex: none;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--cf-primary-bg);
+  color: var(--cf-primary-text);
+  font: 600 11px/18px var(--cf-font);
+  text-align: center;
+}
+
+.cf-notice-open {
+  margin-left: auto;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--cf-text-3);
+  font-size: 13px;
+}
+
+@media (hover: hover) {
+  .cf-notice-line:hover {
+    background: var(--cf-hover);
+  }
+  .cf-notice-line:hover .cf-notice-open {
+    color: var(--cf-text);
+  }
+}
+
+.cf-notice-line:focus-visible {
+  outline: 2px solid var(--cf-focus);
+  outline-offset: -2px;
+}
+
+/* Page */
+
+.cf-comments {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 28px 28px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.cf-comments-head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.cf-comments-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  margin-left: -6px;
+  padding: 0 8px 0 4px;
+  border-radius: 8px;
+  color: var(--cf-text-3);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+@media (hover: hover) {
+  .cf-comments-back:hover {
+    color: var(--cf-text);
+    background: var(--cf-hover);
+  }
+}
+
+.cf-comments-back:focus-visible {
+  outline: 2px solid var(--cf-focus);
+  outline-offset: 1px;
+}
+
+.cf-comments-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.cf-comments-state,
+.cf-comments-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--cf-text-2);
+}
+
+.cf-comments-empty {
+  margin: 24px 0 0;
+  color: var(--cf-text-3);
+}
+
+.cf-comment-lead {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 20px;
+  border: 1px solid var(--cf-line);
+  border-radius: 14px;
+  background: var(--cf-surface);
+}
+
+.cf-comment-lead-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.cf-comment-lead-who {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 6px;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 550;
+}
+
+.cf-comment-lead-who span {
+  color: var(--cf-text-3);
+  font-weight: 400;
+}
+
+.cf-comment-body {
+  margin: 6px 0 0;
+  font-size: 15px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.cf-comment-items {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A linked item opens the question that fixes it; an item with nowhere to fix it is the same row
+   without the link. Long items wrap inside their row (the dot and arrow sit on the first line), and
+   a hairline keeps each row its own. */
+.cf-comment-items li + li {
+  border-top: 1px solid var(--cf-line);
+}
+
+.cf-comment-items a,
+.cf-comment-item-plain {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  min-height: 40px;
+  padding: 9px 10px;
+  margin: 0 -10px;
+  border-radius: 8px;
+  color: var(--cf-text);
+  line-height: 1.5;
+  text-decoration: none;
+}
+
+.cf-comment-items .cf-dot {
+  flex: none;
+  margin-top: 0.55em;
+}
+
+.cf-comment-item-plain {
+  color: var(--cf-text-2);
+}
+
+.cf-comment-items a svg {
+  flex: none;
+  margin: 0.2em 0 0 auto;
+  color: var(--cf-text-3);
+}
+
+@media (hover: hover) {
+  .cf-comment-items a:hover {
+    background: var(--cf-hover);
+  }
+}
+
+.cf-comment-items a:focus-visible {
+  outline: 2px solid var(--cf-focus);
+  outline-offset: -2px;
+}
+
+.cf-comment-plain {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  color: var(--cf-text-2);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.cf-comment-acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.cf-comment-group {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cf-comment {
+  padding: 12px 0;
+  border-top: 1px solid var(--cf-line);
+}
+
+.cf-comment-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--cf-text-3);
+}
+
+.cf-comment-status {
+  padding: 8px 0;
+  border-top: 1px solid var(--cf-line);
+  font-size: 12.5px;
+  color: var(--cf-text-3);
+}
+
+.cf-comment-new {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--cf-text);
+}
+
+.cf-comment-earlier-h {
+  margin: 8px 0 4px;
+  font-size: 13px;
+  font-weight: 550;
+  color: var(--cf-text-3);
+}
+
+/* Earlier history folds behind its heading: a +/− after it, the whole line is the control. */
+summary.cf-comment-earlier-h {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 6px 0;
+  list-style: none;
+  cursor: pointer;
+}
+
+summary.cf-comment-earlier-h::-webkit-details-marker {
+  display: none;
+}
+
+summary.cf-comment-earlier-h::after {
+  content: "+";
+  margin-left: 6px;
+  color: var(--cf-text-4);
+  font-weight: 500;
+}
+
+.cf-comment-earlier[open] > summary.cf-comment-earlier-h::after {
+  content: "−";
+}
+
+summary.cf-comment-earlier-h:focus-visible {
+  outline: 2px solid var(--cf-focus);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (hover: hover) {
+  summary.cf-comment-earlier-h:hover {
+    color: var(--cf-text);
+  }
+}
+
+@media (max-width: 760px) {
+  .cf-notice-line {
+    padding: 0 16px;
+  }
+  .cf-comments {
+    padding: 18px 16px 48px;
+  }
+  .cf-comment-lead {
+    padding: 16px;
+    gap: 12px;
+  }
+}

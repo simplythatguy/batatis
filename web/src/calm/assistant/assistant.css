@@ -1,0 +1,413 @@
+/* Assistant and voice: the parts the shared calm.css does not have. Light, monotone, ink only. */
+.cf-assist { --cf-text-3: #656c78; }
+.cf-av-boundary { flex: none; margin: 0; padding: 7px 18px 0; color: var(--cf-text-3); font-size: 11.5px; line-height: 1.4; }
+.cf-av-tool { position: relative; display: inline-flex; flex: none; }
+.cf-av-tooltip {
+  position: absolute; z-index: 10; bottom: calc(100% + 6px); right: 0;
+  width: max-content; max-width: 220px; padding: 6px 8px; border: 1px solid var(--cf-line);
+  border-radius: 8px; background: var(--cf-surface); box-shadow: var(--cf-shadow);
+  color: var(--cf-text); font: 12px/1.4 var(--cf-font); text-align: left; white-space: normal;
+  visibility: hidden; pointer-events: none;
+}
+.cf-assist-head .cf-av-tooltip { top: calc(100% + 6px); bottom: auto; }
+.cf-av-tool:focus-within > .cf-av-tooltip { visibility: visible; }
+@media (hover: hover) { .cf-av-tool:hover > .cf-av-tooltip { visibility: visible; } }
+
+.cf-av-scroll { position: relative; display: flex; flex: 1; min-height: 0; }
+.cf-av-scroll .cf-assist-body { width: 100%; display: block; overflow-anchor: none; }
+.cf-assist-transcript { display: flex; flex-direction: column; gap: 16px; }
+.cf-av-turn { min-width: 0; display: flex; flex-direction: column; }
+.cf-av-latest { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); white-space: nowrap; box-shadow: var(--cf-shadow); }
+.cf-av-shimmer { color: var(--cf-text-3); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .cf-av-turn[data-enter] { animation: cf-av-arrive 220ms cubic-bezier(.2,.8,.2,1) both; }
+  .cf-av-shimmer {
+    background: linear-gradient(100deg, var(--cf-text-3) 30%, var(--cf-text) 48%, var(--cf-text-3) 65%);
+    background-size: 220% 100%; background-clip: text; -webkit-background-clip: text; color: transparent;
+    animation: cf-av-shine 1600ms linear infinite;
+  }
+}
+@keyframes cf-av-arrive { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes cf-av-shine { from { background-position: 140% 0; } to { background-position: -100% 0; } }
+
+.cf-av-sources { margin: 8px 0; font-size: 12.5px; }
+.cf-av-sources summary { cursor: pointer; color: var(--cf-text-2); }
+.cf-av-sources ul { list-style: none; margin: 8px 0; padding: 0; }
+.cf-av-sources li { border-left: 1px solid var(--cf-line-2); padding-left: 10px; margin: 8px 0; overflow-wrap: anywhere; }
+.cf-av-sources b { font-weight: 550; }
+
+.cf-av-scope {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin: 0;
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--cf-line);
+  font-size: 12.5px;
+  color: var(--cf-text-3);
+  white-space: nowrap;
+}
+
+.cf-av-scope svg {
+  flex: none;
+}
+
+.cf-av-scope b {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--cf-text);
+  font-weight: 550;
+}
+
+.cf-av-scope-at {
+  flex: 0 10000 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cf-msg-user.is-unanswered {
+  color: var(--cf-text-3);
+  background: transparent;
+  border-style: dashed;
+}
+
+.cf-av-said {
+  display: inline-flex;
+  margin-right: 6px;
+  vertical-align: -1px;
+  color: var(--cf-text-3);
+}
+
+.cf-av-about {
+  margin-top: -2px;
+}
+
+.cf-av-about summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 24px;
+  min-height: 24px;
+  justify-content: center;
+  padding: 2px;
+  border-radius: 6px;
+  color: var(--cf-text-4);
+  cursor: pointer;
+  list-style: none;
+  transition-property: color;
+  transition-duration: 150ms;
+}
+
+.cf-av-about summary::-webkit-details-marker {
+  display: none;
+}
+
+.cf-av-about[open] summary {
+  color: var(--cf-text-2);
+}
+
+@media (hover: hover) {
+  .cf-av-about summary:hover {
+    color: var(--cf-text-2);
+  }
+}
+
+.cf-av-about .cf-fine {
+  margin-top: 4px;
+}
+
+.cf-av-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+  font-size: 13.5px;
+  color: var(--cf-text);
+}
+
+.cf-av-nav.is-quiet {
+  color: var(--cf-text-3);
+}
+
+.cf-av-nav-note {
+  color: var(--cf-text-3);
+}
+
+.cf-av-pending {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--cf-text-3);
+}
+
+.cf-assist-error .cf-btn {
+  margin-top: 8px;
+}
+
+.cf-av-tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+}
+
+/* —— Voice notice and bar —— */
+
+.cf-av-notice {
+  flex: none;
+  margin: 0 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--cf-line-2);
+  border-radius: 14px;
+  background: var(--cf-surface);
+  box-shadow: var(--cf-shadow);
+}
+
+.cf-av-notice-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 6px;
+  font-size: 14px;
+  font-weight: 550;
+}
+
+.cf-av-notice-text {
+  margin: 0 0 12px;
+  max-height: 160px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--cf-text-2);
+}
+
+.cf-av-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.cf-av-bar {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  margin: 12px 12px 0;
+  padding: 8px 8px 8px 12px;
+  border: 1px solid var(--cf-line-2);
+  border-radius: 14px;
+  background: var(--cf-surface);
+}
+
+.cf-av-bar.is-ended {
+  border-style: dashed;
+  background: transparent;
+}
+
+.cf-av-bar .cf-av-row {
+  margin-left: auto;
+}
+
+.cf-av-bar-text {
+  min-width: 0;
+  font-size: 13px;
+  color: var(--cf-text);
+}
+
+.cf-av-bar.is-ended .cf-av-bar-text {
+  flex: 1;
+  color: var(--cf-text-2);
+}
+
+.cf-av-hint {
+  color: var(--cf-text-3);
+}
+
+.cf-av-time {
+  font: 500 12px/1 var(--cf-mono);
+  color: var(--cf-text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* A quiet ink orb: its ring follows the voice level; listening is calmer than speaking. */
+.cf-av-orb {
+  --level: 0;
+  position: relative;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--cf-text);
+  opacity: calc(0.55 + var(--level) * 0.45);
+}
+
+.cf-av-orb::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1.5px solid var(--cf-text);
+  opacity: calc(var(--level) * 0.6);
+}
+
+.cf-av-orb:is([data-status="mic"], [data-status="connecting"], [data-status="updating"], [data-status="stopping"]) {
+  background: var(--cf-text-4);
+}
+
+.cf-av-orb[data-status="sending"] {
+  background: var(--cf-text-3);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cf-av-orb {
+    scale: calc(0.9 + var(--level) * 0.25);
+  }
+  .cf-av-orb::after {
+    scale: calc(1 + var(--level) * 0.35);
+  }
+  .cf-av-orb[data-status="sending"] {
+    animation: cf-av-think 1200ms ease-in-out infinite;
+  }
+}
+
+@keyframes cf-av-think {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* —— Files for voice —— */
+
+.cf-av-files {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.cf-av-files-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--cf-text-3);
+  cursor: help;
+}
+
+.cf-av-file {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 100%;
+  height: 28px;
+  padding: 0 4px 0 8px;
+  border: 1px solid var(--cf-line-2);
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--cf-text-2);
+}
+
+.cf-av-file.is-failed {
+  border-style: dashed;
+  color: var(--cf-text-3);
+}
+
+.cf-av-file-name {
+  min-width: 0;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cf-av-file-error {
+  color: var(--cf-blocking-ink);
+  white-space: nowrap;
+}
+
+.cf-av-file-x {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--cf-text-3);
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .cf-av-file-x:hover {
+    color: var(--cf-text);
+    background: var(--cf-hover);
+  }
+}
+
+.cf-av-add {
+  position: relative;
+}
+
+.cf-av-menu {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  right: 0;
+  z-index: 5;
+  width: 240px;
+  max-height: 220px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 4px;
+  border: 1px solid var(--cf-line-2);
+  border-radius: 12px;
+  background: var(--cf-surface);
+  box-shadow: var(--cf-shadow);
+}
+
+.cf-av-menu button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 34px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--cf-text-2);
+  font: 500 13px var(--cf-font);
+  text-align: left;
+  cursor: pointer;
+}
+
+.cf-av-menu button span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (hover: hover) {
+  .cf-av-menu button:hover {
+    color: var(--cf-text);
+    background: var(--cf-hover);
+  }
+}
+
+.cf-av-menu button:focus-visible,
+.cf-av-file-x:focus-visible,
+.cf-av-about summary:focus-visible {
+  outline: 2px solid var(--cf-focus);
+  outline-offset: 1px;
+}

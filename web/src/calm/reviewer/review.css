@@ -325,3 +325,51 @@
 .rv-spin { width: 14px; height: 14px; border: 2px solid var(--cf-line-2); border-top-color: var(--cf-text-2); border-radius: 50%; }
 @media (prefers-reduced-motion: no-preference) { .rv-spin { animation: rv-spin 800ms linear infinite; } }
 @keyframes rv-spin { to { rotate: 360deg; } }
+
+/* —— Monotone (user direction 2026-10-22): the review draws in ink. Colour is left only to the
+   status dots (required, check, found), which keep their meaning. —— */
+
+.pr .pr-ico,
+.rv .pr-ico { background: var(--cf-hover); color: var(--cf-text-2); }
+.pr-title-row { gap: 12px; }
+.pr-title-row .pr-ico { width: 32px; height: 32px; border-radius: 9px; }
+.pr-count-pill { background: var(--cf-hover); color: var(--cf-text-2); }
+.pr-title { font-size: 24px; }
+.pr-title-row + .pr-lede { margin-top: 2px; }
+
+/* The request: the proposal, then three plain counts in a row. */
+.pr-quote blockquote { border-left-color: var(--cf-line-2); }
+.pr-quote figcaption { margin: 8px 0 0 18px; }
+ul.pr-metrics { list-style: none; display: flex; flex-wrap: wrap; gap: 8px 28px; margin: 24px 0 0; padding: 14px 0; border-top: 1px solid var(--cf-line); border-bottom: 1px solid var(--cf-line); }
+ul.pr-metrics > li { display: flex; align-items: baseline; gap: 8px; padding: 0; border: 0; background: none; }
+ul.pr-metrics > li > .cf-dot { translate: 0 -2px; }
+ul.pr-metrics b { margin: 0; color: var(--cf-text); font-size: 20px; font-weight: 550; line-height: 1; }
+ul.pr-metrics span { color: var(--cf-text-3); font-size: 13.5px; }
+.pr-facts { margin-top: 0; border-top: 0; }
+
+/* Missing: neutral section letters, the source behind the fold. */
+.pr-sec-badge { background: var(--cf-hover); color: var(--cf-text-2); }
+
+/* Checks: plain rows. */
+.pr-panel { box-shadow: none; }
+
+/* The decision: three quiet tiles, one line each. */
+.rv-choices { gap: 10px; }
+.rv-choice { min-height: 0; padding: 16px; gap: 6px; box-shadow: none; }
+.rv-choice .pr-ico { width: 36px; height: 36px; border-radius: 10px; margin-bottom: 4px; }
+.rv-choice:disabled .rv-choice-d { color: var(--cf-blocking-ink); }
+.rv-choice-t { font-size: 15.5px; }
+@media (hover: hover) { .rv-choice:not(:disabled):hover { border-color: var(--cf-line-2); background: var(--cf-hover); } }
+.rv-tag { background: var(--cf-selected); color: var(--cf-text); }
+.rv-chip { background: var(--cf-hover); color: var(--cf-text-2); }
+.rv-chip .cf-dot { background: var(--cf-accent); }
+
+/* Close-out card: neutral. */
+.co-due { background: var(--cf-hover); }
+
+/* Header steps on a narrow header: names hide on the side buttons first. */
+@media (max-width: 1180px) { .rv-head-label { display: none; } }
+/* The work area and the step body take focus when the screen changes under the keyboard (so a
+   screen reader lands there); they are not controls and need no ring. */
+.cf-app .ac-page-body.rv[tabindex="-1"]:focus-visible,
+.cf-app .pr-body[tabindex="-1"]:focus-visible { outline: none; }

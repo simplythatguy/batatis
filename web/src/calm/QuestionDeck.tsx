@@ -16,7 +16,7 @@ import { CodeProgress, ForkNote, ReadingState, ReadSource, RedirectPage, ShowCod
 import { Icon24 } from "./icons";
 import { RelevanceRing } from "./RelevanceRing";
 import { getSession, updateSession, useSession } from "./session";
-import { CONFLICT_TEXT } from "../api/sync";
+import { CONFLICT_TEXT, engineGeneration } from "../api/sync";
 import { retryExtras, getExtras } from "./caseExtras";
 import { CIcon } from "./ui";
 import { engine } from "../api/client";
@@ -31,6 +31,8 @@ import { JurisdictionNote } from "./JurisdictionNote";
 import { AuthorityPicker } from "./AuthorityPicker";
 import { AUTHORITIES } from "../config";
 import { PACKAGE_YES, RULE_ADD, RULE_LEAVE } from "./deck";
+import { useAccount } from "./account";
+import { useQuestionDraft } from "./useQuestionDraft";
 
 type Shown = DeckItem & { gone?: boolean };
 
@@ -458,7 +460,7 @@ function NoQuestionsYet() {
 
 /** Coordinate the visit queue, rule and checklist answers, and navigation through the case’s cards. */
 function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boolean }) {
-  const { c, gaps, dispatch, requestCheck, sectionCLookup, reading, answerPlan, answerChecklist, reloadChecklists } = useCase();
+  const { c, engineId, gaps, dispatch, requestCheck, sectionCLookup, reading, answerPlan, answerChecklist, reloadChecklists } = useCase();
   const session = useSession();
   const { app, locked } = useCurrentApplication();
   const { onAnswer, decisionNoteFor } = useCandidateAnswer();
@@ -500,11 +502,27 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queueSig]);
 
-  const [picked, setPicked] = useState<Record<string, string>>({});
+  const account = useAccount();
+  const savedDraft = (() => {
+    if (!item) return "";
+    if (item.kind === "question") return c.questions.find((q) => q.id === item.ref)?.answer ?? "";
+    if (item.kind === "storeys") return c.questions.find((q) => q.id === "q-desc-storeys")?.answer ?? "";
+    if (item.kind === "plan" && item.plan) {
+      const saved = factFor(c, localField(item.plan.field))?.value;
+      return saved == null || typeof saved === "boolean" ? "" : String(saved);
+    }
+    if (item.kind === "rule-input" && item.input) {
+      const saved = extras.rules ? ruleFacts(c, extras.rules.index).get(item.input.field)?.value : undefined;
+      return typeof saved === "number" ? String(saved) : "";
+    }
+    if (item.kind === "condition") return extras.checklists?.checklists.find((x) => x.id === item.checklist)?.conditions.find((x) => x.id === item.condition)?.answer?.reason ?? "";
+    return "";
+  })();
+  const draftAccount = account.user ? JSON.stringify([account.user.id, account.user.role, account.user.authority]) : null;
+  const { value: draft, setValue: setDraft, choices: picked, setChoices: setPicked } = useQuestionDraft(draftAccount, engineGeneration(), engineId, currentKey, savedDraft);
   const [why, setWhy] = useState(false);
   const [drawer, setDrawer] = useState<DrawerState | null>(null);
   const [jumpTo, setJumpTo] = useState<string | null>(null);
-  const [draft, setDraft] = useState("");
   const [planNotes, setPlanNotes] = useState<Record<string, string>>({});
   /** Rule and package cards: a note per card (an error, or a 409 waiting for a reload), and the card being saved. */
   const [cardNotes, setCardNotes] = useState<Record<string, string>>({});
@@ -517,23 +535,9 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
   const formPos = currentKey ? all.findIndex((i) => i.key === currentKey) : all.length;
   const dir = useDirection(formPos < 0 ? index : formPos);
 
-  // Text drafts start from the saved answer each time a card opens.
+  // Help starts closed on each card; unconfirmed text stays with that application and card.
   useEffect(() => {
     setWhy(false);
-    if (!item) return setDraft("");
-    if (item.kind === "question") setDraft(c.questions.find((q) => q.id === item.ref)?.answer ?? "");
-    else if (item.kind === "storeys") setDraft(c.questions.find((q) => q.id === "q-desc-storeys")?.answer ?? "");
-    else if (item.kind === "plan" && item.plan) {
-      const saved = factFor(c, localField(item.plan.field))?.value;
-      setDraft(saved == null || typeof saved === "boolean" ? "" : String(saved));
-    } else if (item.kind === "rule-input" && item.input) {
-      const saved = extras.rules ? ruleFacts(c, extras.rules.index).get(item.input.field)?.value : undefined;
-      setDraft(typeof saved === "number" ? String(saved) : "");
-    } else if (item.kind === "condition") {
-      const row = extras.checklists?.checklists.find((x) => x.id === item.checklist)?.conditions.find((x) => x.id === item.condition);
-      setDraft(row?.answer?.reason ?? "");
-    } else setDraft("");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentKey]);
 
   // The assistant follows the open question.

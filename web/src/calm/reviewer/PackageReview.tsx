@@ -29,13 +29,13 @@ import "./review.css";
 export type StepId = "changes" | "summary" | "missing" | "checks";
 
 const STEP_LABEL: Record<StepId, string> = {
-  changes: "What changed",
-  summary: "Overview",
+  changes: "Changes",
+  summary: "Request",
   missing: "Missing",
   checks: "Checks",
 };
 
-/** Each step's colour and icon, so the steps are told apart at a glance. */
+/** Each step's icon. The hue is kept for callers; the review itself draws in ink (monotone). */
 export const STEP_LOOK: Record<StepId | "final", { hue: string; icon: AcIconName }> = {
   changes: { hue: "slate", icon: "diff" },
   summary: { hue: "blue", icon: "eye" },
@@ -44,7 +44,7 @@ export const STEP_LOOK: Record<StepId | "final", { hue: string; icon: AcIconName
   final: { hue: "green", icon: "scale" },
 };
 
-/** A step's heading: its coloured icon, the title and an optional count. */
+/** A step's heading: its icon, the task in a few words and an optional count. */
 export function StepTitle({ step, children, count, icon }: { step: StepId | "final"; children: ReactNode; count?: number; icon?: AcIconName }) {
   const look = STEP_LOOK[step];
   return (
@@ -56,8 +56,6 @@ export function StepTitle({ step, children, count, icon }: { step: StepId | "fin
   );
 }
 
-/** The form's parts keep the colours the applicant sees in their questions (A blue, B teal, C violet, D amber). */
-export const SECTION_HUE: Record<string, string> = { A: "blue", B: "teal", C: "violet", D: "amber", process: "amber" };
 
 export function stepsFor(s: ReviewSession): StepId[] {
   return [...(s.diff ? (["changes"] as StepId[]) : []), "summary", "missing", "checks"];
@@ -71,8 +69,9 @@ function FindingItem({ f }: { f: FindingView }) {
     <li className="pr-item">
       <Dot tone={f.tone} />
       <details className="pr-item-body pr-fold">
-        <summary className="pr-item-title">{f.title}<span className="cf-sr"> ({TONE_WORD[f.tone]})</span>{f.where && <span className="pr-where">{f.where}</span>}</summary>
+        <summary className="pr-item-title">{f.title}<span className="cf-sr"> ({TONE_WORD[f.tone]})</span></summary>
         <p className="pr-item-msg">{f.message}</p>
+        {f.where && <p className="pr-item-meta">{f.where}</p>}
         {f.quote && <p className="pr-src"><q>{f.quote}</q></p>}
         {f.citations.length > 0 && <div className="pr-cites">{f.citations.map((c) => <CodeRef key={c} citation={c} />)}</div>}
       </details>
@@ -103,8 +102,8 @@ function Changes({ s }: { s: ReviewSession }) {
   );
   return (
     <>
-      <StepTitle step="changes">{d.statement}</StepTitle>
-      <p className="pr-lede">Since version {d.from}</p>
+      <StepTitle step="changes">See what changed</StepTitle>
+      <p className="pr-lede">{d.statement} · since version {d.from}</p>
       <div className="pr-meter" role="img" aria-label={`${Math.round(d.ratio * 100)}% of the earlier gaps resolved`}>
         <span style={{ width: `${Math.round(d.ratio * 100)}%` }} />
       </div>
@@ -119,20 +118,21 @@ function Summary({ s }: { s: ReviewSession }) {
   const v = summaryView(s);
   return (
     <>
-      <StepTitle step="summary">{v.headline}</StepTitle>
+      <StepTitle step="summary">Read the request</StepTitle>
+      <p className="pr-lede">{v.headline}</p>
       {v.proposal ? (
         <figure className="pr-quote">
-          <figcaption>Their proposal{v.proposalWhere ? ` · ${v.proposalWhere}` : ""}</figcaption>
           <blockquote>{v.proposal}</blockquote>
+          <figcaption>Their proposal{v.proposalWhere ? ` · ${v.proposalWhere}` : ""}</figcaption>
         </figure>
       ) : (
         <p className="pr-item-msg"><Dot tone="blocking" /> No proposal found</p>
       )}
-      <div className="pr-metrics">
-        <div className="is-rose"><AcIcon name="send" size={16} /><b>{v.toAsk}</b><span>to ask</span></div>
-        <div className="is-amber"><AcIcon name="eye" size={16} /><b>{v.toCheck}</b><span>for you</span></div>
-        <div className="is-green"><AcIcon name="check" size={16} /><b>{v.present}</b><span>found{v.blank ? ` · ${v.blank} blank` : ""}{v.notFound ? ` · ${v.notFound} not found` : ""}</span></div>
-      </div>
+      <ul className="pr-metrics" aria-label="What the review found">
+        <li><Dot tone={v.toAsk ? "blocking" : "done"} /><b>{v.toAsk}</b><span>to ask for</span></li>
+        <li><Dot tone={v.toCheck ? "warning" : "done"} /><b>{v.toCheck}</b><span>for you to check</span></li>
+        <li title={[v.blank ? `${v.blank} blank` : "", v.notFound ? `${v.notFound} not found` : ""].filter(Boolean).join(" · ") || undefined}><Dot tone="done" /><b>{v.present}</b><span>found</span></li>
+      </ul>
       <dl className="pr-facts">
         <dt><AcIcon name="book" size={14} />Code</dt>
         <dd>{v.provisions.length ? v.provisions.map((p) => <span key={p} className="pr-mono pr-pill">{p}</span>) : <span className="pr-faint">None cited</span>}</dd>
@@ -146,13 +146,13 @@ function Summary({ s }: { s: ReviewSession }) {
 
 function Missing({ s }: { s: ReviewSession }) {
   const v = missingView(s);
-  if (!v.total) return <StepTitle step="missing" icon="check">Nothing missing</StepTitle>;
+  if (!v.total) return <StepTitle step="missing" icon="check">Nothing is missing</StepTitle>;
   return (
     <>
-      <StepTitle step="missing" count={v.total}>What’s missing</StepTitle>
+      <StepTitle step="missing" count={v.total}>What to ask for</StepTitle>
       {v.groups.map((g) => (
         <section key={g.section} className="pr-group" aria-label={g.label}>
-          <h3 className={`pr-group-h pr-sec is-${SECTION_HUE[g.section]}`}>
+          <h3 className="pr-group-h pr-sec">
             <span className="pr-sec-badge" aria-hidden="true">{g.section === "process" ? "D" : g.section}</span>
             {g.label.replace(/^Section [A-D] · /, "")} <span className="pr-n">{g.items.length}</span>
           </h3>
@@ -288,9 +288,9 @@ function Peer({ s }: { s: ReviewSession }) {
 }
 
 /** One folded check: icon, name and a status chip; the detail opens in place. */
-function Panel({ hue, icon, title, chip, tone, children, group }: { hue: string; icon: AcIconName; title: string; chip: string; tone: Tone; children: ReactNode; group: string }) {
+function Panel({ icon, title, chip, tone, children, group }: { icon: AcIconName; title: string; chip: string; tone: Tone; children: ReactNode; group: string }) {
   return (
-    <details className={`pr-panel is-${hue}`} name={group}>
+    <details className="pr-panel" name={group}>
       <summary>
         <span className="pr-ico" aria-hidden="true"><AcIcon name={icon} size={18} /></span>
         <span className="pr-panel-t">{title}</span>
@@ -315,19 +315,19 @@ function Checks({ s }: { s: ReviewSession }) {
   const peer = peerView(s);
   return (
     <>
-      <StepTitle step="checks">Checks</StepTitle>
+      <StepTitle step="checks">Look over the checks</StepTitle>
       <div className="pr-panels">
-        <Panel group={group} hue="violet" icon="files" title="Documents" tone={s.documents.length ? "done" : "pending"} chip={s.documents.length ? String(s.documents.length) : "None"}>
+        <Panel group={group} icon="files" title="Documents" tone={s.documents.length ? "done" : "pending"} chip={s.documents.length ? String(s.documents.length) : "None"}>
           <Documents s={s} />
         </Panel>
-        <Panel group={group} hue="teal" icon="book" title="Code references" tone={s.lookup_skipped ? "pending" : code.length ? worst(code) : "pending"}
+        <Panel group={group} icon="book" title="Code references" tone={s.lookup_skipped ? "pending" : code.length ? worst(code) : "pending"}
           chip={s.lookup_skipped ? "Not looked up" : !s.citations.length ? "None cited" : codeOpen ? `${codeOpen} to look at` : "All found"}>
           <CodeChecks s={s} />
         </Panel>
-        <Panel group={group} hue="amber" icon="clipboard" title="File checklist" tone={worst(fileTones)} chip={!file.read ? "Not checked" : fileOpen ? `${fileOpen} open` : "No gaps"}>
+        <Panel group={group} icon="clipboard" title="File checklist" tone={worst(fileTones)} chip={!file.read ? "Not checked" : fileOpen ? `${fileOpen} open` : "No gaps"}>
           <FileItems s={s} />
         </Panel>
-        <Panel group={group} hue="slate" icon="users" title="Peer review · only you" tone={peer.signal ? "warning" : "done"} chip={peer.signal ? "May help" : "No signal"}>
+        <Panel group={group} icon="users" title="Peer review" tone={peer.signal ? "warning" : "done"} chip={peer.signal ? "May help" : "No signal"}>
           <Peer s={s} />
         </Panel>
       </div>
@@ -344,9 +344,9 @@ export interface FinalStep {
 type Step = StepId | "final";
 
 /**
- * The steps as the shell's stage icons (the applicant's Describe · Questions · Review · Application
- * look): each step's icon in a ring, tinted in its hue when current, a check once passed, and the
- * open count as a badge. Names are the accessible name and a label on hover or focus.
+ * The steps as the shell's stage buttons (the applicant's Describe · Questions · Review · Application
+ * look): the current step named in a soft tab, a check once passed, the open count as a quiet number.
+ * Other names are the accessible name and a label on hover or focus.
  */
 export function StepTabs({ steps, active, label, counts, onPick }: { steps: Step[]; active: Step; label: (s: Step) => string; counts: Partial<Record<Step, number>>; onPick: (s: Step) => void }) {
   const at = steps.indexOf(active);
@@ -365,8 +365,7 @@ export function StepTabs({ steps, active, label, counts, onPick }: { steps: Step
             pct={past || s === active ? 100 : 0}
             current={s === active}
             done={past}
-            count={n}
-            hue={STEP_LOOK[s].hue}
+            count={past ? 0 : n}
             note={n && !past ? `${n} to look at` : undefined}
             onClick={() => onPick(s)}
           />
@@ -472,8 +471,8 @@ export function PackageReview({
       )}
       {at === 0 && (
         <div className="pr-meta-foot">
-          <p className="pr-faint">
-            Review version {session.version} · {session.input_kind === "case" ? "read from the saved application" : "read from uploaded PDFs"} · {session.created_by_name}, {sentLabel(session.created_at).replace(/^Today, /, "")}
+          <p className="pr-faint" title={`${session.input_kind === "case" ? "Read from the saved application" : "Read from uploaded PDFs"} by ${session.created_by_name}`}>
+            Version {session.version} · {sentLabel(session.created_at)}
           </p>
           {actions && <div className="pr-head-acts">{actions}</div>}
         </div>

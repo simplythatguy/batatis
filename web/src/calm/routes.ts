@@ -4,7 +4,7 @@
  * so every "Fix" or "Answer" link lands on the matching question card.
  */
 
-export type Screen = "start" | "questions" | "review" | "application" | "officer" | "accuracy" | "references" | "code";
+export type Screen = "start" | "questions" | "review" | "application" | "officer" | "accuracy" | "references" | "code" | "comments";
 
 export interface CalmRoute {
   screen: Screen;
@@ -27,6 +27,15 @@ export const STAGES: { screen: Screen; n: string; label: string }[] = [
   { screen: "review", n: "03", label: "Review" },
   { screen: "application", n: "04", label: "Application" },
 ];
+
+/** The last stage page this tab showed, so pages off the stages (comments) can go back to it. */
+let lastStage = "#/questions";
+export function rememberStage(hash: string) {
+  lastStage = hash || "#/";
+}
+export function lastStageHash(): string {
+  return lastStage;
+}
 
 /** Legacy focus ids map onto deck keys. Professional fields live on the Section D card. */
 export function deckFocus(focus: string | null): string | null {
@@ -92,6 +101,8 @@ export function resolveRoute(path: string, params: URLSearchParams): CalmRoute {
     }
     case "/officer":
       return build("officer");
+    case "/comments":
+      return build("comments");
     case "/accuracy":
       return build("accuracy");
     case "/section-c":

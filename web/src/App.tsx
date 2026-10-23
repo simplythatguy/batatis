@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Application } from "./calm/Application";
 import { CodeLibrary } from "./calm/CodeLibrary";
+import { Comments } from "./calm/comments/Comments";
 import { Deck } from "./calm/QuestionDeck";
 import { Review } from "./calm/Review";
 import { resolveRoute, type Screen } from "./calm/routes";
@@ -42,7 +43,7 @@ function normalHash(hash: string): string {
 }
 
 /** The four stages and the code library open in every state; the old screens need an application. */
-const OPEN_WITHOUT_CASE: ReadonlySet<Screen> = new Set(["start", "questions", "review", "application", "code"]);
+const OPEN_WITHOUT_CASE: ReadonlySet<Screen> = new Set(["start", "questions", "review", "application", "code", "comments"]);
 
 export function App() {
   const route = useRoute();
@@ -94,6 +95,9 @@ export function App() {
       break;
     case "code":
       body = <CodeLibrary route={calm} />;
+      break;
+    case "comments":
+      body = <Comments caseParam={route.params.get("case")} />;
       break;
     default:
       body = <Start />;
