@@ -16,12 +16,19 @@ the user tests. In the Vercel project set **Production Branch = `main`**
 Git). `dev` then builds as a Preview at the stable branch URL
 `batatis-git-dev-abdelwaly-projects.vercel.app` (Vercel login). `git.deploymentEnabled`
 in `vercel.json` turns every other branch off, so nothing else can spend the
-deployment allowance. Keep automatic PR previews disabled in the project settings.
+deployment allowance. Keep Preview deployments enabled in the project settings:
+disabling them also prevents `dev` from deploying once `main` is the production
+branch. The repository branch allowlist limits previews to `dev`.
 Agents push verified work to `dev` only; production changes only when the user
 merges the release PR `dev → main` (see `docs/agents/git-workflow.md`). Set
 Production Branch to `main` before merging the first release PR, so the live URL
 keeps serving its current build until `main` deploys. Do not redeploy an
 unchanged SHA.
+
+On 2026-10-23, the project was still tracking `dev` for production and had Preview
+deployments disabled. Both settings were corrected and read back: production
+tracks `main`, previews are enabled, and the repository root/build overrides remain
+automatic. This settings repair does not publish local commits or approve a release.
 
 The Hobby project's deployment allowance was exhausted on October 20, 2026
 (`api-deployments-free-per-day`, more than 100 deployments). When Vercel reports

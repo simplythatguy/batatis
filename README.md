@@ -76,4 +76,6 @@ Local development uses SQLite for case storage. Hosted runs require PostgreSQL. 
 
 Batatis is under active development. Independent UI review and the complete hosted applicant-to-officer journey are still under verification. The [hosted prototype](https://batatis-vert.vercel.app) currently runs an earlier build; run this source locally to explore the current integration.
 
+Historical engineer-needed measurement: At measured source `d479e82`, the shipped facts-only `rules_plus_unknown` agreed with model gold on 50/60 text-only dev cases (0 no outputs, 27 unknowns) and 8/11 model-constructed cases without ground truth. Unshipped `rules_only` had 55/60 dev agreement and 1 under-flag. These were in-sample, model-checked labels, not expert validation or a measurement of the current build. Zero under-flags on the dev set was partly by design because it never answered no. See the [API contract](docs/api-contract.md) for the receipt and limitations.
+
 For more detail, see the [challenge brief](docs/hackathon-problem-brief.md), [API contract](docs/api-contract.md), [verification guide](docs/user-testing/README.md), and [deployment guide](docs/deploy.md). Contributors using coding agents can start with [AGENTS.md](AGENTS.md).

@@ -48,7 +48,8 @@ def test_never_fills_a_blank_from_elsewhere_in_the_package():
     assert item.text.startswith('Please provide')
 
 
-def test_never_writes_rationale_risk_mitigation_or_assumptions():
+def test_never_writes_risk_mitigation_or_assumptions():
+    """Keep the accuracy receipt's stable test id; rationale is checked too."""
     narrative = dict(CLEAN_NARRATIVE, **{'Rationale': '', 'Risk assessment': '', 'Mitigating measures': '',
                                          'Assumptions and limits': ''})
     parts = review_uploads(package(narrative=narrative), None)

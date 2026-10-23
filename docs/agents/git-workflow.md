@@ -36,9 +36,9 @@ Locally the app runs on **one** port pair: web on `3000`, engine on `8000`. Noth
 scripts/install-git-hooks.sh   # once per clone; covers all its worktrees
 ```
 
-## One-time Vercel setup (owner)
+## Vercel environment settings
 
-In the Vercel project (`abdelwaly-projects/batatis`) set **Production Branch = `main`** (Settings, Environments, Production, Branch Tracking; older dashboards: Settings, Git). Do it **before** merging the first release PR, so the live URL keeps serving its current build until `main` deploys. `vercel.json` already lets only `dev` and `main` deploy. See `docs/deploy.md`.
+The Vercel project (`abdelwaly-projects/batatis`) must have **Production Branch = `main`** (Settings, Environments, Production, Branch Tracking; older dashboards: Settings, Git), with **Preview deployments enabled** for `dev`. Both settings were corrected and read back on 2026-10-23. Changing branch tracking preserves the currently served production build until `main` deploys. `vercel.json` lets only `dev` and `main` deploy; keep that allowlist. See `docs/deploy.md`.
 
 ## Where parked work went
 
