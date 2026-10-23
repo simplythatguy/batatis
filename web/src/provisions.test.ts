@@ -33,3 +33,13 @@ test("a reopened case whose lookup only re-orders its cards is not an edit", () 
   assert.ok(sameCards(next.candidates, c.candidates));
   assert.ok(!sameCards([{ ...c.candidates[0], answer: null }, c.candidates[1]], c.candidates));
 });
+
+test("a Yes still waiting for the engine (pending) is never sent as a confirmed reference; an acknowledged Yes is", () => {
+  let c = reducer(emptyCase("contractor"), { type: "addCandidate", candidate: candidate("3.1.9.1.(1)") });
+  c = reducer(c, { type: "addCandidate", candidate: candidate("3.1.9.1.(2)") });
+  c = reducer(c, { type: "reconcileSectionC", rows: [row("3.1.9.1.(1)"), row("3.1.9.1.(2)")], basis: lookupBasis(c) });
+  c = reducer(c, { type: "markDecisionPending", id: "c-3.1.9.1.(2)", pending: true });
+  assert.deepEqual(confirmedProvisions(c), ["3.1.9.1.(1)"]);
+  const card = c.candidates.find((a) => a.id === "c-3.1.9.1.(2)");
+  assert.deepEqual([card?.answer, card?.pending], ["yes", true], "the pending Yes itself is kept as it is");
+});
