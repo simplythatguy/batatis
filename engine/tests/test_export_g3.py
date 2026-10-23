@@ -12,7 +12,7 @@ from pathlib import Path
 import pytest
 
 from engine.codes import Codes
-from engine.export import export_case, form_path, load_field_map
+from engine.export import ExportBlocked, export_case, form_path, load_field_map
 from engine.export.demo_cases import CASES, demo_case
 from engine.export.g3 import (appendix_text, applicant_fields, check_case, coverage, wording_problems)
 from engine.export.sample import sample_case
@@ -36,6 +36,21 @@ def exported(codes):
 
 def test_the_field_map_has_50_applicant_fields():
     assert len(applicant_fields()) == 50 == len(set(applicant_fields()))
+
+
+def test_homebuilder_fixture_needs_a_current_officer_determination(exported, codes):
+    case, _ = exported['c-homebuilder-infill-house']
+    resolution = case.professional_resolutions[0]
+    assert resolution.required is False and 'window W-07' in resolution.scope
+    assert resolution.by_name == 'EXAMPLE DATA fictional officer'
+    unresolved = case.model_copy(deep=True)
+    unresolved.professional_resolutions = []
+    with pytest.raises(ExportBlocked, match='professional_requirement'):
+        export_case(unresolved, codes=codes)
+    changed = case.model_copy(deep=True)
+    next(f for f in changed.facts if f.field == 'alternative_description').value = 'EXAMPLE DATA changed applicant scope'
+    with pytest.raises(ExportBlocked, match='professional_requirement'):
+        export_case(changed, codes=codes)
 
 
 @pytest.mark.parametrize('name', NAMES)

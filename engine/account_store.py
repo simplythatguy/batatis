@@ -1,9 +1,11 @@
 """Accounts on the same durable database as cases; no second storage configuration.
 
-Case history/messages are part of the case JSON and its CAS transaction. These
-tables contain accounts, hashed sessions, short-lived OAuth exchanges, hashed
-rate-limit keys and account-relative application-list flags. SQL is portable
-between SQLite and Postgres.
+Messages remain in the case JSON, but have a separate atomic mutation seam:
+communication does not advance the content/workflow CAS version. Whole-case
+writers preserve the current thread under their lock. These tables contain only
+accounts, hashed sessions, short-lived OAuth exchanges, hashed rate-limit keys and
+account-relative application-list flags.
+SQL is intentionally portable between SQLite and Postgres.
 """
 from __future__ import annotations
 
@@ -11,8 +13,26 @@ import json
 import time
 from contextlib import closing, contextmanager
 from types import SimpleNamespace
+from typing import Callable, TypeVar
 
-from .account_models import ApplicationPreferences, ApplicationPreferencesPatch, User
+from .account_models import ApplicationPreferences, ApplicationPreferencesPatch, StoredMessage, User
+from .access import authorize_case, enforce_stored_mutation
+from .models import Case, now
+
+T = TypeVar('T')
+
+
+def preserve_messages(case: Case, stored: str | dict) -> None:
+    """Keep stored immutable messages/receipts, then append new workflow messages.
+
+    A content snapshot can predate message-only writes at the same version. Its
+    old thread must never replace the current one or undo another user's receipt.
+    """
+    data = json.loads(stored) if isinstance(stored, str) else stored
+    messages = [StoredMessage.model_validate(message) for message in data.get('messages', [])]
+    existing = {message.id for message in messages}
+    case.messages = messages + [message for message in case.messages if message.id not in existing]
+
 
 ACCOUNT_MIGRATIONS = (
     'CREATE TABLE IF NOT EXISTS account_users (id TEXT PRIMARY KEY, email TEXT NOT NULL UNIQUE, data TEXT NOT NULL)',
@@ -54,6 +74,36 @@ class _DB:
 
 
 class AccountsMixin:
+    def mutate_messages(self, case_id: str, user: User, operation: Callable[[Case], T]) -> tuple[Case, T] | None:
+        """Authorize and mutate only the thread under the case write lock.
+
+        No content version is adopted or advanced. All other JSON fields come
+        from the locked row, even if the operation changes its working copy.
+        Missing/expired cases return None after committing retention cleanup.
+        """
+        with self.account_db() as db:
+            column = 'data' if db.postgres else 'json'
+            lock = ' FOR UPDATE' if db.postgres else ''
+            row = db.execute(f'SELECT {column}, version FROM cases WHERE id=?' + lock, (case_id,)).fetchone()
+            if row is None or self._purge_expired(db.con, case_id):
+                return None
+            data = json.loads(row[0]) if isinstance(row[0], str) else row[0]
+            enforce_stored_mutation(data)
+            case = authorize_case(Case.model_validate({**data, 'version': int(row[1])}), user, mode='message')
+            result = operation(case)
+            messages = [message.model_dump(mode='json') for message in case.messages]
+            if messages != data.get('messages', []):
+                case.updated_at = now()
+                data = {**data, 'messages': messages, 'updated_at': case.updated_at}
+                if db.postgres:
+                    from psycopg.types.json import Jsonb
+                    payload = Jsonb(data)
+                else:
+                    payload = json.dumps(data)
+                db.execute(f'UPDATE cases SET {column}=?, updated_at=? WHERE id=?',
+                           (payload, case.updated_at, case_id))
+            return case, result
+
     def init_accounts(self, con):
         for statement in ACCOUNT_MIGRATIONS:
             con.execute(statement)

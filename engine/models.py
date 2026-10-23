@@ -12,10 +12,11 @@ import uuid
 from datetime import datetime, timezone
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator, model_validator
 
 from codedb.ids import parse
-from .account_models import ApplicationStatus, Claim, Decision, StatusChange, StoredMessage
+from .account_models import ApplicationStatus, Claim, Decision, ReviewSnapshot, StatusChange, StoredMessage, Submission
+from .case_retention import expiry_at
 
 from .models_intake import IntakeRecord
 from .relevance_models import RelevanceRecord
@@ -152,6 +153,22 @@ class Gap(BaseModel):
     message: str
     severity: Literal['blocking', 'warning', 'info'] = 'blocking'   # info never blocks (jurisdiction pack notices)
     routed_to: RouteTarget | None = None
+    # An unresolved officer requirement can travel with a submission, but still blocks acceptance/export.
+    submission_blocking: bool = True
+
+
+class ProfessionalRequirementResolution(BaseModel):
+    """An officer's scoped administrative determination, never professional credentials or evidence."""
+
+    id: str = Field(default_factory=lambda: new_id('professional_resolution'))
+    required: bool
+    scope: str
+    basis: str
+    reference: str
+    by_id: str
+    by_name: str
+    at: str = Field(default_factory=now)
+    content_fingerprint: str
 
 
 class SelectedArticle(BaseModel):
@@ -189,7 +206,11 @@ class Case(BaseModel):
     status_history: list[StatusChange] = Field(default_factory=list)
     claim: Claim | None = None
     decision: Decision | None = None
+    decision_history: list[Decision] = Field(default_factory=list)
+    submissions: list[Submission] = Field(default_factory=list)
+    return_snapshot: ReviewSnapshot | None = None
     messages: list[StoredMessage] = Field(default_factory=list)
+    professional_resolutions: list[ProfessionalRequirementResolution] = Field(default_factory=list)
     created_at: str = Field(default_factory=now)
     updated_at: str = Field(default_factory=now)
     version: int = Field(default=1, ge=1)      # acknowledgment of the store's row version, never input authority
@@ -205,6 +226,19 @@ class Case(BaseModel):
     relevance: RelevanceRecord | None = None   # explicit scoring only; GET recomputes its staleness
     identify: IdentifyResult | None = None     # last code identification (models_identify.py); never writes provisions
     intake: IntakeRecord | None = None         # last intake run: fact pointers and file reports (models_intake)
+
+    @computed_field
+    @property
+    def expires_at(self) -> str | None:
+        return expiry_at(self.created_at)
+
+    @computed_field
+    @property
+    def submission_number(self) -> int:
+        # Legacy records already have workflow history. Releases are not submissions.
+        historic = sum(change.by_id == self.owner_id and change.to_status == 'submitted'
+                       and change.from_status in {'draft', 'returned'} for change in self.status_history)
+        return max(historic, max((item.number for item in self.submissions), default=0))
 
     @model_validator(mode='after')
     def _kind_follows_the_file(self):
