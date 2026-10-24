@@ -93,7 +93,7 @@ def _norm(text: str) -> str:
     return re.sub(r'\s+', ' ', text or '').strip()
 
 
-def text_value(pages: list[tuple[str, int, str]], pattern) -> TextValue:
+def text_value(pages: list[tuple[str, int, str]], pattern, reads=None) -> TextValue:
     """Passage after a heading, up to the next heading or source line. Absent heading: not_found."""
     for file, page, text in pages:
         match = pattern.search(text)
@@ -108,6 +108,18 @@ def text_value(pages: list[tuple[str, int, str]], pattern) -> TextValue:
         body = rest[:stop.start()] if stop else rest
         body = body.split('\n\n', 1)[0]
         value = _norm(body)
+        read = (reads or {}).get(file)
+        if read:
+            raw_heading = match.group(0)
+            heading = (_norm(raw_heading), match.start() + len(raw_heading) - len(raw_heading.lstrip()))
+            end = None
+            if stop:
+                suffix = rest[stop.start():]
+                end = (_norm(suffix.strip().split('\n', 1)[0]),
+                       match.end() + stop.start() + len(suffix) - len(suffix.lstrip()))
+            if read.passage_has_marks(page - 1, heading, end):
+                return TextValue('not_found', '', file, page, None, [Pointer(file=file, page=page)],
+                                 'This answer contains text or marks that could not be read confidently. Check the page.')
         return TextValue('present' if value else 'blank', value, file, page, value or _norm(match.group(0)))
     return TextValue('not_found', '', '', None, None)
 
@@ -281,7 +293,7 @@ def _legal(read: ReadFile) -> tuple[StoredValue | None, list[str]]:
                                                             'quote': fields[group[0]].value},
                                input_field=group[0]), []
     states = [fields[name].status for name in lbp + ats if name in fields]
-    if any(state == 'not_found' for state in states) and not any(state == 'present' for state in states):
+    if any(state == 'not_found' for state in states):
         return None, []
     blank = [name for name in lbp + ats if name in fields and fields[name].status != 'present']
     return StoredValue('legal_description', '', 'exact', None, form_field='Lot', explicit_blank=True,
@@ -338,8 +350,9 @@ def review_uploads(uploads: list[tuple[str, bytes]], codes) -> Parts:
                                              status=value.status, value=value.value or None, reason=value.reason,
                                              pointer=_pointer(form, value)))
     rationale_reads = forms + attachments + [read for read in reads if read.role == 'unreadable']
+    reads_by_name = {read.name: read for read in reads}
     texts = {key: rationale_value(rationale_reads) if key == 'rationale'
-             else text_value(pages, pattern) for key, (_label_text, pattern) in TEXT_FIELDS.items()}
+             else text_value(pages, pattern, reads_by_name) for key, (_label_text, pattern) in TEXT_FIELDS.items()}
     for key, found in texts.items():
         label = TEXT_FIELDS[key][0]
         section = 'process' if key in ('rationale', 'risk_assessment', 'mitigating_measures', 'assumptions_and_limits') else (
@@ -413,6 +426,11 @@ def review_uploads(uploads: list[tuple[str, bytes]], codes) -> Parts:
         widget = widgets_by_logical.get(element.field)
         if form is not None and widget in by_widget:
             pointers.append(_pointer(form, by_widget[widget]))
+        uncertain_legal = [value for name, value in by_widget.items()
+                           if name in ('Lot', 'Block', 'Plan', 'QTR', 'SEC', 'TWP', 'RGE', 'MER')
+                           and value.status == 'not_found'] if element.field == 'legal_description' and legal is None else []
+        if uncertain_legal:
+            pointers = [_pointer(form, value) for value in uncertain_legal]
         found = texts.get(element.field)
         if found is not None and found.file:
             pointers.extend(found.pointers or [Pointer(file=found.file, page=found.page, quote=found.quote)])
@@ -430,6 +448,9 @@ def review_uploads(uploads: list[tuple[str, bytes]], codes) -> Parts:
             continue
         if element.field == 'legal_description' and form is not None and legal_blank and finding.status == 'blank':
             finding.message += ' Blank components: ' + ', '.join(legal_blank) + '.'
+        if uncertain_legal:
+            finding.status = 'not_found'
+            finding.message = 'Part of the legal description could not be read confidently. Check the indicated cells.'
         if element.field in TEXT_FIELDS and texts[element.field].status == 'not_found':
             finding.status = 'not_found'
             finding.message = texts[element.field].reason or (
@@ -478,9 +499,15 @@ def _div_c_upload(form, by_widget, pages, engineering, parts: Parts, codes, read
     responsible = [row.responsible.value for row in parts.documents if row.responsible.known]
     readable = any(text.strip() for _f, _p, text in corpus)
     if readable:
-        uncertain = any(read.role == 'unreadable' for read in reads)
-        parts.findings.extend(div_c.file_findings(corpus, where, codes, responsible=responsible,
-                                                  uncertain=uncertain))
+        locations = [Pointer(file=read.name, page=page + 1)
+                     for read in reads for page in read.unreadable_pages()]
+        locations += [Pointer(file=read.name, page=1 if read.pages else None)
+                      for read in reads if read.role == 'unreadable']
+        findings = div_c.file_findings(corpus, where, codes, responsible=responsible, uncertain=bool(locations))
+        for finding in findings:
+            if finding.status == 'not_found':
+                finding.pointers = locations
+        parts.findings.extend(findings)
     signal = div_c.peer_review_finding(
         professional_required=bool(engineering and engineering.group(1).casefold() == 'yes'),
         provisions=[check.provision_id for check in parts.citations if check.provision_id],
@@ -542,7 +569,20 @@ def _rows(form: ReadFile, fmap: dict | None, codes, parts: Parts, description: T
                     message=issue.message, severity='blocking', pointers=[pointer]))
         objective = cells['objective'].value if cells.get('objective') and cells['objective'].status == 'present' else ''
         function = cells['function'].value if cells.get('function') and cells['function'].status == 'present' else ''
-        comparison = cite.compare_row(number, article.value, objective, function, pointer, codes)
+        unreadable = [cells[key] for key in ('objective', 'function')
+                      if cells.get(key) and cells[key].status == 'not_found']
+        if unreadable:
+            message = ('The objective or functional statement could not be read confidently. '
+                       'Check the indicated cells before comparing the pair.')
+            comparison = SectionCCheck(row=number, provision_id=ids[0] if ids else None,
+                                       form_objective=objective or None, form_function=function or None,
+                                       status='not_checked', message=message, pointer=_pointer(form, unreadable[0]))
+            parts.findings.append(Finding(
+                key=f'section_c.row{number}:pair', section='C', field=f'section_c.row{number}.pair',
+                label=f'Section C row {number} objective and function', status='not_found', problem='unreadable',
+                message=message, pointers=[_pointer(form, cell) for cell in unreadable]))
+        else:
+            comparison = cite.compare_row(number, article.value, objective, function, pointer, codes)
         parts.section_c.append(comparison)
         if comparison.status == 'mismatch':
             parts.findings.append(Finding(

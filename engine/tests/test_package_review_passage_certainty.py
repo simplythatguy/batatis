@@ -137,6 +137,19 @@ def test_uncertainty_keeps_its_file_when_another_attachment_has_hidden_text():
     officer_check(parts, 'risk_assessment', 'b-risk.pdf')
 
 
+def test_text_outside_the_page_cannot_supply_an_unseen_answer_suffix():
+    from engine.tests.package_review_fixtures import CLEAN_NARRATIVE
+
+    output = io.BytesIO()
+    c = canvas.Canvas(output, pagesize=(612, 792))
+    c.drawString(50, 740, 'Description of the proposed alternative')
+    c.drawString(50, 704, CLEAN_NARRATIVE['Description of the proposed alternative'])
+    c.drawString(50, 668, 'Risk assessment')
+    c.save()
+    parts = review_uploads([('answer.pdf', output.getvalue())], None)
+    officer_check(parts, 'alternative_description')
+
+
 def readable_layout(kind):
     """The six saved U1 layout controls, without their obsolete implementation assertions."""
     output = io.BytesIO()
@@ -183,3 +196,23 @@ def test_readable_layout_controls_preserve_the_exact_answer(kind):
     row = next(x for x in parts.fields if x.field == 'risk_assessment')
     assert row.status == 'present' and row.value == READABLE
     assert (row.pointer.file, row.pointer.page) == ('narrative.pdf', 1)
+
+
+def test_readable_narrative_fixture_does_not_clip_its_declared_source_words():
+    import pypdfium2 as pdfium
+    from engine.tests.package_review_fixtures import CLEAN_NARRATIVE, narrative_pdf
+
+    with pdfium.PdfDocument(narrative_pdf(CLEAN_NARRATIVE)) as doc:
+        text = []
+        for index in range(len(doc)):
+            page = doc[index]
+            left, bottom, right, top = page.get_bbox()
+            textpage = page.get_textpage()
+            text.append(textpage.get_text_range())
+            for i in range(textpage.count_chars()):
+                if textpage.get_text_range(i, 1).strip():
+                    x0, y0, x1, y1 = textpage.get_charbox(i)
+                    assert left <= x0 < x1 <= right and bottom <= y0 < y1 <= top
+            textpage.close()
+        actual = ' '.join(' '.join(text).split())
+        assert all(' '.join(value.split()) in actual for value in CLEAN_NARRATIVE.values())

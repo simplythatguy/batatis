@@ -64,3 +64,17 @@ def test_genuinely_empty_objective_remains_a_table_mismatch():
     finding = next(x for x in parts.findings if x.field == 'section_c.row1.pair')
     assert finding.problem == 'pair_mismatch'
     assert next(x for x in ir.build(parts.findings).items if x.finding_key == finding.key).included
+
+
+def test_unreadable_supplement_cannot_establish_a_missing_coordinator():
+    from engine.tests.package_review_fixtures import scanned, text_pdf
+
+    values = dict(CLEAN_FORM, **{'Supporting Doc2': 'SYNTHETIC second document',
+                                'Name Responsible2': 'SYNTHETIC second firm'})
+    supplement = scanned(text_pdf(['SYNTHETIC single co-ordinator: fictional person']))
+    parts = review_uploads([('form.pdf', fillable(values)), ('supplement.pdf', supplement)], None)
+    finding = next(x for x in parts.findings if x.field == 'div_c.coordinator')
+    assert finding.status == 'not_found' and 'Ask the applicant' not in finding.message
+    assert [(p.file, p.page, p.quote) for p in finding.pointers] == [('supplement.pdf', 1, None)]
+    item = next(x for x in ir.build(parts.findings).items if x.finding_key == finding.key)
+    assert item.officer_check and not item.included and finding.key not in ir.open_gaps(parts.findings)

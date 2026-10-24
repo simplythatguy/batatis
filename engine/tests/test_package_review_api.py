@@ -21,6 +21,35 @@ from engine.tests.test_accounts import onboard, signup
 NAMES = ['owner', 'other', 'reviewer', 'second', 'foreign', 'anonymous']
 
 
+@pytest.mark.parametrize('kind,field', [('image', 'risk_assessment'), ('invisible', 'rationale'),
+                                      ('Block', 'legal_description'), ('Objective', 'section_c.row1.pair')])
+def test_upload_uncertainty_stays_out_of_the_http_applicant_request(scene, kind, field):
+    from engine.tests.package_review_fixtures import CLEAN_FORM, fillable
+    from engine.tests.test_package_review_logical_certainty import hidden_cell
+    from engine.tests.test_package_review_passage_certainty import passage
+
+    store, clients, _ = scene
+    case = claimed(scene)
+    before = store.get(case.id).model_dump()
+    if kind in ('Block', 'Objective'):
+        files = [('form.pdf', hidden_cell(kind))]
+        source = 'form.pdf'
+    else:
+        heading = 'Rationale' if field == 'rationale' else 'Risk assessment'
+        files = [('form.pdf', fillable(CLEAN_FORM)), ('answer.pdf', passage(kind, heading))]
+        source = 'answer.pdf'
+    response = clients['reviewer'].post(f'/review/{case.id}/package-review', files=multipart(files))
+    assert response.status_code == 201, response.text
+    body = response.json()
+    finding = next(x for x in body['findings'] if x['field'] == field)
+    assert finding['status'] == 'not_found'
+    assert all(p['file'] == source and p['page'] == 1 for p in finding['pointers'])
+    item = next(x for x in body['information_request']['items'] if x['finding_key'] == finding['key'])
+    assert item['officer_check'] and not item['included']
+    assert item['text'] not in body['information_request']['text']
+    assert store.get(case.id).model_dump() == before
+
+
 @pytest.fixture(scope='module')
 def scene(tmp_path_factory):
     with pytest.MonkeyPatch.context() as patch, ExitStack() as stack:

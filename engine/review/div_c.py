@@ -85,9 +85,12 @@ def _citation(codes, provision: str) -> list[str]:
 def _missing(item: Item, where: Pointer, codes, *, demonstrate: bool, uncertain: bool = False) -> Finding:
     message = item.message + (' Ask the applicant to state it; the review does not judge adequacy.'
                               if demonstrate else ' Ask the applicant to include it.')
+    if uncertain:
+        message = (f'The {item.label} could not be established because part of the package could not be read. '
+                   'Check the indicated pages.')
     return Finding(key=f'{item.key}:not_mentioned' if demonstrate else f'{item.key}:presence',
                    section='process', field=item.key, label=item.label,
-                   status='unclear' if demonstrate else ('not_found' if uncertain else 'missing'), problem='not_mentioned' if demonstrate else 'absent',
+                   status='not_found' if uncertain else ('unclear' if demonstrate else 'missing'), problem='not_mentioned' if demonstrate else 'absent',
                    message=message, severity='warning' if demonstrate else 'blocking',
                    pointers=[where], citations=_citation(codes, item.provision))
 
@@ -107,15 +110,17 @@ def file_findings(corpus: Corpus, where: Pointer, codes, *, responsible: list[st
     if len(people) > 1 and _find(corpus, COORDINATOR) is None:
         out.append(Finding(
             key='div_c.coordinator:presence', section='process', field='div_c.coordinator',
-            label='single co-ordinator for the design', status='missing', problem='absent',
-            message=(f'{len(people)} different people or firms take responsibility for parts of the design, and no '
+            label='single co-ordinator for the design', status='not_found' if uncertain else 'missing', problem='absent',
+            message=('The single co-ordinator could not be established because part of the package could not be read. '
+                     'Check the indicated pages.' if uncertain else
+                     f'{len(people)} different people or firms take responsibility for parts of the design, and no '
                      'single person is identified to co-ordinate the design, code analysis and documentation. '
                      'Ask the applicant to name one.'),
             severity='blocking', pointers=[where], citations=_citation(codes, '2.3.1.1.(6)')))
     if any(text.strip() for _f, _p, text in corpus):
         for item in DEMONSTRATE:
             if _find(corpus, item.pattern) is None:
-                out.append(_missing(item, where, codes, demonstrate=True))
+                out.append(_missing(item, where, codes, demonstrate=True, uncertain=uncertain))
     return out
 
 

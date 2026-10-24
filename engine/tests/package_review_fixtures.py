@@ -120,17 +120,28 @@ def scanned(pdf: bytes) -> bytes:
 
 
 def text_pdf(lines: list[str]) -> bytes:
+    """Draw readable source lines; long fixture prose must not silently run off the page."""
     from reportlab.lib.pagesizes import letter
     from reportlab.pdfgen import canvas
     buf = io.BytesIO()
     c = canvas.Canvas(buf, pagesize=letter)
     y = 740
     for line in lines:
-        if y < 60:
-            c.showPage()
-            y = 740
-        c.drawString(50, y, line)
-        y -= 18
+        wrapped, current = [], ''
+        for word in line.split(' '):
+            candidate = current + (' ' if current else '') + word
+            if current and c.stringWidth(candidate, 'Helvetica', 12) > 512:
+                wrapped.append(current)
+                current = word
+            else:
+                current = candidate
+        wrapped.append(current)
+        for part in wrapped:
+            if y < 60:
+                c.showPage()
+                y = 740
+            c.drawString(50, y, part)
+            y -= 18
     c.save()
     return buf.getvalue()
 

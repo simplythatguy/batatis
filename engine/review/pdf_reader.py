@@ -45,6 +45,7 @@ class FieldValue:
 class PageText:
     page: int                       # 0-based
     text: str
+    uncertain_boxes: tuple[tuple[float, float, float, float], ...] = ()
 
 
 @dataclass
@@ -70,23 +71,32 @@ class ReadFile:
 
         Boundaries carry their offsets in the newline-normalized extracted page text.
         Unmatched or reversed boundaries cannot establish a readable, empty region.
-        Coordinates and object boxes use the same PDF-point convention as flattened fields.
+        Unsafe text and visible graphics are regional. Compare their device coordinates
+        so a rotated or cropped passage uses the same reading direction as its headings.
         """
         import pypdfium2 as pdfium
         try:
-            doc = pdfium.PdfDocument(self.data)
-            pdf_page = doc[page]
-            textpage = pdf_page.get_textpage()
-            after = _boundary_box(textpage, heading) if heading else None
-            before = _boundary_box(textpage, stop) if stop else None
-            if (heading and after is None) or (stop and before is None):
-                return True
-            if after and before and after[1] <= before[3]:
-                return True
-            top = after[3] if after else float('inf')
-            bottom = before[3] if before else float('-inf')
-            boxes = _object_boxes(pdf_page) | _annotation_boxes(pdf_page)
-            return any(y0 < top and y1 > bottom for _x0, y0, _x1, y1 in boxes)
+            with pdfium.PdfDocument(self.data) as doc:
+                pdf_page = doc[page]
+                textpage = pdf_page.get_textpage()
+                try:
+                    after = _boundary_box(textpage, heading) if heading else None
+                    before = _boundary_box(textpage, stop) if stop else None
+                finally:
+                    textpage.close()
+                if (heading and after is None) or (stop and before is None):
+                    return True
+                after = _device_box(pdf_page, after, 2) if after else None
+                before = _device_box(pdf_page, before, 2) if before else None
+                if after and before and after[3] >= before[1]:
+                    return True
+                top = after[1] if after else float('-inf')
+                bottom = before[1] if before else float('inf')
+                boxes = frozenset(box for source in self.text_pages if source.page == page
+                                  for box in source.uncertain_boxes)
+                boxes |= _passage_object_boxes(pdf_page) | _annotation_boxes(pdf_page)
+                return any(box[1] < bottom and box[3] > top
+                           for box in (_device_box(pdf_page, rect, 2) for rect in boxes))
         except Exception:  # noqa: BLE001 - unreadable graphics must not establish a blank passage
             return True
 
@@ -99,14 +109,15 @@ class ReadFile:
         import pypdfium2 as pdfium
         import pypdfium2.raw as raw
         try:
-            doc = pdfium.PdfDocument(self.data)
-            unreadable = []
-            for page in self.text_pages:
-                pdf_page = doc[page.page]
-                if _annotation_boxes(pdf_page) or (not page.text.strip() and _object_boxes(pdf_page)) or any(
-                        obj.type == raw.FPDF_PAGEOBJ_IMAGE for obj in pdf_page.get_objects(max_depth=4)):
-                    unreadable.append(page.page)
-            return unreadable
+            with pdfium.PdfDocument(self.data) as doc:
+                unreadable = []
+                for page in self.text_pages:
+                    pdf_page = doc[page.page]
+                    if (page.uncertain_boxes or _annotation_boxes(pdf_page)
+                            or (not page.text.strip() and _object_boxes(pdf_page)) or any(
+                                obj.type == raw.FPDF_PAGEOBJ_IMAGE for obj in pdf_page.get_objects(max_depth=4))):
+                        unreadable.append(page.page)
+                return unreadable
         except Exception:  # noqa: BLE001 - a failed inspection cannot establish absence
             return [page.page for page in self.text_pages]
 
@@ -150,6 +161,51 @@ def _object_boxes(page) -> frozenset:
         except Exception:  # noqa: BLE001 - an object without bounds cannot be compared
             continue
     return frozenset(boxes)
+
+
+def _passage_object_boxes(page) -> frozenset:
+    """Keep answer graphics, while allowing the saved readable underline control.
+
+    This does not change the native-field object inventory or form recognition.
+    """
+    import pypdfium2.raw as raw
+    boxes = set()
+    for obj in page.get_objects(max_depth=4):
+        if obj.type in (raw.FPDF_PAGEOBJ_TEXT, raw.FPDF_PAGEOBJ_FORM):
+            continue
+        bounds = obj.get_bounds() if hasattr(obj, 'get_bounds') else obj.get_pos()
+        if obj.type == raw.FPDF_PAGEOBJ_PATH and _passage_underline(page, bounds):
+            continue
+        boxes.add(tuple(bounds))
+    return frozenset(boxes)
+
+
+def _passage_underline(page, bounds) -> bool:
+    """A thin rule immediately below at least two glyph origins is text decoration."""
+    import ctypes
+    import pypdfium2.raw as raw
+    left, top, right, bottom = _device_box(page, bounds, 2)
+    if right - left < 4 * max(1, bottom - top):
+        return False
+    text = page.get_textpage()
+    matched = 0
+    try:
+        for index in range(min(text.count_chars(), 65536)):
+            if not text.get_text_range(index, 1).strip():
+                continue
+            x, y = ctypes.c_double(), ctypes.c_double()
+            if not raw.FPDFText_GetCharOrigin(text, index, ctypes.byref(x), ctypes.byref(y)):
+                return False
+            baseline_x, baseline_y, _right, _bottom = _device_box(page, (x.value, y.value, x.value, y.value), 2)
+            size = raw.FPDFText_GetFontSize(text, index) * 2
+            if (left <= baseline_x <= right and baseline_y <= top
+                    and bottom <= baseline_y + .3 * size + 1 and bottom - top <= .15 * size + 1):
+                matched += 1
+                if matched >= 2:
+                    return True
+        return False
+    finally:
+        text.close()
 
 
 def _annotation_boxes(page) -> frozenset:
@@ -550,11 +606,54 @@ def _fillable(reader, data: bytes, name: str, fmaps: list[dict]) -> ReadFile | N
 
 def _page_texts(data: bytes, pages) -> list[PageText]:
     import pypdfium2 as pdfium
-    doc = pdfium.PdfDocument(data)
+    import pypdfium2.raw as raw
     out = []
-    for index in pages:
-        text = doc[index].get_textpage().get_text_range()
-        out.append(PageText(index, text.replace('\r\n', '\n').replace('\r', '\n')))
+    with pdfium.PdfDocument(data) as doc:
+        for index in pages:
+            page = doc[index]
+            textpage = page.get_textpage()
+            raw_text = textpage.get_text_range()
+            unsafe_boxes = []
+            try:
+                if textpage.count_chars() > 65536:
+                    raise ValueError('Too many characters for bounded passage inspection.')
+                units = [textpage.get_text_range(i, 1) for i in range(textpage.count_chars())]
+                if ''.join(units) != raw_text:
+                    raise ValueError('Text offsets could not be mapped confidently.')
+                # Keep PDFium's text-line order, including rotated text. A hidden line
+                # does not erase another answer or shift its source-text offsets.
+                lines, glyphs = [[]], []
+                for i, char in enumerate(units):
+                    if '\n' in char or '\r' in char:
+                        if lines[-1]:
+                            lines.append([])
+                        continue
+                    if not char.strip():
+                        continue
+                    box = textpage.get_charbox(i)
+                    glyphs.append((char, box, raw.FPDFText_GetTextObject(textpage, i)))
+                    lines[-1].append((i, box))
+                page_box = page.get_bbox()
+                for chars in filter(None, lines):
+                    bounds = (min(b[0] for _i, b in chars), min(b[1] for _i, b in chars),
+                              max(b[2] for _i, b in chars), max(b[3] for _i, b in chars))
+                    rect = (max(page_box[0], bounds[0] - .5), max(page_box[1], bounds[1] - .5),
+                            min(page_box[2], bounds[2] + .5), min(page_box[3], bounds[3] + .5))
+                    valid = rect[0] < rect[2] and rect[1] < rect[3]
+                    # Validate the whole source line, including any clipped suffix;
+                    # validating only get_text_bounded(rect) would attest unseen text.
+                    value = ''.join(units[i] for i, _box in chars)
+                    if not valid or not _text_is_visible(page, rect, value, glyphs):
+                        unsafe_boxes.append(bounds)
+                        for i, _box in chars:
+                            units[i] = ' ' * len(units[i])
+                safe_text = ''.join(units)
+            except Exception:  # noqa: BLE001 - unverified text cannot establish presence or absence
+                safe_text = re.sub(r'\S', ' ', raw_text)
+                unsafe_boxes = [tuple(page.get_bbox())]
+            finally:
+                textpage.close()
+            out.append(PageText(index, safe_text.replace('\r\n', '\n').replace('\r', '\n'), tuple(unsafe_boxes)))
     return out
 
 
