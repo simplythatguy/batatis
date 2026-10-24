@@ -1,24 +1,17 @@
 ---
 name: batatis-ui-opus
-description: Batatis UI/frontend/visual work. Always use Claude Opus 5.5 at the highest available Opus 5.5 tier for implementation AND review. Default look is the Linear-caliber system in batatis-ui-linear (no prompt needed). Use for any UI, UX, component, layout, PDF preview, applicant or SCO interface work.
+description: Batatis UI implementation and review with the current model policy, calm design contract, and applicant/officer quality boundaries. Use for components, layout, PDF previews, and other visible surfaces.
 ---
 
-# Batatis UI — Opus 5.5 required
+# Batatis UI — model and quality policy
 
-## Model pin (mandatory)
+## Model
 
-For **all** UI / frontend / visual / UX **implementation and UI review** in this repo:
+Use **GPT-6.1-Sol at max** for UI implementation and independent UI review (user override, 2026-10-23). Read `.cursor/rules/pstack-models.mdc` for the shared role map. In T3 set the exact supported model/options through the task tool and verify the returned selection. User instructions govern subsequent model changes.
 
-- Model family: **Claude Opus 5.5**
-- Tier: **highest available** Opus 5.5 reasoning tier in the current session (prefer max → xhigh → high)
-- Example slugs when available: `claude-opus-5-5-max`, `claude-opus-5-5-xhigh`, `claude-opus-5-5-high`
-- Do **not** route UI work or UI review to non-Opus models for cost/speed unless the user explicitly overrides
+## Default look
 
-When spawning subagents for UI implement or UI review, set `model` to the Opus 5.5 slug above.
-
-## Default look (mandatory)
-
-Load and follow `../batatis-ui-linear/SKILL.md` + `docs/design/tokens.css` + `docs/design-system-linear.md`. Produce that system by default — the user should not need to name a reference product.
+Follow `../batatis-ui-linear/SKILL.md` for P0 interaction rules, `../batatis-ui-minimalist/SKILL.md` for content density, and `docs/design-system-calm.md` plus `web/src/calm/` for the current design. The historical Linear look does not replace the calm contract. Keep the light, mostly monotone interface, neutral primary actions, and colour only for identifying the active section or distinguishing crowded items.
 
 ## Product UI surfaces (attribute UX rules correctly)
 

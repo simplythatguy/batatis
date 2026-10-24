@@ -1,25 +1,31 @@
 ---
-description: pstack per-role model choices (overrides skill defaults). Review/judgment = Claude Opus 5.5 max.
+description: Batatis model roles use GPT-6.1-Sol at max under the user-selected Sol-only profile.
 alwaysApply: true
 ---
-# pstack model configuration. One line per role. Delete a line to fall back to the skill default.
-# `inherit-parent` or `auto` as a value: the role runs on the parent chat model (omit Task `model`).
-# budget: unlimited (max) for judgment/review; code roles stay on fast Grok at xhigh.
-# Batatis policy: ALL review and judgment roles use Claude Opus 5.5 at the highest available tier.
-feature, refactoring: grok-4.7-xhigh-fast
-bug-fix: grok-4.7-xhigh-fast
-perf-issue: grok-4.7-xhigh-fast
-hillclimb: grok-4.7-xhigh-fast
-judgment and prose: claude-opus-5-5-max
-hardest tasks: claude-opus-5-5-max
-how explorer: grok-4.7-xhigh-fast
-how explainer: claude-opus-5-5-max
-why investigators: grok-4.7-xhigh-fast
-why synthesizer: claude-opus-5-5-max
-reflect tooling: grok-4.7-xhigh-fast
-reflect judgment, divergent, synthesizer: claude-opus-5-5-max
-arena runners: claude-opus-5-5-max, grok-4.7-xhigh-fast
-arena cross-judge pool: claude-opus-5-5-max, grok-4.7-xhigh-fast
-swarm workers: grok-4.7-xhigh-fast
-architect runners: claude-opus-5-5-max, grok-4.7-xhigh-fast
-interrogate reviewers: claude-opus-5-5-max, grok-4.7-xhigh-fast
+
+# pstack model configuration
+
+# User instruction 2026-10-23: GPT Sol only. All roles use GPT-6.1-Sol at max.
+# T3 uses provider codex, model gpt-6.1-sol, reasoningEffort max; inherit service tier.
+# Panels are independent Sol lanes when warranted; they have no provider diversity.
+# T3 delegates through its supported task tools, never subprocess agent CLIs.
+# The source is ~/.agents/pstack-models.md; native harness sheets mirror it.
+codex writer sandbox: bounded
+
+feature, refactoring: codex:gpt-6.1-sol@max
+bug-fix: codex:gpt-6.1-sol@max
+perf-issue: codex:gpt-6.1-sol@max
+hillclimb: codex:gpt-6.1-sol@max
+judgment and prose: codex:gpt-6.1-sol@max
+hardest tasks: codex:gpt-6.1-sol@max
+how explorer: codex:gpt-6.1-sol@max
+how explainer: codex:gpt-6.1-sol@max
+why investigators, synthesizer: codex:gpt-6.1-sol@max
+reflect tooling, judgment, divergent, synthesizer: codex:gpt-6.1-sol@max
+arena runners: codex:gpt-6.1-sol@max
+arena cross-judge pool: codex:gpt-6.1-sol@max
+swarm workers: codex:gpt-6.1-sol@max
+architect runners: codex:gpt-6.1-sol@max
+interrogate reviewers: codex:gpt-6.1-sol@max
+
+In T3 use provider `codex`, model `gpt-6.1-sol`, and `target.options.reasoningEffort=max`; inherit service tier. Use supported T3 task tools, with isolated worktrees for writers. User instructions take precedence over upstream model defaults.
