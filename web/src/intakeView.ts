@@ -4,7 +4,7 @@
  * `Case.identify` (docs/api/identify.md). Nothing here confirms a fact or invents an article.
  */
 import type { FileReport, Fork, IdentifyResult, Question as PlanQuestion } from "./api/types.gen";
-import { localField } from "./intakeFields";
+import { confirmedAnswer, localField } from "./intakeFields";
 import type { Candidate, CandidateAnswer, Case, Fact } from "./types";
 
 /* —— Values in words —— */
@@ -261,10 +261,10 @@ export const NOT_SURE = "Not sure";
 export function planQuestions(c: Case): { q: PlanQuestion; done: boolean; notSure: boolean }[] {
   const plan = c.intake?.record.plan;
   if (!plan || plan.scope.status === "redirect") return [];
-  const has = (field: string) => c.facts.some((f) => f.field === localField(field) && f.value != null && f.value !== "");
+  const has = (field: string) => Boolean(confirmedAnswer(c.facts, field));
   return plan.questions.map((q) => {
     const notSure = plan.not_sure.includes(q.id);
-    return { q, notSure, done: notSure || has(q.field) };
+    return { q, notSure, done: notSure || (q.kind !== "conflict" && has(q.field)) };
   });
 }
 
@@ -353,6 +353,10 @@ export function identifyCandidates(result: IdentifyResult, previous: Candidate[]
     if (a) add("committed", a.provision, a.provision_id ?? a.provision, a.title, a.part, a.quote ?? "", a.citation);
   }
   for (const ch of (result.choices ?? []).slice(0, 3)) add("choice", articleOf(ch.provision), ch.provision_id ?? ch.provision, ch.title, ch.part, ch.quote, ch.citation);
+  // Keep the complete keyword shortlist inspectable without making every sentence a required question.
+  if (result.mode === "bm25_fallback") {
+    for (const a of result.articles) add("choice", articleOf(a.provision), a.provision_id ?? a.provision, a.title, a.part, a.quote ?? "", a.citation);
+  }
   return out;
 }
 

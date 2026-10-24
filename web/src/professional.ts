@@ -14,6 +14,7 @@ export interface ProfessionalFact {
 }
 
 const APPLICANT_SOURCES = new Set(["user_text", "user_click"]);
+const UNRESOLVED_ANSWERS = new Set(["not sure", "not_sure", "not sure (the officer decides)", "not_engaged_yet", "not_engaged", "no professional engaged yet"]);
 const ROLE_FIELDS = [
   "professional.role",
   "professional.discipline",
@@ -68,6 +69,7 @@ function applicantText(facts: ProfessionalFact[], fields: string[]): string | nu
   if (!fact || fact.status !== "confirmed" || fact.kind === "proposed") return null;
   if (!fact.source?.type || !APPLICANT_SOURCES.has(fact.source.type)) return null;
   if (typeof fact.value !== "string" || !fact.value.trim()) return null;
+  if (UNRESOLVED_ANSWERS.has(fact.value.trim().toLowerCase().replace(/\s+/g, " "))) return null;
   return fact.value.trim();
 }
 

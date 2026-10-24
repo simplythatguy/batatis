@@ -176,11 +176,13 @@ test("refusal posts a distinct decision with the officer's reasons and appeal no
     return new Response(JSON.stringify({ status: "refused", outcome: "refuse" }), { status: 200 });
   });
   const reasons = "The requested fire separation drawings were not provided.";
-  await review.decide("case/refusal", refusalDecision(reasons));
+  await review.decide("case/refusal", refusalDecision(reasons, 7));
+  // The displayed version pins the refusal (a newer save is a conflict); a refusal has no correction list.
   assert.deepEqual(calls, [{
     url: "/api/review/case%2Frefusal/decision", method: "POST",
-    body: { outcome: "refuse", message: refusalMessage(reasons), items: [] },
+    body: { outcome: "refuse", message: refusalMessage(reasons), expected_version: 7 },
   }]);
+  assert.equal("items" in (calls[0].body as object), false);
   assert.ok(refusalMessage(reasons).includes(reasons));
   assert.ok(refusalMessage(reasons).endsWith(APPEAL_NOTICE));
   assert.doesNotMatch(refusalMessage(reasons), /returned|fix and resubmit/i);

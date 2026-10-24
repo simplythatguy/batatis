@@ -339,3 +339,41 @@ summary.cf-comment-earlier-h:focus-visible {
     gap: 12px;
   }
 }
+
+/* The thread on the comments page: the current decision is a card like a lead comment, not a full-width banner. */
+.cf-correspondence {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.cf-comments .cf-returned {
+  padding: 20px;
+  border: 1px solid var(--cf-line);
+  border-radius: 14px;
+  background: var(--cf-surface);
+}
+
+.cf-comments .cf-returned-av {
+  background: var(--cf-hover);
+  color: var(--cf-text-2);
+}
+
+.cf-comments .cf-conversation {
+  padding: 0;
+  border-bottom: 0;
+}
+
+.cf-comments .cf-conversation > details > .cf-btn {
+  margin: 4px 0 8px;
+}
+
+.cf-comments .cf-conversation .ac-thread {
+  max-height: none;
+}
+
+@media (max-width: 760px) {
+  .cf-comments .cf-returned {
+    padding: 16px;
+  }
+}

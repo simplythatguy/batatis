@@ -10,6 +10,7 @@ import test from "node:test";
 import { componentHarness, nodes, text } from "../../../scripts/component-harness.mjs";
 import * as packageView from "./packageView.ts";
 import * as queue from "./queue.ts";
+import * as threadMessages from "./threadMessages.ts";
 
 class EngineError extends Error {
   status: number;
@@ -51,7 +52,11 @@ async function harness(start: Partial<Case>, opts: { claim?: () => Promise<unkno
       index: async () => ({ latest: reviewed, sessions: reviewed ? [reviewed] : [], close_out: null }),
       run: async () => { calls.run++; reviewed = session(1); return reviewed; },
     } },
-    "../account": { useAccount: () => ({ user: me }) },
+    "../account": { useAccount: () => ({ user: me }), accountSession: () => "officer-session" },
+    // The page reads the case, its gaps, questions and thread as one snapshot (reviewSnapshot.ts).
+    "./reviewSnapshot": { readReviewSnapshot: async () => ({ c: await (opts.getCase ?? (async () => ({ ...current })))(), gaps: [], information: null, messages: [], gapError: "", questionError: "" }) },
+    "./threadMessages": threadMessages,
+    "./sheet": { sheetFromEngine: () => ({ questions: [] }) },
     "./reviewData": { useQueue: () => ({ rows: [] }), setBlocking() {}, patchRow() {}, loadQueue: async () => {} },
     "./queue": queue,
     "./packageView": packageView,

@@ -94,7 +94,7 @@ def test_officer_notice_send_access_matrix(scene, status):
         assert notice['author']['role'] == 'reviewer' and notice['kind'] == 'message'
         assert after['messages'][:-1] == before['messages']
         assert after['messages'][-1]['id'] == notice['id']
-        assert after['version'] == before['version'] + 1
+        assert after['version'] == before['version']
         assert {key: value for key, value in after.items() if key not in {'messages', 'version', 'updated_at'}} == {
             key: value for key, value in before.items() if key not in {'messages', 'version', 'updated_at'}}
         notes = owner.get('/me/notifications').json()['notifications']
@@ -125,7 +125,7 @@ def test_historic_correspondence_and_read_receipts_remain_available(scene, statu
         if not allowed:
             assert after == before
             continue
-        assert after['version'] == before['version'] + 1
+        assert after['version'] == before['version']
         read = client.get(f'/cases/{case.id}/messages').json()['messages']
         assert all(message['read_by_me'] for message in read)
         assert [(message['id'], message['body'], message['author']) for message in read] == [
@@ -158,6 +158,32 @@ def test_multiple_applications_and_anonymous_legacy_creation(scene):
 
 
 READ_ROUTES = ['', '/gaps', '/process-fields', '/professional', '/section-d/issues', '/messages']
+
+
+@pytest.mark.parametrize('status', ['draft', 'submitted', 'in_review', 'returned', 'accepted', 'refused', 'withdrawn'])
+def test_notices_are_one_way_and_preserve_historical_applicant_messages(scene, status):
+    from engine.account_models import MessageAuthor, StoredMessage
+    store, clients, users = scene
+    case = owned(scene, status)
+    historical = StoredMessage(author=MessageAuthor(id=users['owner']['id'], name='Owner', role='applicant'),
+                               body='SYNTHETIC historical applicant message.')
+    case.messages.append(historical)
+    store.put(case, expected_version=case.version)
+    for name in clients:
+        before = store.get(case.id).model_dump()
+        response = clients[name].post(f'/cases/{case.id}/messages', json={'body': f'SYNTHETIC notice from {name}.'})
+        allowed = name in {'reviewer', 'second'} and status in {'submitted', 'in_review', 'returned', 'accepted', 'refused'}
+        assert response.status_code == (201 if allowed else 403 if name == 'owner' else 404), (name, status, response.text)
+        after = store.get(case.id).model_dump()
+        if allowed:
+            assert after['version'] == before['version']
+            assert {k: v for k, v in after.items() if k not in {'messages', 'updated_at'}} == {
+                k: v for k, v in before.items() if k not in {'messages', 'updated_at'}}
+        else:
+            assert after == before
+    thread = clients['owner'].get(f'/cases/{case.id}/messages').json()['messages']
+    assert any(message['id'] == historical.id and message['body'] == historical.body for message in thread)
+    store.delete(case.id)
 
 
 @pytest.mark.parametrize('status', ['draft', 'submitted', 'in_review', 'returned', 'accepted', 'refused', 'withdrawn'])
@@ -230,7 +256,7 @@ def test_submit_uses_the_same_blocking_gaps_and_changes_nothing_when_blocked(sce
     gaps = clients['owner'].get(f'/cases/{case.id}/gaps').json()['items']
     r = clients['owner'].post(f'/cases/{case.id}/submit', json={})
     assert r.status_code == 409
-    assert r.json()['detail']['gaps'] == [g for g in gaps if g['severity'] == 'blocking']
+    assert r.json()['detail']['gaps'] == [g for g in gaps if g['severity'] == 'blocking' and g['submission_blocking']]
     assert store.get(case.id).model_dump() == before
     assert clients['other'].post(f'/cases/{case.id}/submit', json={}).status_code == 404
 
@@ -258,12 +284,16 @@ def test_complete_submit_claim_return_messages_resubmit_and_accept(scene):
     r = first.post(f'/review/{case.id}/decision', json={'outcome': 'return',
                       'message': 'Please clarify the stated scope and attachment revision.', 'items': items})
     assert r.status_code == 200 and r.json()['status'] == 'returned'
+    original_decision = r.json()['decision']
+    assert first.post(f'/cases/{case.id}/messages', json={'body': 'SYNTHETIC follow-up: retain the owner details.'}).status_code == 201
+    assert owner.get(f'/cases/{case.id}/messages').json()['decision'] == original_decision
     applications = owner.get('/me/applications').json()['applications']
     entry = next(a for a in applications if a['id'] == case.id)
-    assert entry['unread_messages'] == 1 and entry['reviewer']['name'] == 'Reviewer'
+    assert entry['unread_messages'] == 2 and entry['reviewer']['name'] == 'Reviewer'
     messages = owner.get(f'/cases/{case.id}/messages').json()['messages']
-    assert messages[-1]['kind'] == 'decision' and messages[-1]['items'] == [dict(items[0], gap_id=None)]
-    assert not messages[-1]['read_by_me']
+    decision_message = next(message for message in messages if message['kind'] == 'decision')
+    assert decision_message['items'] == [dict(items[0], gap_id=None)]
+    assert not decision_message['read_by_me']
     assert owner.post(f'/cases/{case.id}/messages/read', json={}).status_code == 204
     assert owner.get(f'/cases/{case.id}/messages').json()['messages'][-1]['read_by_me']
     reply = owner.post(f'/cases/{case.id}/messages', json={'body': '<script>plain text</script> Revision clarified.'})
@@ -276,13 +306,21 @@ def test_complete_submit_claim_return_messages_resubmit_and_accept(scene):
     assert first.get('/review/queue?mine=true').json()['applications']
     assert owner.post(f'/cases/{case.id}/submit', json={}).json()['status'] == 'submitted'
     assert first.post(f'/review/{case.id}/claim', json={}).status_code == 200
-    r = first.post(f'/review/{case.id}/decision', json={'outcome': 'accept'})
+    assert first.post(f'/cases/{case.id}/messages', json={'body': 'SYNTHETIC final note before acceptance.'}).status_code == 201
+    r = first.post(f'/review/{case.id}/decision', json={'outcome': 'accept', 'message': 'SYNTHETIC acceptance record note.'})
     assert r.status_code == 200 and r.json()['status'] == 'accepted'
     assert 'administratively complete' in r.json()['decision']['message']
     assert not any(word in r.json()['decision']['message'].lower() for word in ['approved', 'compliant', 'complies', 'safe'])
     assert [x['to_status'] for x in r.json()['status_history']] == ['submitted', 'in_review', 'returned', 'submitted', 'in_review', 'accepted']
     assert first.delete(f'/review/{case.id}/claim').status_code == 409
     assert owner.post(f'/cases/{case.id}/submit', json={}).status_code == 409
+    final_decision = r.json()['decision']
+    assert first.post(f'/cases/{case.id}/messages', json={'body': 'SYNTHETIC notice after acceptance.'}).status_code == 201
+    reopened = owner.get(f'/cases/{case.id}/messages').json()
+    assert reopened['decision'] == final_decision
+    assert {message['body'] for message in reopened['messages']} >= {
+        original_decision['message'], final_decision['message'], 'SYNTHETIC final note before acceptance.',
+        'SYNTHETIC notice after acceptance.'}
 
 
 def test_takeover_history_release_and_message_limits(scene):
@@ -306,14 +344,14 @@ def test_simultaneous_officer_notices_preserve_both_messages(scene, monkeypatch)
     store, clients, _ = scene
     case = owned(scene, 'returned')
     before = clients['owner'].get(f'/cases/{case.id}').json()
-    barrier, real_put = threading.Barrier(2), store.put
+    barrier, real_mutation = threading.Barrier(2), store.mutate_messages
 
-    def synchronized_put(candidate, *, expected_version=None):
-        if candidate.id == case.id and expected_version == before['version']:
+    def synchronized_messages(case_id, user, operation):
+        if case_id == case.id:
             barrier.wait(timeout=5)
-        return real_put(candidate, expected_version=expected_version)
+        return real_mutation(case_id, user, operation)
 
-    monkeypatch.setattr(store, 'put', synchronized_put)
+    monkeypatch.setattr(store, 'mutate_messages', synchronized_messages)
     with ThreadPoolExecutor(max_workers=2) as pool:
         pending = [pool.submit(clients[name].post, f'/cases/{case.id}/messages',
                                json={'body': f'SYNTHETIC notice from {name}.'})
@@ -321,7 +359,7 @@ def test_simultaneous_officer_notices_preserve_both_messages(scene, monkeypatch)
         responses = [result.result(timeout=10) for result in pending]
     assert [response.status_code for response in responses] == [201, 201], [r.text for r in responses]
     after = clients['owner'].get(f'/cases/{case.id}').json()
-    assert after['version'] == before['version'] + 2
+    assert after['version'] == before['version']
     assert {message['id'] for message in after['messages']} == {response.json()['id'] for response in responses}
     assert {key: value for key, value in after.items() if key not in {'messages', 'version', 'updated_at'}} == {
         key: value for key, value in before.items() if key not in {'messages', 'version', 'updated_at'}}
@@ -332,17 +370,17 @@ def test_officer_notice_rechecks_self_review_after_a_concurrent_ownership_change
     store, clients, users = scene
     case = owned(scene, 'submitted')
     before = clients['owner'].get(f'/cases/{case.id}').json()
-    real_put, concurrent = store.put, None
+    real_mutation, concurrent = store.mutate_messages, None
 
-    def ownership_change_before_put(candidate, *, expected_version=None):
+    def ownership_change_before_message(case_id, user, operation):
         nonlocal concurrent
-        if candidate.id == case.id and concurrent is None:
+        if case_id == case.id and concurrent is None:
             changed = store.get(case.id)
             changed.owner_id = users['reviewer']['id']
-            concurrent = real_put(changed, expected_version=changed.version)
-        return real_put(candidate, expected_version=expected_version)
+            concurrent = store.put(changed, expected_version=changed.version)
+        return real_mutation(case_id, user, operation)
 
-    monkeypatch.setattr(store, 'put', ownership_change_before_put)
+    monkeypatch.setattr(store, 'mutate_messages', ownership_change_before_message)
     response = clients['reviewer'].post(f'/cases/{case.id}/messages', json={'body': 'This notice must not be saved.'})
 
     assert response.status_code == 404 and concurrent is not None, response.text
@@ -507,23 +545,24 @@ def test_refuse_records_a_distinct_terminal_decision(scene):
     assert reviewer.post(f'/review/{case.id}/claim', json={}).status_code == 200
     before = store.get(case.id)
     reason = 'The requested administrative record has not been provided.'
-    items = [{'field': 'owner_name', 'note': 'The requested owner record is still missing.'}]
     response = reviewer.post(f'/review/{case.id}/decision',
-                             json={'outcome': 'refuse', 'message': reason, 'items': items})
+                             json={'outcome': 'refuse', 'message': reason, 'expected_version': before.version})
     assert response.status_code == 200, response.text
     assert response.json()['status'] == 'refused'
     saved = store.get(case.id)
     assert saved.status == 'refused'
     assert saved.decision.outcome == 'refuse'
     assert saved.decision.message.endswith(reason)
-    assert saved.decision.message.startswith('Refusal recorded by the reviewing officer.')
+    assert saved.decision.message.startswith('Administrative refusal recorded by the reviewing officer.')
     assert 'Returned' not in saved.decision.message
     assert saved.decision.by_id == users['reviewer']['id']
     assert saved.version == before.version + 1
     assert saved.claim == before.claim
     assert saved.status_history[-1].from_status == 'in_review'
     assert saved.status_history[-1].to_status == 'refused'
-    assert not any(word in saved.status_history[-1].note.lower()
+    assert 'This is not a finding about design compliance or safety.' in saved.status_history[-1].note
+    administrative_label = saved.status_history[-1].note.split(' This is not a finding')[0]
+    assert not any(word in administrative_label.lower()
                    for word in ['compliant', 'non-compliance', 'safe', 'unsafe'])
     application = next(a for a in clients['owner'].get('/me/applications').json()['applications'] if a['id'] == case.id)
     assert application['status'] == 'refused' and application['unread_messages'] == 1
@@ -539,11 +578,11 @@ def test_refuse_records_a_distinct_terminal_decision(scene):
     assert case.id not in {a['id'] for a in reviewer.get('/review/queue?status=returned').json()['applications']}
     message = clients['owner'].get(f'/cases/{case.id}/messages').json()['messages'][-1]
     assert message['kind'] == 'decision' and message['body'] == saved.decision.message
-    assert message['items'] == [dict(items[0], gap_id=None)] and not message['read_by_me']
+    assert message['items'] == [] and saved.decision.items == [] and not message['read_by_me']
     notes = [n for n in clients['owner'].get('/me/notifications').json()['notifications']
              if n['case_id'] == case.id and n['status'] == 'refused']
     assert len(notes) == 1 and not notes[0]['read']
-    assert notes[0]['summary'] == f'Reviewer recorded a refusal for {case.title}'
+    assert notes[0]['summary'] == f'Reviewer recorded an administrative refusal for {case.title}'
     assert not any(n['case_id'] == case.id and n['status'] == 'refused'
                    for n in clients['second'].get('/me/notifications').json()['notifications'])
     assert clients['owner'].post(f'/cases/{case.id}/messages/read', json={}).status_code == 204
@@ -564,7 +603,8 @@ def test_refuse_records_a_distinct_terminal_decision(scene):
         assert clients[name].delete(f'/review/{case.id}/claim').status_code == 409
         for outcome in ['accept', 'return', 'refuse']:
             assert clients[name].post(f'/review/{case.id}/decision',
-                                     json={'outcome': outcome, 'message': reason}).status_code == 409
+                                     json={'outcome': outcome, 'message': reason,
+                                           'expected_version': terminal['version']}).status_code == 409
     assert store.get(case.id).model_dump() == terminal
     store.delete(case.id)
 
@@ -575,7 +615,8 @@ def test_refusal_requires_a_written_reason_without_mutation(scene, reason):
     case = owned(scene, status='submitted')
     assert clients['reviewer'].post(f'/review/{case.id}/claim', json={}).status_code == 200
     before = store.get(case.id).model_dump()
-    response = clients['reviewer'].post(f'/review/{case.id}/decision', json={'outcome': 'refuse', 'message': reason})
+    response = clients['reviewer'].post(f'/review/{case.id}/decision', json={
+        'outcome': 'refuse', 'message': reason, 'expected_version': before['version']})
     assert response.status_code == 422, response.text
     assert store.get(case.id).model_dump() == before
     store.delete(case.id)
@@ -584,7 +625,8 @@ def test_refusal_requires_a_written_reason_without_mutation(scene, reason):
 def test_refusal_requires_authority_and_current_claim(scene):
     store, clients, _ = scene
     case = owned(scene, status='submitted')
-    body = {'outcome': 'refuse', 'message': 'Administrative record not provided.'}
+    body = {'outcome': 'refuse', 'message': 'Administrative record not provided.',
+            'expected_version': case.version}
     before = store.get(case.id).model_dump()
     for name in ['reviewer', 'second', 'owner', 'other', 'foreign', 'anonymous']:
         response = clients[name].post(f'/review/{case.id}/decision', json=body)
@@ -592,6 +634,7 @@ def test_refusal_requires_authority_and_current_claim(scene):
     assert store.get(case.id).model_dump() == before
     assert clients['reviewer'].post(f'/review/{case.id}/claim', json={}).status_code == 200
     before = store.get(case.id).model_dump()
+    body['expected_version'] = before['version']
     assert clients['second'].post(f'/review/{case.id}/decision', json=body).status_code == 409
     assert store.get(case.id).model_dump() == before
     store.delete(case.id)
@@ -614,7 +657,8 @@ def test_simultaneous_refusal_and_decision_have_exactly_one_winner(scene, monkey
     monkeypatch.setattr(store, 'put', synchronized_put)
     with ThreadPoolExecutor(max_workers=2) as pool:
         pending = [pool.submit(reviewer.post, f'/review/{case.id}/decision',
-                               json={'outcome': outcome, 'message': f'Written reason from request {index}.'})
+                               json={'outcome': outcome, 'message': f'Written reason from request {index}.',
+                                     'expected_version': before.version})
                    for index, outcome in enumerate(['refuse', competing_outcome])]
         responses = [result.result(timeout=10) for result in pending]
     assert sorted(r.status_code for r in responses) == [200, 409], [r.text for r in responses]
@@ -649,7 +693,8 @@ def test_refusal_rechecks_claim_after_a_concurrent_takeover(scene, monkeypatch):
 
     monkeypatch.setattr(store, 'put', takeover_before_put)
     response = clients['reviewer'].post(f'/review/{case.id}/decision',
-                                        json={'outcome': 'refuse', 'message': 'Administrative record not provided.'})
+                                        json={'outcome': 'refuse', 'message': 'Administrative record not provided.',
+                                              'expected_version': before.version})
     assert response.status_code == 409 and raced
     saved = store.get(case.id)
     assert saved.claim.reviewer_id == users['second']['id']

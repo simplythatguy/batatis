@@ -1,15 +1,15 @@
 /** #/review for reviewers: everything sent to their authority, one quiet row each. A row opens the file. */
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { review, type QueueApplication } from "../../api/accounts";
-import { useAccount } from "../account";
+import { accountSession, useAccount } from "../account";
 import { authorityName } from "../applications";
 import { AcIcon, Avatar, PageHead, type AcIconName } from "../auth/bits";
 import { MOD_KEY } from "../ui";
 import { completenessView, filterQueue, reviewerCell, sentLabel, statusPill, tabCounts, TABS, type QueueTab } from "./queue";
 import { loadQueue, patchRow, useQueue } from "./reviewData";
 
-export function StatusPill({ a }: { a: Pick<QueueApplication, "status" | "claim"> }) {
-  const s = statusPill(a.status, Boolean(a.claim));
+export function StatusPill({ a }: { a: Pick<QueueApplication, "status" | "claim" | "submission_number"> }) {
+  const s = statusPill(a.status, Boolean(a.claim), a.submission_number);
   const hue = { accent: "accent", warning: "amber", blocking: "rose", done: "green", pending: "slate" }[s.tone];
   return <span className={`ac-pill is-${hue}`}><span className={`ac-pill-dot is-${s.tone}`} aria-hidden="true" />{s.label}</span>;
 }
@@ -18,6 +18,7 @@ export function StatusPill({ a }: { a: Pick<QueueApplication, "status" | "claim"
 const TAB_ICON: Record<QueueTab, AcIconName> = {
   all: "inbox",
   new: "inbox",
+  resubmitted: "history",
   mine: "hand",
   returned: "send",
   accepted: "check",
@@ -37,9 +38,10 @@ function Checklist({ pct, label }: { pct: number | null; label: string }) {
   );
 }
 
-/** What the officer does next with this row, in plain words. */
+/** What the officer does next with this row, in plain words. A kept reservation resumes only on request. */
 function nextStep(a: QueueApplication, me: string | null): string {
   if (a.status === "submitted" && !a.claim) return "Pick up";
+  if (a.status === "submitted" && me && a.claim?.reviewer_id === me) return "Resume";
   if (a.status === "in_review" && me && a.claim?.reviewer_id === me) return "Continue";
   return "View";
 }
@@ -53,24 +55,36 @@ export function ReviewQueue({ phoneTools }: { phoneTools?: ReactNode }) {
   const search = useRef<HTMLInputElement>(null);
   const [now] = useState(() => Date.now());
   const [picking, setPicking] = useState("");
+  const pendingClaim = useRef<AbortController | null>(null);
 
-  /** "Pick up" means it: claim, then open the review (no second "start" screen). If someone got
-   *  there first, the review page says who and offers to take over. */
+  // Another sign-in (even the same person again) never inherits a claim this one started.
+  useLayoutEffect(() => {
+    setPicking("");
+    return () => { pendingClaim.current?.abort(); pendingClaim.current = null; };
+  }, [user]);
+  useEffect(() => { void loadQueue(); }, [user]);
+
+  /** "Pick up" (and "Resume", for your kept reservation) means it: claim, then open the review (no
+   *  second "start" screen). If someone got there first, the review page says who and offers to take over. */
   async function pickUp(a: QueueApplication, href: string) {
     if (picking) return;
+    const session = accountSession(), ctl = new AbortController();
+    pendingClaim.current = ctl;
+    const current = () => session === accountSession() && !ctl.signal.aborted;
     setPicking(a.id);
     try {
-      const claim = await review.claim(a.id, false);
-      patchRow(a.id, { claim, status: "in_review" });
+      const claim = await review.claim(a.id, false, ctl.signal);
+      if (current()) patchRow(a.id, { claim, status: "in_review" }, session);
     } catch {
       // Fall through: the review page shows the conflict or the error.
     } finally {
-      setPicking("");
-      window.location.hash = href;
+      if (pendingClaim.current === ctl) pendingClaim.current = null;
+      if (current()) {
+        setPicking("");
+        window.location.hash = href;
+      }
     }
   }
-
-  useEffect(() => { void loadQueue(); }, []);
 
   // ⌘K / Ctrl+K searches the queue here (captured before the shell's own shortcut).
   useEffect(() => {
@@ -142,7 +156,7 @@ export function ReviewQueue({ phoneTools }: { phoneTools?: ReactNode }) {
                     className="rq-row"
                     href={`#/review/${encodeURIComponent(a.id)}`}
                     aria-busy={picking === a.id || undefined}
-                    onClick={step === "Pick up" ? (e) => {
+                    onClick={step === "Pick up" || step === "Resume" ? (e) => {
                       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
                       e.preventDefault();
                       void pickUp(a, e.currentTarget.getAttribute("href") ?? "");
@@ -161,7 +175,7 @@ export function ReviewQueue({ phoneTools }: { phoneTools?: ReactNode }) {
                     <span className="rq-side">
                       {who.name && <span className="rq-who" title={who.mine ? "You’re reviewing this" : `${who.name} is reviewing this`}><Avatar name={who.name} size="sm" /><span className="rq-who-name">{who.label}</span></span>}
                       {step !== "Pick up" && <StatusPill a={a} />}
-                      <span className={`rq-go${step === "Pick up" ? " is-new" : ""}`}>{picking === a.id ? "Picking up…" : step}<AcIcon name="chev" size={14} /></span>
+                      <span className={`rq-go${step === "Pick up" ? " is-new" : ""}`}>{picking === a.id ? (step === "Resume" ? "Resuming…" : "Picking up…") : step}<AcIcon name="chev" size={14} /></span>
                     </span>
                   </a>
                 </li>

@@ -10,7 +10,6 @@ from engine.api import create_app
 from engine.codes import Codes
 from engine.export.scc import blockers, load_field_map
 from engine.models import Case, Fact, Source
-from engine.professional import NOT_ENGAGED_ITEM
 from engine.section_c import section_c_rows
 from engine.store import CaseStore
 from engine.tests.test_completeness_saved_case import _complete_package
@@ -150,11 +149,11 @@ def test_edition_screen_cannot_promote_pending_or_withdrawn_label(context, with_
 
 @pytest.mark.parametrize('old_key,new_key', [('professional_status', 'professional.status'),
                                            ('professional.status', 'professional_status')])
-def test_professional_warning_uses_current_engagement_source(context, old_key, new_key):
+def test_unresolved_professional_requirement_uses_current_engagement_source(context, old_key, new_key):
     newest = fact(new_key, 'not_engaged', ref='SYNTHETIC shared applicant ref', page=7, bbox=(10, 20, 30, 40))
     entry = review(context, Case(facts=[fact(old_key, 'engaged', ref=newest.source.ref, page=2), newest]))[
         'professional_requirement']
-    assert entry['reason'] == NOT_ENGAGED_ITEM
+    assert entry['reason'] and entry['severity'] == 'blocking' and entry['routed_to'] == 'officer'
     assert entry['sources'] == [newest.source.model_dump(mode='json')]
 
 
@@ -185,11 +184,12 @@ def test_public_alias_replacement_removes_phantom_preflight_blocker(context, old
         assert response.status_code == 200, response.text
     response = client.post(f'/api/cases/{case.id}/completeness', json={})
     assert response.status_code == 200, response.text
-    assert response.json()['reviews'][0]['export_reasons'] == []
-    assert client.post(f'/api/cases/{case.id}/export', json={}).status_code == 200
+    reasons = response.json()['reviews'][0]['export_reasons']
+    assert len(reasons) == 1 and 'professional_requirement' in reasons[0]
+    assert client.post(f'/api/cases/{case.id}/export', json={}).status_code == 409
     found = {e['field']: e for s in response.json()['reviews'][0]['sections'] for e in s['elements']}
     assert not found.get(old_key, found[logical])['in_export_preflight']
-    assert all(not e['in_export_preflight'] for e in found.values())
+    assert all(not e['in_export_preflight'] for e in found.values() if e['field'] != 'professional_requirement')
     assert all(s['quote'] != 'SYNTHETIC obsolete value' for e in found.values() for s in e['sources'])
 
 
@@ -268,11 +268,14 @@ def test_pending_process_alias_action_and_public_resolution_preserve_export_poli
     assert client.get(f'/api/cases/{case.id}').json() == before
     assert response.json()['case_version'] == before['version']
     reasons = response.json()['reviews'][0]['export_reasons']
+    requirement_reasons = [r for r in reasons if r.startswith('blocking gap in section D, professional_requirement:')]
+    assert len(requirement_reasons) == 1, 'An unresolved officer determination is independent of process alias edits'
+    process_reasons = [r for r in reasons if r not in requirement_reasons]
     assert reasons[0] == f'unconfirmed {kind} fact "{target}" ({current.id})'
     if pathway == 'acceptable_solution':
-        assert len(reasons) == 1
+        assert len(process_reasons) == 1
     else:
-        assert len(reasons) == 2 and reasons[1].startswith(f'blocking gap in section process, {logical}:')
+        assert len(process_reasons) == 2 and process_reasons[1].startswith(f'blocking gap in section process, {logical}:')
     official = client.post(f'/api/cases/{case.id}/export', json={'draft': False})
     assert official.status_code == 409 and official.json()['detail']['reasons'] == reasons
     elements = [e for s in response.json()['reviews'][0]['sections'] for e in s['elements']]
@@ -298,10 +301,12 @@ def test_pending_process_alias_action_and_public_resolution_preserve_export_poli
         assert all(current.source.model_dump(mode='json') not in e['sources'] for e in elements)
         assert not any('unconfirmed' in r for r in reasons)
         official = client.post(f'/api/cases/{case.id}/export', json={'draft': False})
+        assert official.status_code == 409 and official.json()['detail']['reasons'] == reasons
+        process_reasons = [r for r in reasons if not r.startswith('blocking gap in section D, professional_requirement:')]
         if pathway == 'acceptable_solution' or value == original_value:
-            assert reasons == [] and official.status_code == 200
+            assert process_reasons == []
         else:
-            assert official.status_code == 409 and official.json()['detail']['reasons'] == reasons
+            assert any(f'blocking gap in section process, {logical}:' in r for r in process_reasons)
         if pathway == 'acceptable_solution':
             entry = next(e for e in elements if e['field'] == logical)
             assert entry['verdict'] == 'present' and entry['prompt'] is None

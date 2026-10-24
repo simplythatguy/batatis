@@ -3,6 +3,7 @@
 Use an engine-ready Python environment and set BATATIS_CODEDB to a built code DB.
 No provider credentials are inherited. Optional --browser runs the CaseProvider
 regressions too (requires Playwright and a running Vite server in SYNC_WEB_BASE).
+Use --aliases to run only the saved-case alias/rehydration regressions.
 """
 import os
 from pathlib import Path
@@ -32,8 +33,8 @@ if len(sys.argv) > 1 and sys.argv[1] == '--serve':
     directory = Path(sys.argv[2])
     sock = socket.socket()
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    # SYNC_ENGINE_PORT pins the loopback port for runs that must stay on an assigned port.
-    sock.bind(('127.0.0.1', int(os.environ.get('SYNC_ENGINE_PORT', '0'))))
+    # Tests share the user's fixed local engine port; a busy port fails without fallback.
+    sock.bind(('127.0.0.1', 8000))
     sock.listen(128)
     (directory / 'port').write_text(str(sock.getsockname()[1]))
     app = create_app(store=CaseStore(directory / 'cases.sqlite'))
@@ -62,7 +63,8 @@ with tempfile.TemporaryDirectory(prefix='batatis-web-sync-') as tmp:
                 raise RuntimeError('Local engine did not start')
             env['SYNC_TEST_BASE'] = base
             env['SYNC_TEST_DB'] = str(directory / 'cases.sqlite')
-            result = subprocess.run(['node', '--experimental-strip-types', '--import', './scripts/register-ts.mjs', 'tests/sync.integration.mts'], cwd=WEB, env=env, timeout=120)
+            suite = 'tests/aliases.integration.ts' if '--aliases' in sys.argv else 'tests/sync.integration.mts'
+            result = subprocess.run(['node', '--experimental-strip-types', '--import', './scripts/register-ts.mjs', suite], cwd=WEB, env=env, timeout=120)
             if result.returncode == 0 and '--browser' in sys.argv:
                 result = subprocess.run(['node', 'tests/provider.integration.mjs'], cwd=WEB, env=env, timeout=120)
             if result.returncode == 0 and '--selection' in sys.argv:

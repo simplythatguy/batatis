@@ -82,6 +82,7 @@ _YES_PRIORITY = (
     'suppression', 'fire_alarm', 'truss_design',
 )
 _RULE_IDS = {
+    'ahj_resolution': ('2.4.1.1.(4)', 'C'),
     'general_building': ('2.4.1.1.(3)', 'C'),
     'general_exception': ('2.4.1.1.(1)', 'C'),
     'general_unresolved': ('2.4.1.1.(1)', 'C'),
@@ -255,6 +256,9 @@ def render_practice(result: ProfessionalResult, codes: Codes, *, span_handoff: b
         return _with_prompts(_flag(True, reason, text, PROFESSIONAL_REQUEST), result)
     if result.required == 'no':
         reason = _pick(result, 'no') or _pick(result, 'depends')
+        if result.resolution is not None:
+            reason = next(row for row in result.reasons if row.code == 'ahj_resolution')
+            return _with_prompts(_flag(False, reason, reason.message, None), result)
         return _with_prompts(_flag(False, reason,
                      ('The stated facts fit a general exception. Recommend checking component duties and any '
                       'authority direction. This screen does not decide professional-law scope.'),

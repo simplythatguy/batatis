@@ -32,11 +32,15 @@ async function shell(over: { saveStatus?: string; saveDraft?: () => Promise<bool
     openCase: over.openCase ?? (async () => null),
     resetToWho: () => { calls.push("resetToWho"); location.hash = "#/"; },
     requestCheck() {}, renameCase: async () => null,
+    // The synchronous save state the switch reads (an answer derived since the last render is unsaved too).
+    readSync: () => ({ saved: store.saveStatus === "saved", reviewed: false, detail: "" }),
+    refreshCurrentCase: async () => null,
   };
   const h = await componentHarness(new URL("../Shell.tsx", import.meta.url), "Shell", {
     "../store": { useCase: () => store },
     "../humanReview": { groupGaps: () => new Map() },
-    "./account": { useAccount: () => account, bootAccount() {}, refreshApplications: async () => {} },
+    "./account": { useAccount: () => account, bootAccount() {}, refreshApplications: async () => {}, accountSession: () => "session-1" },
+    "./notifications/notifications": { useNotifications: () => ({ phase: "idle", items: [] }) },
     "./applications": { readOnly: () => false, groupApplications: () => ({ pinned: [], active: [] }) },
     "./assistant/assistant": { invalidateAssistantNavigation() {}, setAssistantCase() {}, setAssistantContext() {}, toggleAssistant() {}, useAssistant: () => ({ open: false }) },
     "./assistant/destinations": { OPEN_APPLICATIONS: "cf:open-applications" },
@@ -53,7 +57,7 @@ async function shell(over: { saveStatus?: string; saveDraft?: () => Promise<bool
     "./shell/AppLayout": { AppLayout: "AppLayout" },
     "./shell/ApplicationList": { ApplicationList: "ApplicationList" },
     "../router": { useRoute: () => ({ path: "/questions", params: new URLSearchParams() }) },
-    "../api/sync": { engineGeneration: () => 1 },
+    "../api/sync": { engineGeneration: () => 1, engineCaseId: () => store.engineId, isEngineGeneration: () => true },
     "./useRelevance": { resetRelevance: () => calls.push("resetRelevance") },
     "./ui": { MOD_KEY: "⌘" },
   }, {

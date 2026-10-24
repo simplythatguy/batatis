@@ -83,6 +83,7 @@ def test_existing_application_defaults_are_false_without_changing_the_case(scene
     assert response.json()['applications'] == [{
         'id': case.id, 'title': 'SYNTHETIC application', 'status': 'draft', 'authority': 'edmonton',
         'updated_at': case.updated_at, 'submitted_at': None, 'completeness': None,
+        'submission_number': case.submission_number, 'expires_at': case.expires_at,
         'unread_messages': 0, 'reviewer': None, 'archived': False, 'pinned': False,
     }]
     assert scene.store.get(case.id) == before

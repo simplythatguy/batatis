@@ -9,6 +9,7 @@ from email import policy
 from email.message import Message
 from email.parser import BytesParser
 from typing import Callable
+from urllib.parse import quote
 
 import psycopg
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
@@ -224,6 +225,27 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
         if saved is None:
             raise HTTPException(404, 'case not found')
         return {key: saved[key] for key in ('id', 'name', 'size', 'content_type')}
+
+    @app.get('/cases/{case_id}/files')
+    def list_files(case_id: str):
+        files = cases().list_files(case_id)
+        if files is None:
+            raise HTTPException(404, 'case not found')
+        return {'items': files}
+
+    @app.get('/cases/{case_id}/files/{file_id}', response_class=Response)
+    def download_file(case_id: str, file_id: str):
+        saved = cases().get_file(case_id, file_id)
+        if saved is None:
+            raise HTTPException(404, 'file not found', headers={'Cache-Control': 'no-store'})
+        # A supplied name is display metadata, never a path, MIME type or raw header.
+        name = re.split(r'[/\\]', saved['name'])[-1]
+        name = ''.join(char for char in name if ord(char) >= 32 and ord(char) != 127) or 'document.pdf'
+        fallback = re.sub(r'[^A-Za-z0-9 ._()-]', '_', name)
+        headers = {'Content-Disposition': f'attachment; filename="{fallback}"; filename*=UTF-8\'\'{quote(name, safe="")}',
+                   'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff',
+                   'Content-Security-Policy': "sandbox; default-src 'none'"}
+        return Response(saved['data'], media_type='application/pdf', headers=headers)
 
     @app.delete('/cases/{case_id}', status_code=204)
     def delete_case(case_id: str):

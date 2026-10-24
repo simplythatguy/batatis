@@ -15,12 +15,16 @@ from .account_models import (reviewing_authority, ApplicationPreferences, Applic
 from .accounts import require_user
 from .completeness import check_completeness
 from .jurisdictions import reviewing_authority_names
-from .models import Case, now
+from .models import Case, ProfessionalRequirementResolution, now
+from .process_fields import confirmed_value
+from .professional import professional_involvement
+from .professional_resolution import requirement_fingerprint
+from .review_lifecycle import remember_decision, snapshot, submit_round
 from .store import VersionConflict
 
 ACCEPT_TEXT = 'Accepted as administratively complete. Technical review remains the responsibility of the authority.'
 RETURN_TEXT = 'Returned for administrative information.'
-REFUSE_TEXT = 'Refusal recorded by the reviewing officer.'
+REFUSE_TEXT = 'Administrative refusal recorded by the reviewing officer. This is not a finding about design compliance or safety.'
 
 
 class CompletenessSummary(BaseModel):
@@ -39,6 +43,8 @@ class ApplicationSummary(BaseModel):
     authority: str | None
     updated_at: str
     submitted_at: str | None
+    submission_number: int
+    expires_at: str | None
     completeness: CompletenessSummary | None = None
     unread_messages: int
     reviewer: ReviewerName | None
@@ -48,6 +54,12 @@ class ApplicationSummary(BaseModel):
 
 class ApplicationsResult(BaseModel):
     applications: list[ApplicationSummary]
+
+
+class SubmitRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    # Older callers can omit this; the applicant coordinator pins its acknowledged revision.
+    expected_version: int | None = Field(default=None, ge=1, strict=True)
 
 
 class ApplicantSummary(BaseModel):
@@ -68,6 +80,8 @@ class QueueApplication(BaseModel):
     authority: str | None
     status: ApplicationStatus
     submitted_at: str | None
+    submission_number: int
+    expires_at: str | None
     updated_at: str
     completeness: CompletenessSummary | None = None
     claim: Claim | None
@@ -77,6 +91,8 @@ class QueueApplication(BaseModel):
 
 class QueueResult(BaseModel):
     applications: list[QueueApplication]
+    reviewer_id: str
+    authority: str
 
 
 class ClaimRequest(BaseModel):
@@ -91,15 +107,31 @@ class ClaimResult(BaseModel):
 class DecisionRequest(BaseModel):
     model_config = ConfigDict(extra='forbid')
     outcome: DecisionOutcome
+    # Legacy accept/return callers may omit this. New final refusals pin their displayed revision.
+    expected_version: int | None = Field(default=None, ge=1, strict=True,
+                                        description='Required for a refusal; the displayed saved application version.')
     message: str | None = Field(default=None, max_length=4000)
     items: list[DecisionItem] = Field(default_factory=list, max_length=50)
 
     @model_validator(mode='after')
     def _reason_required(self):
+        if self.outcome == 'refuse' and self.expected_version is None:
+            raise ValueError('A refusal requires the displayed application expected_version')
         if self.outcome in {'return', 'refuse'} and (self.message is None or len(self.message.strip()) < 10):
             noun = 'return' if self.outcome == 'return' else 'refusal'
             raise ValueError(f'A {noun} requires a message of at least 10 characters')
+        if self.outcome == 'refuse' and self.items:
+            raise ValueError('A final refusal has a reason, not a correction checklist')
         return self
+
+
+class ProfessionalRequirementRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid', str_strip_whitespace=True)
+    expected_version: int = Field(ge=1, strict=True)
+    required: bool = Field(strict=True)
+    scope: str = Field(min_length=3, max_length=1000)
+    basis: str = Field(min_length=10, max_length=4000)
+    reference: str = Field(min_length=3, max_length=1000)
 
 
 class MessageRequest(BaseModel):
@@ -112,6 +144,12 @@ class MessageRequest(BaseModel):
         if not value.strip():
             raise ValueError('Enter a message')
         return value
+
+
+class MessageReadRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    # Omission keeps the legacy mark-all contract. New readers name only displayed messages.
+    message_ids: list[str] | None = Field(default=None, max_length=500)
 
 
 def reviewer(request: Request) -> User:
@@ -158,6 +196,14 @@ def mutate(store, case_id, user, operation):
     raise HTTPException(409, 'case was updated concurrently')
 
 
+def communicate(store, case_id, user, operation):
+    """Messages/receipts share the case lock, not its content/workflow revision."""
+    saved = store.mutate_messages(case_id, user, operation)
+    if saved is None:
+        raise HTTPException(404, 'case not found')
+    return saved
+
+
 class NotificationActor(BaseModel):
     name: str
     role: Role | None = None
@@ -169,6 +215,7 @@ class Notification(BaseModel):
     case_title: str
     kind: Literal['status', 'message']
     status: ApplicationStatus | None = None
+    submission_number: int | None = None
     actor: NotificationActor
     # Not `text`: the NRC attribution layer treats `text` fields as code text.
     summary: str
@@ -181,12 +228,13 @@ class NotificationsResult(BaseModel):
     unread: int
 
 
-def notification_summary(actor: str, status: str, title: str) -> str:
+def notification_summary(actor: str, status: str, title: str, submission_number: int | None = None) -> str:
     """What the other party did, in plain words. Never "approved"."""
     if status == 'accepted':
         return f'{actor} accepted {title} as administratively complete'
-    verb = {'in_review': 'started reviewing', 'returned': 'returned', 'submitted': 'submitted',
-            'refused': 'recorded a refusal for'}[status]
+    verb = ('resubmitted' if status == 'submitted' and (submission_number or 0) > 1
+            else {'in_review': 'started reviewing', 'returned': 'returned', 'submitted': 'submitted',
+                  'refused': 'recorded an administrative refusal for'}[status])
     return f'{actor} {verb} {title}'
 
 
@@ -201,7 +249,10 @@ def notifications_for(user, store, limit: int = 50) -> NotificationsResult:
     for case in scoped:
         title = case.title or 'Untitled application'
         latest: dict[tuple, Notification] = {}
+        submission_number = 0
         for index, change in enumerate(case.status_history):
+            if change.by_id == case.owner_id and change.to_status == 'submitted' and change.from_status in {'draft', 'returned'}:
+                submission_number = max(submission_number + 1, 2 if change.from_status == 'returned' else 1)
             if change.by_id == user.id or change.to_status not in wanted:
                 continue
             # Reviewers hear about the applicant's (re)submissions only, not a colleague releasing a claim.
@@ -210,7 +261,8 @@ def notifications_for(user, store, limit: int = 50) -> NotificationsResult:
             note = Notification(
                 id=f'{case.id}:status:{index}', case_id=case.id, case_title=title, kind='status',
                 status=change.to_status, actor=NotificationActor(name=change.by_name, role=other_role),
-                summary=notification_summary(change.by_name, change.to_status, title), created_at=change.at,
+                submission_number=submission_number if change.to_status == 'submitted' else None,
+                summary=notification_summary(change.by_name, change.to_status, title, submission_number), created_at=change.at,
                 read=change.at <= seen)
             # A release and re-claim repeats the same event; keep the newest one.
             latest[(change.by_id, change.to_status)] = note
@@ -242,7 +294,7 @@ def post_message(case, user, body: str):
     threaded(case)
     if user.role != 'reviewer':
         raise HTTPException(403, 'Only reviewing officers can send notices')
-    # Officer notices only. Recheck on every CAS retry, including ownership changes.
+    # Runs against the currently locked row, including concurrent ownership/authority changes.
     authorize_case(case, user, mode='review')
     if len(case.messages) >= MAX_MESSAGES:
         raise HTTPException(409, 'This application has reached its message limit')
@@ -280,6 +332,7 @@ def create_router(cases, code):
             flags = preferences.get(case.id, ApplicationPreferences())
             result.append(ApplicationSummary(id=case.id, title=case.title, status=case.status,
                 authority=case.authority, updated_at=case.updated_at, submitted_at=case.submitted_at,
+                submission_number=case.submission_number, expires_at=case.expires_at,
                 unread_messages=unread(case, user), reviewer=ReviewerName(name=name) if name else None,
                 archived=flags.archived, pinned=flags.pinned))
         return ApplicationsResult(applications=result)
@@ -293,7 +346,7 @@ def create_router(cases, code):
         return saved
 
     @router.post('/cases/{case_id}/submit', response_model=Case)
-    def submit(case_id: str, request: Request):
+    def submit(case_id: str, request: Request, body: SubmitRequest | None = None):
         user = require_user(request)
 
         def apply(case):
@@ -303,16 +356,21 @@ def create_router(cases, code):
                 raise HTTPException(403, 'Reviewer accounts cannot submit applications')
             if case.status not in {'draft', 'returned'}:
                 raise HTTPException(409, 'Only draft or returned applications may be submitted')
-            blocking = [gap for gap in check_completeness(case, code()) if gap.severity == 'blocking']
+            if body and body.expected_version is not None and case.version != body.expected_version:
+                raise HTTPException(409, 'The saved application changed. Review it before submitting again.')
+            blocking = [gap for gap in check_completeness(case, code())
+                        if gap.severity == 'blocking' and gap.submission_blocking]
             if blocking:
                 raise HTTPException(409, {'message': 'Resolve blocking administrative gaps before submitting',
                                           'gaps': [gap.model_dump() for gap in blocking]})
             if not reviewing_authority(case.authority):
                 raise HTTPException(409, f'Choose {reviewing_authority_names()} as the reviewing authority before submitting')
-            transition(case, user, 'submitted', 'Submitted for administrative review')
-            case.submitted_at = now()
-            case.claim = case.decision = None
-            append_message(case, user, 'Submitted for administrative review.', kind='status')
+            at = now()
+            number = submit_round(case, cases(), at)
+            label = 'Resubmitted' if number > 1 else 'Submitted'
+            transition(case, user, 'submitted', f'{label} for administrative review · submission {number}')
+            case.submitted_at = at
+            append_message(case, user, f'{label} for administrative review. Submission {number}.', kind='status')
 
         return mutate(cases(), case_id, user, apply)[0]
 
@@ -331,10 +389,11 @@ def create_router(cases, code):
                 applicant=ApplicantSummary(name=applicant.name if applicant else 'Applicant',
                                            applicant_type=applicant.applicant_type if applicant else None),
                 authority=case.authority, status=case.status, submitted_at=case.submitted_at,
+                submission_number=case.submission_number, expires_at=case.expires_at,
                 updated_at=case.updated_at, claim=case.claim,
                 decision=DecisionSummary(**case.decision.model_dump()) if case.decision else None,
                 unread_messages=unread(case, user)))
-        return QueueResult(applications=result)
+        return QueueResult(applications=result, reviewer_id=user.id, authority=user.authority)
 
     @router.post('/review/{case_id}/claim', response_model=ClaimResult)
     def claim(case_id: str, request: Request, body: ClaimRequest | None = None):
@@ -354,6 +413,8 @@ def create_router(cases, code):
             else:
                 note = f'{user.name} claimed administrative review'
             if previous and previous.reviewer_id == user.id:
+                if case.status == 'submitted':
+                    transition(case, user, 'in_review', f'{user.name} resumed administrative review')
                 return previous
             case.claim = Claim(reviewer_id=user.id, reviewer_name=user.name)
             transition(case, user, 'in_review', note)
@@ -392,8 +453,10 @@ def create_router(cases, code):
                 raise HTTPException(409, 'Only the current reviewer may record a decision')
             if case.status != 'in_review':
                 raise HTTPException(409, 'Only an application in review may receive a decision')
+            if body.expected_version is not None and case.version != body.expected_version:
+                raise HTTPException(409, 'The application changed. Refresh it before recording a decision.')
             if body.outcome == 'accept':
-                # Same gate as submission and the official PDF: never accept with blocking gaps.
+                # Handoffs allowed at submission still block acceptance and the official PDF.
                 blocking = [gap for gap in check_completeness(case, code()) if gap.severity == 'blocking']
                 if blocking:
                     raise HTTPException(409, {'message': 'Resolve blocking administrative gaps before accepting',
@@ -402,10 +465,40 @@ def create_router(cases, code):
                              'refuse': ('refused', REFUSE_TEXT)}[body.outcome]
             message = (body.message or '').strip()
             text = label + ('\n\n' + message if message else '')
+            remember_decision(case)
             case.decision = Decision(outcome=body.outcome, by_id=user.id, by_name=user.name,
                                      message=text, items=body.items)
+            case.decision_history.append(case.decision.model_copy(deep=True))
+            if body.outcome == 'return':
+                case.return_snapshot = snapshot(case, case.decision.at)
             transition(case, user, status, label)
             append_message(case, user, text, kind='decision', items=body.items)
+
+        return mutate(cases(), case_id, user, apply)[0]
+
+    @router.post('/review/{case_id}/professional-requirement', response_model=Case)
+    def resolve_professional_requirement(case_id: str, body: ProfessionalRequirementRequest, request: Request):
+        user = reviewer(request)
+
+        def apply(case):
+            if case.owner_id == user.id:
+                raise HTTPException(404, 'case not found')
+            if not case.claim or case.claim.reviewer_id != user.id or case.status != 'in_review':
+                raise HTTPException(409, 'Only the current reviewer of an application in review may resolve this requirement')
+            if case.version != body.expected_version:
+                raise HTTPException(409, 'The application changed. Reload before recording the professional requirement.')
+            codes = code()
+            # Evaluate the underlying duties, independent of a previous officer determination.
+            screen = professional_involvement(case.model_copy(update={'professional_resolutions': []}), codes)
+            if (any(reason.source_unresolved for reason in screen.reasons)
+                    or not codes.provision('2.4.1.1.(4)', 'C')):
+                raise HTTPException(409, 'Resolve the professional source lookups before recording a determination')
+            if not body.required and (screen.required == 'yes'
+                                      or confirmed_value(case, 'engineering_required') in ('yes', True)):
+                raise HTTPException(409, 'A mandatory professional requirement cannot be waived through administrative review')
+            case.professional_resolutions.append(ProfessionalRequirementResolution(
+                required=body.required, scope=body.scope, basis=body.basis, reference=body.reference,
+                by_id=user.id, by_name=user.name or user.email, content_fingerprint=requirement_fingerprint(case)))
 
         return mutate(cases(), case_id, user, apply)[0]
 
@@ -413,28 +506,29 @@ def create_router(cases, code):
     def messages(case_id: str, request: Request):
         user = require_user(request)
         case = threaded(authorize_case(cases().get(case_id), user))
-        return MessagesResult(messages=[as_thread(message, user) for message in case.messages])
+        return MessagesResult(messages=[as_thread(message, user) for message in case.messages], decision=case.decision)
 
     @router.post('/cases/{case_id}/messages', response_model=ThreadMessage, status_code=201)
     def message(case_id: str, body: MessageRequest, request: Request):
         user = require_user(request)
-        _, saved = mutate(cases(), case_id, user, lambda case: post_message(case, user, body.body))
+        _, saved = communicate(cases(), case_id, user, lambda case: post_message(case, user, body.body))
         return as_thread(saved, user)
 
     @router.post('/cases/{case_id}/messages/read', status_code=204)
-    def read(case_id: str, request: Request):
+    def read(case_id: str, request: Request, body: MessageReadRequest | None = None):
         user = require_user(request)
+        displayed = set(body.message_ids) if body is not None and body.message_ids is not None else None
 
         def apply(case):
             threaded(case)
             changed = False
             for message in case.messages:
-                if user.id not in message.read_by:
+                if (displayed is None or message.id in displayed) and user.id not in message.read_by:
                     message.read_by.append(user.id)
                     changed = True
             return None if changed else UNCHANGED
 
-        mutate(cases(), case_id, user, apply)
+        communicate(cases(), case_id, user, apply)
         return Response(status_code=204)
 
     return router

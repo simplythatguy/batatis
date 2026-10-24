@@ -31,6 +31,17 @@ test("cut-offs: the historical benchmark bands are used; legacy relevance-1 plac
   assert.deepEqual(cutoffsOf(LEGACY_PLACEHOLDER), { rated: true, x: 0.3, y: 0.85, fallback: true });
 });
 
+test("cut-offs: the pinned Elephant relevance-3 payload stays an estimate; a zero score and an unscored article stay distinct", () => {
+  // engine/relevance.py scoring_bands() for any non-historical configuration, Elephant's included.
+  const ELEPHANT = { model: "relevance-3", bands: { x: 0, y: 1, status: "uncalibrated; display range only" } };
+  const c = cutoffsOf(ELEPHANT);
+  assert.deepEqual(c, UNRATED, "no relevance-1 benchmark (or any other) thresholds are borrowed");
+  assert.equal(bandFor(0, c), "estimate", "0 is a score, shown as an estimate");
+  assert.equal(bandFor(0.97, c), "estimate", "never 'likely applies' without fitted cut-offs");
+  assert.equal(bandFor(null, c), "unscored");
+  assert.equal(bandFor(undefined, c), "unscored");
+});
+
 test("cut-offs: uncalibrated, missing or malformed bands give no likely/unlikely rating, never the historical thresholds", () => {
   assert.deepEqual(cutoffsOf(UNCALIBRATED), UNRATED, "the exact backend payload");
   assert.deepEqual(cutoffsOf({ ...UNCALIBRATED, model: "relevance-1" }), UNRATED, "a relevance-1 run outside the benchmark configuration is uncalibrated too");

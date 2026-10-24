@@ -1,18 +1,21 @@
 import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from "react";
 import { SectionDRecoveryError } from "../api/sectionD";
 import {
+  engine,
   failureText,
   type EngineProcessField,
   type ProfessionalResult,
   type SectionDIssue,
   type SectionDPlan,
+  type StoredFile,
 } from "../api/client";
 import { ServiceUnavailable, FieldSteps } from "../components";
 import { practiceFlagLine, practicePrompt } from "../humanReview";
 import { evidenceDocuments, factFor, keptDocuments, orphanedEvidence, shownProcessAnswer } from "../model";
 import { AUTHORITY_DECISION_FIELDS, evidenceLinked, evidenceRecorded, isScopeField, practiceFromReview, SCOPE_HELP, sectionDIssueStatus } from "../professional";
 import { useCase } from "../store";
-import { evidenceTask } from "../evidence";
+import { evidenceBinding, evidenceTask } from "../evidence";
+import { EvidenceFileLink } from "../EvidenceFileLink";
 import type { Case, EvidenceDraft } from "../types";
 
 type Load = {
@@ -70,7 +73,7 @@ const PROFESSIONAL_FIELDS: { field: string; label: string; kind: ProfKind }[] = 
 ];
 
 function deferredChoice(c: Case, field: string): "" | "not_sure" | "not_engaged_yet" {
-  const fact = [...c.facts].reverse().find((item) => item.field === `professional.${field}` && item.status === "unconfirmed");
+  const fact = [...c.facts].reverse().find((item) => item.field === `professional.${field}`);
   return fact?.value === "not_sure" || fact?.value === "not_engaged_yet" ? fact.value : "";
 }
 
@@ -95,7 +98,7 @@ const EVIDENCE_TYPES = [
   "engineering review",
 ] as const;
 
-const EMPTY_DRAFT: EvidenceDraft = { document: "", responsible: "", date: "", evidenceType: "", note: "", step: 0 };
+const EMPTY_DRAFT: EvidenceDraft = { document: "", responsible: "", date: "", evidenceType: "", fileRef: undefined, note: "", step: 0 };
 const STEPS = 3;
 
 /** Saved details of one document, or the staged edit waiting for the engine. */
@@ -110,16 +113,34 @@ function documentDetails(c: Case, id: string) {
     evidenceType: staged?.evidenceType ?? saved("evidence_type"),
     responsible: staged && staged.responsible !== undefined ? staged.responsible ?? "" : saved("responsible_party"),
     date: staged && staged.date !== undefined ? staged.date ?? "" : saved("date"),
+    fileRef: staged?.fileRef !== undefined ? staged.fileRef : evidenceBinding(c.facts, id)?.fileId ?? null,
   };
 }
 
 /**
  * Add or edit one document in three short steps: name, type, optional details. Saving stages
- * one listing; it shows as saved only after the engine acknowledges it. Nothing here attaches
- * a file, reviews the document or confirms who prepared it.
+ * one versioned write, including the chosen uploaded PDF. Only an engine acknowledgement
+ * counts as saved. Attaching bytes never reviews the document or confirms who prepared it.
  */
 function EvidenceAnswer({ itemId, provisionId, types }: { itemId: string; provisionId: string; types: string[] }) {
-  const { c, dispatch, saveStatus, saveDraft } = useCase();
+  const { c, dispatch, saveStatus, saveDraft, engineId, uploadEvidenceFile } = useCase();
+  const [files, setFiles] = useState<StoredFile[]>([]);
+  const [filesNote, setFilesNote] = useState("");
+  const [fileBusy, setFileBusy] = useState(false);
+  const [inventoryRevision, setInventoryRevision] = useState(0);
+  const uploadInput = useRef<HTMLInputElement>(null);
+  const active = useRef(true);
+  useEffect(() => { active.current = true; return () => { active.current = false; }; }, []);
+  useEffect(() => {
+    if (!engineId) return;
+    const ctl = new AbortController();
+    setFiles([]);
+    setFilesNote("");
+    engine.files(engineId, ctl.signal).then(setFiles).catch((error) => {
+      if (!ctl.signal.aborted) setFilesNote(failureText(error));
+    });
+    return () => ctl.abort();
+  }, [engineId, inventoryRevision]);
   const draft = { ...EMPTY_DRAFT, ...c.evidenceDrafts?.[itemId] };
   const step = Math.min(Math.max(draft.step ?? 0, 0), STEPS - 1);
   const edit = (patch: Partial<EvidenceDraft>) => dispatch({ type: "editEvidenceDraft", itemId, patch });
@@ -144,8 +165,20 @@ function EvidenceAnswer({ itemId, provisionId, types }: { itemId: string; provis
     go(step + 1);
   }
   function save() {
+    if (fileBusy) return;
     moved.current = true;
-    dispatch({ type: "saveEvidence", itemId, document: draft.document, responsible: draft.responsible, date: draft.date, evidenceType: draft.evidenceType, provisionId, ...(draft.editing ? { slot: draft.editing } : {}) });
+    dispatch({ type: "saveEvidence", itemId, document: draft.document, responsible: draft.responsible, date: draft.date, evidenceType: draft.evidenceType, provisionId, fileRef: draft.fileRef, ...(draft.editing ? { slot: draft.editing } : {}) });
+  }
+  async function upload(file: File) {
+    setFileBusy(true);
+    setFilesNote("");
+    try {
+      const saved = await uploadEvidenceFile(file);
+      if (!active.current) return;
+      edit({ fileRef: saved.id, note: "PDF uploaded. Save the document to attach it." });
+      setInventoryRevision((n) => n + 1);
+    } catch (error) { if (active.current) setFilesNote(failureText(error)); }
+    finally { if (active.current) setFileBusy(false); }
   }
   const onEnter = (e: KeyboardEvent) => {
     if (e.key !== "Enter") return;
@@ -196,19 +229,36 @@ function EvidenceAnswer({ itemId, provisionId, types }: { itemId: string; provis
               <label htmlFor={`evidence-date-${itemId}`}>Date or revision (optional)</label>
               <input id={`evidence-date-${itemId}`} value={draft.date} onKeyDown={onEnter} onChange={(e) => edit({ date: e.target.value })} />
             </div>
-            <p className="field-note">This lists the document. It does not attach a file.</p>
+            <div className="field">
+              <label htmlFor={`evidence-file-${itemId}`}>Supporting PDF</label>
+              <select id={`evidence-file-${itemId}`} value={draft.fileRef ?? ""} disabled={fileBusy}
+                onChange={(e) => edit({ fileRef: e.target.value || null, note: "" })}>
+                <option value="">No file attached</option>
+                {draft.fileRef && !files.some((f) => f.id === draft.fileRef) && <option value={draft.fileRef}>Selected PDF</option>}
+                {files.map((file) => <option key={file.id} value={file.id}>{file.name}</option>)}
+              </select>
+              <input ref={uploadInput} type="file" accept="application/pdf,.pdf" hidden onChange={(e) => {
+                const file = e.target.files?.[0]; e.target.value = ""; if (file) void upload(file);
+              }} />
+              <div className="btn-row">
+                <button type="button" className="btn btn-xs" disabled={fileBusy} onClick={() => uploadInput.current?.click()}>{fileBusy ? "Uploading…" : draft.fileRef ? "Upload replacement PDF" : "Upload PDF"}</button>
+                {draft.fileRef && <button type="button" className="btn btn-xs" disabled={fileBusy} onClick={() => edit({ fileRef: null, note: "Save to remove this binding. The source PDF stays in this application." })}>Remove file binding</button>}
+              </div>
+              <p className="field-note">Choose a saved PDF or upload one. A document name alone is a listing.</p>
+              {filesNote && <p className="field-note" role="status">{filesNote} <button type="button" className="btn btn-xs" onClick={() => setInventoryRevision((n) => n + 1)}>Refresh files</button></p>}
+            </div>
           </>
         )}
         {draft.note && <p className="field-note doc-note" role="status">{draft.note}</p>}
         <div className="step-controls">
           {step > 0
-            ? <button type="button" className="btn btn-ghost" onClick={() => go(step - 1)}>Back</button>
+            ? <button type="button" className="btn btn-ghost" disabled={fileBusy} onClick={() => go(step - 1)}>Back</button>
             : draft.editing
               ? <button type="button" className="btn btn-ghost" onClick={() => edit({ ...EMPTY_DRAFT, editing: undefined })}>Cancel</button>
               : <span />}
           {step < STEPS - 1
             ? <button type="button" className="btn btn-primary" onClick={next}>Continue</button>
-            : <button type="button" className="btn btn-primary" onClick={save}>Save document</button>}
+            : <button type="button" className="btn btn-primary" disabled={fileBusy} onClick={save}>Save document</button>}
         </div>
       </div>
       {rows.length > 0 && (
@@ -220,9 +270,10 @@ function EvidenceAnswer({ itemId, provisionId, types }: { itemId: string; provis
               const title = details.document || saved.find((doc) => doc.id === id)?.title || id;
               const pendingRemoval = removing.has(id);
               const pendingSave = c.listedEvidence?.some((item) => item.id === id);
+              const binding = evidenceBinding(c.facts, id);
               const status = pendingRemoval ? (busy ? "Removing…" : "Not removed yet")
                 : pendingSave ? (busy ? "Saving…" : "Not saved yet")
-                : "Saved · listed, no file attached";
+                : binding ? "Saved · PDF attached" : "Saved · listed, no file attached";
               return (
                 <li key={id} className="doc-row">
                   <div className="doc-row-text">
@@ -231,11 +282,12 @@ function EvidenceAnswer({ itemId, provisionId, types }: { itemId: string; provis
                       <span className={`status-dot ${pendingRemoval || pendingSave ? (busy ? "pending" : "warning") : "done"}`} /><span>{status}</span>
                     </span>
                     {c.evidenceIssues?.[id] && <span className="field-note">{c.evidenceIssues[id]}</span>}
+                    {binding && engineId && <span className="meta">Source: {binding.name} · <EvidenceFileLink caseId={engineId} fileId={binding.fileId} name={binding.name} /></span>}
                   </div>
                   {!pendingRemoval && (
                     <div className="doc-row-actions">
-                      <button type="button" className="btn btn-xs" aria-label={`Edit ${title}`} onClick={() => go(0, { ...details, editing: id })}>Edit</button>
-                      <button type="button" className="btn btn-xs" aria-label={`Remove ${title}`} onClick={() => dispatch({ type: "removeEvidence", id })}>Remove</button>
+                      <button type="button" className="btn btn-xs" disabled={fileBusy} aria-label={`Edit ${title}`} onClick={() => go(0, { ...details, editing: id })}>Edit</button>
+                      <button type="button" className="btn btn-xs" disabled={fileBusy} aria-label={`Remove ${title}`} onClick={() => dispatch({ type: "removeEvidence", id })}>Remove listing</button>
                     </div>
                   )}
                 </li>
@@ -245,6 +297,11 @@ function EvidenceAnswer({ itemId, provisionId, types }: { itemId: string; provis
           {unsaved && saveStatus === "failed" && <button type="button" className="btn btn-xs" onClick={() => void saveDraft()}>Try saving again</button>}
         </div>
       )}
+      {engineId && files.length > 0 && <details className="compact-help">
+        <summary>Saved source PDFs ({files.length})</summary>
+        <p className="field-note">Removing or replacing a binding keeps these PDFs until the application is deleted or expires.</p>
+        <ul className="plain-list">{files.map((file) => <li key={file.id}>{file.name} · <EvidenceFileLink caseId={engineId} fileId={file.id} name={file.name} /></li>)}</ul>
+      </details>}
     </div>
   );
 }
@@ -282,7 +339,7 @@ function ProfessionalAnswers({ onEvidence }: { onEvidence: () => void }) {
           return (
             <div key={q.field} className={`field full ${value ? "" : "is-empty"}`}>
               <label className="sr-only" htmlFor="prof-role">{q.label}</label>
-              <details className="compact-help"><summary>Why we ask</summary><p>An engineer or architect must confirm their registration. Not sure keeps the official PDF on hold for officer review. A draft remains available.</p></details>
+              <details className="compact-help"><summary>Why we ask</summary><p>If a professional is required, provide their identity and authenticated work. Not sure or Not engaged yet leaves the requirement for the officer to determine. A draft remains available; mandatory duties still apply.</p></details>
               <select
                 id="prof-role"
                 value={value}
@@ -518,7 +575,7 @@ export function Recommendations() {
                 <details className="compact-help"><summary>Evidence types</summary><p>{issue.recommended_types.join(", ") || "None listed"}. These are suggestions, not test results.</p></details>
                 {issue.provision?.citation && <p className="mono meta">{issue.provision.citation}</p>}
                 </details>
-                <EvidenceAnswer itemId={issue.id} provisionId={issue.provision?.provision_id ?? ""} types={issue.recommended_types} />
+                <EvidenceAnswer key={issue.id} itemId={issue.id} provisionId={issue.provision?.provision_id ?? ""} types={issue.recommended_types} />
               </article>
             );
           })}
@@ -541,7 +598,7 @@ export function Recommendations() {
               <details className="compact-help"><summary>Evidence types</summary><p>{item.recommended_types.join(", ") || "None listed"}. These are suggestions, not test results.</p></details>
               {item.citation && <p className="mono meta">{item.citation}</p>}
               </details>
-              <EvidenceAnswer itemId={item.id} provisionId={item.provision_id} types={item.recommended_types} />
+              <EvidenceAnswer key={item.id} itemId={item.id} provisionId={item.provision_id} types={item.recommended_types} />
             </article>
           ))}
           {load.plan.notices.length > 0 && <details className="compact-help"><summary>Evidence notes</summary>{load.plan.notices.map((n) => (

@@ -1,4 +1,4 @@
-"""Atomic applicant text listings. Scope is an explicit ledger link, never a review."""
+"""Atomic applicant listings and owned-file bindings, never a professional review."""
 from __future__ import annotations
 
 from typing import Callable, Literal
@@ -37,6 +37,8 @@ class EvidenceWrite(BaseModel):
     responsible_party: str | None = None
     date: str | None = None
     issuer: str | None = None
+    # Omitted = retain; null = remove binding (bytes remain); id = owned uploaded PDF.
+    file_ref: str | None = Field(default=None, min_length=1)
     # Omitted = retain; explicit null = withdraw; object = explicit current re-link.
     scope: EvidenceScope | None = None
 
@@ -145,13 +147,18 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes]) -
         store = cases()
         case = _snapshot(store, case_id, body.expected_version)
         exists = _check_slot(case, body.evidence_id)
-        # Text input may never replace an attachment, including a fact-only legacy slot.
-        if any(doc.id == body.evidence_id for doc in supporting_documents(case)):
+        # Legacy text-only callers cannot silently convert an attached slot to text.
+        if 'file_ref' not in body.model_fields_set and any(doc.id == body.evidence_id for doc in supporting_documents(case)):
             raise HTTPException(422, 'use the attachment workflow for an attached document')
         if body.operation == 'create' and exists:
             raise HTTPException(409, 'evidence id already exists')
         if body.operation == 'update' and not exists:
             raise HTTPException(404, 'evidence not found')
+        uploaded = None
+        if body.file_ref is not None:
+            uploaded = store.get_file(case_id, body.file_ref)
+            if uploaded is None:
+                raise HTTPException(422, 'Attach an uploaded file from this application before confirming the document.')
         prefix = f'evidence.{body.evidence_id}.'
         item = next((entry for entry in case.evidence if entry.id == body.evidence_id), None)
         if item is None:
@@ -175,6 +182,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes]) -
                 for name, value in (('item_id', target.id), ('provision_id', target.provision_id),
                                     ('objective', target.objective), ('function', target.function)):
                     case.facts.append(_text_fact(body.evidence_id, name, value))
+                case.facts.append(_text_fact(body.evidence_id, 'covers.' + target.id, True))
         elif body.operation == 'create':
             item.objective = item.function = None
         # New stable IDs and metadata-only edits cannot acquire implicit plan coverage.
@@ -182,7 +190,15 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes]) -
         case.facts.append(Fact(field=prefix + 'auto_link', value=False, kind='computed', status='confirmed',
             source=Source(type='user_click', ref=f'applicant-evidence:{body.evidence_id}'),
             formula='Document scope requires an explicit current item link; identity alone supplies no scope'))
-        saved = _commit(store, case, body.expected_version)
+        if 'file_ref' in body.model_fields_set:
+            # Keep prior binding revisions as provenance. Only the latest is active; removing
+            # or replacing it never deletes source bytes or another document's binding.
+            case.facts.append(Fact(field=prefix + 'file_ref', value=body.file_ref, kind='pointed',
+                status='confirmed' if uploaded else 'unconfirmed',
+                source=Source(type='file' if uploaded else 'user_click',
+                              ref=body.file_ref if uploaded else f'applicant-evidence:{body.evidence_id}',
+                              quote=uploaded['name'] if uploaded else None)))
+        saved = _commit(store, Case.model_validate(case.model_dump()), body.expected_version)
         actual = next(entry for entry in saved.evidence if entry.id == body.evidence_id)
         return EvidenceSaved(evidence=actual, case=saved, case_version=saved.version)
 

@@ -5,6 +5,7 @@
  */
 import { EngineError } from "./client";
 import { credentialsMode } from "./engineAuth";
+import { accountRequestSignal } from "./requestLifetime";
 
 export type Division = "A" | "B" | "C";
 
@@ -105,7 +106,8 @@ function plain(status: number, raw: string, path: string): string {
   return raw || `Request failed (${status}).`;
 }
 
-async function call<T>(method: "GET" | "POST", path: string, signal?: AbortSignal, ms = 15000): Promise<T> {
+async function call<T>(method: "GET" | "POST", path: string, parent?: AbortSignal, ms = 15000): Promise<T> {
+  const signal = accountRequestSignal(parent);
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), ms);
   const onAbort = () => ctl.abort();

@@ -95,7 +95,7 @@ export function officerProfessionalLines(
     return [
       professionalConfirmed(facts)
         ? "Practice of engineering is indicated. A registered professional is named on this application."
-        : "Practice of engineering is indicated. The registered professional is not confirmed. This item is routed to the officer until an engineer or architect confirms a seal or registration number.",
+        : "Practice of engineering is indicated. The required registered professional is not confirmed. Provide their identity, registration or seal, and authenticated work; an engagement answer does not waive that duty.",
     ];
   }
   if (practice === false) return ["Practice of engineering was not indicated."];
@@ -107,7 +107,7 @@ export function professionalFlagLines(c: Pick<Case, "practiceOfEngineering" | "f
     return [
       professionalConfirmed(c.facts)
         ? "Practice of engineering is indicated. A registered professional is named on this application."
-        : "Practice of engineering is indicated. The registered professional is not confirmed. This item is routed to the officer until an engineer or architect confirms a seal or registration number.",
+        : "Practice of engineering is indicated. The required registered professional is not confirmed. Provide their identity, registration or seal, and authenticated work; an engagement answer does not waive that duty.",
     ];
   }
   if (c.practiceOfEngineering === false) return ["Practice of engineering was not indicated."];
@@ -115,17 +115,37 @@ export function professionalFlagLines(c: Pick<Case, "practiceOfEngineering" | "f
   return ["Practice of engineering has not been screened on this application."];
 }
 
-const PROFESSIONAL_HOLD = /responsible_professional|professional_authentication|professional_qualifications|professional_requirement|professional\.role|needs-professional|professional-not-engaged/;
+type ProfessionalGap = { id: string; field?: string };
+const PROFESSIONAL_HOLD = /responsible_professional|professional_confirmation|professional_authentication|professional_qualifications|professional_requirement|professional_source|professional\.role|needs-professional|professional-not-engaged/;
 
 /** A professional blocker the applicant cannot clear by inventing a seal. */
 export function isProfessionalHold(gap: { id: string; field?: string }): boolean {
   return PROFESSIONAL_HOLD.test(gap.id) || PROFESSIONAL_HOLD.test(gap.field ?? "");
 }
 
+/** Requirement determination is distinct from a known duty's missing credentials or work. */
+export function professionalHoldKind(gaps: ProfessionalGap[]): "source" | "requirement" | "confirmation" | null {
+  if (gaps.some(g => /professional_source|professional:source_lookup/.test(`${g.id} ${g.field ?? ""}`))) return "source";
+  if (gaps.some(g => /professional_confirmation|responsible_professional|professional_authentication|professional_qualifications|needs-professional/.test(`${g.id} ${g.field ?? ""}`))) return "confirmation";
+  if (gaps.some(g => /professional_requirement|practice-unknown|professional-not-engaged/.test(`${g.id} ${g.field ?? ""}`))) return "requirement";
+  return gaps.some(isProfessionalHold) ? "confirmation" : null;
+}
+
+export function professionalHoldReason(gaps: ProfessionalGap[]): string | null {
+  const kind = professionalHoldKind(gaps);
+  if (kind === "requirement") return "Waiting for the officer to determine whether a registered professional is required.";
+  if (kind === "source") return "Waiting for the professional requirement’s source references to be resolved.";
+  if (kind === "confirmation") return "Waiting for the required professional’s information or authenticated work.";
+  return null;
+}
+
 /** What to do while the official PDF stays closed for a missing engineer or architect. */
 export function professionalRouteNote(gaps: { id: string; field?: string }[]): string | null {
-  if (!gaps.some(isProfessionalHold)) return null;
-  return "This professional item is routed to the officer. Name an engineer or architect and their seal or registration number, or choose Not sure or Not engaged yet. That does not open the official PDF. Download a draft PDF, or open Officer review and copy the request. Do not invent a number.";
+  const kind = professionalHoldKind(gaps);
+  if (kind === "requirement") return "The unresolved professional requirement is routed to the officer. The officer determines whether one is required for this scope; no professional confirmation is being asserted. That does not open the official PDF or administrative acceptance. Submit the question with your application when the other required items are complete. A draft PDF remains available. Do not invent a number.";
+  if (kind === "source") return "The professional requirement’s source references need review before the requirement can be determined. Submission, acceptance and the official PDF wait for those references. A draft PDF remains available.";
+  if (kind === "confirmation") return "A professional is required for this scope. Provide their identity, registration or seal, and the required authenticated work before submission, administrative acceptance or the official PDF. Not sure and Not engaged yet do not waive that duty. A draft PDF remains available. Do not invent a number.";
+  return null;
 }
 
 /** Keep the missing item, and say it goes to the officer with a next step. */
@@ -155,7 +175,7 @@ export function practicePrompt(
   }
   if (value === true) {
     return {
-      lead: "This item is routed to the officer. Name the registered professional and their seal or registration number, or choose Not sure or Not engaged yet. That does not clear it. This screen does not state their engineering judgment.",
+      lead: "A registered professional is required for this scope. Name the registered professional and their seal or registration number, and supply the required authenticated work. Not sure or Not engaged yet does not waive the duty. This screen does not state their engineering judgment.",
       question: null,
     };
   }

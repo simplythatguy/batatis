@@ -1,0 +1,12 @@
+{
+  "_note": "EXAMPLE DATA. A completed version of demo case C (homebuilder, bedroom window W-07) for the G3 export gate. Every person, firm, address, document and process passage is fictional. The separate professional_requirement_resolution is a fictional officer scope determination for this layout fixture, not an applicant answer or a real authority decision. No test result, professional opinion or finding about the design is asserted. Loaded by engine/export/demo_cases.py.",
+  "c-homebuilder-infill-house": {
+    "required": false,
+    "scope": "EXAMPLE DATA: bedroom 3 window W-07 and the submitted opening-control alternative only.",
+    "basis": "EXAMPLE DATA: fictional officer determined no registered professional is required for this scope.",
+    "reference": "EXAMPLE DATA: G3 synthetic authority scope record; not an authority decision.",
+    "by_id": "synthetic-g3-officer",
+    "by_name": "EXAMPLE DATA fictional officer",
+    "at": "2026-10-22T00:00:00Z"
+  }
+}

@@ -42,8 +42,8 @@ export function useBegin() {
 
 /** The account's row for the open case (status, authority, reviewer), or null without one. */
 export function useCurrentApplication(): { app: ApplicationSummary | null; locked: boolean } {
-  const { engineId } = useCase();
+  const { engineId, applicationStatus, submissionDispatched } = useCase();
   const account = useAccount();
   const app = (engineId && account.applications?.find((a) => a.id === engineId)) || null;
-  return { app, locked: readOnly(app?.status) };
+  return { app, locked: submissionDispatched || readOnly(app?.status ?? applicationStatus) };
 }

@@ -5,7 +5,6 @@ The accompanying private replay uses the actual read-only CodeDB and SCC exporte
 """
 import pytest
 
-from engine.professional import NOT_ENGAGED_ITEM
 from engine.tests.case_builder_fixtures import fact
 from engine.tests.test_professional_export_gate import package  # noqa: F401 - shared fixture
 from engine.tests.test_professional_review_regressions import _cleared
@@ -15,7 +14,7 @@ from engine.tests.test_professional_source_failclosed import _OFFICER, _client, 
 @pytest.mark.parametrize('division,provision_id', [('B', '9.15.3.3.(2)'), ('C', '2.4.1.2.(1)')])
 @pytest.mark.parametrize('failure', ['record', 'blank', 'whitespace'])
 @pytest.mark.parametrize('ahj_requires', [False, True], ids=['source-duty', 'independent-ahj-duty'])
-def test_not_engaged_keeps_source_blocker_and_identity_warning(
+def test_not_engaged_keeps_source_blocker_and_mandatory_identity_requirements(
         package, tmp_path, division, provision_id, failure, ahj_requires):
     case, codes = package
     _cleared(case)
@@ -31,11 +30,12 @@ def test_not_engaged_keeps_source_blocker_and_identity_warning(
     gaps = response.json()['items']
     assert any(g['field'] == 'professional_source' and g['severity'] == 'blocking'
                and provision_id in g['message'] for g in gaps)
-    warnings = [g for g in gaps if g['id'] == 'professional:not_engaged']
-    assert len(warnings) == 1
-    assert warnings[0]['severity'] == 'warning' and warnings[0]['message'] == NOT_ENGAGED_ITEM
-    assert not {'professional_confirmation', 'responsible_professional', 'professional_qualifications',
-                'professional_authentication'} & {g['field'] for g in gaps}
+    assert not any(g['id'] == 'professional:not_engaged' for g in gaps)
+    if ahj_requires:
+        assert {'professional_confirmation', 'responsible_professional', 'professional_qualifications',
+                'professional_authentication'} <= {g['field'] for g in gaps}
+    else:
+        assert any(g['field'] == 'professional_requirement' and g['severity'] == 'blocking' for g in gaps)
 
     response = client.post(f'/cases/{case.id}/export', json={'draft': False})
     assert response.status_code == 409, response.text[:300]

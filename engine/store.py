@@ -12,17 +12,17 @@ import uuid
 from contextlib import closing
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Protocol
+from typing import Callable, Protocol
 
 from .models import Case, Fact, now
 from .uploads import PDF_MAX_BYTES, PDF_TOO_LARGE_DETAIL
-from .account_store import FileAccountsMixin, _DB
+from .account_store import FileAccountsMixin, _DB, preserve_messages
 from .account_models import ApplicationPreferences, User
 from .access import enforce_mutation, enforce_stored_mutation, enforce_read
 from .identify.title import normalize_title
+from .case_retention import RETENTION_DAYS
 
 DEFAULT_PATH = Path.home() / '.batatis' / 'cases.sqlite'
-RETENTION_DAYS = 7
 
 
 class VersionConflict(Exception):
@@ -83,6 +83,7 @@ class CaseBackend(Protocol):
     def get_snapshot(self, case_id: str) -> tuple[Case, int] | None: ...
     def get_version(self, case_id: str) -> int | None: ...
     def put(self, case: Case, *, expected_version: int | None = None) -> Case: ...
+    def mutate_messages(self, case_id: str, user: User, operation: Callable[[Case], object]) -> tuple[Case, object] | None: ...
     def add_fact(self, case_id: str, fact: Fact) -> Case | None: ...
     def rename_title(self, case_id: str, title: str) -> Case | None: ...
     def list_application_preferences(self, user_id: str) -> dict[str, ApplicationPreferences]: ...
@@ -91,6 +92,7 @@ class CaseBackend(Protocol):
     def remove_evidence(self, case_id: str, evidence_id: str) -> Case | None: ...
     def put_file(self, case_id: str, name: str, data: bytes, content_type: str = 'application/pdf') -> dict | None: ...
     def get_file(self, case_id: str, file_id: str) -> dict | None: ...
+    def list_files(self, case_id: str) -> list[dict] | None: ...
     def delete(self, case_id: str) -> bool: ...
     def purge_expired(self) -> int: ...
 
@@ -158,14 +160,16 @@ class CaseStore(FileAccountsMixin):
 
     def put(self, case: Case, *, expected_version: int | None = None) -> Case:
         case.updated_at = now()
-        payload = case.model_dump_json(exclude={'version'})
         conflict = None
         with closing(self._connect()) as con, con:
             if expected_version is None:
+                # Reserve before reading the thread: communication leaves version unchanged.
                 con.execute('BEGIN IMMEDIATE')
                 previous = con.execute('SELECT json FROM cases WHERE id=?', (case.id,)).fetchone()
                 if previous:
                     enforce_stored_mutation(previous[0])
+                    preserve_messages(case, previous[0])
+                payload = case.model_dump_json(exclude={'version'})
                 row = con.execute('INSERT INTO cases (id, json, updated_at, version) VALUES (?,?,?,1) '
                                   'ON CONFLICT(id) DO UPDATE SET json=excluded.json, updated_at=excluded.updated_at, '
                                   'version=cases.version+1 RETURNING version',
@@ -173,6 +177,7 @@ class CaseStore(FileAccountsMixin):
                 case.version = int(row[0])
                 return case
             if expected_version == 0:
+                payload = case.model_dump_json(exclude={'version'})
                 try:
                     con.execute('INSERT INTO cases (id, json, updated_at, version) VALUES (?,?,?,1)',
                                 (case.id, payload, case.updated_at))
@@ -188,6 +193,8 @@ class CaseStore(FileAccountsMixin):
             previous = con.execute('SELECT json FROM cases WHERE id=?', (case.id,)).fetchone()
             if previous:
                 enforce_stored_mutation(previous[0])
+                preserve_messages(case, previous[0])
+            payload = case.model_dump_json(exclude={'version'})
             row = con.execute('UPDATE cases SET json=?, updated_at=?, version=version+1 '
                               'WHERE id=? AND version=? RETURNING version',
                               (payload, case.updated_at, case.id, expected_version)).fetchone()
@@ -358,9 +365,25 @@ class CaseStore(FileAccountsMixin):
     def get_file(self, case_id: str, file_id: str) -> dict | None:
         with closing(self._connect()) as con, con:
             self._purge_expired(con, case_id)
+            case = con.execute('SELECT json FROM cases WHERE id=?', (case_id,)).fetchone()
+            if case is None:
+                return None
+            enforce_read(Case.model_validate_json(case[0]))
             row = con.execute('SELECT name, content_type, size, data FROM case_files WHERE id=? AND case_id=?',
                               (file_id, case_id)).fetchone()
         if row is None:
             return None
         return {'id': file_id, 'case_id': case_id, 'name': row[0], 'content_type': row[1],
                 'size': row[2], 'data': row[3]}
+
+    def list_files(self, case_id: str) -> list[dict] | None:
+        """Owned upload inventory, including sources whose evidence binding was removed."""
+        with closing(self._connect()) as con, con:
+            self._purge_expired(con, case_id)
+            case = con.execute('SELECT json FROM cases WHERE id=?', (case_id,)).fetchone()
+            if case is None:
+                return None
+            enforce_read(Case.model_validate_json(case[0]))
+            rows = con.execute('SELECT id, name, content_type, size FROM case_files WHERE case_id=? '
+                               'ORDER BY created_at, id', (case_id,)).fetchall()
+        return [dict(zip(('id', 'name', 'content_type', 'size'), row)) for row in rows]

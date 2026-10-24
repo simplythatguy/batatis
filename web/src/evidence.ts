@@ -2,6 +2,16 @@ import type { Case } from "./types";
 
 type EvidenceContext = { provision_id?: string; provision?: { provision_id: string } | null; function?: string | null; objective?: string | null };
 
+type BindingFact = { field: string; value: unknown; status?: string; kind: string; source: { type: string; ref: string; quote?: string | null } };
+
+/** Latest confirmed file-source binding only. A title or copied text id supplies no link. */
+export function evidenceBinding(facts: readonly BindingFact[], id: string): { fileId: string; name: string } | null {
+  const fact = [...facts].reverse().find((f) => f.field === `evidence.${id}.file_ref`);
+  if (!fact || fact.status !== "confirmed" || fact.kind === "proposed" || fact.source.type !== "file"
+    || !fact.source.ref.trim() || fact.value !== fact.source.ref) return null;
+  return { fileId: fact.source.ref, name: fact.source.quote || fact.source.ref };
+}
+
 /** Compact choices retain sentence, function and objective identity. Full source
  * wording stays in the guidance; these labels are navigation, not code quotations. */
 export function evidenceTask(c: Case, item: EvidenceContext): string {

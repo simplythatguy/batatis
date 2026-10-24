@@ -71,7 +71,7 @@ def test_applicant_confirmation_closes_only_the_identity_gap_and_withdrawal_reop
     assert any('professional_confirmation' in reason for reason in blockers(case, load_field_map(), codes))
 
 
-def test_draft_and_explicit_not_engaged_path_keep_their_existing_behavior(package, monkeypatch):
+def test_draft_remains_available_but_not_engaged_never_waives_a_professional_gate(package, monkeypatch):
     from engine.export.scc import FormNotFound
 
     case, codes = package
@@ -84,4 +84,6 @@ def test_draft_and_explicit_not_engaged_path_keep_their_existing_behavior(packag
     with pytest.raises(ExportBlocked):
         export_case(case, draft=False, codes=codes)
     case.facts.append(fact('professional_status', 'not_engaged'))
-    assert blockers(case, load_field_map(), codes) == []
+    assert any('professional_confirmation' in reason for reason in blockers(case, load_field_map(), codes))
+    with pytest.raises(ExportBlocked):
+        export_case(case, draft=False, codes=codes)

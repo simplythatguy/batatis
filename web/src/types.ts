@@ -145,8 +145,8 @@ export type ProcessFieldId =
   | "maintenance"
   | "qualifications";
 
-/** Empty until the applicant picks. PUT /cases/{id}/jurisdiction records the choice. */
-export type AuthorityId = "" | "calgary" | "edmonton";
+/** Empty until chosen. Saved API authorities remain portable beyond the current picker options. */
+export type AuthorityId = string;
 
 export type GapSeverity = "blocking" | "warning";
 
@@ -158,10 +158,12 @@ export interface Gap {
   href: string;
   /** Engine or local field, used to drop a second copy of the same item. */
   field?: string;
+  /** False only when the current completeness check explicitly permits an officer handoff. */
+  submissionBlocking?: boolean;
 }
 
 /**
- * One staged listing write for POST /cases/{id}/evidence. Text only, never a file reference.
+ * One staged write for POST /cases/{id}/evidence, optionally binding a verified owned upload.
  * It stays staged until the engine acknowledges this exact `rev`; only then is it shown as saved.
  * `responsible`/`date`: a string is sent, null withdraws a saved value, undefined is omitted.
  */
@@ -177,6 +179,7 @@ export interface ListedEvidence {
   description: string;
   responsible?: string | null;
   date?: string | null;
+  fileRef?: string | null;
 }
 
 /** One document editor: three short steps (name, type, optional details). */
@@ -189,6 +192,8 @@ export interface EvidenceDraft {
   step?: number;
   /** Slot being edited; absent for a new document. */
   editing?: string;
+  /** Undefined retains a saved binding; null explicitly removes it. */
+  fileRef?: string | null;
 }
 
 export type ApplicantType = "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner";

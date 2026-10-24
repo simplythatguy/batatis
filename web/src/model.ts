@@ -1,11 +1,12 @@
 import type { IntakeRecord, IntakeResult, IdentifyResult } from "./api/types.gen";
 import { AUTHORITIES } from "./config";
 import { applyDescription } from "./intake";
-import { asLocal } from "./intakeFields";
+import { asLocal, confirmedAnswer, localField } from "./intakeFields";
 import { codeQuestion, identifyCandidates, readGroups } from "./intakeView";
 import { AUTHORITY_ONLY_FIELDS, professionalConfirmed } from "./professional";
 import type { Candidate, CandidateAnswer, Case, EvidenceDraft, Fact, Gap, ListedEvidence, ProcessFieldId, SectionCRow } from "./types";
-import { canonicalProvision, isProvision, reconcileSectionC } from "./provisions";
+import { canonicalProvision, isProvision, keywordCandidate, reconcileSectionC } from "./provisions";
+import { evidenceBinding } from "./evidence";
 
 /** Section A and B fields. Values live only in `case.facts`; nothing here holds a default. */
 export interface DetailField {
@@ -240,7 +241,7 @@ export function gapLabel(message: string, hint?: string | null): string {
 
 /** Newest fact for a field. Matches the engine, where the latest entry wins. */
 export const factFor = (c: Case, field: string): Fact | undefined => {
-  for (let i = c.facts.length - 1; i >= 0; i--) if (c.facts[i].field === field) return c.facts[i];
+  for (let i = c.facts.length - 1; i >= 0; i--) if (localField(c.facts[i].field) === localField(field)) return c.facts[i];
   return undefined;
 };
 
@@ -254,6 +255,7 @@ export function displayValue(f: Fact): string {
   const text = valueText(f);
   if (f.field === "professional.occupancy" || f.field.endsWith(".occupancy")) return OCCUPANCY_LABELS[text] ?? text;
   if (text === "not_sure") return "Not sure";
+  if (text === "not_engaged") return "Not engaged yet";
   if (text === "not_engaged_yet") return "Not engaged yet";
   if (text === "true") return "Yes";
   if (text === "false") return "No";
@@ -309,6 +311,13 @@ export function answeredByDescription(c: Pick<Case, "description">, questionId: 
   return ANSWERED_BY_DESCRIPTION.has(questionId) && Boolean(c.description.trim());
 }
 
+/** A question about a field can reuse an explicit answer, never a candidate's technical uncertainty. */
+export function questionAnsweredByFact(c: Case, q: Case["questions"][number]): boolean {
+  return !q.cardId && q.kind !== "article" && !q.id.startsWith("q-from-")
+    && q.field !== "project.description"
+    && Boolean(confirmedAnswer(c.facts, q.field));
+}
+
 export function getGaps(c: Case): Gap[] {
   const gaps: Gap[] = [];
   const redirect = c.facts.find((f) => f.field === "scope.redirect" && f.status === "unconfirmed");
@@ -349,10 +358,12 @@ export function getGaps(c: Case): Gap[] {
     });
   }
   for (const a of c.candidates) {
-    if (isProvision(a.provision) && !c.sectionC.some(r => canonicalProvision(r.provision) === canonicalProvision(a.provision))) {
+    if (a.id === "desc-storeys" && confirmedAnswer(c.facts, "storeys")) continue;
+    const keywordLead = keywordCandidate(c, a) && a.answer !== "yes";
+    if (!keywordLead && isProvision(a.provision) && !c.sectionC.some(r => canonicalProvision(r.provision) === canonicalProvision(a.provision))) {
       gaps.push({ id: `lookup-${a.id}`, severity: "blocking", label: `Rule ${a.provision} is still loading from the code`, href: "#/section-c", field: `candidate.${a.id}` });
     }
-    if (a.answer === null) {
+    if (a.answer === null && !keywordLead) {
       gaps.push({
         id: `answer-${a.id}`,
         severity: "blocking",
@@ -361,6 +372,9 @@ export function getGaps(c: Case): Gap[] {
         field: `candidate.${a.id}`,
       });
     }
+  }
+  if (c.candidates.some((a) => keywordCandidate(c, a) && a.answer === null)) {
+    gaps.push({ id: "keyword-triage", severity: "warning", label: "Keyword matches are unconfirmed leads. Review them by topic, or choose a code reference yourself.", href: "#/questions?focus=code-triage", field: "identify.keyword_triage" });
   }
   for (const p of PROCESS_FIELDS) {
     if (!c.process[p.id].trim()) {
@@ -374,17 +388,18 @@ export function getGaps(c: Case): Gap[] {
     }
   }
   for (const q of c.questions) {
-    if (q.id.startsWith("q-prof-") || answeredByDescription(c, q.id)) continue;
+    if (q.id.startsWith("q-prof-") || answeredByDescription(c, q.id) || questionAnsweredByFact(c, q)) continue;
     if (!q.answer) {
       const article = q.kind === "article" || q.id.startsWith("q-from-") || q.id.startsWith("oq_") || Boolean(q.cardId);
       const intake = q.kind === "intake" || q.id.startsWith("q-identify-");
       const scope = q.id.startsWith("q-scope-");
       const routed = article || intake || scope;
       const card = q.cardId || (q.id.startsWith("q-from-") ? q.id.slice("q-from-".length) : "");
+      const uncertain = card ? c.candidates.find((a) => a.id === card && a.answer === "not-sure") : undefined;
       gaps.push({
         id: `question-${q.id}`,
         severity: "warning",
-        label: routed ? `Open question: ${q.text}` : `Open question: ${factLabel(q.field).toLowerCase()}`,
+        label: uncertain ? `Open question for the officer: ${uncertain.topic}${isProvision(uncertain.provision) ? ` (${uncertain.provision})` : ""}. ${q.text}` : routed ? `Open question: ${q.text}` : `Open question: ${factLabel(q.field).toLowerCase()}`,
         href: card
           ? `#/code-check?focus=cand-${card}`
           : scope
@@ -399,7 +414,7 @@ export function getGaps(c: Case): Gap[] {
       id: "needs-professional",
       severity: "blocking",
       label:
-        "Registered professional not confirmed. Routed to the officer. Name an engineer or architect and their seal or registration number.",
+        "A registered professional is required and is not confirmed. Name the engineer or architect and their seal or registration number.",
       href: "#/application?tab=D&focus=prof-role",
       field: "professional.role",
     });
@@ -417,7 +432,9 @@ export function getGaps(c: Case): Gap[] {
     gaps.push({
       id: "professional-not-engaged",
       severity: "blocking",
-      label: "Registered professional not confirmed. Not sure and not engaged yet are routed to the officer. Official export stays blocked.",
+      label: c.practiceOfEngineering === true
+        ? "The required professional is not confirmed. Not sure or Not engaged yet does not waive that duty."
+        : "The professional requirement is for the officer to determine. Official export waits for that determination.",
       href: "#/application?tab=D&focus=prof-role",
       field: "professional.role",
     });
@@ -449,6 +466,8 @@ export type Action =
   | { type: "noteIntake"; result: IntakeResult; text: string }
   /** Derived: a saved case reopened; its stored intake run without adding facts (the case has its latest). */
   | { type: "restoreIntake"; result: IntakeResult; text: string }
+  /** Derived: officer requests change without an applicant fact edit. */
+  | { type: "restoreReviewQuestions"; questions: Case["questions"] }
   /** Derived: a newer intake record (plan after an answer, an override or code identification). */
   | { type: "noteIntakeRecord"; record: IntakeRecord }
   /** Derived: facts the engine wrote on an intake route (answers, scope), adopted as saved. */
@@ -478,7 +497,7 @@ export type Action =
   | { type: "removeCandidate"; id: string }
   | { type: "editEvidenceDraft"; itemId: string; patch: Partial<EvidenceDraft> }
   /** `slot` edits that saved document; without it a new document is staged. */
-  | { type: "saveEvidence"; itemId: string; document: string; responsible: string; date: string; evidenceType: string; provisionId: string; slot?: string }
+  | { type: "saveEvidence"; itemId: string; document: string; responsible: string; date: string; evidenceType: string; provisionId: string; slot?: string; fileRef?: string | null }
   | { type: "removeEvidence"; id: string }
   /**
    * The engine's answer to evidence writes. `facts` replaces the browser's evidence mirror.
@@ -549,7 +568,7 @@ function restoreDraft(c: Case, op: ListedEvidence, note: string, editing?: strin
   if (current && (current.document.trim() || current.responsible.trim() || current.date.trim())) {
     return { ...c, evidenceIssues: { ...c.evidenceIssues, [op.id]: `${note} Not saved: ${op.description}` } };
   }
-  const draft: EvidenceDraft = { document: op.description, evidenceType: op.evidenceType, responsible: op.responsible ?? "", date: op.date ?? "", note, step: 0, ...(editing ? { editing } : {}) };
+  const draft: EvidenceDraft = { document: op.description, evidenceType: op.evidenceType, responsible: op.responsible ?? "", date: op.date ?? "", fileRef: op.fileRef, note, step: 0, ...(editing ? { editing } : {}) };
   return { ...c, evidenceDrafts: { ...c.evidenceDrafts, [op.taskId]: draft } };
 }
 
@@ -599,7 +618,8 @@ function applyAck(c: Case, a: Extract<Action, { type: "ackEvidence" }>): Case {
       if (op.operation === "create" && saved.has(op.id)) {
         const same = value(op.id, "title") === op.description && value(op.id, "evidence_type") === op.evidenceType
           && (op.responsible == null || value(op.id, "responsible_party") === op.responsible)
-          && (op.date == null || value(op.id, "date") === op.date);
+          && (op.date == null || value(op.id, "date") === op.date)
+          && (op.fileRef === undefined || (evidenceBinding(next.facts, op.id)?.fileId ?? null) === op.fileRef);
         const rest = (next.listedEvidence ?? []).filter((item) => item !== op);
         next = same ? { ...next, listedEvidence: rest }
           : { ...next, listedEvidence: [...rest, { ...op, id: nextSlot({ ...next, listedEvidence: rest }, op.taskId) }] };
@@ -676,13 +696,19 @@ export function reducer(c: Case, a: Action): Case {
         const f = asLocal(raw) as Fact;
         if (facts.some((x) => x.id === f.id)) continue;
         // The same value already confirmed under the browser's name is not asked twice: it is confirmed again.
-        const confirmedBefore = facts.some((x) => x.field === f.field && x.status === "confirmed" && x.value != null && String(x.value).trim() === String(f.value ?? "").trim());
+        const previousAnswer = confirmedAnswer(facts, f.field);
+        const confirmedBefore = previousAnswer && String(previousAnswer.value).trim() === String(f.value ?? "").trim();
         facts = [...facts, confirmedBefore && f.field !== "scope.redirect" ? confirmedCopy(f) : f];
       }
       return { ...c, facts, intake: { text: a.text, record: a.result.record, factIds: a.result.facts.map((f) => f.id), facts: a.result.facts.map((f) => asLocal(f) as Fact) } };
     }
     case "restoreIntake":
       return { ...c, intake: { text: a.text, record: a.result.record, factIds: a.result.facts.map((f) => f.id), facts: a.result.facts.map((f) => asLocal(f) as Fact) } };
+    case "restoreReviewQuestions": {
+      const questions = [...c.questions.filter(q => !q.field.startsWith("clarification.")),
+        ...a.questions.filter(q => q.field.startsWith("clarification."))];
+      return JSON.stringify(questions) === JSON.stringify(c.questions) ? c : { ...c, questions };
+    }
     case "noteIntakeRecord":
       return c.intake ? { ...c, intake: { ...c.intake, record: a.record } } : c;
     case "adoptFacts": {
@@ -697,7 +723,7 @@ export function reducer(c: Case, a: Action): Case {
       const decidedYes = new Set(made.filter((m) => m.answer === "yes").map((m) => articleOf(m.provision)));
       // The rest of the ranking stays in the code library.
       const rest = c.candidates.filter((x) => x.suggestion !== "identify" && !(x.id.startsWith("search-") && decidedYes.has(articleOf(x.provision))));
-      const candidates = [...rest, ...made];
+      const candidates = [...rest, ...made.filter((m) => !rest.some((x) => canonicalProvision(x.provision) === canonicalProvision(m.provision)))];
       return {
         ...c,
         identify: a.result,
@@ -721,8 +747,8 @@ export function reducer(c: Case, a: Action): Case {
     case "setStoreyCount": {
       const value = a.value.trim();
       const known = value !== "" && Number.isInteger(Number(value)) && Number(value) > 0;
-      const facts = c.facts.filter(f => f.field !== "building.storeys");
-      if (known) facts.push({ id: newId("f"), field: "building.storeys", value: Number(value), kind: "pointed", status: "confirmed", source: { type: "user_text", ref: "Your storey count", quote: value } });
+      const facts = c.facts.filter(f => localField(f.field) !== "storeys");
+      if (known) facts.push({ id: newId("f"), field: "storeys", value: Number(value), kind: "pointed", status: "confirmed", source: { type: "user_text", ref: "Your storey count", quote: value } });
       const next = { ...c, facts, questions: c.questions.map(q => q.id === "q-desc-storeys" ? { ...q, answer: known ? value : undefined } : q) };
       return reducer(next, { type: "answerCandidate", id: "desc-storeys", answer: known ? "no" : "not-sure" });
     }
@@ -753,7 +779,7 @@ export function reducer(c: Case, a: Action): Case {
         const field = `${CODECHECK_PREFIX}${a.id}`;
         facts = [
           ...c.facts.filter((f) => f.field !== field),
-          ...(a.answer ? [{ id: newId("f"), field, value: a.answer, kind: "pointed" as const, status: "confirmed" as const, confidence: null, formula: null, inputs: [], source: { type: "user_click" as const, ref: "Your code check answer", quote: a.answer } }] : []),
+          ...(a.answer ? [{ id: newId("f"), field, value: a.answer, kind: "pointed" as const, status: "confirmed" as const, confidence: null, formula: null, inputs: [], source: { type: "user_click" as const, ref: "Your code check answer", quote: a.id === "desc-storeys" ? "How many storeys is the building?" : `Does your design ${cand.departure}?` } }] : []),
         ];
       }
       return { ...c, candidates, questions, facts };
@@ -781,10 +807,15 @@ export function reducer(c: Case, a: Action): Case {
       return { ...c, title: a.title, titleKept: true };
     case "setAuthority":
       return { ...c, authority: a.authority };
-    case "addCandidate":
-      return c.candidates.some((x) => canonicalProvision(x.provision) === canonicalProvision(a.candidate.provision))
-        ? c
-        : { ...c, candidates: [...c.candidates, a.candidate] };
+    case "addCandidate": {
+      const existing = c.candidates.find((x) => canonicalProvision(x.provision) === canonicalProvision(a.candidate.provision));
+      // Choosing a keyword lead manually opens its ordinary decision card. Preserve its answer,
+      // ids and lookup rows; selecting it in the library is still not a Yes.
+      if (existing) return keywordCandidate(c, existing) && a.candidate.suggestion === "search"
+        ? { ...c, candidates: c.candidates.map((x) => x === existing ? { ...x, suggestion: "search" as const } : x) }
+        : c;
+      return { ...c, candidates: [...c.candidates, a.candidate] };
+    }
     case "addIdentified": {
       const made: Candidate[] = a.articles
         .filter((article) => /^\d/.test(article.provision))
@@ -886,6 +917,7 @@ export function reducer(c: Case, a: Action): Case {
         op = { id: nextSlot(c, a.itemId), rev, operation: "create", taskId: a.itemId, provisionId: a.provisionId.trim(),
           description, evidenceType, responsible: who || undefined, date: date || undefined };
       }
+      if (a.fileRef !== undefined) op.fileRef = a.fileRef;
       const drafts = { ...c.evidenceDrafts };
       delete drafts[a.itemId];
       const issues = { ...c.evidenceIssues };
@@ -925,7 +957,8 @@ export function reducer(c: Case, a: Action): Case {
         field,
         value: a.choice,
         kind: "pointed",
-        status: "unconfirmed",
+        // This confirms the applicant's honest answer, never a role, credential or requirement.
+        status: "confirmed",
         confidence: null,
         formula: null,
         inputs: [],

@@ -6,7 +6,8 @@
  */
 import { EngineError } from "./client";
 import { credentialsMode, ENGINE_BASE } from "./engineAuth";
-import type { AssistNavigation, VoiceCapability } from "./types.gen";
+import { accountRequestSignal } from "./requestLifetime";
+import type { AssistNavigation, Case, ProfessionalRequirementRequest, VoiceCapability } from "./types.gen";
 
 export type Role = "applicant" | "reviewer";
 
@@ -30,6 +31,8 @@ export interface ApplicationSummary {
   authority: string | null;
   updated_at: string;
   submitted_at: string | null;
+  submission_number?: number;
+  expires_at?: string | null;
   completeness: { answered: number; total: number } | null;
   unread_messages: number;
   reviewer: { name: string } | null;
@@ -56,6 +59,11 @@ export interface Message {
   kind: "message" | "decision" | "status";
   created_at: string;
   read_by_me: boolean;
+}
+
+export interface Conversation {
+  messages: Message[];
+  decision: Case["decision"];
 }
 
 export interface AssistRequest {
@@ -120,6 +128,12 @@ export class AccountsError extends EngineError {
   }
 }
 
+export class QueueSessionChanged extends AccountsError {
+  constructor() {
+    super(409, "Your sign-in changed. Sign in again before loading this queue.", "queue reviewer/authority mismatch");
+  }
+}
+
 /** The route is not on this server (or the browser could not reach it with credentials). */
 export const notAvailable = (e: unknown) => e instanceof EngineError && (e.status === 404 || e.status === 405 || e.status === 0);
 
@@ -137,7 +151,8 @@ function plain(status: number, raw: string, path: string): string {
   return raw || `Request failed (${status}).`;
 }
 
-export async function call<T>(method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE", path: string, body?: unknown, signal?: AbortSignal, ms = 15000): Promise<T> {
+export async function call<T>(method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE", path: string, body?: unknown, parent?: AbortSignal, ms = 15000): Promise<T> {
+  const signal = accountRequestSignal(parent);
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), ms);
   const onAbort = () => ctl.abort();
@@ -193,11 +208,17 @@ export const accounts = {
     })),
   /** Permanently delete an owned application (204). */
   deleteCase: (id: string, signal?: AbortSignal) => call<void>("DELETE", `/cases/${enc(id)}`, undefined, signal),
-  submit: (caseId: string, signal?: AbortSignal) => call<unknown>("POST", `/cases/${enc(caseId)}/submit`, {}, signal, 30000),
+  /** Submits exactly the displayed saved revision (`expected_version`); a newer save is a 409. */
+  submit: (caseId: string, expectedVersion: number, signal?: AbortSignal) =>
+    call<Case>("POST", `/cases/${enc(caseId)}/submit`, { expected_version: expectedVersion }, signal, 30000),
   messages: (caseId: string, signal?: AbortSignal) =>
     call<{ messages: Message[] }>("GET", `/cases/${enc(caseId)}/messages`, undefined, signal).then((r) => r.messages ?? []),
+  conversation: (caseId: string, signal?: AbortSignal) =>
+    call<Conversation>("GET", `/cases/${enc(caseId)}/messages`, undefined, signal),
+  // Communication leaves Case.version unchanged. Never adopt a content revision from the thread.
   postMessage: (caseId: string, body: string, signal?: AbortSignal) => call<Message>("POST", `/cases/${enc(caseId)}/messages`, { body }, signal),
-  markRead: (caseId: string, signal?: AbortSignal) => call<unknown>("POST", `/cases/${enc(caseId)}/messages/read`, {}, signal),
+  markRead: (caseId: string, messageIds?: string[], signal?: AbortSignal) =>
+    call<void>("POST", `/cases/${enc(caseId)}/messages/read`, messageIds ? { message_ids: messageIds } : {}, signal),
   assist: (req: AssistRequest, signal?: AbortSignal) => call<AssistResponse>("POST", "/assist", req, signal, 60000),
   /** GET /voice/session: configuration only; opens no microphone or provider and reserves nothing. */
   voiceSession: (caseId: string | null, signal?: AbortSignal) =>
@@ -248,6 +269,8 @@ export interface QueueApplication {
   authority: string | null;
   status: ApplicationStatus;
   submitted_at: string | null;
+  submission_number?: number;
+  expires_at?: string | null;
   updated_at: string;
   completeness: { answered: number; total: number } | null;
   claim: Claim | null;
@@ -261,7 +284,10 @@ export interface DecisionItemInput {
   note: string;
 }
 
-export type DecisionRequest = { outcome: "accept" } | { outcome: "return" | "refuse"; message: string; items: DecisionItemInput[] };
+export type DecisionRequest =
+  | { outcome: "accept"; expected_version?: number }
+  | { outcome: "return"; message: string; items: DecisionItemInput[]; expected_version?: number }
+  | { outcome: "refuse"; message: string; expected_version: number };
 
 export interface AppNotification {
   id: string;
@@ -269,6 +295,7 @@ export interface AppNotification {
   case_title: string | null;
   kind: "status" | "message";
   status: string | null;
+  submission_number?: number | null;
   actor: { name: string; role: Role | null } | null;
   summary: string;
   created_at: string;
@@ -297,12 +324,17 @@ export const auth = {
 };
 
 export const review = {
-  queue: (signal?: AbortSignal) =>
-    call<{ applications: QueueApplication[] }>("GET", "/review/queue", undefined, signal).then((r) => r.applications ?? []),
-  claim: (caseId: string, takeOver = false) =>
-    call<{ claim: Claim }>("POST", `/review/${enc(caseId)}/claim`, takeOver ? { take_over: true } : {}).then((r) => r.claim),
+  queue: (signal?: AbortSignal, expected?: { id: string; authority: string | null }) =>
+    call<{ applications: QueueApplication[]; reviewer_id: string; authority: string }>("GET", "/review/queue", undefined, signal).then(r => {
+      if (expected && (r.reviewer_id !== expected.id || r.authority !== expected.authority)) throw new QueueSessionChanged();
+      return r.applications ?? [];
+    }),
+  claim: (caseId: string, takeOver = false, signal?: AbortSignal) =>
+    call<{ claim: Claim }>("POST", `/review/${enc(caseId)}/claim`, takeOver ? { take_over: true } : {}, signal).then((r) => r.claim),
   release: (caseId: string) => call<void>("DELETE", `/review/${enc(caseId)}/claim`),
-  decide: (caseId: string, body: DecisionRequest) => call<unknown>("POST", `/review/${enc(caseId)}/decision`, body, undefined, 30000),
+  decide: (caseId: string, body: DecisionRequest) => call<Case>("POST", `/review/${enc(caseId)}/decision`, body, undefined, 30000),
+  resolveProfessional: (caseId: string, body: ProfessionalRequirementRequest) =>
+    call<Case>("POST", `/review/${enc(caseId)}/professional-requirement`, body, undefined, 30000),
 };
 
 export const notifications = {
@@ -311,5 +343,5 @@ export const notifications = {
       notifications: r.notifications ?? [],
       unread: typeof r.unread === "number" ? r.unread : (r.notifications ?? []).filter((n) => !n.read).length,
     })),
-  markAllRead: () => call<void>("POST", "/me/notifications/read", {}),
+  markAllRead: (signal?: AbortSignal) => call<void>("POST", "/me/notifications/read", {}, signal),
 };

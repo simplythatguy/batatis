@@ -427,6 +427,7 @@
 /* Review detail */
 
 .ac-sheet { max-width: 620px; }
+.ac-side-sec dd { margin: 4px 0 12px; color: var(--cf-text-2); overflow-wrap: anywhere; white-space: pre-wrap; }
 .ac-done { display: flex; align-items: baseline; gap: 8px; margin: 0; color: var(--cf-text); font-size: 14px; }
 .ac-side-sec { display: flex; flex-direction: column; }
 .ac-side-h { margin: 0 0 6px; font-size: 13px; font-weight: 500; color: var(--cf-text-3); }

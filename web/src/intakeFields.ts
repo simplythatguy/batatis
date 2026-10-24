@@ -1,22 +1,45 @@
 /**
- * The engine's intake writes Section A and B facts under the SCC export keys (`owner_name`,
- * `municipal_address`, ...); the web's form cards use their own ids (`owner`, `municipalAddress`).
- * The engine treats both names as one logical field (engine/export/scc.py `_ALIASES`,
- * engine/completeness.py `_CORE`), so the browser renames at the boundary and keeps one card per
- * field. Every other intake field (storeys, building_area_m2, ...) keeps the engine's name.
+ * Saved API and intake facts share the engine's aliases (engine/export/scc.py `_ALIASES`,
+ * engine/completeness.py `_CORE`, engine/process_fields.py `PROCESS_ALIASES`). Resolve them at
+ * the browser boundary, including in sync's already-posted record, so reopening never writes
+ * renamed copies. Only the field changes; ids, values, confirmation and provenance stay intact.
  */
-const ENGINE_TO_LOCAL: Readonly<Record<string, string>> = {
-  owner_name: "owner",
-  owner_rep_name: "representative",
-  mailing_address: "mailingAddress",
-  municipal_address: "municipalAddress",
-  legal_description: "legalDescription",
-  permit_number: "permit",
-  request_date: "date",
-  alternative_description: "alternative",
+import type { Fact } from "./types";
+
+const FIELD_ALIASES: Readonly<Record<string, readonly string[]>> = {
+  storeys: ["building.storeys"],
+  owner: ["owner_name", "section_a.owner_name"],
+  representative: ["owner_rep_name", "applicant_name"],
+  mailingAddress: ["mailing_address"],
+  municipalAddress: ["municipal_address", "civic_address", "address"],
+  legalDescription: ["legal_description", "section_b.legal_description"],
+  permit: ["permit_number", "section_b.permit_number"],
+  date: ["request_date", "application_date", "section_a.date"],
+  alternative: ["alternative_description"],
+  "process.rationale": ["rationale"],
+  "process.risk_assessment": ["risk_assessment", "risk", "process.risk"],
+  "process.mitigating_measures": ["mitigating_measures", "mitigation", "process.mitigation"],
+  "process.assumptions_and_limits": ["assumptions_and_limits", "assumptions_limits", "assumptions", "process.assumptions_limits", "process.assumptions"],
+  "process.maintenance_operation": ["maintenance_operation", "operation_maintenance", "process.operation_maintenance"],
+  "process.qualifications": ["qualifications"],
+  "professional.role": ["registered_professional.role"],
+  "professional.discipline": ["registered_professional.discipline"],
+  "professional.registration_number": ["professional.registration", "registered_professional.registration_number", "apega_number", "aaa_number"],
+  "professional.seal": ["professional_seal", "registered_professional.seal"],
+  // Engagement and a professional role are separate facts, not interchangeable credentials.
+  "professional.status": ["professional_status"],
 };
 
-const LOCAL_TO_ENGINE: Readonly<Record<string, string>> = Object.fromEntries(Object.entries(ENGINE_TO_LOCAL).map(([e, l]) => [l, e]));
+const ENGINE_TO_LOCAL: Readonly<Record<string, string>> = Object.fromEntries(
+  Object.entries(FIELD_ALIASES).flatMap(([local, aliases]) => aliases.map((alias) => [alias, local])),
+);
+
+// Intake answers keep their established export keys, independent of the saved-case aliases.
+const LOCAL_TO_ENGINE: Readonly<Record<string, string>> = {
+  owner: "owner_name", representative: "owner_rep_name", mailingAddress: "mailing_address",
+  municipalAddress: "municipal_address", legalDescription: "legal_description", permit: "permit_number",
+  date: "request_date", alternative: "alternative_description",
+};
 
 /**
  * The other names the engine reads as the same field (engine/completeness.py `_CORE`,
@@ -57,4 +80,25 @@ export const engineField = (field: string): string => LOCAL_TO_ENGINE[field] ?? 
 export function asLocal<T extends { field: string }>(fact: T): T {
   const field = localField(fact.field);
   return field === fact.field ? fact : { ...fact, field };
+}
+
+/** Select the newest revision across aliases before checking status, even when it is blank. */
+export function latestLocalFacts<T extends { field: string }>(facts: readonly T[]): T[] {
+  const latest = new Map(facts.map((fact) => [localField(fact.field), fact]));
+  return facts.filter((fact) => latest.get(localField(fact.field)) === fact).map(asLocal);
+}
+
+/** A saved clear must suppress older aliases and must not be posted again when reopening. */
+export function answerWithdrawn(fact: { value: unknown; status?: string; source?: { ref?: string } }): boolean {
+  return fact.source?.ref === "Answer withdrawn by applicant" || (fact.value === "" && fact.status === "unconfirmed");
+}
+
+/** Only an authoritative latest answer can satisfy another question. A reading still needs a click. */
+export function confirmedAnswer(facts: readonly Fact[], field: string): Fact | undefined {
+  const f = latestLocalFacts(facts).find((x) => x.field === localField(field));
+  if (!f || f.status !== "confirmed" || f.kind === "proposed" || f.kind === "computed" || answerWithdrawn(f)) return undefined;
+  const text = f.value == null ? "" : String(f.value).trim();
+  if (!text || /^(?:not[-_ ]sure|unsure|unknown|don.t know|do not know)$/i.test(text)) return undefined;
+  if (localField(field) === "storeys" && (!Number.isInteger(Number(text)) || Number(text) <= 0)) return undefined;
+  return f;
 }

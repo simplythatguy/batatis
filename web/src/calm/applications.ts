@@ -120,19 +120,32 @@ export function previewFacts(a: ApplicationSummary, now = Date.now()): PreviewFa
   return facts;
 }
 
-/** Sent applications wait for a return; settled applications stay read-only. */
-export const readOnly = (s: ApplicationStatus | null | undefined) => s === "submitted" || s === "in_review" || (s != null && SETTLED.has(s));
+/** Only draft and returned records are editable, including when a newer server adds a final status. */
+export const readOnly = (s: string | null | undefined) => s != null && s !== "draft" && s !== "returned";
 
-/** Shared wording for the header, questions and submitted application. */
-export function readOnlyStatus(status: ApplicationStatus | null | undefined, authority?: string | null): {
+/**
+ * Shared wording for a read-only application: the header label, the heading and note on Review, the
+ * questions and the saved form, and what the applicant can do next. A final status never promises a return.
+ */
+export function readOnlyStatus(status: string | null | undefined, authority?: string | null): {
   label: string;
   heading: string;
   note: string;
+  next: string;
   tone: "done" | "blocking" | "pending" | "warning";
 } {
   const where = authorityName(authority) || "the authority";
-  if (status === "refused") return { label: "Refused · read-only", heading: `Refused by ${where}`, note: "This application is closed. Read the officer’s reasons and appeal notice.", tone: "blocking" };
-  if (status === "accepted") return { label: "Accepted", heading: `Accepted by ${where}`, note: "Accepted as administratively complete. This is not a finding that the design complies or is safe.", tone: "done" };
-  if (status === "withdrawn") return { label: "Withdrawn · read-only", heading: "Withdrawn", note: "This application is closed.", tone: "pending" };
-  return { label: "Sent · read-only", heading: `Sent to ${where}`, note: "Read-only until the officer returns it.", tone: "warning" };
+  const records = "You can review the saved application and download the available records.";
+  if (status === "refused") return { label: "Refused · read-only", heading: `Refused by ${where}`, note: "The officer recorded an administrative refusal. This application is closed.", next: "Read the officer’s reasons and the appeal notice in the application’s messages.", tone: "blocking" };
+  if (status === "accepted") return { label: "Accepted", heading: `Accepted by ${where}`, note: "Accepted as administratively complete. This does not decide whether the design complies or is safe.", next: `This is the final saved application. ${records}`, tone: "done" };
+  if (status === "withdrawn") return { label: "Withdrawn · read-only", heading: "Withdrawn", note: "This application is closed.", next: records, tone: "pending" };
+  if (status === "submitted" || status === "in_review") return {
+    label: "Sent · read-only",
+    heading: `Sent to ${where}`,
+    note: "Read-only while it is with the authority.",
+    next: `${status === "in_review" ? "An officer is reviewing it." : "Waiting for an officer to pick it up."} You can make corrections if the officer returns it.`,
+    tone: "warning",
+  };
+  // A status this client does not know yet is final until the server says otherwise.
+  return { label: "Read-only", heading: "Saved application", note: "This saved application is read-only.", next: records, tone: "pending" };
 }

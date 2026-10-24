@@ -82,6 +82,30 @@ class Decision(BaseModel):
     items: list[DecisionItem] = Field(default_factory=list)
 
 
+class ReviewSnapshot(BaseModel):
+    """Stored application values at a return; expires and is deleted with its case."""
+    returned_at: str
+    authority: str | None
+    values: dict[str, str]
+
+
+class SubmissionChange(BaseModel):
+    field: str
+    before: str | None
+    after: str | None
+
+
+class Submission(BaseModel):
+    """A submission round, distinct from content versions and claim/release events."""
+    number: int = Field(ge=1)
+    at: str
+    by_id: str
+    authority: str
+    returned_at: str | None = None
+    comparison_available: bool = False
+    changes: list[SubmissionChange] = Field(default_factory=list)
+
+
 class StatusChange(BaseModel):
     by_id: str
     by_name: str
@@ -119,3 +143,5 @@ class ThreadMessage(BaseModel):
 
 class MessagesResult(BaseModel):
     messages: list[ThreadMessage]
+    # The authoritative current decision is independent of later conversational notices.
+    decision: Decision | None = None

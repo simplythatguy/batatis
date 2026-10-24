@@ -21,7 +21,8 @@ from .models import Case, Fact, SectionCRow
 from .account_models import ApplicationPreferences, ApplicationPreferencesPatch, UserResult, MessagesResult
 from .routes_auth import SignupRequest, LoginRequest, OnboardingRequest
 from .routes_review import (NotificationsResult, ApplicationsResult, QueueResult, ClaimResult, ClaimRequest,
-                            DecisionRequest, MessageRequest)
+                            DecisionRequest, MessageRequest, MessageReadRequest, ProfessionalRequirementRequest,
+                            SubmitRequest)
 from .routes_assist import AssistRequest, AssistResult
 from .routes_voice import VoiceCapability
 from .voice import VoiceStart, VoiceCommand
@@ -45,7 +46,8 @@ RESPONSES = (Case, SectionCRow, CodeTOC, ProvisionContext, UserResult, MessagesR
              JurisdictionChecklists, CaseChecklists, ChecklistAnswerResult,
              ApplicationPreferences, VoiceCapability)  # responses carry every field
 REQUESTS = (Fact, NewCase, SectionCRequest, SignupRequest, LoginRequest, OnboardingRequest,
-            ClaimRequest, DecisionRequest, MessageRequest, AssistRequest, InformationRequestEdit,
+            ClaimRequest, DecisionRequest, MessageRequest, MessageReadRequest, ProfessionalRequirementRequest,
+            SubmitRequest, AssistRequest, InformationRequestEdit,
             IntakeRequest, AnswersRequest, ScopeRequest, PlanRequest,
             IdentifyRequest, IdentifyDecisionRequest, IdentifyConfirmRequest, BenchmarkConfirmRequest,
             ChecklistAnswerRequest, TitleRequest, SelectedArticlesRequest, ApplicationPreferencesPatch,

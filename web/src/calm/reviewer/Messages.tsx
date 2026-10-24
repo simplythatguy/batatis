@@ -1,41 +1,72 @@
 /** The application's message thread (GET/POST /cases/{id}/messages). One way: only the officer writes. Bodies render as text, never HTML. */
-import { useEffect, useId, useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useId, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { accounts, AccountsError, type Message } from "../../api/accounts";
 import { Avatar } from "../auth/bits";
+import { useThreadRequests } from "../threadRequests";
+import { requestedItemLabel, requestedMessageBody } from "../requestedItems";
 import { MOD_KEY } from "../ui";
 import { clock, sentLabel } from "./queue";
+import { mergeThreadMessages } from "./threadMessages";
 
 function when(iso: string, now: number): string {
   const day = sentLabel(iso, now);
   return day.startsWith("Today") ? clock(iso) : `${day}, ${clock(iso)}`;
 }
 
-export function Messages({ caseId, me, messages, onChange, canWrite, hideTitle = false, draft: outerDraft, onDraft }: { caseId: string; me: string | null; messages: Message[] | null; onChange: Dispatch<SetStateAction<Message[] | null>>; canWrite: boolean; /** Inside a drawer that already says "Messages". */ hideTitle?: boolean; /** Held by the caller so closing a drawer keeps an unsent message. */ draft?: string; onDraft?: (d: string) => void }) {
+export function Messages({ caseId, me, messages, onChange, canWrite, hideTitle = false, draft: outerDraft, onDraft, reading = true }: { caseId: string; me: string | null; messages: Message[] | null; onChange: Dispatch<SetStateAction<Message[] | null>>; canWrite: boolean; /** Inside a drawer that already says "Messages". */ hideTitle?: boolean; /** Held by the caller so closing a drawer keeps an unsent message. */ draft?: string; onDraft?: (d: string) => void; /** Shown to the reader now: only then are its unread messages acknowledged. */ reading?: boolean }) {
   const id = useId();
+  const { phase, user, startRequest, finishRequest } = useThreadRequests(caseId);
   const [ownDraft, setOwnDraft] = useState("");
   const draft = outerDraft ?? ownDraft;
   const setDraft = onDraft ?? setOwnDraft;
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [now] = useState(() => Date.now());
+  const mayWrite = canWrite && phase === "signed-in" && user?.id === me && user.role === "reviewer";
+
+  // Another case or sign-in never inherits an unsent message. Reopening the drawer (a remount) keeps
+  // the caller's draft, so only an actual change clears it.
+  const scope = useRef({ caseId, me, phase, user });
+  useEffect(() => {
+    const shown = scope.current;
+    if (shown.caseId === caseId && shown.me === me && shown.phase === phase && shown.user === user) return;
+    scope.current = { caseId, me, phase, user };
+    setDraft("");
+    setBusy(false);
+    setError("");
+  }, [caseId, me, phase, user, setDraft]);
 
   useEffect(() => {
-    if (messages?.some((m) => !m.read_by_me)) void accounts.markRead(caseId).catch(() => undefined);
-  }, [caseId, messages]);
+    if (!reading || phase !== "signed-in" || user?.id !== me) return;
+    const displayed = messages?.filter((m) => !m.read_by_me).map((m) => m.id) ?? [];
+    if (!displayed.length) return;
+    const ctl = startRequest();
+    void accounts.markRead(caseId, displayed, ctl.signal).then(() => {
+      if (ctl.signal.aborted) return;
+      const read = new Set(displayed);
+      onChange(previous => ctl.signal.aborted ? previous : previous && previous.map(message => read.has(message.id)
+        ? { ...message, read_by_me: true } : message));
+    }).catch(() => undefined).finally(() => finishRequest(ctl));
+    return () => { ctl.abort(); finishRequest(ctl); };
+  }, [caseId, messages, me, phase, user, startRequest, finishRequest, onChange, reading]);
 
   async function send() {
     const body = draft.trim();
-    if (!body || busy) return;
+    if (!body || busy || !mayWrite) return;
+    const ctl = startRequest();
     setBusy(true);
     setError("");
     try {
-      const m = await accounts.postMessage(caseId, body);
-      onChange((prev) => [...(prev ?? []), m]);
+      const m = await accounts.postMessage(caseId, body, ctl.signal);
+      if (ctl.signal.aborted) return;
+      onChange(prev => ctl.signal.aborted ? prev : mergeThreadMessages(prev, [...(prev ?? []), m]));
       setDraft("");
     } catch (e) {
+      if (ctl.signal.aborted) return;
       setError(e instanceof AccountsError ? e.detail : "The message didn’t send. Try again.");
     } finally {
-      setBusy(false);
+      finishRequest(ctl);
+      if (!ctl.signal.aborted) setBusy(false);
     }
   }
 
@@ -61,11 +92,10 @@ export function Messages({ caseId, me, messages, onChange, canWrite, hideTitle =
                     <span className="ac-faint">{when(m.created_at, now)}</span>
                     {!m.read_by_me && m.author.id !== me && <span className="ac-note-dot" aria-label="New" />}
                   </div>
-                  <p className="ac-msg-body">{m.body}</p>
-                  {/* An information request already lists its items in the body; show them once. */}
-                  {m.items.length > 0 && !m.items.every((it) => it.note && m.body.includes(it.note.trim())) && (
+                  <p className="ac-msg-body">{requestedMessageBody(m.body, m.items)}</p>
+                  {m.items.length > 0 && (
                     <ul className="ac-msg-items">
-                      {m.items.map((it, i) => <li key={i}>{it.note || it.field}</li>)}
+                      {m.items.map((it, i) => <li key={`${it.gap_id ?? ""}:${it.field ?? ""}:${i}`}>{requestedItemLabel(it)}</li>)}
                     </ul>
                   )}
                 </>
@@ -74,7 +104,7 @@ export function Messages({ caseId, me, messages, onChange, canWrite, hideTitle =
           ))}
         </ol>
       )}
-      {canWrite && (
+      {mayWrite && (
         <div className="ac-composer">
           <label htmlFor={`${id}-in`} className="cf-sr">Message to the applicant</label>
           <textarea
