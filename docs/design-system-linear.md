@@ -1,8 +1,8 @@
 # Batatis design system (Linear-default)
 
-Default product look for all Batatis UI. Agents apply this **without** being asked to “make it Linear.”
+Historical visual reference. The current product look is the [calm system](design-system-calm.md); retain the interaction P0 requirements from this document.
 
-**Formal UI seal = Opus 5.5.** Composer reviews are provisional.
+Formal UI review follows the current model profile in `.cursor/rules/pstack-models.mdc` (GPT-6.1-Sol at max) and requires a fresh independent reviewer.
 
 | Resource | Path |
 | --- | --- |
@@ -13,7 +13,7 @@ Default product look for all Batatis UI. Agents apply this **without** being ask
 | Smoke | [`evals/ui-artifacts/smoke.mjs`](../evals/ui-artifacts/smoke.mjs) |
 | Captures | [`evals/ui-artifacts/screenshots.mjs`](../evals/ui-artifacts/screenshots.mjs) |
 
-## Opus P0 (blocking)
+## UI P0 (blocking)
 
 1. **Primary CTA = neutral** — `#E6E6E6` fill + dark text. Not indigo/purple filled buttons.
 2. **Active nav = faint fill** — `rgba(255,255,255,~0.06)`; no accent ring/glow.
