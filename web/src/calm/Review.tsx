@@ -119,8 +119,8 @@ export function Review() {
 /** Summarize shared gaps, deck progress and rule departures for the current case. */
 function CaseReview() {
   const { c, gaps: currentGaps, notices, engineGaps, gapsSource, checkStatus, checkNote, checkDetail, requestCheck, reading, applicationStatus } = useCase();
-  const { app, locked } = useCurrentApplication();
-  const gaps = locked && gapsSource !== "engine" ? [] : currentGaps;
+  const { app, readOnly } = useCurrentApplication();
+  const gaps = readOnly && gapsSource !== "engine" ? [] : currentGaps;
   const session = useSession();
   const [showAll, setShowAll] = useState(false);
   const { options } = useDeckExtras();
@@ -159,7 +159,7 @@ function CaseReview() {
     { letter: "D", title: "Your case and proof", gaps: pick("D", "process"), ok: "Nothing missing" },
   ];
 
-  const go = () => { location.hash = !locked && !applicantComplete && openCards ? "#/questions" : "#/application"; };
+  const go = () => { location.hash = !readOnly && !applicantComplete && openCards ? "#/questions" : "#/application"; };
   useEffect(() => {
     const on = (e: KeyboardEvent) => {
       if (e.key !== "Enter" || e.defaultPrevented || document.querySelector("dialog[open]")) return;
@@ -177,7 +177,7 @@ function CaseReview() {
 
   let headline: string;
   let lede = "";
-  if (locked) {
+  if (readOnly) {
     headline = status.heading;
     lede = `${status.note} ${status.next}`;
     if (checkStatus === "running" || checkStatus === "unavailable") lede += ` ${checkNote}`;
@@ -212,7 +212,7 @@ function CaseReview() {
         {!checked && (
           <div className="cf-row-actions">
             <button type="button" className="cf-btn is-primary" disabled={checkStatus === "running"} onClick={() => void requestCheck(checkStatus === "unavailable")}>
-              {checkStatus === "running" ? "Checking…" : locked ? "Check saved application" : checkStatus === "unavailable" ? "Try the check again" : "Check my application"} <Kbd>↵</Kbd>
+              {checkStatus === "running" ? "Checking…" : readOnly ? "Check saved application" : checkStatus === "unavailable" ? "Try the check again" : "Check my application"} <Kbd>↵</Kbd>
             </button>
           </div>
         )}
@@ -222,20 +222,20 @@ function CaseReview() {
 
         <div className="cf-metrics">
           <div className="cf-tile cf-metric">
-            <div className="cf-metric-k">{locked ? "Saved application" : applicantComplete ? "Required answers" : "Complete"}</div>
-            <div className="cf-metric-v">{locked || applicantComplete ? checked ? <span className="cf-faint">Checked</span> : "—" : <>{done}<span className="cf-faint">/{total}</span></>}</div>
+            <div className="cf-metric-k">{readOnly ? "Saved application" : applicantComplete ? "Required answers" : "Complete"}</div>
+            <div className="cf-metric-v">{readOnly || applicantComplete ? checked ? <span className="cf-faint">Checked</span> : "—" : <>{done}<span className="cf-faint">/{total}</span></>}</div>
           </div>
           <div className="cf-tile cf-metric">
-            <div className="cf-metric-k">{locked ? "Open administrative items" : "Left for you"}</div>
-            <div className="cf-metric-v">{locked && !checked ? "—" : locked ? gaps.length : work.applicant.length}{applicantBlocking.length > 0 && <small>{applicantBlocking.length} required</small>}{officerPending.length > 0 && <small>{officerPending.length} with the officer</small>}{work.checkNeeded.length > 0 && <small>Check your changed application</small>}</div>
+            <div className="cf-metric-k">{readOnly ? "Open administrative items" : "Left for you"}</div>
+            <div className="cf-metric-v">{readOnly && !checked ? "—" : readOnly ? gaps.length : work.applicant.length}{applicantBlocking.length > 0 && <small>{applicantBlocking.length} required</small>}{officerPending.length > 0 && <small>{officerPending.length} with the officer</small>}{work.checkNeeded.length > 0 && <small>Check your changed application</small>}</div>
           </div>
         </div>
 
-        {(gaps.length > 0 || (locked && !checked)) && (
-          <div className="cf-list-label" title={!locked && gapsSource !== "engine" ? "From this browser’s list. The online check can add more." : undefined}>{applicantComplete ? "With the officer" : locked ? "Saved-record requirements" : "Still needed"}</div>
+        {(gaps.length > 0 || (readOnly && !checked)) && (
+          <div className="cf-list-label" title={!readOnly && gapsSource !== "engine" ? "From this browser’s list. The online check can add more." : undefined}>{applicantComplete ? "With the officer" : readOnly ? "Saved-record requirements" : "Still needed"}</div>
         )}
         {gaps.length === 0 ? (
-          locked && !checked && <p className="cf-faint cf-row-empty">No current check yet.</p>
+          readOnly && !checked && <p className="cf-faint cf-row-empty">No current check yet.</p>
         ) : (
           <ul className="cf-rows">
             {shown.map((g) => {
@@ -245,7 +245,7 @@ function CaseReview() {
                 <li key={g.id} className="cf-row">
                   <Dot tone={g.severity} />
                   <span className="cf-row-text">{g.label}</span>
-                  {work.officer.includes(g) ? <span className="cf-faint cf-small">For the officer</span> : work.checkNeeded.includes(g) ? <span className="cf-faint cf-small">Check needed</span> : !locked && <a className="cf-row-go" href={href}>{g.id === "keyword-triage" ? "Review leads" : key ? "Answer" : "Open"} <CIcon name="arrow" size={13} /></a>}
+                  {work.officer.includes(g) ? <span className="cf-faint cf-small">For the officer</span> : work.checkNeeded.includes(g) ? <span className="cf-faint cf-small">Check needed</span> : !readOnly && <a className="cf-row-go" href={href}>{g.id === "keyword-triage" ? "Review leads" : key ? "Answer" : "Open"} <CIcon name="arrow" size={13} /></a>}
                 </li>
               );
             })}
@@ -257,7 +257,7 @@ function CaseReview() {
           </button>
         )}
         {notices.length > 0 && <div className="cf-notices"><Notices notices={notices} /></div>}
-        <EngineerCallout c={c} gaps={gaps} readOnly={locked} />
+        <EngineerCallout c={c} gaps={gaps} readOnly={readOnly} />
         {fork && !scopeRedirect(c) && (
           <section className="cf-review-fork" aria-labelledby="cf-fork-h">
             <h2 id="cf-fork-h" className="cf-list-label">Your path</h2>
@@ -274,9 +274,9 @@ function CaseReview() {
             // An empty Section C is not complete: no reference has been confirmed yet.
             const sectionWork = preparationGaps(c, s.gaps);
             const officerOnly = s.gaps.length > 0 && sectionWork.officer.length === s.gaps.length;
-            const tone: DotTone = locked && !checked ? "pending" : officerOnly ? "warning" : "empty" in s && s.empty && !s.gaps.length ? "pending" : worst(s.gaps);
+            const tone: DotTone = readOnly && !checked ? "pending" : officerOnly ? "warning" : "empty" in s && s.empty && !s.gaps.length ? "pending" : worst(s.gaps);
             const engineer = s.letter === "D" && need;
-            const summary = locked && !checked ? "Check the saved application" : s.letter === "C" ? `${s.ok}${s.gaps.length ? ` · ${plural(s.gaps.length, "unresolved item")}` : ""}` : sectionWork.checkNeeded.length && !sectionWork.applicant.length ? "Check your changed application" : officerOnly ? "Officer determination pending" : s.gaps.length
+            const summary = readOnly && !checked ? "Check the saved application" : s.letter === "C" ? `${s.ok}${s.gaps.length ? ` · ${plural(s.gaps.length, "unresolved item")}` : ""}` : sectionWork.checkNeeded.length && !sectionWork.applicant.length ? "Check your changed application" : officerOnly ? "Officer determination pending" : s.gaps.length
               ? `${engineer ? `${engineer.summary} · ` : ""}${plural(s.gaps.length, "item")} left`
               : engineer ? engineer.summary : s.ok;
             return (
@@ -298,7 +298,7 @@ function CaseReview() {
           })}
         </ul>
         <div className="cf-sec-actions">
-          {!locked && !applicantComplete && openCards > 0 ? (
+          {!readOnly && !applicantComplete && openCards > 0 ? (
             <>
               <a className="cf-btn is-primary is-grow" href="#/questions">Answer {openCards} remaining {checked && <Kbd>↵</Kbd>}</a>
               <a className="cf-btn" href="#/application">Preview</a>

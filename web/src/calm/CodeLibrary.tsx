@@ -383,10 +383,11 @@ function CodeText({ id, text }: { id: string; text: string }) {
 /**
  * The reader's one write: add the article to the application the library reads for (the open one).
  * Nothing under None; a sent or closed application says it is read-only (the code stays readable).
+ * While a submission is on its way the button stays, paused.
  */
 export function AddToApplication({ id, record }: { id: string; record: CodeRecord | null }) {
   const { c, dispatch, engineId } = useCase();
-  const { locked } = useCurrentApplication();
+  const { locked, readOnly } = useCurrentApplication();
   const scope = useCodeScope();
   /** The case the article was added to, so the note never shows for another one. */
   const [addedTo, setAddedTo] = useState<string | null>(null);
@@ -395,7 +396,7 @@ export function AddToApplication({ id, record }: { id: string; record: CodeRecor
   const inCase = c.candidates.some((a) => canonicalProvision(a.provision) === canonicalProvision(id) || withinProvision(a.provision, id));
   return (
     <div className="cf-read-actions">
-      {locked ? (
+      {readOnly ? (
         <span className="cf-faint cf-small">Your saved application is read-only. You can still read the code.</span>
       ) : inCase ? (
         <a className="cf-btn is-sm" href="#/questions?first=code"><CIcon name="check" size={13} />In your application</a>
@@ -403,9 +404,9 @@ export function AddToApplication({ id, record }: { id: string; record: CodeRecor
         <button
           type="button"
           className="cf-btn is-sm"
-          disabled={!record}
+          disabled={!record || locked}
           onClick={() => {
-            if (!record) return;
+            if (!record || locked) return;
             dispatch({ type: "addCandidate", candidate: provisionCandidate({ id, article_title: record.article_title, title: record.title, text: record.text, citation: record.citation }) });
             setAddedTo(here);
           }}

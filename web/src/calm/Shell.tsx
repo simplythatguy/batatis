@@ -48,10 +48,11 @@ function CheckStatus() {
 
 export function SaveStatus() {
   const { phase, saveStatus, savedNote, saveDetail, saveDraft } = useCase();
-  const { app, locked } = useCurrentApplication();
+  // A submission on its way keeps the saved state; the page says editing is paused.
+  const current = useCurrentApplication();
   if (phase !== "case") return null;
-  if (locked) {
-    const s = readOnlyStatus(app?.status);
+  if (current.readOnly) {
+    const s = readOnlyStatus(current.app?.status);
     return <div className="cf-save" role="status"><Dot tone={s.tone} /><span className="cf-save-label">{s.label}</span></div>;
   }
   const map: Record<string, { tone: DotTone; label: string }> = {

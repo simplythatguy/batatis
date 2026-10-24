@@ -40,10 +40,16 @@ export function useBegin() {
   };
 }
 
-/** The account's row for the open case (status, authority, reviewer), or null without one. */
-export function useCurrentApplication(): { app: ApplicationSummary | null; locked: boolean } {
+/**
+ * The account's row for the open case (status, authority, reviewer), or null without one.
+ * `readOnly`: the saved application itself is sent or closed, and screens show it as such.
+ * `locked`: nothing may be edited now. Also true while a dispatched submission is on its way: the
+ * application is not read-only yet, so its editing controls stay mounted and paused (App's edit lock).
+ */
+export function useCurrentApplication(): { app: ApplicationSummary | null; locked: boolean; readOnly: boolean } {
   const { engineId, applicationStatus, submissionDispatched } = useCase();
   const account = useAccount();
   const app = (engineId && account.applications?.find((a) => a.id === engineId)) || null;
-  return { app, locked: submissionDispatched || readOnly(app?.status ?? applicationStatus) };
+  const saved = readOnly(app?.status ?? applicationStatus);
+  return { app, locked: submissionDispatched || saved, readOnly: saved };
 }

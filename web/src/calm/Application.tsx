@@ -192,7 +192,7 @@ export function Application({ download }: { download: "" | "options" | "draft" }
 /** Derive the application preview and export panel from shared gaps and jurisdiction data. */
 function CaseApplication({ download }: { download: "" | "options" | "draft" }) {
   const account = useAccount();
-  const { app, locked } = useCurrentApplication();
+  const { app, locked, readOnly } = useCurrentApplication();
   const signedIn = account.phase === "signed-in";
   const { c, gaps, applicationIdentity, checkStatus, checkNote, engineId, factsEpoch } = useCase();
   const extras = useCaseExtras(engineId, factsEpoch, c.authority);
@@ -216,15 +216,15 @@ function CaseApplication({ download }: { download: "" | "options" | "draft" }) {
   const reasons: { tone: "blocking" | "warning" | "pending"; text: string; action?: { label: string; run: () => void } | { label: string; href: string } }[] = [];
   if (!ex.officialReady) {
     if (checkStatus === "running") reasons.push({ tone: "pending", text: checkNote || "Checking your draft…" });
-    else if (!checked) reasons.push({ tone: "warning", text: checkStatus === "unavailable" ? "The last check couldn’t finish." : checkStatus === "stale" ? "Your application changed since the last check." : locked ? "Check the saved application to see the current official PDF requirements." : "Your application hasn’t been checked yet.", action: { label: locked ? "Check saved application" : checkStatus === "unavailable" ? "Try again" : "Check now", run: ex.runCheck } });
+    else if (!checked) reasons.push({ tone: "warning", text: checkStatus === "unavailable" ? "The last check couldn’t finish." : checkStatus === "stale" ? "Your application changed since the last check." : readOnly ? "Check the saved application to see the current official PDF requirements." : "Your application hasn’t been checked yet.", action: { label: readOnly ? "Check saved application" : checkStatus === "unavailable" ? "Try again" : "Check now", run: ex.runCheck } });
     // A saved (read-only) application is judged only by a current check of what was saved.
-    if (officerPending && (!locked || checked)) reasons.push({ tone: "warning", text: "Officer determination pending. Official PDF and administrative acceptance remain on hold.", action: { label: "Review", href: "#/review" } });
+    if (officerPending && (!readOnly || checked)) reasons.push({ tone: "warning", text: "Officer determination pending. Official PDF and administrative acceptance remain on hold.", action: { label: "Review", href: "#/review" } });
     const professionalReason = professionalHoldReason(ex.blocking);
-    if (professionalReason && !officerPending && !work.checkNeeded.length && (!locked || checked)) reasons.push({ tone: "warning", text: professionalReason });
+    if (professionalReason && !officerPending && !work.checkNeeded.length && (!readOnly || checked)) reasons.push({ tone: "warning", text: professionalReason });
   }
 
   // Each blocker links to the card that fixes it (the same shared gap list as Review and the deck).
-  const blockers = ex.officialReady || (locked && !checked) ? [] : work.applicant;
+  const blockers = ex.officialReady || (readOnly && !checked) ? [] : work.applicant;
   /** Link an export blocker to its deck card, falling back to the gap’s existing destination. */
   const fixHref = (g: (typeof gaps)[number]) => {
     const key = gapKey(c, g);
@@ -242,10 +242,10 @@ function CaseApplication({ download }: { download: "" | "options" | "draft" }) {
   return (
     <div className="cf-doc">
       {/* The actual PDF the engine fills, not a drawing of it. */}
-      <FormViewer locked={locked} status={locked && app ? readOnlyStatus(app.status).label.split(" · ")[0] : undefined} />
+      <FormViewer locked={locked} status={readOnly && app ? readOnlyStatus(app.status).label.split(" · ")[0] : undefined} />
       <aside className="cf-glass cf-side" aria-label="Download">
         <Eyebrow plain>Status</Eyebrow>
-        {!locked && <div className="cf-side-big">{headline}<br /><span className="cf-muted">{sub}</span></div>}
+        {!readOnly && <div className="cf-side-big">{headline}<br /><span className="cf-muted">{sub}</span></div>}
         {/* A new selection or sign-in owns its own errors; late callbacks target the unmounted panel. */}
         <SubmitPanel key={applicationIdentity} />
         <ExpiryNotice expiresAt={app?.expires_at} />
@@ -265,7 +265,7 @@ function CaseApplication({ download }: { download: "" | "options" | "draft" }) {
         <button ref={draftBtn} type="button" className={`cf-btn is-center${signedIn ? "" : " is-primary"}`} disabled={ex.busy || Boolean(c.exampleId)} onClick={() => void ex.prepare(true)}>
           {ex.stage === "preparing" && ex.draftIntent ? "Preparing draft…" : "Download draft PDF"}
         </button>
-        <button type="button" className="cf-btn is-center" disabled={ex.busy || !ex.officialReady} data-requires-no-blocking-gaps={ex.blocking.length ? "true" : undefined} title={ex.officialReady ? undefined : locked ? "Uses a current read-only check of the saved application." : "Unlocks after a current check finds no administrative holds, including any officer determination."} onClick={() => void ex.prepare(false)}>
+        <button type="button" className="cf-btn is-center" disabled={ex.busy || !ex.officialReady} data-requires-no-blocking-gaps={ex.blocking.length ? "true" : undefined} title={ex.officialReady ? undefined : readOnly ? "Uses a current read-only check of the saved application." : "Unlocks after a current check finds no administrative holds, including any officer determination."} onClick={() => void ex.prepare(false)}>
           {ex.stage === "preparing" && !ex.draftIntent ? "Preparing PDF…" : "Official PDF"}
         </button>
         {blockers.length > 0 && (
@@ -276,7 +276,7 @@ function CaseApplication({ download }: { download: "" | "options" | "draft" }) {
                 <li key={g.id} className="cf-row">
                   <Dot tone="blocking" />
                   <span className="cf-row-text">{g.label}</span>
-                  {!locked && <a className="cf-row-go" href={fixHref(g)}>Fix <CIcon name="arrow" size={13} /></a>}
+                  {!readOnly && <a className="cf-row-go" href={fixHref(g)}>Fix <CIcon name="arrow" size={13} /></a>}
                 </li>
               ))}
             </ul>
@@ -298,7 +298,7 @@ function CaseApplication({ download }: { download: "" | "options" | "draft" }) {
             {n.sources[0] && <p><a className="cf-inline-link" href={n.sources[0].url} target="_blank" rel="noreferrer">{n.sources[0].title}</a></p>}
           </details>
         ))}
-        <button type="button" className="cf-btn is-ghost is-sm is-center" aria-label="Download a text record" title={locked ? "The officer’s decision, reason, date and message history, with the saved answers. Not the official form." : "Not the official form"} disabled={ex.recordBusy} onClick={() => void ex.downloadRecord()}>{ex.recordBusy ? "Reading review record…" : "Text record"}</button>
+        <button type="button" className="cf-btn is-ghost is-sm is-center" aria-label="Download a text record" title={readOnly ? "The officer’s decision, reason, date and message history, with the saved answers. Not the official form." : "Not the official form"} disabled={ex.recordBusy} onClick={() => void ex.downloadRecord()}>{ex.recordBusy ? "Reading review record…" : "Text record"}</button>
         {ex.recordNote && <p className="cf-faint cf-small" role="status">{ex.recordNote}</p>}
         <DocumentList c={c} caseId={engineId} />
         <RetainedSourceFiles caseId={engineId} />
@@ -323,7 +323,7 @@ function CaseApplication({ download }: { download: "" | "options" | "draft" }) {
             {ex.reasons.length > 0 ? <ul>{ex.reasons.map((r) => <li key={r}>{r}</li>)}</ul> : <p>{ex.tech}</p>}
           </details>
         )}
-        <EngineerCallout c={c} gaps={locked && !checked ? [] : gaps} readOnly={locked} />
+        <EngineerCallout c={c} gaps={readOnly && !checked ? [] : gaps} readOnly={readOnly} />
         <CompletenessNote />
       </aside>
     </div>

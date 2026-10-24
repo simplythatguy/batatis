@@ -245,7 +245,7 @@ import * as provisions from "../provisions.ts";
 import * as applications from "./applications.ts";
 import { nodes, text } from "../../scripts/component-harness.mjs";
 
-async function addAction(world: { scope: "application" | "none"; engineId: string; status: string | null }) {
+async function addAction(world: { scope: "application" | "none"; engineId: string; status: string | null; sending?: boolean }) {
   const dispatched: { to: string; action: { type: string; candidate?: { provision: string } } }[] = [];
   const h = await componentHarness(new URL("./CodeLibrary.tsx", import.meta.url), "AddToApplication", {
     "../store": {
@@ -257,7 +257,9 @@ async function addAction(world: { scope: "application" | "none"; engineId: strin
     "./begin": {
       useCurrentApplication: () => {
         const app = world.status ? { id: world.engineId, status: world.status, authority: "edmonton" } : null;
-        return { app, locked: applications.readOnly(app?.status as never) };
+        const readOnly = applications.readOnly(app?.status as never);
+        // `sending`: a dispatched submission is on its way (begin.ts: locked, not yet read-only).
+        return { app, locked: Boolean(world.sending) || readOnly, readOnly };
       },
     },
     "./codeScope": { useCodeScope: () => world.scope },
@@ -267,7 +269,7 @@ async function addAction(world: { scope: "application" | "none"; engineId: strin
     "./ui": { CIcon: () => null },
   });
   const props = { id: "9.10.15.4.", record: { id: "9.10.15.4.", title: "Area", article_title: "Area", text: "Synthetic.", citation: "NBC(AE) 2023" } };
-  const button = (tree: unknown) => nodes(tree, (n: { type: unknown }) => n.type === "button")[0] as { props: { onClick: () => void } } | undefined;
+  const button = (tree: unknown) => nodes(tree, (n: { type: unknown }) => n.type === "button")[0] as { props: { onClick: () => void; disabled?: boolean } } | undefined;
   return { h, props, dispatched, button };
 }
 
@@ -287,6 +289,20 @@ test("a sent application stays read-only in the library: no Add, a read-only not
     const tree = await h.render(props);
     assert.equal(button(tree), undefined, `${status} cannot be changed from the library`);
     assert.match(text(tree), /Your saved application is read-only\. You can still read the code\./);
+    h.unmount();
+  }
+});
+
+test("a submission on its way pauses Add: the button stays, disabled, and the draft is not called read-only", async () => {
+  for (const status of ["draft", "returned"]) {
+    const { h, props, dispatched, button } = await addAction({ scope: "application", engineId: "case-a", status, sending: true });
+    const tree = await h.render(props);
+    const add = button(tree);
+    assert.ok(add, `${status}: the mounted control stays while the saved revision is sent`);
+    assert.equal(add.props.disabled, true);
+    add.props.onClick();
+    assert.equal(dispatched.length, 0, "a late click cannot change the revision on its way");
+    assert.doesNotMatch(text(tree), /read-only/);
     h.unmount();
   }
 });

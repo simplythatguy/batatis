@@ -464,9 +464,9 @@ function NoQuestionsYet() {
 
 /** Coordinate the visit queue, rule and checklist answers, and navigation through the case’s cards. */
 function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boolean }) {
-  const { c, engineId, gaps, dispatch, requestCheck, sectionCLookup, reading, answerPlan, answerChecklist, reloadChecklists, applicationStatus, submissionDispatched } = useCase();
+  const { c, engineId, gaps, dispatch, requestCheck, sectionCLookup, reading, answerPlan, answerChecklist, reloadChecklists, applicationStatus } = useCase();
   const session = useSession();
-  const { app, locked } = useCurrentApplication();
+  const { app, locked, readOnly } = useCurrentApplication();
   const { onAnswer, decisionNoteFor } = useCandidateAnswer();
   const { options: deckExtras, extras } = useDeckExtras();
   const seen = useMemo(() => new Set(session.seen), [session.seen]);
@@ -938,13 +938,14 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
   return (
     <div className="cf-deck-page">
       {/* The check state lives on Review and in the header; the deck stays quiet. */}
-      {locked && !submissionDispatched && (
+      {readOnly && (
         <div className="cf-deck-status" role="status">
           <span className={`cf-dot is-${status.tone}`} aria-hidden="true" />{status.heading}. {status.note}
         </div>
       )}
       <div className="cf-q-stage">
-        {locked ? (
+        {/* A submission on its way only pauses the mounted card (App's edit lock); a sent one is read-only. */}
+        {readOnly ? (
           <div className="cf-q-wrap" aria-labelledby="cf-q" role="group">
             <h2 id="cf-q" className="cf-q-text" tabIndex={-1}>Your saved answers are read-only.</h2>
             <p className="cf-q-help">Review the saved application, check its administrative completeness or download a record.</p>
