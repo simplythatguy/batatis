@@ -1,6 +1,12 @@
 """The supplied default is tracked; the legacy form is still fetched at build time."""
 import importlib.util
 import json
+import shlex
+import shutil
+import subprocess
+import sys
+
+import pytest
 from fnmatch import fnmatch
 from pathlib import Path
 
@@ -43,3 +49,35 @@ def test_each_versioned_runtime_template_is_bundled_without_an_ignored_reference
     assert '--scc-form' in build or 'SCC-Variance-Form.pdf' in build
     assert '--codes-only' not in build
     assert 'f2749e1273e1b1d5826ac98cc0d8cfcb1204386914751d496f0d162d9014b42a' in build
+
+
+@pytest.mark.parametrize('state', ['valid', 'changed', 'missing'])
+def test_build_checks_the_supplied_hash_before_any_download(tmp_path, state):
+    """Run the real guard; block later package/download commands in the offline fixture."""
+    root = Path(__file__).resolve().parents[2]
+    scripts = tmp_path / 'scripts'
+    scripts.mkdir()
+    script = scripts / 'vercel_build_engine.sh'
+    shutil.copyfile(root / 'scripts/vercel_build_engine.sh', script)
+    asset = tmp_path / 'engine/export/templates/challenge_2026-09-15.pdf'
+    asset.parent.mkdir(parents=True)
+    if state != 'missing':
+        asset.write_bytes((root / 'engine/export/templates/challenge_2026-09-15.pdf').read_bytes()
+                          + (b'\n% altered' if state == 'changed' else b''))
+    binary = tmp_path / 'bin'
+    binary.mkdir()
+    shim = binary / 'python'
+    shim.write_text('#!/bin/sh\nif [ "$1" = "-" ]; then exec '
+                    + shlex.quote(sys.executable) + ' "$@"; fi\n'
+                    + 'echo "OFFLINE: downstream command blocked"\nexit 73\n')
+    shim.chmod(0o755)
+    run = subprocess.run(['/bin/sh', str(script)], capture_output=True, text=True,
+                         env={'PATH': f'{binary}:/usr/bin:/bin', 'HOME': str(tmp_path)})
+    if state == 'valid':
+        assert run.returncode == 73
+        assert 'supplied challenge form sha256-checked' in run.stdout
+        assert 'OFFLINE: downstream command blocked' in run.stdout
+    else:
+        assert run.returncode == 1
+        assert 'missing or has a different SHA-256' in run.stderr
+        assert 'OFFLINE: downstream command blocked' not in run.stdout

@@ -158,7 +158,7 @@ def test_export_and_ccmc_runtime_files_are_bundled_and_not_excluded():
 
     function = json.loads((ROOT / 'vercel.json').read_text())['services']['engine']['functions']['engine/api.py']
     included, excluded = _globs(function['includeFiles']), _globs(function['excludeFiles'])
-    runtime = [scc.BUNDLE_FORM, scc.MAP_DIR / f'{scc.CURRENT_MAP}.json', ccmc.BUNDLED_SNAPSHOT, ccmc.BUNDLED_META,
+    runtime = [scc.BUNDLE_FORM, scc.form_path(), scc.MAP_DIR / f'{scc.CURRENT_MAP}.json', ccmc.BUNDLED_SNAPSHOT, ccmc.BUNDLED_META,
                ROOT / 'engine' / 'data' / 'process_examples.json']
     for path in runtime:
         rel = path.relative_to(ROOT).as_posix()

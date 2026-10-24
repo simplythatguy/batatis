@@ -3,7 +3,8 @@
 Steps: check the blank form's SHA-256 against the version-keyed field map, decide what goes in each applicant
 field (short values in the cell, long ones moved to the appendix with a reference), fill with pypdf, flatten
 (appearance streams merged into the page, every widget removed, so the help pop-ups and buttons disappear and
-every viewer shows the same thing), and append the generated appendix. Draft status stays in metadata.
+every viewer shows the same thing), and append the generated appendix. Draft status stays in metadata;
+the website displays it without adding visible markings to the supplied form or generated appendix.
 
 Export refuses while a fact is unconfirmed, a blocking gap is open or a required field is empty, unless
 draft=True. Only confirmed facts are ever written to the form, draft or not.
@@ -29,6 +30,7 @@ from ..process_fields import PROCESS_ALIASES
 from ..section_c import section_c_rows
 from ..section_d import supporting_documents, text_evidence
 from .edition import code_or_standard_value
+from .challenge_form import prepare_form
 from .text import fit, pdf_safe
 
 DEFAULT_FORM = Path(__file__).resolve().parents[2] / 'reference' / 'guides' / 'SCC-Variance-Form.pdf'
@@ -36,7 +38,7 @@ BUNDLE_FORM = Path(__file__).resolve().parents[2] / 'codedb' / 'build' / 'SCC-Va
 FORM_NOT_FOUND_DETAIL = 'SCC variance form not found'
 EXPORT_FAILED_DETAIL = 'The SCC variance form could not be exported.'
 MAP_DIR = Path(__file__).parent / 'field_maps'
-CURRENT_MAP = 'scc_2026-10'
+CURRENT_MAP = 'challenge_2026-09-15'
 MULTILINE = 1 << 12
 SECTION_C_SIZES = (9.0, 7.0)          # one size band for the attribution table so the rows read evenly
 
@@ -92,9 +94,12 @@ class ExportResult:
         return [*self.form_text, *self.appendix_text]
 
 
-def form_path() -> Path:
-    """Explicit path, then a local guide copy, then the file the engine build downloads."""
+def form_path(version: str = CURRENT_MAP) -> Path:
+    """The tracked supplied asset, or the legacy-only override/guide/build copy."""
     override = (os.environ.get('BATATIS_SCC_FORM') or '').strip()
+    fmap = load_field_map(version)
+    if fmap.get('asset'):
+        return Path(__file__).parent / fmap['asset']
     if override:
         return Path(override)
     if DEFAULT_FORM.is_file():
@@ -107,7 +112,7 @@ def load_field_map(version: str = CURRENT_MAP) -> dict:
 
 
 def load_form(path: Path | str | None, fmap: dict) -> bytes:
-    path = Path(path) if path else form_path()
+    path = Path(path) if path else form_path(fmap['version'])
     if not path.is_file():
         raise FormNotFound(FORM_NOT_FOUND_DETAIL)
     data = path.read_bytes()
@@ -235,7 +240,9 @@ def _plan(case: Case, values: dict, fmap: dict, rects: dict, codes=None) -> _Pla
             put(name, f'See Appendix {ref}', ref, value)
             plan.overflow.append((ref, spec['label'], value))
     for name, spec in fmap['checkboxes'].items():
-        plan.checks[name] = spec['on'] if values.get(spec['fact']) is True else '/Off'
+        answer = values.get(spec['fact'])
+        checked = answer == spec['equals'] if 'equals' in spec else answer is True
+        plan.checks[name] = spec['on'] if checked else '/Off'
 
     # The form provides structured legal-description boxes. A free-text legal description
     # continues in the appendix; it is never split into invented lot/block/plan components.
@@ -261,7 +268,22 @@ def _plan(case: Case, values: dict, fmap: dict, rects: dict, codes=None) -> _Pla
         if row.differs:
             intent += 'The 2020 intent is attributed differently from NBC(AE) 2023. '
         intent += f'{INTENT_LABEL}: Appendix {ref}.' if row.intents else f'No NBC 2020 intent statement; Appendix {ref}.'
-        put(slot['intent'], intent, ref, None, see)
+        if fmap.get('dynamic_attributions') and row.intents:
+            from ..copyright import NRC_PUBLICATION_URL
+            actual = ' '.join(pdf_safe(t) for block in row.intents for t in block.intents)
+            labelled = notes[row.attribution_status]
+            if row.differs:
+                labelled += 'The 2020 intent is attributed differently from NBC(AE) 2023. '
+            labelled += f'{INTENT_LABEL}: {actual}'
+            shown = labelled if fit(labelled, rects[slot['intent']], *SECTION_C_SIZES) is not None else intent
+            put(slot['intent'], shown, ref, labelled if shown == labelled else actual, see)
+            if shown != labelled:
+                # Preserve the complete deterministic entry and its source when
+                # it needs more room than the exact source cell provides.
+                plan.overflow.append((ref, f'Intent entry for {row.provision_id} ({INTENT_LABEL})',
+                                      f'{actual}\n{row.citation}\n{NRC_PUBLICATION_URL}'))
+        else:
+            put(slot['intent'], intent, ref, None, see)
     plan.rows_in_form = len(shown_rows)
     if len(rows) > len(slots):
         k0, n = len(slots), len(rows)
@@ -278,6 +300,21 @@ def _plan(case: Case, values: dict, fmap: dict, rects: dict, codes=None) -> _Pla
     dslots = fmap['section_d_rows']
     docs = [(pdf_safe(d.title), pdf_safe(d.responsible_party)) for d in supporting_documents(case)]
     docs += [(pdf_safe(title), pdf_safe(who)) for title, who in text_evidence(case)]
+    if fmap.get('supporting_document_field'):
+        # The supplied source has one combined full-width field, not the legacy
+        # five-row/two-column table. Keep its exact box and use existing D refs.
+        name = fmap['supporting_document_field']
+        if docs:
+            listing = '\n'.join(f'D-{n}: {title}' + (f' - {who}' if who else '')
+                                for n, (title, who) in enumerate(docs, start=1))
+            if fit(listing, rects[name]) is not None:
+                put(name, listing)
+                plan.docs_in_form = len(docs)
+            else:
+                put(name, f'See Appendix D (D-1 to D-{len(docs)})')
+        elif NA_ROWS['section_d'] in na:
+            mark_na(name, NA_ROWS['section_d'])
+        return plan
     shown_docs = docs if len(docs) <= len(dslots) else docs[:len(dslots) - 1]
     for n, (slot, (doc, who)) in enumerate(zip(dslots, shown_docs), start=1):
         ref = f'D-{n}'
@@ -374,10 +411,21 @@ def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str
     notes = package_notes(case, codes)
     case = _canonical_case(case, codes)
     blank_form = load_form(form, fmap)
+    blank_form, fmap = prepare_form(blank_form, fmap, len(case.section_c))
     values = confirmed_values(case)
     plan = _plan(case, values, fmap, _rects(blank_form, fmap), codes)
     filled, placements = _fill_and_flatten(blank_form, plan)
-    form_text = [f'{name}: {full}' for name, (_shown, _ref, full) in plan.text.items()]
+    # Keep a source passage separate from its field label. "Intent statement"
+    # is a PDF /T name, not a claim that every cross-reference inside the quoted
+    # passage identifies a national intent-table entry.
+    intent_fields = {slot['intent'] for slot in fmap['section_c_rows']} if fmap.get('dynamic_attributions') else set()
+    form_text = []
+    for name, (_shown, _ref, full) in plan.text.items():
+        if name in intent_fields:
+            full = full.replace(f'{INTENT_LABEL}: ', f'{INTENT_LABEL}:\n\n')
+            form_text.append(f'{name}:\n\n{full}')
+        else:
+            form_text.append(f'{name}: {full}')
     appendix_text: list[str] = []
     appendix = build_appendix(case, plan, values, fmap, codes=codes,
                               open_items=reasons if draft else [], package_notes=notes, text=appendix_text)
@@ -388,12 +436,17 @@ def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str
     for page in app_reader.pages:
         out.add_page(page)
     out.add_metadata({'/Title': 'Variance Form for Proposed Alternative Solution' + (' (DRAFT)' if draft else ''),
-                      '/Producer': f'Batatis export, field map {fmap["version"]}'})
+                      '/Producer': f'Batatis export, field map {fmap["version"]}',
+                      '/BatatisFormVersion': fmap['version'],
+                      '/BatatisAttributionRows': str(max(1, len(case.section_c))),
+                      '/BatatisFormPages': str(form_pages)})
     buf = io.BytesIO()
     out.write(buf)
     filled_names = set(plan.text) | {k for k, v in plan.checks.items() if v != '/Off'}
     blank = [n for n in [*fmap['text_fields'], *[f for r in fmap['section_c_rows'] for f in r.values()],
-                         *[f for r in fmap['section_d_rows'] for f in r.values()]] if n not in filled_names]
+                         *[f for r in fmap['section_d_rows'] for f in r.values()],
+                         *([fmap['supporting_document_field']] if fmap.get('supporting_document_field') else [])]
+             if n not in filled_names]
     visible = list(dict.fromkeys((reasons if draft else []) + notes))
     return ExportResult(pdf=buf.getvalue(), field_map=fmap['version'], form_pages=form_pages,
                         appendix_pages=len(app_reader.pages), draft=draft, placements=placements,

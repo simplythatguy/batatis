@@ -1,10 +1,10 @@
 """Gate G3: the official SCC form export is complete and clean for the three demo cases and the BTRboard sample.
 
-Run: python scripts/gate_g3.py            (needs the blank SCC form: BATATIS_SCC_FORM or codedb/build/)
+Run: python scripts/gate_g3.py            (uses the tracked supplied form and a built public CodeDB)
 
 Checks, one line each, then PASS or FAIL:
   1. N/A only from applicant facts: N/A cells trace to a confirmed applicant fact; removing the fact leaves a blank
-  2. 50 applicant fields filled or N/A for each case
+  2. runtime applicant fields filled or N/A for each case
   3. `python -m codedb validate` over the exported text: 0 errors
   4. render: every filled field drawn inside its box; long values carried by the appendix
   5. appendix: Section C rows (lookup objectives and functions, quoted sentence, how identified) and the six
@@ -74,7 +74,7 @@ def _bundle_problems() -> list[str]:
     inc, exc = (function[k].strip('{}').split(',') for k in ('includeFiles', 'excludeFiles'))
     match = lambda rel, globs: any(fnmatch(rel, g) or fnmatch(rel, g.replace('/**/', '/')) for g in globs)  # noqa: E731
     out = []
-    for path in (scc.BUNDLE_FORM, scc.MAP_DIR / f'{scc.CURRENT_MAP}.json', ccmc.BUNDLED_SNAPSHOT, ccmc.BUNDLED_META,
+    for path in (scc.BUNDLE_FORM, scc.form_path(), scc.MAP_DIR / f'{scc.CURRENT_MAP}.json', ccmc.BUNDLED_SNAPSHOT, ccmc.BUNDLED_META,
                  ROOT / 'engine' / 'data' / 'process_examples.json'):
         rel = path.relative_to(ROOT).as_posix()
         if not match(rel, inc) or match(rel, exc):
@@ -89,12 +89,12 @@ def _bundle_problems() -> list[str]:
 
 def main() -> int:
     if not form_path().is_file():
-        print('G3 cannot run: the blank SCC form is missing (set BATATIS_SCC_FORM).')
+        print('G3 cannot run: the tracked supplied challenge template is missing.')
         return 2
     codes = Codes()
     cases = {name: demo_case(name, codes) for name in CASES}
     cases['sample-btrboard'] = sample_case(codes)
-    checks = {k: [] for k in ('1 N/A only from applicant facts', '2 50 applicant fields filled or N/A',
+    checks = {k: [] for k in ('1 N/A only from applicant facts', '2 runtime applicant fields filled or N/A',
                               '3 codedb validate: 0 errors', '4 render test', '5 Section C and process rows',
                               '6 precedent-example panel data', '7 CCMC snapshot and bundle', '8 wording')}
     keys = list(checks)
@@ -102,7 +102,7 @@ def main() -> int:
     for name, case in cases.items():
         result = export_case(case, codes=codes)
         cov = coverage(case, result)
-        print(f'  {name}: {len(cov["filled"])} filled + {len(cov["na"])} N/A of 50; '
+        print(f'  {name}: {len(cov["filled"])} filled + {len(cov["na"])} N/A of {sum(map(len, cov.values()))}; '
               f'{result.form_pages} form pages + {result.appendix_pages} appendix pages; {len(case.section_c)} Section C rows')
         checks[keys[0]] += _na_problems(name, case, result, codes)
         checks[keys[1]] += [f'{name}: {p}' for p in coverage_problems(case, result) if 'N/A' not in p]

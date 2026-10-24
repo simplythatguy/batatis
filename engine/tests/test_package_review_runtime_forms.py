@@ -11,12 +11,19 @@ from engine.export.scc import load_form
 from engine.export.sample import sample_case
 from engine.review.package import review_uploads
 from engine.review.pdf_reader import read_pdf
-from engine.tests.test_supplied_form_export import PROVISIONS, prepare_form
+from engine.tests.test_supplied_form_export import PROVISIONS, prepare_form, legacy_form
 
 
 def editable(count, *, version='challenge_2026-09-15', flatten=False):
     fmap = load_field_map(version)
-    blank, runtime = prepare_form(load_form(None, fmap), fmap, count)
+    from engine.export import FormNotFound
+    try:
+        source = load_form(None, fmap)
+    except FormNotFound:
+        if version == 'scc_2026-10':
+            pytest.skip('legacy SCC form requires the build-time fetch or BATATIS_SCC_FORM')
+        raise
+    blank, runtime = prepare_form(source, fmap, count)
     writer = PdfWriter(clone_from=io.BytesIO(blank))
     values = {'Owner': 'SYNTHETIC actual owner', 'Supporting Doc': 'SYNTHETIC attachment - SYNTHETIC author'}
     values.update({row['article']: PROVISIONS[index] for index, row in enumerate(runtime['section_c_rows'])})
@@ -144,7 +151,9 @@ def test_scanned_dynamic_page_cannot_attest_a_tampered_row_hint():
 
 
 @pytest.mark.parametrize('version', ['scc_2026-10', 'challenge_2026-09-15'])
-def test_each_version_refuses_its_own_source_hash_mismatch(monkeypatch, tmp_path, version):
+def test_each_version_refuses_its_own_source_hash_mismatch(monkeypatch, tmp_path, version, request):
+    if version == 'scc_2026-10':
+        request.getfixturevalue('legacy_form')
     bad = tmp_path / 'source.pdf'
     bad.write_bytes(load_form(None, load_field_map(version)) + b'\n% altered\n')
     data = editable(1, version=version, flatten=True)
@@ -154,13 +163,16 @@ def test_each_version_refuses_its_own_source_hash_mismatch(monkeypatch, tmp_path
         # Option B: the environment override is deliberately legacy-only.
         from engine.export import scc
         original = scc.form_path
-        monkeypatch.setattr(scc, 'form_path', lambda v=scc.CURRENT_MAP: bad if v == version else original(v))
+        target_version = version
+        def source_path(version=scc.CURRENT_MAP):
+            return bad if version == target_version else original(version)
+        monkeypatch.setattr(scc, 'form_path', source_path)
     read = read_pdf(data, 'source-unavailable.pdf')
     assert read.form_version is None
     assert {v.status for v in read.fields.values()} == {'not_found'}
 
 
-def test_legacy_selected_row_metadata_keeps_fixed_five_rows_and_overflow():
+def test_legacy_selected_row_metadata_keeps_fixed_five_rows_and_overflow(legacy_form):
     codes = Codes()
     result = export_case(sample_case(codes, provisions=PROVISIONS), codes=codes, version='scc_2026-10')
     read = read_pdf(result.pdf, 'legacy-overflow.pdf')

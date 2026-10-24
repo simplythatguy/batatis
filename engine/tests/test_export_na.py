@@ -35,25 +35,41 @@ def shown(result):
     return {p.field: ' '.join(p.lines) for p in result.placements}
 
 
-def test_confirmed_na_renders_n_a_with_the_applicants_reason_in_the_appendix(codes):
+@pytest.mark.parametrize('version', ['challenge_2026-09-15', 'scc_2026-10'])
+def test_confirmed_na_renders_n_a_with_the_applicants_reason_in_the_appendix(codes, version):
     case = demo_case(CASE_A, codes)
-    result = export_case(case, codes=codes)
+    if not form_path(version).is_file():
+        pytest.skip('legacy SCC form not available')
+    result = export_case(case, codes=codes, version=version)
     cells = shown(result)
     assert cells['Permit'] == 'N/A' and cells['QTR'] == 'N/A' and cells['Owner Rep'] == 'N/A'
-    assert cells['Article(s)3'] == 'N/A' and cells['Supporting Doc5'] == 'N/A'
-    assert {'Permit', 'Owner Rep', 'Owner Rep Print', 'Date2', 'QTR', 'MER'} <= set(result.not_applicable)
+    if version == 'scc_2026-10':
+        assert cells['Article(s)3'] == 'N/A' and cells['Supporting Doc5'] == 'N/A'
+        assert {'Owner Rep Print', 'Date2'} <= set(result.not_applicable)
+    else:
+        assert {name for name in cells if name.startswith('Article(s)')} == {'Article(s)', 'Article(s)1'}
+        assert 'Supporting Doc' in cells and 'Supporting Doc5' not in cells
+        assert not {'Date1', 'Date2', 'Owner Rep Print'} & set(cells)
+    assert {'Permit', 'Owner Rep', 'QTR', 'MER'} <= set(result.not_applicable)
     assert not result.blank_fields
     text = appendix_text(result)
     assert 'N. Fields marked not applicable' in text
     assert 'No building permit has been applied for yet' in text and 'not_applicable.permit_number' in text
 
 
-def test_without_the_fact_the_field_stays_blank_and_is_never_shown_as_n_a(codes):
+@pytest.mark.parametrize('version', ['challenge_2026-09-15', 'scc_2026-10'])
+def test_without_the_fact_the_field_stays_blank_and_is_never_shown_as_n_a(codes, version):
     case = without(demo_case(CASE_A, codes), 'permit_number', 'section_c.unused_rows')
-    result = export_case(case, codes=codes)
+    if not form_path(version).is_file():
+        pytest.skip('legacy SCC form not available')
+    result = export_case(case, codes=codes, version=version)
     cells = shown(result)
     assert 'Permit' not in cells and 'Article(s)3' not in cells
-    assert {'Permit', 'Article(s)3', 'Intent statement4'} <= set(result.blank_fields)
+    if version == 'scc_2026-10':
+        assert {'Permit', 'Article(s)3', 'Intent statement4'} <= set(result.blank_fields)
+    else:
+        assert result.blank_fields == ['Permit']
+        assert not {'Article(s)3', 'Intent statement4'} & set(result.blank_fields)
     assert 'Permit' in coverage(case, result)['missing']
     assert 'N/A' not in cells.values() or all(f in result.not_applicable for f, v in cells.items() if v == 'N/A')
 

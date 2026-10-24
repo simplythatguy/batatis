@@ -26,19 +26,27 @@ def norm(text: str) -> str:
 
 
 def applicant_fields(fmap: dict | None = None) -> list[str]:
-    """The 50 applicant fields: 19 text, 1 checkbox, 20 Section C and 10 Section D cells."""
+    """Applicant fields for this template/layout; signatures and consent are excluded."""
     fmap = fmap or load_field_map()
     return [*fmap['text_fields'], *fmap['checkboxes'], *[f for r in fmap['section_c_rows'] for f in r.values()],
-            *[f for r in fmap['section_d_rows'] for f in r.values()]]
+            *[f for r in fmap['section_d_rows'] for f in r.values()],
+            *([fmap['supporting_document_field']] if fmap.get('supporting_document_field') else [])]
 
 
 def coverage(case: Case, result: ExportResult, fmap: dict | None = None) -> dict[str, list[str]]:
     """Each applicant field is filled, N/A (from an applicant fact) or missing. A checkbox is filled when the
     applicant confirmed a yes or a no for it."""
-    fmap = fmap or load_field_map()
+    if fmap is None:
+        fmap = load_field_map(result.field_map)
+        if fmap.get('dynamic_attributions'):
+            from .challenge_form import row_fields
+            count = len(case.section_c)
+            fmap['section_c_rows'] = [row_fields(i) for i in range(max(1, count))]
     values = confirmed_values(case)
     drawn = {p.field for p in result.placements}
-    answered_boxes = {name for name, spec in fmap['checkboxes'].items() if isinstance(values.get(spec['fact']), bool)}
+    answered_boxes = {name for name, spec in fmap['checkboxes'].items()
+                      if (values.get(spec['fact']) in spec['answers'] if 'answers' in spec
+                          else isinstance(values.get(spec['fact']), bool))}
     out = {'filled': [], 'na': [], 'missing': []}
     for name in applicant_fields(fmap):
         if name in result.not_applicable:

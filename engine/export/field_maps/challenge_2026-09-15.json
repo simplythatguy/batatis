@@ -1,0 +1,209 @@
+{
+  "version": "challenge_2026-09-15",
+  "form": "User-supplied Building Codes Challenge Scope Sept 15 2026, physical pages 5-11 (7 pages; 74 independent AcroForm widgets)",
+  "sha256": "f2749e1273e1b1d5826ac98cc0d8cfcb1204386914751d496f0d162d9014b42a",
+  "field_count": 74,
+  "note": "Mechanically extracted from the exact user-supplied source; shared attribution Kids split into independent terminal fields. Printed Part 4 is original source content, not verified CodeDB authority.",
+  "text_fields": {
+    "Owner": {
+      "fact": "owner_name",
+      "section": "A",
+      "label": "Owner's Name"
+    },
+    "Owner Rep": {
+      "fact": "owner_rep_name",
+      "section": "A",
+      "label": "Owner's Representative"
+    },
+    "Mailing Address": {
+      "fact": "mailing_address",
+      "section": "A",
+      "label": "Mailing Address"
+    },
+    "Date of Reqeuest": {
+      "fact": "request_date",
+      "section": "A",
+      "label": "Date of Request"
+    },
+    "Permit": {
+      "fact": "permit_number",
+      "section": "B",
+      "label": "Permit Number (if applicable)"
+    },
+    "Municipal Address": {
+      "fact": "municipal_address",
+      "section": "B",
+      "label": "Municipal Address"
+    },
+    "Lot": {
+      "fact": "lot",
+      "section": "B",
+      "label": "Lot"
+    },
+    "Block": {
+      "fact": "block",
+      "section": "B",
+      "label": "Block"
+    },
+    "Plan": {
+      "fact": "plan",
+      "section": "B",
+      "label": "Plan"
+    },
+    "QTR": {
+      "fact": "ats_qtr",
+      "section": "B",
+      "label": "ATS QTR"
+    },
+    "SEC": {
+      "fact": "ats_sec",
+      "section": "B",
+      "label": "ATS SEC"
+    },
+    "TWP": {
+      "fact": "ats_twp",
+      "section": "B",
+      "label": "ATS TWP"
+    },
+    "RGE": {
+      "fact": "ats_rge",
+      "section": "B",
+      "label": "ATS RGE"
+    },
+    "MER": {
+      "fact": "ats_mer",
+      "section": "B",
+      "label": "ATS MER"
+    },
+    "Code or Standard": {
+      "fact": "code_or_standard",
+      "section": "C",
+      "label": "Applicable Code or Standard",
+      "default": "National Building Code - 2023 Alberta Edition (2nd printing), Division B"
+    }
+  },
+  "checkboxes": {
+    "Check Box": {
+      "fact": "scope",
+      "equals": "jurisdiction",
+      "answers": [
+        "site",
+        "jurisdiction"
+      ],
+      "section": "B",
+      "label": "Proposed alternative solution is for a jurisdiction and is not site-specific",
+      "on": "/Yes"
+    }
+  },
+  "required_facts": [
+    "owner_name",
+    "mailing_address",
+    "request_date",
+    "municipal_address"
+  ],
+  "section_c_rows": [
+    {
+      "article": "Article(s)",
+      "objective": "Objective",
+      "function": "Function",
+      "intent": "Intent statement"
+    },
+    {
+      "article": "Article(s)1",
+      "objective": "Objective1",
+      "function": "Function1",
+      "intent": "Intent statement1"
+    },
+    {
+      "article": "Article(s)2",
+      "objective": "Objective2",
+      "function": "Function2",
+      "intent": "Intent statement2"
+    },
+    {
+      "article": "Article(s)3",
+      "objective": "Objective3",
+      "function": "Function3",
+      "intent": "Intent statement3"
+    },
+    {
+      "article": "Article(s)4",
+      "objective": "Objective4",
+      "function": "Function4",
+      "intent": "Intent statement4"
+    }
+  ],
+  "section_d_rows": [],
+  "section_d_facts": {
+    "document": "supporting_doc.{n}.name",
+    "responsible": "supporting_doc.{n}.responsible"
+  },
+  "skipped": {
+    "officer": [
+      "Date Review",
+      "Jurisdiction",
+      "Agency",
+      "SCO",
+      "Discipline",
+      "Certification",
+      "Designation",
+      "Must be Met",
+      "SCO Date",
+      "Date Review1",
+      "Jurisdiction1",
+      "Agency1",
+      "SCO1",
+      "Discipline1",
+      "Certification1",
+      "Designation1",
+      "Reasons for Refusal",
+      "SCO Date1",
+      "B1",
+      "B2",
+      "B3"
+    ],
+    "signature": [
+      "Signature1",
+      "Signature2",
+      "Signature3",
+      "Signature4",
+      "Date1",
+      "Date2"
+    ],
+    "consent": [
+      "Check Box14"
+    ],
+    "button": [
+      "Logo",
+      "ATS",
+      "Section C Button",
+      "Supp Doc Button",
+      "Appeals Info"
+    ],
+    "help": [
+      "Logo Popup",
+      "ATS Popup",
+      "Section C Popup",
+      "Supp Doc Popup"
+    ]
+  },
+  "asset": "templates/challenge_2026-09-15.pdf",
+  "form_pages": 7,
+  "source": {
+    "title": "Building Codes Challenge Scope Sept 15 2026.pdf",
+    "sha256": "761bf8d9d8e93445a49ce58c443a1a8928fa08a45a031a0adc371d45fd5a7d55",
+    "physical_pages": [
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "canonical_fields": 58,
+    "widgets": 74
+  },
+  "dynamic_attributions": true,
+  "supporting_document_field": "Supporting Doc"
+}

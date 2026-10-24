@@ -39,7 +39,7 @@ The fetch script downloads and checks the expected hashes of these official publ
 
 It also extracts the page text needed by the builder. Downloads and extraction can take several minutes. A missing source or hash mismatch stops the process.
 
-The build creates `codedb/build/codedb.sqlite`. The form is saved as `codedb/build/SCC-Variance-Form.pdf`. Refresh the app after a successful build. Do not commit these files or the downloaded source PDFs. See the [CodeDB guide](../codedb/README.md) for source details and lookup commands.
+The build creates `codedb/build/codedb.sqlite`. The legacy five-page form is saved as `codedb/build/SCC-Variance-Form.pdf`; `BATATIS_SCC_FORM` overrides only that legacy version. The default seven-page challenge form is the tracked, hash-pinned `engine/export/templates/challenge_2026-09-15.pdf`. See [template provenance](../engine/export/templates/README.md). Refresh the app after a successful build. Do not commit the generated SQLite database, downloaded legacy form, or downloaded NRC source PDFs. See the [CodeDB guide](../codedb/README.md) for source details and lookup commands.
 
 ## Manage the local app
 

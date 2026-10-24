@@ -2,11 +2,13 @@
 from __future__ import annotations
 
 from contextlib import ExitStack
+import io
 import os
 import uuid
 
 import pytest
 from fastapi.testclient import TestClient
+from pypdf import PdfReader
 
 from engine.api import create_app
 from engine.codes import Codes
@@ -410,7 +412,8 @@ def test_official_blank_draft_retains_graphics_and_page_uncertainty(
     assert reading['status'] == finding['status'] == 'not_found', reading
     assert reading['value'] is None
     assert [(p['page'], p['quote']) for p in finding['pointers'] if p['file'] == 'supplement.pdf'] == expected_sources
-    assert any(p['file'] == 'official-blank-draft.pdf' and p['page'] == 6
+    appendix_page = int(PdfReader(io.BytesIO(exported.content)).metadata['/BatatisFormPages']) + 1
+    assert any(p['file'] == 'official-blank-draft.pdf' and p['page'] == appendix_page
                and p['quote'] == '(Not provided or not confirmed. No answer has been supplied by Batatis.)'
                for p in finding['pointers'])
     assert next(f for f in session['files'] if f['name'] == 'supplement.pdf')['sha256'] == hashlib.sha256(data).hexdigest()

@@ -69,7 +69,9 @@ The builder needs the NBC(AE) 2023 2nd-printing PDF and the NBC 2020 intent-stat
 
 Do not work around a failed download by committing the PDF or the sqlite.
 
-The same build downloads the Safety Codes Council variance form from `https://ebs.safetycodes.ab.ca/documents/webdocs/PI/Variance%20Template%20final.pdf`. The pinned sha256 is `f44640ca005c957c11a2387d2768fffc35ef93c97125dcca37436fcc0b9afc1d` (334580 bytes), the same digest as `engine/export/field_maps/scc_2026-10.json`. The file lands at `codedb/build/SCC-Variance-Form.pdf` and is included in the engine bundle. It is not committed. If that host is unreachable, set `SCC_FORM_URL` to a private object. `CODEDB_SKIP_OFFICIAL=1` skips the official URL when the private one is set. A missing form at runtime makes `POST /cases/{id}/export` return 503 with `SCC variance form not found`. The server log says the export is unavailable on this deployment. A form whose sha256 does not match the field map returns 500 with `The SCC variance form could not be exported.` The response does not include the form path.
+The default export uses the tracked seven-page `engine/export/templates/challenge_2026-09-15.pdf`, mechanically extracted from physical pages 5–11 of the supplied challenge. Its SHA-256 is `f2749e1273e1b1d5826ac98cc0d8cfcb1204386914751d496f0d162d9014b42a`; the build verifies it before downloading sources. The field map and tracked asset ship in the engine bundle. See [template provenance and reproduction](../engine/export/templates/README.md).
+
+For explicit legacy `scc_2026-10` exports and uploads, the same build downloads the Safety Codes Council variance form from `https://ebs.safetycodes.ab.ca/documents/webdocs/PI/Variance%20Template%20final.pdf`. The pinned sha256 is `f44640ca005c957c11a2387d2768fffc35ef93c97125dcca37436fcc0b9afc1d` (334580 bytes), the same digest as `engine/export/field_maps/scc_2026-10.json`. The file lands at `codedb/build/SCC-Variance-Form.pdf` and is included in the engine bundle. It is not committed. If that host is unreachable, set `SCC_FORM_URL` to a private object. `CODEDB_SKIP_OFFICIAL=1` skips the official URL when the private one is set. A missing requested form at runtime makes `POST /cases/{id}/export` return 503 with `SCC variance form not found`. The server log says the export is unavailable on this deployment. A form whose sha256 does not match the field map returns 500 with `The SCC variance form could not be exported.` The response does not include the form path.
 
 ## Environment variables
 
@@ -86,7 +88,7 @@ Set these on the Vercel project for Preview and Production. Leave the project Ro
 | `BATATIS_LLM_RATE_WINDOW_SECONDS` | engine runtime | Default `600`. |
 | `BATATIS_SEARCH_RATE_LIMIT` | engine runtime | Default `60` searches per IP per window, per engine instance. `GET /code/search` and `GET /ccmc/search` share this window. The client IP is the first hop of `x-vercel-forwarded-for`, then `X-Forwarded-For`, then the peer address. |
 | `BATATIS_SEARCH_RATE_WINDOW_SECONDS` | engine runtime | Default `600` (10 minutes). A 429 body is `Search limit reached; try again in N seconds` and sets `Retry-After`. The search window and the model window are each an in-memory `SlidingWindow` on one process. They are not a cap shared across instances. The shared cap is the Postgres daily spend ledger. |
-| `BATATIS_SCC_FORM` | engine runtime | Optional filesystem path to the SCC variance form. The build's copy is `codedb/build/SCC-Variance-Form.pdf`. |
+| `BATATIS_SCC_FORM` | engine runtime | Optional filesystem path for the legacy `scc_2026-10` form only; it cannot replace the supplied default. The build's copy is `codedb/build/SCC-Variance-Form.pdf`. |
 | `SCC_FORM_URL` | engine build | Optional private URL for the SCC variance form. Still sha256-checked. |
 | `CODEDB_PDF_URL` | engine build | Optional private URL for the NBC(AE) PDF. |
 | `CODEDB_INTENT_PDF_URL` | engine build | Optional private URL for the intent PDF. |

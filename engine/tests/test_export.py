@@ -58,16 +58,23 @@ def appendix_text(pdf: bytes, form_pages: int) -> str:
     return norm(' '.join(FOOTER.sub(' ', t) for t in page_texts(pdf)[form_pages:]))
 
 
-def test_field_map_covers_all_87_fields_once():
-    fmap = load_field_map()
-    reader = pypdf.PdfReader(FORM)
+@pytest.mark.parametrize('version,field_count,applicant_count', [
+    ('challenge_2026-09-15', 74, 37), ('scc_2026-10', 87, 50),
+])
+def test_field_map_covers_every_source_field_once(version, field_count, applicant_count):
+    fmap = load_field_map(version)
+    source = form_path(version)
+    if not source.is_file():
+        pytest.skip('legacy SCC form not available (build-time fetch or BATATIS_SCC_FORM)')
+    reader = pypdf.PdfReader(source)
     fields = set(reader.get_fields())
     applicant = [*fmap['text_fields'], *fmap['checkboxes'],
                  *[f for r in fmap['section_c_rows'] for f in r.values()],
-                 *[f for r in fmap['section_d_rows'] for f in r.values()]]
+                 *[f for r in fmap['section_d_rows'] for f in r.values()],
+                 *([fmap['supporting_document_field']] if fmap.get('supporting_document_field') else [])]
     skipped = [f for group in fmap['skipped'].values() for f in group]
-    assert len(fields) == fmap['field_count'] == 87
-    assert len(applicant) == 50 and len(set(applicant)) == 50
+    assert len(fields) == fmap['field_count'] == field_count
+    assert len(applicant) == len(set(applicant)) == applicant_count
     assert sorted(applicant + skipped) == sorted(fields)
 
 
@@ -120,7 +127,8 @@ def test_final_export_has_no_widgets_or_help_popups(final):
 def test_render_and_extract_every_filled_value(final, case):
     doc = pdfium.PdfDocument(final.pdf)
     appendix = appendix_text(final.pdf, final.form_pages)
-    assert final.form_pages == 5 and final.appendix_pages >= 1
+    assert len(case.section_c) == 8
+    assert final.form_pages == 8 and final.appendix_pages >= 1
     assert len(final.placements) >= 40
     for pl in final.placements:
         tp = doc[pl.page].get_textpage()
@@ -143,10 +151,11 @@ def test_render_and_extract_every_filled_value(final, case):
 
 def test_section_c_cells_and_appendix_match_section_c_rows(final, case, codes):
     shown = {pl.field: norm(' '.join(pl.lines)) for pl in final.placements}
-    fmap = load_field_map()
+    from engine.export.challenge_form import row_fields
     rows = case.section_c
-    assert len(rows) > 5                           # fixture exercises the overflow path
-    for slot, row in zip(fmap['section_c_rows'][:4], rows):
+    assert len(rows) > 5                           # fixture exercises native table expansion
+    slots = [row_fields(i) for i in range(len(rows))]
+    for slot, row in zip(slots, rows):
         assert shown[slot['article']] == row.provision_id
         objs = list(dict.fromkeys(p.objective for p in row.pairs))
         fns = list(dict.fromkeys(p.function for p in row.pairs))
@@ -154,7 +163,8 @@ def test_section_c_cells_and_appendix_match_section_c_rows(final, case, codes):
         assert shown[slot['function']] in (', '.join(fns) if fns else 'No table row', f'See Appendix C-{rows.index(row) + 1}')
         if row.attribution_status == 'no row in the attribution table':
             assert 'No row in the NBC(AE) attribution table' in shown[slot['intent']]
-    assert f'rows 5 to {len(rows)}' in shown[fmap['section_c_rows'][4]['intent']]
+    assert [shown[slot['article']] for slot in slots] == [row.provision_id for row in rows]
+    assert not any(value.startswith('Rows ') for name, value in shown.items() if name.startswith('Article(s)'))
 
     appendix = appendix_text(final.pdf, final.form_pages)
     assert INTENT_LABEL in appendix

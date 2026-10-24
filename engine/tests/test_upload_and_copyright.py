@@ -219,8 +219,7 @@ def _export_client(tmp_path, monkeypatch):
 
 
 def test_export_without_the_scc_form_is_503(tmp_path, monkeypatch, caplog):
-    monkeypatch.setattr('engine.export.scc.DEFAULT_FORM', tmp_path / 'missing-guide.pdf')
-    monkeypatch.setattr('engine.export.scc.BUNDLE_FORM', tmp_path / 'missing-bundle.pdf')
+    monkeypatch.setattr('engine.export.scc.form_path', lambda *args, **kwargs: tmp_path / 'missing-supplied.pdf')
     client, case_id = _export_client(tmp_path, monkeypatch)
     with caplog.at_level(logging.ERROR, logger='engine.api'):
         response = client.post(f'/cases/{case_id}/export', json={'draft': True})
@@ -233,8 +232,7 @@ def test_export_without_the_scc_form_is_503(tmp_path, monkeypatch, caplog):
 def test_mismatched_form_is_500_without_a_path(tmp_path, monkeypatch, caplog):
     bad = tmp_path / 'wrong-form.pdf'
     bad.write_bytes(b'%PDF-1.4 not the council form')
-    monkeypatch.setattr('engine.export.scc.DEFAULT_FORM', bad)
-    monkeypatch.setattr('engine.export.scc.BUNDLE_FORM', tmp_path / 'missing-bundle.pdf')
+    monkeypatch.setattr('engine.export.scc.form_path', lambda *args, **kwargs: bad)
     client, case_id = _export_client(tmp_path, monkeypatch)
     with caplog.at_level(logging.ERROR, logger='engine.api'):
         response = client.post(f'/cases/{case_id}/export', json={'draft': True})

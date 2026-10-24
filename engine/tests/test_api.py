@@ -98,11 +98,12 @@ def test_cors_allows_localhost(client):
 
 def test_missing_scc_form_response_does_not_expose_path(tmp_path, monkeypatch):
     from engine import api
-    from engine.export.scc import load_form
+    from engine.export.scc import load_field_map, load_form
 
     missing_form = tmp_path / 'private-scc-form.pdf'
     monkeypatch.setenv('BATATIS_SCC_FORM', str(missing_form))
-    monkeypatch.setattr(api, 'export_case', lambda *args, **kwargs: load_form(None, {}))
+    monkeypatch.setattr(api, 'export_case',
+                        lambda *args, **kwargs: load_form(None, load_field_map('scc_2026-10')))
     client = TestClient(create_app(store=CaseStore(tmp_path / 'cases.sqlite'), codes=object()))
     case_id = client.post('/cases').json()['id']
 

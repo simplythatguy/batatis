@@ -264,11 +264,13 @@ def _label(fmap: dict, name: str) -> tuple[str, str]:
         for key, widget in row.items():
             if widget == name:
                 return f'Section D row {index} {"document" if key == "document" else "responsible person"}', 'D'
+    if name == fmap.get('supporting_document_field'):
+        return 'Supporting documents and responsible persons', 'D'
     return name, 'A'
 
 
 def _pointer(read: ReadFile, value: FieldValue) -> Pointer:
-    return Pointer(file=read.name, page=value.page + 1, form_field=value.name,
+    return Pointer(file=read.name, page=value.page + 1 if value.page is not None else None, form_field=value.name,
                    bbox=tuple(round(v, 1) for v in value.rect) if value.rect else None,
                    quote=value.value or None)
 
@@ -333,7 +335,8 @@ def review_uploads(uploads: list[tuple[str, bytes]], codes) -> Parts:
                 key=f'file:{read.name}:unreadable', section='D', field=f'file.{read.name}', label=f'file "{read.name}"',
                 status='not_found', problem='unreadable', message=f'{read.note} Check this file by eye.',
                 routed_to='officer', pointers=[Pointer(file=read.name)]))
-    fmap = next((m for m in field_maps() if form and m['version'] == form.form_version), None)
+    fmap = (form.field_map or next((m for m in field_maps() if m['version'] == form.form_version), None)
+            if form else None)
 
     # ---- field readings
     if form is not None:
@@ -473,6 +476,11 @@ def review_uploads(uploads: list[tuple[str, bytes]], codes) -> Parts:
             rows.append(unreadable_row(read, index))
     listed = []
     if form is not None and fmap:
+        combined = by_widget.get(fmap.get('supporting_document_field'))
+        if combined and combined.status == 'present':
+            # A delimiter in free text cannot establish separate titles or people.
+            pointer = _pointer(form, combined)
+            listed.append((1, combined.value, '', pointer, pointer))
         for number, row in enumerate(fmap['section_d_rows'], start=1):
             name, who = by_widget.get(row['document']), by_widget.get(row['responsible'])
             if name and name.status == 'present':

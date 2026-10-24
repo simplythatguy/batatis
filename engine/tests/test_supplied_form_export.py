@@ -30,6 +30,15 @@ def row_fields(index):
     return names(index)
 
 
+@pytest.fixture
+def legacy_form():
+    from engine.export import FormNotFound
+    try:
+        return load_form(None, load_field_map('scc_2026-10'))
+    except FormNotFound:
+        pytest.skip('legacy SCC form requires the build-time fetch or BATATIS_SCC_FORM')
+
+
 VERSION = 'challenge_2026-09-15'
 SOURCE_HASH = '761bf8d9d8e93445a49ce58c443a1a8928fa08a45a031a0adc371d45fd5a7d55'
 
@@ -153,7 +162,7 @@ def test_review_appeal_and_original_appendix_pages_are_unchanged(count):
     assert '2.2.2.1.(1) Information Required' not in '\n'.join(result.text)
 
 
-def test_legacy_form_remains_explicit_and_hash_matching():
+def test_legacy_form_remains_explicit_and_hash_matching(legacy_form):
     legacy = load_field_map('scc_2026-10')
     source = load_form(None, legacy)
     assert hashlib.sha256(source).hexdigest() == 'f44640ca005c957c11a2387d2768fffc35ef93c97125dcca37436fcc0b9afc1d'
@@ -164,10 +173,10 @@ def test_legacy_form_remains_explicit_and_hash_matching():
         load_form(form_path(), legacy)
 
 
-def test_an_old_download_override_cannot_silently_replace_the_supplied_default(monkeypatch):
+def test_an_old_download_override_cannot_silently_replace_the_supplied_default(monkeypatch, legacy_form):
     legacy_path = form_path('scc_2026-10')
     monkeypatch.setenv('BATATIS_SCC_FORM', str(legacy_path))
-    result = export_case(sample_case(Codes()), codes=Codes(), draft=True)
+    result = export_case(sample_case(Codes(), provisions=PROVISIONS[:1]), codes=Codes(), draft=True)
     assert result.field_map == VERSION and result.form_pages == 7
     assert form_path() != legacy_path
     assert load_form(None, load_field_map('scc_2026-10')) == legacy_path.read_bytes()
@@ -227,7 +236,9 @@ def test_coverage_detects_a_missing_last_native_article_instead_of_shrinking_the
 
 @pytest.mark.parametrize('version,count', [(VERSION, 0), (VERSION, 1), (VERSION, 6), (VERSION, 12),
                                           ('scc_2026-10', 0), ('scc_2026-10', 12)])
-def test_draft_pdf_has_no_added_visible_draft_marks_but_keeps_the_validation_contract(version, count):
+def test_draft_pdf_has_no_added_visible_draft_marks_but_keeps_the_validation_contract(version, count, request):
+    if version == 'scc_2026-10':
+        request.getfixturevalue('legacy_form')
     codes = Codes()
     case = sample_case(codes, provisions=PROVISIONS[:count])
     marker = 'UNCONFIRMED SHOULD NEVER APPEAR'

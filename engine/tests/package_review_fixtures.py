@@ -62,9 +62,9 @@ CLEAN_REPORT = [
 
 
 def blank_form() -> bytes:
-    fmap = load_field_map()
+    fmap = load_field_map('scc_2026-10')
     try:
-        return load_form(form_path(), fmap)
+        return load_form(form_path('scc_2026-10'), fmap)
     except (FormNotFound, FormMismatch):
         pytest.skip('SCC variance form not available (set BATATIS_SCC_FORM)')
 

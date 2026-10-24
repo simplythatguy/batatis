@@ -1,6 +1,6 @@
 """Gate G3 (WP-33, AC9.1): the three demo cases and the BTRboard sample export complete and clean.
 
-For each case: all 50 applicant fields are filled or N/A from an applicant fact; `codedb validate` over the
+For each case: all runtime applicant fields are filled or N/A from an applicant fact; `codedb validate` over the
 exported text reports 0 errors; every filled field renders inside its box; Section C rows (provision, lookup
 objectives and functions, quoted sentence, how identified) and the six process rows with their provenance are in
 the appendix; Batatis-authored text never says complies, safe, approved or adequate.
@@ -34,8 +34,10 @@ def exported(codes):
     return {name: (case, export_case(case, codes=codes)) for name, case in cases.items()}
 
 
-def test_the_field_map_has_50_applicant_fields():
-    assert len(applicant_fields()) == 50 == len(set(applicant_fields()))
+@pytest.mark.parametrize('version,count', [('challenge_2026-09-15', 37), ('scc_2026-10', 50)])
+def test_each_source_map_has_all_applicant_fields(version, count):
+    fields = applicant_fields(load_field_map(version))
+    assert len(fields) == len(set(fields)) == count
 
 
 def test_homebuilder_fixture_needs_a_current_officer_determination(exported, codes):
@@ -59,7 +61,8 @@ def test_gate_g3_passes(exported, codes, name):
     problems = check_case(case, result, codes)
     assert problems == {k: [] for k in problems}, problems
     cov = coverage(case, result)
-    assert len(cov['filled']) + len(cov['na']) == 50 and not cov['missing']
+    assert len(cov['filled']) + len(cov['na']) == 17 + 4 * max(1, len(case.section_c))
+    assert not cov['missing']
 
 
 def test_demo_cases_are_the_three_personas_and_exercise_na(exported):

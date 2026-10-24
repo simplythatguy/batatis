@@ -27,14 +27,13 @@ from functools import lru_cache
 from ..export import scc
 
 FORM_TITLE = 'Variance Form for Proposed Alternative Solution'
-FORM_PAGES = 5
-TEMPLATE_MATCH = 0.8
+MAX_ATTRIBUTION_ROWS = 256  # bound untrusted reconstruction hints independently of upload byte limits
 
 
 @dataclass
 class FieldValue:
     name: str                       # the form's own /T value
-    page: int                       # 0-based
+    page: int | None                # 0-based; unknown layout has only a file pointer
     rect: tuple[float, float, float, float] | None
     status: str                     # present | blank | not_found
     value: str = ''
@@ -61,6 +60,7 @@ class ReadFile:
     text_pages: list[PageText] = field(default_factory=list)   # attachment pages, or form pages after the form
     note: str = ''
     data: bytes = b''
+    field_map: dict | None = None    # verified runtime map for this form layout
 
     def locate(self, page: int, quote: str) -> tuple[float, float, float, float] | None:
         return locate(self.data, page, quote)
@@ -131,6 +131,9 @@ class FormVersion:
     pages: dict[str, int]
     template_text: tuple[str, ...]            # normalised text of each blank page
     template_objects: tuple[frozenset, ...]   # non-text object boxes on each blank page
+    template_glyphs: tuple[frozenset, ...]
+    page_boxes: tuple[tuple, ...]
+    widget_rects: dict[str, tuple]
 
 
 def _norm(text: str) -> str:
@@ -141,6 +144,8 @@ def mapped_widgets(fmap: dict) -> set[str]:
     names = set(fmap['text_fields']) | set(fmap['checkboxes'])
     for row in fmap['section_c_rows'] + fmap['section_d_rows']:
         names.update(row.values())
+    if fmap.get('supporting_document_field'):
+        names.add(fmap['supporting_document_field'])
     return names
 
 
@@ -270,28 +275,51 @@ def _annotation_boxes(page) -> frozenset:
     return frozenset(boxes)
 
 
-@lru_cache(maxsize=4)
-def _version(version: str, path: str) -> FormVersion | None:
-    import pypdfium2 as pdfium
+def _version(version: str, path: str, row_count: int = 5) -> FormVersion | None:
     fmap = scc.load_field_map(version)
     try:
-        blank = scc.load_form(path or None, fmap)
+        source = scc.load_form(path or None, fmap)
     except scc.ExportError:
         return None
-    rects = scc._rects(blank, fmap)
+    return _prepared_version(version, source, row_count)
+
+
+def _glyphs(page) -> frozenset:
+    """Source characters AND their geometry, rather than prose/name-overlap scores."""
+    text = page.get_textpage()
+    return frozenset((char, *(round(v, 1) for v in text.get_charbox(i)))
+                     for i in range(text.count_chars()) if (char := text.get_text_range(i, 1)).strip())
+
+
+def _page_box(page) -> tuple:
+    return (*map(float, page.mediabox), *map(float, page.cropbox), page.rotation)
+
+
+@lru_cache(maxsize=16)
+def _prepared_version(version: str, source: bytes, row_count: int) -> FormVersion:
+    import pypdfium2 as pdfium
     from pypdf import PdfReader
-    pages = {name: page for page, name, _ in scc._widgets(PdfReader(io.BytesIO(blank)).pages)}
+    fmap = scc.load_field_map(version)
+    blank, fmap = scc.prepare_form(source, fmap, row_count)
+    rects = scc._rects(blank, fmap)
+    reader = PdfReader(io.BytesIO(blank))
+    pages = {name: page for page, name, _ in scc._widgets(reader.pages)}
     doc = pdfium.PdfDocument(blank)
+    fmap['form_pages'] = len(doc)  # legacy stays fixed, irrespective of selected-row metadata
     texts = tuple(_norm(doc[i].get_textpage().get_text_range()) for i in range(len(doc)))
     objects = tuple(_object_boxes(doc[i]) for i in range(len(doc)))
-    return FormVersion(version, fmap, blank, rects, pages, texts, objects)
+    glyphs = tuple(_glyphs(doc[i]) for i in range(len(doc)))
+    return FormVersion(version, fmap, blank, rects, pages, texts, objects, glyphs,
+                       tuple(_page_box(page) for page in reader.pages),
+                       {name: tuple(round(float(v), 1) for v in widget['/Rect'])
+                        for _page, name, widget in scc._widgets(reader.pages)})
 
 
 def form_versions() -> list[FormVersion]:
     """Every version-keyed field map whose blank form is available on this deployment."""
     out = []
     for path in sorted(scc.MAP_DIR.glob('*.json')):
-        found = _version(path.stem, str(scc.form_path()))
+        found = _version(path.stem, str(scc.form_path(version=path.stem)))
         if found is not None:
             out.append(found)
     return out
@@ -301,12 +329,49 @@ def field_maps() -> list[dict]:
     return [scc.load_field_map(path.stem) for path in sorted(scc.MAP_DIR.glob('*.json'))]
 
 
-def _template_score(page_text: str, template: str) -> float:
-    words = template.split()
-    if not words:
-        return 0.0
-    lines = [' '.join(words[i:i + 6]) for i in range(0, len(words), 6)]
-    return sum(1 for line in lines if line in page_text) / len(lines)
+def _candidate_versions(reader) -> list[FormVersion]:
+    """Metadata can nominate a bounded candidate, never attest the uploaded layout."""
+    metadata = reader.metadata or {}
+    keys = ('/BatatisFormVersion', '/BatatisAttributionRows', '/BatatisFormPages',
+            '/BatatisSourceSHA256', '/BatatisSourcePages')
+    if not any(key in metadata for key in keys):
+        # Native legacy forms predate these hints. Missing new-layout hints stay uncertain.
+        return [v for v in form_versions() if not v.fmap.get('dynamic_attributions')]
+    version = metadata.get('/BatatisFormVersion')
+    fmap = next((m for m in field_maps() if m['version'] == version), None)
+    if not fmap:
+        return []
+    rows, pages = str(metadata.get(keys[1], '')), str(metadata.get(keys[2], ''))
+    if not re.fullmatch(r'[1-9]\d{0,3}', rows) or not re.fullmatch(r'[1-9]\d{0,3}', pages):
+        return []
+    if int(rows) > MAX_ATTRIBUTION_ROWS or int(pages) > len(reader.pages):
+        return []
+    if fmap.get('dynamic_attributions'):
+        if metadata.get(keys[3]) != fmap['source']['sha256'] or metadata.get(keys[4]) != '5-11':
+            return []
+    elif any(key in metadata for key in keys[3:]):
+        return []  # these source-page hints do not describe the five-page legacy form
+    found = _version(version, str(scc.form_path(version=version)), int(rows))
+    return [found] if found and found.fmap['form_pages'] == int(pages) else []
+
+
+def _layout_matches(reader, doc, version: FormVersion) -> bool:
+    count = version.fmap['form_pages']
+    if len(doc) < count:
+        return False
+    for i in range(count):
+        if _page_box(reader.pages[i]) != version.page_boxes[i]:
+            return False
+        page = doc[i]
+        if page.get_textpage().count_chars() == 0 and i > 0 and not version.fmap.get('dynamic_attributions'):
+            continue  # scanned page: its individual fields will be uncertain
+        # Dynamic table-only blanks can have no text. Their exact source vectors
+        # still need to match; a scanned page or forged hint cannot stand in for them.
+        if not version.template_glyphs[i] <= _glyphs(page):
+            return False
+        if not version.template_objects[i] <= _object_boxes(page):
+            return False
+    return True
 
 
 def locate(data: bytes, page: int, quote: str) -> tuple[float, float, float, float] | None:
@@ -527,32 +592,33 @@ def _overlaps(rect, boxes):
     return any(bx0 < x1 and bx1 > x0 and by0 < y1 and by1 > y0 for bx0, by0, bx1, by1 in boxes)
 
 
-def _fillable(reader, data: bytes, name: str, fmaps: list[dict]) -> ReadFile | None:
+def _fillable(reader, data: bytes, name: str, version: FormVersion) -> ReadFile | None:
     try:
         fields = reader.get_fields() or {}
     except Exception:  # noqa: BLE001
         return None
     if not fields:
         return None
-    best = None
-    for fmap in fmaps:
-        wanted = mapped_widgets(fmap)
-        share = len(wanted & set(fields)) / len(wanted)
-        if share >= TEMPLATE_MATCH and (best is None or share > best[0]):
-            best = (share, fmap)
-    if best is None:
+    # Canonical fields and actual widget geometry must match the verified blank.
+    if set(fields) != set(version.pages):
         return None
-    fmap = best[1]
+    fmap = version.fmap
     pages = {}
     rects = {}
     widgets = {}
     for page_no, widget_name, widget in scc._widgets(reader.pages):
-        pages.setdefault(widget_name, page_no)
-        rects.setdefault(widget_name, tuple(round(float(v), 1) for v in widget['/Rect']))
-        widgets.setdefault(widget_name, widget)
-    out = ReadFile(name, '', len(data), len(reader.pages), 'scc_form_fillable', fmap['version'], data=data)
+        rect = tuple(round(float(v), 1) for v in widget['/Rect'])
+        if (widget_name in pages or page_no != version.pages.get(widget_name)
+                or rect != version.widget_rects.get(widget_name)):
+            return None
+        pages[widget_name] = page_no
+        rects[widget_name] = rect
+        widgets[widget_name] = widget
+    if set(pages) != set(version.pages):
+        return None
+    out = ReadFile(name, '', len(data), len(reader.pages), 'scc_form_fillable', fmap['version'],
+                   data=data, field_map=fmap)
     import pypdfium2 as pdfium
-    version = _version(fmap['version'], str(scc.form_path()))
     doc = pdfium.PdfDocument(data)
     marks = {}
     for widget_name in sorted(mapped_widgets(fmap)):
@@ -600,7 +666,7 @@ def _fillable(reader, data: bytes, name: str, fmaps: list[dict]) -> ReadFile | N
             widget_name, pages.get(widget_name, 1), rects.get(widget_name), 'present' if signed else 'not_found',
             'digital signature present (not validated)' if signed else '',
             '' if signed else 'No digital signature value. A wet or image signature cannot be read; check the page.')
-    out.text_pages = _page_texts(data, range(FORM_PAGES, len(reader.pages)))
+    out.text_pages = _page_texts(data, range(fmap['form_pages'], len(reader.pages)))
     return out
 
 
@@ -657,71 +723,49 @@ def _page_texts(data: bytes, pages) -> list[PageText]:
     return out
 
 
-def _flattened(data: bytes, name: str, versions: list[FormVersion], fmaps: list[dict]) -> ReadFile | None:
+def _flattened(data: bytes, name: str, version: FormVersion) -> ReadFile:
     import pypdfium2 as pdfium
     doc = pdfium.PdfDocument(data)
-    if len(doc) < FORM_PAGES:
-        return None
-    first = _norm(doc[0].get_textpage().get_text_range())
-    if FORM_TITLE.casefold() not in first.casefold():
-        return None
-    for version in versions:
-        # Page 1 identifies the form; any other page with a text layer must match its template page too.
-        # A page with no text layer (scanned) does not disqualify the form; its fields become not found.
-        texts = [_norm(doc[i].get_textpage().get_text_range()) for i in range(FORM_PAGES)]
-        scores = [_template_score(texts[i], version.template_text[i]) for i in range(FORM_PAGES)
-                  if i == 0 or texts[i]]
-        if min(scores) < TEMPLATE_MATCH:
+    out = ReadFile(name, '', len(data), len(doc), 'scc_form_flattened', version.version,
+                   data=data, field_map=version.fmap)
+    annotations, glyphs, pdf_pages = {}, {}, {}
+    for widget_name in sorted(mapped_widgets(version.fmap)) + signature_widgets(version.fmap):
+        page_no = version.pages.get(widget_name, 0)
+        rect = version.rects[widget_name]
+        if page_no not in pdf_pages:
+            pdf_pages[page_no] = doc[page_no]
+        page = pdf_pages[page_no]  # retain the owner of cached raw text-object handles
+        text = _norm(page.get_textpage().get_text_bounded(*rect))
+        if widget_name in signature_widgets(version.fmap):
+            out.signatures[widget_name] = FieldValue(
+                widget_name, page_no, rect, 'not_found', '',
+                'A signature on a flattened form cannot be read. Check the signature box on the page.')
             continue
-        out = ReadFile(name, '', len(data), len(doc), 'scc_form_flattened', version.version, data=data)
-        annotations, glyphs, pdf_pages = {}, {}, {}
-        for widget_name in sorted(mapped_widgets(version.fmap)) + signature_widgets(version.fmap):
-            page_no = version.pages.get(widget_name, 0)
-            rect = version.rects[widget_name]
-            if page_no not in pdf_pages:
-                pdf_pages[page_no] = doc[page_no]
-            page = pdf_pages[page_no]  # retain the owner of cached raw text-object handles
-            text = _norm(page.get_textpage().get_text_bounded(*rect))
-            if widget_name in signature_widgets(version.fmap):
-                out.signatures[widget_name] = FieldValue(
-                    widget_name, page_no, rect, 'not_found', '',
-                    'A signature on a flattened form cannot be read. Check the signature box on the page.')
-                continue
-            if page_no not in annotations:
-                annotations[page_no] = _annotation_boxes(page)
-            if text:
-                if page_no not in glyphs:
-                    glyphs[page_no] = _text_glyphs(page)
-                state = (FieldValue(widget_name, page_no, rect, 'present', text)
-                         if not _overlaps(rect, annotations[page_no]) and _text_is_visible(page, rect, text, glyphs[page_no]) else
-                         FieldValue(widget_name, page_no, rect, 'not_found',
-                                    reason='The extracted text could not be verified as visible. Check the box on the page.'))
-            elif page.get_textpage().count_chars() == 0:
-                state = FieldValue(widget_name, page_no, rect, 'not_found',
-                                   reason='The page has no text layer (it may be scanned). Check the box on the page.')
-            elif _added_marks(page, rect, version.template_objects[page_no]) or _overlaps(rect, annotations[page_no]):
-                state = FieldValue(widget_name, page_no, rect, 'not_found',
-                                   reason='Something other than text is drawn in this box (handwriting, an image '
-                                          'or a stamp). Check the box on the page.')
-            else:
-                state = FieldValue(widget_name, page_no, rect, 'blank', reason='No text is in this box on the page.')
-            if widget_name in version.fmap['checkboxes']:
-                # A flattened check mark is a drawing, not text: never treat it as certain.
-                state = FieldValue(widget_name, page_no, rect, 'not_found',
-                                   reason='A check box on a flattened form cannot be read reliably.')
-            out.fields[widget_name] = state
-        out.text_pages = _page_texts(data, range(FORM_PAGES, len(doc)))
-        return out
-    note = ('This looks like the SCC variance form, but its layout does not match a known field map version, '
-            'or the blank form for that version is not available on this deployment.')
-    fmap = fmaps[-1] if fmaps else None
-    out = ReadFile(name, '', len(data), len(doc), 'scc_form_flattened', None, note=note, data=data)
-    if fmap:
-        for widget_name in sorted(mapped_widgets(fmap)):
-            out.fields[widget_name] = FieldValue(widget_name, 0, None, 'not_found', reason=note)
-    out.text_pages = _page_texts(data, range(FORM_PAGES, len(doc)))
+        if page_no not in annotations:
+            annotations[page_no] = _annotation_boxes(page)
+        if text:
+            if page_no not in glyphs:
+                glyphs[page_no] = _text_glyphs(page)
+            state = (FieldValue(widget_name, page_no, rect, 'present', text)
+                     if not _overlaps(rect, annotations[page_no]) and _text_is_visible(page, rect, text, glyphs[page_no]) else
+                     FieldValue(widget_name, page_no, rect, 'not_found',
+                                reason='The extracted text could not be verified as visible. Check the box on the page.'))
+        elif page.get_textpage().count_chars() == 0:
+            state = FieldValue(widget_name, page_no, rect, 'not_found',
+                               reason='The page has no text layer (it may be scanned). Check the box on the page.')
+        elif _added_marks(page, rect, version.template_objects[page_no]) or _overlaps(rect, annotations[page_no]):
+            state = FieldValue(widget_name, page_no, rect, 'not_found',
+                               reason='Something other than text is drawn in this box (handwriting, an image '
+                                      'or a stamp). Check the box on the page.')
+        else:
+            state = FieldValue(widget_name, page_no, rect, 'blank', reason='No text is in this box on the page.')
+        if widget_name in version.fmap['checkboxes']:
+            # A flattened check mark is a drawing, not text: never treat it as certain.
+            state = FieldValue(widget_name, page_no, rect, 'not_found',
+                               reason='A check box on a flattened form cannot be read reliably.')
+        out.fields[widget_name] = state
+    out.text_pages = _page_texts(data, range(version.fmap['form_pages'], len(doc)))
     return out
-
 
 def _added_marks(page, rect, template: frozenset) -> bool:
     x0, y0, x1, y1 = rect
@@ -730,6 +774,35 @@ def _added_marks(page, rect, template: frozenset) -> bool:
         if bx0 < x1 and bx1 > x0 and by0 < y1 and by1 > y0:
             return True
     return False
+
+
+def _form_read(reader, data: bytes, name: str) -> ReadFile | None:
+    import pypdfium2 as pdfium
+    doc = pdfium.PdfDocument(data)
+    metadata = reader.metadata or {}
+    has_fields = bool(reader.get_fields())
+    has_hint = any(key.startswith('/Batatis') for key in metadata)
+    has_title = len(doc) and FORM_TITLE.casefold() in _norm(doc[0].get_textpage().get_text_range()).casefold()
+    form_fields = {'Owner', 'Code or Standard', 'Article(s)'} <= set(reader.get_fields() or {})
+    if not (has_title or has_hint or form_fields):
+        return None
+    candidates = [v for v in _candidate_versions(reader) if _layout_matches(reader, doc, v)]
+    if len(candidates) == 1:
+        version = candidates[0]
+        if not has_fields:
+            return _flattened(data, name, version)
+        found = _fillable(reader, data, name, version)
+        if found is not None:
+            return found
+    note = ('This looks like the SCC variance form, but its source, layout, widgets or version hints '
+            'could not be verified. Check the original file; no field is treated as blank or present.')
+    out = ReadFile(name, '', len(data), len(doc),
+                   'scc_form_fillable' if has_fields else 'scc_form_flattened', note=note, data=data)
+    names = set().union(*(mapped_widgets(fmap) for fmap in field_maps()))
+    for widget in names:
+        out.fields[widget] = FieldValue(widget, None, None, 'not_found', reason=note)
+    # Unknown form boundaries must not turn its printed reviewer/Part 4 pages into applicant evidence.
+    return out
 
 
 def read_pdf(data: bytes, name: str) -> ReadFile:
@@ -746,16 +819,11 @@ def read_pdf(data: bytes, name: str) -> ReadFile:
         page_count = len(reader.pages)
     except Exception:  # noqa: BLE001 - a malformed upload is reported, not raised
         return ReadFile(name, digest, len(data), 0, 'unreadable', note='The PDF could not be opened.')
-    fmaps = field_maps()
     try:
-        found = _fillable(reader, data, name, fmaps)
-    except Exception:  # noqa: BLE001 - pypdf parses pages lazily; a broken widget falls through to flattened
-        found = None
-    if found is None:
-        try:
-            found = _flattened(data, name, form_versions(), fmaps)
-        except Exception:  # noqa: BLE001
-            found = None
+        found = _form_read(reader, data, name)
+    except Exception:  # noqa: BLE001 - broken form internals cannot establish a readable field
+        return ReadFile(name, digest, len(data), page_count, 'unreadable', data=data,
+                        note='The PDF layout or fields could not be inspected. Check the original file.')
     if found is not None:
         found.sha256, found.size = base['sha256'], base['size']
         return found

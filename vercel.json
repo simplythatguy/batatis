@@ -38,7 +38,7 @@
       "rewrites": [{ "source": "/api/:path(.*)?", "destination": "/:path" }],
       "functions": {
         "engine/api.py": {
-          "includeFiles": "{codedb/build/codedb.sqlite,codedb/build/SCC-Variance-Form.pdf,engine/data/**/*.json,engine/export/field_maps/*.json}",
+          "includeFiles": "{codedb/build/codedb.sqlite,codedb/build/SCC-Variance-Form.pdf,engine/data/**/*.json,engine/export/field_maps/*.json,engine/export/templates/*.pdf}",
           "excludeFiles": "{engine/tests/**,codedb/tests/**,evals/**,evals_dev/**,**/*fixture*/**,web/**,docs/**,research/**,reference/**,.cursor/**,.agents/**}"
         }
       }
