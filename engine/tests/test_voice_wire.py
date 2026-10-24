@@ -440,7 +440,10 @@ def test_configuration_commit_response_cancel_clear_and_reference_share_the_same
                 while len(remote.responses) < count:
                     await asyncio.sleep(0.001)
                 await answer(remote, list(remote.responses)[-1])
-                assert [e['type'] for e in await collect(ws)] == ['response.text', 'response.audio', 'response.done']
+                # Await the reply before using the short idle window to check for extra events.
+                events = [await receive(ws) for _ in range(3)]
+                assert [e['type'] for e in events] == ['response.text', 'response.audio', 'response.done']
+                assert await collect(ws) == []
             await update(ws, started)
             await utterance(ws, started, remote, revision=1)
             await remote.wait('response.create', count=7)
