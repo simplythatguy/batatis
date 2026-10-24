@@ -386,6 +386,10 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
     if (id === selectedId || id === engineId) {
       setListNote("");
       setOpenProblem(null);
+      // Go there now: the refresh below finishes later, when the visitor may have moved on.
+      if (to) location.replace(to);
+      else if (refused) location.hash = destination;
+      else if (!onStage) location.hash = lastStage.current;
       if (signedIn && engineId === id) {
         // The application already open here (a notification, or its own row): refresh its status, officer
         // updates and messages in place. It is never reopened over unsaved answers.
@@ -394,9 +398,6 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
         if (session !== accountSession() || request !== openRequest.current || engineCaseId() !== id) return;
         setListNote(error ?? "");
       }
-      if (to) location.replace(to);
-      else if (refused) location.hash = destination;
-      else if (!onStage) location.hash = lastStage.current;
       return;
     }
     if (!signedIn || opening) return;

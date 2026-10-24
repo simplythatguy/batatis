@@ -6,16 +6,19 @@ import "../src/styles.css";
 import "../src/calm/calm.css";
 import "../src/calm/accounts.css";
 import { review } from "../src/api/accounts";
-import type { EngineGap } from "../src/api/client";
+import type { EngineGap, ReviewQuestion } from "../src/api/client";
 import { setAccountState } from "../src/calm/account";
 import { ReturnDialog } from "../src/calm/reviewer/ReturnDialog";
+
+// The review page also passes the case's open questions (none in these scenarios) and their load error.
+const NO_QUESTIONS: ReviewQuestion[] = [];
 
 function Harness() {
   const [props, setProps] = useState({ open: false, caseId: "unopened", applicant: "SYNTHETIC applicant", gaps: [] as EngineGap[] });
   const [sent, setSent] = useState("");
   Object.assign(window, { returnDraft: { setProps, setAccountState } });
   return <div className="cf-app">
-    <ReturnDialog {...props} onClose={() => setProps(current => ({ ...current, open: false }))}
+    <ReturnDialog questions={NO_QUESTIONS} questionError="" {...props} onClose={() => setProps(current => ({ ...current, open: false }))}
       onSend={async (message, items) => {
         await review.decide(props.caseId, { outcome: "return", message, items });
         setSent(message);

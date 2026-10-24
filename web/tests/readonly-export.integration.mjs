@@ -14,6 +14,11 @@ let passed = 0, failed = 0;
 // Thread-only reads may update communication metadata. Every content/workflow value,
 // version, message body and retention date must still match exactly.
 const withoutReceipts = ({ updated_at, ...saved }) => ({ ...saved, messages: saved.messages.map(({ read_by, ...message }) => message) });
+// Headless Chromium may download the embedded PDF preview too. Wait for the named export
+// requested by the control, then keep checking its actual bytes and all server-side gates.
+const pdfDownload = (page, id, draft = false) => page.waitForEvent('download', {
+  predicate: download => download.suggestedFilename() === `${id}-scc-variance${draft ? '-DRAFT' : ''}.pdf`,
+});
 
 async function scenario(name, key, run) {
   const context = await browser.newContext({ acceptDownloads: true });
@@ -92,14 +97,14 @@ async function scenario(name, key, run) {
 
 try {
   for (const status of ['accepted', 'submitted', 'in_review']) {
-    await scenario(`J09 ${status} reload: read-only server check unlocks the real official PDF without a write`, status, async ({ page, open, check, remote, noWrites, nav }) => {
+    await scenario(`J09 ${status} reload: read-only server check unlocks the real official PDF without a write`, status, async ({ page, id, open, check, remote, noWrites, nav }) => {
       // A new visit must establish server completeness; it must not inherit a prior draft check.
       await open();
       const before = await remote();
       assert.equal(await page.getByRole('button', { name: 'Official PDF', exact: true }).isDisabled(), true);
       await check();
       assert.equal(await page.getByRole('button', { name: 'Official PDF', exact: true }).isEnabled(), true);
-      const downloading = page.waitForEvent('download');
+      const downloading = pdfDownload(page, id);
       await page.getByRole('button', { name: 'Official PDF', exact: true }).click();
       const download = await downloading;
       assert.match(download.suggestedFilename(), /-scc-variance\.pdf$/);
@@ -133,9 +138,11 @@ try {
       assert.ok((await page.evaluate(() => window.caseStore.gaps)).some(g => g.severity === 'blocking'));
       assert.equal((await context.request.post(base + `/cases/${id}/export`, { data: { draft: false } })).status(), 409, 'The backend independently enforces every official-export gate');
       await nav('/application');
-      const downloading = page.waitForEvent('download');
+      const downloading = pdfDownload(page, id, true);
       await page.getByRole('button', { name: 'Download draft PDF', exact: true }).click();
-      assert.match((await downloading).suggestedFilename(), /-DRAFT\.pdf$/);
+      const download = await downloading;
+      assert.match(download.suggestedFilename(), /-DRAFT\.pdf$/);
+      assert.equal((await readFile(await download.path())).subarray(0, 4).toString(), '%PDF');
       noWrites(); assert.deepEqual(withoutReceipts(await remote()), withoutReceipts(before));
     });
   }

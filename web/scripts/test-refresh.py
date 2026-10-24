@@ -44,11 +44,11 @@ def serve(directory):
     store = CaseStore(directory / 'cases.sqlite')
     app = create_app(store=store)
     people = {}
-    for role in ('applicant', 'reviewer'):
+    for name, role in (('applicant', 'applicant'), ('reviewer', 'reviewer'), ('replacement', 'applicant')):
         with TestClient(app, base_url='http://localhost') as client:
-            assert signup(client, f'refresh-{role}@example.test', f'Synthetic {role}').status_code == 201
+            assert signup(client, f'refresh-{name}@example.test', f'Synthetic {name}').status_code == 201
             user = onboard(client, role)
-            people[role] = {'cookie': client.cookies.get('batatis_session'), 'user': user}
+            people[name] = {'cookie': client.cookies.get('batatis_session'), 'user': user}
     ids = []
     for index in range(42):
         case = complete_case()

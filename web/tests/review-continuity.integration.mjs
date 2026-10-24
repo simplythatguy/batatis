@@ -161,7 +161,8 @@ try {
     await page.keyboard.press('Escape');
     assert.equal(await page.getByRole('button', { name: 'Accept', exact: true }).count(), 0, 'nothing is decided before resuming');
     await page.getByRole('button', { name: 'Resume review', exact: true }).click();
-    await page.getByRole('button', { name: 'Resume review', exact: true }).waitFor({ state: 'detached' });
+    // The button reads "Resuming…" while the claim is sent; the resubmitted view leaves only once it succeeded.
+    await page.getByRole('region', { name: 'Resubmitted', exact: true }).waitFor({ state: 'detached' });
     assert.equal((await api(applicant, '/cases/' + id, undefined, 'GET')).status, 'in_review');
   });
 

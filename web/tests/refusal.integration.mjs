@@ -87,7 +87,7 @@ async function scenario(name, run) {
   // The officer's note once a refusal is recorded (its reasons and the appeal notice went to the applicant).
   const refusedNote = () => op.getByText(/^Refusal sent to .+ with the appeal notice\. This application is closed\.$/).waitFor();
   const downloadText = async () => {
-    const pending = ap.waitForEvent('download');
+    const pending = ap.waitForEvent('download', { predicate: download => download.suggestedFilename().endsWith('-text-record.txt') });
     await ap.getByRole('button', { name: 'Download a text record', exact: true }).click();
     const download = await pending;
     assert.match(download.suggestedFilename(), /-text-record\.txt$/);
@@ -95,7 +95,7 @@ async function scenario(name, run) {
   };
   try {
     await run({ owner, officer, ap, op, id, api, remote, applicant, reviewer, begin, send, requests,
-      downloadText, setIntercept: callback => { intercept = callback; } });
+      downloadText, refusedNote, setIntercept: callback => { intercept = callback; } });
     assert.deepEqual(errors, []);
     assert.equal(requests.some(r => r.method === 'POST' && /\/(identify|intake|relevance|assist)(\/|$)/.test(r.path)), false);
     passed++; console.log('PASS', name);
@@ -111,7 +111,7 @@ async function scenario(name, run) {
 }
 
 try {
-  await scenario('refusal survives both reloads, notification refresh, queue filtering and actual saved review/text/PDF downloads', async ({ owner, officer, ap, op, id, api, remote, applicant, reviewer, begin, requests, downloadText }) => {
+  await scenario('refusal survives both reloads, notification refresh, queue filtering and actual saved review/text/PDF downloads', async ({ owner, officer, ap, op, id, api, remote, applicant, reviewer, begin, requests, downloadText, refusedNote }) => {
     await begin();
     await api(officer, `/review/${id}/decision`, { outcome: 'return', message: 'SYNTHETIC previous return requesting the attachment record.' });
     await api(officer, `/cases/${id}/messages`, { body: 'SYNTHETIC previous officer notice.' }, 'POST', 201);
@@ -165,12 +165,14 @@ try {
     }
     for (const message of saved.messages) assert.ok(text.includes(message.body), 'Missing downloaded message: ' + message.body);
     assert.ok(text.includes('Keep original supporting attachments separately.'));
-    assert.equal(requests.some(r => r.actor === 'applicant' && r.method !== 'GET'
-      && !r.path.endsWith('/messages/read') && !r.path.endsWith('/notifications/read') && r.path !== '/section-c'), false);
+    assert.deepEqual(requests.filter(r => r.actor === 'applicant' && r.method !== 'GET'
+      && !r.path.endsWith('/messages/read') && !r.path.endsWith('/notifications/read') && r.path !== '/section-c'
+      && !(r.path === `/cases/${id}/export` && r.body?.draft === true)), [], 'only read receipts, Section C lookup and the draft PDF projection are allowed');
     await ap.getByRole('button', { name: 'Check saved application', exact: true }).click();
     await ap.waitForFunction(() => window.caseStore.readSync().reviewed);
     for (const label of ['Download draft PDF', 'Official PDF']) {
-      const pending = ap.waitForEvent('download');
+      const filename = `${id}-scc-variance${label === 'Download draft PDF' ? '-DRAFT' : ''}.pdf`;
+      const pending = ap.waitForEvent('download', { predicate: download => download.suggestedFilename() === filename });
       await ap.getByRole('button', { name: label, exact: true }).click();
       const pdf = await bytes(await pending);
       assert.equal(pdf.subarray(0, 4).toString(), '%PDF'); assert.ok(pdf.length > 1000);
@@ -199,7 +201,7 @@ try {
     assert.equal(await row.getByText('Pick up', { exact: true }).count(), 0, 'a refused file is never picked up again');
   });
 
-  await scenario('stale officer refusal is rejected without losing the written reason; explicit refresh permits a current decision', async ({ officer, op, id, api, remote, reviewer, begin, send }) => {
+  await scenario('stale officer refusal is rejected without losing the written reason; explicit refresh permits a current decision', async ({ officer, op, id, api, remote, reviewer, begin, send, refusedNote }) => {
     await begin(); await reviewer();
     const before = await remote();
     await api(officer, `/review/${id}/claim`, undefined, 'DELETE', 204);
@@ -221,7 +223,7 @@ try {
     assert.equal(after.decision_history.filter(d => d.outcome === 'refuse').length, 1);
   });
 
-  await scenario('a failed fresh review-record read offers retry and never downloads an incomplete local-only record', async ({ ap, op, id, remote, applicant, reviewer, begin, send, downloadText, setIntercept }) => {
+  await scenario('a failed fresh review-record read offers retry and never downloads an incomplete local-only record', async ({ ap, op, id, remote, applicant, reviewer, begin, send, downloadText, refusedNote, setIntercept }) => {
     await begin(); await reviewer(); await send();
     await refusedNote();
     await applicant();

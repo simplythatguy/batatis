@@ -102,6 +102,9 @@ async function scenario(name, run, role = 'applicant') {
 // with its composer, in the Messages drawer (an unsent message survives closing it).
 const officerReady = page => page.getByRole('button', { name: /^Messages/ }).waitFor();
 async function decisionStep(page) {
+  // Resuming starts the saved version's automatic package review. A new review deliberately
+  // starts on Changes, so choose Decide after that version has finished replacing the old one.
+  await page.locator('.pr-note').filter({ hasText: 'Changed since review v' }).waitFor({ state: 'detached' });
   const ask = page.getByRole('button', { name: 'Ask for more', exact: true });
   const step = page.getByRole('navigation', { name: 'Review steps' }).getByRole('button', { name: /: Decide\b/ });
   await ask.or(step).first().waitFor();
@@ -141,15 +144,21 @@ try {
     assert.equal(await page.locator('.cf-save').innerText(), 'Accepted');
   });
 
-  await scenario('J05 current-case notification and list clicks both refresh after their event was already seen', async ({ page, id, returned, row, requests }) => {
+  await scenario('J05 current-case notification and list clicks both refresh after their event was already seen', async ({ page, id, returned, row, requests, hold }) => {
     await returned(); await poll(page);
     await patchStatus(page, id, 'submitted');
+    const reading = hold('/cases/' + id);
     await page.getByRole('button', { name: /^Notifications(?:, \d+ new)?$/ }).click();
     await page.locator('.ac-note').filter({ hasText: 'returned' }).first().click();
     // An applicant notification opens that application's comments; the open case refreshes in place.
     await page.getByRole('heading', { name: 'Comments', exact: true }).waitFor();
+    await reading.entered;
     await page.evaluate(() => { location.hash = '#/application'; });
+    const refreshed = page.waitForResponse(response => new URL(response.url()).pathname === '/api/cases/' + id);
+    reading.release(); await refreshed;
     await page.getByRole('button', { name: 'Resubmit to Edmonton', exact: true }).waitFor();
+    await page.waitForTimeout(150);
+    assert.equal(await page.evaluate(() => location.hash), '#/application', 'a finished notification refresh must not navigate over a later stage choice');
     await patchStatus(page, id, 'submitted');
     const before = requests.length;
     await row().click();
@@ -235,12 +244,19 @@ try {
     assert.equal(await page.evaluate(async id => (await import('/src/calm/account.ts')).getAccountState().applications.find(a => a.id === id)?.status, id), 'returned');
   });
 
-  await scenario('J05 a thread read receipt preserves its unread count without cancelling a newer returned status', async ({ page, id, returned, hold }) => {
+  await scenario('J05 a thread read receipt preserves its unread count without cancelling a newer returned status', async ({ page, context, api, id, returned, hold }) => {
     await returned();
     const reading = hold('/me/applications');
     await page.evaluate(() => { window.pendingList = import('/src/calm/account.ts').then(a => a.refreshApplications()); });
     await reading.entered;
-    await page.evaluate(async id => (await import('/src/calm/account.ts')).patchApplication(id, { unread_messages: 0 }), id);
+    // Read through the mounted thread, so zero is an acknowledged server receipt as well as
+    // a local patch. A newer list may legitimately replace a local-only synthetic zero.
+    await page.evaluate(() => { location.hash = '#/comments'; });
+    await page.locator('.cf-returned-msg').filter({ hasText: 'Please correct' }).waitFor();
+    await page.evaluate(async () => { window.readAccount = (await import('/src/calm/account.ts')).getAccountState; });
+    await page.waitForFunction(id => window.readAccount().applications.find(a => a.id === id)?.unread_messages === 0, id);
+    const saved = (await api(context, '/me/applications', undefined, 'GET')).applications.find(a => a.id === id);
+    assert.equal(saved.status, 'returned'); assert.equal(saved.unread_messages, 0);
     reading.release(); await page.evaluate(() => window.pendingList);
     const row = await page.evaluate(async id => (await import('/src/calm/account.ts')).getAccountState().applications.find(a => a.id === id), id);
     assert.equal(row.status, 'returned'); assert.equal(row.unread_messages, 0);
@@ -324,11 +340,13 @@ try {
     await row().click(); await Promise.all([list.entered, reading.entered]);
     await page.evaluate(() => { window.oldNotifications = import('/src/calm/notifications/notifications.ts').then(n => n.loadNotifications()); });
     await notifications.entered;
-    await context.addCookies([{ name: 'batatis_session', value: fixture.reviewer.cookie, url: base }]);
+    // This person owns no applications or notifications. The reviewer fixture legitimately receives
+    // the earlier scenarios' authority-wide events, so it cannot prove an empty replacement account.
+    await context.addCookies([{ name: 'batatis_session', value: fixture.replacement.cookie, url: base }]);
     await page.evaluate(async user => {
       (await import('/src/calm/account.ts')).setAccountState({ phase: 'signed-in', user, applications: [] });
       window.caseStore.resetToWho();
-    }, fixture.reviewer.user);
+    }, fixture.replacement.user);
     list.release(); notifications.release(); reading.release();
     await page.evaluate(() => window.oldNotifications);
     await page.waitForTimeout(150);
@@ -336,9 +354,14 @@ try {
       const a = (await import('/src/calm/account.ts')).getAccountState();
       return { user: a.user.id, ids: a.applications?.map(a => a.id), caseId: window.caseStore.engineId, phase: window.caseStore.phase };
     });
-    assert.equal(state.user, fixture.reviewer.user.id);
+    assert.equal(state.user, fixture.replacement.user.id);
     assert.deepEqual(state.ids, []);
     assert.equal(state.caseId, null); assert.equal(state.phase, 'who');
+    const notificationsAfterReplacement = await page.evaluate(async () => (await import('/src/calm/notifications/notifications.ts')).getNotificationsState());
+    assert.deepEqual(notificationsAfterReplacement.items, [], 'a late response republished the previous account notifications');
+    await poll(page);
+    const currentNotifications = await api(context, '/me/notifications', undefined, 'GET');
+    assert.deepEqual(currentNotifications.notifications, [], 'the replacement fixture must have no notifications on the server');
     await page.getByRole('button', { name: /^Notifications/ }).click();
     assert.equal(await page.locator('.ac-note').count(), 0, 'the replacement session inherited old notifications');
   });
@@ -400,6 +423,14 @@ try {
       const draft = (await messagesDrawer(page)).getByRole('textbox', { name: 'Message to the applicant', exact: true });
       await draft.fill('Unsent officer draft must survive background updates.');
       await page.keyboard.press('Escape');
+      // The composer lives in the Messages drawer and the review page holds its unsent text: each check
+      // opens the drawer again and reads the real control, then closes it.
+      const drafted = async () => {
+        await messagesDrawer(page);
+        const value = await draft.inputValue();
+        await page.keyboard.press('Escape');
+        return value;
+      };
       await api(owner, `/cases/${id}/facts`, { field: 'codecheck.desc-wall', value: 'not-sure', kind: 'pointed', status: 'confirmed',
         source: { type: 'user_click', ref: 'Your code check answer', quote: 'Does your design replace the usual wall assembly?' } });
       const saved = await api(owner, `/cases/${id}`, undefined, 'GET');
@@ -408,7 +439,7 @@ try {
       await page.getByRole('heading', { name: 'Resubmitted · submission 2', exact: true }).waitFor();
       await page.getByRole('button', { name: 'Resume review', exact: true }).waitFor();
       await page.locator('.ac-sheet-question strong').filter({ hasText: 'Does your design replace the usual wall assembly?' }).waitFor();
-      assert.equal(await draft.inputValue(), 'Unsent officer draft must survive background updates.');
+      assert.equal(await drafted(), 'Unsent officer draft must survive background updates.');
       const count = () => requests.filter(r => r.path === `/cases/${id}` && r.method === 'GET').length;
       const seen = count();
       await poll(page); await poll(page); await page.waitForTimeout(100);
@@ -417,8 +448,9 @@ try {
       await page.locator('.ac-note').filter({ hasText: 'resubmitted' }).first().click();
       for (let i = 0; i < 100 && count() <= seen; i++) await page.waitForTimeout(50);
       assert.ok(count() > seen, 'same-case notification click must refresh even when the event was already seen');
-      assert.equal(await draft.inputValue(), 'Unsent officer draft must survive background updates.');
+      assert.equal(await drafted(), 'Unsent officer draft must survive background updates.');
       await page.getByRole('button', { name: 'Resume review', exact: true }).click();
+      await page.getByRole('region', { name: 'Resubmitted', exact: true }).waitFor({ state: 'detached' });
       await openReturn(page);
       await returnDialog.getByRole('textbox').fill('Unsent return decision must survive notifications.');
       const protectedCount = count();
@@ -429,8 +461,8 @@ try {
       await page.getByRole('button', { name: 'Cancel', exact: true }).click();
       await messagesDrawer(page);
       await page.getByText('Synthetic notice while return dialog is open.', { exact: true }).waitFor();
-      await page.keyboard.press('Escape');
       assert.equal(await draft.inputValue(), 'Unsent officer draft must survive background updates.');
+      await page.keyboard.press('Escape');
       await page.getByRole('button', { name: /^(Record|Update) determination$/ }).click();
       await page.getByRole('textbox', { name: 'Scope reviewed', exact: true }).fill('Unsent determination scope.');
       const determining = count();
@@ -441,8 +473,8 @@ try {
       await page.getByRole('button', { name: 'Cancel', exact: true }).click();
       await messagesDrawer(page);
       await page.getByText('Synthetic notice while determination is open.', { exact: true }).waitFor();
-      await page.keyboard.press('Escape');
       assert.equal(await draft.inputValue(), 'Unsent officer draft must survive background updates.');
+      await page.keyboard.press('Escape');
       const updating = hold(`/cases/${id}/identify/information-request`);
       await page.getByRole('button', { name: /^Notifications/ }).click();
       await page.locator('.ac-note').filter({ hasText: 'resubmitted' }).first().click();
@@ -451,10 +483,10 @@ try {
       updating.release();
       await page.getByText('The application changed while its review was loading. Refresh to read the current version.', { exact: false }).waitFor();
       assert.equal(await page.getByRole('button', { name: 'Accept', exact: true }).isDisabled(), true);
-      assert.equal(await draft.inputValue(), 'Unsent officer draft must survive background updates.');
+      assert.equal(await drafted(), 'Unsent officer draft must survive background updates.');
       await page.getByRole('button', { name: 'Refresh application', exact: true }).click();
       await page.locator('.rv-who').filter({ hasText: 'Synthetic colleague is reviewing this' }).waitFor();
-      assert.equal(await draft.inputValue(), 'Unsent officer draft must survive background updates.');
+      assert.equal(await drafted(), 'Unsent officer draft must survive background updates.');
     } finally { await owner.close(); await colleague.close(); }
   }, 'reviewer');
 

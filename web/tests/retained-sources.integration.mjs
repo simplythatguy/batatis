@@ -110,16 +110,20 @@ for (const status of Object.keys(fixture.cases).filter(s => !['second', 'expired
     if (actor === 'officer' && ['draft', 'withdrawn'].includes(status)) continue;
     if (process.env.RETAINED_REPRODUCE === '1' && (status !== 'accepted' || actor !== 'applicant')) continue;
     await scenario(`${actor} ${status}: original and current PDFs remain downloadable from the read-only sheet`, actor, async ({ page, context, open }) => {
+      const initial = await (await context.request.get(base + '/cases/' + fixture.cases[status].id)).json();
+      assert.equal(initial.status, status, 'actual server status, not a simulated label');
       const c = await open(status);
       const before = await (await context.request.get(base + '/cases/' + c.id)).json();
-      assert.equal(before.status, status, 'actual server status, not a simulated label');
+      // An officer opening a file nobody has picked up picks it up: they are already in the review.
+      assert.equal(before.status, actor === 'officer' && status === 'submitted' ? 'in_review' : status);
       if (status === 'accepted' && actor === 'applicant') await page.getByText('Accepted by Edmonton', { exact: true }).waitFor();
       const disclosure = page.locator('details').filter({ has: page.locator('summary', { hasText: 'Saved source PDFs' }) });
       await disclosure.locator('summary').click();
       for (const [i, file] of c.files.entries()) {
-        const pending = page.waitForEvent('download');
+        const pending = page.waitForEvent('download', { predicate: download => download.suggestedFilename() === file.name });
         await disclosure.getByRole('link', { name: 'Download ' + file.name, exact: true }).click();
-        assert.deepEqual(await readFile(await (await pending).path()), pdfs[i]);
+        const downloaded = await readFile(await (await pending).path());
+        assert.equal(downloaded.equals(pdfs[i]), true, 'the named source download must match the original bytes');
       }
       const after = await (await context.request.get(base + '/cases/' + c.id)).json();
       assert.equal(after.version, before.version, 'inventory and delivery never advance content CAS');
