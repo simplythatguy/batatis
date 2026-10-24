@@ -7,28 +7,17 @@ This guide starts the current Vite app and FastAPI engine without model API keys
 Use Python 3.12 and Node.js 22.12 or newer. CI uses Python 3.12 and Node.js 22.
 
 ```bash
-git clone --branch work/mvp-improvement-20261022 \
-  https://github.com/simplythatguy/batatis.git
+git clone --branch dev https://github.com/simplythatguy/batatis.git
 cd batatis
 python3.12 -m venv .venv
 .venv/bin/pip install -r engine/requirements.txt -r codedb/requirements.txt
-BATATIS_LIVE=0 BATATIS_STORE=file BATATIS_CASES=./.data/cases.sqlite \
-  .venv/bin/uvicorn engine.api:app --port 8000
+npm ci --prefix web
+BATATIS_LIVE=0 BATATIS_LIVE_ELEPHANT=0 scripts/local-app.sh start
 ```
 
-Keep that terminal open. The engine's interactive route documentation is at http://127.0.0.1:8000/docs.
+Open http://localhost:3000. The engine's route documentation is at http://127.0.0.1:8000/docs. Create a local applicant account to explore saved applications. Officer access requires a reviewer account; see the [account setup guide](api/accounts-review.md#configuration-and-security-receipt).
 
-In a second terminal, open the cloned repository's `web` directory:
-
-```bash
-cd batatis/web
-npm ci
-npm run dev
-```
-
-Open the URL Vite prints, usually http://localhost:5173. Create a local applicant account from the sign-in page to explore saved applications. Officer access requires a reviewer account; see the [account setup guide](api/accounts-review.md#configuration-and-security-receipt).
-
-The launch command stores this clone's cases in `.data/cases.sqlite`. Without `BATATIS_CASES`, the engine uses `~/.batatis/cases.sqlite`, which other local clones can share. Cases and their files expire seven days after creation. Stop each server with Ctrl+C.
+The launcher keeps this checkout's cases in `.data/cases.sqlite`. Cases and their files expire seven days after creation. Stop both servers with `scripts/local-app.sh stop`.
 
 The workspace can start before the code database exists. Code lookup and export then report that their source data is unavailable.
 
@@ -52,28 +41,23 @@ It also extracts the page text needed by the builder. Downloads and extraction c
 
 The build creates `codedb/build/codedb.sqlite`. The form is saved as `codedb/build/SCC-Variance-Form.pdf`. Refresh the app after a successful build. Do not commit these files or the downloaded source PDFs. See the [CodeDB guide](../codedb/README.md) for source details and lookup commands.
 
-## Use another port
+## Manage the local app
 
-If port 8000 is occupied, start the engine on an unused port:
-
-```bash
-BATATIS_LIVE=0 BATATIS_STORE=file BATATIS_CASES=./.data/cases.sqlite \
-  .venv/bin/uvicorn engine.api:app --port 8010
-```
-
-Start Vite from `web` with the same engine URL:
+Use only port 3000 for the web app and 8000 for the engine. The launcher refuses to start if either port is occupied. Check its owner before stopping a server.
 
 ```bash
-VITE_ENGINE_URL=http://127.0.0.1:8010 npm run dev
+scripts/local-app.sh status
+scripts/local-app.sh stop
+scripts/local-app.sh start
 ```
 
-Use the URL each process prints. Vite may choose another port if 5173 is occupied.
+The [Git workflow](agents/git-workflow.md) covers shared ownership, local verification, and the single `dev` to `main` release PR.
 
 ## Optional configuration
 
-The offline setup needs no `.env` file. [`.env.example`](../.env.example) lists optional variable names and defaults. The engine reads process environment variables; the commands above set the local storage and offline choices explicitly.
+The offline setup needs no `.env` file. [`.env.example`](../.env.example) lists optional variable names and defaults. The launcher loads the checkout's `.env` into Uvicorn. Existing process variables take precedence, so the start command above keeps all live providers off. It does not load server credentials into Vite.
 
-Keep real keys out of Git and the web bundle. Enabling a live provider requires separate configuration and spend controls. Adding a key alone is not proof that a provider works. See the [identification API](api/identify.md) and [deployment guide](deploy.md) before configuring a hosted environment.
+Keep real keys out of Git and the web bundle. Enabling a live provider requires separate configuration and spend controls. Adding a key alone is not proof that a provider works. See the [Elephant provider guide](elephant-provider.md), [identification API](api/identify.md), and [deployment guide](deploy.md) before enabling providers or configuring a hosted environment.
 
 ## Run checks
 
