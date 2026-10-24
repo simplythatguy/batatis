@@ -77,7 +77,7 @@ stop() {
 
 start() {
   local i
-  local env_args=()
+  set --
   if ! status; then
     echo "local-app: not starting; a port is in use. Ask the owner to stop it, or run: scripts/local-app.sh wait" >&2
     return 3
@@ -98,10 +98,10 @@ start() {
       echo "local-app: install engine/requirements.txt in the selected Python environment before loading .env" >&2
       return 2
     fi
-    env_args=(--env-file "$root/.env")
+    set -- --env-file "$root/.env"
   fi
   ( cd "$root" && BATATIS_CASES="${BATATIS_CASES:-$root/.data/cases.sqlite}" detached "$py" -m uvicorn engine.api:app \
-      "${env_args[@]}" --host 127.0.0.1 --port $ENGINE_PORT >"$logs/engine.log" 2>&1 </dev/null )
+      "$@" --host 127.0.0.1 --port $ENGINE_PORT >"$logs/engine.log" 2>&1 </dev/null )
   ( cd "$root/web" && detached npm run dev -- --port $WEB_PORT --strictPort --host 127.0.0.1 >"$logs/web.log" 2>&1 </dev/null )
   for i in $(seq 1 60); do
     if curl -fsS -m 3 -o /dev/null "http://127.0.0.1:$ENGINE_PORT/docs" 2>/dev/null && curl -fsS -m 3 -o /dev/null "http://127.0.0.1:$WEB_PORT/" 2>/dev/null; then

@@ -16,7 +16,7 @@ Batatis brings that work into one place for applicants and Safety Codes Officers
 - Helps applicants find code provisions and retrieves Section C objectives, functions, and intent through deterministic lookups.
 - Keeps answers, supporting documents, and PDF drafts with the application.
 - Identifies missing administrative information and questions that need professional input.
-- Gives officers a review queue, notices, decisions, and a resubmission history.
+- Gives officers a review queue, notices, and decisions.
 
 Batatis checks administrative completeness. Decisions about technical correctness, equivalent performance, and safety remain with qualified professionals and the reviewing authority.
 
@@ -48,6 +48,8 @@ Open http://localhost:3000. The engine uses port 8000. Stop both with `scripts/l
 The offline path needs no API key. Code search and PDF export need the official source files and a built CodeDB; follow the [local setup guide](docs/local-development.md).
 
 ## What's next
+
+This is a shared development baseline. The [recovery status](docs/recovery-status.md) lists the newer work still being verified.
 
 Test the full workflow with applicants and officers, calibrate the new relevance model, and validate results against independently reviewed applications. Batatis remains a prototype for Alberta's [Building Codes Challenge](docs/hackathon-problem-brief.md).
 
