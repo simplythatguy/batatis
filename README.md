@@ -6,7 +6,22 @@ Batatis helps builders in Alberta prepare a complete building-code variance appl
 
 ## The problem
 
-The building code describes a standard way to build each part of a building. A builder who wants to use a new product or method applies for a variance. The application must show, with code references and evidence, that the design performs at least as well as the standard way.
+Every new building in Alberta has to follow the building code. The code is a set of safety rules that tell builders how to build, so that buildings don't collapse, catch fire easily, or trap people inside.
+
+Sometimes a builder wants to build something the rules don't describe, such as a new product or a different design. They can still ask to build it, but first they must apply for a variance. A variance is permission to meet a rule's purpose in a different way, and the builder has to prove that the different way is at least as safe.
+
+Here is an example. The code requires at least two exits from every floor of a larger building, so people can still get out if fire or smoke blocks one staircase. Say you design a four-storey apartment building with only one staircase. To build it, you file a variance application. It has to show six things:
+
+| The application shows | In the staircase example |
+| --- | --- |
+| Which rule you aren't following, and what the rule is for (code analysis) | Sentence 3.4.2.1.(1) of the National Building Code, 2023 Alberta Edition, requires two exits so that people can escape, and firefighters can get in, when one exit is blocked |
+| Why you want a different design (rationale) | One staircase leaves room for more homes on a small lot |
+| What could go wrong (risk assessment) | Smoke fills the only staircase |
+| What you add to keep people as safe (mitigating measures) | Sprinklers throughout, and a staircase built to keep smoke out |
+| What your plan depends on (assumptions and limits) | The sprinklers are maintained and always working |
+| Proof (supporting evidence) | A fire engineer's report showing that everyone can get out in time |
+
+A Safety Codes Officer then reviews the application and decides.
 
 According to the challenge organizers, most first submissions fail because they are incomplete. The officer sends the application back, the builder fixes it, and each round adds weeks.
 
@@ -104,16 +119,26 @@ For both:
 
 ## How Batatis works
 
-![The web app calls the engine, which reads the project, finds code articles with Elephant 1 and GPT, looks up Section C in CodeDB, checks for missing items, and fills the official form](docs/readme/deep-dive.png)
+![The same workflow as Our solution, with the technology under each step](docs/readme/how-it-works.png)
 
-The web app is React and TypeScript, built with Vite. It calls the engine, a Python API built with FastAPI. Vercel hosts both.
+This diagram has the same steps as the one in [Our solution](#our-solution), with the technology that runs each step. The colors mark the same four stages in both diagrams. The website is React and TypeScript, built with Vite. It calls the engine, a Python API built with FastAPI. Vercel hosts both.
 
-1. **Read the project.** Rules pull facts, such as the owner and the address, from the description and the PDFs. If AI is on, GPT points at more facts, and each one must quote the applicant's own words.
-2. **Find the code articles.** Elephant 1 scores all 2,080 articles in Division B of the code and reranks the top 60. Elephant 1 is a model hosted on Baseten, and Batatis reaches it through OpenRouter. GPT then reads the top 15 in full and quotes the sentences that apply. The applicant confirms each article. With AI off, a keyword search suggests articles instead.
-3. **Look up Section C.** The objectives, functions, and intent of each confirmed article come from the code's own tables in CodeDB. No AI is involved.
-4. **Find missing items.** Rules check every required part of the form and build the Section D evidence plan. No AI is involved.
-5. **Fill the official PDF form.** The engine fills in the Council's variance form and adds an appendix with the full code text.
-6. **Officer review.** Officers claim, review, and decide on applications in the same app.
+For applicants:
+
+1. **Describe the project.** Rules read facts, such as the owner and the address, from the description and from the text and fields of any PDFs. If AI is on, GPT points at more facts, and each one must quote the applicant's own words.
+2. **Answer a few questions.** A rule-based planner picks up to five questions. It starts with conflicts in what you wrote, then facts that narrow down the code articles. The website then shows one card for each item that is still open. No AI writes the questions.
+3. **Confirm the code articles.** Elephant 1 scores all 2,080 articles in Division B of the code and reranks the top 60. Elephant 1 is a model hosted on Baseten, and Batatis reaches it through OpenRouter. GPT then reads the top 15 in full and quotes the sentences that apply. You confirm each article. With AI off, a keyword search over CodeDB suggests articles instead.
+4. **Section C fills itself in.** The objectives, functions, and intent of each confirmed article come from the code's own tables in CodeDB. No AI is involved.
+5. **Plan the evidence.** Rules match each article to the kinds of evidence it needs, and flag when an engineer or another professional is required. No AI is involved.
+6. **Anything missing?** Completeness rules check every required part of Sections A to D. Anything missing sends you back to the questions.
+7. **Submit the official form.** The engine fills in the Council's variance form, adds an appendix with the full code text, and saves the exact version you sent.
+
+For Safety Codes Officers:
+
+8. **Pick it up from the queue.** The queue lists submitted applications. Claiming one stops two officers from reviewing it at the same time.
+9. **Review the application.** The officer sees the filled form, the same completeness checks, and the code citations checked against CodeDB.
+10. **Decide.** Returning the application sends the applicant a message, and they fix it and resubmit. Accepting it marks it as administratively complete.
+11. **Close-out.** The engine builds the decision's record package for the Council.
 
 CodeDB is a SQLite database of the building code. You build it on your computer from the official PDFs of the National Building Code, 2023 Alberta Edition, second printing. Applications and accounts live in SQLite on your computer, or in PostgreSQL on Neon when the app is hosted. The assistant answers with GPT. Voice uses Grok from xAI.
 
@@ -128,11 +153,64 @@ At measured source `d479e82`, the shipped facts-only `rules_plus_unknown` agreed
 
 ## Folder structure
 
-![The main folders and files: web, engine, codedb, scripts, docs, evals, agent skills, and the root files](docs/readme/folder-structure.png)
+The repository and the backend:
 
-The diagram shows the main folders and files, not every one.
+![The main folders and backend files: engine, codedb, scripts, docs, evals, agent skills, and the root files](docs/readme/folder-structure-backend.png)
+
+The frontend, meaning the files that build the screens and their look:
+
+![The frontend files: the web app's entry, the screens in web/src/calm, and the design rules and tokens in docs](docs/readme/folder-structure-frontend.png)
+
+Both pictures show the main folders and files, not every one.
 
 ## Get started
+
+### Set it up with an AI agent
+
+Open an AI coding agent, such as Claude Code, Codex, or Cursor, in an empty folder, and paste this prompt:
+
+```text
+Set up the Batatis app on this computer so I can run it locally.
+
+1. Unless this folder is already a clone, clone https://github.com/simplythatguy/batatis.git
+   with --branch dev. Then run scripts/install-git-hooks.sh.
+2. Check for Git, Python 3.12, and Node.js 22.12 or newer. Install only what is missing. On
+   macOS, use Homebrew.
+3. Create .venv with Python 3.12. Install engine/requirements.txt, codedb/requirements.txt,
+   and research/precedents/requirements.txt into it. Then run npm ci --prefix web.
+4. Build the code database. Run .venv/bin/pip install 'fonttools>=4.39', then
+   .venv/bin/python scripts/fetch_sources.py, then .venv/bin/python -m codedb build.
+5. If .env does not exist, copy .env.example to .env. Leave the API keys empty. I will add
+   my own.
+6. Start the app with scripts/local-app.sh start, and check that http://localhost:3000
+   loads. Use only ports 3000 and 8000. If a port is busy, stop and tell me.
+7. Do not commit, push, or create branches. When you finish, tell me what you installed and
+   anything that failed.
+```
+
+### Open a pull request with an AI agent
+
+When your change is ready, paste this prompt into the same agent. Replace `YOUR-USERNAME` with your GitHub username.
+
+```text
+Open a pull request with my change to github.com/simplythatguy/batatis.
+
+1. Read AGENTS.md and the skills it names before you change any code.
+2. Work on the dev branch. Do not create a new branch, on this computer or on GitHub.
+3. If the origin remote points at simplythatguy/batatis, make my fork the origin remote:
+   gh repo fork simplythatguy/batatis --remote
+4. Run scripts/verify.sh and fix anything that fails.
+5. Commit the change and push it to my fork:
+   git push origin dev
+6. Open the pull request:
+   gh pr create --repo simplythatguy/batatis --base dev --head YOUR-USERNAME:dev
+7. Stop there. Never push to, merge into, or delete dev or main on simplythatguy/batatis.
+   Do not run scripts/land.sh, and do not merge the pull request.
+```
+
+### Set it up by hand
+
+If you'd rather not use an agent, follow steps 1 to 6.
 
 ### 1. Clone the repository
 
@@ -312,11 +390,33 @@ To stop the app:
 scripts/local-app.sh stop
 ```
 
+#### Why `npm run dev` isn't enough
+
+Batatis has two parts: the website, and the engine, a Python server that saves applications and runs the checks. `npm run dev` starts only the website, which can't load anything without the engine. `scripts/local-app.sh start` runs `npm run dev` for the website on port 3000 and starts the engine on port 8000.
+
+To run the two parts yourself instead, start the engine in one terminal:
+
+```bash
+.venv/bin/python -m uvicorn engine.api:app --env-file .env --port 8000
+```
+
+Then start the website in a second terminal:
+
+```bash
+npm run dev --prefix web
+```
+
 ### Make a pull request
 
-Pull requests go to the `dev` branch, never to `main`. The project owner releases by merging `dev` into `main`.
+Pull requests go to the `dev` branch, never to `main`. They come from the `dev` branch of your fork, so you never create a new branch.
 
-Work on `dev` in your fork. When your change is ready, run every check:
+If you cloned this repository instead of your fork, make your fork the `origin` remote first:
+
+```bash
+gh repo fork simplythatguy/batatis --remote
+```
+
+Work on `dev`. When your change is ready, run every check:
 
 ```bash
 scripts/verify.sh
@@ -387,7 +487,8 @@ These rules always apply:
 - On the alternative-solution path, keep the risk assessment, mitigating measures, and assumptions.
 - Cite the National Building Code, 2023 Alberta Edition, second printing, first.
 - Keep AI provider names out of everything the app shows. Tests enforce this.
-- Run `scripts/verify.sh` before work lands. Only `scripts/land.sh` pushes, and only to `dev`. Never push to `main`.
+- GitHub only ever has two branches, `main` and `dev`. Never create, push, or leave any other branch there.
+- Contribute through a pull request from your fork's `dev` branch into `dev`, after `scripts/verify.sh` passes. Never push to, merge into, or delete `dev` or `main`.
 - Run the app with `scripts/local-app.sh`, on ports 3000 and 8000 only.
 - Subagents report only in their own task output. They never message other threads or agents.
 
