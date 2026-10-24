@@ -308,9 +308,30 @@ def _intent_ok(text: str) -> bool:
             or 'no nbc 2020' in folded or bool(cite._APPENDIX.search(text)) and len(text) < 40)
 
 
+def _unique_uploads(uploads: list[tuple[str, bytes]]) -> list[tuple[str, bytes]]:
+    """Disambiguate source names before any reading or pointer is built; retain every upload."""
+    reserved = {name for name, _data in uploads}
+    used = set()
+    sources = []
+    for name, data in uploads:
+        source = name
+        if source in used:
+            stem, extension = (name[:-4], name[-4:]) if name.lower().endswith('.pdf') else (name, '')
+            number = 2
+            while True:
+                suffix = f' ({number})'
+                source = f'{stem[:200 - len(suffix) - len(extension)]}{suffix}{extension}'
+                if source not in reserved and source not in used:
+                    break
+                number += 1
+        used.add(source)
+        sources.append((source, data))
+    return sources
+
+
 def review_uploads(uploads: list[tuple[str, bytes]], codes) -> Parts:
     parts = Parts(lookup_skipped=codes is None)
-    reads = [read_pdf(data, name) for name, data in uploads]
+    reads = [read_pdf(data, name) for name, data in _unique_uploads(uploads)]
     for read in reads:
         parts.files.append(InputFile(name=read.name, sha256=read.sha256, size=read.size, pages=read.pages,
                                      role=read.role, form_version=read.form_version, note=read.note))
@@ -487,7 +508,7 @@ def review_uploads(uploads: list[tuple[str, bytes]], codes) -> Parts:
                 listed.append((number, name.value, who.value if who and who.status == 'present' else '',
                                _pointer(form, name), _pointer(form, who) if who else _pointer(form, name)))
     parts.documents = merge_section_d(rows, listed)
-    _div_c_upload(form, by_widget, pages, engineering, parts, codes, reads)
+    _div_c_upload(form, by_widget, pages, engineering, parts, codes, reads, fmap)
     for row in parts.documents:
         looks_like_evidence = row.listed_in_section_d or row.type.known or row.evidence_rung.known
         if row.file and looks_like_evidence and not row.issuer.known and not row.responsible.known:
@@ -499,7 +520,7 @@ def review_uploads(uploads: list[tuple[str, bytes]], codes) -> Parts:
     return parts
 
 
-def _div_c_upload(form, by_widget, pages, engineering, parts: Parts, codes, reads) -> None:
+def _div_c_upload(form, by_widget, pages, engineering, parts: Parts, codes, reads, fmap) -> None:
     where = Pointer(file=form.name if form else (reads[0].name if reads else 'upload'))
     corpus: div_c.Corpus = [(form.name, value.page + 1, f'{value.name}: {value.value}')
                             for value in by_widget.values() if value.status == 'present'] if form else []
@@ -511,6 +532,9 @@ def _div_c_upload(form, by_widget, pages, engineering, parts: Parts, codes, read
                      for read in reads for page in read.unreadable_pages()]
         locations += [Pointer(file=read.name, page=1 if read.pages else None)
                       for read in reads if read.role == 'unreadable']
+        if form and fmap:
+            locations += [_pointer(form, value) for name, value in by_widget.items()
+                          if value.status == 'not_found' and _label(fmap, name)[1] in ('C', 'D')]
         findings = div_c.file_findings(corpus, where, codes, responsible=responsible, uncertain=bool(locations))
         for finding in findings:
             if finding.status == 'not_found':
