@@ -17,6 +17,7 @@ from engine import llm_gate
 from engine.models import Case, Fact, Source
 from engine.retention import reset_purge_clock
 from engine.store import CaseStore
+from engine.tests._db_skip import require_repo_db
 
 
 @pytest.fixture(autouse=True)
@@ -81,6 +82,7 @@ def fact(field, value, **changes):
 
 @pytest.mark.parametrize('collision', ['generated', 'first_sentence'])
 def test_manual_rename_wins_even_when_identical_to_automatic_or_description(context, collision):
+    require_repo_db()
     client, store = context
     prose = 'A house in Edmonton needs an egress window. We want a smaller opening.'
     case = store.put(Case(facts=[fact('project.description', prose)]))
@@ -227,6 +229,7 @@ def test_legacy_anonymous_draft_remains_editable(context):
     ('北側の増築', 'A retail unit in Calgary.'),
 ])
 def test_old_serialized_custom_titles_keep_precedence_on_open_intake_and_identify(context, legacy_title, description):
+    require_repo_db()
     client, store = context
     # Load a payload that predates the marker rather than using an opt-in manual flag.
     payload = Case(title=legacy_title, facts=[fact('project.description', description)]).model_dump(exclude={'title_is_manual'})
@@ -252,6 +255,7 @@ def test_old_serialized_custom_titles_keep_precedence_on_open_intake_and_identif
 
 @pytest.mark.parametrize('clip', [False, True])
 def test_legacy_sentence_seed_can_be_replaced_without_changing_applicant_words(context, clip):
+    require_repo_db()
     client, store = context
     prose = ('A house in Edmonton needs an egress window with a different opening and a project-specific design. '
              'These are the applicant’s exact words.')
@@ -285,6 +289,7 @@ def test_greetings_and_unaccepted_model_suggestions_cannot_invent_a_subject(cont
 
 @pytest.mark.parametrize('streaming', [False, True])
 def test_unaccepted_saved_description_is_not_treated_as_explicit_identify_naming_input(context, streaming):
+    require_repo_db()
     client, store = context
     case = store.put(Case(facts=[fact('project.description', 'An industrial warehouse needs firestopping.',
                                      kind='proposed', status='unconfirmed')]))
@@ -422,6 +427,8 @@ def test_owner_is_reauthorized_inside_mutation(context, actors, monkeypatch):
 
 @pytest.mark.parametrize('stage', ['identify', 'intake'])
 def test_late_automatic_run_cannot_undo_a_rename_or_overwrite_newer_facts(context, monkeypatch, stage):
+    if stage == 'identify':
+        require_repo_db()
     client, store = context
     case = store.put(Case(facts=[fact('project.description', 'A house with an egress window.')]))
     entered, release = threading.Event(), threading.Event()

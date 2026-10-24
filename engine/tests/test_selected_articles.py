@@ -18,6 +18,7 @@ from engine.codes import Codes
 from engine.models import Case, Fact, Gap, Source
 from engine.retention import reset_purge_clock
 from engine.store import CaseStore
+from engine.tests._db_skip import require_repo_db
 
 
 @pytest.fixture(params=['sqlite', 'postgres'])
@@ -50,6 +51,7 @@ def save(client, case, articles):
 
 
 def test_unanswered_article_survives_opening_another_application_and_reopening(context):
+    require_repo_db()
     client, store = context
     first = store.put(Case(title='SYNTHETIC first application'))
     second = store.put(Case(title='SYNTHETIC second application'))
@@ -102,6 +104,7 @@ def fact():
 
 
 def test_all_answers_and_pending_confirmation_survive_reopen_without_becoming_benchmarks(context):
+    require_repo_db()
     client, store = context
     case = store.put(Case(title='SYNTHETIC mixed cards'))
     articles = [selection(pid, answer, pending=pending) for pid, answer, pending in [
@@ -119,6 +122,7 @@ def test_all_answers_and_pending_confirmation_survive_reopen_without_becoming_be
 
 
 def test_removal_and_clear_replace_the_saved_snapshot(context):
+    require_repo_db()
     client, store = context
     case = store.put(Case())
     first, second = selection(), selection('9.25.2.2.(1)', 'not-sure')
@@ -130,6 +134,7 @@ def test_removal_and_clear_replace_the_saved_snapshot(context):
 
 
 def test_canonical_ids_and_default_unanswered_state_preserve_stable_card_identity(context):
+    require_repo_db()
     client, store = context
     case = store.put(Case())
     response = save(client, case, [{'id': 'search-original-id', 'provision': '9.25.2.2 (1)'}])
@@ -176,6 +181,7 @@ def test_missing_or_extra_fields_are_rejected(context, body):
 
 
 def test_unknown_division_b_provision_is_not_saved(context):
+    require_repo_db()
     client, store = context
     case = store.put(Case())
     response = save(client, case, [selection(), selection('9.99.99.99.')])
@@ -184,6 +190,7 @@ def test_unknown_division_b_provision_is_not_saved(context):
 
 
 def test_selection_does_not_rewrite_confirmed_references_or_other_application_material(context):
+    require_repo_db()
     client, store = context
     from engine.section_c import section_c_rows
     codes = Codes()
@@ -235,25 +242,29 @@ def actors(context):
 
 
 @pytest.mark.parametrize('status', ['draft', 'returned', 'submitted', 'in_review', 'accepted', 'refused', 'withdrawn'])
-def test_only_owner_can_edit_and_read_only_cases_stay_immutable(context, actors, status):
+@pytest.mark.parametrize('name', ['owner', 'other', 'reviewer', 'foreign', 'anonymous'])
+def test_only_owner_can_edit_and_read_only_cases_stay_immutable(context, actors, status, name):
     _, store = context
     clients, users = actors
     case = store.put(Case(owner_id=users['owner'].id, authority='edmonton', status=status))
-    for name, client in clients.items():
-        before = store.get(case.id)
-        response = save(client, before, [selection()])
-        expected = 200 if name == 'owner' and status in {'draft', 'returned'} else 409 if name == 'owner' else 404
-        assert response.status_code == expected, (name, status, response.text)
-        assert response.headers['cache-control'] == 'no-store'
-        if expected != 200:
-            assert store.get(case.id) == before
-        if name in {'other', 'anonymous', 'foreign'}:
-            read = client.get(f'/cases/{case.id}')
-            assert read.status_code == 404
-            assert case.id not in read.text and 'selected_articles' not in read.text
+    client = clients[name]
+    expected = 200 if name == 'owner' and status in {'draft', 'returned'} else 409 if name == 'owner' else 404
+    if expected == 200:
+        require_repo_db()
+    before = store.get(case.id)
+    response = save(client, before, [selection()])
+    assert response.status_code == expected, (name, status, response.text)
+    assert response.headers['cache-control'] == 'no-store'
+    if expected != 200:
+        assert store.get(case.id) == before
+    if name in {'other', 'anonymous', 'foreign'}:
+        read = client.get(f'/cases/{case.id}')
+        assert read.status_code == 404
+        assert case.id not in read.text and 'selected_articles' not in read.text
 
 
 def test_list_preferences_are_unchanged_by_selection_save(context, actors):
+    require_repo_db()
     _, store = context
     clients, users = actors
     case = store.put(Case(owner_id=users['owner'].id))
@@ -307,6 +318,7 @@ def test_edit_revocation_before_snapshot_wins_over_stale_version_even_with_revie
 
 
 def test_two_simultaneous_selection_snapshots_have_one_winner(context, monkeypatch):
+    require_repo_db()
     _, store = context
     case = store.put(Case())
     barrier, put = threading.Barrier(2), store.put
@@ -332,6 +344,7 @@ def test_two_simultaneous_selection_snapshots_have_one_winner(context, monkeypat
 
 @pytest.mark.parametrize('change', ['fact', 'delete', 'submit', 'transfer_owner'])
 def test_late_write_or_revocation_cannot_be_overwritten_or_resurrected(context, actors, monkeypatch, change):
+    require_repo_db()
     _, store = context
     clients, users = actors
     case = store.put(Case(owner_id=users['owner'].id))
