@@ -12,6 +12,12 @@ GitHub has exactly two branches: `dev` (the user's test site) and `main` (produc
 - Before rebasing run `git merge-base --is-ancestor origin/dev HEAD`; if true, do not rebase. Otherwise `git -c rebase.updateRefs=false rebase --rebase-merges origin/dev`.
 - Ports: `scripts/local-app.sh status|start|stop|wait`. If 3000 or 8000 is busy, wait for the owner. Never pick another port; stop what you start.
 
+## Subagent communication (user decision 2026-10-23)
+
+- Subagents report progress, questions, findings and handoffs only in their own task output and final result. The parent handles all coordination.
+- Subagents must never send messages to any other thread or agent, including the parent and siblings. This applies to thread-send tools, attachment sends, native agent messaging and CLI/RPC equivalents.
+- Automatic delivery of a task's completion result to its parent is allowed. Include this boundary in every subagent brief.
+
 ## Agent skills
 
 ### Issue tracker
