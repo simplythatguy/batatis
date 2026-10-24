@@ -15,7 +15,7 @@ In Claude Code, install `pstack@open-pstack` from the `ericlitman/open-pstack` m
 
 ## Shared rules
 
-All Batatis agent roles, including UI implementation and independent review, use **GPT-6.1-Sol at max** under the user's 2026-10-23 decision. The portable role map is [pstack-models.mdc](../.cursor/rules/pstack-models.mdc). Verify the actual supported model/options before dispatching. Do not substitute another provider or lower effort silently.
+All Batatis agent roles, including UI implementation and independent review, use **GPT-6.1-Sol at max** under the user's 2026-10-23 decision. The portable role map is [pstack-models.mdc](../.cursor/rules/pstack-models.mdc). T3 subagents also request Fast mode with `serviceTier=priority`. Verify the actual supported model/options before dispatching. Do not substitute another provider or lower effort silently.
 
 In T3, `~/.codex/skills/t3-workflow/SKILL.md` routes the shared source at `~/.agents/skill-libraries/pstack/skills/`, Matt Pocock methods, and UI verification. Native Codex/Claude installations use the same Open Pstack version. T3 task, browser and PR tools take precedence over upstream subprocess-runner and polling examples. Keep the current main-thread model as the user's composer choice.
 

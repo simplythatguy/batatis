@@ -1,81 +1,33 @@
-# Batatis cloneable agent environment
+# Batatis agent setup
 
-Battle-oriented stack for Alberta Building Codes Challenge agents.
+Start from the shared development branch:
 
-## 1. Clone
-
-```bash
-git clone https://github.com/simplythatguy/batatis.git
+```sh
+git clone --branch dev https://github.com/simplythatguy/batatis.git
 cd batatis
-git checkout cursor/clone-ready-agent-env-54c9   # until PR #1 merges
+scripts/install-git-hooks.sh
 ```
 
-## 2. Fresh-clone installs (order matters)
+Follow [local development](local-development.md) to run the app on localhost:3000 with the engine on `8000`. GitHub has only dev/main; agents publish verified work to dev, and the user merges the single release PR into main. Keep feature branches local.
 
-### A. Open in Cursor
+## Engineering workflows
 
-Rules under `.cursor/rules/` apply automatically. Read `AGENTS.md` first.
+Read [AGENTS.md](../AGENTS.md) first. It routes the domain/variance skills, Matt Pocock engineering methods and UI quality checks. [Open Pstack](pstack.md) is the supported pstack source for Codex and Claude Code; the old Cursor-specific installation is retired on the shared machine. Installation and model setup are described in that guide.
 
-### B. pstack / poteto-mode (plugin — not vendored)
+Every agent role, including implementation, research and independent quality/UI review, uses **GPT-6.1-Sol at max**. T3 subagents request Fast mode through **serviceTier=priority**. The portable role map is `.cursor/rules/pstack-models.mdc`; the shared machine's model source is `~/.agents/pstack-models.md`. Respect the user's selected main-thread model and actual supported task options.
 
-1. In Cursor chat: `/add-plugin pstack` (or install **pstack / poteto** from the plugin marketplace).
-2. Confirm committed map exists: `.cursor/rules/pstack-models.mdc` (Opus 5.5 for judgment/review).
-3. Optional: `/setup-pstack` only to retarget models for your account — **keep review roles on Opus 5.5**.
-4. For nontrivial feature/eval/shipping work: `/poteto-mode`.
-5. Details: [`docs/pstack.md`](./pstack.md).
+Children work in isolated checkouts, return results through task output/completion only, and never message another thread or agent. The parent integrates and lands. T3's supported task, browser and PR tools govern transport; upstream CLI examples do not override them.
 
-If you skip this step, Batatis domain skills still work; poteto-mode / pstack playbooks will not.
+## Product rules
 
-### C. Matt Pocock skills (already vendored — refresh optional)
+- Administrative completeness only; technical correctness, safety and professional decisions remain human-owned.
+- Section C uses deterministic lookup after article identification. Section D recommends evidence topics and never invents professional evidence.
+- The alternative path includes risk, mitigations, assumptions and limits.
+- Keep the data model portable across **430+** Alberta jurisdictions; prefer NBC – 2023 Alberta Edition, 2nd printing citations.
+- UI follows the light, minimal, mostly monotone [calm system](design-system-calm.md), plus the shared P0 interaction rules. Every control works; capabilities stay intact.
 
-Committed under `.agents/skills/` and symlinked into `.cursor/skills/`, locked by `skills-lock.json`.
+## Verification
 
-On a **fresh machine** you can work immediately. To **refresh** from upstream:
+Run `scripts/verify.sh` and the checks relevant to the change. Visible work needs actual browser/PDF evidence, saved media inspection and a fresh independent review on the final revision. Capture failures and limits explicitly.
 
-```bash
-npx skills@latest add mattpocock/skills -a cursor
-```
-
-Domain pointers: `docs/agents/` (`domain.md`, `issue-tracker.md`, `triage-labels.md`).
-
-### D. Batatis challenge + UI system (committed — no install)
-
-| Piece | Path |
-| --- | --- |
-| Domain / variance / pitfalls | `.cursor/skills/batatis-hackathon`, `batatis-variance-workflow` |
-| UI model pin | `.cursor/skills/batatis-ui-opus` → **Claude Opus 5.5** implement **and** review |
-| Default product look | `.cursor/skills/batatis-ui-linear` + [`docs/design-system-linear.md`](./design-system-linear.md) + [`docs/design/tokens.css`](./design/tokens.css) |
-| References | [`docs/design/linear-reference/`](./design/linear-reference/) |
-
-Agents must produce Linear-caliber UI **without** the user saying “Linear.” Simplify ruthlessly; do not drop capabilities; meet the bug-free bar.
-
-## 3. Start an agent thread
-
-1. Open the repo in Cursor.
-2. Read `AGENTS.md`.
-3. Domain: `batatis-hackathon` + `docs/hackathon-problem-brief.md` + diagram.
-4. Product flow: `batatis-variance-workflow`.
-5. **Any UI:** `batatis-ui-linear` + `batatis-ui-opus` → Opus 5.5 + tokens.
-6. Engineering workflows: Matt Pocock skills via `docs/agents/`.
-7. Nontrivial work: `/poteto-mode` after pstack install.
-8. **Every quality / UI review:** Opus 5.5 (`claude-opus-5-5-max` preferred).
-
-## 4. Prove the env
-
-```text
-evals/battle-prompts/           # BT01–BT47 domain suite
-evals/battle-prompts/ui-blind/  # feature-only UI prompts (no look keywords)
-evals/ui-artifacts/             # HTML surfaces for blind UI round
-evals/fixtures/                 # short checklist
-```
-
-Pass bars: domain ≥ 4.0/5 under Opus 5.5 review (zero material gaps); UI-blind per `evals/battle-prompts/ui-blind/README.md`.
-
-## 5. Policy pins
-
-- Default UI language → Linear-caliber tokens (no prompt required)
-- UI implement + UI review → Opus 5.5
-- Completeness ≠ technical correctness
-- Section C = deterministic lookup; Section D ≠ inventing engineering
-- Alt path: never skip risk / mitigations / assumptions (**process**, not ladder rungs)
-- Portability = data-model / judging — not an SCO UX rule
+The [understanding checklist](../evals/fixtures/understanding-checklist.md) and [battle prompts](../evals/battle-prompts/README.md) exercise domain understanding. Domain scoring retains the 80% hard-constraint and 4/5 review bar with zero material gaps; the current Sol-only role map governs reviewers. The [UI suite](../evals/battle-prompts/ui-blind/README.md) keeps its interaction/capability bar under the current design/model policy.
