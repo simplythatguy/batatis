@@ -50,7 +50,7 @@ def serve(directory):
             user = onboard(client, role)
             people[name] = {'cookie': client.cookies.get('batatis_session'), 'user': user}
     ids = []
-    for index in range(42):
+    for index in range(44):
         case = complete_case()
         case.owner_id, case.authority = people['applicant']['user']['id'], 'edmonton'
         case.jurisdiction = Jurisdiction(id='edmonton', name='Edmonton')

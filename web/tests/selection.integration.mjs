@@ -101,6 +101,23 @@ const puts = p => p.evaluate(() => window.requests.filter(r => r.startsWith('PUT
 const hold = (p, path, method, { after = true, fail = false } = {}) => p.evaluate(h => { window.hold = { ...h, path: new RegExp(h.path) }; }, { path, method, after, fail });
 const waitHeld = p => p.waitForFunction(() => window.hold?.ready);
 
+/** Put a nonempty intake record in the owned fixture's bundled case snapshot. */
+async function bundledIntake(id) {
+  const sql = new DatabaseSync(db);
+  try {
+    const c = JSON.parse(sql.prepare('SELECT json FROM cases WHERE id=?').get(id).json);
+    const owner = c.facts.find(f => f.field === 'owner');
+    assert.ok(owner);
+    const intake = {
+      ran_at: '2026-10-23T00:00:00+00:00', text_sha256: 'a'.repeat(64),
+      pointers: [{ fact_id: owner.id, field: owner.field, method: 'rules', source_ref: 'description', verified: true }],
+      files: [], model: { status: 'off' }, conflicts: [], unresolved_citations: [], plan: null,
+    };
+    sql.prepare('UPDATE cases SET json=? WHERE id=?').run(JSON.stringify({ ...c, intake }), id);
+  } finally { sql.close(); }
+  assert.equal((await remote(id)).intake.pointers.length, 1);
+}
+
 /** Application A: three sentences, unanswered / No / Not sure. Application B: another sentence unanswered and a pending Yes. */
 async function twoApplications(p) {
   await begin(p);
@@ -238,13 +255,14 @@ try {
     assert.deepEqual(await cards(p), A);
   });
 
-  for (const [what, path] of [['the case read', '$'], ['the stored intake read', '/intake$']]) {
+  for (const [what, holdAfter] of [['the case read', false], ['the completed bundled case and intake read', true]]) {
     await scenario(`starting over while ${what} of an opening application is held keeps the new draft`, async open => {
       const p = await open();
       const { a } = await twoApplications(p);
+      if (holdAfter) await bundledIntake(a);
       const before = await remote(a);
       await begin(p);
-      await hold(p, `/cases/${a}${path}`, 'GET');
+      await hold(p, `/cases/${a}$`, 'GET', { after: holdAfter });
       await p.evaluate(id => { window.opening = window.caseStore.openCase(id, 'homebuilder'); }, a);
       await waitHeld(p);
       await begin(p);                                                    // Start over / New application
@@ -252,7 +270,7 @@ try {
       await dispatch(p, { type: 'addCandidate', candidate: card('9.36.2.6.(1)') });
       const result = await p.evaluate(async () => { window.release(); return await window.opening; });
       await settle(p);
-      assert.equal(result, null, 'a superseded open reports nothing to its caller');
+      assert.equal(result, 'The application or sign-in changed while opening. Your current answers stay open.', 'a superseded open reports its cancellation without replacing the new draft');
       const state = await p.evaluate(() => ({ engineId: window.caseStore.engineId, phase: window.caseStore.phase, owner: window.caseStore.c.facts.find(f => f.field === 'owner')?.value }));
       assert.notEqual(state.engineId, a, 'the old application is not reattached');
       assert.equal(state.owner, 'SYNTHETIC new draft owner');
@@ -268,12 +286,13 @@ try {
   await scenario('a newer open wins over an older one still reading', async open => {
     const p = await open();
     const { a, b } = await twoApplications(p);
-    await hold(p, `/cases/${a}/intake$`, 'GET');
+    await bundledIntake(a);
+    await hold(p, `/cases/${a}$`, 'GET', { after: true });
     await p.evaluate(id => { window.older = window.caseStore.openCase(id, 'homebuilder'); }, a);
     await waitHeld(p);
     assert.equal(await openCase(p, b), null);
     await looked(p);
-    assert.equal(await p.evaluate(async () => { window.release(); return await window.older; }), null);
+    assert.equal(await p.evaluate(async () => { window.release(); return await window.older; }), 'The application or sign-in changed while opening. Your current answers stay open.');
     await settle(p);
     assert.equal(await p.evaluate(() => window.caseStore.engineId), b);
     assert.deepEqual(await cards(p), B, 'B stays open with its own cards');

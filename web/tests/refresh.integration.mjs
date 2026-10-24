@@ -654,6 +654,35 @@ try {
     assert.equal((await remote()).facts.filter(f => f.field === field).at(-1).value, 'SYNTHETIC response: layers remain subject to responsible human review.');
     assert.equal(requests.filter(r => r.method === 'POST' && /\/(identify|intake)/.test(r.path)).length, 0);
   });
+  await scenario('J05 a removed refreshed article re-added from the library expands and saves its sentences', async ({ page, id, context, returned, row, api, remote }) => {
+    await returned(); await poll(page);
+    const before = await remote();
+    const provision = '9.27.3.4.';
+    const b = { id: 'search-' + provision, provision, answer: null, pending: false };
+    const baseline = before.selected_articles ?? before.provisions.map(p => ({ id: 'search-' + p, provision: p, answer: 'yes', pending: false }));
+    const updated = await api(context, `/cases/${id}/selected-articles`, {
+      expected_version: before.version, selected_articles: [...baseline, b],
+    }, 'PUT');
+    await page.evaluate(async () => { window.readdVersion = (await import('/src/api/sync.ts')).acknowledgedVersion; });
+    await row().click();
+    await page.waitForFunction(({ id, version }) => window.readdVersion(id) === version, { id, version: updated.version });
+    await page.evaluate(() => { location.hash = '#/references'; });
+    await page.locator('#reference-choice').selectOption({ label: '9.27.3.4.(1)' });
+    const removed = page.waitForResponse(r => r.request().method() === 'PUT' && r.url().endsWith('/selected-articles'));
+    await page.getByRole('button', { name: 'Remove reference', exact: true }).click();
+    assert.equal((await removed).status(), 200);
+    await page.locator('.cf-save-label').filter({ hasText: 'Saved' }).waitFor();
+    assert.equal((await remote()).selected_articles.some(a => a.provision.startsWith(provision)), false);
+    await page.evaluate(p => { location.hash = '#/code/' + encodeURIComponent(p); }, provision);
+    const added = page.waitForResponse(r => r.request().method() === 'PUT' && r.url().endsWith('/selected-articles'));
+    await page.getByRole('button', { name: 'Add to my application', exact: true }).click();
+    assert.equal((await added).status(), 200);
+    await page.locator('.cf-save-label').filter({ hasText: 'Saved' }).waitFor();
+    const children = (await remote()).selected_articles.filter(a => a.provision.startsWith(provision));
+    assert.deepEqual(children.map(a => a.provision), ['9.27.3.4.(1)', '9.27.3.4.(2)']);
+    assert.ok(children.every(a => a.answer === null && !a.pending), 'the new sentences inherit no parent decision');
+    assert.equal(await page.evaluate(id => window.caseStore.gaps.some(g => g.id === 'lookup-' + id), b.id), false, 'completed lookup is not a loading gap');
+  });
 } finally { await browser.close(); }
 console.log(`Application refresh integration: ${passed} passed, ${failed} failed`);
 process.exitCode = failed ? 1 : 0;
