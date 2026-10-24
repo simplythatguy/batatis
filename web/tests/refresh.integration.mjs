@@ -123,7 +123,7 @@ async function messagesDrawer(page) {
 }
 
 try {
-  await scenario('J05 selected-article-only revisions reconcile every card before a later acknowledged save', async ({ page, context, id, returned, row, api, remote, requests }) => {
+  await scenario('J05 selected-article-only revisions reconcile every card before a later acknowledged save', async ({ page, context, id, other, open, returned, row, api, remote, requests }) => {
     await returned(); await poll(page);
     await page.getByRole('button', { name: 'Resubmit to Edmonton', exact: true }).waitFor();
     await page.waitForFunction(() => window.caseStore.sectionCLookup.source === 'live');
@@ -145,7 +145,7 @@ try {
       [],
       [b, ...baseline],
     ];
-    for (const selected_articles of selections) {
+    for (const [index, selected_articles] of selections.entries()) {
       const before = await remote();
       const updated = await api(context, `/cases/${id}/selected-articles`, { expected_version: before.version, selected_articles }, 'PUT');
       assert.deepEqual(updated.provisions, saved.provisions, 'selection writes never confirm or withdraw a benchmark');
@@ -163,9 +163,13 @@ try {
         assert.equal(await page.evaluate(() => window.caseStore.c.questions.some(q => q.cardId === 'search-remote-b')), true, 'Not sure retains its open question');
       }
       await page.waitForLoadState('networkidle');
+      if (index === 0) await page.waitForTimeout(650); // Beyond the autosave deadline: adoption must remain read-only.
       assert.equal(requests.slice(start).some(r => r.method !== 'GET' && r.path !== '/section-c'), false, 'refresh must not write the adopted selection in the background');
       assert.equal((await remote()).version, updated.version);
     }
+    await page.evaluate(() => { window.cardsBeforeSelectionRefresh = window.caseStore.c.candidates; });
+    assert.equal(await page.evaluate(() => window.caseStore.refreshCurrentCase()), null);
+    assert.equal(await page.evaluate(() => window.caseStore.c.candidates === window.cardsBeforeSelectionRefresh), true, 'an unchanged selection retains the active cards');
     await page.evaluate(() => { location.hash = '#/code/' + encodeURIComponent('9.27.3.1.(1)'); });
     const writing = page.waitForResponse(r => r.request().method() === 'PUT' && r.url().endsWith('/selected-articles'));
     await page.getByRole('button', { name: 'Add to my application', exact: true }).click();
@@ -175,6 +179,16 @@ try {
     const after = await remote();
     assert.ok(after.selected_articles.some(a => a.id === b.id && a.provision === b.provision), 'the later acknowledged PUT/GET retains remote B');
     assert.ok(after.selected_articles.some(a => a.provision === '9.27.3.1.(1)'), 'the later local addition was saved');
+    await page.evaluate(() => window.caseStore.decide(window.caseStore.c.candidates.find(a => a.id === 'search-remote-b'), 'yes'));
+    await page.waitForFunction(() => window.caseStore.c.candidates.some(a => a.provision === '9.27.3.4.(1)'));
+    assert.equal(await page.evaluate(() => window.caseStore.c.candidates.some(a => a.provision.startsWith('9.27.3.4.') && (a.answer !== null || a.benchmark))), false, 'explicit expansion never inherits the parent Yes');
+    assert.equal(await page.evaluate(() => window.caseStore.saveDraft()), id);
+    assert.deepEqual((await remote()).provisions, saved.provisions, 'an answer or lookup never substitutes for confirmed references');
+    await open(other);
+    await page.waitForFunction(() => window.caseStore.sectionCLookup.source === 'live' && window.caseStore.c.candidates.some(a => a.provision === '9.27.3.4.(1)'));
+    await page.evaluate(() => { window.cardsBeforeSelectionRefresh = window.caseStore.c.candidates; });
+    assert.equal(await page.evaluate(() => window.caseStore.refreshCurrentCase()), null);
+    assert.equal(await page.evaluate(() => window.caseStore.c.candidates === window.cardsBeforeSelectionRefresh), true, 'unchanged read-only content retains its derived cards and active controls');
   });
 
   await scenario('J05 a new return notification refreshes the open application and unlocks it without reload or fetch loops', async ({ page, returned, requests }) => {

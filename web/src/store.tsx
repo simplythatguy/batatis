@@ -304,6 +304,8 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     setReadingState((r) => ({ ...r, ...(typeof patch === "function" ? patch(r) : patch) }));
   const latestGaps = useRef<Gap[]>([]);
   const latestCase = useRef(c);
+  const savedSelection = useRef<string | null>(null);
+  const refreshedSelection = useRef(new Map<string, string>());
   latestCase.current = c;
   const renderGeneration = engineGeneration();
   const renderSession = accountSession();
@@ -336,6 +338,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     const editing = !derived || ["editEvidenceDraft", "addFiles", "removeFile"].includes(action.type);
     if (action.type !== "reset" && editing && transition?.dispatched
       && isEngineGeneration(transition.generation) && transition.caseId === engineCaseId()) return;
+    if (action.type === "answerCandidate") refreshedSelection.current.delete(action.id);
     if (!derived) {
       revision.current += 1;
       if (action.type !== "saveEvidence" && action.type !== "removeEvidence") planRevision.current += 1;
@@ -372,7 +375,10 @@ export function CaseProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (sectionCLookup.source !== "live") return;
-    if (reconcileSectionC(c, sectionCLookup.rows) !== c) dispatch({ type: "reconcileSectionC", rows: sectionCLookup.rows, basis: lookupBasis(c) });
+    // A refresh adopts the saved cards as-is. Looking up their wording must not rewrite that
+    // selection; an explicit answer releases its card for the normal sentence expansion.
+    const preserve = selectedArticles(c).filter(a => refreshedSelection.current.get(a.id) === selectionKey([a])).map(a => a.id);
+    if (reconcileSectionC(c, sectionCLookup.rows, preserve) !== c) dispatch({ type: "reconcileSectionC", rows: sectionCLookup.rows, basis: lookupBasis(c), preserve });
   }, [sectionCLookup, c.candidates, dispatch]);
 
   /** Adopt an explicit fresh read's evidence ledger before writing again (derived, not new input). */
@@ -496,6 +502,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       // The code-check cards, answers and pending state: a snapshot that never confirms a reference.
       const selectionError = await pushSelectedArticles(id, selectedArticles(snapshot), signal);
       if (!current()) return null;
+      if (!selectionError) savedSelection.current = selectionKey(selectedArticles(snapshot));
       // One atomic write per listing, then removals. Only acknowledged revisions count as saved.
       const listed = await pushListedEvidence(id, snapshot.listedEvidence ?? [], signal);
       if (!current()) return null;
@@ -1060,6 +1067,8 @@ export function CaseProvider({ children }: { children: ReactNode }) {
 
   /** Reset the save session, case extras and visible request state before adopting another case. */
   function clearVisit(next: Case) {
+    savedSelection.current = null;
+    refreshedSelection.current.clear();
     for (const read of caseReads.current) read.ctl.abort();
     caseReads.current.clear();
     caseRead.current++;
@@ -1116,6 +1125,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     clearVisit(next);
     // Adopt the saved version, answers and shown code cards so the next save sends only what the applicant changes.
     adoptEngineCase(read.saved, selectedArticles(next));
+    savedSelection.current = selectionKey(read.saved.selected_articles ?? selectedArticles(next));
     openedStatus.current = read.saved.status;
     setSavedStatus(read.saved.status);
     patchApplication(read.saved.id, { status: read.saved.status, authority: read.saved.authority });
@@ -1174,12 +1184,15 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         const next = caseFromEngine(read.saved, latestCase.current.applicantType);
         const signatures = (facts: Fact[]) => JSON.stringify(facts.map(f => [f.field, factSignature(f)]).sort());
         const local = latestCase.current;
+        const restored = openedCase(read.saved, local.applicantType, read);
         const sameContent = local.title === next.title && local.authority === next.authority
           && signatures(latestFacts(local.facts as EngineCase["facts"])) === signatures(next.facts)
           && JSON.stringify(local.intake?.record ?? null) === JSON.stringify(read.saved.intake)
           && JSON.stringify(local.identify ?? null) === JSON.stringify(read.saved.identify)
           && JSON.stringify(local.candidates.filter(a => a.answer === "yes" && isProvision(a.provision)).map(a => a.provision).sort())
-            === JSON.stringify([...read.saved.provisions].sort());
+            === JSON.stringify([...read.saved.provisions].sort())
+          // Compare the acknowledged wire snapshot: read-only lookup expansion is display only.
+          && savedSelection.current === selectionKey(read.saved.selected_articles ?? selectedArticles(restored));
         // Officer status/thread updates preserve the active card, files and unfinished controls.
         if (sameContent) {
           // The shown cards are the acknowledged selection (nothing unsaved here): never re-sent over another tab's.
@@ -1188,7 +1201,10 @@ export function CaseProvider({ children }: { children: ReactNode }) {
           // Reconcile only these cards so the active applicant controls stay mounted.
           derive({ type: "restoreReviewQuestions", questions: next.questions });
         }
-        else showSavedCase(read, { ...openedCase(read.saved, local.applicantType, read), files: local.files });
+        else {
+          showSavedCase(read, { ...restored, files: local.files });
+          refreshedSelection.current = new Map(selectedArticles(restored).map(a => [a.id, selectionKey([a])]));
+        }
         openedStatus.current = read.saved.status;
         setSavedStatus(read.saved.status);
         patchApplication(read.saved.id, { status: read.saved.status, authority: read.saved.authority });

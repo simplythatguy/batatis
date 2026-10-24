@@ -27,7 +27,7 @@ def serve(directory):
     sys.path.insert(0, str(ROOT))
     from fastapi.testclient import TestClient
     from engine.api import create_app
-    from engine.models import Jurisdiction
+    from engine.models import Jurisdiction, SelectedArticle
     from engine.store import CaseStore
     from engine.tests.case_builder_fixtures import complete_case, fact, store_with_synthetic_files
     from engine.tests.test_accounts import onboard, signup
@@ -55,6 +55,11 @@ def serve(directory):
         case.owner_id, case.authority = people['applicant']['user']['id'], 'edmonton'
         case.jurisdiction = Jurisdiction(id='edmonton', name='Edmonton')
         case.title, case.status = f'SYNTHETIC refresh regression {index}', 'submitted'
+        if index == 1:  # The selected-article refresh scenario's other, read-only application.
+            case.selected_articles = [
+                SelectedArticle(id='search-' + provision, provision=provision, answer=answer)
+                for provision, answer in (('9.10.9.16.(1)', 'yes'), ('9.27.3.4.', None))
+            ]
         values = {entry.field: entry.value for entry in case.facts}
         case.facts += [fact('date', values['application_date']), fact('municipalAddress', values['civic_address'])]
         case.facts += [fact('process.' + key, values[key]) for key in (

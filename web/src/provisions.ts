@@ -24,15 +24,21 @@ export const withinProvision = (row: string, parent: string) => {
 };
 
 /** Expand an article once, preserving only decisions about that exact sentence.
- * Overlapping article/child lookup must not duplicate rows or inherit a parent Yes. */
-export function reconcileSectionC(c: Case, rows: SectionCRow[]): Case {
+ * Overlapping article/child lookup must not duplicate rows or inherit a parent Yes.
+ * Preserved saved cards receive rows without changing their selection or answers. */
+export function reconcileSectionC(c: Case, rows: SectionCRow[], preserve: string[] = []): Case {
+  const kept = new Set(preserve);
   const unique = [...new Map(rows.map(r => [canonicalProvision(r.provision), r])).values()];
-  const candidates = c.candidates.filter(a => !unique.some(r => withinProvision(r.provision, a.provision)));
+  const candidates = c.candidates.filter(a => kept.has(a.id) || !unique.some(r => withinProvision(r.provision, a.provision)));
   const sectionC: SectionCRow[] = [];
   for (const row of unique) {
     const exact = c.candidates.find(a => canonicalProvision(a.provision) === canonicalProvision(row.provision));
     const parent = exact ?? c.candidates.find(a => withinProvision(row.provision, a.provision));
     if (!parent) continue; // A stale lookup cannot reintroduce a removed reference.
+    if (kept.has(parent.id)) {
+      sectionC.push({ ...row, candidateId: parent.id });
+      continue;
+    }
     const candidate = exact ?? {
       ...parent, id: `provision-${row.provision}`, provision: row.provision,
       answer: null, benchmark: false,

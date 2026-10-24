@@ -491,8 +491,8 @@ export type Action =
   | { type: "noteIdentifyQuestions"; questions: { id?: string; field: string; text: string; why?: string | null }[] }
   | { type: "bindOpenQuestion"; candidateId: string; questionId: string }
   | { type: "noteSectionC"; rows: SectionCRow[] }
-  /** `basis` is the candidate list the rows were looked up for (see lookupBasis). */
-  | { type: "reconcileSectionC"; rows: SectionCRow[]; basis?: string }
+  /** `basis` guards stale lookups; `preserve` keeps acknowledged cards unchanged by display lookup. */
+  | { type: "reconcileSectionC"; rows: SectionCRow[]; basis?: string; preserve?: string[] }
   | { type: "noteUnscopedEvidence"; ids: string[] }
   | { type: "removeCandidate"; id: string }
   | { type: "editEvidenceDraft"; itemId: string; patch: Partial<EvidenceDraft> }
@@ -869,7 +869,7 @@ export function reducer(c: Case, a: Action): Case {
     case "reconcileSectionC":
       // Rows looked up for an older candidate list must not reorder or drop newer answers.
       if (a.basis !== undefined && a.basis !== lookupBasis(c)) return c;
-      return reconcileSectionC(c, a.rows);
+      return reconcileSectionC(c, a.rows, a.preserve);
     case "noteUnscopedEvidence": {
       const next = [...new Set([...(c.unscopedEvidence ?? []), ...a.ids])];
       if (next.length === (c.unscopedEvidence ?? []).length) return c;
