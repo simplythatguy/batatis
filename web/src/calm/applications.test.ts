@@ -21,6 +21,8 @@ test("status lines: draft, in review, returned with news, settled", () => {
   assert.equal(statusLine(app({ status: "returned", unread_messages: 3 }), NOW).text, "Returned · 3 new messages");
   assert.equal(statusLine(app({ status: "returned" }), NOW).text, "Returned · fix and resubmit");
   assert.equal(statusLine(app({ status: "accepted", authority: "calgary" }), NOW).text, "Accepted · Calgary");
+  assert.equal(statusLine(app({ status: "refused", authority: "edmonton" }), NOW).text, "Refused · Edmonton");
+  assert.equal(groupApplications([app({ status: "refused" })]).settled.length, 1);
 });
 
 test("the list groups settled applications and searches titles", () => {
@@ -54,6 +56,19 @@ test("refused applications are settled and read-only, without resubmission instr
   assert.match(display.note, /closed/);
   assert.doesNotMatch(display.note, /until|return|fix|resubmit|missing/i);
   assert.equal(readOnly("returned"), false, "an ordinary return stays editable");
+});
+
+test("final statuses stay read-only and never promise an officer return", () => {
+  for (const status of ["accepted", "refused", "withdrawn", "future_final_status"]) {
+    assert.equal(readOnly(status), true);
+    const copy = readOnlyStatus(status, "edmonton");
+    assert.doesNotMatch(copy.note + copy.next, /until.*return|if.*return/i);
+  }
+  assert.match(readOnlyStatus("accepted", "edmonton").note, /administratively complete/);
+  assert.match(readOnlyStatus("accepted", "edmonton").note, /does not decide whether the design complies or is safe/);
+  assert.match(readOnlyStatus("refused", "edmonton").heading, /Refused by Edmonton/);
+  assert.equal(readOnly(undefined), false);
+  for (const status of ["submitted", "in_review"]) assert.match(readOnlyStatus(status).next, /if the officer returns it/);
 });
 
 import { answerBlocks } from "./assistant/assistant.ts";

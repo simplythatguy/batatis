@@ -4,7 +4,8 @@ import test from "node:test";
 import type { Case as EngineCase, IdentifyResult } from "../api/types.gen.ts";
 import { toViewRow } from "../api/sectionC.ts";
 import { engineField } from "../intakeFields.ts";
-import { getGaps, reducer } from "../model.ts";
+import { displayValue, factFor, getGaps, reducer } from "../model.ts";
+import { professionalConfirmed } from "../professional.ts";
 import { caseFromEngine, latestFacts, openedCase, selectedArticles } from "./openCase.ts";
 
 const fact = (id: string, field: string, value: string, ref = "Typed in Section A") => ({
@@ -194,4 +195,82 @@ test("an acknowledged identification decision stays the answer of its card; a le
   assert.deepEqual(c.candidates.map((a) => [a.id, a.answer]), [["id-9.10.14.4.(1)", "yes"]]);
   const legacy = openedCase(saved({ provisions: [], selected_articles: null }), "manufacturer", { intake: null, identify: identified() });
   assert.deepEqual(legacy.candidates.map((a) => [a.id, a.answer]), [["id-9.10.14.4.(1)", null], ["id-9.10.14.5.(1)", null]]);
+});
+
+test("a raw API application reopens every applicant field without changing saved provenance", () => {
+  const api = saved({ jurisdiction: null, authority: "calgary", facts: [
+    fact("owner-api", "section_a.owner_name", "API owner"),
+    fact("rep-api", "applicant_name", "API representative"),
+    fact("mail-api", "mailing_address", "API mailing address"),
+    fact("date-api", "application_date", "2026-10-22"),
+    fact("site-api", "civic_address", "API site address"),
+    fact("legal-api", "section_b.legal_description", "Lot 1 Block 2 Plan 3"),
+    fact("permit-api", "section_b.permit_number", "API permit"),
+    fact("alternative-api", "alternative_description", "API proposed alternative"),
+    fact("scope-api", "scope", "jurisdiction"),
+    fact("rationale-api", "rationale", "Applicant rationale"),
+    fact("risk-api", "risk_assessment", "Applicant risks"),
+    fact("mitigation-api", "mitigation", "Applicant measures"),
+    fact("assumptions-api", "process.assumptions_limits", "Applicant limits"),
+    fact("maintenance-api", "operation_maintenance", "Applicant upkeep"),
+    fact("qualifications-api", "qualifications", "Applicant qualifications"),
+    fact("status-api", "professional_status", "not_engaged"),
+    fact("registration-api", "apega_number", "Applicant supplied registration"),
+  ] });
+  const original = structuredClone(api);
+  const c = caseFromEngine(api, "homebuilder");
+  assert.equal(c.authority, "calgary");
+  for (const [field, id] of Object.entries({
+    owner: "owner-api", representative: "rep-api", mailingAddress: "mail-api", date: "date-api",
+    municipalAddress: "site-api", legalDescription: "legal-api", permit: "permit-api",
+    alternative: "alternative-api", scope: "scope-api", "professional.status": "status-api",
+    "professional.registration_number": "registration-api",
+  })) {
+    const actual = factFor(c, field);
+    const stored = api.facts.find((f) => f.id === id)!;
+    assert.deepEqual(actual, { ...stored, field }, `${field} retains its original id, status and source`);
+  }
+  assert.deepEqual(c.process, { rationale: "Applicant rationale", risk: "Applicant risks", mitigation: "Applicant measures", assumptions: "Applicant limits", maintenance: "Applicant upkeep", qualifications: "Applicant qualifications" });
+  assert.equal(displayValue(factFor(c, "professional.status")!), "Not engaged yet");
+  assert.equal(factFor(c, "professional.role"), undefined, "engagement status is not a professional role");
+  assert.equal(professionalConfirmed(c.facts), false);
+  assert.deepEqual(api, original, "rehydration never mutates the API case");
+});
+
+test("the newest alias controls, including withdrawals and unconfirmed revisions", () => {
+  const c = caseFromEngine(saved({ facts: [
+    fact("owner-old", "owner_name", "Old owner"),
+    fact("date-old", "request_date", "2026-10-20"),
+    fact("risk-old", "process.risk_assessment", "Old risks"),
+    fact("mitigation-old", "mitigation", "Old measures"),
+    fact("owner-new", "owner", "New owner"),
+    { ...fact("risk-new", "risk", "Unconfirmed new risks", "Applicant PDF"), status: "unconfirmed", confidence: .8 },
+    { ...fact("owner-withdrawn", "section_a.owner_name", "", "Answer withdrawn by applicant"), status: "unconfirmed" },
+    { ...fact("date-empty", "application_date", ""), status: "unconfirmed" },
+    { ...fact("mitigation-withdrawn", "process.mitigating_measures", "", "Answer withdrawn by applicant"), status: "unconfirmed" },
+    fact("other", "custom.authority_note", "API data to keep"),
+  ] as EngineCase["facts"] }), "homebuilder");
+  assert.equal(factFor(c, "owner"), undefined);
+  assert.equal(factFor(c, "date"), undefined);
+  assert.equal(c.process.mitigation, "");
+  // As engine/process_fields.py: an unconfirmed reading is kept as a fact but is not the applicant's answer.
+  assert.equal(c.process.risk, "");
+  assert.equal(factFor(c, "process.risk_assessment")?.id, "risk-new");
+  assert.equal(factFor(c, "process.risk_assessment")?.status, "unconfirmed");
+  assert.equal(factFor(c, "custom.authority_note")?.value, "API data to keep");
+});
+
+test("rehydration keeps saved alias facts pointing at the same description source", () => {
+  const api = saved({ facts: [
+    fact("description", "project.description", "Applicant description", "Your description"),
+    fact("owner-from-description", "owner_name", "Applicant owner", "Your description"),
+  ] });
+  const c = caseFromEngine(api, "homebuilder");
+  assert.deepEqual(factFor(c, "owner"), { ...api.facts[1], field: "owner" });
+  assert.equal(factFor(c, "project.description")?.id, "description");
+});
+
+test("a saved reviewing authority is preserved beyond the current picker choices", () => {
+  const c = caseFromEngine(saved({ authority: null, jurisdiction: { id: "red-deer", name: "Red Deer", authority: "City of Red Deer" } }), "homebuilder");
+  assert.equal(c.authority, "red-deer");
 });

@@ -1040,6 +1040,23 @@ body {
   overscroll-behavior: contain;
 }
 
+/* Keep the existing screen geometry while disabling every mounted form during submission. */
+.cf-edit-lock {
+  display: contents;
+}
+
+.cf-submission-pending {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  margin: 0;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--cf-line);
+  background: var(--cf-bg);
+  color: var(--cf-text-2);
+  font-size: 13px;
+}
+
 /* Assistant: a column beside main (pushes it), raised surface. */
 
 .cf-assist {
@@ -2724,6 +2741,10 @@ body {
   white-space: pre-line;
 }
 
+.cf-sheet-document { display: block; }
+.cf-sheet-document + .cf-sheet-document { margin-top: 10px; }
+.cf-sheet-document-meta { display: block; color: var(--cf-sheet-muted); font-size: 12px; }
+
 .cf-sheet-label {
   margin: 10px 0 2px;
   color: var(--cf-sheet-muted);
@@ -3046,7 +3067,8 @@ body {
   overflow: hidden;
 }
 
-.cf-main:has(> .cf-legacy) {
+.cf-main:has(> .cf-legacy),
+.cf-main:has(> .cf-edit-lock > .cf-legacy) {
   padding: 0 24px 24px;
 }
 
@@ -3210,7 +3232,8 @@ body {
   .cf-drawer-scroll {
     padding: 22px 20px 28px;
   }
-  .cf-main:has(> .cf-legacy) {
+  .cf-main:has(> .cf-legacy),
+  .cf-main:has(> .cf-edit-lock > .cf-legacy) {
     padding: 0 10px 12px;
   }
   .cf-legacy .panel-header,
@@ -3478,7 +3501,8 @@ body {
    chapters pane takes its place (same width, head and search field). With less than 760px of
    room (assistant open on a small laptop, phones) it is one pane at a time with a back control. */
 
-.cf-main:has(> .cf-lib) {
+.cf-main:has(> .cf-lib),
+.cf-main:has(> .cf-edit-lock > .cf-lib) {
   overflow: hidden;
 }
 
@@ -5246,7 +5270,7 @@ body {
 
 .cf-returned-items a {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   padding: 4px 0;
   color: var(--cf-text-2);
@@ -5254,7 +5278,14 @@ body {
   text-decoration: none;
 }
 
+.cf-returned-items a > .cf-dot { flex: none; margin-top: 7px; }
+.cf-returned-item-text { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+.cf-returned-item-state { color: var(--cf-text-3); font-size: 12px; }
+.cf-returned-next { margin: 10px 0 0; }
+
 .cf-returned-items a svg {
+  flex: none;
+  margin-top: 3px;
   opacity: 0;
   transition-property: opacity;
   transition-duration: 150ms;
@@ -5276,9 +5307,12 @@ body {
   margin-top: 14px;
 }
 
-.cf-returned-reply {
-  margin: 12px 0 0;
-}
+.cf-conversation { padding: 16px 28px; border-bottom: 1px solid var(--cf-line); }
+.cf-conversation > details { max-width: 864px; }
+.cf-conversation summary { cursor: pointer; color: var(--cf-text-2); font-size: 14px; }
+.cf-conversation .ac-thread { max-height: 360px; overflow-y: auto; overscroll-behavior: contain; padding: 6px 0; }
+.cf-conversation .ac-msg-head { flex-wrap: wrap; }
+.cf-conversation .ac-msg-body, .cf-conversation .ac-msg-items { margin-left: 0; }
 
 /* Submit to the authority (Application stage). */
 .cf-submit {
@@ -6181,3 +6215,12 @@ a.cf-save-check {
     transition: none;
   }
 }
+.cf-triage-topic { padding: 14px 0; border-bottom: 1px solid var(--cf-line); }
+.cf-triage-topic > summary { cursor: pointer; font-size: 15px; line-height: 1.5; }
+.cf-keyword-triage .cf-row { flex-wrap: wrap; }
+.cf-keyword-triage .cf-row-text { min-width: 160px; }
+.cf-keyword-triage .cf-row-text p { margin: 4px 0 0; }
+.cf-keyword-triage .cf-row-actions { margin-top: 20px; }
+.ac-sheet-question { padding: 14px 0; border-bottom: 1px solid rgba(0,0,0,.12); overflow-wrap: anywhere; }
+.ac-sheet-questions details { margin: 12px 0; }
+.ac-sheet-questions summary { cursor: pointer; font-size: 13px; line-height: 1.5; }

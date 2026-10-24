@@ -6,7 +6,6 @@ import { NrcCredit } from "../components";
 import { canonicalProvision, withinProvision } from "../provisions";
 import { provisionCandidate } from "../screens/SectionC";
 import { useCase } from "../store";
-import { readOnlyStatus } from "./applications";
 import { useCurrentApplication } from "./begin";
 import { useApplicationSwitch, useCodeScope } from "./codeScope";
 import { useAccount } from "./account";
@@ -383,11 +382,11 @@ function CodeText({ id, text }: { id: string; text: string }) {
 
 /**
  * The reader's one write: add the article to the application the library reads for (the open one).
- * Nothing under None, and a sent or closed application keeps its read-only note.
+ * Nothing under None; a sent or closed application says it is read-only (the code stays readable).
  */
 export function AddToApplication({ id, record }: { id: string; record: CodeRecord | null }) {
   const { c, dispatch, engineId } = useCase();
-  const { app, locked } = useCurrentApplication();
+  const { locked } = useCurrentApplication();
   const scope = useCodeScope();
   /** The case the article was added to, so the note never shows for another one. */
   const [addedTo, setAddedTo] = useState<string | null>(null);
@@ -396,8 +395,8 @@ export function AddToApplication({ id, record }: { id: string; record: CodeRecor
   const inCase = c.candidates.some((a) => canonicalProvision(a.provision) === canonicalProvision(id) || withinProvision(a.provision, id));
   return (
     <div className="cf-read-actions">
-      {locked && app ? (
-        <span className="cf-faint cf-small">{readOnlyStatus(app.status, app.authority).note}</span>
+      {locked ? (
+        <span className="cf-faint cf-small">Your saved application is read-only. You can still read the code.</span>
       ) : inCase ? (
         <a className="cf-btn is-sm" href="#/questions?first=code"><CIcon name="check" size={13} />In your application</a>
       ) : (

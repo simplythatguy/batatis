@@ -5,6 +5,7 @@
  * `createEngine(base)` serves scripts and tests outside Vite.
  */
 import { credentialsMode } from "./engineAuth";
+import { accountRequestSignal } from "./requestLifetime";
 import { publicDetail, takeSseEvents } from "../rules";
 import type { RuleDef, RuleIndex } from "../rules/evaluate";
 import type {
@@ -93,7 +94,7 @@ export interface JurisdictionBody {
 }
 
 /**
- * POST /cases/{id}/evidence: one applicant text listing, written atomically against
+ * POST /cases/{id}/evidence: applicant metadata and owned-file binding, written atomically against
  * `expected_version`. Optional details: a string is saved, null withdraws, omission retains.
  * `scope` omitted retains links; null unlinks; `{ item_id }` links to one current plan task.
  */
@@ -107,6 +108,8 @@ export interface EvidenceWrite {
   responsible_party?: string | null;
   date?: string | null;
   issuer?: string | null;
+  /** Owned upload id; null removes only the binding, omission retains it. */
+  file_ref?: string | null;
   scope?: { item_id: string } | null;
 }
 
@@ -155,7 +158,7 @@ export function createEngine(base: string) {
         body: body === undefined ? undefined : JSON.stringify(body),
       });
     } catch (e) {
-      if (signal?.aborted) throw e;
+      if (timed.canceled()) throw e;
       if (timed.timedOut()) throw new EngineError(0, "The engine did not answer in time.");
       throw new EngineError(0, e instanceof Error ? e.message : String(e));
     } finally {
@@ -231,11 +234,12 @@ export function createEngine(base: string) {
      * A missing code database is not turned into a 503 on this branch.
      */
     exportPdf: (caseId: string, draft = false, signal?: AbortSignal) => exportPdf(base, caseId, draft, signal),
-    /**
-     * Multipart PDF upload (FormData field `file`). Not served on today's dev.
-     * When backend/case-api lands, this sends the PDF bytes and reads {id, name, pages, sha256, read}.
-     */
+    /** Multipart PDF upload (FormData field `file`), returning its stored id and metadata. */
     upload: (caseId: string, file: File, signal?: AbortSignal) => uploadPdf(base, caseId, file, signal),
+    files: (caseId: string, signal?: AbortSignal) =>
+      call<ItemEnvelope<StoredFile>>("GET", `/cases/${enc(caseId)}/files`, undefined, signal).then(unwrapItems),
+    fileUrl: (caseId: string, fileId: string) => `${base}/cases/${enc(caseId)}/files/${enc(fileId)}`,
+    downloadFile: (caseId: string, fileId: string, signal?: AbortSignal) => downloadFile(base, caseId, fileId, signal),
     /**
      * POST /cases/{id}/identify with Accept: text/event-stream, from PR #12.
      * 404 on today's dev. The caller keeps the description cards.
@@ -285,7 +289,7 @@ export function createEngine(base: string) {
         withVersion({ decision }, expectedVersion),
         signal,
       ),
-    /** GET /cases/{id}/identify/information-request. Items are not_sure decisions. */
+    /** GET /cases/{id}/identify/information-request. Read-only questions and legacy not_sure items. */
     informationRequest: (caseId: string, signal?: AbortSignal) =>
       call<InformationRequest>("GET", `/cases/${enc(caseId)}/identify/information-request`, undefined, signal),
     /** POST /cases/{id}/evidence. 409 = stale version or existing ID; 404 = case gone or slot absent. */
@@ -341,6 +345,8 @@ export interface EngineGap {
   severity: "blocking" | "warning" | "info";
   fix_hint?: string;
   citation?: string | null;
+  routed_to?: "officer" | "professional" | "applicant" | null;
+  submission_blocking?: boolean;
 }
 
 export interface EngineProcessField {
@@ -377,6 +383,8 @@ export interface ProfessionalResult {
   reasons: { code: string; required: "yes" | "no" | "depends"; message: string; citation: string }[];
   questions: string[];
   scope_note: string;
+  resolution?: import("./types.gen").ProfessionalRequirementResolution | null;
+  mandatory_required?: boolean;
 }
 
 /** One issue from GET /cases/{id}/section-d/issues (PR #8). */
@@ -404,14 +412,51 @@ export interface SectionDIssue {
 export interface InformationRequest {
   case_id: string;
   items: { id: string; provision_id: string; text: string }[];
+  case_version?: number;
+  /** Context for the officer, separate from the administrative completeness gaps. */
+  questions?: ReviewQuestion[];
 }
 
-export interface UploadedFile {
+export interface ReviewQuestion {
+  id: string;
+  field: string;
+  text: string;
+  provision_id: string | null;
+  answer: string | null;
+  state: "not_sure" | "unanswered" | "answered" | "unconfirmed" | "withdrawn";
+  source: string;
+  source_detail: string | null;
+  origin: "code_check" | "code_matching" | "intake" | "officer_request";
+  /** A response to an officer request, separate from the original manual code decision. */
+  clarification?: Pick<ReviewQuestion, "answer" | "state" | "source" | "source_detail">;
+}
+
+export interface UploadedFile extends StoredFile {
+  pages?: number;
+  sha256?: string;
+  read?: boolean;
+}
+
+/** Metadata from the case-owned upload inventory. Presence is verified by the store. */
+export interface StoredFile {
   id: string;
   name: string;
-  pages: number;
-  sha256: string;
-  read: boolean;
+  size: number;
+  content_type: string;
+}
+
+async function downloadFile(base: string, caseId: string, fileId: string, signal?: AbortSignal): Promise<Blob> {
+  const timed = withTimeout(signal, ENGINE_WAIT_MS);
+  try {
+    const response = await fetch(`${base}/cases/${enc(caseId)}/files/${enc(fileId)}`, {
+      credentials: credentialsMode(), signal: timed.signal,
+    });
+    if (!response.ok) throw new EngineError(response.status, await readError(response));
+    return await response.blob();
+  } catch (error) {
+    if (error instanceof EngineError || timed.canceled()) throw error;
+    throw new EngineError(0, timed.timedOut() ? "The engine did not answer in time." : "The file could not be downloaded. Try again.");
+  } finally { timed.clear(); }
 }
 
 export interface SectionDPlan {
@@ -444,11 +489,18 @@ export class ExportBlockedError extends EngineError {
 const ENGINE_WAIT_MS = 8000;
 
 function withTimeout(parent: AbortSignal | undefined, ms: number) {
+  const scope = accountRequestSignal(parent);
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), ms);
-  if (parent?.aborted) ctl.abort();
-  else parent?.addEventListener("abort", () => ctl.abort(), { once: true });
-  return { signal: ctl.signal, clear: () => clearTimeout(timer), timedOut: () => ctl.signal.aborted && !parent?.aborted };
+  const abort = () => ctl.abort();
+  if (scope.aborted) ctl.abort();
+  else scope.addEventListener("abort", abort, { once: true });
+  return {
+    signal: ctl.signal,
+    clear: () => { clearTimeout(timer); scope.removeEventListener("abort", abort); },
+    canceled: () => scope.aborted,
+    timedOut: () => ctl.signal.aborted && !scope.aborted,
+  };
 }
 
 /**
@@ -487,7 +539,7 @@ async function exportPdf(base: string, caseId: string, draft: boolean, signal?: 
       body: JSON.stringify({ draft }),
     });
   } catch (e) {
-    if (signal?.aborted) throw e;
+    if (timed.canceled()) throw e;
     if (timed.timedOut()) throw new EngineError(0, "The engine did not answer in time.");
     throw new EngineError(0, e instanceof Error ? e.message : String(e));
   } finally {
@@ -535,7 +587,7 @@ async function uploadPdf(base: string, caseId: string, file: File, signal?: Abor
   try {
     res = await fetch(`${base}/cases/${enc(caseId)}/files`, { method: "POST", body, signal: timed.signal, credentials: credentialsMode() });
   } catch (e) {
-    if (signal?.aborted) throw e;
+    if (timed.canceled()) throw e;
     if (timed.timedOut()) throw new EngineError(0, "The engine did not answer in time.");
     throw new EngineError(0, e instanceof Error ? e.message : String(e));
   } finally {
@@ -624,7 +676,7 @@ async function identifyCase(
     });
     return await readIdentifyResponse(res, onStage);
   } catch (e) {
-    if (signal?.aborted || e instanceof EngineError) throw e;
+    if (timed.canceled() || e instanceof EngineError) throw e;
     if (timed.timedOut()) throw new EngineError(0, "The engine did not answer in time.");
     throw new EngineError(0, e instanceof Error ? e.message : String(e));
   } finally {

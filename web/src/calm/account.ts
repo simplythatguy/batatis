@@ -7,6 +7,7 @@ import { useSyncExternalStore } from "react";
 import { accounts, notAvailable, type ApplicationPreferences, type ApplicationSummary, type User } from "../api/accounts";
 import { EngineError } from "../api/client";
 import { probeAuth } from "../api/engineAuth";
+import { replaceAccountRequests } from "../api/requestLifetime";
 
 export type AccountPhase = "probing" | "anonymous" | "signed-out" | "signed-in";
 
@@ -20,9 +21,22 @@ export interface AccountState {
 }
 
 let state: AccountState = { phase: "probing", user: null, applications: null, listError: "", loadingList: false };
+let session = 0;
+let listRequest = 0;
+let listController: AbortController | null = null;
+let listPatches = new Map<string, Partial<ApplicationSummary>>();
 const listeners = new Set<() => void>();
 const set = (next: Partial<AccountState>) => {
+  const changed = (next.phase !== undefined && next.phase !== state.phase) || (next.user !== undefined && next.user !== state.user);
+  if (changed) {
+    session++;
+    listRequest++;
+    listController?.abort();
+    listController = null;
+    next = { applications: null, loadingList: false, listError: "", ...next };
+  }
   state = { ...state, ...next };
+  if (changed) replaceAccountRequests();
   for (const l of listeners) l();
 };
 
@@ -32,7 +46,9 @@ let booted = false;
 export function bootAccount() {
   if (booted) return;
   booted = true;
+  const token = session;
   void probeAuth().then(async (p) => {
+    if (token !== session) return;
     if (p.status === 200) {
       const body = p.body as { user?: User } | User | null;
       const user = (body && "user" in body ? body.user : (body as User | null)) ?? null;
@@ -46,20 +62,39 @@ export function bootAccount() {
 
 export async function refreshApplications() {
   if (state.phase !== "signed-in") return;
+  const token = session, request = ++listRequest;
+  const controller = new AbortController();
+  const patches = new Map<string, Partial<ApplicationSummary>>();
+  listPatches = patches;
+  listController?.abort();
+  listController = controller;
+  const current = () => token === session && request === listRequest && state.phase === "signed-in";
   set({ loadingList: true, listError: "" });
   try {
-    const applications = await accounts.applications();
-    set({ applications, loadingList: false });
+    const applications = await accounts.applications(controller.signal);
+    if (!current()) return;
+    set({ applications: applications.map(a => ({ ...a, ...patches.get(a.id) })), loadingList: false });
   } catch (e) {
-    if (notAvailable(e)) set({ applications: null, loadingList: false, phase: "anonymous" });
+    if (!current()) return;
+    if (e instanceof EngineError && e.status === 401) {
+      set({ phase: "signed-out", user: null });
+      return;
+    }
+    if (notAvailable(e)) set({ applications: null, loadingList: false, phase: "anonymous", user: null });
     else set({ loadingList: false, listError: e instanceof EngineError ? e.detail : "The list did not load." });
+  } finally {
+    if (listController === controller) listController = null;
   }
 }
 
 /** Patch one row locally after an action (submit, read), before the next refresh. */
 export function patchApplication(id: string, patch: Partial<ApplicationSummary>) {
   if (!state.applications) return;
-  set({ applications: state.applications.map((a) => (a.id === id ? { ...a, ...patch } : a)) });
+  // A receipt overlays its unread count on the pending list, without discarding newer status.
+  // A workflow acknowledgement invalidates an earlier list that could roll that status back.
+  if (listController) listPatches.set(id, { ...listPatches.get(id), ...patch });
+  if (patch.status !== undefined) listRequest++;
+  set({ applications: state.applications.map((a) => (a.id === id ? { ...a, ...patch } : a)), ...(patch.status !== undefined ? { loadingList: false } : {}) });
 }
 
 const failure = (e: unknown, fallback: string) => (e instanceof EngineError ? e.detail : fallback);
@@ -95,6 +130,9 @@ export async function deleteApplication(id: string): Promise<string | null> {
   return null;
 }
 
+/** Changes on sign-in, sign-out and onboarding, even when the same person signs back in. */
+export const accountSession = () => session;
+
 /** The current state outside React (route tables, sign-in actions). */
 export function getAccountState(): AccountState {
   return state;
@@ -107,13 +145,13 @@ export function setAccountState(next: Partial<AccountState>) {
   set(next);
 }
 
-function subscribe(l: () => void) {
+export function subscribeAccount(l: () => void) {
   listeners.add(l);
   return () => listeners.delete(l);
 }
 
 export function useAccount(): AccountState {
-  return useSyncExternalStore(subscribe, () => state, () => state);
+  return useSyncExternalStore(subscribeAccount, () => state, () => state);
 }
 
 export function initials(name: string | null | undefined, email?: string): string {

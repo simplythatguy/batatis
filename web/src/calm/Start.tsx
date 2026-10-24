@@ -21,7 +21,7 @@ const isText = (f: File) => /^text\/(plain|markdown)$/.test(f.type) || /\.(txt|m
  * the reviewing authority is a Section B question in the deck.
  */
 export function Start() {
-  const { c, phase, dispatch, resetNote, readDescription } = useCase();
+  const { c, phase, dispatch, resetNote, readDescription, submissionDispatched } = useCase();
   const session = useSession();
   const { begin, userRole } = useBegin();
   const [askRole, setAskRole] = useState(false);
@@ -96,7 +96,8 @@ export function Start() {
   takeRef.current = take;
 
   // Batatis reads the description and the text layer of attached PDFs (intake).
-  const blocked = locked ? readOnlyStatus(app?.status, app?.authority).note : !text.trim() ? "Describe your project to start." : "";
+  const blocked = submissionDispatched ? "Submission in progress. Your saved answers are temporarily read-only."
+    : locked ? readOnlyStatus(app?.status, app?.authority).note : !text.trim() ? "Describe your project to start." : "";
 
   function start() {
     if (blocked) return;

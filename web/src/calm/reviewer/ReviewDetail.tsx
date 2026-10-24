@@ -3,30 +3,44 @@
  * picked up picks it up (as "Pick up" in the queue does), so there is no second button to start the
  * review; the review then runs by itself. Its steps (Request, Missing, Checks, Decide) sit in the
  * header as the shell's stage tabs. The "Pick up" bar is only the fallback when that claim failed.
+ * A resubmitted application whose reservation you kept waits for an explicit "Resume review".
  * The application and the messages open in drawers from the header; running the review again and
  * releasing the claim ("Stop reviewing", back to the queue) live in ⋯.
+ *
+ * The case, its gaps, the saved officer questions and the thread are read as one snapshot for the
+ * current application and sign-in; a late read for another one is dropped and aborted. Every
+ * decision pins the version on screen (`expected_version`), so a newer save is a conflict to refresh.
  */
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { accounts, AccountsError, claimConflict, review, type Claim, type DecisionItemInput, type Message } from "../../api/accounts";
-import { engine, EngineError, type EngineGap } from "../../api/client";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { AccountsError, claimConflict, review, type Claim, type DecisionItemInput, type Message } from "../../api/accounts";
+import { EngineError, type EngineGap, type InformationRequest } from "../../api/client";
 import { packageReview, type ReviewTarget } from "../../api/packageReview";
-import type { Case as EngineCase, PackageReviewIndex, ReviewSession } from "../../api/types.gen";
+import type { Case as EngineCase, PackageReviewIndex, ProfessionalRequirementRequest, ReviewSession } from "../../api/types.gen";
 import { CODE_EDITION } from "../../config";
-import { useAccount } from "../account";
+import { EvidenceFileLink } from "../../EvidenceFileLink";
+import { RetainedSourceFiles } from "../../RetainedSourceFiles";
+import { accountSession, useAccount } from "../account";
 import { AcIcon, Avatar, PageHead } from "../auth/bits";
+import { ExpiryNotice } from "../ExpiryNotice";
+import { getNotificationsState, subscribeNotifications } from "../notifications/notifications";
 import { CIcon, ConfirmDialog, Modal } from "../ui";
 import { MoreMenu } from "../shell/MoreMenu";
 import { Messages } from "./Messages";
 import { CloseOutDue, CloseOutPanel } from "./CloseOutPanel";
 import { InfoRequest } from "./InfoRequest";
+import { OpenQuestions } from "./OpenQuestions";
 import { PackageReview, StepTitle, type FinalStep } from "./PackageReview";
 import { blockingGaps, refusalDecision } from "./packageView";
+import { ProfessionalRequirement } from "./ProfessionalRequirement";
 import { applicantLine, decisionGate, sentLabel, sentPhrase, sinceLabel, withPackage, type PackageState } from "./queue";
 import { RefuseDialog } from "./RefuseDialog";
 import { ReturnDialog } from "./ReturnDialog";
 import { StatusPill } from "./ReviewQueue";
 import { loadQueue, patchRow, setBlocking, useQueue } from "./reviewData";
+import { readReviewSnapshot } from "./reviewSnapshot";
 import { sheetFromEngine, type SheetRow } from "./sheet";
+import { SubmissionHistory } from "./SubmissionHistory";
+import { mergeThreadMessages } from "./threadMessages";
 
 function Value({ r }: { r: SheetRow }) {
   if (!r.value) {
@@ -45,8 +59,8 @@ function Kv({ rows, wide }: { rows: SheetRow[]; wide?: boolean }) {
   );
 }
 
-function Sheet({ c }: { c: EngineCase }) {
-  const s = useMemo(() => sheetFromEngine(c), [c]);
+function Sheet({ c, information, questionError }: { c: EngineCase; information: InformationRequest | null; questionError: string }) {
+  const s = useMemo(() => sheetFromEngine(c, information), [c, information]);
   return (
     <article className="cf-sheet ac-sheet" aria-label="Submitted application">
       <h2>Safety Codes Variance — Part 1</h2>
@@ -69,7 +83,16 @@ function Sheet({ c }: { c: EngineCase }) {
       <Kv rows={s.process} wide />
       <h4>D · Supporting information</h4>
       <Kv rows={s.supporting} />
+      {s.documents.map((doc) => <p className="cf-sheet-p" key={doc.id}>
+        {doc.title}<br />
+        {[doc.type, doc.author, doc.date].filter(Boolean).join(" · ")}
+        <br />{doc.fileId
+          ? <><EvidenceFileLink caseId={c.id} fileId={doc.fileId} name={doc.fileName || doc.title} /> · Source: {doc.fileName}</>
+          : <span className="cf-sheet-flag">Listed only · no file attached</span>}
+      </p>)}
+      <RetainedSourceFiles caseId={c.id} />
       <p className="cf-sheet-note">Professional evidence is provided by the applicant’s registered professional. Batatis does not write it.</p>
+      <OpenQuestions questions={s.questions} loading={information === null && !questionError} error={questionError} />
     </article>
   );
 }
@@ -105,8 +128,8 @@ function Completeness({ gaps, error }: { gaps: EngineGap[] | null; error: string
 /** A right-side drawer (bottom sheet on phones) with a title and a close button. */
 function Drawer({ open, onClose, title, children }: { open: boolean; onClose: () => void; title: string; children: ReactNode }) {
   const id = `rv-drawer-${title.toLowerCase().replace(/\W+/g, "-")}`;
-  // Mount on first open, then stay mounted: closing slides out with its content, and a half-written
-  // message survives. Messages are only marked read once the drawer has been opened.
+  // Mount on first open, then stay mounted: closing slides out with its content. Messages are only
+  // marked read while their drawer is open (see `reading`).
   const [seen, setSeen] = useState(open);
   if (open && !seen) setSeen(true);
   return (
@@ -135,13 +158,18 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
   const [gaps, setGaps] = useState<EngineGap[] | null>(null);
   const [gapError, setGapError] = useState("");
   const [messages, setMessages] = useState<Message[] | null>(null);
-  const [busy, setBusy] = useState<"" | "claim" | "release" | "accept">("");
+  const [information, setInformation] = useState<InformationRequest | null>(null);
+  const [questionError, setQuestionError] = useState("");
+  const [busy, setBusy] = useState<"" | "claim" | "release" | "accept" | "professional">("");
   const [note, setNote] = useState("");
   const [actionError, setActionError] = useState("");
   const [conflict, setConflict] = useState<Claim | null>(null);
   const [confirm, setConfirm] = useState<"" | "accept" | "takeover">("");
   const [returning, setReturning] = useState(false);
   const [refusing, setRefusing] = useState(false);
+  const [professionalEditing, setProfessionalEditing] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshError, setRefreshError] = useState("");
   // Package review: the index (versions, latest, close-out) and the version on screen.
   const [index, setIndex] = useState<PackageReviewIndex | null>(null);
   const [indexState, setIndexState] = useState<"loading" | "ready" | "unavailable" | "failed">("loading");
@@ -159,28 +187,87 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
   // One automatic pick-up per application opened; a failure shows the bar with its error instead.
   const autoClaimed = useRef("");
 
+  // A background refresh never swaps the record under an open decision, dialog or determination;
+  // it waits and runs once they close.
+  const pendingRefresh = useRef(false);
+  const protectedInteraction = useRef(false);
+  useLayoutEffect(() => { protectedInteraction.current = Boolean(busy || returning || refusing || confirm || professionalEditing); });
+  // Reads belong to this application and this sign-in: a replaced one aborts and ignores them.
+  const request = useRef(0);
+  const controller = useRef<AbortController | null>(null);
+  const scope = useRef({ caseId, session: accountSession() });
+  useLayoutEffect(() => {
+    scope.current = { caseId, session: accountSession() };
+    return () => { request.current++; controller.current?.abort(); pendingRefresh.current = false; };
+  }, [caseId, user]);
+
   const row = q.rows.find((r) => r.id === caseId) ?? null;
 
-  const reload = useCallback(async (): Promise<EngineCase | null> => {
-    try {
-      const saved = (await engine.getCase(caseId)) as unknown as EngineCase;
-      setCase(saved);
-      setLoadError("");
-      return saved;
-    } catch (e) {
-      setLoadError(e instanceof EngineError && e.status === 404 ? "This application isn’t available to you. It may have been withdrawn or sent to another authority." : "The application didn’t load.");
-      return null;
+  const reload = useCallback(async (mode: "replace" | "background" | "action" = "action"): Promise<EngineCase | null> => {
+    const session = accountSession();
+    if (scope.current.caseId !== caseId || scope.current.session !== session) return null;
+    const read = ++request.current;
+    controller.current?.abort();
+    const ctl = new AbortController();
+    controller.current = ctl;
+    const current = () => request.current === read && session === accountSession()
+      && scope.current.caseId === caseId && scope.current.session === session;
+    setRefreshing(true);
+    setRefreshError("");
+    if (mode === "replace") {
+      setCase(null);
+      setGaps(null);
+      setMessages(null);
+      setInformation(null);
+      setConflict(null);
+      setConfirm("");
+      setReturning(false);
+      setRefusing(false);
     }
-  }, [caseId]);
+    setLoadError("");
+    setGapError("");
+    setQuestionError("");
+    try {
+      const snapshot = await readReviewSnapshot(caseId, ctl.signal);
+      if (!current()) return null;
+      if (mode === "background" && protectedInteraction.current) { pendingRefresh.current = true; return null; }
+      setCase(snapshot.c);
+      setGaps(snapshot.gaps);
+      setInformation(snapshot.information);
+      setMessages((previous) => (current() ? mergeThreadMessages(previous, snapshot.messages) : previous));
+      setGapError(snapshot.gapError);
+      setQuestionError(snapshot.questionError);
+      if (snapshot.gaps) setBlocking(caseId, snapshot.gaps.filter((g) => g.severity === "blocking").length);
+      return snapshot.c;
+    } catch (e) {
+      if (!current()) return null;
+      // Missing and unauthorized cases intentionally share a privacy-friendly 404.
+      if (mode === "replace" || (e instanceof EngineError && e.status === 404)) {
+        setCase(null);
+        setNote("");
+        setLoadError(e instanceof EngineError && e.status === 404 ? "This application isn’t available to you. It may have been withdrawn or sent to another authority." : "The application didn’t load.");
+      } else {
+        setRefreshError(e instanceof EngineError ? e.detail : "The updated application didn’t load. Refresh to try again.");
+      }
+      return null;
+    } finally {
+      if (controller.current === ctl) controller.current = null;
+      if (current()) setRefreshing(false);
+    }
+  }, [caseId, user]);
 
   const loadIndex = useCallback(async (keepShown = false) => {
+    const session = accountSession();
+    const live = () => scope.current.caseId === target.id && scope.current.session === session && session === accountSession();
     try {
       const ix = await packageReview.index(target);
+      if (!live()) return null;
       setIndex(ix);
       setIndexState("ready");
       if (!keepShown) setShown(ix.latest);
       return ix;
     } catch (e) {
+      if (!live()) return null;
       // Only a missing route means "not on this server"; anything else (network, 5xx) is a failure
       // with a retry, and acceptance waits for it.
       setIndexState(e instanceof EngineError && (e.status === 404 || e.status === 405) ? "unavailable" : "failed");
@@ -189,39 +276,67 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
   }, [target]);
 
   useEffect(() => {
-    setCase(null);
-    setGaps(null);
-    setMessages(null);
     setNote("");
     setConflict(null);
+    setBusy("");
+    setActionError("");
+    setProfessionalEditing(false);
     setIndex(null);
     setShown(null);
     setIndexState("loading");
-    void reload();
+    setRunError("");
     setView("flow");
     setDrawer("");
+    setMsgDraft("");
+    void reload("replace");
     void loadIndex();
     if (!q.rows.length) void loadQueue();
-    engine.gaps(caseId).then(
-      (g) => { setGaps(g); setBlocking(caseId, g.filter((x) => x.severity === "blocking").length); },
-      () => setGapError("The completeness check didn’t run. Reload to try again."),
-    );
-    accounts.messages(caseId).then(setMessages, () => setMessages([]));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [caseId]);
+  }, [caseId, reload]);
 
-  // Opening the messages reads them: the badge clears here and in the queue.
+  const refreshDetail = useCallback(() => {
+    if (protectedInteraction.current || controller.current) { pendingRefresh.current = true; return; }
+    pendingRefresh.current = false;
+    void reload("background");
+  }, [reload]);
+
+  // A refresh that waited for a dialog or action runs once nothing is open.
   useEffect(() => {
-    if (drawer !== "messages") return;
-    setMessages((ms) => (ms?.some((m) => !m.read_by_me) ? ms.map((m) => ({ ...m, read_by_me: true })) : ms));
-    patchRow(caseId, { unread_messages: 0 });
-  }, [drawer, messages, caseId]);
+    if (refreshing || busy || returning || refusing || confirm || professionalEditing || !pendingRefresh.current) return;
+    refreshDetail();
+  }, [refreshing, busy, returning, refusing, confirm, professionalEditing, refreshDetail]);
 
-  // Unknown (loading or failed) is not "no gaps": acceptance waits for a real completeness result.
-  const blocking = gaps === null ? null : gaps.filter((g) => g.severity === "blocking").length;
+  // A notification about this application (a resend, a notice) refreshes the open review in place.
+  useEffect(() => {
+    if (user?.role !== "reviewer" || !user.authority) return;
+    const session = accountSession();
+    const key = (n: ReturnType<typeof getNotificationsState>["items"][number]) => JSON.stringify([n.id, n.created_at, n.status]);
+    let seen = new Set(getNotificationsState().items.map(key));
+    const stop = subscribeNotifications(() => {
+      const notifications = getNotificationsState();
+      if (session !== accountSession() || notifications.phase !== "ready") return;
+      const changed = notifications.items.some((n) => n.case_id === caseId && !seen.has(key(n)));
+      seen = new Set(notifications.items.map(key));
+      if (changed) refreshDetail();
+    });
+    // The same hash does not fire hashchange. An already-seen bell row still asks for a fresh read.
+    const onPick = (event: MouseEvent) => {
+      if (session !== accountSession() || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const link = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>("a.ac-note") : null;
+      if (link?.getAttribute("href") === `#/review/${encodeURIComponent(caseId)}`) refreshDetail();
+    };
+    document.addEventListener("click", onPick);
+    return () => { stop(); document.removeEventListener("click", onPick); };
+  }, [caseId, user, refreshDetail]);
+
+  // Unknown (loading, refreshing or failed) is not "no gaps": acceptance waits for a real completeness result.
+  const blocking = refreshing || refreshError || gaps === null ? null : gaps.filter((g) => g.severity === "blocking").length;
   const status = c?.status ?? row?.status ?? "submitted";
-  const claim = c?.claim ?? row?.claim ?? null;
+  // The saved case is the authority on the claim once it is read; the queue row only fills the wait.
+  const claim = c ? c.claim ?? null : row?.claim ?? null;
   const latest = index?.latest ?? null;
+  const professionalPending = Boolean(gaps?.some((g) => g.severity === "blocking" && g.field === "professional_requirement"));
+  const available = c?.id === caseId && !loadError;
 
   // The screen changes under the keyboard (Pick up, Take over, the request and back):
   // move focus to the top of the work area so nobody is left on the page body.
@@ -239,27 +354,31 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
     : !latest ? { state: "none" }
     : c && latest.case_version != null && latest.case_version !== c.version ? { state: "stale", version: latest.version }
     : { state: "current", blocking: blockingGaps(latest) };
-  const gate = withPackage(decisionGate({ status, claim }, me, blocking), pkg);
+  const gate = withPackage(decisionGate({ status, claim }, me, blocking, professionalPending), pkg);
+  const questions = useMemo(() => (c ? sheetFromEngine(c, information).questions : []), [c, information]);
+  const openQuestions = questions.filter((q) => q.state !== "answered").length;
   const mine = Boolean(claim && me && claim.reviewer_id === me);
   const canRun = mine && status === "in_review";
   const applicant = row ? row.applicant.name : "the applicant";
   const Applicant = applicant === "the applicant" ? "The applicant" : applicant;
   const title = c?.title?.trim() || row?.title?.trim() || "Application";
   const closeOut = index?.close_out ?? null;
-  const otherClaim = conflict ?? (claim && !mine && status === "in_review" ? claim : null);
+  // A reservation kept across a resubmission still names its officer; only they resume it.
+  const otherClaim = conflict ?? (claim && !mine && (status === "in_review" || status === "submitted") ? claim : null);
   const unclaimed = status === "submitted" && !claim && !otherClaim;
+  const resumable = mine && status === "submitted";
 
   // Opening a file nobody has picked up picks it up: you are already in the review.
   useEffect(() => {
-    if (!unclaimed || !c || !me || busy || autoClaimed.current === caseId) return;
+    if (!unclaimed || !available || !me || busy || autoClaimed.current === caseId) return;
     autoClaimed.current = caseId;
     void doClaim();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [unclaimed, c, me, caseId]);
+  }, [unclaimed, available, me, caseId]);
 
   // Yours and not reviewed yet (or changed since): run the review now instead of asking for a
   // click. Once per saved version, so a failure shows its retry rather than looping.
-  const needsRun = canRun && indexState === "ready" && Boolean(c) && (!latest || pkg.state === "stale");
+  const needsRun = canRun && available && indexState === "ready" && (!latest || pkg.state === "stale");
   useEffect(() => {
     const key = `${caseId}:${c?.version ?? ""}`;
     if (!needsRun || running || autoRan.current === key) return;
@@ -277,7 +396,6 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
       setShown(s);
       setView("flow");
       await loadIndex(true);
-      // Reading messages can advance the saved version after the initial case load.
       await reload();
     } catch (e) {
       setRunError(e instanceof AccountsError
@@ -299,23 +417,28 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
   }
 
   async function doClaim(takeOver = false) {
+    const session = accountSession();
+    const current = () => session === accountSession() && scope.current.session === session && scope.current.caseId === caseId;
     setBusy("claim");
     setActionError("");
     try {
       const cl = await review.claim(caseId, takeOver);
+      if (!current()) return;
       setConflict(null);
-      patchRow(caseId, { claim: cl, status: "in_review" });
-      // The review then runs by itself (see needsRun) unless one exists for this version of the
-      // application; after a resend it runs again, so the diff shows what was resolved.
+      patchRow(caseId, { claim: cl, status: "in_review" }, session);
+      // Deciding needs the case's new version, so read it again. The review then runs by itself (see
+      // needsRun) unless one exists for this version; after a resend it runs again, so the diff shows
+      // what changed.
       await reload();
       await loadIndex();
     } catch (e) {
+      if (!current()) return;
       const other = claimConflict(e);
       if (other) setConflict(other);
       else setActionError(e instanceof AccountsError ? e.detail : "That didn’t work. Try again.");
       await reload();
     } finally {
-      setBusy("");
+      if (current()) setBusy("");
     }
   }
 
@@ -329,6 +452,7 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
       window.location.hash = "#/review";
     } catch (e) {
       setActionError(e instanceof AccountsError ? e.detail : "That didn’t work. Try again.");
+      if (e instanceof EngineError && e.status === 404) await reload();
     } finally {
       setBusy("");
     }
@@ -336,29 +460,36 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
 
   async function decided() {
     await reload();
-    accounts.messages(caseId).then(setMessages, () => undefined);
     void loadQueue();
     await loadIndex(true);
   }
 
   async function accept() {
+    if (!c) return;
     setConfirm("");
     setBusy("accept");
     setActionError("");
     try {
-      await review.decide(caseId, { outcome: "accept" });
+      await review.decide(caseId, { outcome: "accept", expected_version: c.version });
       patchRow(caseId, { status: "accepted" });
       setNote(`Accepted as administratively complete. ${Applicant} has been told.`);
       await decided();
     } catch (e) {
       setActionError(e instanceof AccountsError ? e.detail : "That didn’t work. Try again.");
+      if (e instanceof EngineError && e.status === 404) await reload();
     } finally {
       setBusy("");
     }
   }
 
   async function sendReturn(message: string, items: DecisionItemInput[]) {
-    await review.decide(caseId, { outcome: "return", message, items });
+    if (!c) throw new Error("Refresh the application before recording a decision.");
+    try {
+      await review.decide(caseId, { outcome: "return", message, items, expected_version: c.version });
+    } catch (e) {
+      if (e instanceof EngineError && e.status === 404) await reload();
+      throw e;
+    }
     setReturning(false);
     setView("flow");
     patchRow(caseId, { status: "returned" });
@@ -366,14 +497,38 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
     await decided();
   }
 
+  /** The officer's written reasons with the appeal notice, pinned to the version on screen. No correction list. */
   async function sendRefusal(reasons: string) {
-    await review.decide(caseId, refusalDecision(reasons));
+    if (!c) throw new Error("Refresh the application before recording a decision.");
+    try {
+      await review.decide(caseId, refusalDecision(reasons, c.version));
+    } catch (e) {
+      if (e instanceof EngineError && e.status === 404) await reload();
+      throw e;
+    }
     setRefusing(false);
     setView("flow");
     patchRow(caseId, { status: "refused" });
-    setCase((saved) => saved ? { ...saved, status: "refused" } : saved);
+    setCase((saved) => (saved ? { ...saved, status: "refused" } : saved));
     setNote(`Refusal sent to ${applicant} with the appeal notice. This application is closed.`);
     await decided();
+  }
+
+  /** The officer's own determination for this scope; acceptance waits for the refreshed result. */
+  async function resolveProfessional(body: ProfessionalRequirementRequest) {
+    setBusy("professional");
+    setGaps(null);
+    setGapError("");
+    try {
+      await review.resolveProfessional(caseId, body);
+      await reload();
+    } catch (e) {
+      await reload();
+      setGapError("Reload the completeness check before accepting this application.");
+      throw e;
+    } finally {
+      setBusy("");
+    }
   }
 
   function requestMore() {
@@ -403,6 +558,12 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
   const requestSent = Boolean(latest?.information_request.sent_at);
   const suggestAsk = gate.canReturn && !gate.canAccept;
 
+  // The queue's badge follows what was actually read here (receipts name the displayed messages only).
+  useEffect(() => {
+    if (messages && available) patchRow(caseId, { unread_messages: unread });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unread, messages === null, available]);
+
   const menu = [
     ...(canRun ? [
       { label: running ? "Reviewing…" : "Run the review again", onClick: () => void run(), disabled: running },
@@ -417,12 +578,12 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
   /** Who has the file: one quiet line above the path. */
   function claimLine() {
     // Yours: the steps in the header already say so; nothing to read here.
-    if (unclaimed || (mine && status === "in_review")) return null;
+    if (unclaimed || resumable || (mine && status === "in_review")) return null;
     if (otherClaim) {
       return (
         <div className="rv-who">
           <Avatar name={otherClaim.reviewer_name} size="sm" />
-          <span>{otherClaim.reviewer_name} is reviewing this <span className="ac-faint">· {sinceLabel(otherClaim.claimed_at)}</span></span>
+          <span>{status === "submitted" ? `Reserved for ${otherClaim.reviewer_name}` : `${otherClaim.reviewer_name} is reviewing this`} <span className="ac-faint">· {sinceLabel(otherClaim.claimed_at)}</span></span>
           <button type="button" className="cf-btn is-xs" disabled={Boolean(busy)} onClick={() => setConfirm("takeover")}>Take over</button>
           {record}
         </div>
@@ -430,7 +591,7 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
     }
     return (
       <div className="rv-who">
-        <StatusPill a={{ status, claim }} />
+        <StatusPill a={{ status, claim, submission_number: c?.submission_number }} />
         {decidedRow && <span className="ac-faint">{decidedRow}</span>}
         {record}
       </div>
@@ -451,7 +612,24 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
             <AcIcon name="hand" size={15} />Pick up
           </button>
         </div>
-        {c ? <Sheet c={c} /> : <p className="ac-empty">Loading the application…</p>}
+        {c ? <Sheet c={c} information={information} questionError={questionError} /> : <p className="ac-empty">Loading the application…</p>}
+      </>
+    );
+  }
+
+  /** Resent with your reservation kept: nothing changes until you resume, so you see what changed first. */
+  function resume() {
+    return (
+      <>
+        <div className="rv-pick" role="region" aria-label="Resubmitted">
+          <span className="rv-chip is-accent"><span className="cf-dot" aria-hidden="true" />Resubmitted</span>
+          <span className="rv-pick-t">Waiting for you to resume</span>
+          <button type="button" className="cf-btn is-sm is-primary" disabled={Boolean(busy)} onClick={() => void doClaim()}>
+            {busy === "claim" ? "Resuming…" : "Resume review"}
+          </button>
+        </div>
+        {c && <SubmissionHistory c={c} />}
+        {c ? <Sheet c={c} information={information} questionError={questionError} /> : <p className="ac-empty">Loading the application…</p>}
       </>
     );
   }
@@ -460,6 +638,7 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
   function acceptHint(): string {
     const n = (k: number) => `${k} required ${k === 1 ? "item" : "items"}`;
     if (blocking === null || pkg.state === "loading") return "Checking…";
+    if (professionalPending) return "Determination needed";
     if (blocking > 0) return `${n(blocking)} missing`;
     if (pkg.state === "current" && pkg.blocking > 0) return `${n(pkg.blocking)} open`;
     if (pkg.state === "stale") return "Changed · review again";
@@ -475,23 +654,41 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
         <div id="rv-decide-h"><StepTitle step="final">Decide</StepTitle></div>
         <p className="rv-scope"><AcIcon name="clipboard" size={14} />Completeness only · not a design approval</p>
         <div className="rv-choices">
-          <button type="button" className="rv-choice is-green" disabled={!gate.canAccept || Boolean(busy)} onClick={() => setConfirm("accept")} data-requires-no-blocking-gaps={gate.canAccept ? undefined : "true"}>
+          <button type="button" className="rv-choice is-green" aria-label="Accept" aria-describedby="rv-choice-accept" disabled={!gate.canAccept || Boolean(busy) || refreshing} onClick={() => setConfirm("accept")} data-requires-no-blocking-gaps={gate.canAccept ? undefined : "true"}>
             <span className="pr-ico" aria-hidden="true"><AcIcon name="check" size={22} /></span>
             <span className="rv-choice-t">{busy === "accept" ? "Accepting…" : "Accept"}</span>
-            <span className="rv-choice-d" title={gate.canAccept ? undefined : gate.reason}>{gate.canAccept ? "Complete" : acceptHint()}</span>
+            <span id="rv-choice-accept" className="rv-choice-d" title={gate.canAccept ? undefined : gate.reason}>{gate.canAccept ? "Complete" : acceptHint()}</span>
           </button>
-          <button type="button" className="rv-choice is-amber" disabled={Boolean(busy)} onClick={requestMore}>
+          <button type="button" className="rv-choice is-amber" aria-label="Ask for more" aria-describedby="rv-choice-ask" disabled={!gate.canReturn || Boolean(busy) || refreshing} onClick={requestMore}>
             <span className="pr-ico" aria-hidden="true"><AcIcon name="send" size={20} /></span>
             <span className="rv-choice-t">Ask for more</span>
-            <span className="rv-choice-d">{suggestAsk ? <span className="rv-tag">Suggested</span> : "Send a list"}</span>
+            <span id="rv-choice-ask" className="rv-choice-d">{suggestAsk ? <span className="rv-tag">Suggested</span> : "Send a list"}</span>
           </button>
-          <button type="button" className="rv-choice is-rose" disabled={Boolean(busy)} onClick={() => setRefusing(true)}>
+          <button type="button" className="rv-choice is-rose" aria-label="Refuse" aria-describedby="rv-choice-refuse" disabled={!gate.canRefuse || Boolean(busy) || refreshing} onClick={() => setRefusing(true)}>
             <span className="pr-ico" aria-hidden="true"><AcIcon name="ban" size={20} /></span>
             <span className="rv-choice-t">Refuse</span>
-            <span className="rv-choice-d">With appeal notice</span>
+            <span id="rv-choice-refuse" className="rv-choice-d">With appeal notice</span>
           </button>
         </div>
         {!gate.canAccept && gate.reason && <p className="cf-sr" role="note">{gate.reason}</p>}
+        {/* With a package review, Ask for more sends its request; the plain return (open applicant
+            questions included, as clarification requests) stays one click away. */}
+        {(shown || latest) && gate.canReturn && (
+          <p className="rv-scope">
+            {openQuestions > 0 && <>{openQuestions} open applicant {openQuestions === 1 ? "question" : "questions"} · </>}
+            <button type="button" className="cf-link-btn" disabled={Boolean(busy) || refreshing} onClick={() => setReturning(true)}>Return with a message</button>
+          </p>
+        )}
+        {c && (
+          <ProfessionalRequirement
+            c={c}
+            editable={canRun}
+            busy={Boolean(busy) || refreshing}
+            unresolved={professionalPending}
+            onEditingChange={setProfessionalEditing}
+            onResolve={resolveProfessional}
+          />
+        )}
       </section>
     );
   }
@@ -528,6 +725,7 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
 
   function main() {
     if (unclaimed) return pickUp();
+    if (resumable) return resume();
     if (view === "request" && shown) {
       return (
         <>
@@ -548,7 +746,7 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
             held={canRun && indexState !== "ready" && indexState !== "unavailable"}
             terminalStatus={status === "accepted" || status === "refused" ? status : undefined}
             applicant={applicant === "the applicant" ? "the applicant" : applicant}
-            onChange={(s) => { setShown(s); void loadIndex(true); accounts.messages(caseId).then(setMessages, () => undefined); }}
+            onChange={(s) => { setShown(s); void loadIndex(true); void reload(); }}
             onReturned={requestSentAndReturned}
           />
         </>
@@ -592,10 +790,7 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
                 <p className="ac-empty rv-reading" role="status"><span className="rv-spin" aria-hidden="true" />Reading the application…</p>
               )
             ) : (
-              <>
-                <h2 className="pr-title">No review was run</h2>
-                
-              </>
+              <h2 className="pr-title">No review was run</h2>
             )}
           </div>
           {/* While the review reads the file, only that shows; a failed run still lets you decide. */}
@@ -653,12 +848,19 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
         )}
       />
       {loadError ? (
-        <div className="ac-page-body is-narrow"><p className="ac-empty">{loadError} <a className="ac-link" href="#/review">Back to the queue</a></p></div>
+        <div className="ac-page-body is-narrow">
+          <p className="ac-empty" role="status">{loadError}</p>
+          <div className="cf-row-actions">
+            <a className="cf-btn is-sm is-primary" href="#/review" onClick={() => void loadQueue()}>Back to the queue</a>
+            <button type="button" className="cf-btn is-sm" onClick={() => { void reload("replace"); void loadQueue(); }}>Refresh</button>
+          </div>
+        </div>
       ) : (
         <div ref={work} className="ac-page-body rv" tabIndex={-1} aria-label="Review">
           {claimLine()}
           {note && <p className="ac-done rv-note" role="status"><span className="cf-dot is-done" aria-hidden="true" />{note}</p>}
           {actionError && <p className="ac-error rv-note" role="alert">{actionError}</p>}
+          {refreshError && <p className="ac-error rv-note" role="status">{refreshError} <button type="button" className="cf-btn is-xs" onClick={refreshDetail}>Refresh application</button></p>}
           {main()}
         </div>
       )}
@@ -667,16 +869,19 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
         onChange={(e) => { const f = [...(e.target.files ?? [])]; e.target.value = ""; if (f.length) void run(f); }} />
       <Drawer open={drawer === "application"} onClose={() => setDrawer("")} title="Application">
         {meta && <p className="ac-faint ac-small rv-drawer-meta">{meta}</p>}
+        {available && <ExpiryNotice expiresAt={c.expires_at} officer />}
+        {available && <SubmissionHistory c={c} />}
         <Completeness gaps={gaps} error={gapError} />
-        {c ? <Sheet c={c} /> : <p className="ac-empty">Loading the application…</p>}
+        {available && !canRun && <ProfessionalRequirement c={c} editable={false} busy={false} unresolved={professionalPending} onResolve={resolveProfessional} />}
+        {available ? <Sheet c={c} information={information} questionError={questionError} /> : <p className="ac-empty">Loading the application…</p>}
       </Drawer>
       <Drawer open={drawer === "messages"} onClose={() => setDrawer("")} title="Messages">
-        <Messages caseId={caseId} me={me} messages={messages} onChange={setMessages} canWrite={Boolean(user)} hideTitle draft={msgDraft} onDraft={setMsgDraft} />
+        <Messages caseId={caseId} me={me} messages={messages} onChange={setMessages} canWrite={Boolean(user)} hideTitle draft={msgDraft} onDraft={setMsgDraft} reading={drawer === "messages"} />
       </Drawer>
-      <ReturnDialog open={returning} caseId={caseId} applicant={Applicant} gaps={gaps ?? []} onClose={() => setReturning(false)} onSend={sendReturn} />
-      <RefuseDialog open={refusing} applicant={Applicant} onClose={() => setRefusing(false)} onSend={sendRefusal} />
+      <ReturnDialog open={available && returning} caseId={caseId} applicant={Applicant} gaps={gaps ?? []} questions={questions} questionError={questionError} onClose={() => setReturning(false)} onSend={sendReturn} />
+      <RefuseDialog key={`${me}:${caseId}`} open={available && refusing} applicant={Applicant} onClose={() => setRefusing(false)} onSend={sendRefusal} onRefresh={() => void reload()} />
       <ConfirmDialog
-        open={confirm === "accept"}
+        open={available && confirm === "accept"}
         title="Accept as administratively complete?"
         body={<p>{Applicant} is told the application is administratively complete. It isn’t an approval of the design; technical review stays with the authority. The copy to the Safety Codes Council is then due within 10 days.</p>}
         cancel="Not yet"
@@ -685,7 +890,7 @@ export function ReviewDetail({ caseId, phoneTools }: { caseId: string; phoneTool
         onConfirm={() => void accept()}
       />
       <ConfirmDialog
-        open={confirm === "takeover"}
+        open={available && confirm === "takeover"}
         title="Take over this review?"
         body={<p>{otherClaim?.reviewer_name} started reviewing this application. If you take over, you become the reviewer and the history records both names.</p>}
         cancel="Keep theirs"

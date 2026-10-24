@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { DETAIL_FIELDS, NOT_RIGHT, PROCESS_FIELDS, factFor, isTyped, valueText } from "../model";
-import { withinProvision } from "../provisions";
+import { confirmedProvisions, withinProvision } from "../provisions";
 import { exitCountWarning } from "../rules";
 import { useCandidateAnswer } from "../screens/CodeCheck";
 import { Recommendations } from "../screens/Recommendations";
@@ -9,9 +9,10 @@ import { readOnlyStatus } from "./applications";
 import { openAssistant, setAssistantContext, useAssistant } from "./assistant/assistant";
 import { useCurrentApplication } from "./begin";
 import { CodeDrawer, type DrawerState } from "./CodeDrawer";
-import { aliasKey, alternativeChoice, buildDeck, mergeQueue, rankAhead, choiceKey, choicesFor, preCaseState, SECTIONS, sourcePhrase, type DeckItem, type SectionId } from "./deck";
+import { aliasKey, alternativeChoice, buildDeck, deckCompletion, mergeQueue, rankAhead, choiceKey, choicesFor, preCaseState, SECTIONS, sourcePhrase, type DeckItem, type SectionId } from "./deck";
 import { forkOf, NOT_SURE, planInput } from "../intakeView";
-import { localField } from "../intakeFields";
+import { confirmedAnswer, localField } from "../intakeFields";
+import { KeywordTriage } from "./KeywordTriage";
 import { CodeProgress, ForkNote, ReadingState, ReadSource, RedirectPage, ShowCode } from "./ReadCards";
 import { Icon24 } from "./icons";
 import { RelevanceRing } from "./RelevanceRing";
@@ -102,6 +103,8 @@ function useDirection(index: number): "down" | "up" {
 /* —— Footer: progress split by form section, popover per section, up/down —— */
 
 export function SectionFooter({ items, index, onJump, onPrev, onNext, canPrev, canNext }: { items: Shown[]; index: number; onJump: (i: number) => void; onPrev: () => void; onNext: () => void; canPrev: boolean; canNext: boolean }) {
+  const { c } = useCase();
+  const references = confirmedProvisions(c).length;
   const [open, setOpen] = useState<SectionId | null>(null);
   const timer = useRef<number | undefined>(undefined);
   const hold = (id: SectionId | null) => { window.clearTimeout(timer.current); setOpen(id); };
@@ -144,7 +147,7 @@ export function SectionFooter({ items, index, onJump, onPrev, onNext, canPrev, c
                 <span className="cf-qsec-lab">
                   <span className="cf-qsec-name" title={s.label}>{s.short}</span>
                   <span className="cf-qsec-l"><span className="cf-sr">, Section </span>{s.id}</span>
-                  <span className="cf-qsec-count">{s.done}<span className="cf-qsec-of"> of </span><span className="cf-qsec-slash" aria-hidden="true">/</span>{s.total}</span>
+                  <span className="cf-qsec-count">{s.id === "C" ? `${references} confirmed` : <>{s.done}<span className="cf-qsec-of"> of </span><span className="cf-qsec-slash" aria-hidden="true">/</span>{s.total}</>}</span>
                 </span>
                 <span className="cf-sr">. Go to the first open question here.</span>
               </button>
@@ -281,6 +284,7 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
   }
   if (item.kind === "plan") return <PlanBody item={item} onPick={onPick} draft={draft} setDraft={setDraft} note={planNote} first={firstPlan} />;
   if (item.kind === "code-run") return <CodeProgress />;
+  if (item.kind === "code-triage") return <KeywordTriage c={c} openDrawer={openDrawer} />;
   if (item.kind === "reading") return <ReadingState />;
   if (item.kind === "code-note") {
     return (
@@ -460,13 +464,16 @@ function NoQuestionsYet() {
 
 /** Coordinate the visit queue, rule and checklist answers, and navigation through the case’s cards. */
 function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boolean }) {
-  const { c, engineId, gaps, dispatch, requestCheck, sectionCLookup, reading, answerPlan, answerChecklist, reloadChecklists } = useCase();
+  const { c, engineId, gaps, dispatch, requestCheck, sectionCLookup, reading, answerPlan, answerChecklist, reloadChecklists, applicationStatus, submissionDispatched } = useCase();
   const session = useSession();
   const { app, locked } = useCurrentApplication();
   const { onAnswer, decisionNoteFor } = useCandidateAnswer();
   const { options: deckExtras, extras } = useDeckExtras();
   const seen = useMemo(() => new Set(session.seen), [session.seen]);
-  const all = buildDeck(c, gaps, { ...deckExtras, seen, includeDone: true, identify: reading.identify, intake: reading.intake, intakeNote: reading.intakeNote });
+  // A keyword lead opened from the grouped triage (or a saved link) stays on the deck while you answer it.
+  const [focusedCandidate, setFocusedCandidate] = useState(focus?.startsWith("cand-") ? focus : undefined);
+  useEffect(() => { if (focus?.startsWith("cand-")) setFocusedCandidate(focus); }, [focus]);
+  const all = buildDeck(c, gaps, { ...deckExtras, seen, includeDone: true, identify: reading.identify, intake: reading.intake, intakeNote: reading.intakeNote, focusedCandidate: focus?.startsWith("cand-") ? focus : focusedCandidate });
   const byKey = new Map(all.map((i) => [i.key, i] as const));
   const snapshots = useRef(new Map<string, DeckItem>());
   for (const i of all) snapshots.current.set(i.key, i);
@@ -506,7 +513,8 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
   const savedDraft = (() => {
     if (!item) return "";
     if (item.kind === "question") return c.questions.find((q) => q.id === item.ref)?.answer ?? "";
-    if (item.kind === "storeys") return c.questions.find((q) => q.id === "q-desc-storeys")?.answer ?? "";
+    // A confirmed saved value under any of its names wins over the description question (alias rehydration).
+    if (item.kind === "storeys") return String(confirmedAnswer(c.facts, "storeys")?.value ?? c.questions.find((q) => q.id === "q-desc-storeys")?.answer ?? "");
     if (item.kind === "plan" && item.plan) {
       const saved = factFor(c, localField(item.plan.field))?.value;
       return saved == null || typeof saved === "boolean" ? "" : String(saved);
@@ -564,7 +572,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
       if (first && item?.done && !item.gone) moveFrom(index, false);
       return;
     }
-    const key = focus ? aliasKey(c, focus) : all.find((i) => (i.kind === "candidate" || i.kind === "storeys") && !i.done)?.key;
+    const key = focus ? aliasKey(c, focus) : all.find((i) => (i.kind === "candidate" || i.kind === "storeys" || i.kind === "code-triage") && !i.done)?.key;
     if (key && byKey.has(key)) {
       updateSession((s) => {
         const base = s.queue.length >= queue.length ? s.queue : queue;
@@ -671,7 +679,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
   /** Check whether the current answer can advance, including pending writes and required reasons. */
   function canContinue(it: Shown): boolean {
     if (locked) return false;
-    if (it.kind === "section-d" || it.kind === "file" || it.kind === "code-run" || it.kind === "code-note") return true;
+    if (it.kind === "section-d" || it.kind === "file" || it.kind === "code-run" || it.kind === "code-note" || it.kind === "code-triage") return true;
     if (it.kind === "reading") return reading.intake !== "running";
     if (it.kind === "scope") return false;
     if (it.kind === "plan") return it.done || (Boolean(draft.trim()) && reading.busy !== it.ref);
@@ -921,23 +929,34 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
   }, []);
 
   const n = (pos < 0 ? index : pos) + 1;
-  const openLeft = queue.filter((k) => !itemFor(k)?.done && !itemFor(k)?.optional).length;
+  // Counted from the derived deck: an answered card waiting on the officer (or on a fresh check) is not "left".
+  const completion = deckCompletion(all, session.skipped);
+  const openLeft = completion.open;
   const typed = Boolean(item && (item.kind === "condition" ? (picked[item.key] ?? currentState(item)) === "does_not_apply" : multiline(item)));
-  const status = readOnlyStatus(app?.status, app?.authority);
+  const status = readOnlyStatus(app?.status ?? applicationStatus, app?.authority ?? c.authority);
 
   return (
     <div className="cf-deck-page">
       {/* The check state lives on Review and in the header; the deck stays quiet. */}
-      {locked && (
+      {locked && !submissionDispatched && (
         <div className="cf-deck-status" role="status">
           <span className={`cf-dot is-${status.tone}`} aria-hidden="true" />{status.heading}. {status.note}
         </div>
       )}
       <div className="cf-q-stage">
-        {item?.kind === "scope" && !item.gone ? (
+        {locked ? (
+          <div className="cf-q-wrap" aria-labelledby="cf-q" role="group">
+            <h2 id="cf-q" className="cf-q-text" tabIndex={-1}>Your saved answers are read-only.</h2>
+            <p className="cf-q-help">Review the saved application, check its administrative completeness or download a record.</p>
+            <div className="cf-row-actions">
+              <a className="cf-btn is-primary" href="#/application">View saved application</a>
+              <a className="cf-btn" href="#/review">Review completeness</a>
+            </div>
+          </div>
+        ) : item?.kind === "scope" && !item.gone ? (
           <RedirectPage n={n} />
         ) : item ? (
-          <div ref={wrapRef} key={item.key} className={`cf-q-wrap is-from-${dir}${item.kind === "section-d" ? " is-wide" : ""}`} aria-labelledby="cf-q" role="group">
+          <div ref={wrapRef} key={item.key} className={`cf-q-wrap is-from-${dir}${item.kind === "section-d" || item.kind === "code-triage" ? " is-wide" : ""}`} aria-labelledby="cf-q" role="group">
             <QNum n={n} label={item.eyebrow} hue={SECTION_HUE[item.section]} />
             <h2 id="cf-q" className="cf-q-text" tabIndex={-1}>{item.title}</h2>
             {(item.context || item.quote) && (
@@ -981,9 +1000,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
             <QNum n={<Icon24 name="check" size={15} stroke={2} />} label={openLeft ? "For now" : "All caught up"} />
             <h2 id="cf-q" className="cf-q-text" tabIndex={-1}>That’s everything for now.</h2>
             <p className="cf-q-help">
-              {openLeft
-                ? `You skipped ${openLeft} ${openLeft === 1 ? "question" : "questions"}. They stay on your list and on the review.`
-                : "Batatis checks what you have and shows anything still missing."}
+              {completion.message}
             </p>
             <OkRow label="Review my application" onOk={next} typed={false}>
               {openLeft > 0 && (
@@ -996,7 +1013,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
                       updateSession({ queue, index: Math.max(first, 0), skipped: [], wrapped: true });
                     }}
                   >
-                    Go back to skipped
+                    {completion.skipped ? "Go back to skipped" : "Go to unanswered"}
                   </button>
                 </span>
               )}

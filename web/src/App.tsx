@@ -49,7 +49,7 @@ export function App() {
   const route = useRoute();
   // Signed-out visitors go to #/signin and new accounts to onboarding before any screen renders.
   const redirecting = useAuthRedirect(route);
-  const { phase } = useCase();
+  const { phase, submissionDispatched } = useCase();
   // Accounts, reviewer, settings and notification pages (routes.extra.tsx) come before the stages.
   const extra = extraRoutes(route);
   const calm = resolveRoute(route.path, route.params);
@@ -105,7 +105,10 @@ export function App() {
   return (
     <Shell active={screen}>
       <CalmEffects />
-      {body}
+      {submissionDispatched && <p className="cf-submission-pending" role="status">Submitting your saved application. Editing is paused while it is sent.</p>}
+      <fieldset className="cf-edit-lock" disabled={submissionDispatched} aria-label="Application editing">
+        {body}
+      </fieldset>
     </Shell>
   );
 }

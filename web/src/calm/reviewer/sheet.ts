@@ -4,10 +4,11 @@
  * case written by the web app or through the API reads the same. Missing values stay null. Pure.
  */
 import type { Case as EngineCase } from "../../api/types.gen";
+import type { InformationRequest, ReviewQuestion } from "../../api/client";
+import { answerWithdrawn, localField } from "../../intakeFields";
+import { evidenceBinding } from "../../evidence";
 
 type Fact = EngineCase["facts"][number];
-
-const WITHDRAWN = "Answer withdrawn by applicant";
 
 export interface SheetRow {
   label: string;
@@ -30,6 +31,8 @@ export interface SheetView {
   references: SheetRef[];
   process: SheetRow[];
   supporting: SheetRow[];
+  documents: { id: string; title: string; fileId: string | null; fileName: string | null; type: string | null; author: string | null; date: string | null }[];
+  questions: ReviewQuestion[];
 }
 
 const A_FIELDS: [string, string[], boolean][] = [
@@ -67,10 +70,11 @@ const LABELS: Record<string, string> = {
 
 /** The newest fact among the aliases (the engine's latest_fact rule), without withdrawn answers. */
 export function latest(facts: Fact[], fields: string[]): Fact | null {
+  const aliases = new Set(fields.map(localField));
   for (let i = facts.length - 1; i >= 0; i--) {
     const f = facts[i];
-    if (fields.includes(f.field)) {
-      if (f.source?.ref === WITHDRAWN) return null;
+    if (aliases.has(localField(f.field))) {
+      if (answerWithdrawn(f)) return null;
       return f;
     }
   }
@@ -92,8 +96,11 @@ function row(facts: Fact[], label: string, fields: string[], required: boolean):
 
 const authorityLabel = (id: string | null | undefined) => (id ? id.charAt(0).toUpperCase() + id.slice(1) : null);
 
-export function sheetFromEngine(c: EngineCase): SheetView {
+export function sheetFromEngine(c: EngineCase, information?: InformationRequest | null): SheetView {
   const facts = c.facts ?? [];
+  // Engagement can be shown when no role is stated; it never becomes a credential.
+  const professionalField = latest(facts, ["professional.role"]) ? "professional.role" : "professional.status";
+  const registrationField = latest(facts, ["professional.registration_number"]) ? "professional.registration_number" : "professional.seal";
   const docs = new Map<string, string>();
   for (const f of facts) {
     const m = /^evidence\.([^.]+)\.title$/.exec(f.field);
@@ -108,6 +115,7 @@ export function sheetFromEngine(c: EngineCase): SheetView {
     return { provision: r.provision_id, codes };
   });
   return {
+    questions: information && information.case_id === c.id && information.case_version === c.version ? information.questions ?? [] : [],
     applicant: A_FIELDS.map(([l, f, r]) => row(facts, l, f, r)),
     project: [
       { label: "Reviewing authority", value: authorityLabel(c.authority ?? c.jurisdiction?.id), required: true },
@@ -117,9 +125,15 @@ export function sheetFromEngine(c: EngineCase): SheetView {
     references,
     process: PROCESS.map(([l, f]) => row(facts, l, [...f.map((x) => `process.${x}`), ...f], true)),
     supporting: [
-      row(facts, "Registered professional", ["professional.role", "professional_status"], true),
-      row(facts, "Registration or seal", ["professional.registration_number"], false),
-      { label: "Documents listed", value: docs.size ? [...docs.values()].join("; ") : null, required: true },
+      row(facts, "Registered professional", [professionalField], true),
+      row(facts, "Registration or seal", [registrationField], false),
+      { label: "Documents listed", value: docs.size ? `${docs.size} ${docs.size === 1 ? "document" : "documents"}` : null, required: true },
     ],
+    documents: [...docs].map(([id, title]) => {
+      const binding = evidenceBinding(facts, id);
+      const metadata = (field: string) => text(latest(facts, [`evidence.${id}.${field}`]));
+      return { id, title, fileId: binding?.fileId ?? null, fileName: binding?.name ?? null,
+        type: metadata("evidence_type"), author: metadata("responsible_party"), date: metadata("date") };
+    }),
   };
 }

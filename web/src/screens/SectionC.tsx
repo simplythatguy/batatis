@@ -84,7 +84,7 @@ export function provisionCandidate(h: { id: string; article_title?: string | nul
 /** Manual code search. `onAdded` receives the new card id after "Use this provision". */
 export function ProvisionSearch({ onAdded }: { onAdded?: (candidateId: string) => void } = {}) {
   const { c, dispatch, noteLookupFailure } = useCase();
-  const { app } = useCurrentApplication();
+  const { locked } = useCurrentApplication();
   const [query, setQuery] = useState("");
   const [hits, setHits] = useState<CodeHit[]>([]);
   const [note, setNote] = useState("");
@@ -115,7 +115,7 @@ export function ProvisionSearch({ onAdded }: { onAdded?: (candidateId: string) =
     }
   }
 
-  if (app?.status === "refused") return <p className="meta">{readOnlyStatus(app.status, app.authority).note}</p>;
+  if (locked) return <p className="meta">Your saved application is read-only. Read the code in the code library.</p>;
 
   return (
     <form
@@ -176,8 +176,7 @@ export function ProvisionSearch({ onAdded }: { onAdded?: (candidateId: string) =
 
 export function SectionC() {
   const { c, gaps, dispatch, sectionCLookup, retrySectionC } = useCase();
-  const { app } = useCurrentApplication();
-  const refused = app?.status === "refused";
+  const { app, locked } = useCurrentApplication();
   const { source, error } = sectionCLookup;
   const rows = source === "live" ? c.sectionC : [];
   const [attempt, setAttempt] = useState(0);
@@ -197,8 +196,8 @@ export function SectionC() {
   return (
     <>
       <PanelHeader title="Section C" meta="Code references" />
-      {!refused && <GapStrip gaps={gaps} />}
-      {refused && <p className="meta">{readOnlyStatus(app.status, app.authority).note}</p>}
+      {!locked && <GapStrip gaps={gaps} />}
+      {locked && <p className="meta">{readOnlyStatus(app?.status, app?.authority).note}</p>}
       <div className="pane scroll-body">
         <div className="sc-source">
           {source === "live" && rows.length === 0 ? (
@@ -213,14 +212,14 @@ export function SectionC() {
           <div className="sc-detail">
             {selCand && <div className="field">
               <label htmlFor="sentence-decision">Does your design depart from this sentence?</label>
-              <select id="sentence-decision" disabled={refused} value={selCand.answer ?? ""} onChange={e => {
-                if (refused) return;
+              <select id="sentence-decision" disabled={locked} value={selCand.answer ?? ""} onChange={e => {
+                if (locked) return;
                 const answer = e.target.value;
                 if (answer === "" || answer === "yes" || answer === "no" || answer === "not-sure") dispatch({ type: "answerCandidate", id: selCand.id, answer: answer === "" ? null : answer });
               }}>
                 <option value="">Not answered</option><option value="yes">Yes — a departure</option><option value="no">No departure</option><option value="not-sure">Not sure</option>
               </select>
-              <button type="button" className="btn btn-ghost" disabled={refused} onClick={() => { if (!refused) dispatch({ type: "removeCandidate", id: selCand.id }); }}>Remove reference</button>
+              <button type="button" className="btn btn-ghost" disabled={locked} onClick={() => { if (!locked) dispatch({ type: "removeCandidate", id: selCand.id }); }}>Remove reference</button>
             </div>}
             <details className="source-block disclosure"><summary>Code text and source</summary>
               <div className="block-label">
@@ -356,13 +355,13 @@ export function SectionC() {
       </div>
       <div className="footer-bar">
         <span className="status-note" role="status">
-          {refused ? "Refused · read-only" : <>{open.length ? `${open.length} unanswered Code check question${open.length > 1 ? "s" : ""}. ` : ""}Not sure does not block Continue.</>}
+          {locked ? readOnlyStatus(app?.status, app?.authority).label : <>{open.length ? `${open.length} unanswered Code check question${open.length > 1 ? "s" : ""}. ` : ""}Not sure does not block Continue.</>}
         </span>
         <a className="btn btn-ghost" href="#/code-check">
           Back
         </a>
-        <button type="button" className="btn btn-primary" onClick={() => (location.hash = refused ? "#/application" : "#/application?tab=alt")}>
-          {refused ? "View application" : "Continue"}
+        <button type="button" className="btn btn-primary" onClick={() => (location.hash = locked ? "#/application" : "#/application?tab=alt")}>
+          {locked ? "View application" : "Continue"}
         </button>
       </div>
     </>

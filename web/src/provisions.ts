@@ -1,8 +1,23 @@
-import type { Case, SectionCRow } from "./types";
+import type { Candidate, Case, SectionCRow } from "./types";
 
 /** Normalize punctuation only. IDs still have to come from CodeDB. */
 export const canonicalProvision = (id: string) => id.trim().replace(/\s+/g, "").replace(/\.$/, "");
 export const isProvision = (id: string) => /^\d+(?:\.\d+){3}\.?/.test(id);
+export const articleOf = (id: string) => id.match(/^\d+\.\d+\.\d+\.\d+\.?/)?.[0].replace(/\.$/, "") ?? id;
+
+/** Keyword-only suggestions are leads; manual additions and explicit Yes decisions retain their gates. */
+export function keywordCandidate(c: Case, a: Candidate): boolean {
+  return c.identify?.mode === "bm25_fallback" && a.suggestion === "identify"
+    && c.identify.articles.some((r) => articleOf(r.provision) === articleOf(a.provision));
+}
+
+/** Every returned fallback article, with all its available sentence cards. No relevance estimate is implied. */
+export function keywordGroups(c: Case): { article: string; title: string; candidates: Candidate[] }[] {
+  if (c.identify?.mode !== "bm25_fallback") return [];
+  return c.identify.articles.map((a) => ({ article: a.provision, title: a.title || a.provision,
+    candidates: c.candidates.filter((x) => articleOf(x.provision) === articleOf(a.provision)),
+  }));
+}
 export const withinProvision = (row: string, parent: string) => {
   const r = canonicalProvision(row), p = canonicalProvision(parent);
   return r === p || r.startsWith(`${p}.(`) || r.startsWith(`${p}(`);

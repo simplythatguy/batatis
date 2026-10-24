@@ -8,10 +8,10 @@
  */
 import type { Question as PlanQuestion } from "../api/types.gen";
 import { AUTHORITIES } from "../config";
-import { localField } from "../intakeFields";
+import { confirmedAnswer, localField } from "../intakeFields";
 import { codeQuestion, fileNotes, type ReadCopy, planInput, planQuestions, plannedFields, readCopy, readGroups, scopeRedirect, NOT_SURE } from "../intakeView";
-import { DETAIL_FIELDS, DETAIL_IDS, PROCESS_FIELDS, answeredByDescription, factFor, valueText } from "../model";
-import { isProvision } from "../provisions";
+import { DETAIL_FIELDS, DETAIL_IDS, PROCESS_FIELDS, answeredByDescription, factFor, questionAnsweredByFact, valueText } from "../model";
+import { isProvision, keywordCandidate, keywordGroups } from "../provisions";
 import { quoteKind } from "../rules";
 import type { ApplicantType, Candidate, Case, Gap } from "../types";
 import type { CaseChecklists, CaseRules } from "../api/types.gen";
@@ -19,6 +19,7 @@ import type { InputSpec } from "../rules/evaluate";
 import { conditionChoices, coveredByOption, followedInFull, groupOf, matchingChecklists, tallyLine } from "./checklistView";
 import { calmHref } from "./routes";
 import { caseRuleResults, inputChoices, linkedCandidate, plainResult, RULE_REF, ruleFacts, ruleInPlay, ruleTopic, type RuleData, type ShownRule } from "./rulesView";
+import { preparationGaps } from "./preparation";
 
 /** Choice values on rule and package cards. */
 export const RULE_ADD = "add";
@@ -34,6 +35,8 @@ export type DeckKind =
   | "code-run"
   /** "I could not narrow this down", or the labelled keyword fallback. */
   | "code-note"
+  /** Keyword-only leads grouped by topic; each lead opens on request (never a relevance score). */
+  | "code-triage"
   /** A number or answer a coded rule needs (docs/api/rules.md). */
   | "rule-input"
   /** A coded rule's result: follows or departs from the acceptable solution. */
@@ -104,6 +107,10 @@ export interface DeckItem {
   condition?: string;
   /** Answer choices carried by the card itself (rules and packages), in keyboard order. */
   choices?: { value: string; label: string }[];
+  /** Section D: the applicant's part is done and the officer's professional determination is pending. */
+  pendingForOfficer?: boolean;
+  /** Section D: answers changed after the last check; the current requirements need a fresh check. */
+  needsCheck?: boolean;
 }
 
 export interface DeckOptions {
@@ -129,6 +136,8 @@ export interface DeckOptions {
    * municipality is then confirmed once on that card (optional) instead of being skipped.
    */
   confirmAuthority?: boolean;
+  /** An optional keyword lead the applicant explicitly opened from grouped triage or a saved link. */
+  focusedCandidate?: string;
 }
 
 const RULE_WHY = "Batatis compares the numbers you give with one acceptable solution in the code. It flags where your design departs from it; it never decides whether the design is acceptable. The officer decides.";
@@ -195,7 +204,7 @@ function candidateItem(c: Case, a: Candidate): DeckItem {
       context: "",
       why: "The count decides which part of the code is the benchmark. Buildings up to 3 storeys usually follow Part 9; larger ones follow Part 3. Not sure keeps it as an open question for the officer.",
       ref: a.id,
-      done,
+      done: done || Boolean(confirmedAnswer(c.facts, "storeys")),
       optional: false,
     };
   }
@@ -224,7 +233,9 @@ function candidateItem(c: Case, a: Candidate): DeckItem {
       section: "C",
       eyebrow: sectionEyebrow("C"),
       title: codeQuestion(topic),
-      context: a.rank === "committed" ? "Likely match for your project." : "Close match for your project.",
+      context: keywordCandidate(c, a)
+        ? "A keyword match only. Its relevance has not been assessed. You can leave it unanswered or choose Not sure."
+        : a.rank === "committed" ? "Likely match for your project." : "Close match for your project.",
       why: "Nothing is used until you answer. Yes adds this rule to the list of rules your design differs from (Section C of the form). No leaves it out. Not sure keeps it as an open question for the officer. Batatis never decides whether the design meets the code.",
       ref: a.id,
       done,
@@ -480,7 +491,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       context: "",
       why: q.why,
       ref: q.id,
-      done: Boolean(q.answer?.trim()),
+      done: Boolean(q.answer?.trim()) || questionAnsweredByFact(c, q),
       optional: false,
     });
   }
@@ -634,20 +645,36 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       choices: r.state === "departs" ? [{ value: RULE_ADD, label: "Add this rule to my application" }, { value: RULE_LEAVE, label: "Leave it out for now" }] : [],
     };
   };
+  // A keyword-only lead stays behind the topic triage until the applicant opens it (or answers Yes).
+  const behindTriage = (a: Candidate) => keywordCandidate(c, a) && a.answer !== "yes" && opts.focusedCandidate !== `cand-${a.id}`;
   const linked = new Map<string, ShownRule>();
   for (const r of inPlay) {
     const card = linkedCandidate(c, r);
-    if (card) { linked.set(card.id, r); continue; }
+    // A rule never hides on a lead that is not shown: it keeps its own card instead.
+    if (card && !behindTriage(card)) { linked.set(card.id, r); continue; }
     ruleInputs(r);
     const item = resultItem(r);
     if (item) push("C", item);
   }
 
+  const keyword = keywordGroups(c);
+  if (keyword.length) {
+    push("C", {
+      key: "code-triage", kind: "code-triage", section: "C", eyebrow: sectionEyebrow("C"),
+      title: "Review the keyword matches by topic.",
+      context: `${keyword.length} articles matched words in your description. This search could not assess which apply. Open a topic to inspect its sentences, or find the rule yourself.`,
+      why: "These are unconfirmed leads, not relevance scores or technical decisions. Only an explicit Yes adds a code reference. Leaving a lead unanswered does not mean No.",
+      ref: "code-triage", done: seen.has("code-triage"), optional: true,
+    });
+  }
   for (const a of c.candidates) {
+    if (behindTriage(a)) continue;
     const r = linked.get(a.id);
     if (r) ruleInputs(r);
-    const item = candidateItem(c, a);
-    push("C", r && (r.state === "departs" || r.state === "follows") ? { ...item, rule: r } : item);
+    const base = candidateItem(c, a);
+    const item = r && (r.state === "departs" || r.state === "follows") ? { ...base, rule: r } : base;
+    // An opened keyword lead stays optional: leaving it unanswered does not mean No.
+    push("C", keywordCandidate(c, a) && a.answer !== "yes" ? { ...item, optional: true } : item);
   }
 
   // 5. The alternative-solution case, written by the applicant.
@@ -668,6 +695,10 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
 
   // 6. Section D: professional and evidence documents.
   if (sectionDRelevant(c, gaps)) {
+    const dGaps = sectionDGaps(gaps);
+    const actions = preparationGaps(c, dGaps);
+    const pendingForOfficer = dGaps.length > 0 && actions.applicant.length === 0 && actions.checkNeeded.length === 0;
+    const needsCheck = actions.checkNeeded.length > 0 && actions.applicant.length === 0;
     push("D", {
       key: "section-d",
       kind: "section-d",
@@ -677,8 +708,10 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       context: "Batatis lists what the evidence must address. Your engineer or architect writes it.",
       why: "This part of the form (Section D) names the engineer or architect responsible and lists the proof for each rule your design differs from. Batatis does not write that proof.",
       ref: "section-d",
-      done: seen.has("section-d") && sectionDGaps(gaps).length === 0,
-      optional: false,
+      done: (seen.has("section-d") && dGaps.length === 0) || pendingForOfficer || needsCheck,
+      optional: pendingForOfficer || needsCheck,
+      pendingForOfficer,
+      needsCheck,
     });
   }
   return [...groups.read, ...groups.plan, ...groups.A, ...groups.B, ...groups.questions, ...groups.C, ...groups.D];
@@ -741,6 +774,18 @@ export function preCaseState(draft: string): { items: DeckItem[]; line: string; 
 export function deckProgress(items: DeckItem[]): { done: number; total: number } {
   const tracked = items.filter((i) => !i.optional);
   return { done: tracked.filter((i) => i.done).length, total: tracked.length };
+}
+
+/** Only a real Skip click is called skipped; human-pending work is never an applicant omission. */
+export function deckCompletion(items: DeckItem[], skipped: readonly string[]): { open: number; skipped: number; message: string } {
+  const left = items.filter((i) => !i.done && !i.optional);
+  const count = left.filter((i) => skipped.includes(i.key)).length;
+  const message = count ? `You skipped ${count} ${count === 1 ? "question" : "questions"}. They stay on your list and on the review.`
+    : left.length ? `${left.length} ${left.length === 1 ? "question still needs" : "questions still need"} your answer. Review shows what is missing.`
+      : items.some((i) => i.needsCheck) ? "Your answers are in. Check your changed application to see the current requirements."
+        : items.some((i) => i.pendingForOfficer) ? "Your answers are in. The officer’s determination is still pending; Review keeps it visible."
+          : "Batatis checks what you have and shows anything still missing.";
+  return { open: left.length, skipped: count, message };
 }
 
 /** Letter key for a choice (A, B, C…), Typeform style. */

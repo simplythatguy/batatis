@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Notices } from "../components";
-import { groupGaps, isProfessionalHold, professionalFlagLines } from "../humanReview";
-import { professionalConfirmed } from "../professional";
+import { groupGaps, professionalHoldKind, professionalHoldReason } from "../humanReview";
 import { useCase } from "../store";
 import type { Case, Gap } from "../types";
 import { forkOf, scopeRedirect } from "../intakeView";
@@ -16,34 +15,32 @@ import { useDeckExtras } from "./useDeckExtras";
 import { useRelevance } from "./useRelevance";
 import { Icon24, type IconName } from "./icons";
 import { CIcon, CompletenessNote, Dot, Eyebrow, Kbd, type DotTone } from "./ui";
+import { confirmedProvisions } from "../provisions";
+import { preparationGaps } from "./preparation";
 
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
 /** The engineer callout, only from the professional logic already on the case. Never invented. */
-export function engineerNeed(c: Case, gaps: Gap[]): { title: string; line: string } | null {
-  const confirmed = professionalConfirmed(c.facts);
-  const hold = gaps.some(isProfessionalHold);
-  if (c.practiceOfEngineering === true && !confirmed) {
-    return { title: "Your case and proof needs an engineer or architect", line: professionalFlagLines(c)[0] };
-  }
-  if (c.practiceOfEngineering === "unknown" && !confirmed) {
-    return { title: "Your case and proof may need an engineer or architect", line: professionalFlagLines(c)[0] };
-  }
-  if (hold) {
-    return { title: "The official PDF is on hold for a registered professional", line: "A professional item is routed to the officer until an engineer or architect confirms a seal or registration number." };
-  }
-  return null;
+export function engineerNeed(_c: Case, gaps: Gap[]): { title: string; line: string; summary: string } | null {
+  const kind = professionalHoldKind(gaps);
+  const line = professionalHoldReason(gaps);
+  if (!line) return null;
+  if (kind === "requirement") return { title: "The officer must determine the professional requirement", line, summary: "Officer determination pending" };
+  if (kind === "source") return { title: "The professional requirement needs source review", line, summary: "Source review pending" };
+  return { title: "Complete the required professional information and work", line, summary: "Professional information needed" };
 }
 
-export function EngineerCallout({ c, gaps }: { c: Case; gaps: Gap[] }) {
+export function EngineerCallout({ c, gaps, readOnly = false }: { c: Case; gaps: Gap[]; readOnly?: boolean }) {
   const need = engineerNeed(c, gaps);
   if (!need) return null;
+  const officerPending = gaps.some((g) => g.severity === "blocking" && g.submissionBlocking === false);
   return (
     <section className="cf-engineer" aria-labelledby="cf-engineer-title">
       <h2 className="cf-engineer-h" id="cf-engineer-title"><CIcon name="warn" />{need.title}</h2>
       <p>{need.line}</p>
       <p>Batatis can list what that evidence must address, but it can’t write it.</p>
-      <a className="cf-engineer-link" href="#/questions?focus=section-d">Open your case and proof <CIcon name="arrow" size={13} /></a>
+      {officerPending && <p>Official PDF and administrative acceptance stay on hold until the officer resolves the requirement.</p>}
+      {!readOnly && <a className="cf-engineer-link" href={officerPending ? "#/application" : "#/questions?focus=section-d"}>{officerPending ? "Preview and submit" : "Open your case and proof"} <CIcon name="arrow" size={13} /></a>}
     </section>
   );
 }
@@ -110,7 +107,7 @@ export function Review() {
       <div className="cf-review">
         <div className="cf-review-main">
           <h1 className="cf-h1" tabIndex={-1}>{s.heading}</h1>
-          <p className="cf-lede is-sm">{s.note}</p>
+          <p className="cf-lede is-sm">{s.note} {s.next}</p>
           <div className="cf-row-actions"><a className="cf-btn is-primary" href="#/application">View application</a></div>
         </div>
       </div>
@@ -121,7 +118,9 @@ export function Review() {
 
 /** Summarize shared gaps, deck progress and rule departures for the current case. */
 function CaseReview() {
-  const { c, gaps, notices, engineGaps, gapsSource, checkStatus, checkNote, checkDetail, requestCheck, reading } = useCase();
+  const { c, gaps: currentGaps, notices, engineGaps, gapsSource, checkStatus, checkNote, checkDetail, requestCheck, reading, applicationStatus } = useCase();
+  const { app, locked } = useCurrentApplication();
+  const gaps = locked && gapsSource !== "engine" ? [] : currentGaps;
   const session = useSession();
   const [showAll, setShowAll] = useState(false);
   const { options } = useDeckExtras();
@@ -130,8 +129,13 @@ function CaseReview() {
   const { done, total } = deckProgress(deck);
   const openCards = deck.filter((i) => !i.done && !i.optional).length;
   const blocking = gaps.filter((g) => g.severity === "blocking");
+  const work = preparationGaps(c, gaps);
+  const applicantBlocking = work.applicant.filter((g) => g.severity === "blocking");
+  const officerPending = work.officer;
   const warnings = gaps.length - blocking.length;
   const checked = checkStatus === "ready" || checkStatus === "needs_answers";
+  const applicantComplete = checked && !applicantBlocking.length && !work.checkNeeded.length && officerPending.some((g) => g.severity === "blocking");
+  const status = readOnlyStatus(app?.status ?? applicationStatus, app?.authority ?? c.authority);
   const groups = groupGaps(gaps, new Map(engineGaps.map((g) => [g.id, g.section])));
   const pick = (...keys: string[]) => keys.flatMap((k) => groups.get(k) ?? []);
   const need = engineerNeed(c, gaps);
@@ -140,7 +144,7 @@ function CaseReview() {
   const likely = rankedIn(rel.display, rel.cutoffs, ["high"], rel.rerank).length;
   const fork = forkOf(c);
   const pre = c.intake?.record.plan?.pre_application;
-  const departures = c.sectionC.filter((r) => c.candidates.find((a) => a.id === r.candidateId)?.answer === "yes").length;
+  const departures = confirmedProvisions(c).length;
 
   const sections = [
     { letter: "A", title: "About you", gaps: pick("A"), ok: "Owner, representative and address are in" },
@@ -149,13 +153,13 @@ function CaseReview() {
       letter: "C",
       title: "Which rules apply",
       gaps: pick("C"),
-      ok: c.sectionC.length ? `${plural(c.sectionC.length, "rule")} · looked up from the code, not AI-written` : "No rule chosen yet",
-      empty: c.sectionC.length === 0,
+      ok: departures ? `${plural(departures, "confirmed rule")} · looked up from the code, not AI-written` : "No rule confirmed yet",
+      empty: departures === 0,
     },
     { letter: "D", title: "Your case and proof", gaps: pick("D", "process"), ok: "Nothing missing" },
   ];
 
-  const go = () => { location.hash = openCards ? "#/questions" : "#/application"; };
+  const go = () => { location.hash = !locked && !applicantComplete && openCards ? "#/questions" : "#/application"; };
   useEffect(() => {
     const on = (e: KeyboardEvent) => {
       if (e.key !== "Enter" || e.defaultPrevented || document.querySelector("dialog[open]")) return;
@@ -173,7 +177,11 @@ function CaseReview() {
 
   let headline: string;
   let lede = "";
-  if (checkStatus === "running") {
+  if (locked) {
+    headline = status.heading;
+    lede = `${status.note} ${status.next}`;
+    if (checkStatus === "running" || checkStatus === "unavailable") lede += ` ${checkNote}`;
+  } else if (checkStatus === "running") {
     headline = "Checking your application…";
     lede = checkNote;
   } else if (checkStatus === "unavailable") {
@@ -184,10 +192,13 @@ function CaseReview() {
     lede = checkNote;
   } else if (!checked) {
     headline = "Let’s check your application.";
-  } else if (blocking.length) {
-    headline = `Almost there. ${plural(blocking.length, "thing")} ${blocking.length === 1 ? "stands" : "stand"} between you and the official PDF.`;
+  } else if (applicantComplete) {
+    headline = "Ready to submit for review.";
+    lede = "Your required answers are in. The officer must determine the professional requirement; official PDF and administrative acceptance stay on hold.";
+  } else if (applicantBlocking.length) {
+    headline = `Almost there. ${plural(applicantBlocking.length, "thing")} ${applicantBlocking.length === 1 ? "stands" : "stand"} between you and submission.`;
   } else if (warnings) {
-    headline = `Nothing required is missing. ${plural(warnings, "open question")} to look at.`;
+    headline = `Nothing required is missing. ${plural(warnings, "open question")}${!work.applicant.length && officerPending.length ? " with the officer" : " to look at"}.`;
   } else {
     headline = "Nothing required is missing.";
   }
@@ -201,7 +212,7 @@ function CaseReview() {
         {!checked && (
           <div className="cf-row-actions">
             <button type="button" className="cf-btn is-primary" disabled={checkStatus === "running"} onClick={() => void requestCheck(checkStatus === "unavailable")}>
-              {checkStatus === "running" ? "Checking…" : checkStatus === "unavailable" ? "Try the check again" : "Check my application"} <Kbd>↵</Kbd>
+              {checkStatus === "running" ? "Checking…" : locked ? "Check saved application" : checkStatus === "unavailable" ? "Try the check again" : "Check my application"} <Kbd>↵</Kbd>
             </button>
           </div>
         )}
@@ -211,19 +222,21 @@ function CaseReview() {
 
         <div className="cf-metrics">
           <div className="cf-tile cf-metric">
-            <div className="cf-metric-k">Complete</div>
-            <div className="cf-metric-v">{done}<span className="cf-faint">/{total}</span></div>
+            <div className="cf-metric-k">{locked ? "Saved application" : applicantComplete ? "Required answers" : "Complete"}</div>
+            <div className="cf-metric-v">{locked || applicantComplete ? checked ? <span className="cf-faint">Checked</span> : "—" : <>{done}<span className="cf-faint">/{total}</span></>}</div>
           </div>
           <div className="cf-tile cf-metric">
-            <div className="cf-metric-k">Left to answer</div>
-            <div className="cf-metric-v">{gaps.length}{blocking.length > 0 && <small>{blocking.length} required</small>}</div>
+            <div className="cf-metric-k">{locked ? "Open administrative items" : "Left for you"}</div>
+            <div className="cf-metric-v">{locked && !checked ? "—" : locked ? gaps.length : work.applicant.length}{applicantBlocking.length > 0 && <small>{applicantBlocking.length} required</small>}{officerPending.length > 0 && <small>{officerPending.length} with the officer</small>}{work.checkNeeded.length > 0 && <small>Check your changed application</small>}</div>
           </div>
         </div>
 
-        {gaps.length > 0 && (
-          <div className="cf-list-label" title={gapsSource !== "engine" ? "From this browser’s list. The online check can add more." : undefined}>Still needed</div>
+        {(gaps.length > 0 || (locked && !checked)) && (
+          <div className="cf-list-label" title={!locked && gapsSource !== "engine" ? "From this browser’s list. The online check can add more." : undefined}>{applicantComplete ? "With the officer" : locked ? "Saved-record requirements" : "Still needed"}</div>
         )}
-        {gaps.length > 0 && (
+        {gaps.length === 0 ? (
+          locked && !checked && <p className="cf-faint cf-row-empty">No current check yet.</p>
+        ) : (
           <ul className="cf-rows">
             {shown.map((g) => {
               const key = gapKey(c, g);
@@ -232,7 +245,7 @@ function CaseReview() {
                 <li key={g.id} className="cf-row">
                   <Dot tone={g.severity} />
                   <span className="cf-row-text">{g.label}</span>
-                  <a className="cf-row-go" href={href}>{key ? "Answer" : "Open"} <CIcon name="arrow" size={13} /></a>
+                  {work.officer.includes(g) ? <span className="cf-faint cf-small">For the officer</span> : work.checkNeeded.includes(g) ? <span className="cf-faint cf-small">Check needed</span> : !locked && <a className="cf-row-go" href={href}>{g.id === "keyword-triage" ? "Review leads" : key ? "Answer" : "Open"} <CIcon name="arrow" size={13} /></a>}
                 </li>
               );
             })}
@@ -244,7 +257,7 @@ function CaseReview() {
           </button>
         )}
         {notices.length > 0 && <div className="cf-notices"><Notices notices={notices} /></div>}
-        <EngineerCallout c={c} gaps={gaps} />
+        <EngineerCallout c={c} gaps={gaps} readOnly={locked} />
         {fork && !scopeRedirect(c) && (
           <section className="cf-review-fork" aria-labelledby="cf-fork-h">
             <h2 id="cf-fork-h" className="cf-list-label">Your path</h2>
@@ -259,11 +272,13 @@ function CaseReview() {
         <ul className="cf-sec-list">
           {sections.map((s) => {
             // An empty Section C is not complete: no reference has been confirmed yet.
-            const tone: DotTone = "empty" in s && s.empty && !s.gaps.length ? "pending" : worst(s.gaps);
+            const sectionWork = preparationGaps(c, s.gaps);
+            const officerOnly = s.gaps.length > 0 && sectionWork.officer.length === s.gaps.length;
+            const tone: DotTone = locked && !checked ? "pending" : officerOnly ? "warning" : "empty" in s && s.empty && !s.gaps.length ? "pending" : worst(s.gaps);
             const engineer = s.letter === "D" && need;
-            const summary = s.gaps.length
-              ? `${engineer ? "Engineer needed · " : ""}${plural(s.gaps.length, "item")} left`
-              : engineer ? "Engineer needed" : s.letter === "C" && !departures && c.sectionC.length ? `${s.ok} · no departure confirmed` : s.ok;
+            const summary = locked && !checked ? "Check the saved application" : s.letter === "C" ? `${s.ok}${s.gaps.length ? ` · ${plural(s.gaps.length, "unresolved item")}` : ""}` : sectionWork.checkNeeded.length && !sectionWork.applicant.length ? "Check your changed application" : officerOnly ? "Officer determination pending" : s.gaps.length
+              ? `${engineer ? `${engineer.summary} · ` : ""}${plural(s.gaps.length, "item")} left`
+              : engineer ? engineer.summary : s.ok;
             return (
               <li key={s.letter} className="cf-sec">
                 <span className="cf-sec-icon" aria-hidden="true"><Icon24 name={SECTION_ICON[s.letter] ?? "file"} size={18} /></span>
@@ -277,13 +292,13 @@ function CaseReview() {
                   </div>
                 </div>
                 <Dot tone={engineer && tone === "done" ? "warning" : tone} />
-                <span className="cf-sr">{tone === "done" ? "complete" : tone === "blocking" ? "required items missing" : tone === "pending" ? "not started" : "open questions"}</span>
+                <span className="cf-sr">{officerOnly ? "officer determination pending" : tone === "done" ? "complete" : tone === "blocking" ? "required items missing" : tone === "pending" ? "not started" : "open questions"}</span>
               </li>
             );
           })}
         </ul>
         <div className="cf-sec-actions">
-          {openCards > 0 ? (
+          {!locked && !applicantComplete && openCards > 0 ? (
             <>
               <a className="cf-btn is-primary is-grow" href="#/questions">Answer {openCards} remaining {checked && <Kbd>↵</Kbd>}</a>
               <a className="cf-btn" href="#/application">Preview</a>

@@ -1,8 +1,9 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { ApplicationSummary } from "../api/accounts";
+import { engineCaseId, engineGeneration, isEngineGeneration } from "../api/sync";
 import { groupGaps } from "../humanReview";
 import { useCase } from "../store";
-import { bootAccount, deleteApplication, refreshApplications, setApplicationPreferences, useAccount, type AccountPhase } from "./account";
+import { accountSession, bootAccount, deleteApplication, refreshApplications, setApplicationPreferences, useAccount, type AccountPhase } from "./account";
 import { groupApplications, readOnly, readOnlyStatus } from "./applications";
 import { saveTitle, titleError } from "./rename";
 import { RenameDialog } from "./shell/RenameDialog";
@@ -30,8 +31,8 @@ import { Rail, type RailDestination } from "./shell/Rail";
 import { RequestBanner } from "./shell/RequestBanner";
 import { ReturnedBanner } from "./shell/ReturnedBanner";
 import { AccountButton, NotificationsBell } from "./routes.extra";
+import { useNotifications } from "./notifications/notifications";
 import { useRoute } from "../router";
-import { engineGeneration } from "../api/sync";
 import { resetRelevance } from "./useRelevance";
 import { CIcon, ConfirmDialog, Dot, MOD_KEY, type DotTone } from "./ui";
 
@@ -97,10 +98,16 @@ function useStageProgress() {
 
 const PHONE = "(max-width: 760px)";
 const signedInParam = (id: string | null, phase: AccountPhase) => (id && phase === "signed-in" ? id : null);
-/** The signed-in application open in this tab, so a reload reopens it. Tab-scoped, id only. */
+/** Tab-scoped application and owner ids, so another account never restores this selection. */
 const OPEN_KEY = "batatis-open-application";
-const remembered = () => { try { return sessionStorage.getItem(OPEN_KEY); } catch { return null; } };
-const remember = (id: string | null) => { try { if (id) sessionStorage.setItem(OPEN_KEY, id); else sessionStorage.removeItem(OPEN_KEY); } catch { /* storage unavailable */ } };
+const OPEN_OWNER_KEY = "batatis-open-application-owner";
+const remembered = (owner: string | null) => { try { return owner && sessionStorage.getItem(OPEN_OWNER_KEY) === owner ? sessionStorage.getItem(OPEN_KEY) : null; } catch { return null; } };
+const remember = (id: string | null, owner?: string) => {
+  try {
+    if (id && owner) { sessionStorage.setItem(OPEN_KEY, id); sessionStorage.setItem(OPEN_OWNER_KEY, owner); }
+    else { sessionStorage.removeItem(OPEN_KEY); sessionStorage.removeItem(OPEN_OWNER_KEY); }
+  } catch { /* storage unavailable */ }
+};
 const isPhone = () => window.matchMedia(PHONE).matches;
 /** `#/review/<case id>` (not the PDF-package pages): the file a reviewer has open. */
 function reviewCaseOf(path: string): string | null {
@@ -126,12 +133,13 @@ function accountPage(path: string): { screen: string; label: string } {
  * application list or the stage header.
  */
 export function Shell({ active, children, plain = false }: { active: Screen; children: ReactNode; plain?: boolean }) {
-  const { c, phase, engineId, resetToWho, openCase, saveStatus, saveDraft, checkStatus, requestCheck, renameCase } = useCase();
+  const { c, phase, engineId, resetToWho, openCase, refreshCurrentCase, readSync, saveStatus, saveDraft, checkStatus, requestCheck, renameCase } = useCase();
   const [renaming, setRenaming] = useState<{ id: string; title: string } | null>(null);
   const [deleting, setDeleting] = useState<{ id: string; title: string } | null>(null);
   /** Applications with a pin or archive change on its way to the server. */
   const [pending, setPending] = useState<ReadonlySet<string>>(() => new Set());
   const account = useAccount();
+  const notifications = useNotifications();
   const assistant = useAssistant();
   const [confirm, setConfirm] = useState(false);
   const [palette, setPalette] = useState(false);
@@ -142,6 +150,7 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
   const [listCollapsed, setListCollapsed] = useState(false);
   const [sheet, setSheet] = useState(false);
   const listRef = useRef<ApplicationListHandle>(null);
+  const openRequest = useRef(0);
   const inCase = phase === "case";
   const progress = useStageProgress();
   const signedIn = account.phase === "signed-in";
@@ -190,20 +199,39 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
   }, [signedIn, account.user?.id, account.user?.role, account.user?.authority, assistMode, assistCase, unsavedLifetime, assistName, assistUpload, assistFilesKey]); // eslint-disable-line react-hooks/exhaustive-deps
   // A new owned case appears in the list once the engine has created it.
   useEffect(() => { if (signedIn && engineId) void refreshApplications(); }, [signedIn, engineId]);
-  useEffect(() => { if (signedIn && engineId) remember(engineId); }, [signedIn, engineId]);
+  useEffect(() => { if (signedIn && engineId && !reviewer) remember(engineId, account.user!.id); }, [signedIn, engineId, reviewer, account.user?.id]);
+
+  // The existing notification poll is the only timer. Read/unread changes and repeated polls
+  // do not re-fetch cases; a new status or message refreshes the list and its selected case.
+  const seenNotifications = useRef({ session: -1, keys: new Set<string>() });
+  useEffect(() => {
+    if (!signedIn || reviewer || notifications.phase !== "ready") return;
+    const session = accountSession();
+    const previous = seenNotifications.current.session === session ? seenNotifications.current.keys : new Set<string>();
+    const key = (n: (typeof notifications.items)[number]) => JSON.stringify([n.id, n.created_at, n.status]);
+    const fresh = notifications.items.filter(n => !previous.has(key(n)));
+    seenNotifications.current = { session, keys: new Set(notifications.items.map(key)) };
+    if (!fresh.length) return;
+    void refreshApplications();
+    if (engineId && fresh.some(n => n.case_id === engineId)) void refreshCurrentCase();
+  }, [signedIn, reviewer, notifications.phase, notifications.items, engineId, account.user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // After a reload, reopen the application this tab had open (signed in only).
   const restored = useRef(false);
   useEffect(() => {
     if (restored.current || account.phase === "probing") return;
     restored.current = true;
-    const id = remembered();
+    if (reviewer) return;
+    const id = remembered(account.user?.id ?? null);
     if (!id) return;
     if (!signedIn || inCase || caseParam) { if (!signedIn) remember(null); return; }
+    const session = accountSession(), request = ++openRequest.current, token = engineGeneration();
     setOpening(id);
     void openCase(id, roleOf(account.user) ?? "homebuilder").then((error) => {
+      if (session !== accountSession() || request !== openRequest.current) return;
       setOpening(null);
       if (!error) return;
+      if (!isEngineGeneration(token)) return;
       remember(null);
       resetToWho("That application is no longer available.");
     });
@@ -314,6 +342,8 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
 
   function startNew() {
     freshDraft.current += 1;
+    openRequest.current++;
+    setOpening(null);
     setListNote("");
     remember(null);
     resetSession();
@@ -321,23 +351,28 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
     resetToWho(signedIn ? "" : undefined);
   }
 
-  /** Open another saved application here (the list and the code library's picker share it). */
+  /** Open another saved application here (the list, notification links and the code library's picker share it). */
   async function switchTo(id: string): Promise<string | null> {
     if (!signedIn) return "Sign in to open a saved application.";
     if (opening) return "Another application is still opening.";
     // Choosing another application retires what the assistant was about to open, even if the switch fails.
     invalidateAssistantNavigation();
+    const session = accountSession(), request = ++openRequest.current;
+    // A newer open or another sign-in owns the list and the open application from then on.
+    const stale = () => session !== accountSession() || request !== openRequest.current;
     setOpening(id);
     const role = roleOf(account.user) ?? (c.applicantType as Parameters<typeof openCase>[1]);
     const mark = freshDraft.current;
-    const superseded = () => freshDraft.current !== mark;
+    const superseded = () => freshDraft.current !== mark || stale();
     // Keep the open draft before switching; a failed save keeps it open and says so. A new draft started
-    // meanwhile wins: nothing is opened over it and its description, files and role stay.
+    // meanwhile wins: nothing is opened over it and its description, files and role stay. The save state is
+    // read when the switch starts (an answer derived since the last render is unsaved too).
     const error = await switchApplication(id, {
-      inCase, saveStatus, saveDraft,
+      inCase, saveStatus: readSync().saved ? saveStatus : "unsaved", saveDraft,
       openCase: (next) => (superseded() ? Promise.resolve(null) : openCase(next, role)),
       settle: () => { if (!superseded()) { resetSession(); resetRelevance(); } },
     });
+    if (stale()) return null;
     setOpening(null);
     // A deleted or expired application leaves the list; a refused save changed nothing on the server.
     if (error && error !== KEEP_OPEN_NOTE) void refreshApplications();
@@ -347,18 +382,29 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
   async function open(id: string, to?: string) {
     const refused = items.find((a) => a.id === id)?.status === "refused";
     const destination = to ?? (refused ? "#/application" : "#/questions");
-    if (id === selectedId) {
+    if (id === selectedId || id === engineId) {
       setListNote("");
-      if (to || refused) location.hash = destination;
+      setOpenProblem(null);
+      if (signedIn && engineId === id) {
+        // The application already open here (a notification, or its own row): refresh its status, officer
+        // updates and messages in place. It is never reopened over unsaved answers.
+        const session = accountSession(), request = ++openRequest.current;
+        const [, error] = await Promise.all([refreshApplications(), refreshCurrentCase()]);
+        if (session !== accountSession() || request !== openRequest.current || engineCaseId() !== id) return;
+        setListNote(error ?? "");
+      }
+      if (to) location.replace(to);
+      else if (refused) location.hash = destination;
       else if (!onStage) location.hash = lastStage.current;
       return;
     }
     if (!signedIn || opening) return;
     setListNote("");
     setOpenProblem(null);
-    const mark = freshDraft.current;
+    const mark = freshDraft.current, request = openRequest.current + 1, session = accountSession();
     const error = await switchTo(id);
-    if (freshDraft.current !== mark) return; // Start over meanwhile: stay on the new draft
+    // Start over, a newer open or another sign-in meanwhile: stay where they left things.
+    if (freshDraft.current !== mark || openRequest.current !== request || session !== accountSession()) return;
     if (error) {
       setListNote(error);
       // A link (a notification's comments) says why on its page; the open application stays as it was.
@@ -370,15 +416,8 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
 
   useEffect(() => {
     if (!caseParam) return;
-    const to = `#${route.path || "/"}`;
-    if (caseParam === engineId) {
-      // A notification can target the file already open here. Refresh status and message freshness
-      // without reopening the case, which would replace any unsaved applicant answers.
-      void refreshApplications();
-      location.replace(to);
-      return;
-    }
-    void open(caseParam, to);
+    // A notification can target the application already open here: open() refreshes it in place.
+    void open(caseParam, `#${route.path || "/"}`);
   }, [caseParam]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /** Pin, unpin, archive or restore: the row moves once the server has saved it; the open application stays open. */

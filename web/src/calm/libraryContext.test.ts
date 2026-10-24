@@ -281,12 +281,12 @@ test("None offers no write: the hidden open application cannot receive the artic
   h.unmount();
 });
 
-test("a sent application stays read-only in the library: no Add, its status note instead", async () => {
+test("a sent application stays read-only in the library: no Add, a read-only note instead", async () => {
   for (const status of ["submitted", "in_review", "accepted", "refused"]) {
     const { h, props, button } = await addAction({ scope: "application", engineId: "case-a", status });
     const tree = await h.render(props);
     assert.equal(button(tree), undefined, `${status} cannot be changed from the library`);
-    assert.match(text(tree), new RegExp(applications.readOnlyStatus(status as never).note.slice(0, 20)));
+    assert.match(text(tree), /Your saved application is read-only\. You can still read the code\./);
     h.unmount();
   }
 });

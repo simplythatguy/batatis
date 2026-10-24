@@ -417,9 +417,12 @@ export function refusalMessage(reasons: string): string {
   return ["Your variance request is refused for the reasons below.", "", reasons.trim(), "", `Appeal: ${APPEAL_NOTICE}`].join("\n").slice(0, 4000);
 }
 
-/** A terminal refusal, with the officer's reasons and the existing appeal notice. */
-export function refusalDecision(reasons: string): DecisionRequest {
-  return { outcome: "refuse", message: refusalMessage(reasons), items: [] };
+/**
+ * A terminal refusal, with the officer's reasons and the existing appeal notice, pinned to the
+ * version on screen. A refusal carries no correction list: it is not a return.
+ */
+export function refusalDecision(reasons: string, expectedVersion: number): DecisionRequest {
+  return { outcome: "refuse", message: refusalMessage(reasons), expected_version: expectedVersion };
 }
 
 export function reasonsProblem(reasons: string): string {

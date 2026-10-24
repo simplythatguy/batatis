@@ -9,21 +9,15 @@
  */
 import type { Case as EngineCase, IdentifyResult, IntakeResult, SelectedArticleInput } from "../api/types.gen";
 import { emptyCase, applyDescription } from "../intake";
-import { localField } from "../intakeFields";
+import { answerWithdrawn, latestLocalFacts } from "../intakeFields";
 import { CODECHECK_PREFIX, PROCESS_FACT, reducer } from "../model";
 import { canonicalProvision, isProvision } from "../provisions";
 import type { ApplicantType, AuthorityId, Candidate, Case, Fact, ProcessFieldId } from "../types";
-
-const WITHDRAWN = "Answer withdrawn by applicant";
+import { clarificationQuestionId } from "./uncertainty";
 
 /** The latest saved fact per field, without withdrawn answers. Order is preserved. */
 export function latestFacts(facts: EngineCase["facts"]): Fact[] {
-  // Intake's Section A/B export keys (owner_name, ...) are the browser's field ids (owner, ...).
-  const latest = new Map<string, EngineCase["facts"][number]>();
-  for (const f of facts) latest.set(localField(f.field), f);
-  return [...latest.entries()]
-    .filter(([, f]) => f.source?.ref !== WITHDRAWN && !(f.value === "" && f.status === "unconfirmed"))
-    .map(([field, f]) => ({ ...f, field, id: f.id, status: f.status }) as Fact);
+  return latestLocalFacts(facts).filter((f) => !answerWithdrawn(f)) as Fact[];
 }
 
 export function caseFromEngine(saved: EngineCase, type: ApplicantType): Case {
@@ -31,7 +25,7 @@ export function caseFromEngine(saved: EngineCase, type: ApplicantType): Case {
   const facts = latestFacts(saved.facts);
   const by = new Map(facts.map((f) => [f.field, f]));
   const description = by.get("project.description");
-  const authority = (saved.jurisdiction?.id === "calgary" || saved.jurisdiction?.id === "edmonton" ? saved.jurisdiction.id : "") as AuthorityId;
+  const authority: AuthorityId = saved.authority ?? saved.jurisdiction?.id ?? "";
   const process = { ...base.process };
   // As engine/process_fields.py: the newest answer across the field's names counts only when the
   // applicant confirmed it as their own words. Anything else stays a gap; its saved fact is kept.
@@ -44,6 +38,17 @@ export function caseFromEngine(saved: EngineCase, type: ApplicantType): Case {
     const v = by.get(q.field)?.value;
     return v != null && v !== "" ? { ...q, answer: String(v) } : q;
   });
+  // A returned contextual request has its own text-answer card. It never overwrites a manual
+  // Yes/No/Not sure code decision or a human professional determination.
+  for (const item of saved.decision?.outcome === "return" ? saved.decision.items : []) {
+    if (!item.field?.startsWith("clarification.") || questions.some(q => q.field === item.field)) continue;
+    const f = by.get(item.field);
+    questions.push({ id: clarificationQuestionId(item.field), field: item.field,
+      text: item.note || "What can you clarify for the officer?",
+      why: "The officer asked for this clarification. Describe what you know or what remains unknown; the original code decision stays unchanged.",
+      answer: f?.value == null ? undefined : String(f.value),
+    });
+  }
   // A saved selection is the card list; `null` (never saved) falls back to the confirmed references.
   const confirmed: Candidate[] = saved.selected_articles ? [] : saved.provisions.filter(isProvision).map((id) => ({
     id: `search-${id}`,
@@ -62,15 +67,13 @@ export function caseFromEngine(saved: EngineCase, type: ApplicantType): Case {
     id: `case-${saved.id}`,
     title: saved.title || base.title,
     authority,
-    facts: facts.filter((f) => f.field !== "project.description"),
+    facts,
     questions,
     process,
     candidates: confirmed,
   };
-  // The description re-derives its own facts and code-check cards, exactly as when typed.
-  if (description && typeof description.value === "string") c = applyDescription(c, description.value);
-  // Keep the saved description fact itself (same id and value), so nothing is re-sent.
-  if (description) c = { ...c, facts: [...c.facts.filter((f) => f.field !== "project.description"), description] };
+  // Restore the description/title without replacing any saved facts that share its source ref.
+  if (description && typeof description.value === "string") c = { ...applyDescription(c, description.value), facts };
   if (saved.title) c = { ...c, title: saved.title, titleKept: true };
   if (saved.selected_articles) c = restoreSelection(c, saved.selected_articles, saved.provisions);
   return restoreCardAnswers(c);
@@ -164,8 +167,8 @@ export function openedCase(saved: EngineCase, type: ApplicantType, stored: { int
 
 /**
  * Answers to cards read from the description come back from their saved facts: a stored
- * `codecheck.<card>` answer, and the storey count for the storeys card. The saved facts are kept
- * as they are (same ids), so reopening sends nothing.
+ * `codecheck.<card>` answer. The deck resolves the storey count from the saved fact without
+ * inventing a card decision. Facts keep the same ids, so reopening sends nothing.
  */
 function restoreCardAnswers(c: Case): Case {
   const savedFacts = c.facts;
@@ -177,10 +180,6 @@ function restoreCardAnswers(c: Case): Case {
     if ((answer === "yes" || answer === "no" || answer === "not-sure") && next.candidates.some((a) => a.id === id && a.answer === null)) {
       next = reducer(next, { type: "answerCandidate", id, answer });
     }
-  }
-  const storeys = savedFacts.find((f) => f.field === "building.storeys" && f.status === "confirmed" && Number.isInteger(Number(f.value)) && Number(f.value) > 0);
-  if (storeys && next.candidates.some((a) => a.id === "desc-storeys" && a.answer === null)) {
-    next = reducer(next, { type: "setStoreyCount", value: String(storeys.value) });
   }
   return next === c ? c : { ...next, facts: savedFacts };
 }
