@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import math
 import time
 from dataclasses import dataclass
 from datetime import datetime, timezone
@@ -119,7 +120,8 @@ def _rank(prose, db, arts, ids, config, tp, stages) -> tuple[list[tuple[str, flo
     judge = None
     if config.exhaustive:
         judge = Judge(scoring_ask(tp, config.screen), chars=config.card_chars, attempts=2,
-                      model=config.screen_model, method=config.screen)
+                      model=config.screen_model, method=config.screen,
+                      question_style=config.question_style if config.screen == 'elephant' else 'shared')
 
         def do_screen(record):
             scores = judge.judge(prose, arts, ids)
@@ -142,7 +144,8 @@ def _rank(prose, db, arts, ids, config, tp, stages) -> tuple[list[tuple[str, flo
     if config.rerank in ('elephant', 'decisions', 'jev'):
         if judge is None or judge.method != config.rerank:
             judge = Judge(scoring_ask(tp, config.rerank), chars=config.card_chars, attempts=2,
-                          model=config.rerank_model, method=config.rerank)
+                          model=config.rerank_model, method=config.rerank,
+                          question_style=config.question_style if config.rerank == 'elephant' else 'shared')
 
         def do_rerank(record):
             before = judge.usage.requests
@@ -167,6 +170,50 @@ def _rank(prose, db, arts, ids, config, tp, stages) -> tuple[list[tuple[str, flo
     return ranked, screen, rerank, scored
 
 
+def _rank_shortlist(prose, db, arts, config, tp, stages):
+    """Non-exhaustive candidates. A failed optional rerank never discards the pool."""
+    from .shortlist import candidate_pool
+
+    def do_screen(record):
+        if tp.openai is None:
+            raise StageUnavailable('candidate selection unavailable')
+        keywords = _lexical('bm25', prose, db, arts)[:config.shortlist_n]
+        pool = candidate_pool(tp.openai, prose, arts, keywords, model=config.screen_model,
+                              effort=config.verifier_effort, toc_n=config.shortlist_toc_n,
+                              pool_n=config.shortlist_n)
+        if not pool:
+            raise StageUnavailable('candidate selection returned no articles')
+        record.detail = 'Bounded TOC and keyword union; non-exhaustive, tentative candidates'
+        return pool
+
+    pool = stages.run('screen', 'shortlist', config.screen_model, do_screen)
+    stages.emit('screen', status='done', method='shortlist', articles=len(pool))
+    rerank, failed = None, False
+    if config.rerank == 'elephant':
+        def do_rerank(record):
+            nonlocal failed
+            try:
+                judge = Judge(scoring_ask(tp, 'elephant'), chars=config.card_chars, model=config.rerank_model,
+                              method='elephant', question_style=config.question_style)
+                scores = judge.judge(prose, arts, pool)
+                if set(scores) != set(pool) or any(type(p) not in (int, float) or not 0 <= p <= 1
+                                                  or not math.isfinite(p) for p in scores.values()):
+                    raise ScreenIncomplete('rerank did not return valid scores for the pool')
+                return scores
+            except Exception:
+                failed = True
+                record.errors = 1
+                record.detail = 'Rerank unavailable; tentative candidate order retained'
+                return None
+        rerank = stages.run('rerank', config.rerank, config.rerank_model, do_rerank)
+    ranked = [(a, rerank[a] if rerank is not None else None) for a in pool]
+    if rerank is not None:
+        ranked.sort(key=lambda item: -item[1])
+    stages.emit('rerank', status='failed' if failed else ('skipped' if config.rerank == 'none' else 'done'),
+                method=config.rerank, articles=len(pool))
+    return ranked, rerank, len(pool), failed
+
+
 def _guard(picks: list[Pick], candidates: list[str], arts: dict) -> tuple[list[Pick], list]:
     """Second, independent quote check at the display boundary (the verifier adapters already ran one)."""
     return check_quotes(list(picks), candidates, arts)
@@ -183,7 +230,8 @@ def run(prose: str, *, codes: Codes, config: IdentifyConfig | None = None, trans
     config = config or load_config()
     tp = transports or default_transports(client_ip, scoring={config.screen, config.rerank},
                                           anthropic=config.verifier == 'anthropic')
-    policy = policy or load_policy(config.config_hash)
+    policy = (CommitPolicy('uncalibrated', 'tentative workflow: automatic commits are disabled', max_commits=0)
+              if config.tentative else (policy or load_policy(config.config_hash)))
     if policy.status == 'calibrated' and policy.config_hash != config.config_hash:
         policy = CommitPolicy('uncalibrated', 'calibration was fitted for a different pipeline config')
     db = Path(codes.db_path)
@@ -193,17 +241,22 @@ def run(prose: str, *, codes: Codes, config: IdentifyConfig | None = None, trans
     stages = _Stages(on_stage, tp.log)
     mode = 'fake' if tp.kind == 'fake' else 'live'
     fallback_reason = None
+    rerank_failed = False
     screen = rerank = None
     try:
-        ranked, screen, rerank, scored = _rank(prose, db, arts, ids, config, tp, stages)
+        if config.screen == 'shortlist':
+            ranked, rerank, scored, rerank_failed = _rank_shortlist(prose, db, arts, config, tp, stages)
+        else:
+            ranked, screen, rerank, scored = _rank(prose, db, arts, ids, config, tp, stages)
         ranker = f'{config.screen} screen + {config.rerank} rerank'
     except Exception as error:
-        fallback_reason = _reason(error)
+        fallback_reason = 'candidate selection unavailable' if config.tentative else _reason(error)
         # The response says only that scoring was unavailable (engine/public_names.py); the cause is logged here.
         logger.warning('Identify model path unavailable, keyword fallback: %s', fallback_reason)
         mode = 'bm25_fallback'
+        limit = config.shortlist_n if config.screen == 'shortlist' else config.rerank_n
         ranked = [(a, None) for a in stages.run('fallback', config.fallback, None,
-                                                lambda r: _lexical(config.fallback, prose, db, arts))[:config.rerank_n]]
+                                                lambda r: _lexical(config.fallback, prose, db, arts))[:limit]]
         scored, ranker = len(ranked), f'{config.fallback} fallback'
         stages.emit('screen', status='failed', method=config.screen, fallback=config.fallback)
         stages.emit('rerank', status='fallback', method=config.fallback, articles=len(ranked))
@@ -214,28 +267,47 @@ def run(prose: str, *, codes: Codes, config: IdentifyConfig | None = None, trans
     dropped: list[DroppedPick] = []
     verifier_state = 'not run: keyword fallback' if fallback else 'not run: verifier off'
     verifier_ran = False
-    candidates = [a for a, _ in ranked[:config.verify_n]]
+    candidates = [a for a, _ in (ranked if config.screen == 'shortlist' else ranked[:config.verify_n])]
     if not fallback and (verifier is not None or config.verifier != 'none'):
         def do_verify(record):
-            v = verifier or _verifier(config, tp, arts, db)
-            return v.verify(prose, candidates)
+            if config.screen == 'shortlist' and verifier is None:
+                from .shortlist import PoolVerifier
+                if tp.openai is None:
+                    raise StageUnavailable('full-text review unavailable')
+                v = PoolVerifier(tp.openai, arts, model=config.verifier_model, effort=config.verifier_effort)
+            else:
+                v = verifier or _verifier(config, tp, arts, db)
+            checked = v.verify(prose, candidates)
+            if config.screen == 'shortlist':
+                record.detail = f'Full text of all {len(candidates)} pool articles supplied; tentative suggestions only'
+                if hasattr(checked, 'labels'):
+                    priority = {'applies': 0, 'check': 1, 'unlikely': 2}
+                    ranked.sort(key=lambda item: priority[checked.labels[item[0]].label])
+                    record.errors = sum(checked.counts.values())
+            return checked
         try:
             checked = stages.run('verify', config.verifier, config.verifier_model, do_verify)
             keep, again = _guard(checked.picks, candidates, arts)
             picks = keep
+            if config.tentative:
+                picks = [p.model_copy(update={'reason': public_text(p.reason, '') or ''}) for p in picks]
             dropped = [DroppedPick(article=p.article, reason=why) for p, why in [*checked.dropped, *again]]
             verifier_ran = checked.stop_reason != 'refusal'
-            verifier_state = (f'{len(picks)} picked, {len(dropped)} dropped' if verifier_ran
+            verifier_state = (f'{len(picks)} tentative suggestions; full pool supplied' if config.screen == 'shortlist'
+                              else f'{len(picks)} picked, {len(dropped)} dropped' if verifier_ran
                               else 'refused: no picks')
         except Exception as error:
-            verifier_state = f'failed: {_reason(error)}'
+            verifier_state = ('failed: full-text review unavailable' if config.tentative
+                              else f'failed: {_reason(error)}')
     stages.emit('verify', status='done' if verifier_ran else 'skipped', picks=len(picks), dropped=len(dropped))
 
     # Order: verifier picks lead, then rerank order
     prob = dict(ranked)
     by_pick = {p.article: p for p in picks}
     order = [p.article for p in picks] + [a for a, _ in ranked if a not in by_pick]
-    order = [a for a in order if a in arts][:config.top_k]
+    # A small display cutoff would silently hide unresolved (or required) pool articles.
+    limit = config.shortlist_n if config.screen == 'shortlist' else config.top_k
+    order = [a for a in order if a in arts][:limit]
 
     shown: list[IdentifyArticle] = []
     committed: list[str] = []
@@ -297,7 +369,8 @@ def run(prose: str, *, codes: Codes, config: IdentifyConfig | None = None, trans
                 log.by_provider())
     result = IdentifyResult(
         mode=mode, source={'live': 'live', 'fake': 'fake', 'bm25_fallback': 'bm25 fallback'}[mode],
-        label=_label(mode, config, scored, public_text(fallback_reason, UNAVAILABLE), verifier_ran=verifier_ran), narrowed=narrowed,
+        label=_label(mode, config, scored, public_text(fallback_reason, UNAVAILABLE),
+                     verifier_ran=verifier_ran, rerank_failed=rerank_failed), narrowed=narrowed,
         message=None if narrowed else NOT_NARROWED, articles=shown, committed=committed, choices=choices,
         questions=[q.text for q in questions], open_questions=questions, benchmark=benchmark,
         process_refs=process_refs(codes), model_ids=model_ids, commit_policy=policy.view(), scored_at=_now(),
@@ -318,10 +391,19 @@ def _reason(error: Exception) -> str:
     return f'{type(error).__name__}/{type(cause).__name__}'
 
 
-def _label(mode: str, config: IdentifyConfig, scored: int, fallback_reason: str | None, *, verifier_ran: bool) -> str:
+def _label(mode: str, config: IdentifyConfig, scored: int, fallback_reason: str | None, *, verifier_ran: bool,
+           rerank_failed: bool = False) -> str:
     if mode == 'bm25_fallback':
         return (f'Ranked by keyword search ({config.fallback.upper()}) because the model path was unavailable '
                 f'({fallback_reason}). Nothing is committed.')
+    if config.screen == 'shortlist':
+        rerank = (' Rerank unavailable; tentative pool retained.' if rerank_failed else
+                  ' Pool scores are uncalibrated estimates.' if config.rerank != 'none' else '')
+        review = (f' All {scored} pool articles were supplied for tentative full-text review.' if verifier_ran else
+                  ' Full-text review was off or unavailable.')
+        fake = ' Offline fake providers: for testing only, not a measurement.' if mode == 'fake' else ''
+        return (f'Non-exhaustive TOC and keyword shortlist of {scored} articles; required articles may be missing.'
+                f'{rerank}{review} Suggestions require human review. Nothing is committed.{fake}')
     screen = (f'All {scored} Division B articles were scored' if config.exhaustive
               else f'Keyword search ({config.screen}) shortlisted {scored} articles')
     rerank = {'elephant': f'; the top {config.rerank_n} were re-checked',
@@ -331,7 +413,8 @@ def _label(mode: str, config: IdentifyConfig, scored: int, fallback_reason: str 
     verify = ('' if config.verifier == 'none' else f'; the top {config.verify_n} were read in full'
               if verifier_ran else '; full-text verification was unavailable')
     fake = ' Offline fake providers: for testing only, not a measurement.' if mode == 'fake' else ''
-    return f'{screen}{rerank}{verify}.{fake}'
+    tentative = ' Tentative suggestions; scores are uncalibrated estimates. Nothing is committed.' if config.tentative else ''
+    return f'{screen}{rerank}{verify}.{tentative}{fake}'
 
 
 def _benchmark(shown, committed, narrowed, by_pick, codes, facts) -> BenchmarkRecord:

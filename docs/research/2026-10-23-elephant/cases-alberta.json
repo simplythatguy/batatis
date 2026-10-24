@@ -1,0 +1,2316 @@
+[
+ {
+  "id": "ab-wocd-window-guards-egress",
+  "type": "variance",
+  "applicant": "homebuilder",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/01b622f0-f4a1-426d-b15f-ffc25e725949/download/ma-standata-variance-building-23-bcv-001-2024-04.pdf",
+   "title": "STANDATA variance 23-BCV-001 - Window opening control devices (WOCD)",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building Administrator)",
+   "date": "2024-04",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "To provide an alternative solution in meeting the requirements of Sentences 9.8.8.1 (4) and (5) …"
+  },
+  "description": "We build houses and small residential buildings in Alberta. Many of our bedroom windows sit low to the floor with a long drop outside, so they need a way to stop small children from opening them wide. We want to fit window opening control devices that limit the sash to a narrow opening of about 100 mm. The same bedroom windows also have to work as emergency escape windows that open from the inside without keys, tools or special knowledge. We would like to use devices that meet the ASTM F2090 fall-prevention standard, which have an emergency release. We understand these devices are not allowed in adaptable or barrier-free dwelling units. What are we varying, and what would the building officer expect?",
+  "gold": [
+   "9.8.8.1.",
+   "9.9.10.1."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.8.8.1.",
+    "as_cited": "Sentences 9.8.8.1.(4) and (5), NBC(AE) 2023",
+    "codedb_title": "Required Guards",
+    "verification": "same number, same requirement: 2023 text says 'openable windows in buildings of residential occupancy shall be protected by'"
+   },
+   {
+    "article": "9.9.10.1.",
+    "as_cited": "Sentence 9.9.10.1.(1), NBC(AE) 2023",
+    "codedb_title": "Egress Windows or Doors for Bedrooms",
+    "verification": "same number, same requirement: 2023 text says 'openable from the inside without the use of keys, tools or special knowledge'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": "standata-nbc2023-variance-23-bcv-001",
+  "notes": "Condition: WOCD mechanisms are not permitted in adaptable or barrier-free dwelling units. Province-wide variance. Edmonton Policy B23-02 (2024-12) restates the same variance and is not a separate case. No Division A/C articles cited."
+ },
+ {
+  "id": "ab-heated-slab-insulation-hydronic",
+  "type": "variance",
+  "applicant": "homebuilder",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/3915ba54-96dd-4c54-a9c1-63df5c917836/download/ma-standata-variance-building-23-bcv-003-2024-05.pdf",
+   "title": "STANDATA variance 23-BCV-003 - Insulation below a heated floor",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building Administrator)",
+   "date": "2024-05",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "This province-wide variance will allow an alternative solution to the provisions under Section 9.36. for …"
+  },
+  "description": "I am building a house in Alberta with in-floor hydronic heating tubes in the basement slab. The energy provisions call for a thick layer of rigid insulation under any heated floor that sits on the ground, and that amount makes radiant floor heating hard to justify. I want to install a thinner under-slab insulation layer, roughly half of what the table asks for, while still meeting the energy requirements for the walls, roof and windows. The slab is in contact with the ground, either below or above the frost line. Which requirement am I varying, and what do I need to show the building officer?",
+  "gold": [
+   "9.36.2.8."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.36.2.8.",
+    "as_cited": "Sentence 9.36.2.8.(1) and Tables 9.36.2.8.-A and B, NBC(AE) 2023",
+    "codedb_title": "Thermal Characteristics of Building Assemblies Below-Grade or in Contact with the Ground",
+    "verification": "same number, same requirement: 2023 text says 'the effective thermal resistance of building assemblies that are below-grade or in contact with the ground'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": "standata-nbc2023-variance-23-bcv-003",
+  "notes": "Variance allows a minimum RSI 1.32 (R 7.5) under-slab insulation for heated floors in ground contact, instead of RSI 2.32 to 2.84 in the tables. Objective and functional attribution cited: OE1.1 and F92. Applies to Part 9 buildings with a heating system creating a heated floor in contact with the ground."
+ },
+ {
+  "id": "ab-sprinkler-protected-glazing-rated-walls",
+  "type": "variance",
+  "applicant": "designer",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/b5795c91-92b2-40b8-997f-ff5d955e2a5c/download/ma-standata-variance-building-23-bcv-004-2024-05.pdf",
+   "title": "STANDATA variance 23-BCV-004 - Sprinkler-protected glazing in fire-resistant wall assemblies",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building Administrator)",
+   "date": "2024-05",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "glazing assemblies are permitted to be installed for interior or exterior fire rated assemblies required …"
+  },
+  "description": "We are designing a building where the owner wants large clear glass panels in a fire-rated corridor wall, in the enclosure of an exit stair and in an exterior wall, so people can see through instead of looking at wired glass or glass block. We would protect the glass with listed window sprinkler heads on an automatic sprinkler system. The glazing has not been through the standard fire endurance test for rated walls, because that test does not address sprinkler-protected glass. It has been evaluated to the sprinkler-protected window test standard instead. Can we use it in rated assemblies, and which conditions apply?",
+  "gold": [
+   "3.1.7.1.",
+   "9.10.3.1."
+  ],
+  "context": [
+   "3.2.4.1.",
+   "3.2.5.12."
+  ],
+  "mapping": [
+   {
+    "article": "3.1.7.1.",
+    "as_cited": "Sentence 3.1.7.1.(1), NBC(AE) 2023",
+    "codedb_title": "Determination of Ratings",
+    "verification": "same number, same requirement: 2023 text says 'shall be determined on the basis of the results of tests conducted in conformance with CAN/ULC-S101'"
+   },
+   {
+    "article": "9.10.3.1.",
+    "as_cited": "Sentence 9.10.3.1.(1), NBC(AE) 2023",
+    "codedb_title": "Fire-Resistance and Fire-Protection Ratings",
+    "verification": "same number, same requirement: 2023 text says 'Where a fire-resistance rating or a fire-protection rating is required in this Section'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": "standata-nbc2023-variance-23-bcv-004",
+  "notes": "Conditions include SCC-accredited evaluation to CAN/ULC-S136, specific-application window sprinklers, fixed heat-strengthened/tempered/ceramic glass, not in a firewall, not in required exits of high buildings or residential/care/treatment occupancies; fire alarm required. Context articles (fire alarm and sprinkler design) are cited in the variance text but are not provisions varied."
+ },
+ {
+  "id": "ab-oilgas-processing-building-f2",
+  "type": "variance",
+  "applicant": "owner-developer",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/bda7efc6-de1f-480f-b81b-1ecc8f66eea0/download/ma-standata-variance-building-23-bcv-005-2024-05.pdf",
+   "title": "STANDATA variance 23-BCV-005 - Occupancy classification of oil and gas processing buildings",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building Administrator)",
+   "date": "2024-05",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "Oil or gas processing buildings may be classified as Group F, Division 2 medium-hazard occupancy …"
+  },
+  "description": "We operate small, portable oil and gas production facilities outside urban areas: compressor stations, heater, pump and separator packages, treaters and similar equipment housed in buildings of about 150 square metres or less that people only enter occasionally. By default these buildings would be treated as high-hazard industrial occupancies, which brings tougher requirements, including more egress doorways. We want them classified as medium-hazard instead, backed by a risk assessment from an Alberta-licensed engineer covering ventilation, gas detection, emergency shutdown and fire detection, plus industry safety guidelines. Larger buildings would get two remote exit doors with panic hardware. Which code provisions are we departing from?",
+  "gold": [
+   "3.3.1.5."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "3.3.1.5.",
+    "as_cited": "Clause 3.3.1.5.(1)(c) and Table 3.3.1.5.-A, NBC(AE) 2023",
+    "codedb_title": "Egress Doorways",
+    "verification": "same number, same requirement: 2023 text says 'a minimum of 2 egress doorways located so that one doorway could provide egress'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": "standata-nbc2023-variance-23-bcv-005",
+  "notes": "The only Division B provision in the Code References is Clause 3.3.1.5.(1)(c) with Table 3.3.1.5.-A (two egress doorways for rooms over the table limits in floor areas not sprinklered throughout). Division A defined terms for high-hazard/medium-hazard industrial occupancy apply but are not Division B. Spatial-separation conditions cite whole Subsections (not articles) so they are not in gold or context."
+ },
+ {
+  "id": "ab-span-book-joist-rafter-beam-spans",
+  "type": "variance",
+  "applicant": "homebuilder",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/dd0eda59-a22a-4d87-aae8-fa5dcd5d2069/download/ma-standata-variance-building-23-bcv-007-2024-05.pdf",
+   "title": "STANDATA variance 23-BCV-007 - Maximum span values for joists, rafters and beams",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building Administrator)",
+   "date": "2024-05",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "The values for the maximum spans of joists, rafters, and beams referenced in Article 9.23.4.2. …"
+  },
+  "description": "We frame houses and small buildings in Alberta and want to size floor joists, rafters and beams using The Span Book, the 2020 edition published by the Canadian Wood Council. It covers many alternative configurations that the span tables printed in the code do not. The Span Book tables are produced by the same organization that generates the code's own span tables, but they have not gone through the formal code committee review. Can we take maximum spans from The Span Book for our permit drawings, and which code requirement are we departing from?",
+  "gold": [
+   "9.23.4.2."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.23.4.2.",
+    "as_cited": "Article 9.23.4.2., NBC(AE) 2023",
+    "codedb_title": "Spans for Joists, Rafters and Beams",
+    "verification": "same number, same requirement: 2023 text says 'spans for wood joists and rafters shall conform to the spans shown in Span Tables'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": "standata-nbc2023-variance-23-bcv-007",
+  "notes": "Province-wide variance recognising the 2020 Span Book values for Part 9 wood framing. Appendix Note A-9.23.4.2. is cited by the source. No Division A/C articles."
+ },
+ {
+  "id": "ab-exhaust-outlet-air-intake-clearance",
+  "type": "variance",
+  "applicant": "homebuilder",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/3b792769-bcb0-4acf-a315-cefdbedac893/download/ma-standata-variance-building-23-bcv-008-rev1-2024-10.pdf",
+   "title": "STANDATA variance 23-BCV-008(REV1) - Residential exhaust outlet clearance from air intakes",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building Administrator)",
+   "date": "2024-10",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "Provides an alternative solution to Sentence 9.32.3.13.(4) for the minimum clearance requirement for domestic exhaust …"
+  },
+  "description": "In our house design the clothes dryer, bathroom fan and kitchen exhaust outlets end up close to the fresh-air intake for the heat recovery ventilator. They are closer than the 1.8 m the code asks for between a moist-air exhaust outlet and an air intake. Each outlet sits at the same level as, or higher than, the intake. The house is a single dwelling or a house with a secondary suite. We want to use the reduced clearance of about 900 mm shown in the province's clearance diagram for these cases. Which ventilation provision are we varying?",
+  "gold": [
+   "9.32.3.13."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.32.3.13.",
+    "as_cited": "Sentence 9.32.3.13.(4), NBC(AE) 2023",
+    "codedb_title": "Outdoor Intake and Exhaust Openings",
+    "verification": "same number, same requirement: 2023 text says 'exhaust outlets that discharge air containing moisture, such as bathroom ventilation and clothes dryer exhaust outlets'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": "standata-nbc2023-variance-23-bcv-008-rev1",
+  "notes": "The reduction (1 800 mm to 900 mm) applies only where the moist-air outlet is horizontal to or above the intake; manufacturer instructions that are more stringent still govern. Applies to an individual dwelling unit or a house with a secondary suite. The superseded 23-BCV-008 (2024-06) is the same topic and not a separate case."
+ },
+ {
+  "id": "ab-csa-b52-2023-refrigerant-standard",
+  "type": "variance",
+  "applicant": "contractor",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/21316179-6a6c-4ed0-b888-c151c7a57281/download/ma-standata-variance-building-23-bcv-009-2024-10.pdf",
+   "title": "STANDATA variance 23-BCV-009 - CSA B52:23 Mechanical refrigeration code",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building Administrator)",
+   "date": "2024-10",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "Conformance with CSA B52:23, “Mechanical refrigeration code,” is considered to comply with the installation standard …"
+  },
+  "description": "We install heat pumps and air-conditioning equipment. New units on the market use the lower-impact A2L refrigerants, and those units are designed to the 2023 edition of the mechanical refrigeration code. The building code, however, designates the 2018 edition of that standard for installing refrigeration equipment, including the mounting, clearances and air supply. We want the building officer to accept installations done to the 2023 edition so we can use the new refrigerants. Which installation requirements are we varying, in houses and in larger buildings?",
+  "gold": [
+   "6.2.1.5.",
+   "9.33.5.2."
+  ],
+  "context": [
+   "1.3.1.2."
+  ],
+  "mapping": [
+   {
+    "article": "6.2.1.5.",
+    "as_cited": "Sentence 6.2.1.5.(1), NBC(AE) 2023",
+    "codedb_title": "Installation Standards",
+    "verification": "same number, same requirement: 2023 text says 'the installation of heating and air-conditioning equipment, including mechanical refrigeration equipment'"
+   },
+   {
+    "article": "9.33.5.2.",
+    "as_cited": "Sentence 9.33.5.2.(1), NBC(AE) 2023",
+    "codedb_title": "Installation Standards",
+    "verification": "same number, same requirement: 2023 text says 'the installation of heating and air-conditioning equipment, including mechanical refrigeration equipment'"
+   },
+   {
+    "article": "1.3.1.2.",
+    "as_cited": "Table 1.3.1.2. (designated edition CSA B52:18), NBC(AE) 2023",
+    "codedb_title": "Applicable Editions",
+    "verification": "same number, same requirement: 2023 text says 'they shall be the editions designated in Table 1.3.1.2.'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": "standata-nbc2023-variance-23-bcv-009",
+  "notes": "The Application statement names 6.2.1.5.(1) and 9.33.5.2.(1); Table 1.3.1.2. (applicable editions, here CSA B52:18) is the reason the newer edition needs a variance, so 1.3.1.2. is kept as context."
+ },
+ {
+  "id": "ab-skid-fabricator-welding-certification",
+  "type": "variance",
+  "applicant": "manufacturer",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/e18fadda-66e8-40e2-950b-79f990724912/download/ma-23-bcv-010r1-engineers-authentication-welding-procedures.pdf",
+   "title": "STANDATA variance 23-BCV-010R1 - Engineer's authentication for welding procedures",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building Administrator)",
+   "date": "2025-04",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "To provide an alternative solution to the National Building Code – 2023 Alberta Edition (NBC(AE)) …"
+  },
+  "description": "We fabricate steel skids for mounting mechanical equipment and some proprietary structural components at a shop outside Canada. Structural steel must follow the Canadian steel design standard, which in turn expects fabricators to be certified by the Canadian Welding Bureau. Our shop is not certified to that standard, and our welding follows the American structural welding code. We would rely on an Alberta registered engineer to authenticate the documentation, confirm the welding procedures and fabricator competence, and have the owner's inspector verify welder qualifications in the shop. Can this be accepted instead of company certification?",
+  "gold": [
+   "4.3.4.1."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "4.3.4.1.",
+    "as_cited": "Sentence 4.3.4.1.(1), NBC(AE) 2023",
+    "codedb_title": "Design Basis for Structural Steel",
+    "verification": "same number, same requirement: 2023 text says 'made of structural steel shall conform to CSA S16'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": "standata-nbc2023-variance-23-bcv-010r1",
+  "notes": "The CWB-certification requirement reaches Division B through CSA S16 (Clause 24.3) referenced from 4.3.4.1.(1); Division C 2.2.2.4.(1) (owner evidence of CWB certification) and Division A 1.4.1.2. are also cited but are not Division B. Supersedes 23-BCV-010 (2025-02)."
+ },
+ {
+  "id": "ab-greenhouse-polyethylene-film-public-retail",
+  "type": "variance",
+  "applicant": "owner-developer",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/85d5eedb-04e6-47b3-8922-79de7fb9c5f2/download/ma-standata-variance-building-23-bcv-011r1-2026-10.pdf",
+   "title": "STANDATA variance 23-BCV-011R1 - Polyethylene film for greenhouse enclosures",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building Administrator)",
+   "date": "2026-10",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "Polyethylene film used to enclose commercial greenhouse facilities is not required to conform to CAN/ULC-S109, …"
+  },
+  "description": "We run a commercial greenhouse and want to cover it with polyethylene film made for plant growing. These greenhouse films carry additives that help plants but they generally do not meet the flame test standard written for tents and air-supported structures, and the treatments needed to meet it cut the ultraviolet light plants need. Part of our one-storey greenhouse would be open to customers who buy plants. We would keep public aisles wide with exits in two directions, make the exit doors wider than normal, use a lower floor area per person for the occupant load, post exit signs and prepare a fire safety plan. Which provision are we varying?",
+  "gold": [
+   "3.1.18.5."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "3.1.18.5.",
+    "as_cited": "Article 3.1.18.5., NBC(AE) 2023",
+    "codedb_title": "Flame Resistance",
+    "verification": "same number, same requirement: 2023 text says 'all tarpaulins and decorative materials used in connection with these structures'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": "standata-nbc2023-variance-23-bcv-011r1",
+  "notes": "Option 1: staff-only plant-growing greenhouse, film flame spread rating not above 25. Option 2: one-storey Group F, Division 3 greenhouse with limited public retail access plus aisle, door-width (+40%), 4.6 m2/person occupant load, exit signage and fire safety plan conditions. Earlier versions (14-BCV-009 ABC 2014, 19-BCV-011 NBC 2019, 23-BCV-011 2025-02) are the same topic; the newest is used."
+ },
+ {
+  "id": "ab-mltp-permanent-wood-foundation",
+  "type": "variance",
+  "applicant": "homebuilder",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/f0256837-d2a2-4038-bb0c-cb19aacfeb43/download/ma-standata-variance-building-23-bcv-012r1-2025-05.pdf",
+   "title": "STANDATA variance 23-BCV-012R1 - Permanent wood foundations with mechanically laminated timber panels for Part 9 residential buildings",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building Administrator)",
+   "date": "2025-05",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "MLTP are not included within the scope of the CSA S406-16 standard. Therefore, permanent wood …"
+  },
+  "description": "We want to build permanent wood foundations for houses using mechanically laminated timber panels instead of conventional preserved-wood framing. These panels are outside the scope of the standard that the code accepts for permanent wood foundations, so the only route would be a full structural design under the engineering part of the code, with a registered professional doing field reviews. A University of Alberta guide gives pre-engineered structural designs for these panel foundations on residential buildings. Can we follow that guide, and what must the permit drawings show?",
+  "gold": [
+   "9.15.2.4."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.15.2.4.",
+    "as_cited": "Sentence 9.15.2.4.(1) and Clauses (1)(a), (1)(b), NBC(AE) 2023",
+    "codedb_title": "Wood-Frame Foundations",
+    "verification": "same number, same requirement: 2023 text says 'Foundations of wood-frame construction shall conform to'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": "standata-nbc2023-variance-23-bcv-012r1",
+  "notes": "Application: Group C residential occupancies designed under Part 9. Condition: project-specific MLTP details must appear on the permit drawings; panels outside the guide scope must use the engineered route. Division C 2.4.1.2.(1)-(2) (registered professional design and field review) is cited but not Division B."
+ },
+ {
+  "id": "ab-elevator-instead-of-barrier-free-lift",
+  "type": "variance",
+  "applicant": "designer",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/6b8cc19a-67c5-4f5b-847c-972c638837bc/download/ma-standata-joint-variance-23-bcv-013-19-edb-002.pdf",
+   "title": "STANDATA variance 23-BCV-013 / 19-EDB-002 - Elevator and passenger-elevating devices",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building Administrator) and Provincial Administrator Elevating Devices",
+   "date": "2026-02",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "Where a passenger elevator is used instead of a lift conforming to CSA B355, or …"
+  },
+  "description": "We are designing a small building where barrier-free access to one level could be provided by a platform lift or a limited-use limited-application elevator. The owner would rather install a regular passenger elevator. A regular elevator car normally has to be long enough for a patient stretcher, which a lift or limited-use elevator is exempt from. Our vertical travel is under 7.6 m and the car would meet the minimum clear floor size set for barrier-free passenger lifts. We also assume firefighters' emergency operation would not be needed, as it is not required for lifts. Can the stretcher-size rule be set aside here?",
+  "gold": [
+   "3.5.4.1."
+  ],
+  "context": [
+   "3.8.3.7."
+  ],
+  "mapping": [
+   {
+    "article": "3.5.4.1.",
+    "as_cited": "Sentence 3.5.4.1.(1), NBC(AE) 2023",
+    "codedb_title": "Elevator Car Dimensions",
+    "verification": "same number, same requirement: 2023 text says 'adequate access for a patient stretcher'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": "standata-nbc2023-variance-23-bcv-013",
+  "notes": "Conditions: vertical travel 7 620 mm or less; car not smaller than the minimum in 3.8.3.7.(2); applicants give the AHJ a copy of the building permit and elevating devices permit. The elevating-device code aspects (ASME A17.1/CSA B44, CSA B355) are outside the NBC; the NBC provision varied is the stretcher-size requirement. Earlier versions 14-BCV-006 and 19-BCV-003 are the same topic."
+ },
+ {
+  "id": "ab-multilevel-storage-racking-special-structure",
+  "type": "variance",
+  "applicant": "owner-developer",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/8246dd4b-20e7-4e37-b5f7-5e554accd3c5/download/ma-standata-variance-building-23-bcv-014-2025-03.pdf",
+   "title": "STANDATA variance 23-BCV-014 - Multi-level storage racking systems",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building Administrator)",
+   "date": "2025-03",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "Multi-level storage racking systems are permitted to be classified as special and unusual structures according …"
+  },
+  "description": "We are planning a distribution facility with a multi-level storage racking system: self-supporting steel racks with intermediate walkway levels so staff can reach stored goods without ladders. Some safety codes officers treat each access level as a storey, a mezzanine or an interconnected floor space. Only authorized staff would enter, with low occupant loads. We want the racking assessed as a special and unusual structure designed to good fire protection engineering practice, with a fire safety plan, sprinklers under every platform, a fire alarm, emergency power, guards and toe-boards, and two remote egress stairs from each level. Which provision are we relying on?",
+  "gold": [
+   "3.2.2.2."
+  ],
+  "context": [
+   "3.3.1.18."
+  ],
+  "mapping": [
+   {
+    "article": "3.2.2.2.",
+    "as_cited": "Sentence 3.2.2.2.(1), NBC(AE) 2023",
+    "codedb_title": "Special and Unusual Structures",
+    "verification": "same number, same requirement: 2023 text says 'shall be protected against fire spread and collapse in conformance with good fire protection engineering practice'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": "standata-nbc2023-variance-23-bcv-014",
+  "notes": "Permitted in medium/low-hazard industrial or mercantile buildings; not required to meet Subsection 3.2.6. (high buildings) or Section 3.8. (conditions 1.5). Other conditions cite the National Fire Code and whole Subsections 3.2.4. and 3.2.7. (not articles). Article 3.3.1.18. (guards) is the only other Division B article cited. Earlier versions 14-BCV-015 and 19-BCV-008 are the same topic."
+ },
+ {
+  "id": "ab-unvented-roof-assembly-evaluation-report",
+  "type": "variance",
+  "applicant": "homebuilder",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/2aa7678c-c476-4523-b0c3-36e71256e11b/download/ma-standata-variance-building-23-bcv-017-2025-09.pdf",
+   "title": "STANDATA variance 23-BCV-017 - Unvented roof assembly",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building Administrator)",
+   "date": "2025-09",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "Sentence 9.19.1.1.(1) suggests there are some types of roof assemblies where venting is not necessary, …"
+  },
+  "description": "We build houses and small residential buildings and want to use unvented roof assemblies, where there is no ventilated space between the insulation and the roof sheathing. The code expects that space to be vented so moisture can escape unless it can be shown that venting is unnecessary, and the only examples it gives are specialized factory-built roofs and the lower portion of mansard or gambrel roofs. We want to follow the design requirements in an Alberta-specific building science evaluation report on unvented roofs and attach the report to the permit application. Which provisions are we varying?",
+  "gold": [
+   "9.19.1.1.",
+   "9.19.1.4."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.19.1.1.",
+    "as_cited": "Sentence 9.19.1.1.(1), NBC(AE) 2023",
+    "codedb_title": "Required Venting",
+    "verification": "same number, same requirement: 2023 text says 'Except where it can be shown to be unnecessary'"
+   },
+   {
+    "article": "9.19.1.4.",
+    "as_cited": "Sentence 9.19.1.4.(1), NBC(AE) 2023",
+    "codedb_title": "Mansard or Gambrel Roof",
+    "verification": "same number, same requirement: 2023 text says 'The lower portion of a mansard or gambrel style roof need not be ventilated'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": "standata-nbc2023-variance-23-bcv-017",
+  "notes": "Application: roof assemblies in Part 9 residential buildings; the evaluation report must accompany the permit application. The 2019 version (19-BCV-022, 2022-04) is the same topic. Note A-9.19.1.1.(1) is cited by the source."
+ },
+ {
+  "id": "ab-vented-soffit-intumescent-protection",
+  "type": "variance",
+  "applicant": "homebuilder",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/3cd8d34e-f417-4f3e-86b6-fc106564be76/download/ma-standata-variance-building-23-bcv-018-2025-09.pdf",
+   "title": "STANDATA variance 23-BCV-018 - Vented soffit protection",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building Administrator)",
+   "date": "2025-09",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "Sentences 9.10.14.5.(12), 9.10.15.5.(11) and 9.10.12.4.(2) and (3) of the National Building Code – 2023 Alberta …"
+  },
+  "description": "We build houses close to the property line. Where the roof soffit sits within 1.2 m of the lot line, or a floor projection covers the wall between two suites, the code wants a closed soffit covered in sheet steel, unvented aluminum, gypsum board, plywood, OSB or lumber. That forces us to add roof surface vents instead of venting through the soffit. We want to use a material with an intumescent coating on a vented fibreglass or metal base, which seals its openings in a fire, fastened under the projection with a vented finish soffit over it. It has been tested at an accredited lab to perform at least as well as 11 mm plywood. Which provisions are we varying?",
+  "gold": [
+   "9.10.14.5.",
+   "9.10.15.5.",
+   "9.10.12.4."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.10.14.5.",
+    "as_cited": "Sentence 9.10.14.5.(12), NBC(AE) 2023",
+    "codedb_title": "Construction of Exposing Building Face and Walls above Exposing Building Face",
+    "verification": "same number, same requirement: 2023 text says 'they shall a) have no openings'"
+   },
+   {
+    "article": "9.10.15.5.",
+    "as_cited": "Sentence 9.10.15.5.(11), NBC(AE) 2023",
+    "codedb_title": "Construction of Exposing Building Face of Houses",
+    "verification": "same number, same requirement: 2023 text says 'they shall a) have no openings'"
+   },
+   {
+    "article": "9.10.12.4.",
+    "as_cited": "Sentences 9.10.12.4.(2) and (3), NBC(AE) 2023",
+    "codedb_title": "Protection of Soffits",
+    "verification": "same number, same requirement: 2023 text says 'shall have no unprotected openings and shall be protected in accordance with Sentence (3)'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": "standata-nbc2023-variance-23-bcv-018",
+  "notes": "Conditions: lab test accredited by the Standards Council of Canada showing performance at least equal to 11 mm plywood (radiant heat flux 50 kW/m2, Appendix A Table 1) and installation per manufacturer instructions or test documentation. Earlier version 19-BCV-017 (2020-11) is the same topic."
+ },
+ {
+  "id": "ab-tall-wall-heights-guideline",
+  "type": "variance",
+  "applicant": "homebuilder",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/27900157-f850-4138-a964-b813f0921a3b/resource/ed820685-ee6e-46f7-83b0-44174268ce92/download/14-bcv-002r1-tallwall.pdf",
+   "title": "STANDATA variance 14-BCV-002R1 - Tall wall generic engineered details",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building Administrator)",
+   "date": "2017-09",
+   "edition_cited": "ABC 2014",
+   "excerpt": "Table 9.23.10.1. specifies the requirements for exterior walls only up to 3.6 metres and for …"
+  },
+  "description": "We build houses and want some walls taller than the stud tables allow, more than 3.6 m for exterior walls or 4.2 m for interior walls. Walls above those heights have to be individually engineered, which adds cost and time to every house. We would like to use a published residential tall wall guideline, prepared by an engineering firm and distributed by the home builders' association, in place of project-specific engineering. The tall wall details for the project would be shown on the drawings submitted for the building permit. Walls outside the guideline's criteria would still be engineered. Which code provision are we varying?",
+  "gold": [
+   "9.23.10.1."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.23.10.1.",
+    "as_cited": "Article 9.23.10.1. and Table 9.23.10.1., ABC 2014",
+    "codedb_title": "Stud Size and Spacing",
+    "verification": "same number, same requirement: 2023 text says 'The size and spacing of studs shall conform to Table 9.23.10.1.'"
+   }
+  ],
+  "confidence": "medium",
+  "rewrite_of": null,
+  "notes": "Archived 2014-edition variance (no 2019 or 2023 equivalent found), kept because the Part 9 rule it varies is unchanged in 2023 (stud size and spacing table). The table values were not re-checked (tables are not in the code database)."
+ },
+ {
+  "id": "ab-low-rise-window-wind-ratings-guideline",
+  "type": "variance",
+  "applicant": "homebuilder",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/27900157-f850-4138-a964-b813f0921a3b/resource/bc15e3e0-447a-4c74-9cd7-6035a5e8e691/download/14-bcv-003r1-winddataforlow-rise-buildingsbild.pdf",
+   "title": "STANDATA variance 14-BCV-003R1 - Wind data for low-rise buildings guideline",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building Administrator)",
+   "date": "2017-09",
+   "edition_cited": "ABC 2014",
+   "excerpt": "Article 9.7.4.3. of the Alberta Building Code 2014 (ABC 2014) requires that performance grades for …"
+  },
+  "description": "We design and build houses across Alberta. The code makes us choose performance grades for windows, doors and skylights using a Canadian supplement. Its simplified method for wind load and driving rain pressure uses exposure factors intended for high-rise buildings, so the ratings it gives for low houses are far higher than the actual weather loads require. We want to take the design values from a guideline that a registered engineering firm prepared for low-rise residential buildings and that the home builders' association publishes, instead of paying for project-specific engineering. Which provision are we varying?",
+  "gold": [
+   "9.7.4.3."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.7.4.3.",
+    "as_cited": "Article 9.7.4.3., ABC 2014",
+    "codedb_title": "Performance Requirements",
+    "verification": "same number, same requirement: 2023 text says 'Performance grades for windows, doors and skylights shall be selected according to the Canadian Supplement'"
+   }
+  ],
+  "confidence": "medium",
+  "rewrite_of": null,
+  "notes": "Archived 2014-edition variance; the guideline is tied to Part 9 of ABC 2014 and the wording of the article is unchanged in the 2023 text, but the guideline itself may not be current. Kept as a Part 9 building-envelope example."
+ },
+ {
+  "id": "ab-strip-mall-suite-separation-no-corridor",
+  "type": "variance",
+  "applicant": "owner-developer",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/27900157-f850-4138-a964-b813f0921a3b/resource/6c0b2102-3594-4e8a-869f-5a525dd80d11/download/14-bcv-008-separationofsuitesinstripmalls.pdf",
+   "title": "STANDATA variance 14-BCV-008 - Separation of suites in strip malls",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building Administrator)",
+   "date": "2017-06",
+   "edition_cited": "ABC 2014",
+   "excerpt": "In a strip mall, suites of business and personal services occupancy and suites of mercantile …"
+  },
+  "description": "We are developing a one-storey strip mall with sprinklers and a fire alarm system. Each suite opens straight to the outside with at least two exits, so there is no enclosed public corridor. Dentist and lawyer type office suites will sit next to retail shops. The code lets sprinklered buildings skip the fire separation between those two kinds of suites when they are served by a wide public corridor, but a strip mall has no such corridor, so as written we would need rated separations between every suite. We want the same exception to apply to our strip mall. Which provisions are we varying?",
+  "gold": [
+   "3.3.1.1.",
+   "9.10.9.15."
+  ],
+  "context": [
+   "3.3.1.4.",
+   "3.2.5.12.",
+   "3.2.4.5."
+  ],
+  "mapping": [
+   {
+    "article": "3.3.1.1.",
+    "as_cited": "Sentences 3.3.1.1.(1), (2), (3), ABC 2014",
+    "codedb_title": "Separation of Suites",
+    "verification": "same number, same requirement: 2023 text says 'Occupancies that are served by public corridors conforming to Clause 3.3.1.4.(4)(b) in a building that is sprinklered throughout'"
+   },
+   {
+    "article": "9.10.9.15.",
+    "as_cited": "Sentences 9.10.9.13.(1), (2), ABC 2014 (now 9.10.9.15.)",
+    "codedb_title": "Separation of Suites",
+    "verification": "renumbered successor with matching title and text (ABC 2014 9.10.9.13. is now Separation of Suites): 2023 text says 'In sprinklered buildings, suites of business and personal services occupancy and mercantile occupancy'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": null,
+  "notes": "Trap: in the 2023 edition 9.10.9.13. is \"Separation of Residential Occupancies\"; the ABC 2014 suite-separation article is now 9.10.9.15. (both sentences matched by text). Conditions: one storey, sprinklered, fire alarm, two exits per suite directly outside, no residential or institutional occupancy; assembly suite separated per the major-occupancy table. Archived 2014 variance; the Part 3 and Part 9 provisions it varies still need a corridor to qualify for the exception."
+ },
+ {
+  "id": "ab-photoluminescent-exit-sign-charging-lights",
+  "type": "interpretation",
+  "applicant": "contractor",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/d2851ca8-3883-498c-9293-d71665299098/download/ma-standata-interpretation-building-23-bci-017-2025-03.pdf",
+   "title": "STANDATA interpretation 23-BCI-017 - Photoluminescent exit signs",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building Administrator)",
+   "date": "2025-03",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "The charging light source provided for PL exit signs do not require connection to the …"
+  },
+  "description": "We are installing listed photoluminescent exit signs in a building. These signs need a light source that stays on to keep them charged, and we have been told the circuit serving exit sign lighting must serve only emergency equipment and be connected to the emergency power supply. Our charging lights would be on a separate circuit used for nothing else, with no automatic timers, with controls reachable only by authorized staff, using lamps that match the sign listing, and installed to the manufacturer's listed instructions. Can the charging lights stay off emergency power, whether the project is a larger building or a small residential building?",
+  "gold": [
+   "3.4.5.1.",
+   "9.9.11.3."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "3.4.5.1.",
+    "as_cited": "Sentence 3.4.5.1.(5), NBC(AE) 2023",
+    "codedb_title": "Exit Signs",
+    "verification": "same number, same requirement: 2023 text says 'shall a) serve no equipment other than emergency equipment'"
+   },
+   {
+    "article": "9.9.11.3.",
+    "as_cited": "Sentence 9.9.11.3.(5), NBC(AE) 2023",
+    "codedb_title": "Exit Signs",
+    "verification": "same number, same requirement: 2023 text says 'shall a) serve no equipment other than emergency equipment'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": "standata-nbc2023-interpretation-23-bci-017",
+  "notes": "Interpretation, not a variance. It applies to both the Part 3 article and its Part 9 twin. The NECB (lighting power exemptions for exit signs) is cited but is a different code."
+ },
+ {
+  "id": "ab-mechanically-vented-appliance-makeup-air",
+  "type": "interpretation",
+  "applicant": "contractor",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/4e7c13c7-081e-4e40-83e5-f8ae7162581c/resource/8283de1f-9edb-4d63-91de-de7faa77396f/download/ma-standata-interpretation-gas-building-25-gci-003-23-bci-020-2026-03.pdf",
+   "title": "STANDATA interpretation 25-GCI-003/23-BCI-020 - Mechanically vented appliances",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building Administrator) and Provincial Gas Administrator",
+   "date": "2026-03",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "Category I and II appliances do not meet the definition of either mechanically vented or …"
+  },
+  "description": "We are installing new gas furnaces and water heaters in houses. Some safety codes officers say that any appliance where room air can mix with the combustion products is at risk of spilling exhaust when the house is depressurized, so a make-up air supply would be required. Our equipment is fan-powered and vents through a sealed pipe to the outdoors, and some units draw their combustion air directly from outside. Which kinds of fuel-fired heating and water-heating appliances count as mechanically vented or direct-vented, so the dwelling unit does not need protection against depressurization?",
+  "gold": [
+   "9.32.3.8."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.32.3.8.",
+    "as_cited": "Sentence 9.32.3.8.(1), NBC(AE) 2023",
+    "codedb_title": "Protection Against Depressurization",
+    "verification": "same number, same requirement: 2023 text says 'other than direct-vented or mechanically vented types'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": "standata-nbc2023-interpretation-23-bci-020",
+  "notes": "Interpretation applies to Part 9 buildings. Category I and II appliances are not mechanically vented; Category III and IV count as mechanically vented; direct-vent appliances with enclosed passageways to the exterior count as direct-vented. Division A defined terms and CSA B149.1 are cited but are not Division B."
+ },
+ {
+  "id": "ab-elevator-out-of-service-barrier-free",
+  "type": "interpretation",
+  "applicant": "homeowner",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/8537c677-cfe7-49a8-8790-f0993db42c48/download/ma-standata-interpretation-building-23-bci-034-2025-03.pdf",
+   "title": "STANDATA interpretation 23-BCI-034 - Elevator operation and accessibility for residential buildings",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building Administrator)",
+   "date": "2025-03",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "The authority for ordering an owner to make an elevator operational is under Article 3.8.2.3. …"
+  },
+  "description": "I live in a residential building that is required to have a barrier-free path of travel, and the only passenger elevator has been out of service for months. Residents who use wheelchairs or have limited mobility cannot get to or from their homes. The building rules only require an elevator to be available for firefighters in high buildings, and the elevator code does not oblige an owner to keep a lift running. Which provision of the building code lets a safety codes officer order the owner to get the elevator working again?",
+  "gold": [
+   "3.8.2.3.",
+   "3.8.3.7."
+  ],
+  "context": [
+   "3.8.2.1."
+  ],
+  "mapping": [
+   {
+    "article": "3.8.2.3.",
+    "as_cited": "Article 3.8.2.3., NBC(AE) 2023",
+    "codedb_title": "Areas Requiring a Barrier-Free Path of Travel",
+    "verification": "same number, same requirement: 2023 text says 'a barrier-free path of travel from the entrances required by Sentence 3.8.2.2.(1) to be barrier-free shall be provided'"
+   },
+   {
+    "article": "3.8.3.7.",
+    "as_cited": "Article 3.8.3.7., NBC(AE) 2023",
+    "codedb_title": "Passenger-Elevating Devices",
+    "verification": "same number, same requirement: 2023 text says 'Where passenger elevators are used in a barrier-free path of travel'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": "standata-nbc2023-interpretation-23-bci-034",
+  "notes": "Interpretation. Article 3.8.3.7. (passenger-elevating devices in a barrier-free path) is listed in the source's Code References and defines the devices the interpretation covers. Article 3.8.2.1. (exceptions: houses, townhouses etc. are exempt) is discussed in the source and kept as context. Division A 1.4.2.1. (barrier-free definition) is cited but is not Division B."
+ },
+ {
+  "id": "ab-energy-code-exempt-equipment-shelter",
+  "type": "interpretation",
+  "applicant": "owner-developer",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/f887c64c-068b-4b7d-852e-dfd56531807c/download/ma-standata-interpretation-building-23-bci-022-2025-05.pdf",
+   "title": "STANDATA interpretation 23-BCI-022 - Energy efficiency exemptions for buildings",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building Administrator)",
+   "date": "2025-05",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "Sentence 9.36.1.3.(7) of the NBC(AE) provides for exemptions where the building is not required to …"
+  },
+  "description": "We are putting up small industrial buildings at an oil and gas site to shelter compressors, pumps, heaters, separators, electrical gear and similar equipment. Nobody works inside them day to day. There are no offices or washrooms, and workers only enter for short maintenance or servicing tasks. We also plan some tent and membrane-supported structures. We want to confirm that the energy efficiency requirements for small buildings, and the national energy code for larger ones, do not have to be applied to these buildings, and what information the building officer will want to see.",
+  "gold": [
+   "9.36.1.3."
+  ],
+  "context": [
+   "9.25.2.1."
+  ],
+  "mapping": [
+   {
+    "article": "9.36.1.3.",
+    "as_cited": "Sentence 9.36.1.3.(7), NBC(AE) 2023",
+    "codedb_title": "Compliance and Application",
+    "verification": "same number, same requirement: 2023 text says 'are not required to be conditioned spaces are exempted from the requirements of this Section'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": "standata-nbc2023-interpretation-23-bci-022",
+  "notes": "The sentence cross-refers to Article 9.25.2.1. (garage insulation), kept as context. NECB Division C 2.2.1.1.(2) (AHJ may exempt where occupancy is impractical to apply) is cited but is a different code."
+ },
+ {
+  "id": "ab-attached-garage-house-with-secondary-suite",
+  "type": "interpretation",
+  "applicant": "homebuilder",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/629f1ea8-79bd-482d-b730-32ed794c696d/download/ma-standata-interpretation-building-23-bci-035-2025-03.pdf",
+   "title": "STANDATA interpretation 23-BCI-035 - Attached garage separation serving a house with a secondary suite",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building Administrator)",
+   "date": "2025-03",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "Sentence 9.10.9.18.(3) of the NBC(AE) waives the requirement for a one-hour fire separation between an …"
+  },
+  "description": "We are building a house with a basement secondary suite and an attached garage. The code waives the one-hour fire separation between an attached garage and the house when the garage serves only the dwelling unit it is attached to. Because a house with a secondary suite contains two dwelling units, we are not sure the waiver can be used. We want to rely on it, finishing the garage interior as required and installing an air barrier between the garage and the living space so fumes cannot pass through. May we leave out the fire separation between the garage and the house?",
+  "gold": [
+   "9.10.9.18."
+  ],
+  "context": [
+   "9.35.4.1.",
+   "9.35.1.1.",
+   "9.10.9.16.",
+   "9.10.9.17."
+  ],
+  "mapping": [
+   {
+    "article": "9.10.9.18.",
+    "as_cited": "Sentence 9.10.9.18.(3), NBC(AE) 2023",
+    "codedb_title": "Separation of Storage Garages",
+    "verification": "same number, same requirement: 2023 text says 'Where a storage garage serves only the dwelling unit to which it is attached or in which it is built'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": "standata-nbc2023-interpretation-23-bci-035",
+  "notes": "Interpretation, not a variance: the source says the waiver is intended to apply to a house with a secondary suite, while the air barrier requirement in the same article and the garage interior finish still apply. Context articles are the other house-with-secondary-suite provisions the source cites for comparison."
+ },
+ {
+  "id": "ab-hydronic-heating-design-verification",
+  "type": "interpretation",
+  "applicant": "contractor",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/05262a26-9b45-47b3-9668-9793e9a1ff5d/download/ma-standata-interpretation-building-plumbing-23-bci-042-20-pcb-011r1-2025-07.pdf",
+   "title": "STANDATA interpretation 23-BCI-042 / 20-PCB-011R1 - Hydronic heating systems",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building Administrator) and Provincial Plumbing Administrator",
+   "date": "2025-07",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "Proper verification of compliance with Sentence 9.33.4.1.(1) for hydronic heating systems in buildings not within …"
+  },
+  "description": "We design and install in-floor radiant, baseboard and radiator hydronic heating in houses where the code does not require professionals on the building design. The code says heating systems must follow good practice such as the listed industry manuals, but it does not say how a building officer can verify that a hydronic design does. We would submit either a pre-engineered package prepared by an Alberta engineer, with project-specific design by an engineer or a certified hydronics designer, or a custom design by those same people. Will that be accepted as showing the hydronic system meets the design requirement?",
+  "gold": [
+   "9.33.4.1."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.33.4.1.",
+    "as_cited": "Sentence 9.33.4.1.(1), NBC(AE) 2023",
+    "codedb_title": "Design of Heating and Air-conditioning Systems",
+    "verification": "same number, same requirement: 2023 text says 'shall be designed, constructed and installed to conform with good practice'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": "standata-nbc2023-interpretation-23-bci-042",
+  "notes": "Interpretation applies to hydronic systems heating the building interior (not exterior snowmelt or pool heaters). Division C 2.4.1.1.(3) (full professional involvement) is cited but is not Division B."
+ },
+ {
+  "id": "ab-barrier-free-exempt-building-uses",
+  "type": "interpretation",
+  "applicant": "owner-developer",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/d0af9eda-ac40-4f33-b54f-2b24ee2eaa03/download/ma-standata-interpretation-building-23-bci-016r1-2025-11.pdf",
+   "title": "STANDATA interpretation 23-BCI-016R1 - Barrier-free design requirements: relaxations",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building Administrator) and Provincial Barrier-Free Administrator",
+   "date": "2025-11",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "Sentence 3.8.2.1.(1) of the NBC(AE) allows the AHJ or SCO the discretion to assess building …"
+  },
+  "description": "We are designing several buildings for different clients: a fire hall dormitory with washrooms and showers, a heavy equipment maintenance and storage building, a waste management facility, and a small food and beverage kiosk. Barrier-free design requirements apply to most new buildings, with a few exceptions. We want these uses treated as exempt, or partly exempt, so we do not have to apply to the province for a barrier-free relaxation. Who decides whether a building is exempt, and which code provision lists the exceptions?",
+  "gold": [
+   "3.8.2.1."
+  ],
+  "context": [
+   "3.8.1.1.",
+   "3.8.2.3."
+  ],
+  "mapping": [
+   {
+    "article": "3.8.2.1.",
+    "as_cited": "Sentence 3.8.2.1.(1), NBC(AE) 2023",
+    "codedb_title": "Exceptions",
+    "verification": "same number, same requirement: 2023 text says 'The requirements of this Section apply to all buildings except'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": "standata-nbc2023-interpretation-23-bci-016",
+  "notes": "Interpretation. The provincial relaxation route is Division C 2.2.1.4.(1) (not Division B). Related exemption lists named in the source: 3.8.1.1.(1), 3.8.2.3.(2) and 3.8.2.8.(12). Relaxations are not accepted for new construction that must comply."
+ },
+ {
+  "id": "ab-wood-roof-truss-engineered-design",
+  "type": "interpretation",
+  "applicant": "homebuilder",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/750b7bd6-7a6a-47b8-8acf-bd58298f672b/download/ma-standata-interpretation-building-23-bci-015r1-2025-05.pdf",
+   "title": "STANDATA interpretation 23-BCI-015R1 - Design of wood trusses for roof assemblies in Part 9 buildings",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building Administrator)",
+   "date": "2025-05",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "Based on the requirements of Article 9.23.14.11., a truss assembly constructed using wood trusses must …"
+  },
+  "description": "We build houses and small residential buildings with prefabricated wood roof trusses from a truss supplier. The authenticated truss drawings often are not ready when we apply for the building permit, because the trusses are bought later. We want to know whether the truss assembly has to be designed by a registered engineering professional, including the way separate trusses are tied to each other, whether the roof truss layout plan itself has to be authenticated, and whether the permit can be issued with the truss drawings required before the framing inspection.",
+  "gold": [
+   "9.23.14.11."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.23.14.11.",
+    "as_cited": "Article 9.23.14.11., NBC(AE) 2023",
+    "codedb_title": "Roof Trusses",
+    "verification": "same number, same requirement: 2023 text says 'Wood roof trusses shall be designed in accordance with good engineering practice'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": "standata-nbc2023-interpretation-23-bci-015r1",
+  "notes": "Interpretation replacing 23-BCI-015 and the archived bulletins 23-BCB-002/002R1. Edmonton Policy Bulletin B23-03 (2026) applies it locally but cites no Division B article, so it is not a separate case. Division C 2.4.1.2. cited but not Division B."
+ },
+ {
+  "id": "ab-radon-pipe-labelling",
+  "type": "bulletin",
+  "applicant": "contractor",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/5cd7e000-4f7c-4188-b26f-11a16bbe43f8/resource/af31ca67-0db6-43ef-8df6-6da1f537f85e/download/ma-standata-bulletin-building-plumbing-23-bcb-013-20-pcb-010r1-2025-07.pdf",
+   "title": "STANDATA bulletin 23-BCB-013 / 20-PCB-010R1 - Radon/soil gas pipe labelling",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building Administrator) and Provincial Plumbing Administrator",
+   "date": "2025-07",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "Part 9 buildings have prescriptive requirements for labeling of radon/soil gas piping systems in NBC(AE) …"
+  },
+  "description": "I am a plumber roughing in radon piping for new houses and for larger buildings. In houses the soil gas rough-in is a pipe at least 100 mm across through the slab, and I have been told it has to be labelled near the cap and along its length. For larger buildings the ventilation part of the code points to an American radon guide for schools and large buildings, which also asks for labelling of the vent pipe. What are the labelling requirements, and which code references apply to each type of building?",
+  "gold": [
+   "6.2.1.1.",
+   "9.13.4.3."
+  ],
+  "context": [
+   "9.13.4.1."
+  ],
+  "mapping": [
+   {
+    "article": "6.2.1.1.",
+    "as_cited": "Clause 6.2.1.1.(1)(i), NBC(AE) 2023",
+    "codedb_title": "Good Engineering Practice",
+    "verification": "same number, same requirement: 2023 text says 'Radon Prevention in the Design and Construction of Schools and Other Large Buildings'"
+   },
+   {
+    "article": "9.13.4.3.",
+    "as_cited": "Subclause 9.13.4.3.(3)(b)(iii), NBC(AE) 2023",
+    "codedb_title": "Providing for the Rough-in for a Subfloor Depressurization System",
+    "verification": "same number, same requirement: 2023 text says 'the pipe is clearly labeled near the cap and, if applicable, every 1.8 m and at every change in direction'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": "standata-nbc2023-bulletin-23-bcb-013",
+  "notes": "Bulletin, not a variance. Part 3 buildings are routed through Part 6 (good engineering practice, EPA 625/R-92/016); Part 9 buildings through the rough-in article. Article 9.13.4.1. (application and scope) is cited as context."
+ },
+ {
+  "id": "ab-roof-mounted-hvac-access",
+  "type": "bulletin",
+  "applicant": "designer",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/5cd7e000-4f7c-4188-b26f-11a16bbe43f8/resource/8b436047-1937-4439-8d0d-cc40ab79d37a/download/ma-standata-bulletin-joint-23bcb008-25gcb002-2026-06.pdf",
+   "title": "STANDATA bulletin 23-BCB-008 / 25-GCB-002 - Access to roof-mounted HVAC equipment",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building Administrator) and Provincial Gas Administrator",
+   "date": "2026-06",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "when applying Article 3.6.4.7. of the NBC(AE) for access to roof-mounted HVAC equipment, they may …"
+  },
+  "description": "We are designing a building with gas-fired heating, ventilating and air-conditioning units on the roof. The roof is well above grade and we need to know how access to the equipment has to be provided, including for a sloped roof. The building code sends us to the gas installation code for the roof access rules, and the code lists an older edition of that standard while a new edition came into force in March 2026. Which building code provisions apply to roof access for this equipment, in both larger buildings and small residential buildings?",
+  "gold": [
+   "3.6.4.7.",
+   "6.2.1.6.",
+   "9.33.1.2."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "3.6.4.7.",
+    "as_cited": "Article 3.6.4.7., NBC(AE) 2023",
+    "codedb_title": "Access to Roof-Mounted HVAC Equipment",
+    "verification": "same number, same requirement: 2023 text says 'A building shall be provided with access to the roof in conformance with'"
+   },
+   {
+    "article": "6.2.1.6.",
+    "as_cited": "Sentence 6.2.1.6.(4), NBC(AE) 2023",
+    "codedb_title": "Installation – General",
+    "verification": "same number, same requirement: 2023 text says 'Access to roof-mounted heating, ventilating or air-conditioning equipment shall be provided in conformance with Article 3.6.4.7.'"
+   },
+   {
+    "article": "9.33.1.2.",
+    "as_cited": "Article 9.33.1.2., NBC(AE) 2023",
+    "codedb_title": "Access to Roof-Mounted HVAC Equipment",
+    "verification": "same number, same requirement: 2023 text says 'Provisions for access to roof-mounted heating, ventilating and air-conditioning equipment'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": "standata-nbc2023-bulletin-23-bcb-008",
+  "notes": "Bulletin consolidating roof-access provisions; supersedes the earlier variances 14-BCV-007 and 19-BCV-019 (ship stairs/ladders for roof access to HVAC), which are the same topic. CSA B149.1 clauses are cited but are not NBC provisions."
+ },
+ {
+  "id": "ab-tier1-energy-airtightness-modelling",
+  "type": "bulletin",
+  "applicant": "homebuilder",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/5cd7e000-4f7c-4188-b26f-11a16bbe43f8/resource/37c27a63-3517-4b03-b4e2-bd2733219caa/download/ma-standata-bulletin-building-23-bcb-001-2024-04.pdf",
+   "title": "STANDATA bulletin 23-BCB-001 - Energy efficiency Tier 1 of section 9.36.",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building Administrator)",
+   "date": "2024-04",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "In Alberta, Tier 1 is the minimum province-wide standard for building energy efficiency for housing …"
+  },
+  "description": "We build houses in Alberta and want to be clear about which energy standard is mandatory. We understand the province requires the lowest level of the tiered energy provisions, and that the higher tiers are optional and cannot be enforced. We plan to show compliance by energy modelling and want to know which airtightness value we must use for the proposed house, and how the peak cooling load and the higher-tier calculations come into it if an owner chooses to build above the minimum.",
+  "gold": [
+   "9.36.1.3.",
+   "9.36.5.10.",
+   "9.36.7.3."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.36.1.3.",
+    "as_cited": "Article 9.36.1.3., NBC(AE) 2023",
+    "codedb_title": "Compliance and Application",
+    "verification": "same number, same requirement: 2023 text says 'the performance requirements in Subsection 9.36.5.'"
+   },
+   {
+    "article": "9.36.5.10.",
+    "as_cited": "Sentence 9.36.5.10.(9), NBC(AE) 2023",
+    "codedb_title": "Modeling Building Envelope of Proposed House",
+    "verification": "same number, same requirement: 2023 text says 'The airtightness used in the energy model calculations for the proposed house shall be'"
+   },
+   {
+    "article": "9.36.7.3.",
+    "as_cited": "Sentences 9.36.7.3.(1), (2), (4), NBC(AE) 2023",
+    "codedb_title": "Energy Performance Improvement Compliance Calculations",
+    "verification": "same number, same requirement: 2023 text says 'the peak cooling load of the proposed and reference houses'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": "standata-nbc2023-bulletin-23-bcb-001",
+  "notes": "Bulletin, not a variance. Also mentions 9.36.2.7. (window U-values) and 9.36.3.10. (equipment standards) as Alberta-specific changes; they are in the Discussion rather than the Code References list, so they are not in gold."
+ },
+ {
+  "id": "ab-heat-pump-seer2-hspf2-minimums",
+  "type": "bulletin",
+  "applicant": "contractor",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/5cd7e000-4f7c-4188-b26f-11a16bbe43f8/resource/f15b9d93-5091-4e7b-9690-e907b1744737/download/ma-standata-bulletin-building-23-bcb-006-2025-03.pdf",
+   "title": "STANDATA bulletin 23-BCB-006 - SEER2 and HSPF2 application",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building Administrator)",
+   "date": "2025-03",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "Table 9.36.3.10. of the NBC(AE) and Table 5.2.12.1.-A of the NECB provide the minimum SEER2 …"
+  },
+  "description": "We install electric air-cooled air conditioners and heat pumps in houses. The units now carry ratings under the newer test procedure, and the efficiency numbers cannot be converted directly from the older seasonal efficiency ratings the code used to list. We need to know which part of the building code sets the minimum efficiency for this equipment, which metrics apply for single-phase residential units under 19 kW, and how to confirm that a model meets the minimum before we install it.",
+  "gold": [
+   "9.36.3.10."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.36.3.10.",
+    "as_cited": "Article 9.36.3.10., NBC(AE) 2023",
+    "codedb_title": "Equipment Efficiency",
+    "verification": "same number, same requirement: 2023 text says 'HVAC equipment and components shall comply with the performance requirements stated in Table 9.36.3.10.'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": "standata-nbc2023-bulletin-23-bcb-006",
+  "notes": "Bulletin. The parallel NECB table (5.2.12.1.-A) is another code. Climate regions (equipment testing) are not the same as the NBC climate zones, per the source."
+ },
+ {
+  "id": "ab-calgary-zero-lot-line-soffits",
+  "type": "variance",
+  "applicant": "homebuilder",
+  "source": {
+   "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/zero-lot-line-march-2026.pdf",
+   "title": "Standing Posted Variance SPV-001 - Zero Lot Line (Revision 5)",
+   "issuer": "City of Calgary (Calgary Building Services)",
+   "date": "2026-03",
+   "edition_cited": "NBC(AE) (edition not numbered in the PDF; current 2023-edition wording)",
+   "excerpt": "Contrary to the applicable regulatory requirement: National Building Code Alberta Edition Division B, 9.10.15.5. (8) …"
+  },
+  "description": "We build single-family homes in Calgary, up to three storeys, on narrow lots with only 1.5 m between the exposed sides of neighbouring houses. On one side each house sits 1.5 m from the lot line (the easement side). On the other side the wall is built right at the property line, and the roof soffit on that side reaches the line or crosses it. The code does not allow soffits that close to a property line. We would register a maintenance access right-of-way on both lots, keep the buildings at least 0.9 m apart including eaves, and build both side walls to a prescribed fire-rated assembly with limits on windows and cladding. Which code provisions are we varying?",
+  "gold": [
+   "9.10.15.5."
+  ],
+  "context": [
+   "9.10.15.4.",
+   "9.10.6.2."
+  ],
+  "mapping": [
+   {
+    "article": "9.10.15.5.",
+    "as_cited": "Sentences 9.10.15.5.(8) and (9), NBC(AE)",
+    "codedb_title": "Construction of Exposing Building Face of Houses",
+    "verification": "same number, same requirement: 2023 text says 'projecting roof soffits shall not be constructed above the exposing building face'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": "calgary-spv-001-zero-lot-line-2026-03",
+  "notes": "Calgary Standing Posted Variance (SPV): a pre-approved municipal variance that a permit applicant references in the permit conditions; the SPV itself says changes need a separate site-specific variance. Objective/function: OP3 / F03. Context articles are cited in the accepted method (glazed openings per Table 9.10.15.4., mass-timber rating per 9.10.6.2.). 9.10.15.5. is the most-varied article province-wide in the Safety Codes Council 2026 Q1 variance data (about 1 500 of the 3 118 article counts)."
+ },
+ {
+  "id": "ab-rockyview-zero-lot-line-dc129",
+  "type": "variance",
+  "applicant": "homebuilder",
+  "source": {
+   "url": "https://www.rockyview.ca/sites/default/files/2026-04/Variance-Zero-Lot-Line-Land-Use-Bylaw-DC-129.pdf",
+   "title": "Zero Lot Line Variance DC-129 (ZLL-DC129-PMA-01), Variance-01",
+   "issuer": "Rocky View County (Building Services)",
+   "date": "2026-04",
+   "edition_cited": "NBC(AE) 2023 (the variance cites the current NBC - Alberta Edition)",
+   "excerpt": "As per Sentence 9.10.15.5.(8) of Division B in the current National Building Code – Alberta …"
+  },
+  "description": "We are building houses in a Direct Control District in Rocky View County where lots are laid out with only 1.8 m between the exposed building faces of neighbouring houses. One house sits 1.8 m from the property line, and its neighbour is built right at the line, with the neighbour's roof soffit and overhang extending past it. The code limits how far roof soffits may project toward a property line. We would register a private maintenance easement on both lots allowing a small eave and footing encroachment, keep roof drainage on the building's own parcel, and build both side walls to the county's prescribed fire-protected assembly. Which code provisions are we varying?",
+  "gold": [
+   "9.10.15.5."
+  ],
+  "context": [
+   "9.10.15.4.",
+   "9.10.6.2."
+  ],
+  "mapping": [
+   {
+    "article": "9.10.15.5.",
+    "as_cited": "Sentence 9.10.15.5.(8), NBC(AE) 2023",
+    "codedb_title": "Construction of Exposing Building Face of Houses",
+    "verification": "same number, same requirement: 2023 text says 'projecting roof soffits shall not be constructed above the exposing building face'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": null,
+  "notes": "Standing county variance for one Direct Control District. Same article family as Calgary SPV-001 but a different issuing authority, a 1.8 m separation and its own conditions; kept as a separate jurisdiction example. The variance paraphrases the sentence loosely (it says soffits may project up to 0.45 m); the mapped text is the 2023 wording. Edmonton Policy B14-01 (ABC 2014, 2019) is the older sibling and is not a separate case."
+ },
+ {
+  "id": "ab-calgary-newer-ashrae-ventilation-edition",
+  "type": "variance",
+  "applicant": "designer",
+  "source": {
+   "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/ventilation-for-acceptable-indoor-air-quality.pdf",
+   "title": "Standing Posted Variance SPV-004 - ANSI/ASHRAE 62 Ventilation for Acceptable Indoor Air Quality",
+   "issuer": "City of Calgary (Calgary Building Services)",
+   "date": "2020-02",
+   "edition_cited": "NBC(AE) 2019",
+   "excerpt": "the standard ANSI/ASHRAE 62-2001, which is currently referenced in the most recent version of the …"
+  },
+  "description": "We are mechanical engineers designing building ventilation in Calgary. The building code designates a specific old edition of the ventilation standard for acceptable indoor air quality, but many newer editions have been published and they call for lower ventilation rates. With the newer energy code there are many sustainable design practices that go beyond what the old edition assumed. We want to use a more recent edition of that standard, with one addendum excluded, for the whole project. The engineer of record would seal the mechanical drawings, state in writing which edition is used, and confirm the ventilation rates suit the intended occupancy. Which provision are we varying?",
+  "gold": [
+   "1.3.1.2."
+  ],
+  "context": [
+   "6.2.1.1."
+  ],
+  "mapping": [
+   {
+    "article": "1.3.1.2.",
+    "as_cited": "Sentence 1.3.1.2.(1), NBC(AE) 2019",
+    "codedb_title": "Applicable Editions",
+    "verification": "same number, same requirement: 2023 text says 'they shall be the editions designated in Table 1.3.1.2.'"
+   }
+  ],
+  "confidence": "medium",
+  "rewrite_of": null,
+  "notes": "Older Calgary SPV (no longer listed among current SPVs). The designated edition is set by Table 1.3.1.2., so the varied provision is the applicable-editions article; the good-engineering-practice article (6.2.1.1.) is the stated basis and is context. Calgary advisory B23-011 shows the 2023-edition code designates ASHRAE 62.1-2016."
+ },
+ {
+  "id": "ab-calgary-f3-garage-wall-facing-dwellings",
+  "type": "variance",
+  "applicant": "owner-developer",
+  "source": {
+   "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/construction-of-exposing-building-face-spv-003.pdf",
+   "title": "Standing Posted Variance SPV-003 - Construction of Exposed Building Face (Revision 3)",
+   "issuer": "City of Calgary (Calgary Building Services)",
+   "date": "2025-02",
+   "edition_cited": "NBC(AE) (edition not numbered in the PDF; current 2023-edition wording)",
+   "excerpt": "This variance addresses the area and location of the exposing building face of single storey …"
+  },
+  "description": "We are building a multi-dwelling residential development with detached single-storey garages and storage buildings, classified as low-hazard industrial, that do not directly serve the dwellings they face. Their exterior walls facing those dwellings would normally have to be noncombustible construction. We want to use a wood-frame wall encapsulated in gypsum board with noncombustible cladding, mineral fibre insulation and a gypsum ceiling instead, with no unprotected openings on the face toward the dwellings, 45-minute self-closing doors, and at least 1.2 m between the garage and the dwelling. How is the area and location of the garage's exposing building face determined, and what are we varying?",
+  "gold": [
+   "9.10.14.2.",
+   "9.10.14.5."
+  ],
+  "context": [
+   "9.10.14.4."
+  ],
+  "mapping": [
+   {
+    "article": "9.10.14.2.",
+    "as_cited": "Article 9.10.14.2., NBC(AE)",
+    "codedb_title": "Area and Location of Exposing Building Face",
+    "verification": "same number, same requirement: 2023 text says 'taken as the exterior wall area facing in one direction on any side of a building'"
+   },
+   {
+    "article": "9.10.14.5.",
+    "as_cited": "Sentence 9.10.14.5.(1) and Table 9.10.14.5.-A, NBC(AE)",
+    "codedb_title": "Construction of Exposing Building Face and Walls above Exposing Building Face",
+    "verification": "same number, same requirement: 2023 text says 'each exposing building face and any exterior wall located above an exposing building face'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": "calgary-spv-003-construction-of-exposed-building-face",
+  "notes": "Calgary Standing Posted Variance. Applies to single-storey Group F, Division 3 buildings facing multi-dwelling buildings governed by the house spatial-separation subsection that they do not serve. Other walls follow 9.10.14.4. (context). Also cited but not varied: cladding, vapour barrier and stud articles. 9.10.14.2. and 9.10.14.5. together account for roughly 575 article counts in the Safety Codes Council 2026 Q1 variance data."
+ },
+ {
+  "id": "ab-edmonton-rowhouse-one-hour-party-wall",
+  "type": "variance",
+  "applicant": "homebuilder",
+  "source": {
+   "url": "https://www.edmonton.ca/sites/default/files/public-files/Policy-B23-01-Secondary-Suites-in-Row-houses.pdf?cb=1755184683",
+   "title": "Policy B23-01 - Fire Separation Between Row Houses with More Than Two Secondary Suites",
+   "issuer": "City of Edmonton (Development Services, Safety Codes, Permits and Inspections)",
+   "date": "2024-07",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "need not be constructed as a firewall, provided it is constructed as a fire separation …"
+  },
+  "description": "We are building a new row house development in Edmonton where more than two adjacent houses will each have a secondary suite. The code would make us build the party wall between adjacent houses with suites as a firewall, so that the building is divided into separate buildings of no more than two houses with suites. That adds cost and complexity. We would like to build the party wall on the property line as a fire separation with a one-hour fire-resistance rating instead, supported by the City's alternative solution report, with everything else for houses with secondary suites built to the code. Which provision are we varying, and how do we show the city our intention?",
+  "gold": [
+   "9.10.11.2."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.10.11.2.",
+    "as_cited": "Sentence 9.10.11.2.(2), NBC2023(AE)",
+    "codedb_title": "Firewalls Not Required",
+    "verification": "same number, same requirement: 2023 text says 'a party wall that separates any 2 adjacent houses with a secondary suite from the rest of the building'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": null,
+  "notes": "Edmonton policy with a Letter of Construction Intention managed as a variance, supported by the 2024-07-26 report Life Safety and Property Protection: Alternative Solution for Secondary Suites in Row Houses. Same article as Calgary SPV-006 but a new-construction proposal with a different solution. Predecessor B19-03 (NBC 2019, area separation walls) is archived and not a separate case."
+ },
+ {
+  "id": "ab-calgary-rowhouse-suites-without-firewall",
+  "type": "variance",
+  "applicant": "homeowner",
+  "source": {
+   "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/firewall-in-a-rowhouse-with-secondary-suites-spv-006.pdf",
+   "title": "Standing Posted Variance SPV-006 - Firewall in a Rowhouse with Secondary Suites",
+   "issuer": "City of Calgary (Calgary Building Services)",
+   "date": "2025-06",
+   "edition_cited": "NBC(AE) (edition not numbered in the PDF; current 2023-edition wording)",
+   "excerpt": "National Building Code - Alberta Edition Division B, Sentence 9.10.11.2.(2) Firewalls Not Required Division B, …"
+  },
+  "description": "I want to add a secondary suite to my house in an existing rowhouse building that has no firewall between the units. Once the building has more than two houses, the party wall between adjacent houses with suites has to be a firewall, which is rarely feasible in an existing building, and a custom alternative solution is beyond my means. Instead I would add fire separations around the exits and the suites, rated loadbearing walls below the floors, no separate second exit when the building is sprinklered or each unit has direct access to a balcony or an openable window, noncombustible ducts without fire dampers serving only one compartment, 20-minute closures and sealed penetrations. Which provisions am I varying?",
+  "gold": [
+   "9.10.11.2.",
+   "9.10.13.13."
+  ],
+  "context": [
+   "9.10.3.1.",
+   "9.9.9.1.",
+   "9.10.13.2.",
+   "9.10.9.6.",
+   "9.33.1.1."
+  ],
+  "mapping": [
+   {
+    "article": "9.10.11.2.",
+    "as_cited": "Sentence 9.10.11.2.(2), NBC(AE)",
+    "codedb_title": "Firewalls Not Required",
+    "verification": "same number, same requirement: 2023 text says 'a party wall that separates any 2 adjacent houses with a secondary suite from the rest of the building'"
+   },
+   {
+    "article": "9.10.13.13.",
+    "as_cited": "Sentence 9.10.13.13.(1), NBC(AE)",
+    "codedb_title": "Fire Dampers",
+    "verification": "same number, same requirement: 2023 text says 'shall be equipped with a fire damper in conformance with Articles 3.1.8.4. and 3.1.8.10.'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": "calgary-spv-006-firewall-rowhouse-secondary-suites",
+  "notes": "Calgary Standing Posted Variance. The source states the firewall requirement in its Reason for Variance (a party wall between adjacent houses with suites, in a building with more than two houses). A site-specific variance to vary the firewall sentence needs professional involvement (stated in the SPV). Objectives OS1.2, OP1.2, OP3.1 and function F03. Context: other articles named in the accepted method. 9.10.11.2. (about 366 counts) and 9.10.13.13. (about 251) are the 2nd and 3rd most varied articles in the Safety Codes Council 2026 Q1 variance data."
+ },
+ {
+  "id": "ab-calgary-openings-near-exterior-exit-stair",
+  "type": "interpretation",
+  "applicant": "homebuilder",
+  "source": {
+   "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-012-protection-of-openings-near-unenclosed-exterior-stairs-and-ramps.pdf",
+   "title": "Building Advisory B23-012 - Protection of Openings Near Unenclosed Exterior Stairs and Ramps",
+   "issuer": "City of Calgary (Calgary Building Services)",
+   "date": "2026-03",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "For points 2. b), c), and d), an application for Alternative Solution must be submitted …"
+  },
+  "description": "We are adding a secondary suite to a house, and the only way out of the suite is an unenclosed exterior stair. Windows of the main dwelling are within 3 m horizontally of that stair and less than 10 m below or 5 m above it. The code says those openings must be protected with wired glass in fixed steel frames or glass block. We would rather use the other methods the city lists: a fire shutter released by a fusible link on windows that are not egress windows, a sprinkler system throughout the house, or a water curtain of closely spaced sprinklers over the windows. Which of these can be accepted, and what has to be submitted?",
+  "gold": [
+   "9.9.4.4."
+  ],
+  "context": [
+   "9.10.13.5.",
+   "9.10.13.7."
+  ],
+  "mapping": [
+   {
+    "article": "9.9.4.4.",
+    "as_cited": "Article 9.9.4.4., NBC(AE) 2023",
+    "codedb_title": "Openings Near Unenclosed Exterior E xit Stairs and Ramps",
+    "verification": "same number, same requirement: 2023 text says 'an unenclosed exterior exit stair or ramp provides the only means of egress from a suite'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": null,
+  "notes": "Calgary advisory (no legal status). Fire shutters are accepted outright; sprinkler-system and water-curtain options require an alternative solution with professional involvement. Stairs and ramps with 600 mm or less difference in elevation are not treated as exit stairs. 9.9.4.4. had about 73 article counts in the Safety Codes Council 2026 Q1 variance data. Edmonton B23-05 covers the same article from a threshold angle (separate case)."
+ },
+ {
+  "id": "ab-calgary-fire-access-rear-part9-building",
+  "type": "interpretation",
+  "applicant": "homebuilder",
+  "source": {
+   "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-013-fire-department-access-to-part-9-buildings-which-do-not-face-a-street.pdf",
+   "title": "Building Advisory B23-013 / Fire Marshal Bulletin 2026-002 - Fire Department Access to Part 9 Buildings Which do not Face a Street",
+   "issuer": "City of Calgary (Calgary Building Services)",
+   "date": "2026-09",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "Fire Department Access to Buildings is covered under Article 9.10.20.3. which contains the requirements for …"
+  },
+  "description": "We are building a house, or a pair of rowhouse units, on an infill lot behind another building, so it does not face a street, private roadway or yard. A lane or private drive would serve as the fire department route. The small-building part of the code only describes fire department access in general terms, while the large-building part is very specific. We would show that the route meets the access route design requirements and can carry fire trucks, keep the firefighters' path from the vehicle to each entrance within 45 m, and add an exterior strobe light tied to the smoke alarms. If distances run longer we would sprinkler the building. Which provisions apply?",
+  "gold": [
+   "9.10.20.3.",
+   "3.2.5.6."
+  ],
+  "context": [
+   "3.2.5.12.",
+   "9.10.20.1."
+  ],
+  "mapping": [
+   {
+    "article": "9.10.20.3.",
+    "as_cited": "Article 9.10.20.3., NBC(AE) 2023",
+    "codedb_title": "Fire Department Access to Buildings",
+    "verification": "same number, same requirement: 2023 text says 'Access for fire department equipment shall be provided to each building by means of a street, private roadway or yard'"
+   },
+   {
+    "article": "3.2.5.6.",
+    "as_cited": "Article 3.2.5.6., NBC(AE) 2023",
+    "codedb_title": "Access Route Design",
+    "verification": "same number, same requirement: 2023 text says 'A portion of a roadway or yard provided as a required access route for fire department use shall'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": null,
+  "notes": "Calgary advisory issued with the Calgary Fire Department. A hydrant-to-vehicle distance of 75 m instead of 45 m needs an alternative solution by a registered engineer (Division C 2.3.1.1.). Sprinkler standards by building type are in the advisory. Edmonton Policy B19-04 (2019 edition, 2023-05) covers the same two articles and is not a separate case."
+ },
+ {
+  "id": "ab-edmonton-exterior-stair-opening-protection-thresholds",
+  "type": "interpretation",
+  "applicant": "homebuilder",
+  "source": {
+   "url": "https://www.edmonton.ca/sites/default/files/public-files/documents/coe-scpi-pol-int-0001-b23-05-application-of-9944.pdf?cb=1781105565",
+   "title": "Policy Interpretation B23-05 (COE-SCPI-POL-INT-0001) - Application of 9.9.4.4",
+   "issuer": "City of Edmonton (Safety Codes, Permits and Inspections)",
+   "date": "2026-06",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "Article 9.9.4.4. need not apply if: ● the stair or ramp is not more than …"
+  },
+  "description": "We are designing houses and rowhouses with secondary suites in Edmonton. In one layout the suite door opens to an exterior stair that rises about 1.2 m above grade. In another it opens to a stair sunk about 500 mm below the surrounding ground. A third has a below-grade exterior passageway with an exit stair at each end. We were told that windows near an unenclosed exterior exit stair that is the only way out of a suite need wired glass or glass block. Do those opening-protection rules apply at these heights, and does the two-stair passageway layout avoid them?",
+  "gold": [
+   "9.9.4.4."
+  ],
+  "context": [
+   "9.9.9.1.",
+   "9.9.9.2.",
+   "9.9.9.3.",
+   "9.9.4.2.",
+   "9.9.8.4.",
+   "9.10.9.3.",
+   "9.8.8.1."
+  ],
+  "mapping": [
+   {
+    "article": "9.9.4.4.",
+    "as_cited": "Article 9.9.4.4., NBC(AE) 2023",
+    "codedb_title": "Openings Near Unenclosed Exterior E xit Stairs and Ramps",
+    "verification": "same number, same requirement: 2023 text says 'an unenclosed exterior exit stair or ramp provides the only means of egress from a suite'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": null,
+  "notes": "Edmonton policy interpretation that limits where the article applies and says alternative solutions need a Request for Specific Variance with a report. Context articles are the egress-travel, exit-separation, guard and door-closure provisions used in its justification. Related Calgary advisory B23-012 is a separate case on the same article."
+ },
+ {
+  "id": "ab-calgary-side-yard-egress-widths",
+  "type": "interpretation",
+  "applicant": "homebuilder",
+  "source": {
+   "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/Building-Advisory-A19-004-Exterior-Egress-Requirements-for-Single-Family-Dwellings-Final-August-31-2022.pdf",
+   "title": "Building Advisory A19-004 - Exterior egress requirements for single family homes",
+   "issuer": "City of Calgary (Calgary Building Services)",
+   "date": "2022-08",
+   "edition_cited": "NBC(AE) 2019",
+   "excerpt": "The minimum clear egress width (no obstructions*) for a primary or secondary entrance and exit …"
+  },
+  "description": "We design narrow-lot homes with a side-yard entrance to the main dwelling or to a secondary suite, and bedroom egress windows that open into the side yard. The code sets no width requirements for exits serving a single dwelling unit or a house with a secondary suite, so we do not know how narrow the path between the wall and the fence or property line may be. The city has said it expects about 860 mm clear for an entrance door and 760 mm in front of an egress window. The advisory also allows a conditional 550 mm clear path beyond the egress-window area, distinct from the 760 mm clearance at the window. We need to distinguish that relief from obstructions at the entrance or window. Which code provisions were those widths derived from?",
+  "gold": [
+   "9.9.3.1.",
+   "9.5.4.1.",
+   "9.8.2.1.",
+   "9.8.6.3.",
+   "9.9.10.1."
+  ],
+  "context": [
+   "9.9.5.5.",
+   "9.9.6.1."
+  ],
+  "mapping": [
+   {
+    "article": "9.9.3.1.",
+    "as_cited": "Article 9.9.3.1., NBC(AE) 2019",
+    "codedb_title": "Application",
+    "verification": "same number, same requirement: 2023 text says 'This Subsection applies to every means of egress except'"
+   },
+   {
+    "article": "9.5.4.1.",
+    "as_cited": "Sentence 9.5.4.1.(1), NBC(AE) 2019",
+    "codedb_title": "Hallway Width",
+    "verification": "same number, same requirement: 2023 text says 'The unobstructed width of a hallway within a dwelling unit shall be not less than 860 mm'"
+   },
+   {
+    "article": "9.8.2.1.",
+    "as_cited": "Sentence 9.8.2.1.(2), NBC(AE) 2019",
+    "codedb_title": "Stair Width",
+    "verification": "same number, same requirement: 2023 text says 'Exit stairs serving a single dwelling unit or a house with a secondary suite'"
+   },
+   {
+    "article": "9.8.6.3.",
+    "as_cited": "Sentence 9.8.6.3.(4), NBC(AE) 2019",
+    "codedb_title": "Dimensions of Landings",
+    "verification": "same article number and title (Dimensions of Landings); the landing-size rule now sits in sentence (1), the cited sentence number does not match: 2023 text says 'landings shall be at least as wide and as long as the width of the stair'"
+   },
+   {
+    "article": "9.9.10.1.",
+    "as_cited": "Sentence 9.9.10.1.(3), NBC(AE) 2019",
+    "codedb_title": "Egress Windows or Doors for Bedrooms",
+    "verification": "same number, same requirement: 2023 text says 'a clearance of not less than 760 mm shall be provided in front of the window'"
+   }
+  ],
+  "confidence": "medium",
+  "rewrite_of": null,
+  "notes": "Calgary advisory (2019-edition wording, revised 2022). Gold lists the article that exempts single-dwelling exits from egress width rules plus the four articles the advisory says the 860 mm and 760 mm figures were derived from; Articles 9.9.5.5. and 9.9.6.1. are cited as consistent with the 760 mm figure and are context. Caveat: the advisory cites Sentence 9.8.6.3.(4); in the 2023 text sentence (4) concerns stairs of different widths, so only the article-level match is verified. Source audit correction: the advisory distinguishes the 760 mm window clearance from conditional 550 mm path clearance beyond it; this qualifier is included in the scenario."
+ },
+ {
+  "id": "ab-calgary-smoking-room-ventilation",
+  "type": "interpretation",
+  "applicant": "designer",
+  "source": {
+   "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-011-ventilation-requirements-for-smoking-areas-in-buildings.pdf",
+   "title": "Building Advisory B23-011 - Ventilation Requirements for Smoking Areas in Buildings",
+   "issuer": "City of Calgary (Calgary Building Services)",
+   "date": "2025-05",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "The referenced version of ANSI/ASHRAE 62.1 in the current NBC (AE) does not provide sufficient …"
+  },
+  "description": "I am the designer for a hookah lounge, and also a cigar and vape room, in a commercial building in Calgary. Indoor smoking is largely prohibited by provincial law but with some exemptions, and the charcoal used for water pipes gives off combustion products. The ventilation standard that our building code references for indoor air quality has dropped every mention of smoking, so I cannot properly design or check the ventilation of a smoking room from it. The city accepts designing these rooms to an older edition of the ASHRAE ventilation standard. Which building code provision does this ventilation design fall under?",
+  "gold": [
+   "6.3.1.1."
+  ],
+  "context": [
+   "6.3.1.3."
+  ],
+  "mapping": [
+   {
+    "article": "6.3.1.1.",
+    "as_cited": "Article 6.3.1.1., NBC(AE) 2023",
+    "codedb_title": "Required Ventilation",
+    "verification": "same number, same requirement: 2023 text says 'outdoor air shall be supplied to buildings for ventilation purposes in accordance with one of the following'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": null,
+  "notes": "Calgary advisory accepted by the technical interpretation committee 2025-05-20: ventilation design for any room permitted as a smoking room (tobacco, vapes, water pipes) is to follow ASHRAE 62-2001; all other ventilation follows the standards in force. 6.3.1.3. (storage garages) is mentioned only as an exception in the quoted article."
+ },
+ {
+  "id": "ab-calgary-temporary-bleachers",
+  "type": "interpretation",
+  "applicant": "contractor",
+  "source": {
+   "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/B23-009-Temporary-Bleachers-for-Public-Events.pdf",
+   "title": "Building Advisory B23-009 - Temporary Bleachers for Public Events",
+   "issuer": "City of Calgary (Calgary Building Services)",
+   "date": "2025-03",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "Temporary bleacher design and installation references are found in NBC(AE) Part 3 - Fire protection, …"
+  },
+  "description": "We rent pre-engineered modular bleachers, up to twenty rows tall, for street festivals, parades and sporting events. We know an Alberta professional engineer has to seal the structural drawings and consider live loads, wind and overturning. We also need to know what the code says about aisle step risers and treads, footboards, openings that must stop a large sphere, guard heights at the backs, ends and fronts of bleacher seating, the loads that guards and handrails must be designed for, and designated barrier-free seating. Which building code articles apply, and could an alternative solution be used for something that does not fit?",
+  "gold": [
+   "3.3.2.12.",
+   "3.3.2.9.",
+   "4.1.5.14."
+  ],
+  "context": [
+   "4.1.5.3."
+  ],
+  "mapping": [
+   {
+    "article": "3.3.2.12.",
+    "as_cited": "Article 3.3.2.12., NBC(AE) 2023",
+    "codedb_title": "Bleachers",
+    "verification": "same number, same requirement: 2023 text says 'Steps provided in aisles of bleachers of the telescopic type shall'"
+   },
+   {
+    "article": "3.3.2.9.",
+    "as_cited": "Article 3.3.2.9., NBC(AE) 2023",
+    "codedb_title": "Guards",
+    "verification": "same number, same requirement: 2023 text says 'The backs and ends of bleacher seats more than 1 200 mm above the ground or floor'"
+   },
+   {
+    "article": "4.1.5.14.",
+    "as_cited": "Article 4.1.5.14., NBC(AE) 2023",
+    "codedb_title": "Loads on Guards and Handrails",
+    "verification": "same number, same requirement: 2023 text says 'applied outward at the minimum required height of every required guard'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": null,
+  "notes": "Calgary advisory. It also points to barrier-free seating under Section 3.8. (whole section, not an article) and to NFPA 102 as non-mandatory guidance. Alternative solutions are said to need engineering justification. Table 4.1.5.3. (live loads) is cited as a table of an article kept in context."
+ },
+ {
+  "id": "ab-calgary-permanent-hail-shelter",
+  "type": "interpretation",
+  "applicant": "owner-developer",
+  "source": {
+   "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/br-advisory-permanent-hail-structures.pdf",
+   "title": "Building Advisory - Permanent Hail Shelters - Building Code Requirements",
+   "issuer": "City of Calgary (Calgary Building Services)",
+   "date": "2019-07",
+   "edition_cited": "ABC (Alberta Building Code, as cited by Calgary in 2019)",
+   "excerpt": "Pursuant to Article 3.2.2.2. of Division B of the Alberta Building Code, these shelters are …"
+  },
+  "description": "We are a vehicle dealership and want a permanent hail shelter over our inventory lot: tubular steel arch trusses with a fabric covering that stays up all year, not just seasonally. The city treats it like an open-air parkade, and the risk in a severe wind or a heavy snowfall is serious. It is not one of the building types the code lists. We understand we need a building permit with a site plan showing property lines and the fire department access route, spatial separation information, and structural drawings sealed by a registered professional. How does the code classify a structure like this?",
+  "gold": [
+   "3.2.2.2."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "3.2.2.2.",
+    "as_cited": "Article 3.2.2.2., ABC / NBC(AE) 2019",
+    "codedb_title": "Special and Unusual Structures",
+    "verification": "same number, same requirement: 2023 text says 'shall be protected against fire spread and collapse in conformance with good fire protection engineering practice'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": null,
+  "notes": "Calgary advisory on permanent (not seasonal) hail shelters; temporary shelters are out of scope. Division C professional involvement (2.4.2.1.(9), 2.4.2.2.(1)) and Division A building definition are cited but are not Division B. The same article is used for the multi-level racking variance 23-BCV-014."
+ },
+ {
+  "id": "ab-medhat-adhered-masonry-veneer-engineering",
+  "type": "bulletin",
+  "applicant": "contractor",
+  "source": {
+   "url": "https://www.medicinehat.ca/news/posts/safety-codes-bulletin-withdrawal-of-standata-19-bcv-018-rev2/",
+   "title": "Safety Codes Bulletin: Withdrawal of STANDATA 19-BCV-018(REV2)",
+   "issuer": "City of Medicine Hat (Planning and Development Services)",
+   "date": "2023-08",
+   "edition_cited": "NBC(AE) 2019",
+   "excerpt": "Masonry Veneer - 9.20.6.4. (4): Masonry veneer shall conform to Subsection 4.3.2., where the masonry …"
+  },
+  "description": "We install adhered thin masonry veneer up to about 3 m above grade on houses and other small residential buildings. Until mid-2023 we relied on the province's generic engineered details, but they were withdrawn when the engineering documentation behind them expired and the masonry council would not renew it. Now the building officer asks for site-specific engineering approval. The small-building part of the code does not spell out requirements for this type of installation. It sends masonry veneer, stone and concrete facings and ties to the masonry design requirements. Which code provisions are involved?",
+  "gold": [
+   "9.20.1.1.",
+   "9.20.6.4.",
+   "9.20.6.6.",
+   "9.20.9.5."
+  ],
+  "context": [
+   "4.3.2.1."
+  ],
+  "mapping": [
+   {
+    "article": "9.20.1.1.",
+    "as_cited": "Sentence 9.20.1.1.(2), NBC(AE) 2019",
+    "codedb_title": "General",
+    "verification": "same number, same requirement: 2023 text says 'For walls other than those described in Sentence (1)'"
+   },
+   {
+    "article": "9.20.6.4.",
+    "as_cited": "Sentence 9.20.6.4.(4), NBC(AE) 2019",
+    "codedb_title": "Masonry Veneer",
+    "verification": "same number, same requirement: 2023 text says 'Masonry veneer shall conform to Subsection 4.3.2.'"
+   },
+   {
+    "article": "9.20.6.6.",
+    "as_cited": "Sentence 9.20.6.6.(1), NBC(AE) 2019",
+    "codedb_title": "Stone or Concrete Facings",
+    "verification": "same number, same requirement: 2023 text says 'Slab and panel facings of precast concrete and natural or artificial stone shall conform to Subsection 4.3.2.'"
+   },
+   {
+    "article": "9.20.9.5.",
+    "as_cited": "Sentence 9.20.9.5.(3), NBC(AE) 2019",
+    "codedb_title": "Ties for Masonry Veneer",
+    "verification": "same number, same requirement: 2023 text says 'Masonry veneer individually supported by masonry or wood-frame backing shall be secured to the backing in conformance with Subsection 4.3.2.'"
+   }
+  ],
+  "confidence": "medium",
+  "rewrite_of": null,
+  "notes": "Municipal bulletin about a withdrawn provincial variance (19-BCV-018 REV2, archived; the STANDATA itself cites no articles, the Medicine Hat bulletin lists them). 2019 edition cited; each sentence text was matched in the 2023 database. Context 4.3.2.1. is the masonry design basis the four sentences point to."
+ },
+ {
+  "id": "ab-edmonton-single-stair-point-access-block",
+  "type": "alternative-solution-example",
+  "applicant": "owner-developer",
+  "source": {
+   "url": "https://www.edmonton.ca/sites/default/files/public-files/Point-Access-Block-Technical-Report.pdf",
+   "title": "Point Access Block Single Exit Stair - Technical Report (LMDG file 24-232, Revision 4) in the Edmonton Alternative Solution Guide for Point Access Blocks",
+   "issuer": "City of Edmonton (Safety Codes, Permits and Inspections with Edmonton Fire Rescue Services)",
+   "date": "2025-02",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "an alternative solution is required to be submitted for a PAB building where a departure …"
+  },
+  "description": "We want to build a compact apartment building of up to six storeys, with no more than four dwelling units per floor, on a small infill lot in Edmonton. To keep the footprint small we would serve every floor from a single exit stair. The code asks for at least two exits from every floor area intended for occupancy, with narrow exceptions for buildings of two storeys or less, so one stair is a departure from the acceptable solution. We expect to submit an alternative solution prepared by a fire protection or life safety consultant with architect and engineer involvement, using a risk assessment and mitigating measures such as compartmentation and smoke management. What are we varying?",
+  "gold": [
+   "3.4.2.1."
+  ],
+  "context": [
+   "3.4.2.3."
+  ],
+  "mapping": [
+   {
+    "article": "3.4.2.1.",
+    "as_cited": "Sentence 3.4.2.1.(1), NBC(AE) 2023",
+    "codedb_title": "Minimum Number of Exits",
+    "verification": "same number, same requirement: 2023 text says 'every floor area intended for occupancy shall be served by at least 2 exits'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": null,
+  "notes": "City-published example technical report and guide (benchmark: the single-exit-stair alternative solution). The report states the applicable acceptable solution is 3.4.2.1.(1) and cites 3.4.2.3. (distance between exits) as the other exit-diversity component. Alberta Municipal Affairs interpretation 23-BCI-026 (2026-10) confirms alternative solutions for single-egress-stair residential buildings but names no Division B article, so it is not a separate case."
+ },
+ {
+  "id": "ab-beaumont-fire-response-halved-limiting-distance",
+  "type": "bulletin",
+  "applicant": "homebuilder",
+  "source": {
+   "url": "https://beaumont.ab.ca/wp-content/uploads/2024/05/Notice_CityofBeaumont_FireResponse_Dec162021_202112201410214237.pdf",
+   "title": "Notice: City of Beaumont Fire Response Times (Attachment 1: Fire Response Time and Deemed Limiting Distance)",
+   "issuer": "City of Beaumont (Building Inspections)",
+   "date": "2021-12",
+   "edition_cited": "NBC(AE) 2019",
+   "excerpt": "the builder must assume that the distance between property line and the house is half …"
+  },
+  "description": "We build houses in a municipality whose fire department can no longer respond to structural fires within 10 minutes, 90% of the time. The municipality now requires every new building permit application to be designed as if the response time were over 10 minutes, so for the window calculations and for wall construction and cladding the distance from the house to the property line is treated as half its real value. Our side yards are under 2.4 m. We could stay with the stricter rules, meaning no windows on the side wall, a 45-minute rated side wall with noncombustible cladding and closed soffits, or install a sprinkler system. What provision drives this?",
+  "gold": [
+   "9.10.15.3."
+  ],
+  "context": [
+   "9.10.15.5."
+  ],
+  "mapping": [
+   {
+    "article": "9.10.15.3.",
+    "as_cited": "Clause 9.10.15.3., NBC(AE) 2019",
+    "codedb_title": "Limiting Distance and Fire Department Response",
+    "verification": "same number, same requirement: 2023 text says 'a limiting distance equal to half the actual limiting distance shall be used as input'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": null,
+  "notes": "Municipal bulletin. The 2021 notice (NBC-AE 2019) says the older city zero-lot-line variance was suspended until updated for the new response times. Camrose posted a similar 2026 notice (NBC(AE) 2023) citing the parallel article 9.10.14.3. and the house spatial-separation subsection, so 9.10.14.3. (same halving rule, non-house buildings) is a plausible companion but is not cited by Beaumont. Installing sprinklers removes the penalty. 9.10.15.3. had roughly 150 article counts in the Safety Codes Council 2026 Q1 variance data."
+ },
+ {
+  "id": "ab-appeal-group-c-nine-levels-sloped-site",
+  "type": "appeal",
+  "applicant": "owner-developer",
+  "source": {
+   "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2014/Redacted_Permit%20Refusal%20Residential%20Occupancy%20Alternative%20Solution%20October%202014_0015441.pdf",
+   "title": "Council Order No. 0015441 - Refusal to issue a building permit: residential occupancy alternative solution",
+   "issuer": "Safety Codes Council (Building Technical Council appeal panel)",
+   "date": "2014-10",
+   "edition_cited": "ABC 2006",
+   "excerpt": "The Appellants propose an alternative solution to the requirements of 3.2.2.42 of Division B of …"
+  },
+  "description": "We are developing a residential building on a steeply sloped lot beside a ravine: six storeys show at the front street and three more levels sit partly below grade at the back, nine levels in all. Poor soil makes building weight important. We want to design the whole sprinklered building under the lighter construction rules for a sprinklered residential building of up to six storeys instead of the rules for any height. We would add a four-hour fire separation around the lower residential levels, a four-hour floor between the lower and upper exit stairs, pressurized stairs, and responder access at the fourth level. The municipality refused the permit. Which construction requirement are we departing from?",
+  "gold": [
+   "3.2.2.47."
+  ],
+  "context": [
+   "3.2.2.49."
+  ],
+  "mapping": [
+   {
+    "article": "3.2.2.47.",
+    "as_cited": "Article 3.2.2.42. (Group C, Any Height, Any Area, Sprinklered), ABC 2006",
+    "codedb_title": "Group C, Any Height, Any Area, Sprinklered",
+    "verification": "renumbered successor with matching title and text (3.2.2.42. is now 3.2.2.47.): 2023 text says 'floor assemblies shall be fire separations with a fire-resistance rating not less than 2 h'"
+   },
+   {
+    "article": "3.2.2.49.",
+    "as_cited": "Article 3.2.2.43. (Group C, up to 6 Storeys, Sprinklered), ABC 2006",
+    "codedb_title": "Group C, up to 6 Storeys, Sprinklered, Noncombustible Construction",
+    "verification": "renumbered successor with matching title and text (3.2.2.43. is now 3.2.2.49.): 2023 text says 'not more than 6 000 m² if 6 storeys in building height'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": null,
+  "notes": "Council confirmed the refusal: the first storey is set by the grade definition, the proposal gave no equivalency for the 2 h floor requirement, and sprinklering is required by both articles so it is not an enhancement. Trap: in the 2023 edition 3.2.2.42. and 3.2.2.43. are Group B, Division 3 articles; the Group C articles moved to 3.2.2.47. and 3.2.2.49. (mapped by identical title and sentence text). Division A 1.2.1.1. and 1.3.3.4. (firewalls) and Division C documentation are cited but are not Division B."
+ },
+ {
+  "id": "ab-appeal-house-wall-too-close-to-lot-line",
+  "type": "appeal",
+  "applicant": "homebuilder",
+  "source": {
+   "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2016/Building%20-%20Meeting%20the%20requirements%20of%20exposing%20building%20face%20-%20November%202016.pdf",
+   "title": "Council Order No. 0015471 - Meeting the requirements of exposing building face",
+   "issuer": "Safety Codes Council (Building Sub-Council appeal panel)",
+   "date": "2016-11",
+   "edition_cited": "ABC 2006 (2014 provisions confirmed identical at the hearing)",
+   "excerpt": "The issue on appeal is the need to comply with Sentence 9.10.15.5 (2) and Sentence …"
+  },
+  "description": "We are a home builder. We built a house with an attached garage and a secondary suite, and its side wall turned out slightly closer to the property line than the 1.2 m the plans allowed, because a survey pin was missing and the fence was off. The wall has combustible vinyl siding and two bedroom egress windows. A neighbour complained and the municipality ordered us to comply. We argued the error is only a few centimetres. What do the code and the Council require for the wall construction and for the windows when the limiting distance is under 1.2 m, and can a small encroachment be excused?",
+  "gold": [
+   "9.10.15.5.",
+   "9.10.15.4."
+  ],
+  "context": [
+   "9.10.15.3."
+  ],
+  "mapping": [
+   {
+    "article": "9.10.15.5.",
+    "as_cited": "Sentence 9.10.15.5.(2), ABC 2006",
+    "codedb_title": "Construction of Exposing Building Face of Houses",
+    "verification": "same article; the 2006 sentence (2) is split into sentences (2) and (3) in 2023, same requirement: 2023 text says 'where the limiting distance is equal to or greater than 0.6 m and less than 1.2 m'"
+   },
+   {
+    "article": "9.10.15.4.",
+    "as_cited": "Sentence 9.10.15.4.(1), ABC 2006",
+    "codedb_title": "Glazed Openings in Exposing Building Face",
+    "verification": "same number, same requirement: 2023 text says 'the maximum aggregate area of glazed openings in an exposing building face shall'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": null,
+  "notes": "Council confirmed the order: the encroachment (0.01 m to 0.05 m) exceeded the 2% dimensional tolerance in Division C, the maximum glazed area is zero when the limiting distance is under 1.2 m, and the builder was told an alternative solution was possible but chose to appeal. The panel confirmed no substantive change between the 2006 and 2014 codes. 9.10.15.3. is quoted in the decision text (context)."
+ },
+ {
+  "id": "ab-appeal-stair-door-frame-foam-gap",
+  "type": "appeal",
+  "applicant": "owner-developer",
+  "source": {
+   "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2014/Building_Exit_Stairwell_Door_and_FrameAssemblies_and_Compliance_with_ABC2006_and_NFPA80.pdf",
+   "title": "Council Order No. 0015442 - Exit stairwell door and frame assemblies and compliance with ABC 2006 and NFPA 80",
+   "issuer": "Safety Codes Council (Building Technical Council appeal panel)",
+   "date": "2014-12",
+   "edition_cited": "ABC 2006",
+   "excerpt": "Whether the exit stairwell door and frame assemblies show compliance with the test standards for …"
+  },
+  "description": "We are the developer of a ten-storey building with seven levels of underground parking. The exit stairwell doors and frames were installed with a wide gap between the frame and the concrete opening, filled with foam and sealed with firestop sealant. The municipality stopped work on the doors because the assemblies as installed are not on a published listing and have not been tested with the foam and sealant, and it says the installation does not follow the door installation standard. We had a small-scale fire test done with the door swinging into the furnace and no glazing. Is that test representative, and what do the rating, installation and temperature rise requirements demand?",
+  "gold": [
+   "3.1.8.4.",
+   "3.1.8.5.",
+   "3.1.8.17."
+  ],
+  "context": [
+   "3.1.8.1."
+  ],
+  "mapping": [
+   {
+    "article": "3.1.8.4.",
+    "as_cited": "Clause 3.1.8.4.(1)(a), ABC 2006",
+    "codedb_title": "Determination of Ratings and Classifications",
+    "verification": "same number, same requirement: 2023 text says 'the fire-protection rating of a closure shall be determined in accordance with'"
+   },
+   {
+    "article": "3.1.8.5.",
+    "as_cited": "Sentence 3.1.8.5.(2), ABC 2006",
+    "codedb_title": "Installation of Closures",
+    "verification": "same number, same requirement: 2023 text says 'shall be installed in conformance with NFPA 80'"
+   },
+   {
+    "article": "3.1.8.17.",
+    "as_cited": "Article 3.1.8.15. (Temperature Rise Limit for Doors), ABC 2006",
+    "codedb_title": "Temperature Rise Limit for Doors",
+    "verification": "renumbered successor with matching title and text (3.1.8.15. is now 3.1.8.17.): 2023 text says 'the maximum temperature rise on the opaque portion of the unexposed side of a door used as a closure'"
+   },
+   {
+    "article": "3.1.8.1.",
+    "as_cited": "Sentence 3.1.8.1.(1), ABC 2006",
+    "codedb_title": "General Requirements",
+    "verification": "same number, same requirement: 2023 text says 'Openings in a fire separation shall be protected with closures'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": null,
+  "notes": "Council varied the order to three options: a testing-agency letter that the small-scale test is representative, full-scale testing, or removal and reinstallation. Trap: in 2023, 3.1.8.15. is Door Latches and the temperature-rise article is 3.1.8.17. Part 8 (8.1.2.2.) stop-work reference and the NFPA standards are cited but are not mapped."
+ },
+ {
+  "id": "ab-appeal-aluminum-cladding-polyamide-inserts",
+  "type": "appeal",
+  "applicant": "designer",
+  "source": {
+   "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2016/Redacted_Decision_0015467.pdf",
+   "title": "Council Order No. 0015467 - Use of an aluminium panel system utilizing polyamide inserts",
+   "issuer": "Safety Codes Council (Building Sub-Council appeal panel)",
+   "date": "2016-08",
+   "edition_cited": "ABC 2014",
+   "excerpt": "Article 3.1.5.5. of the 2014 ABC (Combustible Components for Exterior Walls) requires (among other things) …"
+  },
+  "description": "We are the architects re-cladding an existing building that has to be of noncombustible construction. The old stucco contains asbestos, so we want a proprietary aluminum panel cladding system whose panels clip onto rails with polyamide plastic inserts. The system has been used on many buildings, was fire tested at an Austrian laboratory with results similar to the Canadian exterior wall fire test, and has a fire engineer's supporting opinion, but it has never been tested to the Canadian standard. The municipality refused the permit. Are the plastic inserts minor combustible components or structural connections, and must the wall assembly pass the exterior wall fire test? Could an alternative solution work?",
+  "gold": [
+   "3.1.5.5.",
+   "3.1.5.2."
+  ],
+  "context": [
+   "4.1.1.3."
+  ],
+  "mapping": [
+   {
+    "article": "3.1.5.5.",
+    "as_cited": "Article 3.1.5.5. (Combustible Components for Exterior Walls), ABC 2014",
+    "codedb_title": "Combustible Cladding on Exterior Walls",
+    "verification": "same number, same requirement (title changed to Combustible Cladding on Exterior Walls): 2023 text says 'when tested in accordance with CAN/ULC-S134'"
+   },
+   {
+    "article": "3.1.5.2.",
+    "as_cited": "Article 3.1.5.2., ABC 2014",
+    "codedb_title": "Minor Combustible Components",
+    "verification": "same number, same requirement: 2023 text says 'The following minor combustible components are permitted in a building required to be of noncombustible construction'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": null,
+  "notes": "Council confirmed the refusal because the cladding had not been tested to the exterior wall fire test; it accepted that the inserts are minor combustible components and are not structural, and it urged the parties to pursue an alternative solution (with steel flashing around openings as the engineer advised). The structural-design article is context because the municipality relied on it and the panel rejected it."
+ },
+ {
+  "id": "ab-appeal-access-route-604-m2-tolerance",
+  "type": "appeal",
+  "applicant": "owner-developer",
+  "source": {
+   "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2012/REDACTED_Bldg_Access%20route%20for%20fire%20department%20vehicles%20June%202012_0015422.pdf",
+   "title": "Council Order No. 0015422 - Access route for fire department vehicles",
+   "issuer": "Safety Codes Council (Building Technical Council appeal panel)",
+   "date": "2012-06",
+   "edition_cited": "ABC 2006",
+   "excerpt": "Is the Appellant required to provide an access route compliant with 3.2.5.6.(1) of the Alberta …"
+  },
+  "description": "We run a car dealership with service bays in a one-storey building of 604 m2 that faces one street. The municipality would not grant occupancy because we had not finished a fire department access route, saying the code requires one for buildings over 600 m2 in area. Our building is only a few square metres over the limit, the site paving was delayed by ground frost and rain, the neighbouring buildings have noncombustible exteriors, and our building sits in the middle of the site with about seven employees. We asked to apply the code's allowance for a minor variation of up to 2% in a dimension. Do we need the access route?",
+  "gold": [
+   "3.2.5.4.",
+   "3.2.5.6."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "3.2.5.4.",
+    "as_cited": "Clause 3.2.5.4.(1)(a), ABC 2006",
+    "codedb_title": "Access Routes",
+    "verification": "same number, same requirement: 2023 text says 'or more than 600 m² in building area shall be provided with access routes for fire department vehicles'"
+   },
+   {
+    "article": "3.2.5.6.",
+    "as_cited": "Sentence 3.2.5.6.(1), ABC 2006",
+    "codedb_title": "Access Route Design",
+    "verification": "same number, same requirement: 2023 text says 'have a clear width not less than 6 m, unless it can be shown that lesser widths are satisfactory'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": null,
+  "notes": "Council revoked the order: 604 m2 is 0.7% over the 600 m2 threshold, within the 2% dimensional tolerance in Division C 2.2.2.4.(1), with life safety not reduced. The Group F, Division 2 classification article cited in the decision (3.2.2.71. in ABC 2006) was renumbered in 2023 and is not used."
+ },
+ {
+  "id": "ab-appeal-sagd-process-building-no-standpipe",
+  "type": "appeal",
+  "applicant": "owner-developer",
+  "source": {
+   "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2012/REDACTED_Bldg_Installation%20of%20Standpipe%20System%20in%20Hydrocarbon%20Buildin%20October%202012_0015427.pdf",
+   "title": "Council Order No. 0015427 - Installation of standpipe system in hydrocarbon buildings",
+   "issuer": "Safety Codes Council (Building Technical Council appeal panel)",
+   "date": "2012-10",
+   "edition_cited": "ABC 2006",
+   "excerpt": "The issue on appeal is: (a) The requirement to install a standpipe system in accordance …"
+  },
+  "description": "We are an oil sands operator building four one-storey process buildings, each more than 14 m high, at a thermal plant. The code requires a standpipe system in buildings that tall. Water from hose streams does not put out hydrocarbon fires, and sending people in with hoses is a life-safety hazard because those fires develop instantly. Instead of standpipes we propose layers of protection: removing credible leak points, controlling ignition sources, gas and fire detection with alarms, fuel isolation, a plant-wide emergency shutdown with automatic evacuation, and regular drills. The municipal officer said he could not accept this. Which requirements are we asking to vary, and what water supply requirement would remain?",
+  "gold": [
+   "3.2.5.8.",
+   "3.2.5.9.",
+   "3.2.5.15."
+  ],
+  "context": [
+   "3.2.5.7."
+  ],
+  "mapping": [
+   {
+    "article": "3.2.5.8.",
+    "as_cited": "Article 3.2.5.8., ABC 2006",
+    "codedb_title": "Standpipe Systems",
+    "verification": "same number, same requirement: 2023 text says 'a standpipe system shall be installed in a building that is'"
+   },
+   {
+    "article": "3.2.5.9.",
+    "as_cited": "Article 3.2.5.9., ABC 2006",
+    "codedb_title": "Standpipe System Design",
+    "verification": "same number, same requirement: 2023 text says 'the design, construction, installation and testing of a standpipe system shall conform to NFPA 14'"
+   },
+   {
+    "article": "3.2.5.15.",
+    "as_cited": "Article 3.2.5.16. (Fire Department Connections), ABC 2006",
+    "codedb_title": "Fire Department Connections",
+    "verification": "renumbered successor with matching title and text (3.2.5.16. is now 3.2.5.15.): 2023 text says 'The fire department connection for a standpipe system shall be located so that the distance'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": null,
+  "notes": "Council varied the order and accepted the alternative solution: the standpipe requirement (3.2.5.8. and 3.2.5.9. named in the varied order; 3.2.5.16. named in the issue) was excluded but the firefighting water supply article (3.2.5.7.) stayed in force. This is the closest published Council decision to a granted site-specific variance. Buildings were Group F, Division 3."
+ },
+ {
+  "id": "ab-appeal-dementia-care-maglocks-impeded-egress",
+  "type": "appeal",
+  "applicant": "owner-developer",
+  "source": {
+   "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2013/Redacted_Building_Electromagnetic_Locking_Devices_and_Impeded_Egress_Zone_December_2013.pdf",
+   "title": "Council Order No. 0015437 - Electromagnetic locking devices and impeded egress zone",
+   "issuer": "Safety Codes Council (Building Technical Council appeal panel)",
+   "date": "2013-12",
+   "edition_cited": "ABC 2006",
+   "excerpt": "The Appellants propose an alternative solution to the requirements of Clause 3.4.6.15.(4)(e) of Division B …"
+  },
+  "description": "We are a health care provider finishing a two-storey, sprinklered, combustible-construction care building of about 3 900 m2, divided into four buildings by firewalls, for residents with dementia who tend to wander. We installed electromagnetic locks on several doors to keep residents inside their assigned areas, but they do not release within 15 seconds when someone pushes on the door. The municipality says that creates an impeded egress zone, which a two-storey building with sleeping accommodation cannot have unless it is built differently. Our alternative solution relies on staffing, monitoring and staged release at fire alarm. Which provisions are involved?",
+  "gold": [
+   "3.4.6.16.",
+   "3.2.2.19."
+  ],
+  "context": [
+   "3.3.1.13."
+  ],
+  "mapping": [
+   {
+    "article": "3.4.6.16.",
+    "as_cited": "Clause 3.4.6.15.(4)(e) (door release hardware), ABC 2006",
+    "codedb_title": "Door Release Hardware",
+    "verification": "renumbered successor with matching title and text (3.4.6.15. is now 3.4.6.16.(5)(e)): 2023 text says 'initiates an irreversible process that will release the locking device within 15 s'"
+   },
+   {
+    "article": "3.2.2.19.",
+    "as_cited": "Article 3.2.2.19., ABC 2006",
+    "codedb_title": "Buildings Containing Impeded Egress Zones",
+    "verification": "same number, same requirement: 2023 text says 'A building containing an impeded egress zone'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": null,
+  "notes": "Council varied the order (compliance before occupancy) and rejected the alternative solution because staffing is not regulated by the code and the combined measures did not show equivalency. In the 2023 text electromagnetic locks are in 3.4.6.16.(5), and 3.3.1.13. (doors and door hardware, contained-use and impeded-egress locking) is the other locking route the decision quotes. Related STANDATA 14-BCV-011 (ABC 2014, care and treatment occupancies) is the same topic and is not a separate case."
+ },
+ {
+  "id": "ab-appeal-tenant-fire-rating-in-medium-hazard-warehouse",
+  "type": "appeal",
+  "applicant": "designer",
+  "source": {
+   "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2015/Building%20-%20Second%20Storey%20Fire%20Resistance%20Rating%20and%20Base%20Building%20Classification%20January%202015.pdf",
+   "title": "Council Order No. 0015443 - Second storey fire resistance rating and base building classification",
+   "issuer": "Safety Codes Council (Building Technical Council appeal panel)",
+   "date": "2015-01",
+   "edition_cited": "ABC 2006",
+   "excerpt": "The issue is whether the second storey structure must comply with the base building classification …"
+  },
+  "description": "We are the architects for a proposed two-storey, multi-bay warehouse. The base building is classified as medium-hazard industrial, but the tenant spaces inside would be business and low-hazard industrial uses. We want the second-storey floor assembly, loadbearing walls and columns of a tenant space to have a 45-minute fire-resistance rating based on the tenant's occupancy, instead of the two-hour rating the base building classification requires, as long as the suites are separated from each other properly. Does the second storey structure have to meet the base building classification, or can each tenant occupancy have its own lower rating?",
+  "gold": [
+   "3.2.2.6."
+  ],
+  "context": [
+   "3.2.2.7.",
+   "3.2.2.8.",
+   "3.1.3.1."
+  ],
+  "mapping": [
+   {
+    "article": "3.2.2.6.",
+    "as_cited": "Article 3.2.2.6., ABC 2006",
+    "codedb_title": "Multiple Major Occupancies",
+    "verification": "same number, same requirement: 2023 text says 'the requirements of this Subsection for the most restricted major occupancy contained shall apply to the whole building'"
+   },
+   {
+    "article": "3.2.2.7.",
+    "as_cited": "Article 3.2.2.7., ABC 2006",
+    "codedb_title": "Superimposed Major Occupancies",
+    "verification": "same number, same requirement: 2023 text says 'the fire-resistance rating of the floor assembly between the major occupancies shall be determined'"
+   },
+   {
+    "article": "3.2.2.8.",
+    "as_cited": "Article 3.2.2.8., ABC 2006",
+    "codedb_title": "Exceptions for Major Occupancies",
+    "verification": "same number, same requirement: 2023 text says 'the aggregate area of all major occupancies in a particular Group or Division'"
+   },
+   {
+    "article": "3.1.3.1.",
+    "as_cited": "Article 3.1.3.1., ABC 2006",
+    "codedb_title": "Separation of Major Occupancies",
+    "verification": "same number, same requirement: 2023 text says 'major occupancies shall be separated from adjoining major occupancies by fire separations'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": null,
+  "notes": "Council confirmed the refusal: lesser-rated tenant occupancies exist inside a more restrictive base building but do not override the building fire-safety requirements of the size-and-construction subsection. The base-building F2 and tenant D articles cited in the decision (3.2.2.67. and 3.2.2.54. in ABC 2006) were renumbered in 2023 and are not used."
+ },
+ {
+  "id": "ab-appeal-rural-arena-firefighting-water-supply",
+  "type": "appeal",
+  "applicant": "owner-developer",
+  "source": {
+   "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2013/Redacted_Building_Equestrian_Centre_Dry_Hydrant_November_2013.pdf",
+   "title": "Council Order No. 0015435 - Equestrian centre dry hydrant",
+   "issuer": "Safety Codes Council (Building Technical Council appeal panel)",
+   "date": "2013-11",
+   "edition_cited": "ABC 2006",
+   "excerpt": "The water supply for a non-sprinklered building greater than 600 m² is required to be …"
+  },
+  "description": "We own an equestrian centre, a two-storey assembly building without sprinklers that was built in 2009. The building permit required a water supply for firefighting and we never completed it. The municipality ordered a dry hydrant within 90 m of the building. We agree to provide it, but the site is a bog that is easiest to work on when it is frozen, so we asked for until June of next year. We have an engineer's drawing of the dry hydrant. What does the code require, and what interim safety measure is appropriate while the building stays occupied?",
+  "gold": [
+   "3.2.5.7.",
+   "3.2.5.5."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "3.2.5.7.",
+    "as_cited": "Article 3.2.5.7., ABC 2006",
+    "codedb_title": "Water Supply",
+    "verification": "same number; core requirement kept (2023 adds a piped municipal supply option and keeps the private supply formula): 2023 text says 'a building shall have water available for firefighting purposes'"
+   },
+   {
+    "article": "3.2.5.5.",
+    "as_cited": "Clause 3.2.5.5.(2)(b), ABC 2006",
+    "codedb_title": "Location of Access Routes",
+    "verification": "same number, same requirement: 2023 text says 'from a hydrant to the vehicle plus the unobstructed path of travel for the firefighter'"
+   }
+  ],
+  "confidence": "medium",
+  "rewrite_of": null,
+  "notes": "Council varied the order only on timing (interim fire watch now, dry hydrant by 2014-06-01); the code requirement itself was upheld. Included because rural water supply for firefighting is a recurring variance topic and the decision names both articles. The 2023 wording of 3.2.5.7.(1) was restructured (municipal piped supply or private supply), so the requirement is matched in substance, not word for word. Division C 2.2.10.2. (occupancy before completion) is cited but is not Division B."
+ },
+ {
+  "id": "ab-appeal-restaurant-kitchen-exhaust-nfpa96",
+  "type": "appeal",
+  "applicant": "owner-developer",
+  "source": {
+   "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2012/REDACTED_Bldg_Ventilation%20Control%20and%20Fire%20Protection%20of%20Commercial%20Cooking%20Operations%20March%202012_0015408.pdf",
+   "title": "Council Order No. 0015408 - Ventilation control and fire protection of commercial cooking operations",
+   "issuer": "Safety Codes Council (Building Technical Council appeal panel)",
+   "date": "2012-03",
+   "edition_cited": "ABC 2006",
+   "excerpt": "The Alberta Building Code 2006 requires that systems for the ventilation of commercial cooking equipment …"
+  },
+  "description": "We run a family restaurant that opened in 2010. The municipality says our kitchen exhaust system does not conform to the commercial cooking ventilation standard that the code references, and ordered us to correct six items or vacate. A compliant system would cost about $80,000, which would be a hardship, and other restaurants nearby seem to have systems like ours. We believed ours was accepted because the city allowed us to open and issued a business licence, and we have the system cleaned every three months. What does the code require of a restaurant kitchen exhaust system, and can we be given time to comply?",
+  "gold": [
+   "6.3.1.6."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "6.3.1.6.",
+    "as_cited": "Sentences 6.2.2.6.(1) and (5), ABC 2006",
+    "codedb_title": "Commercial Cooking Equipment",
+    "verification": "renumbered successor with matching title and text (6.2.2.6. is now 6.3.1.6.; the stainless-steel sentence (5) has no 2023 successor): 2023 text says 'systems for the ventilation of commercial cooking equipment shall be designed, constructed and installed to conform to NFPA 96'"
+   }
+  ],
+  "confidence": "medium",
+  "rewrite_of": null,
+  "notes": "Council varied the order (comply and obtain a final inspection by 2012-06-01, instead of vacating) because the exhaust system did not comply with the standard and the city had not proved prior notice of the infractions. The decision also cites 3.6.3.1.(1) and 3.6.4.2. as exceptions in the 2006 sentence; the 2023 sentence instead refers to 3.6.3.5., so they are not mapped. The 2023 interpretation 23-BCI-009 cites the same article for fixed suppression and exhaust systems."
+ },
+ {
+  "id": "ab-appeal-dinner-theatre-platform-not-a-stage",
+  "type": "appeal",
+  "applicant": "owner-developer",
+  "source": {
+   "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2012/REDACTED_Bldg_Performance%20Platform%20Classification%20and%20Requirement%20of%20Sprinkler%20Deluge%20System%20June%202012_0015421.pdf",
+   "title": "Council Order No. 0015421 - Performance platform classification and requirement of sprinkler deluge system",
+   "issuer": "Safety Codes Council (Building Technical Council appeal panel)",
+   "date": "2012-06",
+   "edition_cited": "ABC 2006",
+   "excerpt": "The stage in the building does not meet the definition of a “Stage for Theatrical …"
+  },
+  "description": "We are a theatre company renovating a one-storey, sprinklered assembly building of about 715 m2 with a 300-seat auditorium to host dinner theatre. It has a raised performance platform that we enlarged in combustible construction and sprinklered underneath. There is no fly tower, no proscenium wall, only lightweight overhead lighting, and no workshops or storage attached to the platform. The municipality ordered us to meet the requirements for stages for theatrical performances, including a one-hour separation from the seating, a deluge system at the opening and roof vents. We say our platform is not a stage as the code defines it. Do the stage requirements apply to us?",
+  "gold": [
+   "3.3.2.14."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "3.3.2.14.",
+    "as_cited": "Article 3.3.2.13. (Stages for Theatrical Performances), ABC 2006",
+    "codedb_title": "Stages for Theatrical Performances",
+    "verification": "renumbered successor with matching title and text (3.3.2.13. is now 3.3.2.14.): 2023 text says 'A stage for theatrical performances and ancillary spaces, including workshops, dressing rooms and storage areas, shall be sprinklered'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": null,
+  "notes": "Council revoked the order: the raised platform does not meet the Division A definition of stage (no fly tower, proscenium wall, wide-range lighting or attached workshops), and underside sprinklering adds protection. Trap: the decision text lists \"3.2.2.13.\" in the issue statement (a typo for 3.3.2.13.), and in 2023 3.3.2.13. is Libraries while the stage article is 3.3.2.14."
+ },
+ {
+  "id": "ab-edmonton-suite-exit-door-window-exposure",
+  "type": "interpretation",
+  "applicant": "homebuilder",
+  "source": {
+   "url": "https://www.edmonton.ca/sites/default/files/public-files/documents/PDF/Secondary_Suite_Design_Guide.pdf",
+   "title": "Secondary Suite Design Guide (version January 31, 2025), exit exposure protection and permit checklist",
+   "issuer": "City of Edmonton (Development Services, Safety Codes, Permits and Inspections)",
+   "date": "2025-01",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "no exit stair/ramp passes near any glazing of the other dwelling or common spaces [9.9.4.4.]; …"
+  },
+  "description": "We are designing a house with a secondary suite in Edmonton, and the suite's only exit would be a single exterior door. Windows of the main dwelling and the common spaces look onto that door from within about 3 m, in facing walls or walls that meet at an angle under 135 degrees. We understand a suite exit has to be protected from fire exposure from the other dwelling unless each dwelling has a second way out or the whole building is sprinklered. The same exposure rule applies to an exterior exit stair, and to an exterior passageway or platform more than 1.5 m above grade with windows below it. Which exposures must be protected, and which design options let us avoid protecting the windows?",
+  "gold": [
+   "9.9.4.6.",
+   "9.9.4.4.",
+   "9.9.9.3."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.9.4.6.",
+    "as_cited": "Article 9.9.4.6., NBC(AE) 2023",
+    "codedb_title": "Openings Near Exit Doors",
+    "verification": "same number, same requirement: 2023 text says 'an exterior exit door'"
+   },
+   {
+    "article": "9.9.4.4.",
+    "as_cited": "Article 9.9.4.4., NBC(AE) 2023",
+    "codedb_title": "Openings Near Unenclosed Exterior E xit Stairs and Ramps",
+    "verification": "same number, same requirement: 2023 text says 'an unenclosed exterior exit stair or ramp provides the only means of egress from a suite'"
+   },
+   {
+    "article": "9.9.9.3.",
+    "as_cited": "Article 9.9.9.3., NBC(AE) 2023",
+    "codedb_title": "Shared Egress Facilities",
+    "verification": "same number, same requirement: 2023 text says 'Except for dwelling units in a house with a secondary suite'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": null,
+  "notes": "City design guide and permit checklist (not a variance). The checklist offers three routes: two separate means of egress for both dwellings, a sprinkler system throughout, or confirmed exit protections [9.9.4.4.] stair/ramp, [9.9.4.6.] exit door, [9.9.9.3.] passageway or platform over 1.5 m above grade. 9.9.4.6. had about 26 article counts in the Safety Codes Council 2026 Q1 variance data. Other articles in the guide (9.8.4.7., 9.7.5.2., 9.10.3.1., 9.32.3.13., 9.36.x) are outside this situation."
+ },
+ {
+  "id": "ab-licensed-beverage-establishment-occupant-load",
+  "type": "interpretation",
+  "applicant": "owner-developer",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/b7caed68-90ad-4798-8f1e-2c7e0a716590/download/ma-standata-interpretation-building-fire-23-bci-003r1-23-fci-002r1-2025-01.pdf",
+   "title": "STANDATA interpretation 23-BCI-003R1 / 23-FCI-002R1 - Occupant loads",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building and Fire Administrators)",
+   "date": "2025-01",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "In a building that is not sprinklered throughout, the principal entrance serving a dance hall …"
+  },
+  "description": "We are opening a licensed restaurant and lounge in an existing commercial unit, and no occupant load was ever issued for it. We were told its maximum occupant load is the lowest of four numbers: the limits that call for a fire alarm system, the building design occupant load that the structure, ventilation and washrooms are sized for, the net floor space at no less than 0.4 square metres per person, and the capacity of our exits. The building is not sprinklered, and the room could hold more than 250 people. How do we determine the design occupant load, and which building code provisions control it, including the width of the principal entrance?",
+  "gold": [
+   "3.1.17.1.",
+   "3.4.2.6."
+  ],
+  "context": [
+   "3.2.5.12.",
+   "3.4.3.2."
+  ],
+  "mapping": [
+   {
+    "article": "3.1.17.1.",
+    "as_cited": "Article 3.1.17.1. and Table 3.1.17.1., NBC(AE) 2023",
+    "codedb_title": "Occupant Load Determination",
+    "verification": "same number, same requirement: 2023 text says 'The occupant load of a floor area or part of a floor area shall be based on'"
+   },
+   {
+    "article": "3.4.2.6.",
+    "as_cited": "Article 3.4.2.6., NBC(AE) 2023",
+    "codedb_title": "Principal Entrances",
+    "verification": "same number, same requirement: 2023 text says 'at least one door at every principal entrance to a building providing access from the exterior at ground level'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": "standata-nbc2023-interpretation-23-bci-003",
+  "notes": "Interpretation, not a variance (building and fire). The NBC design occupant load (3.1.17.1.) and the NFC maximum permissible occupant load differ; the lowest of the four criteria governs. 3.2.5.12. is the sprinkler article referenced by the principal-entrance rule and 3.4.3.2. (exit width) supplies the capacity factors; both are context. NFC Articles 2.1.4.1., 2.7.1.3. and 2.7.1.4. are cited but are not NBC."
+ },
+ {
+  "id": "ab-maglock-fire-alarm-integration-testing",
+  "type": "interpretation",
+  "applicant": "contractor",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/aa64d44e-6f21-474b-a86f-47bf24e40665/resource/9d416bf3-2a63-4dab-986c-0f04d3ed8e1c/download/ma-standata-joint-interpretation-23-fci-010-23-bci-043-2025-11.pdf",
+   "title": "STANDATA interpretation 23-FCI-010 / 23-BCI-043 - Electromagnetic locks - installation, maintenance, testing, and verification",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building and Fire Administrators)",
+   "date": "2025-11",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "Maglocks are considered ancillary devices and must be integrated with the building’s FAS. Article 3.2.9.1. …"
+  },
+  "description": "We install electromagnetic locks on doors in commercial buildings. The locks are tied to keypads, card readers or remote release, and some of our clients want them on exit doors and on fire-rated doors. We understand they have to release on fire alarm, on power loss and by manual override. What does the building code require for installing, verifying and testing these locks, how do they connect to the fire alarm system, and does it matter that the owner is installing them voluntarily rather than because the code prescribes them? Do we need a permit or a registered engineer?",
+  "gold": [
+   "3.2.4.5.",
+   "3.2.9.1."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "3.2.4.5.",
+    "as_cited": "Article 3.2.4.5., NBC(AE) 2023",
+    "codedb_title": "Installation and Verification of Fire Alarm Systems",
+    "verification": "same number, same requirement: 2023 text says 'Fire alarm systems shall be verified in conformance with CAN/ULC-S537'"
+   },
+   {
+    "article": "3.2.9.1.",
+    "as_cited": "Article 3.2.9.1., NBC(AE) 2023",
+    "codedb_title": "Testing",
+    "verification": "same number, same requirement: 2023 text says 'they shall be tested as a whole in accordance with CAN/ULC-S1001'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": "standata-nbc2023-interpretation-23-bci-043",
+  "notes": "Joint fire/building interpretation (2025-11). Its fire-code material (NFC Division C 2.2.1.1., 2.2.1.2., 2.2.4.) and the Division C items (2.2.3.3., 2.4.1.1.(3)) are not Division B. The exit-door release conditions for electromagnetic locks sit in 3.4.6.16.(5) (see the dementia-care appeal case); the interpretation itself does not cite that article."
+ },
+ {
+  "id": "ab-overnight-child-care-smoke-and-fire-alarms",
+  "type": "interpretation",
+  "applicant": "owner-developer",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/dbe79285-1847-4a1c-b62d-8343fe507f99/download/ma-standata-interpretation-building-fire-23-bci-002-23-fci-009-2024-04.pdf",
+   "title": "STANDATA interpretation 23-BCI-002 / 23-FCI-009 - Overnight child care",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building and Fire Administrators)",
+   "date": "2024-04",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "a fire alarm system shall be installed in a building that is not sprinklered throughout …"
+  },
+  "description": "We run licensed child care, and since 2021 the provincial rules allow overnight care. One site is a dayhome in our own house. Another is a daycare in an assembly occupancy space with a few sleeping areas, and a third would have more than ten sleeping spaces. What smoke alarms, residential fire warning system or fire alarm system does the building code require in each case, how must the alarms be interconnected, and when does the occupant load of a child care facility trigger a full fire alarm system? We also need to know about egress windows or doors from the sleeping rooms, unless the building is sprinklered.",
+  "gold": [
+   "3.2.4.20.",
+   "3.2.4.21.",
+   "3.2.4.1.",
+   "9.10.18.2."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "3.2.4.20.",
+    "as_cited": "Sentences 3.2.4.20.(1) and (2), NBC(AE) 2023",
+    "codedb_title": "Smoke Alarms",
+    "verification": "same number, same requirement: 2023 text says 'shall be installed in each dwelling unit'"
+   },
+   {
+    "article": "3.2.4.21.",
+    "as_cited": "Sentence 3.2.4.21.(1), NBC(AE) 2023",
+    "codedb_title": "Residential Fire Warning Systems",
+    "verification": "same number, same requirement: 2023 text says 'smoke detectors forming part of a residential fire warning system'"
+   },
+   {
+    "article": "3.2.4.1.",
+    "as_cited": "Clause 3.2.4.1.(4)(f), NBC(AE) 2023",
+    "codedb_title": "Determination of Requirement for a Fire Alarm System",
+    "verification": "same number, same requirement: 2023 text says 'a school, college, or child care facility, including a daycare facility, with an occupant load more than 40'"
+   },
+   {
+    "article": "9.10.18.2.",
+    "as_cited": "Sentences 9.10.18.2.(1), (2) and (5) and Table 9.10.18.2., NBC(AE) 2023",
+    "codedb_title": "Fire Alarm System Required",
+    "verification": "same number, same requirement: 2023 text says 'a fire alarm system shall be installed in buildings in which a sprinkler system is installed'"
+   }
+  ],
+  "confidence": "medium",
+  "rewrite_of": "standata-nbc2023-interpretation-23-bci-002",
+  "notes": "Joint building/fire interpretation. The Division B articles above are the ones listed in its Code References (dayhome = Group C residential; daycare = Group A, Division 2 assembly; more than 10 sleeping spaces needs a fire alarm system). The egress window requirement is described in the interpretation but no article is named, so it is not in gold. NFC Division B 2.8.1.1., 2.8.1.3. are cited but are not NBC. Medium confidence because the interpretation lists the articles as reference text rather than as the provisions varied."
+ },
+ {
+  "id": "ab-garage-flat-cathedral-roof-insulation",
+  "type": "variance",
+  "applicant": "homebuilder",
+  "source": {
+   "url": "https://open.alberta.ca/dataset/5a1e414d-6639-467d-b5a4-6d68454f1340/resource/e53f4a36-ab31-4c5b-9b27-a76064a77555/download/ma-standata-building-code-variance-19-bcv-023.pdf",
+   "title": "STANDATA variance 19-BCV-023 - Insulation values for flat or cathedral roofs serving residential garages",
+   "issuer": "Government of Alberta (Municipal Affairs, Provincial Building Administrator)",
+   "date": "2022-04",
+   "edition_cited": "NBC(AE) 2019",
+   "excerpt": "This variance addresses thermal resistance requirements for flat and cathedral roofs above attached garages and …"
+  },
+  "description": "We are building a house with an attached garage under a flat roof, and we have another design with a cathedral-style garage roof. The code's special insulation requirement for roofs over attached garages and heated detached garages assumes an attic-style roof, and the high thermal resistance it asks for is hard to fit into a flat or cathedral roof depth. The values the energy section sets for ordinary flat roofs and cathedral ceilings are lower. We want to use those energy-section values for the garage roof. Which requirement are we varying, and which one supplies the values we want to use?",
+  "gold": [
+   "9.25.2.1."
+  ],
+  "context": [
+   "9.36.2.6."
+  ],
+  "mapping": [
+   {
+    "article": "9.25.2.1.",
+    "as_cited": "Sentence 9.25.2.1.(1), NBC(AE) 2019 (now Sentence (2))",
+    "codedb_title": "Required Insulation",
+    "verification": "same article, sentence renumbered (1) to (2), same requirement: 2023 text says 'insulation conforming with Table 9.25.2.1. shall be provided for attached garages and heated detached garages'"
+   }
+  ],
+  "confidence": "medium",
+  "rewrite_of": null,
+  "notes": "Archived 2019-edition variance; no 23-series equivalent was found. Table 9.25.2.1. content is not in the code database, so the roof-ceiling value could not be re-checked; the article and sentence wording were. The source cites Tables 9.36.2.6.-A and -B, so 9.36.2.6. is context. Built in the first pass and held back only because of the 60-case target; restored after the coordinator allowed additions."
+ },
+ {
+  "id": "ab-calgary-existing-secondary-suite-legalization",
+  "type": "interpretation",
+  "applicant": "homeowner",
+  "source": {
+   "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-002-secondary-suites-existing-prior-to-march-12th-2018.pdf",
+   "title": "Calgary Building Advisory B23-002 - Secondary Suites - Existing Prior to March 12th, 2018",
+   "issuer": "City of Calgary (Calgary Building Services, Planning & Development)",
+   "date": "2024-01",
+   "edition_cited": "NBC(AE) 2023",
+   "excerpt": "Except as permitted in Sentence 9.9.10.1.(1) of Division B of the NBC 2023 (AE), each …"
+  },
+  "description": "I own a house in Calgary with a secondary suite that existed before the city began allowing them in most areas in March 2018. I want to legalize it under the city's amnesty program without rebuilding it to the full current code. The city will accept an alternative proposal covering the minimum life-safety items. Each bedroom in the suite needs an outside window that meets the bedroom window rules, both units need smoke alarms and carbon monoxide alarms interconnected so that one sounding sets off all of them, and the walls and ceilings between the units need gypsum board. Which code provisions do my permit drawings need to reference for the bedroom windows and the carbon monoxide alarms?",
+  "gold": [
+   "9.9.10.1.",
+   "9.32.3.9."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.9.10.1.",
+    "as_cited": "Sentence 9.9.10.1.(1) and Article 9.9.10., NBC(AE) 2023",
+    "codedb_title": "Egress Windows or Doors for Bedrooms",
+    "verification": "same number, same requirement: 2023 text says 'each bedroom or combination bedroom shall have at least one outside window or exterior door openable from the inside'"
+   },
+   {
+    "article": "9.32.3.9.",
+    "as_cited": "Sentence 9.32.3.9.(2), NBC(AE) 2023",
+    "codedb_title": "Carbon Monoxide Alarms",
+    "verification": "same number, same requirement: 2023 text says 'Carbon monoxide (CO) alarms required by this Article shall'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": null,
+  "notes": "Calgary advisory (no legal status), accepted by the city's technical interpretation committee 2023-12-18, document dated 2024-01-29; it applies until the end of the secondary suite amnesty (2026-12-31) and then is to be reviewed. The bedroom-window sentence is quoted with an Article-level reference; smoke alarms are cited only at Subsection 9.10.19. level and the exterior-stair openings point to advisory B23-012 (separate case), so neither is in gold. Division A 1.1.1.2. (alternative proposals for existing buildings) is the stated basis and is not Division B."
+ },
+ {
+  "id": "ab-calgary-airborne-sound-between-dwellings",
+  "type": "interpretation",
+  "applicant": "homebuilder",
+  "source": {
+   "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/br-advisory-enforcement-of-astc-requirements-2019.pdf",
+   "title": "Calgary Advisory - Administration of Apparent Sound Transmission Classification Class (ASTC) Requirements",
+   "issuer": "City of Calgary (Calgary Building Services, Planning & Development)",
+   "date": "2019-10",
+   "edition_cited": "NBC(AE) 2019",
+   "excerpt": "Install an assembly with an ASTC rating not less than 47 determined through calculations conforming …"
+  },
+  "description": "We build row houses and multi-residential buildings in Calgary, and the code now protects each dwelling from airborne noise from other units and spaces. We can use a wall or floor assembly rated at least 50 for sound transmission class and build the adjoining walls the way the code specifies, or we can show an apparent sound transmission class of at least 47 by testing in place, by calculation with a letter from an architect or engineer, or by using an assembly from the code's rating tables together with the adjoining construction details. A house with a secondary suite is allowed lower ratings. Which provisions must our drawings cite, and what do we submit at permit application and before occupancy?",
+  "gold": [
+   "9.11.1.1.",
+   "9.11.1.4.",
+   "5.8.1.4.",
+   "5.8.1.5."
+  ],
+  "context": [
+   "9.10.3.1."
+  ],
+  "mapping": [
+   {
+    "article": "9.11.1.1.",
+    "as_cited": "Clause 9.11.1.1.(2)(a), NBC(AE) 2019",
+    "codedb_title": "Required Protection",
+    "verification": "same number, same requirement: 2023 text says 'which together provide an apparent sound transmission class (ASTC) rating of not less than 47'"
+   },
+   {
+    "article": "9.11.1.4.",
+    "as_cited": "Article 9.11.1.4., NBC(AE) 2019",
+    "codedb_title": "Adjoining Constructions",
+    "verification": "same number, same requirement: 2023 text says 'Flanking wall assemblies connected to a separating floor or ceiling assembly shall be constructed with'"
+   },
+   {
+    "article": "5.8.1.4.",
+    "as_cited": "Article 5.8.1.4. (detailed method), NBC(AE) 2019",
+    "codedb_title": "Detailed Method for Calculating ASTC",
+    "verification": "same number, same requirement: 2023 text says 'The sound transmission loss measured in accordance with ASTM E90'"
+   },
+   {
+    "article": "5.8.1.5.",
+    "as_cited": "Article 5.8.1.5. (simplified method), NBC(AE) 2019",
+    "codedb_title": "Simplified Method for Calculating ASTC",
+    "verification": "same number, same requirement: 2023 text says 'The STC rating shall be used in lieu of the weighted sound reduction index'"
+   }
+  ],
+  "confidence": "high",
+  "rewrite_of": null,
+  "notes": "Calgary advisory (no legal status) issued by the technical interpretation committee 2019-10-09. The 2023 sentences carry the same options as the advisory (STC 50 plus adjoining construction, ASTC 47, and the three secondary-suite routes: prescriptive assembly, STC 43, ASTC 40). Tables 9.10.3.1.-A and -B (fire and sound resistance tables) are cited by table name; the article that holds them is context because tables are not stored in the code database. Part 5 applies to larger Part 3 buildings and Part 9 to smaller buildings, so both parts appear in gold."
+ },
+ {
+  "id": "ab-calgary-micro-brewery-tasting-room-separation",
+  "type": "interpretation",
+  "applicant": "owner-developer",
+  "source": {
+   "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/br-advisory-micro-brewery.pdf",
+   "title": "Calgary Advisory - Application of Alberta Building and Fire Codes to a Micro-brewery",
+   "issuer": "City of Calgary (Calgary Building Services, Planning & Development)",
+   "date": "2019-07",
+   "edition_cited": "ABC (edition not stated in the advisory; issued July 2019, when ABC 2014 applied)",
+   "excerpt": "The fire separation between adjacent tenants is to comply with Articles 3.1.3.1. and 3.3.1.1. of …"
+  },
+  "description": "We plan to open a micro-brewery with a tasting room in a multi-tenant building in Calgary. The code has no brewery-specific rules, and the city says a micro-brewery would not be high hazard but could be treated as medium or low hazard industrial. If the tasting room stays under about a tenth of the building area it can be treated as part of the brewery with no fire separation between them, but a larger tasting room is treated as its own major occupancy. We also need to know how to separate the brewery from the neighbouring tenants and what an architect or engineer must prepare if our design departs from the prescriptive rules.",
+  "gold": [
+   "3.1.3.1.",
+   "3.3.1.1."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "3.1.3.1.",
+    "as_cited": "Article 3.1.3.1., ABC (edition not stated in the advisory)",
+    "codedb_title": "Separation of Major Occupancies",
+    "verification": "same number, same requirement: 2023 text says 'major occupancies shall be separated from adjoining major occupancies by fire separations'"
+   },
+   {
+    "article": "3.3.1.1.",
+    "as_cited": "Article 3.3.1.1., ABC (edition not stated in the advisory)",
+    "codedb_title": "Separation of Suites",
+    "verification": "same number, same requirement: 2023 text says 'each suite in other than business and personal services occupancies shall be separated from adjoining suites'"
+   }
+  ],
+  "confidence": "medium",
+  "rewrite_of": null,
+  "notes": "Calgary advisory (no legal status) approved by the technical interpretation committee 2019-07-10. The advisory names these two articles for separating the brewery from adjacent tenants; the general construction requirements are only cited at Subsection 3.2.2. and the fire-safety-within-floor-areas rules at Subsection 3.3. level, so they are not articles in gold. Medium confidence because the advisory does not state a code edition; the 2023 text of both articles was matched to the described requirement. Distilling on site may change the classification to high-hazard industrial (stated in the advisory). The same two articles appear in the strip mall suite separation case."
+ }
+]

@@ -1,0 +1,2964 @@
+[
+ {
+  "id": "ca-ccmc-dimpled-foundation-dampproofing",
+  "type": "product-evaluation",
+  "applicant": "manufacturer",
+  "source": {
+   "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=12266-R&type=cert",
+   "title": "CCMC 12266-R: Platon Foundation Wrap, Canadian code compliance evaluation",
+   "issuer": "National Research Council Canada, Canadian Construction Materials Centre (CCMC)",
+   "date": "2026-09",
+   "edition_cited": "NBC 2020",
+   "excerpt": "when used as a material for dampproofing in accordance with the conditions and limitations stated …"
+  },
+  "description": "We manufacture a carbon-compounded, high-density polyethylene membrane with a dimpled surface that leaves a small air gap between a concrete foundation wall and the soil. We supply it as a complete system with fasteners, sealants and accessories to dampproof the outside of cast-in-place and concrete block basement walls, from the top of the footing up to final grade, on well-drained foundations in houses and small buildings. The membrane is not one of the dampproofing materials the code lists by name, so we want it accepted as an alternative, for walls up to about 3.7 m below grade, with the membrane kept out of sunlight and its top edge and joints fastened and sealed.",
+  "gold": [
+   "9.13.2.2."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.13.2.2.",
+    "as_cited": "Article 9.13.2.2., solution type Alternative, NBC 2020 (CCMC 12266-R)",
+    "codedb_title": "Dampproofing Materials",
+    "verification": "same number, same requirement: 2023 text says 'materials used for exterior dampproofing shall'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "Canada-wide CCMC opinion (not Alberta-specific); applicant is the product manufacturer. The report also ties use to well-drained foundations but cites the drainage subsection only at subsection level, so no context article is listed. Report first issued 1991-07; this is the 2026-09 version."
+ },
+ {
+  "id": "ca-ccmc-rigid-board-radon-barrier",
+  "type": "product-evaluation",
+  "applicant": "manufacturer",
+  "source": {
+   "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14349-R&type=cert",
+   "title": "CCMC 14349-R: FOAMULAR NGX RadonBARRIER Radon Abatement System, Canadian code compliance evaluation",
+   "issuer": "National Research Council Canada, Canadian Construction Materials Centre (CCMC)",
+   "date": "2025-06",
+   "edition_cited": "NBC 2020",
+   "excerpt": "The NBC 2020 benchmark is 6-mil polyethylene in accordance with Sentence 9.13.4.2.(1), Protection from Soil …"
+  },
+  "description": "We make extruded polystyrene insulation boards, with joint tape, gun foam and flexible sealant, that we sell as a sub-slab radon mitigation system for houses and other buildings. The boards, 25 to 50 mm thick, sit directly on the gravel layer under a concrete slab with all joints and penetrations sealed, so the board plane serves as the air and soil-gas barrier instead of the usual polyethylene sheet. We want this rigid-board system accepted as an effective barrier to soil gas entry, installed only by our trained installers, with a thicker gravel layer to allow for gravel pressing into the board.",
+  "gold": [
+   "9.13.4.2.",
+   "9.25.3.6."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.13.4.2.",
+    "as_cited": "Sentence 9.13.4.2.(1), solution type Alternative, NBC 2020 (CCMC 14349-R)",
+    "codedb_title": "Protection from Soil Gas Ingress",
+    "verification": "same number, same requirement: 2023 text says 'assemblies separating conditioned space from the ground shall be protected by an air barrier system'"
+   },
+   {
+    "article": "9.25.3.6.",
+    "as_cited": "Sentence 9.25.3.6.(1), solution type Alternative, NBC 2020 (CCMC 14349-R)",
+    "codedb_title": "Air Barrier Systems in Floors-on-ground",
+    "verification": "same number, same requirement: 2023 text says 'shall conform to CAN/CGSB-51.34'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "Both gold articles are rows marked Alternative in the CCMC compliance opinion; the report names 6-mil polyethylene as the acceptable-solution benchmark. Canada-wide opinion."
+ },
+ {
+  "id": "ca-ccmc-xps-air-barrier-system",
+  "type": "product-evaluation",
+  "applicant": "manufacturer",
+  "source": {
+   "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=12935-R&type=cert",
+   "title": "CCMC 12935-R: FOAMULAR NGX CodeBord Air Barrier System, Canadian code compliance evaluation",
+   "issuer": "National Research Council Canada, Canadian Construction Materials Centre (CCMC)",
+   "date": "2025-10",
+   "edition_cited": "NBC 2020",
+   "excerpt": "when used as an air barrier system for exterior walls of buildings in accordance with …"
+  },
+  "description": "We make extruded polystyrene insulation panels that are installed over wood-frame exterior walls, with foam gaskets under the panel joints plus tape and sealants, as a complete exterior air barrier system for low-rise buildings. A hybrid version also resists wind loads on studs at 400 or 600 mm spacing, for building heights of about 12 to 20 m depending on panel thickness and local wind pressure, and an original version is limited to 12 m. The usual route to airtightness relies on polyethylene sheet, so we want our board-based system accepted as the air barrier, installed only by our trained contractors from our manual.",
+  "gold": [
+   "9.25.3.2."
+  ],
+  "context": [
+   "9.25.3.1.",
+   "9.25.3.3.",
+   "5.1.4.1.",
+   "5.1.4.2."
+  ],
+  "mapping": [
+   {
+    "article": "9.25.3.2.",
+    "as_cited": "Sentence 9.25.3.2.(2), solution type Alternative, NBC 2020 (CCMC 12935-R)",
+    "codedb_title": "Air Barrier System Properties",
+    "verification": "same number, same requirement: 2023 text says 'Where polyethylene sheet is used to provide airtightness in the air barrier system'"
+   },
+   {
+    "article": "9.25.3.1.",
+    "as_cited": "Article 9.25.3.1., solution type Acceptable, NBC 2020 (CCMC 12935-R)",
+    "codedb_title": "Required Barrier to Air Leakage",
+    "verification": "same number, same requirement (context article): 2023 text says 'constructed so as to include an air barrier system that will provide a continuous barrier to air leakage'"
+   },
+   {
+    "article": "9.25.3.3.",
+    "as_cited": "Article 9.25.3.3., solution type Acceptable, NBC 2020 (CCMC 12935-R)",
+    "codedb_title": "Continuity of the Air Barrier System",
+    "verification": "same number, same requirement (context article): 2023 text says 'where the air barrier system consists of an air-impermeable panel-type material, all joints shall be sealed'"
+   },
+   {
+    "article": "5.1.4.1.",
+    "as_cited": "Article 5.1.4.1., solution type Acceptable, NBC 2020 (CCMC 12935-R)",
+    "codedb_title": "Structural and Environmental Loads",
+    "verification": "same number, same requirement (context article): 2023 text says 'shall have sufficient capacity and integrity to resist or accommodate'"
+   },
+   {
+    "article": "5.1.4.2.",
+    "as_cited": "Article 5.1.4.2., solution type Acceptable, NBC 2020 (CCMC 12935-R)",
+    "codedb_title": "Resistance to Deterioration",
+    "verification": "same number, same requirement (context article): 2023 text says 'resistant to any mechanisms of deterioration'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "Context articles are rows the CCMC opinion marks Acceptable (met without variation). Canada-wide opinion; the Part 5 rows are listed in the opinion, and the report also qualifies the system for wind load on walls."
+ },
+ {
+  "id": "ca-ccmc-sheathing-tape-joints",
+  "type": "product-evaluation",
+  "applicant": "manufacturer",
+  "source": {
+   "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=11362-R&type=cert",
+   "title": "CCMC 11362-R: 3M Construction Sheathing Tape 8088, Canadian code compliance evaluation",
+   "issuer": "National Research Council Canada, Canadian Construction Materials Centre (CCMC)",
+   "date": "2026-05",
+   "edition_cited": "NBC 2020 (also NBC 2015)",
+   "excerpt": "when used as a sheathing tape in accordance with the conditions and limitations stated in …"
+  },
+  "description": "We make a sheathing tape, a polypropylene film with a clear acrylic pressure-sensitive adhesive sold in rolls 60 to 102 mm wide, to seal the joints and tears of housewrap-type sheathing membranes behind cladding on new and existing residential walls. We want our tape accepted as an alternative way of treating the joints in the membrane layer, in place of relying on sheet overlaps alone. It would go on dry, clean membrane, even in cold weather down to minus 10 degrees, be pressed on firmly, and be marked with our evaluation number along the roll.",
+  "gold": [
+   "9.27.3.3."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.27.3.3.",
+    "as_cited": "Sentences 9.27.3.3.(2) and (3), solution type Alternative, NBC 2020 and NBC 2015 (CCMC 11362-R)",
+    "codedb_title": "Required Sheathing Membrane and Installation",
+    "verification": "same number, same requirement: 2023 text says 'shall be applied so that joints are lapped not less than 100 mm'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "Both table rows (the lapped-joints sentence and the horizontal-overlap sentence) are in one article, so the article is the single gold item. First issued 1986-11."
+ },
+ {
+  "id": "ca-ccmc-eps-sheathing-integral-membrane",
+  "type": "product-evaluation",
+  "applicant": "manufacturer",
+  "source": {
+   "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=13488-R&type=cert",
+   "title": "CCMC 13488-R: AiRclad (Sheathing Membrane / Insulation Board), Canadian code compliance evaluation",
+   "issuer": "National Research Council Canada, Canadian Construction Materials Centre (CCMC)",
+   "date": "2026-01",
+   "edition_cited": "NBC 2020 (also NBC 2015)",
+   "excerpt": "when used as an exterior insulating sheathing with an integral sheathing membrane (weather side) in …"
+  },
+  "description": "We manufacture moulded expanded polystyrene insulation panels that come laminated at the plant with a vapour-permeable polyolefin film on the weather side. The panels go on the outside of the wall framing as insulating sheathing, at least 38 mm thick where sheathing is required, with the film acting as the sheathing membrane behind the cladding so no separate membrane layer is installed. The panels are covered from sunlight within 60 days and the cladding leaves an air space behind it. We want the film accepted as the sheathing membrane as an alternative to the code material standard for that layer.",
+  "gold": [
+   "9.27.3.2."
+  ],
+  "context": [
+   "9.25.2.2.",
+   "9.27.3.4.",
+   "9.23.17.2."
+  ],
+  "mapping": [
+   {
+    "article": "9.27.3.2.",
+    "as_cited": "Article 9.27.3.2., solution type Alternative, NBC 2020 (CCMC 13488-R)",
+    "codedb_title": "Sheathing Membrane Material Standard",
+    "verification": "same number, same requirement: 2023 text says 'Sheathing membranes shall conform to the performance requirements of CAN/CGSB-51.32-M'"
+   },
+   {
+    "article": "9.25.2.2.",
+    "as_cited": "Article 9.25.2.2., solution type Acceptable, NBC 2020 (CCMC 13488-R)",
+    "codedb_title": "Insulation Materials",
+    "verification": "same number, same requirement (context article): 2023 text says 'thermal insulation shall conform to the requirements of'"
+   },
+   {
+    "article": "9.27.3.4.",
+    "as_cited": "Sentence 9.27.3.4.(2), cited in the conditions (CCMC 13488-R)",
+    "codedb_title": "Insulating Sheathing in lieu of Sheathing Membrane",
+    "verification": "same number, same requirement (context article): 2023 text says 'exterior insulating sheathing with an integral sheathing membrane is installed, a separate sheathing membrane is not required'"
+   },
+   {
+    "article": "9.23.17.2.",
+    "as_cited": "Table 9.23.17.2.-A cited in the conditions (CCMC 13488-R)",
+    "codedb_title": "Thickness, Rating and Material Standards",
+    "verification": "same number, same requirement (context article): 2023 text says 'it shall conform to either Table 9.23.17.2.-A or 9.23.17.2.-B'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "Context: 9.25.2.2. is a row marked Acceptable in the opinion; 9.27.3.4. and 9.23.17.2. are cited by the report in its conditions (insulating sheathing in lieu of membrane; minimum 38 mm sheathing thickness). Canada-wide opinion."
+ },
+ {
+  "id": "ca-ccmc-intumescent-thermal-barrier-over-spf",
+  "type": "product-evaluation",
+  "applicant": "manufacturer",
+  "source": {
+   "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14036-R&type=cert",
+   "title": "CCMC 14036-R: DC315, Canadian code compliance evaluation",
+   "issuer": "National Research Council Canada, Canadian Construction Materials Centre (CCMC)",
+   "date": "2026-03",
+   "edition_cited": "NBC 2020 (also NBC 2015)",
+   "excerpt": "when used as thermal barrier over spray-applied polyurethane foam insulation in accordance with the conditions …"
+  },
+  "description": "We make a liquid intumescent coating that licensed installers spray over medium-density spray polyurethane foam insulation in wall stud cavities and ceilings. We want the coating accepted as the protective thermal barrier over the foam in place of the finishes the code lists for covering foamed plastic, such as gypsum board, plywood, OSB, fibreboard, particleboard or plaster, in both houses and larger buildings. A thinner wet coat is proposed to match the listed wood-based panels, and a thicker coat to match 12.7 mm gypsum board or a laboratory thermal-barrier classification. Exposed framing is also coated where the local authority requires it.",
+  "gold": [
+   "3.1.4.2.",
+   "3.1.5.15.",
+   "9.10.17.10.",
+   "9.25.2.3.",
+   "9.29.5.2."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "3.1.4.2.",
+    "as_cited": "Sentence 3.1.4.2.(1)(a), solution type Alternative, NBC 2020 and NBC 2015 (CCMC 14036-R)",
+    "codedb_title": "Protection of Foamed Plastics",
+    "verification": "same number, same requirement: 2023 text says 'foamed plastics that form part of a wall or ceiling assembly in combustible construction shall be protected'"
+   },
+   {
+    "article": "3.1.5.15.",
+    "as_cited": "Sentence 3.1.5.15.(2), solution type Alternative, NBC 2020 and NBC 2015 (CCMC 14036-R)",
+    "codedb_title": "Foamed Plastic Insulation",
+    "verification": "same number, same requirement: 2023 text says 'foamed plastic insulation with a flame-spread rating not more than 500 on any exposed surface'"
+   },
+   {
+    "article": "9.10.17.10.",
+    "as_cited": "Sentence 9.10.17.10.(1)(a), solution type Alternative, NBC 2020 and NBC 2015 (CCMC 14036-R)",
+    "codedb_title": "Protection of Foamed Plastics",
+    "verification": "same number, same requirement: 2023 text says 'foamed plastics that form part of a wall or ceiling assembly shall be protected from adjacent space in the building'"
+   },
+   {
+    "article": "9.25.2.3.",
+    "as_cited": "Sentence 9.25.2.3.(7), solution type Alternative, NBC 2020 and NBC 2015 (CCMC 14036-R)",
+    "codedb_title": "Installation of Thermal Insulation",
+    "verification": "same number, same requirement: 2023 text says 'Insulation located in areas where it may be subject to mechanical damage shall be protected by a covering'"
+   },
+   {
+    "article": "9.29.5.2.",
+    "as_cited": "Article 9.29.5.2., solution type Alternative, NBC 2020 and NBC 2015 (CCMC 14036-R)",
+    "codedb_title": "Materials",
+    "verification": "same number, same requirement: 2023 text says 'Gypsum products shall conform to'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "The opinion also marks the whole finish subsections for plaster, gypsum board joints, plywood, hardboard, fibreboard and particleboard/OSB finishes as Alternative; those are subsection-level rows and cannot be mapped to articles without judgment, so only the article- and sentence-level rows are gold. Covers both Part 3 and Part 9 buildings."
+ },
+ {
+  "id": "ca-ccmc-pmdi-binder-osb-panels",
+  "type": "product-evaluation",
+  "applicant": "manufacturer",
+  "source": {
+   "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14072-R&type=cert",
+   "title": "CCMC 14072-R: WANNATE PM-200 (pMDI binder for OSB), Canadian code compliance evaluation",
+   "issuer": "National Research Council Canada, Canadian Construction Materials Centre (CCMC)",
+   "date": "2024-07",
+   "edition_cited": "NBC 2020 (also NBC 2015)",
+   "excerpt": "when used as binder for oriented strandboards (OSB) in accordance with the conditions and limitations …"
+  },
+  "description": "We make a fast-curing isocyanate (pMDI) resin used as the binder in the core layer of oriented strandboard panels. The binder is evaluated under the standard for OSB binder systems, and each finished panel would still meet the construction sheathing standard and be certified by an accredited body. Panel mills that use our binder want their OSB accepted wherever the code calls for panels made to the listed wood-panel standards: subflooring, roof sheathing, wall sheathing, OSB cladding, interior panel finish and panel underlay in houses and small buildings.",
+  "gold": [
+   "9.23.15.2.",
+   "9.23.16.2.",
+   "9.23.17.2.",
+   "9.27.10.1.",
+   "9.29.9.1.",
+   "9.30.2.2."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.23.15.2.",
+    "as_cited": "Article 9.23.15.2., solution type Alternative, NBC 2020 and NBC 2015 (CCMC 14072-R)",
+    "codedb_title": "Material Standards",
+    "verification": "same number, same requirement: 2023 text says 'wood-based panels for subfloors shall conform to'"
+   },
+   {
+    "article": "9.23.16.2.",
+    "as_cited": "Article 9.23.16.2., solution type Alternative, NBC 2020 and NBC 2015 (CCMC 14072-R)",
+    "codedb_title": "Material Standards",
+    "verification": "same number, same requirement: 2023 text says 'Wood-based panels used for roof sheathing shall conform to the requirements of'"
+   },
+   {
+    "article": "9.23.17.2.",
+    "as_cited": "Article 9.23.17.2., solution type Alternative, NBC 2020 and NBC 2015 (CCMC 14072-R)",
+    "codedb_title": "Thickness, Rating and Material Standards",
+    "verification": "same number, same requirement: 2023 text says 'it shall conform to either Table 9.23.17.2.-A or 9.23.17.2.-B'"
+   },
+   {
+    "article": "9.27.10.1.",
+    "as_cited": "Article 9.27.10.1., solution type Alternative, NBC 2020 and NBC 2015 (CCMC 14072-R)",
+    "codedb_title": "Material Standard",
+    "verification": "same number, same requirement: 2023 text says 'OSB and waferboard cladding shall conform to CSA O437.0'"
+   },
+   {
+    "article": "9.29.9.1.",
+    "as_cited": "Article 9.29.9.1., solution type Alternative, NBC 2020 and NBC 2015 (CCMC 14072-R)",
+    "codedb_title": "Material Standard",
+    "verification": "same number, same requirement: 2023 text says 'OSB or waferboard finish shall conform to'"
+   },
+   {
+    "article": "9.30.2.2.",
+    "as_cited": "Article 9.30.2.2., solution type Alternative, NBC 2020 and NBC 2015 (CCMC 14072-R)",
+    "codedb_title": "Materials and Thickness",
+    "verification": "same number, same requirement: 2023 text says 'Panel-type underlay shall be not less than 6 mm thick and shall conform to'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "The CCMC opinion lists these six Material Standard / thickness articles, all marked Alternative. Several other pMDI binders carry the identical list in separate CCMC reports (Huntsman, BASF, Covestro); only one is used here to avoid near-duplicate cases."
+ },
+ {
+  "id": "ca-ccmc-open-cell-spf-insulation",
+  "type": "product-evaluation",
+  "applicant": "manufacturer",
+  "source": {
+   "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14138-R&type=cert",
+   "title": "CCMC 14138-R: Duka Open Cell SPF, Canadian code compliance evaluation",
+   "issuer": "National Research Council Canada, Canadian Construction Materials Centre (CCMC)",
+   "date": "2026-02",
+   "edition_cited": "NBC 2020 (also NBC 2015)",
+   "excerpt": "when used as a thermal insulation in accordance with the conditions and limitations stated in …"
+  },
+  "description": "We make a low-density, open-cell, spray-in-place polyurethane foam insulation, mixed on site from two components and installed by certified installers trained by us under a site quality assurance program. It is for open cavities in new or retrofit wood-frame buildings: exterior walls including perimeter joists, cathedral ceilings with a vented air space, floors over garages, cantilevered floors and interior below-grade foundation walls. This type of foam is not one of the thermal insulation materials the prescriptive rules name, so we want it accepted as an alternative for the required insulation.",
+  "gold": [
+   "9.25.2.2."
+  ],
+  "context": [
+   "9.25.2.3."
+  ],
+  "mapping": [
+   {
+    "article": "9.25.2.2.",
+    "as_cited": "Article 9.25.2.2., solution type Alternative, NBC 2020 and NBC 2015 (CCMC 14138-R)",
+    "codedb_title": "Insulation Materials",
+    "verification": "same number, same requirement: 2023 text says 'thermal insulation shall conform to the requirements of'"
+   },
+   {
+    "article": "9.25.2.3.",
+    "as_cited": "Article 9.25.2.3., cited in the conditions (CCMC 14138-R)",
+    "codedb_title": "Installation of Thermal Insulation",
+    "verification": "same number, same requirement (context article): 2023 text says 'Insulation shall be installed so that there is a reasonably uniform insulating value'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "Same article and same type of material as BC Building Code Appeal Board decision 1945 (light-density open-cell spray foam needs an alternative solution to the insulation material list). Verified that the 2023 material list does not include a light-density spray foam standard."
+ },
+ {
+  "id": "ca-ccmc-closed-cell-spf-single-pass",
+  "type": "product-evaluation",
+  "applicant": "manufacturer",
+  "source": {
+   "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14230-R&type=cert",
+   "title": "CCMC 14230-R: WALLTITE XL01, Canadian code compliance evaluation",
+   "issuer": "National Research Council Canada, Canadian Construction Materials Centre (CCMC)",
+   "date": "2025-10",
+   "edition_cited": "NBC 2020 (also NBC 2015)",
+   "excerpt": "This installation method differs from the method described in CAN/ULC-S705.2-05 ... which specifies a 50-mm …"
+  },
+  "description": "We supply a two-component, medium-density, closed-cell spray polyurethane foam sold as a high-lift product. Our qualified installers mix it on site and spray it in a single pass to a cured thickness of 50 to 127 mm, whereas the installation standard the code points to limits a single pass to 50 mm. We want the thicker single-pass method accepted as an alternative for insulating walls and ceilings, only on clean, dry substrates, with no multiple-pass work and no exterior below-grade or attic use. Foam sprayed beyond about 140 mm would have to be removed and redone.",
+  "gold": [
+   "5.9.1.1.",
+   "9.25.2.5."
+  ],
+  "context": [
+   "9.25.2.3."
+  ],
+  "mapping": [
+   {
+    "article": "5.9.1.1.",
+    "as_cited": "Article 5.9.1.1., solution type Alternative, NBC 2020 (CCMC 14230-R)",
+    "codedb_title": "Compliance with Applicable Standards",
+    "verification": "same number, same requirement: 2023 text says 'materials and components, and their installation, shall conform to the requirements of the applicable standards'"
+   },
+   {
+    "article": "9.25.2.5.",
+    "as_cited": "Article 9.25.2.5., solution type Alternative, NBC 2020 (CCMC 14230-R)",
+    "codedb_title": "Installation of Spray-Applied Polyurethane",
+    "verification": "same number, same requirement: 2023 text says 'Spray-applied polyurethane insulation shall be installed in accordance with CAN/ULC-S705.2'"
+   },
+   {
+    "article": "9.25.2.3.",
+    "as_cited": "Article 9.25.2.3., cited in the conditions (CCMC 14230-R)",
+    "codedb_title": "Installation of Thermal Insulation",
+    "verification": "same number, same requirement (context article): 2023 text says 'Insulation shall be installed so that there is a reasonably uniform insulating value'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "The varied item is the installation method: the application standard allows 50 mm per pass, the product is applied up to 127 mm in one pass. In the older NBC 2015 table the report also marks the insulation material list as Alternative; the NBC 2020 table does not, so it is not used. Canada-wide opinion."
+ },
+ {
+  "id": "ca-ccmc-reflective-eps-board-foundation-wall",
+  "type": "product-evaluation",
+  "applicant": "manufacturer",
+  "source": {
+   "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=13459-R&type=cert",
+   "title": "CCMC 13459-R: EZfoil (EPS board with low-E facer), Canadian code compliance evaluation",
+   "issuer": "National Research Council Canada, Canadian Construction Materials Centre (CCMC)",
+   "date": "2026-02",
+   "edition_cited": "NBC 2020 (also NBC 2015)",
+   "excerpt": "when used as a vapour barrier and a thermal insulation board installed in conjunction with …"
+  },
+  "description": "We make a 76 mm moulded expanded polystyrene board laminated on one side with an aluminized kraft paper facer that has low-emissivity properties. The boards are nailed to the inside face of poured concrete basement walls with the reflective face toward a furred air space, then covered with gypsum board, and the joints are sealed with 50 mm aluminum tape. We want the board accepted both as the vapour barrier and as the insulation of enclosed foundation walls, and we want the whole wall assembly credited with the thermal resistance measured in full-scale hot-box testing, including the reflective air space.",
+  "gold": [
+   "9.25.2.2.",
+   "9.25.4.2.",
+   "9.36.2.2.",
+   "9.36.2.8."
+  ],
+  "context": [
+   "9.25.4.3."
+  ],
+  "mapping": [
+   {
+    "article": "9.25.2.2.",
+    "as_cited": "Sentence 9.25.2.2.(1), solution type Alternative, NBC 2020 (CCMC 13459-R)",
+    "codedb_title": "Insulation Materials",
+    "verification": "same number, same requirement: 2023 text says 'thermal insulation shall conform to the requirements of'"
+   },
+   {
+    "article": "9.25.4.2.",
+    "as_cited": "Sentence 9.25.4.2.(5), solution type Alternative, NBC 2020 (CCMC 13459-R)",
+    "codedb_title": "Vapour Barrier Materials",
+    "verification": "same number, same requirement: 2023 text says 'Membrane-type vapour barriers other than polyethylene shall conform to the requirements of'"
+   },
+   {
+    "article": "9.36.2.2.",
+    "as_cited": "Clause 9.36.2.2.(4)(b), solution type Alternative, NBC 2020 (CCMC 13459-R)",
+    "codedb_title": "Determination of Thermal Characteristics of Materials, Components and Assemblies",
+    "verification": "same number, same requirement: 2023 text says 'laboratory tests performed in accordance with ASTM C1363'"
+   },
+   {
+    "article": "9.36.2.8.",
+    "as_cited": "Article 9.36.2.8., solution type Alternative, NBC 2020 (CCMC 13459-R)",
+    "codedb_title": "Thermal Characteristics of Building Assemblies Below-Grade or in Contact with the Ground",
+    "verification": "same number, same requirement: 2023 text says 'the effective thermal resistance of building assemblies that are below-grade or in contact with the ground'"
+   },
+   {
+    "article": "9.25.4.3.",
+    "as_cited": "Article 9.25.4.3., solution type Acceptable, NBC 2020 (CCMC 13459-R)",
+    "codedb_title": "Installation of Vapour Barriers",
+    "verification": "same number, same requirement (context article): 2023 text says 'shall protect the warm side of wall, ceiling and floor assemblies'"
+   }
+  ],
+  "confidence": "medium",
+  "notes": "Energy articles: the NBC(AE) 2023 text of 9.36.2.8. and 9.36.2.2. was read and keeps the same requirement (effective thermal resistance of below-grade assemblies; lab-test method for opaque assemblies); numeric table values were not compared, so Alberta-specific table differences are not ruled out."
+ },
+ {
+  "id": "ca-ccmc-insulated-polymer-cladding",
+  "type": "product-evaluation",
+  "applicant": "manufacturer",
+  "source": {
+   "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14182-R&type=cert",
+   "title": "CCMC 14182-R: ALIGN Composite Cladding 7 in. Plank, Canadian code compliance evaluation",
+   "issuer": "National Research Council Canada, Canadian Construction Materials Centre (CCMC)",
+   "date": "2026-05",
+   "edition_cited": "NBC 2020",
+   "excerpt": "when used as an exterior siding for buildings of combustible construction in accordance with the …"
+  },
+  "description": "We make an insulated exterior cladding plank of glass-reinforced polymer with a graphite-infused polystyrene insulation backing glued and shaped to the back of the siding profile. Planks are nailed through pre-punched slots along the top edge, which the next plank hides, over furring at least 19 by 38 mm and no more than 600 mm apart, leaving a 19 mm clear air space outside the sheathing membrane. It is for houses and small buildings of combustible construction. The code only describes insulated siding that is made of vinyl, so we want our polymer-based insulated siding accepted as an alternative.",
+  "gold": [
+   "9.27.12.1."
+  ],
+  "context": [
+   "9.27.3.2.",
+   "9.27.3.8.",
+   "9.27.5.3."
+  ],
+  "mapping": [
+   {
+    "article": "9.27.12.1.",
+    "as_cited": "Sentence 9.27.12.1.(2), solution type Alternative, NBC 2020 (CCMC 14182-R)",
+    "codedb_title": "Material Standards",
+    "verification": "same number, same requirement: 2023 text says 'Insulated vinyl siding shall conform to ASTM D7793'"
+   },
+   {
+    "article": "9.27.3.2.",
+    "as_cited": "Article 9.27.3.2., cited in the conditions (CCMC 14182-R)",
+    "codedb_title": "Sheathing Membrane Material Standard",
+    "verification": "same number, same requirement (context article): 2023 text says 'Sheathing membranes shall conform to the performance requirements of CAN/CGSB-51.32-M'"
+   },
+   {
+    "article": "9.27.3.8.",
+    "as_cited": "Article 9.27.3.8., cited in the conditions (CCMC 14182-R)",
+    "codedb_title": "Flashing Installation",
+    "verification": "same number, same requirement (context article): 2023 text says 'Flashing'"
+   },
+   {
+    "article": "9.27.5.3.",
+    "as_cited": "Article 9.27.5.3., cited in the conditions (CCMC 14182-R)",
+    "codedb_title": "Furring",
+    "verification": "same number, same requirement (context article): 2023 text says 'Furring'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "The CCMC opinion also marks the whole vinyl-siding subsection as Alternative (subsection level, not an article). Context articles are cited by the report in its installation conditions."
+ },
+ {
+  "id": "ca-ccmc-clip-fastened-composite-siding",
+  "type": "product-evaluation",
+  "applicant": "manufacturer",
+  "source": {
+   "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14734-R&type=cert",
+   "title": "CCMC 14734-R: UH61 Fluted Wall Panels, Canadian code compliance evaluation",
+   "issuer": "National Research Council Canada, Canadian Construction Materials Centre (CCMC)",
+   "date": "2026-05",
+   "edition_cited": "NBC 2020",
+   "excerpt": "when used as wood thermoplastic composite lumber (WTCL) wall cladding in accordance with the conditions …"
+  },
+  "description": "We make fluted exterior wall cladding planks from wood thermoplastic composite lumber, with trim of the same material and concealed aluminum clips that interlock successive planks and hold them to the wall. The planks go on furring at least 19 by 38 mm and no more than 406 mm apart, over the sheathing membrane, with a vented air space of at least 10 mm, flashing and fire blocks in the cavity. They are for houses and small buildings within tested wind-pressure limits. Because the planks are held by clips rather than the nail or staple sizes and spacings the code tabulates, and are not a listed siding material, we want them accepted as an alternative.",
+  "gold": [
+   "9.27.5.4.",
+   "9.27.12.1."
+  ],
+  "context": [
+   "9.10.16.2."
+  ],
+  "mapping": [
+   {
+    "article": "9.27.5.4.",
+    "as_cited": "Article 9.27.5.4., solution type Alternative, NBC 2020 (CCMC 14734-R)",
+    "codedb_title": "Size and Spacing of Fasteners",
+    "verification": "same number, same requirement: 2023 text says 'Nail or staple size and spacing for the attachment of cladding and trim to wood framing'"
+   },
+   {
+    "article": "9.27.12.1.",
+    "as_cited": "Sentence 9.27.12.1.(1), solution type Alternative, NBC 2020 (CCMC 14734-R)",
+    "codedb_title": "Material Standards",
+    "verification": "same number, same requirement: 2023 text says 'Vinyl siding shall conform to ASTM D3679'"
+   },
+   {
+    "article": "9.10.16.2.",
+    "as_cited": "Article 9.10.16.2., cited in the conditions (CCMC 14734-R)",
+    "codedb_title": "Required Fire Blocks in Wall Assemblies",
+    "verification": "same number, same requirement (context article): 2023 text says 'fire blocks shall be provided to block off concealed spaces within wall assemblies'"
+   }
+  ],
+  "confidence": "medium",
+  "notes": "Medium: the report cites the fire block article in its conditions under a different heading than the 2023 title (the report says concealed spaces; 2023 title is wall assemblies) but the requirement read is the same. The vinyl siding row is marked Alternative in the opinion and is kept as gold on that basis. Applicant text is a cautious reading of why the rows are Alternative."
+ },
+ {
+  "id": "ca-ccmc-pvc-footing-form-and-drain",
+  "type": "product-evaluation",
+  "applicant": "manufacturer",
+  "source": {
+   "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=13492-R&type=cert",
+   "title": "CCMC 13492-R: Form-A-Drain, Canadian code compliance evaluation",
+   "issuer": "National Research Council Canada, Canadian Construction Materials Centre (CCMC)",
+   "date": "2026-01",
+   "edition_cited": "NBC 2020",
+   "excerpt": "when used as a concrete footing form and drainage tile in accordance with the conditions …"
+  },
+  "description": "We manufacture an extruded PVC channel, from 100 to 250 mm deep, that serves as the concrete form for a foundation footing and then stays in place as the foundation drainage tile. It is laid on undisturbed or well-compacted soil with its top below the underside of the floor slab or crawl space cover, then covered with at least 150 mm of clean crushed stone, for depths up to 3.7 m. It must be shaded from sunlight until buried and kept clear of filter fabric. We want it accepted both as the footing formwork and as the foundation drain, as an alternative to the listed drain tile and pipe products.",
+  "gold": [
+   "4.1.1.3.",
+   "9.14.3.1.",
+   "9.14.3.2.",
+   "9.14.3.3."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "4.1.1.3.",
+    "as_cited": "Clause 4.1.1.3.(4)(c), solution type Alternative, NBC 2020 (CCMC 13492-R)",
+    "codedb_title": "Design Requirements",
+    "verification": "same number, same requirement: 2023 text says 'Falsework, scaffolding, and formwork shall be designed in conformance with'"
+   },
+   {
+    "article": "9.14.3.1.",
+    "as_cited": "Article 9.14.3.1., solution type Alternative, NBC 2020 (CCMC 13492-R)",
+    "codedb_title": "Material Standards",
+    "verification": "same number, same requirement: 2023 text says 'Drain tile and drain pipe for foundation drainage shall conform to'"
+   },
+   {
+    "article": "9.14.3.2.",
+    "as_cited": "Article 9.14.3.2., solution type Alternative, NBC 2020 (CCMC 13492-R)",
+    "codedb_title": "Minimum Size",
+    "verification": "same number, same requirement: 2023 text says 'not less than 100 mm in diam'"
+   },
+   {
+    "article": "9.14.3.3.",
+    "as_cited": "Article 9.14.3.3., solution type Alternative, NBC 2020 (CCMC 13492-R)",
+    "codedb_title": "Installation",
+    "verification": "same number, same requirement: 2023 text says 'Drain tile or pipe shall be laid on undisturbed or well-compacted soil'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "The opinion also marks the drainage disposal subsection as Alternative; that is a subsection-level row and is not mapped to an article. The report says the product has not been evaluated as part of a radon or other soil-gas mitigation system."
+ },
+ {
+  "id": "ca-ccmc-vented-plastic-sill-plate",
+  "type": "product-evaluation",
+  "applicant": "manufacturer",
+  "source": {
+   "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14229-R&type=cert",
+   "title": "CCMC 14229-R: Vented sill plate (TEK-BASE), Canadian code compliance evaluation",
+   "issuer": "National Research Council Canada, Canadian Construction Materials Centre (CCMC)",
+   "date": "2025-10",
+   "edition_cited": "NBC 2020 (also NBC 2015)",
+   "excerpt": "when used as vented sill plates in accordance with the conditions and limitations stated in …"
+  },
+  "description": "We make a vented sill plate from high-density polyethylene that grips onto a standard 38 by 89 mm wood sill plate and sits below the bottom plates of non-loadbearing interior stud walls. Fins 20 mm high along the bottom leave a cavity that lets air and water pass under the plate. It comes in 1.2 m lengths, with or without a UV stabilizer, and is for interior non-loadbearing walls in houses and small buildings only. We want it accepted as an alternative to the code rules that separate framing from concrete and that describe wood sleepers under floors.",
+  "gold": [
+   "9.23.2.3.",
+   "9.30.1.3."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.23.2.3.",
+    "as_cited": "Sentence 9.23.2.3.(1), solution type Alternative, NBC 2020 and NBC 2015 (CCMC 14229-R)",
+    "codedb_title": "Protection from Dampness",
+    "verification": "same number, same requirement: 2023 text says 'shall be separated from the concrete by not less than 0.05 mm polyethylene film or Type S roll roofing'"
+   },
+   {
+    "article": "9.30.1.3.",
+    "as_cited": "Article 9.30.1.3., solution type Alternative, NBC 2020 and NBC 2015 (CCMC 14229-R)",
+    "codedb_title": "Sleepers",
+    "verification": "same number, same requirement: 2023 text says 'Wood sleepers supporting finished flooring over a concrete base supported on the ground'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "The report does not claim any benefit for post-flooding drying; CCMC only evaluated conformance with the code. Canada-wide opinion."
+ },
+ {
+  "id": "ca-ccmc-composite-decking-and-stair-treads",
+  "type": "product-evaluation",
+  "applicant": "manufacturer",
+  "source": {
+   "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=13125-R&type=cert",
+   "title": "CCMC 13125-R: Trex wood-plastic composite decking, Canadian code compliance evaluation",
+   "issuer": "National Research Council Canada, Canadian Construction Materials Centre (CCMC)",
+   "date": "2026-05",
+   "edition_cited": "NBC 2020 (also NBC 2015)",
+   "excerpt": "when used as both exterior decking and as stair treads in accordance with the conditions …"
+  },
+  "description": "We make decking planks from reclaimed hardwood sawdust and recycled polyethylene, extruded in 21 to 33 mm thicknesses, for exterior decks and stair treads over traditional wood framing. Joist spacing runs from 300 to 600 mm and stair stringer spacing from 200 to 275 mm depending on the plank, with at least three joists under each plank, corrosion-resistant fasteners, gaps set by temperature, and no installation below minus 9 degrees. The planks are not dimensional lumber, so we want them accepted for decks and stairs where the code sets decay and termite protection, snow and occupancy loads, deflection limits, stair loads and decking thickness.",
+  "gold": [
+   "9.3.2.9.",
+   "9.4.2.3.",
+   "9.4.3.1.",
+   "9.8.9.1.",
+   "9.23.15.5."
+  ],
+  "context": [
+   "9.8.9.6.",
+   "9.23.3.1."
+  ],
+  "mapping": [
+   {
+    "article": "9.3.2.9.",
+    "as_cited": "Article 9.3.2.9., solution type Alternative, NBC 2020 and NBC 2015 (CCMC 13125-R)",
+    "codedb_title": "Termite and Decay Protection",
+    "verification": "same number, same requirement: 2023 text says 'Structural wood elements shall be pressure-treated with a preservative to resist decay'"
+   },
+   {
+    "article": "9.4.2.3.",
+    "as_cited": "Article 9.4.2.3., solution type Alternative, NBC 2020 and NBC 2015 (CCMC 13125-R)",
+    "codedb_title": "Platforms Subject to Snow and Occupancy Loads",
+    "verification": "same number, same requirement: 2023 text says 'Balconies, decks and other accessible exterior platforms intended for an occupancy and subject to snow loads'"
+   },
+   {
+    "article": "9.4.3.1.",
+    "as_cited": "Article 9.4.3.1., solution type Alternative, NBC 2020 and NBC 2015 (CCMC 13125-R)",
+    "codedb_title": "Deflections",
+    "verification": "same number, same requirement: 2023 text says 'The maximum deflection of structural members shall conform to Table 9.4.3.1.'"
+   },
+   {
+    "article": "9.8.9.1.",
+    "as_cited": "Article 9.8.9.1., solution type Alternative, NBC 2020 and NBC 2015 (CCMC 13125-R)",
+    "codedb_title": "Loads on Stairs and Ramps",
+    "verification": "same number, same requirement: 2023 text says 'stairs and ramps shall be designed for strength and rigidity under uniform loading criteria'"
+   },
+   {
+    "article": "9.23.15.5.",
+    "as_cited": "Article 9.23.15.5., solution type Alternative, NBC 2020 and NBC 2015 (CCMC 13125-R)",
+    "codedb_title": "Subfloor Thickness or Rating",
+    "verification": "same number, same requirement: 2023 text says 'subfloors shall conform to either Table 9.23.15.5.-A or 9.23.15.5.-B'"
+   },
+   {
+    "article": "9.8.9.6.",
+    "as_cited": "Article 9.8.9.6., cited in the conditions (CCMC 13125-R)",
+    "codedb_title": "Finish for Treads and Landings",
+    "verification": "same number, same requirement (context article): 2023 text says 'shall have a slip-resistant finish or be provided with slip-resistant strips'"
+   },
+   {
+    "article": "9.23.3.1.",
+    "as_cited": "Article 9.23.3.1., cited in the conditions (CCMC 13125-R)",
+    "codedb_title": "Standards for Nails and Screws",
+    "verification": "same number, same requirement (context article): 2023 text says 'Wood screws specified in this Section shall conform to ASME B18.6.1'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "Many similar wood-plastic decking products in the CCMC registry carry the same five alternative rows (Fiberon, MoistureShield, Azek, Veranda, Zuri and others); one is used to avoid duplicates. Canada-wide opinion."
+ },
+ {
+  "id": "ca-ccmc-laminated-strand-lumber",
+  "type": "product-evaluation",
+  "applicant": "manufacturer",
+  "source": {
+   "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=12627-R&type=cert",
+   "title": "CCMC 12627-R: TimberStrand LSL, Canadian code compliance evaluation",
+   "issuer": "National Research Council Canada, Canadian Construction Materials Centre (CCMC)",
+   "date": "2025-10",
+   "edition_cited": "NBC 2015",
+   "excerpt": "The product is intended for use in construction as an alternative material to lumber. Proprietary …"
+  },
+  "description": "We make laminated strand lumber, a structural composite lumber of wood strands blended with an isocyanate adhesive and pressed with the strands running along the length of the member. It is meant as an alternative material to lumber for beams, headers, joists, rafters, studs and columns in dry service, with pre-engineered tables for houses and small buildings and proprietary design values for engineers. The product is treated with zinc borate. We want it accepted in place of sawn lumber where the code tabulates joist, rafter and beam spans and stud size and spacing, and where member ends framing into masonry or concrete need decay protection.",
+  "gold": [
+   "9.23.2.2.",
+   "9.23.4.2.",
+   "9.23.10.1."
+  ],
+  "context": [
+   "4.3.1.1."
+  ],
+  "mapping": [
+   {
+    "article": "9.23.2.2.",
+    "as_cited": "Sentence 9.23.2.2.(1), solution type Alternative, NBC 2015 (CCMC 12627-R)",
+    "codedb_title": "Protection from Decay",
+    "verification": "same number, same requirement: 2023 text says 'Ends of wood joists, beams and other members framing into masonry or concrete shall be treated to prevent decay'"
+   },
+   {
+    "article": "9.23.4.2.",
+    "as_cited": "Sentence 9.23.4.2.(3), solution type Alternative, NBC 2015 (CCMC 12627-R)",
+    "codedb_title": "Spans for Joists, Rafters and Beams",
+    "verification": "same number, same requirement: 2023 text says 'Spans for built-up wood and glued-laminated timber floor beams shall conform to the spans'"
+   },
+   {
+    "article": "9.23.10.1.",
+    "as_cited": "Sentence 9.23.10.1.(1), solution type Alternative, NBC 2015 (CCMC 12627-R)",
+    "codedb_title": "Stud Size and Spacing",
+    "verification": "same number, same requirement: 2023 text says 'The size and spacing of studs shall conform to Table 9.23.10.1.'"
+   },
+   {
+    "article": "4.3.1.1.",
+    "as_cited": "Sentence 4.3.1.1.(1), solution type Acceptable, NBC 2015 (CCMC 12627-R)",
+    "codedb_title": "Design Basis for Wood",
+    "verification": "same number, same requirement (context article): 2023 text says 'shall conform to CSA O86'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "NBC 2015 table only (report not yet re-issued to NBC 2020); the three alternative articles keep the same number and requirement in the 2023 text. Similar structural composite lumber reports (LVL, PSL) mark only the span article as Alternative; this LSL one has the richest set."
+ },
+ {
+  "id": "ca-ccmc-wood-i-joist-floors-houses",
+  "type": "product-evaluation",
+  "applicant": "manufacturer",
+  "source": {
+   "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=13032-R&type=cert",
+   "title": "CCMC 13032-R: Nordic I-Joist Series, Canadian code compliance evaluation",
+   "issuer": "National Research Council Canada, Canadian Construction Materials Centre (CCMC)",
+   "date": "2025-10",
+   "edition_cited": "NBC 2020 (also NBC 2015)",
+   "excerpt": "when used as joists in floor and roof applications in accordance with the conditions and …"
+  },
+  "description": "We make prefabricated wood I-joists with two continuous spruce-pine-fir flanges glued to an oriented strandboard web, sold with span tables and installation guides for floors, roofs and ceilings in dry service. Fire tests show I-joists fail sooner than exposed 38 by 235 mm lumber joists, so we offer underside fire-protection options, such as 12.5 mm gypsum board on the bottom of the flange, so floors in unsprinklered houses perform as well as exposed lumber joists. We want the joists accepted in houses, where the code normally leaves floors without a fire-resistance rating, and our engineered floor spans accepted in place of the usual span tables.",
+  "gold": [
+   "9.10.8.10.",
+   "9.23.4.2."
+  ],
+  "context": [
+   "4.3.1.1."
+  ],
+  "mapping": [
+   {
+    "article": "9.10.8.10.",
+    "as_cited": "Article 9.10.8.10., solution type Alternative, NBC 2020 and NBC 2015 (CCMC 13032-R)",
+    "codedb_title": "Application to Houses",
+    "verification": "same number, same requirement: 2023 text says 'Table 9.10.8.1. does not apply to'"
+   },
+   {
+    "article": "9.23.4.2.",
+    "as_cited": "Sentence 9.23.4.2.(2), solution type Alternative, NBC 2020 and NBC 2015 (CCMC 13032-R)",
+    "codedb_title": "Spans for Joists, Rafters and Beams",
+    "verification": "same number, same requirement: 2023 text says 'Spans for floor joists that are not selected from Span Tables 9.23.4.2.-A and 9.23.4.2.-B'"
+   },
+   {
+    "article": "4.3.1.1.",
+    "as_cited": "Sentence 4.3.1.1.(1), solution type Acceptable, NBC 2020 (CCMC 13032-R)",
+    "codedb_title": "Design Basis for Wood",
+    "verification": "same number, same requirement (context article): 2023 text says 'shall conform to CSA O86'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "The fire-protection options are presented by CCMC as additional information for authorities having jurisdiction and are outside its structural compliance opinion; they explain why the fire article is marked Alternative. Canada-wide opinion."
+ },
+ {
+  "id": "ca-ccmc-steel-joist-hangers",
+  "type": "product-evaluation",
+  "applicant": "manufacturer",
+  "source": {
+   "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=13287-R&type=cert",
+   "title": "CCMC 13287-R: Face-mount joist hangers (Credit Valley Steel Products), Canadian code compliance evaluation",
+   "issuer": "National Research Council Canada, Canadian Construction Materials Centre (CCMC)",
+   "date": "2023-11",
+   "edition_cited": "NBC 2015",
+   "excerpt": "when used as joist hangers or framing connectors in accordance with the conditions and limitations …"
+  },
+  "description": "We make face-mount joist hangers fabricated from cold-formed light-gauge steel, tested to establish factored resistances for hanging lumber joists, wood trusses, glued-laminated timber, prefabricated wood I-joists and structural composite lumber from a supporting beam or header. Engineers design the supported members under the wood design standard and the hangers go in with the fasteners we specify. We want our proprietary hangers, with their tested design values, accepted in place of the nailing table for framing and of the ledger-strip option for joists framed into the side of a beam.",
+  "gold": [
+   "4.3.1.1.",
+   "9.23.3.4.",
+   "9.23.9.2."
+  ],
+  "context": [
+   "9.23.9.7."
+  ],
+  "mapping": [
+   {
+    "article": "4.3.1.1.",
+    "as_cited": "Sentence 4.3.1.1.(1), solution type Alternative (also listed Acceptable), NBC 2015 (CCMC 13287-R)",
+    "codedb_title": "Design Basis for Wood",
+    "verification": "same number, same requirement: 2023 text says 'shall conform to CSA O86'"
+   },
+   {
+    "article": "9.23.3.4.",
+    "as_cited": "Article 9.23.3.4., solution type Alternative, NBC 2015 (CCMC 13287-R)",
+    "codedb_title": "Nailing of Framing",
+    "verification": "same number, same requirement: 2023 text says 'nailing of framing shall conform to'"
+   },
+   {
+    "article": "9.23.9.2.",
+    "as_cited": "Clause 9.23.9.2.(2)(b), solution type Alternative, NBC 2015 (CCMC 13287-R)",
+    "codedb_title": "Joists Supported by Beams",
+    "verification": "same number, same requirement: 2023 text says 'ledger strips nailed to the side of the beam'"
+   },
+   {
+    "article": "9.23.9.7.",
+    "as_cited": "Article 9.23.9.7., solution type Acceptable, NBC 2015 (CCMC 13287-R)",
+    "codedb_title": "Support of Tail and Header Joists",
+    "verification": "same number, same requirement (context article): 2023 text says 'they shall be supported by suitable joist hangers or nailing in accordance with Table 9.23.3.4.'"
+   }
+  ],
+  "confidence": "medium",
+  "notes": "NBC 2015 table only; articles map by same number and requirement in the 2023 text. Medium because the report lists the wood design article as both Acceptable and Alternative (different aspects), and the applicant-voice reading of what differs is cautious."
+ },
+ {
+  "id": "ca-ccmc-self-tapping-structural-screws",
+  "type": "product-evaluation",
+  "applicant": "manufacturer",
+  "source": {
+   "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=13677-R&type=cert",
+   "title": "CCMC 13677-R: SWG ASSY self-tapping wood screws, Canadian code compliance evaluation",
+   "issuer": "National Research Council Canada, Canadian Construction Materials Centre (CCMC)",
+   "date": "2023-11",
+   "edition_cited": "NBC 2015",
+   "excerpt": "The products are self-tapping wood screws for structural wood connections fabricated with dry lumber, intended …"
+  },
+  "description": "We make proprietary self-tapping structural wood screws, five designations in carbon steel, with partial or full threads and several head types, for connections in dry lumber. They are driven at angles from 30 to 90 degrees to the grain and we publish withdrawal and lateral resistances for Canadian wood species and some structural composite lumber, for engineers to use in connection design. We want the screws accepted for structural wood connections, with design values based on testing, in place of the nails and wood screws the code names.",
+  "gold": [
+   "4.3.1.1.",
+   "9.23.3.1."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "4.3.1.1.",
+    "as_cited": "Sentence 4.3.1.1.(1), solution type Alternative, NBC 2015 (CCMC 13677-R)",
+    "codedb_title": "Design Basis for Wood",
+    "verification": "same number, same requirement: 2023 text says 'shall conform to CSA O86'"
+   },
+   {
+    "article": "9.23.3.1.",
+    "as_cited": "Article 9.23.3.1., solution type Alternative, NBC 2015 (CCMC 13677-R)",
+    "codedb_title": "Standards for Nails and Screws",
+    "verification": "same number, same requirement: 2023 text says 'Wood screws specified in this Section shall conform to ASME B18.6.1'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "NBC 2015 table only; both articles keep the same number and requirement in the 2023 text. Dry service only; design by an engineer with wood design expertise."
+ },
+ {
+  "id": "ca-ccmc-helical-steel-piles-small-buildings",
+  "type": "product-evaluation",
+  "applicant": "manufacturer",
+  "source": {
+   "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14027-R&type=cert",
+   "title": "CCMC 14027-R: Roterra auger-installed steel piles, Canadian code compliance evaluation",
+   "issuer": "National Research Council Canada, Canadian Construction Materials Centre (CCMC)",
+   "date": "2024-10",
+   "edition_cited": "NBC 2015",
+   "excerpt": "when used as an auger-installed steel pile foundation system in accordance with the conditions and …"
+  },
+  "description": "We make auger-installed steel piles, a helical blade welded to a steel shaft with drive holes and a leading edge cut at 45 degrees, in four pile types. They are meant as the foundation for single-storey houses and for sheds, gazebos, sunrooms, carports, decks and porches. Allowable compression and tension loads are tied to installation torque in undisturbed soil, and on-site load tests are required in fill or sensitive clays. We want the piles accepted as a deep foundation, with the pile steel accepted as an alternative to the steel standards the code names for load-carrying steel piles.",
+  "gold": [
+   "4.2.3.8."
+  ],
+  "context": [
+   "4.2.3.10.",
+   "4.2.4.1."
+  ],
+  "mapping": [
+   {
+    "article": "4.2.3.8.",
+    "as_cited": "Article 4.2.3.8., solution type Alternative (also listed Acceptable), NBC 2015 (CCMC 14027-R)",
+    "codedb_title": "Steel Piles",
+    "verification": "same number, same requirement: 2023 text says 'Where steel piles are used in deep foundations and act as permanent load-carrying members'"
+   },
+   {
+    "article": "4.2.3.10.",
+    "as_cited": "Sentence 4.2.3.10.(1), solution type Acceptable, NBC 2015 (CCMC 14027-R)",
+    "codedb_title": "Corrosion of Steel",
+    "verification": "same number, same requirement (context article): 2023 text says 'Where conditions are corrosive to steel, adequate protection of exposed steel shall be provided'"
+   },
+   {
+    "article": "4.2.4.1.",
+    "as_cited": "Sentence 4.2.4.1.(1), solution type Acceptable, NBC 2015 (CCMC 14027-R)",
+    "codedb_title": "Design Basis",
+    "verification": "same number, same requirement (context article): 2023 text says 'The design of foundations, excavations and soil- and rock-retaining structures shall be based on a subsurface investigation'"
+   }
+  ],
+  "confidence": "medium",
+  "notes": "Medium: NBC 2015 table only, and the steel pile article appears as both Acceptable and Alternative in the opinion. Other applications beyond single-storey houses and accessory buildings need an engineer. Canada-wide opinion."
+ },
+ {
+  "id": "ca-ccmc-cement-free-concrete-block",
+  "type": "product-evaluation",
+  "applicant": "manufacturer",
+  "source": {
+   "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14346-R&type=cert",
+   "title": "CCMC 14346-R: CarbiCrete Concrete Masonry Unit, Canadian code compliance evaluation",
+   "issuer": "National Research Council Canada, Canadian Construction Materials Centre (CCMC)",
+   "date": "2026-01",
+   "edition_cited": "NBC 2015",
+   "excerpt": "This evaluation confirms that the product is an alternative solution equivalent to CSA A165.1-14, \"Concrete …"
+  },
+  "description": "We make a cement-free concrete masonry unit from steel slag, aggregates, water, admixtures and carbon dioxide, in a standard 190 by 390 by 190 mm hollow block with stretcher and kerf units. It is intended as an alternative to conventional concrete block for masonry walls in houses and small buildings. Tests show performance equivalent to a conventional block of the 15 MPa class, with limits on flexural tensile strength for certain mortars, and no use in insulating or cavity walls or veneer. We want it accepted in place of the block standard and the unit masonry rules, and want its measured sound transmission used in the building's sound-insulation calculations.",
+  "gold": [
+   "5.8.1.4.",
+   "9.15.2.2.",
+   "9.20.2.1."
+  ],
+  "context": [
+   "3.1.7.1."
+  ],
+  "mapping": [
+   {
+    "article": "5.8.1.4.",
+    "as_cited": "Article 5.8.1.4., solution type Alternative, NBC 2015 (CCMC 14346-R)",
+    "codedb_title": "Detailed Method for Calculating ASTC",
+    "verification": "same number, same requirement: 2023 text says 'The sound transmission loss measured in accordance with ASTM E90'"
+   },
+   {
+    "article": "9.15.2.2.",
+    "as_cited": "Article 9.15.2.2., solution type Alternative, NBC 2015 (CCMC 14346-R)",
+    "codedb_title": "Unit Masonry Construction",
+    "verification": "same number, same requirement: 2023 text says 'Concrete block shall conform to CSA A165.1'"
+   },
+   {
+    "article": "9.20.2.1.",
+    "as_cited": "Article 9.20.2.1., solution type Alternative, NBC 2015 (CCMC 14346-R)",
+    "codedb_title": "Masonry Unit Standards",
+    "verification": "same number, same requirement: 2023 text says 'Masonry units shall comply with'"
+   },
+   {
+    "article": "3.1.7.1.",
+    "as_cited": "Article 3.1.7.1., solution type Acceptable, NBC 2015 (CCMC 14346-R)",
+    "codedb_title": "Determination of Ratings",
+    "verification": "same number, same requirement (context article): 2023 text says 'is permitted to be assigned a fire-resistance rating on the basis of Appendix D'"
+   }
+  ],
+  "confidence": "medium",
+  "notes": "Medium: NBC 2015 table only; the mortar joints subsection is also marked Alternative but is subsection-level and not mapped. The ASTC article maps by same number and title; its 2023 text names ASTM E90 in the same way. First issued 2025-11."
+ },
+ {
+  "id": "ca-ccmc-structural-insulated-panels",
+  "type": "product-evaluation",
+  "applicant": "manufacturer",
+  "source": {
+   "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=13016-R&type=cert",
+   "title": "CCMC 13016-R: Insulspan Structural Insulated Panel (SIP) System, Canadian code compliance evaluation",
+   "issuer": "National Research Council Canada, Canadian Construction Materials Centre (CCMC)",
+   "date": "2025-10",
+   "edition_cited": "NBC 2015 (also NBC 2010)",
+   "excerpt": "This CCMC evaluation presents Plasti-Fab Ltd.’s alternative solutions to: using the lumber stud tables in …"
+  },
+  "description": "We make structural insulated panels of expanded polystyrene foam glued between two sheets of oriented strandboard, used as loadbearing walls and roofs for single-family houses, with lumber studs or I-joists as structural ribs at 1.2 m. Our engineered load tables replace the lumber stud and rafter tables, and the panels also provide the insulation and, with sealed joints, the air barrier. We want the panels accepted as an alternative to the conventional wood-frame rules for studs and rafters, with their structural capacity established by limit states design to the structural design requirements, and with lintels and point loads framed conventionally.",
+  "gold": [
+   "9.4.1.1.",
+   "9.23.10.1.",
+   "9.23.4.2."
+  ],
+  "context": [
+   "9.23.12.3.",
+   "9.25.3.3."
+  ],
+  "mapping": [
+   {
+    "article": "9.4.1.1.",
+    "as_cited": "Clause 9.4.1.1.(1)(c), alternative solution named in the report scope (CCMC 13016-R)",
+    "codedb_title": "General",
+    "verification": "same number, same requirement: 2023 text says 'be designed according to Part 4 using the loads and deflection and vibration limits'"
+   },
+   {
+    "article": "9.23.10.1.",
+    "as_cited": "Article 9.23.10.1., stud tables, alternative solution named in the report scope (CCMC 13016-R)",
+    "codedb_title": "Stud Size and Spacing",
+    "verification": "same number, same requirement: 2023 text says 'The size and spacing of studs shall conform to Table 9.23.10.1.'"
+   },
+   {
+    "article": "9.23.4.2.",
+    "as_cited": "Sentence 9.23.4.2.(1), rafter span tables, alternative solution named in the report scope (CCMC 13016-R)",
+    "codedb_title": "Spans for Joists, Rafters and Beams",
+    "verification": "same number, same requirement: 2023 text says 'spans for wood joists and rafters shall conform to the spans shown in Span Tables'"
+   },
+   {
+    "article": "9.23.12.3.",
+    "as_cited": "Article 9.23.12.3., cited in the conditions (CCMC 13016-R)",
+    "codedb_title": "Lintel Spans and Sizes",
+    "verification": "same number, same requirement (context article): 2023 text says 'Spans and sizes of wood lintels shall conform to the spans shown in Span Tables'"
+   },
+   {
+    "article": "9.25.3.3.",
+    "as_cited": "Article 9.25.3.3., cited in the conditions (CCMC 13016-R)",
+    "codedb_title": "Continuity of the Air Barrier System",
+    "verification": "same number, same requirement (context article): 2023 text says 'where the air barrier system consists of an air-impermeable panel-type material, all joints shall be sealed'"
+   }
+  ],
+  "confidence": "medium",
+  "notes": "Medium: the compliance table lists only subsections (stud and roof framing, air barrier) as Alternative; the gold articles are those the report scope text names as the conventional rules the panels replace (stud tables, rafter spans, and the structural design clause). NBC 2015 and NBC 2010 only. Limited to single-family houses."
+ },
+ {
+  "id": "ca-ccmc-pex-piping-noncombustible-buildings",
+  "type": "product-evaluation",
+  "applicant": "manufacturer",
+  "source": {
+   "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=13529-R&type=cert",
+   "title": "CCMC 13529-R: AquaPEX cross-linked polyethylene piping (Uponor), Canadian code compliance evaluation",
+   "issuer": "National Research Council Canada, Canadian Construction Materials Centre (CCMC)",
+   "date": "2024-05",
+   "edition_cited": "NBC 2015",
+   "excerpt": "when used as an alternative solution for sprinkler, potable water and reclaimed water piping and …"
+  },
+  "description": "We make cross-linked polyethylene pipe, fittings and accessories for potable water, sprinkler, and heating and cooling piping, with rated insulation wrap on the larger sizes. We want the pipe accepted as combustible piping in buildings that must be of noncombustible construction, including where it passes through fire separations, in plenums and as sprinkler piping, based on fire-rated tested installations: no spacing limit for pipes up to 12.7 mm, 457 mm between runs for sizes up to 25.4 mm, firestopping at penetrations, and pipes filled with water up to 50 mm.",
+  "gold": [
+   "3.1.5.19.",
+   "3.1.9.1.",
+   "3.1.9.4.",
+   "3.1.12.1.",
+   "3.2.5.13.",
+   "3.6.4.3."
+  ],
+  "context": [
+   "6.5.1.1.",
+   "6.7.1.1."
+  ],
+  "mapping": [
+   {
+    "article": "3.1.5.19.",
+    "as_cited": "Article 3.1.5.19., solution type Alternative, NBC 2015 (CCMC 13529-R)",
+    "codedb_title": "Combustible Piping Materials",
+    "verification": "same number, same requirement: 2023 text says 'permitted to be used in a building required to be of noncombustible construction'"
+   },
+   {
+    "article": "3.1.9.1.",
+    "as_cited": "Article 3.1.9.1. Fire Stops, solution type Alternative, NBC 2015 (CCMC 13529-R)",
+    "codedb_title": "Firestops",
+    "verification": "same number, same requirement: 2023 text says 'sealed by a firestop that'"
+   },
+   {
+    "article": "3.1.9.4.",
+    "as_cited": "Article 3.1.9.5. Combustible Piping Penetrations, solution type Alternative, NBC 2015 (CCMC 13529-R)",
+    "codedb_title": "Combustible Piping Penetrations",
+    "verification": "renumbered successor (2015 3.1.9.5. is 2023 3.1.9.4.: identical title Combustible Piping Penetrations, and the 2023 sentences cover sprinkler and water piping through fire separations; 2023 3.1.9.5. is now a different topic, membrane ceiling openings): 2023 text says 'Combustible sprinkler piping is permitted to penetrate a fire separation'"
+   },
+   {
+    "article": "3.1.12.1.",
+    "as_cited": "Article 3.1.12.1., solution type Alternative, NBC 2015 (CCMC 13529-R)",
+    "codedb_title": "Determination of Ratings",
+    "verification": "same number, same requirement: 2023 text says 'flame-spread rating and smoke developed classification of a material, assembly, or structural member shall be determined'"
+   },
+   {
+    "article": "3.2.5.13.",
+    "as_cited": "Article 3.2.5.13., solution type Alternative, NBC 2015 (CCMC 13529-R)",
+    "codedb_title": "Combustible Sprinkler Piping",
+    "verification": "same number, same requirement: 2023 text says 'Combustible sprinkler piping shall be used only for sprinkler systems in residential occupancies and other light-hazard occupancies'"
+   },
+   {
+    "article": "3.6.4.3.",
+    "as_cited": "Article 3.6.4.3., solution type Alternative, NBC 2015 (CCMC 13529-R)",
+    "codedb_title": "Plenum Requirements",
+    "verification": "same number, same requirement: 2023 text says 'A concealed space used as a plenum within a floor assembly or within a roof assembly'"
+   },
+   {
+    "article": "6.5.1.1.",
+    "as_cited": "Article 6.5.1.1., solution type Acceptable, NBC 2015 (CCMC 13529-R)",
+    "codedb_title": "Insulation and Coverings",
+    "verification": "same number, same requirement (context article): 2023 text says 'Insulation and coverings on pipes shall comply with Article 3.6.5.5.'"
+   },
+   {
+    "article": "6.7.1.1.",
+    "as_cited": "Article 6.7.1.1., solution type Acceptable, NBC 2015 (CCMC 13529-R)",
+    "codedb_title": "Piping Materials and Installation",
+    "verification": "same number, same requirement (context article): 2023 text says 'Piping shall be made from materials designed to withstand the effects of temperatures and pressures'"
+   }
+  ],
+  "confidence": "medium",
+  "notes": "Medium: NBC 2015 table only. The report also marks a service-penetration article (3.1.9.2., 2015 title Combustibility of Service Penetrations) as Alternative; that number now carries a differently titled article in 2023, so it is dropped. The table also lists National Plumbing Code rows, which are outside the building code and excluded. Pre-2020 Part 3 numbering: 3.1.9.4. is the renumbered successor as explained in the mapping."
+ },
+ {
+  "id": "ca-ccmc-ductwrap-fire-rated-grease-duct",
+  "type": "product-evaluation",
+  "applicant": "manufacturer",
+  "source": {
+   "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14382-R&type=cert",
+   "title": "CCMC 14382-R: CL4FIRE Code-96 Grease Duct Insulation System, Canadian code compliance evaluation",
+   "issuer": "National Research Council Canada, Canadian Construction Materials Centre (CCMC)",
+   "date": "2025-10",
+   "edition_cited": "NBC 2020 (also NBC 2015)",
+   "excerpt": "when used as an alternative solution for thermal/fire protection when a fire rating is required …"
+  },
+  "description": "We make a duct and pipe wrap insulation of calcium, magnesium and silica in a fibre-reinforced foil, 38 mm thick, that is applied directly to ventilation ducts, cooking exhaust (grease) ducts and pipes that need a fire rating. The fire ratings come from our fire-test listings, limited to steel, cast iron or copper pipe up to 200 mm outside diameter and a maximum service temperature of 120 degrees. We want the wrap accepted as an alternative way to provide the required fire-resistance rating for these ducts and pipes, installed strictly as in the listed systems.",
+  "gold": [
+   "3.1.7.1."
+  ],
+  "context": [
+   "3.6.3.5.",
+   "3.6.5.4.",
+   "3.6.5.5.",
+   "6.5.1.1."
+  ],
+  "mapping": [
+   {
+    "article": "3.1.7.1.",
+    "as_cited": "Article 3.1.7.1., solution type Alternative, NBC 2020 and NBC 2015 (CCMC 14382-R)",
+    "codedb_title": "Determination of Ratings",
+    "verification": "same number, same requirement: 2023 text says 'shall be determined on the basis of the results of tests conducted in conformance with CAN/ULC-S101'"
+   },
+   {
+    "article": "3.6.3.5.",
+    "as_cited": "Article 3.6.3.5., solution type Acceptable, NBC 2020 (CCMC 14382-R)",
+    "codedb_title": "Grease Duct Enclosures",
+    "verification": "same number, same requirement (context article): 2023 text says 'fire separations enclosing grease ducts for commercial cooking operations shall conform to NFPA 96'"
+   },
+   {
+    "article": "3.6.5.4.",
+    "as_cited": "Article 3.6.5.4., solution type Acceptable, NBC 2020 (CCMC 14382-R)",
+    "codedb_title": "Coverings, Linings, Adhesives and Insulation",
+    "verification": "same number, same requirement (context article): 2023 text says 'Coverings, linings and associated adhesives and insulation for air ducts, plenums and other parts of air duct systems'"
+   },
+   {
+    "article": "3.6.5.5.",
+    "as_cited": "Article 3.6.5.5., solution type Acceptable, NBC 2020 (CCMC 14382-R)",
+    "codedb_title": "Insulation and Coverings",
+    "verification": "same number, same requirement (context article): 2023 text says 'Insulation and coverings on pipes in which the temperature of the fluid exceeds'"
+   },
+   {
+    "article": "6.5.1.1.",
+    "as_cited": "Article 6.5.1.1., solution type Acceptable, NBC 2020 (CCMC 14382-R)",
+    "codedb_title": "Insulation and Coverings",
+    "verification": "same number, same requirement (context article): 2023 text says 'Insulation and coverings on pipes shall comply with Article 3.6.5.5.'"
+   }
+  ],
+  "confidence": "medium",
+  "notes": "Medium: the report names the Alternative rows (fire-rating determination) but the applicant-voice reading of why is cautious. The context articles are Part 3 and Part 6 rows marked Acceptable in the opinion."
+ },
+ {
+  "id": "ca-ccmc-liquid-applied-deck-membrane",
+  "type": "product-evaluation",
+  "applicant": "manufacturer",
+  "source": {
+   "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=13473-R&type=cert",
+   "title": "CCMC 13473-R: FlexStone cold liquid-applied polyurethane deck membrane, Canadian code compliance evaluation",
+   "issuer": "National Research Council Canada, Canadian Construction Materials Centre (CCMC)",
+   "date": "2026-08",
+   "edition_cited": "NBC 2015",
+   "excerpt": "when used as a cold, liquid-applied polyurethane membrane for balconies and roof decks in accordance …"
+  },
+  "description": "We make a three-layer, cold liquid-applied polyurethane coating that cures into a seamless, monolithic waterproof membrane for residential balconies and roof decks with light pedestrian traffic. It goes on a continuous plywood or concrete substrate sloped from 1 in 50 to 1 in 25 for positive drainage, with colour flakes broadcast into the middle coat, installed only by our approved installers. Where a roof fire classification or a fire-resistance rating is required, the system must be tested to the fire test methods. The roofing materials the code lists by standard do not include our liquid-applied system, so we want it accepted as an alternative roofing material.",
+  "gold": [
+   "9.26.2.1."
+  ],
+  "context": [
+   "9.26.1.2."
+  ],
+  "mapping": [
+   {
+    "article": "9.26.2.1.",
+    "as_cited": "Table 9.26.2.1.B Roofing Materials, solution type Alternative, NBC 2015 (CCMC 13473-R)",
+    "codedb_title": "Material Standards",
+    "verification": "same number, same requirement: 2023 text says 'Where roofing materials are covered in the scope of a standard listed in Table 9.26.2.1.-B'"
+   },
+   {
+    "article": "9.26.1.2.",
+    "as_cited": "Sentence 9.26.1.2.(1), solution type Acceptable, NBC 2015 (CCMC 13473-R)",
+    "codedb_title": "Required Protection",
+    "verification": "same number, same requirement (context article): 2023 text says 'Roofs shall be protected with roofing, including flashing'"
+   }
+  ],
+  "confidence": "medium",
+  "notes": "Medium: NBC 2015 only, and the Alternative row names the roofing materials table (which belongs to the material standards article) and the roofing materials subsection as a whole; only the table-bearing article is gold because the subsection row cannot be reduced to articles. Same subject as BC Building Code Appeal Board decision 1854 (a deck membrane is treated as roofing). Not Alberta-specific."
+ },
+ {
+  "id": "ca-bcab-1976-sip-fire-rating-alt-solution",
+  "type": "appeal",
+  "applicant": "owner-developer",
+  "source": {
+   "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1976",
+   "title": "BCAB 1976: Alternative solution regarding the fire-resistance rating of structural insulated panels",
+   "issuer": "Building Code Appeal Board, Province of British Columbia",
+   "date": "2025-08",
+   "edition_cited": "BCBC 2024",
+   "excerpt": "In some locations walls constructed of SIPs require a one-hour fire resistance rating and an …"
+  },
+  "description": "We are designing a two-storey, sprinklered residential building with four dwelling units. Some walls will be built from proprietary structural insulated panels, and each unit must be separated from the others by one-hour fire separations. Those panels have not been fire tested for a rating, the calculation method cannot establish a rating for them, and they are not among the wall assemblies the code tables list. We propose an alternative solution that relies on a fire test report for a different manufacturer's panel, which our panel supplier is licensed to use, together with an engineer's statement that the report applies to our panels. The local authority refuses the proposal.",
+  "gold": [
+   "9.10.3.1."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.10.3.1.",
+    "as_cited": "Sentence 9.10.3.1.(1), Division B, BCBC 2024",
+    "codedb_title": "Fire-Resistance and Fire-Protection Ratings",
+    "verification": "same number, same requirement: 2023 text says 'such rating shall be determined in conformance with'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "British Columbia decision under the BC Building Code; BC has its own edition and amendments, so each article was mapped only after reading the NBC(AE) 2023 text. Appellant role is not stated in the decision; the applicant label is inferred from the project. Board decisions are specific to the appeal and are not binding elsewhere. The Board confirmed the local authority: a licensing agreement between manufacturers does not by itself show the panels are equivalent. The decision also cites Division A and Division C sentences on alternative solutions; those are not Division B articles and are excluded. Same product class as CCMC 13016-R."
+ },
+ {
+  "id": "ca-bcab-1945-open-cell-foam-insulation",
+  "type": "appeal",
+  "applicant": "homebuilder",
+  "source": {
+   "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1945",
+   "title": "BCAB 1945: Insulation material, acceptable or alternative solution",
+   "issuer": "Building Code Appeal Board, Province of British Columbia",
+   "date": "2024-12",
+   "edition_cited": "BCBC 2024",
+   "excerpt": "Light Density, Open Cell Spray Applied Semi-Rigid Polyurethane Foam (CAN/ULC-S712.1) is not an acceptable solution …"
+  },
+  "description": "We are building a new wood-frame house with staggered-stud exterior walls and plan to insulate them with a light-density, open-cell, semi-rigid spray polyurethane foam made to the light-density foam standard. The local authority says that foam is not on the code's list of insulation materials and needs an alternative solution. We point out that the foam's thermal resistance appears in the code's reference tables used to calculate wall insulation values, so we believe it already counts as an acceptable solution and no alternative solution should be required.",
+  "gold": [
+   "9.25.2.2."
+  ],
+  "context": [
+   "9.36.2.4."
+  ],
+  "mapping": [
+   {
+    "article": "9.25.2.2.",
+    "as_cited": "Sentence 9.25.2.2.(1), Division B, Insulation Materials, BCBC 2024",
+    "codedb_title": "Insulation Materials",
+    "verification": "same number, same requirement: 2023 text says 'thermal insulation shall conform to the requirements of'"
+   },
+   {
+    "article": "9.36.2.4.",
+    "as_cited": "Note A-9.36.2.4.(1) thermal resistance values table, BCBC 2024",
+    "codedb_title": "Calculation of Effective Thermal Resistance of Assemblies",
+    "verification": "same number, same requirement (context article): 2023 text says 'the thermal bridging effect of closely spaced, repetitive structural members'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "British Columbia decision under the BC Building Code; BC has its own edition and amendments, so each article was mapped only after reading the NBC(AE) 2023 text. Appellant role is not stated in the decision; the applicant label is inferred from the project. Board decisions are specific to the appeal and are not binding elsewhere. The Board confirmed the local authority: notes have no legal effect and the foam is not in the list of insulation standards. Verified that the 2023 list of insulation standards also omits the light-density foam standard. The context article is the article the cited explanatory note belongs to. Same material as CCMC 14138-R."
+ },
+ {
+  "id": "ca-bcab-1852-mezzanine-enclosed-second-level",
+  "type": "appeal",
+  "applicant": "owner-developer",
+  "source": {
+   "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1852",
+   "title": "BCAB 1852: Alternative solution to Sentences 3.2.1.1.(3) and (4)",
+   "issuer": "Building Code Appeal Board, Province of British Columbia",
+   "date": "2020-10",
+   "edition_cited": "BCBC 2018",
+   "excerpt": "The proposed second level of the building does not meet the requirements of Sentence 3.2.1.1.(3) …"
+  },
+  "description": "We own an older, unsprinklered industrial building of about 1,880 square metres whose second level is built like a mezzanine but is enclosed and separated from the floor below, with three enclosed exits. We want to divide the building into two suites, one for a dance and music studio with childcare and one for medium-hazard industrial use, each with an enclosed second level of about 39 percent of its suite. To let those levels count as mezzanines instead of storeys, we propose limiting them to 40 percent of each suite, adding smoke detectors throughout, and monitoring the fire alarm. The local authority rejects the proposal.",
+  "gold": [
+   "3.2.1.1."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "3.2.1.1.",
+    "as_cited": "Sentences 3.2.1.1.(3) and (4), Division B, BCBC 2018",
+    "codedb_title": "Exceptions in Determining Building Height",
+    "verification": "same number, same requirement: 2023 text says 'the area of a mezzanine in a suite does not exceed 10% of the area of that suite'"
+   }
+  ],
+  "confidence": "medium",
+  "notes": "British Columbia decision under the BC Building Code; BC has its own edition and amendments, so each article was mapped only after reading the NBC(AE) 2023 text. Appellant role is not stated in the decision; the applicant label is inferred from the project. Board decisions are specific to the appeal and are not binding elsewhere. Medium: BCBC 2018 sentence (3) (mezzanine at least 60 percent open) differs from the 2023 sentence (3) (aggregate mezzanine area not over 40 percent of the open room area); sentence (4), quoted in the mapping, is identical, and the article is the same exceptions-to-building-height article. The Board confirmed the local authority because the proposed mitigation did not show equivalent performance."
+ },
+ {
+  "id": "ca-bcab-1911-spatial-separation-combined-buildings",
+  "type": "appeal",
+  "applicant": "owner-developer",
+  "source": {
+   "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1911",
+   "title": "BCAB 1911: Alternative solution to address spatial separation requirements",
+   "issuer": "Building Code Appeal Board, Province of British Columbia",
+   "date": "2023-07",
+   "edition_cited": "BCBC 2018",
+   "excerpt": "The appellant has provided an Alternative Solution to address the spatial separation requirements contained in …"
+  },
+  "description": "We are building six buildings on one site. Five are sprinklered, single-storey, noncombustible self-storage buildings with areas from about 390 to 1,160 square metres, and the sixth contains an office and a dwelling unit. Rather than meeting the usual rules for spacing and openings between the storage buildings, we propose an alternative solution that adds their areas together so they are treated as one building and then applies the construction requirements for that combined area. The local authority says our analysis does not address all the applicable requirements and uses outside documents out of context.",
+  "gold": [
+   "3.2.3.1.",
+   "3.2.3.7.",
+   "3.2.3.14."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "3.2.3.1.",
+    "as_cited": "Article 3.2.3.1., Division B, BCBC 2018",
+    "codedb_title": "Limiting Distance and Area of Unprotected Openings",
+    "verification": "same number, same requirement: 2023 text says 'the area of unprotected openings in an exposing building face for the applicable limiting distance shall be not more than'"
+   },
+   {
+    "article": "3.2.3.7.",
+    "as_cited": "Article 3.2.3.7., sentence (2), Division B, BCBC 2018",
+    "codedb_title": "Construction of Exposing Building Face",
+    "verification": "same number, same requirement: 2023 text says 'exposing building faces of buildings or fire compartments of Group E or Group F, Division 1 or 2 occupancy classification'"
+   },
+   {
+    "article": "3.2.3.14.",
+    "as_cited": "Article 3.2.3.14., sentence (3), Division B, BCBC 2018",
+    "codedb_title": "Wall Exposed to Another Wall",
+    "verification": "same number, same requirement: 2023 text says 'Sentence (1) does not apply to unprotected openings of fire compartments within a building that is sprinklered throughout'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "British Columbia decision under the BC Building Code; BC has its own edition and amendments, so each article was mapped only after reading the NBC(AE) 2023 text. Appellant role is not stated in the decision; the applicant label is inferred from the project. Board decisions are specific to the appeal and are not binding elsewhere. The Board found the alternative solution had merit but lacked enough supporting technical documentation. The decision also names Subsections 3.2.2. and 3.2.3. generally; only the three articles quoted in the decision are gold."
+ },
+ {
+  "id": "ca-bcab-1930-combustible-high-building-alt-solution",
+  "type": "appeal",
+  "applicant": "owner-developer",
+  "source": {
+   "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1930",
+   "title": "BCAB 1930: Alternative solution to address combustible construction and high building measures",
+   "issuer": "Building Code Appeal Board, Province of British Columbia",
+   "date": "2024-05",
+   "edition_cited": "BCBC 2024",
+   "excerpt": "An alternative solution is proposed to address combustible construction requirements and high building measures. ... …"
+  },
+  "description": "We are designing a new residential building with six storeys of combustible construction over two storeys of noncombustible parking. Retaining walls around the site adjust the finished ground levels so the building counts as seven storeys, with the top floor about 19.7 m above grade. We propose an alternative solution to address the combustible-construction requirements and the extra measures required for high buildings, identifying which of those measures would give no benefit worth their cost. The local authority says the building would not perform as well as one built to the acceptable solutions and that every high-building measure must be addressed.",
+  "gold": [
+   "3.2.2.47.",
+   "3.2.6.1."
+  ],
+  "context": [
+   "3.2.2.48.",
+   "3.2.2.51."
+  ],
+  "mapping": [
+   {
+    "article": "3.2.2.47.",
+    "as_cited": "Article 3.2.2.47., Division B, BCBC 2024",
+    "codedb_title": "Group C, Any Height, Any Area, Sprinklered",
+    "verification": "same number, same requirement: 2023 text says 'a building classified as Group C shall conform to Sentence (2)'"
+   },
+   {
+    "article": "3.2.6.1.",
+    "as_cited": "Article 3.2.6.1., Division B, BCBC 2024",
+    "codedb_title": "Application",
+    "verification": "same number, same requirement: 2023 text says 'containing a Group C major occupancy whose floor level is more than 18 m above grade'"
+   },
+   {
+    "article": "3.2.2.48.",
+    "as_cited": "Article 3.2.2.48., named by the local authority as an acceptable solution, BCBC 2024",
+    "codedb_title": "Group C, up to 12 Storeys, Sprinklered",
+    "verification": "same number, same requirement (context article): 2023 text says 'A building classified as Group C is permitted to conform to Sentence (2), provided'"
+   },
+   {
+    "article": "3.2.2.51.",
+    "as_cited": "Article 3.2.2.51., cited by the local authority, BCBC 2024",
+    "codedb_title": "Group C, up to 6 Storeys, Sprinklered",
+    "verification": "same number, same requirement (context article): 2023 text says 'A building classified as Group C is permitted to conform to Sentence (2), provided'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "British Columbia decision under the BC Building Code; BC has its own edition and amendments, so each article was mapped only after reading the NBC(AE) 2023 text. Appellant role is not stated in the decision; the applicant label is inferred from the project. Board decisions are specific to the appeal and are not binding elsewhere. The Board confirmed the local authority, finding the approach would not achieve at least the minimum required performance. The decision names Subsection 3.2.6. (high building measures) as a whole; the article quoted is its application article. The local authority names the Group C up-to-12-storeys article as another acceptable solution; the decision does not list it among the applicable requirements, so it is context."
+ },
+ {
+  "id": "ca-bcab-1985-fire-block-metal-cladding-cavity",
+  "type": "appeal",
+  "applicant": "homebuilder",
+  "source": {
+   "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1985",
+   "title": "BCAB 1985: Requirement for fire blocks in an exterior wall assembly",
+   "issuer": "Building Code Appeal Board, Province of British Columbia",
+   "date": "2025-10",
+   "edition_cited": "BCBC 2024",
+   "excerpt": "The Code’s acceptable solution is prescriptive and the installation does not comply with the requirement. …"
+  },
+  "description": "We are building a new house whose exterior wall has metal cladding fixed over two layers of 19 mm wood strapping, one horizontal and one vertical. That leaves a concealed air space 38 mm thick and 4.2 m tall between the sheathing membrane and the back of the cladding, closed at the top and bottom with metal flashing. The local authority requires a fire block because the space is taller than 3 m. We say the space is isolated, limited in extent and closed off with fire-resistive flashing, so it should be accepted as an alternative solution.",
+  "gold": [
+   "9.10.16.2."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.10.16.2.",
+    "as_cited": "Sentence 9.10.16.2.(1), Division B, BCBC 2024",
+    "codedb_title": "Required Fire Blocks in Wall Assemblies",
+    "verification": "same number, same requirement: 2023 text says 'fire blocks shall be provided to block off concealed spaces within wall assemblies, including spaces created by furring'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "British Columbia decision under the BC Building Code; BC has its own edition and amendments, so each article was mapped only after reading the NBC(AE) 2023 text. Appellant role is not stated in the decision; the applicant label is inferred from the project. Board decisions are specific to the appeal and are not binding elsewhere. The Board confirmed the local authority: the alternative solution documentation did not meet the Division C documentation requirements. Decision is dated 2025-10-02."
+ },
+ {
+  "id": "ca-bcab-1965-membrane-tape-flashing-detail",
+  "type": "appeal",
+  "applicant": "homebuilder",
+  "source": {
+   "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1965",
+   "title": "BCAB 1965: Requirements for the installation of flashing",
+   "issuer": "Building Code Appeal Board, Province of British Columbia",
+   "date": "2025-05",
+   "edition_cited": "BCBC 2024",
+   "excerpt": "The requirements related to the installation of cladding in the Part 9 Articles are prescriptive. …"
+  },
+  "description": "We are building a new house with wood shingle cladding over walls covered by a lapped, vapour-permeable combined air barrier and sheathing membrane that wraps into the window openings. At the top of each window we propose a metal flashing outside the window flange, its upper part covered by a proprietary membrane tape stuck to the sheathing membrane, instead of lapping the sheathing membrane over the flashing. This tape detail is widely used in the industry and keeps the air barrier continuous. The local authority says the code requires the sheathing membrane to cover the flashing and allows no flashing tapes.",
+  "gold": [
+   "9.27.3.8.",
+   "5.6.1.2.",
+   "9.27.1.1."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.27.3.8.",
+    "as_cited": "Sentence 9.27.3.8.(4), Division B, BCBC 2024",
+    "codedb_title": "Flashing Installation",
+    "verification": "same number, same requirement: 2023 text says 'extend not less than 50 mm upward inboard of the sheathing membrane'"
+   },
+   {
+    "article": "5.6.1.2.",
+    "as_cited": "Sentence 5.6.1.2.(1), Division B, BCBC 2024",
+    "codedb_title": "Installat ion of Protective Materials",
+    "verification": "same number, same requirement: 2023 text says 'they shall be installed so as to shed precipitation or otherwise minimize its entry into the assembly'"
+   },
+   {
+    "article": "9.27.1.1.",
+    "as_cited": "Sentence 9.27.1.1.(1), Division B, BCBC 2024",
+    "codedb_title": "General",
+    "verification": "same number, same requirement: 2023 text says 'the cladding assembly shall comply with'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "British Columbia decision under the BC Building Code; BC has its own edition and amendments, so each article was mapped only after reading the NBC(AE) 2023 text. Appellant role is not stated in the decision; the applicant label is inferred from the project. Board decisions are specific to the appeal and are not binding elsewhere. The Board confirmed the local authority: the prescriptive flashing rule applies, and neither a Part 5 performance route nor an alternative solution was put forward."
+ },
+ {
+  "id": "ca-bcab-1990-landing-headroom-variance-request",
+  "type": "appeal",
+  "applicant": "homeowner",
+  "source": {
+   "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1990",
+   "title": "BCAB 1990: Clear height over landing, step from landing to floor",
+   "issuer": "Building Code Appeal Board, Province of British Columbia",
+   "date": "2025-12",
+   "edition_cited": "BCBC 2024",
+   "excerpt": "Sentence 9.8.6.4.(2), Division B, Height over Landings ... The Board has no authority to alter …"
+  },
+  "description": "We are building a two-storey house. At the top of the interior stair, a landing leads into the second-floor area through a door fitted with a sliding barn door. Two sloping timber rafters poke into the required headroom over the landing by up to 20 mm over about 140 mm of length. We ask for a variance so the rafters need not be cut. As a fallback we propose lowering the landing by about 50 mm, which we say is safe because the occupants will know the layout. The local authority says the headroom is required and that a lowered landing would be a hazard.",
+  "gold": [
+   "9.8.6.4.",
+   "9.8.6.2.",
+   "9.8.4.1.",
+   "9.8.3.2."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.8.6.4.",
+    "as_cited": "Sentence 9.8.6.4.(2), Division B, BCBC 2024",
+    "codedb_title": "Height over Landings",
+    "verification": "same number, same requirement: 2023 text says 'The clear height over landings serving a single dwelling unit'"
+   },
+   {
+    "article": "9.8.6.2.",
+    "as_cited": "Sentences 9.8.6.2.(1) and (2), Division B, BCBC 2024",
+    "codedb_title": "Required Landings",
+    "verification": "same number, same requirement: 2023 text says 'a landing shall be provided'"
+   },
+   {
+    "article": "9.8.4.1.",
+    "as_cited": "Sentence 9.8.4.1.(1), Division B, BCBC 2024",
+    "codedb_title": "Dimensions for Risers",
+    "verification": "same number, same requirement: 2023 text says 'the rise, which is measured as the vertical nosing-to-nosing distance'"
+   },
+   {
+    "article": "9.8.3.2.",
+    "as_cited": "Sentence 9.8.3.2.(1), Division B, BCBC 2024",
+    "codedb_title": "Minimum Number of Risers",
+    "verification": "same number, same requirement: 2023 text says 'at least 3 risers shall be provided in interior flights'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "British Columbia decision under the BC Building Code; BC has its own edition and amendments, so each article was mapped only after reading the NBC(AE) 2023 text. Appellant role is not stated in the decision; the applicant label is inferred from the project. Board decisions are specific to the appeal and are not binding elsewhere. The Board has no power to grant variances; it confirmed the local authority and noted a 50 mm drop would be a one-riser stair needing a compliant rise and landing. Decision is dated 2025-12-18."
+ },
+ {
+  "id": "ca-bcab-1942-limiting-distance-window-secondary-suite",
+  "type": "appeal",
+  "applicant": "homeowner",
+  "source": {
+   "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1942",
+   "title": "BCAB 1942: Actual and effective limiting distances, and fire department response",
+   "issuer": "Building Code Appeal Board, Province of British Columbia",
+   "date": "2024-11",
+   "edition_cited": "BCBC 2024",
+   "excerpt": "The building is not sprinklered and is located in an area where the fire department …"
+  },
+  "description": "We are converting part of our unsprinklered single-family house into a secondary suite. In our area the fire department takes more than 10 minutes to arrive in at least one call in ten. We want to add a window in an exterior wall that is 1.58 m from the property line. The local authority says the response-time rule halves that distance to 0.79 m, which allows no openings in the wall. We argue that the halving rule belongs only to the large-building tables, that our window should be judged on the actual distance, and that openings can be interpolated between the first two columns of the table.",
+  "gold": [
+   "9.10.15.3.",
+   "9.10.15.4.",
+   "3.2.3.1."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.10.15.3.",
+    "as_cited": "Sentence 9.10.15.3.(1), Division B, BCBC 2024",
+    "codedb_title": "Limiting Distance and Fire Department Response",
+    "verification": "same number, same requirement: 2023 text says 'a limiting distance equal to half the actual limiting distance shall be used as input to the requirements'"
+   },
+   {
+    "article": "9.10.15.4.",
+    "as_cited": "Sentence 9.10.15.4.(1), Division B, BCBC 2024",
+    "codedb_title": "Glazed Openings in Exposing Building Face",
+    "verification": "same number, same requirement: 2023 text says 'the maximum aggregate area of glazed openings in an exposing building face shall'"
+   },
+   {
+    "article": "3.2.3.1.",
+    "as_cited": "Sentence 3.2.3.1.(8), Division B, BCBC 2024",
+    "codedb_title": "Limiting Distance and Area of Unprotected Openings",
+    "verification": "same number, same requirement: 2023 text says 'A limiting distance equal to half the actual limiting distance shall be used as input to Tables'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "British Columbia decision under the BC Building Code; BC has its own edition and amendments, so each article was mapped only after reading the NBC(AE) 2023 text. Appellant role is not stated in the decision; the applicant label is inferred from the project. Board decisions are specific to the appeal and are not binding elsewhere. The Board confirmed the local authority: no interpolation is permitted below a limiting distance of 1.2 m, so no glazed openings are allowed. Wording of the three sentences matches the 2023 text, except that the 2023 fire-department response sentences add that the first vehicle must be capable of beginning suppression activities."
+ },
+ {
+  "id": "ca-bcab-1869-garden-cottage-next-to-garage",
+  "type": "appeal",
+  "applicant": "homeowner",
+  "source": {
+   "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1869",
+   "title": "BCAB 1869: Applicable Code requirements for spatial separation, subsections 9.10.14. and 9.10.15.",
+   "issuer": "Building Code Appeal Board, Province of British Columbia",
+   "date": "2021-08",
+   "edition_cited": "BCBC 2018",
+   "excerpt": "An additional detached single dwelling house (garden suite/cottage) is proposed to be built on the …"
+  },
+  "description": "We have a single house with a detached garage that serves only that house, and we want to build a second detached house, a garden cottage, on the same lot next to the garage. The garage will keep serving only the existing house. The local authority says the spacing rules for buildings other than houses govern the distance between the new cottage and the garage. We say the spacing rules for houses and their accessory buildings apply.",
+  "gold": [
+   "9.10.14.1.",
+   "9.10.15.1."
+  ],
+  "context": [
+   "9.10.15.5."
+  ],
+  "mapping": [
+   {
+    "article": "9.10.14.1.",
+    "as_cited": "Sentence 9.10.14.1.(1), Division B, BCBC 2018",
+    "codedb_title": "Application",
+    "verification": "same number, same requirement: 2023 text says 'This Subsection applies to buildings other than those to which Subsection 9.10.15. applies'"
+   },
+   {
+    "article": "9.10.15.1.",
+    "as_cited": "Sentence 9.10.15.1.(1), Division B, BCBC 2018",
+    "codedb_title": "Application",
+    "verification": "same number, same requirement: 2023 text says 'buildings that contain only dwelling units and have no dwelling unit above another dwelling unit'"
+   },
+   {
+    "article": "9.10.15.5.",
+    "as_cited": "Sentences 9.10.15.5.(2) to (4), cited in the Board reasoning, BCBC 2018",
+    "codedb_title": "Construction of Exposing Building Face of Houses",
+    "verification": "same number, same requirement (context article): 2023 text says 'where the limiting distance is less than 0.6 m'"
+   }
+  ],
+  "confidence": "medium",
+  "notes": "British Columbia decision under the BC Building Code; BC has its own edition and amendments, so each article was mapped only after reading the NBC(AE) 2023 text. Appellant role is not stated in the decision; the applicant label is inferred from the project. Board decisions are specific to the appeal and are not binding elsewhere. Medium: the 2018 scope sentence also had a clause covering accessory buildings that serve a house; the 2023 sentence has only the dwelling-units clause and the secondary-suite clause, so the outcome could differ in Alberta, but the two application articles are the ones to address. The Board found the houses subsection applies."
+ },
+ {
+  "id": "ca-bcab-1948-detached-multi-suite-garage",
+  "type": "appeal",
+  "applicant": "owner-developer",
+  "source": {
+   "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1948",
+   "title": "BCAB 1948: Spatial separation requirements for a detached multi-suite garage",
+   "issuer": "Building Code Appeal Board, Province of British Columbia",
+   "date": "2025-01",
+   "edition_cited": "BCBC 2024",
+   "excerpt": "The proposed garage is a common building serving multiple houses; Clauses (a) and (b) of …"
+  },
+  "description": "We are building three buildings on one lot: two duplexes with side-by-side dwelling units, and a detached building holding four one-car garages separated by one-hour fire separations, each garage serving one dwelling unit. We say the garage building is an accessory building to the houses, so the spacing rules for houses apply. The local authority says the garage building serves several houses, is classed as a low-hazard industrial building, and falls under the spacing rules for other buildings.",
+  "gold": [
+   "9.10.2.1.",
+   "9.10.14.1.",
+   "9.10.15.1."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.10.2.1.",
+    "as_cited": "Sentence 9.10.2.1.(1), Division B, BCBC 2024",
+    "codedb_title": "Occupancy Classification",
+    "verification": "same number, same requirement: 2023 text says 'every building or part thereof shall be classified according to its major occupancy'"
+   },
+   {
+    "article": "9.10.14.1.",
+    "as_cited": "Sentence 9.10.14.1.(1), Division B, BCBC 2024",
+    "codedb_title": "Application",
+    "verification": "same number, same requirement: 2023 text says 'This Subsection applies to buildings other than those to which Subsection 9.10.15. applies'"
+   },
+   {
+    "article": "9.10.15.1.",
+    "as_cited": "Sentence 9.10.15.1.(1), Division B, BCBC 2024",
+    "codedb_title": "Application",
+    "verification": "same number, same requirement: 2023 text says 'buildings that contain only dwelling units and have no dwelling unit above another dwelling unit'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "British Columbia decision under the BC Building Code; BC has its own edition and amendments, so each article was mapped only after reading the NBC(AE) 2023 text. Appellant role is not stated in the decision; the applicant label is inferred from the project. Board decisions are specific to the appeal and are not binding elsewhere. The Board confirmed the local authority: the garage building is Group F, Division 3 and the other-buildings subsection applies. Wording of the three sentences is the same in the 2023 text."
+ },
+ {
+  "id": "ca-bcab-1999-combustible-roof-overhang-townhouse",
+  "type": "appeal",
+  "applicant": "owner-developer",
+  "source": {
+   "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1999",
+   "title": "BCAB 1999: Roof overhangs above a wall of a townhouse facing a property line",
+   "issuer": "Building Code Appeal Board, Province of British Columbia",
+   "date": "2026-06",
+   "edition_cited": "BCBC 2024",
+   "excerpt": "a roof overhang at the top storey on that side is proposed to project 0.6 …"
+  },
+  "description": "We are building a three-unit townhouse building with the units side by side. One side stands 1.22 m from a property line, and at the top storey we want a combustible roof overhang projecting 0.6 m toward that line, so its face would be 0.62 m from the line. The local authority says combustible projections more than 1 m above the ground cannot be within 1.2 m of a property line, so the overhang must be noncombustible. We say roof overhangs are not part of the exposing building face, that the soffit rule is enough, and that noncombustible overhangs are not the usual practice where we build.",
+  "gold": [
+   "9.10.15.5."
+  ],
+  "context": [
+   "3.2.3.6.",
+   "9.10.14.5."
+  ],
+  "mapping": [
+   {
+    "article": "9.10.15.5.",
+    "as_cited": "Sentences 9.10.15.5.(5), (6) and (11), Division B, BCBC 2024",
+    "codedb_title": "Construction of Exposing Building Face of Houses",
+    "verification": "same number, same requirement: 2023 text says 'combustible projections on the exterior of a wall that are more than 1 m above ground level'"
+   },
+   {
+    "article": "3.2.3.6.",
+    "as_cited": "Sentences 3.2.3.6.(2) to (5), cited in the Board reasoning, BCBC 2024",
+    "codedb_title": "Combustible Projections",
+    "verification": "same number, same requirement (context article): 2023 text says 'projecting roof soffits shall not be constructed above the exposing building face'"
+   },
+   {
+    "article": "9.10.14.5.",
+    "as_cited": "Sentences 9.10.14.5.(5) to (7), cited in the Board reasoning, BCBC 2024",
+    "codedb_title": "Construction of Exposing Building Face and Walls above Exposing Building Face",
+    "verification": "same number, same requirement (context article): 2023 text says 'combustible projections on the exterior of a wall that are more than 1 m above ground level'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "British Columbia decision under the BC Building Code; BC has its own edition and amendments, so each article was mapped only after reading the NBC(AE) 2023 text. Appellant role is not stated in the decision; the applicant label is inferred from the project. Board decisions are specific to the appeal and are not binding elsewhere. The Board confirmed the local authority: a building with three units does not get the one-or-two-unit exemption, so any projection within 1.2 m must not be combustible. Wording of the quoted sentences is the same in the 2023 text. Decision date not shown on the page (2026)."
+ },
+ {
+  "id": "ca-bcab-1981-open-rv-shelter-spatial-separation",
+  "type": "appeal",
+  "applicant": "owner-developer",
+  "source": {
+   "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1981",
+   "title": "BCAB 1981: Spatial separation requirements for an RV shelter",
+   "issuer": "Building Code Appeal Board, Province of British Columbia",
+   "date": "2025-09",
+   "edition_cited": "BCBC 2024",
+   "excerpt": "The project is the design and construction of a post-and-beam, roofed, structure without walls to …"
+  },
+  "description": "We want to build a roofed post-and-beam shelter with no walls for a recreational vehicle on a rural property with seasonal RV sites, with a roofed deck attached on one side. It would stand 3.7 m from an existing RV shelter, across a pad line that is not a legal property line. The local authority treats our shelter as a principal building whose side facing the neighbouring shelter is an exposing wall, and so requires a one-hour rated, noncombustible wall. We say a structure with no exterior walls has nothing to count as an exposing building face, and a fire-rated wall would defeat the purpose of the open shelter.",
+  "gold": [
+   "9.10.14.2.",
+   "9.10.14.4.",
+   "9.10.14.5."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.10.14.2.",
+    "as_cited": "Sentence 9.10.14.2.(1), Division B, BCBC 2024",
+    "codedb_title": "Area and Location of Exposing Building Face",
+    "verification": "same number, same requirement: 2023 text says 'The area of an exposing building face shall be'"
+   },
+   {
+    "article": "9.10.14.4.",
+    "as_cited": "Sentence 9.10.14.4.(1), Division B, BCBC 2024",
+    "codedb_title": "Openings in Exposing Building Face",
+    "verification": "same number, same requirement: 2023 text says 'the maximum aggregate area of unprotected openings in an exposing building face shall'"
+   },
+   {
+    "article": "9.10.14.5.",
+    "as_cited": "Sentences 9.10.14.5.(1) and (6), Division B, BCBC 2024",
+    "codedb_title": "Construction of Exposing Building Face and Walls above Exposing Building Face",
+    "verification": "same number, same requirement: 2023 text says 'each exposing building face and any exterior wall located above an exposing building face'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "British Columbia decision under the BC Building Code; BC has its own edition and amendments, so each article was mapped only after reading the NBC(AE) 2023 text. Appellant role is not stated in the decision; the applicant label is inferred from the project. Board decisions are specific to the appeal and are not binding elsewhere. The Board varied the local authority: the outside edge of the posts facing the other shelter is an exposing building face, the roof over the deck is a combustible projection, and the shelter can be placed so the limiting distance exceeds 1.2 m. The decision also quotes defined terms (exposing building face, limiting distance) from Division A, which are not articles. Decision date not shown on the page (2025)."
+ },
+ {
+  "id": "ca-bcab-1887-secondary-suite-separation-attic",
+  "type": "appeal",
+  "applicant": "homebuilder",
+  "source": {
+   "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1887",
+   "title": "BCAB 1887: Continuity of required fire separation for a secondary suite",
+   "issuer": "Building Code Appeal Board, Province of British Columbia",
+   "date": "2022-04",
+   "edition_cited": "BCBC 2018",
+   "excerpt": "There is a common roof space/attic area above both suites created by a 6 in …"
+  },
+  "description": "We are building a two-level house with a secondary suite in part of the upper level. A common roof space above both suites is formed by a sloped truss roof, with a girder truss directly over the vertical fire separation between the suites and other roof framing connected to that girder. The local authority says the fire separation must continue up through the roof space to the roof sheathing with no truss members passing through it, or the whole ceiling below the attic must be a rated horizontal fire separation. We say a fire-rated ceiling over the suite alone, together with interconnected hardwired smoke alarms, should be enough.",
+  "gold": [
+   "9.10.9.12.",
+   "9.10.5.1."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.10.9.12.",
+    "as_cited": "Article 9.10.9.10. Concealed Spaces above Fire Separations, BCBC 2018",
+    "codedb_title": "Concealed Spaces above Fire Separations",
+    "verification": "renumbered successor (2018 9.10.9.10. is 2023 9.10.9.12.: identical title and word-for-word identical sentences; 2023 9.10.9.10. is now the unrelated Collapse of Combustible Construction): 2023 text says 'a horizontal service space or other concealed space located above a required vertical fire separation shall be divided'"
+   },
+   {
+    "article": "9.10.5.1.",
+    "as_cited": "Article 9.10.5.1., Division B, BCBC 2018",
+    "codedb_title": "Permitted Openings in Wall and Ceiling Membranes",
+    "verification": "same number, same requirement: 2023 text says 'a membrane forming part of an assembly required to have a fire-resistance rating shall not be pierced by openings'"
+   }
+  ],
+  "confidence": "medium",
+  "notes": "British Columbia decision under the BC Building Code; BC has its own edition and amendments, so each article was mapped only after reading the NBC(AE) 2023 text. Appellant role is not stated in the decision; the applicant label is inferred from the project. Board decisions are specific to the appeal and are not binding elsewhere. Medium: one gold article is a renumbered successor (identical text, verified), and the membrane-opening article has re-ordered sentences in 2023 though the same subject. The Board accepted two options: continue the vertical separation to the roof sheathing, or abut it against a rated horizontal separation across the whole ceiling."
+ },
+ {
+  "id": "ca-bcab-2006-rooftop-deck-privacy-screen-rowhouse",
+  "type": "appeal",
+  "applicant": "owner-developer",
+  "source": {
+   "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-2006",
+   "title": "BCAB 2006: Fire separation of residential roof-top decks",
+   "issuer": "Building Code Appeal Board, Province of British Columbia",
+   "date": "2026-08",
+   "edition_cited": "BCBC 2024",
+   "excerpt": "Each of the three units will have an exterior rooftop deck accessed by an internal …"
+  },
+  "description": "We are building a new three-unit sprinklered rowhouse with no stacked units or secondary suites. The lot will be subdivided so the walls between units become party walls, and each unit has an exterior rooftop deck reached by an internal stair, with a 1.8 m high privacy screen between two of the decks. The local authority says adjacent roof deck spaces must be separated by a vertical continuation of a one-hour rated party wall. We say the fire separation rules do not apply to open exterior spaces and the screen needs no rating.",
+  "gold": [
+   "9.10.9.1.",
+   "9.10.9.16.",
+   "9.10.11.2."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.10.9.1.",
+    "as_cited": "Clause 9.10.9.1.(1)(a), Division B, BCBC 2024",
+    "codedb_title": "Application",
+    "verification": "same number, same requirement: 2023 text says 'This Subsection applies to a) fire separations required between rooms and spaces in buildings'"
+   },
+   {
+    "article": "9.10.9.16.",
+    "as_cited": "Sentence 9.10.9.16.(3), Division B, BCBC 2024",
+    "codedb_title": "Separation of Residential Suites",
+    "verification": "same number, same requirement: 2023 text says 'dwelling units that contain 2 or more storeys including basements shall be separated from the remainder of the building'"
+   },
+   {
+    "article": "9.10.11.2.",
+    "as_cited": "Clause 9.10.11.2.(1)(a), Division B, BCBC 2024",
+    "codedb_title": "Firewalls Not Required",
+    "verification": "same number, same requirement: 2023 text says 'A party wall on a property line of a building of residential occupancy need not be constructed as a firewall'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "British Columbia decision under the BC Building Code; BC has its own edition and amendments, so each article was mapped only after reading the NBC(AE) 2023 text. Appellant role is not stated in the decision; the applicant label is inferred from the project. Board decisions are specific to the appeal and are not binding elsewhere. The Board reversed the local authority: a privacy divider on an open roof is not a fire separation and needs no fire-resistance rating. Decision date not shown on the page (August 2026)."
+ },
+ {
+  "id": "ca-bcab-1954-egress-balcony-secondary-suite-alteration",
+  "type": "appeal",
+  "applicant": "homeowner",
+  "source": {
+   "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1954",
+   "title": "BCAB 1954: Means of egress from a house with a secondary suite",
+   "issuer": "Building Code Appeal Board, Province of British Columbia",
+   "date": "2025-03",
+   "edition_cited": "BCBC 2024",
+   "excerpt": "Article 9.9.9.1., Division B, Travel Limit to Exits or Egress Doors ... the second storey …"
+  },
+  "description": "We are altering an existing three-storey house to add a secondary suite on part of the first floor, so the upper unit and the suite each have their own front door. Enclosing the third-storey balconies removes the permission that let occupants travel more than one storey to reach an exit. We propose to use the existing second-storey deck, rebuilt with a 45-minute fire-resistance rating and a new exterior stair, as an exterior exit passageway, and to rely on a large openable window for third-storey egress. The local authority says a balcony cannot count as an exit passageway and that snow could block it.",
+  "gold": [
+   "9.9.9.1.",
+   "9.9.9.2."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.9.9.1.",
+    "as_cited": "Article 9.9.9.1., Division B, BCBC 2024",
+    "codedb_title": "Travel Limit to Exits or Egress Doors",
+    "verification": "same number, same requirement: 2023 text says 'it shall not be necessary to travel up or down more than 1 storey to reach a level served by'"
+   },
+   {
+    "article": "9.9.9.2.",
+    "as_cited": "Article 9.9.9.2., Division B, BCBC 2024",
+    "codedb_title": "Two Separate Exits",
+    "verification": "same number, same requirement: 2023 text says 'go in opposite directions to 2 separate exits unless the dwelling unit has a second and separate means of egress'"
+   }
+  ],
+  "confidence": "medium",
+  "notes": "British Columbia decision under the BC Building Code; BC has its own edition and amendments, so each article was mapped only after reading the NBC(AE) 2023 text. Appellant role is not stated in the decision; the applicant label is inferred from the project. Board decisions are specific to the appeal and are not binding elsewhere. Medium: the 2023 text of the two-exits article handles houses with a secondary suite inside its first sentence (an exception) rather than in a separate sentence, so the Alberta wording differs in structure; the article and subject are the same. The Board reversed the local authority and accepted the deck and stair as a single-direction exterior exit passageway."
+ },
+ {
+  "id": "ca-bcab-1940-window-opening-control-device-egress",
+  "type": "appeal",
+  "applicant": "homeowner",
+  "source": {
+   "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1940",
+   "title": "BCAB 1940: Restrictions on window openings and requirements for egress windows",
+   "issuer": "Building Code Appeal Board, Province of British Columbia",
+   "date": "2024-11",
+   "edition_cited": "BCBC 2018",
+   "excerpt": "A required egress window in a bedroom on the second storey has an in-swing casement …"
+  },
+  "description": "We are building a two-storey house. The required egress window of a second-floor bedroom is an in-swing casement about 1,680 by 860 mm with its sill at floor level. To limit how far a child could open it, we fitted a window opening control device that holds the opening to 100 mm and can be released to swing open fully in an emergency. The local authority says the device means special knowledge is needed to open the window, so it cannot be used on a required escape window, while we say the device satisfies both the child-fall rule and the escape rule.",
+  "gold": [
+   "9.8.8.1.",
+   "9.9.10.1."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.8.8.1.",
+    "as_cited": "Sentence 9.8.8.1.(4), Division B, BCBC 2018",
+    "codedb_title": "Required Guards",
+    "verification": "same number, same requirement: 2023 text says 'openable windows in buildings of residential occupancy shall be protected by'"
+   },
+   {
+    "article": "9.9.10.1.",
+    "as_cited": "Sentence 9.9.10.1.(1), Division B, BCBC 2018",
+    "codedb_title": "Egress Windows or Doors for Bedrooms",
+    "verification": "same number, same requirement: 2023 text says 'without the use of keys, tools or special knowledge'"
+   }
+  ],
+  "confidence": "medium",
+  "notes": "British Columbia decision under the BC Building Code; BC has its own edition and amendments, so each article was mapped only after reading the NBC(AE) 2023 text. Appellant role is not stated in the decision; the applicant label is inferred from the project. Board decisions are specific to the appeal and are not binding elsewhere. Medium: the 2023 text of the window protection sentence differs from the 2018 wording: it requires a mechanism that can only be released with tools or special knowledge, which is the same tension the BC Board describes. The Board itself notes that Alberta used an alternative-solution STANDATA variance for the same device. The Board confirmed the local authority: the escape window must open by the normal operating procedure."
+ },
+ {
+  "id": "ca-bcab-1936-stair-width-inset-wall",
+  "type": "appeal",
+  "applicant": "homeowner",
+  "source": {
+   "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1936",
+   "title": "BCAB 1936: Required width of stair below handrails",
+   "issuer": "Building Code Appeal Board, Province of British Columbia",
+   "date": "2025-01",
+   "edition_cited": "BCBC 2018",
+   "excerpt": "The width of the stair above the handrail (i.e., at shoulder height) measured between finished …"
+  },
+  "description": "We built a second-storey addition to our house with a new single-flight stair that is 890 mm wide between finished walls at shoulder height. The handrail and an inset wall below it narrow the stair to 800 mm. The local authority treats the inset wall as ordinary building construction, not a handrail projection, so it does not get the permitted intrusion into the stair width and the stair is too narrow. We say the inset wall is a handrail support or construction below the handrail, so 800 mm complies.",
+  "gold": [
+   "9.8.2.1.",
+   "9.8.7.6."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.8.2.1.",
+    "as_cited": "Sentence 9.8.2.1.(4), Division B, BCBC 2018",
+    "codedb_title": "Stair Width",
+    "verification": "same number, same requirement: 2023 text says 'at least one stair between each floor level within a dwelling unit'"
+   },
+   {
+    "article": "9.8.7.6.",
+    "as_cited": "Sentence 9.8.7.6.(1), Division B, BCBC 2018",
+    "codedb_title": "Projections into Stairs and Ramps",
+    "verification": "same number, same requirement: 2023 text says 'Handrails and constructions below handrails, including handrail supports and stair stringers, shall not project more than 100 mm'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "British Columbia decision under the BC Building Code; BC has its own edition and amendments, so each article was mapped only after reading the NBC(AE) 2023 text. Appellant role is not stated in the decision; the applicant label is inferred from the project. Board decisions are specific to the appeal and are not binding elsewhere. The Board reversed the local authority: the handrail and the inset wall are constructions below handrails and may project up to 100 mm into the required 860 mm width. Wording of both sentences matches the 2023 text."
+ },
+ {
+  "id": "ca-bcab-1859-climbable-guard-return-privacy-screen",
+  "type": "appeal",
+  "applicant": "designer",
+  "source": {
+   "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1859",
+   "title": "BCAB 1859: Climbability of guards",
+   "issuer": "Building Code Appeal Board, Province of British Columbia",
+   "date": "2021-03",
+   "edition_cited": "BCBC 2018",
+   "excerpt": "The guard is designed to be a protective barrier for roof decks/balconies where the walking …"
+  },
+  "description": "We designed roof decks and balconies whose walking surface is more than 4.2 m above the ground, with a non-climbable guard around the edge. Between two adjacent decks at the same level there is a 1.7 m high privacy screen that is climbable over its full height, and the edge guard has a non-climbable 90-degree return of about 1 m that ends just past the screen. The local authority says a 125 mm ledge on the parapet at the end of the return creates a foothold within 600 mm of the top of the guard, so a person could climb over. We say nothing climbable is within 1 m of the deck edge.",
+  "gold": [
+   "9.8.8.6."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.8.8.6.",
+    "as_cited": "Sentence 9.8.8.6.(1), Division B, BCBC 2018",
+    "codedb_title": "Design of Guards to Not Facilitate Climbing",
+    "verification": "same number, same requirement: 2023 text says 'guards required by Article 9.8.8.1. that protect a level located more than 4.2 m above the adjacent level'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "British Columbia decision under the BC Building Code; BC has its own edition and amendments, so each article was mapped only after reading the NBC(AE) 2023 text. Appellant role is not stated in the decision; the applicant label is inferred from the project. Board decisions are specific to the appeal and are not binding elsewhere. The Board confirmed the local authority on the guard as designed (the open space at parapet level made a foothold) but said the climbability rule is limited to the construction of the guard itself, not adjacent building components. Wording of the sentence matches the 2023 text."
+ },
+ {
+  "id": "ca-bcab-2002-loft-in-vaulted-unit",
+  "type": "appeal",
+  "applicant": "homeowner",
+  "source": {
+   "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-2002",
+   "title": "BCAB 2002: Loft access and ceiling height, and definition of storey",
+   "issuer": "Building Code Appeal Board, Province of British Columbia",
+   "date": "2026-09",
+   "edition_cited": "BCBC 2024",
+   "excerpt": "A loft has been constructed within an over-height vaulted-ceiling space in an existing dwelling. ... …"
+  },
+  "description": "We own a unit in a multi-storey, multi-family building and built a loft of about 9.6 square metres inside the over-height vaulted ceiling space of our unit. Its floor is attached to and supported by the building structure, the sloped ceiling above it ranges from 0 to 1.4 m high, and it is reached through a hatch with a retractable ladder about 760 mm wide. The local authority says the loft is either a mezzanine or a storey and has neither a compliant ceiling height nor compliant stair access. The loft is already built and we want to keep it.",
+  "gold": [
+   "9.5.3.1.",
+   "9.8.2.1."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.5.3.1.",
+    "as_cited": "Sentence 9.5.3.1.(1), Division B, BCBC 2024",
+    "codedb_title": "Ceiling Heights of Rooms or Spaces",
+    "verification": "same number, same requirement: 2023 text says 'the ceiling heights and clear heights in rooms or spaces in residential occupancies shall conform to Table 9.5.3.1.'"
+   },
+   {
+    "article": "9.8.2.1.",
+    "as_cited": "Sentence 9.8.2.1.(4), Division B, BCBC 2024",
+    "codedb_title": "Stair Width",
+    "verification": "same number, same requirement: 2023 text says 'at least one stair between each floor level within a dwelling unit'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "British Columbia decision under the BC Building Code; BC has its own edition and amendments, so each article was mapped only after reading the NBC(AE) 2023 text. Appellant role is not stated in the decision; the applicant label is inferred from the project. Board decisions are specific to the appeal and are not binding elsewhere. The Board confirmed the local authority: the loft is an additional storey within the unit with insufficient headroom and no compliant access stair; the requirements are prescriptive and the installation does not comply. Decision dated 2026-09-03. The decision also quotes the Division A definition of storey."
+ },
+ {
+  "id": "ca-bcab-1849-vapour-barrier-paint-over-spray-foam",
+  "type": "appeal",
+  "applicant": "homebuilder",
+  "source": {
+   "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1849",
+   "title": "BCAB 1849: Vapour barrier paint applied to spray applied polyurethane insulation",
+   "issuer": "Building Code Appeal Board, Province of British Columbia",
+   "date": "2020-07",
+   "edition_cited": "BCBC 2018",
+   "excerpt": "It is proposed that a latex vapour barrier primer be applied over ½ pound open …"
+  },
+  "description": "We are building a house and plan to meet the vapour barrier requirement by applying a latex vapour barrier primer paint over half-pound open-cell spray foam insulation in the walls. The local authority says a coating may serve as the vapour barrier only on gypsum board, so any other substrate needs an alternative solution. We say the code sets performance criteria for vapour barriers instead of limiting the materials, so a paint with the right permeance should be acceptable over any substrate.",
+  "gold": [
+   "9.25.4.2."
+  ],
+  "context": [
+   "9.25.4.1."
+  ],
+  "mapping": [
+   {
+    "article": "9.25.4.2.",
+    "as_cited": "Sentences 9.25.4.2.(1) and (5), Division B, BCBC 2018",
+    "codedb_title": "Vapour Barrier Materials",
+    "verification": "same number, same requirement: 2023 text says 'vapour barriers shall have a permeance not greater than'"
+   },
+   {
+    "article": "9.25.4.1.",
+    "as_cited": "Article 9.25.4.1. Required Barrier to Vapour Diffusion, named in the project description, BCBC 2018",
+    "codedb_title": "Required Barrier to Vapour Diffusion",
+    "verification": "same number, same requirement (context article): 2023 text says 'Thermally insulated wall, ceiling and floor assemblies shall be constructed with a vapour barrier'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "British Columbia decision under the BC Building Code; BC has its own edition and amendments, so each article was mapped only after reading the NBC(AE) 2023 text. Appellant role is not stated in the decision; the applicant label is inferred from the project. Board decisions are specific to the appeal and are not binding elsewhere. The Board reversed the local authority: no alternative solution is needed for vapour barrier paint that meets the permeance criterion over substrates other than gypsum board, though evidence may be needed that paint and substrate work together. The coating-on-gypsum-board sentence is numbered (5) in the 2018 article and (7) in the 2023 article; the article is the same."
+ },
+ {
+  "id": "ca-bcab-1950-attic-rec-room-foam-walls-unfinished",
+  "type": "appeal",
+  "applicant": "homebuilder",
+  "source": {
+   "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1950",
+   "title": "BCAB 1950: Protection of foamed plastic insulation and protection from mechanical damage",
+   "issuer": "Building Code Appeal Board, Province of British Columbia",
+   "date": "2025-01",
+   "edition_cited": "BCBC 2024",
+   "excerpt": "It is proposed that the gypsum board on the walls only be installed in the …"
+  },
+  "description": "We are building a new house with a space above the main living area labelled attic space and future rec room, 107 m2 in area, reached only by a ladder for now, with a plywood floor, a gypsum board ceiling under the roof trusses, and foamed plastic insulation with an air and vapour barrier on its exterior walls. We want to install the wall gypsum board later, after wiring is done and the stairs are built under a new permit. The local authority says the space is a floor area that can easily be occupied, so the foamed plastic needs protection now and the insulation needs protection from mechanical damage.",
+  "gold": [
+   "9.10.17.10.",
+   "9.25.2.3."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.10.17.10.",
+    "as_cited": "Sentence 9.10.17.10.(1), Division B, BCBC 2024",
+    "codedb_title": "Protection of Foamed Plastics",
+    "verification": "same number, same requirement: 2023 text says 'foamed plastics that form part of a wall or ceiling assembly shall be protected from adjacent space in the building'"
+   },
+   {
+    "article": "9.25.2.3.",
+    "as_cited": "Sentence 9.25.2.3.(7), Division B, BCBC 2024",
+    "codedb_title": "Installation of Thermal Insulation",
+    "verification": "same number, same requirement: 2023 text says 'Insulation located in areas where it may be subject to mechanical damage shall be protected by a covering'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "British Columbia decision under the BC Building Code; BC has its own edition and amendments, so each article was mapped only after reading the NBC(AE) 2023 text. Appellant role is not stated in the decision; the applicant label is inferred from the project. Board decisions are specific to the appeal and are not binding elsewhere. The Board varied the local authority only in reasoning: the space is a floor area and a second storey, so both the foam protection and the mechanical-damage protection apply; it also noted other storey requirements such as stair egress with guards and smoke alarms. Wording of both sentences matches the 2023 text."
+ },
+ {
+  "id": "ca-bcab-2000-interior-foundation-drain-stepped-slab",
+  "type": "appeal",
+  "applicant": "homebuilder",
+  "source": {
+   "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-2000",
+   "title": "BCAB 2000: Foundation wall drainage at interior locations",
+   "issuer": "Building Code Appeal Board, Province of British Columbia",
+   "date": "2026-06",
+   "edition_cited": "BCBC 2024",
+   "excerpt": "It is proposed that the rear side of the interior foundation walls be dampproofed and …"
+  },
+  "description": "We are building a new house on a steep slope, with the bottom storey set into the hillside and the ground at the back 3.65 m higher than at the front. To avoid bedrock, the excavation will be stepped and the bottom storey will have floors at different levels, with interior foundation walls running across the slope. We propose to dampproof the uphill side of those interior walls and add a drain pipe there that connects to the perimeter drains. The local authority says foundation drains must be outside the foundation walls and an interior drain is not permitted. We say the pipe also protects the lower floors on the ground.",
+  "gold": [
+   "9.14.2.1.",
+   "9.14.3.3.",
+   "9.16.3.1."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.14.2.1.",
+    "as_cited": "Sentence 9.14.2.1.(1), Division B, BCBC 2024",
+    "codedb_title": "Foundation Wall Drainage",
+    "verification": "same number, same requirement: 2023 text says 'the bottom of every exterior foundation wall shall be drained by drainage tile or pipe laid around the exterior'"
+   },
+   {
+    "article": "9.14.3.3.",
+    "as_cited": "Sentence 9.14.3.3.(1), Division B, BCBC 2024",
+    "codedb_title": "Installation",
+    "verification": "same number, same requirement: 2023 text says 'Drain tile or pipe shall be laid on undisturbed or well-compacted soil'"
+   },
+   {
+    "article": "9.16.3.1.",
+    "as_cited": "Sentence 9.16.3.1.(1), Division B, BCBC 2024",
+    "codedb_title": "Control of Water Ingress",
+    "verification": "same number, same requirement: 2023 text says 'ingress of water underneath a floor-on-ground shall be prevented by grading or drainage'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "British Columbia decision under the BC Building Code; BC has its own edition and amendments, so each article was mapped only after reading the NBC(AE) 2023 text. Appellant role is not stated in the decision; the applicant label is inferred from the project. Board decisions are specific to the appeal and are not binding elsewhere. The Board reversed the local authority: the code requires drainage at the exterior of foundation walls but does not prohibit drainage elsewhere, and an interior pipe protecting the lower floor-on-ground satisfies the floor protection requirement. Decision dated 2026-06-18."
+ },
+ {
+  "id": "ca-bcab-1854-deck-membrane-treated-as-roofing",
+  "type": "appeal",
+  "applicant": "homeowner",
+  "source": {
+   "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1854",
+   "title": "BCAB 1854: Deck surface material",
+   "issuer": "Building Code Appeal Board, Province of British Columbia",
+   "date": "2021-03",
+   "edition_cited": "BCBC 2018",
+   "excerpt": "The deck’s walking surface is plywood covered with a waterproof membrane. The waterproof membrane does …"
+  },
+  "description": "We are rebuilding and enlarging a rear deck on a two-storey house, about 5.8 by 4.2 m and mostly uncovered, sloped 2 percent away from the house. The walking surface is plywood covered with a waterproof membrane that is not one of the roofing products the code lists, and we have no evidence it complies under the performance route. The underside of the deck is open with no ceiling or soffit finish. The local authority says the deck membrane must be treated as roofing. We say a deck is not a roof because it does not protect a space below.",
+  "gold": [
+   "9.26.1.1.",
+   "9.26.1.2."
+  ],
+  "context": [
+   "9.26.2.1."
+  ],
+  "mapping": [
+   {
+    "article": "9.26.1.1.",
+    "as_cited": "Sentences 9.26.1.1.(1) and (2), Division B, BCBC 2018",
+    "codedb_title": "Definitions",
+    "verification": "same number, same requirement: 2023 text says 'platforms that effectively serve as roofs with respect to the accumulation or drainage of precipitation'"
+   },
+   {
+    "article": "9.26.1.2.",
+    "as_cited": "Sentences 9.26.1.2.(1) and (2), Division B, BCBC 2018",
+    "codedb_title": "Required Protection",
+    "verification": "same number, same requirement: 2023 text says 'Roofs shall be protected with roofing, including flashing'"
+   },
+   {
+    "article": "9.26.2.1.",
+    "as_cited": "Table 9.26.2.1.B roofing material standards, named in the project description, BCBC 2018",
+    "codedb_title": "Material Standards",
+    "verification": "same number, same requirement (context article): 2023 text says 'Where roofing materials are covered in the scope of a standard listed in Table 9.26.2.1.-B'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "British Columbia decision under the BC Building Code; BC has its own edition and amendments, so each article was mapped only after reading the NBC(AE) 2023 text. Appellant role is not stated in the decision; the applicant label is inferred from the project. Board decisions are specific to the appeal and are not binding elsewhere. The Board decided the deck, which does not drain freely through its surface, is a roof and the membrane must comply with the roofing requirements. It consulted NRC, whose written reply the decision quotes. Same subject as CCMC 13473-R (case ca-ccmc-liquid-applied-deck-membrane)."
+ },
+ {
+  "id": "ca-bcab-1855-vaulted-ceiling-roof-venting-baffles",
+  "type": "appeal",
+  "applicant": "homeowner",
+  "source": {
+   "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1855",
+   "title": "BCAB 1855: Roof space ventilation",
+   "issuer": "Building Code Appeal Board, Province of British Columbia",
+   "date": "2021-01",
+   "edition_cited": "BCBC 2018",
+   "excerpt": "The depth of the truss space cavity from the finished ceiling to the underside of …"
+  },
+  "description": "Our house has a bonus room above the attached garage, with about 60 percent of its ceiling sloped. The top chords of the roof trusses act as roof joists, and the truss spaces, about 280 mm deep, are full of batt insulation with foam baffles between the top of the insulation and the roof sheathing. The local authority accepted this venting by treating the truss intersection like the junction of a sloped roof and an exterior wall, where baffles are allowed. We say the sloped ceiling must keep a clear 63 mm space between the insulation and the roof sheathing along its whole length.",
+  "gold": [
+   "9.19.1.1.",
+   "9.19.1.3."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.19.1.1.",
+    "as_cited": "Sentence 9.19.1.1.(1), Division B, BCBC 2018",
+    "codedb_title": "Required Venting",
+    "verification": "same number, same requirement: 2023 text says 'a space shall be provided between the insulation and the sheathing, and vents shall be installed'"
+   },
+   {
+    "article": "9.19.1.3.",
+    "as_cited": "Sentences 9.19.1.3.(1) and (2), Division B, BCBC 2018",
+    "codedb_title": "Clearances",
+    "verification": "same number, same requirement: 2023 text says 'not less than 63 mm of space shall be provided between the top of the insulation and the underside'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "British Columbia decision under the BC Building Code; BC has its own edition and amendments, so each article was mapped only after reading the NBC(AE) 2023 text. Appellant role is not stated in the decision; the applicant label is inferred from the project. Board decisions are specific to the appeal and are not binding elsewhere. The Board agreed with the appellant: the baffle exemption at the junction of a sloped roof and an exterior wall does not extend along the full sloped ceiling. The appellant here is the party objecting to the local authority acceptance. Wording matches the 2023 text."
+ },
+ {
+  "id": "ca-bcab-1920-recirculating-kitchen-hood-airtight-home",
+  "type": "appeal",
+  "applicant": "homeowner",
+  "source": {
+   "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1920",
+   "title": "BCAB 1920: Kitchen ventilation in a home with high energy efficiency",
+   "issuer": "Building Code Appeal Board, Province of British Columbia",
+   "date": "2023-10",
+   "edition_cited": "BCBC 2018",
+   "excerpt": "The kitchen has a hood fan with closed carbon filtration for odor and humidity control; …"
+  },
+  "description": "We built a highly energy-efficient, very airtight single-family home with a heat recovery ventilation system and no gas or propane appliances. Over the kitchen cooktop we installed a recirculating hood fan with carbon filtration for odour and humidity, with no duct to the outdoors, because an exhaust penetration through the kitchen wall would hurt airtightness and the efficiency of the mechanical system. The local authority says the kitchen needs an exhaust fan of the required capacity that discharges outdoors, with a noncombustible duct and a grease filter near the cooktop.",
+  "gold": [
+   "9.32.3.7.",
+   "9.32.3.11."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.32.3.7.",
+    "as_cited": "Subclause 9.32.3.6.(1)(a), Kitchen and Bathroom Exhaust Fans, BCBC 2018",
+    "codedb_title": "Supplemental Exhaust",
+    "verification": "renumbered successor (2018 9.32.3.6. kitchen and bathroom exhaust fans is 2023 9.32.3.7. Supplemental Exhaust; 2023 9.32.3.6. is Reserved; same requirement, an exhaust fan in every kitchen): 2023 text says 'a supplemental exhaust fan with a rated capacity not less than 50 L/s shall be installed in each kitchen'"
+   },
+   {
+    "article": "9.32.3.11.",
+    "as_cited": "Sentences 9.32.3.8.(2) and (7), Air Ducts, BCBC 2018",
+    "codedb_title": "Ducts",
+    "verification": "renumbered successor (2018 9.32.3.8. air ducts is 2023 9.32.3.11. Ducts; the 2023 cooktop-exhaust duct sentence carries the discharge-outdoors, noncombustible and grease filter requirements; 2023 9.32.3.8. is Protection Against Depressurization): 2023 text says 'lead directly to the outdoors with no connections to other exhaust fans or ducts'"
+   }
+  ],
+  "confidence": "medium",
+  "notes": "British Columbia decision under the BC Building Code; BC has its own edition and amendments, so each article was mapped only after reading the NBC(AE) 2023 text. Appellant role is not stated in the decision; the applicant label is inferred from the project. Board decisions are specific to the appeal and are not binding elsewhere. Medium: both gold articles are renumbered successors found by reading the 2023 ventilation subsection; the wording is similar but not identical (2023 fixes the fan size at 50 L/s instead of a table). The Board confirmed the local authority: a recirculating hood does not exhaust."
+ },
+ {
+  "id": "ca-bcab-1897-exterior-passageway-alcove-suite-door",
+  "type": "appeal",
+  "applicant": "owner-developer",
+  "source": {
+   "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1897",
+   "title": "BCAB 1897: Egress from residential suite to exterior passageway",
+   "issuer": "Building Code Appeal Board, Province of British Columbia",
+   "date": "2022-10",
+   "edition_cited": "BCBC 2018",
+   "excerpt": "The subject residential suite egress door is set back in an alcove off of the …"
+  },
+  "description": "We are building a five-storey, sprinklered, mixed-use building with residential suites on the third to fifth floors, each served by an exterior passageway as the required means of egress. At one end of a passageway, one suite door sits in an alcove set back about 4 m from the passageway, beyond the exit stair near the end. The local authority says that from the point where the suite door opens onto the passageway it must be possible to go in two opposite directions to separate exits. We say the code allows dead-end corridors up to 6 m and ours is 4 m.",
+  "gold": [
+   "3.3.1.3.",
+   "3.3.1.9."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "3.3.1.3.",
+    "as_cited": "Sentences 3.3.1.3.(11) and (12), Division B, BCBC 2018",
+    "codedb_title": "Means of Egress",
+    "verification": "same number, same requirement: 2023 text says 'it shall be possible to go in opposite directions to each of 2 separate exits'"
+   },
+   {
+    "article": "3.3.1.9.",
+    "as_cited": "Sentence 3.3.1.9.(7), Division B, BCBC 2018",
+    "codedb_title": "Corridors",
+    "verification": "same number, same requirement: 2023 text says 'a dead-end corridor is permitted provided it is not more than 6 m long'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "British Columbia decision under the BC Building Code; BC has its own edition and amendments, so each article was mapped only after reading the NBC(AE) 2023 text. Appellant role is not stated in the decision; the applicant label is inferred from the project. Board decisions are specific to the appeal and are not binding elsewhere. The Board confirmed the local authority: the code does not address dead ends for exterior passageways as it does for corridors, so the two-direction requirement stands. The two sentences are numbered (8), (9) and (5) in the 2023 articles; text and article are the same."
+ },
+ {
+  "id": "ca-bcab-1929-concealed-combustible-pipe-noncombustible-building",
+  "type": "appeal",
+  "applicant": "contractor",
+  "source": {
+   "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1929",
+   "title": "BCAB 1929: Concealment of combustible water piping in a building of noncombustible construction",
+   "issuer": "Building Code Appeal Board, Province of British Columbia",
+   "date": "2024-04",
+   "edition_cited": "BCBC 2018",
+   "excerpt": "The water piping is combustible and has a flame-spread rating of more than 25 and …"
+  },
+  "description": "We are altering the water piping for a residential shower in an existing, sprinklered high-rise building of noncombustible construction. The new piping is combustible and has a flame-spread rating over 25 and a smoke developed classification over 50. The piping and shower diverter sit beside, not inside, a rated fire separation wall and will be concealed on the shower side by gypsum board and tile. The local authority says only the valve escutcheon covers the piping, so it is not really concealed in a wall. We say it is concealed in a wall and so is exempt from the flame-spread and smoke limits.",
+  "gold": [
+   "3.1.5.19."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "3.1.5.19.",
+    "as_cited": "Sentence 3.1.5.19.(1), Division B, BCBC 2018",
+    "codedb_title": "Combustible Piping Materials",
+    "verification": "same number, same requirement: 2023 text says 'combustible piping and tubing and associated adhesives are permitted to be used'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "British Columbia decision under the BC Building Code; BC has its own edition and amendments, so each article was mapped only after reading the NBC(AE) 2023 text. Appellant role is not stated in the decision; the applicant label is inferred from the project. Board decisions are specific to the appeal and are not binding elsewhere. The Board reversed the local authority: photographs showed the piping is concealed in a wall. Same article as CCMC 13529-R (cross-linked polyethylene piping)."
+ },
+ {
+  "id": "ca-bcic-24-0096-detached-garage-and-carport-spacing",
+  "type": "interpretation",
+  "applicant": "homeowner",
+  "source": {
+   "url": "https://boabc.org/wp-content/uploads/2025/09/24-0096.pdf",
+   "title": "BC Building Code Interpretation 24-0096: Spatial separation for accessory buildings",
+   "issuer": "BC Building Code Interpretation Committee (joint AIBC, EGBC, BOABC), published by the Building Officials' Association of BC",
+   "date": "2025-07",
+   "edition_cited": "BCBC 2024",
+   "excerpt": "Subsection 9.10.14. applies to detached garages or accessory buildings serving a single-family dwelling (except detached …"
+  },
+  "description": "We are planning a detached garage, and possibly a carport, to serve our single-family house on a small lot. We want to know which of the two spacing-from-property-line rule sets applies to the garage, including how far its wall must be from the boundary, how much glazing it may have, and how it must be built, and whether a carport that serves one dwelling unit is treated differently from a garage or from a carport serving a duplex.",
+  "gold": [
+   "9.10.14.1.",
+   "9.10.14.4.",
+   "9.10.14.5.",
+   "9.10.15.1.",
+   "9.10.15.4.",
+   "9.10.15.5."
+  ],
+  "context": [
+   "9.35.2.1."
+  ],
+  "mapping": [
+   {
+    "article": "9.10.14.1.",
+    "as_cited": "Sentences 9.10.14.1.(1) and (2), BCBC 2024",
+    "codedb_title": "Application",
+    "verification": "same number, same requirement: 2023 text says 'This Subsection does not apply to detached carports conforming to Section 9.35.'"
+   },
+   {
+    "article": "9.10.14.4.",
+    "as_cited": "Sentences 9.10.14.4.(10) and (11), BCBC 2024",
+    "codedb_title": "Openings in Exposing Building Face",
+    "verification": "same number, same requirement: 2023 text says 'garages or accessory buildings that serve a single dwelling unit only and are detached from any building'"
+   },
+   {
+    "article": "9.10.14.5.",
+    "as_cited": "Sentences 9.10.14.5.(4), (5) and (7), BCBC 2024",
+    "codedb_title": "Construction of Exposing Building Face and Walls above Exposing Building Face",
+    "verification": "same number, same requirement: 2023 text says 'where a garage or accessory building serves one dwelling unit only and is detached from any building'"
+   },
+   {
+    "article": "9.10.15.1.",
+    "as_cited": "Sentence 9.10.15.1.(1), BCBC 2024",
+    "codedb_title": "Application",
+    "verification": "same number, same requirement: 2023 text says 'buildings that contain only dwelling units and have no dwelling unit above another dwelling unit'"
+   },
+   {
+    "article": "9.10.15.4.",
+    "as_cited": "Sentence 9.10.15.4.(6), BCBC 2024",
+    "codedb_title": "Glazed Openings in Exposing Building Face",
+    "verification": "same number, same requirement: 2023 text says 'facing a detached garage or accessory building'"
+   },
+   {
+    "article": "9.10.15.5.",
+    "as_cited": "Sentences 9.10.15.5.(4) and (6), BCBC 2024",
+    "codedb_title": "Construction of Exposing Building Face of Houses",
+    "verification": "same number, same requirement: 2023 text says 'the detached garage or accessory building serves only one dwelling unit'"
+   },
+   {
+    "article": "9.35.2.1.",
+    "as_cited": "Article 9.35.2.1., listed in the interpretation reference list, BCBC 2024",
+    "codedb_title": "Carport Considered to be Garage",
+    "verification": "same number, same requirement (context article): 2023 text says 'the enclosure shall be considered a garage'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "British Columbia interpretation of the BC Building Code 2024, which the committee says it harmonized with NBC 2020 (the base of NBC(AE) 2023). The committee views are non-binding; each article was mapped only after reading the NBC(AE) 2023 text. The asker's role is not stated; the applicant label is inferred from the question. The committee explains that the 2024 BC Code returned to the wording of the national code, where the other-buildings subsection covers all detached garages and accessory buildings except carports serving one dwelling unit; the 2023 text of every cited sentence matches. The carport-as-garage article is in the reference list but the answer does not discuss it, so it is context. Useful for Alberta garages and carports."
+ },
+ {
+  "id": "ca-bcic-24-0080-crawl-space-insulation-protection",
+  "type": "interpretation",
+  "applicant": "designer",
+  "source": {
+   "url": "https://boabc.org/wp-content/uploads/2025/05/24-0080.pdf",
+   "title": "BC Building Code Interpretation 24-0080: Protection of insulation in crawl spaces",
+   "issuer": "BC Building Code Interpretation Committee (joint AIBC, EGBC, BOABC), published by the Building Officials' Association of BC",
+   "date": "2025-04",
+   "edition_cited": "BCBC 2024",
+   "excerpt": "When a crawl space is used for storage or for mechanical equipment, is the insulation …"
+  },
+  "description": "We are designing a house with a crawl space that will be used for storage and for mechanical equipment such as a furnace or water heater. We have insulation on the crawl space walls and want to know whether it must be covered with a durable material like gypsum board or plywood to protect it from mechanical damage, and what fire-resistance treatment applies to the floor above if the crawl space is tall or occupied. If the equipment can be reached without entering the crawl space, we ask whether the protection can be left out.",
+  "gold": [
+   "9.10.8.9.",
+   "9.25.2.3."
+  ],
+  "context": [
+   "9.10.17.10."
+  ],
+  "mapping": [
+   {
+    "article": "9.10.8.9.",
+    "as_cited": "Article 9.10.8.9., BCBC 2024",
+    "codedb_title": "Crawl Spaces",
+    "verification": "same number, same requirement: 2023 text says 'it shall be considered as a basement in applying the requirements in Article 9.10.8.1.'"
+   },
+   {
+    "article": "9.25.2.3.",
+    "as_cited": "Sentence 9.25.2.3.(7), BCBC 2024",
+    "codedb_title": "Installation of Thermal Insulation",
+    "verification": "same number, same requirement: 2023 text says 'Insulation located in areas where it may be subject to mechanical damage shall be protected by a covering'"
+   },
+   {
+    "article": "9.10.17.10.",
+    "as_cited": "Sentence 9.10.17.10.(1), named in the answer as an additional requirement for foamed plastic insulation, BCBC 2024",
+    "codedb_title": "Protection of Foamed Plastics",
+    "verification": "same number, same requirement (context article): 2023 text says 'foamed plastics that form part of a wall or ceiling assembly shall be protected'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "British Columbia interpretation of the BC Building Code 2024, which the committee says it harmonized with NBC 2020 (the base of NBC(AE) 2023). The committee views are non-binding; each article was mapped only after reading the NBC(AE) 2023 text. The asker's role is not stated; the applicant label is inferred from the question. The committee answered yes: insulation in a crawl space used for storage or fixed equipment generally needs a durable covering, except where equipment can be serviced without entering the crawl space; it also notes crawl spaces over 1.8 m high, occupied or used as a plenum count as a basement for fire-resistance. Wording matches the 2023 text."
+ },
+ {
+  "id": "ca-bcic-24-0181-furring-fasteners-through-exterior-insulation",
+  "type": "interpretation",
+  "applicant": "designer",
+  "source": {
+   "url": "https://boabc.org/wp-content/uploads/2026/09/24-0181.pdf",
+   "title": "BC Building Code Interpretation 24-0181: Furring fasteners through exterior insulation",
+   "issuer": "BC Building Code Interpretation Committee (joint AIBC, EGBC, BOABC), published by the Building Officials' Association of BC",
+   "date": "2026-08",
+   "edition_cited": "BCBC 2024",
+   "excerpt": "Can furring conforming with Sentence 9.27.5.3.(1) as part of an exterior wall assembly be attached …"
+  },
+  "description": "We are designing a wood-frame house with rigid insulation outboard of the wall structure to meet energy goals, with cladding carried on strapping. We want to attach the 19 by 38 mm furring through the exterior insulation into the wall structure with the ordinary cladding fasteners, and keep a drained and vented air space behind the cladding. The code gives fastener sizes and penetration depths but does not say anything about fasteners passing through insulation, and we want to know whether that detail is acceptable.",
+  "gold": [
+   "9.27.2.2.",
+   "9.27.5.3.",
+   "9.27.5.4.",
+   "9.27.5.7."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.27.2.2.",
+    "as_cited": "Article 9.27.2.2., BCBC 2024",
+    "codedb_title": "Minimum Protection from Precipitation Ingress",
+    "verification": "same number, same requirement: 2023 text says 'a drained and vented air space not less than 9.5 mm deep behind the cladding'"
+   },
+   {
+    "article": "9.27.5.3.",
+    "as_cited": "Sentences 9.27.5.3.(1) and (3), BCBC 2024",
+    "codedb_title": "Furring",
+    "verification": "same number, same requirement: 2023 text says 'furring for the attachment of cladding shall be not less than 19 mm by 38 mm lumber'"
+   },
+   {
+    "article": "9.27.5.4.",
+    "as_cited": "Article 9.27.5.4., BCBC 2024",
+    "codedb_title": "Size and Spacing of Fasteners",
+    "verification": "same number, same requirement: 2023 text says 'Nail or staple size and spacing for the attachment of cladding and trim'"
+   },
+   {
+    "article": "9.27.5.7.",
+    "as_cited": "Article 9.27.5.7., BCBC 2024",
+    "codedb_title": "Penetration of Fasteners",
+    "verification": "same number, same requirement: 2023 text says 'shall penetrate through the nail-holding base or not less than 25 mm into the framing'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "British Columbia interpretation of the BC Building Code 2024, which the committee says it harmonized with NBC 2020 (the base of NBC(AE) 2023). The committee views are non-binding; each article was mapped only after reading the NBC(AE) 2023 text. The asker's role is not stated; the applicant label is inferred from the question. The committee answered yes with practical limits (heavier claddings, deflection and drainage gap) and recommended design by qualified persons. Same topic as continuous exterior insulation products. Interpretation dated 2026-08-18."
+ },
+ {
+  "id": "ca-bcic-24-0122-foam-plastic-inside-concrete-wall",
+  "type": "interpretation",
+  "applicant": "designer",
+  "source": {
+   "url": "https://boabc.org/wp-content/uploads/2025/09/24-0122.pdf",
+   "title": "BC Building Code Interpretation 24-0122: Foamed plastic insulation on the inside face of a concrete wall",
+   "issuer": "BC Building Code Interpretation Committee (joint AIBC, EGBC, BOABC), published by the Building Officials' Association of BC",
+   "date": "2025-09",
+   "edition_cited": "BCBC 2024",
+   "excerpt": "An exposing building face is constructed as a solid concrete wall with foamed plastic insulation …"
+  },
+  "description": "We are designing a sprinklered building more than three storeys high whose exposing wall is solid concrete, with foamed plastic insulation on the inside face covered by 12 mm gypsum board. The limiting distance only permits less than 10 percent unprotected openings in that wall. We want to know whether the foamed plastic is permitted in this exposing wall, given the rules that restrict foamed plastic in exterior walls of buildings more than three storeys high and the rules for combustible cladding.",
+  "gold": [
+   "3.2.3.8.",
+   "3.1.5.5."
+  ],
+  "context": [
+   "3.1.5.6."
+  ],
+  "mapping": [
+   {
+    "article": "3.2.3.8.",
+    "as_cited": "Sentences 3.2.3.8.(1) and (3), BCBC 2024",
+    "codedb_title": "Protection of Exterior Building Face",
+    "verification": "same number, same requirement: 2023 text says 'foamed plastic insulation used in an exterior wall of a building more than 3 storeys in building height'"
+   },
+   {
+    "article": "3.1.5.5.",
+    "as_cited": "Sentence 3.1.5.5.(2), BCBC 2024",
+    "codedb_title": "Combustible Cladding on Exterior Walls",
+    "verification": "same number, same requirement: 2023 text says 'combustible cladding is permitted to be used on an exterior wall assembly in a building'"
+   },
+   {
+    "article": "3.1.5.6.",
+    "as_cited": "Sentence 3.1.5.6.(1)(b)(ii), listed in the interpretation reference list, BCBC 2024",
+    "codedb_title": "Combustible Components in Exterior Walls",
+    "verification": "same number, same requirement (context article): 2023 text says 'Combustible components, other than those permitted by Article 3.1.5.5. and Sentence 3.1.5.7.(2)'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "British Columbia interpretation of the BC Building Code 2024, which the committee says it harmonized with NBC 2020 (the base of NBC(AE) 2023). The committee views are non-binding; each article was mapped only after reading the NBC(AE) 2023 text. The asker's role is not stated; the applicant label is inferred from the question. The committee answered yes: the concrete wall fully meets the exposing-face rules, so the interior foam is permitted; the cladding article does not apply because the cladding is noncombustible. The combustible-components article is in the reference list but the answer does not discuss it, so it is context. Wording matches the 2023 text."
+ },
+ {
+  "id": "ca-bcic-24-0123-combustible-ceiling-finish-test-method",
+  "type": "interpretation",
+  "applicant": "designer",
+  "source": {
+   "url": "https://boabc.org/wp-content/uploads/2025/09/24-0123.pdf",
+   "title": "BC Building Code Interpretation 24-0123: Ceiling products tested to CAN/ULC S102.2",
+   "issuer": "BC Building Code Interpretation Committee (joint AIBC, EGBC, BOABC), published by the Building Officials' Association of BC",
+   "date": "2025-07",
+   "edition_cited": "BCBC 2024",
+   "excerpt": "In a sprinklered building that is required to be noncombustible construction, can a combustible interior …"
+  },
+  "description": "We are designing a sprinklered building that must be of noncombustible construction and want a combustible interior ceiling finish no thicker than 25 mm. Its flame-spread rating was determined with the test method meant for flooring and miscellaneous materials, the one used for products that melt or cannot be tested on a ceiling rig, rather than the standard wall and ceiling test. We want to know whether the finish is allowed under the limited combustible ceiling finish permission, given that up to ten percent of the ceiling area may have a higher rating.",
+  "gold": [
+   "3.1.5.12.",
+   "3.1.12.1."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "3.1.5.12.",
+    "as_cited": "Sentence 3.1.5.12.(3), BCBC 2024",
+    "codedb_title": "Combustible Interior Finishes",
+    "verification": "same number, same requirement: 2023 text says 'combustible interior ceiling finishes, other than foamed plastics, that are not more than 25 mm thick'"
+   },
+   {
+    "article": "3.1.12.1.",
+    "as_cited": "Sentences 3.1.12.1.(1) and (2), BCBC 2024",
+    "codedb_title": "Determination of Ratings",
+    "verification": "same number, same requirement: 2023 text says 'shall be determined on the basis of not less than three tests conducted in conformance with CAN/ULC-S102.2'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "British Columbia interpretation of the BC Building Code 2024, which the committee says it harmonized with NBC 2020 (the base of NBC(AE) 2023). The committee views are non-binding; each article was mapped only after reading the NBC(AE) 2023 text. The asker's role is not stated; the applicant label is inferred from the question. The committee answered yes with caution: the second test method may be used for products that cannot be tested the standard way, but designers should consider whether such products suit walls and ceilings. Wording matches the 2023 text."
+ },
+ {
+  "id": "ca-bcic-24-0120-heated-crawlspace-ground-cover-joints",
+  "type": "interpretation",
+  "applicant": "designer",
+  "source": {
+   "url": "https://boabc.org/wp-content/uploads/2026/04/24-0120.pdf",
+   "title": "BC Building Code Interpretation 24-0120: Heated crawlspace vapour barrier",
+   "issuer": "BC Building Code Interpretation Committee (joint AIBC, EGBC, BOABC), published by the Building Officials' Association of BC",
+   "date": "2026-03",
+   "edition_cited": "BCBC 2024",
+   "excerpt": "If a 50mm thick concrete slab is installed above the ground cover within a heated …"
+  },
+  "description": "We are building a house with a heated crawl space and plan to pour a 50 mm concrete slab over the polyethylene ground cover. The sheets overlap by 300 mm. We want to know whether the overlapping joints of the ground cover must be sealed when they are covered by that slab, and whether the requirement to seal penetrations of the ground cover against air leakage also applies to the overlap joints, or only to pipes, ducts and similar items passing through it.",
+  "gold": [
+   "9.18.6.2.",
+   "9.25.3.3.",
+   "9.25.3.6."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.18.6.2.",
+    "as_cited": "Sentences 9.18.6.2.(1), (2) and (4), BCBC 2024",
+    "codedb_title": "Ground Cover in Heated Crawl Spaces",
+    "verification": "same number, same requirement: 2023 text says 'shall have its joints lapped not less than 300 mm'"
+   },
+   {
+    "article": "9.25.3.3.",
+    "as_cited": "Sentence 9.25.3.3.(6), BCBC 2024",
+    "codedb_title": "Continuity of the Air Barrier System",
+    "verification": "same number, same requirement: 2023 text says 'Penetrations of the air barrier system, such as those created by the installation of doors, windows'"
+   },
+   {
+    "article": "9.25.3.6.",
+    "as_cited": "Sentence 9.25.3.6.(3), BCBC 2024",
+    "codedb_title": "Air Barrier Systems in Floors-on-ground",
+    "verification": "same number, same requirement: 2023 text says 'joints in the barrier shall be lapped not less than 300 mm'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "British Columbia interpretation of the BC Building Code 2024, which the committee says it harmonized with NBC 2020 (the base of NBC(AE) 2023). The committee views are non-binding; each article was mapped only after reading the NBC(AE) 2023 text. The asker's role is not stated; the applicant label is inferred from the question. The committee answered no to both questions: joints need not be sealed when covered by 50 mm concrete and lapped 300 mm, and the penetration-sealing requirement refers to items passing through the ground cover. Wording matches the 2023 text. Interpretation dated 2026-03-10."
+ },
+ {
+  "id": "ca-bcic-24-0144-vertical-cladding-horizontal-furring",
+  "type": "interpretation",
+  "applicant": "designer",
+  "source": {
+   "url": "https://boabc.org/wp-content/uploads/2026/02/24-0144.pdf",
+   "title": "BC Building Code Interpretation 24-0144: Vertical exterior cladding with horizontal furring",
+   "issuer": "BC Building Code Interpretation Committee (joint AIBC, EGBC, BOABC), published by the Building Officials' Association of BC",
+   "date": "2026-02",
+   "edition_cited": "BCBC 2024",
+   "excerpt": "In areas that do not require capillary breaks, does horizontal furring installed directly on the …"
+  },
+  "description": "We are designing a house with vertical siding that needs horizontal furring for its attachment. In our climate we want to know whether we can fix horizontal furring directly onto the sheathing membrane where a capillary break is not required, and whether, where a capillary break is required, we must first install vertical furring against the membrane before the horizontal furring so that water can drain downward.",
+  "gold": [
+   "9.27.2.2.",
+   "9.27.2.3."
+  ],
+  "context": [
+   "9.27.3.6."
+  ],
+  "mapping": [
+   {
+    "article": "9.27.2.2.",
+    "as_cited": "Sentences 9.27.2.2.(1), (5) and (6), BCBC 2024",
+    "codedb_title": "Minimum Protection from Precipitation Ingress",
+    "verification": "same number, same requirement: 2023 text says 'a drained and vented air space not less than 9.5 mm deep behind the cladding'"
+   },
+   {
+    "article": "9.27.2.3.",
+    "as_cited": "Subclause 9.27.2.3.(1)(b)(ii), BCBC 2024",
+    "codedb_title": "First and Second Planes of Protection",
+    "verification": "same number, same requirement: 2023 text says 'Where walls required to provide protection from precipitation comprise cladding assemblies with first and second planes of protection'"
+   },
+   {
+    "article": "9.27.3.6.",
+    "as_cited": "Article 9.27.3.6. Face Sealed Cladding, listed in the interpretation reference list, BCBC 2024",
+    "codedb_title": "Face Sealed Cladding",
+    "verification": "same number, same requirement (context article): 2023 text says 'Sheathing membrane is permitted to be omitted beneath cladding'"
+   }
+  ],
+  "confidence": "high",
+  "notes": "British Columbia interpretation of the BC Building Code 2024, which the committee says it harmonized with NBC 2020 (the base of NBC(AE) 2023). The committee views are non-binding; each article was mapped only after reading the NBC(AE) 2023 text. The asker's role is not stated; the applicant label is inferred from the question. The committee answered no to question one (horizontal furring on the membrane blocks the drainage plane unless extra design detail shows otherwise) and yes to question two. The second-plane article is named in the question and answer rather than in the reference list; the face-sealed cladding article is in the reference list and keywords but the answer does not discuss it, so it is context. Interpretation dated 2026-02-17."
+ },
+ {
+  "id": "ca-sk-ministerial-interpretation-co-detectors-in-lieu-of-alarms",
+  "type": "interpretation",
+  "applicant": "owner-developer",
+  "source": {
+   "url": "https://publications.saskatchewan.ca/api/v1/products/129927/formats/157352/download",
+   "title": "Ministerial Interpretation NBC 2020-004: Carbon Monoxide (CO) Detectors Installed in Lieu of CO Alarms",
+   "issuer": "Minister of Government Relations, Government of Saskatchewan (The Construction Codes Act)",
+   "date": "2026-09",
+   "edition_cited": "NBC 2020 (with Saskatchewan amendments)",
+   "excerpt": "NBC 2020 Subsection 6.9.3. and Article 9.32.3.9. ... To provide options for owners of multi-unit …"
+  },
+  "description": "We own an apartment building that has a fire alarm system. New provincial rules will require a carbon monoxide alarm in every residential suite by November 1, 2026, regardless of when the building was built or last renovated. Rather than installing a separate alarm in each suite, we want to use interconnected carbon monoxide detectors that form part of our fire alarm system, meet the gas and vapour detector standard, and can sound an audible signal inside the individual suite without alarming the rest of the building. We want to know whether the code lets detectors be used in place of alarms.",
+  "gold": [
+   "9.32.3.9.",
+   "6.9.3.1."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.32.3.9.",
+    "as_cited": "Article 9.32.3.9. Carbon Monoxide Alarms and Detectors, NBC 2020 as substituted by the interpretation",
+    "codedb_title": "Carbon Monoxide Alarms",
+    "verification": "same-number related topic only; applicability and detector permission differ from Alberta: 2023 text says 'Carbon monoxide (CO) alarms required by this Article shall'"
+   },
+   {
+    "article": "6.9.3.1.",
+    "as_cited": "Article 6.9.3.1. Carbon Monoxide Alarms and Detectors, NBC 2020 as substituted by the interpretation",
+    "codedb_title": "Carbon Monoxide Alarms",
+    "verification": "same-number related topic only; applicability and detector permission differ from Alberta: 2023 text says 'This Article applies to every building that contains a residential occupancy'"
+   }
+  ],
+  "confidence": "medium",
+  "notes": "Saskatchewan ministerial interpretation effective 2026-09-21 with provincial wording (a province-wide CO alarm requirement and the detector permission), so the new sentences are not in NBC(AE) 2023; the two articles it substitutes are the same articles in the 2023 text (6.9.3.1. and 9.32.3.9.), whose wording was read. Medium because the permission itself is a Saskatchewan amendment. Subsection 6.9.3. contains only the one article. Not Alberta-specific.",
+  "evaluation_scope": "foreign_topic",
+  "evaluation_exclusion": "Saskatchewan substitution differs from Alberta applicability and detector permission; topic mapping only, excluded from current-Alberta primary recall."
+ },
+ {
+  "id": "ca-sk-advisory-secondary-suite-checklist",
+  "type": "interpretation",
+  "applicant": "homeowner",
+  "source": {
+   "url": "https://publications.saskatchewan.ca/api/v1/products/122665/formats/142536/download",
+   "title": "Construction Codes Advisory: Secondary Suites (how the NBC 2020 applies to secondary suites)",
+   "issuer": "Building and Technical Standards, Ministry of Government Relations, Government of Saskatchewan",
+   "date": "2024-01",
+   "edition_cited": "NBC 2020",
+   "excerpt": "The following checklist references the NBC 2020 requirements for designing and constructing a secondary suite."
+  },
+  "description": "We want to turn part of our single-family house into a self-contained rental suite, in the basement or as an addition. The house and the suite will stay under one title and one owner, and the suite will be separated from the main unit by smoke-tight drywall and a self-closing solid door rather than a full fire separation. We need to know every building code requirement that specifically applies to a secondary suite: room heights, doors, stairs, ramps and guards, exits and bedroom escape windows, the separation and sound insulation between the two units, interconnected smoke and carbon monoxide alarms, separate heating, ventilation and lighting, and energy compliance.",
+  "gold": [
+   "9.5.3.1.",
+   "9.5.5.1.",
+   "9.8.1.2.",
+   "9.8.2.1.",
+   "9.8.2.2.",
+   "9.8.3.1.",
+   "9.8.4.1.",
+   "9.8.4.2.",
+   "9.8.4.9.",
+   "9.8.5.2.",
+   "9.8.5.3.",
+   "9.8.6.2.",
+   "9.8.6.4.",
+   "9.8.7.1.",
+   "9.8.7.2.",
+   "9.8.7.7.",
+   "9.8.8.2.",
+   "9.8.8.3.",
+   "9.8.9.1.",
+   "9.8.9.4.",
+   "9.9.4.2.",
+   "9.9.4.4.",
+   "9.9.4.6.",
+   "9.9.9.3.",
+   "9.9.10.1.",
+   "9.10.8.3.",
+   "9.10.9.1.",
+   "9.10.9.2.",
+   "9.10.9.3.",
+   "9.10.9.4.",
+   "9.10.9.16.",
+   "9.10.9.17.",
+   "9.10.10.4.",
+   "9.10.11.2.",
+   "9.10.12.3.",
+   "9.10.12.4.",
+   "9.10.15.1.",
+   "9.10.19.5.",
+   "9.11.1.1.",
+   "9.32.1.2.",
+   "9.32.3.8.",
+   "9.32.3.9.",
+   "9.33.1.1.",
+   "9.33.3.1.",
+   "9.33.4.3.",
+   "9.34.2.3.",
+   "9.36.1.3."
+  ],
+  "context": [],
+  "mapping": [
+   {
+    "article": "9.5.3.1.",
+    "as_cited": "Article 9.5.3.1., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Ceiling Heights of Rooms or Spaces",
+    "verification": "same number, same requirement: 2023 text says 'Ceiling heights in secondary suites shall be not less than 1.95 m.'"
+   },
+   {
+    "article": "9.5.5.1.",
+    "as_cited": "Article 9.5.5.1., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Doorway Opening Sizes",
+    "verification": "same number, same requirement: 2023 text says 'units and within houses with a secondary suite including their common spaces shall be'"
+   },
+   {
+    "article": "9.8.1.2.",
+    "as_cited": "Article 9.8.1.2., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Stairs, Ramps, Landings, Handrails and Guards in Garages",
+    "verification": "same number, same requirement: 2023 text says 'unit or a house with a secondary suite including their common spaces, the garage'"
+   },
+   {
+    "article": "9.8.2.1.",
+    "as_cited": "Article 9.8.2.1., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Stair Width",
+    "verification": "same number, same requirement: 2023 text says 'unit or a house with a secondary suite including their common spaces shall have'"
+   },
+   {
+    "article": "9.8.2.2.",
+    "as_cited": "Article 9.8.2.2., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Height over Stairs",
+    "verification": "same number, same requirement: 2023 text says 'unit or a house with a secondary suite including their common spaces shall not'"
+   },
+   {
+    "article": "9.8.3.1.",
+    "as_cited": "Article 9.8.3.1., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Permitted Configurations",
+    "verification": "same number, same requirement: 2023 text says 'dwelling units and houses with a secondary suite, including their common spaces, shall consist'"
+   },
+   {
+    "article": "9.8.4.1.",
+    "as_cited": "Article 9.8.4.1., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Dimensions for Risers",
+    "verification": "same number, same requirement: 2023 text says 'Except as provided in Article 9.8.4.7. and except for stairs serving areas only used'"
+   },
+   {
+    "article": "9.8.4.2.",
+    "as_cited": "Article 9.8.4.2., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Dimensions for Rectangular Treads",
+    "verification": "same number, same requirement: 2023 text says 'Except for stairs serving areas only used as service rooms or service spaces, the'"
+   },
+   {
+    "article": "9.8.4.9.",
+    "as_cited": "Article 9.8.4.9., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Open Risers",
+    "verification": "same number, same requirement: 2023 text says 'unit or a house with a secondary suite, b) fire escape stairs, c) stairs'"
+   },
+   {
+    "article": "9.8.5.2.",
+    "as_cited": "Article 9.8.5.2., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Ramp Width",
+    "verification": "same number, same requirement: 2023 text says 'unit or a house with a secondary suite including their common spaces shall be'"
+   },
+   {
+    "article": "9.8.5.3.",
+    "as_cited": "Article 9.8.5.3., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Height over Ramps",
+    "verification": "same number, same requirement: 2023 text says 'unit or a house with a secondary suite including their common spaces shall be'"
+   },
+   {
+    "article": "9.8.6.2.",
+    "as_cited": "Article 9.8.6.2., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Required Landings",
+    "verification": "same number, same requirement: 2023 text says 'unit or a house with a secondary suite, provided a) the stair does not'"
+   },
+   {
+    "article": "9.8.6.4.",
+    "as_cited": "Article 9.8.6.4., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Height over Landings",
+    "verification": "same number, same requirement: 2023 text says 'unit or a house with a secondary suite including their common spaces shall be'"
+   },
+   {
+    "article": "9.8.7.1.",
+    "as_cited": "Article 9.8.7.1., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Required Handrails",
+    "verification": "same number, same requirement: 2023 text says 'unit or a house with a secondary suite, where a) interior stairs have not'"
+   },
+   {
+    "article": "9.8.7.2.",
+    "as_cited": "Article 9.8.7.2., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Continuity of Handrails",
+    "verification": "same number, same requirement: 2023 text says 'unit or a house with a secondary suite including their common spaces, at least'"
+   },
+   {
+    "article": "9.8.7.7.",
+    "as_cited": "Article 9.8.7.7., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Design and Attachment of Handrails",
+    "verification": "same number, same requirement: 2023 text says 'unit or a house with a secondary suite including their common spaces are attached'"
+   },
+   {
+    "article": "9.8.8.2.",
+    "as_cited": "Article 9.8.8.2., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Loads on Guards",
+    "verification": "same number, same requirement: 2023 text says 'units and within houses with a secondary suite including their common spaces and for'"
+   },
+   {
+    "article": "9.8.8.3.",
+    "as_cited": "Article 9.8.8.3., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Height of Guards",
+    "verification": "same number, same requirement: 2023 text says 'units or within houses with a secondary suite including their common spaces shall be'"
+   },
+   {
+    "article": "9.8.9.1.",
+    "as_cited": "Article 9.8.9.1., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Loads on Stairs and Ramps",
+    "verification": "same number, same requirement: 2023 text says 'unit or a house with a secondary suite including their common spaces, and b)'"
+   },
+   {
+    "article": "9.8.9.4.",
+    "as_cited": "Article 9.8.9.4., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Wooden Stair Stringers",
+    "verification": "same number, same requirement: 2023 text says 'unit or a house with a secondary suite including their common spaces, and 600'"
+   },
+   {
+    "article": "9.9.4.2.",
+    "as_cited": "Article 9.9.4.2., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Fire Separations for Exits",
+    "verification": "same number, same requirement: 2023 text says 'located in a house with a secondary suite including their common spaces, the exit'"
+   },
+   {
+    "article": "9.9.4.4.",
+    "as_cited": "Article 9.9.4.4., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Openings Near Unenclosed Exterior E xit Stairs and Ramps",
+    "verification": "same number, same requirement: 2023 text says 'space in a house with a secondary suite, and b) unprotected openings in the'"
+   },
+   {
+    "article": "9.9.4.6.",
+    "as_cited": "Article 9.9.4.6., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Openings Near Exit Doors",
+    "verification": "same number, same requirement: 2023 text says 'space in a house with a secondary suite is within 3 m horizontally of'"
+   },
+   {
+    "article": "9.9.9.3.",
+    "as_cited": "Article 9.9.9.3., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Shared Egress Facilities",
+    "verification": "same number, same requirement: 2023 text says 'units in a house with a secondary suite,a dwelling unit shall be provided with'"
+   },
+   {
+    "article": "9.9.10.1.",
+    "as_cited": "Article 9.9.10.1., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Egress Windows or Doors for Bedrooms",
+    "verification": "same number, same requirement: 2023 text says 'Except where the suite is sprinklered, each bedroom or combination bedroom shall have at'"
+   },
+   {
+    "article": "9.10.8.3.",
+    "as_cited": "Article 9.10.8.3., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Fire-Resistance Ratings for Walls, Columns and Arches",
+    "verification": "same number, same requirement: 2023 text says 'units in a house with a secondary suite including their common spaces shall be'"
+   },
+   {
+    "article": "9.10.9.1.",
+    "as_cited": "Article 9.10.9.1., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Application",
+    "verification": "same number, same requirement: 2023 text says 'barriers required in houses with a secondary suite including their common spaces.'"
+   },
+   {
+    "article": "9.10.9.2.",
+    "as_cited": "Article 9.10.9.2., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Continuous Barrier",
+    "verification": "same number, same requirement: 2023 text says 'Except as permitted in Article 9.10.9.3., a wall or floor assembly required to be'"
+   },
+   {
+    "article": "9.10.9.3.",
+    "as_cited": "Article 9.10.9.3., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Openings to be Protected with Closures",
+    "verification": "same number, same requirement: 2023 text says 'Except as permitted in Articles 9.10.9.5. to 9.10.9.8., openings in required fire separations shall'"
+   },
+   {
+    "article": "9.10.9.4.",
+    "as_cited": "Article 9.10.9.4., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Floor Assemblies",
+    "verification": "same number, same requirement: 2023 text says 'units and within houses with a secondary suite need not be constructed as fire'"
+   },
+   {
+    "article": "9.10.9.16.",
+    "as_cited": "Article 9.10.9.16., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Separation of Residential Suites",
+    "verification": "same number, same requirement: 2023 text says 'framing in a house with a secondary suite that separate dwelling units from each'"
+   },
+   {
+    "article": "9.10.9.17.",
+    "as_cited": "Article 9.10.9.17., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Separation of Public Corridors",
+    "verification": "same number, same requirement: 2023 text says 'located in a house with a secondary suite, a continuous smoke-tight barrier of not'"
+   },
+   {
+    "article": "9.10.10.4.",
+    "as_cited": "Article 9.10.10.4., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Location of Fuel-Fired Appliances",
+    "verification": "same number, same requirement: 2023 text says 'i) serve a house with a secondary suite including their common spaces, and ii)'"
+   },
+   {
+    "article": "9.10.11.2.",
+    "as_cited": "Article 9.10.11.2., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Firewalls Not Required",
+    "verification": "same number, same requirement: 2023 text says 'unit and a house with a secondary suite including their common spaces, or c)'"
+   },
+   {
+    "article": "9.10.12.3.",
+    "as_cited": "Article 9.10.12.3., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Exterior Walls Meeting at an Angle",
+    "verification": "same number, same requirement: 2023 text says 'spaces in a house with a secondary suite.'"
+   },
+   {
+    "article": "9.10.12.4.",
+    "as_cited": "Article 9.10.12.4., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Protection of Soffits",
+    "verification": "same number, same requirement: 2023 text says 'space in a house with a secondary suite, or c) a floor space where'"
+   },
+   {
+    "article": "9.10.15.1.",
+    "as_cited": "Article 9.10.15.1., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Application",
+    "verification": "same number, same requirement: 2023 text says 'unit, and b) houses with a secondary suite including their common spaces. (See Note'"
+   },
+   {
+    "article": "9.10.19.5.",
+    "as_cited": "Article 9.10.19.5., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Interconnection of Smoke Alarms",
+    "verification": "same number, same requirement: 2023 text says 'alarms in a house with a secondary suite shall be wirelessly interconnected or interconnected'"
+   },
+   {
+    "article": "9.11.1.1.",
+    "as_cited": "Article 9.11.1.1., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Required Protection",
+    "verification": "same number, same requirement: 2023 text says 'Where a house contains a secondary suite, each dwelling unit shall be separated from'"
+   },
+   {
+    "article": "9.32.1.2.",
+    "as_cited": "Article 9.32.1.2., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Required Ventilation",
+    "verification": "same number, same requirement: 2023 text says 'In houses that contain a secondary suite, heating-season ventilation need not be provided for'"
+   },
+   {
+    "article": "9.32.3.8.",
+    "as_cited": "Article 9.32.3.8., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Protection Against Depressurization",
+    "verification": "same number, same requirement: 2023 text says 'unit in a house with a secondary suite and where the house with a'"
+   },
+   {
+    "article": "9.32.3.9.",
+    "as_cited": "Article 9.32.3.9., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Carbon Monoxide Alarms",
+    "verification": "same number, same requirement: 2023 text says 'installed in a house with a secondary suite including their common spaces, the CO'"
+   },
+   {
+    "article": "9.33.1.1.",
+    "as_cited": "Article 9.33.1.1., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Application",
+    "verification": "same number, same requirement: 2023 text says 'heating systems in houses with a secondary suite including their common spaces.'"
+   },
+   {
+    "article": "9.33.3.1.",
+    "as_cited": "Article 9.33.3.1., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Indoor Design Temperatures",
+    "verification": "same number, same requirement: 2023 text says 'and exits in houses with a secondary suite, and d) 15°C in heated crawl'"
+   },
+   {
+    "article": "9.33.4.3.",
+    "as_cited": "Article 9.33.4.3., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Heating System Control",
+    "verification": "same number, same requirement: 2023 text says 'system serves a house with a secondary suite, individual temperature controls shall be provided'"
+   },
+   {
+    "article": "9.34.2.3.",
+    "as_cited": "Article 9.34.2.3., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Stairways",
+    "verification": "same number, same requirement: 2023 text says 'dwelling units and houses with a secondary suite including their common spaces.'"
+   },
+   {
+    "article": "9.36.1.3.",
+    "as_cited": "Article 9.36.1.3., listed in the Saskatchewan secondary suite checklist (NBC 2020)",
+    "codedb_title": "Compliance and Application",
+    "verification": "same number, same requirement: 2023 text says 'a) houses with or without a secondary suite, and b) buildings containing only dwelling'"
+   }
+  ],
+  "confidence": "medium",
+  "notes": "Large-gold case: 47 articles from one source checklist; score it separately from small-gold cases. The checklist lists 48 articles; one (9.1.2.1., the secondary suite floor-area limit) is absent from NBC(AE) 2023 (the Alberta edition keeps only one article in Section 9.1), so it is dropped and shows an Alberta deviation. For each of the other 47, the checklist description was compared with the 2023 article text and matches (for example 9.10.10.4. holds the smoke-tight furnace room option inside its second sentence). Saskatchewan advisory, NBC 2020 basis. Verification quotes were picked mechanically as the secondary-suite phrase of each 2023 article or its first sentence."
+ }
+]

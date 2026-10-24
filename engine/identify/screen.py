@@ -21,6 +21,8 @@ JEV_PROVIDER = 'typesafe'         # OpenRouter names the model differently (~typ
 MAX_QUESTIONS = 400              # independent of state/card length (Decisions request limit)
 GOVERN = ('Article {L} states a requirement that directly governs the situation described in `proposal`: '
           'the proposal must meet that requirement, relies on it, or departs from it.')
+SELF_QUESTION = ('A complete alternative-solution application for the proposal in `proposal` must cite '
+                 'this building-code article: {card}')
 
 # ask(state, questions, timeout) -> {"answers": {name: {"noul": p, ...}}, "usage": {...}, "latency_ms": int}
 Ask = Callable[[Any, Mapping[str, Mapping[str, Any]], float], Mapping[str, Any]]
@@ -75,7 +77,7 @@ class Judge:
 
     def __init__(self, ask: Ask | None = None, *, chars: int = 700, max_state: int = 56000, workers: int = 8,
                  timeout: float = 60, attempts: int = 4, question: str = GOVERN,
-                 model: str | None = None, method: str | None = None):
+                 model: str | None = None, method: str | None = None, question_style: str = 'shared'):
         self.config = None
         self.transports = None
         if ask is None:
@@ -84,6 +86,7 @@ class Judge:
             config = load_config()
             self.config = config
             method, model, chars = config.screen, config.screen_model, config.card_chars
+            question_style = config.question_style if method == 'elephant' else 'shared'
             self.transports = transports(scoring={config.screen, config.rerank})
             ask = scoring_ask(self.transports, method)
         # Metered adapters carry their identity through the injectable Ask seam. Plain
@@ -91,6 +94,9 @@ class Judge:
         self.ask = ask
         self.model = model or getattr(ask, 'model', JEV_MODEL)
         self.method = method or getattr(ask, 'method', 'jev')
+        if question_style not in ('shared', 'self') or (question_style == 'self' and self.method != 'elephant'):
+            raise ValueError('self question style requires the supported scoring method')
+        self.question_style = question_style
         self.chars, self.max_state, self.workers = chars, max_state, workers
         self.timeout, self.attempts, self.question = timeout, (1 if self.method == 'elephant' else attempts), question
         self.usage = Usage()
@@ -131,6 +137,9 @@ class Judge:
         return out
 
     def _payload(self, query, batch):
+        if self.question_style == 'self':
+            return {'proposal': query}, {f'q{i}': noul(SELF_QUESTION.format(card=text))
+                                         for i, (_, text) in enumerate(batch)}
         state = {'proposal': query, 'articles': {f'A{i}': t for i, (_, t) in enumerate(batch)}}
         qs = {f'q{i}': noul(self.question.format(L=f'A{i}')) for i in range(len(batch))}
         return state, qs

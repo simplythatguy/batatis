@@ -40,13 +40,15 @@ def identify(query: str, db_path: Path | str, judge: Judge | None = None, *, rer
             raise ValueError('relevance requires an exhaustive scoring configuration')
         tp = transports(scoring={config.screen, config.rerank})
         judge = Judge(scoring_ask(tp, config.screen), chars=config.card_chars,
-                      model=config.screen_model, method=config.screen)
+                      model=config.screen_model, method=config.screen,
+                      question_style=config.question_style if config.screen == 'elephant' else 'shared')
     elif judge.config is not None:
         config = judge.config
         tp = judge.transports
     else:
         config = replace(config, screen=judge.method, screen_model=judge.model,
-                         rerank=judge.method, rerank_model=judge.model, card_chars=judge.chars)
+                         rerank=judge.method, rerank_model=judge.model, card_chars=judge.chars,
+                         question_style=judge.question_style)
     n = rerank_n if rerank_n is not None else config.rerank_n
     if n != config.rerank_n:
         config = replace(config, rerank_n=n, verify_n=min(config.verify_n, n))
@@ -64,7 +66,8 @@ def identify(query: str, db_path: Path | str, judge: Judge | None = None, *, rer
     if config.rerank in ('elephant', 'decisions', 'jev'):
         if config.rerank != judge.method:
             reranker = Judge(scoring_ask(tp, config.rerank), chars=config.card_chars,
-                             model=config.rerank_model, method=config.rerank)
+                             model=config.rerank_model, method=config.rerank,
+                             question_style=config.question_style if config.rerank == 'elephant' else 'shared')
         rer = reranker.judge(query, arts, top)
     elif config.rerank == 'openai':
         from .llm import score_candidates

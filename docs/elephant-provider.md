@@ -87,12 +87,79 @@ bands are `{x: 0, y: 1, status: "uncalibrated; display range only"}`, and automa
 commits remain off without an exact-config validated fit. A single smoke does not
 establish calibration, technical equivalence, safety or professional approval.
 
-Integration must regenerate the shared API schema/types **after** parent composition.
-The new backend model enum includes `relevance-3`; this worker deliberately leaves
-generated web files untouched. At base `6274b8be`, `web/src/calm/relevance.ts:26-35`
-already treats uncalibrated `0..1` ranges as unrated and reserves historical fallback
-bands for `relevance-1` placeholder rows. Preserve and test that behavior on the
-actual integrated UI; do not replace zero with historical cutoffs.
+## Opt-in candidate experiment (identify only)
+
+Defaults remain the exhaustive shared-card screen, rerank and top-15 verifier
+above. The experiment is selected only by `BATATIS_IDENTIFY_SCREEN=shortlist` (or
+`screen: "shortlist"` in the identify config). It uses one **metered OpenAI JSON**
+request with the complete authoritative Division B table of contents, accepts only
+exact known article IDs, and interleaves those candidates with the existing fast
+BM25 ranking. It takes the first 60 unique IDs by default, never an exhaustive
+screen. A key or the Elephant-only live switch does not enable the text selector
+or reviewer: those still require their existing OpenAI/live gates.
+
+Settings are `shortlist_n` (default 60, maximum 120) and `shortlist_toc_n` (default
+40, no larger than the pool). Their environment overrides are
+`BATATIS_IDENTIFY_SHORTLIST_N` and `BATATIS_IDENTIFY_SHORTLIST_TOC_N`.
+`load_config` infers `screen_model=gpt-6-luna` when omitted; direct
+`IdentifyConfig` construction must set that screen pin. The existing
+`verifier_effort` also selects the TOC request's effort. The shortlist supports
+`rerank=elephant` or `none`, and `verifier=openai` or `none`. It does not import
+the evaluation harness, use its caches, or switch scoring providers on failure.
+
+Optional reranking scores **every pool article**, without dropping candidates.
+A rerank failure retains the tentative pool and reports that reranking was
+unavailable. The reviewer receives the **full text of every pool article**,
+independent of `verify_n` or `rerank_n`, and labels each internally as `applies`,
+`check`, or `unlikely`. These labels are model judgments. Only an `applies` with
+a verbatim body quote can lead the suggestions. A missing, malformed, duplicated
+or ungrounded answer becomes `check`; unknown IDs are rejected. Review failure
+retains all candidates. Selector failure/empty output returns a clearly labelled,
+bounded keyword fallback and skips model review.
+
+The existing `IdentifyResult` shape is retained: **all bounded pool articles**
+are returned as tentative `articles`, including unresolved and unlikely items;
+the normal `top_k=10` cutoff is not applied. Quote-grounded model suggestions
+lead, followed by `check`, then `unlikely`, preserving rerank order within each
+group. Up to `choices_k` quoted questions are offered as before. `verifier=picked`
+means a tentative model suggestion with a source quote, never verified
+applicability. No full-pool recall guarantee is made. The run returns no exhaustive
+score map and cannot replace or create a relevance record or trusted bands.
+Automatic commits are **always disabled** for this experiment, even with an
+injected matching calibration policy. Applicant confirmation remains separate.
+
+`BATATIS_IDENTIFY_QUESTION_STYLE=self` independently opts an Elephant stage into
+one self-contained `noul` question per article. State contains only `proposal`;
+each question says ``A complete alternative-solution application for the proposal
+in `proposal` must cite this building-code article: {card}``. The default `shared`
+wire payload is unchanged. The same wire-byte admission, TLS, deadline, serial
+dispatch and no-retry rules still apply to either shape. This style also disables
+automatic commits. Offline fakes support both shapes and the actual TOC/pool
+review path; their results provide no accuracy measurement.
+
+Inactive experiment settings do not change historical configuration dictionaries
+or hashes. `self` binds its question text into its new hash; `shortlist` binds its
+selector/reviewer prompts, schemas, output bounds, pool settings and validation
+policies. Existing `relevance-3` remains uncalibrated; no new relevance version,
+thresholds or display bands are introduced.
+
+The motivation is the approximately 131-request exhaustive screen versus the
+50/day free allowance. Earlier **gold-injected diagnostic** pools improved AUC
+from .912 to .948 and complete top-10 coverage from 80% to 95% with self-contained
+questions, which does not establish end-to-end recall. Cached 57-case runs found
+complete pools in 50/57 cases (87.7%) with TOC40 plus fast BM25, 52/57 with slow V3,
+and 51/57 with capped graph expansion. The V3 run had 38/57 cases with every gold
+article labelled `applies`, despite no further gold loss at the labeler's
+`applies`/`check` boundary. These are prior measurements, not validation of this
+exact engine implementation. They provide no basis for default promotion or a
+100% claim. The parent must measure the exact opt-in pipeline separately.
+
+The opt-in candidate reuses the existing API models; schema export and generated
+web contract checks pass without generated-file edits. If later parent composition
+changes a shared model, regenerate schema/types from that composed backend.
+`web/src/calm/relevance.ts` treats uncalibrated `0..1` ranges as unrated and reserves
+historical fallback bands for `relevance-1` placeholder rows. Preserve that behavior
+on the integrated UI; do not replace zero with historical cutoffs.
 
 ## Primary references checked 2026-10-23
 
@@ -102,6 +169,7 @@ actual integrated UI; do not replace zero with historical cutoffs.
 - [TypeSafe API](https://docs.typesafe.ai/api.md), [Noul](https://docs.typesafe.ai/primitives/noul.md), [Score](https://docs.typesafe.ai/primitives/score.md), [Choice](https://docs.typesafe.ai/primitives/choice.md)
 - [python-dotenv release metadata](https://pypi.org/project/python-dotenv/1.2.4/)
 
-This worker used offline synthetic peers only. The parent owns one tiny integrated
-adapter smoke with the real credential, independent review, restart and verified
-dev publication. No provider accuracy or browser/production signoff is implied.
+The isolated work includes offline regressions, independent engine review, a live
+60-article optional-scorer integration smoke, and the separately recorded exact-engine
+retrieval panel. See the [handoff](research/2026-10-23-elephant/handoff.md) for results
+and limits. Application servers and remote branches were outside the authorized work.

@@ -67,7 +67,8 @@ def live_judge() -> Judge:
     tp = transports(scoring={config.screen, config.rerank})
     try:
         judge = Judge(scoring_ask(tp, config.screen), chars=config.card_chars,
-                      model=config.screen_model, method=config.screen)
+                      model=config.screen_model, method=config.screen,
+                      question_style=config.question_style if config.screen == 'elephant' else 'shared')
     except RuntimeError:
         raise RelevanceUnavailable('configured scoring credential is absent or disabled') from None
     judge.config = config

@@ -28,7 +28,7 @@ HERE = Path(__file__).resolve().parent
 PIPELINE_FILE = HERE / 'pipeline.json'
 DIVISION_B_ARTICLES = 2080           # NBC(AE) 2023 2nd printing; asserted on every exhaustive model screen
 
-SCREENS = ('elephant', 'decisions', 'jev', 'bm25', 'bm25_v3')
+SCREENS = ('elephant', 'decisions', 'jev', 'bm25', 'bm25_v3', 'shortlist')
 RERANKS = ('elephant', 'decisions', 'jev', 'openai', 'none')
 VERIFIERS = ('anthropic', 'openai', 'none')
 FALLBACKS = ('bm25', 'bm25_v3')
@@ -60,6 +60,9 @@ class IdentifyConfig:
     fallback: str = 'bm25'               # lexical ranking when the model path fails; commits nothing
     top_k: int = 10                      # article cards returned
     choices_k: int = 3                   # quoted choices offered
+    question_style: str = 'shared'       # self is an explicit Elephant-only experiment
+    shortlist_n: int = 60                # bounded TOC + keyword union; used only by screen='shortlist'
+    shortlist_toc_n: int = 40
 
     def __post_init__(self):
         checks = [('screen', SCREENS), ('rerank', RERANKS), ('verifier', VERIFIERS), ('fallback', FALLBACKS),
@@ -67,7 +70,20 @@ class IdentifyConfig:
         for name, allowed in checks:
             if getattr(self, name) not in allowed:
                 raise ConfigError(f'{name} must be one of {", ".join(allowed)}')
-        if (self.verifier == 'openai' or self.rerank == 'openai') and self.verifier_effort not in OPENAI_EFFORTS:
+        if self.question_style not in ('shared', 'self'):
+            raise ConfigError('question_style must be shared or self')
+        if self.question_style == 'self' and 'elephant' not in (self.screen, self.rerank):
+            raise ConfigError('self question style requires an Elephant stage')
+        if self.screen == 'shortlist':
+            if self.screen_model != OPENAI_VERIFIER or self.verifier not in ('openai', 'none'):
+                raise ConfigError('shortlist requires the pinned text screen and an openai or none verifier')
+            if self.rerank not in ('elephant', 'none'):
+                raise ConfigError('shortlist supports elephant or none rerank')
+            if any(type(getattr(self, name)) is not int for name in ('shortlist_n', 'shortlist_toc_n')) \
+                    or not 1 <= self.shortlist_toc_n <= self.shortlist_n <= 120:
+                raise ConfigError('shortlist sizes must satisfy 1 <= shortlist_toc_n <= shortlist_n <= 120')
+        if (self.verifier == 'openai' or self.rerank == 'openai' or self.screen == 'shortlist') \
+                and self.verifier_effort not in OPENAI_EFFORTS:
             raise ConfigError(f'OpenAI reasoning effort must be one of {", ".join(OPENAI_EFFORTS)}')
         for name in ('screen_model', 'rerank_model', 'verifier_model'):
             if 'haiku' in getattr(self, name).lower():
@@ -93,7 +109,18 @@ class IdentifyConfig:
         return self.screen in ('elephant', 'decisions', 'jev')
 
     def as_dict(self) -> dict:
-        return asdict(self)
+        values = asdict(self)
+        # Inactive options must not invalidate historical hashes or calibration.
+        if self.question_style == 'shared':
+            values.pop('question_style')
+        if self.screen != 'shortlist':
+            values.pop('shortlist_n')
+            values.pop('shortlist_toc_n')
+        return values
+
+    @property
+    def tentative(self) -> bool:
+        return self.screen == 'shortlist' or self.question_style == 'self'
 
     @property
     def config_hash(self) -> str:
@@ -101,11 +128,17 @@ class IdentifyConfig:
         if 'elephant' in (self.screen, self.rerank):
             from .elephant_runtime import IDENTITY
             values['scoring_identity'] = IDENTITY
+        if self.question_style == 'self':
+            from .screen import SELF_QUESTION
+            values['question_identity'] = SELF_QUESTION
+        if self.screen == 'shortlist':
+            from .shortlist import identity
+            values['shortlist_identity'] = identity()
         blob = json.dumps(values, sort_keys=True, separators=(',', ':'))
         return hashlib.sha256(blob.encode()).hexdigest()[:16]
 
     def model_ids(self) -> dict[str, str | None]:
-        return {'screen': self.screen_model if self.exhaustive else None,
+        return {'screen': self.screen_model if self.exhaustive or self.screen == 'shortlist' else None,
                 'rerank': self.rerank_model if self.rerank != 'none' else None,
                 'verifier': self.verifier_model if self.verifier != 'none' else None}
 
@@ -144,7 +177,8 @@ def load_config(path: Path | str | None = None, env: dict | None = None) -> Iden
         if f'{stage}_model' not in values:
             method = values.get(stage, 'elephant')
             pin = {'jev': JEV_MODEL, 'elephant': ELEPHANT_MODEL,
-                   'decisions': DECISIONS_MODEL, 'openai': OPENAI_RERANK}.get(method)
+                   'decisions': DECISIONS_MODEL, 'openai': OPENAI_RERANK,
+                   'shortlist': OPENAI_VERIFIER}.get(method)
             if pin is not None:
                 values[f'{stage}_model'] = pin
     if 'verifier_model' not in values and values.get('verifier') == 'anthropic':

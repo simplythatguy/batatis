@@ -42,15 +42,23 @@ def _tokens(text: str) -> int:
     return max(1, len(text) // 4)
 
 
+def _question_card(state, name, question) -> str:
+    if 'articles' in state:
+        return state['articles'][f'A{name[1:]}']
+    from .screen import SELF_QUESTION
+    return question['instructions'].removeprefix(SELF_QUESTION.partition('{card}')[0])
+
+
 def fake_jev_ask():
     """Jev's ask(state, questions, timeout) contract: one `noul` probability per question."""
     def ask(state, questions, timeout):
         proposal = state['proposal']
         answers = {}
-        for name in questions:
-            card = state['articles'][f'A{name[1:]}']
+        for name, question in questions.items():
+            card = _question_card(state, name, question)
             answers[name] = {'noul': overlap(proposal, card)}
-        size = len(proposal) + sum(len(v) for v in state['articles'].values())
+        size = len(proposal) + (sum(len(v) for v in state['articles'].values()) if 'articles' in state else
+                                sum(len(q['instructions']) for q in questions.values()))
         return {'answers': answers, 'usage': {'input_tokens': max(1, size // 4), 'output_tokens': 4 * len(questions)},
                 'latency_ms': 1}
     return ask
@@ -60,7 +68,7 @@ def fake_decisions(body: dict, timeout: float) -> dict:
     """The Decisions wire shape, using only synthetic overlap estimates in offline mode."""
     state = json.loads(body['input'])
     answers = [{'name': q['name'], 'type': 'predicate',
-                'probability': overlap(state['proposal'], state['articles'][f"A{q['name'][1:]}"])}
+                'probability': overlap(state['proposal'], _question_card(state, q['name'], q))}
                for q in body['questions']]
     tokens = _tokens(json.dumps(body))
     return {'model': body['model'], 'answers': answers,
@@ -74,8 +82,10 @@ def fake_elephant_post(body: bytes, headers: dict, timeout: float) -> tuple[int,
     from .elephant_runtime import RESPONSE_MODEL
     request = json.loads(body)
     state = request['state']
-    answers = {name: {'type': 'noul', 'noul': overlap(state['proposal'], state['articles'][f'A{name[1:]}'])}
-               for name in request['questions']}
+    answers = {}
+    for name, question in request['questions'].items():
+        text = _question_card(state, name, question)
+        answers[name] = {'type': 'noul', 'noul': overlap(state['proposal'], text)}
     return 200, json.dumps({'model': RESPONSE_MODEL, 'answers': answers,
                             'usage': {'input_tokens': _tokens(body), 'output_tokens': len(answers),
                                       'cost': 0}}).encode('utf-8')
@@ -184,6 +194,16 @@ def fake_openai_json(name, schema, system, user, *, model, max_output_tokens=409
     proposal, listed = parse_request(user)
     if name == 'picks':
         payload = {'picks': honest_picks(user)}
+    elif name == 'toc_candidates':
+        # Read the same complete TOC as the live selector; no hidden gold ids or corpus access.
+        toc = re.findall(r'^(\d+\.\d+\.\d+\.\d+\.) (.*)$', system, re.M)
+        toc.sort(key=lambda item: -overlap(proposal, item[1]))
+        count = re.search(r'Return up to (\d+) tentative', user)
+        payload = {'articles': [a for a, _ in toc[:int(count.group(1)) if count else 40]]}
+    elif name == 'pool_review':
+        payload = {'labels': [dict(article=a, label='applies' if overlap(proposal, text) > 0.01 else 'check',
+                                   quote=_quote(text), reason='A tentative requirement for the applicant to review.',
+                                   confidence=overlap(proposal, text)) for a, text in listed]}
     else:
         payload = {'scores': [{'article': a, 'probability': overlap(proposal, text)} for a, text in listed]}
     return payload, {'input_tokens': _tokens(system + user), 'output_tokens': 150, 'returned_model': model}

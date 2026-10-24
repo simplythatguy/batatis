@@ -81,7 +81,7 @@ def public_config(config: dict) -> dict:
         if stage in out:
             out[stage] = public_method(method)
         if f'{stage}_model' in out:
-            used = method in PROVIDER_METHODS or method == MODEL
+            used = method in PROVIDER_METHODS or method in (MODEL, 'shortlist')
             out[f'{stage}_model'] = public_stage_model(method, out[f'{stage}_model']) if used else None
     return out
 
