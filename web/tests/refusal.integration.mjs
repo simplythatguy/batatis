@@ -57,22 +57,35 @@ async function scenario(name, run) {
     }, id);
     await ap.waitForFunction(id => window.caseStore.engineId === id, id);
   };
+  // The officer's review shows one step at a time: the decision is the last step (or, when no package
+  // review can run, the panel under its notice). The submitted application sits in the header drawer.
+  const decision = async () => {
+    const refuse = op.getByRole('button', { name: 'Refuse', exact: true });
+    const step = op.getByRole('navigation', { name: 'Review steps' }).getByRole('button', { name: /: Decide\b/ });
+    await refuse.or(step).first().waitFor();
+    if (!await refuse.isVisible()) await step.click();
+    await refuse.waitFor();
+  };
   const reviewer = async () => {
     await op.goto(web + '/tests/check.html#/review/' + id);
+    await op.getByRole('button', { name: 'Application', exact: true }).click();
     await op.getByRole('article', { name: 'Submitted application' }).waitFor();
-    await op.getByRole('button', { name: 'Refuse application', exact: true }).waitFor();
+    await op.keyboard.press('Escape');
+    await decision();
   };
   const begin = async () => {
     await api(owner, `/cases/${id}/submit`, {});
     await api(officer, `/review/${id}/claim`, {});
   };
   const send = async (reason = REASON) => {
-    await op.getByRole('button', { name: 'Refuse application', exact: true }).click();
-    const dialog = op.getByRole('dialog', { name: 'Refuse this application?' });
-    await dialog.getByRole('textbox', { name: 'Reason for refusal' }).fill(reason);
-    await dialog.getByRole('button', { name: 'Record refusal', exact: true }).click();
+    await op.getByRole('button', { name: 'Refuse', exact: true }).click();
+    const dialog = op.getByRole('dialog', { name: 'Refuse the variance' });
+    await dialog.getByRole('textbox', { name: 'Your reasons' }).fill(reason);
+    await dialog.getByRole('button', { name: 'Send the refusal', exact: true }).click();
     return dialog;
   };
+  // The officer's note once a refusal is recorded (its reasons and the appeal notice went to the applicant).
+  const refusedNote = () => op.getByText(/^Refusal sent to .+ with the appeal notice\. This application is closed\.$/).waitFor();
   const downloadText = async () => {
     const pending = ap.waitForEvent('download');
     await ap.getByRole('button', { name: 'Download a text record', exact: true }).click();
@@ -105,29 +118,40 @@ try {
     await api(owner, `/cases/${id}/submit`, {});
     await api(officer, `/review/${id}/claim`, {});
     await applicant(); await reviewer();
-    await op.getByRole('button', { name: 'Refuse application', exact: true }).click();
-    const dialog = op.getByRole('dialog', { name: 'Refuse this application?' });
-    await dialog.getByRole('button', { name: 'Record refusal', exact: true }).click();
-    await dialog.getByText('Write a reason of at least 10 characters.', { exact: true }).waitFor();
+    await op.getByRole('button', { name: 'Refuse', exact: true }).click();
+    const dialog = op.getByRole('dialog', { name: 'Refuse the variance' });
+    await dialog.getByRole('button', { name: 'Send the refusal', exact: true }).click();
+    await dialog.getByText('Write your reasons for the refusal.', { exact: true }).waitFor();
     assert.equal(requests.filter(r => r.path.endsWith('/decision')).length, 0);
-    await dialog.getByRole('textbox', { name: 'Reason for refusal' }).fill(REASON);
+    await dialog.getByRole('textbox', { name: 'Your reasons' }).fill(REASON);
     const before = await remote();
-    await dialog.getByRole('button', { name: 'Record refusal', exact: true }).click();
-    await op.getByText('Administrative refusal recorded. This application is closed and read-only.', { exact: true }).waitFor();
+    await dialog.getByRole('button', { name: 'Send the refusal', exact: true }).click();
+    await refusedNote();
     const request = requests.find(r => r.path.endsWith('/decision'));
-    assert.deepEqual(request.body, { outcome: 'refuse', message: REASON, expected_version: before.version });
+    // The displayed version, the officer's own reasons verbatim with the appeal notice below them, no correction list.
+    assert.deepEqual(Object.keys(request.body).sort(), ['expected_version', 'message', 'outcome']);
+    assert.equal(request.body.outcome, 'refuse');
+    assert.equal(request.body.expected_version, before.version);
+    assert.ok(request.body.message.includes(REASON));
+    assert.match(request.body.message, /Safety Codes Council within 30 days/);
     let saved = await remote();
     assert.equal(saved.status, 'refused');
     assert.deepEqual(saved.decision_history.map(d => d.outcome), ['return', 'refuse']);
     assert.equal(saved.submission_number, 2);
     await op.reload();
+    await op.getByRole('button', { name: /^Messages/ }).click();
     await op.locator('.ac-thread').getByText(new RegExp(REASON)).waitFor();
-    assert.equal(await op.getByRole('button', { name: 'Refuse application', exact: true }).count(), 0);
-    assert.equal(await op.getByRole('button', { name: 'Accept as complete', exact: true }).count(), 0);
+    await op.keyboard.press('Escape');
+    assert.equal(await op.getByRole('button', { name: 'Refuse', exact: true }).count(), 0);
+    assert.equal(await op.getByRole('button', { name: 'Accept', exact: true }).count(), 0);
     await ap.evaluate(async () => (await import('/src/calm/notifications/notifications.ts')).loadNotifications());
     await ap.locator('.cf-save-label').getByText('Refused · read-only', { exact: true }).waitFor();
+    // The full decision is on the comments page; the stage keeps a one-line notice that links there.
+    await ap.evaluate(() => { location.hash = '#/comments'; });
     await ap.locator('.cf-refused').getByText(new RegExp(REASON)).waitFor();
     await ap.reload(); await ap.locator('.cf-refused').getByText(new RegExp(REASON)).waitFor();
+    await ap.evaluate(() => { location.hash = '#/application'; });
+    await ap.getByRole('region', { name: 'Application form' }).waitFor();
     assert.equal(await ap.getByRole('button', { name: /^(Submit|Resubmit) to / }).count(), 0);
     assert.equal(await ap.getByRole('button', { name: 'Reply', exact: true }).count(), 0);
     // A notice arriving after reload must be in the download, even without refreshing the thread.
@@ -170,9 +194,9 @@ try {
     await op.evaluate(() => { location.hash = '#/review'; });
     await op.getByRole('heading', { name: /Review queue/ }).waitFor();
     await op.getByRole('button', { name: /^Refused 1$/ }).click();
-    const row = op.getByRole('row').filter({ has: op.getByRole('link', { name: saved.title, exact: true }) });
+    const row = op.locator('a.rq-row').filter({ hasText: saved.title });
     await row.getByText('Refused', { exact: true }).waitFor();
-    assert.equal(await row.getByRole('button', { name: 'Start reviewing', exact: true }).count(), 0);
+    assert.equal(await row.getByText('Pick up', { exact: true }).count(), 0, 'a refused file is never picked up again');
   });
 
   await scenario('stale officer refusal is rejected without losing the written reason; explicit refresh permits a current decision', async ({ officer, op, id, api, remote, reviewer, begin, send }) => {
@@ -183,15 +207,15 @@ try {
     const dialog = await send();
     await dialog.getByRole('alert').getByText(/The application changed/).waitFor();
     assert.equal((await remote()).decision, null);
-    assert.equal(await dialog.getByRole('textbox', { name: 'Reason for refusal' }).inputValue(), REASON);
+    assert.equal(await dialog.getByRole('textbox', { name: 'Your reasons' }).inputValue(), REASON);
     await dialog.getByRole('button', { name: 'Refresh application', exact: true }).click();
-    // J12 refreshes the saved revision in place and keeps the active reason dialog.
-    await op.waitForFunction(() => Array.from(document.querySelectorAll('button'))
-      .some(button => button.textContent === 'Refuse application' && !button.disabled));
+    // J12 refreshes the saved revision in place and keeps the active reason dialog (the Refuse choice
+    // behind it is disabled while the read is in flight).
+    await op.waitForFunction(() => { const refuse = document.querySelector('button[aria-label="Refuse"]'); return Boolean(refuse && !refuse.disabled); });
     assert.equal(await dialog.isVisible(), true);
-    assert.equal(await dialog.getByRole('textbox', { name: 'Reason for refusal' }).inputValue(), REASON);
-    await dialog.getByRole('button', { name: 'Record refusal', exact: true }).click();
-    await op.getByText('Administrative refusal recorded. This application is closed and read-only.', { exact: true }).waitFor();
+    assert.equal(await dialog.getByRole('textbox', { name: 'Your reasons' }).inputValue(), REASON);
+    await dialog.getByRole('button', { name: 'Send the refusal', exact: true }).click();
+    await refusedNote();
     const after = await remote();
     assert.equal(after.status, 'refused'); assert.equal(after.version, before.version + 3);
     assert.equal(after.decision_history.filter(d => d.outcome === 'refuse').length, 1);
@@ -199,8 +223,12 @@ try {
 
   await scenario('a failed fresh review-record read offers retry and never downloads an incomplete local-only record', async ({ ap, op, id, remote, applicant, reviewer, begin, send, downloadText, setIntercept }) => {
     await begin(); await reviewer(); await send();
-    await op.getByText('Administrative refusal recorded. This application is closed and read-only.', { exact: true }).waitFor();
-    await applicant(); await ap.locator('.cf-refused').waitFor();
+    await refusedNote();
+    await applicant();
+    await ap.evaluate(() => { location.hash = '#/comments'; });
+    await ap.locator('.cf-refused').waitFor();
+    await ap.evaluate(() => { location.hash = '#/application'; });
+    await ap.getByRole('region', { name: 'Application form' }).waitFor();
     let downloads = 0; ap.on('download', () => downloads++);
     setIntercept(r => r.actor === 'applicant' && r.method === 'GET' && r.path === '/cases/' + id
       ? { status: 503, contentType: 'application/json', body: JSON.stringify({ detail: 'SYNTHETIC saved review record temporarily unavailable.' }) } : null);

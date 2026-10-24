@@ -85,12 +85,18 @@ await scenario('upload and bind synthetic PDF, download exact bytes, share sourc
   await row('SYNTHETIC first document').getByRole('link', { name: 'Download SYNTHETIC source A.pdf' }).click();
   assert.deepEqual(await readFile(await (await downloading).path()), pdfA);
   await page.evaluate(() => { location.hash = '#/application'; });
-  const preview = page.getByRole('article', { name: 'Application preview' });
+  // The application page shows the actual filled PDF; the listed documents and their saved PDFs are one step away.
+  const preview = page.locator('details.cf-side-docs');
+  const openDocuments = async () => {
+    await preview.waitFor();
+    if (!(await preview.evaluate(d => d.open))) await preview.locator('summary').click();
+  };
+  await openDocuments();
   assert.equal((await preview.innerText()).split('SYNTHETIC first document').length - 1, 1, 'each listed document appears once beside its action');
   await preview.getByText(/SYNTHETIC fixture author/).waitFor();
   const applicantDownload = page.waitForEvent('download');
   await preview.getByRole('link', { name: 'Download SYNTHETIC source A.pdf' }).click();
-  assert.deepEqual(await readFile(await (await applicantDownload).path()), pdfA, 'the applicant sheet exposes the same authorized source');
+  assert.deepEqual(await readFile(await (await applicantDownload).path()), pdfA, 'the applicant page exposes the same authorized source');
   await page.evaluate(() => { location.hash = '#/evidence'; });
   await page.getByRole('button', { name: 'Evidence', exact: true }).click();
   await entry.waitFor();
@@ -111,6 +117,7 @@ await scenario('upload and bind synthetic PDF, download exact bytes, share sourc
   assert.equal(latest(stored, `evidence.${task}.file_ref`).status, 'unconfirmed');
   assert.equal(latest(stored, `evidence.${task}~2.file_ref`).value, fileA);
   await page.evaluate(() => { location.hash = '#/application'; });
+  await openDocuments();
   const unbound = preview.locator('.cf-sheet-document').filter({ hasText: 'SYNTHETIC first document' });
   assert.equal((await preview.innerText()).split('SYNTHETIC first document').length - 1, 1, 'unbound listings stay visible once');
   await unbound.getByText('Listed only · no file attached', { exact: true }).waitFor();

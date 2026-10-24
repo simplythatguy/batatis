@@ -109,10 +109,13 @@ async function scenario(name, status, work, options = {}) {
     await page.waitForFunction(() => !!window.caseStore);
     await page.locator('.cf-app').waitFor(); // Session restore/reset must finish before opening.
     if (options.actor === 'officer') {
+      // The officer's thread and composer open in the review page's Messages drawer.
+      await page.getByRole('button', { name: /^Messages/ }).click();
       await page.getByRole('textbox', { name: 'Message to the applicant' }).waitFor();
     } else {
       assert.equal(await page.evaluate(id => window.caseStore.openCase(id, 'contractor'), scene.id), null);
-      await page.evaluate(() => { location.hash = '#/application'; });
+      // The applicant reads the officer's decision and messages on the comments page (the stages keep a one-line notice).
+      await page.evaluate(() => { location.hash = '#/comments'; });
       await page.getByRole('heading', { name: 'Messages and application history' }).waitFor({ state: 'attached' });
     }
     await work({ page, context, scene, requests, hold, canceled });
@@ -322,7 +325,7 @@ try {
     assert.equal(await page.locator('.cf-returned').count(), 0);
   }, { history: false });
 
-  await scenario('leaving the applicant stages aborts an in-flight displayed receipt', 'returned', async ({ page, scene, hold, canceled }) => {
+  await scenario('leaving the comments page aborts an in-flight displayed receipt', 'returned', async ({ page, scene, hold, canceled }) => {
     await page.waitForFunction(() => document.querySelector('.cf-conversation summary')?.textContent?.includes('1 unread'));
     await page.waitForLoadState('networkidle');
     const path = `/cases/${scene.id}/messages/read`, delayed = hold(path, 'POST');

@@ -75,7 +75,7 @@ async function scenario(name, run, role = 'applicant') {
     assert.equal(await page.evaluate(caseId => window.caseStore.openCase(caseId, 'contractor'), caseId), null);
     await page.waitForFunction(caseId => window.caseStore.engineId === caseId, caseId);
     await page.evaluate(() => { location.hash = '#/application'; });
-    await page.getByRole('article', { name: 'Application preview' }).waitFor();
+    await page.getByRole('region', { name: 'Application form' }).waitFor();
   };
   const row = () => page.locator('.cf-list-hit[aria-current="page"]');
   try {
@@ -95,6 +95,28 @@ async function scenario(name, run, role = 'applicant') {
     await page.unrouteAll({ behavior: 'ignoreErrors' });
     await context.close(); await officer.close();
   }
+}
+
+// The officer's review shows one step at a time: the decision is the last step (or the panel shown when no
+// package review ran). The submitted application sits in the header's Application drawer and the thread,
+// with its composer, in the Messages drawer (an unsent message survives closing it).
+const officerReady = page => page.getByRole('button', { name: /^Messages/ }).waitFor();
+async function decisionStep(page) {
+  const ask = page.getByRole('button', { name: 'Ask for more', exact: true });
+  const step = page.getByRole('navigation', { name: 'Review steps' }).getByRole('button', { name: /: Decide\b/ });
+  await ask.or(step).first().waitFor();
+  if (!await ask.isVisible()) await step.click();
+  await ask.waitFor();
+}
+async function openReturn(page) {
+  await decisionStep(page);
+  const plain = page.getByRole('button', { name: 'Return with a message', exact: true });
+  await (await plain.count() ? plain : page.getByRole('button', { name: 'Ask for more', exact: true })).click();
+  return page.getByRole('dialog', { name: 'Return with a message', exact: true });
+}
+async function messagesDrawer(page) {
+  await page.getByRole('button', { name: /^Messages/ }).click();
+  return page.getByRole('dialog', { name: 'Messages' });
 }
 
 try {
@@ -124,6 +146,9 @@ try {
     await patchStatus(page, id, 'submitted');
     await page.getByRole('button', { name: /^Notifications(?:, \d+ new)?$/ }).click();
     await page.locator('.ac-note').filter({ hasText: 'returned' }).first().click();
+    // An applicant notification opens that application's comments; the open case refreshes in place.
+    await page.getByRole('heading', { name: 'Comments', exact: true }).waitFor();
+    await page.evaluate(() => { location.hash = '#/application'; });
     await page.getByRole('button', { name: 'Resubmit to Edmonton', exact: true }).waitFor();
     await patchStatus(page, id, 'submitted');
     const before = requests.length;
@@ -289,9 +314,11 @@ try {
     await page.waitForFunction(() => window.caseStore.sectionCLookup.source === 'live');
     // Isolate the three reads below; the conversation receipt belongs to J06 and
     // also renews a session cookie. Finish it before deliberately replacing cookies.
+    await page.evaluate(() => { location.hash = '#/comments'; });
     await page.locator('.cf-returned-msg').filter({ hasText: 'Please correct' }).waitFor();
     await page.evaluate(async () => { window.readAccount = (await import('/src/calm/account.ts')).getAccountState; });
     await page.waitForFunction(id => window.readAccount().applications.find(a => a.id === id)?.unread_messages === 0, id);
+    await page.evaluate(() => { location.hash = '#/application'; });
     await page.evaluate(() => window.caseStore.refreshCurrentCase());
     const list = hold('/me/applications'), notifications = hold('/me/notifications'), reading = hold('/cases/' + id);
     await row().click(); await Promise.all([list.entered, reading.entered]);
@@ -317,14 +344,16 @@ try {
   });
 
   await scenario('J05 a removed officer case clears action controls and offers refresh plus queue return', async ({ page, context, api, id }) => {
-    await page.getByRole('article', { name: 'Submitted application' }).waitFor();
+    await officerReady(page);
     const owner = await browser.newContext();
     try {
       await owner.addCookies([{ name: 'batatis_session', value: fixture.applicant.cookie, url: base }]);
       await api(owner, '/cases/' + id, undefined, 'DELETE');
-      await page.getByRole('button', { name: 'Start reviewing', exact: true }).click();
-      await page.getByText('This application is no longer available.', { exact: true }).waitFor();
-      assert.equal(await page.getByRole('button', { name: /Return with message|Accept as complete|Start reviewing/ }).count(), 0);
+      // Opening the review already picked it up; the page's next read finds it gone (missing and
+      // unauthorized share one privacy-friendly answer).
+      await page.reload();
+      await page.getByText(/^This application isn’t available to you\./).waitFor();
+      assert.equal(await page.getByRole('button', { name: /^(Accept|Ask for more|Refuse|Pick up|Resume review)$/ }).count(), 0);
       await page.getByRole('button', { name: 'Refresh', exact: true }).click();
       await page.getByRole('link', { name: 'Back to the queue', exact: true }).click();
       await page.waitForFunction(() => location.hash === '#/review');
@@ -333,12 +362,14 @@ try {
   }, 'reviewer');
 
   await scenario('J05 a delayed officer detail read cannot replace the case selected afterwards', async ({ page, id, other, hold }) => {
-    await page.getByRole('article', { name: 'Submitted application' }).waitFor();
+    await officerReady(page);
     const reading = hold('/cases/' + other);
     await page.evaluate(other => { location.hash = '#/review/' + other; }, other);
     await reading.entered;
     await page.evaluate(id => { location.hash = '#/review/' + id; }, id);
+    await page.getByRole('button', { name: 'Application', exact: true }).click();
     await page.getByRole('article', { name: 'Submitted application' }).waitFor();
+    await page.keyboard.press('Escape');
     reading.release();
     await page.waitForTimeout(100);
     const title = `SYNTHETIC refresh regression ${fixture.ids.indexOf(id)}`;
@@ -353,23 +384,22 @@ try {
       await owner.addCookies([{ name: 'batatis_session', value: fixture.applicant.cookie, url: base }]);
       await api(colleague, '/auth/signup', { email: 'j12-colleague@example.test', name: 'Synthetic colleague', password: 'a long test password' });
       await api(colleague, '/auth/onboarding', { role: 'reviewer', authority: 'edmonton', access_code: 'officer-secret' });
-      await page.getByRole('article', { name: 'Submitted application' }).waitFor();
-      await page.getByRole('button', { name: 'Start reviewing', exact: true }).click();
-      await page.waitForFunction(() => Array.from(document.querySelectorAll('button')).some(button => button.textContent === 'Return with message' && !button.disabled));
+      await officerReady(page);
+      // Opening the review picked it up; deciding waits for its decision step.
+      await decisionStep(page);
       const reviewing = await api(officer, `/cases/${id}`, undefined, 'GET');
       await api(officer, `/review/${id}/professional-requirement`, { expected_version: reviewing.version, required: true,
         scope: 'SYNTHETIC existing professional scope.', basis: 'SYNTHETIC human requirement record; no design approval.', reference: 'SYNTHETIC authority record' });
       // This fixture setup changed the content revision outside the mounted officer view.
       // Decision callers now pin their displayed version; read that saved determination first.
       await page.reload();
-      await page.getByRole('article', { name: 'Submitted application' }).waitFor();
-      await page.getByRole('button', { name: 'Return with message', exact: true }).click();
-      const returnDialog = page.getByRole('dialog', { name: 'Return with a message', exact: true });
+      const returnDialog = await openReturn(page);
       await returnDialog.getByRole('textbox').fill('Please clarify the synthetic wall assembly.');
       await page.getByRole('button', { name: 'Send and return', exact: true }).click();
       await page.getByText('Returned to the applicant. It comes back here when they resend it.', { exact: true }).waitFor();
-      const draft = page.getByRole('textbox', { name: 'Message to the applicant', exact: true });
+      const draft = (await messagesDrawer(page)).getByRole('textbox', { name: 'Message to the applicant', exact: true });
       await draft.fill('Unsent officer draft must survive background updates.');
+      await page.keyboard.press('Escape');
       await api(owner, `/cases/${id}/facts`, { field: 'codecheck.desc-wall', value: 'not-sure', kind: 'pointed', status: 'confirmed',
         source: { type: 'user_click', ref: 'Your code check answer', quote: 'Does your design replace the usual wall assembly?' } });
       const saved = await api(owner, `/cases/${id}`, undefined, 'GET');
@@ -385,11 +415,11 @@ try {
       assert.equal(count(), seen, 'unchanged/read-marker polls must not reload detail');
       await page.getByRole('button', { name: /^Notifications/ }).click();
       await page.locator('.ac-note').filter({ hasText: 'resubmitted' }).first().click();
-      await page.waitForFunction(() => !document.querySelector('.ac-rv-side')?.textContent.includes('Checking…'));
+      for (let i = 0; i < 100 && count() <= seen; i++) await page.waitForTimeout(50);
       assert.ok(count() > seen, 'same-case notification click must refresh even when the event was already seen');
       assert.equal(await draft.inputValue(), 'Unsent officer draft must survive background updates.');
       await page.getByRole('button', { name: 'Resume review', exact: true }).click();
-      await page.getByRole('button', { name: 'Return with message', exact: true }).click();
+      await openReturn(page);
       await returnDialog.getByRole('textbox').fill('Unsent return decision must survive notifications.');
       const protectedCount = count();
       await api(colleague, `/cases/${id}/messages`, { body: 'Synthetic notice while return dialog is open.' });
@@ -397,7 +427,9 @@ try {
       assert.equal(await returnDialog.getByRole('textbox').inputValue(), 'Unsent return decision must survive notifications.');
       assert.equal(count(), protectedCount, 'defer the background snapshot while a decision is being edited');
       await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+      await messagesDrawer(page);
       await page.getByText('Synthetic notice while return dialog is open.', { exact: true }).waitFor();
+      await page.keyboard.press('Escape');
       assert.equal(await draft.inputValue(), 'Unsent officer draft must survive background updates.');
       await page.getByRole('button', { name: /^(Record|Update) determination$/ }).click();
       await page.getByRole('textbox', { name: 'Scope reviewed', exact: true }).fill('Unsent determination scope.');
@@ -407,7 +439,9 @@ try {
       assert.equal(await page.getByRole('textbox', { name: 'Scope reviewed', exact: true }).inputValue(), 'Unsent determination scope.');
       assert.equal(count(), determining, 'defer while the professional determination dialog is being edited');
       await page.getByRole('button', { name: 'Cancel', exact: true }).click();
+      await messagesDrawer(page);
       await page.getByText('Synthetic notice while determination is open.', { exact: true }).waitFor();
+      await page.keyboard.press('Escape');
       assert.equal(await draft.inputValue(), 'Unsent officer draft must survive background updates.');
       const updating = hold(`/cases/${id}/identify/information-request`);
       await page.getByRole('button', { name: /^Notifications/ }).click();
@@ -416,18 +450,19 @@ try {
       await api(colleague, `/review/${id}/claim`, { take_over: true });
       updating.release();
       await page.getByText('The application changed while its review was loading. Refresh to read the current version.', { exact: false }).waitFor();
-      assert.equal(await page.getByRole('button', { name: 'Accept as complete', exact: true }).isDisabled(), true);
+      assert.equal(await page.getByRole('button', { name: 'Accept', exact: true }).isDisabled(), true);
       assert.equal(await draft.inputValue(), 'Unsent officer draft must survive background updates.');
       await page.getByRole('button', { name: 'Refresh application', exact: true }).click();
-      await page.locator('.ac-claimed-txt').filter({ hasText: 'Synthetic colleague is reviewing this' }).waitFor();
+      await page.locator('.rv-who').filter({ hasText: 'Synthetic colleague is reviewing this' }).waitFor();
       assert.equal(await draft.inputValue(), 'Unsent officer draft must survive background updates.');
     } finally { await owner.close(); await colleague.close(); }
   }, 'reviewer');
 
   await scenario('J12 background message snapshots retain acknowledged notices and read receipts', async ({ page, officer, api, id, hold }) => {
-    await page.getByRole('article', { name: 'Submitted application' }).waitFor();
-    await page.getByRole('button', { name: 'Start reviewing', exact: true }).click();
-    await page.locator('.ac-claimed-txt').filter({ hasText: 'You’re reviewing this' }).waitFor();
+    await officerReady(page);
+    // Opening the review picked it up; the thread and its composer are in the Messages drawer.
+    await decisionStep(page);
+    await messagesDrawer(page);
     const colleague = await browser.newContext();
     const receiptIds = [];
     page.on('request', request => {
@@ -474,7 +509,6 @@ try {
         row.textContent.includes(text) && !row.querySelector('[aria-label="New"]')), trigger.body);
       staleReceipts.release();
       await page.locator('.ac-thread').getByText(nextNotice.body, { exact: true }).waitFor();
-      await page.waitForFunction(() => !document.querySelector('.ac-rv-side')?.textContent.includes('Checking…'));
       assert.equal(await triggerRow.getByLabel('New', { exact: true }).count(), 0, 'an old snapshot cannot undo an acknowledged read receipt');
       assert.equal(receiptIds.filter(messageId => messageId === trigger.id).length, 1, 'stale receipts must not mark the same displayed notice unread again');
       assert.equal(await page.locator('.ac-thread').getByText(note, { exact: true }).count(), 1);
@@ -507,6 +541,7 @@ try {
       message: 'Please address the requested synthetic clarification.',
       items: [{ gap_id: 'intake.assembly', field, note }] });
     await poll(page);
+    await page.evaluate(() => { location.hash = '#/comments'; });
     const link = page.locator('.cf-returned-items a').filter({ hasText: note });
     await page.locator('.cf-returned-items a[href="#/questions?focus=q-return-clarification.intake.assembly"]').waitFor();
     assert.equal(await link.getAttribute('href'), '#/questions?focus=q-return-clarification.intake.assembly');

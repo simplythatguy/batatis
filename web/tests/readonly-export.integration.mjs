@@ -106,7 +106,10 @@ try {
       const bytes = await readFile(await download.path());
       assert.equal(bytes.subarray(0, 4).toString(), '%PDF');
       assert.ok(bytes.length > 10000);
-      assert.match(await page.getByRole('complementary', { name: 'Download' }).innerText(), /does not.*(?:design complies|say the design)/i);
+      // The completeness boundary is the panel's "Completeness only" note (its sentence one click away).
+      const boundary = page.getByRole('complementary', { name: 'Download' }).locator('details.cf-complete');
+      await boundary.locator('summary').click();
+      assert.match(await boundary.innerText(), /never says the design complies or is safe/i);
       await nav('/review');
       assert.equal(await page.getByRole('link', { name: /^Answer/ }).count(), 0);
       assert.equal(await page.getByRole('link', { name: 'Open your case and proof' }).count(), 0);
@@ -150,7 +153,7 @@ try {
 
   await scenario('J09 failed official export reports unavailable form without claiming a download', 'accepted', async ({ page, check, intercept, noWrites }) => {
     await check();
-    intercept(entry => entry.path.endsWith('/export') ? { status: 503, json: { detail: 'SYNTHETIC missing form file' } } : null);
+    intercept(entry => entry.path.endsWith('/export') && entry.body?.draft !== true ? { status: 503, json: { detail: 'SYNTHETIC missing form file' } } : null);
     await page.getByRole('button', { name: 'Official PDF', exact: true }).click();
     await page.getByText('The application PDF form is unavailable. Download a text record or try again later.', { exact: true }).waitFor();
     assert.equal(await page.getByRole('button', { name: 'Download again', exact: true }).count(), 0);
@@ -177,14 +180,15 @@ try {
     }] } } : null);
     await page.getByRole('button', { name: 'Official PDF', exact: true }).click();
     await page.getByText('The saved application has required administrative items. Review them before official export.', { exact: true }).waitFor();
-    assert.equal(requests.some(r => r.path.endsWith('/export')), false);
+    // The page's own draft PDF (draft: true) is not an official export attempt.
+    assert.equal(requests.some(r => r.path.endsWith('/export') && r.body?.draft !== true), false);
     assert.equal(await page.getByRole('button', { name: 'Official PDF', exact: true }).isDisabled(), true);
     noWrites();
   });
 
   await scenario('J09 backend export rejection preserves its reasons and never reports a PDF download', 'accepted', async ({ page, check, intercept, noWrites }) => {
     await check();
-    intercept(entry => entry.path.endsWith('/export') ? { status: 409, json: { detail: {
+    intercept(entry => entry.path.endsWith('/export') && entry.body?.draft !== true ? { status: 409, json: { detail: {
       message: 'export blocked', reasons: ['SYNTHETIC official form requirement remains unresolved'],
     } } } : null);
     await page.getByRole('button', { name: 'Official PDF', exact: true }).click();

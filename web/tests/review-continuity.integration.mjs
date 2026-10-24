@@ -60,7 +60,13 @@ async function scenario(name, run) {
     await page.evaluate(() => window.reviewData.loadQueue());
   };
   const submit = () => api(applicant, `/cases/${id}/submit`, {});
-  const row = () => page.getByRole('row').filter({ has: page.getByRole('link', { name: title, exact: true }) });
+  // One quiet link per application; its step word ("Pick up", "Resume") is the action.
+  const row = () => page.locator('a.rq-row').filter({ hasText: title });
+  // The review page keeps the submitted application (and its expiry note) in its header's Application drawer.
+  const sheet = async () => {
+    await page.getByRole('button', { name: 'Application', exact: true }).click();
+    await page.getByRole('article', { name: 'Submitted application' }).waitFor();
+  };
   const replaceAccount = async who => {
     await context.addCookies([{ name: 'batatis_session', value: fixture[who].cookie, url: base }]);
     await page.evaluate(async user => (await import('/src/calm/account.ts')).setAccountState({ phase: 'signed-in', user, applications: [] }), fixture[who].user);
@@ -70,7 +76,7 @@ async function scenario(name, run) {
     return ['ready', 'error'].includes(state.phase) && state.rows.length === 0;
   });
   try {
-    await run({ page, context, applicant, id, title, requests, api, hold, open, submit, row, replaceAccount, replacedQueue });
+    await run({ page, context, applicant, id, title, requests, api, hold, open, submit, row, sheet, replaceAccount, replacedQueue });
     assert.deepEqual(errors, []);
     assert.equal(requests.some(r => r.method === 'POST' && /\/(identify|intake|relevance)(\/|$)/.test(r.path)), false);
     passed++; console.log('PASS', name);
@@ -87,22 +93,23 @@ async function scenario(name, run) {
 }
 
 try {
-  await scenario('J08 open empty queue receives first submission and real applicant resubmission through notifications', async ({ page, context, applicant, id, title, requests, api, open, submit, row }) => {
+  await scenario('J08 open empty queue receives first submission and real applicant resubmission through notifications', async ({ page, context, applicant, id, title, requests, api, open, submit, row, sheet }) => {
     await open();
     await page.getByText('No applications have been sent to Edmonton yet.', { exact: true }).waitFor();
-    await page.getByRole('button', { name: /^New 0$/ }).click();
+    // Empty filters stay out of the way: the queue starts on All, and New appears once it has something.
+    assert.equal(await page.getByRole('button', { name: /^New / }).count(), 0);
     await page.getByRole('searchbox', { name: 'Search applications' }).fill(title);
     await submit(); await poll(page);
-    await row().getByRole('button', { name: 'Start reviewing', exact: true }).waitFor();
+    await row().getByText('Pick up', { exact: true }).waitFor();
     assert.equal(await page.getByRole('searchbox').inputValue(), title);
-    assert.equal(await page.getByRole('button', { name: /^New 1$/ }).getAttribute('aria-pressed'), 'true');
+    assert.equal(await page.getByRole('button', { name: /^New 1$/ }).count(), 1);
     // Repeated polls and read markers must not create queue requests or another timer.
     const before = requests.filter(r => r.path === '/review/queue').length;
     await poll(page);
     await page.evaluate(async () => (await import('/src/calm/notifications/notifications.ts')).openedPanel());
     assert.equal(requests.filter(r => r.path === '/review/queue').length, before);
-    await row().getByRole('button', { name: 'Start reviewing', exact: true }).click();
-    await page.getByRole('article', { name: 'Submitted application' }).waitFor();
+    await row().click(); // "Pick up" means it: claim, then the review opens.
+    await sheet();
     const expiry = await api(applicant, '/cases/' + id, undefined, 'GET');
     assert.equal(await page.getByRole('note').filter({ hasText: 'Stored until' }).locator('time[datetime]').getAttribute('datetime'), expiry.expires_at);
     assert.match(await page.getByRole('note').filter({ hasText: 'Stored until' }).innerText(), /seven days after creation.*attachments.*authority’s records.*does not extend/s);
@@ -137,31 +144,34 @@ try {
     assert.equal(revised.expires_at, expiry.expires_at);
     await poll(page);
     await row().getByText('Resubmitted', { exact: true }).waitFor();
-    await row().getByRole('button', { name: 'Resume review', exact: true }).waitFor();
+    await row().getByText('Resume', { exact: true }).waitFor();
     assert.equal(await page.getByRole('button', { name: /^Mine 1$/ }).getAttribute('aria-pressed'), 'true');
     assert.equal(await page.getByRole('searchbox').inputValue(), title);
-    assert.equal(await page.getByRole('button', { name: /^New 0$/ }).count(), 1);
-    await row().getByRole('link', { name: title, exact: true }).click();
+    assert.equal(await page.getByRole('button', { name: /^New / }).count(), 0, 'an empty filter stays hidden');
+    // Opened from a link (not the row's "Resume"), the kept reservation waits for an explicit resume.
+    await page.evaluate(id => { location.hash = '#/review/' + id; }, id);
     const history = page.getByRole('region', { name: 'Submission history' });
     await history.getByText('Resubmitted · submission 2', { exact: true }).waitFor();
     await history.getByText(/changed item/).click();
     assert.match(await history.innerText(), /Before: REVISION A.*Now: REVISION B/s);
     await history.getByText('Decision history (1)', { exact: true }).click();
     assert.match(await history.innerText(), /Returned · Synthetic reviewer/);
+    await page.getByRole('button', { name: /^Messages/ }).click();
     await page.getByText('Clarify the synthetic lot.', { exact: true }).waitFor();
-    assert.equal(await page.getByRole('button', { name: 'Accept as complete', exact: true }).isDisabled(), true);
+    await page.keyboard.press('Escape');
+    assert.equal(await page.getByRole('button', { name: 'Accept', exact: true }).count(), 0, 'nothing is decided before resuming');
     await page.getByRole('button', { name: 'Resume review', exact: true }).click();
-    await page.getByText(/You’re reviewing this/).waitFor();
+    await page.getByRole('button', { name: 'Resume review', exact: true }).waitFor({ state: 'detached' });
     assert.equal((await api(applicant, '/cases/' + id, undefined, 'GET')).status, 'in_review');
   });
 
-  await scenario('J08 a delayed queue response cannot roll back an acknowledged exclusive claim', async ({ page, id, open, submit, hold, row }) => {
+  await scenario('J08 a delayed queue response cannot roll back an acknowledged exclusive claim', async ({ page, id, open, submit, hold, row, sheet }) => {
     await submit(); await open();
     const reading = hold('/review/queue');
     await page.evaluate(() => { window.oldQueueRead = window.reviewData.loadQueue(true); });
     await reading.entered;
-    await row().getByRole('button', { name: 'Start reviewing', exact: true }).click();
-    await page.getByRole('article', { name: 'Submitted application' }).waitFor();
+    await row().click();
+    await sheet();
     reading.release();
     await page.evaluate(() => window.oldQueueRead);
     const entry = (await queueState(page)).rows.find(row => row.id === id);
@@ -179,7 +189,7 @@ try {
     reading.release(); await page.evaluate(() => window.oldQueueRead);
     assert.deepEqual((await queueState(page)).rows, []);
     assert.deepEqual((await queueState(page)).blocking, {});
-    assert.equal(await page.locator('.ac-table').count(), 0);
+    assert.equal(await page.locator('.rq-list').count(), 0);
   });
 
   await scenario('J08 late blocking counts cannot leak into another officer account', async ({ page, id, open, submit, hold, replaceAccount, replacedQueue }) => {
@@ -197,7 +207,7 @@ try {
   await scenario('J08 a pending claim cannot navigate or publish into a replacement officer session', async ({ page, id, open, submit, hold, row, replaceAccount, replacedQueue }) => {
     await submit(); await open();
     const claiming = hold('/review/' + id + '/claim', 'POST');
-    await row().getByRole('button', { name: 'Start reviewing', exact: true }).click();
+    await row().click();
     await claiming.entered;
     await replaceAccount('foreign');
     await replacedQueue();
@@ -218,7 +228,7 @@ try {
     assert.deepEqual((await queueState(page)).rows, []);
     assert.deepEqual((await queueState(page)).blocking, {});
     assert.match((await queueState(page)).error, /sign-in changed/);
-    assert.equal(await page.locator('.ac-table').count(), 0);
+    assert.equal(await page.locator('.rq-list').count(), 0);
   });
 } finally { await browser.close(); }
 console.log(`Review continuity integration: ${passed} passed, ${failed} failed`);

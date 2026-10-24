@@ -83,7 +83,7 @@ async function scenario(name, run, { freshLogin = false } = {}) {
     await page.waitForFunction(caseId => window.caseStore.engineId === caseId
       && window.caseStore.sectionCLookup.source === 'live', caseId);
     await page.waitForFunction(async () => !(await import('/src/calm/account.ts')).getAccountState().loadingList);
-    await page.getByRole('article', { name: 'Application preview' }).waitFor();
+    await page.getByRole('region', { name: 'Application form' }).waitFor();
     await paint(page);
   };
   const submit = async (caseId = id, result = 'originalSubmit') => {
@@ -101,7 +101,7 @@ async function scenario(name, run, { freshLogin = false } = {}) {
       save: store.saveStatus, sync: store.readSync(),
       application: getAccountState().applications.find(app => app.id === store.engineId),
       submit: document.querySelector('.cf-submit')?.textContent,
-      preview: document.querySelector('[aria-label="Application preview"]')?.textContent,
+      // The page shows the actual filled PDF (FormViewer); `data` above is the case it is filled from.
       actions: [...document.querySelectorAll('[aria-label="Download"] button, [aria-label="Download"] a')]
         .map(el => [el.textContent, el.disabled ?? null, el.getAttribute('href')]),
     };
@@ -229,7 +229,7 @@ try {
     const sent = hold();
     await submit(); await sent.entered;
     await page.evaluate(() => { location.hash = '#/review'; });
-    await page.getByRole('article', { name: 'Application preview' }).waitFor({ state: 'detached' });
+    await page.getByRole('region', { name: 'Application form' }).waitFor({ state: 'detached' });
     await page.evaluate(() => { location.hash = '#/application'; });
     assert.equal(await page.getByRole('button', { name: 'Submitting…', exact: true }).isDisabled(), true);
     assert.equal(canceled.includes(`/cases/${id}/submit`), false, 'Application navigation must keep its provider-owned submit alive');
@@ -320,7 +320,8 @@ try {
             assert.equal(await page.getByRole('button', { name: 'Resubmit to Edmonton', exact: true }).count(), 0);
           } else {
             assert.equal(await page.evaluate(() => window.caseStore.saveStatus), 'saved');
-            assert.match(await page.getByRole('article', { name: 'Application preview' }).innerText(), /committed save awaiting an old session acknowledgement/);
+            // What the page displays (and the PDF is filled from): the open case's acknowledged values.
+            assert.match(String(await page.evaluate(() => [...window.caseStore.c.facts].reverse().find(f => f.field === 'legalDescription')?.value ?? '')), /committed save awaiting an old session acknowledgement/);
             assert.equal(await page.getByRole('button', { name: 'Resubmit to Edmonton', exact: true }).isEnabled(), true);
           }
         }

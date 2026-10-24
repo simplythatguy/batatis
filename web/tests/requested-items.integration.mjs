@@ -95,9 +95,10 @@ async function scenario(name, run, options) {
     await page.locator('.cf-app').waitFor(); // AuthGate must finish session restore/reset (J05).
     if (actor === 'owner') {
       assert.equal(await page.evaluate(id => window.caseStore.openCase(id, 'contractor'), scene.id), null);
-      await page.evaluate(() => { location.hash = '#/application'; });
+      // The return is read in full on the comments page; the stages keep a one-line notice.
+      await page.evaluate(() => { location.hash = '#/comments'; });
       await page.locator('.cf-returned').waitFor();
-    } else await page.getByRole('heading', { name: 'Messages', exact: true }).waitFor();
+    } else await page.getByRole('button', { name: /^Messages/ }).waitFor();
     return page;
   }
   try {
@@ -113,6 +114,24 @@ async function scenario(name, run, options) {
 }
 
 const occurrences = (text, label) => text.split(label).length - 1;
+// The officer's review: the decision is its last step (or the panel shown when no package review ran).
+// With a package review, "Ask for more" sends its request and the plain return sits beside the choices.
+async function openReturn(officer) {
+  const ask = officer.getByRole('button', { name: 'Ask for more', exact: true });
+  const step = officer.getByRole('navigation', { name: 'Review steps' }).getByRole('button', { name: /: Decide\b/ });
+  await ask.or(step).first().waitFor();
+  if (!await ask.isVisible()) await step.click();
+  await ask.waitFor();
+  const plain = officer.getByRole('button', { name: 'Return with a message', exact: true });
+  await (await plain.count() ? plain : ask).click();
+  return officer.getByRole('dialog', { name: 'Return with a message', exact: true });
+}
+// The officer's thread is in the review page's Messages drawer; the sheet is in its Application drawer.
+const officerThread = async officer => { await officer.getByRole('button', { name: /^Messages/ }).click(); return officer.locator('.ac-thread .is-decision'); };
+const officerSheet = async officer => {
+  await officer.getByRole('button', { name: 'Application', exact: true }).click();
+  return officer.getByRole('article', { name: 'Submitted application', exact: true });
+};
 async function returnCase(scene, message, items = [scene.item]) {
   return api('officer', `/review/${scene.id}/decision`, { outcome: 'return', message, items });
 }
@@ -120,8 +139,7 @@ async function returnCase(scene, message, items = [scene.item]) {
 try {
   await scenario('drafted checklist item renders once on both sides while structured identity persists', async ({ scene, mount }) => {
     const officer = await mount('officer');
-    await officer.getByRole('button', { name: 'Return with message', exact: true }).click();
-    const dialog = officer.getByRole('dialog', { name: 'Return with a message', exact: true });
+    const dialog = await openReturn(officer);
     await dialog.getByLabel(scene.gap.message, { exact: true }).check();
     await dialog.getByRole('button', { name: 'Draft from ticked items', exact: true }).click();
     await dialog.getByText('Draft built from the ticked items. Edit it before sending.', { exact: true }).waitFor();
@@ -129,7 +147,7 @@ try {
     await message.fill((await message.inputValue()) + '\n\nSYNTHETIC keep the owner unchanged.');
     await dialog.getByRole('button', { name: 'Send and return', exact: true }).click();
     await dialog.waitFor({ state: 'hidden' });
-    const thread = officer.locator('.ac-thread .is-decision');
+    const thread = await officerThread(officer);
     await thread.waitFor();
     assert.equal(occurrences(await thread.innerText(), scene.item.note), 1);
     const stored = await api('owner', `/cases/${scene.id}/messages`);
@@ -154,7 +172,7 @@ try {
     assert.ok((await banner.innerText()).includes('- SYNTHETIC keep this separate officer comment.'));
     await owner.locator('.ac-thread').getByText('SYNTHETIC later follow-up: retain the owner.', { exact: true }).waitFor();
     const officer = await mount('officer');
-    assert.equal(occurrences(await officer.locator('.ac-thread .is-decision').innerText(), scene.item.note), 1);
+    assert.equal(occurrences(await (await officerThread(officer)).innerText(), scene.item.note), 1);
     assert.deepEqual((await api('owner', `/cases/${scene.id}/messages`)).decision, saved.decision, 'display normalization must not rewrite historical records');
   });
 
@@ -208,7 +226,7 @@ try {
     assert.equal(await banner.getByRole('link', { name: 'Review corrections', exact: true }).getAttribute('href'), '#/application');
     assert.ok((await banner.innerText()).includes('Resubmit on Application'));
     await banner.getByRole('link', { name: 'Review corrections', exact: true }).click();
-    await owner.getByRole('article', { name: 'Application preview', exact: true }).waitFor();
+    await owner.getByRole('region', { name: 'Application form', exact: true }).waitFor();
   });
 
   await scenario('next correction skips saved items while unresolved requested fields stay open', async ({ scene, mount }) => {
@@ -226,12 +244,12 @@ try {
     const action = owner.locator('.cf-returned-acts').getByRole('link', { name: 'Address next item', exact: true });
     assert.equal(await action.getAttribute('href'), '#/questions?focus=field-owner');
     await action.click();
-    await owner.getByRole('heading', { name: 'Who is the owner?', exact: true }).waitFor();
+    await owner.getByRole('heading', { name: 'Owner', exact: true }).waitFor();
   });
 
   await scenario('officer sheet lists each bound/unbound document once with metadata and an authorized download', async ({ scene, mount }) => {
     const officer = await mount('officer');
-    const sheet = officer.getByRole('article', { name: 'Submitted application', exact: true });
+    const sheet = await officerSheet(officer);
     const text = await sheet.innerText();
     assert.equal(occurrences(text, 'SYNTHETIC attached officer report'), 1);
     assert.equal(occurrences(text, 'SYNTHETIC unbound officer report'), 1);

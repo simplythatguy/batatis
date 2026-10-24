@@ -15,6 +15,9 @@ let next = 0, passed = 0, failed = 0;
 const B = 'REVISION B — synthetic saved lot', C = 'REVISION C — synthetic latest lot';
 const action = (value) => ({ type: 'setDetail', field: 'legalDescription', section: 'B', value });
 const legal = (c) => [...(c.facts ?? [])].reverse().find(f => ['legalDescription', 'legal_description'].includes(f.field))?.value;
+// The application page shows the actual filled PDF (FormViewer), filled from the open case's values:
+// what is displayed is the store's case, the same values the drawn preview used to render.
+const shown = async page => String(await page.evaluate(() => [...window.caseStore.c.facts].reverse().find(f => f.field === 'legalDescription')?.value ?? ''));
 
 async function scenario(name, run, fixtureId) {
   const context = await browser.newContext();
@@ -115,7 +118,7 @@ try {
     const saved = await remote();
     assert.equal(saved.status, 'submitted'); assert.equal(legal(saved), C);
     assert.equal(submits()[0].body.expected_version + 1, saved.version);
-    assert.match(await page.getByRole('article', { name: 'Application preview' }).innerText(), /REVISION C/);
+    assert.match(await shown(page), /REVISION C/);
   });
 
   await scenario('J01 waits for an older in-flight save, then acknowledges the currently displayed C', async ({ page, remote, hold, submits, edit, submit }) => {
@@ -164,7 +167,7 @@ try {
     assert.equal((await remote()).status, 404);
     assert.equal(await page.evaluate(() => window.caseStore.saveStatus), 'gone');
     assert.equal(requests.some(r => r.path === '/cases' && r.method === 'POST'), false);
-    assert.match(await page.getByRole('article', { name: 'Application preview' }).innerText(), /REVISION C/);
+    assert.match(await shown(page), /REVISION C/);
   });
 
   await scenario('J01 changing the revision while its save is pending cancels submission', async ({ page, remote, hold, submits, edit, submit }) => {
@@ -188,7 +191,7 @@ try {
     assert.match(await page.evaluate(() => window.submitResult), /changed while submitting/);
     assert.equal(submits().length, 0); assert.equal((await remote()).status, 'returned');
     assert.equal(await page.evaluate(() => window.caseStore.engineId), other);
-    assert.match(await page.getByRole('article', { name: 'Application preview' }).innerText(), /REVISION B/);
+    assert.match(await shown(page), /REVISION B/);
   });
 
   await scenario('J01 switching the account session during saving cannot submit', async ({ page, remote, hold, submits, edit }) => {
@@ -214,7 +217,7 @@ try {
     }, id);
     assert.equal(shared, true);
     await page.evaluate(() => { location.hash = '#/review'; });
-    await page.getByRole('article', { name: 'Application preview' }).waitFor({ state: 'detached' });
+    await page.getByRole('region', { name: 'Application form' }).waitFor({ state: 'detached' });
     await page.evaluate(() => { location.hash = '#/application'; });
     assert.equal(await page.getByRole('button', { name: 'Submitting…', exact: true }).isDisabled(), true);
     assert.equal(submits().length, 1);
@@ -295,12 +298,13 @@ try {
     await page.locator('a[href="#/application"]:visible').first().click();
     await page.getByText('Sent to Edmonton', { exact: true }).waitFor();
     const saved = await remote();
-    const sheet = await page.getByRole('article', { name: 'Application preview' }).innerText();
+    const sheet = await shown(page);
     const header = await page.locator('.cf-save').innerText();
     await page.reload();
     await page.locator('.cf-app').waitFor();
     await page.getByText('Sent to Edmonton', { exact: true }).waitFor();
-    const reloaded = await page.getByRole('article', { name: 'Application preview' }).innerText();
+    await page.getByRole('region', { name: 'Application form' }).waitFor();
+    const reloaded = await shown(page);
     console.log('Pending submit integrity', JSON.stringify({ editPaused, storedLegal: legal(saved),
       previewC: sheet.includes(C), previewD: sheet.includes('REVISION D'), header, reloadC: reloaded.includes(C) }));
     assert.equal(saved.status, 'submitted'); assert.equal(legal(saved), C);

@@ -68,9 +68,12 @@ async function scenario(name, actor, work) {
     if (who === 'applicant') {
       assert.equal(await page.evaluate(id => window.caseStore.openCase(id, 'contractor'), c.id), null);
       await page.evaluate(() => { location.hash = '#/application'; });
-      await page.getByRole('article', { name: 'Application preview' }).waitFor();
+      // The page shows the actual filled PDF; the saved source PDFs sit in its side panel.
+      await page.getByRole('region', { name: 'Application form' }).waitFor();
     } else {
       await page.evaluate(id => { location.hash = '#/officer?case=' + id; }, c.id);
+      // The officer's review keeps the submitted application in its header's Application drawer.
+      await page.getByRole('button', { name: 'Application', exact: true }).click();
       await page.getByRole('article', { name: 'Submitted application' }).waitFor();
     }
     return c;
