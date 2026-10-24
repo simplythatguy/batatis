@@ -8,7 +8,7 @@ cd batatis
 scripts/install-git-hooks.sh
 ```
 
-Follow [local development](local-development.md) to run the app on localhost:3000 with the engine on `8000`. GitHub has only dev/main; agents publish verified work to dev, and the user merges the single release PR into main. Keep feature branches local.
+Follow [local development](local-development.md) to run the app on localhost:3000 with the engine on `8000`. GitHub has only dev/main; agents publish verified work to dev, and the user merges the single release PR into main. Vercel deploys only main, with preview deployments disabled. Keep feature branches local.
 
 ## Engineering workflows
 

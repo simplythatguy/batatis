@@ -246,16 +246,20 @@ def actors(context):
 def test_only_owner_can_edit_and_read_only_cases_stay_immutable(context, actors, status, name):
     _, store = context
     clients, users = actors
+    editable_owner = name == 'owner' and status in {'draft', 'returned'}
     case = store.put(Case(owner_id=users['owner'].id, authority='edmonton', status=status,
-                          selected_articles=[selection()]))
+                          selected_articles=None if editable_owner else [selection()]))
     client = clients[name]
-    expected = 200 if name == 'owner' and status in {'draft', 'returned'} else 409 if name == 'owner' else 404
+    expected = 200 if editable_owner else 409 if name == 'owner' else 404
     if expected == 200:
         require_repo_db()
     before = store.get(case.id)
     response = save(client, before, [selection()])
     assert response.status_code == expected, (name, status, response.text)
     assert response.headers['cache-control'] == 'no-store'
+    if expected == 200:
+        assert response.json()['selected_articles'] == [selection()]
+        assert response.json()['version'] == before.version + 1
     if expected != 200:
         assert store.get(case.id) == before
     if name in {'other', 'anonymous', 'foreign'}:

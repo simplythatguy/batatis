@@ -1,6 +1,6 @@
 #!/bin/bash
-# Run what CI runs, locally. GitHub Actions cannot gate while the account billing is failing,
-# so this is the gate before anything lands on dev. Docs: docs/agents/git-workflow.md
+# Run the local gate before anything lands on dev; GitHub Actions supplements these checks.
+# Docs: docs/agents/git-workflow.md
 # Usage: scripts/verify.sh [--web] [--engine]     (default: both)
 # UI changes: also run `node evals/ui-artifacts/smoke.mjs` against the app from scripts/local-app.sh.
 set -euo pipefail

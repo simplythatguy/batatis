@@ -2,13 +2,13 @@
 
 Alberta **Building Codes Challenge** (Built World Tech — Venture Pilots 2026).
 
-## Git and environments (non-negotiable, user decision 2026-10-22)
+## Git and environments (user decisions 2026-10-22 and 2026-10-24)
 
-GitHub has exactly two branches: `dev` (the user's test site) and `main` (production). Locally the app runs on port `3000` (web) and `8000` (engine) only. Full rules: [`docs/agents/git-workflow.md`](./docs/agents/git-workflow.md).
+GitHub has exactly two branches: `dev` (shared integration source) and `main` (production). **Vercel deploys only `main`; preview deployments are disabled.** Locally the app runs on port `3000` (web) and `8000` (engine) only. Full rules: [`docs/agents/git-workflow.md`](./docs/agents/git-workflow.md).
 
-- Flow: **verify locally** (`scripts/verify.sh`) → **land on `dev`** (`scripts/land.sh`, fast-forward only) → the user tests the dev site → the user merges the single release PR `dev → main`.
+- Flow: **verify locally** (`scripts/verify.sh`) → **land on `dev`** (`scripts/land.sh`, fast-forward only) → the user tests locally and approves the release → the user merges the single release PR `dev → main`.
 - Never push or open a PR from any other branch, never push or merge `main`, never force-push, never delete `dev`. Children never push; the parent lands. Run `scripts/install-git-hooks.sh` in a new clone.
-- Push only verified work (each push is a Vercel deployment; the Hobby plan allows about 100 a day). GitHub Actions is failing on account billing, so local verification is the gate.
+- Push only verified work. Local verification is required even when GitHub Actions runs. `dev` pushes run CI; only an approved merge into `main` triggers Vercel.
 - Before rebasing run `git merge-base --is-ancestor origin/dev HEAD`; if true, do not rebase. Otherwise `git -c rebase.updateRefs=false rebase --rebase-merges origin/dev`.
 - Ports: `scripts/local-app.sh status|start|stop|wait`. If 3000 or 8000 is busy, wait for the owner. Never pick another port; stop what you start.
 

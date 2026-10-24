@@ -10,25 +10,20 @@ root `vercel.json` owns the two services. A dashboard root of `web` builds only
 the frontend; a Services framework override on a branch without service
 declarations fails with `MISSING_SERVICES`.
 
-Two branches deploy, and only two: `main` is production and `dev` is the preview
-the user tests. In the Vercel project set **Production Branch = `main`**
-(Settings, Environments, Production, Branch Tracking; older dashboards: Settings,
-Git). `dev` then builds as a Preview at the stable branch URL
-`batatis-git-dev-abdelwaly-projects.vercel.app` (Vercel login). `git.deploymentEnabled`
-in `vercel.json` turns every other branch off, so nothing else can spend the
-deployment allowance. Keep Preview deployments enabled in the project settings:
-disabling them also prevents `dev` from deploying once `main` is the production
-branch. The repository branch allowlist limits previews to `dev`.
-Agents push verified work to `dev` only; production changes only when the user
-merges the release PR `dev → main` (see `docs/agents/git-workflow.md`). Set
-Production Branch to `main` before merging the first release PR, so the live URL
-keeps serving its current build until `main` deploys. Do not redeploy an
-unchanged SHA.
+Only `main` deploys (user decision, 2026-10-24). Keep **Production Branch = `main`**
+and **preview deployments disabled** in the Vercel project. The repository's
+`git.deploymentEnabled` allows `main` and disables every other branch. `dev` is
+shared integration source tested locally; its former stable hosted alias is retired.
 
-On 2026-10-23, the project was still tracking `dev` for production and had Preview
-deployments disabled. Both settings were corrected and read back: production
-tracks `main`, previews are enabled, and the repository root/build overrides remain
-automatic. This settings repair does not publish local commits or approve a release.
+Agents land verified work on `dev`. Teammates can merge contribution PRs into
+`dev` with GitHub write access. The user approves the release and merges the
+single `dev → main` PR using **Create a merge commit**; that triggers production.
+A `dev` push or contribution PR does not trigger a Vercel preview. See the
+[Git workflow](agents/git-workflow.md).
+
+The previous two-site setup was superseded. Historical preview deployments and
+their isolated data are preserved as recovery evidence. This configuration
+change does not promote an old preview or publish unapproved source to production.
 
 The Hobby project's deployment allowance was exhausted on October 20, 2026
 (`api-deployments-free-per-day`, more than 100 deployments). When Vercel reports
@@ -39,7 +34,7 @@ workflow. A `READY` frontend build alone does not verify the engine: exercise
 
 The branch allowlist follows [Vercel's Git configuration](https://vercel.com/docs/project-configuration/git-configuration).
 
-This repository does not deploy or create accounts. A person with the existing Vercel project connects the Git repository and sets the variables below. Do not commit the NRC PDF, `codedb/build/codedb.sqlite`, `.env`, or uploads.
+Use the existing Vercel project's Git connection and production settings below. Do not commit the NRC PDF, `codedb/build/codedb.sqlite`, `.env`, or uploads.
 
 ## What the build does
 
@@ -75,7 +70,7 @@ For explicit legacy `scc_2026-10` exports and uploads, the same build downloads 
 
 ## Environment variables
 
-Set these on the Vercel project for Preview and Production. Leave the project Root Directory at the repository root so both services build. Do not set a dashboard Output Directory that would override `web/dist`.
+Set hosted runtime variables on the Vercel project for Production. The local `.env.example` contains only the OpenAI/OpenRouter credentials, live switches and daily cap; advanced hosting settings are listed here. Leave the project Root Directory at the repository root so both services build. Do not set a dashboard Output Directory that would override `web/dist`.
 
 | Variable | Where | Purpose |
 | --- | --- | --- |
@@ -83,6 +78,8 @@ Set these on the Vercel project for Preview and Production. Leave the project Ro
 | `DATABASE_URL` | engine runtime | Neon (or any Postgres) URL. `sslmode=require` is added when the URL omits it. |
 | `BATATIS_LIVE` | engine runtime | Unset or anything other than `1` keeps the offline path. Live calls also need `OPENAI_API_KEY`. |
 | `OPENAI_API_KEY` | engine runtime, sensitive | Server only. Do not use a `VITE_` name. The process never logs the value. |
+| `OPENROUTER_API_KEY` | engine runtime, sensitive | Server-only Elephant credential. |
+| `BATATIS_LIVE_ELEPHANT` | engine runtime | `1` enables the fixed free Elephant route, `0` disables it; unset follows `BATATIS_LIVE`. No paid fallback. |
 | `BATATIS_DAILY_SPEND_CAP_USD` | engine runtime | Default `5`. Over the cap, model calls return the offline path with `source: "offline-cap"`. On Vercel this cap requires `BATATIS_STORE=postgres`. The per-instance memory ledger is not used there: if `VERCEL` is set and the store is not postgres, live calls stay on `offline-cap` and do not spend from memory. Off Vercel, the file store keeps the cap in memory for that process. |
 | `BATATIS_LLM_RATE_LIMIT` | engine runtime | Default `20` live model calls per IP per window. The window is in memory on that engine instance. |
 | `BATATIS_LLM_RATE_WINDOW_SECONDS` | engine runtime | Default `600`. |
@@ -110,46 +107,40 @@ case. That verifies shared storage locally; the hosted engine still needs the
 same check after the approved deployment. Hosted startup refuses missing or
 non-Postgres storage settings. `BATATIS_CASES` selects a sqlite path for local runs.
 
-## Preview
+## Verification and release
 
-Push an integration branch. The connected Vercel project builds a Preview deployment of both services. Measure it with:
+Before landing, test locally on localhost:3000/8000 with synthetic records.
+CodeDB and PostgreSQL prerequisites must be present for the affected checks;
+record any skipped coverage. Inspect the saved PDF, not just an HTTP 200.
 
-```sh
-scripts/e2e_smoke.sh https://<preview-host>/api
-```
+After the user approves and merges `dev → main`, verify the production
+deployment's exact commit and both services. Use an authenticated synthetic
+account to check case creation, save/reload, code lookup, PDF export and deletion.
+Record cold/warm latency when useful. A `READY` frontend alone is not backend,
+persistence, provider or professional approval.
 
-The script prints one latency line per request, twice (cold, then warm):
+The main-only policy does not copy local or historical preview secrets into
+Production. Review the production-specific settings before release. Existing
+approved GPT use keeps its configured US$5 daily application cap; activating
+other paid providers or increasing that cap needs user authorization. The user
+still owns release approval; agents do not promote deployments or merge `main`.
 
-```text
-cold POST /cases 201 1.204s
-cold GET /cases/<id> 200 0.080s
-cold GET /code/search?q=egress&limit=5 200 0.110s
-warm POST /cases 201 0.040s
-```
-
-`BASE_URL` may be the first argument or the environment variable. Locally that is `http://127.0.0.1:8000` (no `/api` prefix). On Vercel include `/api`.
-
-## Production
-
-Production is `main`. It changes only when the user merges the release PR (`dev → main`, merge commit) after testing the dev site. The notes below describe the deploy shape; they are not a promotion by themselves. (The #12, #41 and `backend/case-api` notes below predate the 2026-10-22 consolidation; those branches are parked, see `docs/agents/parked-work.md`.)
-
-`backend/case-api` is also making `CaseStore` writes atomic. The overlap is `put(..., expected_version=)` and `VersionConflict` (retry inside `add_fact`, HTTP 409 if the retry is exhausted). Keep one optimistic-update implementation when the branches merge.
-
-```text
-#12 owns engine/identify; this branch does not change it.
-Call engine.llm_gate.authorize before a provider request and record after with the actual token counts.
-Keep the citation and the NRC publication link on code quotes. Do not shorten them.
-Live only when BATATIS_LIVE=1 and OPENAI_API_KEY are both set; otherwise stay offline and do not contact a provider.
-```
+CaseStore uses expected-version concurrency checks; keep one authoritative
+implementation and preserve stale-write refusal. Section C stays deterministic,
+and professional evidence remains human-owned.
 
 ## Accounts and plan limits
 
 The existing Vercel project uses the dedicated free Neon resource `batatis-db`
 (`free_v3`). Keep `BATATIS_STORE=postgres` and its private `DATABASE_URL`
 configured. Hosted startup refuses a missing Postgres configuration; there is
-no temporary-disk fallback. Keep `BATATIS_LIVE=0` and the OpenAI key unset until
-the US$20 total cap in #41 is integrated and passes its gate. The daily ledger
-in this branch does not satisfy that gate.
+no temporary-disk fallback. Live GPT is an explicitly enabled, server-only
+configuration with the approved daily US$5 application cap. The historical #41
+US$20 hold is superseded by the current authorization; it is not a reason to
+silently disable an approved local configuration. A hosted live cap uses the
+shared PostgreSQL ledger; the local file-store cap is per process. A cap is not
+provider-account billing enforcement. Check the actual production configuration
+before an approved release.
 
 Configure an independent, random server-only `CRON_SECRET` for the scheduled
 retention purge (at least 16 characters). Vercel sends it as

@@ -56,7 +56,9 @@ scripts/local-app.sh start
 
 ## Optional configuration
 
-The offline setup needs no `.env` file. [`.env.example`](../.env.example) lists optional variable names and defaults. The launcher loads the checkout's `.env` into Uvicorn. Existing process variables take precedence, so the start command above keeps all live providers off. It does not load server credentials into Vite.
+The offline setup needs no `.env` file. [`.env.example`](../.env.example) contains only OpenAI/OpenRouter keys, their live switches and the US$5 daily application cap. Copy it to `.env` for optional local AI, enter your own server keys and set the relevant switch to `1` when enabling that provider. OpenAI backs GPT; OpenRouter backs Elephant. Hosted app users do not need copies of the server's provider keys.
+
+The launcher loads the checkout's `.env` into Uvicorn. Existing process variables take precedence, so the start command above keeps all live providers off. It does not load server credentials into Vite. Hosting and optional feature settings are documented in the [deployment guide](deploy.md).
 
 Keep real keys out of Git and the web bundle. Enabling a live provider requires separate configuration and spend controls. Adding a key alone is not proof that a provider works. See the [Elephant provider guide](elephant-provider.md), [identification API](api/identify.md), and [deployment guide](deploy.md) before enabling providers or configuring a hosted environment.
 
