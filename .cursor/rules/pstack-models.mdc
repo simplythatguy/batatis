@@ -6,7 +6,7 @@ alwaysApply: true
 # pstack model configuration
 
 # User instruction 2026-10-23: GPT Sol only. All roles use GPT-6.1-Sol at max.
-# T3 uses provider codex, model gpt-6.1-sol, reasoningEffort max; inherit service tier.
+# T3 uses provider codex, model gpt-6.1-sol, reasoningEffort max, serviceTier priority (Fast mode user request).
 # Panels are independent Sol lanes when warranted; they have no provider diversity.
 # T3 delegates through its supported task tools, never subprocess agent CLIs.
 # The source is ~/.agents/pstack-models.md; native harness sheets mirror it.
@@ -28,4 +28,4 @@ swarm workers: codex:gpt-6.1-sol@max
 architect runners: codex:gpt-6.1-sol@max
 interrogate reviewers: codex:gpt-6.1-sol@max
 
-In T3 use provider `codex`, model `gpt-6.1-sol`, and `target.options.reasoningEffort=max`; inherit service tier. Use supported T3 task tools, with isolated worktrees for writers. User instructions take precedence over upstream model defaults.
+In T3 use provider `codex`, model `gpt-6.1-sol`, and `target.options.reasoningEffort=max`; set `target.options.serviceTier=priority` for Fast mode. Use supported T3 task tools, with isolated worktrees for writers. User instructions take precedence over upstream model defaults.
