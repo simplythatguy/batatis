@@ -389,9 +389,11 @@ async function reviewHarness(opts: { index: () => Promise<unknown> }) {
   const current = { id: "c1", title: "Synthetic review refresh", status: "in_review", version: 1, claim };
   class EngineError extends Error { status: number; constructor(status: number) { super("Synthetic failure"); this.status = status; } }
   let runs = 0;
+  const decisions: unknown[] = [];
   const h = await componentHarness(new URL("./reviewer/ReviewDetail.tsx", import.meta.url), "ReviewDetail", {
     "../../api/client": { EngineError, engine: { getCase: async () => current, gaps: async () => [] } },
-    "../../api/accounts": { AccountsError: EngineError, accounts: { messages: async () => [] } },
+    "../../api/accounts": { AccountsError: EngineError, accounts: { messages: async () => [] },
+      review: { decide: async (_id: string, body: unknown) => { decisions.push(JSON.parse(JSON.stringify(body))); return current; } } },
     "../../api/packageReview": { packageReview: { index: opts.index, run: async () => { runs++; return reviewSession(2); } } },
     "../account": { useAccount: () => officer, accountSession: () => "officer-session" },
     "./reviewData": { useQueue: () => ({ rows: [{ ...current, applicant: { name: "Mira", applicant_type: "homebuilder" } }] }), setBlocking() {}, patchRow() {}, loadQueue: async () => {} },
@@ -405,7 +407,7 @@ async function reviewHarness(opts: { index: () => Promise<unknown> }) {
     "../shell/MoreMenu": { MoreMenu: "MoreMenu" },
     "./InfoRequest": { InfoRequest: "InfoRequest" },
   }, { EngineError });
-  return { ...h, EngineError, get runs() { return runs; } };
+  return { ...h, EngineError, current, decisions, get runs() { return runs; } };
 }
 
 const runAgain = (tree) => {
@@ -421,6 +423,21 @@ const accept = (tree) => {
   const final = nodes(tree, (n) => n.type === "PackageReview")[0]?.props.final.content;
   return nodes(tree, isAccept)[0] ?? nodes(final, isAccept)[0];
 };
+
+test("a refusal from the review page pins the version on screen and sends the officer's reasons with the appeal notice, no correction list", async () => {
+  const h = await reviewHarness({ index: async () => ({ latest: reviewSession(1), sessions: [reviewSession(1)], close_out: null }) });
+  h.current.version = 7;
+  const tree = await h.render({ caseId: "c1" });
+  // The refusal dialog: the only element taking both onSend and onRefresh (its module is not stubbed here).
+  const dialog = nodes(tree, (n) => typeof n.props?.onSend === "function" && typeof n.props?.onRefresh === "function")[0];
+  assert.ok(dialog, "the refusal dialog is mounted for this case");
+  const reasons = "The requested fire separation drawings were not provided.";
+  await dialog.props.onSend(reasons);
+  assert.equal(h.decisions.length, 1);
+  assert.deepEqual(h.decisions[0], { outcome: "refuse", message: packageView.refusalMessage(reasons), expected_version: 7 });
+  assert.ok((h.decisions[0] as { message: string }).message.includes(packageView.APPEAL_NOTICE));
+  h.unmount();
+});
 
 test("a review that ran stays on screen when the background index refresh fails; Accept stays blocked", async () => {
   let failRefresh = false, Err: new (s: number) => Error;
