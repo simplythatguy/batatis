@@ -1,10 +1,10 @@
 // Exercises every engine route through the typed client. Needs a running engine (and, for the default
 // base, the Vite dev server's /api proxy):  node scripts/smoke-api.ts [base]
-// Default base: http://127.0.0.1:5173/api. Pass http://127.0.0.1:8000 to call the engine directly.
+// Default base: http://127.0.0.1:3000/api. Pass http://127.0.0.1:8000 to call the engine directly.
 import assert from "node:assert/strict";
 import { createEngine, EngineError } from "../src/api/client.ts";
 
-const api = createEngine(process.argv[2] ?? "http://127.0.0.1:5173/api");
+const api = createEngine(process.argv[2] ?? "http://127.0.0.1:3000/api");
 
 const created = await api.createCase({ title: "Smoke case", jurisdiction: { id: "calgary", name: "Calgary" } });
 assert.match(created.id, /^case_/);

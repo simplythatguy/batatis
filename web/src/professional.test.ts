@@ -85,7 +85,8 @@ test("a later evidence save keeps the earlier document as text", () => {
 test("not sure and not engaged yet stay open and block export", () => {
   let c = reducer(emptyCase("contractor"), { type: "notePractice", value: true });
   c = reducer(c, { type: "deferProfessional", field: "role", choice: "not_sure", label: "Who is the registered professional?" });
-  assert.equal(c.facts.find((fact) => fact.field === "professional.role")?.status, "unconfirmed");
+  assert.equal(c.facts.find((fact) => fact.field === "professional.role")?.status, "confirmed");
+  assert.equal(professionalConfirmed(c.facts), false, "An honest answer does not confirm credentials");
   assert.ok(getGaps(c).some((gap) => gap.id === "professional-not-engaged"));
   assert.ok(getGaps(c).some((gap) => gap.id === "needs-professional"));
   c = reducer(emptyCase("contractor"), {
@@ -96,6 +97,14 @@ test("not sure and not engaged yet stay open and block export", () => {
   });
   assert.ok(getGaps(c).some((gap) => gap.id === "professional-not-engaged"));
   assert.equal(c.facts.some((fact) => fact.source.type === "file"), false);
+});
+
+test("confirmed uncertainty answers are never registration or seal credentials", () => {
+  for (const choice of ["not_sure", "not_engaged_yet"] as const) {
+    let c = reducer(emptyCase("contractor"), { type: "setProfessionalFact", field: "role", value: "engineer" });
+    for (const field of ["registration_number", "seal"]) c = reducer(c, { type: "deferProfessional", field, choice, label: field });
+    assert.equal(professionalConfirmed(c.facts), false);
+  }
 });
 
 function confirmed(field: string, value: string | boolean, sourceType: "user_text" | "user_click" | "file" = "user_text"): Fact {
@@ -154,12 +163,13 @@ test("a registered professional clears the gap and a commercial or file claim do
 test("a code-check gap names the question", () => {
   assert.equal(
     codeCheckLabel("Using the board to hold the siding"),
-    "Code check: answer whether your design relies on the board to hold the siding",
+    "Answer whether your design relies on the board to hold the siding",
   );
   assert.equal(
     codeCheckLabel("What you described", "What would the acceptable solution have required here?"),
-    "Code check: What would the acceptable solution have required here?",
+    "What would the acceptable solution have required here?",
   );
+  assert.equal(codeCheckLabel("Openings in Exposing Building Face", undefined, "9.10.14.4.(1)"), "Does your design do something different from the rule on openings in exposing building face?");
   assert.equal(plainFactStatus("pointed", "confirmed"), "from what you entered");
   assert.doesNotMatch(plainFactStatus("pointed", "confirmed"), /pointed|confirmed/);
 });

@@ -1,0 +1,292 @@
+{
+  "id": "soffits-houses",
+  "title": "Roof soffits near the property line (houses)",
+  "article": "9.10.15.5.",
+  "summary": "Projecting roof soffits above an exposing building face of a house, Sentences 9.10.15.5.(8) and (9), with the exception in Sentence (10).",
+  "reviewed": false,
+  "review_note": "Unreviewed: a domain reviewer has not yet signed the vectors for this rule (evals_dev/rules/REVIEW.md).",
+  "provisions": [
+    {
+      "id": "9.10.15.5.(8)",
+      "division": "B",
+      "pdf_page": 904,
+      "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.10.15.5.(8) [PDF p.904]"
+    },
+    {
+      "id": "9.10.15.5.(9)",
+      "division": "B",
+      "pdf_page": 904,
+      "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.10.15.5.(9) [PDF p.904]"
+    },
+    {
+      "id": "9.10.15.5.(10)",
+      "division": "B",
+      "pdf_page": 904,
+      "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.10.15.5.(10) [PDF p.904]"
+    },
+    {
+      "id": "9.10.15.1.(1)",
+      "division": "B",
+      "pdf_page": 900,
+      "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.10.15.1.(1) [PDF p.900]"
+    },
+    {
+      "id": "9.10.15.3.(1)",
+      "division": "B",
+      "pdf_page": 900,
+      "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.10.15.3.(1) [PDF p.900]"
+    },
+    {
+      "id": "1.3.3.3.(1)",
+      "division": "A",
+      "pdf_page": 40,
+      "citation": "NBC(AE) 2023 p2, Div A, Sentence 1.3.3.3.(1) [PDF p.40]"
+    }
+  ],
+  "notes": [],
+  "tables": [],
+  "inputs": [
+    "occupancy",
+    "dwelling_unit_above_another",
+    "storeys",
+    "building_area_m2",
+    "soffit_projects",
+    "limiting_distance_m",
+    "soffit_to_property_line_m",
+    "faces_public_way",
+    "sprinklered",
+    "fire_response_over_10_min"
+  ],
+  "derived": [
+    {
+      "name": "halve_limiting_distance",
+      "label": "Half the limiting distance is used (slow fire department response, not fully sprinklered)",
+      "expr": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "args": [
+              {
+                "var": "fire_response_over_10_min"
+              },
+              true
+            ]
+          },
+          {
+            "op": "ne",
+            "args": [
+              {
+                "var": "sprinklered"
+              },
+              "yes"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "limiting_distance_used_m",
+      "label": "Limiting distance used (halved under Sentence 9.10.15.3.(1) where it applies)",
+      "unit": "m",
+      "expr": {
+        "op": "if",
+        "args": [
+          {
+            "var": "halve_limiting_distance"
+          },
+          {
+            "op": "div",
+            "args": [
+              {
+                "var": "limiting_distance_m"
+              },
+              2
+            ]
+          },
+          {
+            "var": "limiting_distance_m"
+          }
+        ]
+      }
+    }
+  ],
+  "outcomes": [
+    {
+      "id": "not_part9",
+      "state": "not_applicable",
+      "provision": "1.3.3.3.(1)",
+      "when": {
+        "op": "or",
+        "args": [
+          {
+            "op": "gt",
+            "args": [
+              {
+                "var": "storeys"
+              },
+              3
+            ]
+          },
+          {
+            "op": "gt",
+            "args": [
+              {
+                "var": "building_area_m2"
+              },
+              600
+            ]
+          }
+        ]
+      },
+      "message": "This building has more than 3 storeys or a building area over 600 m², so Part 9 does not apply (Div A, Sentence 1.3.3.3.(1)). The Part 3 requirements are not checked here.",
+      "if_unknown": "assume",
+      "assumption": "Assumed a Part 9 building (3 storeys or less, building area 600 m² or less); the storeys or building area were not stated."
+    },
+    {
+      "id": "not_a_house",
+      "state": "not_applicable",
+      "provision": "9.10.15.1.(1)",
+      "when": {
+        "op": "not",
+        "args": [
+          {
+            "op": "in",
+            "args": [
+              {
+                "var": "occupancy"
+              },
+              [
+                "single_family",
+                "multi_family"
+              ]
+            ]
+          }
+        ]
+      },
+      "message": "Subsection 9.10.15. covers houses and buildings that contain only dwelling units with none above another. For this occupancy the soffit requirements are in Article 9.10.14.5., which this check does not cover."
+    },
+    {
+      "id": "stacked_units",
+      "state": "not_applicable",
+      "provision": "9.10.15.1.(1)",
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "eq",
+            "args": [
+              {
+                "var": "occupancy"
+              },
+              "multi_family"
+            ]
+          },
+          {
+            "op": "eq",
+            "args": [
+              {
+                "var": "dwelling_unit_above_another"
+              },
+              true
+            ]
+          }
+        ]
+      },
+      "message": "A dwelling unit is above another, so Subsection 9.10.15. does not apply; the soffit requirements are in Article 9.10.14.5., which this check does not cover."
+    },
+    {
+      "id": "no_soffit",
+      "state": "not_applicable",
+      "provision": "9.10.15.5.(8)",
+      "when": {
+        "op": "eq",
+        "args": [
+          {
+            "var": "soffit_projects"
+          },
+          false
+        ]
+      },
+      "message": "No roof soffit projects above this wall, so Sentences 9.10.15.5.(8) to (10) do not apply."
+    },
+    {
+      "id": "follows_setback",
+      "state": "follows",
+      "provision": "9.10.15.5.(9)",
+      "when": {
+        "op": "and",
+        "args": [
+          {
+            "op": "ge",
+            "args": [
+              {
+                "var": "soffit_to_property_line_m"
+              },
+              0.45
+            ]
+          },
+          {
+            "op": "gt",
+            "args": [
+              {
+                "var": "limiting_distance_used_m"
+              },
+              0.45
+            ]
+          }
+        ]
+      },
+      "message": "The limiting distance is {limiting_distance_used_m} (more than 0.45 m) and the face of the soffit is {soffit_to_property_line_m} from the property line (not less than 0.45 m). This follows the acceptable solution in Sentence 9.10.15.5.(9)."
+    },
+    {
+      "id": "follows_public_way",
+      "state": "follows",
+      "provision": "9.10.15.5.(10)",
+      "when": {
+        "op": "eq",
+        "args": [
+          {
+            "var": "faces_public_way"
+          },
+          true
+        ]
+      },
+      "message": "The soffit faces a public way, and Sentence 9.10.15.5.(10) permits the face of a roof soffit to project to the property line there. This follows the acceptable solution."
+    },
+    {
+      "id": "departs_close_face",
+      "state": "departs",
+      "provision": "9.10.15.5.(8)",
+      "when": {
+        "op": "le",
+        "args": [
+          {
+            "var": "limiting_distance_used_m"
+          },
+          0.45
+        ]
+      },
+      "message": "The limiting distance of this wall is {limiting_distance_used_m} (not more than 0.45 m) and a roof soffit projects above it. Sentence 9.10.15.5.(8) does not permit a projecting roof soffit there, so the design departs from the acceptable solution."
+    },
+    {
+      "id": "departs_soffit_too_close",
+      "state": "departs",
+      "provision": "9.10.15.5.(9)",
+      "when": {
+        "op": "lt",
+        "args": [
+          {
+            "var": "soffit_to_property_line_m"
+          },
+          0.45
+        ]
+      },
+      "message": "The limiting distance is {limiting_distance_used_m}, and the face of the soffit is {soffit_to_property_line_m} from the property line. Sentence 9.10.15.5.(9) asks for not less than 0.45 m, so the design departs from the acceptable solution."
+    }
+  ],
+  "not_checked": [
+    "Sentence 9.10.15.5.(11): no openings and protective material for soffits within 1.2 m of the property line",
+    "Sentences 9.10.15.5.(2) and (3): fire-resistance rating and cladding of the face"
+  ]
+}

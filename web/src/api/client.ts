@@ -5,8 +5,31 @@
  * `createEngine(base)` serves scripts and tests outside Vite.
  */
 import { credentialsMode } from "./engineAuth";
+import { accountRequestSignal } from "./requestLifetime";
 import { publicDetail, takeSseEvents } from "../rules";
-import type { Case, EvidenceItem, FactInput, Jurisdiction, NewCase, SectionCRow } from "./types.gen";
+import type { RuleDef, RuleIndex } from "../rules/evaluate";
+import type {
+  CaseChecklists,
+  CaseJurisdictionPack,
+  CaseRules,
+  ChecklistAnswerRequest,
+  ChecklistAnswerResult,
+  JurisdictionDetail,
+  JurisdictionsResult,
+} from "./types.gen";
+import type {
+  Case,
+  EvidenceItem,
+  FactInput,
+  IdentifyDecisionResponse,
+  IdentifyResult,
+  IntakeRequest,
+  IntakeResult,
+  Jurisdiction,
+  NewCase,
+  SectionCRow,
+  SelectedArticlesRequest,
+} from "./types.gen";
 import { PRIVACY_NOTICE } from "../privacy";
 
 /** A provision returned by GET /code/search (engine/codes.py `Codes.search`). */
@@ -71,7 +94,7 @@ export interface JurisdictionBody {
 }
 
 /**
- * POST /cases/{id}/evidence: one applicant text listing, written atomically against
+ * POST /cases/{id}/evidence: applicant metadata and owned-file binding, written atomically against
  * `expected_version`. Optional details: a string is saved, null withdraws, omission retains.
  * `scope` omitted retains links; null unlinks; `{ item_id }` links to one current plan task.
  */
@@ -85,6 +108,8 @@ export interface EvidenceWrite {
   responsible_party?: string | null;
   date?: string | null;
   issuer?: string | null;
+  /** Owned upload id; null removes only the binding, omission retains it. */
+  file_ref?: string | null;
   scope?: { item_id: string } | null;
 }
 
@@ -121,7 +146,7 @@ export function isCaseConflict(e: unknown): boolean {
 const enc = encodeURIComponent;
 
 export function createEngine(base: string) {
-  async function call<T>(method: "GET" | "POST" | "PUT" | "DELETE", path: string, body?: unknown, signal?: AbortSignal, ms = ENGINE_WAIT_MS): Promise<T> {
+  async function call<T>(method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE", path: string, body?: unknown, signal?: AbortSignal, ms = ENGINE_WAIT_MS): Promise<T> {
     const timed = withTimeout(signal, ms);
     let res: Response;
     try {
@@ -133,7 +158,7 @@ export function createEngine(base: string) {
         body: body === undefined ? undefined : JSON.stringify(body),
       });
     } catch (e) {
-      if (signal?.aborted) throw e;
+      if (timed.canceled()) throw e;
       if (timed.timedOut()) throw new EngineError(0, "The engine did not answer in time.");
       throw new EngineError(0, e instanceof Error ? e.message : String(e));
     } finally {
@@ -160,7 +185,20 @@ export function createEngine(base: string) {
      */
     setJurisdiction: (caseId: string, body: JurisdictionBody, signal?: AbortSignal) =>
       call<Case>("PUT", `/cases/${enc(caseId)}/jurisdiction`, body, signal),
+    /**
+     * PUT /cases/{id}/selected-articles: replace the saved code-check selection (docs/api/selected-articles.md),
+     * returning the full saved Case. A snapshot only: it never confirms a reference or changes Section C/D.
+     */
+    setSelectedArticles: (caseId: string, body: SelectedArticlesRequest, signal?: AbortSignal) =>
+      call<Case>("PUT", `/cases/${enc(caseId)}/selected-articles`, body, signal),
     getCase: (id: string, signal?: AbortSignal) => call<Case>("GET", `/cases/${enc(id)}`, undefined, signal),
+    /**
+     * PATCH /cases/{id}/title `{ title }`: the applicant's own name for the application, returning the
+     * full Case. The server trims it to one line; empty or over 500 characters is 422; a sent,
+     * accepted or refused application cannot be renamed.
+     */
+    renameCase: (caseId: string, title: string, signal?: AbortSignal) =>
+      call<Case>("PATCH", `/cases/${enc(caseId)}/title`, { title }, signal),
     addFact: (caseId: string, fact: FactInput, signal?: AbortSignal) =>
       call<Case>("POST", `/cases/${enc(caseId)}/facts`, fact, signal),
     provision: (id: string, division?: Division, signal?: AbortSignal) =>
@@ -196,11 +234,12 @@ export function createEngine(base: string) {
      * A missing code database is not turned into a 503 on this branch.
      */
     exportPdf: (caseId: string, draft = false, signal?: AbortSignal) => exportPdf(base, caseId, draft, signal),
-    /**
-     * Multipart PDF upload (FormData field `file`). Not served on today's dev.
-     * When backend/case-api lands, this sends the PDF bytes and reads {id, name, pages, sha256, read}.
-     */
+    /** Multipart PDF upload (FormData field `file`), returning its stored id and metadata. */
     upload: (caseId: string, file: File, signal?: AbortSignal) => uploadPdf(base, caseId, file, signal),
+    files: (caseId: string, signal?: AbortSignal) =>
+      call<ItemEnvelope<StoredFile>>("GET", `/cases/${enc(caseId)}/files`, undefined, signal).then(unwrapItems),
+    fileUrl: (caseId: string, fileId: string) => `${base}/cases/${enc(caseId)}/files/${enc(fileId)}`,
+    downloadFile: (caseId: string, fileId: string, signal?: AbortSignal) => downloadFile(base, caseId, fileId, signal),
     /**
      * POST /cases/{id}/identify with Accept: text/event-stream, from PR #12.
      * 404 on today's dev. The caller keeps the description cards.
@@ -208,21 +247,51 @@ export function createEngine(base: string) {
     /**
      * Explicit start only. Missing routes fail without another provider attempt.
      */
-    identify: (caseId: string, prose: string, answers: { field?: string | null; question_id?: string | null; answer: string }[] = [], signal?: AbortSignal, onStage?: (stage: string) => void) =>
-      identifyCase(base, caseId, prose, answers, signal, onStage),
+    identify: (
+      caseId: string,
+      prose: string,
+      answers: { field?: string | null; question_id?: string | null; answer: string }[] = [],
+      signal?: AbortSignal,
+      onStage?: StageListener,
+      expectedVersion?: number,
+    ) => identifyCase(base, caseId, prose, answers, signal, onStage, expectedVersion),
+    /**
+     * POST /cases/{id}/intake (docs/api/intake.md): read the description and uploaded PDFs into
+     * unconfirmed facts that point at the words they came from, plus the plan (scope, fork, questions).
+     */
+    intake: (caseId: string, body: IntakeRequest, signal?: AbortSignal) =>
+      call<IntakeResult>("POST", `/cases/${enc(caseId)}/intake`, body, signal, 30000),
+    /** GET /cases/{id}/intake: the stored run. 404 `intake not run` before the first run. */
+    storedIntake: (caseId: string, signal?: AbortSignal) =>
+      call<IntakeResult>("GET", `/cases/${enc(caseId)}/intake`, undefined, signal),
+    /** POST /cases/{id}/intake/answers. "Not sure" writes no fact and is never asked again. */
+    intakeAnswers: (caseId: string, answers: { question_id: string; answer: string }[], expectedVersion?: number, signal?: AbortSignal) =>
+      call<IntakeResult>("POST", `/cases/${enc(caseId)}/intake/answers`, withVersion({ answers }, expectedVersion), signal),
+    /** POST /cases/{id}/intake/scope: `true` is the applicant's "this is a building-code question". */
+    intakeScope: (caseId: string, buildingCode: boolean, expectedVersion?: number, signal?: AbortSignal) =>
+      call<IntakeResult>("POST", `/cases/${enc(caseId)}/intake/scope`, withVersion({ building_code: buildingCode }, expectedVersion), signal),
+    /** POST /cases/{id}/intake/plan: re-rank the questions, for example after code identification. */
+    intakePlan: (caseId: string, expectedVersion?: number, signal?: AbortSignal) =>
+      call<IntakeResult>("POST", `/cases/${enc(caseId)}/intake/plan`, withVersion({}, expectedVersion), signal),
     /** GET /cases/{id}/identify. 404 detail `identify result not found` when nothing is stored. */
     storedIdentify: (caseId: string, signal?: AbortSignal) =>
       call<IdentifyResult>("GET", `/cases/${enc(caseId)}/identify`, undefined, signal),
 
     /**
      * POST /cases/{id}/identify/{provision}/decision.
-     * Body is yes, no, or not_sure. The body may be a SectionCRow or the stored identify payload.
+     * Body is yes, no, or not_sure, plus the optional `expected_version`. The reply is the identify
+     * result with `section_c` (the rows a yes wrote) and `case_version`.
      */
-    decide: (caseId: string, provisionId: string, decision: "yes" | "no" | "not_sure", signal?: AbortSignal) =>
-      call<unknown>("POST", `/cases/${enc(caseId)}/identify/${enc(provisionId)}/decision`, { decision }, signal),
-    /** GET /cases/{id}/information-request. Items are not_sure decisions. */
+    decide: (caseId: string, provisionId: string, decision: "yes" | "no" | "not_sure", signal?: AbortSignal, expectedVersion?: number) =>
+      call<IdentifyDecisionResponse>(
+        "POST",
+        `/cases/${enc(caseId)}/identify/${enc(provisionId)}/decision`,
+        withVersion({ decision }, expectedVersion),
+        signal,
+      ),
+    /** GET /cases/{id}/identify/information-request. Read-only questions and legacy not_sure items. */
     informationRequest: (caseId: string, signal?: AbortSignal) =>
-      call<InformationRequest>("GET", `/cases/${enc(caseId)}/information-request`, undefined, signal),
+      call<InformationRequest>("GET", `/cases/${enc(caseId)}/identify/information-request`, undefined, signal),
     /** POST /cases/{id}/evidence. 409 = stale version or existing ID; 404 = case gone or slot absent. */
     saveEvidence: (caseId: string, body: EvidenceWrite, signal?: AbortSignal) =>
       call<EvidenceSaved>("POST", `/cases/${enc(caseId)}/evidence`, body, signal),
@@ -230,9 +299,25 @@ export function createEngine(base: string) {
      * slot and returns the full saved Case; other slots and uploaded bytes stay. */
     deleteEvidence: (caseId: string, evidenceId: string, expectedVersion: number, signal?: AbortSignal) =>
       call<Case>("DELETE", `/cases/${enc(caseId)}/evidence/${enc(evidenceId)}`, { expected_version: expectedVersion }, signal),
+    /** GET /rules: the rule definitions the browser evaluator runs (docs/api/rules.md). No case, no provider. */
+    rules: (signal?: AbortSignal) =>
+      call<{ version: number; edition: string; index: RuleIndex; rules: RuleDef[] }>("GET", "/rules", undefined, signal),
+    /** GET /cases/{id}/rules: the stored state of record for every coded rule. Read-only. */
+    caseRules: (caseId: string, signal?: AbortSignal) => call<CaseRules>("GET", `/cases/${enc(caseId)}/rules`, undefined, signal),
+    /** GET /jurisdictions: every pack, the coverage labels and their meanings (docs/api/jurisdictions.md). */
+    jurisdictions: (signal?: AbortSignal) => call<JurisdictionsResult>("GET", "/jurisdictions", undefined, signal),
+    /** GET /jurisdictions/{id}: one pack with the province's items merged in. */
+    jurisdiction: (id: string, signal?: AbortSignal) => call<JurisdictionDetail>("GET", `/jurisdictions/${enc(id)}`, undefined, signal),
+    /** GET /cases/{id}/jurisdiction/pack: the pack the case resolves to, or null. */
+    casePack: (caseId: string, signal?: AbortSignal) => call<CaseJurisdictionPack>("GET", `/cases/${enc(caseId)}/jurisdiction/pack`, undefined, signal),
+    /** GET /cases/{id}/checklists: standing-package checklists with the applicant's answers (docs/api/checklists.md). */
+    caseChecklists: (caseId: string, signal?: AbortSignal) => call<CaseChecklists>("GET", `/cases/${enc(caseId)}/checklists`, undefined, signal),
+    /** POST one checklist answer with `expected_version`. 409 = stale version: reload and let the person answer again. */
+    answerChecklist: (caseId: string, checklistId: string, body: ChecklistAnswerRequest, signal?: AbortSignal) =>
+      call<ChecklistAnswerResult>("POST", `/cases/${enc(caseId)}/checklists/${enc(checklistId)}/answers`, body, signal),
     /** POST /cases/{id}/identify/confirm. Writes provisions after a code-database check. */
-    confirmIdentify: (caseId: string, provisions: string[], signal?: AbortSignal) =>
-      call<Case>("POST", `/cases/${enc(caseId)}/identify/confirm`, { provisions }, signal),
+    confirmIdentify: (caseId: string, provisions: string[], signal?: AbortSignal, expectedVersion?: number) =>
+      call<Case>("POST", `/cases/${enc(caseId)}/identify/confirm`, withVersion({ provisions }, expectedVersion), signal),
   };
 }
 
@@ -260,6 +345,8 @@ export interface EngineGap {
   severity: "blocking" | "warning" | "info";
   fix_hint?: string;
   citation?: string | null;
+  routed_to?: "officer" | "professional" | "applicant" | null;
+  submission_blocking?: boolean;
 }
 
 export interface EngineProcessField {
@@ -270,6 +357,24 @@ export interface EngineProcessField {
   citation: string;
   required: true;
   answer: { value: string } | null;
+  /** Precedents to read for structure; never text to paste and never an answer. */
+  example?: EngineProcessExample | null;
+}
+
+export interface EngineProcessExample {
+  kind: "structure_only";
+  label: string;
+  must_address: string[];
+  precedents: {
+    title: string;
+    issuer: string;
+    number?: string | null;
+    date?: string | null;
+    pdf_page: number;
+    url?: string | null;
+    structure: string;
+    edition: string;
+  }[];
 }
 
 export interface ProfessionalResult {
@@ -278,6 +383,8 @@ export interface ProfessionalResult {
   reasons: { code: string; required: "yes" | "no" | "depends"; message: string; citation: string }[];
   questions: string[];
   scope_note: string;
+  resolution?: import("./types.gen").ProfessionalRequirementResolution | null;
+  mandatory_required?: boolean;
 }
 
 /** One issue from GET /cases/{id}/section-d/issues (PR #8). */
@@ -302,45 +409,54 @@ export interface SectionDIssue {
   status: "open" | "addressed" | "evidence_listed" | "needs_professional";
 }
 
-export interface IdentifyArticle {
-  provision: string;
-  provision_id?: string | null;
-  division?: string;
-  title: string | null;
-  part?: number;
-  quote?: string | null;
-  snippet?: string | null;
-  reason?: string | null;
-  why?: string | null;
-  citation?: string | null;
-  /** Ranking hint. Not an acceptance. */
-  status?: "suggested" | "candidate" | "unknown" | string;
-  decision?: "yes" | "no" | "not_sure" | null;
-  open_question_id?: string | null;
-}
-
-export interface IdentifyResult {
-  mode?: "live" | "cached_demo" | "bm25_fallback" | string | null;
-  cached?: boolean;
-  source?: string | null;
-  articles: IdentifyArticle[];
-  section_c?: SectionCRow[];
-  questions?: string[];
-  open_questions?: { id?: string; field?: string; text?: string; why?: string; status?: string }[];
-  persisted?: boolean;
-}
-
 export interface InformationRequest {
   case_id: string;
   items: { id: string; provision_id: string; text: string }[];
+  case_version?: number;
+  /** Context for the officer, separate from the administrative completeness gaps. */
+  questions?: ReviewQuestion[];
 }
 
-export interface UploadedFile {
+export interface ReviewQuestion {
+  id: string;
+  field: string;
+  text: string;
+  provision_id: string | null;
+  answer: string | null;
+  state: "not_sure" | "unanswered" | "answered" | "unconfirmed" | "withdrawn";
+  source: string;
+  source_detail: string | null;
+  origin: "code_check" | "code_matching" | "intake" | "officer_request";
+  /** A response to an officer request, separate from the original manual code decision. */
+  clarification?: Pick<ReviewQuestion, "answer" | "state" | "source" | "source_detail">;
+}
+
+export interface UploadedFile extends StoredFile {
+  pages?: number;
+  sha256?: string;
+  read?: boolean;
+}
+
+/** Metadata from the case-owned upload inventory. Presence is verified by the store. */
+export interface StoredFile {
   id: string;
   name: string;
-  pages: number;
-  sha256: string;
-  read: boolean;
+  size: number;
+  content_type: string;
+}
+
+async function downloadFile(base: string, caseId: string, fileId: string, signal?: AbortSignal): Promise<Blob> {
+  const timed = withTimeout(signal, ENGINE_WAIT_MS);
+  try {
+    const response = await fetch(`${base}/cases/${enc(caseId)}/files/${enc(fileId)}`, {
+      credentials: credentialsMode(), signal: timed.signal,
+    });
+    if (!response.ok) throw new EngineError(response.status, await readError(response));
+    return await response.blob();
+  } catch (error) {
+    if (error instanceof EngineError || timed.canceled()) throw error;
+    throw new EngineError(0, timed.timedOut() ? "The engine did not answer in time." : "The file could not be downloaded. Try again.");
+  } finally { timed.clear(); }
 }
 
 export interface SectionDPlan {
@@ -373,11 +489,18 @@ export class ExportBlockedError extends EngineError {
 const ENGINE_WAIT_MS = 8000;
 
 function withTimeout(parent: AbortSignal | undefined, ms: number) {
+  const scope = accountRequestSignal(parent);
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), ms);
-  if (parent?.aborted) ctl.abort();
-  else parent?.addEventListener("abort", () => ctl.abort(), { once: true });
-  return { signal: ctl.signal, clear: () => clearTimeout(timer), timedOut: () => ctl.signal.aborted && !parent?.aborted };
+  const abort = () => ctl.abort();
+  if (scope.aborted) ctl.abort();
+  else scope.addEventListener("abort", abort, { once: true });
+  return {
+    signal: ctl.signal,
+    clear: () => { clearTimeout(timer); scope.removeEventListener("abort", abort); },
+    canceled: () => scope.aborted,
+    timedOut: () => ctl.signal.aborted && !scope.aborted,
+  };
 }
 
 /**
@@ -416,7 +539,7 @@ async function exportPdf(base: string, caseId: string, draft: boolean, signal?: 
       body: JSON.stringify({ draft }),
     });
   } catch (e) {
-    if (signal?.aborted) throw e;
+    if (timed.canceled()) throw e;
     if (timed.timedOut()) throw new EngineError(0, "The engine did not answer in time.");
     throw new EngineError(0, e instanceof Error ? e.message : String(e));
   } finally {
@@ -442,7 +565,7 @@ async function exportPdf(base: string, caseId: string, draft: boolean, signal?: 
   }
   const blob = await res.blob();
   const match = /filename="([^"]+)"/.exec(res.headers.get("Content-Disposition") ?? "");
-  return { blob, filename: match?.[1] ?? `${caseId}-scc-variance.pdf`, notice: exportNotice(res.headers.get("X-Batatis-Notice")) };
+  return { blob, filename: match?.[1] ?? `${caseId}-scc-variance.pdf`, notice: exportNotice(res.headers.get("X-Batatis-Jurisdiction-Notice")) };
 }
 
 async function readError(res: Response): Promise<string> {
@@ -464,7 +587,7 @@ async function uploadPdf(base: string, caseId: string, file: File, signal?: Abor
   try {
     res = await fetch(`${base}/cases/${enc(caseId)}/files`, { method: "POST", body, signal: timed.signal, credentials: credentialsMode() });
   } catch (e) {
-    if (signal?.aborted) throw e;
+    if (timed.canceled()) throw e;
     if (timed.timedOut()) throw new EngineError(0, "The engine did not answer in time.");
     throw new EngineError(0, e instanceof Error ? e.message : String(e));
   } finally {
@@ -474,7 +597,15 @@ async function uploadPdf(base: string, caseId: string, file: File, signal?: Abor
   return (await res.json()) as UploadedFile;
 }
 
-async function readIdentifyResponse(res: Response, onStage?: (stage: string) => void): Promise<IdentifyResult> {
+/** Identify writes are one compare-and-swap: send the case version last read (409 when it is stale). */
+function withVersion<T extends object>(body: T, expectedVersion?: number): T & { expected_version?: number } {
+  return expectedVersion == null ? body : { ...body, expected_version: expectedVersion };
+}
+
+/** One identify stream event: the stage name and its counts (never prose or code text). */
+export type StageListener = (stage: string, data: Record<string, unknown>) => void;
+
+async function readIdentifyResponse(res: Response, onStage?: StageListener): Promise<IdentifyResult> {
   if (!res.ok) throw new EngineError(res.status, await readError(res));
   const type = res.headers.get("content-type") ?? "";
   if (!type.includes("text/event-stream")) return (await res.json()) as IdentifyResult;
@@ -490,8 +621,27 @@ async function readIdentifyResponse(res: Response, onStage?: (stage: string) => 
     const parsed = takeSseEvents(buf);
     buf = parsed.rest;
     for (const ev of parsed.events) {
-      onStage?.(ev.event);
-      if (ev.event === "error") throw new EngineError(503, "Article ranking failed.");
+      if (ev.event !== "done" && ev.event !== "error") {
+        let data: Record<string, unknown> = {};
+        try {
+          const parsedData = JSON.parse(ev.data) as unknown;
+          if (parsedData && typeof parsedData === "object") data = parsedData as Record<string, unknown>;
+        } catch {
+          /* counts are optional */
+        }
+        onStage?.(ev.event, data);
+      }
+      if (ev.event === "error") {
+        // Keep the engine's status (409 conflict, 503 unavailable) and its public message.
+        let payload: { status?: unknown; message?: unknown } = {};
+        try {
+          payload = JSON.parse(ev.data) as typeof payload;
+        } catch {
+          /* fall back below */
+        }
+        const status = typeof payload.status === "number" ? payload.status : 503;
+        throw new EngineError(status, typeof payload.message === "string" ? payload.message : "Article ranking failed.");
+      }
       if (ev.event === "done") {
         try {
           donePayload = JSON.parse(ev.data) as IdentifyResult;
@@ -511,9 +661,10 @@ async function identifyCase(
   prose: string,
   answers: { field?: string | null; question_id?: string | null; answer: string }[],
   signal?: AbortSignal,
-  onStage?: (stage: string) => void,
+  onStage?: StageListener,
+  expectedVersion?: number,
 ): Promise<IdentifyResult> {
-  const timed = withTimeout(signal, 25000);
+  const timed = withTimeout(signal, 60000);
   let res: Response;
   try {
     res = await fetch(`${base}/cases/${enc(caseId)}/identify`, {
@@ -521,11 +672,11 @@ async function identifyCase(
       method: "POST",
       signal: timed.signal,
       headers: { Accept: "text/event-stream", "Content-Type": "application/json" },
-      body: JSON.stringify({ prose, answers }),
+      body: JSON.stringify(withVersion({ prose, answers }, expectedVersion)),
     });
     return await readIdentifyResponse(res, onStage);
   } catch (e) {
-    if (signal?.aborted || e instanceof EngineError) throw e;
+    if (timed.canceled() || e instanceof EngineError) throw e;
     if (timed.timedOut()) throw new EngineError(0, "The engine did not answer in time.");
     throw new EngineError(0, e instanceof Error ? e.message : String(e));
   } finally {

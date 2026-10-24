@@ -14,6 +14,8 @@ const PATHS: Record<string, ReactNode> = {
   upload: <path d="M8 11V3.5M5 6.5l3-3 3 3M3 12.5h10" />,
   external: <path d="M6.5 3.5h-3v9h9v-3M9 3.5h3.5V7M12.5 3.5 7.5 8.5" />,
   retry: <><path d="M13 8a5 5 0 1 1-1.5-3.5" /><path d="M13 2.5v3h-3" /></>,
+  plus: <path d="M8 3.5v9M3.5 8h9" />,
+  info: <><circle cx="8" cy="8" r="6" /><path d="M8 7.2v3.6M8 5v.1" /></>,
 };
 
 export function CIcon({ name, size = 16 }: { name: keyof typeof PATHS; size?: number }) {
@@ -36,6 +38,16 @@ export function MoreIcon() {
 
 export function Eyebrow({ children, plain = false, as: Tag = "span", id }: { children: ReactNode; plain?: boolean; as?: "span" | "p" | "h2"; id?: string }) {
   return <Tag id={id} className={`cf-eyebrow${plain ? " is-plain" : ""}`}>{children}</Tag>;
+}
+
+/** The one standing boundary: a short chip that opens a short explanation (touch, keyboard and pointer). */
+export function CompletenessNote() {
+  return (
+    <details className="cf-complete">
+      <summary>Completeness only</summary>
+      <p>Checks administrative completeness. It never says the design complies or is safe.</p>
+    </details>
+  );
 }
 
 export function Kbd({ children }: { children: ReactNode }) {

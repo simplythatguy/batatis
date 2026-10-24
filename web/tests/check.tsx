@@ -9,4 +9,6 @@ function Probe() {
   Object.assign(window, { caseStore: useCase() });
   return <App />;
 }
-createRoot(document.getElementById("root")!).render(<StrictMode><CaseProvider><Probe /></CaseProvider></StrictMode>);
+const root = createRoot(document.getElementById("root")!);
+Object.assign(window, { unmountCase: () => root.unmount() });
+root.render(<StrictMode><CaseProvider><Probe /></CaseProvider></StrictMode>);

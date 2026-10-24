@@ -2,14 +2,16 @@
 import type { ApplicationStatus, QueueApplication } from "../../api/accounts";
 import { APPLICANT_LABEL } from "../auth/onboardingSteps";
 
-export type QueueTab = "all" | "new" | "mine" | "returned" | "accepted";
+export type QueueTab = "all" | "new" | "resubmitted" | "mine" | "returned" | "accepted" | "refused";
 
 export const TABS: { id: QueueTab; label: string }[] = [
   { id: "all", label: "All" },
   { id: "new", label: "New" },
+  { id: "resubmitted", label: "Resubmitted" },
   { id: "mine", label: "Mine" },
   { id: "returned", label: "Returned" },
   { id: "accepted", label: "Accepted" },
+  { id: "refused", label: "Refused" },
 ];
 
 export function inTab(a: QueueApplication, tab: QueueTab, me: string | null): boolean {
@@ -17,18 +19,22 @@ export function inTab(a: QueueApplication, tab: QueueTab, me: string | null): bo
     case "all":
       return true;
     case "new":
-      return a.status === "submitted" && !a.claim;
+      return a.status === "submitted" && !a.claim && (a.submission_number ?? 1) <= 1;
+    case "resubmitted":
+      return a.status === "submitted" && (a.submission_number ?? 1) > 1;
     case "mine":
-      return Boolean(me && a.claim?.reviewer_id === me) && a.status !== "accepted";
+      return Boolean(me && a.claim?.reviewer_id === me) && a.status !== "accepted" && a.status !== "refused";
     case "returned":
       return a.status === "returned";
     case "accepted":
       return a.status === "accepted";
+    case "refused":
+      return a.status === "refused";
   }
 }
 
 export function tabCounts(rows: QueueApplication[], me: string | null): Record<QueueTab, number> {
-  const out = { all: 0, new: 0, mine: 0, returned: 0, accepted: 0 } as Record<QueueTab, number>;
+  const out: Record<QueueTab, number> = { all: 0, new: 0, resubmitted: 0, mine: 0, returned: 0, accepted: 0, refused: 0 };
   for (const r of rows) for (const t of TABS) if (inTab(r, t.id, me)) out[t.id]++;
   return out;
 }
@@ -50,16 +56,19 @@ export function filterQueue(rows: QueueApplication[], tab: QueueTab, query: stri
 export type PillTone = "accent" | "warning" | "blocking" | "done" | "pending";
 
 /** Status pill: label and dot tone (New uses the accent dot, as in the v2 contract). */
-export function statusPill(status: ApplicationStatus, claimed: boolean): { label: string; tone: PillTone } {
+export function statusPill(status: ApplicationStatus, claimed: boolean, submissionNumber = 1): { label: string; tone: PillTone } {
   switch (status) {
     case "submitted":
-      return claimed ? { label: "In review", tone: "warning" } : { label: "New", tone: "accent" };
+      return submissionNumber > 1 ? { label: "Resubmitted", tone: "warning" }
+        : claimed ? { label: "Awaiting review", tone: "pending" } : { label: "New", tone: "accent" };
     case "in_review":
       return { label: "In review", tone: "warning" };
     case "returned":
       return { label: "Returned", tone: "blocking" };
     case "accepted":
       return { label: "Accepted", tone: "done" };
+    case "refused":
+      return { label: "Refused", tone: "blocking" };
     case "withdrawn":
       return { label: "Withdrawn", tone: "pending" };
     default:
@@ -74,34 +83,67 @@ export function reviewerCell(a: QueueApplication, me: string | null): { name: st
   return { name: a.claim.reviewer_name, label: mine ? "You" : a.claim.reviewer_name, mine };
 }
 
-export type RowAction = "claim" | "open" | "view";
+export type RowAction = "claim" | "resume" | "open" | "view";
 
-/** Unclaimed submitted → Start reviewing; your own in-review → Open; everything else → View. */
+/** Unclaimed submitted → Pick up; your own in-review → Open; everything else → View. */
 export function rowAction(a: QueueApplication, me: string | null): RowAction {
   if (a.status === "submitted" && !a.claim) return "claim";
+  if (a.status === "submitted" && me && a.claim?.reviewer_id === me) return "resume";
   if (a.status === "in_review" && me && a.claim?.reviewer_id === me) return "open";
   return "view";
 }
 
-/** Whether this person may return or accept right now, and the reason shown when not. */
+/** Only the claimant may decide; gaps block acceptance, not return or refusal. */
 export function decisionGate(
   a: { status: ApplicationStatus; claim: { reviewer_id: string; reviewer_name: string } | null },
   me: string | null,
   /** null while the completeness check is loading or has failed: acceptance waits for a real result. */
   blocking: number | null,
-): { canReturn: boolean; canAccept: boolean; reason: string } {
-  const no = (reason: string) => ({ canReturn: false, canAccept: false, reason });
+  professionalPending = false,
+): { canReturn: boolean; canAccept: boolean; canRefuse: boolean; reason: string } {
+  const no = (reason: string) => ({ canReturn: false, canAccept: false, canRefuse: false, reason });
   if (a.status === "accepted") return no("Accepted as administratively complete.");
+  if (a.status === "refused") return no("Administrative refusal recorded. This application is closed and read-only.");
   if (a.status === "returned") return no("Returned to the applicant. It comes back here when they resend it.");
-  if (a.status !== "in_review" || !a.claim) return no("Start reviewing to return or accept this application.");
-  if (!me || a.claim.reviewer_id !== me) return no(`${a.claim.reviewer_name} is reviewing this. Only they can return or accept it.`);
+  if (a.status !== "in_review" || !a.claim) return no("Pick up this application to record a decision.");
+  if (!me || a.claim.reviewer_id !== me) return no(`${a.claim.reviewer_name} is reviewing this. Only they can record a decision.`);
   if (blocking === null) {
-    return { canReturn: true, canAccept: false, reason: "Waiting for the completeness check before this can be accepted." };
+    return { canReturn: true, canAccept: false, canRefuse: true, reason: "Waiting for the completeness check before this can be accepted." };
   }
   if (blocking > 0) {
-    return { canReturn: true, canAccept: false, reason: `${blocking} required ${blocking === 1 ? "item is" : "items are"} missing, so it can only be returned.` };
+    if (professionalPending) {
+      const remaining = blocking - 1;
+      return { canReturn: true, canAccept: false, canRefuse: true, reason: remaining === 0
+        ? "Record the professional determination below before accepting as complete."
+        : `Record the professional determination below. Return the application for the remaining ${remaining} required ${remaining === 1 ? "item" : "items"}.` };
+    }
+    return { canReturn: true, canAccept: false, canRefuse: true, reason: `${blocking} required ${blocking === 1 ? "item is" : "items are"} missing. Request more information or record a refusal.` };
   }
-  return { canReturn: true, canAccept: true, reason: "" };
+  return { canReturn: true, canAccept: true, canRefuse: true, reason: "" };
+}
+
+export type PackageState =
+  | { state: "loading" }
+  | { state: "unavailable" }
+  | { state: "failed" }
+  | { state: "none" }
+  | { state: "stale"; version: number }
+  | { state: "current"; blocking: number };
+
+/**
+ * The accept gate with the package review: acceptance also waits for a package review of the
+ * current application and never passes with its blocking gaps open. When the package review
+ * can't run on this server, the completeness check alone decides (as before).
+ */
+export function withPackage(gate: ReturnType<typeof decisionGate>, pkg: PackageState): ReturnType<typeof decisionGate> {
+  if (!gate.canAccept || pkg.state === "unavailable") return gate;
+  const no = (reason: string) => ({ ...gate, canAccept: false, reason });
+  if (pkg.state === "loading") return no("Waiting for the package review before this can be accepted.");
+  if (pkg.state === "failed") return no("The package review didn’t load. Try again before accepting.");
+  if (pkg.state === "none") return no("Run the package review before accepting.");
+  if (pkg.state === "stale") return no(`The application changed after review version ${pkg.version}. Run the review again before accepting.`);
+  if (pkg.blocking > 0) return no(`The package review has ${pkg.blocking} required ${pkg.blocking === 1 ? "item" : "items"} open, so it can't be accepted yet.`);
+  return gate;
 }
 
 /* —— Times —— */

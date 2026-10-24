@@ -18,17 +18,40 @@ from pydantic.json_schema import GenerateJsonSchema, models_json_schema
 from .api import NewCase, SectionCRequest
 from .code_library import CodeTOC, ProvisionContext
 from .models import Case, Fact, SectionCRow
-from .account_models import UserResult, MessagesResult
+from .account_models import ApplicationPreferences, ApplicationPreferencesPatch, UserResult, MessagesResult
 from .routes_auth import SignupRequest, LoginRequest, OnboardingRequest
 from .routes_review import (NotificationsResult, ApplicationsResult, QueueResult, ClaimResult, ClaimRequest,
-                            DecisionRequest, MessageRequest)
+                            DecisionRequest, MessageRequest, MessageReadRequest, ProfessionalRequirementRequest,
+                            SubmitRequest)
 from .routes_assist import AssistRequest, AssistResult
+from .routes_voice import VoiceCapability
+from .voice import VoiceStart, VoiceCommand
+from .voice_context import VoiceScope
+from .routes_intake import AnswersRequest, IntakeRequest, IntakeResult, PlanRequest, ScopeRequest
+from .identify.http_models import (BenchmarkConfirmRequest, IdentifyConfirmRequest, IdentifyDecisionRequest,
+                                   IdentifyDecisionResponse, IdentifyRequest)
+from .models_review import InformationRequestEdit, PackageReviewIndex, ReviewSession, SentInformationRequests
+from .models_jurisdictions import JurisdictionDetail, JurisdictionsResult
+from .routes_jurisdictions import CaseJurisdictionPack
+from .routes_case import SelectedArticlesRequest, TitleRequest
+from .rules.models import CaseRules, RuleSet
+from .models_checklists import (CaseChecklists, ChecklistAnswerRequest, ChecklistAnswerResult,
+                                JurisdictionChecklists)
 
 OUT = Path(__file__).resolve().parent.parent / 'web' / 'src' / 'api' / 'engine.schema.json'
 RESPONSES = (Case, SectionCRow, CodeTOC, ProvisionContext, UserResult, MessagesResult, ApplicationsResult,
-             QueueResult, ClaimResult, AssistResult, NotificationsResult)  # responses carry every field
+             QueueResult, ClaimResult, AssistResult, NotificationsResult, IdentifyDecisionResponse,
+             ReviewSession, PackageReviewIndex, SentInformationRequests,
+             JurisdictionsResult, JurisdictionDetail, CaseJurisdictionPack, IntakeResult, CaseRules, RuleSet,
+             JurisdictionChecklists, CaseChecklists, ChecklistAnswerResult,
+             ApplicationPreferences, VoiceCapability)  # responses carry every field
 REQUESTS = (Fact, NewCase, SectionCRequest, SignupRequest, LoginRequest, OnboardingRequest,
-            ClaimRequest, DecisionRequest, MessageRequest, AssistRequest)  # defaulted fields optional
+            ClaimRequest, DecisionRequest, MessageRequest, MessageReadRequest, ProfessionalRequirementRequest,
+            SubmitRequest, AssistRequest, InformationRequestEdit,
+            IntakeRequest, AnswersRequest, ScopeRequest, PlanRequest,
+            IdentifyRequest, IdentifyDecisionRequest, IdentifyConfirmRequest, BenchmarkConfirmRequest,
+            ChecklistAnswerRequest, TitleRequest, SelectedArticlesRequest, ApplicationPreferencesPatch,
+            VoiceStart, VoiceCommand, VoiceScope)  # defaulted fields optional
 
 
 class _ResponsesCarryDefaults(GenerateJsonSchema):

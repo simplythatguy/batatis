@@ -52,8 +52,12 @@ def test_per_ip_rate_limit(monkeypatch):
     assert authorize(max_input_tokens=1, max_output_tokens=1, client_ip='203.0.113.2').allowed
 
 
-def test_unused_model_price_is_not_listed():
-    assert set(PRICES) == {'gpt-4.1-mini', 'gpt-4.1'}
+def test_only_pinned_models_are_priced():
+    # Aliases for the assistant and completeness, plus identify's exact pins. Never a Haiku model.
+    assert set(PRICES) == {'gpt-4.1-mini', 'gpt-4.1', 'gpt-4.1-mini-2025-04-14', 'gpt-4.1-2025-04-14',
+                           'claude-sonnet-5-5', 'claude-opus-5-5', 'jev-1.13.0', 'gpt-6-luna',
+                           'baseten/elephant-1:free'}
+    assert not any('haiku' in model for model in PRICES)
 
 
 def test_client_ip_prefers_vercel_then_forwarded_then_peer():

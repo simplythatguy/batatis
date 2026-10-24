@@ -1,7 +1,9 @@
-/** The reviewer's queue and per-case blocking counts, shared by the queue table and the review page. */
+/** Account-scoped queue reads, shared by queue/detail and the existing notification poll. */
 import { useSyncExternalStore } from "react";
-import { review, type QueueApplication } from "../../api/accounts";
+import { QueueSessionChanged, review, type QueueApplication } from "../../api/accounts";
 import { engine, EngineError } from "../../api/client";
+import { accountSession, getAccountState, setAccountState, subscribeAccount } from "../account";
+import { getNotificationsState, subscribeNotifications } from "../notifications/notifications";
 
 export interface QueueState {
   phase: "idle" | "loading" | "ready" | "error";
@@ -11,54 +13,109 @@ export interface QueueState {
   blocking: Record<string, number>;
 }
 
-let state: QueueState = { phase: "idle", rows: [], error: "", blocking: {} };
+const empty = (): QueueState => ({ phase: "idle", rows: [], error: "", blocking: {} });
+let state = empty();
 const listeners = new Set<() => void>();
 const set = (next: Partial<QueueState>) => {
   state = { ...state, ...next };
   for (const l of listeners) l();
 };
 
+let owner = accountSession();
+let generation = 0;
+let controller: AbortController | null = null;
 let inflight: Promise<void> | null = null;
+let patches = new Map<string, Partial<QueueApplication>>();
+let seen = new Set<string>();
+const asked = new Map<string, string>();
+const reviewer = () => {
+  const { phase, user } = getAccountState();
+  return phase === "signed-in" && user?.role === "reviewer" && Boolean(user.authority);
+};
 
-export function loadQueue(): Promise<void> {
-  if (inflight) return inflight;
+subscribeAccount(() => {
+  if (owner === accountSession()) return;
+  owner = accountSession();
+  generation++;
+  controller?.abort();
+  controller = null;
+  inflight = null;
+  patches = new Map();
+  asked.clear();
+  seen.clear();
+  state = empty();
+  for (const l of listeners) l();
+});
+
+subscribeNotifications(() => {
+  const notes = getNotificationsState();
+  if (!reviewer() || notes.phase !== "ready") return;
+  const keys = notes.items.map(n => JSON.stringify([n.id, n.created_at, n.status]));
+  const fresh = keys.some(key => !seen.has(key));
+  seen = new Set(keys);
+  // Read markers are not queue events. No second polling timer.
+  if (fresh && listeners.size) void loadQueue(true);
+});
+
+export function loadQueue(refresh = false): Promise<void> {
+  if (!reviewer()) return Promise.resolve();
+  if (inflight && !refresh) return inflight;
+  controller?.abort();
+  const ctl = new AbortController(), token = ++generation, session = accountSession();
+  const overlay = new Map<string, Partial<QueueApplication>>();
+  patches = overlay;
+  controller = ctl;
+  const current = () => token === generation && session === accountSession() && reviewer();
   if (state.phase !== "ready") set({ phase: "loading", error: "" });
-  inflight = review
-    .queue()
-    .then((rows) => {
-      set({ phase: "ready", rows, error: "" });
-      void fillBlocking(rows.map((r) => r.id));
+  const user = getAccountState().user!;
+  const request = review.queue(ctl.signal, { id: user.id, authority: user.authority })
+    .then(rows => {
+      if (!current()) return;
+      const fresh = rows.map(row => ({ ...row, ...overlay.get(row.id) }));
+      const ids = new Set(fresh.map(row => row.id));
+      set({ phase: "ready", rows: fresh, error: "", blocking: Object.fromEntries(Object.entries(state.blocking).filter(([id]) => ids.has(id))) });
+      void fillBlocking(fresh, ctl.signal, current);
     })
-    .catch((e) => set({ phase: state.rows.length ? "ready" : "error", error: e instanceof EngineError ? e.detail : "The queue didn’t load." }))
-    .finally(() => {
-      inflight = null;
-    });
-  return inflight;
+    .catch(e => {
+      if (!current()) return;
+      if (e instanceof EngineError && e.status === 401) {
+        setAccountState({ phase: "signed-out", user: null });
+        return;
+      }
+      if (e instanceof QueueSessionChanged) {
+        asked.clear();
+        set({ phase: "error", rows: [], blocking: {}, error: e.detail });
+        return;
+      }
+      set({ phase: state.rows.length ? "ready" : "error", error: e instanceof EngineError ? e.detail : "The queue didn’t load." });
+    })
+    .finally(() => { if (inflight === request) inflight = null; });
+  inflight = request;
+  return request;
 }
 
-/** Replace one row after a claim, release or decision, before the next refresh. */
-export function patchRow(id: string, patch: Partial<QueueApplication>) {
-  set({ rows: state.rows.map((r) => (r.id === id ? { ...r, ...patch } : r)) });
+/** Pending queue responses overlay acknowledged actions, so they cannot undo a claim. */
+export function patchRow(id: string, patch: Partial<QueueApplication>, session = accountSession()) {
+  if (session !== accountSession() || !reviewer()) return;
+  patches.set(id, { ...patches.get(id), ...patch });
+  set({ rows: state.rows.map(r => r.id === id ? { ...r, ...patch } : r) });
 }
 
 export function setBlocking(id: string, n: number) {
-  set({ blocking: { ...state.blocking, [id]: n } });
+  if (reviewer()) set({ blocking: { ...state.blocking, [id]: n } });
 }
 
-const asked = new Set<string>();
-
-/** Gap checks for rows without a count, three at a time (each runs the completeness checker). */
-async function fillBlocking(ids: string[]) {
-  const todo = ids.filter((id) => !asked.has(id));
-  todo.forEach((id) => asked.add(id));
+/** Re-check changed submissions/content, three reads at a time, within the same session. */
+async function fillBlocking(rows: QueueApplication[], signal: AbortSignal, current: () => boolean) {
+  const todo = rows.filter(row => asked.get(row.id) !== row.updated_at);
   const worker = async () => {
-    for (let id = todo.shift(); id; id = todo.shift()) {
+    for (let row = todo.shift(); row && current(); row = todo.shift()) {
       try {
-        const gaps = await engine.gaps(id);
-        setBlocking(id, gaps.filter((g) => g.severity === "blocking").length);
-      } catch {
-        asked.delete(id);
-      }
+        const gaps = await engine.gaps(row.id, signal);
+        if (!current()) return;
+        asked.set(row.id, row.updated_at);
+        setBlocking(row.id, gaps.filter(g => g.severity === "blocking").length);
+      } catch { /* A later notification or manual refresh can retry. */ }
     }
   };
   await Promise.all([worker(), worker(), worker()]);
@@ -70,5 +127,7 @@ function subscribe(l: () => void) {
 }
 
 export function useQueue(): QueueState {
-  return useSyncExternalStore(subscribe, () => state, () => state);
+  return useSyncExternalStore(subscribe, getQueueState, getQueueState);
 }
+
+export const getQueueState = () => state;

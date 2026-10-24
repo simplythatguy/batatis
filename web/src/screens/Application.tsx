@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { EngineError, ExportBlockedError, engine } from "../api/client";
+import { engineGeneration } from "../api/sync";
 import { DetailFields, ProcessFields } from "../case-parts";
 import { MissingItems } from "../completenessView";
 import { DraftNote, GapStrip, Notices, PanelHeader } from "../components";
@@ -7,6 +8,10 @@ import { displayValue, factLabel, plainFactStatus } from "../model";
 import { UNSIGNED_LINE, pdfOutcomeLine, professionalRouteNote, textRecord } from "../humanReview";
 import type { Route } from "../router";
 import { useCase } from "../store";
+import { useCurrentApplication } from "../calm/begin";
+import { accountSession } from "../calm/account";
+import { caseFromEngine } from "../calm/openCase";
+import { savedReviewRecord } from "../reviewRecord";
 import type { Gap } from "../types";
 import { Recommendations } from "./Recommendations";
 
@@ -24,8 +29,13 @@ type Stage = "idle" | "checking" | "preparing" | "blocked" | "error" | "ready";
  * `isActive` tells a finished check whether anyone is still waiting for its result.
  */
 export function useApplicationExport(isActive: () => boolean = () => true) {
-  const { gaps, saveDraft, c, gapsSource, syncOk, reviewDetail, readSync, readGaps, setCompletenessRecord, requestCheck, checkStatus, checkedAt } = useCase();
+  const { gaps, saveDraft, engineId, c, gapsSource, syncOk, reviewDetail, readSync, readGaps, setCompletenessRecord, requestCheck, checkStatus, checkedAt } = useCase();
+  const { locked } = useCurrentApplication();
+  const generation = engineGeneration();
   const abortRef = useRef<AbortController | null>(null);
+  const recordAbortRef = useRef<AbortController | null>(null);
+  const [recordBusy, setRecordBusy] = useState(false);
+  const [recordNote, setRecordNote] = useState("");
   const [stage, setStage] = useState<Stage>("idle");
   const [draftIntent, setDraftIntent] = useState(false);
   const [reasons, setReasons] = useState<string[]>([]);
@@ -54,9 +64,9 @@ export function useApplicationExport(isActive: () => boolean = () => true) {
     setExportAttempted(false);
     forgetFile();
     setStage("checking");
-    setStatusText(`Saving ${subject}…`);
+    setStatusText(locked ? "Checking the saved application…" : `Saving ${subject}…`);
     void requestCheck(checkStatus === "unavailable").then((id) => {
-      if (!isActive()) return;
+      if (!isActive() || engineGeneration() !== generation) return;
       const sync = readSync();
       const blockers = readGaps().filter((gap) => gap.severity === "blocking");
       if (!id || !sync.reviewed) {
@@ -112,13 +122,16 @@ export function useApplicationExport(isActive: () => boolean = () => true) {
     const ctl = new AbortController();
     abortRef.current = ctl;
     setStage("checking");
-    setStatusText(`Saving ${subject}…`);
-    const caseId = await saveDraft();
+    setStatusText(locked ? "Checking the saved application…" : `Saving ${subject}…`);
+    // Locked PDFs are generated from the saved record. Official export refreshes the
+    // read-only server check; drafts need no save or completeness preflight.
+    const caseId = locked ? draft ? engineId : await requestCheck(true) : await saveDraft();
     if (ctl.signal.aborted) return;
-    if (!caseId || !readSync().saved || (!draft && (!readSync().reviewed || readGaps().some(g => g.severity === "blocking")))) {
-      setStage("error");
+    if (!caseId || (!locked && !readSync().saved) || (!draft && (!readSync().reviewed || readGaps().some(g => g.severity === "blocking")))) {
+      const blocked = Boolean(caseId && readSync().reviewed && readGaps().some(g => g.severity === "blocking"));
+      setStage(blocked ? "blocked" : "error");
       setTech(readSync().detail || reviewDetail);
-      setStatusText("Save not confirmed. Keep this page open.");
+      setStatusText(locked ? blocked ? "The saved application has required administrative items. Review them before official export." : "The saved application could not be checked. Try the check again." : "Save not confirmed. Keep this page open.");
       return;
     }
     setStage("preparing");
@@ -167,7 +180,30 @@ export function useApplicationExport(isActive: () => boolean = () => true) {
     }
   }
 
-  function downloadRecord() {
+  async function downloadRecord() {
+    if (recordBusy) return;
+    const ctl = new AbortController(), session = accountSession();
+    recordAbortRef.current?.abort();
+    recordAbortRef.current = ctl;
+    const current = () => !ctl.signal.aborted && engineGeneration() === generation && accountSession() === session;
+    let source = c, reviewRecord = "";
+    if (locked) {
+      if (!engineId) { setRecordNote("Reopen the saved application before downloading its review record."); return; }
+      setRecordBusy(true);
+      setRecordNote("Reading the saved application and review history…");
+      try {
+        const saved = await engine.getCase(engineId, ctl.signal);
+        if (!current()) return;
+        source = caseFromEngine(saved, c.applicantType);
+        reviewRecord = savedReviewRecord(saved);
+      } catch (e) {
+        if (current()) setRecordNote(e instanceof EngineError ? `Review record not downloaded. ${e.detail}` : "The review record did not load. Try again before downloading.");
+        return;
+      } finally {
+        if (current()) setRecordBusy(false);
+      }
+    }
+    if (!current()) return;
     const exportReasons = reasons.length ? reasons : statusText.trim() ? [statusText.trim()] : [];
     const pdfLines = pdfOutcomeLine({
       example: Boolean(c.exampleId),
@@ -178,15 +214,15 @@ export function useApplicationExport(isActive: () => boolean = () => true) {
     });
     const text = textRecord({
       exampleLabel: c.exampleId ? exampleLabel : undefined,
-      title: c.title,
-      description: c.description,
-      factLines: c.facts.map((f) => `${factLabel(f.field)}: ${displayValue(f)} (${plainFactStatus(f.kind, f.status)})`),
+      title: source.title,
+      description: source.description,
+      factLines: source.facts.map((f) => `${factLabel(f.field)}: ${displayValue(f)} (${plainFactStatus(f.kind, f.status)})`),
       blockingCount: blocking.length,
       warningCount: warnings,
       checkedAt,
       pdfLines,
     });
-    const blob = new Blob([text], { type: "text/plain" });
+    const blob = new Blob([text, reviewRecord ? `\n\n${reviewRecord}\n` : ""], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const name = `${c.exampleId ? "EXAMPLE-" : ""}${c.id}-text-record.txt`;
     const a = Object.assign(document.createElement("a"), { href: url, download: name });
@@ -195,6 +231,7 @@ export function useApplicationExport(isActive: () => boolean = () => true) {
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 0);
     const line = `Download started: ${name}. A text record is not the Safety Codes Council form.`;
+    setRecordNote(locked ? `${line} Includes the saved decision, officer, date, status history and messages. Keep your original attachments separately.` : line);
     setStatusText((current) => (stage === "blocked" || stage === "error" ? `${current} ${line}` : line));
   }
 
@@ -214,10 +251,21 @@ export function useApplicationExport(isActive: () => boolean = () => true) {
     setStage("idle");
     setExportAttempted(false);
   }, [checkStatus]);
-  useEffect(() => () => abortRef.current?.abort(), []);
+  useEffect(() => () => { abortRef.current?.abort(); recordAbortRef.current?.abort(); }, []);
+  useEffect(() => {
+    abortRef.current?.abort();
+    recordAbortRef.current?.abort();
+    setRecordBusy(false);
+    setRecordNote("");
+    forgetFile();
+    setStage("idle");
+    setExportAttempted(false);
+    setReasons([]);
+    setTech("");
+  }, [generation]);
 
   return {
-    stage, draftIntent, reasons, tech, statusText, file, exportAttempted, busy,
+    stage, draftIntent, reasons, tech, statusText, file, exportAttempted, busy, recordBusy, recordNote,
     blocking, warnings, blank, officialReady,
     runCheck, prepare, downloadRecord, downloadAgain,
     cancel: () => abortRef.current?.abort(),

@@ -14,10 +14,12 @@ from pathlib import Path
 from codedb import validate_text
 
 from .codes import Codes
+from .jurisdictions import notices_for
 from .models import INTENT_LABEL, Case, Gap as CaseGap
+from .not_applicable import not_applicable, problems as not_applicable_problems
 from .process_fields import confirmed_value, latest_fact, process_fields
 from .professional import (
-    NOT_ENGAGED_ITEM, OFFICER_PROFESSIONAL_GAP, PRESCRIPTIVE_CONTRADICTION, ProfessionalResult,
+    OFFICER_PROFESSIONAL_GAP, PRESCRIPTIVE_CONTRADICTION, ProfessionalResult,
     authentication_metadata_usable, professional_authentication_confirmed, professional_confirmed,
     professional_involvement, unresolved_item,
 )
@@ -91,15 +93,8 @@ def professional_involvement_gaps(case: Case, codes: Codes, process, *,
                 id=f'professional:source_lookup:{reason.code}', severity='blocking', section='D',
                 field='professional_source', message=reason.message, fix_hint=reason.message,
                 citation=None, routed_to='officer'))
-    # An honest "no professional engaged yet" does not invent a number. The blocking
-    # name, qualifications, and seal gaps become one officer-routed warning.
-    if professional.professional_status == 'not_engaged' and not professional_confirmed(case):
-        gaps.append(Gap(
-            id='professional:not_engaged', severity='warning', section='D',
-            field='professional_requirement', message=NOT_ENGAGED_ITEM,
-            fix_hint='The officer decides whether a registered professional is required. No registration number has been entered.',
-            citation=None, routed_to='officer'))
-        return gaps
+    # Engagement is not a requirement determination. In particular, not_engaged
+    # must never bypass a mandatory duty or let an officer accept an unresolved question.
     required = professional.required == 'yes' or confirmed_value(case, 'engineering_required') in ('yes', True)
     if required:
         citation = next((r.citation for r in professional.reasons if r.required == 'yes'), codes.citation('2.4.1.1.(3)', 'C'))
@@ -125,13 +120,15 @@ def professional_involvement_gaps(case: Case, codes: Codes, process, *,
                 codes.citation('2.4.1.1.(5)', 'C'))
     elif professional.involvement == 'professional_involved':
         pass
+    elif professional.resolution is not None and not professional.resolution.required:
+        pass
     elif professional.applicant_sourced or professional.not_sure_fields:
         gaps.append(Gap(
             id='professional:professional_requirement', severity='blocking', section='D',
             field='professional_requirement', message=OFFICER_PROFESSIONAL_GAP,
             fix_hint='The officer decides whether a registered professional is required. An applicant yes or no does not close this.',
             citation=next((r.citation for r in professional.reasons if r.required == 'depends'), None),
-            routed_to='officer'))
+            routed_to='officer', submission_blocking=False))
     elif professional.required == 'depends' or professional.involvement == 'unresolved':
         line = next((reason.message for reason in professional.reasons if reason.required == 'depends'), '')
         if not line:
@@ -143,7 +140,7 @@ def professional_involvement_gaps(case: Case, codes: Codes, process, *,
             message=line,
             fix_hint=line,
             citation=next((r.citation for r in professional.reasons if r.required == 'depends'), None),
-            routed_to=professional.routed_to))
+            routed_to=professional.routed_to, submission_blocking=professional.routed_to != 'officer'))
     return gaps
 
 
@@ -172,7 +169,10 @@ def check_completeness(case: Case, codes: Codes, *,
         gaps.append(Gap(id=f'{rule}:{field}', severity=severity, section=section, field=field,
                         message=f'Your application appears to be missing {missing}', fix_hint=fix_hint, citation=citation))
 
+    na = not_applicable(case)
     for rule, section, field, label, aliases in _CORE:
+        if field == 'representative' and 'owner_rep_name' in na:
+            continue    # the applicant confirmed there is no representative; the form shows N/A
         fact = latest_fact(case, *aliases)
         value = confirmed_value(case, *aliases)
         if field == 'legal_description' and fact is None:
@@ -201,6 +201,10 @@ def check_completeness(case: Case, codes: Codes, *,
     ):
         if (latest_fact(case, *signatures, *dates) is not None) and _missing(confirmed_value(case, *dates)):
             add('D02', 'A', name, f'the {name.replace("_", " ")}.', 'Ask the signatory to supply the signature date.')
+    for field, missing, hint in not_applicable_problems(case):
+        section = next((sec for token, sec in (('section_c', 'C'), ('section_d', 'D'), ('owner', 'A'),
+                                                ('representative', 'A')) if token in field), 'B')
+        add('not_applicable', section, field, missing, hint)
     if (case.jurisdiction is None or not case.jurisdiction.id.strip()
             or not case.jurisdiction.name.strip()):
         add('admin', 'B', 'jurisdiction', 'the reviewing jurisdiction.', 'Ask which authority will receive the application.')
@@ -327,4 +331,8 @@ def check_completeness(case: Case, codes: Codes, *,
                 add('evidence', 'D', f'evidence.{item.id}', f'supporting evidence for {item.provision_id}, {item.function}–{item.objective}.',
                     item.performance_issue + ' Select appropriate evidence types with the responsible designer; not every ladder rung is required.',
                     item.citation)
+    # Information from the case's jurisdiction pack (for example a local form). Severity info never blocks.
+    for notice in notices_for(case, 'gaps'):
+        gaps.append(Gap(id=f'info:{notice.id}', severity='info', section=notice.section, field=notice.id,
+                        message=notice.message, fix_hint=notice.fix_hint))
     return gaps

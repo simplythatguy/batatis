@@ -6,6 +6,7 @@ const actor = { name: "Dana Ross", role: "reviewer" as const };
 
 test("notification text reads naturally for status events and messages", () => {
   assert.equal(notificationText({ kind: "status", status: "returned", actor, case_title: "Hempcrete walls", summary: "" }), "Dana Ross returned Hempcrete walls");
+  assert.equal(notificationText({ kind: "status", status: "refused", actor, case_title: "Hempcrete walls", summary: "" }), "Dana Ross recorded an administrative refusal for Hempcrete walls");
   assert.equal(notificationText({ kind: "status", status: "in_review", actor, case_title: "Hempcrete walls", summary: "x" }), "Dana Ross started reviewing Hempcrete walls");
   assert.equal(
     notificationText({ kind: "status", status: "accepted", actor, case_title: "Rooftop deck", summary: "Dana Ross accepted as administratively complete Rooftop deck" }),
@@ -14,13 +15,19 @@ test("notification text reads naturally for status events and messages", () => {
   assert.equal(notificationText({ kind: "message", status: null, actor, case_title: "Hempcrete walls", summary: "Dana Ross sent a message" }), "Dana Ross sent a message");
   assert.equal(notificationText({ kind: "message", status: null, actor: null, case_title: null, summary: "" }), "Someone sent a message about your application");
   assert.equal(notificationText({ kind: "status", status: "submitted", actor: { name: "Mira Kaur", role: "applicant" }, case_title: "A", summary: "" }), "Mira Kaur sent A");
+  assert.equal(notificationText({ kind: "status", status: "submitted", submission_number: 2, actor: { name: "Mira Kaur", role: "applicant" }, case_title: "A", summary: "Mira Kaur resubmitted A" }), "Mira Kaur resubmitted A");
   assert.equal(notificationText({ kind: "status", status: "submitted", actor, case_title: "A", summary: "" }), "Dana Ross stopped reviewing A");
   assert.equal(notificationText({ kind: "status", status: "something_new", actor, case_title: "A", summary: "" }), "Dana Ross updated A");
 });
 
 test("rows lead to the review page for reviewers and the application for applicants", () => {
   assert.equal(notificationHref({ case_id: "case_1" }, "reviewer"), "#/review/case_1");
-  assert.equal(notificationHref({ case_id: "case_1" }, "applicant"), "#/application?case=case_1");
+  assert.equal(notificationHref({ case_id: "case_1" }, "applicant"), "#/comments?case=case_1");
+});
+
+test("refusal notifications say refused and open the recorded decision", () => {
+  assert.equal(notificationText({ kind: "status", status: "refused", actor, case_title: "Hempcrete walls", summary: "" }), "Dana Ross recorded an administrative refusal for Hempcrete walls");
+  assert.equal(notificationHref({ case_id: "refused-case" }, "applicant"), "#/comments?case=refused-case");
 });
 
 test("duplicate ids still get unique keys; newest first", () => {

@@ -4,7 +4,7 @@
  */
 import { useSyncExternalStore } from "react";
 import { notAvailable, notifications as api, type AppNotification, type Role } from "../../api/accounts";
-import { setAccountState } from "../account";
+import { accountSession, getAccountState, setAccountState, subscribeAccount } from "../account";
 
 export type NotificationsPhase = "idle" | "loading" | "ready" | "unavailable" | "error";
 
@@ -24,15 +24,29 @@ const set = (next: Partial<NotificationsState>) => {
 };
 
 let inflight: Promise<void> | null = null;
+let owner = accountSession();
+let generation = 0;
+let controller: AbortController | null = null;
+let receiptController: AbortController | null = null;
+
+subscribeAccount(() => {
+  if (owner !== accountSession()) resetNotifications();
+});
 
 export function loadNotifications(): Promise<void> {
+  if (getAccountState().phase !== "signed-in") return Promise.resolve();
   if (state.phase === "unavailable") return Promise.resolve();
   if (inflight) return inflight;
+  const token = generation, session = accountSession();
+  const ctl = new AbortController();
+  controller = ctl;
+  const current = () => token === generation && session === accountSession();
   if (state.phase === "idle") set({ phase: "loading" });
-  inflight = api
-    .list()
-    .then((r) => set({ phase: "ready", items: sortNewest(r.notifications), unread: r.unread }))
+  const request = api
+    .list(ctl.signal)
+    .then((r) => { if (current()) set({ phase: "ready", items: sortNewest(r.notifications), unread: r.unread }); })
     .catch((e) => {
+      if (!current()) return;
       const status = (e as { status?: number }).status;
       // The session ended: drop what the previous person could see and let the gate ask to sign in.
       if (status === 401) {
@@ -43,23 +57,35 @@ export function loadNotifications(): Promise<void> {
       set(notAvailable(e) && status !== 0 ? { phase: "unavailable", items: [], unread: 0 } : { phase: state.items.length ? "ready" : "error" });
     })
     .finally(() => {
-      inflight = null;
+      if (inflight === request) inflight = null;
+      if (controller === ctl) controller = null;
     });
-  return inflight;
+  inflight = request;
+  return request;
 }
 
 /** Opening the panel marks everything read on the server; the rows that were new stay marked for this view. */
 export async function openedPanel(): Promise<void> {
+  const token = generation, session = accountSession();
+  const current = () => token === generation && session === accountSession();
   await loadNotifications();
-  if (state.phase !== "ready") return;
+  if (!current() || state.phase !== "ready") return;
   const fresh = state.items.filter((n) => !n.read).map((n) => n.id);
   set({ fresh });
   if (!state.unread && !fresh.length) return;
+  const ids = new Set(state.items.map(n => n.id));
+  const ctl = new AbortController();
+  receiptController?.abort();
+  receiptController = ctl;
   try {
-    await api.markAllRead();
-    set({ unread: 0, items: state.items.map((n) => ({ ...n, read: true })) });
+    await api.markAllRead(ctl.signal);
+    if (!current()) return;
+    const items = state.items.map(n => ids.has(n.id) ? { ...n, read: true } : n);
+    set({ unread: items.filter(n => !n.read).length, items });
   } catch {
     /* the dot stays; the next poll tries again */
+  } finally {
+    if (receiptController === ctl) receiptController = null;
   }
 }
 
@@ -85,18 +111,27 @@ export function startPolling(ms = 60_000): () => void {
 }
 
 export function resetNotifications() {
+  owner = accountSession();
+  generation++;
+  controller?.abort();
+  controller = null;
+  receiptController?.abort();
+  receiptController = null;
+  inflight = null;
   state = { phase: "idle", items: [], unread: 0, fresh: [] };
   for (const l of listeners) l();
 }
 
-function subscribe(l: () => void) {
+export function subscribeNotifications(l: () => void) {
   listeners.add(l);
   return () => listeners.delete(l);
 }
 
 export function useNotifications(): NotificationsState {
-  return useSyncExternalStore(subscribe, () => state, () => state);
+  return useSyncExternalStore(subscribeNotifications, getNotificationsState, getNotificationsState);
 }
+
+export const getNotificationsState = () => state;
 
 /* —— Pure helpers —— */
 
@@ -110,6 +145,7 @@ const VERB: Record<string, string> = {
   in_review: "started reviewing",
   returned: "returned",
   accepted: "accepted",
+  refused: "recorded an administrative refusal for",
   withdrawn: "withdrew",
 };
 
@@ -118,12 +154,13 @@ const VERB: Record<string, string> = {
  * Status events with a known status are worded here so the order reads naturally; anything
  * else uses the server's summary, then a generic fallback.
  */
-export function notificationText(n: Pick<AppNotification, "summary" | "kind" | "status" | "actor" | "case_title">): string {
+export function notificationText(n: Pick<AppNotification, "summary" | "kind" | "status" | "actor" | "case_title" | "submission_number">): string {
   const who = n.actor?.name?.trim();
   const title = n.case_title?.trim();
   if (n.kind === "status" && who && title && n.status && VERB[n.status]) {
     // A reviewer moving an application back to "submitted" released their claim; they did not send it.
     if (n.status === "submitted" && n.actor?.role === "reviewer") return `${who} stopped reviewing ${title}`;
+    if (n.status === "submitted" && (n.submission_number ?? 0) > 1) return `${who} resubmitted ${title}`;
     if (n.status === "accepted") return `${who} accepted ${title} as administratively complete`;
     return `${who} ${VERB[n.status]} ${title}`;
   }
@@ -142,10 +179,10 @@ export function rowKeys(items: Pick<AppNotification, "id">[]): string[] {
   });
 }
 
-/** Where a row leads: the review page for reviewers, the application for applicants. */
+/** Where a row leads: the review page for reviewers; for applicants, that application's comments. */
 export function notificationHref(n: Pick<AppNotification, "case_id">, role: Role | null | undefined): string {
   const id = encodeURIComponent(n.case_id);
-  return role === "reviewer" ? `#/review/${id}` : `#/application?case=${id}`;
+  return role === "reviewer" ? `#/review/${id}` : `#/comments?case=${id}`;
 }
 
 /** "now", "5 min", "3 h", "Yesterday", "Oct 19". */

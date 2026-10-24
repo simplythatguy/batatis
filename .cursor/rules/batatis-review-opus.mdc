@@ -1,12 +1,8 @@
 ---
-description: All quality reviews of Batatis agent outputs must use Claude Opus 5.5
+description: Batatis independent reviews use the current Sol-only model profile.
 alwaysApply: true
 ---
 
-# Review model pin
+# Review model
 
-When reviewing battle-test answers, skill quality, PRs, or agent understanding of the Building Codes Challenge:
-
-- Use **Claude Opus 5.5** at the **highest available** tier (`claude-opus-5-5-max`, else `xhigh`, else `high`).
-- Record the reviewer model slug in the review artifact.
-- Do not accept a pass verdict from a non-Opus reviewer for env battle tests.
+Use **GPT-6.1-Sol at max** for quality reviews, battle-test answers, skills, PRs and domain understanding (user decision 2026-10-23). Record the actual model and exact reviewed revision. A substantive implementation needs a fresh independent reviewer; self-review is not its substitute. Follow the shared model map in `.cursor/rules/pstack-models.mdc`.

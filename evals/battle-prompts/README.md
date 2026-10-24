@@ -5,14 +5,14 @@ Prompts for proving the cloneable agent env. Run with repo context only (AGENTS.
 Pass bar (documented in store `docs/battle-test-report.md`):
 
 1. Automated checklist score ≥ 80% of hard constraints for that prompt.
-2. **Opus 5.5** reviewer (`claude-opus-5-5-max` or `xhigh`) overall ≥ **4.0 / 5** with **no material gaps** (wrong completeness/correctness, fabricated citations encouraged, Section D as engineer, skipped risk on alt path, wrong UI model).
+2. A fresh independent reviewer using the current role map in `.cursor/rules/pstack-models.mdc` (**GPT-6.1-Sol at max**) scores overall ≥ **4.0 / 5** with **no material gaps** (wrong completeness/correctness, fabricated citations encouraged, Section D as engineer, skipped risk on alt path, wrong UI model).
 3. Fail → fix skills/rules → re-run until pass.
 
 | ID | File | Category |
 | --- | --- | --- |
 | BT01–BT05 | `01-problem-understanding.md` | Problem understanding |
 | BT06–BT10 | `02-variance-workflow.md` | Variance workflow |
-| BT11–BT14 | `03-ui-constraints.md` | UI / Opus pin |
+| BT11–BT14 | `03-ui-constraints.md` | UI / current model policy |
 | BT15–BT18 | `04-nbc-ae-fork.md` | NBC(AE) fork |
 | BT19–BT22 | `05-evidence-ladder.md` | Evidence ladder |
 | BT23–BT26 | `06-section-c-d.md` | Section C vs D |

@@ -1,0 +1,198 @@
+# Code identification API (`/cases/{id}/identify`)
+
+Code identification ranks the Division B articles that govern an applicant's description. A ranking is a candidate list, not a code determination. The service never says a design complies or is safe, and it never writes provisions on its own: only the applicant's `yes` (or `confirm`) does.
+
+Source: `engine/routes_identify.py`, `engine/identify/` (pipeline, config, commit policy, providers, fakes), `engine/models_identify.py`, `engine/process_refs.py`.
+
+## Pipeline
+
+| Stage | Default | Checked |
+|---|---|---|
+| screen | OpenAI Decisions `gpt-6-luna` predicates judge every Division B article (700-character cards, about 20 requests) | exactly 2,080 scores, none missing, or the run falls back |
+| rerank | the top 60 re-judged by Decisions in one request at the default card length | request count recorded in `trace.stages` |
+| verify | OpenAI `gpt-6-luna`, reasoning effort `medium`, standard tier, reads the full text of the top 15 | every pick's quote must occur word for word in that article; failures are dropped and counted in `trace.dropped`, and the pipeline checks again before display |
+| commit | Part 9 only, verifier picked it, rerank probability at least the calibrated threshold, at most 3 | `engine/identify/calibration.json` must say it is calibrated for this config (below) |
+| choices | the top three uncommitted articles, any Part, as quoted choices | quotes come from the code database or a checked verifier quote |
+| fallback | keyword search (`bm25`, or `bm25_v3` from #33) when any model stage fails | labelled, `mode: bm25_fallback`, commits nothing, verifier not run |
+
+Every run also returns the two process references, Div A Article 1.2.1.1. and Div C Article 2.3.1.1., read from the code database and marked `read_only: true`.
+
+### Configuration (the hand-off from the benchmark, WP-11/12)
+
+`IdentifyConfig` (`engine/identify/config.py`) names every choice that changes results. Resolution: defaults, then a JSON file (`BATATIS_IDENTIFY_CONFIG`, else `engine/identify/pipeline.json` if present), then `BATATIS_IDENTIFY_<FIELD>` variables.
+
+| Field | Default | Allowed |
+|---|---|---|
+| `screen` / `screen_model` | `decisions` / `gpt-6-luna` | `decisions`, `jev`, `bm25`, `bm25_v3` (lexical arms are not exhaustive) |
+| `card_chars` | 700 | at least 1 |
+| `rerank` / `rerank_model` | `decisions` / `gpt-6-luna` | `decisions`, `jev`, `openai` (legacy structured rerank), `none` |
+| `rerank_n` | 60 | |
+| `verifier` / `verifier_model` | `openai` / `gpt-6-luna` | `openai`, `anthropic` (off by default; `claude-sonnet-5-5`), `none` |
+| `verifier_effort` | `medium` | OpenAI: `low`, `medium`, `high` |
+| `verify_n` | 15 | at most `rerank_n` |
+| `fallback` | `bm25` | `bm25`, `bm25_v3` |
+| `top_k` / `choices_k` | 10 / 3 | |
+
+Haiku models are refused. Decisions stages must use `gpt-6-luna`; Jev stages must use the pinned `jev-1.13.0`. When a method is overridden without a model, configuration infers its matching pin before validation. The result records `trace.config` and `trace.config_hash` (16 hex characters of the sorted config JSON); the benchmark writes the winner as `pipeline.json`.
+
+### Temporary Decisions activation and reversal (2026-10-22)
+
+The code defaults apply when no JSON file or environment override selects another method. To make the
+selection explicit even with an older `pipeline.json`, set these at server startup alongside the existing
+private `OPENAI_API_KEY` and `BATATIS_LIVE=1`:
+
+```bash
+export BATATIS_IDENTIFY_SCREEN=decisions
+export BATATIS_IDENTIFY_SCREEN_MODEL=gpt-6-luna
+export BATATIS_IDENTIFY_RERANK=decisions
+export BATATIS_IDENTIFY_RERANK_MODEL=gpt-6-luna
+```
+
+The verifier stays on its existing `openai` / `gpt-6-luna` configuration. For the explicit switch back,
+restart with the existing TypeSafe/Jev credential and all four overrides replaced together:
+
+```bash
+export BATATIS_IDENTIFY_SCREEN=jev
+export BATATIS_IDENTIFY_SCREEN_MODEL=jev-1.13.0
+export BATATIS_IDENTIFY_RERANK=jev
+export BATATIS_IDENTIFY_RERANK_MODEL=jev-1.13.0
+```
+
+If method overrides are supplied without model overrides, matching pins are inferred. Removing all four
+selects the temporary code default again unless the JSON configuration selects something else. Keys and
+billing settings are untouched. Changing providers does not rewrite cases, scores, or calibration files.
+
+The transport calls **`POST https://api.openai.com/v1/decisions`**, with text `input` containing the
+serialized article state and an array of named `predicate` questions. It accepts only the exact requested
+answer names in request order, one answer each, `type: predicate`, finite numeric probabilities in [0,1]
+(with booleans rejected), and the requested model. Any refusal or malformed answer fails the entire batch.
+The judge caps batches at 400 questions independently of article-card size; the transport also checks
+1–400 before reserving. It sends no Chat Completions/Structured Outputs parameters to Decisions. The
+existing full-text quote verifier continues to use its separate JSON transport.
+
+Every request reserves through `llm_gate` before network access. Valid reported input/output counts are
+settled even if answers are unusable; failures without usable reported counts release the reservation.
+Missing counts are never replaced with fabricated usage. Token totals and cache/reasoning details are
+validated; cache tokens already belong to the input total and are never added twice. Existing daily and
+per-run gates and the conservative Luna 0.20/0.75 ledger price remain unchanged. The current Decisions guide
+lists uncached input at $0.10 per million, no output charge, cache pricing, and long-context/regional
+multipliers; the ledger does not claim to reproduce an invoice.
+
+Sources read 2026-10-22: [official Decisions guide](https://developers.openai.com/api/docs/guides/decisions)
+and its linked [create-decision reference](https://developers.openai.com/api/reference/resources/decisions/methods/create).
+
+New scoring is `relevance-2`, distinct from `relevance-1` and `verifier-1` even though the latter's private
+model pin is the same. Stored relevance records carry `config_hash` and neutral per-stage `model_ids`.
+Historical records retain their original model and bands; absent provenance stays unknown (`null`/`{}`).
+New Decisions records use `{x: 0, y: 1, status: "uncalibrated; display range only"}` instead of the Jev-derived
+0.30/0.85 cut-offs. This is an uncalibrated display range, not validated relevance thresholds. Mixed
+configurations retain each stage's actual public version and do not borrow Jev bands. Newly scored Jev
+records also require the historical configuration hash before using those historical bands; changed
+card lengths, shortlist sizes or stage configurations get the uncalibrated display range. Parent-owned UI work
+must respect this status. Full-corpus scoring and predicate estimates establish neither technical adequacy
+nor compliance. Automatic commits remain off without calibration for the exact new configuration hash,
+including when a caller injects an old policy. Applicant `yes`/`no`/`not_sure`, quoted choices and deterministic
+Section C lookup continue unchanged.
+
+The implementation's verification uses synthetic input and mocked/offline transports. A bounded real
+Decisions probe and final browser evidence belong to the parent; no full-corpus live draw is part of this
+backend change. Changing provider configuration back to Jev keeps both stored versions readable on this
+release; do not relabel newer historical scores as Jev scores.
+
+### Commit calibration
+
+With `engine/identify/calibration.json` absent, unreadable, or not matching, nothing is committed: every article is a candidate or a quoted choice. That is the honest default. The former CLI 0.75 placeholder was never fitted and has been removed; the CLI now uses this same pipeline and calibration gate. The file the calibration-fold fit writes:
+
+```json
+{
+  "status": "calibrated",
+  "validated_on": "validation",
+  "config_hash": "<trace.config_hash of the pipeline that was fitted>",
+  "max_commits": 3,
+  "parts": {"9": {"status": "calibrated", "threshold": 0.82}}
+}
+```
+
+A threshold fitted for one config is never applied to another (`config_hash` must match). Only Part 9 can commit, whatever the file says, and `max_commits` cannot exceed 3.
+
+## Providers, spend and privacy
+
+- Every provider call (Jev, OpenAI, Anthropic) goes through `engine/llm_gate.py`: `reserve` the worst-case cost before the call, `settle` with the tokens the provider reported, `release` if it fails. A shut gate (`BATATIS_LIVE` off, credential absent, daily cap reached) makes the run take the labelled fallback. Conservative cost estimates are in `trace.spend` (by scoring/verification role) and `trace.usd`; these are ledger estimates using reported token counts, not billed amounts.
+- Prices (USD per million tokens, input/output): `jev-1.13.0` 0.042/0.042 (input price from the jev-benchmark README; no output price published, so the same); `gpt-6-luna` 0.20/0.75 (OpenAI's long-context list price, used for every call as an over-estimate; the short-context list price is 0.10/0.50); `claude-sonnet-5-5` 2/10; `claude-opus-5-5` 4/20; `gpt-4.1-2025-04-14` 2/8; `gpt-4.1-mini-2025-04-14` 0.40/1.60.
+- Per-IP limit: one slot per run, `BATATIS_IDENTIFY_RATE_LIMIT` (default 6) per `BATATIS_IDENTIFY_RATE_WINDOW_SECONDS` (default 600), per instance. Daily cap: `BATATIS_DAILY_SPEND_CAP_USD` (default 5).
+- Live switch for the temporary default: `BATATIS_LIVE=1` plus `OPENAI_API_KEY` (Decisions scoring and the existing quote verifier). No TypeSafe/Jev key or credits are needed, and a stale Jev key never selects that provider. Explicit Jev stages need the Jev credential. The Jev credential is `TYPESAFE_API_KEY` or `JEV_API_KEY` in the environment, then the keychain, then `~/.config/jev/credentials`. The engine does not read `.env` itself; load it in the shell (`set -a; . ./.env; set +a`).
+- Outbound text is the description with personal details removed (`engine/redact.py`: `scrub` with `known_values` and `people_names`), as for `/relevance`. The stored `description_sha256` is of the applicant's own text.
+- `BATATIS_PROVIDER=fake` swaps every transport for the deterministic offline fakes in `engine/identify/fakes.py` (still metered under the same model ids), including the configured default scorer (`Judge()`) and quote verifier used by the API and `cli_sut.py`. The explicit `jev_ask()` adapter also honors fake mode. Nothing reaches the network in fake mode, even with `BATATIS_LIVE=1` and keys set (tested with sockets and HTTP blocked). Results are labelled `mode: fake` and "not a measurement". Refused when `VERCEL` is set.
+- Decisions is the temporary scoring default; Jev is available only when explicitly configured. An Anthropic client is built only when `verifier: anthropic` is configured (`BATATIS_IDENTIFY_VERIFIER=anthropic` or `pipeline.json`); `ANTHROPIC_API_KEY` alone never reaches Anthropic.
+
+## Routes
+
+Owner writes; reviewers read (`engine/access.py`: every POST here is mode `edit`, so a reviewer gets 404 or 409 and a submitted case is read-only).
+
+**Versions.** Every write is one compare-and-swap (docs/api-contract.md): a concurrent write returns 409 `case was updated concurrently` and is never retried on a newer case. Each POST body accepts an optional `expected_version` (the `Case.version` or `case_version` the client last read), as `POST /cases/{id}/section-d` does; a supplied version that is not the stored one is a 409 and nothing is written. Every identify response carries `case_version`, the version after that read or write. An identify run writes its result with one CAS against the version it started from, so any write to the case during the run makes the run a 409 (`error` event with `status: 409` on the stream).
+
+### `POST /cases/{id}/identify`
+
+Body (all optional): `{"prose": "...", "answers": [{"question_id": "...", "field": "...", "answer": "..."}], "expected_version": 7}`. Without `prose`, the case's latest `project.description` fact is used; with neither, 409 `Describe your project first`.
+
+An answer must name a question this case's stored identification asked (`open_questions[].id`) and can only fill that question's own field (`identify.choice.<article>`; `field` may be omitted). Anything else, including a field such as `project.description`, `citation.*` or `evidence.*.file_ref`, is a 422 and nothing is written, so an answer can never replace a confirmed fact. Accepted answers are stored as unconfirmed facts (an unknown answer has no value).
+
+- `Accept: application/json` returns the `IdentifyResult`.
+- `Accept: text/event-stream` streams one event per stage, in this order: `start`, `screen`, `rerank`, `verify`, `questions`, `done`. Each stage event's data carries status and counts only (`{"stage": "screen", "status": "done", "method": "model", "articles": 2080}`), never prose or code text. `done` carries the full result, the same body as the JSON response. A failure sends `error` with `{"message", "status"}`. Events are not buffered by the HTTP guard.
+- Errors: 404 case not found; 409 no description, a run already in progress (`Retry-After: 1`), or a stale or concurrent case version (`expected_version`); 422 an answer to a question this identification did not ask; 429 rate limit (`Retry-After`); 503 code database missing or config invalid.
+
+The run stores the result on the case (`case.identify`) and writes the relevance rings (`case.relevance`) from the same exhaustive model screen and rerank, so the code library's rings match the identification. It also sets a short subject title from applicant input when the case has none, or when the title is still the one an earlier run generated. Cities, raw provision codes and suggested code-result topics do not name the case. `IdentifyResult.title` records only Batatis's own title; a successful explicit `PATCH /cases/{case_id}/title` persists `Case.title_is_manual`, so every later identify run returns `title: null` and keeps that manual name, even if its wording matches an old generated title. Legacy custom names retain their existing precedence. See [Application titles](../api-contract.md#application-titles).
+
+### `GET /cases/{id}/identify`
+
+The stored result with decisions overlaid and `stale: true` when the description changed since the run. It never calls a provider. 404 `identify result not found` before the first run.
+
+### `IdentifyResult` (main fields)
+
+| Field | Meaning |
+|---|---|
+| `mode`, `source`, `label` | `live`, `fake` or `bm25_fallback`, and a sentence saying what ran |
+| `narrowed`, `message` | false when no verifier pick survived; then `message` is "I could not narrow this down..." |
+| `articles[]` | `rank`, `provision` (article), `provision_id` (sentence, when the quote sits in exactly one), `title`, `part`, `citation`, `quote`, `quote_source` (`verifier` or `codedb`), `reason` (verifier line, dropped if it claims compliance or safety), `probability`, `screen_probability`, `verifier` (`picked`, `not_picked`, `not_run`), `status` (`committed`, `choice`, `candidate`, `fallback`), `commit_reason`, `objectives[]`, `functions[]`, `decision`, `open_question_id` |
+| `committed[]` | articles committed under the calibrated Part 9 rule (empty until calibrated) |
+| `choices[]` | quoted choices: `quote` and `question` ("The code says: \"...\" Does your design do something different from this?"); show the article id behind a disclosure |
+| `questions[]`, `open_questions[]` | the same choices as questions with `field` `identify.choice.<article>` |
+| `benchmark` | the benchmark acceptable solution: `provision`, `provision_id`, `citation`, `sentence` (verbatim), `departure`, `departure_status` (`none`, `proposed`, `confirmed`), `objectives[]`, `functions[]` by lookup, `basis` (`committed`, `top_choice`, `applicant`, `none`), `requirement` (numeric requirement against confirmed facts) |
+| `process_refs[]` | Div A 1.2.1.1. and Div C 2.3.1.1., `read_only: true` |
+| `model_ids`, `commit_policy` | `model_ids` gives each stage (`screen`, `rerank`, `verifier`) an opaque version. The values are `relevance-2` for Decisions scoring, `relevance-1` for historical/explicit Jev scoring, `verifier-1` or `verifier-2` for the verifier (which one depends on the configured model that ran), `custom` for a pin with no public mapping, and `null` when the stage did not run or ran without a public model ID (the keyword screens `bm25` and `bm25_v3`, and every stage of the keyword fallback). It never holds a model pin. `commit_policy` is the policy status and reason |
+| `case_version` | the case version after this read or write; send it back as `expected_version` |
+| `trace` | `config`, `config_hash`, `exhaustive`, `articles_expected` (2080), `articles_scored`, `ranker`, `fallback_reason`, `verifier`, `picks`, `dropped[]`, `stages[]` (seconds, requests, tokens per stage), `spend` (by role: `scoring`, `verification`), `usd`, `seconds` |
+
+**What a response says about providers: nothing.** The owner does not want users to learn which services sit behind Batatis, so no response, stored result, stage event or schema carries a provider name, a model pin, a credential or an environment variable name (`engine/public_names.py`, enforced by `engine/tests/test_no_provider_names_exposed.py`). In `trace` and `label`, a service reads as `model` (`method`, `ranker`, `config.screen`, `config.rerank`, `config.verifier`), models as the versions in `model_ids`, spend by role, and a model-path failure as `fallback_reason: "scoring unavailable"`. The pipeline's pins, spend per provider and the technical cause of a fallback are in the server log (`Identify run detail`, `Identify model path unavailable`). A result stored with the old values is cleaned when it is read.
+
+### `POST /cases/{id}/identify/{provision}/decision`
+
+`{"decision": "yes" | "no" | "not_sure", "expected_version": 8}`. `yes` adds the article to `provisions`, rebuilds Section C by lookup and records a confirmed `citation.<article>` user-click fact; `no` and `not_sure` remove it. `not_sure` gives the card an `open_question_id` and an item in the information request. Returns the `IdentifyResult` plus `section_c`, the Section C rows a `yes` wrote for that article (empty otherwise). 404 when there is no stored result or the article is not in it; 409 on a stale `expected_version`. A `yes` stops showing once a reference withdrawal (`POST /cases/{id}/section-d`) removes the provision.
+
+### `POST /cases/{id}/identify/confirm`
+
+`{"provisions": ["9.10.15.5.(8)", ...], "expected_version": 8}`. Each id must exist in Division B (404 lists the missing ones). Writes provisions and Section C. Returns the `Case`.
+
+### `POST /cases/{id}/identify/benchmark`
+
+`{"provision": "9.10.15.5.(8)", "departure": "one line", "expected_version": 8}`. The applicant names the requirement the design departs from and confirms the departure. The sentence, citation and objective and function codes are looked up; a departure that claims compliance, safety or approval is refused with 422 ("departs from the acceptable solution by ..." is fine). Returns the `IdentifyResult` with `benchmark.basis: applicant` and `departure_status: confirmed`.
+
+### `GET /cases/{id}/identify/information-request`
+
+The officer-facing draft of the applicant's `not_sure` decisions. It is separate from `GET /cases/{id}/information-request`, which is the package review's list of requests an officer has sent (see `docs/api/package-review.md`).
+
+
+`{"case_id", "items": [{"id", "provision_id", "text"}]}`: one item per `not_sure` decision, for the officer.
+
+### `GET /cases/{id}/process-refs`
+
+The two read-only process rows (wrapped as `{"items": [...]}` by the HTTP guard, like every array response).
+
+## Verification
+
+```bash
+# offline, no keys
+BATATIS_PROVIDER=fake BATATIS_CODEDB=codedb/build/codedb.sqlite python -m pytest -q engine/tests/test_identify_service.py engine/tests/test_identify_policy.py
+BATATIS_PROVIDER=fake python -m uvicorn engine.api:app --port 8061
+curl -N -X POST localhost:8061/cases/$CASE/identify -H 'Accept: text/event-stream' -H 'Content-Type: application/json' -d '{}'
+```

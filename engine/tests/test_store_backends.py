@@ -41,8 +41,29 @@ def _exercise(store, created: list | None = None):
     assert store.get_version(case.id) >= 2
 
 
+def _refused_applications(store):
+    """Both account-store SQL filters keep final refusals readable in the authority's queue."""
+    from engine.account_models import Decision
+
+    owner, authority = 'owner_' + uuid.uuid4().hex, 'authority_' + uuid.uuid4().hex
+    refused = store.put(Case(owner_id=owner, authority=authority, status='refused',
+                            decision=Decision(outcome='refuse', by_id='reviewer', by_name='Reviewer',
+                                              message='Administrative record not provided.')))
+    draft = store.put(Case(owner_id=owner, authority=authority))
+    try:
+        assert {c.id for c in store.list_applications(authority=authority)} == {refused.id}
+        assert {c.id for c in store.list_applications(owner_id=owner)} == {refused.id, draft.id}
+        assert store.access_record(refused.id).status == 'refused'
+        assert store.get(refused.id).decision.outcome == 'refuse'
+    finally:
+        store.delete(refused.id)
+        store.delete(draft.id)
+
+
 def test_file_backend_roundtrip_conflict_and_bytes(tmp_path):
-    _exercise(CaseStore(tmp_path / 'cases.sqlite'))
+    store = CaseStore(tmp_path / 'cases.sqlite')
+    _exercise(store)
+    _refused_applications(store)
 
 
 def test_add_fact_retries_lost_updates(tmp_path):
@@ -92,6 +113,24 @@ def test_vercel_refuses_postgres_without_a_database_url(monkeypatch):
         create_app()
 
 
+@pytest.mark.parametrize('connection,sslmode', [
+    ("host=127.0.0.1 dbname=synthetic user=synthetic options='-c search_path=voice_contract'", 'require'),
+    ("host=127.0.0.1 dbname=synthetic user=synthetic sslmode = verify-full options='-c search_path=voice_contract'", 'verify-full'),
+    ('postgres://synthetic@127.0.0.1/synthetic?options=-c%20search_path%3Dvoice_contract', 'require'),
+    ('postgresql://synthetic@127.0.0.1/synthetic?sslmode=verify-full&options=-c%20search_path%3Dvoice_contract', 'verify-full'),
+])
+def test_postgres_config_preserves_scoped_connection_options_and_tls(monkeypatch, connection, sslmode):
+    from psycopg.conninfo import conninfo_to_dict
+    from engine.store_postgres import database_url
+
+    monkeypatch.setenv('DATABASE_URL', connection)
+    params = conninfo_to_dict(database_url())
+    assert params['host'] == '127.0.0.1'
+    assert params['dbname'] == params['user'] == 'synthetic'
+    assert params['options'] == '-c search_path=voice_contract'
+    assert params['sslmode'] == sslmode
+
+
 def test_postgres_backend(monkeypatch):
     url = os.environ.get('TEST_DATABASE_URL')
     if not url:
@@ -99,6 +138,7 @@ def test_postgres_backend(monkeypatch):
     monkeypatch.setenv('DATABASE_URL', url)
     from engine.store_postgres import PostgresCaseStore
     store = PostgresCaseStore(url)
+    _refused_applications(store)
     created = []
     try:
         first = store.put(Case(title='pg'))

@@ -1,34 +1,49 @@
-/** #/review for reviewers: everything sent to their authority, with who is reviewing what. */
-import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { AccountsError, claimConflict, review, type Claim, type QueueApplication } from "../../api/accounts";
-import { useAccount } from "../account";
+/** #/review for reviewers: everything sent to their authority, one quiet row each. A row opens the file. */
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { review, type QueueApplication } from "../../api/accounts";
+import { accountSession, useAccount } from "../account";
 import { authorityName } from "../applications";
-import { AcIcon, Avatar, PageHead } from "../auth/bits";
-import { ConfirmDialog, MOD_KEY } from "../ui";
-import { applicantLine, completenessView, filterQueue, reviewerCell, rowAction, sentLabel, statusPill, tabCounts, TABS, type QueueTab } from "./queue";
+import { AcIcon, Avatar, PageHead, type AcIconName } from "../auth/bits";
+import { MOD_KEY } from "../ui";
+import { completenessView, filterQueue, reviewerCell, sentLabel, statusPill, tabCounts, TABS, type QueueTab } from "./queue";
 import { loadQueue, patchRow, useQueue } from "./reviewData";
 
-export function ProgressRing({ pct, size = 18 }: { pct: number | null; size?: number }) {
-  const r = size / 2 - 1.5;
-  const c = 2 * Math.PI * r;
-  const p = pct == null ? 0 : Math.max(0, Math.min(100, pct));
+export function StatusPill({ a }: { a: Pick<QueueApplication, "status" | "claim" | "submission_number"> }) {
+  const s = statusPill(a.status, Boolean(a.claim), a.submission_number);
+  const hue = { accent: "accent", warning: "amber", blocking: "rose", done: "green", pending: "slate" }[s.tone];
+  return <span className={`ac-pill is-${hue}`}><span className={`ac-pill-dot is-${s.tone}`} aria-hidden="true" />{s.label}</span>;
+}
+
+/** Each filter's icon. */
+const TAB_ICON: Record<QueueTab, AcIconName> = {
+  all: "inbox",
+  new: "inbox",
+  resubmitted: "history",
+  mine: "hand",
+  returned: "send",
+  accepted: "check",
+  refused: "ban",
+};
+
+/** The applicant's own checklist as an icon: green when nothing required is missing. */
+function Checklist({ pct, label }: { pct: number | null; label: string }) {
+  if (pct == null) return null;
+  const ok = label === "Complete" || pct >= 100;
+  const text = ok ? "Applicant’s checklist complete" : label.endsWith("missing") ? `${label.replace(" missing", "")} required missing` : `${label} answered`;
   return (
-    <svg className={`ac-ring${p >= 100 ? " is-full" : ""}${pct == null ? " is-unknown" : ""}`} width={size} height={size} viewBox={`0 0 ${size} ${size}`} aria-hidden="true">
-      <circle className="ac-ring-trk" cx={size / 2} cy={size / 2} r={r} fill="none" strokeWidth="1.75" />
-      {p > 0 && <circle className="ac-ring-arc" cx={size / 2} cy={size / 2} r={r} fill="none" strokeWidth="1.75" strokeDasharray={`${(p / 100) * c} ${c}`} transform={`rotate(-90 ${size / 2} ${size / 2})`} />}
-    </svg>
+    <span className={`rq-check ${ok ? "is-green" : "is-rose"}`} title={text}>
+      <AcIcon name={ok ? "check" : "alert"} size={13} />
+      <span className={ok ? "cf-sr" : undefined}>{ok ? text : label.replace(" missing", "")}</span>
+    </span>
   );
 }
 
-export function StatusPill({ a }: { a: Pick<QueueApplication, "status" | "claim"> }) {
-  const s = statusPill(a.status, Boolean(a.claim));
-  return <span className="ac-pill"><span className={`ac-pill-dot is-${s.tone}`} aria-hidden="true" />{s.label}</span>;
-}
-
-interface RowState {
-  busy?: boolean;
-  conflict?: Claim;
-  error?: string;
+/** What the officer does next with this row, in plain words. A kept reservation resumes only on request. */
+function nextStep(a: QueueApplication, me: string | null): string {
+  if (a.status === "submitted" && !a.claim) return "Pick up";
+  if (a.status === "submitted" && me && a.claim?.reviewer_id === me) return "Resume";
+  if (a.status === "in_review" && me && a.claim?.reviewer_id === me) return "Continue";
+  return "View";
 }
 
 export function ReviewQueue({ phoneTools }: { phoneTools?: ReactNode }) {
@@ -37,12 +52,39 @@ export function ReviewQueue({ phoneTools }: { phoneTools?: ReactNode }) {
   const me = user?.id ?? null;
   const [tab, setTab] = useState<QueueTab>("all");
   const [query, setQuery] = useState("");
-  const [rowState, setRowState] = useState<Record<string, RowState>>({});
-  const [takeOver, setTakeOver] = useState<{ id: string; claim: Claim } | null>(null);
   const search = useRef<HTMLInputElement>(null);
   const [now] = useState(() => Date.now());
+  const [picking, setPicking] = useState("");
+  const pendingClaim = useRef<AbortController | null>(null);
 
-  useEffect(() => { void loadQueue(); }, []);
+  // Another sign-in (even the same person again) never inherits a claim this one started.
+  useLayoutEffect(() => {
+    setPicking("");
+    return () => { pendingClaim.current?.abort(); pendingClaim.current = null; };
+  }, [user]);
+  useEffect(() => { void loadQueue(); }, [user]);
+
+  /** "Pick up" (and "Resume", for your kept reservation) means it: claim, then open the review (no
+   *  second "start" screen). If someone got there first, the review page says who and offers to take over. */
+  async function pickUp(a: QueueApplication, href: string) {
+    if (picking) return;
+    const session = accountSession(), ctl = new AbortController();
+    pendingClaim.current = ctl;
+    const current = () => session === accountSession() && !ctl.signal.aborted;
+    setPicking(a.id);
+    try {
+      const claim = await review.claim(a.id, false, ctl.signal);
+      if (current()) patchRow(a.id, { claim, status: "in_review" }, session);
+    } catch {
+      // Fall through: the review page shows the conflict or the error.
+    } finally {
+      if (pendingClaim.current === ctl) pendingClaim.current = null;
+      if (current()) {
+        setPicking("");
+        window.location.hash = href;
+      }
+    }
+  }
 
   // ⌘K / Ctrl+K searches the queue here (captured before the shell's own shortcut).
   useEffect(() => {
@@ -60,28 +102,8 @@ export function ReviewQueue({ phoneTools }: { phoneTools?: ReactNode }) {
   const counts = useMemo(() => tabCounts(q.rows, me), [q.rows, me]);
   const rows = useMemo(() => filterQueue(q.rows, tab, query, me), [q.rows, tab, query, me]);
   const authority = authorityName(user?.authority);
-  const setRow = (id: string, s: RowState) => setRowState((m) => ({ ...m, [id]: s }));
-
-  async function claim(id: string, over = false) {
-    setRow(id, { busy: true });
-    try {
-      const c = await review.claim(id, over);
-      patchRow(id, { status: "in_review", claim: c });
-      setRow(id, {});
-      location.hash = `#/review/${encodeURIComponent(id)}`;
-    } catch (e) {
-      const conflict = claimConflict(e);
-      if (conflict) {
-        patchRow(id, { claim: conflict, status: "in_review" });
-        setRow(id, { conflict });
-      } else {
-        setRow(id, { error: e instanceof AccountsError ? e.detail : "That didn’t work. Try again." });
-        void loadQueue();
-      }
-    }
-  }
-
-  const open = (id: string) => `#/review/${encodeURIComponent(id)}`;
+  // Only filters with something in them (plus All and the one you're on): fewer things to read.
+  const tabs = TABS.filter((t) => t.id === "all" || t.id === tab || counts[t.id] > 0);
 
   return (
     <div className="ac-page">
@@ -98,20 +120,17 @@ export function ReviewQueue({ phoneTools }: { phoneTools?: ReactNode }) {
           </label>
         }
       />
-      <div className="ac-page-body">
-        <div className="ac-queue-head">
-          <div>
-            <h2 className="ac-h1">{q.phase === "ready" || q.rows.length ? `${counts.all} ${counts.all === 1 ? "application" : "applications"}` : "Applications"}</h2>
-            <p className="ac-lead">{authority ? `Sent to ${authority}. ` : ""}Pick one up to let other officers know you’ve got it.</p>
-          </div>
-          <div className="ac-tabs" role="group" aria-label="Filter applications">
-            {TABS.map((t) => (
+      <div className="ac-page-body rq">
+        <h2 className="cf-sr">Applications</h2>
+        {tabs.length > 1 && (
+          <div className="ac-tabs rq-tabs" role="group" aria-label="Filter applications">
+            {tabs.map((t) => (
               <button key={t.id} type="button" aria-pressed={tab === t.id} className="ac-tab" onClick={() => setTab(t.id)}>
-                {t.label} <span className="ac-tab-n">{counts[t.id]}</span>
+                <AcIcon name={TAB_ICON[t.id]} size={14} />{t.label}<span className="ac-tab-n">{counts[t.id]}</span>
               </button>
             ))}
           </div>
-        </div>
+        )}
 
         {q.error && q.rows.length > 0 && (
           <p className="ac-empty" role="status">{q.error} These rows may be out of date. <button type="button" className="ac-link" onClick={() => void loadQueue()}>Try again</button></p>
@@ -125,84 +144,47 @@ export function ReviewQueue({ phoneTools }: { phoneTools?: ReactNode }) {
         ) : !rows.length ? (
           <p className="ac-empty">{query ? `No applications match “${query.trim()}”.` : "Nothing here right now."}</p>
         ) : (
-          <table className="ac-table">
-            <thead>
-              <tr>
-                <th scope="col">Application</th>
-                <th scope="col">Applicant</th>
-                <th scope="col">Sent</th>
-                <th scope="col">Completeness</th>
-                <th scope="col">Status</th>
-                <th scope="col">Reviewer</th>
-                <th scope="col"><span className="cf-sr">Action</span></th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((a) => {
-                const rs = rowState[a.id] ?? {};
-                const who = reviewerCell(a, me);
-                const action = rowAction(a, me);
-                const comp = completenessView(a.completeness, q.blocking[a.id] ?? null);
-                const title = a.title?.trim() || "Untitled application";
-                return (
-                  <Fragment key={a.id}>
-                  <tr className={rs.conflict ? "has-note" : undefined}>
-                    <td className="ac-td-title" data-label="Application">
-                      <a href={open(a.id)} className="ac-row-link">{title}</a>
-                      {a.unread_messages > 0 && <span className="ac-unread"><span className="ac-note-dot" aria-hidden="true" />{a.unread_messages} unread</span>}
-                    </td>
-                    <td className="ac-muted-cell" data-label="Applicant">{applicantLine(a)}</td>
-                    <td className="ac-muted-cell" data-label="Sent">{sentLabel(a.submitted_at, now)}</td>
-                    <td data-label="Completeness">
-                      <span className="ac-comp" title={comp.pct == null ? "Checking…" : undefined}><ProgressRing pct={comp.pct} />{comp.label}</span>
-                    </td>
-                    <td data-label="Status"><StatusPill a={a} /></td>
-                    <td data-label="Reviewer">
-                      {who.name ? <span className="ac-claim"><Avatar name={who.name} size="sm" />{who.label}</span> : <span className="ac-faint">—</span>}
-                    </td>
-                    <td className="ac-td-action">
-                      {action === "claim" && !rs.conflict ? (
-                        <button type="button" className="cf-btn is-sm" disabled={rs.busy} onClick={() => void claim(a.id)}>
-                          <AcIcon name="hand" size={15} />{rs.busy ? "Starting…" : "Start reviewing"}
-                        </button>
-                      ) : (
-                        <a className="cf-btn is-sm is-ghost" href={open(a.id)}>{action === "open" ? "Open" : "View"}</a>
-                      )}
-                      {rs.error && <p className="ac-error is-row" role="alert">{rs.error}</p>}
-                    </td>
-                  </tr>
-                  {rs.conflict && (
-                    <tr className="ac-conflict-row">
-                      <td colSpan={7}>
-                        <div className="ac-conflict" role="status">
-                          <span>{rs.conflict.reviewer_name} is already reviewing this</span>
-                          <a className="cf-btn is-xs is-ghost" href={open(a.id)}>View</a>
-                          <button type="button" className="cf-btn is-xs" onClick={() => setTakeOver({ id: a.id, claim: rs.conflict! })}>Take over</button>
-                          <button type="button" className="cf-btn is-xs is-ghost" onClick={() => setRow(a.id, {})}>Dismiss</button>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                  </Fragment>
-                );
-              })}
-            </tbody>
-          </table>
+          <ul className="rq-list">
+            {rows.map((a) => {
+              const who = reviewerCell(a, me);
+              const comp = completenessView(a.completeness, q.blocking[a.id] ?? null);
+              const title = a.title?.trim() || "Untitled application";
+              const step = nextStep(a, me);
+              return (
+                <li key={a.id}>
+                  <a
+                    className="rq-row"
+                    href={`#/review/${encodeURIComponent(a.id)}`}
+                    aria-busy={picking === a.id || undefined}
+                    onClick={step === "Pick up" || step === "Resume" ? (e) => {
+                      if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+                      e.preventDefault();
+                      void pickUp(a, e.currentTarget.getAttribute("href") ?? "");
+                    } : undefined}
+                  >
+                    <span className="rq-main">
+                      <span className="rq-title">
+                        {title}
+                        {a.unread_messages > 0 && <span className="rq-unread"><span className="ac-note-dot" aria-hidden="true" />{a.unread_messages} unread</span>}
+                      </span>
+                      <span className="rq-meta">
+                        {[a.applicant.name, a.submitted_at ? sentLabel(a.submitted_at, now) : ""].filter(Boolean).join(" · ")}
+                        <Checklist pct={comp.pct} label={comp.label} />
+                      </span>
+                    </span>
+                    <span className="rq-side">
+                      {who.name && <span className="rq-who" title={who.mine ? "You’re reviewing this" : `${who.name} is reviewing this`}><Avatar name={who.name} size="sm" /><span className="rq-who-name">{who.label}</span></span>}
+                      {step !== "Pick up" && <StatusPill a={a} />}
+                      <span className={`rq-go${step === "Pick up" ? " is-new" : ""}`}>{picking === a.id ? (step === "Resume" ? "Resuming…" : "Picking up…") : step}<AcIcon name="chev" size={14} /></span>
+                    </span>
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
         )}
+        <a className="cf-btn is-sm is-ghost rq-foot" href="#/review/package"><AcIcon name="upload" size={15} />Review outside PDFs</a>
       </div>
-      <ConfirmDialog
-        open={Boolean(takeOver)}
-        title="Take over this review?"
-        body={<p>{takeOver?.claim.reviewer_name} started reviewing this application. If you take over, you become the reviewer and the history records both names.</p>}
-        cancel="Keep theirs"
-        confirm="Take over"
-        onClose={() => setTakeOver(null)}
-        onConfirm={() => {
-          const t = takeOver;
-          setTakeOver(null);
-          if (t) void claim(t.id, true);
-        }}
-      />
     </div>
   );
 }

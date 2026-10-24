@@ -11,14 +11,16 @@ import uuid
 from contextlib import contextmanager
 from decimal import Decimal
 
+from psycopg.conninfo import conninfo_to_dict, make_conninfo
 from psycopg.types.json import Jsonb
 
 from .models import Case, Fact, now
 from .store import (FileTooLarge, InvalidAttachment, VersionConflict, attachment_reference,
                     case_with_stored_files, retention_cutoff)
 from .uploads import PDF_MAX_BYTES
-from .account_store import ACCOUNT_MIGRATIONS, PostgresAccountsMixin, _DB
+from .account_store import ACCOUNT_MIGRATIONS, PostgresAccountsMixin, _DB, preserve_messages
 from .access import enforce_mutation, enforce_stored_mutation, enforce_read
+from .identify.title import normalize_title
 
 MIGRATIONS = (
     """CREATE TABLE IF NOT EXISTS cases (
@@ -46,8 +48,13 @@ def database_url() -> str:
         raise RuntimeError('DATABASE_URL is not set')
     if url.startswith('postgres://'):
         url = 'postgresql://' + url[len('postgres://'):]
-    if 'sslmode=' not in url:
-        url += ('&' if '?' in url else '?') + 'sslmode=require'
+    if not conninfo_to_dict(url).get('sslmode'):
+        if url.startswith('postgresql://'):
+            url += ('&' if '?' in url else '?') + 'sslmode=require'
+        else:
+            # make_conninfo() returns keyword form when adding a scoped search_path.
+            # URL punctuation would turn that valid DSN into an invalid option.
+            url = make_conninfo(url, sslmode='require')
     return url
 
 
@@ -81,6 +88,26 @@ class PostgresCaseStore(PostgresAccountsMixin):
     def get(self, case_id: str) -> Case | None:
         snapshot = self.get_snapshot(case_id)
         return snapshot[0] if snapshot else None
+
+    def rename_title(self, case_id: str, title: str) -> Case | None:
+        """Reauthorize and patch only naming fields of the locked current row."""
+        title = normalize_title(title)
+        with self._conn() as con:
+            row = con.execute('SELECT data, version FROM cases WHERE id=%s FOR UPDATE', (case_id,)).fetchone()
+            if row is None or self._purge_expired(con, case_id):
+                return None
+            payload, version = row[0], int(row[1])
+            enforce_stored_mutation(payload)
+            if payload.get('title') != title or payload.get('title_is_manual') is not True:
+                payload.update(title=title, title_is_manual=True, updated_at=now())
+                saved = con.execute('UPDATE cases SET data=%s, updated_at=%s, version=version+1 '
+                                    'WHERE id=%s AND version=%s RETURNING version',
+                                    (Jsonb(payload), payload['updated_at'], case_id, version)).fetchone()
+                if saved is None:
+                    raise VersionConflict(case_id, version)
+                version = int(saved[0])
+            files = {item[0] for item in con.execute('SELECT id FROM case_files WHERE case_id=%s', (case_id,))}
+            return case_with_stored_files(payload, files, version)
 
     def get_snapshot(self, case_id: str) -> tuple[Case, int] | None:
         """Read the case and version together, checking retention after any lock wait."""
@@ -124,20 +151,29 @@ class PostgresCaseStore(PostgresAccountsMixin):
 
     def put(self, case: Case, *, expected_version: int | None = None) -> Case:
         case.updated_at = now()
-        payload = Jsonb(case.model_dump(mode='json', exclude={'version'}))
         conflict = None
         with self._conn() as con:
             if expected_version is None:
-                previous = con.execute('SELECT data FROM cases WHERE id=%s FOR UPDATE', (case.id,)).fetchone()
-                if previous:
-                    enforce_stored_mutation(previous[0])
+                payload = Jsonb(case.model_dump(mode='json', exclude={'version'}))
                 row = con.execute('INSERT INTO cases (id, data, version, updated_at) VALUES (%s, %s, 1, %s) '
-                                  'ON CONFLICT (id) DO UPDATE SET data=EXCLUDED.data, '
-                                  'version=cases.version+1, updated_at=EXCLUDED.updated_at RETURNING version',
+                                  'ON CONFLICT (id) DO NOTHING RETURNING version',
                                   (case.id, payload, case.updated_at)).fetchone()
+                if row is None:
+                    # An insert race may create the row after an earlier SELECT saw
+                    # nothing. Lock its actual thread before any whole-case update.
+                    previous = con.execute('SELECT data FROM cases WHERE id=%s FOR UPDATE', (case.id,)).fetchone()
+                    if previous is None:
+                        raise VersionConflict(case.id)
+                    enforce_stored_mutation(previous[0])
+                    preserve_messages(case, previous[0])
+                    payload = Jsonb(case.model_dump(mode='json', exclude={'version'}))
+                    row = con.execute('UPDATE cases SET data=%s, version=version+1, updated_at=%s '
+                                      'WHERE id=%s RETURNING version',
+                                      (payload, case.updated_at, case.id)).fetchone()
                 case.version = int(row[0])
                 return case
             if expected_version == 0:
+                payload = Jsonb(case.model_dump(mode='json', exclude={'version'}))
                 row = con.execute('INSERT INTO cases (id, data, version, updated_at) VALUES (%s, %s, 1, %s) '
                                   'ON CONFLICT (id) DO NOTHING RETURNING version',
                                   (case.id, payload, case.updated_at)).fetchone()
@@ -149,10 +185,13 @@ class PostgresCaseStore(PostgresAccountsMixin):
             row = con.execute('SELECT data, version FROM cases WHERE id=%s FOR UPDATE', (case.id,)).fetchone()
             if row is not None and self._purge_expired(con, case.id):
                 row = None
+            if row is not None:
+                enforce_stored_mutation(row[0])
             if row is None or row[1] != expected_version:
                 conflict = VersionConflict(case.id, expected_version, int(row[1]) if row else None)
             else:
-                enforce_stored_mutation(row[0])
+                preserve_messages(case, row[0])
+                payload = Jsonb(case.model_dump(mode='json', exclude={'version'}))
                 saved = con.execute('UPDATE cases SET data=%s, version=version+1, updated_at=%s '
                                   'WHERE id=%s AND version=%s RETURNING version',
                                   (payload, case.updated_at, case.id, expected_version)).fetchone()
@@ -229,13 +268,27 @@ class PostgresCaseStore(PostgresAccountsMixin):
 
     def get_file(self, case_id: str, file_id: str) -> dict | None:
         with self._conn() as con:
-            self._purge_expired(con, case_id)
+            case = con.execute('SELECT data FROM cases WHERE id=%s FOR UPDATE', (case_id,)).fetchone()
+            if case is None or self._purge_expired(con, case_id):
+                return None
+            # Recheck access under the same lock that keeps authority/status stable for the read.
+            enforce_read(Case.model_validate(case[0]))
             row = con.execute('SELECT name, content_type, size, data FROM case_files WHERE id=%s AND case_id=%s',
                               (file_id, case_id)).fetchone()
         if row is None:
             return None
         return {'id': file_id, 'case_id': case_id, 'name': row[0], 'content_type': row[1],
                 'size': row[2], 'data': bytes(row[3])}
+
+    def list_files(self, case_id: str) -> list[dict] | None:
+        with self._conn() as con:
+            case = con.execute('SELECT data FROM cases WHERE id=%s FOR UPDATE', (case_id,)).fetchone()
+            if case is None or self._purge_expired(con, case_id):
+                return None
+            enforce_read(Case.model_validate(case[0]))
+            rows = con.execute('SELECT id, name, content_type, size FROM case_files WHERE case_id=%s '
+                               'ORDER BY created_at, id', (case_id,)).fetchall()
+        return [dict(zip(('id', 'name', 'content_type', 'size'), row)) for row in rows]
 
     def try_reserve_spend(self, usd: Decimal, cap: Decimal) -> bool:
         """Add `usd` to today's spend only when the result stays within `cap`."""

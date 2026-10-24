@@ -1,38 +1,47 @@
 /**
- * Jev relevance rings: pure band mapping, labels and tree aggregation.
+ * Relevance rings: pure band mapping, labels and tree aggregation.
  * A ring is an estimate from the applicant's description. It is never a compliance decision and
  * never the Section C list (Section C is only what the applicant confirmed).
  */
 import type { CodeToc, RelevanceResult, TocPart, TocSection, TocSubsection } from "../api/codeLibrary";
 
-export type Band = "unscored" | "zero" | "low" | "mid" | "high";
+/** "estimate": scored, but the response carries no fitted cut-offs, so it gets no likely/unlikely rating. */
+export type Band = "unscored" | "estimate" | "zero" | "low" | "mid" | "high";
 
 /**
- * Benchmark-derived cut-offs (docs/research/relevance-bands.md, x = 0.30, y = 0.85). Used when a
- * response has no bands, or still carries the old 0.2 / 0.6 placeholders it was scored with.
+ * Benchmark-derived cut-offs (docs/research/relevance-bands.md, x = 0.30, y = 0.85), fitted for
+ * relevance-1 only. Also used for relevance-1 rows that still carry the old 0.2 / 0.6 placeholders.
  */
 export const DEFAULT_BANDS = { x: 0.3, y: 0.85 } as const;
 
-export interface Cutoffs {
-  x: number;
-  y: number;
-  /** True when the response's own bands were missing or placeholders and the defaults apply. */
-  fallback: boolean;
-}
+/**
+ * `rated: false` means no cut-offs apply: every score shows as an estimate, never as "likely applies"
+ * or "unlikely". The engine sends that for every configuration it has not fitted bands for.
+ */
+export type Cutoffs =
+  | { rated: true; x: number; y: number; /** True for a legacy relevance-1 placeholder row read with DEFAULT_BANDS. */ fallback: boolean }
+  | { rated: false; x: null; y: null; fallback: false };
 
-export function cutoffsOf(r: Pick<RelevanceResult, "bands"> | null | undefined): Cutoffs {
+const UNRATED: Cutoffs = { rated: false, x: null, y: null, fallback: false };
+
+export function cutoffsOf(r: Pick<RelevanceResult, "bands" | "model"> | null | undefined): Cutoffs {
   const b = r?.bands;
-  const usable = b && Number.isFinite(b.x) && Number.isFinite(b.y) && b.x > 0 && b.y > b.x && !/placeholder/i.test(b.status ?? "");
-  if (usable) return { x: b!.x, y: b!.y, fallback: false };
-  return { ...DEFAULT_BANDS, fallback: true };
+  const status = typeof b?.status === "string" ? b.status : "";
+  // 0 and 1 are the display range, not cut-offs; a status saying so (or no status) is never trusted.
+  const fitted = b && Number.isFinite(b.x) && Number.isFinite(b.y) && b.x > 0 && b.y > b.x && b.y < 1
+    && status.trim() !== "" && !/uncalibrated|placeholder|display range/i.test(status);
+  if (fitted) return { rated: true, x: b.x, y: b.y, fallback: false };
+  if (r?.model === "relevance-1" && /placeholder/i.test(status)) return { rated: true, ...DEFAULT_BANDS, fallback: true };
+  return UNRATED;
 }
 
-/** Jev reports hundredths; bands compare round(p, 2). */
+/** The engine reports hundredths; bands compare round(p, 2). */
 const hundredths = (p: number) => Math.round(p * 100) / 100;
 
 /** p is a probability in [0, 1]. Missing means the article was not scored. */
 export function bandFor(p: number | null | undefined, c: Pick<Cutoffs, "x" | "y">): Band {
   if (p == null || !Number.isFinite(p)) return "unscored";
+  if (c.x == null || c.y == null) return "estimate";
   const q = hundredths(p);
   if (q <= 0) return "zero";
   if (q < c.x) return "low";
@@ -59,7 +68,8 @@ export function shownFor(id: string, display: Record<string, number> | undefined
   return { p, band, screenedOnly: !judged && p != null };
 }
 
-const RANK: Record<Band, number> = { unscored: 0, zero: 1, low: 2, mid: 3, high: 4 };
+// "estimate" never mixes with the rated bands: one response is either rated or not.
+const RANK: Record<Band, number> = { unscored: 0, zero: 1, estimate: 2, low: 2, mid: 3, high: 4 };
 
 /** The strongest article among ids (band first, then p), for a section ring. */
 export function strongestOf(ids: Iterable<string>, display: Record<string, number> | undefined, rerank: Record<string, number> | undefined, c: Pick<Cutoffs, "x" | "y">): Shown | undefined {
@@ -75,16 +85,18 @@ export function strongestOf(ids: Iterable<string>, display: Record<string, numbe
 
 export const BAND_LABEL: Record<Band, string> = {
   unscored: "Not scored",
-  zero: "No Jev score",
+  estimate: "Estimate only",
+  zero: "No relevance score",
   low: "Unlikely to apply",
   mid: "Might apply · check this",
   high: "Likely applies · address this",
 };
 
-/** Short form for aria-labels: "Jev relevance 34%: might apply". */
+/** Short form for aria-labels: "Relevance estimate 34%: might apply". */
 export const BAND_SHORT: Record<Band, string> = {
   unscored: "not scored",
-  zero: "no Jev score",
+  estimate: "estimate only",
+  zero: "no relevance score",
   low: "unlikely to apply",
   mid: "might apply",
   high: "likely applies",
@@ -138,7 +150,7 @@ export function pruneToc(toc: CodeToc, keep: (articleId: string) => boolean): Co
 export type Filter = "all" | "attention" | "maybe";
 
 export function filterKeep(filter: Filter, display: Record<string, number> | undefined, c: Cutoffs, rerank?: Record<string, number>): (id: string) => boolean {
-  if (filter === "all" || !display) return () => true;
+  if (filter === "all" || !display || !c.rated) return () => true;
   const want: Band = filter === "attention" ? "high" : "mid";
   return (id) => shownFor(id, display, rerank, c).band === want;
 }

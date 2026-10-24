@@ -9,6 +9,7 @@ from email import policy
 from email.message import Message
 from email.parser import BytesParser
 from typing import Callable
+from urllib.parse import quote
 
 import psycopg
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
@@ -23,10 +24,11 @@ from .codes import CodeDbMissing, Codes
 from .export import (EXPORT_FAILED_DETAIL, ExportBlocked, ExportError, FORM_NOT_FOUND_DETAIL, FormNotFound,
                      export_case)
 from .http_guard import HttpGuard
+from .jurisdictions import export_notice
 from .identify import Judge
 from .llm_gate import client_ip_from, search_retry_after
 from .models import Case, Fact, Jurisdiction, SectionCRow
-from .retention import maybe_purge
+from .retention import maybe_purge, purge_now
 from .section_c import section_c_rows
 from .store import CaseStore, FileTooLarge, InvalidAttachment, VersionConflict, assert_durable_when_hosted, open_store
 from .uploads import (MULTIPART_MAX_OVERHEAD_BYTES, MULTIPART_MAX_PARTS,
@@ -134,7 +136,8 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
     app.add_middleware(CORSMiddleware, allow_origin_regex=r'http://(localhost|127\.0\.0\.1)(:\d+)?',
                        allow_origins=[os.environ.get('BATATIS_WEB_ORIGIN', 'http://localhost:5480').rstrip('/')],
                        allow_credentials=True, allow_methods=['*'], allow_headers=['*'],
-                       expose_headers=['Retry-After', 'X-Batatis-Notice', 'Content-Disposition'])
+                       expose_headers=['Retry-After', 'X-Batatis-Notice', 'X-Batatis-Jurisdiction-Notice',
+                                       'Content-Disposition'])
     app.add_middleware(HttpGuard, sweep=sweep)
 
     def code() -> Codes:
@@ -149,7 +152,7 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
     def purge_cases(*, force: bool = False) -> int:
         current = cases()
         try:
-            return current.purge_expired() if force else maybe_purge(current)
+            return purge_now(current) if force else maybe_purge(current)
         except Exception as exc:
             logger.warning('case purge failed: %s', type(exc).__name__)
             raise HTTPException(503, 'case purge failed', headers={'Cache-Control': 'no-store'}) from None
@@ -223,6 +226,27 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
             raise HTTPException(404, 'case not found')
         return {key: saved[key] for key in ('id', 'name', 'size', 'content_type')}
 
+    @app.get('/cases/{case_id}/files')
+    def list_files(case_id: str):
+        files = cases().list_files(case_id)
+        if files is None:
+            raise HTTPException(404, 'case not found')
+        return {'items': files}
+
+    @app.get('/cases/{case_id}/files/{file_id}', response_class=Response)
+    def download_file(case_id: str, file_id: str):
+        saved = cases().get_file(case_id, file_id)
+        if saved is None:
+            raise HTTPException(404, 'file not found', headers={'Cache-Control': 'no-store'})
+        # A supplied name is display metadata, never a path, MIME type or raw header.
+        name = re.split(r'[/\\]', saved['name'])[-1]
+        name = ''.join(char for char in name if ord(char) >= 32 and ord(char) != 127) or 'document.pdf'
+        fallback = re.sub(r'[^A-Za-z0-9 ._()-]', '_', name)
+        headers = {'Content-Disposition': f'attachment; filename="{fallback}"; filename*=UTF-8\'\'{quote(name, safe="")}',
+                   'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff',
+                   'Content-Security-Policy': "sandbox; default-src 'none'"}
+        return Response(saved['data'], media_type='application/pdf', headers=headers)
+
     @app.delete('/cases/{case_id}', status_code=204)
     def delete_case(case_id: str):
         if not cases().delete(case_id):
@@ -245,8 +269,12 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
             logger.error('%s %s', EXPORT_FAILED_DETAIL, exc)
             raise HTTPException(500, EXPORT_FAILED_DETAIL) from None
         name = f'{case_id}-scc-variance{"-DRAFT" if draft else ""}.pdf'
-        return Response(res.pdf, media_type='application/pdf',
-                        headers={'Content-Disposition': f'attachment; filename="{name}"'})
+        headers = {'Content-Disposition': f'attachment; filename="{name}"'}
+        notice = export_notice(case)   # from the case's jurisdiction pack; never a block
+        if notice:
+            # Its own header, so the standard privacy notice in X-Batatis-Notice is kept.
+            headers['X-Batatis-Jurisdiction-Notice'] = notice
+        return Response(res.pdf, media_type='application/pdf', headers=headers)
 
     @app.get('/code/search')
     def code_search(request: Request, q: str, division: str | None = Query('B', pattern='^[ABC]$'),
@@ -311,8 +339,18 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
     app.include_router(__import__('engine.routes_auth', fromlist=['create_router']).create_router(cases))
     app.include_router(__import__('engine.routes_review', fromlist=['create_router']).create_router(cases, code))
     app.include_router(__import__('engine.routes_assist', fromlist=['create_router']).create_router(cases, code))
+    app.include_router(__import__('engine.routes_voice', fromlist=['create_router']).create_router(cases))
+    voice_relay = __import__('engine.routes_voice', fromlist=['create_relay']).create_relay(cases, code)
+    app.mount('/voice/relay', voice_relay)
+    app.mount('/api/voice/relay', voice_relay)
+    app.include_router(__import__('engine.routes_intake', fromlist=['create_router']).create_router(cases, code))
     app.include_router(__import__('engine.routes_relevance', fromlist=['create_router']).create_router(
         cases, code, relevance_judge_factory))
+    app.include_router(__import__('engine.routes_identify', fromlist=['create_router']).create_router(cases, code))
+    app.include_router(__import__('engine.routes_package_review', fromlist=['create_router']).create_router(cases, code))
+    app.include_router(__import__('engine.routes_jurisdictions', fromlist=['create_router']).create_router(cases))
+    app.include_router(__import__('engine.routes_rules', fromlist=['create_router']).create_router(cases))
+    app.include_router(__import__('engine.routes_checklists', fromlist=['create_router']).create_router(cases))
     return app
 
 

@@ -1,0 +1,37 @@
+# Batatis — Python dependencies for running the project locally.
+#
+#   python3.12 -m venv .venv
+#   .venv/bin/pip install -r requirements.txt      # Windows: .venv\Scripts\pip install -r requirements.txt
+#
+# This file is the union of engine/requirements.txt and codedb/requirements.txt, so one
+# install covers the FastAPI engine, the code database and the PDF export. Keep the pins
+# in step with those two files when they change.
+#
+# The web app is Node, not pip: run `npm ci --prefix web` (Node.js 22.12 or newer).
+# No .env is needed: the offline path runs with BATATIS_LIVE=0 BATATIS_LIVE_ELEPHANT=0.
+# See docs/local-development.md for the start commands and the code-database build.
+
+# --- Engine (engine/requirements.txt) -----------------------------------------
+fastapi>=0.115
+uvicorn>=0.30
+python-dotenv==1.2.4  # Uvicorn --env-file: parse server configuration; never shell-source it.
+pydantic>=2.7
+httpx>=0.27
+websockets>=15,<16  # Server-owned, bounded realtime voice relay; no browser provider credential.
+psycopg[binary]>=3.2
+anthropic>=1.0
+PyJWT[crypto]>=2.10  # OIDC RS256 signature, issuer/audience/expiry validation
+pypdf>=6.0
+pypdfium2>=5.14.0,<6  # Tightest pin: codedb build needs >=5.14.0,<6; engine and precedents need >=4.30
+reportlab>=4.0,<5  # BSD licence; appendix pages for the SCC form export
+
+# --- Package review -----------------------------------------------------------
+# engine/review/pdf_reader.py imports PIL.ImageChops to compare annotation appearances.
+# Absent from engine/requirements.txt, so the officer package review fails without it.
+Pillow>=11,<13
+
+# --- Code database build (scripts/fetch_sources.py, python -m codedb build) ----
+fonttools>=4.39
+
+# --- Tests --------------------------------------------------------------------
+pytest>=8.0

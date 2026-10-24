@@ -1,6 +1,6 @@
 /** Return-with-message helpers. Pure. */
 import type { DecisionItemInput } from "../../api/accounts";
-import type { EngineGap } from "../../api/client";
+import type { EngineGap, ReviewQuestion } from "../../api/client";
 
 export const RETURN_MIN = 10;
 
@@ -11,10 +11,27 @@ export function returnableGaps(gaps: EngineGap[]): EngineGap[] {
 }
 
 /** Ticked gaps as decision items the applicant sees beside the message. */
-export function decisionItems(gaps: EngineGap[], ticked: ReadonlySet<string>): DecisionItemInput[] {
+export function decisionItems(gaps: ReturnChoice[], ticked: ReadonlySet<string>): DecisionItemInput[] {
   return gaps
     .filter((g) => ticked.has(g.id))
     .map((g) => ({ gap_id: g.id.slice(0, 200), field: g.field ? g.field.slice(0, 200) : undefined, note: (g.message || g.fix_hint || "Please address this item.").slice(0, 2000) }));
+}
+
+export type ReturnChoice = Pick<EngineGap, "id" | "field" | "message" | "fix_hint"> & {
+  severity?: EngineGap["severity"];
+};
+
+/** Clarification is an explicit officer choice, never an invented completeness gap. */
+export function returnChoices(gaps: EngineGap[], questions: ReviewQuestion[]): ReturnChoice[] {
+  const choices: ReturnChoice[] = returnableGaps(gaps);
+  const ids = new Set(choices.map(item => item.id));
+  for (const q of questions) {
+    if (q.state === "answered" || ids.has(q.id)
+      || /^(professional[._]|responsible_professional)/.test(q.field)) continue;
+    ids.add(q.id);
+    choices.push({ id: q.id, field: `clarification.${q.id}`, message: `Please clarify: ${q.text}${q.answer ? ` Applicant answer: ${q.answer}.` : ""}${q.clarification?.answer ? ` Latest clarification: ${q.clarification.answer}` : ""}` });
+  }
+  return choices;
 }
 
 /**
@@ -26,10 +43,9 @@ export function localDraft(labels: string[]): string {
   if (!items.length) return "";
   return [
     "Thank you for your application. Before it can be accepted as administratively complete, please address the following:",
+    "The requested items are listed below this note.",
     "",
-    ...items.map((l) => `- ${l}`),
-    "",
-    "Resend the application once these are in place.",
+    "Review your corrections, then Resubmit on Application. The officer will confirm them during review.",
   ].join("\n");
 }
 
@@ -37,7 +53,9 @@ export function localDraft(labels: string[]): string {
 export function draftQuestion(labels: string[]): string {
   return [
     "Draft a short, polite note from the Safety Codes Officer to the applicant, returning the application for administrative information only.",
-    "Ask them to address these items, one bullet each, without judging the design or saying whether it complies:",
+    "Write only a brief introduction and next step. The checked items will be displayed separately below your note: do not repeat or list them in the note.",
+    "Ask the applicant to review their corrections, then Resubmit on Application. Do not judge the design or say whether it complies.",
+    "Checked items (context only):",
     ...labels.map((l) => `- ${l}`),
   ].join("\n").slice(0, 1500);
 }

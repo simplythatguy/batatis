@@ -1,0 +1,946 @@
+{
+ "note": "Typed intake facts for the 60 development cases, for engine/tests/test_intake_extract.py. Each label cites where it comes from: \"known_facts\" (the exact string in the case file) or \"description\" (an exact phrase of the description, used where the description states a typed fact that known_facts leave out). Agent-written 2026-10-21 by the WP-21 code agent after reading the cases and while writing the rules, so the score is in-sample. Model-checked, not human-verified.",
+ "fields": [
+  "applicant_role",
+  "storeys",
+  "building_area_m2",
+  "floor_area_m2",
+  "dwelling_units",
+  "occupancy",
+  "sprinklered",
+  "building_height_m",
+  "top_floor_height_m",
+  "limiting_distance_m",
+  "span_m",
+  "part4_design",
+  "scope",
+  "municipality"
+ ],
+ "cases": {
+  "dev-001": {
+   "storeys": {
+    "value": 2,
+    "from": "known_facts",
+    "text": "two-storey house; building area 150 m2"
+   },
+   "building_area_m2": {
+    "value": 150,
+    "from": "known_facts",
+    "text": "two-storey house; building area 150 m2"
+   },
+   "occupancy": {
+    "value": "single_family",
+    "from": "known_facts",
+    "text": "single detached house"
+   },
+   "limiting_distance_m": {
+    "value": 0.3,
+    "from": "known_facts",
+    "text": "limiting distance 0.3 m on the north side"
+   }
+  },
+  "dev-002": {
+   "storeys": {
+    "value": 2,
+    "from": "known_facts",
+    "text": "two storeys"
+   },
+   "building_area_m2": {
+    "value": 500,
+    "from": "known_facts",
+    "text": "six adjacent fee-simple parcels; party walls on parcel boundaries; total building area 500 m2"
+   },
+   "occupancy": {
+    "value": "multi_family",
+    "from": "known_facts",
+    "text": "six houses in one row"
+   }
+  },
+  "dev-003": {
+   "storeys": {
+    "value": 3,
+    "from": "known_facts",
+    "text": "three storeys, twelve dwelling units, wood frame"
+   },
+   "dwelling_units": {
+    "value": 12,
+    "from": "known_facts",
+    "text": "three storeys, twelve dwelling units, wood frame"
+   },
+   "occupancy": {
+    "value": "multi_family",
+    "from": "description",
+    "text": "wood-frame apartment"
+   },
+   "building_area_m2": {
+    "value": 480,
+    "from": "known_facts",
+    "text": "building area 480 m2"
+   },
+   "applicant_role": {
+    "value": "contractor",
+    "from": "description",
+    "text": "Mechanical contractor here"
+   }
+  },
+  "dev-004": {
+   "storeys": {
+    "value": 2,
+    "from": "description",
+    "text": "two-storey side-by-side duplex"
+   },
+   "building_area_m2": {
+    "value": 240,
+    "from": "known_facts",
+    "text": "building area 240 m2"
+   },
+   "occupancy": {
+    "value": "multi_family",
+    "from": "known_facts",
+    "text": "duplex"
+   },
+   "applicant_role": {
+    "value": "architect-engineer",
+    "from": "description",
+    "text": "I'm the architect"
+   }
+  },
+  "dev-005": {
+   "applicant_role": {
+    "value": "manufacturer",
+    "from": "description",
+    "text": "We make a wood-plastic composite siding board"
+   },
+   "occupancy": {
+    "value": "multi_family",
+    "from": "description",
+    "text": "small apartment buildings"
+   }
+  },
+  "dev-006": {
+   "applicant_role": {
+    "value": "manufacturer",
+    "from": "description",
+    "text": "Our product is a 25 mm foil-faced polyiso board"
+   },
+   "municipality": {
+    "value": "Edmonton",
+    "from": "known_facts",
+    "text": "Edmonton"
+   }
+  },
+  "dev-007": {
+   "applicant_role": {
+    "value": "contractor",
+    "from": "description",
+    "text": "Renovation contractor."
+   },
+   "storeys": {
+    "value": 1,
+    "from": "known_facts",
+    "text": "single storey; building area 140 m2"
+   },
+   "occupancy": {
+    "value": "single_family",
+    "from": "known_facts",
+    "text": "single detached bungalow"
+   },
+   "building_area_m2": {
+    "value": 140,
+    "from": "known_facts",
+    "text": "single storey; building area 140 m2"
+   }
+  },
+  "dev-008": {
+   "applicant_role": {
+    "value": "homebuilder",
+    "from": "description",
+    "text": "For our next phase of two-storey single-family homes"
+   },
+   "storeys": {
+    "value": 2,
+    "from": "known_facts",
+    "text": "each home two storeys; building area 160 m2"
+   },
+   "occupancy": {
+    "value": "single_family",
+    "from": "known_facts",
+    "text": "single-family homes"
+   },
+   "building_area_m2": {
+    "value": 160,
+    "from": "known_facts",
+    "text": "each home two storeys; building area 160 m2"
+   }
+  },
+  "dev-009": {
+   "applicant_role": {
+    "value": "manufacturer",
+    "from": "description",
+    "text": "We manufacture an insulated metal panel"
+   },
+   "occupancy": {
+    "value": "single_family",
+    "from": "known_facts",
+    "text": "intended for houses across Alberta"
+   },
+   "scope": {
+    "value": "jurisdiction",
+    "from": "known_facts",
+    "text": "intended for houses across Alberta"
+   }
+  },
+  "dev-010": {
+   "applicant_role": {
+    "value": "owner",
+    "from": "known_facts",
+    "text": "house proposed for re-siding by its owner"
+   },
+   "occupancy": {
+    "value": "single_family",
+    "from": "known_facts",
+    "text": "house proposed for re-siding by its owner"
+   },
+   "limiting_distance_m": {
+    "value": 0.5,
+    "from": "known_facts",
+    "text": "east wall 0.5 m from the property line"
+   }
+  },
+  "dev-011": {
+   "applicant_role": {
+    "value": "manufacturer",
+    "from": "description",
+    "text": "We build factory panelized wall systems for houses"
+   },
+   "storeys": {
+    "value": 2,
+    "from": "known_facts",
+    "text": "two-storey houses"
+   },
+   "occupancy": {
+    "value": "single_family",
+    "from": "known_facts",
+    "text": "two-storey houses"
+   }
+  },
+  "dev-012": {
+   "applicant_role": {
+    "value": "designer",
+    "from": "description",
+    "text": "Designer on a custom home"
+   },
+   "occupancy": {
+    "value": "single_family",
+    "from": "known_facts",
+    "text": "custom single-family home"
+   }
+  },
+  "dev-013": {
+   "storeys": {
+    "value": 4,
+    "from": "known_facts",
+    "text": "four storeys"
+   },
+   "sprinklered": {
+    "value": "yes",
+    "from": "known_facts",
+    "text": "sprinklered"
+   },
+   "occupancy": {
+    "value": "multi_family",
+    "from": "known_facts",
+    "text": "residential, eight units per floor"
+   },
+   "floor_area_m2": {
+    "value": 600,
+    "from": "known_facts",
+    "text": "about 600 m2 per floor"
+   }
+  },
+  "dev-014": {
+   "storeys": {
+    "value": 3,
+    "from": "known_facts",
+    "text": "three storeys"
+   },
+   "occupancy": {
+    "value": "multi_family",
+    "from": "known_facts",
+    "text": "six apartments"
+   },
+   "floor_area_m2": {
+    "value": 280,
+    "from": "known_facts",
+    "text": "about 280 m2 per floor"
+   },
+   "dwelling_units": {
+    "value": 6,
+    "from": "known_facts",
+    "text": "six apartments"
+   }
+  },
+  "dev-015": {
+   "applicant_role": {
+    "value": "owner",
+    "from": "description",
+    "text": "my two-storey house"
+   },
+   "storeys": {
+    "value": 2,
+    "from": "known_facts",
+    "text": "two-storey single-family house"
+   },
+   "occupancy": {
+    "value": "single_family",
+    "from": "known_facts",
+    "text": "two-storey single-family house"
+   }
+  },
+  "dev-016": {
+   "storeys": {
+    "value": 5,
+    "from": "known_facts",
+    "text": "five storeys"
+   },
+   "sprinklered": {
+    "value": "yes",
+    "from": "known_facts",
+    "text": "sprinklered"
+   },
+   "occupancy": {
+    "value": "business",
+    "from": "known_facts",
+    "text": "office"
+   }
+  },
+  "dev-017": {
+   "applicant_role": {
+    "value": "contractor",
+    "from": "description",
+    "text": "Design-build contractor"
+   },
+   "storeys": {
+    "value": 8,
+    "from": "known_facts",
+    "text": "eight storeys"
+   },
+   "dwelling_units": {
+    "value": 40,
+    "from": "known_facts",
+    "text": "forty dwelling units"
+   },
+   "occupancy": {
+    "value": "multi_family",
+    "from": "known_facts",
+    "text": "residential"
+   }
+  },
+  "dev-018": {
+   "applicant_role": {
+    "value": "architect-engineer",
+    "from": "description",
+    "text": "Structural engineer carrying out Part 4 design"
+   },
+   "storeys": {
+    "value": 1,
+    "from": "known_facts",
+    "text": "single-storey warehouse"
+   },
+   "occupancy": {
+    "value": "industrial",
+    "from": "known_facts",
+    "text": "single-storey warehouse"
+   },
+   "part4_design": {
+    "value": true,
+    "from": "known_facts",
+    "text": "structural design under Part 4"
+   }
+  },
+  "dev-019": {
+   "applicant_role": {
+    "value": "manufacturer",
+    "from": "description",
+    "text": "We supply curtain wall and rainscreen cladding"
+   },
+   "storeys": {
+    "value": 20,
+    "from": "known_facts",
+    "text": "cladding for a 20-storey tower"
+   },
+   "part4_design": {
+    "value": true,
+    "from": "known_facts",
+    "text": "structural cladding-anchor design under Part 4"
+   }
+  },
+  "dev-020": {},
+  "dev-021": {
+   "occupancy": {
+    "value": "single_family",
+    "from": "known_facts",
+    "text": "new house"
+   }
+  },
+  "dev-022": {
+   "scope": {
+    "value": "jurisdiction",
+    "from": "known_facts",
+    "text": "wants acceptance in Alberta"
+   }
+  },
+  "dev-023": {
+   "applicant_role": {
+    "value": "owner",
+    "from": "description",
+    "text": "my detached garage"
+   }
+  },
+  "dev-024": {
+   "applicant_role": {
+    "value": "contractor",
+    "from": "description",
+    "text": "Plumbing contractor."
+   }
+  },
+  "dev-025": {},
+  "dev-026": {
+   "storeys": {
+    "value": 1,
+    "from": "known_facts",
+    "text": "one-storey community hall"
+   },
+   "occupancy": {
+    "value": "assembly",
+    "from": "known_facts",
+    "text": "one-storey community hall"
+   },
+   "building_area_m2": {
+    "value": 800,
+    "from": "known_facts",
+    "text": "building area 800 m2"
+   },
+   "sprinklered": {
+    "value": "no",
+    "from": "known_facts",
+    "text": "not sprinklered"
+   }
+  },
+  "dev-027": {
+   "storeys": {
+    "value": 8,
+    "from": "known_facts",
+    "text": "eight-storey office"
+   },
+   "occupancy": {
+    "value": "business",
+    "from": "known_facts",
+    "text": "eight-storey office"
+   },
+   "floor_area_m2": {
+    "value": 1200,
+    "from": "known_facts",
+    "text": "floor area 1200 m2"
+   }
+  },
+  "dev-028": {
+   "storeys": {
+    "value": 6,
+    "from": "known_facts",
+    "text": "six storeys and eighteen apartments"
+   },
+   "dwelling_units": {
+    "value": 18,
+    "from": "known_facts",
+    "text": "six storeys and eighteen apartments"
+   },
+   "occupancy": {
+    "value": "multi_family",
+    "from": "known_facts",
+    "text": "six storeys and eighteen apartments"
+   }
+  },
+  "dev-029": {
+   "storeys": {
+    "value": 20,
+    "from": "known_facts",
+    "text": "twenty-storey apartment"
+   },
+   "dwelling_units": {
+    "value": 120,
+    "from": "known_facts",
+    "text": "120 dwelling units"
+   },
+   "occupancy": {
+    "value": "multi_family",
+    "from": "known_facts",
+    "text": "twenty-storey apartment"
+   }
+  },
+  "dev-030": {
+   "storeys": {
+    "value": 4,
+    "from": "known_facts",
+    "text": "four-storey office"
+   },
+   "occupancy": {
+    "value": "business",
+    "from": "known_facts",
+    "text": "four-storey office"
+   },
+   "building_area_m2": {
+    "value": 900,
+    "from": "known_facts",
+    "text": "building area 900 m2"
+   }
+  },
+  "dev-031": {
+   "storeys": {
+    "value": 7,
+    "from": "known_facts",
+    "text": "seven-storey office"
+   },
+   "occupancy": {
+    "value": "business",
+    "from": "known_facts",
+    "text": "seven-storey office"
+   },
+   "building_area_m2": {
+    "value": 1100,
+    "from": "known_facts",
+    "text": "building area 1100 m2"
+   },
+   "sprinklered": {
+    "value": "no",
+    "from": "known_facts",
+    "text": "building not sprinklered"
+   }
+  },
+  "dev-032": {
+   "applicant_role": {
+    "value": "manufacturer",
+    "from": "description",
+    "text": "We manufacture fire-retardant-treated wood cladding"
+   },
+   "storeys": {
+    "value": 6,
+    "from": "known_facts",
+    "text": "six-storey sprinklered office"
+   },
+   "sprinklered": {
+    "value": "yes",
+    "from": "known_facts",
+    "text": "six-storey sprinklered office"
+   },
+   "occupancy": {
+    "value": "business",
+    "from": "known_facts",
+    "text": "six-storey sprinklered office"
+   }
+  },
+  "dev-033": {
+   "storeys": {
+    "value": 15,
+    "from": "known_facts",
+    "text": "fifteen-storey residential tower"
+   },
+   "dwelling_units": {
+    "value": 100,
+    "from": "known_facts",
+    "text": "100 dwelling units"
+   },
+   "occupancy": {
+    "value": "multi_family",
+    "from": "known_facts",
+    "text": "fifteen-storey residential tower"
+   },
+   "top_floor_height_m": {
+    "value": 42,
+    "from": "known_facts",
+    "text": "top-storey floor 42 m above grade"
+   }
+  },
+  "dev-034": {
+   "storeys": {
+    "value": 12,
+    "from": "known_facts",
+    "text": "twelve-storey residential tower"
+   },
+   "dwelling_units": {
+    "value": 80,
+    "from": "known_facts",
+    "text": "eighty apartments"
+   },
+   "occupancy": {
+    "value": "multi_family",
+    "from": "known_facts",
+    "text": "eighty apartments"
+   },
+   "top_floor_height_m": {
+    "value": 33,
+    "from": "known_facts",
+    "text": "highest occupied floor 33 m above grade"
+   }
+  },
+  "dev-035": {
+   "applicant_role": {
+    "value": "manufacturer",
+    "from": "description",
+    "text": "We want to supply CLT structural walls"
+   },
+   "storeys": {
+    "value": 10,
+    "from": "known_facts",
+    "text": "ten-storey encapsulated mass timber apartment"
+   },
+   "dwelling_units": {
+    "value": 60,
+    "from": "known_facts",
+    "text": "sixty units"
+   },
+   "occupancy": {
+    "value": "multi_family",
+    "from": "known_facts",
+    "text": "ten-storey encapsulated mass timber apartment"
+   }
+  },
+  "dev-036": {
+   "storeys": {
+    "value": 8,
+    "from": "known_facts",
+    "text": "eight-storey encapsulated mass timber apartment"
+   },
+   "dwelling_units": {
+    "value": 40,
+    "from": "known_facts",
+    "text": "forty units"
+   },
+   "occupancy": {
+    "value": "multi_family",
+    "from": "known_facts",
+    "text": "eight-storey encapsulated mass timber apartment"
+   }
+  },
+  "dev-037": {
+   "storeys": {
+    "value": 8,
+    "from": "known_facts",
+    "text": "eight-storey encapsulated mass timber apartment"
+   },
+   "dwelling_units": {
+    "value": 40,
+    "from": "known_facts",
+    "text": "forty units"
+   },
+   "occupancy": {
+    "value": "multi_family",
+    "from": "known_facts",
+    "text": "eight-storey encapsulated mass timber apartment"
+   }
+  },
+  "dev-038": {
+   "storeys": {
+    "value": 9,
+    "from": "known_facts",
+    "text": "nine-storey apartment"
+   },
+   "dwelling_units": {
+    "value": 60,
+    "from": "known_facts",
+    "text": "sixty dwellings"
+   },
+   "occupancy": {
+    "value": "multi_family",
+    "from": "known_facts",
+    "text": "nine-storey apartment"
+   }
+  },
+  "dev-039": {
+   "building_area_m2": {
+    "value": 2500,
+    "from": "known_facts",
+    "text": "building area 2500 m2"
+   },
+   "occupancy": {
+    "value": "assembly",
+    "from": "known_facts",
+    "text": "new arena"
+   },
+   "part4_design": {
+    "value": true,
+    "from": "known_facts",
+    "text": "structural design under Part 4"
+   }
+  },
+  "dev-040": {
+   "building_height_m": {
+    "value": 70,
+    "from": "known_facts",
+    "text": "office tower height 70 m"
+   },
+   "occupancy": {
+    "value": "business",
+    "from": "known_facts",
+    "text": "office tower height 70 m"
+   },
+   "part4_design": {
+    "value": true,
+    "from": "known_facts",
+    "text": "main structural wind design under Part 4"
+   }
+  },
+  "dev-041": {
+   "applicant_role": {
+    "value": "manufacturer",
+    "from": "description",
+    "text": "We are supplying proprietary timber load-bearing wall members"
+   },
+   "storeys": {
+    "value": 4,
+    "from": "known_facts",
+    "text": "four-storey office"
+   },
+   "occupancy": {
+    "value": "business",
+    "from": "known_facts",
+    "text": "four-storey office"
+   },
+   "part4_design": {
+    "value": true,
+    "from": "known_facts",
+    "text": "Part 4 structural design"
+   }
+  },
+  "dev-042": {
+   "occupancy": {
+    "value": "industrial",
+    "from": "known_facts",
+    "text": "Part 4 industrial building"
+   },
+   "part4_design": {
+    "value": true,
+    "from": "known_facts",
+    "text": "Part 4 industrial building"
+   }
+  },
+  "dev-043": {
+   "occupancy": {
+    "value": "assembly",
+    "from": "known_facts",
+    "text": "municipal library floor"
+   },
+   "part4_design": {
+    "value": true,
+    "from": "known_facts",
+    "text": "Part 4 design"
+   }
+  },
+  "dev-044": {
+   "occupancy": {
+    "value": "business",
+    "from": "known_facts",
+    "text": "Part 4 continuous multi-span office floor"
+   },
+   "part4_design": {
+    "value": true,
+    "from": "known_facts",
+    "text": "Part 4 continuous multi-span office floor"
+   }
+  },
+  "dev-045": {
+   "storeys": {
+    "value": 4,
+    "from": "known_facts",
+    "text": "four-storey office"
+   },
+   "occupancy": {
+    "value": "business",
+    "from": "known_facts",
+    "text": "four-storey office"
+   },
+   "part4_design": {
+    "value": true,
+    "from": "known_facts",
+    "text": "Part 4 foundation design"
+   }
+  },
+  "dev-046": {
+   "part4_design": {
+    "value": true,
+    "from": "known_facts",
+    "text": "Part 4 design"
+   }
+  },
+  "dev-047": {
+   "storeys": {
+    "value": 3,
+    "from": "known_facts",
+    "text": "warehouse increased from one storey to three"
+   },
+   "occupancy": {
+    "value": "industrial",
+    "from": "known_facts",
+    "text": "warehouse increased from one storey to three"
+   },
+   "part4_design": {
+    "value": true,
+    "from": "known_facts",
+    "text": "Part 4 alteration and foundation design"
+   }
+  },
+  "dev-048": {
+   "storeys": {
+    "value": 2,
+    "from": "known_facts",
+    "text": "two-storey detached house"
+   },
+   "occupancy": {
+    "value": "single_family",
+    "from": "known_facts",
+    "text": "two-storey detached house"
+   },
+   "building_area_m2": {
+    "value": 180,
+    "from": "known_facts",
+    "text": "building area 180 m2"
+   }
+  },
+  "dev-049": {
+   "storeys": {
+    "value": 1,
+    "from": "known_facts",
+    "text": "single storey; building area 220 m2"
+   },
+   "occupancy": {
+    "value": "single_family",
+    "from": "known_facts",
+    "text": "new detached house"
+   },
+   "building_area_m2": {
+    "value": 220,
+    "from": "known_facts",
+    "text": "single storey; building area 220 m2"
+   }
+  },
+  "dev-050": {
+   "storeys": {
+    "value": 2,
+    "from": "known_facts",
+    "text": "two storeys; building area 200 m2"
+   },
+   "occupancy": {
+    "value": "single_family",
+    "from": "known_facts",
+    "text": "detached wood-framed home"
+   },
+   "building_area_m2": {
+    "value": 200,
+    "from": "known_facts",
+    "text": "two storeys; building area 200 m2"
+   },
+   "span_m": {
+    "value": 18,
+    "from": "known_facts",
+    "text": "18 m structural-member span"
+   }
+  },
+  "dev-051": {
+   "applicant_role": {
+    "value": "owner",
+    "from": "description",
+    "text": "my two-storey detached house"
+   },
+   "storeys": {
+    "value": 2,
+    "from": "known_facts",
+    "text": "two storeys; building area 160 m2"
+   },
+   "occupancy": {
+    "value": "single_family",
+    "from": "known_facts",
+    "text": "detached house with one internal secondary suite"
+   },
+   "building_area_m2": {
+    "value": 160,
+    "from": "known_facts",
+    "text": "two storeys; building area 160 m2"
+   },
+   "dwelling_units": {
+    "value": 2,
+    "from": "known_facts",
+    "text": "two dwellings total"
+   }
+  },
+  "dev-052": {
+   "storeys": {
+    "value": 2,
+    "from": "description",
+    "text": "new two-storey detached house"
+   },
+   "occupancy": {
+    "value": "single_family",
+    "from": "known_facts",
+    "text": "new detached house with one secondary suite"
+   },
+   "building_area_m2": {
+    "value": 180,
+    "from": "known_facts",
+    "text": "building area 180 m2"
+   }
+  },
+  "dev-053": {
+   "occupancy": {
+    "value": "business",
+    "from": "known_facts",
+    "text": "new office proposed"
+   }
+  },
+  "dev-054": {},
+  "dev-055": {},
+  "dev-056": {
+   "part4_design": {
+    "value": true,
+    "from": "known_facts",
+    "text": "Part 4 roof snow design"
+   }
+  },
+  "dev-057": {},
+  "dev-058": {
+   "storeys": {
+    "value": 8,
+    "from": "known_facts",
+    "text": "eight-storey encapsulated mass timber apartment"
+   },
+   "dwelling_units": {
+    "value": 60,
+    "from": "known_facts",
+    "text": "sixty dwelling units"
+   },
+   "occupancy": {
+    "value": "multi_family",
+    "from": "known_facts",
+    "text": "eight-storey encapsulated mass timber apartment"
+   }
+  },
+  "dev-059": {
+   "occupancy": {
+    "value": "single_family",
+    "from": "known_facts",
+    "text": "natural gas supply piping and regulator arrangement for house cooktop"
+   }
+  },
+  "dev-060": {
+   "applicant_role": {
+    "value": "owner",
+    "from": "description",
+    "text": "For my rural property"
+   },
+   "occupancy": {
+    "value": "single_family",
+    "from": "description",
+    "text": "the sewer connection inside the house"
+   }
+  }
+ }
+}

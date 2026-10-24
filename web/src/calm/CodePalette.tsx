@@ -78,16 +78,17 @@ export function CodePalette({ open, onClose }: { open: boolean; onClose: () => v
       }
       return out;
     }
-    if (rel.display) {
+    if (rel.display && rel.cutoffs.rated) {
       return rankedIn(rel.display, rel.cutoffs, ["high", "mid"], rel.rerank).slice(0, 10).map((r) => ({
         kind: "ranked" as const, key: `rank-${r.id}`, id: r.id, target: r.id, title: index.get(r.id)?.title ?? "", path: index.get(r.id)?.path ?? "", p: r.p,
       }));
     }
     const out: Row[] = [];
-    if (!rel.blocked && rel.phase !== "running") out.push({ kind: "score", key: "score", title: "Score relevance for my project" });
+    // Already scored (estimates only): scoring again costs money, so it waits for the library's button.
+    if (rel.scope === "application" && !rel.display && !rel.blocked && rel.phase !== "running") out.push({ kind: "score", key: "score", title: "Score relevance for my project" });
     if (toc.state === "ready") for (const p of toc.value.parts) out.push({ kind: "part", key: `part-${p.part}`, part: p.part, title: p.title ?? "" });
     return out;
-  }, [q, hits, rel.display, rel.cutoffs, rel.rerank, rel.blocked, rel.phase, index, toc]);
+  }, [q, hits, rel.scope, rel.display, rel.cutoffs, rel.rerank, rel.blocked, rel.phase, index, toc]);
 
   useEffect(() => { setActive(0); }, [q, rows.length]);
   useEffect(() => {
@@ -169,7 +170,7 @@ export function CodePalette({ open, onClose }: { open: boolean; onClose: () => v
       <div className="cf-palette-foot cf-faint cf-small">
         <span><span className="cf-kbd is-dark">↑</span> <span className="cf-kbd is-dark">↓</span> move</span>
         <span><span className="cf-kbd is-dark">↵</span> open in the library</span>
-        <span>Rings are Jev estimates, not compliance.</span>
+        <span>Rings are Batatis estimates, not compliance.</span>
       </div>
     </Modal>
   );

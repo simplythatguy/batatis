@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Callable
 
 from fastapi import APIRouter, HTTPException, Query, Request
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from .ccmc import CCMCRegistry, RegistrySearch, RegistryUnavailable
 from .codes import Codes
@@ -17,9 +17,21 @@ from .section_c import section_c_rows
 from .section_d import SectionDPlan, section_d_plan
 from .section_d_issues import SectionDIssue, section_d_issues
 from .llm_gate import client_ip_from, search_retry_after
-from .models import Case, Jurisdiction
+from .models import Case, Jurisdiction, SelectedArticle
 from .store import CaseBackend, VersionConflict
 from .account_models import reviewing_authority
+from .access import enforce_mutation
+from .identify.title import normalize_title
+
+
+class TitleRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    title: str = Field(min_length=1, max_length=500, strict=True)
+
+    @field_validator('title', mode='before')
+    @classmethod
+    def _single_line(cls, value):
+        return normalize_title(value)
 
 
 class SectionDRequest(BaseModel):
@@ -44,6 +56,21 @@ class JurisdictionRequest(BaseModel):
     expected_version: int = Field(ge=1, strict=True)
 
 
+class SelectedArticlesRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    selected_articles: list[SelectedArticle] = Field(max_length=500)
+    expected_version: int = Field(ge=1, strict=True)
+
+    @field_validator('selected_articles')
+    @classmethod
+    def _unique_cards(cls, value):
+        if len({item.id for item in value}) != len(value):
+            raise ValueError('selected card ids must be unique')
+        if len({item.provision for item in value}) != len(value):
+            raise ValueError('selected provisions must be unique')
+        return value
+
+
 def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
                   registry: CCMCRegistry | None = None) -> APIRouter:
     router = APIRouter(tags=['case building'])
@@ -54,6 +81,40 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
         if case is None:
             raise HTTPException(404, 'case not found')
         return case
+
+    @router.put('/cases/{case_id}/selected-articles', response_model=Case)
+    def save_selected_articles(case_id: str, body: SelectedArticlesRequest):
+        store = cases()
+        snapshot = store.get_snapshot(case_id)
+        if snapshot is None:
+            raise HTTPException(404, 'case not found')
+        case, version = snapshot
+        enforce_mutation(case)
+        if body.expected_version != version:
+            raise HTTPException(409, 'case was updated concurrently')
+        if body.selected_articles:
+            codes = code()
+            for article in body.selected_articles:
+                if codes.provision(article.provision, 'B') is None:
+                    raise HTTPException(404, 'provision not found')
+        # This snapshot never confirms a benchmark, creates citation facts, or rebuilds C/D.
+        case.selected_articles = body.selected_articles
+        try:
+            return store.put(case, expected_version=version)
+        except VersionConflict as error:
+            if error.actual is None:
+                raise HTTPException(404, 'case not found') from error
+            raise HTTPException(409, 'case was updated concurrently') from error
+
+    @router.patch('/cases/{case_id}/title', response_model=Case)
+    def rename_title(case_id: str, body: TitleRequest):
+        try:
+            saved = cases().rename_title(case_id, body.title)
+        except VersionConflict as error:
+            raise HTTPException(409, 'case was updated concurrently') from error
+        if saved is None:
+            raise HTTPException(404, 'case not found')
+        return saved
 
     @router.put('/cases/{case_id}/jurisdiction', response_model=Case)
     def set_jurisdiction(case_id: str, body: JurisdictionRequest):

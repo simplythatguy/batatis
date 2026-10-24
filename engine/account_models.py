@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import get_args, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, model_validator
 
 from .models_ids import new_id, now
 
@@ -15,7 +15,8 @@ Authority = Literal['calgary', 'edmonton']
 def reviewing_authority(value: str | None) -> 'Authority | None':
     """Only authorities that have reviewers; anything else (e.g. alberta-other) is not reviewable."""
     return value if value in get_args(Authority) else None  # type: ignore[return-value]
-ApplicationStatus = Literal['draft', 'submitted', 'in_review', 'returned', 'accepted', 'withdrawn']
+ApplicationStatus = Literal['draft', 'submitted', 'in_review', 'returned', 'accepted', 'refused', 'withdrawn']
+DecisionOutcome = Literal['accept', 'return', 'refuse']
 
 
 class User(BaseModel):
@@ -33,6 +34,24 @@ class User(BaseModel):
 
 class UserResult(BaseModel):
     user: User
+
+
+class ApplicationPreferences(BaseModel):
+    archived: bool = False
+    pinned: bool = False
+
+
+class ApplicationPreferencesPatch(BaseModel):
+    """Omitted fields keep their stored value; explicit values must be booleans."""
+    model_config = ConfigDict(extra='forbid', json_schema_extra={'minProperties': 1})
+    archived: StrictBool = False
+    pinned: StrictBool = False
+
+    @model_validator(mode='after')
+    def _nonempty(self):
+        if not self.model_fields_set:
+            raise ValueError('Supply archived or pinned')
+        return self
 
 
 class Claim(BaseModel):
@@ -55,12 +74,36 @@ class DecisionItem(BaseModel):
 
 
 class Decision(BaseModel):
-    outcome: Literal['accept', 'return']
+    outcome: DecisionOutcome
     by_id: str
     by_name: str
     at: str = Field(default_factory=now)
     message: str
     items: list[DecisionItem] = Field(default_factory=list)
+
+
+class ReviewSnapshot(BaseModel):
+    """Stored application values at a return; expires and is deleted with its case."""
+    returned_at: str
+    authority: str | None
+    values: dict[str, str]
+
+
+class SubmissionChange(BaseModel):
+    field: str
+    before: str | None
+    after: str | None
+
+
+class Submission(BaseModel):
+    """A submission round, distinct from content versions and claim/release events."""
+    number: int = Field(ge=1)
+    at: str
+    by_id: str
+    authority: str
+    returned_at: str | None = None
+    comparison_available: bool = False
+    changes: list[SubmissionChange] = Field(default_factory=list)
 
 
 class StatusChange(BaseModel):
@@ -100,3 +143,5 @@ class ThreadMessage(BaseModel):
 
 class MessagesResult(BaseModel):
     messages: list[ThreadMessage]
+    # The authoritative current decision is independent of later conversational notices.
+    decision: Decision | None = None

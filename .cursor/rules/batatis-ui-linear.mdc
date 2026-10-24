@@ -1,5 +1,5 @@
 ---
-description: Default Batatis product UI — Linear-caliber system + Opus 5.5 for implement and review
+description: Batatis UI interaction quality under the calm design contract and current model profile.
 globs:
   - "**/*.{tsx,jsx,css,scss,vue,svelte,html}"
   - "**/components/**"
@@ -13,9 +13,9 @@ alwaysApply: false
 
 For **all** Batatis product UI / frontend / visual / UX work matching these globs:
 
-1. **Look:** Follow `.cursor/skills/batatis-ui-linear/SKILL.md` + `docs/design/tokens.css`. Charcoal layers, thin borders, Inter-like sans, 8px grid, sidebar+main. User need not say “Linear.”
-2. **Opus P0:** Neutral grey primary CTAs (not indigo fill); active nav faint fill only; shared gap source; gate complete/download while gaps open; no demo leakage; styled controls; nowrap labels in wrapping rows (no clipping); previews show real values (no `[placeholder]` / `present`); every control wired (nav = links, no `alert()`); no silent defaults; one derived data model; no "Required" label without a shared gap; checkbox = true 14px square, checked light fill + dark check. Formal seal = Opus 5.5 (Composer is provisional).
+1. **Look:** Follow `docs/design-system-calm.md` and `web/src/calm/`; use `.cursor/skills/batatis-ui-linear/SKILL.md` for P0 interaction rules. The historical charcoal look is superseded.
+2. **UI P0:** Neutral grey primary CTAs (not indigo fill); active nav faint fill only; shared gap source; gate complete/download while gaps open; no demo leakage; styled controls; nowrap labels in wrapping rows (no clipping); previews show real values (no `[placeholder]` / `present`); every control wired (nav = links, no `alert()`); no silent defaults; one derived data model; no "Required" label without a shared gap; checkbox = true 14px square, checked light fill + dark check. Formal review uses a fresh independent reviewer under `.cursor/rules/pstack-models.mdc`.
 3. **Simplify ruthlessly without dropping capabilities.**
-4. **Model:** Claude Opus 5.5 for UI implement **and** UI review.
+4. **Model:** GPT-6.1-Sol at max for UI implementation **and** independent UI review; `.cursor/rules/pstack-models.mdc` is the shared model policy.
 5. **Bug-free bar:** smoke `evals/ui-artifacts/smoke.mjs`; cite ≠ AI; confidence/no silent fills.
 6. **Attribution:** portability ≠ SCO UX; process fields ≠ evidence ladder.

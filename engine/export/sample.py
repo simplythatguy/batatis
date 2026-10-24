@@ -7,6 +7,7 @@ Run: python -m engine.export.sample [out_dir]     (default /tmp/batatis-export)
 """
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -15,18 +16,23 @@ from ..models import Case, EvidenceItem, Fact, Jurisdiction, Source
 from ..section_c import section_c_rows
 from ..section_d import section_d_plan
 
+FIXTURES = Path(__file__).parent / 'fixtures'
+
 # Continuous exterior sheathing insulation on a Part 9 wood-frame house. The applicant, firm and address are fictional.
 PROVISIONS = ['9.25.5.1.', '9.25.2.2.(1)', '9.23.17.2.(1)', '9.27.3.4.(1)', '9.32.1.3.(2)']
 
 FACTS = {
     'owner_name': 'SYNTHETIC - Example Homes Ltd. (EXAMPLE DATA)',
     'owner_rep_name': 'SYNTHETIC - J. Example (EXAMPLE DATA)',
-    'mailing_address': '000 Example Avenue NW, Edmonton (EXAMPLE DATA)',
+    'mailing_address': '000 Example Avenue NW (EXAMPLE DATA)',
     'request_date': '2026-10-20',
     'submitted_to_scc': False,
     'permit_number': 'BP-0000-00000 (EXAMPLE DATA)',
-    'municipal_address': '000 Example Crescent SW, Calgary (EXAMPLE DATA)',
+    'municipal_address': '000 Example Crescent SW (EXAMPLE DATA)',
     'lot': '0', 'block': '0', 'plan': 'EXAMPLE',
+    'owner_signature_date': '2026-10-20', 'owner_rep_signature_date': '2026-10-20',
+    # An explicit applicant "not applicable" fact: the lot is described by lot/block/plan, so ATS boxes show N/A.
+    'not_applicable.ats': 'SYNTHETIC: urban lot described by lot, block and plan; no ATS location applies.',
     'scope': 'site',
     'alternative_description': 'SYNTHETIC TEST: Continuous exterior sheathing insulation on a Part 9 wood-frame house. '
                                'This exercises administrative fields and contains no technical equivalency conclusion.',
@@ -68,10 +74,11 @@ def sample_case(codes: Codes, provisions: list[str] = PROVISIONS, facts: dict = 
                     source=Source(type='user_text', ref='synthetic-test-fixture:applicant', quote=str(value)))
 
     case = Case(title='SYNTHETIC BTRboard-like continuous sheathing insulation (test fixture)',
-                jurisdiction=Jurisdiction(id='calgary', name='City of Calgary'),
+                # Fixture data: a jurisdiction whose pack has a local-form notice, so exports exercise it.
+                jurisdiction=Jurisdiction(**json.loads((FIXTURES / 'sample-jurisdiction.json').read_text())),
                 facts=[synthetic_fact(k, v) for k, v in facts.items()],
                 provisions=provisions, section_c=section_c_rows(provisions, codes))
-    source_file = Path(__file__).parent / 'fixtures' / 'synthetic-evidence.txt'
+    source_file = FIXTURES / 'synthetic-evidence.txt'
     text = source_file.read_text()
     for n in range(1, 7):
         eid = f'synthetic_{n}'

@@ -1,53 +1,37 @@
 import { useEffect } from "react";
-import { engine, EngineError } from "./api/client";
 import { Application } from "./calm/Application";
 import { CodeLibrary } from "./calm/CodeLibrary";
+import { Comments } from "./calm/comments/Comments";
 import { Deck } from "./calm/QuestionDeck";
 import { Review } from "./calm/Review";
 import { resolveRoute, type Screen } from "./calm/routes";
 import { extraRoutes, isStandaloneRoute, useAuthRedirect } from "./calm/routes.extra";
-import { getSession, updateSession, useSession } from "./calm/session";
+import { updateSession, useSession } from "./calm/session";
 import { Shell } from "./calm/Shell";
 import { Start } from "./calm/Start";
 import { useFocusParam, useRoute } from "./router";
-import { uploadMessage } from "./rules";
 import { Accuracy } from "./screens/Accuracy";
 import { Officer } from "./screens/Officer";
 import { SectionC } from "./screens/SectionC";
 import { useCase } from "./store";
 
-/** Store effects the calm screens ask for: the check Start requested, and held PDF uploads. */
+/** Store effects the calm screens ask for: the reading Start requested, and held PDF uploads. */
 function CalmEffects() {
-  const { c, phase, engineId, requestCheck, dispatch } = useCase();
+  const { phase, engineId, readDescription, uploadFiles } = useCase();
   const session = useSession();
 
   useEffect(() => {
-    if (!session.checkAfterStart || phase !== "case") return;
-    updateSession({ checkAfterStart: false });
+    if (!session.readAfterStart || phase !== "case") return;
+    updateSession({ readAfterStart: false });
     // Explicit user action: the applicant pressed Start.
-    void requestCheck();
-  }, [session.checkAfterStart, phase, c, requestCheck]);
+    void readDescription();
+  }, [session.readAfterStart, phase, readDescription]);
 
+  // PDFs attached after the case exists upload in the save queue (intake reads them by id).
   useEffect(() => {
     if (!engineId || !session.held.length) return;
-    const held = getSession().held;
-    updateSession((s) => ({ held: [], uploading: [...s.uploading, ...held.map((h) => h.id)] }));
-    for (const { id, file } of held) {
-      if (!c.files.some((f) => f.id === id)) {
-        updateSession((s) => ({ uploading: s.uploading.filter((x) => x !== id) }));
-        continue;
-      }
-      engine
-        .upload(engineId, file)
-        .then(() => dispatch({ type: "setFileResult", id, error: null, read: true }))
-        .catch((e: unknown) => {
-          const status = e instanceof EngineError ? e.status : 0;
-          const detail = e instanceof EngineError ? e.detail : String(e);
-          dispatch({ type: "setFileResult", id, error: uploadMessage(status, detail), unreachable: status === 0 });
-        })
-        .finally(() => updateSession((s) => ({ uploading: s.uploading.filter((x) => x !== id) })));
-    }
-  }, [engineId, session.held, c.files, dispatch]);
+    void uploadFiles();
+  }, [engineId, session.held, uploadFiles]);
   return null;
 }
 
@@ -59,13 +43,13 @@ function normalHash(hash: string): string {
 }
 
 /** The four stages and the code library open in every state; the old screens need an application. */
-const OPEN_WITHOUT_CASE: ReadonlySet<Screen> = new Set(["start", "questions", "review", "application", "code"]);
+const OPEN_WITHOUT_CASE: ReadonlySet<Screen> = new Set(["start", "questions", "review", "application", "code", "comments"]);
 
 export function App() {
   const route = useRoute();
   // Signed-out visitors go to #/signin and new accounts to onboarding before any screen renders.
   const redirecting = useAuthRedirect(route);
-  const { phase } = useCase();
+  const { phase, submissionDispatched } = useCase();
   // Accounts, reviewer, settings and notification pages (routes.extra.tsx) come before the stages.
   const extra = extraRoutes(route);
   const calm = resolveRoute(route.path, route.params);
@@ -112,13 +96,19 @@ export function App() {
     case "code":
       body = <CodeLibrary route={calm} />;
       break;
+    case "comments":
+      body = <Comments caseParam={route.params.get("case")} />;
+      break;
     default:
       body = <Start />;
   }
   return (
     <Shell active={screen}>
       <CalmEffects />
-      {body}
+      {submissionDispatched && <p className="cf-submission-pending" role="status">Submitting your saved application. Editing is paused while it is sent.</p>}
+      <fieldset className="cf-edit-lock" disabled={submissionDispatched} aria-label="Application editing">
+        {body}
+      </fieldset>
     </Shell>
   );
 }

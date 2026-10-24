@@ -13,3 +13,6 @@ __pycache__/
 reference/codes/*.pdf
 reference/text/
 reference/guides/*.pdf
+
+# Local app data and logs (scripts/local-app.sh)
+.data/

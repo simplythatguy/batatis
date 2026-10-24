@@ -38,4 +38,4 @@ Official process fork: `docs/diagrams/nbc-ae-acceptable-vs-alternative-flow.png`
 - On alternative path: do **not** skip risk assessment, mitigating measures, or assumptions/limits; do **not** invent professional judgment or evidence.
 - NRC code text is copyrighted (link; don’t wholesale redistribute). STANDATA is OGL-Alberta.
 - Full skill: `.cursor/skills/batatis-hackathon/SKILL.md`. Workflow: `.cursor/skills/batatis-variance-workflow/SKILL.md`.
-- UI: `.cursor/skills/batatis-ui-opus/SKILL.md` → **Claude Opus 5.5**.
+- UI: `.cursor/skills/batatis-ui-opus/SKILL.md`; use the current role map in `.cursor/rules/pstack-models.mdc` (**GPT-6.1-Sol at max**).

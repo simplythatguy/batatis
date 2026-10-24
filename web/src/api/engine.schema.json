@@ -1,5 +1,145 @@
 {
   "$defs": {
+    "AnswerCounts": {
+      "additionalProperties": false,
+      "properties": {
+        "confirmed": {
+          "title": "Confirmed",
+          "type": "integer"
+        },
+        "does_not_apply": {
+          "title": "Does Not Apply",
+          "type": "integer"
+        },
+        "not_yet": {
+          "title": "Not Yet",
+          "type": "integer"
+        },
+        "total": {
+          "title": "Total",
+          "type": "integer"
+        },
+        "unanswered": {
+          "title": "Unanswered",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "total",
+        "confirmed",
+        "not_yet",
+        "does_not_apply",
+        "unanswered"
+      ],
+      "title": "AnswerCounts",
+      "type": "object"
+    },
+    "AnswerIn": {
+      "additionalProperties": false,
+      "description": "One answer. `question_id` is the question's stable id; `field` is the fact field it fills.",
+      "properties": {
+        "answer": {
+          "default": "",
+          "maxLength": 2000,
+          "title": "Answer",
+          "type": "string"
+        },
+        "field": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Field"
+        },
+        "question_id": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Question Id"
+        }
+      },
+      "title": "AnswerIn",
+      "type": "object"
+    },
+    "AnswerItem": {
+      "additionalProperties": false,
+      "properties": {
+        "answer": {
+          "default": "",
+          "maxLength": 2000,
+          "title": "Answer",
+          "type": "string"
+        },
+        "field": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Field"
+        },
+        "question_id": {
+          "maxLength": 200,
+          "title": "Question Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "question_id"
+      ],
+      "title": "AnswerItem",
+      "type": "object"
+    },
+    "AnswersRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "answers": {
+          "items": {
+            "$ref": "#/$defs/AnswerItem"
+          },
+          "maxItems": 5,
+          "minItems": 1,
+          "title": "Answers",
+          "type": "array"
+        },
+        "expected_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Version"
+        }
+      },
+      "required": [
+        "answers"
+      ],
+      "title": "AnswersRequest",
+      "type": "object"
+    },
     "ApplicantSummary": {
       "properties": {
         "applicant_type": {
@@ -30,8 +170,52 @@
       "title": "ApplicantSummary",
       "type": "object"
     },
+    "ApplicationPreferences": {
+      "properties": {
+        "archived": {
+          "default": false,
+          "title": "Archived",
+          "type": "boolean"
+        },
+        "pinned": {
+          "default": false,
+          "title": "Pinned",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "archived",
+        "pinned"
+      ],
+      "title": "ApplicationPreferences",
+      "type": "object"
+    },
+    "ApplicationPreferencesPatch": {
+      "additionalProperties": false,
+      "description": "Omitted fields keep their stored value; explicit values must be booleans.",
+      "minProperties": 1,
+      "properties": {
+        "archived": {
+          "default": false,
+          "title": "Archived",
+          "type": "boolean"
+        },
+        "pinned": {
+          "default": false,
+          "title": "Pinned",
+          "type": "boolean"
+        }
+      },
+      "title": "ApplicationPreferencesPatch",
+      "type": "object"
+    },
     "ApplicationSummary": {
       "properties": {
+        "archived": {
+          "default": false,
+          "title": "Archived",
+          "type": "boolean"
+        },
         "authority": {
           "anyOf": [
             {
@@ -54,9 +238,25 @@
           ],
           "default": null
         },
+        "expires_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expires At"
+        },
         "id": {
           "title": "Id",
           "type": "string"
+        },
+        "pinned": {
+          "default": false,
+          "title": "Pinned",
+          "type": "boolean"
         },
         "reviewer": {
           "anyOf": [
@@ -75,10 +275,15 @@
             "in_review",
             "returned",
             "accepted",
+            "refused",
             "withdrawn"
           ],
           "title": "Status",
           "type": "string"
+        },
+        "submission_number": {
+          "title": "Submission Number",
+          "type": "integer"
         },
         "submitted_at": {
           "anyOf": [
@@ -118,9 +323,13 @@
         "authority",
         "updated_at",
         "submitted_at",
+        "submission_number",
+        "expires_at",
         "completeness",
         "unread_messages",
-        "reviewer"
+        "reviewer",
+        "archived",
+        "pinned"
       ],
       "title": "ApplicationSummary",
       "type": "object"
@@ -139,6 +348,186 @@
         "applications"
       ],
       "title": "ApplicationsResult",
+      "type": "object"
+    },
+    "ArticleDecision": {
+      "properties": {
+        "decided_at": {
+          "title": "Decided At",
+          "type": "string"
+        },
+        "decision": {
+          "enum": [
+            "yes",
+            "no",
+            "not_sure"
+          ],
+          "title": "Decision",
+          "type": "string"
+        },
+        "open_question_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Open Question Id"
+        }
+      },
+      "required": [
+        "decision",
+        "open_question_id",
+        "decided_at"
+      ],
+      "title": "ArticleDecision",
+      "type": "object"
+    },
+    "AssistAttachment": {
+      "additionalProperties": false,
+      "properties": {
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "content_state": {
+          "enum": [
+            "not_read",
+            "text_excerpt"
+          ],
+          "title": "Content State",
+          "type": "string"
+        },
+        "file_id": {
+          "title": "File Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "pages": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Pages",
+          "type": "array"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "truncated": {
+          "title": "Truncated",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "case_id",
+        "file_id",
+        "name",
+        "content_state",
+        "pages",
+        "truncated",
+        "reason"
+      ],
+      "title": "AssistAttachment",
+      "type": "object"
+    },
+    "AssistContextBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "attachment_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Attachment Ids",
+          "type": "array"
+        },
+        "case_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Case Id"
+        },
+        "case_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Case Version"
+        },
+        "context_id": {
+          "title": "Context Id",
+          "type": "string"
+        },
+        "revision": {
+          "title": "Revision",
+          "type": "integer"
+        },
+        "user_id": {
+          "title": "User Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "user_id",
+        "context_id",
+        "revision",
+        "case_id",
+        "case_version",
+        "attachment_ids"
+      ],
+      "title": "AssistContextBinding",
+      "type": "object"
+    },
+    "AssistDocumentReference": {
+      "additionalProperties": false,
+      "properties": {
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "file_id": {
+          "title": "File Id",
+          "type": "string"
+        },
+        "page": {
+          "title": "Page",
+          "type": "integer"
+        },
+        "quote": {
+          "title": "Quote",
+          "type": "string"
+        }
+      },
+      "required": [
+        "case_id",
+        "file_id",
+        "page",
+        "quote"
+      ],
+      "title": "AssistDocumentReference",
       "type": "object"
     },
     "AssistFocus": {
@@ -164,9 +553,77 @@
       "title": "AssistFocus",
       "type": "object"
     },
+    "AssistNavigation": {
+      "additionalProperties": false,
+      "properties": {
+        "destination": {
+          "enum": [
+            "applications",
+            "description",
+            "questions",
+            "review",
+            "application",
+            "code-library",
+            "code-search",
+            "references",
+            "downloads",
+            "officer-view",
+            "settings",
+            "notifications",
+            "accuracy",
+            "comments",
+            "question-authority",
+            "question-owner",
+            "question-representative",
+            "question-mailing-address",
+            "question-date",
+            "question-scope",
+            "question-permit",
+            "question-site-address",
+            "question-legal-description",
+            "question-alternative",
+            "question-rationale",
+            "question-risk",
+            "question-mitigation",
+            "question-assumptions",
+            "question-maintenance",
+            "question-qualifications",
+            "question-documents",
+            "review-queue",
+            "package-review",
+            "review-overview",
+            "review-missing",
+            "review-checks",
+            "review-decide",
+            "review-application",
+            "review-messages",
+            "review-request",
+            "review-versions",
+            "review-close-out"
+          ],
+          "title": "Destination",
+          "type": "string"
+        }
+      },
+      "required": [
+        "destination"
+      ],
+      "title": "AssistNavigation",
+      "type": "object"
+    },
     "AssistRequest": {
       "additionalProperties": false,
       "properties": {
+        "attachment_ids": {
+          "items": {
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 3,
+          "title": "Attachment Ids",
+          "type": "array"
+        },
         "case_id": {
           "anyOf": [
             {
@@ -180,6 +637,86 @@
           ],
           "default": null,
           "title": "Case Id"
+        },
+        "case_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Case Version"
+        },
+        "context_id": {
+          "anyOf": [
+            {
+              "maxLength": 80,
+              "minLength": 16,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Context Id"
+        },
+        "destinations": {
+          "items": {
+            "enum": [
+              "applications",
+              "description",
+              "questions",
+              "review",
+              "application",
+              "code-library",
+              "code-search",
+              "references",
+              "downloads",
+              "officer-view",
+              "settings",
+              "notifications",
+              "accuracy",
+              "comments",
+              "question-authority",
+              "question-owner",
+              "question-representative",
+              "question-mailing-address",
+              "question-date",
+              "question-scope",
+              "question-permit",
+              "question-site-address",
+              "question-legal-description",
+              "question-alternative",
+              "question-rationale",
+              "question-risk",
+              "question-mitigation",
+              "question-assumptions",
+              "question-maintenance",
+              "question-qualifications",
+              "question-documents",
+              "review-queue",
+              "package-review",
+              "review-overview",
+              "review-missing",
+              "review-checks",
+              "review-decide",
+              "review-application",
+              "review-messages",
+              "review-request",
+              "review-versions",
+              "review-close-out"
+            ],
+            "type": "string"
+          },
+          "maxItems": 64,
+          "title": "Destinations",
+          "type": "array"
         },
         "focus": {
           "anyOf": [
@@ -206,6 +743,20 @@
           "title": "Question",
           "type": "string"
         },
+        "revision": {
+          "anyOf": [
+            {
+              "maximum": 1000000,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Revision"
+        },
         "screen": {
           "maxLength": 100,
           "minLength": 1,
@@ -226,12 +777,48 @@
           "title": "Answer",
           "type": "string"
         },
+        "attachments": {
+          "items": {
+            "$ref": "#/$defs/AssistAttachment"
+          },
+          "title": "Attachments",
+          "type": "array"
+        },
         "cited": {
           "items": {
             "type": "string"
           },
           "title": "Cited",
           "type": "array"
+        },
+        "context": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AssistContextBinding"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "document_references": {
+          "items": {
+            "$ref": "#/$defs/AssistDocumentReference"
+          },
+          "title": "Document References",
+          "type": "array"
+        },
+        "navigation": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AssistNavigation"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
         "notice": {
           "title": "Notice",
@@ -249,7 +836,11 @@
         "answer",
         "cited",
         "removed_citations",
-        "notice"
+        "notice",
+        "navigation",
+        "context",
+        "attachments",
+        "document_references"
       ],
       "title": "AssistResult",
       "type": "object"
@@ -277,6 +868,40 @@
         "text"
       ],
       "title": "AssistTurn",
+      "type": "object"
+    },
+    "Attribute": {
+      "additionalProperties": false,
+      "description": "A documents-panel cell. `value` is 'unknown' when nothing was read; never a guess.",
+      "properties": {
+        "known": {
+          "default": false,
+          "title": "Known",
+          "type": "boolean"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Pointer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "value": {
+          "default": "unknown",
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "value",
+        "known",
+        "source"
+      ],
+      "title": "Attribute",
       "type": "object"
     },
     "AttributionPair": {
@@ -360,6 +985,315 @@
       "title": "AttributionPair",
       "type": "object"
     },
+    "Authority": {
+      "additionalProperties": false,
+      "description": "The authority having jurisdiction is an organisation, not an officer (SCC IB-2026-10-16).",
+      "properties": {
+        "contact": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Contact"
+        },
+        "kind": {
+          "enum": [
+            "accredited_municipality",
+            "alberta_safety_codes_authority",
+            "accredited_organisation"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "reviewer_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The account `Authority` code when Batatis has reviewer accounts for this office; else null.",
+          "title": "Reviewer Code"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/PackSource"
+          },
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "name",
+        "kind",
+        "reviewer_code",
+        "contact",
+        "sources"
+      ],
+      "title": "Authority",
+      "type": "object"
+    },
+    "BenchmarkConfirmRequest": {
+      "additionalProperties": false,
+      "description": "The applicant names the requirement their design departs from and confirms the one-line departure.",
+      "properties": {
+        "departure": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "Departure",
+          "type": "string"
+        },
+        "expected_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Version"
+        },
+        "provision": {
+          "maxLength": 40,
+          "minLength": 1,
+          "title": "Provision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "provision",
+        "departure"
+      ],
+      "title": "BenchmarkConfirmRequest",
+      "type": "object"
+    },
+    "BenchmarkRecord": {
+      "description": "The benchmark acceptable solution: the quoted Division B sentence the design departs from,\na one-line departure the applicant confirms, and its objective and function codes by lookup.",
+      "properties": {
+        "attribution_missing": {
+          "default": true,
+          "title": "Attribution Missing",
+          "type": "boolean"
+        },
+        "basis": {
+          "default": "none",
+          "enum": [
+            "committed",
+            "top_choice",
+            "applicant",
+            "none"
+          ],
+          "title": "Basis",
+          "type": "string"
+        },
+        "citation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Citation"
+        },
+        "departure": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Departure"
+        },
+        "departure_status": {
+          "default": "none",
+          "enum": [
+            "none",
+            "proposed",
+            "confirmed"
+          ],
+          "title": "Departure Status",
+          "type": "string"
+        },
+        "functions": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Term"
+          },
+          "title": "Functions",
+          "type": "array"
+        },
+        "identified": {
+          "title": "Identified",
+          "type": "boolean"
+        },
+        "objectives": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Term"
+          },
+          "title": "Objectives",
+          "type": "array"
+        },
+        "provision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provision"
+        },
+        "provision_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provision Id"
+        },
+        "question": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Question"
+        },
+        "requirement": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Requirement"
+        },
+        "role": {
+          "const": "benchmark_acceptable_solution",
+          "default": "benchmark_acceptable_solution",
+          "title": "Role",
+          "type": "string"
+        },
+        "sentence": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sentence"
+        }
+      },
+      "required": [
+        "identified",
+        "role",
+        "basis",
+        "provision",
+        "provision_id",
+        "citation",
+        "sentence",
+        "departure",
+        "departure_status",
+        "objectives",
+        "functions",
+        "attribution_missing",
+        "requirement",
+        "question"
+      ],
+      "title": "BenchmarkRecord",
+      "type": "object"
+    },
+    "Bulletin": {
+      "additionalProperties": false,
+      "description": "A Safety Codes Council information bulletin. Title, date and link; paragraphs are not copied.",
+      "properties": {
+        "effective": {
+          "anyOf": [
+            {
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Effective"
+        },
+        "id": {
+          "pattern": "^IB-\\d{4}-\\d{2}-\\d{2}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "issued": {
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "title": "Issued",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/PackSource"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "issued",
+        "effective",
+        "summary",
+        "source"
+      ],
+      "title": "Bulletin",
+      "type": "object"
+    },
     "Case": {
       "properties": {
         "authority": {
@@ -400,6 +1334,13 @@
           ],
           "default": null
         },
+        "decision_history": {
+          "items": {
+            "$ref": "#/$defs/Decision"
+          },
+          "title": "Decision History",
+          "type": "array"
+        },
         "evidence": {
           "default": [],
           "items": {
@@ -407,6 +1348,18 @@
           },
           "title": "Evidence",
           "type": "array"
+        },
+        "expires_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "readOnly": true,
+          "title": "Expires At"
         },
         "facts": {
           "default": [],
@@ -427,6 +1380,28 @@
         "id": {
           "title": "Id",
           "type": "string"
+        },
+        "identify": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/IdentifyResult"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "intake": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/IntakeRecord"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
         "jurisdiction": {
           "anyOf": [
@@ -458,6 +1433,13 @@
           "default": null,
           "title": "Owner Id"
         },
+        "professional_resolutions": {
+          "items": {
+            "$ref": "#/$defs/ProfessionalRequirementResolution"
+          },
+          "title": "Professional Resolutions",
+          "type": "array"
+        },
         "provisions": {
           "default": [],
           "items": {
@@ -477,6 +1459,17 @@
           ],
           "default": null
         },
+        "return_snapshot": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ReviewSnapshot"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "section_c": {
           "default": [],
           "items": {
@@ -484,6 +1477,21 @@
           },
           "title": "Section C",
           "type": "array"
+        },
+        "selected_articles": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/SelectedArticle"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Selected Articles"
         },
         "status": {
           "default": "draft",
@@ -493,6 +1501,7 @@
             "in_review",
             "returned",
             "accepted",
+            "refused",
             "withdrawn"
           ],
           "title": "Status",
@@ -503,6 +1512,18 @@
             "$ref": "#/$defs/StatusChange"
           },
           "title": "Status History",
+          "type": "array"
+        },
+        "submission_number": {
+          "readOnly": true,
+          "title": "Submission Number",
+          "type": "integer"
+        },
+        "submissions": {
+          "items": {
+            "$ref": "#/$defs/Submission"
+          },
+          "title": "Submissions",
           "type": "array"
         },
         "submitted_at": {
@@ -529,6 +1550,11 @@
           "default": null,
           "title": "Title"
         },
+        "title_is_manual": {
+          "default": false,
+          "title": "Title Is Manual",
+          "type": "boolean"
+        },
         "updated_at": {
           "title": "Updated At",
           "type": "string"
@@ -543,6 +1569,7 @@
       "required": [
         "id",
         "title",
+        "title_is_manual",
         "owner_id",
         "authority",
         "status",
@@ -550,19 +1577,744 @@
         "status_history",
         "claim",
         "decision",
+        "decision_history",
+        "submissions",
+        "return_snapshot",
         "messages",
+        "professional_resolutions",
         "created_at",
         "updated_at",
         "version",
         "jurisdiction",
         "facts",
+        "selected_articles",
         "provisions",
         "section_c",
         "evidence",
         "gaps",
-        "relevance"
+        "relevance",
+        "identify",
+        "intake",
+        "expires_at",
+        "submission_number"
       ],
       "title": "Case",
+      "type": "object"
+    },
+    "CaseChecklist": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "conditions": {
+          "items": {
+            "$ref": "#/$defs/CaseCondition"
+          },
+          "title": "Conditions",
+          "type": "array"
+        },
+        "counts": {
+          "$ref": "#/$defs/AnswerCounts"
+        },
+        "groups": {
+          "items": {
+            "$ref": "#/$defs/ChecklistGroup"
+          },
+          "title": "Groups",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "issued": {
+          "title": "Issued",
+          "type": "string"
+        },
+        "jurisdiction": {
+          "title": "Jurisdiction",
+          "type": "string"
+        },
+        "matches_case_provisions": {
+          "description": "A provision the package varies is among the case provisions.",
+          "title": "Matches Case Provisions",
+          "type": "boolean"
+        },
+        "notice": {
+          "title": "Notice",
+          "type": "string"
+        },
+        "package": {
+          "title": "Package",
+          "type": "string"
+        },
+        "provisions": {
+          "description": "Provisions the package names, as printed in the pack.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Provisions",
+          "type": "array"
+        },
+        "reviewed": {
+          "title": "Reviewed",
+          "type": "boolean"
+        },
+        "revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Revision"
+        },
+        "source": {
+          "$ref": "#/$defs/PackSource"
+        },
+        "source_notes": {
+          "items": {
+            "$ref": "#/$defs/SourceNote"
+          },
+          "title": "Source Notes",
+          "type": "array"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jurisdiction",
+        "package",
+        "code",
+        "title",
+        "revision",
+        "issued",
+        "summary",
+        "reviewed",
+        "source",
+        "groups",
+        "source_notes",
+        "notice",
+        "conditions",
+        "counts",
+        "matches_case_provisions",
+        "provisions"
+      ],
+      "title": "CaseChecklist",
+      "type": "object"
+    },
+    "CaseChecklists": {
+      "additionalProperties": false,
+      "properties": {
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "case_version": {
+          "title": "Case Version",
+          "type": "integer"
+        },
+        "checklists": {
+          "items": {
+            "$ref": "#/$defs/CaseChecklist"
+          },
+          "title": "Checklists",
+          "type": "array"
+        },
+        "historical": {
+          "items": {
+            "$ref": "#/$defs/HistoricalPackage"
+          },
+          "title": "Historical",
+          "type": "array"
+        },
+        "jurisdiction": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Pack id the case resolved to; null when the case names none.",
+          "title": "Jurisdiction"
+        },
+        "matched_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Matched By"
+        },
+        "none_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Why no checklist is offered, when the list is empty.",
+          "title": "None Reason"
+        },
+        "notice": {
+          "title": "Notice",
+          "type": "string"
+        }
+      },
+      "required": [
+        "case_id",
+        "case_version",
+        "jurisdiction",
+        "matched_by",
+        "checklists",
+        "historical",
+        "none_reason",
+        "notice"
+      ],
+      "title": "CaseChecklists",
+      "type": "object"
+    },
+    "CaseCondition": {
+      "additionalProperties": false,
+      "properties": {
+        "answer": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ConditionAnswer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "null until the applicant answers."
+        },
+        "group": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Group",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "scope",
+            "construction",
+            "agreement",
+            "documents",
+            "declaration"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "may_not_apply": {
+          "description": "False when the condition always applies to a project that uses the package.",
+          "title": "May Not Apply",
+          "type": "boolean"
+        },
+        "one_of": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Options of one choice share this key; the applicant follows one option and marks the others does not apply.",
+          "title": "One Of"
+        },
+        "option": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The option this row belongs to within `one_of`, as the source labels it.",
+          "title": "Option"
+        },
+        "plain": {
+          "description": "Plain-language wording shown first.",
+          "minLength": 12,
+          "title": "Plain",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/SourcePointer"
+        },
+        "subject": {
+          "description": "What the condition is about: both houses, one side, both parcels, the permit documents...",
+          "enum": [
+            "project",
+            "both_houses",
+            "zero_side",
+            "easement_side",
+            "both_parcels",
+            "building",
+            "each_house_with_suite",
+            "permit_documents",
+            "declaration"
+          ],
+          "title": "Subject",
+          "type": "string"
+        },
+        "when": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Plain-language trigger when the condition only applies in some designs.",
+          "title": "When"
+        }
+      },
+      "required": [
+        "id",
+        "group",
+        "kind",
+        "subject",
+        "plain",
+        "when",
+        "one_of",
+        "option",
+        "may_not_apply",
+        "source",
+        "answer"
+      ],
+      "title": "CaseCondition",
+      "type": "object"
+    },
+    "CaseJurisdictionPack": {
+      "additionalProperties": false,
+      "description": "`pack` is null when the case names no jurisdiction or authority yet.",
+      "properties": {
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "matched_by": {
+          "anyOf": [
+            {
+              "enum": [
+                "id",
+                "name",
+                "reviewer_code",
+                "fallback"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Matched By"
+        },
+        "pack": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/JurisdictionDetail"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "case_id",
+        "matched_by",
+        "pack"
+      ],
+      "title": "CaseJurisdictionPack",
+      "type": "object"
+    },
+    "CaseRules": {
+      "properties": {
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "case_version": {
+          "title": "Case Version",
+          "type": "integer"
+        },
+        "edition": {
+          "title": "Edition",
+          "type": "string"
+        },
+        "notice": {
+          "title": "Notice",
+          "type": "string"
+        },
+        "results": {
+          "items": {
+            "$ref": "#/$defs/RuleResult"
+          },
+          "title": "Results",
+          "type": "array"
+        }
+      },
+      "required": [
+        "case_id",
+        "case_version",
+        "edition",
+        "notice",
+        "results"
+      ],
+      "title": "CaseRules",
+      "type": "object"
+    },
+    "ChecklistAnswerRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "condition_id": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Condition Id",
+          "type": "string"
+        },
+        "expected_version": {
+          "minimum": 1,
+          "title": "Expected Version",
+          "type": "integer"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "maxLength": 1000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "state": {
+          "enum": [
+            "confirmed",
+            "not_yet",
+            "does_not_apply"
+          ],
+          "title": "State",
+          "type": "string"
+        }
+      },
+      "required": [
+        "condition_id",
+        "state",
+        "expected_version"
+      ],
+      "title": "ChecklistAnswerRequest",
+      "type": "object"
+    },
+    "ChecklistAnswerResult": {
+      "additionalProperties": false,
+      "properties": {
+        "case_version": {
+          "title": "Case Version",
+          "type": "integer"
+        },
+        "checklist": {
+          "$ref": "#/$defs/CaseChecklist"
+        }
+      },
+      "required": [
+        "case_version",
+        "checklist"
+      ],
+      "title": "ChecklistAnswerResult",
+      "type": "object"
+    },
+    "ChecklistCondition": {
+      "additionalProperties": false,
+      "description": "One operative condition. Plain language first; the source wording sits behind a disclosure.",
+      "properties": {
+        "group": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Group",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "scope",
+            "construction",
+            "agreement",
+            "documents",
+            "declaration"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "may_not_apply": {
+          "description": "False when the condition always applies to a project that uses the package.",
+          "title": "May Not Apply",
+          "type": "boolean"
+        },
+        "one_of": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z0-9][a-z0-9-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Options of one choice share this key; the applicant follows one option and marks the others does not apply.",
+          "title": "One Of"
+        },
+        "option": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The option this row belongs to within `one_of`, as the source labels it.",
+          "title": "Option"
+        },
+        "plain": {
+          "description": "Plain-language wording shown first.",
+          "minLength": 12,
+          "title": "Plain",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/SourcePointer"
+        },
+        "subject": {
+          "description": "What the condition is about: both houses, one side, both parcels, the permit documents...",
+          "enum": [
+            "project",
+            "both_houses",
+            "zero_side",
+            "easement_side",
+            "both_parcels",
+            "building",
+            "each_house_with_suite",
+            "permit_documents",
+            "declaration"
+          ],
+          "title": "Subject",
+          "type": "string"
+        },
+        "when": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Plain-language trigger when the condition only applies in some designs.",
+          "title": "When"
+        }
+      },
+      "required": [
+        "id",
+        "group",
+        "kind",
+        "subject",
+        "plain",
+        "when",
+        "one_of",
+        "option",
+        "may_not_apply",
+        "source"
+      ],
+      "title": "ChecklistCondition",
+      "type": "object"
+    },
+    "ChecklistGroup": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "plain": {
+          "description": "One plain-language line under the group title.",
+          "title": "Plain",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "plain"
+      ],
+      "title": "ChecklistGroup",
+      "type": "object"
+    },
+    "CitationCheck": {
+      "additionalProperties": false,
+      "description": "Verification of one cited provision against the code database (NBC(AE) 2023, 2nd printing).",
+      "properties": {
+        "canonical_citation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Canonical Citation"
+        },
+        "edition_ok": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Edition Ok"
+        },
+        "exists": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Exists"
+        },
+        "issues": {
+          "items": {
+            "$ref": "#/$defs/CitationIssue"
+          },
+          "title": "Issues",
+          "type": "array"
+        },
+        "page_ok": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page Ok"
+        },
+        "pdf_page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pdf Page"
+        },
+        "pointer": {
+          "$ref": "#/$defs/Pointer"
+        },
+        "provision_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provision Id"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "provision_id",
+        "exists",
+        "edition_ok",
+        "page_ok",
+        "canonical_citation",
+        "pdf_page",
+        "issues",
+        "pointer"
+      ],
+      "title": "CitationCheck",
+      "type": "object"
+    },
+    "CitationIssue": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "CitationIssue",
       "type": "object"
     },
     "Claim": {
@@ -612,6 +2364,91 @@
       "title": "ClaimResult",
       "type": "object"
     },
+    "CloseOut": {
+      "additionalProperties": false,
+      "description": "Close-out after a final decision: the copy goes to the Council within 10 days of the decision.",
+      "properties": {
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "days_remaining": {
+          "title": "Days Remaining",
+          "type": "integer"
+        },
+        "decided_at": {
+          "title": "Decided At",
+          "type": "string"
+        },
+        "due_date": {
+          "title": "Due Date",
+          "type": "string"
+        },
+        "notice": {
+          "default": "Batatis does not send anything to the Safety Codes Council. The officer sends the copy and records it here.",
+          "title": "Notice",
+          "type": "string"
+        },
+        "outcome": {
+          "enum": [
+            "accept",
+            "refuse"
+          ],
+          "title": "Outcome",
+          "type": "string"
+        },
+        "overdue": {
+          "title": "Overdue",
+          "type": "boolean"
+        },
+        "record_package": {
+          "$ref": "#/$defs/RecordPackage"
+        },
+        "sent": {
+          "title": "Sent",
+          "type": "boolean"
+        },
+        "sent_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sent At"
+        },
+        "sent_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sent By Name"
+        }
+      },
+      "required": [
+        "case_id",
+        "outcome",
+        "decided_at",
+        "due_date",
+        "days_remaining",
+        "overdue",
+        "sent",
+        "sent_at",
+        "sent_by_name",
+        "record_package",
+        "notice"
+      ],
+      "title": "CloseOut",
+      "type": "object"
+    },
     "CodeTOC": {
       "properties": {
         "division": {
@@ -655,6 +2492,43 @@
         "total"
       ],
       "title": "CompletenessSummary",
+      "type": "object"
+    },
+    "ConditionAnswer": {
+      "additionalProperties": false,
+      "description": "The applicant's latest answer to one condition, read from case facts. Never a determination.",
+      "properties": {
+        "fact_id": {
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reason"
+        },
+        "state": {
+          "enum": [
+            "confirmed",
+            "not_yet",
+            "does_not_apply"
+          ],
+          "title": "State",
+          "type": "string"
+        }
+      },
+      "required": [
+        "state",
+        "reason",
+        "fact_id"
+      ],
+      "title": "ConditionAnswer",
       "type": "object"
     },
     "ContextDefinition": {
@@ -767,6 +2641,54 @@
       "title": "ContextNote",
       "type": "object"
     },
+    "CoverageEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "coverage": {
+          "enum": [
+            "full",
+            "code_only",
+            "preview"
+          ],
+          "title": "Coverage",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[A-Z]{2}$",
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "note": {
+          "title": "Note",
+          "type": "string"
+        },
+        "roadmap": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Roadmap"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "coverage",
+        "note",
+        "roadmap"
+      ],
+      "title": "CoverageEntry",
+      "type": "object"
+    },
     "Decision": {
       "properties": {
         "at": {
@@ -795,7 +2717,8 @@
         "outcome": {
           "enum": [
             "accept",
-            "return"
+            "return",
+            "refuse"
           ],
           "title": "Outcome",
           "type": "string"
@@ -905,6 +2828,20 @@
     "DecisionRequest": {
       "additionalProperties": false,
       "properties": {
+        "expected_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Required for a refusal; the displayed saved application version.",
+          "title": "Expected Version"
+        },
         "items": {
           "items": {
             "$ref": "#/$defs/DecisionItemInput"
@@ -929,7 +2866,8 @@
         "outcome": {
           "enum": [
             "accept",
-            "return"
+            "return",
+            "refuse"
           ],
           "title": "Outcome",
           "type": "string"
@@ -954,7 +2892,8 @@
         "outcome": {
           "enum": [
             "accept",
-            "return"
+            "return",
+            "refuse"
           ],
           "title": "Outcome",
           "type": "string"
@@ -966,6 +2905,161 @@
         "at"
       ],
       "title": "DecisionSummary",
+      "type": "object"
+    },
+    "DiffEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "section": {
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "process"
+          ],
+          "title": "Section",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "section",
+        "label",
+        "message"
+      ],
+      "title": "DiffEntry",
+      "type": "object"
+    },
+    "DocumentRow": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "$ref": "#/$defs/Attribute"
+        },
+        "evidence_rung": {
+          "$ref": "#/$defs/Attribute"
+        },
+        "file": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "File"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "issuer": {
+          "$ref": "#/$defs/Attribute"
+        },
+        "listed_in_section_d": {
+          "default": false,
+          "title": "Listed In Section D",
+          "type": "boolean"
+        },
+        "note": {
+          "default": "",
+          "title": "Note",
+          "type": "string"
+        },
+        "responsible": {
+          "$ref": "#/$defs/Attribute"
+        },
+        "seal": {
+          "$ref": "#/$defs/Attribute"
+        },
+        "title": {
+          "$ref": "#/$defs/Attribute"
+        },
+        "type": {
+          "$ref": "#/$defs/Attribute"
+        }
+      },
+      "required": [
+        "id",
+        "file",
+        "title",
+        "type",
+        "issuer",
+        "date",
+        "evidence_rung",
+        "seal",
+        "responsible",
+        "listed_in_section_d",
+        "note"
+      ],
+      "title": "DocumentRow",
+      "type": "object"
+    },
+    "DroppedPick": {
+      "properties": {
+        "article": {
+          "title": "Article",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "article",
+        "reason"
+      ],
+      "title": "DroppedPick",
+      "type": "object"
+    },
+    "EditedItem": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "anyOf": [
+            {
+              "maxLength": 100,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Id"
+        },
+        "included": {
+          "default": true,
+          "title": "Included",
+          "type": "boolean"
+        },
+        "text": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "title": "EditedItem",
       "type": "object"
     },
     "EvidenceItem": {
@@ -1284,6 +3378,480 @@
       "title": "Fact",
       "type": "object"
     },
+    "FactPointer": {
+      "description": "One extracted fact and where it sits. `start`/`end` index the source text: the description,\nor the page text of `page` (text layer order). Form values have no span.",
+      "properties": {
+        "end": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "End"
+        },
+        "fact_id": {
+          "title": "Fact Id",
+          "type": "string"
+        },
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "rules",
+            "form",
+            "model"
+          ],
+          "title": "Method",
+          "type": "string"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "source_ref": {
+          "title": "Source Ref",
+          "type": "string"
+        },
+        "start": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Start"
+        },
+        "verified": {
+          "default": true,
+          "title": "Verified",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "fact_id",
+        "field",
+        "method",
+        "source_ref",
+        "page",
+        "start",
+        "end",
+        "verified"
+      ],
+      "title": "FactPointer",
+      "type": "object"
+    },
+    "FieldConflict": {
+      "description": "The text gives two different values for one field, so neither was stored. The planner asks.",
+      "properties": {
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "quotes": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Quotes",
+          "type": "array"
+        },
+        "source_ref": {
+          "title": "Source Ref",
+          "type": "string"
+        },
+        "values": {
+          "default": [],
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          },
+          "title": "Values",
+          "type": "array"
+        }
+      },
+      "required": [
+        "field",
+        "values",
+        "quotes",
+        "source_ref",
+        "page"
+      ],
+      "title": "FieldConflict",
+      "type": "object"
+    },
+    "FieldReading": {
+      "additionalProperties": false,
+      "description": "One form or record field. `blank` is certain; `not_found` means ask the officer to look.",
+      "properties": {
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "pointer": {
+          "$ref": "#/$defs/Pointer"
+        },
+        "reason": {
+          "default": "",
+          "title": "Reason",
+          "type": "string"
+        },
+        "section": {
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "process"
+          ],
+          "title": "Section",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "present",
+            "blank",
+            "not_found"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        }
+      },
+      "required": [
+        "field",
+        "label",
+        "section",
+        "status",
+        "value",
+        "reason",
+        "pointer"
+      ],
+      "title": "FieldReading",
+      "type": "object"
+    },
+    "FileReport": {
+      "properties": {
+        "facts": {
+          "default": 0,
+          "title": "Facts",
+          "type": "integer"
+        },
+        "file_id": {
+          "title": "File Id",
+          "type": "string"
+        },
+        "form": {
+          "anyOf": [
+            {
+              "enum": [
+                "scc_variance",
+                "acroform"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Form"
+        },
+        "form_fields_read": {
+          "default": 0,
+          "title": "Form Fields Read",
+          "type": "integer"
+        },
+        "form_fields_skipped": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Form Fields Skipped",
+          "type": "array"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "pages": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pages"
+        },
+        "pages_not_read": {
+          "default": [],
+          "items": {
+            "type": "integer"
+          },
+          "title": "Pages Not Read",
+          "type": "array"
+        },
+        "pages_read": {
+          "default": [],
+          "items": {
+            "type": "integer"
+          },
+          "title": "Pages Read",
+          "type": "array"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "status": {
+          "enum": [
+            "read",
+            "partly_read",
+            "not_read"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "file_id",
+        "name",
+        "status",
+        "reason",
+        "pages",
+        "pages_read",
+        "pages_not_read",
+        "form",
+        "form_fields_read",
+        "form_fields_skipped",
+        "facts"
+      ],
+      "title": "FileReport",
+      "type": "object"
+    },
+    "Finding": {
+      "additionalProperties": false,
+      "properties": {
+        "citations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Citations",
+          "type": "array"
+        },
+        "defect_class": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Defect Class"
+        },
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "pointers": {
+          "items": {
+            "$ref": "#/$defs/Pointer"
+          },
+          "title": "Pointers",
+          "type": "array"
+        },
+        "problem": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Problem"
+        },
+        "routed_to": {
+          "default": "applicant",
+          "enum": [
+            "applicant",
+            "officer",
+            "professional"
+          ],
+          "title": "Routed To",
+          "type": "string"
+        },
+        "section": {
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "process"
+          ],
+          "title": "Section",
+          "type": "string"
+        },
+        "severity": {
+          "default": "warning",
+          "enum": [
+            "blocking",
+            "warning"
+          ],
+          "title": "Severity",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "blank",
+            "not_found",
+            "missing",
+            "unclear"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "section",
+        "field",
+        "label",
+        "status",
+        "problem",
+        "defect_class",
+        "message",
+        "severity",
+        "routed_to",
+        "pointers",
+        "citations"
+      ],
+      "title": "Finding",
+      "type": "object"
+    },
+    "Fork": {
+      "description": "Acceptable-solution path or alternative-solution path, read early (before Section C).",
+      "properties": {
+        "cues": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Cues",
+          "type": "array"
+        },
+        "explanation": {
+          "title": "Explanation",
+          "type": "string"
+        },
+        "halves": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Half"
+          },
+          "title": "Halves",
+          "type": "array"
+        },
+        "variance_needed": {
+          "enum": [
+            "likely",
+            "not_indicated",
+            "unknown"
+          ],
+          "title": "Variance Needed",
+          "type": "string"
+        }
+      },
+      "required": [
+        "variance_needed",
+        "explanation",
+        "cues",
+        "halves"
+      ],
+      "title": "Fork",
+      "type": "object"
+    },
     "Gap": {
       "properties": {
         "field": {
@@ -1330,10 +3898,16 @@
           "default": "blocking",
           "enum": [
             "blocking",
-            "warning"
+            "warning",
+            "info"
           ],
           "title": "Severity",
           "type": "string"
+        },
+        "submission_blocking": {
+          "default": true,
+          "title": "Submission Blocking",
+          "type": "boolean"
         }
       },
       "required": [
@@ -1342,9 +3916,1499 @@
         "field",
         "message",
         "severity",
-        "routed_to"
+        "routed_to",
+        "submission_blocking"
       ],
       "title": "Gap",
+      "type": "object"
+    },
+    "Guide": {
+      "additionalProperties": false,
+      "description": "A published guide for a design category or process. Guidance, not a variance or an approval.",
+      "properties": {
+        "companions": {
+          "items": {
+            "$ref": "#/$defs/PackSource"
+          },
+          "title": "Companions",
+          "type": "array"
+        },
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "issued": {
+          "anyOf": [
+            {
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Issued"
+        },
+        "requires_professional": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Requires Professional"
+        },
+        "source": {
+          "$ref": "#/$defs/PackSource"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "topic": {
+          "title": "Topic",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "issued",
+        "topic",
+        "summary",
+        "requires_professional",
+        "source",
+        "companions"
+      ],
+      "title": "Guide",
+      "type": "object"
+    },
+    "Half": {
+      "description": "One of the two things an accepted variance needs. They are kept distinct on purpose.",
+      "properties": {
+        "basis": {
+          "title": "Basis",
+          "type": "string"
+        },
+        "id": {
+          "enum": [
+            "variance_request",
+            "alternative_solution"
+          ],
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "what": {
+          "title": "What",
+          "type": "string"
+        },
+        "who": {
+          "title": "Who",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "basis",
+        "who",
+        "what"
+      ],
+      "title": "Half",
+      "type": "object"
+    },
+    "HistoricalPackage": {
+      "additionalProperties": false,
+      "description": "A superseded package. Shown for history only; never offered as a checklist.",
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "historical_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Historical Reason"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "issued": {
+          "title": "Issued",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/PackSource"
+        },
+        "status": {
+          "const": "historical",
+          "title": "Status",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "code",
+        "title",
+        "issued",
+        "status",
+        "historical_reason",
+        "source"
+      ],
+      "title": "HistoricalPackage",
+      "type": "object"
+    },
+    "IdentifyArticle": {
+      "properties": {
+        "attribution_missing": {
+          "default": true,
+          "title": "Attribution Missing",
+          "type": "boolean"
+        },
+        "citation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Citation"
+        },
+        "commit_reason": {
+          "title": "Commit Reason",
+          "type": "string"
+        },
+        "decision": {
+          "anyOf": [
+            {
+              "enum": [
+                "yes",
+                "no",
+                "not_sure"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decision"
+        },
+        "division": {
+          "const": "B",
+          "default": "B",
+          "title": "Division",
+          "type": "string"
+        },
+        "functions": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Term"
+          },
+          "title": "Functions",
+          "type": "array"
+        },
+        "link": {
+          "title": "Link",
+          "type": "string"
+        },
+        "objectives": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Term"
+          },
+          "title": "Objectives",
+          "type": "array"
+        },
+        "open_question_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Open Question Id"
+        },
+        "part": {
+          "title": "Part",
+          "type": "integer"
+        },
+        "probability": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Probability"
+        },
+        "provision": {
+          "title": "Provision",
+          "type": "string"
+        },
+        "provision_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provision Id"
+        },
+        "quote": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Quote"
+        },
+        "quote_source": {
+          "anyOf": [
+            {
+              "enum": [
+                "verifier",
+                "codedb"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Quote Source"
+        },
+        "rank": {
+          "title": "Rank",
+          "type": "integer"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "screen_probability": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Screen Probability"
+        },
+        "status": {
+          "enum": [
+            "committed",
+            "choice",
+            "candidate",
+            "fallback"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "verifier": {
+          "default": "not_run",
+          "enum": [
+            "picked",
+            "not_picked",
+            "not_run"
+          ],
+          "title": "Verifier",
+          "type": "string"
+        }
+      },
+      "required": [
+        "rank",
+        "provision",
+        "provision_id",
+        "division",
+        "title",
+        "part",
+        "citation",
+        "link",
+        "quote",
+        "quote_source",
+        "reason",
+        "probability",
+        "screen_probability",
+        "verifier",
+        "status",
+        "commit_reason",
+        "objectives",
+        "functions",
+        "attribution_missing",
+        "decision",
+        "open_question_id"
+      ],
+      "title": "IdentifyArticle",
+      "type": "object"
+    },
+    "IdentifyConfirmRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "expected_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Version"
+        },
+        "provisions": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 50,
+          "minItems": 1,
+          "title": "Provisions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "provisions"
+      ],
+      "title": "IdentifyConfirmRequest",
+      "type": "object"
+    },
+    "IdentifyDecisionRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "decision": {
+          "enum": [
+            "yes",
+            "no",
+            "not_sure"
+          ],
+          "title": "Decision",
+          "type": "string"
+        },
+        "expected_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Version"
+        }
+      },
+      "required": [
+        "decision"
+      ],
+      "title": "IdentifyDecisionRequest",
+      "type": "object"
+    },
+    "IdentifyDecisionResponse": {
+      "description": "The identify result after a decision, plus the Section C rows a `yes` wrote for that article.",
+      "properties": {
+        "articles": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/IdentifyArticle"
+          },
+          "title": "Articles",
+          "type": "array"
+        },
+        "benchmark": {
+          "$ref": "#/$defs/BenchmarkRecord"
+        },
+        "cached": {
+          "default": false,
+          "title": "Cached",
+          "type": "boolean"
+        },
+        "case_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Case Version"
+        },
+        "choices": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/QuotedChoice"
+          },
+          "title": "Choices",
+          "type": "array"
+        },
+        "commit_policy": {
+          "additionalProperties": true,
+          "default": {},
+          "title": "Commit Policy",
+          "type": "object"
+        },
+        "committed": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Committed",
+          "type": "array"
+        },
+        "decisions": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ArticleDecision"
+          },
+          "title": "Decisions",
+          "type": "object"
+        },
+        "description_sha256": {
+          "title": "Description Sha256",
+          "type": "string"
+        },
+        "engineering_required": {
+          "const": "depends",
+          "default": "depends",
+          "title": "Engineering Required",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "message": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Message"
+        },
+        "mode": {
+          "enum": [
+            "live",
+            "fake",
+            "bm25_fallback"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "model_ids": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "default": {},
+          "title": "Model Ids",
+          "type": "object"
+        },
+        "narrowed": {
+          "title": "Narrowed",
+          "type": "boolean"
+        },
+        "open_questions": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/OpenQuestion"
+          },
+          "title": "Open Questions",
+          "type": "array"
+        },
+        "persisted": {
+          "default": false,
+          "title": "Persisted",
+          "type": "boolean"
+        },
+        "process_refs": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ProcessRef"
+          },
+          "title": "Process Refs",
+          "type": "array"
+        },
+        "questions": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Questions",
+          "type": "array"
+        },
+        "scored_at": {
+          "title": "Scored At",
+          "type": "string"
+        },
+        "section_c": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/SectionCRow"
+          },
+          "title": "Section C",
+          "type": "array"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "stale": {
+          "default": false,
+          "title": "Stale",
+          "type": "boolean"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "trace": {
+          "$ref": "#/$defs/IdentifyTrace"
+        }
+      },
+      "required": [
+        "mode",
+        "source",
+        "label",
+        "narrowed",
+        "message",
+        "articles",
+        "committed",
+        "choices",
+        "questions",
+        "open_questions",
+        "benchmark",
+        "process_refs",
+        "model_ids",
+        "commit_policy",
+        "engineering_required",
+        "title",
+        "scored_at",
+        "description_sha256",
+        "stale",
+        "persisted",
+        "case_version",
+        "cached",
+        "decisions",
+        "trace",
+        "section_c"
+      ],
+      "title": "IdentifyDecisionResponse",
+      "type": "object"
+    },
+    "IdentifyRequest": {
+      "additionalProperties": false,
+      "description": "`prose` defaults to the case's latest project.description fact when omitted.",
+      "properties": {
+        "answers": {
+          "items": {
+            "$ref": "#/$defs/AnswerIn"
+          },
+          "maxItems": 20,
+          "title": "Answers",
+          "type": "array"
+        },
+        "expected_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Version"
+        },
+        "prose": {
+          "anyOf": [
+            {
+              "maxLength": 20000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prose"
+        }
+      },
+      "title": "IdentifyRequest",
+      "type": "object"
+    },
+    "IdentifyResult": {
+      "properties": {
+        "articles": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/IdentifyArticle"
+          },
+          "title": "Articles",
+          "type": "array"
+        },
+        "benchmark": {
+          "$ref": "#/$defs/BenchmarkRecord"
+        },
+        "cached": {
+          "default": false,
+          "title": "Cached",
+          "type": "boolean"
+        },
+        "case_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Case Version"
+        },
+        "choices": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/QuotedChoice"
+          },
+          "title": "Choices",
+          "type": "array"
+        },
+        "commit_policy": {
+          "additionalProperties": true,
+          "default": {},
+          "title": "Commit Policy",
+          "type": "object"
+        },
+        "committed": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Committed",
+          "type": "array"
+        },
+        "decisions": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ArticleDecision"
+          },
+          "title": "Decisions",
+          "type": "object"
+        },
+        "description_sha256": {
+          "title": "Description Sha256",
+          "type": "string"
+        },
+        "engineering_required": {
+          "const": "depends",
+          "default": "depends",
+          "title": "Engineering Required",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "message": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Message"
+        },
+        "mode": {
+          "enum": [
+            "live",
+            "fake",
+            "bm25_fallback"
+          ],
+          "title": "Mode",
+          "type": "string"
+        },
+        "model_ids": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "default": {},
+          "title": "Model Ids",
+          "type": "object"
+        },
+        "narrowed": {
+          "title": "Narrowed",
+          "type": "boolean"
+        },
+        "open_questions": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/OpenQuestion"
+          },
+          "title": "Open Questions",
+          "type": "array"
+        },
+        "persisted": {
+          "default": false,
+          "title": "Persisted",
+          "type": "boolean"
+        },
+        "process_refs": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ProcessRef"
+          },
+          "title": "Process Refs",
+          "type": "array"
+        },
+        "questions": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Questions",
+          "type": "array"
+        },
+        "scored_at": {
+          "title": "Scored At",
+          "type": "string"
+        },
+        "source": {
+          "title": "Source",
+          "type": "string"
+        },
+        "stale": {
+          "default": false,
+          "title": "Stale",
+          "type": "boolean"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        },
+        "trace": {
+          "$ref": "#/$defs/IdentifyTrace"
+        }
+      },
+      "required": [
+        "mode",
+        "source",
+        "label",
+        "narrowed",
+        "message",
+        "articles",
+        "committed",
+        "choices",
+        "questions",
+        "open_questions",
+        "benchmark",
+        "process_refs",
+        "model_ids",
+        "commit_policy",
+        "engineering_required",
+        "title",
+        "scored_at",
+        "description_sha256",
+        "stale",
+        "persisted",
+        "case_version",
+        "cached",
+        "decisions",
+        "trace"
+      ],
+      "title": "IdentifyResult",
+      "type": "object"
+    },
+    "IdentifyTrace": {
+      "properties": {
+        "articles_expected": {
+          "title": "Articles Expected",
+          "type": "integer"
+        },
+        "articles_scored": {
+          "title": "Articles Scored",
+          "type": "integer"
+        },
+        "config": {
+          "additionalProperties": true,
+          "title": "Config",
+          "type": "object"
+        },
+        "config_hash": {
+          "title": "Config Hash",
+          "type": "string"
+        },
+        "dropped": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/DroppedPick"
+          },
+          "title": "Dropped",
+          "type": "array"
+        },
+        "exhaustive": {
+          "title": "Exhaustive",
+          "type": "boolean"
+        },
+        "fallback_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fallback Reason"
+        },
+        "picks": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Picks",
+          "type": "array"
+        },
+        "ranker": {
+          "title": "Ranker",
+          "type": "string"
+        },
+        "seconds": {
+          "default": 0,
+          "title": "Seconds",
+          "type": "number"
+        },
+        "spend": {
+          "additionalProperties": true,
+          "default": {},
+          "title": "Spend",
+          "type": "object"
+        },
+        "stages": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/StageRecord"
+          },
+          "title": "Stages",
+          "type": "array"
+        },
+        "usd": {
+          "default": 0,
+          "title": "Usd",
+          "type": "number"
+        },
+        "verifier": {
+          "title": "Verifier",
+          "type": "string"
+        }
+      },
+      "required": [
+        "config",
+        "config_hash",
+        "exhaustive",
+        "articles_expected",
+        "articles_scored",
+        "ranker",
+        "fallback_reason",
+        "verifier",
+        "picks",
+        "dropped",
+        "stages",
+        "spend",
+        "usd",
+        "seconds"
+      ],
+      "title": "IdentifyTrace",
+      "type": "object"
+    },
+    "InformationRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "edited": {
+          "default": false,
+          "title": "Edited",
+          "type": "boolean"
+        },
+        "intro": {
+          "title": "Intro",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/InformationRequestItem"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "message_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Message Id"
+        },
+        "sent_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sent At"
+        },
+        "sent_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sent By Name"
+        },
+        "text": {
+          "default": "",
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "intro",
+        "items",
+        "edited",
+        "sent_at",
+        "sent_by_name",
+        "message_id",
+        "text"
+      ],
+      "title": "InformationRequest",
+      "type": "object"
+    },
+    "InformationRequestEdit": {
+      "additionalProperties": false,
+      "description": "Officer edits: replace the item list (text, inclusion, order) and optionally the intro.",
+      "properties": {
+        "intro": {
+          "anyOf": [
+            {
+              "maxLength": 2000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Intro"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/EditedItem"
+          },
+          "title": "Items",
+          "type": "array"
+        }
+      },
+      "required": [
+        "items"
+      ],
+      "title": "InformationRequestEdit",
+      "type": "object"
+    },
+    "InformationRequestItem": {
+      "additionalProperties": false,
+      "properties": {
+        "authored_by": {
+          "default": "batatis",
+          "enum": [
+            "batatis",
+            "officer"
+          ],
+          "title": "Authored By",
+          "type": "string"
+        },
+        "field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Field"
+        },
+        "finding_key": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Finding Key"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "included": {
+          "default": true,
+          "title": "Included",
+          "type": "boolean"
+        },
+        "officer_check": {
+          "default": false,
+          "title": "Officer Check",
+          "type": "boolean"
+        },
+        "section": {
+          "anyOf": [
+            {
+              "enum": [
+                "A",
+                "B",
+                "C",
+                "D",
+                "process"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Section"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "finding_key",
+        "section",
+        "field",
+        "text",
+        "authored_by",
+        "included",
+        "officer_check"
+      ],
+      "title": "InformationRequestItem",
+      "type": "object"
+    },
+    "InputFile": {
+      "additionalProperties": false,
+      "properties": {
+        "form_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Form Version"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "note": {
+          "default": "",
+          "title": "Note",
+          "type": "string"
+        },
+        "pages": {
+          "default": 0,
+          "title": "Pages",
+          "type": "integer"
+        },
+        "role": {
+          "enum": [
+            "scc_form_fillable",
+            "scc_form_flattened",
+            "attachment",
+            "unreadable",
+            "case_record"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sha256"
+        },
+        "size": {
+          "default": 0,
+          "title": "Size",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name",
+        "sha256",
+        "size",
+        "pages",
+        "role",
+        "form_version",
+        "note"
+      ],
+      "title": "InputFile",
+      "type": "object"
+    },
+    "IntakePlan": {
+      "properties": {
+        "candidates_seen": {
+          "default": 0,
+          "title": "Candidates Seen",
+          "type": "integer"
+        },
+        "fork": {
+          "$ref": "#/$defs/Fork"
+        },
+        "next": {
+          "enum": [
+            "redirect",
+            "questions",
+            "identify"
+          ],
+          "title": "Next",
+          "type": "string"
+        },
+        "not_sure": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Not Sure",
+          "type": "array"
+        },
+        "pre_application": {
+          "$ref": "#/$defs/PreApplication"
+        },
+        "questions": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Question"
+          },
+          "title": "Questions",
+          "type": "array"
+        },
+        "route_notice": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RouteNotice"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "scope": {
+          "$ref": "#/$defs/ScopeCheck"
+        }
+      },
+      "required": [
+        "next",
+        "scope",
+        "fork",
+        "questions",
+        "not_sure",
+        "pre_application",
+        "route_notice",
+        "candidates_seen"
+      ],
+      "title": "IntakePlan",
+      "type": "object"
+    },
+    "IntakeRecord": {
+      "properties": {
+        "conflicts": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/FieldConflict"
+          },
+          "title": "Conflicts",
+          "type": "array"
+        },
+        "files": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/FileReport"
+          },
+          "title": "Files",
+          "type": "array"
+        },
+        "model": {
+          "$ref": "#/$defs/ModelPass"
+        },
+        "plan": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/IntakePlan"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "pointers": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/FactPointer"
+          },
+          "title": "Pointers",
+          "type": "array"
+        },
+        "ran_at": {
+          "title": "Ran At",
+          "type": "string"
+        },
+        "text_sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Text Sha256"
+        },
+        "unresolved_citations": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/UnresolvedCitation"
+          },
+          "title": "Unresolved Citations",
+          "type": "array"
+        }
+      },
+      "required": [
+        "ran_at",
+        "text_sha256",
+        "pointers",
+        "files",
+        "model",
+        "conflicts",
+        "unresolved_citations",
+        "plan"
+      ],
+      "title": "IntakeRecord",
+      "type": "object"
+    },
+    "IntakeRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "expected_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Version"
+        },
+        "file_ids": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 10,
+          "title": "File Ids",
+          "type": "array"
+        },
+        "model": {
+          "default": true,
+          "title": "Model",
+          "type": "boolean"
+        },
+        "role": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Role"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "maxLength": 20000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Text"
+        }
+      },
+      "title": "IntakeRequest",
+      "type": "object"
+    },
+    "IntakeResult": {
+      "properties": {
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "case_version": {
+          "title": "Case Version",
+          "type": "integer"
+        },
+        "facts": {
+          "items": {
+            "$ref": "#/$defs/Fact"
+          },
+          "title": "Facts",
+          "type": "array"
+        },
+        "record": {
+          "$ref": "#/$defs/IntakeRecord"
+        }
+      },
+      "required": [
+        "case_id",
+        "case_version",
+        "facts",
+        "record"
+      ],
+      "title": "IntakeResult",
       "type": "object"
     },
     "IntentBlock": {
@@ -1438,6 +5502,241 @@
       "title": "Jurisdiction",
       "type": "object"
     },
+    "JurisdictionChecklist": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "conditions": {
+          "items": {
+            "$ref": "#/$defs/ChecklistCondition"
+          },
+          "title": "Conditions",
+          "type": "array"
+        },
+        "groups": {
+          "items": {
+            "$ref": "#/$defs/ChecklistGroup"
+          },
+          "title": "Groups",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "issued": {
+          "title": "Issued",
+          "type": "string"
+        },
+        "jurisdiction": {
+          "title": "Jurisdiction",
+          "type": "string"
+        },
+        "notice": {
+          "title": "Notice",
+          "type": "string"
+        },
+        "package": {
+          "title": "Package",
+          "type": "string"
+        },
+        "reviewed": {
+          "title": "Reviewed",
+          "type": "boolean"
+        },
+        "revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Revision"
+        },
+        "source": {
+          "$ref": "#/$defs/PackSource"
+        },
+        "source_notes": {
+          "items": {
+            "$ref": "#/$defs/SourceNote"
+          },
+          "title": "Source Notes",
+          "type": "array"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "jurisdiction",
+        "package",
+        "code",
+        "title",
+        "revision",
+        "issued",
+        "summary",
+        "reviewed",
+        "source",
+        "groups",
+        "source_notes",
+        "notice",
+        "conditions"
+      ],
+      "title": "JurisdictionChecklist",
+      "type": "object"
+    },
+    "JurisdictionChecklists": {
+      "additionalProperties": false,
+      "properties": {
+        "checklists": {
+          "items": {
+            "$ref": "#/$defs/JurisdictionChecklist"
+          },
+          "title": "Checklists",
+          "type": "array"
+        },
+        "historical": {
+          "items": {
+            "$ref": "#/$defs/HistoricalPackage"
+          },
+          "title": "Historical",
+          "type": "array"
+        },
+        "jurisdiction": {
+          "title": "Jurisdiction",
+          "type": "string"
+        },
+        "notice": {
+          "title": "Notice",
+          "type": "string"
+        }
+      },
+      "required": [
+        "jurisdiction",
+        "checklists",
+        "historical",
+        "notice"
+      ],
+      "title": "JurisdictionChecklists",
+      "type": "object"
+    },
+    "JurisdictionDetail": {
+      "additionalProperties": false,
+      "properties": {
+        "authority": {
+          "$ref": "#/$defs/Authority"
+        },
+        "bulletins": {
+          "items": {
+            "$ref": "#/$defs/Bulletin"
+          },
+          "title": "Bulletins",
+          "type": "array"
+        },
+        "code_edition": {
+          "title": "Code Edition",
+          "type": "string"
+        },
+        "coverage": {
+          "enum": [
+            "full",
+            "code_only",
+            "preview"
+          ],
+          "title": "Coverage",
+          "type": "string"
+        },
+        "disclaimer": {
+          "title": "Disclaimer",
+          "type": "string"
+        },
+        "fallback": {
+          "title": "Fallback",
+          "type": "boolean"
+        },
+        "forms": {
+          "items": {
+            "$ref": "#/$defs/ResolvedForm"
+          },
+          "title": "Forms",
+          "type": "array"
+        },
+        "guides": {
+          "items": {
+            "$ref": "#/$defs/Guide"
+          },
+          "title": "Guides",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "notices": {
+          "items": {
+            "$ref": "#/$defs/PackNotice"
+          },
+          "title": "Notices",
+          "type": "array"
+        },
+        "process_notes": {
+          "items": {
+            "$ref": "#/$defs/ResolvedNote"
+          },
+          "title": "Process Notes",
+          "type": "array"
+        },
+        "province": {
+          "title": "Province",
+          "type": "string"
+        },
+        "standing_packages": {
+          "items": {
+            "$ref": "#/$defs/StandingPackage"
+          },
+          "title": "Standing Packages",
+          "type": "array"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "province",
+        "coverage",
+        "fallback",
+        "code_edition",
+        "summary",
+        "authority",
+        "process_notes",
+        "forms",
+        "standing_packages",
+        "guides",
+        "bulletins",
+        "notices",
+        "disclaimer"
+      ],
+      "title": "JurisdictionDetail",
+      "type": "object"
+    },
     "JurisdictionInput": {
       "properties": {
         "authority": {
@@ -1466,6 +5765,117 @@
         "name"
       ],
       "title": "Jurisdiction",
+      "type": "object"
+    },
+    "JurisdictionSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "authority": {
+          "title": "Authority",
+          "type": "string"
+        },
+        "coverage": {
+          "enum": [
+            "full",
+            "code_only",
+            "preview"
+          ],
+          "title": "Coverage",
+          "type": "string"
+        },
+        "fallback": {
+          "title": "Fallback",
+          "type": "boolean"
+        },
+        "forms": {
+          "title": "Forms",
+          "type": "integer"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "province": {
+          "title": "Province",
+          "type": "string"
+        },
+        "reviewer_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reviewer Code"
+        },
+        "standing_packages": {
+          "title": "Standing Packages",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "province",
+        "coverage",
+        "fallback",
+        "authority",
+        "reviewer_code",
+        "standing_packages",
+        "forms"
+      ],
+      "title": "JurisdictionSummary",
+      "type": "object"
+    },
+    "JurisdictionsResult": {
+      "additionalProperties": false,
+      "properties": {
+        "coverage": {
+          "items": {
+            "$ref": "#/$defs/CoverageEntry"
+          },
+          "title": "Coverage",
+          "type": "array"
+        },
+        "disclaimer": {
+          "title": "Disclaimer",
+          "type": "string"
+        },
+        "jurisdictions": {
+          "items": {
+            "$ref": "#/$defs/JurisdictionSummary"
+          },
+          "title": "Jurisdictions",
+          "type": "array"
+        },
+        "levels": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "propertyNames": {
+            "enum": [
+              "full",
+              "code_only",
+              "preview"
+            ]
+          },
+          "title": "Levels",
+          "type": "object"
+        }
+      },
+      "required": [
+        "jurisdictions",
+        "coverage",
+        "levels",
+        "disclaimer"
+      ],
+      "title": "JurisdictionsResult",
       "type": "object"
     },
     "LoginRequest": {
@@ -1523,6 +5933,29 @@
       "title": "MessageAuthor",
       "type": "object"
     },
+    "MessageReadRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "message_ids": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 500,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Message Ids"
+        }
+      },
+      "title": "MessageReadRequest",
+      "type": "object"
+    },
     "MessageRequest": {
       "additionalProperties": false,
       "properties": {
@@ -1541,6 +5974,17 @@
     },
     "MessagesResult": {
       "properties": {
+        "decision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Decision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "messages": {
           "items": {
             "$ref": "#/$defs/ThreadMessage"
@@ -1550,9 +5994,87 @@
         }
       },
       "required": [
-        "messages"
+        "messages",
+        "decision"
       ],
       "title": "MessagesResult",
+      "type": "object"
+    },
+    "ModelPass": {
+      "properties": {
+        "dropped": {
+          "default": 0,
+          "title": "Dropped",
+          "type": "integer"
+        },
+        "input_tokens": {
+          "default": 0,
+          "title": "Input Tokens",
+          "type": "integer"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model"
+        },
+        "output_tokens": {
+          "default": 0,
+          "title": "Output Tokens",
+          "type": "integer"
+        },
+        "pointed": {
+          "default": 0,
+          "title": "Pointed",
+          "type": "integer"
+        },
+        "proposed": {
+          "default": 0,
+          "title": "Proposed",
+          "type": "integer"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "status": {
+          "enum": [
+            "off",
+            "fake",
+            "live",
+            "gate_closed",
+            "failed",
+            "not_needed"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "model",
+        "reason",
+        "pointed",
+        "proposed",
+        "dropped",
+        "input_tokens",
+        "output_tokens"
+      ],
+      "title": "ModelPass",
       "type": "object"
     },
     "NewCase": {
@@ -1643,6 +6165,7 @@
                 "in_review",
                 "returned",
                 "accepted",
+                "refused",
                 "withdrawn"
               ],
               "type": "string"
@@ -1653,6 +6176,18 @@
           ],
           "default": null,
           "title": "Status"
+        },
+        "submission_number": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Submission Number"
         },
         "summary": {
           "title": "Summary",
@@ -1665,6 +6200,7 @@
         "case_title",
         "kind",
         "status",
+        "submission_number",
         "actor",
         "summary",
         "created_at",
@@ -1786,6 +6322,648 @@
         "role"
       ],
       "title": "OnboardingRequest",
+      "type": "object"
+    },
+    "OpenQuestion": {
+      "properties": {
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "provision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provision"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "why": {
+          "title": "Why",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "field",
+        "text",
+        "why",
+        "provision"
+      ],
+      "title": "OpenQuestion",
+      "type": "object"
+    },
+    "PackNotice": {
+      "additionalProperties": false,
+      "description": "Information shown on the gaps list and the export. Severity is always info; it never blocks.",
+      "properties": {
+        "fix_hint": {
+          "title": "Fix Hint",
+          "type": "string"
+        },
+        "heading": {
+          "description": "Appendix heading for the notice.",
+          "title": "Heading",
+          "type": "string"
+        },
+        "id": {
+          "pattern": "^[a-z0-9_]+$",
+          "title": "Id",
+          "type": "string"
+        },
+        "message": {
+          "description": "ASCII, because it is also sent as an HTTP header.",
+          "minLength": 1,
+          "pattern": "^[\\x20-\\x7e]+$",
+          "title": "Message",
+          "type": "string"
+        },
+        "section": {
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "process"
+          ],
+          "title": "Section",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/PackSource"
+          },
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        },
+        "surfaces": {
+          "items": {
+            "enum": [
+              "gaps",
+              "export_header",
+              "export_appendix"
+            ],
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Surfaces",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "surfaces",
+        "section",
+        "heading",
+        "message",
+        "fix_hint",
+        "sources"
+      ],
+      "title": "PackNotice",
+      "type": "object"
+    },
+    "PackSource": {
+      "additionalProperties": false,
+      "description": "Where a claim comes from. `retrieved` is the date the URL was fetched or checked.",
+      "properties": {
+        "note": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Note"
+        },
+        "pages": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "PDF pages that carry the claim, as printed by the reader, e.g. \"pp.2-3\".",
+          "title": "Pages"
+        },
+        "retrieved": {
+          "description": "Date the URL was fetched or checked (YYYY-MM-DD).",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "title": "Retrieved",
+          "type": "string"
+        },
+        "sha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "SHA-256 of the file fetched on `retrieved`.",
+          "title": "Sha256"
+        },
+        "status": {
+          "default": "verified",
+          "description": "`unverified` when the claim could not be checked against the source.",
+          "enum": [
+            "verified",
+            "unverified"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "title": {
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "url": {
+          "pattern": "^https://",
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "url",
+        "retrieved",
+        "pages",
+        "sha256",
+        "status",
+        "note"
+      ],
+      "title": "PackSource",
+      "type": "object"
+    },
+    "PackageReviewIndex": {
+      "additionalProperties": false,
+      "properties": {
+        "authority": {
+          "title": "Authority",
+          "type": "string"
+        },
+        "case_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Case Id"
+        },
+        "close_out": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/CloseOut"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "latest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ReviewSession"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "package_id": {
+          "title": "Package Id",
+          "type": "string"
+        },
+        "sessions": {
+          "items": {
+            "$ref": "#/$defs/SessionSummary"
+          },
+          "title": "Sessions",
+          "type": "array"
+        }
+      },
+      "required": [
+        "package_id",
+        "case_id",
+        "authority",
+        "sessions",
+        "latest",
+        "close_out"
+      ],
+      "title": "PackageReviewIndex",
+      "type": "object"
+    },
+    "PlanRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "expected_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Version"
+        }
+      },
+      "title": "PlanRequest",
+      "type": "object"
+    },
+    "PlanSource": {
+      "properties": {
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        }
+      },
+      "required": [
+        "title",
+        "url"
+      ],
+      "title": "PlanSource",
+      "type": "object"
+    },
+    "Pointer": {
+      "additionalProperties": false,
+      "description": "Where a value or gap is: file and 1-based page, form field name, rectangle, exact quote.",
+      "properties": {
+        "bbox": {
+          "anyOf": [
+            {
+              "maxItems": 4,
+              "minItems": 4,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bbox"
+        },
+        "file": {
+          "title": "File",
+          "type": "string"
+        },
+        "form_field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Form Field"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "quote": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Quote"
+        }
+      },
+      "required": [
+        "file",
+        "page",
+        "form_field",
+        "bbox",
+        "quote"
+      ],
+      "title": "Pointer",
+      "type": "object"
+    },
+    "PreApplication": {
+      "description": "'Before you submit': meet the authority having jurisdiction and emergency services early.",
+      "properties": {
+        "jurisdiction_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Jurisdiction Id"
+        },
+        "jurisdiction_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Jurisdiction Name"
+        },
+        "resolved_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Resolved By"
+        },
+        "steps": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/PreApplicationStep"
+          },
+          "title": "Steps",
+          "type": "array"
+        }
+      },
+      "required": [
+        "jurisdiction_id",
+        "jurisdiction_name",
+        "resolved_by",
+        "steps"
+      ],
+      "title": "PreApplication",
+      "type": "object"
+    },
+    "PreApplicationStep": {
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "origin": {
+          "enum": [
+            "pack",
+            "generic"
+          ],
+          "title": "Origin",
+          "type": "string"
+        },
+        "sources": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/PlanSource"
+          },
+          "title": "Sources",
+          "type": "array"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "text",
+        "origin",
+        "sources"
+      ],
+      "title": "PreApplicationStep",
+      "type": "object"
+    },
+    "ProcessRef": {
+      "description": "A process reference listed on every case, read-only: how an alternative solution is allowed and documented.",
+      "properties": {
+        "citation": {
+          "title": "Citation",
+          "type": "string"
+        },
+        "division": {
+          "enum": [
+            "A",
+            "C"
+          ],
+          "title": "Division",
+          "type": "string"
+        },
+        "pdf_page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pdf Page"
+        },
+        "provision_id": {
+          "title": "Provision Id",
+          "type": "string"
+        },
+        "read_only": {
+          "const": true,
+          "default": true,
+          "title": "Read Only",
+          "type": "boolean"
+        },
+        "role": {
+          "title": "Role",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "provision_id",
+        "division",
+        "title",
+        "citation",
+        "text",
+        "role",
+        "pdf_page",
+        "read_only"
+      ],
+      "title": "ProcessRef",
+      "type": "object"
+    },
+    "ProfessionalRequirementRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "basis": {
+          "maxLength": 4000,
+          "minLength": 10,
+          "title": "Basis",
+          "type": "string"
+        },
+        "expected_version": {
+          "minimum": 1,
+          "title": "Expected Version",
+          "type": "integer"
+        },
+        "reference": {
+          "maxLength": 1000,
+          "minLength": 3,
+          "title": "Reference",
+          "type": "string"
+        },
+        "required": {
+          "title": "Required",
+          "type": "boolean"
+        },
+        "scope": {
+          "maxLength": 1000,
+          "minLength": 3,
+          "title": "Scope",
+          "type": "string"
+        }
+      },
+      "required": [
+        "expected_version",
+        "required",
+        "scope",
+        "basis",
+        "reference"
+      ],
+      "title": "ProfessionalRequirementRequest",
+      "type": "object"
+    },
+    "ProfessionalRequirementResolution": {
+      "description": "An officer's scoped administrative determination, never professional credentials or evidence.",
+      "properties": {
+        "at": {
+          "title": "At",
+          "type": "string"
+        },
+        "basis": {
+          "title": "Basis",
+          "type": "string"
+        },
+        "by_id": {
+          "title": "By Id",
+          "type": "string"
+        },
+        "by_name": {
+          "title": "By Name",
+          "type": "string"
+        },
+        "content_fingerprint": {
+          "title": "Content Fingerprint",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "reference": {
+          "title": "Reference",
+          "type": "string"
+        },
+        "required": {
+          "title": "Required",
+          "type": "boolean"
+        },
+        "scope": {
+          "title": "Scope",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "required",
+        "scope",
+        "basis",
+        "reference",
+        "by_id",
+        "by_name",
+        "at",
+        "content_fingerprint"
+      ],
+      "title": "ProfessionalRequirementResolution",
       "type": "object"
     },
     "ProvisionContext": {
@@ -1923,6 +7101,86 @@
       "title": "ProvisionContext",
       "type": "object"
     },
+    "Question": {
+      "description": "At most five per plan. The shape of identify's open questions plus why it is asked and what it unblocks.",
+      "properties": {
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "default": "missing",
+          "enum": [
+            "missing",
+            "conflict"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "priority": {
+          "default": "critical",
+          "enum": [
+            "critical",
+            "administrative"
+          ],
+          "title": "Priority",
+          "type": "string"
+        },
+        "provision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provision"
+        },
+        "splits": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Splits",
+          "type": "array"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "unblocks": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Unblocks",
+          "type": "array"
+        },
+        "why": {
+          "title": "Why",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "field",
+        "text",
+        "why",
+        "unblocks",
+        "splits",
+        "priority",
+        "kind",
+        "provision"
+      ],
+      "title": "Question",
+      "type": "object"
+    },
     "QueueApplication": {
       "properties": {
         "applicant": {
@@ -1970,6 +7228,17 @@
             }
           ]
         },
+        "expires_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expires At"
+        },
         "id": {
           "title": "Id",
           "type": "string"
@@ -1981,10 +7250,15 @@
             "in_review",
             "returned",
             "accepted",
+            "refused",
             "withdrawn"
           ],
           "title": "Status",
           "type": "string"
+        },
+        "submission_number": {
+          "title": "Submission Number",
+          "type": "integer"
         },
         "submitted_at": {
           "anyOf": [
@@ -2024,6 +7298,8 @@
         "authority",
         "status",
         "submitted_at",
+        "submission_number",
+        "expires_at",
         "updated_at",
         "completeness",
         "claim",
@@ -2041,12 +7317,211 @@
           },
           "title": "Applications",
           "type": "array"
+        },
+        "authority": {
+          "title": "Authority",
+          "type": "string"
+        },
+        "reviewer_id": {
+          "title": "Reviewer Id",
+          "type": "string"
         }
       },
       "required": [
-        "applications"
+        "applications",
+        "reviewer_id",
+        "authority"
       ],
       "title": "QueueResult",
+      "type": "object"
+    },
+    "QuotedChoice": {
+      "description": "'The code says X. Does your design do something different?' The id sits behind a disclosure.",
+      "properties": {
+        "citation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Citation"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "part": {
+          "title": "Part",
+          "type": "integer"
+        },
+        "provision": {
+          "title": "Provision",
+          "type": "string"
+        },
+        "provision_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provision Id"
+        },
+        "question": {
+          "title": "Question",
+          "type": "string"
+        },
+        "quote": {
+          "title": "Quote",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "provision",
+        "provision_id",
+        "title",
+        "part",
+        "citation",
+        "quote",
+        "question"
+      ],
+      "title": "QuotedChoice",
+      "type": "object"
+    },
+    "RecordItem": {
+      "additionalProperties": false,
+      "properties": {
+        "detail": {
+          "default": "",
+          "title": "Detail",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "present": {
+          "default": true,
+          "title": "Present",
+          "type": "boolean"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Pointer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "label",
+        "detail",
+        "present",
+        "source"
+      ],
+      "title": "RecordItem",
+      "type": "object"
+    },
+    "RecordPackage": {
+      "additionalProperties": false,
+      "description": "What the officer sends to the Safety Codes Council and what stays on file. Batatis never sends it.",
+      "properties": {
+        "basis": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Basis",
+          "type": "array"
+        },
+        "note": {
+          "title": "Note",
+          "type": "string"
+        },
+        "retain_on_file": {
+          "items": {
+            "$ref": "#/$defs/RecordItem"
+          },
+          "title": "Retain On File",
+          "type": "array"
+        },
+        "send_to_council": {
+          "items": {
+            "$ref": "#/$defs/RecordItem"
+          },
+          "title": "Send To Council",
+          "type": "array"
+        }
+      },
+      "required": [
+        "send_to_council",
+        "retain_on_file",
+        "basis",
+        "note"
+      ],
+      "title": "RecordPackage",
+      "type": "object"
+    },
+    "Regime": {
+      "description": "A safety-codes regime other than the building code.",
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "coverage": {
+          "enum": [
+            "roadmap",
+            "not_covered"
+          ],
+          "title": "Coverage",
+          "type": "string"
+        },
+        "framework": {
+          "enum": [
+            "national_model_code",
+            "no_division_c_framework"
+          ],
+          "title": "Framework",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "route": {
+          "title": "Route",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "code",
+        "framework",
+        "coverage",
+        "route"
+      ],
+      "title": "Regime",
       "type": "object"
     },
     "RelevanceBands": {
@@ -2081,6 +7556,18 @@
         "bands": {
           "$ref": "#/$defs/RelevanceBands"
         },
+        "config_hash": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Config Hash"
+        },
         "description_sha256": {
           "title": "Description Sha256",
           "type": "string"
@@ -2095,10 +7582,29 @@
           "type": "object"
         },
         "model": {
-          "const": "jev-1.13.0",
-          "default": "jev-1.13.0",
+          "default": "relevance-1",
+          "enum": [
+            "relevance-1",
+            "relevance-2",
+            "relevance-3"
+          ],
           "title": "Model",
           "type": "string"
+        },
+        "model_ids": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "default": {},
+          "title": "Model Ids",
+          "type": "object"
         },
         "rerank": {
           "additionalProperties": {
@@ -2137,6 +7643,8 @@
       "required": [
         "status",
         "model",
+        "config_hash",
+        "model_ids",
         "scored_at",
         "description_sha256",
         "stale",
@@ -2146,6 +7654,450 @@
         "bands"
       ],
       "title": "RelevanceRecord",
+      "type": "object"
+    },
+    "ResolvedForm": {
+      "additionalProperties": false,
+      "properties": {
+        "export": {
+          "description": "Whether Batatis fills this form today.",
+          "enum": [
+            "supported",
+            "not_yet"
+          ],
+          "title": "Export",
+          "type": "string"
+        },
+        "field_count": {
+          "minimum": 0,
+          "title": "Field Count",
+          "type": "integer"
+        },
+        "field_map": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Repository path of the field map, when export is supported.",
+          "title": "Field Map"
+        },
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "issuer": {
+          "title": "Issuer",
+          "type": "string"
+        },
+        "local_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Git-excluded local copy under reference/.",
+          "title": "Local Path"
+        },
+        "note": {
+          "default": "",
+          "title": "Note",
+          "type": "string"
+        },
+        "page_count": {
+          "minimum": 1,
+          "title": "Page Count",
+          "type": "integer"
+        },
+        "pdf_last_modified": {
+          "anyOf": [
+            {
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pdf Last Modified"
+        },
+        "role": {
+          "enum": [
+            "primary",
+            "additional"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "scope": {
+          "enum": [
+            "province",
+            "local"
+          ],
+          "title": "Scope",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "source": {
+          "$ref": "#/$defs/PackSource"
+        },
+        "status": {
+          "enum": [
+            "current",
+            "confirm_with_office",
+            "historical"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "issuer",
+        "role",
+        "version",
+        "status",
+        "export",
+        "sha256",
+        "page_count",
+        "field_count",
+        "pdf_last_modified",
+        "field_map",
+        "local_path",
+        "note",
+        "source",
+        "scope"
+      ],
+      "title": "ResolvedForm",
+      "type": "object"
+    },
+    "ResolvedNote": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "scope": {
+          "enum": [
+            "province",
+            "local"
+          ],
+          "title": "Scope",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/PackSource"
+          },
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        },
+        "text": {
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "topic": {
+          "enum": [
+            "entry_point",
+            "submission",
+            "permit_link",
+            "scope",
+            "documents",
+            "professional",
+            "review",
+            "decision",
+            "appeal",
+            "registration",
+            "authority"
+          ],
+          "title": "Topic",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "topic",
+        "text",
+        "sources",
+        "scope"
+      ],
+      "title": "ResolvedNote",
+      "type": "object"
+    },
+    "ReviewDiff": {
+      "additionalProperties": false,
+      "properties": {
+        "new": {
+          "items": {
+            "$ref": "#/$defs/DiffEntry"
+          },
+          "title": "New",
+          "type": "array"
+        },
+        "previous_gaps": {
+          "title": "Previous Gaps",
+          "type": "integer"
+        },
+        "previous_version": {
+          "title": "Previous Version",
+          "type": "integer"
+        },
+        "resolved": {
+          "items": {
+            "$ref": "#/$defs/DiffEntry"
+          },
+          "title": "Resolved",
+          "type": "array"
+        },
+        "statement": {
+          "title": "Statement",
+          "type": "string"
+        },
+        "still_open": {
+          "items": {
+            "$ref": "#/$defs/DiffEntry"
+          },
+          "title": "Still Open",
+          "type": "array"
+        }
+      },
+      "required": [
+        "previous_version",
+        "previous_gaps",
+        "resolved",
+        "still_open",
+        "new",
+        "statement"
+      ],
+      "title": "ReviewDiff",
+      "type": "object"
+    },
+    "ReviewSession": {
+      "additionalProperties": false,
+      "properties": {
+        "administrative_only": {
+          "const": true,
+          "default": true,
+          "title": "Administrative Only",
+          "type": "boolean"
+        },
+        "authority": {
+          "title": "Authority",
+          "type": "string"
+        },
+        "case_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Case Id"
+        },
+        "case_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Case Version"
+        },
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/CitationCheck"
+          },
+          "title": "Citations",
+          "type": "array"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "created_by_name": {
+          "title": "Created By Name",
+          "type": "string"
+        },
+        "diff": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ReviewDiff"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "documents": {
+          "items": {
+            "$ref": "#/$defs/DocumentRow"
+          },
+          "title": "Documents",
+          "type": "array"
+        },
+        "fields": {
+          "items": {
+            "$ref": "#/$defs/FieldReading"
+          },
+          "title": "Fields",
+          "type": "array"
+        },
+        "files": {
+          "items": {
+            "$ref": "#/$defs/InputFile"
+          },
+          "title": "Files",
+          "type": "array"
+        },
+        "findings": {
+          "items": {
+            "$ref": "#/$defs/Finding"
+          },
+          "title": "Findings",
+          "type": "array"
+        },
+        "information_request": {
+          "$ref": "#/$defs/InformationRequest"
+        },
+        "input_kind": {
+          "enum": [
+            "case",
+            "upload"
+          ],
+          "title": "Input Kind",
+          "type": "string"
+        },
+        "lookup_skipped": {
+          "default": false,
+          "title": "Lookup Skipped",
+          "type": "boolean"
+        },
+        "not_a_compliance_determination": {
+          "const": true,
+          "default": true,
+          "title": "Not A Compliance Determination",
+          "type": "boolean"
+        },
+        "notice": {
+          "default": "This review lists administrative gaps only. It is not a finding that the design is safe, that it complies with the code, or that a variance is granted. It does not fill any missing item.",
+          "title": "Notice",
+          "type": "string"
+        },
+        "package_id": {
+          "title": "Package Id",
+          "type": "string"
+        },
+        "schema_version": {
+          "const": "batatis.package_review.v1",
+          "default": "batatis.package_review.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "section_c": {
+          "items": {
+            "$ref": "#/$defs/SectionCCheck"
+          },
+          "title": "Section C",
+          "type": "array"
+        },
+        "version": {
+          "minimum": 1,
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "schema_version",
+        "administrative_only",
+        "not_a_compliance_determination",
+        "notice",
+        "package_id",
+        "case_id",
+        "authority",
+        "version",
+        "created_at",
+        "created_by_name",
+        "input_kind",
+        "case_version",
+        "files",
+        "fields",
+        "findings",
+        "documents",
+        "citations",
+        "section_c",
+        "information_request",
+        "diff",
+        "lookup_skipped"
+      ],
+      "title": "ReviewSession",
+      "type": "object"
+    },
+    "ReviewSnapshot": {
+      "description": "Stored application values at a return; expires and is deleted with its case.",
+      "properties": {
+        "authority": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Authority"
+        },
+        "returned_at": {
+          "title": "Returned At",
+          "type": "string"
+        },
+        "values": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Values",
+          "type": "object"
+        }
+      },
+      "required": [
+        "returned_at",
+        "authority",
+        "values"
+      ],
+      "title": "ReviewSnapshot",
       "type": "object"
     },
     "ReviewerName": {
@@ -2159,6 +8111,610 @@
         "name"
       ],
       "title": "ReviewerName",
+      "type": "object"
+    },
+    "RouteBullet": {
+      "properties": {
+        "citations": {
+          "items": {
+            "$ref": "#/$defs/PlanSource"
+          },
+          "title": "Citations",
+          "type": "array"
+        },
+        "claim": {
+          "title": "Claim",
+          "type": "string"
+        }
+      },
+      "required": [
+        "claim",
+        "citations"
+      ],
+      "title": "RouteBullet",
+      "type": "object"
+    },
+    "RouteNotice": {
+      "description": "Product acceptance versus a site variance, for manufacturers and jurisdiction-wide requests.",
+      "properties": {
+        "bullets": {
+          "items": {
+            "$ref": "#/$defs/RouteBullet"
+          },
+          "title": "Bullets",
+          "type": "array"
+        },
+        "summary": {
+          "title": "Summary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "summary",
+        "bullets"
+      ],
+      "title": "RouteNotice",
+      "type": "object"
+    },
+    "RuleComputed": {
+      "properties": {
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Unit"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "name",
+        "label",
+        "unit",
+        "value"
+      ],
+      "title": "RuleComputed",
+      "type": "object"
+    },
+    "RuleInputValue": {
+      "properties": {
+        "fact_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fact Id"
+        },
+        "fact_status": {
+          "anyOf": [
+            {
+              "enum": [
+                "confirmed",
+                "unconfirmed"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fact Status"
+        },
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Unit"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "integer"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Value"
+        }
+      },
+      "required": [
+        "field",
+        "label",
+        "unit",
+        "value",
+        "fact_id",
+        "fact_status"
+      ],
+      "title": "RuleInputValue",
+      "type": "object"
+    },
+    "RuleProvisionRef": {
+      "properties": {
+        "citation": {
+          "title": "Citation",
+          "type": "string"
+        },
+        "division": {
+          "title": "Division",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "pdf_page": {
+          "title": "Pdf Page",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "division",
+        "citation",
+        "pdf_page"
+      ],
+      "title": "RuleProvisionRef",
+      "type": "object"
+    },
+    "RuleQuestion": {
+      "properties": {
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "question": {
+          "title": "Question",
+          "type": "string"
+        },
+        "why": {
+          "title": "Why",
+          "type": "string"
+        }
+      },
+      "required": [
+        "field",
+        "label",
+        "question",
+        "why"
+      ],
+      "title": "RuleQuestion",
+      "type": "object"
+    },
+    "RuleResult": {
+      "description": "One rule over one set of inputs. A departure flag against an acceptable solution, never a finding that\nthe design as a whole meets the code.",
+      "properties": {
+        "article": {
+          "title": "Article",
+          "type": "string"
+        },
+        "assumptions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Assumptions",
+          "type": "array"
+        },
+        "computed": {
+          "items": {
+            "$ref": "#/$defs/RuleComputed"
+          },
+          "title": "Computed",
+          "type": "array"
+        },
+        "ignored_inputs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Ignored Inputs",
+          "type": "array"
+        },
+        "inputs": {
+          "items": {
+            "$ref": "#/$defs/RuleInputValue"
+          },
+          "title": "Inputs",
+          "type": "array"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "missing": {
+          "items": {
+            "$ref": "#/$defs/RuleQuestion"
+          },
+          "title": "Missing",
+          "type": "array"
+        },
+        "next_step": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Step"
+        },
+        "not_checked": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Not Checked",
+          "type": "array"
+        },
+        "outcome_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Outcome Id"
+        },
+        "provision": {
+          "$ref": "#/$defs/RuleProvisionRef"
+        },
+        "reviewed": {
+          "title": "Reviewed",
+          "type": "boolean"
+        },
+        "rule_id": {
+          "title": "Rule Id",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "follows",
+            "departs",
+            "needs_info",
+            "not_applicable"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "state_label": {
+          "title": "State Label",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "unconfirmed_inputs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Unconfirmed Inputs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "rule_id",
+        "title",
+        "article",
+        "state",
+        "state_label",
+        "outcome_id",
+        "provision",
+        "message",
+        "next_step",
+        "missing",
+        "inputs",
+        "ignored_inputs",
+        "computed",
+        "assumptions",
+        "not_checked",
+        "reviewed",
+        "unconfirmed_inputs"
+      ],
+      "title": "RuleResult",
+      "type": "object"
+    },
+    "RuleSet": {
+      "description": "Rule definitions for the browser evaluator (web/src/rules/evaluate.ts).",
+      "properties": {
+        "edition": {
+          "title": "Edition",
+          "type": "string"
+        },
+        "index": {
+          "additionalProperties": true,
+          "title": "Index",
+          "type": "object"
+        },
+        "rules": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Rules",
+          "type": "array"
+        },
+        "version": {
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "version",
+        "edition",
+        "index",
+        "rules"
+      ],
+      "title": "RuleSet",
+      "type": "object"
+    },
+    "ScopeCheck": {
+      "properties": {
+        "cue": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cue"
+        },
+        "end": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "End"
+        },
+        "message": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Message"
+        },
+        "override_allowed": {
+          "default": true,
+          "title": "Override Allowed",
+          "type": "boolean"
+        },
+        "regime": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Regime"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "scores": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "default": {},
+          "title": "Scores",
+          "type": "object"
+        },
+        "start": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Start"
+        },
+        "status": {
+          "enum": [
+            "in_scope",
+            "redirect",
+            "overridden"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "regime",
+        "message",
+        "cue",
+        "start",
+        "end",
+        "scores",
+        "override_allowed"
+      ],
+      "title": "ScopeCheck",
+      "type": "object"
+    },
+    "ScopeRequest": {
+      "additionalProperties": false,
+      "description": "`building_code: true` is the applicant's \"this is a building-code question\" override.",
+      "properties": {
+        "building_code": {
+          "title": "Building Code",
+          "type": "boolean"
+        },
+        "expected_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Version"
+        }
+      },
+      "required": [
+        "building_code"
+      ],
+      "title": "ScopeRequest",
+      "type": "object"
+    },
+    "SectionCCheck": {
+      "additionalProperties": false,
+      "properties": {
+        "form_function": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Form Function"
+        },
+        "form_objective": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Form Objective"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "pointer": {
+          "$ref": "#/$defs/Pointer"
+        },
+        "provision_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Provision Id"
+        },
+        "row": {
+          "title": "Row",
+          "type": "integer"
+        },
+        "status": {
+          "enum": [
+            "match",
+            "mismatch",
+            "no_table_row",
+            "provision_not_found",
+            "not_checked"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "table_pairs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Table Pairs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "row",
+        "provision_id",
+        "form_objective",
+        "form_function",
+        "table_pairs",
+        "status",
+        "message",
+        "pointer"
+      ],
+      "title": "SectionCCheck",
       "type": "object"
     },
     "SectionCRequest": {
@@ -2307,6 +8863,257 @@
         "explainer"
       ],
       "title": "SectionCRow",
+      "type": "object"
+    },
+    "SelectedArticle": {
+      "additionalProperties": false,
+      "description": "An applicant's code-check card, not a confirmed benchmark or code quotation.",
+      "properties": {
+        "answer": {
+          "anyOf": [
+            {
+              "enum": [
+                "yes",
+                "no",
+                "not-sure"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Answer"
+        },
+        "id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "pending": {
+          "default": false,
+          "title": "Pending",
+          "type": "boolean"
+        },
+        "provision": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Provision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "provision",
+        "answer",
+        "pending"
+      ],
+      "title": "SelectedArticle",
+      "type": "object"
+    },
+    "SelectedArticleInput": {
+      "additionalProperties": false,
+      "description": "An applicant's code-check card, not a confirmed benchmark or code quotation.",
+      "properties": {
+        "answer": {
+          "anyOf": [
+            {
+              "enum": [
+                "yes",
+                "no",
+                "not-sure"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Answer"
+        },
+        "id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "pending": {
+          "default": false,
+          "title": "Pending",
+          "type": "boolean"
+        },
+        "provision": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Provision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "provision"
+      ],
+      "title": "SelectedArticle",
+      "type": "object"
+    },
+    "SelectedArticlesRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "expected_version": {
+          "minimum": 1,
+          "title": "Expected Version",
+          "type": "integer"
+        },
+        "selected_articles": {
+          "items": {
+            "$ref": "#/$defs/SelectedArticleInput"
+          },
+          "maxItems": 500,
+          "title": "Selected Articles",
+          "type": "array"
+        }
+      },
+      "required": [
+        "selected_articles",
+        "expected_version"
+      ],
+      "title": "SelectedArticlesRequest",
+      "type": "object"
+    },
+    "SentInformationRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "intro": {
+          "title": "Intro",
+          "type": "string"
+        },
+        "items": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "package_id": {
+          "title": "Package Id",
+          "type": "string"
+        },
+        "sent_at": {
+          "title": "Sent At",
+          "type": "string"
+        },
+        "sent_by_name": {
+          "title": "Sent By Name",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "package_id",
+        "version",
+        "sent_at",
+        "sent_by_name",
+        "intro",
+        "items",
+        "text"
+      ],
+      "title": "SentInformationRequest",
+      "type": "object"
+    },
+    "SentInformationRequests": {
+      "additionalProperties": false,
+      "properties": {
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "requests": {
+          "items": {
+            "$ref": "#/$defs/SentInformationRequest"
+          },
+          "title": "Requests",
+          "type": "array"
+        }
+      },
+      "required": [
+        "case_id",
+        "requests"
+      ],
+      "title": "SentInformationRequests",
+      "type": "object"
+    },
+    "SessionSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "created_by_name": {
+          "title": "Created By Name",
+          "type": "string"
+        },
+        "input_kind": {
+          "enum": [
+            "case",
+            "upload"
+          ],
+          "title": "Input Kind",
+          "type": "string"
+        },
+        "open_gaps": {
+          "title": "Open Gaps",
+          "type": "integer"
+        },
+        "sent_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sent At"
+        },
+        "statement": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Statement"
+        },
+        "version": {
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "version",
+        "created_at",
+        "created_by_name",
+        "input_kind",
+        "open_gaps",
+        "statement",
+        "sent_at"
+      ],
+      "title": "SessionSummary",
       "type": "object"
     },
     "SignupRequest": {
@@ -2499,6 +9306,322 @@
       "title": "Source",
       "type": "object"
     },
+    "SourceNote": {
+      "additionalProperties": false,
+      "description": "Something in the source the applicant should know: an inconsistency, an offence warning, a figure-only note.",
+      "properties": {
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "conflict",
+            "warning",
+            "figure_only",
+            "scope"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "page": {
+          "minimum": 1,
+          "title": "Page",
+          "type": "integer"
+        },
+        "plain": {
+          "title": "Plain",
+          "type": "string"
+        },
+        "quote": {
+          "anyOf": [
+            {
+              "maxLength": 260,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Verified like a condition quote; null when the text is only in a figure.",
+          "title": "Quote"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "plain",
+        "page",
+        "quote"
+      ],
+      "title": "SourceNote",
+      "type": "object"
+    },
+    "SourcePointer": {
+      "additionalProperties": false,
+      "description": "Where in the source PDF the condition is. `quote` is checked word for word against the reference text.",
+      "properties": {
+        "diagram": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "A figure or detail in the source that shows this condition, with its page.",
+          "title": "Diagram"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The item label the source prints, e.g. \"b) ii.\" or \"4. a)\".",
+          "title": "Label"
+        },
+        "lead_in": {
+          "anyOf": [
+            {
+              "maxLength": 260,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The sentence the item hangs from, when the item alone is not readable.",
+          "title": "Lead In"
+        },
+        "page": {
+          "description": "One-based page of the source PDF.",
+          "minimum": 1,
+          "title": "Page",
+          "type": "integer"
+        },
+        "quote": {
+          "description": "A short extract, verbatim apart from whitespace.",
+          "maxLength": 260,
+          "minLength": 8,
+          "title": "Quote",
+          "type": "string"
+        }
+      },
+      "required": [
+        "page",
+        "label",
+        "quote",
+        "lead_in",
+        "diagram"
+      ],
+      "title": "SourcePointer",
+      "type": "object"
+    },
+    "StageRecord": {
+      "properties": {
+        "detail": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Detail"
+        },
+        "errors": {
+          "default": 0,
+          "title": "Errors",
+          "type": "integer"
+        },
+        "input_tokens": {
+          "default": 0,
+          "title": "Input Tokens",
+          "type": "integer"
+        },
+        "method": {
+          "title": "Method",
+          "type": "string"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model"
+        },
+        "output_tokens": {
+          "default": 0,
+          "title": "Output Tokens",
+          "type": "integer"
+        },
+        "requests": {
+          "default": 0,
+          "title": "Requests",
+          "type": "integer"
+        },
+        "seconds": {
+          "default": 0,
+          "title": "Seconds",
+          "type": "number"
+        },
+        "stage": {
+          "title": "Stage",
+          "type": "string"
+        }
+      },
+      "required": [
+        "stage",
+        "method",
+        "model",
+        "seconds",
+        "requests",
+        "input_tokens",
+        "output_tokens",
+        "errors",
+        "detail"
+      ],
+      "title": "StageRecord",
+      "type": "object"
+    },
+    "StandingPackage": {
+      "additionalProperties": false,
+      "description": "A published local route (standing posted variance or policy). Its conditions live in a checklist file.",
+      "properties": {
+        "applies_to": {
+          "title": "Applies To",
+          "type": "string"
+        },
+        "checklist": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Id of the checklist in checklists/<id>.json; null when none is built. Never set on a historical package. A checklist is never a determination.",
+          "title": "Checklist"
+        },
+        "code": {
+          "description": "The identifier the issuer prints, e.g. SPV-001 or B23-01.",
+          "title": "Code",
+          "type": "string"
+        },
+        "edition": {
+          "description": "Code edition the document cites, as printed.",
+          "title": "Edition",
+          "type": "string"
+        },
+        "historical_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Historical Reason"
+        },
+        "id": {
+          "pattern": "^[a-z0-9][a-z0-9-]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "issued": {
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "title": "Issued",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "standing_posted_variance",
+            "policy"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "note": {
+          "default": "",
+          "title": "Note",
+          "type": "string"
+        },
+        "provisions": {
+          "description": "Provisions the source names, as printed. Not a code analysis.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Provisions",
+          "type": "array"
+        },
+        "revision": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Revision"
+        },
+        "source": {
+          "$ref": "#/$defs/PackSource"
+        },
+        "status": {
+          "enum": [
+            "current",
+            "historical"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "code",
+        "kind",
+        "title",
+        "revision",
+        "issued",
+        "edition",
+        "status",
+        "historical_reason",
+        "provisions",
+        "applies_to",
+        "note",
+        "checklist",
+        "source"
+      ],
+      "title": "StandingPackage",
+      "type": "object"
+    },
     "StatusChange": {
       "properties": {
         "at": {
@@ -2520,6 +9643,7 @@
             "in_review",
             "returned",
             "accepted",
+            "refused",
             "withdrawn"
           ],
           "title": "From Status",
@@ -2537,6 +9661,7 @@
             "in_review",
             "returned",
             "accepted",
+            "refused",
             "withdrawn"
           ],
           "title": "To Status",
@@ -2608,6 +9733,147 @@
       "title": "StoredMessage",
       "type": "object"
     },
+    "Submission": {
+      "description": "A submission round, distinct from content versions and claim/release events.",
+      "properties": {
+        "at": {
+          "title": "At",
+          "type": "string"
+        },
+        "authority": {
+          "title": "Authority",
+          "type": "string"
+        },
+        "by_id": {
+          "title": "By Id",
+          "type": "string"
+        },
+        "changes": {
+          "items": {
+            "$ref": "#/$defs/SubmissionChange"
+          },
+          "title": "Changes",
+          "type": "array"
+        },
+        "comparison_available": {
+          "default": false,
+          "title": "Comparison Available",
+          "type": "boolean"
+        },
+        "number": {
+          "minimum": 1,
+          "title": "Number",
+          "type": "integer"
+        },
+        "returned_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Returned At"
+        }
+      },
+      "required": [
+        "number",
+        "at",
+        "by_id",
+        "authority",
+        "returned_at",
+        "comparison_available",
+        "changes"
+      ],
+      "title": "Submission",
+      "type": "object"
+    },
+    "SubmissionChange": {
+      "properties": {
+        "after": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "After"
+        },
+        "before": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Before"
+        },
+        "field": {
+          "title": "Field",
+          "type": "string"
+        }
+      },
+      "required": [
+        "field",
+        "before",
+        "after"
+      ],
+      "title": "SubmissionChange",
+      "type": "object"
+    },
+    "SubmitRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "expected_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Version"
+        }
+      },
+      "title": "SubmitRequest",
+      "type": "object"
+    },
+    "Term": {
+      "description": "An objective (OS1.2) or functional statement (F03) attributed to the provision, by lookup.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "title": "Term",
+      "type": "object"
+    },
     "ThreadMessage": {
       "properties": {
         "author": {
@@ -2656,6 +9922,22 @@
         "read_by_me"
       ],
       "title": "ThreadMessage",
+      "type": "object"
+    },
+    "TitleRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "title"
+      ],
+      "title": "TitleRequest",
       "type": "object"
     },
     "TocArticle": {
@@ -2769,6 +10051,38 @@
       "title": "TocSubsection",
       "type": "object"
     },
+    "UnresolvedCitation": {
+      "description": "An article number the applicant typed that is not in NBC(AE) 2023, 2nd printing.",
+      "properties": {
+        "entered": {
+          "title": "Entered",
+          "type": "string"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "source_ref": {
+          "title": "Source Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "entered",
+        "source_ref",
+        "page"
+      ],
+      "title": "UnresolvedCitation",
+      "type": "object"
+    },
     "User": {
       "properties": {
         "applicant_type": {
@@ -2878,6 +10192,275 @@
         "user"
       ],
       "title": "UserResult",
+      "type": "object"
+    },
+    "VoiceCapability": {
+      "properties": {
+        "available": {
+          "title": "Available",
+          "type": "boolean"
+        },
+        "max_seconds": {
+          "title": "Max Seconds",
+          "type": "integer"
+        },
+        "notice": {
+          "title": "Notice",
+          "type": "string"
+        },
+        "protocol": {
+          "const": "batatis.voice.v1",
+          "title": "Protocol",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reason"
+        },
+        "relay_path": {
+          "const": "/api/voice/relay/session",
+          "title": "Relay Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "available",
+        "reason",
+        "protocol",
+        "relay_path",
+        "max_seconds",
+        "notice"
+      ],
+      "title": "VoiceCapability",
+      "type": "object"
+    },
+    "VoiceCommand": {
+      "additionalProperties": false,
+      "properties": {
+        "audio": {
+          "anyOf": [
+            {
+              "maxLength": 64000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Audio"
+        },
+        "context_id": {
+          "maxLength": 80,
+          "minLength": 16,
+          "title": "Context Id",
+          "type": "string"
+        },
+        "revision": {
+          "anyOf": [
+            {
+              "maximum": 1000000,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Revision"
+        },
+        "scope": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/VoiceScope"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "session_id": {
+          "maxLength": 80,
+          "minLength": 1,
+          "title": "Session Id",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "session.end",
+            "audio.append",
+            "audio.commit",
+            "audio.clear",
+            "response.cancel",
+            "context.update"
+          ],
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "session_id",
+        "context_id"
+      ],
+      "title": "VoiceCommand",
+      "type": "object"
+    },
+    "VoiceScope": {
+      "additionalProperties": false,
+      "properties": {
+        "attachment_ids": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 3,
+          "title": "Attachment Ids",
+          "type": "array"
+        },
+        "case_id": {
+          "anyOf": [
+            {
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Case Id"
+        },
+        "case_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Case Version"
+        },
+        "context_id": {
+          "maxLength": 80,
+          "minLength": 16,
+          "pattern": "^[A-Za-z0-9_-]+$",
+          "title": "Context Id",
+          "type": "string"
+        },
+        "destinations": {
+          "items": {
+            "enum": [
+              "applications",
+              "description",
+              "questions",
+              "review",
+              "application",
+              "code-library",
+              "code-search",
+              "references",
+              "downloads",
+              "officer-view",
+              "settings",
+              "notifications",
+              "accuracy",
+              "comments",
+              "question-authority",
+              "question-owner",
+              "question-representative",
+              "question-mailing-address",
+              "question-date",
+              "question-scope",
+              "question-permit",
+              "question-site-address",
+              "question-legal-description",
+              "question-alternative",
+              "question-rationale",
+              "question-risk",
+              "question-mitigation",
+              "question-assumptions",
+              "question-maintenance",
+              "question-qualifications",
+              "question-documents",
+              "review-queue",
+              "package-review",
+              "review-overview",
+              "review-missing",
+              "review-checks",
+              "review-decide",
+              "review-application",
+              "review-messages",
+              "review-request",
+              "review-versions",
+              "review-close-out"
+            ],
+            "type": "string"
+          },
+          "maxItems": 64,
+          "title": "Destinations",
+          "type": "array"
+        },
+        "focus": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AssistFocus"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "revision": {
+          "default": 0,
+          "maximum": 1000000,
+          "minimum": 0,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "screen": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Screen",
+          "type": "string"
+        }
+      },
+      "required": [
+        "context_id",
+        "screen"
+      ],
+      "title": "VoiceScope",
+      "type": "object"
+    },
+    "VoiceStart": {
+      "additionalProperties": false,
+      "properties": {
+        "scope": {
+          "$ref": "#/$defs/VoiceScope"
+        },
+        "type": {
+          "const": "session.start",
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "scope"
+      ],
+      "title": "VoiceStart",
       "type": "object"
     }
   },

@@ -1,0 +1,218 @@
+{
+  "schema_version": 1,
+  "id": "edmonton",
+  "name": "City of Edmonton",
+  "province": "AB",
+  "coverage": "full",
+  "code_edition": "NBC(AE) 2023, 2nd printing",
+  "summary": "Building permits and alternative solutions in the City of Edmonton, reviewed by Safety Codes, Permits and Inspections (SCPI), with Edmonton Fire Rescue Services where emergency services are affected.",
+  "authority": {
+    "name": "City of Edmonton",
+    "kind": "accredited_municipality",
+    "reviewer_code": "edmonton",
+    "contact": "Safety Codes, Permits and Inspections, Development Services, 3rd Floor, Edmonton Tower, 10111 104 Avenue NW; or 311.",
+    "sources": [
+      {
+        "title": "City of Edmonton, Policy B23-01 Fire Separation Between Row Houses with More Than Two Secondary Suites (30 July 2024)",
+        "url": "https://www.edmonton.ca/sites/default/files/public-files/Policy-B23-01-Secondary-Suites-in-Row-houses.pdf?cb=1755184683",
+        "retrieved": "2026-10-21",
+        "pages": "pp.1-2",
+        "sha256": "85d5c4d38be7df97f9668ea7b46640990c9f3a08ccc7bb93c5c8b74a33f4fe71"
+      },
+      {
+        "title": "Safety Codes Council, Accreditation Search",
+        "url": "https://www.safetycodes.ab.ca/permits-inspections/where-to-get-a-permit/",
+        "retrieved": "2026-10-21",
+        "status": "unverified",
+        "note": "The City's accreditation record was not looked up in the Council's search tool. The Point Access Block guide (p.3) describes the City as the authority having jurisdiction through its administrative responsibility."
+      }
+    ]
+  },
+  "match": {
+    "ids": ["edmonton", "city-of-edmonton", "yeg"],
+    "names": ["Edmonton", "City of Edmonton"]
+  },
+  "process_notes": [
+    {
+      "id": "edm-building-by-building",
+      "topic": "scope",
+      "text": "The City cannot change or reduce the level of performance the provincially adopted codes require; designs outside the acceptable solutions are considered building by building through an alternative solution proposal to the authority having jurisdiction.",
+      "sources": [
+        {
+          "title": "City of Edmonton, Alternative Solution Guide for Point Access Blocks (issued 28 February 2025)",
+          "url": "https://www.edmonton.ca/sites/default/files/public-files/Point-Access-Block-Alternative-Solution-Guide.pdf",
+          "retrieved": "2026-10-21",
+          "pages": "p.3",
+          "sha256": "1546fef639376b5b363214f8ea035ef02c94abb8aa001a2d9d68a44813df0983"
+        }
+      ]
+    },
+    {
+      "id": "edm-emergency-review",
+      "topic": "review",
+      "text": "Alternative solutions that may affect emergency services are reviewed under a joint SCPI and Edmonton Fire Rescue Services procedure. Alternative solutions shown to add no additional or unique impact on emergency services compared with the acceptable solutions need no additional analysis on that point.",
+      "sources": [
+        {
+          "title": "City of Edmonton, Alternative Solution Guide for Point Access Blocks (issued 28 February 2025)",
+          "url": "https://www.edmonton.ca/sites/default/files/public-files/Point-Access-Block-Alternative-Solution-Guide.pdf",
+          "retrieved": "2026-10-21",
+          "pages": "p.6",
+          "sha256": "1546fef639376b5b363214f8ea035ef02c94abb8aa001a2d9d68a44813df0983"
+        },
+        {
+          "title": "City of Edmonton, Guideline for Alternative Solutions Affecting Emergency Services, COE-IM-GUIDE-0040 v01 (15 April 2025)",
+          "url": "https://www.edmonton.ca/sites/default/files/public-files/COE-IM-GUIDE-0040-v01-20250415%20Guideline%20for%20Alternative%20Solutions%20Affecting%20Emergency%20Services.pdf?cb=1745629775",
+          "retrieved": "2026-10-21",
+          "pages": "p.3",
+          "sha256": "1d57547972e4cd2e639a6bb98a588b5ba4ba96f31f4a02a2257a564a8201f757"
+        }
+      ]
+    },
+    {
+      "id": "edm-policy-letter",
+      "topic": "submission",
+      "text": "To use a City policy such as B23-01, the drawings show conformance with the policy and the signed Letter of Construction Intention is submitted with the building permit application, in place of requesting an alternative solution. The letter and detail drawings are kept with the building permit records.",
+      "sources": [
+        {
+          "title": "City of Edmonton, Policy B23-01 Fire Separation Between Row Houses with More Than Two Secondary Suites (30 July 2024)",
+          "url": "https://www.edmonton.ca/sites/default/files/public-files/Policy-B23-01-Secondary-Suites-in-Row-houses.pdf?cb=1755184683",
+          "retrieved": "2026-10-21",
+          "pages": "pp.1-2",
+          "sha256": "85d5c4d38be7df97f9668ea7b46640990c9f3a08ccc7bb93c5c8b74a33f4fe71"
+        }
+      ]
+    },
+    {
+      "id": "edm-policy-refusal",
+      "topic": "decision",
+      "text": "In exceptional circumstances an officer may refuse a building permit that relies on a policy, and the applicant is told why. Where a policy is used, not meeting its requirements is an offence.",
+      "sources": [
+        {
+          "title": "City of Edmonton, Policy B23-01 Fire Separation Between Row Houses with More Than Two Secondary Suites (30 July 2024)",
+          "url": "https://www.edmonton.ca/sites/default/files/public-files/Policy-B23-01-Secondary-Suites-in-Row-houses.pdf?cb=1755184683",
+          "retrieved": "2026-10-21",
+          "pages": "p.2",
+          "sha256": "85d5c4d38be7df97f9668ea7b46640990c9f3a08ccc7bb93c5c8b74a33f4fe71"
+        }
+      ]
+    },
+    {
+      "id": "edm-pab-consultant",
+      "topic": "professional",
+      "text": "A Point Access Block (single exit stair) application must include an alternative solution prepared by a qualified fire protection or life safety code consultant.",
+      "sources": [
+        {
+          "title": "City of Edmonton, Alternative Solution Guide for Point Access Blocks (issued 28 February 2025)",
+          "url": "https://www.edmonton.ca/sites/default/files/public-files/Point-Access-Block-Alternative-Solution-Guide.pdf",
+          "retrieved": "2026-10-21",
+          "pages": "p.4",
+          "sha256": "1546fef639376b5b363214f8ea035ef02c94abb8aa001a2d9d68a44813df0983"
+        }
+      ]
+    },
+    {
+      "id": "edm-no-local-form-found",
+      "topic": "submission",
+      "text": "No Edmonton-specific variance request form was found in the City sources reviewed. Use the Safety Codes Council form and confirm the intake with the assigned plans examiner.",
+      "sources": [
+        {
+          "title": "City of Edmonton, Application requirements for house permits",
+          "url": "https://www.edmonton.ca/residential_neighbourhoods/application-requirements-house-permits",
+          "retrieved": "2026-10-21",
+          "sha256": "2bea12373ccafa104585fb7f2dbdfb0b874d1a76d40d4afa9d0354363fd3fd74",
+          "status": "unverified",
+          "note": "An absence finding over the pages and policies read here, not a statement by the City."
+        }
+      ]
+    }
+  ],
+  "forms": [],
+  "standing_packages": [
+    {
+      "id": "edmonton-b23-01",
+      "code": "B23-01",
+      "kind": "policy",
+      "title": "Fire Separation Between Row Houses with More Than Two Secondary Suites",
+      "revision": null,
+      "issued": "2024-07-30",
+      "edition": "NBC2023(AE)",
+      "status": "current",
+      "provisions": ["9.10.11.2.(2)"],
+      "applies_to": "Part 9 row houses with more than two adjacent houses containing a secondary suite, on freehold or condominium lots.",
+      "note": "Supported by the City report \"Life Safety and Property Protection: Alternative Solution for Secondary Suites in Row Houses\" (26 July 2024). Requires the Letter of Construction Intention with the permit application. Read every operative condition in the source.",
+      "checklist": "edmonton-b23-01",
+      "source": {
+        "title": "City of Edmonton, Policy B23-01 (30 July 2024)",
+        "url": "https://www.edmonton.ca/sites/default/files/public-files/Policy-B23-01-Secondary-Suites-in-Row-houses.pdf?cb=1755184683",
+        "retrieved": "2026-10-21",
+        "pages": "pp.1-2",
+        "sha256": "85d5c4d38be7df97f9668ea7b46640990c9f3a08ccc7bb93c5c8b74a33f4fe71",
+        "note": "Listed on https://www.edmonton.ca/residential_neighbourhoods/application-requirements-house-permits on the retrieval date."
+      }
+    },
+    {
+      "id": "edmonton-b14-01",
+      "code": "B14-01",
+      "kind": "policy",
+      "title": "Reduced or Zero Lot Line Side Yard Wall and Gable Construction",
+      "revision": null,
+      "issued": "2019-01-10",
+      "edition": "Alberta Building Code 2014",
+      "status": "historical",
+      "historical_reason": "The policy cites the Alberta Building Code 2014 (ABC2014), which is superseded by NBC(AE) 2023. The City page still links it; do not use it unchanged for a 2023-edition project, and confirm with the City before relying on it.",
+      "provisions": ["ABC2014:B:9.10.15.5."],
+      "applies_to": "Single detached and semi-detached houses with reduced or zero side yards permitted by zoning, on two adjacent lots.",
+      "note": "Shown for history only. Same article number in the 2023 edition does not mean the same requirement.",
+      "checklist": null,
+      "source": {
+        "title": "City of Edmonton, Policy 14-01 Reduced or Zero Lot Line Side Yard Wall and Gable Construction (10 January 2019)",
+        "url": "https://www.edmonton.ca/sites/default/files/public-files/assets/PDF/ReducedZero_LotLineProject.pdf?cb=1755135906",
+        "retrieved": "2026-10-21",
+        "pages": "pp.1-2",
+        "sha256": "2fe9366e98d7e01f784e36987135736e0b899f4a6e1a776ac93de3ca88e664f8"
+      }
+    }
+  ],
+  "guides": [
+    {
+      "id": "edmonton-point-access-block",
+      "title": "Alternative Solution Guide for Point Access Blocks",
+      "issued": "2025-02-28",
+      "topic": "single_exit_stair",
+      "summary": "Point Access Blocks (single exit stair apartments) are considered building by building as alternative solutions. The included technical report is an example analysis, not a blanket approval; applications need a qualified fire protection or life safety code consultant.",
+      "requires_professional": true,
+      "source": {
+        "title": "City of Edmonton, Alternative Solution Guide for Point Access Blocks (issued 28 February 2025)",
+        "url": "https://www.edmonton.ca/sites/default/files/public-files/Point-Access-Block-Alternative-Solution-Guide.pdf",
+        "retrieved": "2026-10-21",
+        "pages": "pp.1-8",
+        "sha256": "1546fef639376b5b363214f8ea035ef02c94abb8aa001a2d9d68a44813df0983"
+      },
+      "companions": [
+        {
+          "title": "City of Edmonton, Point Access Block resources (Introduction, Building Code Guide, Design Guide, Technical Report)",
+          "url": "https://www.edmonton.ca/business_economy/new-commercial-building",
+          "retrieved": "2026-10-21",
+          "sha256": "0dab948ab51bd7fb52d67e310f6f6be225b6ad8ac9c596d5da76f00f3462556a",
+          "note": "The page links all four companion PDFs; the companions themselves were not re-fetched on this date."
+        }
+      ]
+    },
+    {
+      "id": "edmonton-emergency-services",
+      "title": "Guideline for Alternative Solutions Affecting Emergency Services",
+      "issued": "2025-04-15",
+      "topic": "emergency_services",
+      "summary": "Guidance for design professionals on alternative solutions that may affect emergency services, and the SCPI and EFRS peer review they are subject to.",
+      "requires_professional": null,
+      "source": {
+        "title": "City of Edmonton, COE-IM-GUIDE-0040 v01 (15 April 2025)",
+        "url": "https://www.edmonton.ca/sites/default/files/public-files/COE-IM-GUIDE-0040-v01-20250415%20Guideline%20for%20Alternative%20Solutions%20Affecting%20Emergency%20Services.pdf?cb=1745629775",
+        "retrieved": "2026-10-21",
+        "pages": "p.3",
+        "sha256": "1d57547972e4cd2e639a6bb98a588b5ba4ba96f31f4a02a2257a564a8201f757"
+      }
+    }
+  ],
+  "notices": []
+}

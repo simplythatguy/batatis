@@ -1,0 +1,15 @@
+---
+description: Batatis git and environment rules — GitHub has only dev and main; local app on ports 3000/8000 only
+alwaysApply: true
+---
+
+# Git and environments (user decisions 2026-10-22 and 2026-10-24)
+
+Full rules: `docs/agents/git-workflow.md`.
+
+- GitHub holds exactly two branches: `dev` (shared integration source) and `main` (production). Never push or open a PR from any other branch. Never push or merge `main`. Never force-push. Never delete `dev`.
+- Flow: verify locally (`scripts/verify.sh`) → land on `dev` (`scripts/land.sh`, fast-forward only) → the user tests locally and approves → the user merges the single release PR `dev → main`.
+- Vercel deploys only `main`; preview deployments are disabled. `dev` pushes run CI. Local verification remains required before landing.
+- Check `git merge-base --is-ancestor origin/dev HEAD` before rebasing. If true, do not rebase. Otherwise use `git -c rebase.updateRefs=false rebase --rebase-merges origin/dev`.
+- Local servers: web on port 3000, engine on port 8000, nothing else (`scripts/local-app.sh`). If busy, wait for the owner; never pick another port; stop what you start.
+- Children never push or open PRs; the parent lands.

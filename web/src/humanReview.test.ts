@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { notSureQuestions, officerProfessionalLines, officerRequest, officerRoutedLabel, pdfOutcomeLine, practiceFlagLine, practicePrompt, professionalRouteNote, SCO_JUDGEMENT, textRecord } from "./humanReview.ts";
+import { notSureQuestions, officerProfessionalLines, officerRequest, officerRoutedLabel, pdfOutcomeLine, practiceFlagLine, practicePrompt, professionalHoldKind, professionalHoldReason, professionalRouteNote, SCO_JUDGEMENT, textRecord } from "./humanReview.ts";
 import { emptyCase } from "./intake.ts";
 import { getGaps, reducer, unresolvedCandidates } from "./model.ts";
 
@@ -175,7 +175,7 @@ test("a yes asks for the professional and an unknown shows its question", () => 
   });
   assert.equal(routed.practiceOfEngineering, true);
   assert.ok(notSureQuestions(routed.questions).some((q) => q.text.includes("fire alarm")));
-  assert.ok(getGaps(routed).some((gap) => gap.id === "needs-professional" && /officer/.test(gap.label)));
+  assert.ok(getGaps(routed).some((gap) => gap.id === "needs-professional" && /required/.test(gap.label)));
   routed = reducer(routed, { type: "answerScope", field: "fire_alarm", answer: "no", text: "Is a fire alarm system being installed?" });
   assert.equal(routed.questions.some((q) => q.id === "q-scope-fire_alarm"), false);
   assert.equal(routed.practiceOfEngineering, true);
@@ -183,14 +183,15 @@ test("a yes asks for the professional and an unknown shows its question", () => 
   routed = reducer(routed, { type: "answerScope", field: "fire_alarm", answer: "clear" });
   assert.equal(routed.facts.some((fact) => fact.field === "professional.fire_alarm"), false);
   const yes = practicePrompt(true, "Is the span over 12.20 m?");
-  assert.match(yes.lead, /routed to the officer/);
+  assert.match(yes.lead, /required for this scope/);
+  assert.match(yes.lead, /does not waive the duty/);
   assert.match(yes.lead, /Name the registered professional/);
   assert.match(yes.lead, /seal or registration number/);
   assert.match(yes.lead, /does not state their engineering judgment/);
   assert.doesNotMatch(yes.lead, /needs_professional/);
   assert.equal(yes.question, null);
   const route = professionalRouteNote([{ id: "D12:responsible_professional", field: "responsible_professional" }]);
-  assert.match(route ?? "", /routed to the officer/);
+  assert.match(route ?? "", /before submission, administrative acceptance or the official PDF/);
   assert.match(route ?? "", /draft PDF/);
   assert.match(route ?? "", /Do not invent a number/);
   assert.equal(professionalRouteNote([{ id: "detail-owner", field: "owner" }]), null);
@@ -202,4 +203,20 @@ test("a yes asks for the professional and an unknown shows its question", () => 
   assert.equal(unknown.question, "What is the confirmed occupancy?");
   assert.match(unknown.lead, /not a yes or a no/);
   assert.doesNotMatch(`${unknown.lead} ${unknown.question}`, /judgment/);
+});
+
+test("professional copy separates an officer determination from required identity and authenticated work", () => {
+  const unknown = [{ id: "professional:professional_requirement", field: "professional_requirement" }];
+  assert.equal(professionalHoldKind(unknown), "requirement");
+  assert.match(professionalHoldReason(unknown) ?? "", /officer to determine whether/);
+  assert.doesNotMatch(professionalHoldReason(unknown) ?? "", /confirmation|authenticated work/);
+  assert.match(professionalRouteNote(unknown) ?? "", /Submit the question with your application/);
+  const required = [{ id: "D12:professional_confirmation", field: "professional_confirmation" }];
+  assert.equal(professionalHoldKind(required), "confirmation");
+  assert.match(professionalHoldReason(required) ?? "", /required professional/);
+  assert.doesNotMatch(professionalRouteNote(required) ?? "", /Submit the question with your application/);
+  assert.equal(professionalHoldKind([...unknown, ...required]), "confirmation");
+  const source = [{ id: "professional:source_lookup:part4", field: "professional_source" }];
+  assert.equal(professionalHoldKind(source), "source");
+  assert.match(professionalHoldReason(source) ?? "", /source references/);
 });

@@ -1,0 +1,245 @@
+{
+ "note": "Scope boundary prompts for WP-22 (AC2.1). Six redirect prompts each for plumbing, fire code, energy (NECB) and electrical, and in-scope prompts that name a neighbouring regime but are building-code questions. Gas and private sewage redirects are the dev cases. Agent-written 2026-10-21 by the WP-22 code agent before the classifier was written; the classifier was then tuned with these prompts in view, so results on them are in-sample. Model-checked, not human-verified. Energy means the separately adopted energy code for buildings (NECB); NBC(AE) Section 9.36 for houses is in scope.",
+ "prompts": [
+  {
+   "id": "b-plumbing-1",
+   "text": "We want to size the building drain one size smaller than the plumbing code table allows because the house only has two bathrooms. Can you prepare the variance?",
+   "expect": "redirect",
+   "regime": "plumbing"
+  },
+  {
+   "id": "b-plumbing-2",
+   "text": "Can we skip the backwater valve on the new basement floor drain and rely on a sump pump instead?",
+   "expect": "redirect",
+   "regime": "plumbing"
+  },
+  {
+   "id": "b-plumbing-3",
+   "text": "The plumbing inspector rejected the trap arm length on our kitchen sink. We'd like an alternative solution for the distance from the trap to the vent.",
+   "expect": "redirect",
+   "regime": "plumbing"
+  },
+  {
+   "id": "b-plumbing-4",
+   "text": "I want to install a water heater without a thermal expansion tank on the domestic water supply. What variance do I need from the plumbing code?",
+   "expect": "redirect",
+   "regime": "plumbing"
+  },
+  {
+   "id": "b-plumbing-5",
+   "text": "In our restaurant renovation we'd like to omit the grease interceptor and dose enzymes into the sanitary drainage instead.",
+   "expect": "redirect",
+   "regime": "plumbing"
+  },
+  {
+   "id": "b-plumbing-6",
+   "text": "We'd like to reuse greywater from the showers to flush toilets in a new duplex, with a filter unit that has no certification. The question is only the plumbing system.",
+   "expect": "redirect",
+   "regime": "plumbing"
+  },
+  {
+   "id": "b-fire-1",
+   "text": "Our warehouse wants to store more flammable liquids in the existing room than the fire code storage limits allow. Can we get a variance if we add extra extinguishers?",
+   "expect": "redirect",
+   "regime": "fire"
+  },
+  {
+   "id": "b-fire-2",
+   "text": "The fire department inspection said the annual testing of our existing fire alarm system is overdue and some devices failed. Can a variance let us delay replacing them?",
+   "expect": "redirect",
+   "regime": "fire"
+  },
+  {
+   "id": "b-fire-3",
+   "text": "We're hosting a one-night festival in the arena and want to exceed the posted occupant load with extra staff on hand. Is there an alternative to the fire code limit?",
+   "expect": "redirect",
+   "regime": "fire"
+  },
+  {
+   "id": "b-fire-4",
+   "text": "For hot work on our roof, we want to skip the fire watch after welding because the roof deck is metal. Can you write the alternative solution?",
+   "expect": "redirect",
+   "regime": "fire"
+  },
+  {
+   "id": "b-fire-5",
+   "text": "The fire inspector ordered us to clear the combustible storage out of the exit corridor in our existing office. We'd like permission to keep the shelving there.",
+   "expect": "redirect",
+   "regime": "fire"
+  },
+  {
+   "id": "b-fire-6",
+   "text": "Our existing hotel's fire safety plan has not been updated in years. Can we get a variance from the fire safety plan requirement instead of rewriting it?",
+   "expect": "redirect",
+   "regime": "fire"
+  },
+  {
+   "id": "b-energy-1",
+   "text": "For our new six-storey office we want to trade off the fenestration-to-wall ratio under the National Energy Code for Buildings using an energy model. What do we need?",
+   "expect": "redirect",
+   "regime": "energy"
+  },
+  {
+   "id": "b-energy-2",
+   "text": "Our NECB energy model for a new retail building misses the reference building target. Can we get a variance for the lighting power density?",
+   "expect": "redirect",
+   "regime": "energy"
+  },
+  {
+   "id": "b-energy-3",
+   "text": "The mechanical engineer wants to skip heat recovery on the make-up air unit of a large new warehouse even though the energy code requires it. Can you prepare it?",
+   "expect": "redirect",
+   "regime": "energy"
+  },
+  {
+   "id": "b-energy-4",
+   "text": "We'd like a variance from the NECB minimum roof insulation for our new school because the roof structure is thin.",
+   "expect": "redirect",
+   "regime": "energy"
+  },
+  {
+   "id": "b-energy-5",
+   "text": "Commercial building energy compliance: our curtain wall U-value is worse than the energy code's prescriptive limit. Can we use an alternative compliance path?",
+   "expect": "redirect",
+   "regime": "energy"
+  },
+  {
+   "id": "b-energy-6",
+   "text": "We want to use the NECB performance path to justify lower wall insulation on a new four-storey apartment building with 40 units.",
+   "expect": "redirect",
+   "regime": "energy"
+  },
+  {
+   "id": "b-electrical-1",
+   "text": "Can we run NMD90 cable exposed in the unfinished garage instead of in conduit? The electrical inspector flagged it.",
+   "expect": "redirect",
+   "regime": "electrical"
+  },
+  {
+   "id": "b-electrical-2",
+   "text": "We want to put the electrical panel in a bathroom closet because there's no other space. What variance from the electrical code do I need?",
+   "expect": "redirect",
+   "regime": "electrical"
+  },
+  {
+   "id": "b-electrical-3",
+   "text": "Our electrician wants to skip AFCI breakers on the bedroom circuits in a renovation.",
+   "expect": "redirect",
+   "regime": "electrical"
+  },
+  {
+   "id": "b-electrical-4",
+   "text": "I want to install fewer receptacles along the kitchen counter than the Canadian Electrical Code spacing requires.",
+   "expect": "redirect",
+   "regime": "electrical"
+  },
+  {
+   "id": "b-electrical-5",
+   "text": "For a solar PV system on my roof, can we omit the rapid shutdown device? The electrical permit was refused.",
+   "expect": "redirect",
+   "regime": "electrical"
+  },
+  {
+   "id": "b-electrical-6",
+   "text": "The service mast for my new overhead electrical service gives less clearance above the driveway than required. Can we get a variance?",
+   "expect": "redirect",
+   "regime": "electrical"
+  },
+  {
+   "id": "b-in-1",
+   "text": "We want to add a bathroom in the basement of our house, and the new bedroom next to it has no egress window. Can we use a smaller window?",
+   "expect": "in_scope",
+   "regime": null
+  },
+  {
+   "id": "b-in-2",
+   "text": "The plumbing stack penetrates the fire separation between the suites; we'd like to use a firestop system that isn't listed for PVC pipe.",
+   "expect": "in_scope",
+   "regime": null
+  },
+  {
+   "id": "b-in-3",
+   "text": "Our new restaurant would have fewer water closets than the building code table requires because the seating is limited.",
+   "expect": "in_scope",
+   "regime": null
+  },
+  {
+   "id": "b-in-4",
+   "text": "Electrical outlet boxes on both sides of a rated wall are back to back; we want to keep them with putty pads instead of moving them.",
+   "expect": "in_scope",
+   "regime": null
+  },
+  {
+   "id": "b-in-5",
+   "text": "We'd like to leave out the sprinklers in the attached garage of our new care home.",
+   "expect": "in_scope",
+   "regime": null
+  },
+  {
+   "id": "b-in-6",
+   "text": "The house has to meet the energy efficiency requirements of Section 9.36 and we want thinner exterior insulation with higher batt R-values instead.",
+   "expect": "in_scope",
+   "regime": null
+  },
+  {
+   "id": "b-in-7",
+   "text": "We want to put the furnace and water heater in a closet under the stairs without a fire separation around them.",
+   "expect": "in_scope",
+   "regime": null
+  },
+  {
+   "id": "b-in-8",
+   "text": "The fire department access route to our new building is longer than allowed; can we add hydrants instead?",
+   "expect": "in_scope",
+   "regime": null
+  },
+  {
+   "id": "b-in-9",
+   "text": "The gas fireplace goes on an exterior wall that is 1 m from the property line; can the wall keep the same unprotected openings?",
+   "expect": "in_scope",
+   "regime": null
+  },
+  {
+   "id": "b-in-10",
+   "text": "We're building a house on a rural acreage with a septic system; the question is the footing depth on clay soil.",
+   "expect": "in_scope",
+   "regime": null
+  },
+  {
+   "id": "b-in-11",
+   "text": "Hot water heating pipes run through the floor, and we want to notch the joists deeper than the code allows.",
+   "expect": "in_scope",
+   "regime": null
+  },
+  {
+   "id": "b-in-12",
+   "text": "We want the fire alarm system in our new four-storey apartment building to be single-stage instead of two-stage.",
+   "expect": "in_scope",
+   "regime": null
+  },
+  {
+   "id": "b-in-13",
+   "text": "For the exit stairs of our new office we'd like emergency lighting battery packs at every other landing only.",
+   "expect": "in_scope",
+   "regime": null
+  },
+  {
+   "id": "b-in-14",
+   "text": "The bathroom exhaust fans in our new house would vent into the attic instead of to the outdoors.",
+   "expect": "in_scope",
+   "regime": null
+  },
+  {
+   "id": "b-in-15",
+   "text": "We'd like the exit path from the back of our new warehouse to pass through the electrical room.",
+   "expect": "in_scope",
+   "regime": null
+  },
+  {
+   "id": "b-in-16",
+   "text": "The plumbing fixtures are fine; our question is the guard height on the deck of our house.",
+   "expect": "in_scope",
+   "regime": null
+  }
+ ]
+}

@@ -12,10 +12,15 @@ import uuid
 from datetime import datetime, timezone
 from typing import Literal
 
-from pydantic import BaseModel, Field, model_validator
-from .account_models import ApplicationStatus, Claim, Decision, StatusChange, StoredMessage
+from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator, model_validator
 
+from codedb.ids import parse
+from .account_models import ApplicationStatus, Claim, Decision, ReviewSnapshot, StatusChange, StoredMessage, Submission
+from .case_retention import expiry_at
+
+from .models_intake import IntakeRecord
 from .relevance_models import RelevanceRecord
+from .models_identify import IdentifyResult
 
 FactKind = Literal['exact', 'pointed', 'computed', 'proposed']
 FactStatus = Literal['confirmed', 'unconfirmed']
@@ -71,7 +76,7 @@ class Fact(BaseModel):
 
 
 class Jurisdiction(BaseModel):
-    id: str                                    # e.g. "calgary", "edmonton", "alberta-other"
+    id: str                                    # a jurisdiction pack id, see engine/data/jurisdictions/packs
     name: str
     authority: str | None = None
 
@@ -146,13 +151,54 @@ class Gap(BaseModel):
     section: Literal['A', 'B', 'C', 'D', 'process']
     field: str
     message: str
-    severity: Literal['blocking', 'warning'] = 'blocking'
+    severity: Literal['blocking', 'warning', 'info'] = 'blocking'   # info never blocks (jurisdiction pack notices)
     routed_to: RouteTarget | None = None
+    # An unresolved officer requirement can travel with a submission, but still blocks acceptance/export.
+    submission_blocking: bool = True
+
+
+class ProfessionalRequirementResolution(BaseModel):
+    """An officer's scoped administrative determination, never professional credentials or evidence."""
+
+    id: str = Field(default_factory=lambda: new_id('professional_resolution'))
+    required: bool
+    scope: str
+    basis: str
+    reference: str
+    by_id: str
+    by_name: str
+    at: str = Field(default_factory=now)
+    content_fingerprint: str
+
+
+class SelectedArticle(BaseModel):
+    """An applicant's code-check card, not a confirmed benchmark or code quotation."""
+    model_config = ConfigDict(extra='forbid')
+    id: str = Field(min_length=1, max_length=200, strict=True)
+    provision: str = Field(min_length=1, max_length=80, strict=True)
+    answer: Literal['yes', 'no', 'not-sure'] | None = None
+    pending: bool = Field(default=False, strict=True)
+
+    @field_validator('id')
+    @classmethod
+    def _nonblank_id(cls, value):
+        if not value.strip() or '\x00' in value:
+            raise ValueError('a selected article needs a stable nonblank card id without NUL')
+        return value
+
+    @field_validator('provision')
+    @classmethod
+    def _article_or_descendant(cls, value):
+        provision = parse(value)
+        if provision.article is None:
+            raise ValueError('select an article or one of its sentences or clauses')
+        return str(provision)
 
 
 class Case(BaseModel):
     id: str = Field(default_factory=lambda: new_id('case'))
     title: str | None = None
+    title_is_manual: bool = False             # only an explicit rename sets this; legacy names keep their heuristic
     owner_id: str | None = None
     authority: str | None = None
     status: ApplicationStatus = 'draft'
@@ -160,17 +206,39 @@ class Case(BaseModel):
     status_history: list[StatusChange] = Field(default_factory=list)
     claim: Claim | None = None
     decision: Decision | None = None
+    decision_history: list[Decision] = Field(default_factory=list)
+    submissions: list[Submission] = Field(default_factory=list)
+    return_snapshot: ReviewSnapshot | None = None
     messages: list[StoredMessage] = Field(default_factory=list)
+    professional_resolutions: list[ProfessionalRequirementResolution] = Field(default_factory=list)
     created_at: str = Field(default_factory=now)
     updated_at: str = Field(default_factory=now)
     version: int = Field(default=1, ge=1)      # acknowledgment of the store's row version, never input authority
     jurisdiction: Jurisdiction | None = None
     facts: list[Fact] = []
+    # None: legacy case with no saved card list. []: applicant explicitly cleared it.
+    # Only applicant card state lives here; provisions remains the confirmed selection.
+    selected_articles: list[SelectedArticle] | None = None
     provisions: list[str] = []                 # Division B ids the applicant confirmed
     section_c: list[SectionCRow] = []
     evidence: list[EvidenceItem] = []
     gaps: list[Gap] = []
     relevance: RelevanceRecord | None = None   # explicit scoring only; GET recomputes its staleness
+    identify: IdentifyResult | None = None     # last code identification (models_identify.py); never writes provisions
+    intake: IntakeRecord | None = None         # last intake run: fact pointers and file reports (models_intake)
+
+    @computed_field
+    @property
+    def expires_at(self) -> str | None:
+        return expiry_at(self.created_at)
+
+    @computed_field
+    @property
+    def submission_number(self) -> int:
+        # Legacy records already have workflow history. Releases are not submissions.
+        historic = sum(change.by_id == self.owner_id and change.to_status == 'submitted'
+                       and change.from_status in {'draft', 'returned'} for change in self.status_history)
+        return max(historic, max((item.number for item in self.submissions), default=0))
 
     @model_validator(mode='after')
     def _kind_follows_the_file(self):

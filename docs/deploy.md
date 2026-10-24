@@ -10,12 +10,20 @@ root `vercel.json` owns the two services. A dashboard root of `web` builds only
 the frontend; a Services framework override on a branch without service
 declarations fails with `MISSING_SERVICES`.
 
-Set the production branch to `dev`. Only reviewed merges to `dev` should trigger
-automatic deployments: `git.deploymentEnabled` disables other branches. Keep
-automatic PR previews disabled in the project settings so older PR branches
-without this configuration cannot use the deployment allowance. Use local
-builds and explicitly requested previews for review. Do not redeploy an unchanged
-`dev` SHA on every team standup.
+Only `main` deploys (user decision, 2026-10-24). Keep **Production Branch = `main`**
+and **preview deployments disabled** in the Vercel project. The repository's
+`git.deploymentEnabled` allows `main` and disables every other branch. `dev` is
+shared integration source tested locally; its former stable hosted alias is retired.
+
+Agents land verified work on `dev`. Teammates can merge contribution PRs into
+`dev` with GitHub write access. The user approves the release and merges the
+single `dev → main` PR using **Create a merge commit**; that triggers production.
+A `dev` push or contribution PR does not trigger a Vercel preview. See the
+[Git workflow](agents/git-workflow.md).
+
+The previous two-site setup was superseded. Historical preview deployments and
+their isolated data are preserved as recovery evidence. This configuration
+change does not promote an old preview or publish unapproved source to production.
 
 The Hobby project's deployment allowance was exhausted on October 20, 2026
 (`api-deployments-free-per-day`, more than 100 deployments). When Vercel reports
@@ -26,7 +34,7 @@ workflow. A `READY` frontend build alone does not verify the engine: exercise
 
 The branch allowlist follows [Vercel's Git configuration](https://vercel.com/docs/project-configuration/git-configuration).
 
-This repository does not deploy or create accounts. A person with the existing Vercel project connects the Git repository and sets the variables below. Do not commit the NRC PDF, `codedb/build/codedb.sqlite`, `.env`, or uploads.
+Use the existing Vercel project's Git connection and production settings below. Do not commit the NRC PDF, `codedb/build/codedb.sqlite`, `.env`, or uploads.
 
 ## What the build does
 
@@ -56,11 +64,13 @@ The builder needs the NBC(AE) 2023 2nd-printing PDF and the NBC 2020 intent-stat
 
 Do not work around a failed download by committing the PDF or the sqlite.
 
-The same build downloads the Safety Codes Council variance form from `https://ebs.safetycodes.ab.ca/documents/webdocs/PI/Variance%20Template%20final.pdf`. The pinned sha256 is `f44640ca005c957c11a2387d2768fffc35ef93c97125dcca37436fcc0b9afc1d` (334580 bytes), the same digest as `engine/export/field_maps/scc_2026-10.json`. The file lands at `codedb/build/SCC-Variance-Form.pdf` and is included in the engine bundle. It is not committed. If that host is unreachable, set `SCC_FORM_URL` to a private object. `CODEDB_SKIP_OFFICIAL=1` skips the official URL when the private one is set. A missing form at runtime makes `POST /cases/{id}/export` return 503 with `SCC variance form not found`. The server log says the export is unavailable on this deployment. A form whose sha256 does not match the field map returns 500 with `The SCC variance form could not be exported.` The response does not include the form path.
+The default export uses the tracked seven-page `engine/export/templates/challenge_2026-09-15.pdf`, mechanically extracted from physical pages 5–11 of the supplied challenge. Its SHA-256 is `f2749e1273e1b1d5826ac98cc0d8cfcb1204386914751d496f0d162d9014b42a`; the build verifies it before downloading sources. The field map and tracked asset ship in the engine bundle. See [template provenance and reproduction](../engine/export/templates/README.md).
+
+For explicit legacy `scc_2026-10` exports and uploads, the same build downloads the Safety Codes Council variance form from `https://ebs.safetycodes.ab.ca/documents/webdocs/PI/Variance%20Template%20final.pdf`. The pinned sha256 is `f44640ca005c957c11a2387d2768fffc35ef93c97125dcca37436fcc0b9afc1d` (334580 bytes), the same digest as `engine/export/field_maps/scc_2026-10.json`. The file lands at `codedb/build/SCC-Variance-Form.pdf` and is included in the engine bundle. It is not committed. If that host is unreachable, set `SCC_FORM_URL` to a private object. `CODEDB_SKIP_OFFICIAL=1` skips the official URL when the private one is set. A missing requested form at runtime makes `POST /cases/{id}/export` return 503 with `SCC variance form not found`. The server log says the export is unavailable on this deployment. A form whose sha256 does not match the field map returns 500 with `The SCC variance form could not be exported.` The response does not include the form path.
 
 ## Environment variables
 
-Set these on the Vercel project for Preview and Production. Leave the project Root Directory at the repository root so both services build. Do not set a dashboard Output Directory that would override `web/dist`.
+Set hosted runtime variables on the Vercel project for Production. The local `.env.example` contains only the OpenAI/OpenRouter credentials, live switches and daily cap; advanced hosting settings are listed here. Leave the project Root Directory at the repository root so both services build. Do not set a dashboard Output Directory that would override `web/dist`.
 
 | Variable | Where | Purpose |
 | --- | --- | --- |
@@ -68,12 +78,14 @@ Set these on the Vercel project for Preview and Production. Leave the project Ro
 | `DATABASE_URL` | engine runtime | Neon (or any Postgres) URL. `sslmode=require` is added when the URL omits it. |
 | `BATATIS_LIVE` | engine runtime | Unset or anything other than `1` keeps the offline path. Live calls also need `OPENAI_API_KEY`. |
 | `OPENAI_API_KEY` | engine runtime, sensitive | Server only. Do not use a `VITE_` name. The process never logs the value. |
+| `OPENROUTER_API_KEY` | engine runtime, sensitive | Server-only Elephant credential. |
+| `BATATIS_LIVE_ELEPHANT` | engine runtime | `1` enables the fixed free Elephant route, `0` disables it; unset follows `BATATIS_LIVE`. No paid fallback. |
 | `BATATIS_DAILY_SPEND_CAP_USD` | engine runtime | Default `5`. Over the cap, model calls return the offline path with `source: "offline-cap"`. On Vercel this cap requires `BATATIS_STORE=postgres`. The per-instance memory ledger is not used there: if `VERCEL` is set and the store is not postgres, live calls stay on `offline-cap` and do not spend from memory. Off Vercel, the file store keeps the cap in memory for that process. |
 | `BATATIS_LLM_RATE_LIMIT` | engine runtime | Default `20` live model calls per IP per window. The window is in memory on that engine instance. |
 | `BATATIS_LLM_RATE_WINDOW_SECONDS` | engine runtime | Default `600`. |
 | `BATATIS_SEARCH_RATE_LIMIT` | engine runtime | Default `60` searches per IP per window, per engine instance. `GET /code/search` and `GET /ccmc/search` share this window. The client IP is the first hop of `x-vercel-forwarded-for`, then `X-Forwarded-For`, then the peer address. |
 | `BATATIS_SEARCH_RATE_WINDOW_SECONDS` | engine runtime | Default `600` (10 minutes). A 429 body is `Search limit reached; try again in N seconds` and sets `Retry-After`. The search window and the model window are each an in-memory `SlidingWindow` on one process. They are not a cap shared across instances. The shared cap is the Postgres daily spend ledger. |
-| `BATATIS_SCC_FORM` | engine runtime | Optional filesystem path to the SCC variance form. The build's copy is `codedb/build/SCC-Variance-Form.pdf`. |
+| `BATATIS_SCC_FORM` | engine runtime | Optional filesystem path for the legacy `scc_2026-10` form only; it cannot replace the supplied default. The build's copy is `codedb/build/SCC-Variance-Form.pdf`. |
 | `SCC_FORM_URL` | engine build | Optional private URL for the SCC variance form. Still sha256-checked. |
 | `CODEDB_PDF_URL` | engine build | Optional private URL for the NBC(AE) PDF. |
 | `CODEDB_INTENT_PDF_URL` | engine build | Optional private URL for the intent PDF. |
@@ -85,7 +97,7 @@ Local file runs ignore `DATABASE_URL`. Uploaded PDF bytes go in `case_files` (Po
 
 Every JSON response returns code text in full, with its citation and the NRC publication link. Search still returns at most 20 hits. No route serves `codedb.sqlite`. The exported PDF uses the same rule: form cells carry provision ids and objective/function codes, and the appendix carries citations, objective and functional-statement titles, application notes, the full provision text, and NBC 2020 intent statements and notes, each with the NRC link.
 
-Batatis automatically removes the names, contact details and addresses it recognizes before any text is sent to an AI provider. In live mode, the remaining text is processed in the US by OpenAI, Anthropic or Jev under their API data policies (https://openai.com/policies/api-data-usage-policies); Batatis deletes its own stored case data and files after 7 days or on request. That sentence is `meta.notice` and the default `X-Batatis-Notice` header; a route-specific header is preserved. Cases and their files expire 7 days after `created_at`, or sooner on `DELETE /cases/{case_id}`. The sqlite store and Neon Postgres both remove expired cases and files on access, including between sweeps. Case create and the per-request sweep run the bulk purge at most once every 10 minutes per instance. `python -m engine.retention` runs it immediately, and so does the Hobby cron `GET /api/retention/purge` (`0 6 * * *`, once a day). A second purge deletes nothing. A failed purge returns `503` detail `case purge failed`, with no connection string in the response or log.
+Batatis automatically removes the names, contact details and addresses it recognizes before any text is sent to an AI provider. In live mode, the remaining text is processed in the United States by third-party AI service providers under their API data-use terms; Batatis deletes its own stored case data and files after 7 days or on request. That sentence is `meta.notice` and the default `X-Batatis-Notice` header; a route-specific header is preserved. Cases and their files expire 7 days after `created_at`, or sooner on `DELETE /cases/{case_id}`. The sqlite store and Neon Postgres both remove expired cases and files on access, including between sweeps. Case create and the per-request sweep run the bulk purge at most once every 10 minutes per instance. `python -m engine.retention` runs it immediately, and so does the Hobby cron `GET /api/retention/purge` (`0 6 * * *`, once a day). A second purge deletes nothing. A failed purge returns `503` detail `case purge failed`, with no connection string in the response or log.
 
 The existing Vercel project is connected to a dedicated Neon `batatis-db` resource
 on the `free_v3` plan in `iad1`. `DATABASE_URL` is supplied by that integration and
@@ -95,46 +107,40 @@ case. That verifies shared storage locally; the hosted engine still needs the
 same check after the approved deployment. Hosted startup refuses missing or
 non-Postgres storage settings. `BATATIS_CASES` selects a sqlite path for local runs.
 
-## Preview
+## Verification and release
 
-Push an integration branch. The connected Vercel project builds a Preview deployment of both services. Measure it with:
+Before landing, test locally on localhost:3000/8000 with synthetic records.
+CodeDB and PostgreSQL prerequisites must be present for the affected checks;
+record any skipped coverage. Inspect the saved PDF, not just an HTTP 200.
 
-```sh
-scripts/e2e_smoke.sh https://<preview-host>/api
-```
+After the user approves and merges `dev → main`, verify the production
+deployment's exact commit and both services. Use an authenticated synthetic
+account to check case creation, save/reload, code lookup, PDF export and deletion.
+Record cold/warm latency when useful. A `READY` frontend alone is not backend,
+persistence, provider or professional approval.
 
-The script prints one latency line per request, twice (cold, then warm):
+The main-only policy does not copy local or historical preview secrets into
+Production. Review the production-specific settings before release. Existing
+approved GPT use keeps its configured US$5 daily application cap; activating
+other paid providers or increasing that cap needs user authorization. The user
+still owns release approval; agents do not promote deployments or merge `main`.
 
-```text
-cold POST /cases 201 1.204s
-cold GET /cases/<id> 200 0.080s
-cold GET /code/search?q=egress&limit=5 200 0.110s
-warm POST /cases 201 0.040s
-```
-
-`BASE_URL` may be the first argument or the environment variable. Locally that is `http://127.0.0.1:8000` (no `/api` prefix). On Vercel include `/api`.
-
-## Production
-
-Production tracks `dev`, and only after #12 and `backend/case-api` have merged there. This branch is the deploy shape. It is not the production promotion by itself.
-
-`backend/case-api` is also making `CaseStore` writes atomic. The overlap is `put(..., expected_version=)` and `VersionConflict` (retry inside `add_fact`, HTTP 409 if the retry is exhausted). Keep one optimistic-update implementation when the branches merge.
-
-```text
-#12 owns engine/identify; this branch does not change it.
-Call engine.llm_gate.authorize before a provider request and record after with the actual token counts.
-Keep the citation and the NRC publication link on code quotes. Do not shorten them.
-Live only when BATATIS_LIVE=1 and OPENAI_API_KEY are both set; otherwise stay offline and do not contact a provider.
-```
+CaseStore uses expected-version concurrency checks; keep one authoritative
+implementation and preserve stale-write refusal. Section C stays deterministic,
+and professional evidence remains human-owned.
 
 ## Accounts and plan limits
 
 The existing Vercel project uses the dedicated free Neon resource `batatis-db`
 (`free_v3`). Keep `BATATIS_STORE=postgres` and its private `DATABASE_URL`
 configured. Hosted startup refuses a missing Postgres configuration; there is
-no temporary-disk fallback. Keep `BATATIS_LIVE=0` and the OpenAI key unset until
-the US$20 total cap in #41 is integrated and passes its gate. The daily ledger
-in this branch does not satisfy that gate.
+no temporary-disk fallback. Live GPT is an explicitly enabled, server-only
+configuration with the approved daily US$5 application cap. The historical #41
+US$20 hold is superseded by the current authorization; it is not a reason to
+silently disable an approved local configuration. A hosted live cap uses the
+shared PostgreSQL ledger; the local file-store cap is per process. A cap is not
+provider-account billing enforcement. Check the actual production configuration
+before an approved release.
 
 Configure an independent, random server-only `CRON_SECRET` for the scheduled
 retention purge (at least 16 characters). Vercel sends it as

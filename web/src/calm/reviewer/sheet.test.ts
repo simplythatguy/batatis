@@ -37,10 +37,31 @@ test("the officer's sheet reads API and web field names and keeps missing values
   assert.equal(val(s.process, "Risk assessment"), "Risk text");
   assert.equal(val(s.process, "Mitigating measures"), "Measures text");
   assert.equal(val(s.process, "Rationale"), null);
-  assert.equal(val(s.supporting, "Documents listed"), "Test report");
+  assert.equal(val(s.supporting, "Documents listed"), "1 document");
   assert.equal(val(s.supporting, "Registered professional"), "Not engaged yet");
   assert.deepEqual(s.references, [
     { provision: "9.10.9.16.(1)", codes: "Objectives OS1.2 · Functions F03" },
     { provision: "9.27.3.4.(1)", codes: "No row in the attribution table" },
   ]);
+});
+
+test("the officer sheet links only the latest confirmed file-source binding and retains document details", () => {
+  const file = (slot: string, id: string, sourceType = "file") => fact(`evidence.${slot}.file_ref`, id,
+    { source: { type: sourceType, ref: id, quote: "SYNTHETIC source.pdf" } });
+  const s = sheetFromEngine({ facts: [
+    fact("evidence.attached.title", "SYNTHETIC attached report"),
+    fact("evidence.attached.evidence_type", "evaluation"),
+    fact("evidence.attached.responsible_party", "SYNTHETIC author"),
+    fact("evidence.attached.date", "SYNTHETIC revision B"),
+    file("attached", "file_original"), file("attached", "file_current"),
+    fact("evidence.copied.title", "SYNTHETIC copied id"), file("copied", "file_current", "user_text"),
+    fact("evidence.removed.title", "SYNTHETIC removed binding"), file("removed", "file_original"),
+    fact("evidence.removed.file_ref", null, { status: "unconfirmed", source: { type: "user_click", ref: "Applicant" } }),
+  ], section_c: [] } as never);
+  assert.deepEqual(s.documents, [
+    { id: "attached", title: "SYNTHETIC attached report", type: "evaluation", author: "SYNTHETIC author", date: "SYNTHETIC revision B", fileId: "file_current", fileName: "SYNTHETIC source.pdf" },
+    { id: "copied", title: "SYNTHETIC copied id", type: null, author: null, date: null, fileId: null, fileName: null },
+    { id: "removed", title: "SYNTHETIC removed binding", type: null, author: null, date: null, fileId: null, fileName: null },
+  ]);
+  assert.equal(s.supporting.find(row => row.label === "Documents listed")?.value, "3 documents", "the summary counts documents; titles stay only in their detailed rows");
 });

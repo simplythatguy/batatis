@@ -2,6 +2,22 @@
 
 Alberta **Building Codes Challenge** (Built World Tech — Venture Pilots 2026).
 
+## Git and environments (user decisions 2026-10-22 and 2026-10-24)
+
+GitHub has exactly two branches: `dev` (shared integration source) and `main` (production). **Vercel deploys only `main`; preview deployments are disabled.** Locally the app runs on port `3000` (web) and `8000` (engine) only. Full rules: [`docs/agents/git-workflow.md`](./docs/agents/git-workflow.md).
+
+- Flow: **verify locally** (`scripts/verify.sh`) → **land on `dev`** (`scripts/land.sh`, fast-forward only) → the user tests locally and approves the release → the user merges the single release PR `dev → main`.
+- Never push or open a PR from any other branch, never push or merge `main`, never force-push, never delete `dev`. Children never push; the parent lands. Run `scripts/install-git-hooks.sh` in a new clone.
+- Push only verified work. Local verification is required even when GitHub Actions runs. `dev` pushes run CI; only an approved merge into `main` triggers Vercel.
+- Before rebasing run `git merge-base --is-ancestor origin/dev HEAD`; if true, do not rebase. Otherwise `git -c rebase.updateRefs=false rebase --rebase-merges origin/dev`.
+- Ports: `scripts/local-app.sh status|start|stop|wait`. If 3000 or 8000 is busy, wait for the owner. Never pick another port; stop what you start.
+
+## Subagent communication (user decision 2026-10-23)
+
+- Subagents report progress, questions, findings and handoffs only in their own task output and final result. The parent handles all coordination.
+- Subagents must never send messages to any other thread or agent, including the parent and siblings. This applies to thread-send tools, attachment sends, native agent messaging and CLI/RPC equivalents.
+- Automatic delivery of a task's completion result to its parent is allowed. Include this boundary in every subagent brief.
+
 ## Agent skills
 
 ### Issue tracker
@@ -18,9 +34,9 @@ Single-context: root `GLOSSARY.md` + `docs/adr/` + challenge brief. See `docs/ag
 
 ### Stack skills
 
-- **Batatis challenge:** `.cursor/skills/batatis-*` (hackathon, variance-workflow, ui-opus, **ui-linear**).
+- **Batatis challenge:** `.cursor/skills/batatis-*` (hackathon, variance-workflow, ui-opus, **ui-linear**, **ui-minimalist**).
 - **Matt Pocock engineering:** `.agents/skills/` (also symlinked under `.cursor/skills/`). Reinstall with `npx skills@latest add mattpocock/skills -a cursor`.
-- **pstack / poteto-mode:** Cursor plugin (not vendored). See `docs/pstack.md`. Review/judgment roles pinned to Opus 5.5 in `.cursor/rules/pstack-models.mdc`.
+- **pstack / poteto-mode:** [Open Pstack](https://github.com/ericlitman/open-pstack) for Codex and Claude Code; shared T3 routing uses the installed source. See `docs/pstack.md`. All delegated roles use **GPT-6.1-Sol at max** under the user decision of 2026-10-23; `.cursor/rules/pstack-models.mdc` carries the portable role map.
 
 ## What we are building
 
@@ -34,7 +50,7 @@ Official NBC(AE) process fork (acceptable vs alternative): [`docs/diagrams/nbc-a
 
 1. Read `.cursor/skills/batatis-hackathon/SKILL.md` (domain + pitfalls + NBC(AE) fork).
 2. For product flow work, read `.cursor/skills/batatis-variance-workflow/SKILL.md`.
-3. For any UI / frontend / visual work: read `.cursor/skills/batatis-ui-linear/SKILL.md` (P0 rules) + `.cursor/skills/batatis-ui-opus/SKILL.md`. **Default product look** = the calm system (user decision 2026-10-20): `docs/design-system-calm.md`, contract `docs/design/calm-flow-prototype.html`, code `web/src/calm/`. It replaces the Linear look (`docs/design-system-linear.md` is history); the P0 rules still hold. Primary CTAs are **neutral grey** (not indigo fill). Use **Claude Opus 5.5** for UI implement **and** formal UI review (Composer is provisional). Simplify ruthlessly without dropping capabilities; meet the bug-free bar + `evals/ui-artifacts/smoke.mjs`.
+3. For any UI / frontend / visual work: read `.cursor/skills/batatis-ui-linear/SKILL.md` (P0 rules) + `.cursor/skills/batatis-ui-opus/SKILL.md` + `.cursor/skills/batatis-ui-minimalist/SKILL.md` (how much goes on screen: icons before words, visuals over sentences, obvious questions as a label + control with help on demand, short renamable titles, icon + count metadata). **Default product look** = the calm system (user decision 2026-10-20): `docs/design-system-calm.md`, contract `docs/design/calm-flow-prototype.html`, code `web/src/calm/`. It replaces the Linear look (`docs/design-system-linear.md` is history); the P0 rules still hold. Since 2026-10-22 it is **light mode and minimal text** (visuals over sentences), and since the user's later correction **monotone: colour only identifies** where you are or tells crowded items apart, never decorates; see the Tokens section. Primary CTAs stay **neutral** (near-black fill, never indigo). Use **GPT-6.1-Sol at max** for UI implementation **and** independent UI review (user override, 2026-10-23). Simplify ruthlessly without dropping capabilities; meet the bug-free bar + `evals/ui-artifacts/smoke.mjs`.
 4. Run understanding checks in `evals/fixtures/understanding-checklist.md` when changing skills/rules. Blind UI prompts: `evals/battle-prompts/ui-blind/`.
 
 Always-on domain rule: `.cursor/rules/batatis-hackathon.mdc`. UI globs: `.cursor/rules/batatis-ui-opus.mdc`, `.cursor/rules/batatis-ui-linear.mdc`.

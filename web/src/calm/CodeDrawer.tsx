@@ -7,6 +7,7 @@ import { QUOTE_LABEL, quoteKind } from "../rules";
 import { ProvisionSearch } from "../screens/SectionC";
 import { useCase } from "../store";
 import type { SectionCRow } from "../types";
+import { useCurrentApplication } from "./begin";
 import { RelevanceRing } from "./RelevanceRing";
 import { codeHref } from "./routes";
 import { articleOf } from "./useRelevance";
@@ -40,6 +41,7 @@ function Pairs({ row }: { row: SectionCRow }) {
 /** Right-side drawer (bottom sheet on phones) with the rule behind a code card. */
 export function CodeDrawer({ state, onClose, onAdded }: { state: DrawerState | null; onClose: () => void; onAdded: (candidateId: string) => void }) {
   const { c, sectionCLookup, retrySectionC } = useCase();
+  const { locked, readOnly } = useCurrentApplication();
   const a = state?.candidateId ? c.candidates.find((x) => x.id === state.candidateId) : undefined;
   const [searching, setSearching] = useState(false);
   const [attempt, setAttempt] = useState(0);
@@ -137,8 +139,8 @@ export function CodeDrawer({ state, onClose, onAdded }: { state: DrawerState | n
         <div className="cf-drawer-links">
           {provision && <a className="cf-btn is-sm is-ghost" href={codeHref(articleOf(provision) ?? provision)} onClick={onClose}>Open in code library <CIcon name="arrow" size={13} /></a>}
           <a className="cf-btn is-sm is-ghost" href="#/references" onClick={onClose}>All code references <CIcon name="arrow" size={13} /></a>
-          {a && (
-            <button type="button" className="cf-btn is-sm is-ghost" aria-expanded={searching} onClick={() => setSearching((v) => !v)}>
+          {a && !readOnly && (
+            <button type="button" className="cf-btn is-sm is-ghost" aria-expanded={searching} disabled={locked} onClick={() => setSearching((v) => !v)}>
               <CIcon name="search" size={13} />Add a code reference
             </button>
           )}

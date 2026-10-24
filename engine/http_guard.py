@@ -55,8 +55,23 @@ class HttpGuard:
 
         async def send_wrap(message):
             if message['type'] == 'http.response.start':
+                headers = list(message.get('headers') or [])
+                if b'text/event-stream' in _header(headers, b'content-type'):
+                    # Server-sent events pass through unbuffered so each stage arrives as it happens.
+                    # The route attributes NRC text in its own payloads; the guard adds the same headers.
+                    started['stream'] = True
+                    headers = [(key, value) for key, value in headers
+                               if key.lower() not in (b'x-robots-tag', b'x-batatis-notice', b'cache-control')]
+                    headers += [(b'x-robots-tag', b'noindex, nofollow'), (b'x-batatis-notice', PII_NOTICE.encode()),
+                                (b'cache-control', b'no-store')]
+                    access_log.info('%s %s %s', scope.get('method', '-'), route, message.get('status', '-'))
+                    await send({**message, 'headers': headers})
+                    return
                 started['message'] = message
-                started['headers'] = list(message.get('headers') or [])
+                started['headers'] = headers
+                return
+            if started.get('stream'):
+                await send(message)
                 return
             if message['type'] != 'http.response.body':
                 await send(message)

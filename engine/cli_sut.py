@@ -5,10 +5,9 @@ Reads applicant prose on stdin and prints one JSON object:
      "section_c": [{"provision", "division", "pairs": [{"function", "objective", "condition"}]}...],
      "engineering_required": ..., "intake_action": ..., "questions": [...]}
 
-Pipeline: engine.identify (Jev screen of every Division B article, then one-request rerank) -> optional
-verifier (only when ANTHROPIC_API_KEY is set) -> commit Part 9 articles whose rerank probability is at least
-COMMIT_THRESHOLD (at most MAX_COMMITS); everything else is returned uncommitted -> Section C by deterministic lookup
-(engine.section_c) for committed articles only. If Jev fails, falls back to BM25 order with no commits.
+Pipeline: the same configured exhaustive screen, rerank, full-text quote verifier, and exact-config
+calibration gate as the identify API. The default uses Elephant. Uncalibrated or failed
+runs never commit; Section C remains deterministic lookup for calibrated commits only.
 
 The judge runs this from a temporary directory, so call it by absolute path:
     SSL_CERT_FILE=/etc/ssl/cert.pem /path/.venv/bin/python /path/engine/cli_sut.py < prose.txt
@@ -16,39 +15,21 @@ The judge runs this from a temporary directory, so call it by absolute path:
 from __future__ import annotations
 
 import json
-import os
 import sys
+from dataclasses import replace
 from pathlib import Path
 
 if __package__ in (None, ''):                      # run as a script from any directory
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from engine.codes import Codes, default_db  # noqa: E402
-from engine.identify import Judge, articles, bm25_rank, identify  # noqa: E402
+from engine.identify import Judge  # noqa: E402
+from engine.identify.config import load_config  # noqa: E402
+from engine.identify.pipeline import run as identify_run  # noqa: E402
+from engine.identify.providers import transports  # noqa: E402
 from engine.section_c import section_c_rows  # noqa: E402
 
-COMMIT_THRESHOLD = 0.75    # rerank probability; placeholder until fitted on the calibration fold (plan, day 7)
-MAX_COMMITS = 3            # placeholder cap: rerank probabilities run high, and each commit adds whole-article rows
-COMMIT_PARTS = {9}         # Part 9 commits automatically; other Parts are quoted choices (2-week-build.md)
-TOP_K = 10                 # articles returned, ranked
-RERANK_N = 60              # articles re-judged together after the screen
-VERIFY_N = 15              # rerank top-N the verifier reads in full
-QUESTION_K = 3             # uncommitted choices turned into confirmation questions
-
-
-def _verify(prose: str, db: Path, ranked: list[str], trace: dict) -> list[str] | None:
-    """Verifier picks (quote-checked, in rank order), or None when it is skipped or fails."""
-    if not os.environ.get('ANTHROPIC_API_KEY'):
-        trace['verifier'] = 'skipped: ANTHROPIC_API_KEY not set'
-        return None
-    try:
-        from engine.identify.verify import ClaudeVerifier
-        v = ClaudeVerifier(db).verify(prose, ranked[:VERIFY_N])
-    except Exception as e:                          # a verifier failure must not sink the run
-        trace['verifier'] = f'failed: {type(e).__name__}'
-        return None
-    trace['verifier'] = {'picks': [p.article for p in v.picks], 'dropped': len(v.dropped)}
-    return [p.article for p in v.picks]
+TOP_K = 10
 
 
 def section_c(article_ids: list[str], codes: Codes) -> list[dict]:
@@ -67,46 +48,29 @@ def section_c(article_ids: list[str], codes: Codes) -> list[dict]:
 
 def run(prose: str, db_path: Path | str | None = None, judge: Judge | None = None) -> dict:
     db = Path(db_path) if db_path else default_db()
-    arts = articles(db)
-    trace: dict = {}
-    try:
-        ident = identify(prose, db, judge, rerank_n=RERANK_N)
-        ranked = [(a, p) for a, p in ident.ranked]
-        trace.update(ranker=f'jev screen+rerank ({ident.model})', usage=ident.usage)
-    except Exception as e:                          # Jev unreachable or key missing: BM25 baseline, commit nothing
-        ranked = [(a, None) for a in bm25_rank(prose, db)[:RERANK_N]]
-        trace.update(ranker='bm25 fallback', error=f'{type(e).__name__}: {e}'[:300])
-
-    picks = _verify(prose, db, [a for a, _ in ranked], trace) if trace['ranker'] != 'bm25 fallback' else None
-    if picks is not None:                           # verifier picks lead, then the rest in rerank order
-        prob = dict(ranked)
-        ranked = [(a, prob.get(a)) for a in picks] + [(a, p) for a, p in ranked if a not in picks]
-
-    out_articles, n_committed = [], 0
-    for a, p in ranked[:TOP_K]:
-        committed = (n_committed < MAX_COMMITS and p is not None and p >= COMMIT_THRESHOLD
-                     and arts[a]['part'] in COMMIT_PARTS and (picks is None or a in picks))
-        n_committed += committed
-        out_articles.append({'provision': a, 'division': 'B', 'committed': committed,
-                             'title': arts[a]['title'], 'part': arts[a]['part'],
-                             'probability': None if p is None else round(p, 4)})
-
-    committed_ids = [x['provision'] for x in out_articles if x['committed']]
-    rows = section_c(committed_ids, Codes(db)) if committed_ids else []
-    questions = [f"Does your design meet, rely on, or depart from the requirement on "
-                 f"\"{x['title']}\" (Division B, Article {x['provision']})?"
-                 for x in out_articles if not x['committed']][:QUESTION_K]
-
+    config = load_config()
+    tp = None
+    if judge is not None:
+        config = replace(config, screen=judge.method, screen_model=judge.model,
+                         rerank=judge.method, rerank_model=judge.model, card_chars=judge.chars)
+        tp = transports(scoring={config.screen, config.rerank}, anthropic=config.verifier == 'anthropic')
+        if judge.method == 'elephant':
+            tp.elephant = judge.ask
+        elif judge.method == 'decisions':
+            tp.decisions = judge.ask
+        else:
+            tp.jev = judge.ask
+    codes = Codes(db)
+    result = identify_run(prose, codes=codes, config=config, transports=tp).result
+    out_articles = [{'provision': a.provision, 'division': 'B', 'committed': a.provision in result.committed,
+                     'title': a.title, 'part': a.part, 'probability': a.probability} for a in result.articles]
     return {
         'articles': out_articles,
-        'section_c': rows,
-        # TODO: engineering_required needs the Division C professional-involvement rules; placeholder for now.
-        'engineering_required': 'depends',
-        # TODO: intake_action needs the missing-fact and out-of-scope checks; placeholder from commit coverage.
-        'intake_action': 'proceed_conditionally' if committed_ids else 'ask',
-        'questions': questions,
-        'trace': {**trace, 'commit_threshold': COMMIT_THRESHOLD, 'max_commits': MAX_COMMITS,
-              'commit_parts': sorted(COMMIT_PARTS)},
+        'section_c': section_c(result.committed, codes) if result.committed else [],
+        'engineering_required': result.engineering_required,
+        'intake_action': 'proceed_conditionally' if result.committed else 'ask',
+        'questions': result.questions,
+        'trace': {**result.trace.model_dump(), 'commit_policy': result.commit_policy},
     }
 
 

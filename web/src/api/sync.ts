@@ -4,18 +4,21 @@
  * with the acknowledged version. Never recreate a case when a route is unavailable or the
  * case is gone; keep the draft and report the unacknowledged update.
  *
- * Versions: every committed write increments the stored Case version by one. `known` is the
- * last version reached through this visit's own consecutive writes. A response that skips a
- * number means another writer changed the case, so `known` stays put and the next versioned
+ * Versions: each content/workflow write increments the stored Case version by one. Messages
+ * and read receipts use an atomic thread-only write and leave that version unchanged. `known`
+ * is the last version reached through this visit's own consecutive content writes. A response that
+ * skips a number means another writer changed the case, so `known` stays put and the next versioned
  * write (plan or jurisdiction) is rejected by the engine with 409. Only an explicit reconcile
  * adopts a version the visit did not write itself.
  */
 import { engine, EngineError, isCaseConflict, isCaseGone } from "./client";
 import type { EngineGap, EvidenceWrite } from "./client";
-import type { Case as EngineCase } from "./types.gen";
+import type { Case as EngineCase, SelectedArticleInput } from "./types.gen";
 import { factSignature, jurisdictionBody, jurisdictionForCreate } from "../rules";
 import type { AuthorityId, Fact, ListedEvidence } from "../types";
 import { evidenceSlot } from "../model";
+import { answerWithdrawn, latestLocalFacts } from "../intakeFields";
+import { accountRequestSignal } from "./requestLifetime";
 
 const ID_KEY = "batatis-engine-case-id";
 const POSTED_KEY = "batatis-engine-posted";
@@ -28,6 +31,11 @@ const factQueues = new Map<string, Promise<unknown>>();
 const known = new Map<string, number>();
 const conflicts = new Set<string>();
 const jurisdictions = new Map<string, string | null>();
+/** The code-check selection the engine acknowledged (or holds as of opening), as `selectionKey`. */
+const selections = new Map<string, string>();
+/** Opened cases their owner cannot edit (sent, in review or closed): their selection is never written. Cards
+ * shown on them change only by derived display (a lookup expanding an article), recorded with noteShownSelection. */
+const readOnly = new Set<string>();
 /** Evidence slots the engine has shown for each case, from acknowledged writes and explicit reads. */
 const ledgerSlots = new Map<string, Set<string>>();
 /** Listing revisions the engine acknowledged, so a repeated push never writes them twice. */
@@ -70,8 +78,9 @@ export class StaleEngineSession extends Error {
   }
 }
 
-function assertGeneration(value: number) {
+function assertGeneration(value: number, signal?: AbortSignal) {
   if (!isEngineGeneration(value)) throw new StaleEngineSession();
+  signal?.throwIfAborted();
 }
 
 export function engineCaseId(): string | null {
@@ -84,6 +93,8 @@ export function clearEngineSession() {
   known.clear();
   conflicts.clear();
   jurisdictions.clear();
+  selections.clear();
+  readOnly.clear();
   ledgerSlots.clear();
   ackedRevs.clear();
   attempted.clear();
@@ -116,15 +127,17 @@ function remember(caseId: string, fields: Record<string, PostedFact>) {
  * One create at a time. A second caller waits on the same promise, so two
  * keystrokes cannot open two cases and strand facts on the first.
  */
-export function ensureEngineCase(title: string, authority: AuthorityId): Promise<string> {
+export function ensureEngineCase(title: string | null, authority: AuthorityId, parent?: AbortSignal): Promise<string> {
+  const signal = accountRequestSignal(parent);
+  signal.throwIfAborted();
   const existing = engineCaseId();
   if (existing) return Promise.resolve(existing);
   if (inflight) return inflight;
   const token = generation;
   const request = engine
-    .createCase({ title, jurisdiction: jurisdictionForCreate(authority) })
+    .createCase({ ...(title ? { title } : {}), jurisdiction: jurisdictionForCreate(authority) }, signal)
     .then((created) => {
-      assertGeneration(token);
+      assertGeneration(token, signal);
       sessionStorage.setItem(ID_KEY, created.id);
       acknowledgeWrite(created.id, created.version);
       jurisdictions.set(created.id, created.jurisdiction?.id ?? null);
@@ -142,31 +155,33 @@ export function ensureEngineCase(title: string, authority: AuthorityId): Promise
  * acknowledged value. An engine without the route (404/405) counts as saved only when its
  * stored value already matches. A missing case or a conflict is never retried here.
  */
-export async function syncJurisdiction(caseId: string, authority: AuthorityId, _title: string): Promise<string> {
+export async function syncJurisdiction(caseId: string, authority: AuthorityId, _title: string, parent?: AbortSignal): Promise<string> {
   const token = generation;
-  const jurisdiction = authority ? jurisdictionBody(authority) : null;
-  const wanted = jurisdiction?.id ?? null;
+  const signal = accountRequestSignal(parent);
+  assertGeneration(token, signal);
+  const wanted = authority || null;
   if (jurisdictions.has(caseId) && jurisdictions.get(caseId) === wanted) return caseId;
+  const jurisdiction = authority ? jurisdictionBody(authority) : null;
   const unsaved = wanted
     ? "The reviewing authority could not be saved. Your draft is still open."
     : "The cleared reviewing authority could not be saved. Your draft is still open.";
   const expected = known.get(caseId);
   if (conflicts.has(caseId) || expected === undefined) throw new EngineError(409, CONFLICT_TEXT, "No acknowledged case version to send.");
   try {
-    const saved = await engine.setJurisdiction(caseId, { jurisdiction, expected_version: expected });
-    assertGeneration(token);
+    const saved = await engine.setJurisdiction(caseId, { jurisdiction, expected_version: expected }, signal);
+    assertGeneration(token, signal);
     acknowledgeWrite(caseId, saved.version);
     jurisdictions.set(caseId, saved.jurisdiction?.id ?? null);
     return caseId;
   } catch (e) {
-    assertGeneration(token);
+    assertGeneration(token, signal);
     if (isCaseConflict(e)) {
       noteConflict(caseId);
       throw new EngineError(409, CONFLICT_TEXT, (e as EngineError).technical);
     }
     if (isCaseGone(e) || !(e instanceof EngineError) || ![404, 405].includes(e.status)) throw e;
-    const current = await engine.getCase(caseId);
-    assertGeneration(token);
+    const current = await engine.getCase(caseId, signal);
+    assertGeneration(token, signal);
     const stored = current.jurisdiction?.id ?? null;
     if (stored === wanted) {
       jurisdictions.set(caseId, stored);
@@ -183,15 +198,18 @@ export async function syncJurisdiction(caseId: string, authority: AuthorityId, _
  */
 export async function reconcileEngineCase(caseId: string): Promise<EngineCase> {
   const token = generation;
-  const saved = await engine.getCase(caseId);
-  assertGeneration(token);
+  const signal = accountRequestSignal();
+  const saved = await engine.getCase(caseId, signal);
+  assertGeneration(token, signal);
   known.set(caseId, saved.version);
-  jurisdictions.set(caseId, saved.jurisdiction?.id ?? null);
-  const latest = new Map(saved.facts.map((fact) => [fact.field, fact]));
+  jurisdictions.set(caseId, saved.authority ?? saved.jurisdiction?.id ?? null);
+  if (saved.selected_articles) selections.set(caseId, selectionKey(saved.selected_articles));
+  noteEditable(saved);
+  const latest = new Map(latestLocalFacts(saved.facts).map((fact) => [fact.field, fact]));
   const posted = postedFor(caseId);
   for (const field of Object.keys(posted)) {
     const stored = latest.get(field);
-    if (stored) posted[field] = { id: stored.id, signature: factSignature(stored) };
+    if (stored && !answerWithdrawn(stored)) posted[field] = { id: stored.id, signature: factSignature(stored) };
     else delete posted[field];
   }
   remember(caseId, posted);
@@ -205,32 +223,115 @@ export async function reconcileEngineCase(caseId: string): Promise<EngineCase> {
  * clearEngineSession(): adopts the saved version and jurisdiction, and records the saved latest
  * answer per field as already posted, so the next save sends only what the applicant changes.
  */
-export function adoptEngineCase(saved: EngineCase) {
+export function adoptEngineCase(saved: EngineCase, selection?: SelectedArticleInput[]) {
   sessionStorage.setItem(ID_KEY, saved.id);
   known.set(saved.id, saved.version);
-  jurisdictions.set(saved.id, saved.jurisdiction?.id ?? null);
-  const latest = new Map(saved.facts.map((fact) => [fact.field, fact]));
+  jurisdictions.set(saved.id, saved.authority ?? saved.jurisdiction?.id ?? null);
+  // The cards the opened case shows count as saved: a legacy case (no saved selection) is not rewritten
+  // until the applicant changes a card.
+  const opened = selection ?? saved.selected_articles;
+  if (opened) selections.set(saved.id, selectionKey(opened));
+  noteEditable(saved);
   const posted: Record<string, PostedFact> = {};
-  for (const [field, fact] of latest) {
-    if (field.startsWith("evidence.") || fact.source?.ref === "Answer withdrawn by applicant") continue;
-    posted[field] = { id: fact.id, signature: factSignature(fact) };
+  for (const fact of latestLocalFacts(saved.facts)) {
+    if (fact.field.startsWith("evidence.") || answerWithdrawn(fact)) continue;
+    posted[fact.field] = { id: fact.id, signature: factSignature(fact) };
   }
   remember(saved.id, posted);
   noteLedger(saved.id, saved);
 }
 
-/** Reconcile a complete browser fact snapshot, including withdrawals. Serialize writes
- * so a slower older save cannot become the engine's latest revision. */
-export function pushFacts(caseId: string, facts: Fact[]): Promise<string | null> {
+/**
+ * Facts an engine route wrote itself (intake, its answers, the scope click), adopted by the browser
+ * under its own field names: recorded as already posted so a save never sends them back. `forget`
+ * lists browser fields whose posted entry the engine removed (a re-run dropped its unconfirmed facts),
+ * so no withdrawal is sent for them.
+ */
+export function notePosted(caseId: string, facts: Fact[], forget: string[] = []) {
+  const done = postedFor(caseId);
+  for (const field of forget) delete done[field];
+  for (const fact of facts) done[fact.field] = { id: fact.id, signature: factSignature(fact) };
+  remember(caseId, done);
+}
+
+/** The owner edits only a draft or a returned application (engine/access.py); a case without a status is a draft. */
+function noteEditable(saved: EngineCase) {
+  if (saved.status && saved.status !== "draft" && saved.status !== "returned") readOnly.add(saved.id);
+  else readOnly.delete(saved.id);
+}
+
+/** True when the opened case is read-only for its owner: its code cards are not the applicant's to change. */
+export const isReadOnlyCase = (caseId: string | null) => Boolean(caseId && readOnly.has(caseId));
+
+/**
+ * On a read-only case, cards a lookup derives from the shown (saved) cards are shown too: nothing to save.
+ * Only a change on top of exactly the shown cards moves them; an unsaved change of the applicant's never does.
+ */
+export function noteShownSelection(caseId: string | null, before: SelectedArticleInput[], after: SelectedArticleInput[]) {
+  if (caseId && readOnly.has(caseId) && selections.get(caseId) === selectionKey(before)) selections.set(caseId, selectionKey(after));
+}
+
+const READ_ONLY_SELECTION = "This application is read-only, so the code check change wasn’t saved.";
+
+/** Equal selections, order included. */
+export const selectionKey = (list: SelectedArticleInput[]) => JSON.stringify(list.map((s) => [s.id, s.provision, s.answer ?? null, Boolean(s.pending)]));
+
+const SELECTION_REFUSED: Record<number, string> = {
+  404: "A code reference wasn’t found, so your code check wasn’t saved. Your cards are still here.",
+  422: "Your code check couldn’t be saved. Your cards are still here.",
+};
+
+/**
+ * PUT the complete code-check selection with the acknowledged version, only when it differs from the
+ * last one the engine acknowledged. Runs inside the save queue, so versions advance one at a time.
+ * Resolves to an error text, or null when saved. A conflict (another write, or a read-only case)
+ * throws and waits for an explicit reconcile; a deleted, expired or inaccessible case is reported as
+ * "case not found" and never recreated. Nothing is retried here.
+ */
+export async function pushSelectedArticles(caseId: string, list: SelectedArticleInput[], parent?: AbortSignal): Promise<string | null> {
   const token = generation;
+  // Like every other write here: a replaced sign-in cancels it rather than reporting a save problem.
+  const signal = accountRequestSignal(parent);
+  const key = selectionKey(list);
+  const acked = selections.get(caseId);
+  if (acked === key || (acked === undefined && !list.length)) return null;
+  // Never written, and never reported as saved: the owner cannot change a read-only case's cards.
+  if (readOnly.has(caseId)) return READ_ONLY_SELECTION;
+  const expected = known.get(caseId);
+  if (conflicts.has(caseId) || expected === undefined) throw new EngineError(409, CONFLICT_TEXT, "No acknowledged case version to send.");
+  try {
+    const saved = await engine.setSelectedArticles(caseId, { selected_articles: list, expected_version: expected }, signal);
+    assertGeneration(token, signal);
+    acknowledgeWrite(caseId, saved.version);
+    // The engine canonicalizes provisions; what it acknowledged is this visit's list.
+    selections.set(caseId, key);
+    return null;
+  } catch (e) {
+    assertGeneration(token, signal);
+    if (isCaseConflict(e)) {
+      noteConflict(caseId);
+      throw new EngineError(409, CONFLICT_TEXT, (e as EngineError).technical);
+    }
+    if (isCaseGone(e)) return (e as EngineError).detail;
+    if (e instanceof EngineError) return SELECTION_REFUSED[e.status] ?? e.detail;
+    return String(e);
+  }
+}
+
+/** Reconcile a complete browser fact snapshot, including withdrawals. Serialize writes
+ * so a slower older save cannot become the engine's latest revision. Keep the originating
+ * account signal through the loop: cancellation must never continue under a replacement login. */
+export function pushFacts(caseId: string, facts: Fact[], parent?: AbortSignal): Promise<string | null> {
+  const token = generation;
+  const signal = accountRequestSignal(parent);
   const previous = factQueues.get(caseId) ?? Promise.resolve();
-  const request = previous.catch(() => {}).then(() => reconcileFacts(caseId, facts, token));
+  const request = previous.catch(() => {}).then(() => reconcileFacts(caseId, facts, token, signal));
   factQueues.set(caseId, request);
   return request;
 }
 
-async function reconcileFacts(caseId: string, facts: Fact[], token: number): Promise<string | null> {
-  assertGeneration(token);
+async function reconcileFacts(caseId: string, facts: Fact[], token: number, signal: AbortSignal): Promise<string | null> {
+  assertGeneration(token, signal);
   const done = postedFor(caseId);
   const latest = new Map(facts.map((fact) => [fact.field, fact]));
   const revisions = [...latest.values()];
@@ -244,20 +345,20 @@ async function reconcileFacts(caseId: string, facts: Fact[], token: number): Pro
   }
   let error: string | null = null;
   for (const fact of revisions) {
-    assertGeneration(token);
+    assertGeneration(token, signal);
     // Browser evidence facts mirror what the evidence route already saved. Never re-post them.
     if (fact.field.startsWith("evidence.")) continue;
     const signature = factSignature(fact);
     if (done[fact.field]?.signature === signature) continue;
     try {
-      const saved = await engine.addFact(caseId, fact);
-      assertGeneration(token);
+      const saved = await engine.addFact(caseId, fact, signal);
+      assertGeneration(token, signal);
       acknowledgeWrite(caseId, saved.version);
       if (latest.has(fact.field)) done[fact.field] = { id: fact.id, signature };
       else delete done[fact.field];
       remember(caseId, done);
     } catch (e) {
-      assertGeneration(token);
+      assertGeneration(token, signal);
       error = e instanceof EngineError ? e.detail : String(e);
       // A deleted or expired case stays gone; do not keep posting into it.
       if (isCaseGone(e)) break;
@@ -322,6 +423,7 @@ function listingBody(item: ListedEvidence, expected: number): EvidenceWrite {
   // A string is saved; null withdraws a saved value (update only); undefined retains or omits.
   if (typeof item.responsible === "string" || (item.responsible === null && item.operation === "update")) body.responsible_party = item.responsible;
   if (typeof item.date === "string" || (item.date === null && item.operation === "update")) body.date = item.date;
+  if (item.fileRef !== undefined) body.file_ref = item.fileRef;
   // Only a new listing names its task. An edit omits scope, so withdrawn links are never restored.
   if (item.operation === "create" && item.taskId) body.scope = { item_id: item.taskId };
   return body;
@@ -333,12 +435,13 @@ function listingBody(item: ListedEvidence, expected: number): EvidenceWrite {
  * explicit refresh, a deleted or expired case stops the queue, and a refused listing is returned
  * so its text can go back to the form. No automatic retry, upsert or replacement case.
  */
-export async function pushListedEvidence(caseId: string, items: ListedEvidence[]): Promise<EvidenceOutcome> {
+export async function pushListedEvidence(caseId: string, items: ListedEvidence[], parent?: AbortSignal): Promise<EvidenceOutcome> {
   const token = generation;
+  const signal = accountRequestSignal(parent);
   const outcome: EvidenceOutcome = { acked: [], deleted: [], rejected: [], facts: latestLedger.get(caseId) ?? null, error: null };
   const revs = setFor(ackedRevs, caseId, () => new Map<string, number>());
   for (const item of items) {
-    assertGeneration(token);
+    assertGeneration(token, signal);
     if (revs.get(item.id) === item.rev) {
       outcome.acked.push({ id: item.id, rev: item.rev });
       continue;
@@ -350,15 +453,15 @@ export async function pushListedEvidence(caseId: string, items: ListedEvidence[]
     }
     if (item.operation === "create") setFor(attempted, caseId, () => new Set<string>()).add(item.id);
     try {
-      const saved = await engine.saveEvidence(caseId, listingBody(item, expected));
-      assertGeneration(token);
+      const saved = await engine.saveEvidence(caseId, listingBody(item, expected), signal);
+      assertGeneration(token, signal);
       acknowledgeWrite(caseId, saved.case_version);
       noteLedger(caseId, saved.case);
       revs.set(item.id, item.rev);
       outcome.acked.push({ id: item.id, rev: item.rev });
       outcome.facts = latestLedger.get(caseId) ?? null;
     } catch (e) {
-      assertGeneration(token);
+      assertGeneration(token, signal);
       if (isCaseConflict(e)) {
         noteConflict(caseId);
         outcome.error = CONFLICT_TEXT;
@@ -382,11 +485,12 @@ export async function pushListedEvidence(caseId: string, items: ListedEvidence[]
  * the slot is checked with a read, never taken as success. Ambiguous older slots are refused
  * once and not retried.
  */
-export async function pushDeletedEvidence(caseId: string, ids: string[]): Promise<EvidenceOutcome> {
+export async function pushDeletedEvidence(caseId: string, ids: string[], parent?: AbortSignal): Promise<EvidenceOutcome> {
   const token = generation;
+  const signal = accountRequestSignal(parent);
   const outcome: EvidenceOutcome = { acked: [], deleted: [], rejected: [], facts: latestLedger.get(caseId) ?? null, error: null };
   for (const id of ids) {
-    assertGeneration(token);
+    assertGeneration(token, signal);
     if (!id.trim()) continue;
     if (!attempted.get(caseId)?.has(id) && !ledgerSlots.get(caseId)?.has(id)) {
       outcome.deleted.push(id);
@@ -398,14 +502,14 @@ export async function pushDeletedEvidence(caseId: string, ids: string[]): Promis
       break;
     }
     try {
-      const saved = await engine.deleteEvidence(caseId, id, expected);
-      assertGeneration(token);
+      const saved = await engine.deleteEvidence(caseId, id, expected, signal);
+      assertGeneration(token, signal);
       acknowledgeWrite(caseId, saved.version);
       noteLedger(caseId, saved);
       outcome.deleted.push(id);
       outcome.facts = latestLedger.get(caseId) ?? null;
     } catch (e) {
-      assertGeneration(token);
+      assertGeneration(token, signal);
       if (isCaseConflict(e)) {
         noteConflict(caseId);
         outcome.error = CONFLICT_TEXT;
@@ -418,8 +522,8 @@ export async function pushDeletedEvidence(caseId: string, ids: string[]): Promis
       if (e instanceof EngineError && e.status === 404 && !isCaseGone(e)) {
         // Confirm absence with a read. The version is not adopted from it.
         try {
-          const current = await engine.getCase(caseId);
-          assertGeneration(token);
+          const current = await engine.getCase(caseId, signal);
+          assertGeneration(token, signal);
           const present = current.evidence.some((item) => item.id === id)
             || current.facts.some((fact) => evidenceSlot(fact.field) === id);
           if (!present) {
@@ -429,7 +533,7 @@ export async function pushDeletedEvidence(caseId: string, ids: string[]): Promis
             continue;
           }
         } catch (read) {
-          assertGeneration(token);
+          assertGeneration(token, signal);
           outcome.error = read instanceof EngineError ? read.detail : String(read);
           break;
         }

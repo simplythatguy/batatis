@@ -1,0 +1,262 @@
+{
+  "schema_version": 1,
+  "id": "calgary",
+  "name": "City of Calgary",
+  "province": "AB",
+  "coverage": "full",
+  "code_edition": "NBC(AE) 2023, 2nd printing",
+  "summary": "Building variances (alternative solutions) for projects in the City of Calgary, discussed with and submitted to a safety codes officer in the building discipline.",
+  "authority": {
+    "name": "City of Calgary",
+    "kind": "accredited_municipality",
+    "reviewer_code": "calgary",
+    "contact": "311; ask for the file manager of the permit, or the inspector or plans examiner once construction is under way.",
+    "sources": [
+      {
+        "title": "City of Calgary, Guide to Applying for an Alternative Solution (Variance), 23 November 2023",
+        "url": "https://www.calgary.ca/content/dam/www/tools-and-resources/guide-to-applying-for-an-alternative-solution.pdf",
+        "retrieved": "2026-10-21",
+        "pages": "p.1",
+        "sha256": "bbb0628b7b5f13499a4688089bc09484b67865ef283709d40701d823825b1399"
+      },
+      {
+        "title": "Safety Codes Council, Accreditation Search",
+        "url": "https://www.safetycodes.ab.ca/permits-inspections/where-to-get-a-permit/",
+        "retrieved": "2026-10-21",
+        "status": "unverified",
+        "note": "The City's accreditation record was not looked up in the Council's search tool; the kind is inferred from the City issuing variances through its own officers."
+      }
+    ]
+  },
+  "match": {
+    "ids": ["calgary", "city-of-calgary", "yyc"],
+    "names": ["Calgary", "City of Calgary", "The City of Calgary"]
+  },
+  "process_notes": [
+    {
+      "id": "cgy-discuss-first",
+      "topic": "entry_point",
+      "text": "Start by discussing the need for a variance with a safety codes officer in the building discipline. If a permit has been applied for, call 311 and ask for the file manager of the permit; if construction is under way, contact the inspector or plans examiner who issued the permit.",
+      "sources": [
+        {
+          "title": "City of Calgary, Guide to Applying for an Alternative Solution (Variance), 23 November 2023",
+          "url": "https://www.calgary.ca/content/dam/www/tools-and-resources/guide-to-applying-for-an-alternative-solution.pdf",
+          "retrieved": "2026-10-21",
+          "pages": "p.1",
+          "sha256": "bbb0628b7b5f13499a4688089bc09484b67865ef283709d40701d823825b1399"
+        }
+      ]
+    },
+    {
+      "id": "cgy-permit-required",
+      "topic": "permit_link",
+      "text": "A variance request can only be accepted once a building permit has been applied for, because a variance is tied to a permit; a variance number cannot be issued without a building permit number. Discussion before the permit application is still possible.",
+      "sources": [
+        {
+          "title": "City of Calgary, Guide to Applying for an Alternative Solution (Variance), 23 November 2023",
+          "url": "https://www.calgary.ca/content/dam/www/tools-and-resources/guide-to-applying-for-an-alternative-solution.pdf",
+          "retrieved": "2026-10-21",
+          "pages": "p.2",
+          "sha256": "bbb0628b7b5f13499a4688089bc09484b67865ef283709d40701d823825b1399"
+        }
+      ]
+    },
+    {
+      "id": "cgy-one-issue-one-site",
+      "topic": "scope",
+      "text": "Variances are site specific: a separate request is needed for each permit or site, and a separate form for each different issue. Several articles that belong to one issue can go in one request.",
+      "sources": [
+        {
+          "title": "City of Calgary, Guide to Applying for an Alternative Solution (Variance), 23 November 2023",
+          "url": "https://www.calgary.ca/content/dam/www/tools-and-resources/guide-to-applying-for-an-alternative-solution.pdf",
+          "retrieved": "2026-10-21",
+          "pages": "p.2",
+          "sha256": "bbb0628b7b5f13499a4688089bc09484b67865ef283709d40701d823825b1399"
+        }
+      ]
+    },
+    {
+      "id": "cgy-submission",
+      "topic": "submission",
+      "text": "The owner or the owner's agent submits the formal application with all supporting documentation to the officer contacted first. The guide says the City's Request for Specific Variance form must be completed for all variance applications, whatever other documentation is submitted; completing it digitally is preferred, and supporting documents may go by e-mail or in hard copy.",
+      "sources": [
+        {
+          "title": "City of Calgary, Guide to Applying for an Alternative Solution (Variance), 23 November 2023",
+          "url": "https://www.calgary.ca/content/dam/www/tools-and-resources/guide-to-applying-for-an-alternative-solution.pdf",
+          "retrieved": "2026-10-21",
+          "pages": "p.2",
+          "sha256": "bbb0628b7b5f13499a4688089bc09484b67865ef283709d40701d823825b1399"
+        }
+      ]
+    },
+    {
+      "id": "cgy-sealed-documents",
+      "topic": "professional",
+      "text": "Where the project or the subject of the variance requires a professional, the supporting documents must also be stamped and sealed.",
+      "sources": [
+        {
+          "title": "City of Calgary, Guide to Applying for an Alternative Solution (Variance), 23 November 2023",
+          "url": "https://www.calgary.ca/content/dam/www/tools-and-resources/guide-to-applying-for-an-alternative-solution.pdf",
+          "retrieved": "2026-10-21",
+          "pages": "p.3",
+          "sha256": "bbb0628b7b5f13499a4688089bc09484b67865ef283709d40701d823825b1399"
+        }
+      ]
+    },
+    {
+      "id": "cgy-review-decision",
+      "topic": "review",
+      "text": "Inspections & Permit Services reviews the application and may ask for more information. The applicant is told whether it is accepted or rejected; an accepted variance is issued by the officer with any conditions attached.",
+      "sources": [
+        {
+          "title": "City of Calgary, Guide to Applying for an Alternative Solution (Variance), 23 November 2023",
+          "url": "https://www.calgary.ca/content/dam/www/tools-and-resources/guide-to-applying-for-an-alternative-solution.pdf",
+          "retrieved": "2026-10-21",
+          "pages": "p.2",
+          "sha256": "bbb0628b7b5f13499a4688089bc09484b67865ef283709d40701d823825b1399"
+        }
+      ]
+    },
+    {
+      "id": "cgy-beyond-city",
+      "topic": "scope",
+      "text": "For a variance meant to apply beyond the City of Calgary, the guide directs the applicant to Alberta Municipal Affairs, to speak to the Chief Building Administrator.",
+      "sources": [
+        {
+          "title": "City of Calgary, Guide to Applying for an Alternative Solution (Variance), 23 November 2023",
+          "url": "https://www.calgary.ca/content/dam/www/tools-and-resources/guide-to-applying-for-an-alternative-solution.pdf",
+          "retrieved": "2026-10-21",
+          "pages": "p.1",
+          "sha256": "bbb0628b7b5f13499a4688089bc09484b67865ef283709d40701d823825b1399"
+        }
+      ]
+    },
+    {
+      "id": "cgy-spv-no-deviation",
+      "topic": "scope",
+      "text": "Standing posted variances cannot be altered or deviated from. Any change to their scope or application means following the Division B acceptable solutions or applying for a site-specific variance.",
+      "sources": [
+        {
+          "title": "City of Calgary, Variance SPV-001 Zero Lot Line (Revision 5, 5 March 2026)",
+          "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/zero-lot-line-march-2026.pdf",
+          "retrieved": "2026-10-21",
+          "pages": "p.1",
+          "sha256": "bbe2767cfbebab533b1afa971afc9393ef56547337bd95f7996aa5d981b649de"
+        },
+        {
+          "title": "City of Calgary, Variance SPV-006 Firewall in a Rowhouse with Secondary Suites (19 June 2025)",
+          "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/firewall-in-a-rowhouse-with-secondary-suites-spv-006.pdf",
+          "retrieved": "2026-10-21",
+          "pages": "p.1",
+          "sha256": "8df85aa592abc0272806687daf7de01c14fdc9433b97c6641192e438889e9437"
+        }
+      ]
+    }
+  ],
+  "forms": [
+    {
+      "id": "calgary-request-for-specific-variance",
+      "title": "Request for Specific Variance",
+      "issuer": "City of Calgary",
+      "role": "additional",
+      "version": "R2014-06",
+      "status": "current",
+      "export": "not_yet",
+      "sha256": "fa8881140654ac491732471a576206efce38b826b0d8f7fa84c7a47ada53cce5",
+      "page_count": 1,
+      "field_count": 18,
+      "pdf_last_modified": "2017-12-04",
+      "local_path": "reference/precedents/calgary/calgary-request-for-specific-variance.pdf",
+      "note": "The form prints R2014-06; its PDF was last modified 2017-12-04. On the retrieval date the City's Building Regulation Advisories page still linked this exact file (same SHA-256 as the 2026-10-18 copy), next to the 2023-11-23 guide that calls it \"the attached form\". Batatis does not fill it yet (WP-44). Whether the officer wants it in addition to the SCC form is the officer's call.",
+      "source": {
+        "title": "City of Calgary, Request for Specific Variance (R2014-06)",
+        "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/request-for-specific-variance.pdf",
+        "retrieved": "2026-10-21",
+        "pages": "p.1",
+        "sha256": "fa8881140654ac491732471a576206efce38b826b0d8f7fa84c7a47ada53cce5",
+        "note": "Listed at https://www.calgary.ca/development/permits/building-regulation-advisories.html (page SHA-256 8f582583e6ebdde24529b8517e5621e230155f4fb8d33d4e6445bbefb6121e77 on the retrieval date)."
+      }
+    }
+  ],
+  "standing_packages": [
+    {
+      "id": "calgary-spv-001",
+      "code": "SPV-001",
+      "kind": "standing_posted_variance",
+      "title": "Zero Lot Line",
+      "revision": "Revision 5",
+      "issued": "2026-03-05",
+      "edition": "National Building Code - Alberta Edition (edition not numbered in the PDF)",
+      "status": "current",
+      "provisions": ["9.10.15.5.(8)", "9.10.15.5.(9)"],
+      "applies_to": "Single-family houses up to three storeys, including houses with a secondary suite, in the paired easement-side and zero-side layout the variance describes.",
+      "note": "Originally issued 2017-10-01. Conditions apply to both houses, and a Maintenance Access Right-of-Way agreement is registered on the title of the parcel and the adjacent parcel (pp.4-5); the source has a footing-projection conflict (0.3 m on p.4, 0.6 m on p.5) that only the City can resolve. Read every operative condition in the source.",
+      "checklist": "calgary-spv-001",
+      "source": {
+        "title": "City of Calgary, Variance SPV-001 Zero Lot Line (Revision 5, 5 March 2026)",
+        "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/zero-lot-line-march-2026.pdf",
+        "retrieved": "2026-10-21",
+        "pages": "pp.1-6",
+        "sha256": "bbe2767cfbebab533b1afa971afc9393ef56547337bd95f7996aa5d981b649de"
+      }
+    },
+    {
+      "id": "calgary-spv-006",
+      "code": "SPV-006",
+      "kind": "standing_posted_variance",
+      "title": "Firewall in a Rowhouse with Secondary Suites",
+      "revision": null,
+      "issued": "2025-06-19",
+      "edition": "National Building Code - Alberta Edition (edition not numbered in the PDF)",
+      "status": "current",
+      "provisions": ["9.10.11.2.(2)", "9.10.13.13.(1)"],
+      "applies_to": "Rowhouses with more than two houses containing a secondary suite.",
+      "note": "A site-specific variance to Sentence 9.10.11.2.(2) outside this package needs professional involvement (p.1). Read every operative condition in the source.",
+      "checklist": "calgary-spv-006",
+      "source": {
+        "title": "City of Calgary, Variance SPV-006 Firewall in a Rowhouse with Secondary Suites (19 June 2025)",
+        "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/firewall-in-a-rowhouse-with-secondary-suites-spv-006.pdf",
+        "retrieved": "2026-10-21",
+        "pages": "pp.1-5",
+        "sha256": "8df85aa592abc0272806687daf7de01c14fdc9433b97c6641192e438889e9437"
+      }
+    }
+  ],
+  "guides": [
+    {
+      "id": "calgary-alternative-solution-guide",
+      "title": "Guide to Applying for an Alternative Solution (Variance)",
+      "issued": "2023-11-23",
+      "topic": "process",
+      "summary": "How to discuss, submit and complete a variance request in the City of Calgary, including the field-by-field guide to the Request for Specific Variance form.",
+      "requires_professional": null,
+      "source": {
+        "title": "City of Calgary, Guide to Applying for an Alternative Solution (Variance), 23 November 2023",
+        "url": "https://www.calgary.ca/content/dam/www/tools-and-resources/guide-to-applying-for-an-alternative-solution.pdf",
+        "retrieved": "2026-10-21",
+        "pages": "pp.1-4",
+        "sha256": "bbb0628b7b5f13499a4688089bc09484b67865ef283709d40701d823825b1399"
+      }
+    }
+  ],
+  "notices": [
+    {
+      "id": "calgary_variance_form",
+      "surfaces": ["gaps", "export_header", "export_appendix"],
+      "section": "B",
+      "heading": "Local variance form",
+      "message": "Calgary also asks for its own Request for Specific Variance form (in the City's Guide to Applying for an Alternative Solution: https://www.calgary.ca/content/dam/www/tools-and-resources/guide-to-applying-for-an-alternative-solution.pdf). Keep this SCC form and appendix; ask your Safety Codes Officer whether they want both.",
+      "fix_hint": "Keep the SCC form and appendix. Ask the Safety Codes Officer whether they want the City form as well. This item does not stop the SCC variance form from being exported.",
+      "sources": [
+        {
+          "title": "City of Calgary, Guide to Applying for an Alternative Solution (Variance), 23 November 2023, step 3",
+          "url": "https://www.calgary.ca/content/dam/www/tools-and-resources/guide-to-applying-for-an-alternative-solution.pdf",
+          "retrieved": "2026-10-21",
+          "pages": "p.2",
+          "sha256": "bbb0628b7b5f13499a4688089bc09484b67865ef283709d40701d823825b1399",
+          "note": "Sentence ported from PR #40 engine/jurisdiction_notice.py. It does not say the City accepts the Council form."
+        }
+      ]
+    }
+  ]
+}

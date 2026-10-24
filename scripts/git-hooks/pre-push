@@ -1,0 +1,37 @@
+#!/bin/sh
+# Batatis: GitHub holds exactly two branches, dev and main. Rules: docs/agents/git-workflow.md
+# Allowed: a fast-forward push to refs/heads/dev, and deleting any other remote branch (cleanup).
+# Refused: feature branches, main, tags, rewriting dev, deleting dev or main.
+zero=0000000000000000000000000000000000000000
+
+refuse() {
+  {
+    echo "pre-push: refused. $1"
+    echo "  GitHub has only 'dev' (testing) and 'main' (production). To ship verified work run: scripts/land.sh"
+    echo "  Rules: docs/agents/git-workflow.md"
+  } >&2
+  exit 1
+}
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  case "$remote_ref" in
+    refs/heads/dev)
+      [ "$local_sha" = "$zero" ] && refuse "deleting dev is not allowed."
+      if [ "$remote_sha" != "$zero" ] && ! git merge-base --is-ancestor "$remote_sha" "$local_sha" 2>/dev/null; then
+        refuse "this would rewrite dev (not a fast-forward, or origin/dev is stale). Fetch, put your work on top of origin/dev, verify, push again. Never force-push."
+      fi
+      ;;
+    refs/heads/main)
+      refuse "main changes only when the user merges the release PR (dev -> main) on GitHub."
+      ;;
+    refs/heads/*)
+      [ "$local_sha" = "$zero" ] && continue
+      refuse "'${remote_ref#refs/heads/}' would be a third branch on GitHub."
+      ;;
+    *)
+      [ "$local_sha" = "$zero" ] && continue
+      refuse "pushing $remote_ref is not allowed (no tags or other refs)."
+      ;;
+  esac
+done
+exit 0

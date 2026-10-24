@@ -2,17 +2,12 @@
 import { useId, useState, type ReactNode } from "react";
 import { AccountsError, type ApplicantKind, type AuthorityKey, type Role } from "../../api/accounts";
 import { PRIVACY_NOTICE } from "../../privacy";
-
-/** The same notice the engine shows; its "(https://…)" becomes a link with readable text. */
-const LINK = /\s*\((https?:\/\/[^)\s]+)\)/.exec(PRIVACY_NOTICE);
-const NOTICE = LINK
-  ? { before: PRIVACY_NOTICE.slice(0, LINK.index), url: LINK[1], after: PRIVACY_NOTICE.slice(LINK.index + LINK[0].length) }
-  : { before: PRIVACY_NOTICE, url: null, after: "" };
 import { useAccount } from "../account";
 import { authorityName } from "../applications";
 import { PageHead, clockText, useCountdown } from "../auth/bits";
 import { APPLICANT_CHOICES, APPLICANT_LABEL, AUTHORITY_CHOICES, codeNeeded } from "../auth/onboardingSteps";
 import { saveOnboarding, signOut } from "../auth/useAuthGate";
+import { ArchivedApplications } from "./ArchivedApplications";
 
 
 function roleLine(role: Role | null, applicantType: string | null, authority: string | null): string {
@@ -135,6 +130,7 @@ export function Settings({ phoneTools }: { phoneTools?: ReactNode }) {
               </Row>
               {editing && <RoleEditor onCancel={() => setEditing(false)} onSaved={() => { setEditing(false); setSaved(true); }} />}
             </section>
+            <ArchivedApplications />
           </>
         ) : (
           <section className="ac-section">
@@ -145,11 +141,15 @@ export function Settings({ phoneTools }: { phoneTools?: ReactNode }) {
 
         <section className="ac-section" aria-labelledby="ac-s-data">
           <h2 id="ac-s-data" className="ac-section-title">How your data is handled</h2>
-          <p className="ac-prose">
-            {NOTICE.before}
-            {NOTICE.url && <> (<a className="cf-inline-link" href={NOTICE.url} target="_blank" rel="noopener noreferrer">OpenAI API data policy<span className="cf-sr">, opens in a new tab</span></a>)</>}
-            {NOTICE.after}
-          </p>
+          <details className="cf-help">
+            <summary>Details</summary>
+            <p className="ac-prose">{PRIVACY_NOTICE}</p>
+          </details>
+        </section>
+
+        <section className="ac-section" aria-labelledby="ac-s-accuracy">
+          <h2 id="ac-s-accuracy" className="ac-section-title">Accuracy</h2>
+          <p className="ac-prose"><a className="acc-inline-link" href="#/accuracy">Read the accuracy report</a></p>
         </section>
 
         {user && (

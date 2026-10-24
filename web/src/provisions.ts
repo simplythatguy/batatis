@@ -1,23 +1,44 @@
-import type { Case, SectionCRow } from "./types";
+import type { Candidate, Case, SectionCRow } from "./types";
 
 /** Normalize punctuation only. IDs still have to come from CodeDB. */
 export const canonicalProvision = (id: string) => id.trim().replace(/\s+/g, "").replace(/\.$/, "");
 export const isProvision = (id: string) => /^\d+(?:\.\d+){3}\.?/.test(id);
+export const articleOf = (id: string) => id.match(/^\d+\.\d+\.\d+\.\d+\.?/)?.[0].replace(/\.$/, "") ?? id;
+
+/** Keyword-only suggestions are leads; manual additions and explicit Yes decisions retain their gates. */
+export function keywordCandidate(c: Case, a: Candidate): boolean {
+  return c.identify?.mode === "bm25_fallback" && a.suggestion === "identify"
+    && c.identify.articles.some((r) => articleOf(r.provision) === articleOf(a.provision));
+}
+
+/** Every returned fallback article, with all its available sentence cards. No relevance estimate is implied. */
+export function keywordGroups(c: Case): { article: string; title: string; candidates: Candidate[] }[] {
+  if (c.identify?.mode !== "bm25_fallback") return [];
+  return c.identify.articles.map((a) => ({ article: a.provision, title: a.title || a.provision,
+    candidates: c.candidates.filter((x) => articleOf(x.provision) === articleOf(a.provision)),
+  }));
+}
 export const withinProvision = (row: string, parent: string) => {
   const r = canonicalProvision(row), p = canonicalProvision(parent);
   return r === p || r.startsWith(`${p}.(`) || r.startsWith(`${p}(`);
 };
 
 /** Expand an article once, preserving only decisions about that exact sentence.
- * Overlapping article/child lookup must not duplicate rows or inherit a parent Yes. */
-export function reconcileSectionC(c: Case, rows: SectionCRow[]): Case {
+ * Overlapping article/child lookup must not duplicate rows or inherit a parent Yes.
+ * Preserved saved cards receive rows without changing their selection or answers. */
+export function reconcileSectionC(c: Case, rows: SectionCRow[], preserve: string[] = []): Case {
+  const kept = new Set(preserve);
   const unique = [...new Map(rows.map(r => [canonicalProvision(r.provision), r])).values()];
-  const candidates = c.candidates.filter(a => !unique.some(r => withinProvision(r.provision, a.provision)));
+  const candidates = c.candidates.filter(a => kept.has(a.id) || !unique.some(r => withinProvision(r.provision, a.provision)));
   const sectionC: SectionCRow[] = [];
   for (const row of unique) {
     const exact = c.candidates.find(a => canonicalProvision(a.provision) === canonicalProvision(row.provision));
     const parent = exact ?? c.candidates.find(a => withinProvision(row.provision, a.provision));
     if (!parent) continue; // A stale lookup cannot reintroduce a removed reference.
+    if (kept.has(parent.id)) {
+      sectionC.push({ ...row, candidateId: parent.id });
+      continue;
+    }
     const candidate = exact ?? {
       ...parent, id: `provision-${row.provision}`, provision: row.provision,
       answer: null, benchmark: false,
@@ -32,9 +53,10 @@ export function reconcileSectionC(c: Case, rows: SectionCRow[]): Case {
   return JSON.stringify(next) === JSON.stringify(c) ? c : next;
 }
 
-/** Article-level answers cannot be submitted before deterministic expansion. */
+/** Article-level answers cannot be submitted before deterministic expansion. A Yes still waiting
+ * for the engine (pending) is not confirmed yet: it stays a card until its decision is acknowledged. */
 export function confirmedProvisions(c: Case): string[] {
-  return [...new Set(c.candidates.filter(a => a.answer === "yes" && isProvision(a.provision)
+  return [...new Set(c.candidates.filter(a => a.answer === "yes" && !a.pending && isProvision(a.provision)
     && c.sectionC.some(r => canonicalProvision(r.provision) === canonicalProvision(a.provision)))
     .map(a => a.provision))];
 }

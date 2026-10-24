@@ -87,10 +87,10 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
                     raise HTTPException(429, f'Relevance limit reached; try again in {wait} seconds',
                                         headers={'Retry-After': str(wait)})
                 try:
-                    # Jev sees the description with personal details removed; the stored hash
+                    # Scoring sees the description with personal details removed; the stored hash
                     # stays on the applicant's own text so staleness is unaffected.
                     outbound = scrub(text, known_values(case, people_names(cases(), case)))
-                    result = identify(outbound, codes.db_path, judge=judge, rerank_n=60)
+                    result = identify(outbound, codes.db_path, judge=judge)
                     record = relevance_record(result, text, now())
                 except Exception as error:
                     logger.warning('Relevance scoring unavailable: %s', _failure_reason(error))

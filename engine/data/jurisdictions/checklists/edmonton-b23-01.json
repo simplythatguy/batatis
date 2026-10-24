@@ -1,0 +1,177 @@
+{
+  "schema_version": 1,
+  "id": "edmonton-b23-01",
+  "jurisdiction": "edmonton",
+  "package": "edmonton-b23-01",
+  "code": "B23-01",
+  "title": "Fire Separation Between Row Houses with More Than Two Secondary Suites",
+  "revision": null,
+  "issued": "2024-07-30",
+  "summary": "Lets a Part 9 row house with more than two adjacent houses that have a secondary suite use a party wall with a 1 h fire-resistance rating instead of the firewall in Sentence 9.10.11.2.(2). You declare this in a signed Letter of Construction Intention filed with the permit application.",
+  "reviewed": false,
+  "reviewed_by": null,
+  "reviewed_on": null,
+  "reference_text": "edmonton-policy-b23-01-row-house-fire-separation-more-than-two-secondary-suites",
+  "source": {
+    "title": "City of Edmonton, Policy B23-01 (30 July 2024)",
+    "url": "https://www.edmonton.ca/sites/default/files/public-files/Policy-B23-01-Secondary-Suites-in-Row-houses.pdf?cb=1755184683",
+    "retrieved": "2026-10-21",
+    "pages": "pp.1-2",
+    "sha256": "85d5c4d38be7df97f9668ea7b46640990c9f3a08ccc7bb93c5c8b74a33f4fe71"
+  },
+  "groups": [
+    {"id": "scope", "title": "When this policy can be used", "plain": "Check these first. If one does not fit your project, the policy does not cover it."},
+    {"id": "party-wall", "title": "The party wall", "plain": "What the wall in place of the firewall must be."},
+    {"id": "submission", "title": "What goes in with the permit application", "plain": "Drawings and the Letter of Construction Intention."},
+    {"id": "letter", "title": "What you declare in the Letter of Construction Intention", "plain": "Each statement in the letter, which the owner or the owner's agent signs."}
+  ],
+  "conditions": [
+    {
+      "id": "scope-row-house",
+      "group": "scope",
+      "kind": "scope",
+      "subject": "building",
+      "plain": "The building is a Part 9 row house with more than two adjacent houses that each have a secondary suite, on freehold or condominium lots.",
+      "may_not_apply": false,
+      "source": {"page": 1, "label": "Purpose", "quote": "for Part 9 row houses with more than two adjacent secondary suites, applicable to freehold or condominium lots."}
+    },
+    {
+      "id": "scope-residential",
+      "group": "scope",
+      "kind": "scope",
+      "subject": "building",
+      "plain": "The building is of residential occupancy.",
+      "may_not_apply": false,
+      "source": {"page": 1, "label": "Policy", "quote": "A party wall on a property line of a building of residential occupancy"}
+    },
+    {
+      "id": "party-wall-on-property-line",
+      "group": "party-wall",
+      "kind": "construction",
+      "subject": "building",
+      "plain": "The wall in place of the firewall is a party wall on a property line, and it separates each pair of adjacent houses with a secondary suite from the rest of the building.",
+      "may_not_apply": false,
+      "source": {"page": 1, "label": "Policy", "quote": "that separates any 2 adjacent houses with a secondary suite from the rest of the building need not be constructed as a firewall,", "lead_in": "A party wall on a property line of a building of residential occupancy"}
+    },
+    {
+      "id": "party-wall-1-h",
+      "group": "party-wall",
+      "kind": "construction",
+      "subject": "building",
+      "plain": "That party wall is built as a fire separation with a fire-resistance rating of at least 1 h.",
+      "may_not_apply": false,
+      "source": {"page": 1, "label": "Policy", "quote": "provided it is constructed as a fire separation having not less than a 1 h fire-resistance rating"}
+    },
+    {
+      "id": "all-other-suite-requirements",
+      "group": "party-wall",
+      "kind": "construction",
+      "subject": "building",
+      "plain": "The houses meet every other NBC(AE) requirement for building houses with a secondary suite.",
+      "may_not_apply": false,
+      "source": {"page": 1, "label": "Purpose", "quote": "provided the houses conform with all other NBC(AE) requirements for construction of houses with a secondary suite."}
+    },
+    {
+      "id": "drawings-show-conformance",
+      "group": "submission",
+      "kind": "documents",
+      "subject": "permit_documents",
+      "plain": "The drawings carry enough information to show the design follows this policy, including the related detail drawings.",
+      "may_not_apply": false,
+      "source": {"page": 1, "label": "Procedure 1.", "quote": "PROVIDE SUFFICIENT INFORMATION ON THE DRAWINGS to demonstrate conformance with this policy."}
+    },
+    {
+      "id": "letter-with-application",
+      "group": "submission",
+      "kind": "documents",
+      "subject": "permit_documents",
+      "plain": "The Letter of Construction Intention is submitted with the permit application.",
+      "may_not_apply": false,
+      "source": {"page": 1, "label": "Procedure 2.", "quote": "Submit the LETTER OF CONSTRUCTION INTENTION, provided below, with the permit application."}
+    },
+    {
+      "id": "letter-signed",
+      "group": "submission",
+      "kind": "documents",
+      "subject": "declaration",
+      "plain": "The letter is printed (or typed), read and signed by the owner or the owner's authorized agent, with the project address or City file number filled in.",
+      "may_not_apply": false,
+      "source": {"page": 2, "label": "Letter of Construction Intention", "quote": "READ, SIGN AND SUBMIT THIS LETTER WITH THE BUILDING PERMIT APPLICATION"}
+    },
+    {
+      "id": "letter-owner-or-agent",
+      "group": "letter",
+      "kind": "declaration",
+      "subject": "declaration",
+      "plain": "The person signing is the owner or the owner's authorized agent for the property.",
+      "may_not_apply": false,
+      "source": {"page": 2, "label": "Letter, first statement", "quote": "I am the owner or owner's authorized agent of the above-noted property;"}
+    },
+    {
+      "id": "letter-reviewed-policy",
+      "group": "letter",
+      "kind": "declaration",
+      "subject": "declaration",
+      "plain": "The person signing has read Policy B23-01.",
+      "may_not_apply": false,
+      "source": {"page": 2, "label": "Letter, second statement", "quote": "by providing this letter, I confirm I have reviewed this 'Fire Separation Between Row Houses with More Than Two Secondary Suites' Policy B23-01 document;"}
+    },
+    {
+      "id": "letter-built-to-policy",
+      "group": "letter",
+      "kind": "declaration",
+      "subject": "declaration",
+      "plain": "The party-wall fire separations at this address will be built as the policy sets out, instead of asking for an alternative solution.",
+      "may_not_apply": false,
+      "source": {"page": 2, "label": "Letter, third statement", "quote": "will be constructed in accordance with this policy in lieu of requesting an alternative solution;"}
+    },
+    {
+      "id": "letter-sufficient-details",
+      "group": "letter",
+      "kind": "declaration",
+      "subject": "declaration",
+      "plain": "The policy, together with the plans, documents and details you submit, has enough detail to show conformance with Sentence 2.2.5.2. of Division C.",
+      "may_not_apply": false,
+      "source": {"page": 2, "label": "Letter, fourth statement", "quote": "contain sufficient details to demonstrate conformance with NBC2023(AE):Division C:2.2.5.2.", "lead_in": "I confirm that the policy document together with submitted plans, documents and details"}
+    },
+    {
+      "id": "letter-notify-changes",
+      "group": "letter",
+      "kind": "declaration",
+      "subject": "declaration",
+      "plain": "You will tell the City if the construction intention changes during the project.",
+      "may_not_apply": false,
+      "source": {"page": 2, "label": "Letter, fourth statement", "quote": "I will notify the City of Edmonton if the approved construction intention is modified during the project."}
+    }
+  ],
+  "source_notes": [
+    {
+      "id": "may-refuse",
+      "kind": "scope",
+      "plain": "In exceptional circumstances the officer may refuse to issue a permit that uses the policy, and tells the applicant why.",
+      "page": 2,
+      "quote": "may refuse to issue a building permit that incorporates the policy;"
+    },
+    {
+      "id": "scope-line-cites-9-10-15",
+      "kind": "conflict",
+      "plain": "The policy's opening line says the row house is constructed per 9.10.15. (spatial separation), while the rest of the policy is about the firewall in 9.10.11.2.(2). Ask the City if the reference matters for your design.",
+      "page": 1,
+      "quote": "For a row house being constructed per NBC2023(AE):B:9.10.15. containing more than two adjacent houses"
+    },
+    {
+      "id": "offence",
+      "kind": "warning",
+      "plain": "When the policy is used, not meeting its requirements is an offence.",
+      "page": 2,
+      "quote": "When utilized, non-compliance with requirements of this policy is an offence."
+    },
+    {
+      "id": "periodic-update",
+      "kind": "warning",
+      "plain": "The City updates the policy from time to time; check that you are using the most recent version.",
+      "page": 1,
+      "quote": "Content subject to periodic update. Ensure use of the most recent version."
+    }
+  ]
+}

@@ -11,7 +11,7 @@ from engine.completeness import professional_involvement_gaps
 from engine.export.scc import blockers, load_field_map
 from engine.human_review import human_reviews
 from engine.models import Case, Source
-from engine.professional import NOT_ENGAGED_ITEM, professional_involvement
+from engine.professional import professional_involvement
 from engine.section_d_issues import render_practice
 from engine.store import CaseStore
 from engine.tests.case_builder_fixtures import fact
@@ -146,10 +146,11 @@ def test_source_gap_preserves_existing_professional_gaps_and_not_engaged_policy(
             'professional_qualifications', 'professional_authentication'} <= {g.field for g in gaps}
     case.facts.append(fact('professional_status', 'not_engaged'))
     gaps = professional_involvement_gaps(case, codes, [])
-    assert {g.field for g in gaps} == {'professional_source', 'professional_requirement'}
+    assert {'professional_source', 'professional_confirmation', 'responsible_professional',
+            'professional_qualifications', 'professional_authentication'} <= {g.field for g in gaps}
+    assert all(g.submission_blocking for g in gaps if g.field != 'professional_requirement')
     assert any(g.field == 'professional_source' and g.severity == 'blocking' for g in gaps)
-    warnings = [g for g in gaps if g.severity == 'warning']
-    assert len(warnings) == 1 and warnings[0].message == NOT_ENGAGED_ITEM
+    assert not any(g.id == 'professional:not_engaged' for g in gaps)
 
 
 @pytest.mark.parametrize('field,value,division,provision_id', [

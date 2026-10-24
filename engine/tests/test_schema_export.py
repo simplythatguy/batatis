@@ -17,6 +17,43 @@ def test_schema_names_and_enums():
     assert set(defs['FactInput']['required']) == {'field', 'value', 'kind', 'source'}
 
 
+def test_refusal_schema_covers_decisions_statuses_and_final_close_out():
+    defs = schema_export.schema()['$defs']
+    for model in ['Decision', 'DecisionRequest', 'DecisionSummary']:
+        assert set(defs[model]['properties']['outcome']['enum']) == {'accept', 'return', 'refuse'}
+    for model, fields in [('Case', ['status']), ('ApplicationSummary', ['status']),
+                          ('QueueApplication', ['status']), ('StatusChange', ['from_status', 'to_status'])]:
+        for field in fields:
+            assert 'refused' in defs[model]['properties'][field]['enum']
+    assert set(defs['CloseOut']['properties']['outcome']['enum']) == {'accept', 'refuse'}
+
+
+def test_refusal_outcome_and_status_are_in_all_wire_records():
+    defs = schema_export.schema()['$defs']
+    for name in ('Case', 'ApplicationSummary', 'QueueApplication'):
+        assert 'refused' in defs[name]['properties']['status']['enum']
+    for name in ('Decision', 'DecisionSummary', 'DecisionRequest'):
+        assert defs[name]['properties']['outcome']['enum'] == ['accept', 'return', 'refuse']
+    assert 'expected_version' in defs['DecisionRequest']['properties']
+    assert defs['CloseOut']['properties']['outcome']['enum'] == ['accept', 'refuse']
+
+
+def test_journey_contracts_export_their_requests_history_and_handoff_fields():
+    defs = schema_export.schema()['$defs']
+    assert {'submission_number', 'submissions', 'decision_history', 'return_snapshot', 'expires_at',
+            'professional_resolutions', 'selected_articles', 'title_is_manual'} <= set(defs['Case']['properties'])
+    assert 'submission_blocking' in defs['Gap']['properties']
+    assert {'messages', 'decision'} <= set(defs['MessagesResult']['properties'])
+    assert 'expected_version' in defs['SubmitRequest']['properties']
+    assert 'message_ids' in defs['MessageReadRequest']['properties']
+    assert set(defs['ProfessionalRequirementRequest']['required']) == {
+        'expected_version', 'required', 'scope', 'basis', 'reference'}
+    for name in ('SubmitRequest', 'DecisionRequest', 'MessageReadRequest', 'ProfessionalRequirementRequest'):
+        assert defs[name]['additionalProperties'] is False
+    for name in ('ApplicationSummary', 'QueueApplication'):
+        assert {'submission_number', 'expires_at'} <= set(defs[name]['required'])
+
+
 def test_formula_and_inputs_only_on_computed_facts():
     src = Source(type='code', ref='formula')
     f = Fact(field='ratio', value=0.26, kind='computed', source=src, formula='0.88 / 3.34', inputs=['a', 'b'])

@@ -1,0 +1,574 @@
+{
+ "id": "case_01e74005fad8",
+ "title": "SYNTHETIC HTTP administrative review fixture",
+ "owner_id": "user_afd1ef2e290648e798d3d10ebec97c9b",
+ "authority": "edmonton",
+ "status": "returned",
+ "submitted_at": "2026-10-22T19:40:56.287420+00:00",
+ "status_history": [
+  {
+   "by_id": "user_afd1ef2e290648e798d3d10ebec97c9b",
+   "by_name": "Applicant",
+   "at": "2026-10-22T19:40:56+00:00",
+   "from_status": "draft",
+   "to_status": "submitted",
+   "note": "Submitted for administrative review"
+  },
+  {
+   "by_id": "user_73ddee7bd8e94cd189ae4565c64efb93",
+   "by_name": "Reviewer One",
+   "at": "2026-10-22T19:40:56+00:00",
+   "from_status": "submitted",
+   "to_status": "in_review",
+   "note": "Reviewer One claimed administrative review"
+  },
+  {
+   "by_id": "user_73ddee7bd8e94cd189ae4565c64efb93",
+   "by_name": "Reviewer One",
+   "at": "2026-10-22T19:40:56+00:00",
+   "from_status": "in_review",
+   "to_status": "returned",
+   "note": "Returned for administrative information."
+  }
+ ],
+ "claim": {
+  "reviewer_id": "user_73ddee7bd8e94cd189ae4565c64efb93",
+  "reviewer_name": "Reviewer One",
+  "claimed_at": "2026-10-22T19:40:56+00:00"
+ },
+ "decision": {
+  "outcome": "return",
+  "by_id": "user_73ddee7bd8e94cd189ae4565c64efb93",
+  "by_name": "Reviewer One",
+  "at": "2026-10-22T19:40:56+00:00",
+  "message": "Returned for administrative information.\n\nPlease clarify the synthetic attachment revision.",
+  "items": [
+   {
+    "gap_id": null,
+    "field": "evidence.synthetic.date",
+    "note": "Confirm the revision date."
+   }
+  ]
+ },
+ "messages": [
+  {
+   "id": "msg_ab8dc7b556ab40d6ad86e22ab5f97eec",
+   "author": {
+    "id": "user_afd1ef2e290648e798d3d10ebec97c9b",
+    "name": "Applicant",
+    "role": "applicant"
+   },
+   "body": "Submitted for administrative review.",
+   "items": [],
+   "kind": "status",
+   "created_at": "2026-10-22T19:40:56+00:00",
+   "read_by": [
+    "user_afd1ef2e290648e798d3d10ebec97c9b"
+   ]
+  },
+  {
+   "id": "msg_e4bbb43d16554c02b7e2382cca702ec7",
+   "author": {
+    "id": "user_73ddee7bd8e94cd189ae4565c64efb93",
+    "name": "Reviewer One",
+    "role": "reviewer"
+   },
+   "body": "Returned for administrative information.\n\nPlease clarify the synthetic attachment revision.",
+   "items": [
+    {
+     "gap_id": null,
+     "field": "evidence.synthetic.date",
+     "note": "Confirm the revision date."
+    }
+   ],
+   "kind": "decision",
+   "created_at": "2026-10-22T19:40:56+00:00",
+   "read_by": [
+    "user_73ddee7bd8e94cd189ae4565c64efb93"
+   ]
+  },
+  {
+   "id": "msg_0e42ccf3815a406bb965aac522454248",
+   "author": {
+    "id": "user_73ddee7bd8e94cd189ae4565c64efb93",
+    "name": "Reviewer One",
+    "role": "reviewer"
+   },
+   "body": "Please update the revision date in the application, then send it again.",
+   "items": [],
+   "kind": "message",
+   "created_at": "2026-10-22T19:40:56+00:00",
+   "read_by": [
+    "user_73ddee7bd8e94cd189ae4565c64efb93"
+   ]
+  }
+ ],
+ "created_at": "2026-10-22T19:40:56.193094+00:00",
+ "updated_at": "2026-10-22T19:40:56.306023+00:00",
+ "version": 28,
+ "jurisdiction": {
+  "id": "edmonton",
+  "name": "Edmonton",
+  "authority": null
+ },
+ "facts": [
+  {
+   "id": "fact_11b1c0522a83",
+   "field": "owner_name",
+   "value": "SYNTHETIC owner",
+   "kind": "pointed",
+   "source": {
+    "type": "user_text",
+    "ref": "synthetic-http-applicant",
+    "page": null,
+    "bbox": null,
+    "quote": "SYNTHETIC owner"
+   },
+   "confidence": null,
+   "status": "confirmed",
+   "formula": null,
+   "inputs": []
+  },
+  {
+   "id": "fact_edc61448eb50",
+   "field": "application_date",
+   "value": "2026-10-20",
+   "kind": "pointed",
+   "source": {
+    "type": "user_text",
+    "ref": "synthetic-http-applicant",
+    "page": null,
+    "bbox": null,
+    "quote": "2026-10-20"
+   },
+   "confidence": null,
+   "status": "confirmed",
+   "formula": null,
+   "inputs": []
+  },
+  {
+   "id": "fact_e892ced2c4e1",
+   "field": "civic_address",
+   "value": "000 Synthetic Street",
+   "kind": "pointed",
+   "source": {
+    "type": "user_text",
+    "ref": "synthetic-http-applicant",
+    "page": null,
+    "bbox": null,
+    "quote": "000 Synthetic Street"
+   },
+   "confidence": null,
+   "status": "confirmed",
+   "formula": null,
+   "inputs": []
+  },
+  {
+   "id": "fact_a1b495ee08b8",
+   "field": "legal_description",
+   "value": "Synthetic lot 1 block 2 plan 3",
+   "kind": "pointed",
+   "source": {
+    "type": "user_text",
+    "ref": "synthetic-http-applicant",
+    "page": null,
+    "bbox": null,
+    "quote": "Synthetic lot 1 block 2 plan 3"
+   },
+   "confidence": null,
+   "status": "confirmed",
+   "formula": null,
+   "inputs": []
+  },
+  {
+   "id": "fact_db1d19cd9543",
+   "field": "representative",
+   "value": "SYNTHETIC applicant",
+   "kind": "pointed",
+   "source": {
+    "type": "user_text",
+    "ref": "synthetic-http-applicant",
+    "page": null,
+    "bbox": null,
+    "quote": "SYNTHETIC applicant"
+   },
+   "confidence": null,
+   "status": "confirmed",
+   "formula": null,
+   "inputs": []
+  },
+  {
+   "id": "fact_0c7a6b51f0a8",
+   "field": "mailing_address",
+   "value": "000 Synthetic Street",
+   "kind": "pointed",
+   "source": {
+    "type": "user_text",
+    "ref": "synthetic-http-applicant",
+    "page": null,
+    "bbox": null,
+    "quote": "000 Synthetic Street"
+   },
+   "confidence": null,
+   "status": "confirmed",
+   "formula": null,
+   "inputs": []
+  },
+  {
+   "id": "fact_af8e854fb96b",
+   "field": "scope",
+   "value": "site",
+   "kind": "pointed",
+   "source": {
+    "type": "user_text",
+    "ref": "synthetic-http-applicant",
+    "page": null,
+    "bbox": null,
+    "quote": "site"
+   },
+   "confidence": null,
+   "status": "confirmed",
+   "formula": null,
+   "inputs": []
+  },
+  {
+   "id": "fact_0ded3630db5a",
+   "field": "alternative_description",
+   "value": "SYNTHETIC departure for an API exercise only.",
+   "kind": "pointed",
+   "source": {
+    "type": "user_text",
+    "ref": "synthetic-http-applicant",
+    "page": null,
+    "bbox": null,
+    "quote": "SYNTHETIC departure for an API exercise only."
+   },
+   "confidence": null,
+   "status": "confirmed",
+   "formula": null,
+   "inputs": []
+  },
+  {
+   "id": "fact_a29c3210c53d",
+   "field": "rationale",
+   "value": "SYNTHETIC applicant rationale for the fixture.",
+   "kind": "pointed",
+   "source": {
+    "type": "user_text",
+    "ref": "synthetic-http-applicant",
+    "page": null,
+    "bbox": null,
+    "quote": "SYNTHETIC applicant rationale for the fixture."
+   },
+   "confidence": null,
+   "status": "confirmed",
+   "formula": null,
+   "inputs": []
+  },
+  {
+   "id": "fact_16894546ca5d",
+   "field": "risk_assessment",
+   "value": "SYNTHETIC applicant risk passage, no technical assessment.",
+   "kind": "pointed",
+   "source": {
+    "type": "user_text",
+    "ref": "synthetic-http-applicant",
+    "page": null,
+    "bbox": null,
+    "quote": "SYNTHETIC applicant risk passage, no technical assessment."
+   },
+   "confidence": null,
+   "status": "confirmed",
+   "formula": null,
+   "inputs": []
+  },
+  {
+   "id": "fact_04786b5b9574",
+   "field": "mitigating_measures",
+   "value": "SYNTHETIC applicant measures, no adequacy judgment.",
+   "kind": "pointed",
+   "source": {
+    "type": "user_text",
+    "ref": "synthetic-http-applicant",
+    "page": null,
+    "bbox": null,
+    "quote": "SYNTHETIC applicant measures, no adequacy judgment."
+   },
+   "confidence": null,
+   "status": "confirmed",
+   "formula": null,
+   "inputs": []
+  },
+  {
+   "id": "fact_e643c1934e57",
+   "field": "assumptions_and_limits",
+   "value": "SYNTHETIC scope limits, fixture only.",
+   "kind": "pointed",
+   "source": {
+    "type": "user_text",
+    "ref": "synthetic-http-applicant",
+    "page": null,
+    "bbox": null,
+    "quote": "SYNTHETIC scope limits, fixture only."
+   },
+   "confidence": null,
+   "status": "confirmed",
+   "formula": null,
+   "inputs": []
+  },
+  {
+   "id": "fact_75dd2ed1ddf9",
+   "field": "maintenance_operation",
+   "value": "SYNTHETIC operation and maintenance passage.",
+   "kind": "pointed",
+   "source": {
+    "type": "user_text",
+    "ref": "synthetic-http-applicant",
+    "page": null,
+    "bbox": null,
+    "quote": "SYNTHETIC operation and maintenance passage."
+   },
+   "confidence": null,
+   "status": "confirmed",
+   "formula": null,
+   "inputs": []
+  },
+  {
+   "id": "fact_dc368051dd0b",
+   "field": "qualifications",
+   "value": "SYNTHETIC document author role, no licence or competence asserted.",
+   "kind": "pointed",
+   "source": {
+    "type": "user_text",
+    "ref": "synthetic-http-applicant",
+    "page": null,
+    "bbox": null,
+    "quote": "SYNTHETIC document author role, no licence or competence asserted."
+   },
+   "confidence": null,
+   "status": "confirmed",
+   "formula": null,
+   "inputs": []
+  },
+  {
+   "id": "fact_b6bcf9aeadd9",
+   "field": "professional_status",
+   "value": "not_engaged",
+   "kind": "pointed",
+   "source": {
+    "type": "user_text",
+    "ref": "synthetic-http-applicant",
+    "page": null,
+    "bbox": null,
+    "quote": "not_engaged"
+   },
+   "confidence": null,
+   "status": "confirmed",
+   "formula": null,
+   "inputs": []
+  },
+  {
+   "id": "fact_f8fe775edffd",
+   "field": "occupancy",
+   "value": "single_family",
+   "kind": "pointed",
+   "source": {
+    "type": "user_text",
+    "ref": "synthetic-http-applicant",
+    "page": null,
+    "bbox": null,
+    "quote": "single_family"
+   },
+   "confidence": null,
+   "status": "confirmed",
+   "formula": null,
+   "inputs": []
+  },
+  {
+   "id": "fact_727b9cef3b89",
+   "field": "evidence.synthetic.file_ref",
+   "value": "file_e6b188f90cf2",
+   "kind": "pointed",
+   "source": {
+    "type": "file",
+    "ref": "file_e6b188f90cf2",
+    "page": null,
+    "bbox": null,
+    "quote": "SYNTHETIC storage-binding fixture only."
+   },
+   "confidence": null,
+   "status": "confirmed",
+   "formula": null,
+   "inputs": []
+  },
+  {
+   "id": "fact_b2f51aef44e5",
+   "field": "evidence.synthetic.title",
+   "value": "SYNTHETIC storage-binding attachment",
+   "kind": "pointed",
+   "source": {
+    "type": "user_text",
+    "ref": "synthetic-http-applicant",
+    "page": null,
+    "bbox": null,
+    "quote": "SYNTHETIC storage-binding attachment"
+   },
+   "confidence": null,
+   "status": "confirmed",
+   "formula": null,
+   "inputs": []
+  },
+  {
+   "id": "fact_222dc6065097",
+   "field": "evidence.synthetic.responsible_party",
+   "value": "SYNTHETIC fixture author",
+   "kind": "pointed",
+   "source": {
+    "type": "user_text",
+    "ref": "synthetic-http-applicant",
+    "page": null,
+    "bbox": null,
+    "quote": "SYNTHETIC fixture author"
+   },
+   "confidence": null,
+   "status": "confirmed",
+   "formula": null,
+   "inputs": []
+  },
+  {
+   "id": "fact_5ac875710bc5",
+   "field": "evidence.synthetic.date",
+   "value": "2026-10-20",
+   "kind": "pointed",
+   "source": {
+    "type": "user_text",
+    "ref": "synthetic-http-applicant",
+    "page": null,
+    "bbox": null,
+    "quote": "2026-10-20"
+   },
+   "confidence": null,
+   "status": "confirmed",
+   "formula": null,
+   "inputs": []
+  },
+  {
+   "id": "fact_819a9826ad26",
+   "field": "evidence.synthetic.covers.ev_329f943eadf0513e",
+   "value": true,
+   "kind": "pointed",
+   "source": {
+    "type": "user_text",
+    "ref": "synthetic-http-applicant",
+    "page": null,
+    "bbox": null,
+    "quote": "True"
+   },
+   "confidence": null,
+   "status": "confirmed",
+   "formula": null,
+   "inputs": []
+  },
+  {
+   "id": "fact_567a4fbbbebb",
+   "field": "evidence.synthetic.covers.ev_7964866badc947b2",
+   "value": true,
+   "kind": "pointed",
+   "source": {
+    "type": "user_text",
+    "ref": "synthetic-http-applicant",
+    "page": null,
+    "bbox": null,
+    "quote": "True"
+   },
+   "confidence": null,
+   "status": "confirmed",
+   "formula": null,
+   "inputs": []
+  }
+ ],
+ "provisions": [
+  "9.10.9.16.(1)"
+ ],
+ "section_c": [
+  {
+   "provision_id": "9.10.9.16.(1)",
+   "citation": "NBC(AE) 2023 p2, Div B, Sentence 9.10.9.16.(1) [PDF p.886]",
+   "attribution_status": "direct",
+   "attributed_via": null,
+   "pairs": [
+    {
+     "function": "F03",
+     "function_text": "To retard the effects of fire on areas beyond its point of origin.",
+     "objective": "OS1.2",
+     "objective_text": "fire or explosion impacting areas beyond its point of origin",
+     "bracket": "[F03-OS1.2]",
+     "clauses": [],
+     "application_note": null,
+     "table": "Table 9.38.1.1.",
+     "pdf_page": 1128,
+     "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499"
+    },
+    {
+     "function": "F03",
+     "function_text": "To retard the effects of fire on areas beyond its point of origin.",
+     "objective": "OP1.2",
+     "objective_text": "fire or explosion impacting areas beyond its point of origin",
+     "bracket": "[F03-OP1.2]",
+     "clauses": [],
+     "application_note": null,
+     "table": "Table 9.38.1.1.",
+     "pdf_page": 1128,
+     "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499"
+    }
+   ],
+   "intents": [
+    {
+     "label": "NBC 2020 Intent Statements, explanatory only",
+     "provision_id": "9.10.9.16.(1)",
+     "objective": "OS1",
+     "brackets": [
+      "[F03-OS1.2]"
+     ],
+     "notes": [],
+     "intents": [
+      "To limit the probability that fire will spread from one suite or room to another suite or room, which could lead to harm to persons in the other suite or room."
+     ],
+     "pdf_page": 1371,
+     "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499"
+    },
+    {
+     "label": "NBC 2020 Intent Statements, explanatory only",
+     "provision_id": "9.10.9.16.(1)",
+     "objective": "OP1",
+     "brackets": [
+      "[F03-OP1.2]"
+     ],
+     "notes": [],
+     "intents": [
+      "To limit the probability that fire will spread from one suite or room to another suite or room, which could lead to damage to the building."
+     ],
+     "pdf_page": 1371,
+     "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499"
+    }
+   ],
+   "intent_comparison": "match",
+   "differs": false,
+   "only_in_intent": [],
+   "only_in_ae": [],
+   "related_root": null,
+   "related_root_method": null,
+   "explainer": null,
+   "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499"
+  }
+ ],
+ "evidence": [],
+ "gaps": [],
+ "relevance": null,
+ "identify": null,
+ "intake": null,
+ "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499",
+ "meta": {
+  "notice": "Batatis automatically removes the names, contact details and addresses it recognizes before any text is sent to an AI provider. In live mode, the remaining text is processed in the United States by third-party AI service providers under their API data-use terms; Batatis deletes its own stored case data and files after 7 days or on request."
+ }
+}

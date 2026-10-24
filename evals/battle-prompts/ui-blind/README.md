@@ -11,7 +11,7 @@ Do **not** mention: Linear, dark mode, Inter, spacing tokens, charcoal, pills, s
 1. Read `AGENTS.md`, `batatis-ui-linear`, `batatis-ui-opus`, domain skills as needed.
 2. Implement a real surface under `evals/ui-artifacts/` (HTML or React sandbox) using `docs/design/tokens.css`.
 3. Screenshot → store media `media/ui-battle/` (Project Context) and optionally copy into review notes.
-4. Review against `docs/design/linear-reference/` + pass bar below (Opus 5.5 preferred for formal UI seal).
+4. Use the current calm design contract and pass bar below; the historical Linear references supply interaction examples. Review on the model profile in `.cursor/rules/pstack-models.mdc`.
 
 ## Pass bar (UI-blind)
 
@@ -21,10 +21,10 @@ Do **not** mention: Linear, dark mode, Inter, spacing tokens, charcoal, pills, s
 | 2 | All prompt capabilities present | Feature dropped “for simplicity” |
 | 3 | Bug-free bar | Dead buttons, silent fills, code blended into AI prose, missing empty/error |
 | 4 | Domain safety | Completeness only; no “complies/safe”; alt-path process fields present |
-| 5 | Opus P0 chrome | Neutral grey primary CTA; active nav faint fill only; shared gaps; gating; no demo leakage; styled controls; nowrap |
+| 5 | UI P0 chrome | Neutral grey primary CTA; active nav faint fill only; shared gaps; gating; no demo leakage; styled controls; nowrap |
 | 6 | Interaction smoke | `node evals/ui-artifacts/smoke.mjs` PASS |
 
-**Formal seal = Opus 5.5.** Composer reviews are provisional. Overall: each surface **PASS/FAIL**. Round fails if any FAIL.
+**Formal review uses a fresh independent reviewer** on the final revision under `.cursor/rules/pstack-models.mdc` (GPT-6.1-Sol at max). Overall: each surface **PASS/FAIL**. Round fails if any FAIL.
 
 ## Suite
 

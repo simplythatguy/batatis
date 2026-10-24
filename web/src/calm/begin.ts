@@ -33,17 +33,23 @@ export function useBegin() {
       beginEmpty(r);
       dispatch({ type: "setDescription", text: s.draft });
       if (files.length) dispatch({ type: "addFiles", files: files.map((f) => ({ id: f.id, name: f.file.name })) });
-      resetSession({ held: files, checkAfterStart: true });
+      resetSession({ held: files, readAfterStart: true });
       location.hash = "#/questions";
       return true;
     },
   };
 }
 
-/** The account's row for the open case (status, authority, reviewer), or null without one. */
-export function useCurrentApplication(): { app: ApplicationSummary | null; locked: boolean } {
-  const { engineId } = useCase();
+/**
+ * The account's row for the open case (status, authority, reviewer), or null without one.
+ * `readOnly`: the saved application itself is sent or closed, and screens show it as such.
+ * `locked`: nothing may be edited now. Also true while a dispatched submission is on its way: the
+ * application is not read-only yet, so its editing controls stay mounted and paused (App's edit lock).
+ */
+export function useCurrentApplication(): { app: ApplicationSummary | null; locked: boolean; readOnly: boolean } {
+  const { engineId, applicationStatus, submissionDispatched } = useCase();
   const account = useAccount();
   const app = (engineId && account.applications?.find((a) => a.id === engineId)) || null;
-  return { app, locked: readOnly(app?.status) };
+  const saved = readOnly(app?.status ?? applicationStatus);
+  return { app, locked: submissionDispatched || saved, readOnly: saved };
 }

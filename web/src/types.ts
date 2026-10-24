@@ -4,7 +4,7 @@
  * the tool; it points to a source, computes from sources, or proposes for the user to confirm.
  */
 
-import type { FactInput, SourceInput } from "./api/types.gen";
+import type { FactInput, IdentifyResult, IntakeRecord, SourceInput } from "./api/types.gen";
 
 /** Fact, Source and their enums are the engine's (engine/models.py via src/api/types.gen.ts).
  *  exact = code database or form; pointed = a span from the user's words or files;
@@ -30,6 +30,21 @@ export interface CaseFile {
   sha256?: string;
   /** True only when the engine could not be reached. A missing route is not this. */
   unreachable?: boolean;
+  /** The engine's file id once uploaded; intake reads the file by this id. */
+  engineId?: string;
+}
+
+/**
+ * The latest intake run (docs/api/intake.md): the text it read, the record (pointers, file
+ * reports, conflicts, plan) and the ids of the facts this run wrote. Derived from the engine;
+ * the facts themselves live in `Case.facts` like every other value.
+ */
+export interface IntakeState {
+  text: string;
+  record: IntakeRecord;
+  factIds: string[];
+  /** This run's facts as read (browser field names), so a confirmed card still shows what it confirmed. */
+  facts: Fact[];
 }
 
 export interface Question {
@@ -75,8 +90,12 @@ export interface Candidate {
   /** Asked when the applicant answers "Not sure". */
   clarifyingQuestion: string;
   answer: CandidateAnswer | null;
+  /** The answer is shown but the engine has not stored it yet; the card stays open so answering sends it again. */
+  pending?: boolean;
   /** Set when search or identify suggested the provision and the applicant has not confirmed it. */
   suggestion?: "search" | "identify";
+  /** For code identification: committed under the calibrated Part 9 rule, or one of the quoted choices. */
+  rank?: "committed" | "choice";
   /**
    * False when the card is a question drawn from the applicant's words
    * and no article has been ranked for it yet.
@@ -126,8 +145,8 @@ export type ProcessFieldId =
   | "maintenance"
   | "qualifications";
 
-/** Empty until the applicant picks. PUT /cases/{id}/jurisdiction records the choice. */
-export type AuthorityId = "" | "calgary" | "edmonton";
+/** Empty until chosen. Saved API authorities remain portable beyond the current picker options. */
+export type AuthorityId = string;
 
 export type GapSeverity = "blocking" | "warning";
 
@@ -139,10 +158,12 @@ export interface Gap {
   href: string;
   /** Engine or local field, used to drop a second copy of the same item. */
   field?: string;
+  /** False only when the current completeness check explicitly permits an officer handoff. */
+  submissionBlocking?: boolean;
 }
 
 /**
- * One staged listing write for POST /cases/{id}/evidence. Text only, never a file reference.
+ * One staged write for POST /cases/{id}/evidence, optionally binding a verified owned upload.
  * It stays staged until the engine acknowledges this exact `rev`; only then is it shown as saved.
  * `responsible`/`date`: a string is sent, null withdraws a saved value, undefined is omitted.
  */
@@ -158,6 +179,7 @@ export interface ListedEvidence {
   description: string;
   responsible?: string | null;
   date?: string | null;
+  fileRef?: string | null;
 }
 
 /** One document editor: three short steps (name, type, optional details). */
@@ -170,6 +192,8 @@ export interface EvidenceDraft {
   step?: number;
   /** Slot being edited; absent for a new document. */
   editing?: string;
+  /** Undefined retains a saved binding; null explicitly removes it. */
+  fileRef?: string | null;
 }
 
 export type ApplicantType = "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner";
@@ -177,6 +201,11 @@ export type ApplicantType = "manufacturer" | "contractor" | "homebuilder" | "bui
 export interface Case {
   id: string;
   title: string;
+  /**
+   * The title is a saved name (from the engine) or the applicant's own; the description never replaces
+   * it. Unset on a new draft, whose placeholder title is never sent as a name.
+   */
+  titleKept?: boolean;
   applicantType: ApplicantType;
   /** Test-fixture provenance only. Product visits never load sample cases. */
   exampleId?: string;
@@ -209,4 +238,8 @@ export interface Case {
   evidenceIssues?: Record<string, string>;
   /** Unfinished editors for this visit only; never sent as facts. Reset clears them. */
   evidenceDrafts?: Record<string, EvidenceDraft>;
+  /** What intake read, and its plan. Absent until the description has been read. */
+  intake?: IntakeState;
+  /** The latest code identification (committed articles, quoted choices, labels). */
+  identify?: IdentifyResult;
 }

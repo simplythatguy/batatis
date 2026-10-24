@@ -1,134 +1,95 @@
-import { useEffect, useState } from "react";
-import { accounts, type ApplicationSummary, type Message, type MessageItem } from "../../api/accounts";
-import { EngineError } from "../../api/client";
-import { factLabel } from "../../model";
-import { hrefFor, useCase } from "../../store";
-import type { Case, Gap } from "../../types";
-import { initials, patchApplication } from "../account";
+import type { ApplicationSummary } from "../../api/accounts";
+import type { Decision } from "../../api/types.gen";
+import { useCase } from "../../store";
+import { initials } from "../account";
 import { authorityName } from "../applications";
 import { openAssistant } from "../assistant/assistant";
-import { gapKey } from "../deck";
+import { noticeLine } from "../comments/thread";
 import { Icon24 } from "../icons";
-import { calmHref } from "../routes";
+import { requestedItemRow, requestedMessageBody } from "../requestedItems";
+import "../comments/comments.css";
 
-const when = (iso: string) => {
+export const messageWhen = (iso: string) => {
   const d = new Date(iso);
   return Number.isNaN(d.getTime()) ? "" : d.toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 };
 
-/** A ticked item from the officer, as a row that opens the question that fixes it. */
-export function itemLink(c: Case, gaps: Gap[], item: MessageItem): { label: string; href: string } {
-  const gap = item.gap_id ? gaps.find((g) => g.id === item.gap_id) : item.field ? gaps.find((g) => g.field === item.field) : undefined;
-  const label = item.note?.trim() || gap?.label || (item.field ? factLabel(item.field) : "Item to fix");
-  if (gap) {
-    const key = gapKey(c, gap);
-    return { label, href: key ? `#/questions?focus=${encodeURIComponent(key)}` : calmHref(gap.href) };
-  }
-  return { label, href: item.field ? calmHref(hrefFor(item.field)) : "#/review" };
+/**
+ * One line at the top of the workflow when the officer has written: what happened, how many are
+ * new, and a link to the comments page, where the full reasons and items live. Showing this line
+ * reads nothing and marks nothing read; only the comments page does, once it shows them.
+ */
+export function NoticeLine({ app }: { app: ApplicationSummary }) {
+  const line = noticeLine(app.status);
+  if (!line) return null;
+  const n = Math.max(0, app.unread_messages);
+  const who = app.reviewer?.name?.trim();
+  const label = `${line}${who ? ` by ${who}` : ""}${n ? `, ${n} new ${n === 1 ? "comment" : "comments"}` : ""}. Open comments`;
+  return (
+    <a className={`cf-notice-line${app.status === "refused" ? " is-closed" : ""}`} href="#/comments" aria-label={label}>
+      <Icon24 name="msg" size={16} />
+      <span className="cf-notice-text">{line}</span>
+      {n > 0 && <span className="cf-notice-count" aria-hidden="true">{n}</span>}
+      <span className="cf-notice-open" aria-hidden="true">Comments<Icon24 name="chevRight" size={14} /></span>
+    </a>
+  );
+}
+
+/** The officer returned or refused the application: the one-line notice. */
+export function ReturnedBanner({ app }: { app: ApplicationSummary }) {
+  return <NoticeLine app={app} />;
 }
 
 /**
- * The officer returned the application: who, their message as text, the ticked items as rows
- * that open their questions, then Fix, Reply (posts to the case thread) and Explain (assistant).
+ * The current return decision in full, on the comments page. Each requested item shows its live
+ * state from the shared gaps and acknowledged facts; a factual edit never claims the officer's
+ * confirmation. Follow-up notices stay in the history below it.
  */
-export function ReturnedBanner({ app }: { app: ApplicationSummary }) {
-  const { c, gaps } = useCase();
-  const [messages, setMessages] = useState<Message[] | null>(null);
-  const [error, setError] = useState("");
-  const [replying, setReplying] = useState(false);
-  const [reply, setReply] = useState("");
-  const [sending, setSending] = useState(false);
-  const [sent, setSent] = useState("");
-
-  useEffect(() => {
-    let live = true;
-    setMessages(null);
-    setError("");
-    accounts
-      .messages(app.id)
-      .then((m) => {
-        if (!live) return;
-        setMessages(m);
-        if (m.some((x) => !x.read_by_me)) {
-          accounts.markRead(app.id).then(() => patchApplication(app.id, { unread_messages: 0 })).catch(() => {});
-        }
-      })
-      .catch((e: unknown) => { if (live) setError(e instanceof EngineError ? e.detail : "The officer’s message did not load."); });
-    return () => { live = false; };
-  }, [app.id]);
-
-  const fromOfficer = (messages ?? []).filter((m) => m.author.role === "reviewer" && m.kind !== "status");
-  const latest = fromOfficer[fromOfficer.length - 1];
-  const rows = (latest?.items ?? []).map((it) => itemLink(c, gaps, it));
-  const mine = (messages ?? []).filter((m) => latest && m.author.role !== "reviewer" && m.kind === "message" && m.created_at > latest.created_at);
-  const who = latest?.author.name || app.reviewer?.name || "The officer";
+export function ReturnDecision({ app, decision, messageId }: { app: ApplicationSummary; decision: Decision; messageId?: string }) {
+  const { c, gaps, saveStatus, gapsSource, checkStatus } = useCase();
+  const checked = gapsSource === "engine" && (checkStatus === "ready" || checkStatus === "needs_answers");
+  const rows = decision.items.map((it) => requestedItemRow(c, gaps, it, saveStatus === "saved", checked));
+  const next = rows.find((row) => row.state === "open");
+  const pending = rows.filter((row) => row.state === "pending").length;
+  const body = requestedMessageBody(decision.message, decision.items);
+  const who = decision.by_name || app.reviewer?.name || "The officer";
   const where = authorityName(app.authority);
-
-  async function send() {
-    const body = reply.trim();
-    if (!body || sending) return;
-    setSending(true);
-    setSent("");
-    try {
-      const m = await accounts.postMessage(app.id, body);
-      setMessages((list) => [...(list ?? []), m]);
-      setReply("");
-      setReplying(false);
-      setSent("Reply sent to the officer.");
-    } catch (e) {
-      setSent(e instanceof EngineError ? e.detail : "The reply was not sent. Your text is still here.");
-    } finally {
-      setSending(false);
-    }
-  }
 
   return (
     <section className="cf-returned" aria-labelledby="cf-returned-who">
       <span className="cf-returned-av" aria-hidden="true">{initials(who) || "?"}</span>
       <div className="cf-returned-body">
         <h2 className="cf-returned-who" id="cf-returned-who">
-          {who} <span>· {where ? `Safety Codes Officer, ${where} · ` : ""}returned this{latest ? ` ${when(latest.created_at)}` : ""}</span>
+          {who} <span>· {where ? `Safety Codes Officer, ${where} · ` : ""}returned this <time dateTime={decision.at}>{messageWhen(decision.at)}</time></span>
         </h2>
-        {messages === null && !error && <p className="cf-faint" role="status">Loading the officer’s message…</p>}
-        {error && <p className="cf-faint" role="status">{error}</p>}
-        {latest && <p className="cf-returned-msg">{latest.body}</p>}
-        {messages && !latest && <p className="cf-returned-msg cf-muted">Returned for administrative information. Open the review to see what is missing.</p>}
+        {body && <p className="cf-returned-msg">{body}</p>}
         {rows.length > 0 && (
           <ul className="cf-returned-items">
-            {rows.map((r) => (
-              <li key={r.label + r.href}>
-                <a href={r.href}><span className="cf-dot is-blocking" aria-hidden="true" />{r.label}<Icon24 name="right" size={14} /></a>
+            {rows.map((r, index) => (
+              <li key={`${decision.items[index].gap_id ?? ""}:${decision.items[index].field ?? ""}:${index}`}>
+                <a href={r.href}>
+                  <span className={`cf-dot is-${r.tone}`} aria-hidden="true" />
+                  <span className="cf-returned-item-text"><span>{r.label}</span><span className="cf-returned-item-state">{r.status}</span></span>
+                  <Icon24 name="right" size={14} />
+                </a>
               </li>
             ))}
           </ul>
         )}
-        {mine.length > 0 && <p className="cf-faint cf-small">You replied {mine.length === 1 ? "once" : `${mine.length} times`}. The officer sees it with the application.</p>}
+        <p className="cf-faint cf-small cf-returned-next">
+          {pending > 0 ? `${pending} ${pending === 1 ? "item awaits" : "items await"} officer confirmation. ` : ""}
+          {rows.length ? "Review your corrections, then choose Resubmit on Application. Only the officer can confirm the requested items." : "Follow the officer’s note. Review your corrections, then choose Resubmit on Application."}
+        </p>
         <div className="cf-returned-acts">
-          {rows.length > 0 && <a className="cf-btn is-primary is-sm" href={rows[0].href}>Fix {rows.length} {rows.length === 1 ? "item" : "items"}</a>}
-          {!rows.length && <a className="cf-btn is-primary is-sm" href="#/review">See what’s missing</a>}
-          <button type="button" className="cf-btn is-sm" aria-expanded={replying} onClick={() => setReplying((v) => !v)}><Icon24 name="msg" size={15} />Reply</button>
-          {latest && (
-            <button
-              type="button"
-              className="cf-btn is-ghost is-sm"
-              onClick={() => openAssistant({ screen: "message", focus: { kind: "message", id: latest.id }, label: "the officer’s message", suggestions: ["What do I need to change?", "Explain this message"] }, "Explain this message in plain words. What do I need to change?")}
-            >
-              <Icon24 name="spark" size={15} />Explain this message
-            </button>
-          )}
+          <a className="cf-btn is-primary is-sm" href={next?.href ?? "#/application"}>{next ? "Address next item" : "Review corrections"}</a>
+          <button
+            type="button"
+            className="cf-btn is-ghost is-sm"
+            onClick={() => openAssistant({ screen: "message", focus: messageId ? { kind: "message", id: messageId } : undefined, label: "the return decision", suggestions: ["What do I need to change?", "Explain this message"] }, "Explain the officer’s return decision in plain words. What do I need to change?")}
+          >
+            <Icon24 name="spark" size={15} />Explain this message
+          </button>
         </div>
-        {replying && (
-          <form className="cf-composer-box cf-returned-reply" onSubmit={(e) => { e.preventDefault(); void send(); }}>
-            <label className="cf-sr" htmlFor="cf-reply">Reply to {who}</label>
-            <textarea id="cf-reply" rows={3} maxLength={4000} value={reply} autoFocus onChange={(e) => setReply(e.target.value)} placeholder={`Reply to ${who}…`}
-              onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); void send(); } if (e.key === "Escape") setReplying(false); }} />
-            <div className="cf-composer-box-foot">
-              <span className="cf-faint cf-small">Plain text. The officer sees it with your application.</span>
-              <button type="submit" className="cf-btn is-sm" disabled={!reply.trim() || sending}>{sending ? "Sending…" : "Send"}</button>
-            </div>
-          </form>
-        )}
-        {sent && <p className="cf-faint cf-small" role="status">{sent}</p>}
       </div>
     </section>
   );

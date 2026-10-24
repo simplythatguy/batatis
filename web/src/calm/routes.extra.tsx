@@ -7,12 +7,14 @@
  * `#/review` is the reviewer queue only for reviewers; applicants keep their own Review screen.
  */
 import type { ReactNode } from "react";
+import { AccuracyPage } from "../accuracy/AccuracyPage";
 import type { Route } from "../router";
 import { getAccountState } from "./account";
 import { AccountButton } from "./auth/AccountButton";
 import { AuthPage } from "./auth/AuthPage";
 import { Onboarding } from "./auth/Onboarding";
 import { NotificationsBell, NotificationsLink, NotificationsPage } from "./notifications/NotificationsBell";
+import { PackagePage } from "./reviewer/PackagePage";
 import { ReviewDetail } from "./reviewer/ReviewDetail";
 import { ReviewQueue } from "./reviewer/ReviewQueue";
 import { Settings } from "./settings/Settings";
@@ -24,9 +26,10 @@ export { gateRedirect, gateStatus, homeFor, type GateStatus } from "./auth/gate"
 
 const STANDALONE = new Set(["/signin", "/signup", "/onboarding"]);
 
-/** Sign-in, sign-up and onboarding fill the window; render them without the shell. */
+/** Sign-in, sign-up and onboarding fill the window; render them without the shell. So does the
+ * public accuracy report for a visitor who is not signed in. */
 export function isStandaloneRoute(route: Route): boolean {
-  return STANDALONE.has(route.path);
+  return STANDALONE.has(route.path) || (route.path === "/accuracy" && getAccountState().phase === "signed-out");
 }
 
 function reviewId(path: string): string | null {
@@ -59,12 +62,20 @@ export function extraRoutes(route: Route): ReactNode | null {
       return <Onboarding />;
     case "/settings":
       return <Settings phoneTools={phoneTools} />;
+    case "/accuracy":
+      return getAccountState().phase === "signed-out"
+        ? <AccuracyPage standalone right={<a className="cf-btn is-sm" href="#/signin">Sign in</a>} />
+        : <AccuracyPage phoneTools={phoneTools} />;
     case "/notifications":
       return <NotificationsPage phoneTools={phoneTools} />;
     case "/review":
       return getAccountState().user?.role === "reviewer" ? <ReviewQueue phoneTools={phoneTools} /> : null;
   }
-  const id = getAccountState().user?.role === "reviewer" ? reviewId(path) : null;
+  const reviewer = getAccountState().user?.role === "reviewer";
+  // Third-party packages (no Batatis case): #/review/package and #/review/package/<pkg_id>.
+  const pkg = reviewer ? /^\/review\/package(?:\/([^/]+))?$/.exec(path) : null;
+  if (pkg) return <PackagePage key={pkg[1] ?? "new"} packageId={pkg[1] ? decodeURIComponent(pkg[1]) : null} phoneTools={phoneTools} />;
+  const id = reviewer ? reviewId(path) : null;
   if (id) return <ReviewDetail key={id} caseId={id} phoneTools={phoneTools} />;
   return null;
 }

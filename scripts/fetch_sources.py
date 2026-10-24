@@ -176,13 +176,15 @@ def extract_jsonl(pdf: Path, dest: Path, expect_sha: str | None) -> None:
 def main(argv=None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
     form_only = '--scc-form' in argv
+    codes_only = '--codes-only' in argv
     try:
         if not form_only:
             for item in load_sources():
                 pdf = acquire(item, root=ROOT, log=lambda msg: print(msg, file=sys.stderr))
                 if item.get('jsonl'):
                     extract_jsonl(pdf, ROOT / item['jsonl'], item.get('jsonl_sha256'))
-        acquire(SCC_FORM, root=ROOT, fail=SCC_FAIL, log=lambda msg: print(msg, file=sys.stderr))
+        if not codes_only:
+            acquire(SCC_FORM, root=ROOT, fail=SCC_FAIL, log=lambda msg: print(msg, file=sys.stderr))
     except DownloadError as exc:
         print(str(exc), file=sys.stderr)
         return 1

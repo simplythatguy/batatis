@@ -5,35 +5,56 @@
 */
 
 :root {
-  /* v2 high-contrast layer (docs/design/calm-flow-prototype-v2.html): black canvas, white ink,
-     hairlines; no grey-filled cards. Only overlays use the raised near-black surface. */
-  --cf-bg: #000;
-  --cf-rail: #050506;
-  --cf-raise: #0c0c0e;
-  --cf-text: #fafafa;
-  --cf-text-2: #b4b4bb;
-  --cf-text-3: #82828b;
-  --cf-text-4: #4a4a52;
+  /* Light layer (user decision 2026-10-22): soft grey canvas, white surfaces, dark ink, hairlines.
+     Colour carries meaning: the accent for the brand, one hue per section, status dots. */
+  --cf-bg: #f5f6f8;
+  --cf-rail: #eceef2;
+  --cf-raise: #ffffff;
+  --cf-surface: #ffffff;
+  --cf-text: #14161b;
+  --cf-text-2: #4a505c;
+  --cf-text-3: #6b7280;
+  --cf-text-4: #a3a8b3;
   /* One line set for every divider, chip, card and button (soft), a stronger one for state
-     (pressed, hover borders), and the form-control boundary (3:1 on black) only on inputs. */
-  --cf-line: rgba(255, 255, 255, 0.07);
-  --cf-line-2: rgba(255, 255, 255, 0.13);
-  --cf-line-ctl: rgba(255, 255, 255, 0.36);
-  --cf-hover: rgba(255, 255, 255, 0.05);
-  --cf-selected: rgba(255, 255, 255, 0.08);
-  --cf-glass: transparent;
+     (pressed, hover borders), and the form-control boundary (3:1 on white) only on inputs. */
+  --cf-line: rgba(17, 24, 39, 0.08);
+  --cf-line-2: rgba(17, 24, 39, 0.14);
+  --cf-line-ctl: rgba(17, 24, 39, 0.42);
+  --cf-hover: rgba(17, 24, 39, 0.04);
+  --cf-selected: rgba(17, 24, 39, 0.07);
+  --cf-glass: #ffffff;
   --cf-glass-hi: transparent;
-  --cf-inset: transparent;
-  --cf-accent: #ff6a3d;
-  --cf-accent-ink: #ff9a76;
-  --cf-blocking: #ff5f5f;
-  --cf-warning: #ffc53d;
-  --cf-done: #3ddc84;
-  --cf-pending: #6b6b73;
-  --cf-primary-bg: #fafafa;
-  --cf-primary-hover: #e4e4e7;
-  --cf-primary-text: #000;
-  --cf-focus: #b4b4bb;
+  --cf-inset: #ffffff;
+  --cf-shadow: 0 1px 2px rgba(17, 24, 39, 0.05), 0 4px 16px -6px rgba(17, 24, 39, 0.08);
+  --cf-accent: #f25a2a;
+  --cf-accent-ink: #c2410c;
+  /* Readable text in a status colour on the light page (each at least 4.5:1 on white and on its tint). */
+  --cf-warning-ink: #8a5300;
+  --cf-blocking-ink: #b42318;
+  --cf-done-ink: #11713f;
+  --cf-blocking: #e5484d;
+  --cf-warning: #f0a20b;
+  --cf-done: #18a058;
+  --cf-pending: #9aa0ab;
+  /* Section hues: tell parts apart at a glance (tints for fills, solid for bars and icons). */
+  --cf-hue-blue: #3b82f6;
+  --cf-hue-blue-t: #e8f0fe;
+  --cf-hue-amber: #e8900c;
+  --cf-hue-amber-t: #fdf2e0;
+  --cf-hue-violet: #8b5cf6;
+  --cf-hue-violet-t: #f1ebfe;
+  --cf-hue-teal: #0f9f8f;
+  --cf-hue-teal-t: #e2f5f2;
+  --cf-hue-rose: #e0457b;
+  --cf-hue-rose-t: #fce8ef;
+  --cf-hue-green: #18a058;
+  --cf-hue-green-t: #e4f5ea;
+  --cf-hue-slate: #64748b;
+  --cf-hue-slate-t: #eef1f5;
+  --cf-primary-bg: #16181d;
+  --cf-primary-hover: #2b2f37;
+  --cf-primary-text: #ffffff;
+  --cf-focus: #6b7280;
   --cf-font: "Inter Variable", "Inter", ui-sans-serif, system-ui, sans-serif;
   --cf-mono: "Geist Mono Variable", ui-monospace, "SF Mono", monospace;
   --cf-ease: cubic-bezier(0.2, 0, 0, 1);
@@ -43,7 +64,21 @@
   --cf-sheet: #fff;
   --cf-sheet-text: #111;
   --cf-sheet-muted: #63636b;
+  color-scheme: light;
 }
+
+/* Hues identify, they do not decorate: the UI is monotone, and a hue marks the section or step you
+   are in, or tells crowded items apart. Solid (--hue) for bars and icons, a tint (--hue-t) for fills,
+   a darker shade (--hue-s, at least 5.6:1 on the page) for "you are here" and for text. */
+.is-blue { --hue: var(--cf-hue-blue); --hue-t: var(--cf-hue-blue-t); --hue-s: #1d4ed8; }
+.is-amber { --hue: var(--cf-hue-amber); --hue-t: var(--cf-hue-amber-t); --hue-s: #8a5300; }
+.is-violet { --hue: var(--cf-hue-violet); --hue-t: var(--cf-hue-violet-t); --hue-s: #6d28d9; }
+.is-teal { --hue: var(--cf-hue-teal); --hue-t: var(--cf-hue-teal-t); --hue-s: #0b6b60; }
+.is-rose { --hue: var(--cf-hue-rose); --hue-t: var(--cf-hue-rose-t); --hue-s: #b4235a; }
+.is-green { --hue: var(--cf-hue-green); --hue-t: var(--cf-hue-green-t); --hue-s: #11713f; }
+.is-slate { --hue: var(--cf-hue-slate); --hue-t: var(--cf-hue-slate-t); --hue-s: #3f4b5e; }
+.is-accent { --hue: var(--cf-accent); --hue-t: #fdeae3; }
+
 
 html,
 body {
@@ -159,7 +194,7 @@ body {
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: #1d1d21;
+  background: #e9ecf1;
   border: 1px solid var(--cf-line-2);
   color: var(--cf-text);
   font: 550 11.5px/1 var(--cf-font);
@@ -188,7 +223,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 10px 0 18px;
+  padding: 0 12px 0 22px;
 }
 
 .cf-list-head h2 {
@@ -208,11 +243,11 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  height: 36px;
-  margin: 0 12px 10px;
-  padding: 0 10px;
+  height: 38px;
+  margin: 4px 14px 14px;
+  padding: 0 12px;
   border: 1px solid var(--cf-line);
-  border-radius: 10px;
+  border-radius: 12px;
   color: var(--cf-text-3);
   transition-property: border-color;
   transition-duration: 150ms;
@@ -236,7 +271,12 @@ body {
 }
 
 .cf-list-search input::placeholder {
-  color: var(--cf-text-3);
+  color: #5f6673;
+}
+
+/* The ⌘K hint: 4.5:1 on the page, like the row lines (the global --cf-text-3 gives 4.47). */
+.cf-list-search .cf-kbd.is-dark {
+  color: #5f6673;
 }
 
 .cf-list-search input::-webkit-search-cancel-button {
@@ -252,45 +292,37 @@ body {
 }
 
 .cf-applist-note {
-  margin: 4px 18px 10px;
+  margin: 4px 30px 10px;
   font-size: 12.5px;
   line-height: 1.5;
   color: var(--cf-text-3);
 }
 
 .cf-applist-note.is-error {
-  color: #ffb4b4;
+  color: var(--cf-blocking-ink);
 }
 
 .cf-list-rows {
   list-style: none;
   margin: 0;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .cf-list-row {
   position: relative;
-  margin: 0 8px;
-  border-radius: 10px;
+  margin: 0 14px;
+  border-radius: 12px;
   transition-property: background-color;
   transition-duration: 150ms;
   transition-timing-function: ease-out;
 }
 
+/* Selected = a soft fill, nothing else (no coloured edge). */
 .cf-list-row.is-selected {
   background: var(--cf-selected);
-  border-radius: 0 10px 10px 0;
-}
-
-.cf-list-row.is-selected::before {
-  content: "";
-  position: absolute;
-  left: -8px;
-  top: 6px;
-  bottom: 6px;
-  width: 3px;
-  border-radius: 3px;
-  background: var(--cf-accent);
 }
 
 @media (hover: hover) {
@@ -306,7 +338,7 @@ body {
 .cf-list-hit {
   display: block;
   width: 100%;
-  padding: 10px 12px 10px 14px;
+  padding: 14px 16px;
   border: 0;
   background: none;
   color: inherit;
@@ -329,39 +361,330 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 4px;
+  min-height: 17px;
+  margin-top: 6px;
   font-size: 12.5px;
-  color: var(--cf-text-3);
+  /* A step darker than --cf-text-3: 4.5:1 on the selected and hovered fills too. */
+  color: #5f6673;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+/* Unread on a returned or refused application. Darker than the accent ink: 4.5:1 on the selected fill. */
 .cf-list-line.is-attention {
-  color: var(--cf-accent-ink);
+  color: #a8380a;
 }
 
+/* Unread officer messages: a message icon and the count, nothing else, at the row's right edge. */
+.cf-list-unread {
+  margin-left: auto;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 560;
+  font-variant-numeric: tabular-nums;
+}
+
+/* A pinned row: a small pin before the name. */
+.cf-list-pin {
+  display: inline-flex;
+  vertical-align: -1px;
+  margin-right: 6px;
+  color: var(--cf-text-3);
+}
+
+/* Room for the row's ⋯ so the name never runs under it. */
+.cf-list-row:has(.cf-list-actions) .cf-list-title {
+  padding-right: 26px;
+}
+
+/* On the title row (32px, inside the title's reserved space), clear of the unread count below. */
 .cf-list-actions {
   position: absolute;
   right: 8px;
-  top: 8px;
+  top: 6px;
   display: flex;
-  gap: 2px;
   opacity: 0;
   transition-property: opacity;
   transition-duration: 150ms;
   transition-timing-function: ease-out;
 }
 
+.cf-list-row:focus-within .cf-list-actions,
+.cf-list-row:has([aria-expanded="true"]) .cf-list-actions {
+  opacity: 1;
+}
+
+/* Touch screens cannot hover: the row's ⋯ stays visible. */
+@media (hover: none) {
+  .cf-list-actions {
+    opacity: 1;
+  }
+}
+
+/* The ⋯: just the glyph, no fill or border at rest, on hover or pressed; ink on hover and open. */
+.cf-list-more {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--cf-text-3);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition-property: color;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+
+.cf-list-more[aria-expanded="true"] {
+  color: var(--cf-text);
+}
+
+@media (hover: hover) {
+  .cf-list-more:hover {
+    color: var(--cf-text);
+  }
+}
+
+.cf-list-more:focus-visible {
+  outline: 2px solid var(--cf-focus);
+  outline-offset: -2px;
+}
+
+/* The archived shelf: one quiet line at the foot of the list, its rows under it when open. */
+.cf-list-shelf {
+  margin-top: 12px;
+}
+
+.cf-list-shelf-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: calc(100% - 28px);
+  height: 36px;
+  margin: 0 14px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--cf-text-2);
+  font: 500 13px var(--cf-font);
+  text-align: left;
+  cursor: pointer;
+  transition-property: background-color, color;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+
+@media (hover: hover) {
+  .cf-list-shelf-btn:hover {
+    background: var(--cf-hover);
+    color: var(--cf-text);
+  }
+}
+
+.cf-list-shelf-btn:focus-visible {
+  outline: 2px solid var(--cf-focus);
+  outline-offset: -2px;
+}
+
+.cf-list-shelf-count {
+  font-variant-numeric: tabular-nums;
+  color: var(--cf-text-2);
+}
+
+.cf-list-shelf-chev {
+  display: inline-flex;
+  margin-left: auto;
+  color: var(--cf-text-3);
+}
+
+.cf-list-shelf-btn[aria-expanded="true"] .cf-list-shelf-chev {
+  rotate: 90deg;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cf-list-shelf-chev {
+    transition-property: rotate;
+    transition-duration: 150ms;
+    transition-timing-function: ease-out;
+  }
+}
+
+.cf-list-rows.is-pinned {
+  margin-bottom: 10px;
+}
+
+/* Row menu (⋯, right-click, Shift+F10): inside the sidebar, never wider than it, scrolls when tall. */
+.cf-list {
+  position: relative;
+}
+
+.cf-row-menu {
+  position: absolute;
+  z-index: 30;
+  width: 224px;
+  max-width: calc(100% - 16px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 6px;
+  border-radius: 14px;
+  background: var(--cf-raise);
+  border: 1px solid var(--cf-line-2);
+  box-shadow: 0 24px 60px -24px rgba(17, 24, 39, 0.16);
+}
+
+.cf-row-menu button {
+  width: 100%;
+  min-height: 38px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 9px;
+  background: none;
+  color: var(--cf-text-2);
+  font: 500 14px var(--cf-font);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  transition-property: background-color, color;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+
+.cf-row-menu button > svg {
+  flex: none;
+  color: var(--cf-text-3);
+}
+
+.cf-row-menu-label {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cf-row-menu-hint {
+  flex: none;
+  font-size: 12px;
+  color: var(--cf-text-3);
+}
+
+.cf-row-menu button[aria-disabled="true"] {
+  cursor: not-allowed;
+  color: var(--cf-text-3);
+}
+
+.cf-row-menu button[aria-disabled="true"] > svg {
+  color: var(--cf-text-4);
+}
+
+.cf-row-menu button.is-destructive:not([aria-disabled="true"]),
+.cf-row-menu button.is-destructive:not([aria-disabled="true"]) > svg {
+  color: var(--cf-blocking-ink);
+}
+
+.cf-row-menu button:focus-visible,
+.cf-row-menu button:focus {
+  outline: none;
+  background: var(--cf-selected);
+}
+
+.cf-row-menu button:not([aria-disabled="true"]):focus {
+  color: var(--cf-text);
+}
+
+.cf-row-menu button.is-destructive:not([aria-disabled="true"]):focus {
+  color: var(--cf-blocking-ink);
+}
+
+.cf-row-menu hr {
+  border: 0;
+  border-top: 1px solid var(--cf-line);
+  margin: 6px 4px;
+}
+
+@media (pointer: coarse) {
+  .cf-row-menu button {
+    min-height: 44px;
+  }
+}
+
+/* Row preview: beside the sidebar, the facts as icon + short line. */
+.cf-row-preview {
+  position: fixed;
+  z-index: 60;
+  width: 264px;
+  max-height: calc(100vh - 16px);
+  overflow: hidden;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--cf-raise);
+  border: 1px solid var(--cf-line-2);
+  box-shadow: 0 24px 60px -24px rgba(17, 24, 39, 0.18);
+  color: var(--cf-text-2);
+  font-size: 12.5px;
+  pointer-events: auto;
+}
+
+.cf-row-preview-title {
+  margin: 0 0 10px;
+  color: var(--cf-text);
+  font-size: 13.5px;
+  font-weight: 560;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+.cf-row-preview ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 7px;
+}
+
+.cf-row-preview li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.cf-row-preview li > svg {
+  flex: none;
+  color: var(--cf-text-3);
+}
+
+.cf-row-preview li > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .cf-list-group {
-  padding: 14px 18px 6px;
+  padding: 18px 30px 8px;
   font: 500 12px var(--cf-mono);
   color: var(--cf-text-3);
 }
 
 .cf-list-rows.is-settled .cf-list-hit {
-  padding-top: 8px;
-  padding-bottom: 8px;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .cf-list-rows.is-settled .cf-list-title {
@@ -372,6 +695,10 @@ body {
 
 .cf-list-rows.is-settled .cf-list-line {
   display: none;
+}
+
+.cf-list-rows.is-settled [data-status="refused"] .cf-list-line {
+  display: flex;
 }
 
 /* Work area */
@@ -412,19 +739,96 @@ body {
   font-weight: 550;
 }
 
-.cf-head-name {
+/* The application name, renamed in place (double-click or F2). Editing keeps the same type and
+   place and adds only a caret: no box, border, shadow or selection. Kept short on screen. */
+.cf-title {
+  display: block;
+  min-width: 0;
+  max-width: 34ch;
+  padding: 3px 6px;
+  margin-left: -6px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: text;
+}
+
+.cf-title:focus-visible {
+  outline: 2px solid var(--cf-focus);
+  outline-offset: 0;
+}
+
+.cf-title.is-saving {
+  color: var(--cf-text-3);
+}
+
+.cf-title-text {
+  position: relative;
+  display: block;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.cf-head-meta {
+.cf-title-measure {
+  visibility: hidden;
+}
+
+.cf-title .cf-title-input,
+.cf-title.is-editing .cf-title-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  appearance: none;
+  border: 0;
+  border-radius: 0;
+  outline: 0;
+  box-shadow: none;
+  background: transparent;
+  color: inherit;
+  caret-color: currentColor;
+  font: inherit;
+  letter-spacing: inherit;
+}
+
+.cf-title-error {
   flex: none;
-  color: var(--cf-text-3);
-  font-weight: 400;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  /* Text ink, not the dot colour: 12.5px needs 4.5:1 on the page. */
+  color: var(--cf-blocking-ink);
+  font-size: 12.5px;
+  font-weight: 450;
+  white-space: nowrap;
+}
+
+.cf-title-error .cf-link-btn {
+  color: var(--cf-text-2);
+}
+
+/* The sidebar's rename and delete dialogs: error text in ink red (4.5:1 on white), not the dot colour. */
+.cf-rename .ac-error,
+.cf-delete .ac-error {
+  color: var(--cf-blocking-ink);
+}
+
+.cf-rename-input {
+  width: 100%;
+  margin-top: 14px;
 }
 
 .cf-head-right {
+  /* Always the last column, also when there are no stage rings between (the library under None). */
+  grid-column: -2;
   justify-self: end;
   display: flex;
   align-items: center;
@@ -432,68 +836,163 @@ body {
   min-width: 0;
 }
 
-.cf-stage-rings {
+/* Stages and review steps: no fill, pill or shadow in any state (user decision 2026-10-22, "Option
+   A+B"). The current one is its icon and its one-word name at full opacity; the rest are icons only,
+   dimmed (0.6, 4.6:1 on the page), brighter on hover and keyboard focus (0.85), locked fainter still.
+   Compact cues carry the state: a small green check mark once done, a thin line at the foot while part
+   of the way through, the open count as a quiet number. One neutral ink: no step hues. */
+
+.cf-stages {
   display: flex;
+  align-items: center;
   gap: 6px;
+  height: 100%;
 }
 
-.cf-stage-btn {
+.cf-stage {
   position: relative;
-  width: 40px;
-  height: 40px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  color: var(--cf-text-3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 34px;
+  min-width: 34px;
+  padding: 0 7px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  box-shadow: none;
+  color: var(--cf-text);
+  font: inherit;
+  text-decoration: none;
   cursor: pointer;
-  transition-property: background-color, color, scale;
+  -webkit-tap-highlight-color: transparent;
+  --stage-o: 0.6;
+}
+
+.cf-stage:focus-visible {
+  outline: 2px solid var(--cf-focus);
+  outline-offset: 2px;
+}
+
+/* The icon, its count and its progress line carry the dimming; the done mark stays full strength. */
+.cf-stage-ico,
+.cf-stage-word,
+.cf-stage-count,
+.cf-stage-bar {
+  opacity: var(--stage-o);
+  transition-property: opacity;
   transition-duration: 150ms;
   transition-timing-function: ease-out;
 }
 
-.cf-stage-btn[aria-current="step"] {
-  color: var(--cf-text);
-  background: var(--cf-selected);
+.cf-stage-glyph {
+  position: relative;
+  display: inline-flex;
 }
 
-.cf-stage-btn:not(.is-disabled):active {
-  scale: 0.96;
+.cf-stage-ico {
+  display: inline-flex;
 }
 
-.cf-stage-btn.is-disabled {
+.cf-stage-done {
+  position: absolute;
+  top: -5px;
+  right: -6px;
+  display: grid;
+  place-items: center;
+  width: 11px;
+  height: 11px;
+  border-radius: 999px;
+  background: var(--cf-done);
+  color: #fff;
+  box-shadow: 0 0 0 1.5px var(--cf-bg);
+}
+
+/* The current stage's name, one word beside its icon. */
+.cf-stage-word {
+  margin-left: 2px;
+  font-size: 13.5px;
+  font-weight: 550;
+  line-height: 1;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+}
+
+/* Clear of the done mark, which sits over the icon's top-right corner. */
+.cf-stage.is-done .cf-stage-word {
+  margin-left: 5px;
+}
+
+.cf-stage-count {
+  font: 500 11.5px var(--cf-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Beside the current stage's name the count reads as part of it ("Missing 9"). */
+.cf-stage[aria-current="step"] .cf-stage-count {
+  font: 500 13.5px/1 var(--cf-font);
+  font-variant-numeric: tabular-nums;
+}
+
+.cf-stage-bar {
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 2px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--cf-line-2);
+  overflow: hidden;
+}
+
+.cf-stage-bar > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: currentColor;
+}
+
+.cf-stage:focus-visible {
+  --stage-o: 0.85;
+}
+
+.cf-stage.is-disabled {
   cursor: not-allowed;
-  opacity: 0.5;
+  --stage-o: 0.3;
+}
+
+.cf-stage.is-disabled:focus-visible {
+  --stage-o: 0.45;
+}
+
+/* The current stage stays at full strength in every state, locked included. */
+.cf-stage[aria-current="step"],
+.cf-stage.is-disabled[aria-current="step"] {
+  --stage-o: 1;
 }
 
 @media (hover: hover) {
-  .cf-stage-btn:not(.is-disabled):not([aria-current="step"]):hover {
-    color: var(--cf-text);
+  .cf-stage:not(.is-disabled):not([aria-current="step"]):hover {
+    --stage-o: 0.85;
   }
 }
 
-.cf-stage-ring {
-  position: absolute;
-  inset: 0;
-  width: 40px;
-  height: 40px;
-  fill: none;
-  stroke-width: 1.6;
+/* The smallest phones: narrower stage boxes keep the current name clear of the save status. */
+@media (max-width: 360px) {
+  .cf-stage {
+    min-width: 30px;
+    padding: 0 5px;
+  }
 }
 
-.cf-stage-trk {
-  stroke: var(--cf-line-2);
-}
-
-.cf-stage-arc {
-  stroke: var(--cf-text);
-  stroke-linecap: round;
-  transition-property: stroke-dasharray, stroke;
-  transition-duration: 300ms;
-  transition-timing-function: ease-out;
-}
-
-.cf-stage-arc.is-full {
-  stroke: var(--cf-done);
+@media (prefers-reduced-motion: reduce) {
+  .cf-stage-ico,
+  .cf-stage-word,
+  .cf-stage-count,
+  .cf-stage-bar {
+    transition: none;
+  }
 }
 
 .cf-save {
@@ -514,7 +1013,7 @@ body {
 }
 
 .cf-save.is-problem {
-  color: #ffb4b4;
+  color: var(--cf-blocking-ink);
 }
 
 .cf-ask {
@@ -539,6 +1038,23 @@ body {
   overflow-y: auto;
   overflow-x: hidden;
   overscroll-behavior: contain;
+}
+
+/* Keep the existing screen geometry while disabling every mounted form during submission. */
+.cf-edit-lock {
+  display: contents;
+}
+
+.cf-submission-pending {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  margin: 0;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--cf-line);
+  background: var(--cf-bg);
+  color: var(--cf-text-2);
+  font-size: 13px;
 }
 
 /* Assistant: a column beside main (pushes it), raised surface. */
@@ -620,7 +1136,7 @@ body {
   padding: 10px 14px;
   border: 1px solid var(--cf-line);
   border-radius: 14px 14px 4px 14px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(17, 24, 39, 0.08);
 }
 
 .cf-msg-ai p {
@@ -726,6 +1242,12 @@ body {
   max-height: none;
   border-radius: 0 16px 16px 0;
   border-left: 0;
+}
+
+/* .cf-modal (later, equal weight) rounds all four corners; the sheet meets the screen edge squarely on the left. */
+.cf-modal.cf-nav-sheet {
+  border-radius: 0 16px 16px 0;
+  border-width: 0 1px 0 0;
 }
 
 .cf-nav-sheet[open] {
@@ -839,11 +1361,11 @@ body {
 /* —— Surfaces —— */
 
 .cf-glass {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015)), var(--cf-glass);
+  background: var(--cf-glass);
   border: 1px solid var(--cf-line);
   border-radius: var(--cf-r-card);
   backdrop-filter: blur(24px) saturate(140%);
-  box-shadow: inset 0 1px 0 var(--cf-glass-hi), 0 30px 80px -30px rgba(0, 0, 0, 0.7);
+  box-shadow: inset 0 1px 0 var(--cf-glass-hi), 0 30px 80px -30px rgba(17, 24, 39, 0.16);
 }
 
 .cf-tile {
@@ -857,10 +1379,10 @@ body {
   z-index: 20;
   padding: 8px;
   border-radius: 18px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)), rgba(18, 20, 24, 0.92);
+  background: var(--cf-surface);
   border: 1px solid var(--cf-line-2);
   backdrop-filter: blur(24px) saturate(140%);
-  box-shadow: inset 0 1px 0 var(--cf-glass-hi), 0 24px 60px -20px rgba(0, 0, 0, 0.8);
+  box-shadow: inset 0 1px 0 var(--cf-glass-hi), 0 24px 60px -20px rgba(17, 24, 39, 0.16);
   overscroll-behavior: contain;
 }
 
@@ -894,6 +1416,18 @@ body {
   background: var(--cf-primary-bg);
   color: var(--cf-primary-text);
   border-color: transparent;
+}
+
+/* The one destructive confirm (Delete): blocking ink, never the near-black primary. */
+.cf-btn.is-danger {
+  color: var(--cf-blocking-ink);
+  border-color: rgba(180, 35, 24, 0.32);
+}
+
+@media (hover: hover) {
+  .cf-btn.is-danger:not(:disabled):hover {
+    background: rgba(180, 35, 24, 0.06);
+  }
 }
 
 .cf-btn.is-ghost {
@@ -940,7 +1474,7 @@ body {
 
 @media (hover: hover) {
   .cf-btn:not(:disabled):hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(17, 24, 39, 0.06);
   }
   .cf-btn.is-primary:not(:disabled):hover {
     background: var(--cf-primary-hover);
@@ -954,8 +1488,13 @@ body {
   font: 500 11px/1 var(--cf-mono);
   padding: 4px 6px;
   border-radius: 6px;
-  border: 1px solid rgba(0, 0, 0, 0.18);
-  color: rgba(0, 0, 0, 0.55);
+  border: 1px solid var(--cf-line-2);
+  color: var(--cf-text-3);
+}
+
+.cf-btn.is-primary .cf-kbd {
+  border-color: rgba(255, 255, 255, 0.28);
+  color: rgba(255, 255, 255, 0.75);
 }
 
 .cf-btn:not(.is-primary) .cf-kbd{
@@ -969,7 +1508,7 @@ body {
   flex: none;
   border-radius: 12px;
   border: 1px solid var(--cf-line);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(17, 24, 39, 0.03);
   color: var(--cf-text-2);
   display: grid;
   place-items: center;
@@ -1000,7 +1539,7 @@ body {
 @media (hover: hover) {
   .cf-icon-btn:hover {
     color: var(--cf-text);
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(17, 24, 39, 0.06);
   }
 }
 
@@ -1009,7 +1548,7 @@ body {
   padding: 0 14px;
   border-radius: 999px;
   border: 1px solid var(--cf-line);
-  background: rgba(255, 255, 255, 0.025);
+  background: rgba(17, 24, 39, 0.025);
   color: var(--cf-text-2);
   font: 500 13px/1 var(--cf-font);
   display: inline-flex;
@@ -1023,7 +1562,7 @@ body {
 }
 
 .cf-chip[aria-pressed="true"] {
-  background: rgba(255, 255, 255, 0.09);
+  background: rgba(17, 24, 39, 0.09);
   color: var(--cf-text);
   border-color: var(--cf-line-2);
 }
@@ -1043,7 +1582,7 @@ body {
 @media (hover: hover) {
   .cf-chip:not([aria-disabled="true"]):not([aria-pressed="true"]):hover {
     color: var(--cf-text);
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(17, 24, 39, 0.05);
   }
 }
 
@@ -1056,7 +1595,7 @@ body {
   padding: 0 12px 0 10px;
   border-radius: 999px;
   border: 1px solid var(--cf-line);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(17, 24, 39, 0.03);
   font: 500 12px/1 var(--cf-mono);
   color: var(--cf-text-2);
   white-space: nowrap;
@@ -1078,7 +1617,7 @@ body {
 @media (hover: hover) {
   .cf-cite:hover {
     color: var(--cf-text);
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(17, 24, 39, 0.06);
   }
 }
 
@@ -1203,6 +1742,11 @@ body {
   transition-timing-function: ease-out;
 }
 
+.cf-menu button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .cf-menu .cf-mono {
   font-size: 11px;
 }
@@ -1215,15 +1759,15 @@ body {
 
 @media (hover: hover) {
   .cf-menu a:hover,
-  .cf-menu button:hover {
-    background: rgba(255, 255, 255, 0.05);
+  .cf-menu button:not(:disabled):hover {
+    background: rgba(17, 24, 39, 0.05);
     color: var(--cf-text);
   }
 }
 
 .cf-menu a:focus-visible,
 .cf-menu button:focus-visible {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(17, 24, 39, 0.05);
   color: var(--cf-text);
   outline-offset: -2px;
 }
@@ -1235,9 +1779,9 @@ body {
   border: 1px solid var(--cf-line-2);
   border-radius: 24px;
   color: var(--cf-text);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015)), rgba(16, 18, 22, 0.96);
+  background: var(--cf-surface);
   backdrop-filter: blur(24px) saturate(140%);
-  box-shadow: inset 0 1px 0 var(--cf-glass-hi), 0 30px 80px -20px rgba(0, 0, 0, 0.85);
+  box-shadow: inset 0 1px 0 var(--cf-glass-hi), 0 30px 80px -20px rgba(17, 24, 39, 0.16);
   font-family: var(--cf-font);
   overscroll-behavior: contain;
 }
@@ -1361,7 +1905,7 @@ body {
   height: 36px;
   padding: 0 4px 0 12px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(17, 24, 39, 0.04);
   border: 1px solid var(--cf-line);
   font-size: 13px;
   color: var(--cf-text-2);
@@ -1373,7 +1917,7 @@ body {
   padding: 3px 5px;
   border-radius: 5px;
   background: rgba(255, 106, 61, 0.14);
-  color: #ff9a76;
+  color: var(--cf-accent-ink);
 }
 
 .cf-file-name {
@@ -1395,7 +1939,7 @@ body {
 }
 
 .cf-file-state.is-blocking {
-  color: #fca5a5;
+  color: var(--cf-blocking-ink);
   white-space: normal;
   flex: 0 1 auto;
 }
@@ -1430,7 +1974,7 @@ body {
   align-items: center;
   gap: 10px;
   padding: 44px 64px;
-  border: 1.5px dashed rgba(255, 255, 255, 0.35);
+  border: 1.5px dashed rgba(17, 24, 39, 0.35);
   border-radius: 28px;
   font-size: 20px;
   font-weight: 500;
@@ -1511,10 +2055,6 @@ body {
 
 .cf-tips li + li {
   margin-top: 6px;
-}
-
-.cf-from-desc {
-  margin-top: 12px;
 }
 
 .cf-find {
@@ -1612,12 +2152,12 @@ body {
 .cf-code-text {
   margin: 18px 0 0;
   padding: 18px 18px 18px 20px;
-  border-left: 2px solid rgba(255, 255, 255, 0.22);
-  background: rgba(255, 255, 255, 0.03);
+  border-left: 2px solid rgba(17, 24, 39, 0.22);
+  background: rgba(17, 24, 39, 0.03);
   border-radius: 0 14px 14px 0;
   font-size: 15px;
   line-height: 1.65;
-  color: #e7e7ea;
+  color: var(--cf-text);
   white-space: pre-line;
 }
 
@@ -1784,7 +2324,7 @@ body {
   font-size: 13px;
   font-weight: 500;
   color: var(--cf-text-2);
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(17, 24, 39, 0.06);
   padding: 6px 10px;
   border-radius: 8px;
   letter-spacing: 0;
@@ -1903,7 +2443,7 @@ body {
   margin: 0;
   font-size: 15px;
   font-weight: 550;
-  color: #fde7a8;
+  color: var(--cf-warning-ink);
   line-height: 1.35;
 }
 
@@ -1915,7 +2455,7 @@ body {
   margin: 8px 0 0;
   font-size: 14px;
   line-height: 1.55;
-  color: #d9c9a0;
+  color: var(--cf-text-2);
 }
 
 .cf-engineer-link {
@@ -1925,8 +2465,22 @@ body {
   margin-top: 10px;
   font-size: 13px;
   font-weight: 500;
-  color: #fde7a8;
+  color: var(--cf-warning-ink);
   border-radius: 6px;
+  text-decoration: underline;
+  text-decoration-color: rgba(138, 83, 0, 0.35);
+  text-underline-offset: 3px;
+}
+
+@media (hover: hover) {
+  .cf-engineer-link:hover {
+    text-decoration-color: currentColor;
+  }
+}
+
+.cf-engineer-link:focus-visible {
+  outline: 2px solid var(--cf-focus);
+  outline-offset: 2px;
 }
 
 .cf-sections {
@@ -1954,15 +2508,15 @@ body {
   padding-top: 4px;
 }
 
-.cf-sec-letter {
+.cf-sec-icon {
   flex: none;
   width: 34px;
   height: 34px;
   border-radius: 11px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(17, 24, 39, 0.05);
+  color: var(--cf-text);
   display: grid;
   place-items: center;
-  font: 500 13px var(--cf-mono);
 }
 
 .cf-sec-t {
@@ -2004,6 +2558,35 @@ body {
   margin: 14px 2px 0;
 }
 
+/* "Completeness only": a quiet chip; the one sentence opens on demand. */
+.cf-complete {
+  margin: 14px 2px 0;
+  font-size: 12.5px;
+  color: var(--cf-text-3);
+}
+
+.cf-complete summary {
+  display: inline-block;
+  padding: 3px 9px;
+  border: 1px solid var(--cf-line);
+  border-radius: 999px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.cf-complete summary::-webkit-details-marker {
+  display: none;
+}
+
+.cf-complete p {
+  margin: 8px 2px 0;
+  line-height: 1.5;
+}
+
+.cf-side-notice > summary {
+  cursor: pointer;
+}
+
 /* —— 04 Application —— */
 
 .cf-doc {
@@ -2018,12 +2601,93 @@ body {
 
 .cf-sheet-pane {
   border-radius: 24px;
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(17, 24, 39, 0.02);
   border: 1px solid var(--cf-line);
   padding: 28px 24px;
   display: flex;
   justify-content: center;
   min-width: 0;
+}
+
+/* The application form: the engine's own PDF in the browser's viewer. The pane stays neutral so the
+   official form keeps its own design. */
+.cf-form-view {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cf-form-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 28px;
+}
+
+.cf-form-tag {
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--cf-hue-amber-t);
+  color: var(--cf-warning-ink);
+  font-size: 12px;
+  font-weight: 550;
+}
+
+/* A sent or closed application's status, kept apart from the label of the file on screen. */
+.cf-form-status {
+  font-size: 12.5px;
+  font-weight: 550;
+  color: var(--cf-text-2);
+}
+
+.cf-form-bar .cf-icon-btn {
+  margin-left: auto;
+}
+
+.cf-form-frame {
+  width: 100%;
+  height: calc(100vh - 170px);
+  min-height: 560px;
+  border: 1px solid var(--cf-line);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.cf-form-empty {
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  min-height: 560px;
+  padding: 24px;
+  border: 1px solid var(--cf-line);
+  border-radius: 12px;
+  background: rgba(17, 24, 39, 0.02);
+  text-align: center;
+}
+
+.cf-form-empty ul {
+  margin: 0;
+  padding-left: 18px;
+  text-align: left;
+}
+
+.cf-form-ghost {
+  width: min(420px, 80%);
+  aspect-ratio: 8.5 / 11;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(17, 24, 39, 0.06), 0 0 0 1px var(--cf-line);
+}
+
+@media (max-width: 760px) {
+  .cf-form-frame {
+    height: 70vh;
+    min-height: 420px;
+  }
+  .cf-form-empty {
+    min-height: 420px;
+  }
 }
 
 .cf-sheet {
@@ -2035,7 +2699,7 @@ body {
   padding: 44px 52px;
   font-size: 12.5px;
   line-height: 1.55;
-  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 30px 80px -20px rgba(17, 24, 39, 0.16);
   overflow-wrap: anywhere;
 }
 
@@ -2076,6 +2740,10 @@ body {
 .cf-sheet-kv > span {
   white-space: pre-line;
 }
+
+.cf-sheet-document { display: block; }
+.cf-sheet-document + .cf-sheet-document { margin-top: 10px; }
+.cf-sheet-document-meta { display: block; color: var(--cf-sheet-muted); font-size: 12px; }
 
 .cf-sheet-label {
   margin: 10px 0 2px;
@@ -2184,10 +2852,10 @@ body {
 .cf-legacy {
   --bg-app: transparent;
   --bg-panel: transparent;
-  --bg-elevated: rgba(255, 255, 255, 0.04);
-  --bg-hover: rgba(255, 255, 255, 0.06);
-  --bg-active: rgba(255, 255, 255, 0.08);
-  --bg-input: rgba(255, 255, 255, 0.03);
+  --bg-elevated: rgba(17, 24, 39, 0.04);
+  --bg-hover: rgba(17, 24, 39, 0.06);
+  --bg-active: rgba(17, 24, 39, 0.08);
+  --bg-input: rgba(17, 24, 39, 0.03);
   --border-subtle: var(--cf-line);
   --border-default: var(--cf-line-2);
   --border-strong: var(--cf-line-ctl);
@@ -2203,7 +2871,7 @@ body {
   --status-warning: var(--cf-warning);
   --status-pending: var(--cf-pending);
   --status-done: var(--cf-done);
-  --code-bg: rgba(255, 255, 255, 0.03);
+  --code-bg: rgba(17, 24, 39, 0.03);
   --font-sans: var(--cf-font);
   --font-mono: var(--cf-mono);
   --radius-sm: 6px;
@@ -2236,7 +2904,7 @@ body {
 
 @media (hover: hover) {
   :is(.cf-embed, .cf-legacy) .btn:not(:disabled):hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(17, 24, 39, 0.06);
   }
   :is(.cf-embed, .cf-legacy) .btn-primary:not(:disabled):hover {
     background: var(--cf-primary-hover);
@@ -2271,17 +2939,17 @@ body {
 :is(.cf-embed, .cf-legacy) .field textarea {
   border-radius: 12px;
   border-color: var(--cf-line-2);
-  background-color: rgba(255, 255, 255, 0.03);
+  background-color: rgba(17, 24, 39, 0.03);
   font-size: 14px;
   color: var(--cf-text);
 }
 
 :is(.cf-embed, .cf-legacy) .field select {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 :is(.cf-embed, .cf-legacy) .field select option {
-  background: #16181c;
+  background: #fff;
   color: var(--cf-text);
 }
 
@@ -2318,9 +2986,9 @@ body {
   font-size: 14px;
   line-height: 1.6;
   border: 0;
-  border-left: 2px solid rgba(255, 255, 255, 0.22);
+  border-left: 2px solid rgba(17, 24, 39, 0.22);
   border-radius: 0 14px 14px 0;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(17, 24, 39, 0.03);
   padding: 14px 16px;
 }
 
@@ -2376,7 +3044,7 @@ body {
 
 @media (hover: hover) {
   .cf-sectiond .btn-primary:not(:disabled):hover {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(17, 24, 39, 0.06);
   }
 }
 
@@ -2393,13 +3061,14 @@ body {
   flex-direction: column;
   border: 1px solid var(--cf-line);
   border-radius: var(--cf-r-card);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.012)), var(--cf-glass);
+  background: var(--cf-glass);
   backdrop-filter: blur(24px) saturate(140%);
-  box-shadow: inset 0 1px 0 var(--cf-glass-hi), 0 30px 80px -30px rgba(0, 0, 0, 0.7);
+  box-shadow: inset 0 1px 0 var(--cf-glass-hi), 0 30px 80px -30px rgba(17, 24, 39, 0.16);
   overflow: hidden;
 }
 
-.cf-main:has(> .cf-legacy) {
+.cf-main:has(> .cf-legacy),
+.cf-main:has(> .cf-edit-lock > .cf-legacy) {
   padding: 0 24px 24px;
 }
 
@@ -2473,9 +3142,9 @@ body {
   .cf-head-title {
     display: none;
   }
-  .cf-stage-rings {
+  .cf-stages {
     justify-self: center;
-    gap: 4px;
+    gap: 0;
   }
   .cf-ask-label,
   .cf-save-label,
@@ -2563,7 +3232,8 @@ body {
   .cf-drawer-scroll {
     padding: 22px 20px 28px;
   }
-  .cf-main:has(> .cf-legacy) {
+  .cf-main:has(> .cf-legacy),
+  .cf-main:has(> .cf-edit-lock > .cf-legacy) {
     padding: 0 10px 12px;
   }
   .cf-legacy .panel-header,
@@ -2590,12 +3260,16 @@ body {
 }
 
 .cf-ring-track {
-  stroke: rgba(255, 255, 255, 0.14);
+  stroke: rgba(17, 24, 39, 0.14);
 }
 
 .cf-ring-svg.is-zero .cf-ring-track,
 .cf-ring-svg.is-unscored .cf-ring-track {
   stroke: #71717a;
+}
+
+.cf-ring-svg.is-estimate .cf-ring-arc {
+  stroke: var(--cf-text-3);
 }
 
 .cf-ring-svg.is-low .cf-ring-arc {
@@ -2624,19 +3298,19 @@ body {
 }
 
 .cf-band.is-high {
-  color: #fecaca;
+  color: var(--cf-blocking-ink);
   border-color: rgba(248, 113, 113, 0.35);
   background: rgba(248, 113, 113, 0.08);
 }
 
 .cf-band.is-mid {
-  color: #fde68a;
+  color: var(--cf-warning-ink);
   border-color: rgba(251, 191, 36, 0.32);
   background: rgba(251, 191, 36, 0.07);
 }
 
 .cf-band.is-low {
-  color: #bbf7d0;
+  color: var(--cf-done-ink);
   border-color: rgba(74, 222, 128, 0.28);
 }
 
@@ -2647,10 +3321,10 @@ body {
   max-width: 300px;
   padding: 12px 14px;
   border-radius: 14px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)), rgba(16, 18, 22, 0.96);
+  background: var(--cf-surface);
   border: 1px solid var(--cf-line-2);
   backdrop-filter: blur(20px) saturate(140%);
-  box-shadow: inset 0 1px 0 var(--cf-glass-hi), 0 20px 50px -16px rgba(0, 0, 0, 0.85);
+  box-shadow: inset 0 1px 0 var(--cf-glass-hi), 0 20px 50px -16px rgba(17, 24, 39, 0.16);
   color: var(--cf-text);
   font: 400 13px/1.5 var(--cf-font);
   pointer-events: none;
@@ -2782,7 +3456,7 @@ body {
 }
 
 .cf-pal-row.is-active {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(17, 24, 39, 0.06);
   color: var(--cf-text);
 }
 
@@ -2822,124 +3496,353 @@ body {
   border-top: 1px solid var(--cf-line);
 }
 
-/* Library */
+/* Library
+   Chapters pane | reader. When the library is open the application list folds away and the
+   chapters pane takes its place (same width, head and search field). With less than 760px of
+   room (assistant open on a small laptop, phones) it is one pane at a time with a back control. */
+
+.cf-main:has(> .cf-lib),
+.cf-main:has(> .cf-edit-lock > .cf-lib) {
+  overflow: hidden;
+}
 
 .cf-lib {
-  max-width: 1240px;
   height: 100%;
-  margin: 0 auto;
-  padding: 18px 24px 0;
+  min-height: 0;
+  display: flex;
+}
+
+.cf-lib-nav {
+  width: 320px;
+  flex: none;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  min-height: 0;
+  border-right: 1px solid var(--cf-line);
 }
 
-.cf-main:has(> .cf-lib) {
-  padding-bottom: 16px;
+.cf-lib-nav-head {
+  padding: 16px 18px 12px;
 }
 
-.cf-lib-head {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 12px 20px;
+.cf-lib-name {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
 }
 
-.cf-lib-title {
-  margin: 10px 0 0;
-  font-size: 28px;
-  font-weight: 500;
-  letter-spacing: -0.02em;
-}
-
-.cf-lib-tools {
-  grid-column: 1 / -1;
+.cf-lib-nav-head {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  gap: 4px 8px;
+}
+
+/* The edition sits behind a small info control. */
+.cf-lib-info {
+  color: var(--cf-text-3);
+  font-size: 12.5px;
+}
+
+.cf-lib-info summary {
+  display: inline-grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.cf-lib-info summary::-webkit-details-marker {
+  display: none;
+}
+
+.cf-lib-info[open] {
+  flex-basis: 100%;
+  order: 3;
+}
+
+.cf-lib-info p {
+  margin: 2px 0 0;
+}
+
+/* The application the library reads for: one listbox button above the search. */
+.cf-ctx {
+  position: relative;
+  margin: 0 12px 8px;
+}
+
+.cf-ctx-btn {
+  width: 100%;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 9px 0 11px;
+  border-radius: 10px;
+  border: 1px solid var(--cf-line);
+  background: transparent;
+  color: var(--cf-text);
+  font: 500 13.5px/1 var(--cf-font);
+  text-align: left;
+  cursor: pointer;
+  transition-property: border-color, background-color;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+
+.cf-ctx-btn > svg {
+  flex: none;
+  color: var(--cf-text-3);
+}
+
+.cf-ctx-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cf-ctx-btn[aria-expanded="true"] {
+  border-color: var(--cf-line-2);
+  background: rgba(17, 24, 39, 0.04);
+}
+
+.cf-ctx-btn:disabled {
+  cursor: progress;
+  color: var(--cf-text-3);
+}
+
+@media (hover: hover) {
+  .cf-ctx-btn:not(:disabled):hover {
+    border-color: var(--cf-line-2);
+  }
+}
+
+.cf-ctx-list {
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  max-height: min(320px, 60vh);
+  overflow-y: auto;
+  border-radius: 14px;
+}
+
+.cf-ctx-opt {
+  height: 38px;
+  padding: 0 10px 0 6px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--cf-text-2);
+  font: 500 14px var(--cf-font);
+  cursor: pointer;
+  transition-property: background-color, color;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+
+.cf-ctx-opt.is-none {
+  margin-bottom: 6px;
+  position: relative;
+}
+
+.cf-ctx-opt.is-none::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: -4px;
+  border-top: 1px solid var(--cf-line);
+}
+
+.cf-ctx-opt[aria-selected="true"] {
+  color: var(--cf-text);
+}
+
+.cf-ctx-opt:focus-visible {
+  outline: none;
+  background: rgba(17, 24, 39, 0.05);
+  color: var(--cf-text);
+  box-shadow: inset 0 0 0 2px var(--cf-focus);
+}
+
+@media (hover: hover) {
+  .cf-ctx-opt:hover {
+    background: rgba(17, 24, 39, 0.05);
+    color: var(--cf-text);
+  }
+}
+
+.cf-ctx-check {
+  flex: none;
+  width: 18px;
+  display: grid;
+  place-items: center;
+}
+
+.cf-ctx-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cf-ctx-meta {
+  flex: none;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--cf-text-3);
+}
+
+.cf-ctx-note {
+  margin: 6px 2px 0;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--cf-text-2);
+}
+
+.cf-lib-search {
+  margin: 0 12px;
+  height: 36px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 7px 0 11px;
+  border-radius: 10px;
+  border: 1px solid var(--cf-line);
+  background: transparent;
+  color: var(--cf-text-3);
+  font: 400 13.5px/1 var(--cf-font);
+  text-align: left;
+  cursor: pointer;
+  transition-property: border-color, color;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+
+.cf-lib-search > span:not(.cf-kbd) {
+  flex: 1;
+}
+
+@media (hover: hover) {
+  .cf-lib-search:hover {
+    border-color: var(--cf-line-2);
+    color: var(--cf-text-2);
+  }
+}
+
+.cf-lib-tools {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 12px 10px;
+  border-bottom: 1px solid var(--cf-line);
 }
 
 .cf-filters {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
+}
+
+.cf-chip.is-sm {
+  height: 28px;
+  padding: 0 10px;
+  gap: 6px;
+  font-size: 12.5px;
+}
+
+.cf-lib-score {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cf-lib-score .cf-legend-btn {
+  flex: none;
+  margin-top: 1px;
 }
 
 .cf-score-wrap {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: flex-end;
-  gap: 8px 12px;
-  max-width: 520px;
+  gap: 4px 10px;
+  padding-left: 2px;
 }
 
 .cf-score {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  min-height: 34px;
-  padding: 0 4px 0 12px;
-  border-radius: 999px;
-  border: 1px solid var(--cf-line);
-  background: rgba(255, 255, 255, 0.03);
-  font-size: 13px;
-  color: var(--cf-text-2);
+  min-height: 26px;
+  font-size: 12.5px;
+  color: var(--cf-text-3);
   white-space: nowrap;
 }
 
-.cf-score:not(:has(.cf-btn)) {
-  padding-right: 14px;
+.cf-score .cf-btn {
+  height: 26px;
+  margin-left: 4px;
 }
 
-.cf-score .cf-btn {
-  height: 28px;
+.cf-score-why {
+  flex-basis: 100%;
+  font-size: 12px;
+  color: var(--cf-text-3);
 }
 
 .cf-tech.is-inline {
   margin: 0;
   flex-basis: 100%;
-  text-align: right;
-}
-
-.cf-lib-body {
-  flex: 1;
-  min-height: 0;
-  display: grid;
-  grid-template-columns: 340px minmax(0, 1fr);
-  gap: 16px;
-  margin-top: 16px;
-}
-
-.cf-lib-tree,
-.cf-lib-read {
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  border-radius: 22px;
 }
 
 .cf-lib-tree {
-  padding: 10px 6px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 8px 6px 14px;
 }
 
-.cf-lib-read {
-  padding: 26px 30px 30px;
-}
-
-.cf-lib-links {
+.cf-lib-foot {
+  flex: none;
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
+  height: 46px;
+  padding: 0 18px;
+  border-top: 1px solid var(--cf-line);
+  color: var(--cf-text-2);
+  font-size: 13px;
+  transition-property: color;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
 }
 
-.cf-lib-back {
-  display: none;
+@media (hover: hover) {
+  .cf-lib-foot:hover {
+    color: var(--cf-text);
+  }
 }
+
+/* Tree: part › section › subsection › article. Titles wrap to two lines instead of being cut. */
 
 .cf-tree,
 .cf-tree ul {
@@ -2950,12 +3853,13 @@ body {
 
 .cf-tree-row {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 34px;
-  padding: 4px 10px;
-  border-radius: 10px;
+  align-items: flex-start;
+  gap: 7px;
+  min-height: 32px;
+  padding: 6px 10px 6px 8px;
+  border-radius: 8px;
   font-size: 13.5px;
+  line-height: 20px;
   color: var(--cf-text-2);
   cursor: pointer;
   user-select: none;
@@ -2964,13 +3868,36 @@ body {
   transition-timing-function: ease-out;
 }
 
+.cf-tree-row > .cf-chev {
+  height: 20px;
+}
+
+.cf-tree-row > .cf-ring {
+  margin-top: 2px;
+}
+
+.cf-tree-text {
+  flex: 1;
+  min-width: 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+.cf-tree-id {
+  font-size: 12px;
+  color: var(--cf-text);
+}
+
 .cf-tree-row.is-part {
   color: var(--cf-text);
   font-weight: 500;
 }
 
 .cf-tree-row.is-selected {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--cf-selected);
   color: var(--cf-text);
 }
 
@@ -2980,7 +3907,7 @@ body {
 
 @media (hover: hover) {
   .cf-tree-row:not(.is-selected):hover {
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--cf-hover);
     color: var(--cf-text);
   }
 }
@@ -3000,27 +3927,20 @@ body {
   rotate: 90deg;
 }
 
-.cf-tree-id {
-  flex: none;
-  font-size: 12px;
-  color: var(--cf-text);
-}
-
-.cf-tree-title {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .cf-tree-empty {
-  margin: 14px;
+  margin: 14px 12px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 10px;
+  color: var(--cf-text-3);
 }
+
+.cf-tree-empty p {
+  margin: 0;
+}
+
+/* Hover peek (the roots of an article) */
 
 .cf-peek {
   width: 320px;
@@ -3058,114 +3978,72 @@ body {
   padding: 0 10px;
   border-radius: 999px;
   border: 1px solid var(--cf-line-2);
-  background: rgba(255, 255, 255, 0.03);
+  background: transparent;
   font: 500 12px var(--cf-mono);
   color: var(--cf-text);
-  cursor: help;
+  white-space: nowrap;
 }
 
 .cf-code-chip.is-static {
   height: 22px;
+  padding: 0 8px;
   cursor: default;
 }
 
 .cf-code-chip.is-link {
   cursor: pointer;
-  transition-property: background-color;
+  transition-property: background-color, border-color;
   transition-duration: 150ms;
   transition-timing-function: ease-out;
 }
 
 @media (hover: hover) {
   .cf-code-chip.is-link:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--cf-hover);
+    border-color: var(--cf-line-ctl);
   }
 }
 
-.cf-crumbs {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  font-size: 12.5px;
-  min-height: 18px;
+/* Reader */
+
+.cf-lib-reader {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
-.cf-crumb {
-  border: 0;
-  background: none;
-  padding: 2px 4px;
-  border-radius: 6px;
-  color: var(--cf-text-3);
-  font: inherit;
-  cursor: pointer;
+.cf-read {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 40px 48px 72px;
 }
 
-@media (hover: hover) {
-  .cf-crumb:hover {
-    color: var(--cf-text);
-  }
+.cf-lib-back {
+  display: none;
 }
 
 .cf-read-title {
-  margin: 10px 0 0;
-  font-size: 26px;
+  margin: 12px 0 0;
+  font-size: 30px;
   line-height: 1.2;
-  font-weight: 500;
-  letter-spacing: -0.02em;
+  font-weight: 550;
+  letter-spacing: -0.022em;
   text-wrap: balance;
+  outline: none;
 }
 
-.cf-read-title .cf-mono {
-  font-size: 0.7em;
-  color: var(--cf-text-2);
-  margin-right: 6px;
-}
-
-.cf-read-score {
+.cf-read-meta {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
-  margin: 14px 0 20px;
+  margin-top: 14px;
 }
 
-.cf-read .cf-eyebrow + .cf-code-text {
-  margin-top: 12px;
-}
-
-.cf-roots-row {
-  margin-top: 12px;
-}
-
-.cf-roots-row .cf-chip-row {
-  margin-top: 6px;
-}
-
-.cf-sect.is-tight {
-  margin-top: 16px;
-}
-
-.cf-sect.is-tight p {
-  margin: 6px 0 0;
-}
-
-.cf-notes {
-  margin-top: 16px;
-}
-
-.cf-notes summary {
-  cursor: pointer;
-  color: var(--cf-text-2);
-  width: fit-content;
-  border-radius: 6px;
-}
-
-.cf-note-item {
-  margin-top: 10px;
-  font-size: 13.5px;
-}
-
-.cf-note-item p {
-  margin: 4px 0 0;
+.cf-read-id {
+  font-size: 12.5px;
   color: var(--cf-text-2);
 }
 
@@ -3174,72 +4052,405 @@ body {
   flex-wrap: wrap;
   align-items: center;
   gap: 12px;
-  margin-top: 26px;
-  padding-top: 18px;
+  margin-top: 22px;
+}
+
+.cf-read-wait {
+  margin-top: 36px;
+}
+
+/* Verbatim text as a numbered outline: sentences are disclosures, clauses hang under them. */
+
+.cf-code {
+  margin-top: 40px;
+}
+
+.cf-code-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--cf-line);
+}
+
+.cf-code-label {
+  margin: 0;
+  font: 500 12.5px/1.4 var(--cf-font);
+  color: var(--cf-text-3);
+}
+
+.cf-code-head .cf-link-btn {
+  padding: 0 2px;
+  font-size: 12.5px;
+  color: var(--cf-text-2);
+}
+
+.cf-code-intro {
+  margin: 18px 0 0;
+  max-width: 68ch;
+  font-size: 15.5px;
+  line-height: 26px;
+}
+
+.cf-sents {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cf-sent {
+  border-bottom: 1px solid var(--cf-line);
+}
+
+.cf-sent-row {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 14px;
+  column-gap: 8px;
+  align-items: start;
+  padding: 13px 0;
+  cursor: pointer;
+}
+
+.cf-sent.is-open .cf-sent-row {
+  padding-bottom: 22px;
+  cursor: default;
+}
+
+.cf-sent-btn {
+  justify-self: start;
+  padding: 0 4px;
+  margin-left: -4px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--cf-text-3);
+  font: 500 13px/26px var(--cf-mono);
+  cursor: pointer;
+}
+
+.cf-sent-preview {
+  min-width: 0;
+  font-size: 15px;
+  line-height: 26px;
+  color: var(--cf-text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition-property: color;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+
+@media (hover: hover) {
+  .cf-sent:not(.is-open) .cf-sent-row:hover .cf-sent-preview {
+    color: var(--cf-text);
+  }
+}
+
+.cf-sent-row > .cf-chev {
+  height: 26px;
+}
+
+.cf-sent-body {
+  max-width: 68ch;
+  font-size: 15.5px;
+  line-height: 26px;
+  color: var(--cf-text);
+  cursor: text;
+}
+
+.cf-sent-body p {
+  margin: 0;
+}
+
+.cf-clauses {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cf-clauses > li {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+}
+
+.cf-clauses.is-sub > li {
+  grid-template-columns: 38px minmax(0, 1fr);
+}
+
+.cf-clause-mark {
+  font: 500 12.5px/26px var(--cf-mono);
+  color: var(--cf-text-3);
+}
+
+/* Secondary information, each group folded with its count */
+
+.cf-groups {
+  margin-top: 44px;
   border-top: 1px solid var(--cf-line);
 }
 
-.cf-read-empty {
-  max-width: 560px;
+.cf-group {
+  border-bottom: 1px solid var(--cf-line);
 }
 
-.cf-read-empty .cf-muted {
-  margin: 10px 0 0;
-  line-height: 1.6;
+.cf-group-h {
+  margin: 0;
+  font: inherit;
 }
 
-.cf-plain-link {
-  color: var(--cf-text);
+.cf-group-btn {
+  width: 100%;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border: 0;
   border-radius: 6px;
+  background: none;
+  color: var(--cf-text);
+  font: 500 14.5px/1.3 var(--cf-font);
+  text-align: left;
+  cursor: pointer;
+}
+
+.cf-group-count {
+  font: 500 12px/1 var(--cf-mono);
+  color: var(--cf-text-3);
+}
+
+.cf-group-note {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12.5px;
+  font-weight: 400;
+  color: var(--cf-text-3);
+}
+
+.cf-group-btn > .cf-chev {
+  margin-left: auto;
+}
+
+.cf-group-body {
+  padding: 0 0 24px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--cf-text);
+}
+
+.cf-group-body > p {
+  margin: 0;
+}
+
+.cf-group-body > p + p,
+.cf-group-body > .cf-note,
+.cf-group-body > .cf-code-src {
+  margin-top: 12px;
+}
+
+.cf-pairs {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.cf-pair {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  gap: 12px;
+  align-items: baseline;
+}
+
+.cf-pair dt,
+.cf-pair dd {
+  margin: 0;
+}
+
+.cf-intent {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.cf-intent > li {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 68ch);
+  column-gap: 12px;
+}
+
+.cf-intent-obj {
+  font: 500 12px/1.75 var(--cf-mono);
+  color: var(--cf-text-3);
+}
+
+.cf-refs + .cf-refs {
+  margin-top: 16px;
+}
+
+.cf-refs-label {
+  font-size: 12.5px;
+  color: var(--cf-text-3);
+}
+
+.cf-note-item {
+  max-width: 68ch;
+}
+
+.cf-note-item + .cf-note-item {
+  margin-top: 14px;
+}
+
+.cf-note-item p {
+  margin: 4px 0 0;
+  color: var(--cf-text-2);
+}
+
+.cf-read-src {
+  margin-top: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--cf-text-3);
+}
+
+.cf-read-src > span:first-child {
+  font: 400 11.5px/1.6 var(--cf-mono);
+}
+
+.cf-read-src .nrc-credit,
+.cf-read-src .nrc-credit a {
+  font: inherit;
+  color: inherit;
+}
+
+.cf-read-src .nrc-credit a {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Nothing open yet */
+
+.cf-read-empty {
+  max-width: 600px;
+  min-height: 100%;
+  margin: 0 auto;
+  padding: 40px 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.cf-read-empty-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 550;
+  letter-spacing: -0.02em;
+}
+
+.cf-read-empty-text {
+  margin: 10px 0 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--cf-text-2);
+}
+
+.cf-read-empty-label {
+  margin: 32px 0 8px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--cf-text-3);
+}
+
+.cf-likely {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--cf-line);
+}
+
+.cf-likely-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  border-bottom: 1px solid var(--cf-line);
+  color: var(--cf-text);
+  font-size: 14px;
+}
+
+.cf-likely-id {
+  font-size: 12px;
+  color: var(--cf-text-2);
+}
+
+.cf-likely-title {
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.cf-read-empty .cf-row {
-  align-items: center;
+/* One pane at a time (the class comes from the library's own width, not the window's) */
+
+.cf-lib.is-narrow .cf-lib-nav {
+  width: 100%;
+  border-right: 0;
 }
 
-@media (max-width: 960px) {
-  .cf-lib-body {
-    grid-template-columns: 280px minmax(0, 1fr);
-  }
+.cf-lib.is-narrow.has-article .cf-lib-nav,
+.cf-lib.is-narrow:not(.has-article) .cf-lib-reader {
+  display: none;
+}
+
+.cf-lib.is-narrow .cf-lib-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 18px -2px;
+  padding: 4px 2px;
+  border-radius: 6px;
+  color: var(--cf-text-2);
+  font-size: 13px;
+}
+
+.cf-lib.is-narrow .cf-read {
+  padding: 20px 20px 56px;
+}
+
+.cf-lib.is-narrow .cf-read-title {
+  font-size: 24px;
+}
+
+.cf-lib.is-narrow .cf-sent-row {
+  grid-template-columns: 36px minmax(0, 1fr) 12px;
+}
+
+.cf-lib.is-narrow .cf-clauses > li {
+  grid-template-columns: 28px minmax(0, 1fr);
+}
+
+.cf-lib.is-narrow .cf-clauses.is-sub > li {
+  grid-template-columns: 38px minmax(0, 1fr);
 }
 
 @media (max-width: 760px) {
-  .cf-lib {
-    padding: 14px 12px 0;
-    height: auto;
-  }
-  .cf-lib-head {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .cf-score-wrap {
-    justify-content: flex-start;
-  }
-  .cf-tech.is-inline {
-    text-align: left;
-  }
-  .cf-lib-body {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .cf-lib-tree,
-  .cf-lib-read {
-    overflow: visible;
-  }
-  .cf-lib.has-article .cf-lib-tree {
-    display: none;
-  }
-  .cf-lib:not(.has-article) .cf-lib-read {
-    display: none;
-  }
-  .cf-lib-back {
-    display: inline-flex;
-    margin: -10px 0 8px -8px;
-  }
-  .cf-lib-read {
-    padding: 22px 18px;
-  }
   .cf-pal-path {
     display: none;
   }
@@ -3292,11 +4503,11 @@ body {
   background: var(--cf-raise);
   backdrop-filter: none;
   border: 1px solid var(--cf-line-2);
-  box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.9);
+  box-shadow: 0 24px 60px -24px rgba(17, 24, 39, 0.16);
 }
 
 .cf-modal::backdrop {
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(17, 24, 39, 0.15);
   backdrop-filter: none;
 }
 
@@ -3330,7 +4541,7 @@ body {
 
 .cf-msg-ai .cf-code-text.is-inline {
   border-left-color: var(--cf-text-2);
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(17, 24, 39, 0.04);
   border-radius: 0 8px 8px 0;
 }
 
@@ -3344,7 +4555,7 @@ body {
 
 .cf-engineer-h,
 .cf-engineer-link {
-  color: #ffe08a;
+  color: var(--cf-warning-ink);
 }
 
 .cf-engineer p {
@@ -3367,7 +4578,7 @@ body {
 }
 
 .cf-chip[aria-pressed="true"]{
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(17, 24, 39, 0.08);
   border-color: var(--cf-text);
 }
 
@@ -3435,8 +4646,7 @@ body {
 }
 
 @media (hover: hover) {
-  .cf-link-btn:hover,
-  .cf-assist-link:hover {
+  .cf-link-btn:hover {
     color: var(--cf-text);
   }
 }
@@ -3446,6 +4656,20 @@ body {
   min-height: 100%;
   display: flex;
   flex-direction: column;
+}
+
+/* With a banner above it (an officer's notice), the deck takes only the height that is left, so
+   the question stays centred in what you can see. */
+.cf-main:has(> .cf-deck-page) {
+  display: flex;
+  flex-direction: column;
+}
+.cf-main:has(> .cf-deck-page) > * {
+  flex: none;
+}
+.cf-main:has(> .cf-deck-page) > .cf-deck-page {
+  flex: 1 0 auto;
+  min-height: 0;
 }
 
 .cf-deck-status {
@@ -3506,7 +4730,8 @@ body {
   align-items: center;
   gap: 8px;
   margin-bottom: 12px;
-  color: var(--cf-accent-ink);
+  /* The question number takes its section's shade (neutral where there is no section). */
+  color: var(--hue-s, var(--cf-text-2));
   font-size: 15px;
   font-weight: 550;
 }
@@ -3611,7 +4836,7 @@ body {
 .cf-choice[aria-pressed="true"] .cf-choice-key {
   background: var(--cf-text);
   border-color: var(--cf-text);
-  color: #000;
+  color: #fff;
 }
 
 .cf-choice[aria-pressed="true"] .cf-choice-check {
@@ -3683,12 +4908,12 @@ body {
 
 .cf-uline.is-date {
   width: 260px;
-  color-scheme: dark;
+  color-scheme: light;
   font: 400 20px/1.4 var(--cf-mono);
 }
 
 .cf-uline.is-date::-webkit-calendar-picker-indicator {
-  filter: invert(0.75);
+  opacity: 0.6;
   cursor: pointer;
 }
 
@@ -3711,35 +4936,27 @@ body {
   margin-top: 26px;
 }
 
-.cf-ok-hint {
-  font-size: 13px;
-  color: var(--cf-text-3);
-}
-
-.cf-ok-hint b {
-  color: var(--cf-text-2);
-  font-weight: 600;
-}
-
 .cf-ok-more {
   display: inline-flex;
   gap: 14px;
   margin-left: 8px;
 }
 
-.cf-assist-link {
+/* The one help entry on a question: the reason, then the assistant on this card. */
+.cf-help-btn {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  margin-top: 30px;
-  padding: 4px 0;
-  border: 0;
-  background: none;
-  color: var(--cf-text-3);
-  font: 400 13.5px/1.4 var(--cf-font);
-  cursor: pointer;
-  transition-property: color;
-  transition-duration: 150ms;
+  gap: 6px;
+}
+
+.cf-why p {
+  margin: 0 0 8px;
+}
+
+.cf-why .cf-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .cf-q-wrap .cf-hint,
@@ -3771,7 +4988,8 @@ body {
 
 .cf-qsec {
   position: relative;
-  flex: var(--n) 1 0;
+  /* A short section still gets room for its plain name. */
+  flex: max(var(--n), 5) 1 0;
   min-width: 96px;
   container: qsec / inline-size;
 }
@@ -3803,12 +5021,19 @@ body {
   transition-duration: 150ms;
 }
 
+/* Neutral everywhere but the section you are in: there, answered questions take its hue and the
+   current one a darker shade of the same hue (never the global accent). Open ones stay grey. */
 .cf-qsec-bar i.is-done {
-  background: var(--cf-text);
+  background: var(--cf-text-3);
 }
 
+.cf-qsec.is-on .cf-qsec-bar i.is-done {
+  background: var(--hue, var(--cf-text-3));
+}
+
+.cf-qsec.is-on .cf-qsec-bar i.is-cur,
 .cf-qsec-bar i.is-cur {
-  background: var(--cf-accent);
+  background: var(--hue-s, var(--cf-text));
 }
 
 /* Letter and count never truncate; only the section word does, and it goes first when narrow. */
@@ -3824,12 +5049,22 @@ body {
 
 .cf-qsec-l {
   flex: none;
-  color: var(--cf-text-2);
-  font-weight: 550;
+  color: var(--cf-text-3);
+  font-weight: 450;
 }
 
 .cf-qsec-sep {
   flex: none;
+}
+
+.cf-qsec-name::after {
+  content: " ·";
+  color: var(--cf-text-3);
+  font-weight: 400;
+}
+
+.cf-qsec-l {
+  color: var(--cf-text-3);
 }
 
 .cf-qsec-name {
@@ -3851,8 +5086,13 @@ body {
   display: none;
 }
 
-.cf-qsec.is-on :is(.cf-qsec-l, .cf-qsec-name) {
+.cf-qsec.is-on .cf-qsec-name {
   color: var(--cf-text);
+}
+
+.cf-qsec.is-on .cf-qsec-l {
+  color: var(--hue-s, var(--cf-text-2));
+  font-weight: 550;
 }
 
 /* Compact: "C · 0/1" (narrow segment, assistant open, phone). */
@@ -3983,7 +5223,8 @@ body {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: #26262b;
+  background: var(--cf-hue-blue-t);
+  color: var(--cf-hue-blue);
   font-size: 11.5px;
   font-weight: 600;
 }
@@ -4013,6 +5254,14 @@ body {
   overflow-wrap: anywhere;
 }
 
+.cf-returned-retry {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0 0;
+}
+
 .cf-returned-items {
   margin: 10px 0 0;
   padding: 0;
@@ -4021,7 +5270,7 @@ body {
 
 .cf-returned-items a {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 10px;
   padding: 4px 0;
   color: var(--cf-text-2);
@@ -4029,7 +5278,14 @@ body {
   text-decoration: none;
 }
 
+.cf-returned-items a > .cf-dot { flex: none; margin-top: 7px; }
+.cf-returned-item-text { display: grid; gap: 2px; min-width: 0; overflow-wrap: anywhere; }
+.cf-returned-item-state { color: var(--cf-text-3); font-size: 12px; }
+.cf-returned-next { margin: 10px 0 0; }
+
 .cf-returned-items a svg {
+  flex: none;
+  margin-top: 3px;
   opacity: 0;
   transition-property: opacity;
   transition-duration: 150ms;
@@ -4051,9 +5307,12 @@ body {
   margin-top: 14px;
 }
 
-.cf-returned-reply {
-  margin: 12px 0 0;
-}
+.cf-conversation { padding: 16px 28px; border-bottom: 1px solid var(--cf-line); }
+.cf-conversation > details { max-width: 864px; }
+.cf-conversation summary { cursor: pointer; color: var(--cf-text-2); font-size: 14px; }
+.cf-conversation .ac-thread { max-height: 360px; overflow-y: auto; overscroll-behavior: contain; padding: 6px 0; }
+.cf-conversation .ac-msg-head { flex-wrap: wrap; }
+.cf-conversation .ac-msg-body, .cf-conversation .ac-msg-items { margin-left: 0; }
 
 /* Submit to the authority (Application stage). */
 .cf-submit {
@@ -4121,16 +5380,10 @@ body {
     flex: 1;
     justify-content: center;
   }
-  .cf-ok-hint {
-    display: none;
-  }
   .cf-ok-more {
     width: 100%;
     justify-content: center;
     margin-left: 0;
-  }
-  .cf-assist-link {
-    margin-top: 18px;
   }
   .cf-qfoot {
     min-height: 64px;
@@ -4238,12 +5491,8 @@ a.cf-save-check {
   }
 }
 
-/* Assistant open on a laptop: the title keeps the left column (about 12 characters at 1280);
-   the authority moves into the title's tooltip. */
+/* Assistant open on a laptop: the title keeps the left column (about 12 characters at 1280). */
 @media (max-width: 1440px) {
-  .cf-app[data-assistant="open"] .cf-head-meta {
-    display: none;
-  }
   .cf-app[data-assistant="open"] .cf-head {
     padding-left: 22px;
     gap: 12px;
@@ -4251,7 +5500,727 @@ a.cf-save-check {
   .cf-app[data-assistant="open"] .cf-head-left {
     gap: 4px;
   }
-  .cf-app[data-assistant="open"] .cf-stage-rings {
-    gap: 2px;
+  .cf-app[data-assistant="open"] .cf-stages {
+    gap: 0;
   }
 }
+
+/* A narrow work area (list and assistant both open): the stage icons sit closer. */
+.cf-work {
+  container: work / inline-size;
+}
+
+@container work (max-width: 940px) {
+  .cf-stages {
+    gap: 0;
+  }
+}
+
+/* Questions before anything is described: one quiet line and the way back to Start. */
+
+.cf-q-empty-line {
+  margin: 0;
+  max-width: 520px;
+  font-size: 19px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  color: var(--cf-text-2);
+  text-wrap: pretty;
+}
+
+.cf-q-empty .cf-btn {
+  margin-top: 26px;
+}
+
+/* Start, second step when no role is known: who is applying. */
+
+.cf-start.is-role .cf-q-wrap {
+  width: 100%;
+}
+
+.cf-role-back {
+  margin-top: 28px;
+}
+
+/* —— WP-23: what we read, the planner, the fork, code-check progress, the scope redirect —— */
+
+/* The applicant's own words, with the span a value was read from marked. Quiet: no fill, one hairline. */
+.cf-said {
+  margin: 22px 0 0;
+  max-width: 620px;
+}
+
+.cf-said-words {
+  margin: 0;
+  padding: 2px 0 2px 16px;
+  border-left: 1px solid var(--cf-line-2);
+  font-size: 17px;
+  line-height: 1.6;
+  color: var(--cf-text-2);
+  text-wrap: pretty;
+  overflow-wrap: anywhere;
+}
+
+.cf-said-words mark {
+  background: none;
+  color: var(--cf-text);
+  text-decoration: underline;
+  text-decoration-color: var(--cf-accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+.cf-said-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 16px;
+  margin-top: 10px;
+  padding-left: 17px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--cf-text-3);
+}
+
+.cf-said-sure {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 7px;
+}
+
+/* The fork: a calm inline note, the API's words, the two halves under a disclosure. */
+.cf-fork {
+  margin: 20px 0 0;
+  max-width: 620px;
+  padding: 0 0 0 16px;
+  border-left: 1px solid var(--cf-line-2);
+}
+
+.cf-fork-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--cf-text);
+}
+
+.cf-fork-text {
+  margin: 6px 0 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--cf-text-2);
+}
+
+.cf-fork-more,
+.cf-preapp-step {
+  margin-top: 8px;
+  font-size: 13.5px;
+  color: var(--cf-text-2);
+}
+
+.cf-fork-more > summary,
+.cf-preapp-step > summary {
+  width: fit-content;
+  cursor: pointer;
+  color: var(--cf-text-3);
+  border-radius: 6px;
+  transition-property: color;
+  transition-duration: 150ms;
+}
+
+@media (hover: hover) {
+  .cf-fork-more > summary:hover,
+  .cf-preapp-step > summary:hover {
+    color: var(--cf-text);
+  }
+}
+
+.cf-halves {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.cf-halves li {
+  display: grid;
+  gap: 2px;
+  line-height: 1.5;
+}
+
+.cf-half-label {
+  color: var(--cf-text);
+  font-weight: 500;
+}
+
+.cf-half-term {
+  color: var(--cf-text-3);
+  font-weight: 400;
+}
+
+.cf-half-basis {
+  font: 400 12px/1.5 var(--cf-mono);
+  color: var(--cf-text-3);
+}
+
+.cf-half-who {
+  color: var(--cf-text-3);
+}
+
+.cf-review-fork .cf-fork {
+  margin-top: 4px;
+}
+
+.cf-preapp {
+  margin-top: 6px;
+  max-width: 620px;
+}
+
+.cf-preapp-step p {
+  margin: 8px 0 0;
+  line-height: 1.6;
+}
+
+.cf-preapp-src {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 4px;
+  font-size: 12.5px;
+  color: var(--cf-text-3);
+}
+
+.cf-preapp-src a {
+  color: var(--cf-text-2);
+  text-underline-offset: 2px;
+}
+
+/* Planner inputs: a number with its unit, or words, and Not sure beside them. */
+.cf-inline-answer.is-wide {
+  flex-wrap: wrap;
+}
+
+.cf-inline-answer.is-wide .cf-uline {
+  flex: 1 1 100%;
+}
+
+.cf-inline-answer > .cf-uline:not(.is-number):not(.is-area) {
+  flex: 1;
+  min-width: 0;
+  margin-top: 0;
+}
+
+.cf-inline-answer > .cf-uline.is-area {
+  margin-top: 0;
+}
+
+.cf-unit {
+  padding-bottom: 14px;
+  font-size: 18px;
+  color: var(--cf-text-2);
+}
+
+/* Code-check progress: four stages, counts only. */
+.cf-steps {
+  list-style: none;
+  margin: 26px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+  max-width: 520px;
+}
+
+.cf-step {
+  display: grid;
+  grid-template-columns: 22px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 40px;
+  border-bottom: 1px solid var(--cf-line);
+  font-size: 15px;
+  color: var(--cf-text-3);
+}
+
+.cf-step.is-done,
+.cf-step.is-running {
+  color: var(--cf-text);
+}
+
+.cf-step-mark {
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid var(--cf-line-2);
+  color: var(--cf-done);
+}
+
+.cf-step.is-done .cf-step-mark {
+  border-color: transparent;
+}
+
+.cf-step.is-running .cf-step-mark {
+  border-color: var(--cf-text-2);
+  border-top-color: transparent;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .cf-step.is-running .cf-step-mark {
+    animation: cf-spin 900ms linear infinite;
+  }
+}
+
+@keyframes cf-spin {
+  to {
+    rotate: 1turn;
+  }
+}
+
+.cf-step-detail {
+  font: 400 12.5px/1.4 var(--cf-mono);
+  color: var(--cf-text-3);
+}
+
+.cf-step-start,
+.cf-step-error {
+  margin-top: 26px;
+}
+
+.cf-step-error .cf-btn {
+  margin-top: 14px;
+}
+
+/* "Show the code": the article number and verbatim sentence, hidden until asked. */
+.cf-showcode {
+  margin-top: 18px;
+}
+
+.cf-codebox {
+  margin-top: 10px;
+  max-width: 640px;
+}
+
+.cf-codebox-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  font-size: 13.5px;
+  color: var(--cf-text-2);
+}
+
+.cf-codebox-head .cf-mono {
+  color: var(--cf-text);
+}
+
+.cf-codebox .cf-code-text {
+  margin-top: 10px;
+  background: none;
+}
+
+.cf-codebox-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin-top: 8px;
+}
+
+.cf-codebox-links a.cf-link-btn {
+  text-decoration: none;
+}
+
+/* The scope redirect page. */
+.cf-redirect-facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 8px 18px;
+  margin: 20px 0 0;
+  max-width: 620px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.cf-redirect-facts dt {
+  color: var(--cf-text-3);
+}
+
+.cf-redirect-facts dd {
+  margin: 0;
+  color: var(--cf-text-2);
+}
+
+.cf-redirect-foot {
+  margin-top: 18px;
+  max-width: 560px;
+}
+
+@media (max-width: 760px) {
+  .cf-said-words {
+    font-size: 15.5px;
+  }
+  .cf-redirect-facts {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  .cf-redirect-facts dd + dt {
+    margin-top: 10px;
+  }
+  .cf-redirect .cf-ok-row > .cf-btn {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+}
+
+/* What the form is: once on first use, and at the top of each section's list. */
+.cf-qsec-about {
+  margin: 2px 10px 8px;
+  max-width: 300px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--cf-text-3);
+  white-space: normal;
+}
+
+/* —— WP-35: coded rules, standing packages, the jurisdiction note and the download panel —— */
+
+/* A rule result: the numbers used as a quiet two-column list, then Show the code. No fills. */
+.cf-rule {
+  margin: 20px 0 0;
+  max-width: 640px;
+}
+
+.cf-rule.is-on-card {
+  margin-top: 18px;
+  padding-left: 16px;
+  border-left: 1px solid var(--cf-line-2);
+}
+
+.cf-rule-lead {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--cf-text);
+}
+
+.cf-rule-nums {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  border-top: 1px solid var(--cf-line);
+}
+
+.cf-rule-num {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 4px 18px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--cf-line);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.cf-rule-num dt {
+  color: var(--cf-text-2);
+}
+
+.cf-rule-num dd {
+  margin: 0;
+  color: var(--cf-text);
+  overflow-wrap: anywhere;
+}
+
+.cf-rule-num dd b {
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.cf-rule-num.is-limit dt,
+.cf-rule-num.is-limit dd b {
+  color: var(--cf-text-2);
+}
+
+.cf-rule-next {
+  margin: 14px 0 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--cf-text-2);
+}
+
+.cf-rule-review,
+.cf-pkg-foot {
+  margin: 14px 0 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--cf-text-3);
+}
+
+.cf-rule-how {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px dashed var(--cf-line-2);
+  border-radius: 14px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--cf-text-2);
+}
+
+.cf-rule-how p {
+  margin: 6px 0 0;
+}
+
+.cf-rule-how .cf-rule-how-h {
+  margin: 0;
+  font: 400 12px/1.5 var(--cf-mono);
+  color: var(--cf-text-3);
+}
+
+.cf-rule-calc {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  gap: 4px 14px;
+  margin: 10px 0 0;
+}
+
+.cf-rule-calc dt {
+  color: var(--cf-text-3);
+}
+
+.cf-rule-calc dd {
+  margin: 0;
+  color: var(--cf-text);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.cf-rule-notchecked {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--cf-text-2);
+}
+
+.cf-rule-notchecked > summary,
+.cf-juris details > summary {
+  width: fit-content;
+  cursor: pointer;
+  color: var(--cf-text-3);
+  border-radius: 6px;
+  transition-property: color;
+  transition-duration: 150ms;
+}
+
+@media (hover: hover) {
+  .cf-rule-notchecked > summary:hover,
+  .cf-juris details > summary:hover {
+    color: var(--cf-text);
+  }
+}
+
+.cf-rule-notchecked ul,
+.cf-pkg-ask ul,
+.cf-juris-notes {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+  line-height: 1.5;
+}
+
+.cf-rule-notchecked li,
+.cf-pkg-ask li {
+  padding-left: 14px;
+  border-left: 1px solid var(--cf-line);
+}
+
+/* Standing packages: plain wording first, progress as one hairline bar. */
+.cf-pkg {
+  margin: 18px 0 0;
+  max-width: 640px;
+}
+
+.cf-pkg-summary {
+  margin: 0 0 8px;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--cf-text-2);
+  text-wrap: pretty;
+}
+
+.cf-pkg-progress {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 4px;
+  font-size: 12.5px;
+}
+
+.cf-pkg-bar {
+  display: block;
+  height: 2px;
+  max-width: 320px;
+  border-radius: 999px;
+  background: var(--cf-line-2);
+  overflow: hidden;
+}
+
+.cf-pkg-bar i {
+  display: block;
+  height: 100%;
+  background: var(--cf-text-2);
+  transition-property: width;
+  transition-duration: 300ms;
+}
+
+.cf-pkg-reason {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+  justify-items: start;
+}
+
+.cf-pkg-reason .cf-uline {
+  width: 100%;
+}
+
+.cf-pkg-ask {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--cf-text-2);
+}
+
+/* The jurisdiction note under "Who will review your application?". */
+.cf-juris {
+  margin: 20px 0 0;
+  max-width: 640px;
+  padding-left: 16px;
+  border-left: 1px solid var(--cf-line-2);
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--cf-text-2);
+}
+
+.cf-juris-h {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--cf-text);
+}
+
+.cf-juris p {
+  margin: 6px 0 0;
+}
+
+.cf-juris details {
+  margin-top: 8px;
+}
+
+.cf-juris-notes li {
+  display: grid;
+  gap: 2px;
+}
+
+.cf-juris-src {
+  font-size: 12.5px;
+  color: var(--cf-text-3);
+}
+
+.cf-juris-src a,
+.cf-pkg a.cf-inline-link {
+  color: var(--cf-text-2);
+  text-underline-offset: 2px;
+}
+
+/* Download panel: each blocker on its own row with the card that fixes it; the office's note. */
+.cf-side-blockers .cf-row-text {
+  font-size: 13px;
+}
+
+.cf-side-notice {
+  overflow-wrap: anywhere;
+  margin: 4px 0 0;
+  padding: 12px 14px;
+  border: 1px solid var(--cf-line);
+  border-radius: 14px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--cf-text-2);
+}
+
+.cf-side-notice-h {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--cf-text);
+}
+
+.cf-side-notice p {
+  margin: 4px 0 0;
+}
+
+@media (max-width: 760px) {
+  .cf-rule-num {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  .cf-rule-calc {
+    grid-template-columns: 1fr;
+  }
+  .cf-rule-calc dd {
+    text-align: left;
+  }
+}
+
+/* A short explanation that opens on demand: one quiet summary line, the text below it. */
+.cf-help {
+  margin: 4px 0 8px;
+  font-size: 13px;
+  color: var(--cf-text-3);
+}
+
+.cf-help summary {
+  display: inline-block;
+  cursor: pointer;
+  list-style: none;
+}
+
+.cf-help summary::-webkit-details-marker {
+  display: none;
+}
+
+.cf-help summary::before {
+  content: "›";
+  display: inline-block;
+  margin-right: 6px;
+  transition-property: transform;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+
+.cf-help[open] summary::before {
+  transform: rotate(90deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cf-help summary::before {
+    transition: none;
+  }
+}
+.cf-triage-topic { padding: 14px 0; border-bottom: 1px solid var(--cf-line); }
+.cf-triage-topic > summary { cursor: pointer; font-size: 15px; line-height: 1.5; }
+.cf-keyword-triage .cf-row { flex-wrap: wrap; }
+.cf-keyword-triage .cf-row-text { min-width: 160px; }
+.cf-keyword-triage .cf-row-text p { margin: 4px 0 0; }
+.cf-keyword-triage .cf-row-actions { margin-top: 20px; }
+.ac-sheet-question { padding: 14px 0; border-bottom: 1px solid rgba(0,0,0,.12); overflow-wrap: anywhere; }
+.ac-sheet-questions details { margin: 12px 0; }
+.ac-sheet-questions summary { cursor: pointer; font-size: 13px; line-height: 1.5; }

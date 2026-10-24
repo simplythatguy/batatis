@@ -1,4 +1,5 @@
 import json
+import re
 
 from fastapi.testclient import TestClient
 import httpx
@@ -77,7 +78,8 @@ def test_grounded_provision_lookup_citations_removal_and_spend_receipt(assistant
     context = json.loads(invocation['context'])
     assert context['focused_provision']['text'] == Codes().provision('9.10.9.16.(1)', 'B')['text']
     assert context['section_c'][0]['pairs'][0]['function'] == 'F03'
-    assert ('Anthropic' if provider == 'anthropic' else 'OpenAI') in result['notice']
+    assert 'third-party AI service provider' in result['notice'] and 'API data-use terms' in result['notice']
+    assert not re.search(r'openai|anthropic|claude|gpt|jev', result['notice'] + str(r.headers), re.I)   # who runs the model stays private
     assert llm_gate._memory.today() == llm_gate.estimate_usd(invocation['model'], 100, 40)
     assert result['notice'] == r.headers['x-batatis-notice']
 

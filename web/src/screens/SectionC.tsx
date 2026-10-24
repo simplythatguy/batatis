@@ -6,6 +6,8 @@ import { CodeQuote, ServiceUnavailable, GapStrip, PanelHeader, StatusPill } from
 import { candidateById, unresolvedCandidates } from "../model";
 import { useCase } from "../store";
 import type { Candidate, SectionCRow } from "../types";
+import { readOnlyStatus } from "../calm/applications";
+import { useCurrentApplication } from "../calm/begin";
 
 function AttributionCell({ row }: { row: SectionCRow }) {
   if (row.attributionStatus === "direct") return <span className="label-pill">Direct row</span>;
@@ -82,6 +84,7 @@ export function provisionCandidate(h: { id: string; article_title?: string | nul
 /** Manual code search. `onAdded` receives the new card id after "Use this provision". */
 export function ProvisionSearch({ onAdded }: { onAdded?: (candidateId: string) => void } = {}) {
   const { c, dispatch, noteLookupFailure } = useCase();
+  const { locked, readOnly } = useCurrentApplication();
   const [query, setQuery] = useState("");
   const [hits, setHits] = useState<CodeHit[]>([]);
   const [note, setNote] = useState("");
@@ -111,6 +114,8 @@ export function ProvisionSearch({ onAdded }: { onAdded?: (candidateId: string) =
       noteLookupFailure(e instanceof Error ? e.message : String(e));
     }
   }
+
+  if (readOnly) return <p className="meta">Your saved application is read-only. Read the code in the code library.</p>;
 
   return (
     <form
@@ -152,8 +157,9 @@ export function ProvisionSearch({ onAdded }: { onAdded?: (candidateId: string) =
               <button
                 type="button"
                 className="btn"
+                disabled={locked}
                 onClick={() => {
-                  if (c.candidates.some((x) => x.provision === h.id)) return;
+                  if (locked || c.candidates.some((x) => x.provision === h.id)) return;
                   dispatch({ type: "addCandidate", candidate: provisionCandidate(h) });
                   setNote(`${h.id} is in the table. Confirm it before you submit.`);
                   onAdded?.(`search-${h.id}`);
@@ -171,6 +177,7 @@ export function ProvisionSearch({ onAdded }: { onAdded?: (candidateId: string) =
 
 export function SectionC() {
   const { c, gaps, dispatch, sectionCLookup, retrySectionC } = useCase();
+  const { app, locked, readOnly } = useCurrentApplication();
   const { source, error } = sectionCLookup;
   const rows = source === "live" ? c.sectionC : [];
   const [attempt, setAttempt] = useState(0);
@@ -190,7 +197,8 @@ export function SectionC() {
   return (
     <>
       <PanelHeader title="Section C" meta="Code references" />
-      <GapStrip gaps={gaps} />
+      {!readOnly && <GapStrip gaps={gaps} />}
+      {readOnly && <p className="meta">{readOnlyStatus(app?.status, app?.authority).note}</p>}
       <div className="pane scroll-body">
         <div className="sc-source">
           {source === "live" && rows.length === 0 ? (
@@ -205,13 +213,14 @@ export function SectionC() {
           <div className="sc-detail">
             {selCand && <div className="field">
               <label htmlFor="sentence-decision">Does your design depart from this sentence?</label>
-              <select id="sentence-decision" value={selCand.answer ?? ""} onChange={e => {
+              <select id="sentence-decision" disabled={locked} value={selCand.answer ?? ""} onChange={e => {
+                if (locked) return;
                 const answer = e.target.value;
                 if (answer === "" || answer === "yes" || answer === "no" || answer === "not-sure") dispatch({ type: "answerCandidate", id: selCand.id, answer: answer === "" ? null : answer });
               }}>
                 <option value="">Not answered</option><option value="yes">Yes — a departure</option><option value="no">No departure</option><option value="not-sure">Not sure</option>
               </select>
-              <button type="button" className="btn btn-ghost" onClick={() => dispatch({ type: "removeCandidate", id: selCand.id })}>Remove reference</button>
+              <button type="button" className="btn btn-ghost" disabled={locked} onClick={() => { if (!locked) dispatch({ type: "removeCandidate", id: selCand.id }); }}>Remove reference</button>
             </div>}
             <details className="source-block disclosure"><summary>Code text and source</summary>
               <div className="block-label">
@@ -347,14 +356,13 @@ export function SectionC() {
       </div>
       <div className="footer-bar">
         <span className="status-note" role="status">
-          {open.length ? `${open.length} unanswered Code check question${open.length > 1 ? "s" : ""}. ` : ""}
-          Not sure does not block Continue.
+          {readOnly ? readOnlyStatus(app?.status, app?.authority).label : <>{open.length ? `${open.length} unanswered Code check question${open.length > 1 ? "s" : ""}. ` : ""}Not sure does not block Continue.</>}
         </span>
         <a className="btn btn-ghost" href="#/code-check">
           Back
         </a>
-        <button type="button" className="btn btn-primary" onClick={() => (location.hash = "#/application?tab=alt")}>
-          Continue
+        <button type="button" className="btn btn-primary" onClick={() => (location.hash = readOnly ? "#/application" : "#/application?tab=alt")}>
+          {readOnly ? "View application" : "Continue"}
         </button>
       </div>
     </>
