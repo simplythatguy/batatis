@@ -123,6 +123,60 @@ async function messagesDrawer(page) {
 }
 
 try {
+  await scenario('J05 selected-article-only revisions reconcile every card before a later acknowledged save', async ({ page, context, id, returned, row, api, remote, requests }) => {
+    await returned(); await poll(page);
+    await page.getByRole('button', { name: 'Resubmit to Edmonton', exact: true }).waitFor();
+    await page.waitForFunction(() => window.caseStore.sectionCLookup.source === 'live');
+    await page.evaluate(async () => {
+      window.refreshSelection = (await import('/src/calm/openCase.ts')).selectedArticles;
+      window.refreshVersion = (await import('/src/api/sync.ts')).acknowledgedVersion;
+    });
+    const saved = await remote();
+    const baseline = saved.selected_articles ?? saved.provisions.map(provision => ({ id: 'search-' + provision, provision, answer: 'yes', pending: false }));
+    const b = { id: 'search-remote-b', provision: '9.27.3.4.', answer: null, pending: false };
+    const selections = [
+      [...baseline, b],
+      [...baseline, { ...b, id: 'search-remote-b-renamed' }],
+      [...baseline, { ...b, provision: '9.27.3.4.(2)' }],
+      [...baseline, { ...b, answer: 'not-sure' }],
+      [...baseline, { ...b, answer: 'no', pending: true }],
+      [...baseline, { ...b, answer: 'no', pending: false }],
+      [...baseline, { ...b, answer: 'yes', pending: true }],
+      [],
+      [b, ...baseline],
+    ];
+    for (const selected_articles of selections) {
+      const before = await remote();
+      const updated = await api(context, `/cases/${id}/selected-articles`, { expected_version: before.version, selected_articles }, 'PUT');
+      assert.deepEqual(updated.provisions, saved.provisions, 'selection writes never confirm or withdraw a benchmark');
+      const start = requests.length;
+      await row().click();
+      await page.waitForFunction(({ id, version }) => window.refreshVersion(id) === version, { id, version: updated.version });
+      await page.waitForFunction(expected => JSON.stringify(window.refreshSelection(window.caseStore.c)) === JSON.stringify(expected), selected_articles);
+      const actual = await page.evaluate(async () => {
+        const { selectedArticles } = await import('/src/calm/openCase.ts');
+        return selectedArticles(window.caseStore.c);
+      });
+      assert.deepEqual(actual, selected_articles, 'the acknowledged revision must include the complete saved selection');
+      assert.equal(await page.evaluate(() => window.caseStore.c.candidates.some(a => a.id === 'search-remote-b' && a.benchmark)), false, 'a selected or pending Yes is not a confirmed benchmark');
+      if (selected_articles.some(a => a.answer === 'not-sure')) {
+        assert.equal(await page.evaluate(() => window.caseStore.c.questions.some(q => q.cardId === 'search-remote-b')), true, 'Not sure retains its open question');
+      }
+      await page.waitForLoadState('networkidle');
+      assert.equal(requests.slice(start).some(r => r.method !== 'GET' && r.path !== '/section-c'), false, 'refresh must not write the adopted selection in the background');
+      assert.equal((await remote()).version, updated.version);
+    }
+    await page.evaluate(() => { location.hash = '#/code/' + encodeURIComponent('9.27.3.1.(1)'); });
+    const writing = page.waitForResponse(r => r.request().method() === 'PUT' && r.url().endsWith('/selected-articles'));
+    await page.getByRole('button', { name: 'Add to my application', exact: true }).click();
+    const response = await writing;
+    assert.equal(response.status(), 200, await response.text());
+    await page.locator('.cf-save-label').filter({ hasText: 'Saved' }).waitFor();
+    const after = await remote();
+    assert.ok(after.selected_articles.some(a => a.id === b.id && a.provision === b.provision), 'the later acknowledged PUT/GET retains remote B');
+    assert.ok(after.selected_articles.some(a => a.provision === '9.27.3.1.(1)'), 'the later local addition was saved');
+  });
+
   await scenario('J05 a new return notification refreshes the open application and unlocks it without reload or fetch loops', async ({ page, returned, requests }) => {
     await page.evaluate(() => window.caseStore.dispatch({ type: 'addFiles', files: [{ id: 'synthetic-local-pdf', name: 'Synthetic plan.pdf' }] }));
     await returned(); await poll(page);
