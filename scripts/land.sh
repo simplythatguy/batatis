@@ -1,7 +1,7 @@
 #!/bin/bash
 # Land verified work on dev: sit on top of origin/dev, re-verify, push HEAD to dev fast-forward only,
 # and make sure the one release PR (dev -> main) exists. Docs: docs/agents/git-workflow.md
-# Usage: scripts/land.sh [--note "what changed / what the user should check on the dev site"] [--skip-verify] [--dry-run]
+# Usage: scripts/land.sh [--note "what changed / what the user should test locally"] [--skip-verify] [--dry-run]
 # --dry-run fetches and reports what it would do; it never rebases, verifies, pushes or opens a PR.
 set -euo pipefail
 
@@ -83,9 +83,9 @@ pr=$(gh pr list --repo "$REPO" --base main --head dev --state open --json number
 if [ -z "$pr" ]; then
   if [ $dry = 1 ]; then say "dry run: no open release PR; would open one"; exit 0; fi
   url=$(gh pr create --repo "$REPO" --base main --head dev --title "Release: dev → main" --body \
-"The one standing release PR. GitHub has two branches: \`dev\` (testing) and \`main\` (production).
+"The one standing release PR. GitHub has two branches: \`dev\` (shared integration source) and \`main\` (production).
 
-Agents push verified work to \`dev\` and comment here with what changed and what to check on the dev site. Merge this PR with **Create a merge commit** after testing. Do not delete the \`dev\` branch afterwards.
+Agents land locally verified work on \`dev\` and comment here with what changed and how to test it locally. Only \`main\` deploys to Vercel; preview deployments are disabled. The user approves and merges this PR with **Create a merge commit** after local testing. Keep the \`dev\` branch afterwards.
 
 Process: docs/agents/git-workflow.md")
   pr=${url##*/}
