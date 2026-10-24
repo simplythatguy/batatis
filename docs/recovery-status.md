@@ -1,6 +1,6 @@
 # Restored development source
 
-`dev` is the shared starting point for teammate coding and the user's test site. `main` is production. The single release PR records each verified publication; only the user merges it after testing.
+`dev` is the shared integration source for teammate coding. `main` is production and the only Vercel deployment branch. Test locally before the user merges the single release PR `dev → main`.
 
 ## Included
 
@@ -14,7 +14,7 @@
 
 ## Evidence and limits
 
-Each publication must pass local verification and a fresh independent review; the release PR records the exact revision and checks. Browser checks use synthetic local records. Hosted save/reload and PDF checks use the isolated Neon `preview/dev` branch. Production remains separate.
+Each publication must pass local verification and a fresh independent review; the release PR records the exact revision and checks. Browser checks use synthetic local records. Historical hosted development checks, before the main-only deployment decision, exercised save/reload and PDF export on the isolated Neon `preview/dev` branch. They do not establish current production behavior.
 
 Live provider accuracy, full-corpus Elephant calibration, real voice/device behavior and user/professional acceptance require their own evidence. Offline/mock checks and a small real adapter request do not establish those results. Batatis checks administrative completeness and never certifies design compliance, safety or equivalent performance.
 
@@ -30,4 +30,4 @@ cd batatis
 scripts/install-git-hooks.sh
 ```
 
-Follow [local setup](local-development.md) in an isolated local checkout or worktree. GitHub keeps only `dev` and `main`; feature branches stay local. Run `scripts/verify.sh`, then let the parent land verified work on `dev` through `scripts/land.sh`. Only the user merges the release PR `dev → main`; never push directly to `main`. Follow the [Git workflow](agents/git-workflow.md), including ports 3000/8000 and user-only production approval.
+Follow [local setup](local-development.md) in an isolated local checkout or worktree. GitHub keeps only `dev` and `main`; feature branches stay local. Run `scripts/verify.sh`, then let the parent land verified work on `dev` through `scripts/land.sh`. Finish local testing before release. Only the user merges the release PR `dev → main`; never push directly to `main`. Follow the [Git workflow](agents/git-workflow.md), including ports 3000/8000 and user-only production approval.

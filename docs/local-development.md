@@ -1,6 +1,6 @@
 # Run Batatis locally
 
-This guide starts the current Vite app and FastAPI engine without model API keys. The first block clones the prototype integration. Run later commands from that repository root unless a step says otherwise.
+This guide starts the current Vite app and FastAPI engine without model API keys. The first block clones the shared `dev` integration source. Run later commands from that repository root unless a step says otherwise.
 
 ## Start the workspace
 
@@ -52,7 +52,7 @@ scripts/local-app.sh stop
 scripts/local-app.sh start
 ```
 
-The [Git workflow](agents/git-workflow.md) covers shared ownership and local verification. Land only verified work on `dev` through `scripts/land.sh`. Only the user merges the single `dev → main` release PR; never push directly to `main`.
+`dev` is the shared integration source. Land only locally verified work on `dev` through `scripts/land.sh`, and finish local testing before release. Only the user merges the single `dev → main` release PR; `main` is the only Vercel deployment branch. Never push directly to `main`. See the [Git workflow](agents/git-workflow.md) for shared ownership and local verification.
 
 ## Optional configuration
 

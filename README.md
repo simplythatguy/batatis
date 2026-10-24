@@ -2,7 +2,7 @@
 
 A guided workspace for building-code variance applications in Alberta.
 
-[Development](https://batatis-git-dev-abdelwaly-projects.vercel.app) · [Production](https://batatis-vert.vercel.app)
+[Development source](https://github.com/simplythatguy/batatis/tree/dev) · [Production](https://batatis-vert.vercel.app)
 
 ## Inspiration
 
@@ -48,7 +48,7 @@ Open http://localhost:3000. The engine uses port 8000. Stop both with `scripts/l
 
 The offline path needs no API key. Code search and PDF export need the official source files and a built CodeDB; follow the [local setup guide](docs/local-development.md).
 
-Land only locally verified work on `dev` through `scripts/land.sh`. Only the user merges the release PR `dev → main`; never push directly to `main`. See the [Git workflow](docs/agents/git-workflow.md).
+`dev` is the shared integration source. Land only locally verified work on `dev` through `scripts/land.sh`, and finish local testing before release. Only the user merges the release PR `dev → main`; `main` is the only Vercel deployment branch. Never push directly to `main`. See the [Git workflow](docs/agents/git-workflow.md).
 
 ## What's next
 
