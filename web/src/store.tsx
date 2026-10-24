@@ -338,7 +338,8 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     const editing = !derived || ["editEvidenceDraft", "addFiles", "removeFile"].includes(action.type);
     if (action.type !== "reset" && editing && transition?.dispatched
       && isEngineGeneration(transition.generation) && transition.caseId === engineCaseId()) return;
-    if (action.type === "answerCandidate") refreshedSelection.current.delete(action.id);
+    if (action.type === "answerCandidate" || action.type === "removeCandidate") refreshedSelection.current.delete(action.id);
+    if (action.type === "addCandidate") refreshedSelection.current.delete(action.candidate.id);
     if (!derived) {
       revision.current += 1;
       if (action.type !== "saveEvidence" && action.type !== "removeEvidence") planRevision.current += 1;
