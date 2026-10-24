@@ -53,6 +53,10 @@ const silentAudio = (): VoiceAudio => ({ async startCapture() {}, setMuted() {},
 let f: Fake;
 
 beforeEach(() => {
+  const storage = new Map<string, string>();
+  Object.assign(globalThis, {
+    sessionStorage: { getItem: (key: string) => storage.get(key) ?? null, setItem: (key: string, value: string) => storage.set(key, value), removeItem: (key: string) => storage.delete(key) },
+  });
   resetAssistant();
   f = { requests: [], uploads: [], page: { path: "/questions", card: "field-owner", hash: "#/questions", focused: "cf-q", went: [], redirect: null, shown: new Set() }, user: "u1", capabilityReads: [], mic: { asked: 0, stopped: 0 }, sockets: [], notice: false };
   const deps: Partial<AssistantDeps> = {
