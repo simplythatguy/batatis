@@ -246,7 +246,8 @@ def actors(context):
 def test_only_owner_can_edit_and_read_only_cases_stay_immutable(context, actors, status, name):
     _, store = context
     clients, users = actors
-    case = store.put(Case(owner_id=users['owner'].id, authority='edmonton', status=status))
+    case = store.put(Case(owner_id=users['owner'].id, authority='edmonton', status=status,
+                          selected_articles=[selection()]))
     client = clients[name]
     expected = 200 if name == 'owner' and status in {'draft', 'returned'} else 409 if name == 'owner' else 404
     if expected == 200:
