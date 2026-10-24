@@ -13,7 +13,7 @@ Agents (or humans editing skills) should answer all items correctly. Expected an
 9. **Intake** or **Code Identification** (both 20%).
 10. **False** — wrong citations are worse than uncertainty.
 11. **Safety Codes Officer (SCO)** / AHJ reviewer.
-12. **Claude Opus 5.5** (highest available Opus 5.5 tier).
+12. **GPT-6.1-Sol at max**, for UI implementation and independent review (user override, 2026-10-23).
 13. After “complies with applicable acceptable solution(s)?”: **Yes** = evidence ladder → permit; **No** = SSRIA variance path.
 14. On alternative path, must include **risk assessment, mitigating measures, assumptions/limits** (never skip).
 15. Evidence ladder (low→high): manufacturer lit → STANDATA → ISO 17025 test → evaluation → eval+testing → qualification → ISO 17065 certification (plus CCMC / ICC-ES / professional opinion / engineering review on alt path). Never invent these.
