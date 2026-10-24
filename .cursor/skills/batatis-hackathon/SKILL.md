@@ -81,6 +81,6 @@ Intake 20% · Code identification 20% · Recommendations 10% · Review 10% · Ap
 ## Related
 
 - Workflow skill: `../batatis-variance-workflow/SKILL.md`
-- UI (Opus 5.5): `../batatis-ui-opus/SKILL.md`
+- UI quality and current model policy: `../batatis-ui-opus/SKILL.md`
 - Full brief: `../../../docs/hackathon-problem-brief.md`
 - Process diagram: `../../../docs/diagrams/nbc-ae-acceptable-vs-alternative-flow.png`

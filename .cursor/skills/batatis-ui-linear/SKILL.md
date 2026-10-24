@@ -1,11 +1,11 @@
 ---
 name: batatis-ui-linear
-description: Default Batatis product UI/UX system. Always produce Linear-caliber, ruthlessly simplified interfaces (no feature loss) without the user needing to say Linear. Use for any applicant, SCO, intake, ranking, Section C, export, or product chrome work. Pair with batatis-ui-opus (Claude Opus 5.5 for implementation AND review).
+description: Default Batatis product UI/UX system. Always produce Linear-caliber, ruthlessly simplified interfaces (no feature loss) without the user needing to say Linear. Use for any applicant, SCO, intake, ranking, Section C, export, or product chrome work. Pair with batatis-ui-opus for the current model policy and independent review requirements.
 ---
 
 # Batatis UI — Linear-default system
 
-> **Default look changed (user decision 2026-10-20):** product UI now uses the calm system in `docs/design-system-calm.md` (contract: `docs/design/calm-flow-prototype.html`, code: `web/src/calm/`). The Linear visual language below (sidebar, charcoal tool chrome) is superseded. The **Opus P0 rules** in this file still apply to every surface; where a rule names a Linear detail (sidebar, active nav, 14px checkbox), apply its intent to the calm components.
+> **Default look changed (user decision 2026-10-20):** product UI now uses the calm system in `docs/design-system-calm.md` (contract: `docs/design/calm-flow-prototype.html`, code: `web/src/calm/`). The Linear visual language below (sidebar, charcoal tool chrome) is superseded. The **UI P0 rules** in this file still apply to every surface; where a rule names a Linear detail (sidebar, active nav, 14px checkbox), apply its intent to the calm components.
 
 ## Mandate (always on for product UI)
 
@@ -13,7 +13,7 @@ Agents **always** ship spectacular, simplified product UI matching this system �
 
 - **Simplify ruthlessly; never drop capabilities.**
 - **Bug-free bar:** working controls; focus visible; empty/error states; gates while gaps open.
-- **Formal UI seal = Opus 5.5** (Composer reviews are provisional only). See `../batatis-ui-opus/SKILL.md`.
+- **Formal UI review uses a fresh independent reviewer** on the current model profile in `.cursor/rules/pstack-models.mdc` (GPT-6.1-Sol at max). See `../batatis-ui-opus/SKILL.md`.
 
 References: `../../../docs/design/linear-reference/`  
 Tokens: `../../../docs/design/tokens.css`  
@@ -21,7 +21,7 @@ Doc: `../../../docs/design-system-linear.md`
 Shared gaps: `../../../evals/ui-artifacts/shared-gaps.js`  
 Smoke: `../../../evals/ui-artifacts/smoke.mjs` · Captures: `../../../evals/ui-artifacts/screenshots.mjs`
 
-## Opus P0 (must not fail)
+## UI P0 (must not fail)
 
 | # | Rule |
 | --- | --- |
@@ -81,4 +81,4 @@ Smoke: `../../../evals/ui-artifacts/smoke.mjs` · Captures: `../../../evals/ui-a
 7. Status dots from the single map; lookup = neutral pills.
 8. Required empties: `.field.is-empty` + status dot (not placeholder-only).
 9. Run `node evals/ui-artifacts/smoke.mjs` (chrome, clipping, leakage, every control, cross-screen happy path), then `screenshots.mjs`.
-10. Opus 5.5 re-seal against `evals/battle-prompts/ui-blind/README.md`.
+10. Run a fresh independent UI review on the final revision using the current model profile and `evals/battle-prompts/ui-blind/README.md`.
