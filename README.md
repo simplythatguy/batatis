@@ -1,81 +1,63 @@
 # Batatis
 
-Prepare a code-referenced variance application for Alberta.
+A guided workspace for building-code variance applications in Alberta.
 
-Batatis guides applicants through the Safety Codes Variance Template and helps Safety Codes Officers find missing administrative information. It is a prototype for Alberta's [Building Codes Challenge](docs/hackathon-problem-brief.md).
+[Development](https://batatis-git-dev-abdelwaly-projects.vercel.app) · [Production](https://batatis-vert.vercel.app)
 
-> Batatis checks administrative completeness. It does not certify that a design complies, is safe, or achieves equivalent performance.
+## Inspiration
 
-## Why we are building it
+A new building product or construction method can require an alternative solution to a prescriptive code requirement. Preparing that application means finding the right code references, explaining the proposal, and gathering supporting evidence. Missing information can send the application back for another round of review.
 
-A new building product or construction method may need an alternative solution to a prescriptive code requirement. The applicant must explain the proposal, identify the relevant code provisions, and provide supporting evidence.
+Batatis brings that work into one place for applicants and Safety Codes Officers.
 
-That information is spread across code books, forms, and technical documents. Batatis brings the application into one guided workspace so missing information is visible before the next review.
+## What it does
 
-## Who it is for
+- Guides applicants through Sections A–D of the variance application.
+- Helps applicants find code provisions and retrieves Section C objectives, functions, and intent through deterministic lookups.
+- Keeps answers, supporting documents, and PDF drafts with the application.
+- Identifies missing administrative information and questions that need professional input.
+- Gives officers a review queue, notices, decisions, and a resubmission history.
 
-- Contractors, manufacturers, and design teams preparing an alternative-solution application.
-- Safety Codes Officers reviewing applications sent to their authority.
+Batatis checks administrative completeness. Decisions about technical correctness, equivalent performance, and safety remain with qualified professionals and the reviewing authority.
 
-## How it works
+## How we built it
 
-1. **Describe the proposal.** Add the building and location details, then choose the reviewing authority.
-2. **Review the code.** Search candidate provisions, read their source text, and confirm the provisions for the application. Section C objectives, functional statements, and intent come from database lookups.
-3. **Build the case.** Add the rationale, risks, mitigating measures, assumptions, and supporting documents. Batatis identifies missing items and when professional input is needed. Applicants and their professionals supply the evidence.
-4. **Review and export.** Check the missing-information list, view the actual draft PDF, and export the application with code references.
-5. **Work through officer review.** The officer sends notices and records a decision. The applicant corrects a returned application and resubmits it.
+React, TypeScript, and Vite power the web app. Python and FastAPI handle applications, administrative checks, and PDF export. CodeDB searches pinned official publications, starting with NBC – 2023 Alberta Edition, second printing.
 
-The workspace saves application titles, pins, and archive choices. Archived applications are available in Settings. The code library can use a selected application's context or let you browse without one.
+Local storage uses SQLite; hosted storage uses PostgreSQL. Elephant 1 through OpenRouter supplies code-relevance estimates when enabled. These estimates are uncalibrated and require review.
 
-## What comes out
+## Challenges
 
-- A saved application organized around Sections A–D of the variance template.
-- A list of missing administrative information and supporting-evidence questions.
-- A PDF draft with code references for the applicant to check and complete.
+The application must submit the revision the applicant actually saved, keep uploaded evidence tied to the right application, and preserve officer decisions across resubmissions. PDF reading also needs to preserve uncertainty so an unclear reading never becomes an invented applicant answer.
 
-Code lookup starts with **NBC – 2023 Alberta Edition, second printing**. Source references stay separate from AI explanations and professional judgments.
+## Run locally
 
-## Run it locally
-
-Use Python 3.12 and Node.js 22.12 or newer. No model API key is needed for the offline path.
-
-Clone the current prototype and start the engine:
+Use Python 3.12 and Node.js 22.12 or newer.
 
 ```bash
 git clone --branch dev https://github.com/simplythatguy/batatis.git
 cd batatis
 python3.12 -m venv .venv
 .venv/bin/pip install -r engine/requirements.txt -r codedb/requirements.txt
-BATATIS_LIVE=0 BATATIS_STORE=file BATATIS_CASES=./.data/cases.sqlite \
-  .venv/bin/uvicorn engine.api:app --port 8000
+npm ci --prefix web
+BATATIS_LIVE=0 BATATIS_LIVE_ELEPHANT=0 scripts/local-app.sh start
 ```
 
-In a second terminal, start the web app:
+Open http://localhost:3000. The engine uses port 8000. Stop both with `scripts/local-app.sh stop`.
 
-```bash
-cd batatis/web
-npm ci
-npm run dev
-```
+The offline path needs no API key. Code search and PDF export need the official source files and a built CodeDB; follow the [local setup guide](docs/local-development.md).
 
-Open **http://localhost:3000**. The web app uses this port only and refuses to choose another when it is busy. The engine's route documentation is at **http://127.0.0.1:8000/docs**.
+## What's next
 
-Code search, Section C lookups, and PDF export also need the source documents and a built code database. Follow the [local setup guide](docs/local-development.md#build-code-lookup-and-pdf-export) to enable them. Use `scripts/local-app.sh status|start|stop|wait` to manage the one local web/engine pair on 3000/8000. The [Git workflow](docs/agents/git-workflow.md) defines verification and the dev-to-main release process. The guide also covers configuration and checks. Optional settings are listed in [`.env.example`](.env.example).
+Test the full workflow with applicants and officers, calibrate the new relevance model, and validate results against independently reviewed applications. Batatis remains a prototype for Alberta's [Building Codes Challenge](docs/hackathon-problem-brief.md).
 
-## How it is built
+## Project docs
 
-| Part | Responsibility |
-| --- | --- |
-| [React, TypeScript, and Vite](web/) | Guided applicant workspace and officer review. |
-| [Python and FastAPI](engine/) | Application storage, administrative checks, and PDF export. |
-| [CodeDB](codedb/) | Search and deterministic attribution lookups from pinned official publications. |
+[Setup](docs/local-development.md) · [API](docs/api-contract.md) · [Verification](docs/user-testing/README.md) · [Deployment](docs/deploy.md) · [Contributing with agents](AGENTS.md)
 
-Local development uses SQLite for case storage. Hosted runs require PostgreSQL. AI can assist code identification and application questions when enabled; source lookup and professional approval remain separate.
-
-## Project status
-
-Batatis is under active development. Independent UI review and the complete hosted applicant-to-officer journey are still under verification. The [hosted prototype](https://batatis-vert.vercel.app) currently runs an earlier build; run this source locally to explore the current integration.
+<details>
+<summary>Historical evaluation and limitations</summary>
 
 Historical engineer-needed measurement: At measured source `d479e82`, the shipped facts-only `rules_plus_unknown` agreed with model gold on 50/60 text-only dev cases (0 no outputs, 27 unknowns) and 8/11 model-constructed cases without ground truth. Unshipped `rules_only` had 55/60 dev agreement and 1 under-flag. These were in-sample, model-checked labels, not expert validation or a measurement of the current build. Zero under-flags on the dev set was partly by design because it never answered no. See the [API contract](docs/api-contract.md) for the receipt and limitations.
 
-For more detail, see the [challenge brief](docs/hackathon-problem-brief.md), [API contract](docs/api-contract.md), [verification guide](docs/user-testing/README.md), and [deployment guide](docs/deploy.md). Contributors using coding agents can start with [AGENTS.md](AGENTS.md).
+</details>
