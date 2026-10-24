@@ -37,6 +37,7 @@ Use Python 3.12 and Node.js 22.12 or newer.
 ```bash
 git clone --branch dev https://github.com/simplythatguy/batatis.git
 cd batatis
+scripts/install-git-hooks.sh # once per clone; covers all its worktrees
 python3.12 -m venv .venv
 .venv/bin/pip install -r engine/requirements.txt -r codedb/requirements.txt
 npm ci --prefix web
@@ -46,6 +47,8 @@ BATATIS_LIVE=0 BATATIS_LIVE_ELEPHANT=0 scripts/local-app.sh start
 Open http://localhost:3000. The engine uses port 8000. Stop both with `scripts/local-app.sh stop`.
 
 The offline path needs no API key. Code search and PDF export need the official source files and a built CodeDB; follow the [local setup guide](docs/local-development.md).
+
+Land only locally verified work on `dev` through `scripts/land.sh`. Only the user merges the release PR `dev → main`; never push directly to `main`. See the [Git workflow](docs/agents/git-workflow.md).
 
 ## What's next
 

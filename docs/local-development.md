@@ -9,6 +9,7 @@ Use Python 3.12 and Node.js 22.12 or newer. CI uses Python 3.12 and Node.js 22.
 ```bash
 git clone --branch dev https://github.com/simplythatguy/batatis.git
 cd batatis
+scripts/install-git-hooks.sh # once per clone; covers all its worktrees
 python3.12 -m venv .venv
 .venv/bin/pip install -r engine/requirements.txt -r codedb/requirements.txt
 npm ci --prefix web
@@ -51,7 +52,7 @@ scripts/local-app.sh stop
 scripts/local-app.sh start
 ```
 
-The [Git workflow](agents/git-workflow.md) covers shared ownership, local verification, and the single `dev` to `main` release PR.
+The [Git workflow](agents/git-workflow.md) covers shared ownership and local verification. Land only verified work on `dev` through `scripts/land.sh`. Only the user merges the single `dev → main` release PR; never push directly to `main`.
 
 ## Optional configuration
 

@@ -22,4 +22,12 @@ All original commits and unfinished files remain preserved. The failed broad com
 
 ## Start coding
 
-Clone `dev` and follow [local setup](local-development.md). Use an isolated local checkout or worktree. GitHub keeps only `dev` and `main`; feature branches stay local. Run `scripts/verify.sh`, then let the parent land through `scripts/land.sh`. Follow the [Git workflow](agents/git-workflow.md), including ports 3000/8000 and user-only production approval.
+Clone `dev` and install the Git hook once per clone; it covers all of that clone's worktrees:
+
+```bash
+git clone --branch dev https://github.com/simplythatguy/batatis.git
+cd batatis
+scripts/install-git-hooks.sh
+```
+
+Follow [local setup](local-development.md) in an isolated local checkout or worktree. GitHub keeps only `dev` and `main`; feature branches stay local. Run `scripts/verify.sh`, then let the parent land verified work on `dev` through `scripts/land.sh`. Only the user merges the release PR `dev → main`; never push directly to `main`. Follow the [Git workflow](agents/git-workflow.md), including ports 3000/8000 and user-only production approval.
