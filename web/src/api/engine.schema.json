@@ -238,6 +238,17 @@
           ],
           "default": null
         },
+        "expires_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expires At"
+        },
         "id": {
           "title": "Id",
           "type": "string"
@@ -269,6 +280,10 @@
           ],
           "title": "Status",
           "type": "string"
+        },
+        "submission_number": {
+          "title": "Submission Number",
+          "type": "integer"
         },
         "submitted_at": {
           "anyOf": [
@@ -308,6 +323,8 @@
         "authority",
         "updated_at",
         "submitted_at",
+        "submission_number",
+        "expires_at",
         "completeness",
         "unread_messages",
         "reviewer",
@@ -1317,6 +1334,13 @@
           ],
           "default": null
         },
+        "decision_history": {
+          "items": {
+            "$ref": "#/$defs/Decision"
+          },
+          "title": "Decision History",
+          "type": "array"
+        },
         "evidence": {
           "default": [],
           "items": {
@@ -1324,6 +1348,18 @@
           },
           "title": "Evidence",
           "type": "array"
+        },
+        "expires_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "readOnly": true,
+          "title": "Expires At"
         },
         "facts": {
           "default": [],
@@ -1397,6 +1433,13 @@
           "default": null,
           "title": "Owner Id"
         },
+        "professional_resolutions": {
+          "items": {
+            "$ref": "#/$defs/ProfessionalRequirementResolution"
+          },
+          "title": "Professional Resolutions",
+          "type": "array"
+        },
         "provisions": {
           "default": [],
           "items": {
@@ -1409,6 +1452,17 @@
           "anyOf": [
             {
               "$ref": "#/$defs/RelevanceRecord"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "return_snapshot": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ReviewSnapshot"
             },
             {
               "type": "null"
@@ -1458,6 +1512,18 @@
             "$ref": "#/$defs/StatusChange"
           },
           "title": "Status History",
+          "type": "array"
+        },
+        "submission_number": {
+          "readOnly": true,
+          "title": "Submission Number",
+          "type": "integer"
+        },
+        "submissions": {
+          "items": {
+            "$ref": "#/$defs/Submission"
+          },
+          "title": "Submissions",
           "type": "array"
         },
         "submitted_at": {
@@ -1511,7 +1577,11 @@
         "status_history",
         "claim",
         "decision",
+        "decision_history",
+        "submissions",
+        "return_snapshot",
         "messages",
+        "professional_resolutions",
         "created_at",
         "updated_at",
         "version",
@@ -1524,7 +1594,9 @@
         "gaps",
         "relevance",
         "identify",
-        "intake"
+        "intake",
+        "expires_at",
+        "submission_number"
       ],
       "title": "Case",
       "type": "object"
@@ -2756,6 +2828,20 @@
     "DecisionRequest": {
       "additionalProperties": false,
       "properties": {
+        "expected_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Required for a refusal; the displayed saved application version.",
+          "title": "Expected Version"
+        },
         "items": {
           "items": {
             "$ref": "#/$defs/DecisionItemInput"
@@ -3817,6 +3903,11 @@
           ],
           "title": "Severity",
           "type": "string"
+        },
+        "submission_blocking": {
+          "default": true,
+          "title": "Submission Blocking",
+          "type": "boolean"
         }
       },
       "required": [
@@ -3825,7 +3916,8 @@
         "field",
         "message",
         "severity",
-        "routed_to"
+        "routed_to",
+        "submission_blocking"
       ],
       "title": "Gap",
       "type": "object"
@@ -5841,6 +5933,29 @@
       "title": "MessageAuthor",
       "type": "object"
     },
+    "MessageReadRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "message_ids": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "maxItems": 500,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Message Ids"
+        }
+      },
+      "title": "MessageReadRequest",
+      "type": "object"
+    },
     "MessageRequest": {
       "additionalProperties": false,
       "properties": {
@@ -5859,6 +5974,17 @@
     },
     "MessagesResult": {
       "properties": {
+        "decision": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Decision"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "messages": {
           "items": {
             "$ref": "#/$defs/ThreadMessage"
@@ -5868,7 +5994,8 @@
         }
       },
       "required": [
-        "messages"
+        "messages",
+        "decision"
       ],
       "title": "MessagesResult",
       "type": "object"
@@ -6050,6 +6177,18 @@
           "default": null,
           "title": "Status"
         },
+        "submission_number": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Submission Number"
+        },
         "summary": {
           "title": "Summary",
           "type": "string"
@@ -6061,6 +6200,7 @@
         "case_title",
         "kind",
         "status",
+        "submission_number",
         "actor",
         "summary",
         "created_at",
@@ -6731,6 +6871,101 @@
       "title": "ProcessRef",
       "type": "object"
     },
+    "ProfessionalRequirementRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "basis": {
+          "maxLength": 4000,
+          "minLength": 10,
+          "title": "Basis",
+          "type": "string"
+        },
+        "expected_version": {
+          "minimum": 1,
+          "title": "Expected Version",
+          "type": "integer"
+        },
+        "reference": {
+          "maxLength": 1000,
+          "minLength": 3,
+          "title": "Reference",
+          "type": "string"
+        },
+        "required": {
+          "title": "Required",
+          "type": "boolean"
+        },
+        "scope": {
+          "maxLength": 1000,
+          "minLength": 3,
+          "title": "Scope",
+          "type": "string"
+        }
+      },
+      "required": [
+        "expected_version",
+        "required",
+        "scope",
+        "basis",
+        "reference"
+      ],
+      "title": "ProfessionalRequirementRequest",
+      "type": "object"
+    },
+    "ProfessionalRequirementResolution": {
+      "description": "An officer's scoped administrative determination, never professional credentials or evidence.",
+      "properties": {
+        "at": {
+          "title": "At",
+          "type": "string"
+        },
+        "basis": {
+          "title": "Basis",
+          "type": "string"
+        },
+        "by_id": {
+          "title": "By Id",
+          "type": "string"
+        },
+        "by_name": {
+          "title": "By Name",
+          "type": "string"
+        },
+        "content_fingerprint": {
+          "title": "Content Fingerprint",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "reference": {
+          "title": "Reference",
+          "type": "string"
+        },
+        "required": {
+          "title": "Required",
+          "type": "boolean"
+        },
+        "scope": {
+          "title": "Scope",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "required",
+        "scope",
+        "basis",
+        "reference",
+        "by_id",
+        "by_name",
+        "at",
+        "content_fingerprint"
+      ],
+      "title": "ProfessionalRequirementResolution",
+      "type": "object"
+    },
     "ProvisionContext": {
       "properties": {
         "attribution_status": {
@@ -6993,6 +7228,17 @@
             }
           ]
         },
+        "expires_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expires At"
+        },
         "id": {
           "title": "Id",
           "type": "string"
@@ -7009,6 +7255,10 @@
           ],
           "title": "Status",
           "type": "string"
+        },
+        "submission_number": {
+          "title": "Submission Number",
+          "type": "integer"
         },
         "submitted_at": {
           "anyOf": [
@@ -7048,6 +7298,8 @@
         "authority",
         "status",
         "submitted_at",
+        "submission_number",
+        "expires_at",
         "updated_at",
         "completeness",
         "claim",
@@ -7065,10 +7317,20 @@
           },
           "title": "Applications",
           "type": "array"
+        },
+        "authority": {
+          "title": "Authority",
+          "type": "string"
+        },
+        "reviewer_id": {
+          "title": "Reviewer Id",
+          "type": "string"
         }
       },
       "required": [
-        "applications"
+        "applications",
+        "reviewer_id",
+        "authority"
       ],
       "title": "QueueResult",
       "type": "object"
@@ -7802,6 +8064,40 @@
         "lookup_skipped"
       ],
       "title": "ReviewSession",
+      "type": "object"
+    },
+    "ReviewSnapshot": {
+      "description": "Stored application values at a return; expires and is deleted with its case.",
+      "properties": {
+        "authority": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Authority"
+        },
+        "returned_at": {
+          "title": "Returned At",
+          "type": "string"
+        },
+        "values": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Values",
+          "type": "object"
+        }
+      },
+      "required": [
+        "returned_at",
+        "authority",
+        "values"
+      ],
+      "title": "ReviewSnapshot",
       "type": "object"
     },
     "ReviewerName": {
@@ -9435,6 +9731,120 @@
         "read_by"
       ],
       "title": "StoredMessage",
+      "type": "object"
+    },
+    "Submission": {
+      "description": "A submission round, distinct from content versions and claim/release events.",
+      "properties": {
+        "at": {
+          "title": "At",
+          "type": "string"
+        },
+        "authority": {
+          "title": "Authority",
+          "type": "string"
+        },
+        "by_id": {
+          "title": "By Id",
+          "type": "string"
+        },
+        "changes": {
+          "items": {
+            "$ref": "#/$defs/SubmissionChange"
+          },
+          "title": "Changes",
+          "type": "array"
+        },
+        "comparison_available": {
+          "default": false,
+          "title": "Comparison Available",
+          "type": "boolean"
+        },
+        "number": {
+          "minimum": 1,
+          "title": "Number",
+          "type": "integer"
+        },
+        "returned_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Returned At"
+        }
+      },
+      "required": [
+        "number",
+        "at",
+        "by_id",
+        "authority",
+        "returned_at",
+        "comparison_available",
+        "changes"
+      ],
+      "title": "Submission",
+      "type": "object"
+    },
+    "SubmissionChange": {
+      "properties": {
+        "after": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "After"
+        },
+        "before": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Before"
+        },
+        "field": {
+          "title": "Field",
+          "type": "string"
+        }
+      },
+      "required": [
+        "field",
+        "before",
+        "after"
+      ],
+      "title": "SubmissionChange",
+      "type": "object"
+    },
+    "SubmitRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "expected_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Expected Version"
+        }
+      },
+      "title": "SubmitRequest",
       "type": "object"
     },
     "Term": {

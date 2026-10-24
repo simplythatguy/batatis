@@ -48,10 +48,12 @@ export interface ApplicationSummary {
   archived: boolean;
   authority: string | null;
   completeness: CompletenessSummary | null;
+  expires_at: string | null;
   id: string;
   pinned: boolean;
   reviewer: ReviewerName | null;
   status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "refused" | "withdrawn";
+  submission_number: number;
   submitted_at: string | null;
   title: string | null;
   unread_messages: number;
@@ -200,7 +202,9 @@ export interface Case {
   claim: Claim | null;
   created_at: string;
   decision: Decision | null;
+  decision_history: Decision[];
   evidence: EvidenceItem[];
+  expires_at: string | null;
   facts: Fact[];
   gaps: Gap[];
   id: string;
@@ -209,12 +213,16 @@ export interface Case {
   jurisdiction: Jurisdiction | null;
   messages: StoredMessage[];
   owner_id: string | null;
+  professional_resolutions: ProfessionalRequirementResolution[];
   provisions: string[];
   relevance: RelevanceRecord | null;
+  return_snapshot: ReviewSnapshot | null;
   section_c: SectionCRow[];
   selected_articles: SelectedArticle[] | null;
   status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "refused" | "withdrawn";
   status_history: StatusChange[];
+  submission_number: number;
+  submissions: Submission[];
   submitted_at: string | null;
   title: string | null;
   title_is_manual: boolean;
@@ -431,6 +439,7 @@ export interface DecisionItemInput {
 }
 
 export interface DecisionRequest {
+  /** Required for a refusal; the displayed saved application version. */ expected_version?: number | null;
   items?: DecisionItemInput[];
   message?: string | null;
   outcome: "accept" | "return" | "refuse";
@@ -592,6 +601,7 @@ export interface Gap {
   routed_to: "officer" | "professional" | "applicant" | null;
   section: "A" | "B" | "C" | "D" | "process";
   severity: "blocking" | "warning" | "info";
+  submission_blocking: boolean;
 }
 
 /** A published guide for a design category or process. Guidance, not a variance or an approval. */
@@ -908,11 +918,16 @@ export interface MessageAuthor {
   role: "applicant" | "reviewer" | null;
 }
 
+export interface MessageReadRequest {
+  message_ids?: string[] | null;
+}
+
 export interface MessageRequest {
   body: string;
 }
 
 export interface MessagesResult {
+  decision: Decision | null;
   messages: ThreadMessage[];
 }
 
@@ -942,6 +957,7 @@ export interface Notification {
   kind: "status" | "message";
   read: boolean;
   status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "refused" | "withdrawn" | null;
+  submission_number: number | null;
   summary: string;
 }
 
@@ -1047,6 +1063,27 @@ export interface ProcessRef {
   title: string;
 }
 
+export interface ProfessionalRequirementRequest {
+  basis: string;
+  expected_version: number;
+  reference: string;
+  required: boolean;
+  scope: string;
+}
+
+/** An officer's scoped administrative determination, never professional credentials or evidence. */
+export interface ProfessionalRequirementResolution {
+  at: string;
+  basis: string;
+  by_id: string;
+  by_name: string;
+  content_fingerprint: string;
+  id: string;
+  reference: string;
+  required: boolean;
+  scope: string;
+}
+
 export interface ProvisionContext {
   attribution_status: "direct" | "inherited" | "no-row";
   citation: string;
@@ -1085,8 +1122,10 @@ export interface QueueApplication {
   claim: Claim | null;
   completeness: CompletenessSummary | null;
   decision: DecisionSummary | null;
+  expires_at: string | null;
   id: string;
   status: "draft" | "submitted" | "in_review" | "returned" | "accepted" | "refused" | "withdrawn";
+  submission_number: number;
   submitted_at: string | null;
   title: string | null;
   unread_messages: number;
@@ -1095,6 +1134,8 @@ export interface QueueApplication {
 
 export interface QueueResult {
   applications: QueueApplication[];
+  authority: string;
+  reviewer_id: string;
 }
 
 /** 'The code says X. Does your design do something different?' The id sits behind a disclosure. */
@@ -1212,6 +1253,13 @@ export interface ReviewSession {
   schema_version: "batatis.package_review.v1";
   section_c: SectionCCheck[];
   version: number;
+}
+
+/** Stored application values at a return; expires and is deleted with its case. */
+export interface ReviewSnapshot {
+  authority: string | null;
+  returned_at: string;
+  values: Record<string, string>;
 }
 
 export interface ReviewerName {
@@ -1469,6 +1517,27 @@ export interface StoredMessage {
   items: DecisionItem[];
   kind: "message" | "decision" | "status";
   read_by: string[];
+}
+
+/** A submission round, distinct from content versions and claim/release events. */
+export interface Submission {
+  at: string;
+  authority: string;
+  by_id: string;
+  changes: SubmissionChange[];
+  comparison_available: boolean;
+  number: number;
+  returned_at: string | null;
+}
+
+export interface SubmissionChange {
+  after: string | null;
+  before: string | null;
+  field: string;
+}
+
+export interface SubmitRequest {
+  expected_version?: number | null;
 }
 
 /** An objective (OS1.2) or functional statement (F03) attributed to the provision, by lookup. */
