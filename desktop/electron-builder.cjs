@@ -7,6 +7,21 @@ if (process.env.BATATIS_DESKTOP_REQUIRE_CODEX === "1" && !hasRuntime) {
   throw new Error("The pinned Codex runtime must be prepared before packaging.");
 }
 
+/**
+ * Windows code signing through Microsoft Artifact Signing, when its account is configured. The
+ * certificate details come from BATATIS_SIGN_*; the AZURE_TENANT_ID, AZURE_CLIENT_ID and
+ * AZURE_CLIENT_SECRET credentials are read by the signing module itself. Unsigned otherwise.
+ */
+const windowsSigning = process.env.BATATIS_SIGN_ENDPOINT ? {
+  publisherName: process.env.BATATIS_SIGN_PUBLISHER,
+  endpoint: process.env.BATATIS_SIGN_ENDPOINT,
+  codeSigningAccountName: process.env.BATATIS_SIGN_ACCOUNT,
+  certificateProfileName: process.env.BATATIS_SIGN_PROFILE,
+} : null;
+if (windowsSigning && Object.values(windowsSigning).some((value) => !value)) {
+  throw new Error("Windows signing needs BATATIS_SIGN_PUBLISHER, BATATIS_SIGN_ENDPOINT, BATATIS_SIGN_ACCOUNT and BATATIS_SIGN_PROFILE.");
+}
+
 async function auditBundle(context) {
   const { writeFileSync } = require("node:fs");
   const { audit } = require("./scripts/audit-package.cjs");
@@ -44,5 +59,10 @@ module.exports = {
     target: ["zip"], category: "public.app-category.productivity", identity: "-", hardenedRuntime: false, notarize: false,
     signIgnore: ["/Contents/Resources/codex/codex$"],
   },
-  win: { target: [{ target: "zip", arch: ["x64"] }], signAndEditExecutable: false },
+  win: windowsSigning ? {
+    target: [{ target: "zip", arch: ["x64"] }],
+    azureSignOptions: windowsSigning,
+    // The engine's libraries are signed too; the pinned Codex executable keeps its own signature and checksum.
+    signExts: [".dll", ".pyd", "!codex.exe"],
+  } : { target: [{ target: "zip", arch: ["x64"] }], signAndEditExecutable: false },
 };

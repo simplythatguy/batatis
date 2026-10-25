@@ -24,6 +24,17 @@ if (location.origin === "batatis://app") {
       disconnect: (id: string) => invoke("batatis:disconnect", id),
     },
     codeDb: { choose: () => invoke("batatis:choose-codedb") },
+    updates: {
+      state: () => invoke("batatis:update"),
+      check: () => invoke("batatis:update-check"),
+      download: () => invoke("batatis:update-download"),
+      install: () => invoke("batatis:update-install"),
+      onChange: (listener: () => void) => {
+        const handler = () => listener();
+        ipcRenderer.on("batatis:update-changed", handler);
+        return () => { ipcRenderer.removeListener("batatis:update-changed", handler); };
+      },
+    },
     onChange: (listener: () => void) => {
       const handler = () => listener();
       ipcRenderer.on("batatis:changed", handler);

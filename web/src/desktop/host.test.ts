@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync } from "node:fs";
 import test from "node:test";
-import { desktop, isDesktop, parseInfo, parseOutcome, parseRows } from "./host.ts";
+import { desktop, isDesktop, parseInfo, parseOutcome, parseRows, parseUpdate } from "./host.ts";
 
 const info = {
   version: "0.1.0", workspace: "dev", platform: "darwin",
@@ -54,4 +54,23 @@ test("the desktop page code names no AI provider; labels come from the host", ()
     const source = readFileSync(new URL(name, import.meta.url), "utf8");
     assert.doesNotMatch(source, /jev|typesafe|openai|chatgpt|anthropic|claude|\bgpt/i, name);
   }
+});
+
+test("update state keeps GitHub pages only and drops anything the page can't show", () => {
+  const release = {
+    version: "0.2.0", url: "https://github.com/simplythatguy/batatis/releases/tag/desktop-v0.2.0", history: "https://github.com/simplythatguy/batatis/releases",
+    older: 2, downloadable: true,
+    notes: [{ version: "0.2.0", url: "https://github.com/simplythatguy/batatis/releases/tag/desktop-v0.2.0", items: ["Add the update button (#81)", 3], more: 4 }],
+  };
+  assert.deepEqual(parseUpdate({ status: "available", current: "0.1.0", release }), {
+    status: "available", current: "0.1.0",
+    release: { ...release, notes: [{ ...release.notes[0], items: ["Add the update button (#81)"] }] },
+  });
+  assert.equal(parseUpdate({ status: "available", current: "0.1.0", release: { ...release, url: "https://example.com/x" } }), null);
+  assert.equal(parseUpdate({ status: "available", current: "0.1.0", release: { ...release, url: "javascript:alert(1)" } }), null);
+  const downloading = parseUpdate({ status: "downloading", current: "0.1.0", release, percent: 140 });
+  assert.equal(downloading?.status === "downloading" && downloading.percent, 100);
+  assert.equal(parseUpdate({ status: "ready", current: "0.1.0", release, install: "somewhere" }), null);
+  assert.deepEqual(parseUpdate({ status: "failed", current: "0.1.0", release: null, message: "Couldn’t check." }),
+    { status: "failed", current: "0.1.0", release: null, message: "Couldn’t check." });
 });

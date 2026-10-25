@@ -31,6 +31,7 @@ import { Rail, type RailDestination } from "./shell/Rail";
 import { RequestBanner } from "./shell/RequestBanner";
 import { ReturnedBanner } from "./shell/ReturnedBanner";
 import { AccountButton, NotificationsBell } from "./routes.extra";
+import { UpdateButton } from "../desktop/UpdateButton";
 import { useNotifications } from "./notifications/notifications";
 import { useRoute } from "../router";
 import { resetRelevance } from "./useRelevance";
@@ -542,7 +543,7 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
       <NativePanels ownedCaseId={!reviewer && !opening && assistRow?.id === engineId ? engineId : null} />
     <ApplicationSwitchContext.Provider value={appSwitch}>
       <AppLayout
-        rail={<Rail destinations={destinations} notificationsSlot={<NotificationsBell />} accountSlot={<AccountButton />} />}
+        rail={<Rail destinations={destinations} updateSlot={<UpdateButton />} notificationsSlot={<NotificationsBell />} accountSlot={<AccountButton />} />}
         list={bare ? undefined : list}
         header={bare ? bareHeader : header}
         banner={onStage && (current?.status === "returned" || current?.status === "refused") ? <ReturnedBanner key={`${current.id}:${current.status}`} app={current} /> : onStage && current?.status === "in_review" ? <RequestBanner app={current} /> : null}

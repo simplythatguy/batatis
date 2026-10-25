@@ -3,6 +3,8 @@ name: Desktop native acceptance
 on:
   pull_request:
     branches: [main]
+  push:
+    tags: ["desktop-v*"]
   workflow_dispatch:
 
 permissions:
@@ -32,6 +34,14 @@ jobs:
       BATATIS_LIVE_JEV: "0"
       BATATIS_LIVE_ELEPHANT: "0"
       BATATIS_DESKTOP_REQUIRE_CODEX: "1"
+      # Release builds for Windows are signed once the Artifact Signing account exists (docs/desktop.md).
+      BATATIS_SIGN_ENDPOINT: ${{ startsWith(github.ref, 'refs/tags/desktop-v') && runner.os == 'Windows' && vars.BATATIS_SIGN_ENDPOINT || '' }}
+      BATATIS_SIGN_ACCOUNT: ${{ vars.BATATIS_SIGN_ACCOUNT }}
+      BATATIS_SIGN_PROFILE: ${{ vars.BATATIS_SIGN_PROFILE }}
+      BATATIS_SIGN_PUBLISHER: ${{ vars.BATATIS_SIGN_PUBLISHER }}
+      AZURE_TENANT_ID: ${{ startsWith(github.ref, 'refs/tags/desktop-v') && secrets.AZURE_TENANT_ID || '' }}
+      AZURE_CLIENT_ID: ${{ startsWith(github.ref, 'refs/tags/desktop-v') && secrets.AZURE_CLIENT_ID || '' }}
+      AZURE_CLIENT_SECRET: ${{ startsWith(github.ref, 'refs/tags/desktop-v') && secrets.AZURE_CLIENT_SECRET || '' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -48,6 +58,12 @@ jobs:
           python-version: "3.14"
           cache: pip
           cache-dependency-path: desktop/engine-requirements.txt
+      - name: Check that the release tag names this app version
+        if: startsWith(github.ref, 'refs/tags/desktop-v')
+        shell: bash
+        run: |
+          version="$(node -p "require('./desktop/package.json').version")"
+          test "$GITHUB_REF_NAME" = "desktop-v$version" || { echo "Tag $GITHUB_REF_NAME does not match desktop/package.json $version" >&2; exit 1; }
       - name: Install the web and desktop dependencies
         run: |
           npm ci --prefix web
@@ -100,6 +116,15 @@ jobs:
       - name: Package the native app and portable archive
         working-directory: desktop
         run: npm run package
+      - name: Check the Windows signatures
+        if: runner.os == 'Windows' && env.BATATIS_SIGN_ENDPOINT != ''
+        shell: pwsh
+        run: |
+          $app = Join-Path $env:GITHUB_WORKSPACE 'desktop/build/release/win-unpacked'
+          $files = @(Get-Item (Join-Path $app 'Batatis.exe')) + @(Get-ChildItem (Join-Path $app 'resources/engine') -Recurse -Include *.exe,*.dll,*.pyd)
+          $unsigned = $files | Where-Object { (Get-AuthenticodeSignature $_.FullName).Status -ne 'Valid' }
+          if ($unsigned) { $unsigned.FullName; throw "Unsigned files in the Windows package" }
+          "Signed: $($files.Count) files"
       - name: Launch the packaged app twice and verify its private engine
         shell: bash
         run: |
@@ -156,3 +181,31 @@ jobs:
           name: Batatis-${{ runner.os }}-${{ runner.arch }}
           path: desktop/build/release/*.zip
           if-no-files-found: error
+
+  release:
+    name: Publish the desktop release
+    if: startsWith(github.ref, 'refs/tags/desktop-v')
+    needs: packaged
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - name: Download the accepted portable archives
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          pattern: Batatis-*
+          path: release
+          merge-multiple: true
+      - name: Write checksums and publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          cd release
+          ls Batatis-*.zip
+          sha256sum Batatis-*.zip > SHA256SUMS
+          cat SHA256SUMS
+          gh release create "$GITHUB_REF_NAME" Batatis-*.zip SHA256SUMS \
+            --title "Batatis ${GITHUB_REF_NAME#desktop-v}" --generate-notes --verify-tag

@@ -1,16 +1,20 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { isAbsolute, join, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import { app, type BrowserWindow } from "electron";
 import type { DesktopHost } from "./controller";
 import type { Engine } from "./engine";
 import type { workflowFixture } from "./workflow-fixture";
+import type { Updater } from "./updates";
 
 export interface SmokeOptions {
   output: string;
   userData: string;
   stage: 1 | 2;
+  /** A local releases list the run writes itself; the real feed is never read. */
+  updateFeed: string;
 }
 
 export function smokeOptions(): SmokeOptions | null {
@@ -19,7 +23,9 @@ export function smokeOptions(): SmokeOptions | null {
   assert.ok(isAbsolute(output), "smoke output is an absolute prepared directory");
   const stage = process.env.BATATIS_DESKTOP_SMOKE_STAGE;
   assert.ok(stage === "1" || stage === "2", "smoke stage is 1 or 2");
-  return { output: resolve(output), userData: join(resolve(output), "workspace données 100% #"), stage: stage === "1" ? 1 : 2 };
+  const root = resolve(output);
+  return { output: root, userData: join(root, "workspace données 100% #"), stage: stage === "1" ? 1 : 2,
+    updateFeed: pathToFileURL(join(root, "update feed", "releases.json")).toString() };
 }
 
 export function monitorSmoke(options: SmokeOptions | null) {
@@ -41,6 +47,7 @@ interface SmokeDeps {
   engines: Engine[];
   monitor: ReturnType<typeof monitorSmoke>;
   fixture?: ReturnType<typeof workflowFixture>;
+  updater: Updater;
   runtime(): Promise<{ executable: string; sha256: string }>;
 }
 
@@ -300,6 +307,29 @@ export async function runSmoke(deps: SmokeDeps): Promise<void> {
       assert.equal(deleted.body, null);
       assert.equal((await api(`/cases/${caseId}`)).status, 404);
       await capture("app-reopened", "A new packaged-app process restored the same principal, attachment and review state; 204 deletion worked.");
+
+      const feed = new URL(options.updateFeed);
+      mkdirSync(join(options.output, "update feed"), { recursive: true });
+      writeFileSync(feed, JSON.stringify([{
+        tag_name: "desktop-v99.0.0", html_url: "https://github.com/simplythatguy/batatis/releases/tag/desktop-v99.0.0", draft: false, prerelease: false,
+        body: "## What's Changed\n* Add the update button by @someone in https://github.com/simplythatguy/batatis/pull/81\n* Keep drafts when switching people by @someone in https://github.com/simplythatguy/batatis/pull/80\n",
+        assets: [],
+      }]));
+      const checked = await deps.updater.check();
+      assert.equal(checked.status, "available", JSON.stringify(checked));
+      await until(async () => (await page("Boolean(document.querySelector('.dk-update-btn'))")) === true, "update control in the rail");
+      await page("document.querySelector('.dk-update-btn').focus()");
+      const panel = record(await until(async () => {
+        const found = record(await page(`(() => {
+          const panel = document.querySelector('.dk-update-panel');
+          return panel ? { text: panel.innerText, links: [...panel.querySelectorAll('a')].map((a) => a.href) } : {};
+        })()`));
+        return typeof found.text === "string" ? found : null;
+      }, "update panel on focus"));
+      assert.match(string(panel.text), /99\.0\.0[\s\S]*What’s changed[\s\S]*Add the update button \(#81\)/);
+      assert.ok(Array.isArray(panel.links) && panel.links.length > 0
+        && panel.links.every((href) => String(href).startsWith("https://github.com/simplythatguy/batatis/releases")), JSON.stringify(panel.links));
+      await capture("update-panel", "A newer release appears in the rail; its panel shows the version, what changed and GitHub links. No real feed or download.");
     }
     assert.deepEqual(monitor.csp, []);
     assert.deepEqual(monitor.errors, []);

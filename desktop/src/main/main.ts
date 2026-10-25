@@ -2,7 +2,8 @@
  * Electron entry: one hardened window per generation, the private engine, native dialogs and safeStorage.
  * Everything the window may ask for goes through validated IPC; the page never sees a path, key or cookie.
  */
-import { app, BrowserWindow, dialog, ipcMain, protocol, safeStorage, session, shell, type IpcMainInvokeEvent, type Session, type WebContents } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, net, protocol, safeStorage, session, shell, type IpcMainInvokeEvent, type Session, type WebContents } from "electron";
+import { execFile, spawn } from "node:child_process";
 import { mkdirSync } from "node:fs";
 import { mkdir, mkdtemp, readFile, realpath, rm } from "node:fs/promises";
 import { extname, join, resolve, sep } from "node:path";
@@ -18,6 +19,7 @@ import { codexRuntime, engineCommand, webDist, workspaceDir, type RuntimePaths }
 import { SealedTokenStore, type SessionBox } from "./session";
 import { startEngine, type Engine } from "./engine";
 import { monitorSmoke, runSmoke, smokeOptions } from "./smoke";
+import { launchCommand, RELEASES_FEED, swapCommand, trustedUpdateUrl, Updater } from "./updates";
 
 const KEY_ORIGIN = "batatis-key://dialog";
 const KEY_CSP = "default-src 'none'; script-src 'self'; style-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'";
@@ -85,6 +87,53 @@ const host = new DesktopHost({
   remount: (generation, route) => openWindow(generation, route),
   notify: () => current?.webContents.send("batatis:changed"),
 });
+
+const UPDATE_CHECK_MS = 4 * 60 * 60 * 1000;
+/** Packaged builds read the repository's releases; a smoke run or a development run with a named feed reads a stand-in. */
+const updateFeed = smoke ? smoke.updateFeed : packaged ? RELEASES_FEED : process.env.BATATIS_DESKTOP_UPDATE_FEED ?? null;
+const updater = new Updater({
+  current: app.getVersion(),
+  platform: process.platform,
+  arch: process.arch,
+  feed: updateFeed,
+  trusted: (url) => trustedUpdateUrl(url) || (updateFeed !== null && updateFeed !== RELEASES_FEED && url.href.startsWith(new URL(".", updateFeed).href)),
+  fetch: (url, init) => net.fetch(url, init),
+  dir: join(paths.userData, "updates"),
+  executable: process.execPath,
+  replaceable: packaged,
+  run: (command, args) => new Promise((done, fail) => {
+    execFile(command, args, { windowsHide: true, maxBuffer: 1 << 20 }, (error, stdout) => (error ? fail(error) : done(stdout)));
+  }),
+  notify: () => current?.webContents.send("batatis:update-changed"),
+  log: (line) => process.stderr.write(`${line}\n`),
+});
+
+/** After the person confirms, a detached script swaps the app once this process has exited, then opens it. */
+async function installUpdate(): Promise<Outcome> {
+  const staged = updater.staged();
+  const view = updater.view();
+  if (!staged || !current || view.status !== "ready") return refused;
+  if (staged.kind === "manual") {
+    shell.showItemInFolder(staged.archive);
+    return { ok: true };
+  }
+  const { response } = await dialog.showMessageBox(current, {
+    type: "question", buttons: ["Restart", "Not now"], defaultId: 0, cancelId: 1,
+    message: `Restart Batatis to update to ${view.release.version}?`,
+    detail: "Your applications stay on this computer.",
+  });
+  if (response !== 0) return { ok: false, message: "" };
+  const swap = await swapCommand(join(paths.userData, "updates"), process.platform, process.pid, staged, launchCommand(process.platform, staged.target));
+  const script = spawn(swap.command, swap.args, { cwd: swap.cwd, detached: true, stdio: "ignore", windowsHide: true });
+  const started = await new Promise<boolean>((done) => {
+    script.once("spawn", () => done(true));
+    script.once("error", () => done(false));
+  });
+  if (!started) return { ok: false, message: "Batatis couldn’t start the update. Try again, or download it from GitHub." };
+  script.unref();
+  app.quit();
+  return { ok: true };
+}
 
 function harden(ses: Session) {
   const allowed = (permission: string) => permission === "clipboard-sanitized-write";
@@ -232,6 +281,10 @@ function registerIpc() {
     if (id === "chatgpt") await host.disconnectProvider();
     return host.providerRows();
   }, []);
+  answer("batatis:update", () => updater.view(), null);
+  answer("batatis:update-check", () => updater.check(), null);
+  answer("batatis:update-download", () => updater.download(), null);
+  answer("batatis:update-install", () => installUpdate(), refused);
   answer("batatis:choose-codedb", async () => {
     if (!current) return refused;
     const picked = await dialog.showOpenDialog(current, {
@@ -329,7 +382,12 @@ if (!app.requestSingleInstanceLock()) {
     registerIpc();
     await host.boot();
     host.openWindow(null);
-    if (smoke) void runSmoke({ options: smoke, host, current: () => current, engines: smokeEngines, monitor: smokeMonitor, fixture: fixture ?? undefined,
+    if (updateFeed && !smoke) {
+      await updater.cleanup();
+      setTimeout(() => void updater.check(), 15_000).unref();
+      setInterval(() => void updater.check(), UPDATE_CHECK_MS).unref();
+    }
+    if (smoke) void runSmoke({ options: smoke, host, current: () => current, engines: smokeEngines, monitor: smokeMonitor, fixture: fixture ?? undefined, updater,
       runtime: () => runtime(providerContext, process.platform, process.arch) });
   });
   app.on("activate", () => {
@@ -341,6 +399,7 @@ if (!app.requestSingleInstanceLock()) {
     if (quitting) return;
     quitting = true;
     event.preventDefault();
+    updater.cancel();
     void host.dispose().finally(async () => {
       if (providerWorkDir) await rm(providerWorkDir, { recursive: true, force: true });
       app.quit();

@@ -10,7 +10,7 @@ Build the package on its target operating system, or download the matching porta
 
 The package targets Apple Silicon Macs and Windows x64. Extract the archive before opening `Batatis.app` on macOS or `Batatis.exe` on Windows. The Python engine and Codex runtime come with the package.
 
-The macOS package uses ad hoc signing. It is not notarized. The Windows package has no publisher signature. Download acceptance through Gatekeeper or SmartScreen needs a separate check.
+The macOS package uses ad hoc signing. It is not notarized. Windows release builds are signed once the signing account in [Sign the Windows build](#sign-the-windows-build) exists; until then they have no publisher signature, and Windows warns before opening them.
 
 ## Use local development
 
@@ -59,6 +59,53 @@ Enter keys in the desktop key dialog. The host encrypts them using operating-sys
 An OpenAI key is for text generation and document review through the OpenAI API. A Jev key is for the existing article screening and reranking workflow. After saving a Jev key, turn optional screening on. Saving a key does not change either choice. Missing Jev leaves the engine's labeled keyword fallback available.
 
 The desktop host uses only the key entered for that connection. It does not import a repository `.env` file, the web server's keys or a separate Jev credential file. Provider errors never choose another account or model.
+
+## Update the app
+
+The installed app checks this repository's [GitHub releases](https://github.com/simplythatguy/batatis/releases) when it opens and every four hours. When a newer release exists, an update icon appears in the left rail above the notifications bell. Hover over it or focus it to see the new version, what changed and links to the release on GitHub.
+
+Select the icon to download the update. The app checks the download against the release's `SHA256SUMS` file. When the icon changes to a restart arrow, select it again. The app saves your work, asks you to confirm, quits, replaces itself and opens the new version. **Settings** shows the installed version under **Updates** and checks on request.
+
+The app can replace itself only when it can write to the folder that holds it. On macOS, move `Batatis.app` out of Downloads before you open it, for example into Applications. When the app can't replace itself, it shows the checked download in its folder, and you replace the app by hand.
+
+The updater does not need code signing. Electron's built-in updater on macOS (Squirrel.Mac) installs only apps signed with an Apple Developer ID, and this package is ad hoc signed. Builds from before the updater existed must be replaced by hand once.
+
+### Publish a release
+
+1. In a pull request, raise `version` in [`desktop/package.json`](../desktop/package.json), for example to `0.2.0`. Merge it.
+2. Tag the merged commit and push the tag:
+
+   ```bash
+   git fetch origin main
+   git tag desktop-v0.2.0 origin/main
+   git push origin desktop-v0.2.0
+   ```
+
+3. The **Desktop native acceptance** workflow builds and checks both platforms. If they pass, it publishes the release with both archives, `SHA256SUMS` and notes made from the merged pull request titles. A tag that doesn't match `desktop/package.json` fails before anything is built.
+
+### Sign the Windows build
+
+Windows warns before it opens an unsigned app downloaded from the internet ("Windows protected your PC"). A signed app shows a verified publisher name instead, and the warning stops once enough people have downloaded files signed with the same certificate. [Microsoft's SmartScreen guide](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation) explains this. No setting in the app removes the warning. Updates that the app installs itself are not marked as downloaded, so Windows doesn't check them again.
+
+The release workflow signs Windows builds with [Microsoft Artifact Signing](https://learn.microsoft.com/en-us/azure/artifact-signing/quickstart) once its account exists. It signs `Batatis.exe` and every program and library of the Python engine. It leaves the pinned `codex.exe` as published, because the app checks that file's checksum.
+
+1. Follow the Artifact Signing quickstart. Create an Azure account of type Individual, an Artifact Signing account, an identity validation and a Public Trust certificate profile. Individual developers must be in Canada or the United States. Microsoft lists the price from US$9.99 a month.
+2. Create an app registration with a client secret. Give it the certificate profile signer role from the quickstart.
+3. In the repository's **Settings > Secrets and variables > Actions**, add these.
+
+| Name | Kind | Value |
+| --- | --- | --- |
+| `BATATIS_SIGN_ENDPOINT` | Variable | The account's endpoint, for example `https://eus.codesigning.azure.net` |
+| `BATATIS_SIGN_ACCOUNT` | Variable | The Artifact Signing account name |
+| `BATATIS_SIGN_PROFILE` | Variable | The certificate profile name |
+| `BATATIS_SIGN_PUBLISHER` | Variable | The certificate's subject, for example `CN=Your Name` |
+| `AZURE_TENANT_ID` | Secret | The app registration's tenant ID |
+| `AZURE_CLIENT_ID` | Secret | The app registration's application (client) ID |
+| `AZURE_CLIENT_SECRET` | Secret | The app registration's secret value |
+
+Only release tags read these values. When they are set, the workflow checks every signature before it runs the app, and a signing failure stops the release. When they are missing, the Windows build stays unsigned.
+
+Installed apps see the release at their next check. The workflow builds for Apple Silicon only, so Intel Macs see the release and its GitHub link but no download.
 
 ## How the package runs
 

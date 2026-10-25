@@ -1,7 +1,7 @@
-/** Settings sections that exist only in the desktop app: workspace and person, AI connections, code database. */
+/** Settings sections that exist only in the desktop app: workspace and person, AI connections, code database, updates. */
 import { useEffect, useState, type ReactNode } from "react";
 import { Chips, Row } from "../calm/settings/rows";
-import { desktop, useDesktop, type AiConfiguration, type DesktopInfo, type ProviderRow, type WorkspaceKind } from "./host";
+import { desktop, useDesktop, useUpdate, type AiConfiguration, type DesktopInfo, type ProviderRow, type UpdateView, type WorkspaceKind } from "./host";
 import { personLabel, useSaveBeforeSwitch, useSwitchPerson } from "./People";
 
 const WORKSPACES: { value: WorkspaceKind; label: string }[] = [
@@ -191,6 +191,35 @@ function CodeDbSection({ info }: { info: DesktopInfo }) {
   );
 }
 
+function updateStatus(view: UpdateView | null): ReactNode {
+  switch (view?.status) {
+    case undefined: return null;
+    case "unavailable": return <span className="ac-faint-tag">{view.message}</span>;
+    case "idle": return view.checked ? <span className="ac-saved">Up to date</span> : null;
+    case "checking": return <span className="ac-faint-tag">Checking…</span>;
+    case "available": return <span className="ac-faint-tag">{view.release.version} available</span>;
+    case "downloading": return <span className="ac-faint-tag">Downloading {view.release.version}</span>;
+    case "ready": return <span className="ac-saved">{view.release.version} ready</span>;
+    case "failed": return <span className="ac-faint-tag">Couldn’t update</span>;
+  }
+}
+
+function UpdatesSection({ info }: { info: DesktopInfo }) {
+  const view = useUpdate();
+  const idle = view?.status === "idle" || view?.status === "failed" || view?.status === "available";
+  return (
+    <section className="ac-section" aria-labelledby="dk-s-updates">
+      <h2 id="dk-s-updates" className="ac-section-title">Updates</h2>
+      <Row label={`Batatis ${info.version}`} action={view && view.status !== "unavailable" && (
+        <button type="button" className="cf-btn is-xs" disabled={!idle} onClick={() => void desktop.updates.check()}>Check for updates</button>
+      )}>
+        {updateStatus(view)}
+      </Row>
+      {view?.status === "failed" && <p className="ac-error is-row" role="alert">{view.message}</p>}
+    </section>
+  );
+}
+
 export function DesktopSettings() {
   const info = useDesktop();
   if (!info) return null;
@@ -199,6 +228,7 @@ export function DesktopSettings() {
       <WorkspaceSection info={info} />
       <ConnectionsSection />
       <CodeDbSection info={info} />
+      <UpdatesSection info={info} />
     </>
   );
 }

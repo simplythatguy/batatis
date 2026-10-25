@@ -45,6 +45,19 @@ export type ProviderRow =
   | { id: string; kind: "account"; label: string; description: string; status: Connection; workflow: string | null }
   | { id: string; kind: "key"; label: string; description: string; status: "missing" | "saved" | "secure-storage-unavailable" };
 
+export interface ReleaseNote { version: string; items: string[]; more: number; url: string }
+export interface UpdateRelease { version: string; url: string; notes: ReleaseNote[]; older: number; history: string; downloadable: boolean }
+
+/** The app's own update, as the host reports it. Links are https pages on GitHub. */
+export type UpdateView =
+  | { status: "unavailable"; current: string; message: string }
+  | { status: "idle"; current: string; checked: boolean }
+  | { status: "checking"; current: string }
+  | { status: "available"; current: string; release: UpdateRelease }
+  | { status: "downloading"; current: string; release: UpdateRelease; percent: number | null }
+  | { status: "ready"; current: string; release: UpdateRelease; install: "restart" | "manual" }
+  | { status: "failed"; current: string; release: UpdateRelease | null; message: string };
+
 interface Bridge {
   version: number;
   info(): Promise<unknown>;
@@ -57,6 +70,7 @@ interface Bridge {
     selectScreening(value: boolean): Promise<unknown>;
   };
   codeDb: { choose(): Promise<unknown> };
+  updates?: Record<"state" | "check" | "download" | "install", () => Promise<unknown>> & { onChange(listener: () => void): () => void };
   onChange(listener: () => void): () => void;
 }
 
@@ -160,6 +174,86 @@ export function parseRows(value: unknown): ProviderRow[] {
   return rows;
 }
 
+const github = (value: unknown): string | null => {
+  try {
+    const url = new URL(str(value) ?? "");
+    return url.protocol === "https:" && url.hostname === "github.com" ? url.toString() : null;
+  } catch {
+    return null;
+  }
+};
+
+function parseRelease(value: unknown): UpdateRelease | null {
+  if (!isRecord(value) || !Array.isArray(value.notes)) return null;
+  const version = str(value.version), url = github(value.url), history = github(value.history);
+  if (!version || !url || !history) return null;
+  const notes: ReleaseNote[] = [];
+  for (const note of value.notes) {
+    const noteVersion = isRecord(note) ? str(note.version) : null, noteUrl = isRecord(note) ? github(note.url) : null;
+    if (!isRecord(note) || !noteVersion || !noteUrl || !Array.isArray(note.items)) continue;
+    notes.push({ version: noteVersion, url: noteUrl, items: note.items.filter((item): item is string => typeof item === "string"),
+      more: typeof note.more === "number" && note.more > 0 ? Math.floor(note.more) : 0 });
+  }
+  const older = typeof value.older === "number" && value.older > 0 ? Math.floor(value.older) : 0;
+  return { version, url, notes, older, history, downloadable: value.downloadable === true };
+}
+
+export function parseUpdate(value: unknown): UpdateView | null {
+  if (!isRecord(value)) return null;
+  const current = str(value.current) ?? "";
+  const release = parseRelease(value.release);
+  switch (value.status) {
+    case "unavailable": return { status: "unavailable", current, message: str(value.message) ?? "" };
+    case "idle": return { status: "idle", current, checked: value.checked === true };
+    case "checking": return { status: "checking", current };
+    case "available": return release && { status: "available", current, release };
+    case "downloading": {
+      const percent = typeof value.percent === "number" && Number.isFinite(value.percent) ? Math.min(100, Math.max(0, value.percent)) : null;
+      return release && { status: "downloading", current, release, percent };
+    }
+    case "ready": return release && (value.install === "restart" || value.install === "manual") ? { status: "ready", current, release, install: value.install } : null;
+    case "failed": return { status: "failed", current, release, message: str(value.message) ?? "Something went wrong." };
+    default: return null;
+  }
+}
+
+/** Live update state for React; null on the web and until the host first answers. */
+let update: UpdateView | null = null;
+let updateStarted = false;
+const updateListeners = new Set<() => void>();
+
+function publishUpdate(next: UpdateView | null) {
+  update = next;
+  for (const listener of updateListeners) listener();
+}
+
+async function refreshUpdate() {
+  const updates = bridge()?.updates;
+  if (updates) publishUpdate(parseUpdate(await updates.state().catch(() => null)));
+}
+
+function subscribeUpdate(listener: () => void) {
+  updateListeners.add(listener);
+  const updates = bridge()?.updates;
+  if (!updateStarted && updates) {
+    updateStarted = true;
+    updates.onChange(() => void refreshUpdate());
+    void refreshUpdate();
+  }
+  return () => { updateListeners.delete(listener); };
+}
+
+export function useUpdate(): UpdateView | null {
+  return useSyncExternalStore(subscribeUpdate, () => update, () => null);
+}
+
+const updateAction = (action: "check" | "download") => async (): Promise<void> => {
+  const updates = bridge()?.updates;
+  if (!updates) return;
+  const next = parseUpdate(await updates[action]().catch(() => null));
+  if (next) publishUpdate(next);
+};
+
 /** Live desktop info for React; null on the web and until the host first answers. */
 let info: DesktopInfo | null = null;
 let started = false;
@@ -210,4 +304,9 @@ export const desktop = {
   selectGeneration: (value: string) => call((h) => h.providers.selectGeneration(value), parseOutcome, failed),
   selectScreening: (value: boolean) => call((h) => h.providers.selectScreening(value), parseOutcome, failed),
   onChange: (listener: () => void): (() => void) => bridge()?.onChange(listener) ?? (() => {}),
+  updates: {
+    check: updateAction("check"),
+    download: updateAction("download"),
+    install: () => call((h) => h.updates ? h.updates.install() : Promise.resolve(null), parseOutcome, failed),
+  },
 };
