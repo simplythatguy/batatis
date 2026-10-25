@@ -257,14 +257,16 @@ export function planInput(field: string): PlanInput {
 
 export const NOT_SURE = "Not sure";
 
-/** The planner's questions, ranked as the API ranks them; a field answered anywhere counts as done. */
+/** Issued questions stay reachable and editable when a later plan replaces its current batch. */
 export function planQuestions(c: Case): { q: PlanQuestion; done: boolean; notSure: boolean }[] {
   const plan = c.intake?.record.plan;
   if (!plan || plan.scope.status === "redirect") return [];
   const has = (field: string) => Boolean(confirmedAnswer(c.facts, field));
-  return plan.questions.map((q) => {
+  const questions = new Map([...(plan.asked ?? []), ...plan.questions].map((q) => [q.id, q]));
+  const conflicts = new Set(plan.questions.filter((q) => q.kind === "conflict").map((q) => q.id));
+  return [...questions.values()].map((q) => {
     const notSure = plan.not_sure.includes(q.id);
-    return { q, notSure, done: notSure || (q.kind !== "conflict" && has(q.field)) };
+    return { q, notSure, done: notSure || (!conflicts.has(q.id) && has(q.field)) };
   });
 }
 
@@ -273,7 +275,7 @@ export function plannedFields(c: Case): Map<string, { notSure: boolean }> {
   const plan = c.intake?.record.plan;
   const out = new Map<string, { notSure: boolean }>();
   if (!plan) return out;
-  for (const q of plan.questions) out.set(localField(q.field), { notSure: plan.not_sure.includes(q.id) });
+  for (const { q, notSure } of planQuestions(c)) out.set(localField(q.field), { notSure });
   for (const id of plan.not_sure) {
     const field = id.startsWith("intake.") ? localField(id.slice("intake.".length)) : "";
     if (field && !out.has(field)) out.set(field, { notSure: true });

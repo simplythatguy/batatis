@@ -3,11 +3,11 @@ import { Notices } from "../components";
 import { groupGaps, professionalHoldKind, professionalHoldReason } from "../humanReview";
 import { useCase } from "../store";
 import type { Case, Gap } from "../types";
-import { forkOf, scopeRedirect } from "../intakeView";
+import { scopeRedirect } from "../intakeView";
 import { buildDeck, caseRules, deckProgress, gapKey } from "./deck";
 import { readOnlyStatus } from "./applications";
 import { useCurrentApplication } from "./begin";
-import { BeforeYouSubmit, ForkNote } from "./ReadCards";
+import { BeforeYouSubmit } from "./ReadCards";
 import { calmHref } from "./routes";
 import { rankedIn } from "./relevance";
 import { useSession } from "./session";
@@ -142,7 +142,6 @@ function CaseReview() {
   // Rings never count as Section C; this only points at the library.
   const rel = useRelevance();
   const likely = rankedIn(rel.display, rel.cutoffs, ["high"], rel.rerank).length;
-  const fork = forkOf(c);
   const pre = c.intake?.record.plan?.pre_application;
   const departures = confirmedProvisions(c).length;
 
@@ -258,12 +257,6 @@ function CaseReview() {
         )}
         {notices.length > 0 && <div className="cf-notices"><Notices notices={notices} /></div>}
         <EngineerCallout c={c} gaps={gaps} readOnly={readOnly} />
-        {fork && !scopeRedirect(c) && (
-          <section className="cf-review-fork" aria-labelledby="cf-fork-h">
-            <h2 id="cf-fork-h" className="cf-list-label">Your path</h2>
-            <ForkNote fork={fork} />
-          </section>
-        )}
         {pre && !scopeRedirect(c) && <BeforeYouSubmit pre={pre} />}
       </div>
 

@@ -6,7 +6,7 @@ import { MOD_KEY } from "../ui";
 import { useAccount } from "../account";
 import {
   answerBlocks, ask, assistantKey, cancelQuestion, closeAssistant, endVoice, goBack, MAX_QUESTION, retry, setDraft, useAssistant,
-  type AssistantState, type Turn,
+  type Turn,
 } from "./assistant";
 import { AttachButton, Attachments, MicGlyph, VoiceBar, VoiceButton, VoiceNotice } from "./VoiceControls";
 import { ChatFollow, savedPosition, savePosition } from "./follow";
@@ -78,7 +78,6 @@ export function AssistantPanel() {
           <Icon24 name="x" size={16} />
         </ToolButton>
       </div>
-      {!signedOut && <ScopeLine a={a} />}
       <p className="cf-av-boundary">Administrative help · not a compliance decision</p>
       <div className="cf-av-scroll">
       <div ref={body} className="cf-assist-body" role="log" tabIndex={0} aria-label="Conversation" aria-live="polite">
@@ -108,7 +107,6 @@ export function AssistantPanel() {
           <div className="cf-assist-error" role="status">
             <p>{c.error.text}{wait > 0 ? ` Try again in ${wait} s.` : ""}</p>
             {c.failed && <button type="button" className="cf-btn is-xs" disabled={busy} onClick={retry}>Retry</button>}
-            {c.error.technical && <details className="cf-tech"><summary>Technical detail</summary><p>{c.error.technical}</p></details>}
           </div>
         )}
       </div>
@@ -147,20 +145,6 @@ export function AssistantPanel() {
         </div>
       </form>
     </aside>
-  );
-}
-
-/** Which application (by its short name) and what on screen the assistant is reading. */
-function ScopeLine({ a }: { a: AssistantState }) {
-  const b = a.binding;
-  const name = b.mode === "case" ? b.caseName || "This application" : b.mode === "draft" ? b.caseName || "New application" : "No application";
-  return (
-    <p className="cf-av-scope" title={`${name} · ${a.context.label}`}>
-      <Icon24 name={b.mode === "none" ? "book" : "file"} size={14} />
-      <b>{name}</b>
-      <span aria-hidden="true">·</span>
-      <span className="cf-av-scope-at">{a.context.label}</span>
-    </p>
   );
 }
 

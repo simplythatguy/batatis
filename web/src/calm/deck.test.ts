@@ -5,7 +5,7 @@ import { emptyCase } from "../intake.ts";
 import { readGroups, snippet, spokenValue } from "../intakeView.ts";
 import { DETAIL_IDS, factFor, getGaps, NOT_RIGHT, reducer } from "../model.ts";
 import type { Case } from "../types.ts";
-import { aliasKey, alternativeChoice, buildDeck, choicesFor, deckProgress, gapKey, preCaseState, sectionProgress } from "./deck.ts";
+import { aliasKey, alternativeChoice, buildDeck, choicesFor, deckProgress, gapKey, mergeQueue, preCaseState, questionProgress, QUESTION_PROGRESS_LABEL, sectionProgress } from "./deck.ts";
 import { calmHref, resolveRoute } from "./routes.ts";
 
 /* —— Fixtures: the demo description as the engine's intake and identify routes return it (fake providers). —— */
@@ -65,6 +65,7 @@ function intakeResult(over: { plan?: Partial<NonNullable<IntakeResult["record"][
           question("legal_description", "What is the legal description (lot, block and plan, or ATS)?", "administrative"),
           question("mailing_address", "What mailing address should the officer use?", "administrative"),
         ],
+        asked: [],
         not_sure: [],
         pre_application: { jurisdiction_id: "edmonton", jurisdiction_name: "City of Edmonton", resolved_by: "description", steps: [] },
         route_notice: null,
@@ -193,33 +194,33 @@ test("a value already confirmed is not asked again when the description is read 
 
 /* —— The deck's order and the plan —— */
 
-test("deck order: what we read, then the planner, then the remaining A/B details, code, your case, Section D", () => {
+test("deck asks Sections A, B, C, D in form order even when the planner prioritizes B", () => {
   let c = demoCase();
   c = reducer(c, { type: "noteIdentify", result: identifyResult() });
   const deck = buildDeck(c, getGaps(c));
-  const first = (kind: string) => deck.findIndex((i) => i.kind === kind);
-  const last = (kind: string) => deck.map((i) => i.kind).lastIndexOf(kind as never);
-  assert.equal(deck[0].kind, "fact");
-  assert.ok(last("fact") < first("plan"));
-  assert.ok(last("plan") < first("authority"));
-  assert.ok(first("authority") < first("candidate"));
-  assert.ok(last("detail") < first("candidate"));
-  assert.ok(last("candidate") < first("process"));
+  assert.equal(deck[0].section, "A");
+  assert.deepEqual([...new Set(deck.map((i) => i.section))], ["A", "B", "C", "D"]);
+  const sectionOrder = deck.map((i) => i.section);
+  assert.deepEqual(sectionOrder, [...sectionOrder].sort(), "no later section interrupts an earlier one");
+  assert.deepEqual(deck.filter((i) => i.section === "A").map((i) => i.key), ["field-owner", "field-representative", "plan-intake.mailing_address", "field-date"]);
   assert.equal(deck.filter((i) => i.kind === "process").length, 6);
 });
 
-test("the planner asks at most five questions, ranked as the API ranks them, and its fields are not asked twice", () => {
+test("planner cards follow their form fields, and each field has one editable card", () => {
   const c = demoCase();
   const deck = buildDeck(c, getGaps(c));
   const plan = deck.filter((i) => i.kind === "plan");
-  assert.deepEqual(plan.map((i) => i.ref), ["intake.part4_design", "intake.assembly.description", "intake.sprinklered", "intake.legal_description", "intake.mailing_address"]);
+  assert.deepEqual(plan.map((i) => i.ref), ["intake.mailing_address", "intake.legal_description", "intake.part4_design", "intake.assembly.description", "intake.sprinklered"]);
   assert.equal(plan[0].context, "", "the question stands alone");
-  assert.match(plan[0].why, /^Why part4_design\./, "why it is asked waits behind Help");
-  assert.deepEqual(choicesFor(plan[2]).map((x) => x.label), ["Yes", "No", "Partly", "Not sure"]);
+  assert.equal(plan.find((i) => i.ref === "intake.part4_design")?.why, "Why part4_design.", "Help keeps the contextual reason without boilerplate");
+  assert.deepEqual(choicesFor(plan.find((i) => i.ref === "intake.sprinklered")!).map((x) => x.label), ["Yes", "No", "Partly"]);
   // Legal description and mailing address are planner cards, so their form cards wait.
   assert.ok(!deck.some((i) => i.key === "field-legalDescription" || i.key === "field-mailingAddress"));
   assert.equal(plan.find((i) => i.ref === "intake.legal_description")?.section, "B");
   assert.equal(plan.find((i) => i.ref === "intake.mailing_address")?.section, "A");
+  const all = buildDeck(c, getGaps(c), { includeDone: true });
+  assert.ok(!all.some((i) => i.key === "field-legalDescription" || i.key === "field-mailingAddress"), "footer navigation has no duplicate form cards either");
+  assert.equal(aliasKey(c, "field-mailingAddress"), "plan-intake.mailing_address");
 });
 
 test("Not sure on a planner question never blocks and is not asked again on its form card", () => {
@@ -229,8 +230,10 @@ test("Not sure on a planner question never blocks and is not asked again on its 
   const gaps = getGaps(c);
   const all = buildDeck(c, gaps, { includeDone: true });
   assert.equal(all.find((i) => i.ref === "intake.mailing_address")?.done, true);
-  const form = all.find((i) => i.key === "field-mailingAddress")!;
-  assert.equal(form.done, true, "a blocking gap stays on the review, but the card is settled");
+  const card = all.find((i) => i.key === "plan-intake.mailing_address")!;
+  assert.equal(card.settled, true, "a blocking gap stays on the review, but the card is settled");
+  assert.equal(questionProgress(card, undefined, []), "uncertain");
+  assert.equal(QUESTION_PROGRESS_LABEL.uncertain, "Left open");
   assert.ok(gaps.some((g) => g.id === "detail-mailingAddress"));
   assert.ok(!buildDeck(c, gaps).some((i) => i.key === "field-mailingAddress"));
 });
@@ -245,8 +248,8 @@ test("while intake reads, the deck holds one waiting card; a failed read can be 
   const c = reducer(emptyCase("homebuilder"), { type: "setDescription", text: DEMO });
   assert.deepEqual(buildDeck(c, getGaps(c), { intake: "running" }).map((i) => i.kind), ["reading"]);
   const failed = buildDeck(c, getGaps(c), { intake: "error", intakeNote: "Batatis could not be reached." });
-  assert.equal(failed[0].kind, "reading");
-  assert.equal(failed[0].optional, true);
+  assert.equal(failed[0].section, "A");
+  assert.equal(failed.find((i) => i.kind === "reading")?.optional, true);
   assert.ok(failed.some((i) => i.key === "field-owner"), "every A/B detail is still asked");
 });
 
@@ -287,7 +290,7 @@ test("code identification offers at most three quoted choices; the rest of the r
   const card = code[0];
   assert.equal(card.title, "Does your design do something different from the rule on openings in exposing building face?");
   assert.doesNotMatch(card.title + card.context, /\d+\.\d+\.\d+/, "the article number stays behind Show the code");
-  assert.deepEqual(choicesFor(card).map((x) => x.label), ["Yes, it differs", "No, it follows", "Not sure"]);
+  assert.deepEqual(choicesFor(card).map((x) => x.label), ["Yes, it differs", "No, it follows"]);
   assert.ok(!c.candidates.some((a) => a.provision.startsWith("3.2.3.8")), "ranked articles are not cards");
 });
 
@@ -338,15 +341,16 @@ test("every local gap that routes to questions has a card", () => {
   }
 });
 
-test("the reviewing authority is asked, Not sure yet is an answer, and nothing is picked silently", () => {
+test("authority offers real choices, while legacy uncertainty leaves its gap open", () => {
   const c = demoCase();
   const card = buildDeck(c, []).find((i) => i.key === "authority")!;
   assert.equal(c.authority, "");
   assert.equal(card.done, false);
-  assert.deepEqual(choicesFor(card).map((x) => x.value), ["calgary", "edmonton", "unsure"]);
+  assert.deepEqual(choicesFor(card).map((x) => x.value), ["calgary", "edmonton"]);
   const gap = { id: "jurisdiction", severity: "blocking" as const, label: "Reviewing authority", href: "#/describe?focus=authority" };
   assert.equal(gapKey(c, gap), "authority");
   assert.equal(buildDeck(c, [gap], { seen: new Set(["authority"]), includeDone: true }).find((i) => i.key === "authority")?.done, true);
+  assert.equal(buildDeck(c, [gap], { seen: new Set(["authority"]), includeDone: true }).find((i) => i.key === "authority")?.settled, true);
 });
 
 test("before an application exists the Questions stage has no describe card (Start asks it once)", () => {
@@ -386,6 +390,49 @@ test("section progress counts tracked cards per section", () => {
   assert.equal(secs.reduce((n, s) => n + s.items.length, 0), deckProgress(deck).total);
 });
 
+test("progress marks one current item, grey answers, explicit skips, and neutral future questions", () => {
+  let c = demoCase();
+  c = reducer(c, { type: "setDetail", field: "date", value: "2026-10-25", section: "A" });
+  const deck = buildDeck(c, getGaps(c), { includeDone: true });
+  const current = deck.find((i) => i.key === "authority")!;
+  const skipped = deck.find((i) => i.key === "field-representative")!;
+  const answered = deck.find((i) => i.key === "field-date")!;
+  const future = deck.find((i) => i.key === "field-risk")!;
+  const states = deck.map((i) => questionProgress(i, current.key, [skipped.key]));
+  assert.equal(states.filter((s) => s === "current").length, 1);
+  assert.equal(questionProgress(answered, current.key, []), "done");
+  assert.equal(questionProgress(skipped, current.key, [skipped.key]), "skipped");
+  assert.equal(questionProgress(future, current.key, []), "open");
+  assert.equal(questionProgress(current, current.key, [current.key]), "current", "the current question wins even when revisiting a skip");
+  assert.equal(QUESTION_PROGRESS_LABEL.skipped, "Skipped", "status has a text equivalent");
+  const legacy = { ...future, done: true, settled: true };
+  assert.deepEqual(deckProgress([legacy]), { done: 0, total: 1 }, "legacy uncertainty is not counted as answered");
+});
+
+test("issued planner cards stay editable after a later plan replaces them, without duplicate form cards", () => {
+  let c = demoCase();
+  const scope = question("scope", "One building or site, or many sites?");
+  const record = intakeResult({ plan: { asked: [scope], questions: [] } }).record;
+  c = reducer(c, { type: "noteIntakeRecord", record });
+  let all = buildDeck(c, getGaps(c), { includeDone: true });
+  assert.equal(all.find((i) => i.ref === scope.id)?.done, false, "an unanswered issued card survives reranking");
+  assert.equal(aliasKey(c, "field-scope"), `plan-${scope.id}`);
+  assert.ok(!all.some((i) => i.key === "field-scope"));
+  c = reducer(c, { type: "adoptFacts", facts: [{ id: "saved-scope", field: "scope", value: "site", kind: "pointed", status: "confirmed", source: { type: "user_text", ref: "intake answer", quote: "site" } }] });
+  all = buildDeck(c, getGaps(c), { includeDone: true });
+  const answered = all.find((i) => i.ref === scope.id)!;
+  assert.equal(answered.done, true);
+  assert.deepEqual(choicesFor(answered).map((o) => o.value), ["site", "jurisdiction"], "Back offers both real answers");
+  assert.ok(!all.some((i) => i.key === "field-scope"));
+});
+
+test("question choices use Skip for uncertainty", () => {
+  const c = reducer(demoCase(), { type: "noteIdentify", result: identifyResult() });
+  for (const card of buildDeck(c, getGaps(c), { includeDone: true })) {
+    for (const choice of choicesFor(card)) assert.doesNotMatch(choice.label, /not sure/i, card.key);
+  }
+});
+
 test("answered read cards stay in the progress as done", () => {
   let c = demoCase();
   const before = deckProgress(buildDeck(c, getGaps(c), { includeDone: true }));
@@ -421,12 +468,25 @@ test("Section D joins the deck with a real reference and stays open while its ga
 });
 
 test("new cards join the queue in form order, and unreached planner cards follow the latest ranking", async () => {
-  const { mergeQueue, rankAhead } = await import("./deck.ts");
+  const { rankAhead } = await import("./deck.ts");
   const order = ["fact-a", "plan-x", "plan-y", "authority", "cand-1", "field-risk"];
   assert.deepEqual(mergeQueue(["fact-a", "authority", "field-risk"], ["cand-1"], order), ["fact-a", "authority", "cand-1", "field-risk"]);
   assert.deepEqual(rankAhead(["fact-a", "plan-y", "plan-x", "authority"], 0, order, (k) => k.startsWith("plan-")), ["fact-a", "plan-x", "plan-y", "authority"]);
   // The card on screen (and anything before it) keeps its place.
   assert.deepEqual(rankAhead(["fact-a", "plan-y", "plan-x"], 1, order, (k) => k.startsWith("plan-")), ["fact-a", "plan-y", "plan-x"]);
+});
+
+test("an asynchronous planner replacement keeps a later Section A field ahead of Section B", () => {
+  let c = demoCase();
+  const record = intakeResult({ plan: { questions: [], asked: [] } }).record;
+  c = reducer(c, { type: "noteIntakeRecord", record });
+  const before = buildDeck(c, getGaps(c), { includeDone: true }).map((i) => i.key);
+  c = reducer(c, { type: "noteIntakeRecord", record: intakeResult().record });
+  const after = buildDeck(c, getGaps(c), { includeDone: true }).map((i) => i.key);
+  const queue = mergeQueue(before.filter((k) => after.includes(k)), after.filter((k) => !before.includes(k)), after);
+  assert.ok(queue.indexOf("plan-intake.mailing_address") > queue.indexOf("field-representative"));
+  assert.ok(queue.indexOf("plan-intake.mailing_address") < queue.indexOf("field-date"));
+  assert.ok(queue.indexOf("field-date") < queue.indexOf("authority"));
 });
 
 /* —— Review fixes: pending decisions, reopened references, page counts —— */

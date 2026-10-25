@@ -544,6 +544,34 @@
           "minLength": 1,
           "title": "Kind",
           "type": "string"
+        },
+        "prompt": {
+          "anyOf": [
+            {
+              "maxLength": 600,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prompt"
+        },
+        "why": {
+          "anyOf": [
+            {
+              "maxLength": 1200,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Why"
         }
       },
       "required": [
@@ -3422,6 +3450,71 @@
       "title": "Explainer",
       "type": "object"
     },
+    "ExportPreview": {
+      "description": "The draft export for the application screen: its exact bytes and images of its first pages.",
+      "properties": {
+        "filename": {
+          "title": "Filename",
+          "type": "string"
+        },
+        "kind": {
+          "const": "pages",
+          "default": "pages",
+          "title": "Kind",
+          "type": "string"
+        },
+        "page_count": {
+          "title": "Page Count",
+          "type": "integer"
+        },
+        "pages": {
+          "items": {
+            "$ref": "#/$defs/PreviewPage"
+          },
+          "title": "Pages",
+          "type": "array"
+        },
+        "pdf": {
+          "title": "Pdf",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "filename",
+        "pdf",
+        "page_count",
+        "pages"
+      ],
+      "title": "ExportPreview",
+      "type": "object"
+    },
+    "ExportPreviewTooLarge": {
+      "description": "The draft PDF alone is too large to send as a preview, so none of it is sent; download the draft.",
+      "properties": {
+        "kind": {
+          "const": "too_large",
+          "default": "too_large",
+          "title": "Kind",
+          "type": "string"
+        },
+        "page_count": {
+          "title": "Page Count",
+          "type": "integer"
+        },
+        "pdf_bytes": {
+          "title": "Pdf Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind",
+        "page_count",
+        "pdf_bytes"
+      ],
+      "title": "ExportPreviewTooLarge",
+      "type": "object"
+    },
     "Fact": {
       "properties": {
         "confidence": {
@@ -5422,6 +5515,14 @@
     },
     "IntakePlan": {
       "properties": {
+        "asked": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Question"
+          },
+          "title": "Asked",
+          "type": "array"
+        },
         "candidates_seen": {
           "default": 0,
           "title": "Candidates Seen",
@@ -5478,6 +5579,7 @@
         "scope",
         "fork",
         "questions",
+        "asked",
         "not_sure",
         "pre_application",
         "route_notice",
@@ -7059,6 +7161,29 @@
         "sources"
       ],
       "title": "PreApplicationStep",
+      "type": "object"
+    },
+    "PreviewPage": {
+      "properties": {
+        "height": {
+          "title": "Height",
+          "type": "number"
+        },
+        "image": {
+          "title": "Image",
+          "type": "string"
+        },
+        "width": {
+          "title": "Width",
+          "type": "number"
+        }
+      },
+      "required": [
+        "width",
+        "height",
+        "image"
+      ],
+      "title": "PreviewPage",
       "type": "object"
     },
     "ProcessRef": {

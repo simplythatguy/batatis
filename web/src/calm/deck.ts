@@ -3,13 +3,12 @@
  * Pure and derived. Every card comes from the case and the shared gap list; nothing is typed by hand.
  * Card keys reuse the legacy focus ids (field-*, cand-*, fact-*, q-*), so gap hrefs land on cards.
  *
- * Order: what we read (confirm) → the planner's questions (at most five) → the remaining Section A
- * and B details → the code check → the applicant's own case → Section D.
+ * Order: Section A → B → C → D. Reading and planner cards stay in the section they fill.
  */
 import type { Question as PlanQuestion } from "../api/types.gen";
 import { AUTHORITIES } from "../config";
 import { confirmedAnswer, localField } from "../intakeFields";
-import { codeQuestion, fileNotes, type ReadCopy, planInput, planQuestions, plannedFields, readCopy, readGroups, scopeRedirect, NOT_SURE } from "../intakeView";
+import { codeQuestion, fileNotes, type ReadCopy, planInput, planQuestions, plannedFields, readCopy, readGroups, scopeRedirect } from "../intakeView";
 import { DETAIL_FIELDS, DETAIL_IDS, PROCESS_FIELDS, answeredByDescription, factFor, questionAnsweredByFact, valueText } from "../model";
 import { isProvision, keywordCandidate, keywordGroups } from "../provisions";
 import { quoteKind } from "../rules";
@@ -96,7 +95,7 @@ export interface DeckItem {
   read?: ReadCopy;
   /** A planner card: the question as the API ranked it. */
   plan?: PlanQuestion;
-  /** Answered as Not sure on another card: a gap may stay on the review, but it is not asked again. */
+  /** Legacy uncertainty: left open on Review, without repeatedly asking the card. */
   settled?: boolean;
   /** A coded rule's result: on its own card, or on the code-check card for the same article. */
   rule?: ShownRule;
@@ -202,7 +201,7 @@ function candidateItem(c: Case, a: Candidate): DeckItem {
       eyebrow: sectionEyebrow("C"),
       title: "How many storeys is the building?",
       context: "",
-      why: "The count decides which part of the code is the benchmark. Buildings up to 3 storeys usually follow Part 9; larger ones follow Part 3. Not sure keeps it as an open question for the officer.",
+      why: "The count decides which part of the code is the benchmark. Buildings up to 3 storeys usually follow Part 9; larger ones follow Part 3. Skip leaves the question open for review.",
       ref: a.id,
       done: done || Boolean(confirmedAnswer(c.facts, "storeys")),
       optional: false,
@@ -220,7 +219,7 @@ function candidateItem(c: Case, a: Candidate): DeckItem {
       title: `Does your design ${a.departure}?`,
       context: "You wrote",
       quote: a.quote.text.trim() || firstSentence(c.description),
-      why: "Your answer decides whether this becomes a departure in your application. Not sure keeps it as an open question for the officer.",
+      why: "Your answer decides whether this becomes a departure in your application. Skip leaves the question open for review.",
       ref: a.id,
       done,
       optional: false,
@@ -234,9 +233,9 @@ function candidateItem(c: Case, a: Candidate): DeckItem {
       eyebrow: sectionEyebrow("C"),
       title: codeQuestion(topic),
       context: keywordCandidate(c, a)
-        ? "A keyword match only. Its relevance has not been assessed. You can leave it unanswered or choose Not sure."
+        ? "A keyword match only. Its relevance has not been assessed."
         : a.rank === "committed" ? "Likely match for your project." : "Close match for your project.",
-      why: "Nothing is used until you answer. Yes adds this rule to the list of rules your design differs from (Section C of the form). No leaves it out. Not sure keeps it as an open question for the officer. Batatis never decides whether the design meets the code.",
+      why: "Yes adds this rule to the list of rules your design differs from (Section C of the form). No leaves it out. Skip leaves the question open for review. Batatis never decides whether the design meets the code.",
       ref: a.id,
       done,
       optional: false,
@@ -256,7 +255,7 @@ function candidateItem(c: Case, a: Candidate): DeckItem {
     eyebrow: sectionEyebrow("C"),
     title: "Is your design different from what this rule asks for?",
     context: origin,
-    why: "Yes adds this rule to the list of rules your design differs from (Section C of the form). No leaves it out. Not sure keeps it as an open question for the officer.",
+    why: "Yes adds this rule to the list of rules your design differs from (Section C of the form). No leaves it out. Skip leaves the question open for review.",
     ref: a.id,
     done,
     optional: false,
@@ -272,6 +271,10 @@ function questionOnOtherCard(c: Case, id: string, cardId?: string): boolean {
 
 /** Map a gap or link key to the card that answers it. */
 export function aliasKey(c: Case, key: string): string {
+  if (key.startsWith("field-")) {
+    const q = planQuestions(c).find(({ q }) => localField(q.field) === key.slice("field-".length))?.q;
+    if (q) return `plan-${q.id}`;
+  }
   if (key.startsWith("fact-")) {
     const id = key.slice("fact-".length);
     const group = readGroups(c, DETAIL_IDS).find((g) => g.ids.includes(id));
@@ -313,8 +316,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
   const gapKeys = new Set(gaps.filter((g) => g.severity === "blocking").map((g) => gapKey(c, g)).filter((k): k is string => !!k));
   const groups = { read: [] as DeckItem[], plan: [] as DeckItem[], A: [] as DeckItem[], B: [] as DeckItem[], questions: [] as DeckItem[], C: [] as DeckItem[], D: [] as DeckItem[] };
   const push = (group: keyof typeof groups, item: DeckItem) => {
-    // "Not sure yet" on the authority, or Not sure on a planner question, is an answer: its gap
-    // stays on the review, but the question is not asked again.
+    // Legacy uncertainty stays open on Review without asking the same card repeatedly.
     const answeredUnsure = (item.kind === "authority" && seen.has("authority")) || item.settled;
     const open = !item.done || (!item.optional && gapKeys.has(item.key) && item.kind !== "section-d" && !answeredUnsure);
     const next = { ...item, done: !open };
@@ -412,8 +414,10 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
     });
   }
 
-  // 2. The planner's questions, as the API ranks them (at most five).
-  for (const { q, done, notSure } of planQuestions(c)) {
+  // 2. Every issued planner question; the final section sort places each in the form.
+  const plan = planQuestions(c);
+  const planFields = new Set(plan.map(({ q }) => localField(q.field)));
+  for (const { q, done, notSure } of plan) {
     const detail = DETAIL_FIELDS.find((d) => d.id === localField(q.field));
     push("plan", {
       key: `plan-${q.id}`,
@@ -422,7 +426,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       eyebrow: q.kind === "conflict" ? "You wrote two things" : q.priority === "administrative" ? sectionEyebrow(detail?.section ?? "B") : "A quick question",
       title: q.text,
       context: "",
-      why: [q.why, q.unblocks.length ? `Your answer decides: ${q.unblocks.join(", ")}.` : "", "Not sure is fine; it never blocks you."].filter(Boolean).join(" "),
+      why: q.why,
       ref: q.id,
       done,
       optional: false,
@@ -445,6 +449,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
     // pack); unanswered, it is required.
     done: opts.confirmAuthority ? seen.has("authority") : Boolean(c.authority) || seen.has("authority"),
     optional: Boolean(opts.confirmAuthority && c.authority),
+    settled: !c.authority && seen.has("authority"),
   });
   const planned = plannedFields(c);
   for (const d of DETAIL_FIELDS) {
@@ -453,9 +458,9 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
     // A choice field counts only with one of its choices (a free-text answer elsewhere can land here).
     const filled = d.options ? valueText(fact) in d.options : Boolean(valueText(fact).trim());
     if (!d.required && filled && !opts.includeDone) continue;
-    // A planner question asks this field; its form card waits (or, after Not sure there, stays quiet).
+    // One editable card per field, including in footer navigation and after a planner answer is saved.
     const cover = planned.get(d.id);
-    if (cover && !cover.notSure && !filled && !opts.includeDone) continue;
+    if (planFields.has(d.id)) continue;
     // The proposed alternative is usually what the applicant already described on Start: offer
     // those words instead of asking again. Nothing is filled until they say yes.
     const offer = d.id === "alternative" && Boolean(c.description.trim());
@@ -714,7 +719,14 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       needsCheck,
     });
   }
-  return [...groups.read, ...groups.plan, ...groups.A, ...groups.B, ...groups.questions, ...groups.C, ...groups.D];
+  const items = [...groups.read, ...groups.plan, ...groups.A, ...groups.B, ...groups.questions, ...groups.C, ...groups.D];
+  const formPosition = (item: DeckItem) => {
+    if (item.kind === "authority") return -1;
+    const field = item.plan ? localField(item.plan.field) : item.key.startsWith("field-") ? item.key.slice("field-".length) : "";
+    const at = DETAIL_FIELDS.findIndex((d) => d.id === field);
+    return at < 0 ? DETAIL_FIELDS.length : at;
+  };
+  return SECTIONS.flatMap((s) => items.filter((item) => item.section === s.id).sort((a, b) => formPosition(a) - formPosition(b)));
 }
 
 /** Keys after `index` that match `pick` take the form's order among their own positions. */
@@ -773,8 +785,18 @@ export function preCaseState(draft: string): { items: DeckItem[]; line: string; 
 /** Answered out of tracked (non-optional) cards. */
 export function deckProgress(items: DeckItem[]): { done: number; total: number } {
   const tracked = items.filter((i) => !i.optional);
-  return { done: tracked.filter((i) => i.done).length, total: tracked.length };
+  return { done: tracked.filter((i) => i.done && !i.settled).length, total: tracked.length };
 }
+
+/** One current question; saved uncertainty is never labelled answered. Skip does not create a fact. */
+export function questionProgress(item: DeckItem, currentKey: string | undefined, skipped: readonly string[]): "current" | "done" | "skipped" | "uncertain" | "open" {
+  if (item.key === currentKey) return "current";
+  if (skipped.includes(item.key) && (!item.done || item.optional)) return "skipped";
+  if (item.settled) return "uncertain";
+  return item.done ? "done" : "open";
+}
+
+export const QUESTION_PROGRESS_LABEL = { current: "Current question", done: "Answered", skipped: "Skipped", uncertain: "Left open", open: "Unanswered" };
 
 /** Only a real Skip click is called skipped; human-pending work is never an applicant omission. */
 export function deckCompletion(items: DeckItem[], skipped: readonly string[]): { open: number; skipped: number; message: string } {
@@ -795,7 +817,7 @@ export const choiceKey = (n: number) => String.fromCharCode(65 + n);
 export function sectionProgress(items: DeckItem[]): { id: SectionId; label: string; items: DeckItem[]; done: number }[] {
   return SECTIONS.map((s) => {
     const mine = items.filter((i) => i.section === s.id && !i.optional);
-    return { ...s, items: mine, done: mine.filter((i) => i.done).length };
+    return { ...s, items: mine, done: mine.filter((i) => i.done && !i.settled).length };
   });
 }
 
@@ -804,14 +826,14 @@ export function choicesFor(item: DeckItem): { value: string; label: string }[] {
   if (item.choices) return item.choices;
   if (item.kind === "plan" && item.plan) {
     const input = planInput(item.plan.field);
-    return input.kind === "choices" ? [...(input.choices ?? []), { value: NOT_SURE, label: "Not sure" }] : [];
+    return input.kind === "choices" ? input.choices ?? [] : [];
   }
   if (item.kind === "fact") return [{ value: "confirm", label: item.confirmLabels?.confirm ?? "Yes, that’s right" }, { value: "dismiss", label: item.confirmLabels?.dismiss ?? "No, something else" }];
-  if (item.kind === "authority") return [...AUTHORITIES.map((a) => ({ value: a.id as string, label: a.name })), { value: "unsure", label: "Not sure yet" }];
+  if (item.kind === "authority") return AUTHORITIES.map((a) => ({ value: a.id, label: a.name }));
   if (item.kind === "candidate") {
     return item.provision
-      ? [{ value: "yes", label: "Yes, it differs" }, { value: "no", label: "No, it follows" }, { value: "not-sure", label: "Not sure" }]
-      : [{ value: "yes", label: "Yes" }, { value: "no", label: "No" }, { value: "not-sure", label: "Not sure" }];
+      ? [{ value: "yes", label: "Yes, it differs" }, { value: "no", label: "No, it follows" }]
+      : [{ value: "yes", label: "Yes" }, { value: "no", label: "No" }];
   }
   if (item.kind === "detail") {
     if (item.confirmLabels) return [{ value: "confirm", label: item.confirmLabels.confirm }, { value: "dismiss", label: item.confirmLabels.dismiss }];

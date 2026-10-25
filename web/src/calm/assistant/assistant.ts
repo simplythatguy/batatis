@@ -30,8 +30,8 @@ import {
 export interface AssistContext {
   /** Screen name sent to the engine: "question", "review", "application", "code", "drawer". */
   screen: string;
-  focus?: { kind: string; id: string };
-  /** What the panel says it is looking at, e.g. "question 10 and 9.23.17.3.(1)". */
+  focus?: AssistRequest["focus"];
+  /** Internal place label for navigation and return points. */
   label: string;
   /** Suggestion chips for this context. */
   suggestions?: string[];
@@ -100,7 +100,7 @@ export interface AssistBinding {
   caseId: string | null;
   /** Local application lifetime, kept through its first save so its conversation can follow. */
   draftId?: string;
-  /** The short application name the panel shows. */
+  /** The short application name for internal navigation. */
   caseName: string;
   /** The owner may add files to it (a draft or returned application). */
   canUpload: boolean;
@@ -328,13 +328,17 @@ export function setAssistantCase(binding: AssistBinding | string | null) {
 /** The key of the current conversation (tests). */
 export const assistantKey = () => key;
 
-/** Where the person is now; the panel shows it and it goes with the next question. */
+/** Where the person is now. Only semantic changes retire a pending answer. */
 export function setAssistantContext(context: AssistContext) {
-  const same = context.label === state.context.label && context.screen === state.context.screen && context.focus?.id === state.context.focus?.id && context.focus?.kind === state.context.focus?.kind;
-  if (same) return;
+  const same = context.screen === state.context.screen && context.focus?.id === state.context.focus?.id && context.focus?.kind === state.context.focus?.kind
+    && context.focus?.prompt === state.context.focus?.prompt && context.focus?.why === state.context.focus?.why;
+  if (same) {
+    if (context.label !== state.context.label) set({ context });
+    return;
+  }
   changeTypedContext();
-  // Moving to another card or screen is manual navigation: older plans no longer apply.
-  if (context.focus?.id !== state.context.focus?.id || context.screen !== state.context.screen) bumpViewGeneration();
+  // A different question can share a provision id; its older plans still expire.
+  bumpViewGeneration();
   set({ context });
   scheduleVoiceUpdate();
 }

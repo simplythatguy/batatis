@@ -160,6 +160,7 @@ class IntakePlan(BaseModel):
     scope: ScopeCheck
     fork: Fork
     questions: list[Question] = []
+    asked: list[Question] = []               # issued questions stay editable after the next plan replaces them
     not_sure: list[str] = []                # question ids answered "not sure"; never asked again, never blocking
     pre_application: PreApplication = Field(default_factory=PreApplication)
     route_notice: RouteNotice | None = None

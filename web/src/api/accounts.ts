@@ -7,7 +7,7 @@
 import { EngineError } from "./client";
 import { credentialsMode, ENGINE_BASE } from "./engineAuth";
 import { accountRequestSignal } from "./requestLifetime";
-import type { AssistNavigation, Case, ProfessionalRequirementRequest, VoiceCapability } from "./types.gen";
+import type { AssistFocus, AssistNavigation, Case, ProfessionalRequirementRequest, VoiceCapability } from "./types.gen";
 
 export type Role = "applicant" | "reviewer";
 
@@ -73,7 +73,7 @@ export interface AssistRequest {
   revision?: number;
   attachment_ids?: string[];
   screen: string;
-  focus?: { kind: string; id: string };
+  focus?: AssistFocus;
   question: string;
   history?: { role: "user" | "assistant"; text: string }[];
   /** Destination ids this browser can open right now (docs/api/assistant-navigation.md); never URLs. */

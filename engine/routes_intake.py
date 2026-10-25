@@ -16,6 +16,7 @@ from .intake import model as model_pass
 from .intake import review as review_pass
 from .intake import service
 from .intake.extract import scrubbed
+from .intake.questions import issued_questions
 from .intake.rules import ROLES
 from .llm_gate import client_ip_from
 from .models import Fact
@@ -92,8 +93,10 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes], *
             return None
 
     def result(case) -> IntakeResult:
-        if case.intake is None:
+        if case.intake is None or case.intake.plan is None:
             service.refresh(case)
+        else:
+            case.intake.plan.asked = issued_questions(case.facts, case.intake.plan)
         ids = {pointer.fact_id for pointer in case.intake.pointers}
         return IntakeResult(case_id=case.id, case_version=case.version, record=case.intake,
                             facts=[fact for fact in case.facts if fact.id in ids])

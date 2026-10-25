@@ -7,13 +7,14 @@ import { Recommendations } from "../screens/Recommendations";
 import { useCase } from "../store";
 import { readOnlyStatus } from "./applications";
 import { openAssistant, setAssistantContext, useAssistant } from "./assistant/assistant";
+import { questionContext } from "./assistant/questionContext";
 import { useCurrentApplication } from "./begin";
 import { CodeDrawer, type DrawerState } from "./CodeDrawer";
-import { aliasKey, alternativeChoice, buildDeck, deckCompletion, mergeQueue, rankAhead, choiceKey, choicesFor, preCaseState, SECTIONS, sourcePhrase, type DeckItem, type SectionId } from "./deck";
-import { forkOf, NOT_SURE, planInput } from "../intakeView";
+import { aliasKey, alternativeChoice, buildDeck, deckCompletion, mergeQueue, rankAhead, choiceKey, choicesFor, preCaseState, questionProgress, QUESTION_PROGRESS_LABEL, SECTIONS, sourcePhrase, type DeckItem, type SectionId } from "./deck";
+import { NOT_SURE, planInput } from "../intakeView";
 import { confirmedAnswer, localField } from "../intakeFields";
 import { KeywordTriage } from "./KeywordTriage";
-import { CodeProgress, ForkNote, ReadingState, ReadSource, RedirectPage, ShowCode } from "./ReadCards";
+import { CodeProgress, ReadingState, ReadSource, RedirectPage, ShowCode } from "./ReadCards";
 import { Icon24 } from "./icons";
 import { RelevanceRing } from "./RelevanceRing";
 import { getSession, updateSession, useSession } from "./session";
@@ -30,6 +31,7 @@ import { canonicalProvision } from "../provisions";
 import { useDeckExtras } from "./useDeckExtras";
 import { JurisdictionNote } from "./JurisdictionNote";
 import { AuthorityPicker } from "./AuthorityPicker";
+import { DatePicker } from "./DatePicker";
 import { AUTHORITIES } from "../config";
 import { PACKAGE_YES, RULE_ADD, RULE_LEAVE } from "./deck";
 import { useAccount } from "./account";
@@ -78,17 +80,6 @@ function OkRow({ label = "OK", disabled, onOk, typed, children }: { label?: stri
   );
 }
 
-/** Number and arrow in a shade of the section's hue (neutral without one), then the section label. */
-function QNum({ n, label, hue }: { n: ReactNode; label?: string; hue?: string }) {
-  return (
-    <div className={`cf-q-num${hue ? ` is-${hue}` : ""}`}>
-      <span className="cf-q-n">{n}</span>
-      <Icon24 name="right" size={15} stroke={2} />
-      {label && <span className="cf-q-sec">{label}</span>}
-    </div>
-  );
-}
-
 /** Enter-direction for the vertical slide: forward enters from below, back from above. */
 function useDirection(index: number): "down" | "up" {
   const prev = useRef(index);
@@ -102,7 +93,7 @@ function useDirection(index: number): "down" | "up" {
 
 /* —— Footer: progress split by form section, popover per section, up/down —— */
 
-export function SectionFooter({ items, index, onJump, onPrev, onNext, canPrev, canNext }: { items: Shown[]; index: number; onJump: (i: number) => void; onPrev: () => void; onNext: () => void; canPrev: boolean; canNext: boolean }) {
+export function SectionFooter({ items, index, skipped, onJump, onPrev, onNext, canPrev, canNext }: { items: Shown[]; index: number; skipped: readonly string[]; onJump: (i: number) => void; onPrev: () => void; onNext: () => void; canPrev: boolean; canNext: boolean }) {
   const { c } = useCase();
   const references = confirmedProvisions(c).length;
   const [open, setOpen] = useState<SectionId | null>(null);
@@ -121,7 +112,7 @@ export function SectionFooter({ items, index, onJump, onPrev, onNext, canPrev, c
   const sections = SECTIONS.map((s) => {
     const at = items.map((it, i) => ({ it, i })).filter((x) => x.it.section === s.id);
     const tracked = at.filter((x) => !x.it.optional);
-    return { ...s, at, done: tracked.filter((x) => x.it.done).length, total: tracked.length, on: at.some((x) => x.i === index) };
+    return { ...s, at, done: tracked.filter((x) => x.it.done && !x.it.settled).length, total: tracked.length, on: at.some((x) => x.i === index) };
   }).filter((s) => s.at.length > 0);
   const lastHalf = (n: number) => n >= Math.ceil(sections.length / 2);
   return (
@@ -140,27 +131,32 @@ export function SectionFooter({ items, index, onJump, onPrev, onNext, canPrev, c
               onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) later(); }}
               onKeyDown={(e) => { if (e.key === "Escape" && open) { e.stopPropagation(); setOpen(null); } }}
             >
-              <button type="button" className="cf-qsec-btn" aria-expanded={open === s.id} aria-controls={`cf-qsec-pop-${s.id}`} onClick={() => onJump(first.i)}>
+              <button type="button" className="cf-qsec-btn" aria-expanded={open === s.id} aria-controls={open === s.id ? `cf-qsec-pop-${s.id}` : undefined} onClick={() => { setOpen(null); onJump(first.i); }}>
                 <span className="cf-qsec-bar" aria-hidden="true">
-                  {s.at.map((x) => <i key={x.it.key} className={x.i === index ? "is-cur" : x.it.done ? "is-done" : ""} />)}
+                  {s.at.map((x) => {
+                    const state = questionProgress(x.it, items[index]?.key, skipped);
+                    return <i key={x.it.key} className={state === "current" ? "is-cur" : `is-${state}`} />;
+                  })}
                 </span>
                 <span className="cf-qsec-lab">
                   <span className="cf-qsec-name" title={s.label}>{s.short}</span>
                   <span className="cf-qsec-l"><span className="cf-sr">, Section </span>{s.id}</span>
-                  <span className="cf-qsec-count">{s.id === "C" ? `${references} confirmed` : <>{s.done}<span className="cf-qsec-of"> of </span><span className="cf-qsec-slash" aria-hidden="true">/</span>{s.total}</>}</span>
+                  <span className="cf-qsec-count">{s.id === "C" ? <>{references}<span className="cf-qsec-confirmed" aria-hidden="true"> confirmed</span><span className="cf-sr"> confirmed</span></> : <>{s.done}<span className="cf-qsec-of"> of </span><span className="cf-qsec-slash" aria-hidden="true">/</span>{s.total}</>}</span>
                 </span>
-                <span className="cf-sr">. Go to the first open question here.</span>
+                <span className="cf-sr">. {s.on ? `Current question: ${items[index]?.title}. ` : ""}{s.at.filter((x) => questionProgress(x.it, undefined, skipped) === "skipped").length} skipped. Go to the first open question here.</span>
               </button>
               {open === s.id && (
                 <div id={`cf-qsec-pop-${s.id}`} className={`cf-pop cf-qsec-pop${lastHalf(sn) ? " is-end" : ""}`} role="group" aria-label={`${s.label}, Section ${s.id} questions`}>
                   <p className="cf-qsec-about">{SECTIONS.find((x) => x.id === s.id)?.about}</p>
-                  {s.at.map((x, k) => (
-                    <button key={x.it.key} type="button" className={`cf-qsec-row${x.i === index ? " is-cur" : ""}`} aria-current={x.i === index ? "step" : undefined} onClick={() => { setOpen(null); onJump(x.i); }}>
+                  {s.at.map((x, k) => {
+                    const state = questionProgress(x.it, items[index]?.key, skipped);
+                    return <button key={x.it.key} type="button" className={`cf-qsec-row${state === "current" ? " is-cur" : ""}`} aria-current={state === "current" ? "step" : undefined} aria-label={`${s.id}${k + 1}: ${x.it.title}. ${QUESTION_PROGRESS_LABEL[state]}.`} onClick={() => { setOpen(null); onJump(x.i); }}>
                       <span className="cf-qsec-n">{s.id}{k + 1}</span>
                       <span className="cf-qsec-t">{x.it.title}</span>
-                      {x.it.done && <span className="cf-qsec-done" aria-label="answered"><Icon24 name="check" size={14} /></span>}
-                    </button>
-                  ))}
+                      {state === "done" && <span className="cf-qsec-done"><Icon24 name="check" size={14} /></span>}
+                      {state === "skipped" && <span className="cf-qsec-skipped"><Icon24 name="x" size={14} /></span>}
+                    </button>;
+                  })}
                 </div>
               )}
             </div>
@@ -190,16 +186,14 @@ function planValue(item: Shown, c: ReturnType<typeof useCase>["c"]): string | un
   return typeof f.value === "boolean" ? (f.value ? "yes" : "no") : String(f.value);
 }
 
-function PlanBody({ item, onPick, draft, setDraft, note, first }: { item: Shown; onPick: (value: string) => void; draft: string; setDraft: (v: string) => void; note: string; first: boolean }) {
+function PlanBody({ item, onPick, draft, setDraft, note }: { item: Shown; onPick: (value: string) => void; draft: string; setDraft: (v: string) => void; note: string }) {
   const { c, reading } = useCase();
   const q = item.plan!;
   const input = planInput(q.field);
   const current = planValue(item, c);
-  const fork = forkOf(c);
   const busy = reading.busy === q.id;
   return (
     <>
-      {first && fork && <ForkNote fork={fork} />}
       {input.kind === "choices" ? (
         <Choices choices={choicesFor(item)} current={current} onPick={onPick} />
       ) : (
@@ -219,7 +213,6 @@ function PlanBody({ item, onPick, draft, setDraft, note, first }: { item: Shown;
             />
           )}
           {input.unit && <span className="cf-unit">{input.unit}</span>}
-          <button type="button" className="cf-chip" aria-pressed={current === NOT_SURE} onClick={() => onPick(NOT_SURE)}>Not sure</button>
         </div>
       )}
       {busy && <p className="cf-note" role="status"><span className="cf-dot is-pending" aria-hidden="true" />Saving your answer…</p>}
@@ -231,7 +224,7 @@ function PlanBody({ item, onPick, draft, setDraft, note, first }: { item: Shown;
 }
 
 /** Render the current card’s inputs, saved answer, source details and loading or failure feedback. */
-function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote, firstPlan, extras, note, busy, onReload, position }: { item: Shown; picked?: string; onPick: (value: string) => void; draft: string; setDraft: (v: string) => void; openDrawer: (s: DrawerState) => void; planNote: string; firstPlan: boolean; extras: ReturnType<typeof useDeckExtras>["extras"]; note: string; busy: boolean; onReload?: () => void; position: number }) {
+function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote, extras, note, busy, onReload, position }: { item: Shown; picked?: string; onPick: (value: string) => void; draft: string; setDraft: (v: string) => void; openDrawer: (s: DrawerState) => void; planNote: string; extras: ReturnType<typeof useDeckExtras>["extras"]; note: string; busy: boolean; onReload?: () => void; position: number }) {
   const { c, dispatch } = useCase();
   const session = useSession();
   const [tips, setTips] = useState(false);
@@ -244,10 +237,13 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
     const fact = factFor(c, field);
     const unsure = session.ruleUnsure.includes(field) && (fact?.value === undefined || fact?.value === null);
     if (spec.type === "number" || spec.type === "int") {
-      return <RuleNumberInput id={`cf-rule-${field}`} label={spec.label} unit={spec.unit} draft={draft} setDraft={setDraft} unsure={unsure} onUnsure={() => onPick(NOT_SURE_RULE)} note={note} />;
+      return <RuleNumberInput id={`cf-rule-${field}`} label={spec.label} unit={spec.unit} draft={draft} setDraft={setDraft} unsure={unsure} note={note} />;
     }
     const current = unsure ? NOT_SURE_RULE : fact?.value === undefined || fact?.value === null ? undefined : String(fact.value);
-    return <Choices choices={choices} current={current} onPick={onPick} />;
+    return <>
+      <Choices choices={choices} current={current} onPick={onPick} />
+      {unsure && <p className="cf-note"><span className="cf-dot is-pending" aria-hidden="true" />Saved as Not sure. The rule stays open.</p>}
+    </>;
   }
   if (item.kind === "rule" && item.rule && index) {
     return (
@@ -282,7 +278,7 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
   if (item.kind === "section-d") {
     return <div className="cf-embed cf-sectiond"><Recommendations /></div>;
   }
-  if (item.kind === "plan") return <PlanBody item={item} onPick={onPick} draft={draft} setDraft={setDraft} note={planNote} first={firstPlan} />;
+  if (item.kind === "plan") return <PlanBody item={item} onPick={onPick} draft={draft} setDraft={setDraft} note={planNote} />;
   if (item.kind === "code-run") return <CodeProgress />;
   if (item.kind === "code-triage") return <KeywordTriage c={c} openDrawer={openDrawer} />;
   if (item.kind === "reading") return <ReadingState />;
@@ -328,9 +324,6 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
         <div className="cf-inline-answer">
           <label className="cf-sr" htmlFor="cf-storeys">Number of storeys</label>
           <input id="cf-storeys" className="cf-uline is-number" type="number" inputMode="numeric" min={1} step={1} value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="e.g. 2" />
-          <button type="button" className="cf-chip" aria-pressed={cand?.answer === "not-sure"} onClick={() => { setDraft(""); dispatch({ type: "setStoreyCount", value: "" }); }}>
-            Not sure
-          </button>
         </div>
       ) : item.kind === "question" ? (
         <textarea className="cf-uline is-area" rows={2} aria-label={item.title} value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Type your answer here…" />
@@ -357,15 +350,17 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
           {offer && <Choices choices={choices} current={current} onPick={onPick} />}
           {offer && current !== "dismiss" ? null : def.multiline ? (
             <textarea id={`field-${def.id}`} className="cf-uline is-area" rows={2} aria-label={def.label} value={valueText(fact)} onChange={(e) => dispatch({ type: "setDetail", field: def.id, value: e.target.value, section: def.section })} placeholder={offer ? "What you propose instead, in a sentence or two…" : "Type your answer here…"} />
+          ) : def.inputType === "date" ? (
+            <DatePicker id={`field-${def.id}`} label={def.label} value={valueText(fact)} onChange={(value) => dispatch({ type: "setDetail", field: def.id, value, section: def.section })} />
           ) : (
             <input
               id={`field-${def.id}`}
-              className={`cf-uline${def.inputType === "date" ? " is-date" : ""}`}
+              className="cf-uline"
               type={def.inputType ?? "text"}
               aria-label={def.label}
               value={valueText(fact)}
               onChange={(e) => dispatch({ type: "setDetail", field: def.id, value: e.target.value, section: def.section })}
-              placeholder={def.inputType === "date" ? undefined : def.hint ?? "Type your answer here…"}
+              placeholder={def.hint ?? "Type your answer here…"}
             />
           )}
           {!offer && fact && !isTyped(fact) && (
@@ -379,11 +374,11 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
       ) : item.kind === "authority" ? (
         <>
           <AuthorityPicker options={AUTHORITIES} value={c.authority} onPick={onPick} label={item.title} />
-          <button type="button" className="cf-chip cf-ap-unsure" data-deck-answer aria-pressed={current === "unsure"} onClick={() => onPick("unsure")}>Not sure yet</button>
         </>
       ) : (
         choices.length > 0 && <Choices choices={choices} current={current} onPick={onPick} />
       )}
+      {item.kind === "detail" && item.settled && !fact && <p className="cf-note">Saved as Not sure. This stays open on Review.</p>}
       {item.kind === "candidate" && !item.provision && (
         <button type="button" className="cf-link-btn cf-find" onClick={() => openDrawer({ mode: "search" })}>
           <CIcon name="search" size={13} />Find the rule in the code yourself
@@ -406,12 +401,7 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
 
 /** The assistant opened on this card: it explains; it never answers for you. */
 function askAbout(item: DeckItem, n: number) {
-  openAssistant({
-    screen: "question",
-    focus: item.provision ? { kind: "provision", id: item.provision } : { kind: "card", id: item.key },
-    label: `question ${n}${item.provision ? ` and ${item.provision}` : ""}`,
-    suggestions: item.provision ? ["Explain the code", "What does this question mean?"] : ["What does this question mean?", "What should I have ready?"],
-  });
+  openAssistant(questionContext(item, n));
 }
 
 /**
@@ -492,8 +482,8 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
   const openKeys = all.filter((i) => !i.done).map((i) => i.key);
   const fresh = openKeys.filter((k) => !session.queue.includes(k));
   const sessionKey = session.queue[session.index];
-  // Planner cards not yet reached follow the API's latest ranking (it re-ranks after the code check).
-  const ranked = rankAhead(session.queue, session.index, order, (k) => k.startsWith("plan-"));
+  // Unreached cards keep form order when a replan or another navigation adds a card.
+  const ranked = rankAhead(session.queue, session.index, order, () => true);
   const queue = fresh.length ? mergeQueue(ranked, fresh, order) : ranked;
   const index = sessionKey !== undefined ? Math.max(queue.indexOf(sessionKey), 0) : fresh.length ? queue.indexOf(fresh[0]) : Math.min(session.index, queue.length);
   const currentKey = queue[index];
@@ -502,7 +492,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
   useEffect(() => {
     updateSession((s) => {
       const cur = s.queue[s.index];
-      const kept = rankAhead(s.queue, s.index, order, (k) => k.startsWith("plan-")).filter((k) => byKey.has(k) || k === cur);
+      const kept = rankAhead(s.queue, s.index, order, () => true).filter((k) => byKey.has(k) || k === cur);
       const next = mergeQueue(kept, fresh, order);
       return { queue: next, index: cur ? Math.max(next.indexOf(cur), 0) : fresh.length ? next.indexOf(fresh[0]) : Math.min(s.index, next.length) };
     });
@@ -538,7 +528,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const noteFor = (key: string, text: string) => setCardNotes((n) => ({ ...n, [key]: text }));
   /** A typed planner answer was sent: move on once it is saved. */
-  const advanceAfter = useRef<string | null>(null);
+  const [advanceAfter, setAdvanceAfter] = useState<{ key: string; generation: number } | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const formPos = currentKey ? all.findIndex((i) => i.key === currentKey) : all.length;
   const dir = useDirection(formPos < 0 ? index : formPos);
@@ -554,13 +544,8 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
       setAssistantContext({ screen: "question", label: "your remaining questions", suggestions: ["What happens at review?", "What is still missing?"] });
       return;
     }
-    setAssistantContext({
-      screen: "question",
-      focus: item.provision ? { kind: "provision", id: item.provision } : { kind: "card", id: item.key },
-      label: `question ${(all.findIndex((i) => i.key === item.key) + 1) || index + 1}${item.provision ? ` and ${item.provision}` : ""}`,
-      suggestions: item.provision ? ["Explain the code", "What does this question mean?"] : ["What does this question mean?", "What should I have ready?"],
-    });
-  }, [item?.key, index]); // eslint-disable-line react-hooks/exhaustive-deps
+    setAssistantContext(questionContext(item, (all.findIndex((i) => i.key === item.key) + 1) || index + 1));
+  }, [item?.key, item?.title, item?.why, item?.provision, index]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Land on a card from a link (?focus=) or the code-check entry, then drop the parameter.
   const mounted = useRef(false);
@@ -576,7 +561,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     if (key && byKey.has(key)) {
       updateSession((s) => {
         const base = s.queue.length >= queue.length ? s.queue : queue;
-        const q = base.includes(key) ? base : [...base.slice(0, s.index), key, ...base.slice(s.index)];
+        const q = mergeQueue(base, [key], order);
         return { queue: q, index: q.indexOf(key) };
       });
     }
@@ -596,7 +581,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     const key = `cand-${target.id}`;
     setJumpTo(null);
     updateSession((s) => {
-      const q = s.queue.includes(key) ? s.queue : [...s.queue.slice(0, s.index), key, ...s.queue.slice(s.index)];
+      const q = mergeQueue(s.queue, [key], order);
       return { queue: q, index: q.indexOf(key) };
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -621,11 +606,16 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
 
   // A typed planner answer moves on once the engine has saved it.
   useEffect(() => {
-    if (!item || advanceAfter.current !== item.key || !item.done) return;
-    advanceAfter.current = null;
+    if (!advanceAfter) return;
+    if (engineGeneration() !== advanceAfter.generation || item?.key !== advanceAfter.key) {
+      setAdvanceAfter(null);
+      return;
+    }
+    if (!item.done) return;
+    setAdvanceAfter(null);
     moveFrom(index, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [item?.key, item?.done]);
+  }, [item?.key, item?.done, advanceAfter]);
 
   // A card that takes typing gets the caret straight away; otherwise the heading (no ring) holds focus.
   useEffect(() => {
@@ -655,7 +645,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
       index: j,
       wrapped,
       seen: markSeen && key && !s.seen.includes(key) ? [...s.seen, key] : s.seen,
-      skipped: skipping && key && !s.skipped.includes(key) ? [...s.skipped, key] : s.skipped,
+      skipped: skipping && key && !s.skipped.includes(key) ? [...s.skipped, key] : markSeen && key ? s.skipped.filter((k) => k !== key) : s.skipped,
     }));
   }
 
@@ -665,7 +655,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     if (!key) return updateSession({ index: queue.length });
     updateSession((s) => {
       const base = s.queue.length >= queue.length ? s.queue : queue;
-      const q = base.includes(key) ? base : [...base.slice(0, s.index), key, ...base.slice(s.index)];
+      const q = mergeQueue(base, [key], order);
       return { queue: q, index: q.indexOf(key) };
     });
   }
@@ -682,7 +672,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     if (it.kind === "section-d" || it.kind === "file" || it.kind === "code-run" || it.kind === "code-note" || it.kind === "code-triage") return true;
     if (it.kind === "reading") return reading.intake !== "running";
     if (it.kind === "scope") return false;
-    if (it.kind === "plan") return it.done || (Boolean(draft.trim()) && reading.busy !== it.ref);
+    if (it.kind === "plan") return reading.busy !== it.ref && (it.done || Boolean(draft.trim()));
     if (it.kind === "question") return Boolean(draft.trim()) || it.done;
     if (it.kind === "storeys") return (Number.isInteger(Number(draft)) && Number(draft) > 0) || it.done;
     if (it.kind === "authority") return it.done || Boolean(c.authority) || session.authorityUnsure;
@@ -719,7 +709,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
         updateSession((s) => ({ ruleUnsure: s.ruleUnsure.filter((f) => f !== item.input!.field) }));
         // Move on once the new value has rendered, so a question it opens comes next, not at the end.
         if (!item.done) {
-          advanceAfter.current = item.key;
+          setAdvanceAfter({ key: item.key, generation: engineGeneration() });
           return;
         }
       }
@@ -740,7 +730,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
   function skip() {
     if (!item) return;
     // Optional cards are offered once; required ones come back at the end of this pass.
-    moveFrom(index, item.optional, !item.optional);
+    moveFrom(index, item.optional, true);
   }
 
   /** One planner answer to the intake answers route; a typed answer moves on once saved. */
@@ -748,11 +738,13 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     if (!it.plan) return;
     const key = it.key;
     setPlanNotes((n) => ({ ...n, [key]: "" }));
-    if (advance) advanceAfter.current = key;
+    const generation = engineGeneration();
     void answerPlan(it.plan, answer).then((error) => {
-      if (!error) return;
-      advanceAfter.current = null;
-      setPlanNotes((n) => ({ ...n, [key]: error }));
+      if (engineGeneration() !== generation) return;
+      if (error) {
+        setAdvanceAfter(null);
+        setPlanNotes((n) => ({ ...n, [key]: error }));
+      } else if (advance && getSession().queue[getSession().index] === key) setAdvanceAfter({ key, generation });
     });
   }
 
@@ -799,7 +791,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
       // Move on only if the applicant is still on this card; a first answer moves once it renders.
       const s = getSession();
       if (s.queue[s.index] !== key) return;
-      if (!row.answer) advanceAfter.current = key;
+      if (!row.answer) setAdvanceAfter({ key, generation: engineGeneration() });
       else moveFrom(index, true);
     })();
   }
@@ -955,10 +947,9 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
             </div>
           </div>
         ) : item?.kind === "scope" && !item.gone ? (
-          <RedirectPage n={n} />
+          <RedirectPage />
         ) : item ? (
           <div ref={wrapRef} key={item.key} className={`cf-q-wrap is-from-${dir}${item.kind === "section-d" || item.kind === "code-triage" ? " is-wide" : ""}`} aria-labelledby="cf-q" role="group">
-            <QNum n={n} label={item.eyebrow} hue={SECTION_HUE[item.section]} />
             <h2 id="cf-q" className="cf-q-text" tabIndex={-1}>{item.title}</h2>
             {(item.context || item.quote) && (
               <p className="cf-q-help">
@@ -976,7 +967,6 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
                 setDraft={setDraft}
                 openDrawer={setDrawer}
                 planNote={planNotes[item.key] ?? ""}
-                firstPlan={item.kind === "plan" && queue.find((k) => k.startsWith("plan-")) === item.key}
                 extras={extras}
                 note={cardNotes[item.key] ?? ""}
                 busy={busyKey === item.key}
@@ -998,7 +988,6 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
           </div>
         ) : (
           <div ref={wrapRef} key="finish" className={`cf-q-wrap is-from-${dir}`} aria-labelledby="cf-q" role="group">
-            <QNum n={<Icon24 name="check" size={15} stroke={2} />} label={openLeft ? "For now" : "All caught up"} />
             <h2 id="cf-q" className="cf-q-text" tabIndex={-1}>That’s everything for now.</h2>
             <p className="cf-q-help">
               {completion.message}
@@ -1022,7 +1011,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
           </div>
         )}
       </div>
-      <SectionFooter items={all} index={item ? pos : -1} onJump={(i) => goToKey(all[i]?.key ?? null)} onPrev={() => step(-1)} onNext={() => step(1)} canPrev={(pos < 0 ? all.length : pos) > 0} canNext={Boolean(item)} />
+      <SectionFooter items={all} index={item ? pos : -1} skipped={session.skipped} onJump={(i) => goToKey(all[i]?.key ?? null)} onPrev={() => step(-1)} onNext={() => step(1)} canPrev={(pos < 0 ? all.length : pos) > 0} canNext={Boolean(item)} />
       <CodeDrawer state={drawer} onClose={() => setDrawer(null)} onAdded={(id) => { setDrawer(null); setJumpTo(id); }} />
     </div>
   );
