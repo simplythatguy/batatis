@@ -7,7 +7,7 @@ from ..models_intake import IntakePlan, ScopeCheck
 from .fork import assess
 from .notices import route_notice
 from .preapplication import pre_application
-from .questions import PROBES, plan_questions
+from .questions import PROBES, issued_questions, plan_questions
 from .scope import classify
 
 OVERRIDDEN = 'overridden'
@@ -72,8 +72,7 @@ def build_plan(case: Case) -> IntakePlan:
         step = 'questions'
     else:
         step = 'identify'
-    asked = {q.id: q for q in [*(previous.asked if previous else []),
-                              *(previous.questions if previous else []), *questions]}
+    asked = {q.id: q for q in [*issued_questions(case.facts, previous), *questions]}
     return IntakePlan(next=step, scope=scope, fork=fork, questions=questions, asked=list(asked.values()), not_sure=not_sure,
                       pre_application=pre_application(case, value('municipality')),
                       route_notice=route_notice(value('applicant_role'), value('scope')),

@@ -16,7 +16,7 @@ from ..models_intake import FactPointer, IntakeRecord
 from . import model as model_pass
 from .extract import DESCRIPTION, DESCRIPTION_REF, Extraction, Origin, Outbound, read_file, read_text, scrubbed
 from .plan import OVERRIDDEN, SCOPE_FIELD, build_plan, description, overridden
-from .questions import PROBES, question_id
+from .questions import issued_questions
 from .rules import ENUMS, FIELDS, PERSONAL, ROLES, read
 from .scope import classify
 from .text import NUMBER, number
@@ -52,7 +52,8 @@ def run(text: str | None, files: list[tuple[str, str, bytes]], *, codes=None,
 
 
 def _latest(case: Case, name: str) -> Fact | None:
-    return next((fact for fact in reversed(case.facts) if fact.field == name), None)
+    return next((fact for fact in reversed(case.facts)
+                 if fact.field == name or (name == 'storeys' and fact.field == 'building.storeys')), None)
 
 
 def apply(case: Case, text: str | None, extraction: Extraction, *, role: str | None = None) -> list[Fact]:
@@ -171,13 +172,7 @@ def answer(case: Case, answers: list[dict]) -> list[Fact]:
     plan = case.intake.plan if case.intake else None
     asked = {}
     if plan and plan.scope.status != 'redirect':
-        asked = {q.id: q.field for q in [*plan.asked, *plan.questions]}
-        # Records saved before issued-question history existed still prove earlier answers.
-        answered = {f.field for f in case.facts if f.source.ref == 'intake answer' and f.status == 'confirmed'}
-        for probe in PROBES:
-            qid = question_id(probe.field)
-            if probe.field in answered or qid in plan.not_sure:
-                asked.setdefault(qid, probe.field)
+        asked = {q.id: q.field for q in issued_questions(case.facts, plan)}
     checked = []
     for item in answers:
         qid, raw = item.get('question_id'), item.get('answer') or ''

@@ -9,7 +9,9 @@ from __future__ import annotations
 
 import json
 import re
+import shutil
 import socket
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -24,6 +26,7 @@ from engine.intake.questions import CAP
 from engine.intake.scope import REGIMES, classify, redirect_message
 from engine.jurisdictions import registry
 from engine.models import Case, Jurisdiction
+from engine.models_intake import IntakeRecord
 from engine.models_identify import ArticleDecision, BenchmarkRecord, IdentifyArticle, IdentifyResult, IdentifyTrace
 from engine.store import CaseStore
 
@@ -303,6 +306,93 @@ def test_legacy_answers_stay_editable_and_uncertainty_withdraws_the_old_value():
     service.answer(case, [{'question_id': qid, 'answer': 'single_family'}])
     assert qid not in case.intake.plan.not_sure
     assert [f for f in case.facts if f.field == 'occupancy'][-1].value == 'single_family'
+
+
+@pytest.mark.parametrize('answer', ['no', 'not sure'])
+def test_legacy_choice_history_is_hydrated_on_read_and_replan(tmp_path, answer):
+    case = _case('We want to omit the fire separation in our new house.')
+    issued = next(q for q in case.intake.plan.questions if q.field == 'sprinklered')
+    service.answer(case, [{'question_id': issued.id, 'answer': answer}])
+    record = case.intake.model_dump()
+    record['plan'].pop('asked')
+    case.intake = IntakeRecord.model_validate(record)
+    assert case.intake.plan.asked == [] and issued.id not in [q.id for q in case.intake.plan.questions]
+    store = CaseStore(tmp_path / 'cases.sqlite')
+    saved = store.put(case)
+    with TestClient(create_app(store=store)) as client:
+        loaded = client.get(f'/cases/{saved.id}/intake')
+        assert loaded.status_code == 200
+        asked = [q for q in loaded.json()['record']['plan']['asked'] if q['id'] == issued.id]
+        assert len(asked) == 1
+        assert (asked[0]['field'], asked[0]['text'], asked[0]['why']) == (issued.field, issued.text, issued.why)
+        assert store.get(saved.id).model_dump() == saved.model_dump(), 'reading history cannot write or advance the case'
+        replanned = client.post(f'/cases/{saved.id}/intake/plan', json={'expected_version': saved.version})
+        assert replanned.status_code == 200
+        assert [q['id'] for q in replanned.json()['record']['plan']['asked']].count(issued.id) == 1
+        edited = client.post(f'/cases/{saved.id}/intake/answers', json={
+            'answers': [{'question_id': issued.id, 'answer': 'yes'}],
+            'expected_version': replanned.json()['case_version'],
+        })
+        assert edited.status_code == 200
+        assert issued.id not in edited.json()['record']['plan']['not_sure']
+        assert [f for f in store.get(saved.id).facts if f.field == issued.field][-1].value == 'yes'
+
+
+def test_reopened_legacy_choice_has_one_editable_deck_card(tmp_path):
+    node = shutil.which('node')
+    if node is None:
+        pytest.skip('node is required to exercise the real openedCase -> buildDeck projection')
+    case = _case('We want to omit the fire separation in our new house.')
+    issued = next(q for q in case.intake.plan.questions if q.field == 'sprinklered')
+    service.answer(case, [{'question_id': issued.id, 'answer': 'no'}])
+    serialized = case.model_dump()
+    serialized['intake']['plan'].pop('asked')
+    store = CaseStore(tmp_path / 'cases.sqlite')
+    saved = store.put(Case.model_validate(serialized))
+    with TestClient(create_app(store=store)) as client:
+        intake = client.get(f'/cases/{saved.id}/intake').json()
+    payload = tmp_path / 'reopened.json'
+    payload.write_text(json.dumps({'saved': saved.model_dump(mode='json'), 'intake': intake}))
+    script = '''
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { openedCase } from './src/calm/openCase.ts';
+import { buildDeck, choicesFor } from './src/calm/deck.ts';
+const payload = JSON.parse(readFileSync(process.argv[1], 'utf8'));
+const c = openedCase(payload.saved, 'homebuilder', { intake: payload.intake, identify: null });
+const cards = buildDeck(c, [], { includeDone: true }).filter(c => c.ref === 'intake.sprinklered');
+assert.equal(cards.length, 1, 'the older saved choice must have one editable card');
+assert.equal(cards[0].done, true);
+assert.deepEqual(choicesFor(cards[0]).map(c => c.value), ['yes', 'no', 'partial']);
+console.log('legacy reopened choice: one editable card, all three real choices');
+'''
+    result = subprocess.run([node, '--experimental-strip-types', '--no-warnings', '--import',
+                             './scripts/register-ts.mjs', '--input-type=module', '-e', script, str(payload)],
+                            cwd=ROOT / 'web', capture_output=True, text=True, timeout=30)
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_legacy_history_requires_own_case_answer_or_remembered_uncertainty():
+    from engine.models import Fact, Source
+    case = _case('We want to omit the fire separation in our new house.')
+    case.facts.extend([
+        Fact(field='part4_design', value=False, kind='pointed', status='confirmed',
+             source=Source(type='user_text', ref='intake:description', quote='not a Part 4 design')),
+        Fact(field='scope', value='site', kind='pointed', status='unconfirmed',
+             source=Source(type='user_text', ref='intake answer', quote='site')),
+        Fact(field='unissued_probe', value='yes', kind='pointed', status='confirmed',
+             source=Source(type='user_text', ref='intake answer', quote='yes')),
+    ])
+    case.intake.plan.not_sure.extend(['intake.assembly.description', 'intake.unissued_probe'])
+    service.refresh(case)
+    asked = {q.id for q in case.intake.plan.asked}
+    assert 'intake.assembly.description' in asked
+    assert not {'intake.part4_design', 'intake.scope', 'intake.unissued_probe'} & asked
+    for qid in ('intake.part4_design', 'intake.scope', 'intake.unissued_probe'):
+        before = case.model_dump()
+        with pytest.raises(service.AnswerRejected):
+            service.answer(case, [{'question_id': qid, 'answer': 'yes'}])
+        assert case.model_dump() == before
 
 
 def test_issued_history_does_not_bypass_a_scope_redirect():
