@@ -99,6 +99,8 @@ export interface AssistDocumentReference {
 export interface AssistFocus {
   id: string;
   kind: string;
+  prompt?: string | null;
+  why?: string | null;
 }
 
 export interface AssistNavigation {
@@ -501,6 +503,22 @@ export interface Explainer {
   text: string;
 }
 
+/** The draft export for the application screen: its exact bytes and images of its first pages. */
+export interface ExportPreview {
+  filename: string;
+  kind: "pages";
+  page_count: number;
+  pages: PreviewPage[];
+  pdf: string;
+}
+
+/** The draft PDF alone is too large to send as a preview, so none of it is sent; download the draft. */
+export interface ExportPreviewTooLarge {
+  kind: "too_large";
+  page_count: number;
+  pdf_bytes: number;
+}
+
 export interface Fact {
   confidence: number | null;
   field: string;
@@ -788,6 +806,7 @@ export interface InputFile {
 }
 
 export interface IntakePlan {
+  asked: Question[];
   candidates_seen: number;
   fork: Fork;
   next: "redirect" | "questions" | "identify";
@@ -1049,6 +1068,12 @@ export interface PreApplicationStep {
   sources: PlanSource[];
   text: string;
   title: string;
+}
+
+export interface PreviewPage {
+  height: number;
+  image: string;
+  width: number;
 }
 
 /** A process reference listed on every case, read-only: how an alternative solution is allowed and documented. */

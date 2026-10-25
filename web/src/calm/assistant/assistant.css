@@ -37,40 +37,6 @@
 .cf-av-sources li { border-left: 1px solid var(--cf-line-2); padding-left: 10px; margin: 8px 0; overflow-wrap: anywhere; }
 .cf-av-sources b { font-weight: 550; }
 
-.cf-av-scope {
-  flex: none;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-  margin: 0;
-  padding: 10px 18px;
-  border-bottom: 1px solid var(--cf-line);
-  font-size: 12.5px;
-  color: var(--cf-text-3);
-  white-space: nowrap;
-}
-
-.cf-av-scope svg {
-  flex: none;
-}
-
-.cf-av-scope b {
-  flex: 0 1 auto;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: var(--cf-text);
-  font-weight: 550;
-}
-
-.cf-av-scope-at {
-  flex: 0 10000 auto;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 .cf-msg-user.is-unanswered {
   color: var(--cf-text-3);
   background: transparent;

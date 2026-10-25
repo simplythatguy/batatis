@@ -7,6 +7,7 @@
  * complies, is safe, approved or adequate, and every rule is shown as not yet reviewed by an expert.
  */
 import type { CaseRules } from "../api/types.gen";
+import { latestLocalFacts } from "../intakeFields";
 import { evaluateAll, fmt, type InputSpec, type RuleDef, type RuleIndex, type RuleResult, type Value } from "../rules/evaluate";
 import type { Candidate, Case, Fact } from "../types";
 
@@ -35,12 +36,11 @@ export const NOT_REVIEWED = "Checked by Batatis, not yet reviewed by an expert."
 /** Read the article prefix from a provision id, preserving ids with no article prefix. */
 export const articleOf = (id: string) => id.match(/^\d+\.\d+\.\d+\.\d+\./)?.[0] ?? id;
 
-/** The latest usable fact per rule input, read like the engine's `case_inputs`: never a proposed fact. */
+/** Choose the latest revision first: a withdrawal or proposal must never revive an older input. */
 export function ruleFacts(c: Case, index: RuleIndex): Map<string, Fact> {
   const found = new Map<string, Fact>();
-  for (let i = c.facts.length - 1; i >= 0; i--) {
-    const f = c.facts[i];
-    if (!(f.field in index.inputs) || found.has(f.field) || f.kind === "proposed" || f.value === null || f.value === undefined) continue;
+  for (const f of latestLocalFacts(c.facts)) {
+    if (!(f.field in index.inputs) || f.kind === "proposed" || f.value === null || f.value === undefined) continue;
     found.set(f.field, f);
   }
   return found;
@@ -229,10 +229,10 @@ export function numbersUsed(r: ShownRule, index: RuleIndex): Row[] & { others?: 
 /** The next step for a departure, in plain words (the engine's full sentence sits behind Show the code). */
 export const DEPARTS_NEXT = "To build it this way, you prepare an alternative solution that performs at least as well, and ask for a variance. A safety codes officer decides.";
 
-/** A rule input card's answer choices (yes/no, a list, or a number), always with Not sure. */
+/** Confirmed choices only. The deck's Skip action leaves uncertainty open. */
 export function inputChoices(spec: InputSpec): { value: string; label: string }[] {
-  if (spec.type === "bool") return [{ value: "true", label: "Yes" }, { value: "false", label: "No" }, { value: NOT_SURE_RULE, label: "Not sure" }];
-  if (spec.type === "enum") return [...(spec.choices ?? []), { value: NOT_SURE_RULE, label: "Not sure" }];
+  if (spec.type === "bool") return [{ value: "true", label: "Yes" }, { value: "false", label: "No" }];
+  if (spec.type === "enum") return spec.choices ?? [];
   return [];
 }
 

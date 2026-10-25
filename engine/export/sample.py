@@ -13,6 +13,7 @@ from pathlib import Path
 
 from ..codes import Codes
 from ..models import Case, EvidenceItem, Fact, Jurisdiction, Source
+from ..pdfium_lock import pdfium_locked
 from ..section_c import section_c_rows
 from ..section_d import section_d_plan
 
@@ -96,6 +97,7 @@ def sample_case(codes: Codes, provisions: list[str] = PROVISIONS, facts: dict = 
     return case
 
 
+@pdfium_locked
 def main(out_dir: str = '/tmp/batatis-export') -> None:
     import pypdfium2 as pdfium
 

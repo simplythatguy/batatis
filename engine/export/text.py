@@ -72,6 +72,35 @@ def wrap(text: str, width: float, size: float) -> list[str] | None:
     return lines
 
 
+def lines_at(text: str, width: float, size: float) -> list[str]:
+    """Greedy word wrap at one size that never gives up: a word wider than the box is broken at its edge."""
+    lines: list[str] = []
+    for para in text.split('\n'):
+        cur = ''
+        for word in para.split(' '):
+            if stringWidth(word, FONT, size) > width:
+                if cur:
+                    lines.append(cur)
+                part, used = '', 0.0
+                for char in word:
+                    advance = stringWidth(char, FONT, size)
+                    if part and used + advance > width:
+                        lines.append(part)
+                        part, used = '', 0.0
+                    part += char
+                    used += advance
+                cur = part
+                continue
+            trial = f'{cur} {word}' if cur else word
+            if stringWidth(trial, FONT, size) <= width:
+                cur = trial
+            else:
+                lines.append(cur)
+                cur = word
+        lines.append(cur)
+    return lines
+
+
 def fit(text: str, rect: tuple[float, float, float, float], max_size: float = MAX_SIZE,
         min_size: float = MIN_SIZE) -> tuple[list[str], float] | None:
     width = rect[2] - rect[0] - H_PAD
@@ -83,3 +112,25 @@ def fit(text: str, rect: tuple[float, float, float, float], max_size: float = MA
             return lines, size
         size = round(size - 0.5, 1)
     return None
+
+
+def fit_start(head: str, body: str, tail: str, rect: tuple[float, float, float, float],
+              max_size: float = MAX_SIZE, min_size: float = MIN_SIZE) -> str | None:
+    """`head`, the longest whole-word start of `body`, then `tail`, as one string that fits; None if none does.
+
+    For source text whose whole passage is carried elsewhere: `tail` names where. Adding words never takes
+    fewer lines, so the longest fitting start is found by bisection.
+    """
+    words = body.split(' ')
+
+    def start(count: int) -> str:
+        return (head + ' '.join(words[:count])).rstrip() + tail
+
+    low, high = -1, len(words) + 1      # `low` words fit (-1: not even head and tail); `high` words do not
+    while high - low > 1:
+        mid = (low + high) // 2
+        if fit(start(mid), rect, max_size, min_size) is not None:
+            low = mid
+        else:
+            high = mid
+    return None if low < 0 else start(low)
