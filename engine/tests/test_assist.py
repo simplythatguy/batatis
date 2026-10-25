@@ -9,6 +9,8 @@ from engine import llm_gate, routes_assist
 from engine.api import create_app
 from engine.codes import Codes
 from engine.models import Case
+from engine.models_intake import IntakeRecord
+from engine.intake.plan import build_plan
 from engine.store import CaseStore
 from engine.tests.case_builder_fixtures import fact
 from engine.tests.test_accounts import signup, onboard
@@ -103,6 +105,43 @@ def test_case_context_and_focus_only_follow_authorization(assistant, monkeypatch
         assert signup(other, 'other@example.test').status_code == 201
         assert ask(other, case_id=private.id).status_code == 404
         assert len(calls) == before
+
+
+@pytest.mark.parametrize('answered', [False, True])
+def test_planner_question_focus_uses_the_issued_question_including_answered_history(assistant, monkeypatch, answered):
+    client, store, calls = assistant
+    enable(monkeypatch, 'openai')
+    case = Case(facts=[fact('project.description', 'A new wall product for a house.')])
+    case.intake = IntakeRecord(plan=build_plan(case))
+    question = next(q for q in case.intake.plan.questions if q.field == 'storeys')
+    if answered:
+        case.facts.append(fact('storeys', 2))
+        case.intake.plan = build_plan(case)
+        assert not any(q.id == question.id for q in case.intake.plan.questions)
+    case = store.put(case)
+    result = ask(client, case_id=case.id, screen='question',
+                 focus={'kind': 'card', 'id': f'plan-{question.id}'}, question="I don't understand")
+    assert result.status_code == 200, result.text
+    focused = json.loads(calls[-1]['context']).get('focused_card')
+    assert focused is not None, 'The visible planner question must reach the provider context'
+    assert focused['id'] == question.id
+    assert focused['text'] == question.text and focused['why'] == question.why
+
+
+@pytest.mark.parametrize(('card', 'field'), [
+    ('process-risk', 'risk_assessment'), ('process-mitigation', 'mitigating_measures'),
+    ('process-assumptions', 'assumptions_and_limits'), ('process-maintenance', 'maintenance_operation'),
+])
+def test_deck_process_card_ids_resolve_to_the_canonical_requirements(assistant, monkeypatch, card, field):
+    client, store, calls = assistant
+    enable(monkeypatch, 'openai')
+    case = store.put(Case())
+    result = ask(client, case_id=case.id, screen='question', focus={'kind': 'card', 'id': card},
+                 question="I don't understand")
+    assert result.status_code == 200, result.text
+    focused = json.loads(calls[-1]['context']).get('focused_card')
+    assert focused is not None, 'The visible process question must reach the provider context'
+    assert focused['id'] == field
 
 
 @pytest.mark.parametrize('change', [{'question': 'x' * 1501}, {'history': [{'role': 'user', 'text': 'hi'}] * 9},

@@ -321,6 +321,32 @@ test("cancel stops the request; its question stays with Retry", async () => {
   assert.ok(!state().conv.turns.some((t) => t.text === "late"));
 });
 
+test("renumbering the same question keeps its pending answer and navigation valid", async () => {
+  setAssistantBinding(caseBinding("A"));
+  void ask("I don't understand");
+  setAssistantContext({ screen: "question", focus: { kind: "card", id: "field-owner" }, label: "question 2" });
+  assert.equal(f.requests[0].signal.aborted, false, "a display number is not a new question");
+  f.requests[0].reply.resolve({ answer: "This asks who owns the site.", cited: [], removed_citations: [], notice: "" });
+  await flush();
+  assert.equal(state().conv.turns.at(-1)?.text, "This asks who owns the site.");
+  assert.equal(state().conv.error, null);
+});
+
+test("retry uses the question on screen now and discards a prior card's late reply", async () => {
+  setAssistantBinding(caseBinding("A"));
+  void ask("I don't understand");
+  setAssistantContext({ screen: "question", focus: { kind: "card", id: "field-date" }, label: "question 2" });
+  assert.equal(f.requests[0].signal.aborted, true);
+  retry();
+  assert.equal(f.requests[1].req.focus?.id, "field-date");
+  assert.equal(f.requests[1].req.question, "I don't understand");
+  f.requests[0].reply.resolve({ answer: "Old owner explanation", cited: [], removed_citations: [], notice: "" });
+  f.requests[1].reply.resolve({ answer: "Enter the date of your request.", cited: [], removed_citations: [], notice: "" });
+  await flush();
+  assert.ok(!state().conv.turns.some((t) => t.text === "Old owner explanation"));
+  assert.equal(state().conv.turns.at(-1)?.text, "Enter the date of your request.");
+});
+
 test("typed navigation opens the exact question card and returns to the exact prior card", async () => {
   setAssistantBinding(caseBinding("A"));
   void ask("Open the request date");
