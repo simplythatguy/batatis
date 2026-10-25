@@ -1,5 +1,5 @@
 #!/bin/bash
-# Run the local gate before anything lands on dev; GitHub Actions supplements these checks.
+# Run the local gate before a pull request into main; GitHub Actions supplements these checks.
 # Docs: docs/agents/git-workflow.md
 # Usage: scripts/verify.sh [--web] [--engine]     (default: both)
 # UI changes: also run `node evals/ui-artifacts/smoke.mjs` against the app from scripts/local-app.sh.
@@ -49,7 +49,7 @@ fi
 
 step "secrets scan"
 if command -v gitleaks >/dev/null 2>&1; then
-  base=$(git rev-parse --verify -q origin/dev || true)
+  base=$(git rev-parse --verify -q origin/main || true)
   if [ -n "$base" ]; then
     gitleaks detect --redact --exit-code=2 --log-opts="$base..HEAD"
   else
