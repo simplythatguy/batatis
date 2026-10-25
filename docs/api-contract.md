@@ -82,7 +82,7 @@ Returning code text is not a finding that a design complies. The code database f
 
 ### Exported PDF
 
-`POST /cases/{case_id}/export` fills the Safety Codes Council form and adds a generated appendix when it has real content. On the supplied form, cells grow or continue in matching boxes across pages. Sections A, B and D use 10 pt text. Section C uses 9 pt text and carries provision ids, objective and function codes, and the complete deterministic NBC 2020 intent statements. Appendix C-k retains the full lookup record with its citation. Provision sentences stay in that record.
+`POST /cases/{case_id}/export` fills the Safety Codes Council form and adds a generated appendix when it has real content. On the supplied form, cells grow or continue in matching boxes across pages. Text uses 10 pt, with 9 pt text in the Section C attribution cells. Those cells carry provision ids, objective and function codes, and the complete deterministic NBC 2020 intent statements. Appendix C-k retains the full lookup record with its citation. Provision sentences stay in that record.
 
 A typed legal description appears in the printed "Legal description of property that this variance will apply to:" row, beside any separately supplied lot, block and plan. That row and the Section D document listing also grow or continue. Oversized inputs beyond the bounded layout fail explicitly instead of losing text. The legacy five-page form retains labelled `See Appendix X-n` references for long values.
 

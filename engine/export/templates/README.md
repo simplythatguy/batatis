@@ -29,8 +29,8 @@ line counts from `form_growth.Layout`. It retains at least one attribution row
 and gives each selected canonical row its own cells. The default blank remains
 byte-compatible with earlier exports.
 
-The supplied form makes room for full values at 10 pt in Sections A, B and D,
-and 9 pt in Section C. Its own blue borders stretch as cells grow. A value that
+The supplied form makes room for full values at 10 pt, with 9 pt text in the
+Section C attribution cells. Its own blue borders stretch as cells grow. A value that
 crosses a page continues in matching boxes, with repeated labels or a
 continuation heading. Later rows move down or onto another page. The source
 Section D, disclosure and signature blocks stay intact. Intent cells show the
