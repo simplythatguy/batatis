@@ -31,6 +31,7 @@ import { canonicalProvision } from "../provisions";
 import { useDeckExtras } from "./useDeckExtras";
 import { JurisdictionNote } from "./JurisdictionNote";
 import { AuthorityPicker } from "./AuthorityPicker";
+import { DatePicker } from "./DatePicker";
 import { AUTHORITIES } from "../config";
 import { PACKAGE_YES, RULE_ADD, RULE_LEAVE } from "./deck";
 import { useAccount } from "./account";
@@ -349,15 +350,17 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
           {offer && <Choices choices={choices} current={current} onPick={onPick} />}
           {offer && current !== "dismiss" ? null : def.multiline ? (
             <textarea id={`field-${def.id}`} className="cf-uline is-area" rows={2} aria-label={def.label} value={valueText(fact)} onChange={(e) => dispatch({ type: "setDetail", field: def.id, value: e.target.value, section: def.section })} placeholder={offer ? "What you propose instead, in a sentence or two…" : "Type your answer here…"} />
+          ) : def.inputType === "date" ? (
+            <DatePicker id={`field-${def.id}`} label={def.label} value={valueText(fact)} onChange={(value) => dispatch({ type: "setDetail", field: def.id, value, section: def.section })} />
           ) : (
             <input
               id={`field-${def.id}`}
-              className={`cf-uline${def.inputType === "date" ? " is-date" : ""}`}
+              className="cf-uline"
               type={def.inputType ?? "text"}
               aria-label={def.label}
               value={valueText(fact)}
               onChange={(e) => dispatch({ type: "setDetail", field: def.id, value: e.target.value, section: def.section })}
-              placeholder={def.inputType === "date" ? undefined : def.hint ?? "Type your answer here…"}
+              placeholder={def.hint ?? "Type your answer here…"}
             />
           )}
           {!offer && fact && !isTyped(fact) && (
