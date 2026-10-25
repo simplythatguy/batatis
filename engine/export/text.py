@@ -83,3 +83,25 @@ def fit(text: str, rect: tuple[float, float, float, float], max_size: float = MA
             return lines, size
         size = round(size - 0.5, 1)
     return None
+
+
+def fit_start(head: str, body: str, tail: str, rect: tuple[float, float, float, float],
+              max_size: float = MAX_SIZE, min_size: float = MIN_SIZE) -> str | None:
+    """`head`, the longest whole-word start of `body`, then `tail`, as one string that fits; None if none does.
+
+    For source text whose whole passage is carried elsewhere: `tail` names where. Adding words never takes
+    fewer lines, so the longest fitting start is found by bisection.
+    """
+    words = body.split(' ')
+
+    def start(count: int) -> str:
+        return (head + ' '.join(words[:count])).rstrip() + tail
+
+    low, high = -1, len(words) + 1      # `low` words fit (-1: not even head and tail); `high` words do not
+    while high - low > 1:
+        mid = (low + high) // 2
+        if fit(start(mid), rect, max_size, min_size) is not None:
+            low = mid
+        else:
+            high = mid
+    return None if low < 0 else start(low)

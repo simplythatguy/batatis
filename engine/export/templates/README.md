@@ -28,8 +28,17 @@ bytes plus the runtime field map. It retains at least one attribution row,
 copies the original continuation-row vector operators for more rows, and
 moves the intact original Section D/disclosure/signature block. It closes
 table-only pages with the source's bottom rule. Each selected canonical row
-has its own native cells; long individual values retain labelled references
-and complete text in the generated appendix. No spare rows are added.
+has its own native cells. An intent cell shows the deterministic passages, or
+their start and `(full text: Appendix C-k)`; Appendix C-k prints each passage
+once. A long applicant value keeps a labelled reference and its complete text
+in the generated appendix. No spare rows are added.
+
+The source's printed row "Legal description of property that this variance
+will apply to:" has no widget. Export alone draws a typed legal description
+there through a temporary widget that flattening removes; `prepare_form`, the
+field map and the re-upload reader keep the source's own 74 widgets. The
+combined Section D box lists as many whole entries as it holds, then
+`D-k to D-n: continued in Appendix D`.
 
 The new source has one combined supporting-document box. It has no separate
 owner-print fields, and its jurisdiction checkbox is driven by confirmed

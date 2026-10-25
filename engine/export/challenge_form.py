@@ -29,6 +29,13 @@ REPEAT_BOTTOM = 630.7
 ROW_HEIGHT = 62.025
 FOLLOWING_TOP = 506.65
 FOLLOWING_BOTTOM = 81.275
+# The printed Section B row "Legal description of property that this variance will apply to:" has no source
+# widget. Export draws a typed legal description after its label (ending at x 303.3), inset in the row
+# (y 333.6 to 351.1) as the source insets its Permit widget. Export only: the editable blank and the
+# re-upload reader keep the source's own widgets.
+LEGAL_ROW = 'Legal description'
+LEGAL_PAGE = 0
+LEGAL_RECT = (305.5, 334.5, 571.8, 349.5)
 
 
 def row_fields(index: int) -> dict[str, str]:

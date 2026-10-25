@@ -19,7 +19,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 from pypdf import PdfReader, PdfWriter
-from pypdf.generic import ArrayObject, NameObject, NumberObject, RectangleObject, TextStringObject
+from pypdf.generic import ArrayObject, DictionaryObject, NameObject, NumberObject, RectangleObject, TextStringObject
 
 from ..models import INTENT_LABEL, Case, SectionCRow
 from ..not_applicable import LABEL as NA_LABEL, ROWS as NA_ROWS, NotApplicable, not_applicable
@@ -30,8 +30,8 @@ from ..process_fields import PROCESS_ALIASES
 from ..section_c import section_c_rows
 from ..section_d import supporting_documents, text_evidence
 from .edition import code_or_standard_value
-from .challenge_form import prepare_form
-from .text import fit, pdf_safe
+from .challenge_form import LEGAL_PAGE, LEGAL_RECT, LEGAL_ROW, VERSION as CHALLENGE_VERSION, prepare_form
+from .text import fit, fit_start, pdf_safe
 
 DEFAULT_FORM = Path(__file__).resolve().parents[2] / 'reference' / 'guides' / 'SCC-Variance-Form.pdf'
 BUNDLE_FORM = Path(__file__).resolve().parents[2] / 'codedb' / 'build' / 'SCC-Variance-Form.pdf'
@@ -203,6 +203,7 @@ class _Plan:
     rows_in_form: int = 0
     docs_in_form: int = 0
     na: dict[str, NotApplicable] = field(default_factory=dict)                  # field -> applicant N/A fact
+    printed: dict[str, int] = field(default_factory=dict)       # export-only cell in a printed row -> page
 
 
 def _plan(case: Case, values: dict, fmap: dict, rects: dict, codes=None) -> _Plan:
@@ -244,9 +245,21 @@ def _plan(case: Case, values: dict, fmap: dict, rects: dict, codes=None) -> _Pla
         checked = answer == spec['equals'] if 'equals' in spec else answer is True
         plan.checks[name] = spec['on'] if checked else '/Off'
 
-    # The form provides structured legal-description boxes. A free-text legal description
-    # continues in the appendix; it is never split into invented lot/block/plan components.
-    if values.get('legal_description') and not all(values.get(k) for k in ('lot', 'block', 'plan')):
+    # A typed legal description is never split into invented lot/block/plan components. The supplied form
+    # prints a row for it, so it is drawn there, beside any lot, block and plan the applicant gave, and
+    # continues in the appendix only when the row cannot hold it. The older form keeps it in the appendix.
+    legal = values.get('legal_description')
+    if legal and fmap['version'] == CHALLENGE_VERSION:
+        value = pdf_safe(legal)
+        rects[LEGAL_ROW] = LEGAL_RECT
+        plan.printed[LEGAL_ROW] = LEGAL_PAGE
+        if fit(value, LEGAL_RECT) is not None:
+            put(LEGAL_ROW, value)
+        else:
+            ref = f'X-{len(plan.overflow) + 1}'
+            put(LEGAL_ROW, f'See Appendix {ref}', ref, value)
+            plan.overflow.append((ref, 'Legal description', value))
+    elif legal and not all(values.get(k) for k in ('lot', 'block', 'plan')):
         ref = f'X-{len(plan.overflow) + 1}'
         value = pdf_safe(values['legal_description'])
         plan.na.pop('Lot', None)
@@ -267,21 +280,17 @@ def _plan(case: Case, values: dict, fmap: dict, rects: dict, codes=None) -> _Pla
         intent = notes[row.attribution_status]
         if row.differs:
             intent += 'The 2020 intent is attributed differently from NBC(AE) 2023. '
+        head = f'{intent}{INTENT_LABEL}: '
         intent += f'{INTENT_LABEL}: Appendix {ref}.' if row.intents else f'No NBC 2020 intent statement; Appendix {ref}.'
         if fmap.get('dynamic_attributions') and row.intents:
-            from ..copyright import NRC_PUBLICATION_URL
+            # The cell shows the deterministic passages, or as much of them as it holds and where the whole
+            # entry is. Appendix C-k carries every passage whole, once, with its citation and the NRC link.
             actual = ' '.join(pdf_safe(t) for block in row.intents for t in block.intents)
-            labelled = notes[row.attribution_status]
-            if row.differs:
-                labelled += 'The 2020 intent is attributed differently from NBC(AE) 2023. '
-            labelled += f'{INTENT_LABEL}: {actual}'
-            shown = labelled if fit(labelled, rects[slot['intent']], *SECTION_C_SIZES) is not None else intent
-            put(slot['intent'], shown, ref, labelled if shown == labelled else actual, see)
-            if shown != labelled:
-                # Preserve the complete deterministic entry and its source when
-                # it needs more room than the exact source cell provides.
-                plan.overflow.append((ref, f'Intent entry for {row.provision_id} ({INTENT_LABEL})',
-                                      f'{actual}\n{row.citation}\n{NRC_PUBLICATION_URL}'))
+            rect = rects[slot['intent']]
+            shown = head + actual
+            if fit(shown, rect, *SECTION_C_SIZES) is None:
+                shown = fit_start(head, actual, f' ... (full text: Appendix {ref})', rect, *SECTION_C_SIZES) or intent
+            put(slot['intent'], shown, ref, shown, see)
         else:
             put(slot['intent'], intent, ref, None, see)
     plan.rows_in_form = len(shown_rows)
@@ -302,14 +311,20 @@ def _plan(case: Case, values: dict, fmap: dict, rects: dict, codes=None) -> _Pla
     docs += [(pdf_safe(title), pdf_safe(who)) for title, who in text_evidence(case)]
     if fmap.get('supporting_document_field'):
         # The supplied source has one combined full-width field, not the legacy
-        # five-row/two-column table. Keep its exact box and use existing D refs.
+        # five-row/two-column table. Keep its exact box and use existing D refs:
+        # as many whole entries as it holds, then the rest named; Appendix D lists all.
         name = fmap['supporting_document_field']
         if docs:
-            listing = '\n'.join(f'D-{n}: {title}' + (f' - {who}' if who else '')
-                                for n, (title, who) in enumerate(docs, start=1))
-            if fit(listing, rects[name]) is not None:
-                put(name, listing)
-                plan.docs_in_form = len(docs)
+            entries = [f'D-{n}: {title}' + (f' - {who}' if who else '') for n, (title, who) in enumerate(docs, start=1)]
+            for count in range(len(entries), 0, -1):
+                rest = [] if count == len(entries) else [
+                    f'D-{count + 1}' + (f' to D-{len(entries)}' if count + 1 < len(entries) else '')
+                    + ': continued in Appendix D']
+                listing = '\n'.join([*entries[:count], *rest])
+                if fit(listing, rects[name]) is not None:
+                    put(name, listing)
+                    plan.docs_in_form = count
+                    break
             else:
                 put(name, f'See Appendix D (D-1 to D-{len(docs)})')
         elif NA_ROWS['section_d'] in na:
@@ -353,9 +368,23 @@ def _widgets(pages):
                 yield i, str(_field(a)['/T']), a
 
 
+def _printed_cell(writer: PdfWriter, page_no: int, name: str, rect: tuple[float, float, float, float]) -> None:
+    """A text widget for a printed row the source gives no widget; flattening removes it like every other."""
+    page = writer.pages[page_no]
+    ref = writer._add_object(DictionaryObject({
+        NameObject('/Type'): NameObject('/Annot'), NameObject('/Subtype'): NameObject('/Widget'),
+        NameObject('/FT'): NameObject('/Tx'), NameObject('/F'): NumberObject(4), NameObject('/T'): TextStringObject(name),
+        NameObject('/P'): page.indirect_reference, NameObject('/Rect'): RectangleObject(rect),
+        NameObject('/DA'): TextStringObject('/Helv 10 Tf 0 g')}))
+    page['/Annots'].append(ref)
+    writer.root_object['/AcroForm']['/Fields'].append(ref)
+
+
 def _fill_and_flatten(form: bytes, plan: _Plan) -> tuple[bytes, list[Placement]]:
     """Fill each planned field at its fitted size, merge appearances into the page, then drop every widget."""
     writer = PdfWriter(clone_from=io.BytesIO(form))
+    for name, page_no in plan.printed.items():
+        _printed_cell(writer, page_no, name, plan.rects[name])
     placements: list[Placement] = []
     values: dict[str, str] = {}
     for page_no, name, widget in _widgets(writer.pages):

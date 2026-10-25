@@ -12,9 +12,9 @@ from engine.codes import Codes
 from engine.export import ExportBlocked, FormMismatch, export_case, form_path, load_field_map
 from engine.export.scc import load_form
 from engine.export.sample import sample_case
-from engine.export.g3 import citation_problems, coverage_problems, render_problems
-from engine.export.text import pdf_safe
-from engine.models import Fact, Source
+from engine.export.g3 import appendix_text, citation_problems, coverage_problems, render_problems
+from engine.export.text import faithful_font_text, pdf_safe
+from engine.models import INTENT_LABEL, Fact, Source
 from engine.api import create_app
 from engine.store import CaseStore
 from engine.tests.case_builder_fixtures import store_with_synthetic_files
@@ -102,9 +102,16 @@ def test_native_intent_uses_deterministic_source_text_with_lossless_overflow():
     case = sample_case(codes, provisions=['9.25.2.2.(1)'])
     result = export_case(case, codes=codes)
     intent = next(p for p in result.placements if p.field == 'Intent statement')
-    for block in case.section_c[0].intents:
-        for text in block.intents:
-            assert pdf_safe(text) in intent.value
+    passages = [text for block in case.section_c[0].intents for text in block.intents]
+    # The cell holds the start of the deterministic passages and names the entry that carries them whole.
+    shown = ' '.join(' '.join(intent.lines).split())
+    tail = ' ... (full text: Appendix C-1)'
+    assert shown.startswith(f'{INTENT_LABEL}: ') and shown.endswith(tail) and intent.ref == 'C-1'
+    start = shown[len(f'{INTENT_LABEL}: '):-len(tail)]
+    assert len(start) > 200 and ' '.join(' '.join(pdf_safe(t) for t in passages).split()).startswith(start)
+    appendix = appendix_text(result)
+    for text in passages:
+        assert ' '.join(faithful_font_text(text).split()) in appendix
     assert not render_problems(result)
 
 
