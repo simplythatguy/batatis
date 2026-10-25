@@ -18,6 +18,7 @@ from engine.models import INTENT_LABEL, Fact, Source
 from engine.api import create_app
 from engine.store import CaseStore
 from engine.tests.case_builder_fixtures import store_with_synthetic_files
+from engine.tests.form_layout_helpers import drawn, segments
 
 
 def prepare_form(*args):
@@ -101,14 +102,11 @@ def test_native_intent_uses_deterministic_source_text_with_lossless_overflow():
     codes = Codes()
     case = sample_case(codes, provisions=['9.25.2.2.(1)'])
     result = export_case(case, codes=codes)
-    intent = next(p for p in result.placements if p.field == 'Intent statement')
+    boxes = segments(result, 'Intent statement')
     passages = [text for block in case.section_c[0].intents for text in block.intents]
-    # The cell holds the start of the deterministic passages and names the entry that carries them whole.
-    shown = ' '.join(' '.join(intent.lines).split())
-    tail = ' ... (full text: Appendix C-1)'
-    assert shown.startswith(f'{INTENT_LABEL}: ') and shown.endswith(tail) and intent.ref == 'C-1'
-    start = shown[len(f'{INTENT_LABEL}: '):-len(tail)]
-    assert len(start) > 200 and ' '.join(' '.join(pdf_safe(t) for t in passages).split()).startswith(start)
+    shown = drawn(result, boxes)
+    assert all(p.size == 9 and p.ref is None for p in boxes)
+    assert shown == f'{INTENT_LABEL}: ' + ' '.join(' '.join(pdf_safe(t) for t in passages).split())
     appendix = appendix_text(result)
     for text in passages:
         assert ' '.join(faithful_font_text(text).split()) in appendix
@@ -221,7 +219,10 @@ def test_saved_answers_change_the_real_http_pdf_bytes(tmp_path):
         assert value in reader.pages[0].extract_text()
         assert reader.metadata['/BatatisFormVersion'] == VERSION
         assert reader.metadata['/BatatisAttributionRows'] == '6'
-        assert reader.metadata['/BatatisFormPages'] == '8'
+        count = int(reader.metadata['/BatatisFormPages'])
+        assert count > 8 and count < len(reader.pages)
+        assert 'Part 4' in reader.pages[count - 2].extract_text()
+        assert 'Professional Design' in reader.pages[count - 1].extract_text()
         assert not reader.get_fields()
 
 

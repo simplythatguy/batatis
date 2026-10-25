@@ -52,11 +52,12 @@ def test_typed_document_titles_are_in_appendix_without_claiming_files_or_review(
         assert 'listed by applicant, no file attached, not reviewed.' in appendix
         assert 'No supporting documents listed.' not in appendix
         if count == 24:
-            assert 'appendix only; no file' in appendix
-            # The form's box keeps the whole entries it holds and names the rest.
+            assert 'appendix only; no file' not in appendix
+            # The form grows its own boxes to keep every complete entry at normal size.
             form = ' '.join(pages[:int(reader.metadata['/BatatisFormPages'])])
-            assert 'D-1: TEST typed document 1 - TEST applicant-listed organisation 1' in form
-            assert 'to D-24: continued in Appendix D' in form
+            for index, title in enumerate(titles, start=1):
+                assert f'D-{index}: {title} - TEST applicant-listed organisation {index}' in form
+            assert 'continued in Appendix D' not in form
         assert client.get(f'/api/cases/{case_id}').json() == before
         with closing(sqlite3.connect(store.path)) as con:
             assert con.execute('SELECT COUNT(*) FROM case_files WHERE case_id=?', (case_id,)).fetchone()[0] == 0

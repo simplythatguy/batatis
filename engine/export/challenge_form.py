@@ -11,10 +11,14 @@ import copy
 import hashlib
 import io
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 from pypdf import PageObject, PdfWriter
 from pypdf.generic import (ArrayObject, BooleanObject, ContentStream, DictionaryObject,
                            FloatObject, NameObject, NumberObject, RectangleObject, TextStringObject)
+
+if TYPE_CHECKING:
+    from .form_growth import Layout
 
 VERSION = 'challenge_2026-09-15'
 SOURCE_SHA256 = '761bf8d9d8e93445a49ce58c443a1a8928fa08a45a031a0adc371d45fd5a7d55'
@@ -31,8 +35,8 @@ FOLLOWING_TOP = 506.65
 FOLLOWING_BOTTOM = 81.275
 # The printed Section B row "Legal description of property that this variance will apply to:" has no source
 # widget. Export draws a typed legal description after its label (ending at x 303.3), inset in the row
-# (y 333.6 to 351.1) as the source insets its Permit widget. Export only: the editable blank and the
-# re-upload reader keep the source's own widgets.
+# (y 333.6 to 351.1) as the source insets its Permit widget. The editable blank keeps the source's own widgets;
+# flattened readback verifies this printed row against the same prepared geometry.
 LEGAL_ROW = 'Legal description'
 LEGAL_PAGE = 0
 LEGAL_RECT = (305.5, 334.5, 571.8, 349.5)
@@ -139,17 +143,31 @@ def _translated(operations: list, dy: float) -> list:
             *copy.deepcopy(operations), ([], b'Q')]
 
 
-def prepare_form(form: bytes, fmap: dict, row_count: int) -> tuple[bytes, dict]:
+def prepare_form(form: bytes, fmap: dict, layout: 'int | Layout') -> tuple[bytes, dict]:
     """Return a correctly editable dynamic blank and its complete runtime field map.
 
     Both export and review can reconstruct geometry with this public seam. It
     accepts only the already hash-checked packaged template, not upload metadata.
+    `layout` is a row count (every cell at its own size) or a `form_growth.Layout`
+    whose cells need more lines; only a grown layout changes anything but rows.
     """
+    from .form_growth import Layout, grown_blank
+    if isinstance(layout, int):
+        layout = Layout.of([0] * max(1, layout))
     if fmap['version'] != VERSION:
         return form, copy.deepcopy(fmap)
     if hashlib.sha256(form).hexdigest() != fmap['sha256']:
         raise ValueError('The challenge template hash does not match its field map')
-    count = max(1, row_count)
+    if not layout.default:
+        return grown_blank(form, fmap, layout)
+    blank, runtime_map = _rows_only(form, fmap, len(layout.rows))
+    runtime_map['continuations'] = {}
+    runtime_map['printed'] = {LEGAL_ROW: {'page': LEGAL_PAGE, 'rect': list(LEGAL_RECT)}}
+    return blank, runtime_map
+
+
+def _rows_only(form: bytes, fmap: dict, count: int) -> tuple[bytes, dict]:
+    """Today's dynamic blank, unchanged byte for byte: page 1 verbatim, more or fewer default-height rows."""
     geometry = layout(count)
     if count == 5:
         # The supplied layout already has exactly these five independent rows.

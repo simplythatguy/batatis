@@ -4,8 +4,6 @@ Regression for the seven-page challenge form: a typed legal description, intent 
 listing used to leave their cells with only a pointer while the text went to the appended pages (each intent
 passage twice), and a typed legal description beside lot, block and plan was dropped from the PDF.
 """
-import re
-
 import pypdfium2 as pdfium
 import pytest
 
@@ -13,8 +11,9 @@ from engine.codes import Codes
 from engine.export import export_case, form_path
 from engine.export.g3 import appendix_text, norm, page_texts, render_problems
 from engine.export.sample import FACTS, sample_case
-from engine.export.text import faithful_font_text
+from engine.export.text import faithful_font_text, pdf_safe
 from engine.models import INTENT_LABEL, Fact, Source
+from engine.tests.form_layout_helpers import drawn as drawn_cells, segments, shown_fields
 
 pytestmark = pytest.mark.skipif(not form_path().exists(), reason='SCC form not present (git-excluded)')
 
@@ -77,10 +76,10 @@ def test_a_legal_description_too_long_for_its_row_continues_once_from_that_row(c
     facts = {key: value for key, value in FACTS.items() if key not in ('lot', 'block', 'plan')}
     case = sample_case(codes, provisions=['9.25.2.2.(1)'], facts={**facts, 'legal_description': legal})
     result = export_case(case, codes=codes, draft=True)
-    [pointer] = [p for p in result.placements if p.ref and p.value == legal]
-    [boxes] = drawn(result.pdf, 0, f'See Appendix {pointer.ref}')
-    assert inside(boxes, LEGAL_ROW)
-    assert appendix_text(result).count(norm(legal)) == 1
+    boxes = segments(result, 'Legal description')
+    assert boxes and all(p.ref is None and p.size == 10 for p in boxes)
+    assert drawn_cells(result, boxes) == legal
+    assert legal not in appendix_text(result)
     assert not render_problems(result)
 
 
@@ -89,10 +88,10 @@ def test_an_intent_cell_shows_the_lookup_text_and_the_appendix_has_each_passage_
     result = export_case(case, codes=codes)
     passages = [t for block in case.section_c[0].intents for t in block.intents]
     assert len(passages) > 1 and sum(map(len, passages)) > 1000      # more than one cell can hold
-    cell = norm(' '.join(next(p for p in result.placements if p.field == 'Intent statement').lines))
-    # The cell carries the passage itself, then says where the whole entry is; not a bare pointer.
+    cell = shown_fields(result)['Intent statement']
+    # Every passage stays in the form's boxes; the appendix preserves the detailed source record.
     assert cell.startswith(f'{INTENT_LABEL}: {norm(passages[0])[:200]}')
-    assert cell.endswith('(full text: Appendix C-1)')
+    assert '(full text:' not in cell and all(norm(pdf_safe(t)) in cell for t in passages)
     appendix = appendix_text(result)
     for passage in passages:
         assert appendix.count(norm(faithful_font_text(passage))) == 1   # the C-1 entry, never a second copy
@@ -107,15 +106,12 @@ def test_the_supporting_document_box_lists_whole_entries_before_naming_the_rest(
         case.facts += [confirmed(f'evidence.typed_{n:02d}.title', title),
                        confirmed(f'evidence.typed_{n:02d}.responsible_party', f'TEST organisation {n}')]
     result = export_case(case, codes=codes, draft=True)
-    box = norm(' '.join(next(p for p in result.placements if p.field == 'Supporting Doc').lines))
+    box = shown_fields(result)['Supporting Doc']
     total = 6 + len(titles)                                   # six attached files, then the typed listings
-    match = re.search(rf'D-(\d+) to D-{total}: continued in Appendix D$', box)
-    assert match and box.startswith('D-1: SYNTHETIC product-literature attachment - SYNTHETIC manufacturer role')
-    shown = int(match.group(1)) - 1
-    assert shown >= 6
-    for n in range(1, shown + 1):
+    assert box.startswith('D-1: SYNTHETIC product-literature attachment - SYNTHETIC manufacturer role')
+    assert 'continued in Appendix' not in box
+    for n in range(1, total + 1):
         assert f'D-{n}: ' in box
-    assert f'D-{shown + 1}: ' not in box
     appendix = appendix_text(result)
     for title in titles:
         assert title in appendix

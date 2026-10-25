@@ -23,6 +23,7 @@ from engine.export.scc import load_form
 from engine.export.text import pdf_safe
 from engine.models import INTENT_LABEL, Fact, Source
 from engine.review.pdf_reader import read_pdf
+from engine.tests.form_layout_helpers import drawn, segments
 
 pytestmark = pytest.mark.skipif(not form_path().exists(), reason='SCC form not present (git-excluded)')
 
@@ -47,18 +48,6 @@ def codes():
 def confirmed(field, value):
     return Fact(field=field, value=value, kind='pointed', status='confirmed',
                 source=Source(type='user_text', ref='test:applicant', quote=str(value)))
-
-
-def segments(result, name):
-    """A field's drawn boxes in reading order: its own cell, then its continuations (`name~2`, `name~3`...)."""
-    found = [p for p in result.placements if p.field == name or re.fullmatch(re.escape(name) + r'~\d+', p.field)]
-    return sorted(found, key=lambda p: (p.page, -p.rect[3]))
-
-
-def drawn(result, placements) -> str:
-    """The text PDFium finds inside the boxes, joined in order (what a reader of the page sees)."""
-    doc = pdfium.PdfDocument(result.pdf)
-    return norm(' '.join(doc[p.page].get_textpage().get_text_bounded(*p.rect) for p in placements))
 
 
 def no_overlaps(result):
@@ -192,3 +181,182 @@ def test_a_grown_export_reads_back_and_its_layout_hint_alone_proves_nothing(code
         writer.write(buf)
         altered = read_pdf(buf.getvalue(), 'altered.pdf')
         assert altered.note and all(v.status == 'not_found' for v in altered.fields.values()), forged
+
+
+@pytest.mark.parametrize('fact,field', [('mailing_address', 'Mailing Address'),
+                                       ('legal_description', 'Legal description'), ('lot', 'Lot')])
+def test_a_value_longer_than_a_page_continues_in_labelled_source_style_boxes(codes, fact, field):
+    value = '\n'.join(f'SYNTHETIC parcel {n:03d}' for n in range(1, 81))
+    case = sample_case(codes, provisions=['9.9.10.1.(1)'], facts={**FACTS, fact: value})
+    result = export_case(case, codes=codes)
+    boxes = segments(result, field)
+    assert len(boxes) >= 2 and all(p.size == 10 and p.ref is None for p in boxes)
+    assert drawn(result, boxes) == norm(value)
+    assert '(continued)' in page_texts(result.pdf)[boxes[1].page]
+    assert not any('See Appendix X-' in text for text in page_texts(result.pdf)[:result.form_pages])
+    read = read_pdf(result.pdf, 'crosspage.pdf')
+    assert read.fields[field].status == 'present' and read.fields[field].value == norm(value)
+    if field == 'Lot':
+        assert read.fields['Block'].value == FACTS['block'] and read.fields['Plan'].value == FACTS['plan']
+    no_overlaps(result)
+    assert not render_problems(result)
+
+
+def test_supporting_document_entries_continue_across_pages_at_10_pt(codes):
+    case = sample_case(codes, provisions=['9.9.10.1.(1)'])
+    for n in range(1, 81):
+        case.facts += [confirmed(f'evidence.typed_{n:02d}.title', f'SYNTHETIC document {n:03d}'),
+                       confirmed(f'evidence.typed_{n:02d}.responsible_party', f'SYNTHETIC organisation {n:03d}')]
+    result = export_case(case, codes=codes)
+    boxes = segments(result, 'Supporting Doc')
+    assert len(boxes) >= 2 and all(p.size == 10 for p in boxes)
+    listing = drawn(result, boxes)
+    for n in range(1, 81):
+        assert listing.count(f'D-{n + 6}: SYNTHETIC document {n:03d} - SYNTHETIC organisation {n:03d}') == 1
+    read = read_pdf(result.pdf, 'documents.pdf')
+    assert read.fields['Supporting Doc'].status == 'present' and read.fields['Supporting Doc'].value == listing
+    no_overlaps(result)
+    assert not render_problems(result)
+
+
+@pytest.mark.parametrize('hint', ['r2000;c2:2000;d5000', 'r5;c2:2001', 'r5;c2:3,2:4',
+                                  'r5;c2:0', 'r5;c99:10', 'r0', 'r5;d5001',
+                                  'r2000,' * 1000 + '2000', 'r5;c5:3;c2:4'])
+def test_untrusted_layout_hints_are_bounded_before_reconstruction(codes, monkeypatch, hint):
+    from engine.review import pdf_reader
+    result = export_case(sample_case(codes, provisions=['9.9.10.1.(1)']), codes=codes)
+    writer = PdfWriter(clone_from=io.BytesIO(result.pdf))
+    writer.add_metadata({'/BatatisLayout': hint})
+    out = io.BytesIO()
+    writer.write(out)
+
+    def must_not_rebuild(*args, **kwargs):
+        pytest.fail('An invalid or implausibly large uploaded hint reached form reconstruction')
+
+    monkeypatch.setattr(pdf_reader, '_version', must_not_rebuild)
+    read = read_pdf(out.getvalue(), 'untrusted-hint.pdf')
+    assert read.note and all(f.status == 'not_found' and not f.value for f in read.fields.values())
+
+
+def test_covering_a_continuation_box_makes_the_entire_field_uncertain(codes):
+    from reportlab.pdfgen import canvas
+    value = '\n'.join(f'SYNTHETIC address {n:03d}' for n in range(1, 81))
+    case = sample_case(codes, provisions=['9.9.10.1.(1)'], facts={**FACTS, 'mailing_address': value})
+    result = export_case(case, codes=codes)
+    target = segments(result, 'Mailing Address')[1]
+    writer = PdfWriter(clone_from=io.BytesIO(result.pdf))
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=(612, 792))
+    x0, y0, x1, y1 = target.rect
+    c.setFillColorRGB(1, 1, 1)
+    c.rect(x0, y0, x1 - x0, y1 - y0, fill=1, stroke=0)
+    c.save()
+    writer.pages[target.page].merge_page(PdfReader(buf).pages[0])
+    out = io.BytesIO()
+    writer.write(out)
+    read = read_pdf(out.getvalue(), 'covered-continuation.pdf')
+    assert read.fields['Mailing Address'].status == 'not_found'
+    assert not read.fields['Mailing Address'].value
+    assert read.fields['Mailing Address'].page == target.page
+    assert read.fields['Owner'].status == 'present'
+
+
+def test_long_unbroken_words_keep_every_character_at_normal_size(codes):
+    value = 'EXAMPLE' * 150
+    case = sample_case(codes, provisions=['9.9.10.1.(1)'], facts={**FACTS, 'owner_name': value})
+    result = export_case(case, codes=codes)
+    boxes = segments(result, 'Owner')
+    assert all(p.size == 10 and p.ref is None for p in boxes)
+    assert ''.join(drawn(result, boxes).split()) == value
+    no_overlaps(result)
+    assert not render_problems(result)
+
+
+@pytest.mark.parametrize('change', ['control', 'empty-first', 'stale-value', 'invisible-appearance',
+                                    'moved-widget', 'moved-page', 'wrong-source'])
+def test_grown_editable_continuations_require_matching_values_appearances_and_geometry(change):
+    from pypdf import Transformation
+    from pypdf.generic import NameObject, RectangleObject, TextStringObject
+    from engine.export.form_growth import Layout
+    fmap = load_field_map()
+    blank, runtime = prepare_form(load_form(None, fmap), fmap, Layout.of([5], {'Mailing Address': 80}))
+    writer = PdfWriter(clone_from=io.BytesIO(blank))
+    [continued] = runtime['continuations']['Mailing Address']
+    values = {'Owner': 'SYNTHETIC owner', 'Mailing Address': 'SYNTHETIC first address part',
+              continued: 'SYNTHETIC second address part'}
+    if change == 'empty-first':
+        values['Mailing Address'] = ''
+    writer.update_page_form_field_values(None, values, auto_regenerate=False)
+    widget = next(a.get_object() for page in writer.pages for a in page.get('/Annots', [])
+                  if a.get_object().get('/T') == continued)
+    if change == 'stale-value':
+        widget[NameObject('/V')] = TextStringObject('FORGED invisible replacement')
+    elif change == 'invisible-appearance':
+        appearance = widget['/AP']['/N']
+        appearance.set_data(appearance.get_data().replace(b'BT', b'BT 3 Tr'))
+    elif change == 'moved-widget':
+        x0, y0, x1, y1 = widget['/Rect']
+        widget[NameObject('/Rect')] = RectangleObject((x0 + 10, y0, x1 + 10, y1))
+    elif change == 'moved-page':
+        writer.pages[1].add_transformation(Transformation().translate(0, -20))
+    elif change == 'wrong-source':
+        writer.add_metadata({'/BatatisSourceSHA256': '0' * 64})
+    buf = io.BytesIO()
+    writer.write(buf)
+    read = read_pdf(buf.getvalue(), 'editable-grown.pdf')
+    if change == 'control':
+        assert read.role == 'scc_form_fillable' and not read.note
+        assert read.fields['Mailing Address'].status == 'present'
+        assert read.fields['Mailing Address'].value == 'SYNTHETIC first address part SYNTHETIC second address part'
+    else:
+        assert read.fields['Mailing Address'].status == 'not_found' and not read.fields['Mailing Address'].value
+        if change in ('moved-widget', 'moved-page', 'wrong-source'):
+            assert read.note and all(f.status == 'not_found' for f in read.fields.values())
+
+
+def test_excessive_applicant_text_fails_explicitly_instead_of_losing_or_squeezing_it(codes):
+    from engine.export.scc import ExportError
+    value = '\n'.join('SYNTHETIC address' for _ in range(2001))
+    case = sample_case(codes, provisions=['9.9.10.1.(1)'], facts={**FACTS, 'mailing_address': value})
+    with pytest.raises(ExportError, match='too much text'):
+        export_case(case, codes=codes)
+
+
+def test_render_conservation_still_detects_a_lost_word_space(codes):
+    case = sample_case(codes, provisions=['9.9.10.1.(1)'], facts={**FACTS, 'owner_name': 'SYNTHETIC AB'})
+    result = export_case(case, codes=codes)
+    segments(result, 'Owner')[0].value = 'SYNTHETIC A B'
+    assert any('Owner: the full value' in problem for problem in render_problems(result))
+
+
+@pytest.mark.parametrize('covered', [False, True], ids=['visible', 'covered'])
+def test_package_review_uses_only_a_verified_printed_legal_description(codes, covered):
+    from reportlab.pdfgen import canvas
+    from engine.review.package import review_uploads
+    facts = {key: value for key, value in FACTS.items() if key not in ('lot', 'block', 'plan', 'not_applicable.ats')}
+    result = export_case(sample_case(codes, provisions=['9.9.10.1.(1)'],
+                                     facts={**facts, 'legal_description': LONG_LEGAL}), codes=codes)
+    data = result.pdf
+    if covered:
+        target = segments(result, 'Legal description')[-1]
+        x0, y0, x1, y1 = target.rect
+        buf = io.BytesIO()
+        c = canvas.Canvas(buf, pagesize=(612, 792))
+        c.setFillColorRGB(1, 1, 1)
+        c.rect(x0, y0, x1 - x0, y1 - y0, fill=1, stroke=0)
+        c.save()
+        writer = PdfWriter(clone_from=io.BytesIO(data))
+        writer.pages[target.page].merge_page(PdfReader(buf).pages[0])
+        output = io.BytesIO()
+        writer.write(output)
+        data = output.getvalue()
+    parts = review_uploads([('legal.pdf', data)], codes)
+    reading = next(field for field in parts.fields if field.field == 'Legal description')
+    assert reading.section == 'B'
+    if covered:
+        assert reading.status == 'not_found' and reading.value is None
+        finding = next(f for f in parts.findings if f.field == 'legal_description')
+        assert finding.status == 'not_found' and any(p.form_field == 'Legal description' for p in finding.pointers)
+    else:
+        assert reading.status == 'present' and reading.value == norm(LONG_LEGAL)
+        assert not any(f.field == 'legal_description' and f.status in ('blank', 'missing') for f in parts.findings)

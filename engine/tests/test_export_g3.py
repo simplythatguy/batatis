@@ -130,8 +130,9 @@ def test_every_na_cell_traces_to_an_applicant_fact(exported):
                    if f.field.startswith('not_applicable.'))
 
 
-def test_a_600_word_rationale_goes_to_the_appendix_in_full(codes):
-    """AC9.3: long applicant text is carried by the appendix by default, never clipped on the form."""
+def test_a_600_word_rationale_is_whole_and_a_long_address_grows_its_form_boxes(codes):
+    """The applicant narrative stays in the appendix; an actual form field grows instead of squeezing."""
+    from engine.tests.form_layout_helpers import drawn, segments
     from engine.models import Fact, Source
     case = demo_case('a-manufacturer-nailbase-sheathing', codes)
     long = ' '.join(f'EXAMPLE rationale word {n}.' for n in range(150))   # 600 words
@@ -142,8 +143,9 @@ def test_a_600_word_rationale_goes_to_the_appendix_in_full(codes):
     result = export_case(case, codes=codes)
     text = appendix_text(result)
     assert long in text
-    mailing = next(p for p in result.placements if p.field == 'Mailing Address')
-    assert mailing.ref and mailing.lines == [f'See Appendix {mailing.ref}']
+    mailing = segments(result, 'Mailing Address')
+    assert all(p.ref is None and p.size == 10 for p in mailing)
+    assert drawn(result, mailing) == long
     assert check_case(case, result, codes)['render'] == []
 
 

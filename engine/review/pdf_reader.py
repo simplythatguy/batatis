@@ -14,7 +14,9 @@ Field states:
 - not_found: Batatis could not tell. Ask the officer to look at the pointer.
 
 Flattened reading uses the widget rectangles of the hash-checked blank form for
-the field map's version (engine/export field maps).
+the field map's version (engine/export field maps). A supplied form grown for long
+content is rebuilt from its strictly parsed `/BatatisLayout` hint and verified like
+any other blank; a field continued in more boxes reads as one value.
 """
 from __future__ import annotations
 
@@ -25,6 +27,7 @@ from dataclasses import dataclass, field
 from functools import lru_cache
 
 from ..export import scc
+from ..export.form_growth import Layout
 from ..pdfium_lock import pdfium_locked
 
 FORM_TITLE = 'Variance Form for Proposed Alternative Solution'
@@ -150,6 +153,35 @@ def mapped_widgets(fmap: dict) -> set[str]:
     if fmap.get('supporting_document_field'):
         names.add(fmap['supporting_document_field'])
     return names
+
+
+def _read_widgets(fmap: dict, *, printed: bool = False) -> list[str]:
+    """Mapped widgets, then the continuation boxes (`name~2`...) of a grown supplied form."""
+    names = mapped_widgets(fmap)
+    if printed:
+        names |= {name for name in fmap.get('printed', {}) if '~' not in name}
+    names = sorted(names)
+    return names + [box for name in names for box in (fmap.get('continuations') or {}).get(name, [])]
+
+
+def _join_continuations(fields: dict[str, FieldValue], fmap: dict) -> None:
+    """Each continued field reads as one value from its boxes in order. Text must fill the boxes from the
+    first, and a box that cannot be verified leaves the whole field unverified."""
+    for name, boxes in (fmap.get('continuations') or {}).items():
+        if name not in fields:
+            continue  # the export-only printed legal row has no widget on an editable blank
+        parts = [fields[name], *(fields.pop(box) for box in boxes)]
+        statuses = [part.status for part in parts]
+        own = parts[0]
+        if 'not_found' in statuses or statuses != sorted(statuses, key=lambda status: status != 'present'):
+            uncertain = next((part for part in parts if part.status == 'not_found'),
+                             next(part for part in parts if part.status != 'present'))
+            doubt = uncertain.reason if uncertain.status == 'not_found' else (
+                'Text continues in a later box after an empty one. Check the boxes on the page.')
+            fields[name] = FieldValue(name, uncertain.page, uncertain.rect, 'not_found', reason=doubt)
+        elif 'present' in statuses:
+            fields[name] = FieldValue(name, own.page, own.rect, 'present',
+                                      _norm(' '.join(part.value for part in parts if part.status == 'present')))
 
 
 def signature_widgets(fmap: dict) -> list[str]:
@@ -278,13 +310,13 @@ def _annotation_boxes(page) -> frozenset:
     return frozenset(boxes)
 
 
-def _version(version: str, path: str, row_count: int = 5) -> FormVersion | None:
+def _version(version: str, path: str, layout: int | Layout = 5) -> FormVersion | None:
     fmap = scc.load_field_map(version)
     try:
         source = scc.load_form(path or None, fmap)
     except scc.ExportError:
         return None
-    return _prepared_version(version, source, row_count)
+    return _prepared_version(version, source, layout)
 
 
 def _glyphs(page) -> frozenset:
@@ -300,14 +332,16 @@ def _page_box(page) -> tuple:
 
 @lru_cache(maxsize=16)
 @pdfium_locked
-def _prepared_version(version: str, source: bytes, row_count: int) -> FormVersion:
+def _prepared_version(version: str, source: bytes, layout: int | Layout) -> FormVersion:
     import pypdfium2 as pdfium
     from pypdf import PdfReader
     fmap = scc.load_field_map(version)
-    blank, fmap = scc.prepare_form(source, fmap, row_count)
+    blank, fmap = scc.prepare_form(source, fmap, layout)
     rects = scc._rects(blank, fmap)
     reader = PdfReader(io.BytesIO(blank))
     pages = {name: page for page, name, _ in scc._widgets(reader.pages)}
+    for name, where in fmap.get('printed', {}).items():
+        rects[name], pages[name] = tuple(where['rect']), where['page']
     doc = pdfium.PdfDocument(blank)
     fmap['form_pages'] = len(doc)  # legacy stays fixed, irrespective of selected-row metadata
     texts = tuple(_norm(doc[i].get_textpage().get_text_range()) for i in range(len(doc)))
@@ -337,7 +371,7 @@ def _candidate_versions(reader) -> list[FormVersion]:
     """Metadata can nominate a bounded candidate, never attest the uploaded layout."""
     metadata = reader.metadata or {}
     keys = ('/BatatisFormVersion', '/BatatisAttributionRows', '/BatatisFormPages',
-            '/BatatisSourceSHA256', '/BatatisSourcePages')
+            '/BatatisSourceSHA256', '/BatatisSourcePages', '/BatatisLayout')
     if not any(key in metadata for key in keys):
         # Native legacy forms predate these hints. Missing new-layout hints stay uncertain.
         return [v for v in form_versions() if not v.fmap.get('dynamic_attributions')]
@@ -350,12 +384,17 @@ def _candidate_versions(reader) -> list[FormVersion]:
         return []
     if int(rows) > MAX_ATTRIBUTION_ROWS or int(pages) > len(reader.pages):
         return []
+    layout: int | Layout | None = int(rows)
     if fmap.get('dynamic_attributions'):
         if metadata.get(keys[3]) != fmap['source']['sha256'] or metadata.get(keys[4]) != '5-11':
             return []
+        if keys[5] in metadata:     # grown cells: rebuilt only from a canonical, bounded hint
+            layout = Layout.parse(str(metadata[keys[5]]), int(rows))
+            if layout is None or layout.pages() > len(reader.pages):
+                return []
     elif any(key in metadata for key in keys[3:]):
         return []  # these source-page hints do not describe the five-page legacy form
-    found = _version(version, str(scc.form_path(version=version)), int(rows))
+    found = _version(version, str(scc.form_path(version=version)), layout)
     return [found] if found and found.fmap['form_pages'] == int(pages) else []
 
 
@@ -607,7 +646,7 @@ def _fillable(reader, data: bytes, name: str, version: FormVersion) -> ReadFile 
     if not fields:
         return None
     # Canonical fields and actual widget geometry must match the verified blank.
-    if set(fields) != set(version.pages):
+    if set(fields) != set(version.widget_rects):
         return None
     fmap = version.fmap
     pages = {}
@@ -621,14 +660,14 @@ def _fillable(reader, data: bytes, name: str, version: FormVersion) -> ReadFile 
         pages[widget_name] = page_no
         rects[widget_name] = rect
         widgets[widget_name] = widget
-    if set(pages) != set(version.pages):
+    if set(pages) != set(version.widget_rects):
         return None
     out = ReadFile(name, '', len(data), len(reader.pages), 'scc_form_fillable', fmap['version'],
                    data=data, field_map=fmap)
     import pypdfium2 as pdfium
     doc = pdfium.PdfDocument(data)
     marks = {}
-    for widget_name in sorted(mapped_widgets(fmap)):
+    for widget_name in _read_widgets(fmap):
         if widget_name not in fields:
             out.fields[widget_name] = FieldValue(widget_name, pages.get(widget_name, 0), None, 'not_found',
                                                  reason='This field is missing from the uploaded form.')
@@ -667,6 +706,7 @@ def _fillable(reader, data: bytes, name: str, version: FormVersion) -> ReadFile 
                                              'Check the box on the page.' if status == 'not_found' else
                                              'The fillable field is empty.' if status == 'blank' else '')
     doc.close()
+    _join_continuations(out.fields, fmap)
     for widget_name in signature_widgets(fmap):
         signed = widget_name in fields and fields[widget_name].get('/V') is not None
         out.signatures[widget_name] = FieldValue(
@@ -738,7 +778,7 @@ def _flattened(data: bytes, name: str, version: FormVersion) -> ReadFile:
     out = ReadFile(name, '', len(data), len(doc), 'scc_form_flattened', version.version,
                    data=data, field_map=version.fmap)
     annotations, glyphs, pdf_pages = {}, {}, {}
-    for widget_name in sorted(mapped_widgets(version.fmap)) + signature_widgets(version.fmap):
+    for widget_name in _read_widgets(version.fmap, printed=True) + signature_widgets(version.fmap):
         page_no = version.pages.get(widget_name, 0)
         rect = version.rects[widget_name]
         if page_no not in pdf_pages:
@@ -773,6 +813,7 @@ def _flattened(data: bytes, name: str, version: FormVersion) -> ReadFile:
             state = FieldValue(widget_name, page_no, rect, 'not_found',
                                reason='A check box on a flattened form cannot be read reliably.')
         out.fields[widget_name] = state
+    _join_continuations(out.fields, version.fmap)
     out.text_pages = _page_texts(data, range(version.fmap['form_pages'], len(doc)))
     return out
 

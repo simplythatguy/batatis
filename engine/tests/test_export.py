@@ -21,6 +21,7 @@ from engine.process_fields import process_fields
 from engine.section_c import section_c_rows
 from engine.section_d import supporting_documents
 from engine.models import INTENT_LABEL, Fact, Gap, Source
+from engine.tests.form_layout_helpers import drawn, segments, shown_fields
 
 FORM = form_path()
 pytestmark = pytest.mark.skipif(
@@ -131,7 +132,7 @@ def test_render_and_extract_every_filled_value(final, case):
     doc = pdfium.PdfDocument(final.pdf)
     appendix = appendix_text(final.pdf, final.form_pages)
     assert len(case.section_c) == 8
-    assert final.form_pages == 8 and final.appendix_pages >= 1
+    assert final.form_pages > 8 and final.appendix_pages >= 1  # full intents grow the source-style rows
     assert len(final.placements) >= 40
     for pl in final.placements:
         tp = doc[pl.page].get_textpage()
@@ -145,15 +146,16 @@ def test_render_and_extract_every_filled_value(final, case):
                             for b in (tp.get_charbox(i) for i in range(start, start + count)) if b[2] > b[0])
                         for start, count in hits]
             assert any(boxes_ok), f'{pl.field}: "{line}" not drawn inside {pl.rect} on page {pl.page + 1}'
-        if norm(' '.join(pl.lines)) != norm(pl.value):
-            assert pl.ref and norm(pl.value) in appendix, f'{pl.field}: full value missing from appendix'
-    shown = {pl.field: norm(' '.join(pl.lines)) for pl in final.placements}
+    shown = shown_fields(final)
+    for pl in final.placements:
+        if shown[pl.field] != norm(pl.value):
+            assert pl.ref and norm(pl.value) in appendix, f'{pl.field}: full value missing from its boxes or appendix'
     assert shown['Owner'] == FACTS['owner_name'] and shown['Lot'] == FACTS['lot']
     assert shown['Date of Reqeuest'] == FACTS['request_date']
 
 
 def test_section_c_cells_and_appendix_match_section_c_rows(final, case, codes):
-    shown = {pl.field: norm(' '.join(pl.lines)) for pl in final.placements}
+    shown = shown_fields(final)
     from engine.export.challenge_form import row_fields
     rows = case.section_c
     assert len(rows) > 5                           # fixture exercises native table expansion
@@ -192,23 +194,24 @@ def test_differing_intent_is_labelled(codes):
     [row] = case.section_c
     assert row.differs
     res = export_case(case, codes=codes)
-    shown = {pl.field: norm(' '.join(pl.lines)) for pl in res.placements}
+    shown = shown_fields(res)
     assert 'attributed differently' in shown['Intent statement']
     appendix = appendix_text(res.pdf, res.form_pages)
     assert 'attributed differently from NBC(AE) 2023' in appendix
     assert all(re.sub(r'[\[\]]', '', x) in appendix or x in appendix for x in row.only_in_ae)
 
 
-def test_long_section_a_value_moves_to_appendix(case, codes):
+def test_long_section_a_value_grows_its_form_box(case, codes):
     long = case.model_copy(deep=True)
     addr = 'Unit 1200, ' + ', '.join(f'Building {i} Long Industrial Business Park Road' for i in range(14)) + ', Calgary AB'
     for f in long.facts:
         if f.field == 'mailing_address':
             f.value = addr
     res = export_case(long, codes=codes)
-    pl = next(p for p in res.placements if p.field == 'Mailing Address')
-    assert pl.lines == [f'See Appendix {pl.ref}'] and pl.value == addr
-    assert addr in appendix_text(res.pdf, res.form_pages)
+    boxes = segments(res, 'Mailing Address')
+    assert all(p.ref is None and p.size == 10 and p.value == addr for p in boxes)
+    assert drawn(res, boxes) == addr
+    assert addr not in appendix_text(res.pdf, res.form_pages)
 
 
 def test_direct_export_cannot_bypass_authoritative_completeness(case, codes):
