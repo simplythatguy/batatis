@@ -15,6 +15,8 @@ from pathlib import Path
 import pypdfium2 as pdfium
 from pypdf import PdfReader
 
+from ..pdfium import open_pdf
+
 MAX_PAGES = 60
 SCC_MAP = Path(__file__).resolve().parents[1] / 'export' / 'field_maps' / 'scc_2026-10.json'
 # The SCC form's own heading, used to recognise a flattened copy that has lost its fields.
@@ -118,8 +120,7 @@ def _widgets(reader: PdfReader) -> list[Widget]:
 
 def _text_pages(data: bytes, limit: int) -> tuple[list[Page], list[int]]:
     pages, blank = [], []
-    pdf = pdfium.PdfDocument(data)
-    try:
+    with open_pdf(data) as pdf:
         for index in range(min(len(pdf), limit)):
             page = pdf[index]
             textpage = page.get_textpage()
@@ -139,8 +140,6 @@ def _text_pages(data: bytes, limit: int) -> tuple[list[Page], list[int]]:
             finally:
                 textpage.close()
                 page.close()
-    finally:
-        pdf.close()
     return pages, blank
 
 

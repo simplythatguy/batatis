@@ -12,6 +12,7 @@ from pathlib import Path
 from ..copyright import NRC_PUBLICATION_URL
 from ..models import Case
 from ..not_applicable import LABEL as NA_LABEL
+from ..pdfium import open_pdf
 from ..process_fields import process_fields
 from .appendix import _reflow
 from .scc import ExportResult, confirmed_values, load_field_map
@@ -83,9 +84,8 @@ def citation_problems(result: ExportResult, *, db_path=None) -> list[str]:
 
 
 def page_texts(pdf: bytes) -> list[str]:
-    import pypdfium2 as pdfium
-    doc = pdfium.PdfDocument(pdf)
-    return [doc[i].get_textpage().get_text_range() for i in range(len(doc))]
+    with open_pdf(pdf) as doc:
+        return [doc[i].get_textpage().get_text_range() for i in range(len(doc))]
 
 
 def appendix_text(result: ExportResult) -> str:
@@ -95,26 +95,25 @@ def appendix_text(result: ExportResult) -> str:
 def render_problems(result: ExportResult) -> list[str]:
     """Every shown line of every filled field is drawn on its page with each character inside the field box,
     and every value shown only as a reference is carried in full by the appendix."""
-    import pypdfium2 as pdfium
-    doc = pdfium.PdfDocument(result.pdf)
-    appendix = appendix_text(result)
-    problems = []
-    for pl in result.placements:
-        tp = doc[pl.page].get_textpage()
-        x0, y0, x1, y1 = pl.rect
-        for line in pl.lines:
-            searcher = tp.search(line, match_case=True)
-            hits = []
-            while (hit := searcher.get_next()) is not None:
-                hits.append(hit)
-            inside = [all(x0 - 0.5 <= b[0] and b[2] <= x1 + 0.5 and y0 - 0.5 <= b[1] and b[3] <= y1 + 0.5
-                          for b in (tp.get_charbox(i) for i in range(start, start + count)) if b[2] > b[0])
-                      for start, count in hits]
-            if not any(inside):
-                problems.append(f'{pl.field}: "{line}" is not drawn inside its box on page {pl.page + 1}')
-        if norm(' '.join(pl.lines)) != norm(pl.value) and not (pl.ref and norm(pl.value) in appendix):
-            problems.append(f'{pl.field}: the full value is not in the appendix')
-    return problems
+    with open_pdf(result.pdf) as doc:
+        appendix = appendix_text(result)
+        problems = []
+        for pl in result.placements:
+            tp = doc[pl.page].get_textpage()
+            x0, y0, x1, y1 = pl.rect
+            for line in pl.lines:
+                searcher = tp.search(line, match_case=True)
+                hits = []
+                while (hit := searcher.get_next()) is not None:
+                    hits.append(hit)
+                inside = [all(x0 - 0.5 <= b[0] and b[2] <= x1 + 0.5 and y0 - 0.5 <= b[1] and b[3] <= y1 + 0.5
+                              for b in (tp.get_charbox(i) for i in range(start, start + count)) if b[2] > b[0])
+                          for start, count in hits]
+                if not any(inside):
+                    problems.append(f'{pl.field}: "{line}" is not drawn inside its box on page {pl.page + 1}')
+            if norm(' '.join(pl.lines)) != norm(pl.value) and not (pl.ref and norm(pl.value) in appendix):
+                problems.append(f'{pl.field}: the full value is not in the appendix')
+        return problems
 
 
 def appendix_problems(case: Case, result: ExportResult, codes) -> list[str]:
