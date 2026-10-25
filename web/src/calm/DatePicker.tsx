@@ -160,10 +160,10 @@ export function DatePicker({ id, label, value, onChange }: { id?: string; label:
         >
           <div className="cf-dp-head">
             <p id={monthId} className="cf-dp-month" aria-live="polite">{formatMonth(focus)}</p>
-            <button type="button" className="cf-dp-nav is-prev" aria-label="Previous month" onClick={() => setFocus(addMonths(focus, -1))}>
+            <button type="button" className="cf-dp-nav is-prev" aria-label="Previous month" title="Previous month" onClick={() => setFocus(addMonths(focus, -1))}>
               <Icon24 name="chevRight" size={16} stroke={1.8} />
             </button>
-            <button type="button" className="cf-dp-nav" aria-label="Next month" onClick={() => setFocus(addMonths(focus, 1))}>
+            <button type="button" className="cf-dp-nav" aria-label="Next month" title="Next month" onClick={() => setFocus(addMonths(focus, 1))}>
               <Icon24 name="chevRight" size={16} stroke={1.8} />
             </button>
           </div>

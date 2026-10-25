@@ -131,7 +131,7 @@ export function SectionFooter({ items, index, skipped, onJump, onPrev, onNext, c
               onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) later(); }}
               onKeyDown={(e) => { if (e.key === "Escape" && open) { e.stopPropagation(); setOpen(null); } }}
             >
-              <button type="button" className="cf-qsec-btn" aria-expanded={open === s.id} aria-controls={open === s.id ? `cf-qsec-pop-${s.id}` : undefined} onClick={() => onJump(first.i)}>
+              <button type="button" className="cf-qsec-btn" aria-expanded={open === s.id} aria-controls={open === s.id ? `cf-qsec-pop-${s.id}` : undefined} onClick={() => { setOpen(null); onJump(first.i); }}>
                 <span className="cf-qsec-bar" aria-hidden="true">
                   {s.at.map((x) => {
                     const state = questionProgress(x.it, items[index]?.key, skipped);

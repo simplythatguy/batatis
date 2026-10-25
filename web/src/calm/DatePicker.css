@@ -40,7 +40,7 @@
 }
 
 .cf-dp-value.is-empty {
-  color: var(--cf-text-4);
+  color: var(--cf-text-3);
 }
 
 @media (hover: hover) {
@@ -110,6 +110,7 @@
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
+  font-variant-numeric: tabular-nums;
 }
 
 .cf-dp-grid th {
