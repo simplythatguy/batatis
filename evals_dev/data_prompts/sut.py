@@ -38,7 +38,7 @@ def load_env(path: str | None = None) -> None:
             continue
         name, value = line.split('=', 1)
         name = name.strip()
-        if name in ('OPENAI_API_KEY', 'OPENROUTER_API_KEY'):
+        if name in ('OPENAI_API_KEY', 'OPENROUTER_API_KEY', 'JEV_API_KEY', 'TYPESAFE_API_KEY'):
             os.environ.setdefault(name, value.strip().strip('"').strip("'"))
 
 
@@ -51,6 +51,7 @@ def configure(*, live: bool, elephant: bool) -> None:
     os.environ['BATATIS_LLM_RATE_LIMIT'] = '1000000'
     os.environ['BATATIS_LLM_RATE_WINDOW_SECONDS'] = '1'
     os.environ.setdefault('BATATIS_STORE', 'file')
+    os.environ['BATATIS_JEV_UNCAPPED'] = '1'          # the engine's own switch: Jev is outside the dollar ledger
     ledger.install(read=os.environ.get('DPE_HTTP_CACHE', 'read') != 'refresh')
 
 
@@ -105,6 +106,10 @@ def run_case(case: Case) -> dict:
             output = identify_run(outbound, codes=codes, config=load_config(), facts=engine_case.facts,
                                   description_sha256=description_hash(text), client_ip='dpe')
             engine_case.identify = output.result
+            trace = output.result.trace
+            result['identify_spend'] = {'usd': trace.usd, 'by_provider': trace.spend}
+            # Every article's screen and rerank score, kept for the hand-off threshold study (never judged).
+            result['identify_scores'] = {'screen': output.screen, 'rerank': output.rerank}
         except _Skipped:
             pass
         except Exception as error:                     # the route answers 503; the case keeps its intake

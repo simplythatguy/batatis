@@ -40,6 +40,7 @@ def _meta(args) -> dict:
             'engine_diff_sha256': hashlib.sha256(dirty.encode()).hexdigest() if dirty else None,
             'identify_config': config.as_dict(), 'identify_config_hash': config.config_hash,
             'intake_model': model_pass.MODEL, 'intake_effort': model_pass.EFFORT,
+            'identify_env': {k: v for k, v in os.environ.items() if k.startswith('BATATIS_IDENTIFY_')},
             'review': {k: os.environ.get(k) for k in ('BATATIS_REVIEW', 'BATATIS_REVIEW_MODEL', 'BATATIS_REVIEW_EFFORT')},
             'elephant': os.environ.get('BATATIS_LIVE_ELEPHANT') == '1', 'split': args.split}
 
@@ -75,7 +76,7 @@ def cmd_run(args) -> int:
             (folder / f'{result["case_id"]}.json').write_text(json.dumps(result))
             done += 1
             errors += bool(result.get('errors'))
-            usd += result['cost']['summary']['usd']
+            usd += result['cost']['summary']['usd'] + (result.get('identify_spend') or {}).get('usd', 0.0)
             if done % 10 == 0 or done == len(todo):
                 print(f'  {done}/{len(todo)} done, {errors} with errors, ${usd:.4f} workflow cost, '
                       f'{time.monotonic() - started:.0f}s', flush=True)
@@ -94,9 +95,15 @@ def _judge_case(case, result, codes, model, effort):
     rows += [{'id': f'A:{a}', 'kind': 'A', 'passed': ok, 'note': '', 'evidence': ''}
              for a, ok in checks.articles(g.articles, result)]
     review = ((result.get('case') or {}).get('intake') or {}).get('review') or {}
+    cost = dict(result['cost']['summary'])
+    scoring_usd = (result.get('identify_spend') or {}).get('usd', 0.0) - sum(
+        v.get('usd', 0.0) for k, v in ((result.get('identify_spend') or {}).get('by_provider') or {}).items()
+        if k == 'openai')
+    cost['usd'] = round(cost.get('usd', 0.0) + max(0.0, scoring_usd), 6)
+    cost['scoring_usd'] = round(max(0.0, scoring_usd), 6)
     return {'case_id': case.id, 'tier': case.tier, 'case_type': case.case_type, 'checks': rows,
             'review_status': review.get('status') or 'none', 'review_reason': review.get('reason'),
-            'guardrails': checks.guardrails(case, result, codes), 'cost': result['cost']['summary'],
+            'guardrails': checks.guardrails(case, result, codes), 'cost': cost,
             'judge_usd': book.summary()['usd'], 'facts_unavailable': len(g.facts_unavailable)}
 
 
