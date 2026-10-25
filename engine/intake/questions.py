@@ -10,8 +10,10 @@ the question is dropped from later plans and stays visible to the officer as an 
 from __future__ import annotations
 
 from dataclasses import dataclass
+from collections.abc import Iterable
 
-from ..models_intake import FieldConflict, Question
+from ..models import Fact
+from ..models_intake import FieldConflict, IntakePlan, Question
 
 CAP = 5
 
@@ -88,6 +90,18 @@ ALIASES = {'building_area_m2': ('building_area_m2', 'floor_area_m2', 'building_a
 
 def question_id(field: str) -> str:
     return 'intake.' + field
+
+
+def issued_questions(facts: Iterable[Fact], previous: IntakePlan | None) -> list[Question]:
+    """Recover only probes whose issuance this case's saved answer or uncertainty already proves."""
+    answered = {'storeys' if f.field == 'building.storeys' else f.field for f in facts
+                if f.source.ref == 'intake answer' and f.status == 'confirmed'}
+    not_sure = set(previous.not_sure) if previous else set()
+    recovered = [Question(id=question_id(p.field), field=p.field, text=p.text, why=p.why,
+                          priority=p.priority, unblocks=list(p.unblocks)) for p in PROBES
+                 if p.field in answered or question_id(p.field) in not_sure]
+    stored = [*previous.asked, *previous.questions] if previous else []
+    return list({q.id: q for q in [*recovered, *stored]}.values())
 
 
 def plan_questions(*, known: set[str], prose: str, candidates: list[dict], conflicts: list[FieldConflict],

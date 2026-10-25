@@ -12,12 +12,13 @@ from engine.codes import Codes
 from engine.export import ExportBlocked, FormMismatch, export_case, form_path, load_field_map
 from engine.export.scc import load_form
 from engine.export.sample import sample_case
-from engine.export.g3 import citation_problems, coverage_problems, render_problems
-from engine.export.text import pdf_safe
-from engine.models import Fact, Source
+from engine.export.g3 import appendix_text, citation_problems, coverage_problems, render_problems
+from engine.export.text import faithful_font_text, pdf_safe
+from engine.models import INTENT_LABEL, Fact, Source
 from engine.api import create_app
 from engine.store import CaseStore
 from engine.tests.case_builder_fixtures import store_with_synthetic_files
+from engine.tests.form_layout_helpers import drawn, segments
 
 
 def prepare_form(*args):
@@ -101,10 +102,14 @@ def test_native_intent_uses_deterministic_source_text_with_lossless_overflow():
     codes = Codes()
     case = sample_case(codes, provisions=['9.25.2.2.(1)'])
     result = export_case(case, codes=codes)
-    intent = next(p for p in result.placements if p.field == 'Intent statement')
-    for block in case.section_c[0].intents:
-        for text in block.intents:
-            assert pdf_safe(text) in intent.value
+    boxes = segments(result, 'Intent statement')
+    passages = [text for block in case.section_c[0].intents for text in block.intents]
+    shown = drawn(result, boxes)
+    assert all(p.size == 9 and p.ref is None for p in boxes)
+    assert shown == f'{INTENT_LABEL}: ' + ' '.join(' '.join(pdf_safe(t) for t in passages).split())
+    appendix = appendix_text(result)
+    for text in passages:
+        assert ' '.join(faithful_font_text(text).split()) in appendix
     assert not render_problems(result)
 
 
@@ -214,7 +219,10 @@ def test_saved_answers_change_the_real_http_pdf_bytes(tmp_path):
         assert value in reader.pages[0].extract_text()
         assert reader.metadata['/BatatisFormVersion'] == VERSION
         assert reader.metadata['/BatatisAttributionRows'] == '6'
-        assert reader.metadata['/BatatisFormPages'] == '8'
+        count = int(reader.metadata['/BatatisFormPages'])
+        assert count > 8 and count < len(reader.pages)
+        assert 'Part 4' in reader.pages[count - 2].extract_text()
+        assert 'Professional Design' in reader.pages[count - 1].extract_text()
         assert not reader.get_fields()
 
 
@@ -255,4 +263,7 @@ def test_draft_pdf_has_no_added_visible_draft_marks_but_keeps_the_validation_con
     for page in reader.pages:
         text = page.extract_text()
         assert 'DRAFT' not in text and 'not for submission; see appendix' not in text
-    assert any('Open items (draft export)' in p.extract_text() for p in reader.pages[result.form_pages:])
+    # The draft's open items stay in the result for the questions and Review; the document never lists them.
+    pdf_text = ' '.join(' '.join(p.extract_text().split()) for p in reader.pages)
+    assert 'Open items' not in pdf_text and 'Not provided or not confirmed' not in pdf_text
+    assert not any(' '.join(item.split())[:60] in pdf_text for item in result.open_items)

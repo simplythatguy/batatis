@@ -10,6 +10,7 @@ import re
 from dataclasses import dataclass, field
 
 from ..completeness_variants import ElementVerdict, run_variant
+from ..export.challenge_form import LEGAL_ROW
 from ..models import INTENT_LABEL
 from ..models_review import (CitationCheck, DocumentRow, FieldReading, Finding, InputFile, Pointer,
                              SectionCCheck)
@@ -252,6 +253,8 @@ def element_finding(element: ElementVerdict, pointers: list[Pointer]) -> Finding
 # ---------------------------------------------------------------- uploaded PDFs
 
 def _label(fmap: dict, name: str) -> tuple[str, str]:
+    if name == LEGAL_ROW and name in fmap.get('printed', {}):
+        return 'Legal description', 'B'
     spec = fmap['text_fields'].get(name) or fmap['checkboxes'].get(name)
     if spec:
         section = spec['section'] if spec['section'] in 'ABCD' else 'A'
@@ -286,15 +289,19 @@ def _stored(logical: str, value: FieldValue, read: ReadFile) -> StoredValue | No
 
 def _legal(read: ReadFile) -> tuple[StoredValue | None, list[str]]:
     fields = read.fields
+    printed = fields.get(LEGAL_ROW)
+    if printed is not None and printed.status == 'present':
+        return _stored('legal_description', printed, read), []
     lbp, ats = ('Lot', 'Block', 'Plan'), ('QTR', 'SEC', 'TWP', 'RGE', 'MER')
     for group in (lbp, ats):
         if all(fields.get(name) and fields[name].status == 'present' for name in group):
             value = ', '.join(f'{name} {fields[name].value}' for name in group)
             return StoredValue('legal_description', value, 'exact', fields[group[0]].value,
-                               form_field=group[0], source={'type': 'file', 'ref': read.name, 'page': 1,
+                               form_field=group[0], source={'type': 'file', 'ref': read.name,
+                                                            'page': fields[group[0]].page + 1,
                                                             'quote': fields[group[0]].value},
                                input_field=group[0]), []
-    states = [fields[name].status for name in lbp + ats if name in fields]
+    states = [fields[name].status for name in (LEGAL_ROW, *lbp, *ats) if name in fields]
     if any(state == 'not_found' for state in states):
         return None, []
     blank = [name for name in lbp + ats if name in fields and fields[name].status != 'present']
@@ -396,6 +403,7 @@ def review_uploads(uploads: list[tuple[str, bytes]], codes) -> Parts:
                   'code_or_standard': 'Code or Standard', 'objective': 'Objective', 'function': 'Function',
                   'section_c.intent': 'Intent statement', 'supporting_doc': 'Supporting Doc',
                   'responsible_party': 'Name Responsible'}
+    legal = None
     if form is not None:
         for logical, widget in widget_for.items():
             if widget in by_widget:
@@ -440,7 +448,8 @@ def review_uploads(uploads: list[tuple[str, bytes]], codes) -> Parts:
         'attachment': '\n'.join(page.text for read in attachments if read.name not in narrative_files
                                 for page in read.text_pages)}
     result = run_variant('B', doc, codes)
-    widgets_by_logical = {**widget_for, 'section_c.article': 'Article(s)', 'legal_description': 'Lot'}
+    widgets_by_logical = {**widget_for, 'section_c.article': 'Article(s)',
+                          'legal_description': legal.form_field if legal else 'Lot'}
     for element in result.elements:
         if element.field in _REPLACED:
             continue
@@ -451,7 +460,7 @@ def review_uploads(uploads: list[tuple[str, bytes]], codes) -> Parts:
         if form is not None and widget in by_widget:
             pointers.append(_pointer(form, by_widget[widget]))
         uncertain_legal = [value for name, value in by_widget.items()
-                           if name in ('Lot', 'Block', 'Plan', 'QTR', 'SEC', 'TWP', 'RGE', 'MER')
+                           if name in (LEGAL_ROW, 'Lot', 'Block', 'Plan', 'QTR', 'SEC', 'TWP', 'RGE', 'MER')
                            and value.status == 'not_found'] if element.field == 'legal_description' and legal is None else []
         if uncertain_legal:
             pointers = [_pointer(form, value) for value in uncertain_legal]

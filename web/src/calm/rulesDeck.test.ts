@@ -10,7 +10,7 @@ import type { RuleDef, RuleIndex } from "../rules/evaluate.ts";
 import type { Candidate, Case, Fact } from "../types.ts";
 import { conditionChoices, coveredByOption, followedInFull, matchingChecklists, otherOptions, tallyLine } from "./checklistView.ts";
 import { buildDeck, caseRules, choicesFor, PACKAGE_YES, RULE_ADD, type DeckOptions } from "./deck.ts";
-import { BUILDING_WIDE, caseRuleResults, numbersUsed, plainResult, readNumber, ruleInPlay, type RuleData } from "./rulesView.ts";
+import { BUILDING_WIDE, caseRuleResults, numbersUsed, plainResult, readNumber, ruleFacts, ruleInPlay, type RuleData } from "./rulesView.ts";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 /** Load a checked-in JSON fixture relative to the repository root. */
@@ -21,7 +21,7 @@ const DATA: RuleData = { index, rules };
 
 let n = 0;
 /** Create a pointed fixture fact with a unique id and explicit confirmation and source. */
-function fact(field: string, value: string | number | boolean, status: "confirmed" | "unconfirmed" = "confirmed", ref = "intake:description"): Fact {
+function fact(field: string, value: Fact["value"], status: "confirmed" | "unconfirmed" = "confirmed", ref = "intake:description"): Fact {
   n += 1;
   return { id: `f${n}`, field, value, kind: "pointed", status, source: { type: "user_text", ref, quote: String(value) } };
 }
@@ -70,8 +70,8 @@ test("missing inputs become Section C deck questions, one card per field, in rul
   assert.deepEqual(inputs.map((i) => i.key), ["rulein-ebf_area_m2", "rulein-glazed_area_m2", "rulein-soffit_projects"]);
   assert.ok(inputs.every((i) => i.section === "C" && !i.done && !i.optional));
   assert.equal(inputs[0].title, index.inputs.ebf_area_m2.question);
-  // Yes / No / Not sure for a yes-or-no input; a number has no choices (typed).
-  assert.deepEqual(choicesFor(inputs[2]).map((x) => x.label), ["Yes", "No", "Not sure"]);
+  // Skip leaves a rule open; only confirmed choices belong in the answer controls.
+  assert.deepEqual(choicesFor(inputs[2]).map((x) => x.label), ["Yes", "No"]);
   assert.deepEqual(choicesFor(inputs[0]), []);
   // No result card while the rule still needs answers.
   assert.ok(!items.some((i) => i.kind === "rule"));
@@ -142,6 +142,40 @@ test("the engine's stored result wins when it read the same inputs; a newer loca
   const r = caseRuleResults(changed, DATA, stored).find((x) => x.rule_id === "glazed-openings-houses")!;
   assert.notEqual(r.message, "STORED");
   assert.equal(r.stored, false);
+});
+
+test("withdrawn planner counts never survive as live rule inputs or stale stored outcomes", () => {
+  for (const count of [2, 4]) {
+    const c = demo([...NUMBERS, ...NO_EXCEPTIONS, fact("storeys", count, "confirmed", "intake answer")]);
+    const before = caseRuleResults(c, DATA);
+    assert.equal(before[0].state, count === 2 ? "departs" : "not_applicable");
+    const stored: CaseRules = {
+      case_id: "case_1", case_version: 1, edition: "NBC(AE) 2023, 2nd printing", notice: "",
+      results: before.map((r) => ({ ...r, inputs: r.inputs.map((i) => ({ ...i, fact_id: null, fact_status: null })) })),
+    };
+    const withdrawn = { ...c, facts: [...c.facts, fact("storeys", null, "confirmed", "intake answer")] };
+    assert.equal(ruleFacts(withdrawn, index).has("storeys"), false);
+    const after = caseRuleResults(withdrawn, DATA, stored);
+    for (const rule of after) assert.equal(rule.inputs.find((i) => i.field === "storeys")?.value ?? null, null);
+    assert.equal(after[0].stored, false, "the older stored outcome has different inputs");
+    assert.equal(after[0].state, "departs");
+    assert.equal(after[0].outcome_id, "departs");
+    assert.ok(after[0].assumptions.length > 0);
+  }
+});
+
+test("live rules resolve aliases and confirmation only after choosing the latest fact", () => {
+  for (const [oldField, newField] of [["storeys", "storeys"], ["building.storeys", "storeys"], ["storeys", "building.storeys"]]) {
+    const c = { ...emptyCase("homebuilder"), facts: [fact(oldField, 2)] };
+    assert.equal(ruleFacts(c, index).get("storeys")?.value, 2);
+    c.facts.push(fact(newField, null));
+    assert.equal(ruleFacts(c, index).has("storeys"), false);
+    c.facts.push(fact(newField, 3, "unconfirmed"));
+    assert.equal(ruleFacts(c, index).get("storeys")?.value, 3);
+    assert.equal(ruleFacts(c, index).get("storeys")?.status, "unconfirmed");
+    c.facts.push({ ...fact(newField, 4, "unconfirmed"), kind: "proposed" });
+    assert.equal(ruleFacts(c, index).has("storeys"), false);
+  }
 });
 
 test("a rule input answer is a confirmed applicant fact; Not sure is settled and not asked again", () => {

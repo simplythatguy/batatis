@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import json
 import re
+import shutil
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -23,6 +25,7 @@ from engine.intake.questions import CAP
 from engine.intake.scope import REGIMES, classify, redirect_message
 from engine.jurisdictions import registry
 from engine.models import Case, Jurisdiction
+from engine.models_intake import IntakeRecord
 from engine.models_identify import ArticleDecision, BenchmarkRecord, IdentifyArticle, IdentifyResult, IdentifyTrace
 from engine.store import CaseStore
 from engine.tests._network_guard import block_network
@@ -218,6 +221,190 @@ def test_answers_fill_only_their_own_question_and_not_sure_never_blocks():
     assert 'storeys' not in fields and 'occupancy' not in fields
     assert asked['occupancy'] in case.intake.plan.not_sure
     assert not [f for f in case.facts if f.field == 'occupancy']           # nothing that could block export
+
+
+def test_an_answered_choice_can_be_changed_after_the_plan_moves_on(http):
+    case_id = http.post('/cases', json={}).json()['id']
+    intake = http.post(f'/cases/{case_id}/intake', json={
+        'text': 'We manufacture an insulated panel for house walls.', 'role': 'manufacturer', 'model': False,
+    }).json()
+    scope = next(q for q in intake['record']['plan']['questions'] if q['field'] == 'scope')
+    first = http.post(f'/cases/{case_id}/intake/answers', json={
+        'answers': [{'question_id': scope['id'], 'answer': 'site'}], 'expected_version': intake['case_version'],
+    })
+    assert first.status_code == 200
+    saved = first.json()
+    assert scope['id'] not in [q['id'] for q in saved['record']['plan']['questions']]
+
+    # Read the persisted record before going Back and changing the saved choice.
+    reloaded = http.get(f'/cases/{case_id}/intake').json()
+    edited = http.post(f'/cases/{case_id}/intake/answers', json={
+        'answers': [{'question_id': scope['id'], 'answer': 'jurisdiction'}],
+        'expected_version': reloaded['case_version'],
+    })
+    assert edited.status_code == 200, edited.text
+    latest = http.get(f'/cases/{case_id}').json()
+    assert [f for f in latest['facts'] if f['field'] == 'scope'][-1]['value'] == 'jurisdiction'
+    assert edited.json()['case_version'] == saved['case_version'] + 1
+
+    # An issued question remains bound to its field and to the acknowledged case version.
+    stale = http.post(f'/cases/{case_id}/intake/answers', json={
+        'answers': [{'question_id': scope['id'], 'answer': 'site'}], 'expected_version': saved['case_version'],
+    })
+    assert stale.status_code == 409
+    wrong_field = http.post(f'/cases/{case_id}/intake/answers', json={
+        'answers': [{'question_id': scope['id'], 'field': 'project.description', 'answer': 'site'}],
+        'expected_version': edited.json()['case_version'],
+    })
+    assert wrong_field.status_code == 422
+    unasked = http.post(f'/cases/{case_id}/intake/answers', json={
+        'answers': [{'question_id': 'intake.owner_name_not_asked', 'answer': 'x'}],
+        'expected_version': edited.json()['case_version'],
+    })
+    assert unasked.status_code == 422
+    assert http.get(f'/cases/{case_id}').json() == latest
+
+
+def test_a_saved_not_sure_can_be_replaced_with_a_real_answer():
+    case = _case('Our client wants a single staircase in their new building instead of two.')
+    qid = next(q.id for q in case.intake.plan.questions if q.field == 'occupancy')
+    service.answer(case, [{'question_id': qid, 'answer': 'not sure'}])
+    service.answer(case, [{'question_id': qid, 'answer': 'single_family'}])
+    assert qid not in case.intake.plan.not_sure
+    assert [f for f in case.facts if f.field == 'occupancy'][-1].value == 'single_family'
+
+
+def test_an_issued_question_survives_replanning_and_batch_validation_is_atomic():
+    case = _case('Our client wants a single staircase in their new building instead of two.')
+    question = next(q for q in case.intake.plan.questions if q.field == 'storeys')
+    from engine.models import Fact, Source
+    case.facts.append(Fact(field='storeys', value=2, kind='pointed', status='unconfirmed',
+                           source=Source(type='user_text', ref='intake:description', quote='two storeys')))
+    service.refresh(case)
+    assert question.id not in [q.id for q in case.intake.plan.questions]
+    assert question.id in [q.id for q in case.intake.plan.asked]
+    before = case.model_dump()
+    with pytest.raises(service.AnswerRejected):
+        service.answer(case, [{'question_id': question.id, 'answer': '3'},
+                              {'question_id': 'intake.never_asked', 'answer': 'x'}])
+    assert case.model_dump() == before
+    service.answer(case, [{'question_id': question.id, 'answer': '3'}])
+    assert [f for f in case.facts if f.field == 'storeys'][-1].value == 3
+    service.refresh(case)
+    assert len([q for q in case.intake.plan.asked if q.id == question.id]) == 1
+
+
+def test_legacy_answers_stay_editable_and_uncertainty_withdraws_the_old_value():
+    case = _case('Our client wants a single staircase in their new building instead of two.')
+    qid = next(q.id for q in case.intake.plan.questions if q.field == 'occupancy')
+    service.answer(case, [{'question_id': qid, 'answer': 'single_family'}])
+    case.intake.plan.asked = []  # persisted before issued-question history was added
+    service.answer(case, [{'question_id': qid, 'answer': 'not sure'}])
+    assert [f for f in case.facts if f.field == 'occupancy'][-1].value is None
+    assert qid in case.intake.plan.not_sure
+    case.intake.plan.asked = []
+    service.answer(case, [{'question_id': qid, 'answer': 'single_family'}])
+    assert qid not in case.intake.plan.not_sure
+    assert [f for f in case.facts if f.field == 'occupancy'][-1].value == 'single_family'
+
+
+@pytest.mark.parametrize('answer', ['no', 'not sure'])
+def test_legacy_choice_history_is_hydrated_on_read_and_replan(tmp_path, answer):
+    case = _case('We want to omit the fire separation in our new house.')
+    issued = next(q for q in case.intake.plan.questions if q.field == 'sprinklered')
+    service.answer(case, [{'question_id': issued.id, 'answer': answer}])
+    record = case.intake.model_dump()
+    record['plan'].pop('asked')
+    case.intake = IntakeRecord.model_validate(record)
+    assert case.intake.plan.asked == [] and issued.id not in [q.id for q in case.intake.plan.questions]
+    store = CaseStore(tmp_path / 'cases.sqlite')
+    saved = store.put(case)
+    with TestClient(create_app(store=store)) as client:
+        loaded = client.get(f'/cases/{saved.id}/intake')
+        assert loaded.status_code == 200
+        asked = [q for q in loaded.json()['record']['plan']['asked'] if q['id'] == issued.id]
+        assert len(asked) == 1
+        assert (asked[0]['field'], asked[0]['text'], asked[0]['why']) == (issued.field, issued.text, issued.why)
+        assert store.get(saved.id).model_dump() == saved.model_dump(), 'reading history cannot write or advance the case'
+        replanned = client.post(f'/cases/{saved.id}/intake/plan', json={'expected_version': saved.version})
+        assert replanned.status_code == 200
+        assert [q['id'] for q in replanned.json()['record']['plan']['asked']].count(issued.id) == 1
+        edited = client.post(f'/cases/{saved.id}/intake/answers', json={
+            'answers': [{'question_id': issued.id, 'answer': 'yes'}],
+            'expected_version': replanned.json()['case_version'],
+        })
+        assert edited.status_code == 200
+        assert issued.id not in edited.json()['record']['plan']['not_sure']
+        assert [f for f in store.get(saved.id).facts if f.field == issued.field][-1].value == 'yes'
+
+
+def test_reopened_legacy_choice_has_one_editable_deck_card(tmp_path):
+    node = shutil.which('node')
+    if node is None:
+        pytest.skip('node is required to exercise the real openedCase -> buildDeck projection')
+    case = _case('We want to omit the fire separation in our new house.')
+    issued = next(q for q in case.intake.plan.questions if q.field == 'sprinklered')
+    service.answer(case, [{'question_id': issued.id, 'answer': 'no'}])
+    serialized = case.model_dump()
+    serialized['intake']['plan'].pop('asked')
+    store = CaseStore(tmp_path / 'cases.sqlite')
+    saved = store.put(Case.model_validate(serialized))
+    with TestClient(create_app(store=store)) as client:
+        intake = client.get(f'/cases/{saved.id}/intake').json()
+    payload = tmp_path / 'reopened.json'
+    payload.write_text(json.dumps({'saved': saved.model_dump(mode='json'), 'intake': intake}))
+    script = '''
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { openedCase } from './src/calm/openCase.ts';
+import { buildDeck, choicesFor } from './src/calm/deck.ts';
+const payload = JSON.parse(readFileSync(process.argv[1], 'utf8'));
+const c = openedCase(payload.saved, 'homebuilder', { intake: payload.intake, identify: null });
+const cards = buildDeck(c, [], { includeDone: true }).filter(c => c.ref === 'intake.sprinklered');
+assert.equal(cards.length, 1, 'the older saved choice must have one editable card');
+assert.equal(cards[0].done, true);
+assert.deepEqual(choicesFor(cards[0]).map(c => c.value), ['yes', 'no', 'partial']);
+console.log('legacy reopened choice: one editable card, all three real choices');
+'''
+    result = subprocess.run([node, '--experimental-strip-types', '--no-warnings', '--import',
+                             './scripts/register-ts.mjs', '--input-type=module', '-e', script, str(payload)],
+                            cwd=ROOT / 'web', capture_output=True, text=True, timeout=30)
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_legacy_history_requires_own_case_answer_or_remembered_uncertainty():
+    from engine.models import Fact, Source
+    case = _case('We want to omit the fire separation in our new house.')
+    case.facts.extend([
+        Fact(field='part4_design', value=False, kind='pointed', status='confirmed',
+             source=Source(type='user_text', ref='intake:description', quote='not a Part 4 design')),
+        Fact(field='scope', value='site', kind='pointed', status='unconfirmed',
+             source=Source(type='user_text', ref='intake answer', quote='site')),
+        Fact(field='unissued_probe', value='yes', kind='pointed', status='confirmed',
+             source=Source(type='user_text', ref='intake answer', quote='yes')),
+    ])
+    case.intake.plan.not_sure.extend(['intake.assembly.description', 'intake.unissued_probe'])
+    service.refresh(case)
+    asked = {q.id for q in case.intake.plan.asked}
+    assert 'intake.assembly.description' in asked
+    assert not {'intake.part4_design', 'intake.scope', 'intake.unissued_probe'} & asked
+    for qid in ('intake.part4_design', 'intake.scope', 'intake.unissued_probe'):
+        before = case.model_dump()
+        with pytest.raises(service.AnswerRejected):
+            service.answer(case, [{'question_id': qid, 'answer': 'yes'}])
+        assert case.model_dump() == before
+
+
+def test_issued_history_does_not_bypass_a_scope_redirect():
+    case = _case('Our client wants a single staircase in their new building instead of two.')
+    qid = next(q.id for q in case.intake.plan.questions if q.field == 'storeys')
+    text = 'Can we skip AFCI breakers on the bedroom circuits?'
+    service.apply(case, text, service.run(text, []))
+    assert case.intake.plan.scope.status == 'redirect'
+    before = case.model_dump()
+    with pytest.raises(service.AnswerRejected):
+        service.answer(case, [{'question_id': qid, 'answer': '3'}])
+    assert case.model_dump() == before
 
 
 # ---------------------------------------------------------------- redirect on the case (AC2.2, AC2.3)

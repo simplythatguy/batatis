@@ -7,14 +7,14 @@ from .models import CaseRules, RuleResult
 
 
 def case_inputs(case: Case) -> dict[str, Fact]:
-    """The latest usable fact per rule input field. A proposed fact (model judgement) is never used: the
-    rule asks instead of guessing."""
+    """Resolve the latest revision before checking usability; nulls and proposals suppress older values."""
     fields = set(load_index()['inputs'])
-    found: dict[str, Fact] = {}
-    for fact in reversed(case.facts):
-        if fact.field in fields and fact.field not in found and fact.kind != 'proposed' and fact.value is not None:
-            found[fact.field] = fact
-    return found
+    latest: dict[str, Fact] = {}
+    for fact in case.facts:
+        field = 'storeys' if fact.field == 'building.storeys' else fact.field
+        if field in fields:
+            latest[field] = fact
+    return {field: fact for field, fact in latest.items() if fact.kind != 'proposed' and fact.value is not None}
 
 
 def case_rules(case: Case) -> CaseRules:

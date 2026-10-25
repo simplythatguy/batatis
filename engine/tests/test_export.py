@@ -18,8 +18,10 @@ from engine.export import ExportBlocked, FormMismatch, export_case, form_path, l
 from engine.export.sample import FACTS, sample_case
 from engine.export.text import faithful_font_text, pdf_safe
 from engine.process_fields import process_fields
+from engine.section_c import section_c_rows
 from engine.section_d import supporting_documents
 from engine.models import INTENT_LABEL, Fact, Gap, Source
+from engine.tests.form_layout_helpers import drawn, segments, shown_fields
 
 FORM = form_path()
 pytestmark = pytest.mark.skipif(
@@ -107,7 +109,9 @@ def test_blocks_on_unconfirmed_facts_and_blocking_gaps(case, codes):
     texts = page_texts(draft.pdf)
     assert draft.draft is True
     assert pypdf.PdfReader(io.BytesIO(draft.pdf)).metadata.title.endswith(' (DRAFT)')
-    assert 'risk assessment not written' in appendix_text(draft.pdf, draft.form_pages)
+    # The draft keeps its open items in the result; the document itself carries no to-do list.
+    assert any('risk assessment not written' in item for item in draft.open_items)
+    assert 'risk assessment not written' not in ' '.join(texts)
     assert '99' not in norm(texts[0]).split()          # proposed value never reaches the form
     assert 'Lot' not in {p.field for p in draft.placements}  # the older lot value must not silently return
 
@@ -128,7 +132,7 @@ def test_render_and_extract_every_filled_value(final, case):
     doc = pdfium.PdfDocument(final.pdf)
     appendix = appendix_text(final.pdf, final.form_pages)
     assert len(case.section_c) == 8
-    assert final.form_pages == 8 and final.appendix_pages >= 1
+    assert final.form_pages > 8 and final.appendix_pages >= 1  # full intents grow the source-style rows
     assert len(final.placements) >= 40
     for pl in final.placements:
         tp = doc[pl.page].get_textpage()
@@ -142,15 +146,16 @@ def test_render_and_extract_every_filled_value(final, case):
                             for b in (tp.get_charbox(i) for i in range(start, start + count)) if b[2] > b[0])
                         for start, count in hits]
             assert any(boxes_ok), f'{pl.field}: "{line}" not drawn inside {pl.rect} on page {pl.page + 1}'
-        if norm(' '.join(pl.lines)) != norm(pl.value):
-            assert pl.ref and norm(pl.value) in appendix, f'{pl.field}: full value missing from appendix'
-    shown = {pl.field: norm(' '.join(pl.lines)) for pl in final.placements}
+    shown = shown_fields(final)
+    for pl in final.placements:
+        if shown[pl.field] != norm(pl.value):
+            assert pl.ref and norm(pl.value) in appendix, f'{pl.field}: full value missing from its boxes or appendix'
     assert shown['Owner'] == FACTS['owner_name'] and shown['Lot'] == FACTS['lot']
     assert shown['Date of Reqeuest'] == FACTS['request_date']
 
 
 def test_section_c_cells_and_appendix_match_section_c_rows(final, case, codes):
-    shown = {pl.field: norm(' '.join(pl.lines)) for pl in final.placements}
+    shown = shown_fields(final)
     from engine.export.challenge_form import row_fields
     rows = case.section_c
     assert len(rows) > 5                           # fixture exercises native table expansion
@@ -189,23 +194,24 @@ def test_differing_intent_is_labelled(codes):
     [row] = case.section_c
     assert row.differs
     res = export_case(case, codes=codes)
-    shown = {pl.field: norm(' '.join(pl.lines)) for pl in res.placements}
+    shown = shown_fields(res)
     assert 'attributed differently' in shown['Intent statement']
     appendix = appendix_text(res.pdf, res.form_pages)
     assert 'attributed differently from NBC(AE) 2023' in appendix
     assert all(re.sub(r'[\[\]]', '', x) in appendix or x in appendix for x in row.only_in_ae)
 
 
-def test_long_section_a_value_moves_to_appendix(case, codes):
+def test_long_section_a_value_grows_its_form_box(case, codes):
     long = case.model_copy(deep=True)
     addr = 'Unit 1200, ' + ', '.join(f'Building {i} Long Industrial Business Park Road' for i in range(14)) + ', Calgary AB'
     for f in long.facts:
         if f.field == 'mailing_address':
             f.value = addr
     res = export_case(long, codes=codes)
-    pl = next(p for p in res.placements if p.field == 'Mailing Address')
-    assert pl.lines == [f'See Appendix {pl.ref}'] and pl.value == addr
-    assert addr in appendix_text(res.pdf, res.form_pages)
+    boxes = segments(res, 'Mailing Address')
+    assert all(p.ref is None and p.size == 10 and p.value == addr for p in boxes)
+    assert drawn(res, boxes) == addr
+    assert addr not in appendix_text(res.pdf, res.form_pages)
 
 
 def test_direct_export_cannot_bypass_authoritative_completeness(case, codes):
@@ -248,7 +254,8 @@ def test_stale_section_c_blocks_final_and_draft_rebuilds_from_database(codes, ch
     result = export_case(case, codes=codes, draft=True)
     text = appendix_text(result.pdf, result.form_pages)
     assert 'FORGED INTENT CONTENT' not in text and 'FORGED-OBJECTIVE' not in text
-    assert 'rebuilt from verified confirmed provisions' in text and result.open_items
+    fresh = section_c_rows(['9.25.2.2.(1)'], codes)[0]                 # what the database says, not the case
+    assert result.open_items and norm(faithful_font_text(fresh.intents[0].intents[0])) in text
     assert codes.citation('9.25.2.2.(1)', 'B') in text
     assert case.model_dump_json() == before
 

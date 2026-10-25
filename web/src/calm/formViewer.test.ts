@@ -1,37 +1,52 @@
 import assert from "node:assert/strict";
+import { resolveObjectURL } from "node:buffer";
 import test from "node:test";
 import { componentHarness, nodes, text } from "../../scripts/component-harness.mjs";
 
 class EngineError extends Error { status: number; constructor(status: number) { super("x"); this.status = status; } }
 class ExportBlockedError extends EngineError { reasons: string[]; constructor(reasons: string[]) { super(409); this.reasons = reasons; } }
 
-async function viewer({ locked = false, fail = 0, status = undefined as string | undefined } = {}) {
+const PDF = "%PDF-1.7 draft bytes";
+const page = (n: number) => ({ width: 612, height: 792, image: `data:image/png;base64,${Buffer.from(`page ${n}`).toString("base64")}` });
+
+async function viewer({ locked = false, fail = 0, status = undefined as string | undefined, total = 2, shown = 2, tooLarge = false,
+  draftDownload = undefined as { run: () => void; disabled: boolean } | undefined } = {}) {
   const calls: string[] = [];
   let failures = fail, epoch = 1;
   // Saving moves the sync epoch, as the real store does; only a changed answer makes the PDF out of date.
   let c = { facts: [{ field: "owner", value: "Ada", status: "confirmed" }], process: {}, authority: "edmonton", sectionC: [] };
   const store = { engineId: "case_1", get c() { return c; }, get factsEpoch() { return epoch; }, saveDraft: async () => { calls.push("save"); epoch++; return "case_1"; } };
   const h = await componentHarness(new URL("./FormViewer.tsx", import.meta.url), "FormViewer", {
-    "../api/client": { EngineError, ExportBlockedError, engine: { exportPdf: async (id: string, draft: boolean) => {
-      calls.push(`export ${id} draft=${draft}`);
+    "../api/client": { EngineError, ExportBlockedError, engine: { exportPreview: async (id: string) => {
+      calls.push(`preview ${id}`);
       if (failures-- > 0) throw new EngineError(500);
-      return { blob: new Blob(["%PDF-1.7"], { type: "application/pdf" }), filename: "x.pdf", notice: "" };
+      if (tooLarge) return { kind: "too_large", page_count: total, pdf_bytes: 4_083_802 };
+      return { kind: "pages", filename: "x.pdf", pdf: `data:application/pdf;base64,${Buffer.from(PDF).toString("base64")}`,
+        page_count: total, pages: Array.from({ length: shown }, (_, i) => page(i + 1)) };
     } } },
     "../store": { useCase: () => store },
     "./ui": { CIcon: "CIcon" },
-  }, { URL, Blob });
-  let tree = await h.render({ locked, status });
+  }, { URL, Blob, atob });
+  let tree = await h.render({ locked, status, draftDownload });
   await new Promise((r) => setTimeout(r, 0));
-  tree = await h.render({ locked, status });
-  return { h, calls, get tree() { return tree; }, async rerender() { tree = await h.render({ locked, status }); return tree; }, bump() { epoch++; c = { ...c, facts: [{ field: "owner", value: `Ada ${epoch}`, status: "confirmed" }] }; } };
+  tree = await h.render({ locked, status, draftDownload });
+  return { h, calls, get tree() { return tree; }, async rerender() { tree = await h.render({ locked, status, draftDownload }); return tree; }, bump() { epoch++; c = { ...c, facts: [{ field: "owner", value: `Ada ${epoch}`, status: "confirmed" }] }; } };
 }
 
-test("the form is the engine's own draft PDF, filled after the draft is saved", async () => {
+const pages = (tree: unknown) => nodes(tree, (n) => n.type === "img");
+const opened = async (href: string) => Buffer.from(await resolveObjectURL(href)!.arrayBuffer()).toString();
+
+test("the form is the engine's own draft PDF, drawn as its pages after the draft is saved", async () => {
   const v = await viewer();
-  assert.deepEqual(v.calls, ["save", "export case_1 draft=true"]);
-  const frame = nodes(v.tree, (n) => n.type === "iframe")[0];
-  assert.match(frame.props.src, /^blob:.*#toolbar=0/);
-  assert.equal(frame.props.title, "Application form, draft PDF");
+  assert.deepEqual(v.calls, ["save", "preview case_1"]);
+  const region = nodes(v.tree, (n) => n.props?.role === "region")[0];
+  assert.equal(region.props["aria-label"], "Application form, draft PDF");
+  assert.equal(region.props.tabIndex, 0, "the page column scrolls from the keyboard");
+  assert.deepEqual(pages(v.tree).map((n) => [n.props.src, n.props.alt]), [[page(1).image, "Page 1 of 2"], [page(2).image, "Page 2 of 2"]]);
+  assert.equal(nodes(v.tree, (n) => n.type === "iframe").length, 0, "no browser PDF viewer and its dark frame");
+  const open = nodes(v.tree, (n) => n.type === "a")[0];
+  assert.match(open.props.href, /^blob:/);
+  assert.equal(await opened(open.props.href), PDF, "the new tab opens the bytes the pages were drawn from");
   assert.match(text(v.tree), /Draft/);
   assert.equal(nodes(await v.rerender(), (n) => n.type === "button" && text(n).includes("Update")).length, 0, "its own save does not make it out of date");
   assert.doesNotMatch(JSON.stringify(v.tree), /cf-sheet|Official/, "no drawn imitation and no official claim");
@@ -43,14 +58,47 @@ test("the form is the engine's own draft PDF, filled after the draft is saved", 
   update.props.onClick();
   await new Promise((r) => setTimeout(r, 0));
   tree = await v.rerender();
-  assert.deepEqual(v.calls.slice(2), ["save", "export case_1 draft=true"]);
+  assert.deepEqual(v.calls.slice(2), ["save", "preview case_1"]);
   assert.equal(nodes(tree, (n) => n.type === "button" && text(n).includes("Update")).length, 0);
   v.h.unmount();
 });
 
+test("pages past the response budget stay one link away in the PDF", async () => {
+  const v = await viewer({ total: 30, shown: 2 });
+  assert.equal(pages(v.tree).length, 2);
+  assert.equal(pages(v.tree)[1].props.alt, "Page 2 of 30");
+  const more = nodes(v.tree, (n) => n.type === "a" && text(n).includes("more pages"))[0];
+  assert.equal(text(more), "28 more pages in the PDF");
+  assert.equal(await opened(more.props.href), PDF);
+  const all = await viewer();
+  assert.equal(nodes(all.tree, (n) => n.type === "a" && text(n).includes("more")).length, 0, "nothing to add when every page is shown");
+  v.h.unmount();
+  all.h.unmount();
+});
+
+test("a draft too large to preview says so and offers the panel's draft download, with nothing embedded", async () => {
+  let downloads = 0;
+  const v = await viewer({ tooLarge: true, total: 1007, draftDownload: { run: () => { downloads++; }, disabled: false } });
+  assert.equal(pages(v.tree).length, 0, "no page images");
+  assert.equal(nodes(v.tree, (n) => n.type === "a").length, 0, "no PDF to open: none was sent");
+  assert.equal(nodes(v.tree, (n) => n.props?.role === "alert").length, 0, "not a failure");
+  const note = nodes(v.tree, (n) => n.props?.role === "status" && text(n).includes("Too large"))[0];
+  assert.equal(text(nodes(note, (n) => n.type === "p")[0]), `Too large to preview: ${(1007).toLocaleString()} pages.`);
+  const download = nodes(note, (n) => n.type === "button")[0];
+  assert.equal(text(download), "Download draft PDF");
+  download.props.onClick();
+  assert.equal(downloads, 1);
+  v.bump();
+  assert.ok(nodes(await v.rerender(), (n) => n.type === "button" && text(n).includes("Update"))[0], "a changed answer can still update it");
+  v.h.unmount();
+  const busy = await viewer({ tooLarge: true, draftDownload: { run: () => { downloads++; }, disabled: true } });
+  assert.equal(nodes(busy.tree, (n) => n.type === "button" && text(n) === "Download draft PDF")[0].props.disabled, true);
+  busy.h.unmount();
+});
+
 test("a read-only application is shown as saved, without saving", async () => {
   const v = await viewer({ locked: true });
-  assert.deepEqual(v.calls, ["export case_1 draft=true"]);
+  assert.deepEqual(v.calls, ["preview case_1"]);
   v.bump();
   assert.equal(nodes(await v.rerender(), (n) => n.type === "button" && text(n).includes("Update")).length, 0);
   v.h.unmount();
@@ -63,7 +111,7 @@ test("a failed fill says so and can be tried again", async () => {
   nodes(alert, (n) => n.type === "button" && text(n) === "Try again")[0].props.onClick();
   await new Promise((r) => setTimeout(r, 0));
   const tree = await v.rerender();
-  assert.ok(nodes(tree, (n) => n.type === "iframe").length);
+  assert.equal(pages(tree).length, 2);
   v.h.unmount();
 });
 
@@ -73,7 +121,7 @@ test("a sent or closed application keeps its own status apart from the draft PDF
     const tree = await v.rerender();
     const bar = nodes(tree, (n) => n.props?.className === "cf-form-bar")[0];
     assert.equal(text(bar).startsWith(`${status}Draft PDF`), true, `${status}: the application's status, then what the file is`);
-    assert.match(nodes(tree, (n) => n.type === "iframe")[0].props.title, /draft PDF/);
+    assert.match(nodes(tree, (n) => n.props?.role === "region")[0].props["aria-label"], /draft PDF/);
     const open = nodes(tree, (n) => n.type === "a")[0];
     assert.match(open.props["aria-label"], /draft PDF/, "the new tab link says it opens the draft");
     assert.doesNotMatch(text(tree), /official/i, "status never labels the draft bytes official");

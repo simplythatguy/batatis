@@ -52,7 +52,9 @@ def _gaps(case: Case):
 
 def _pdf_text(case: Case) -> str:
     pdf = build_appendix(case, SimpleNamespace(overflow=[], rows_in_form=0, docs_in_form=4),
-                         {}, {'version': 'test'}, codes=None, open_items=[])
+                         {}, {'version': 'test'}, codes=None)
+    if pdf is None:                         # nothing real to print: no appendix
+        return ''
     text = ' '.join(page.extract_text() or '' for page in PdfReader(io.BytesIO(pdf)).pages)
     return ' '.join(text.split())
 

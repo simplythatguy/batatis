@@ -14,6 +14,8 @@ import type {
   CaseRules,
   ChecklistAnswerRequest,
   ChecklistAnswerResult,
+  ExportPreview,
+  ExportPreviewTooLarge,
   JurisdictionDetail,
   JurisdictionsResult,
 } from "./types.gen";
@@ -234,6 +236,13 @@ export function createEngine(base: string) {
      * A missing code database is not turned into a 503 on this branch.
      */
     exportPdf: (caseId: string, draft = false, signal?: AbortSignal) => exportPdf(base, caseId, draft, signal),
+    /**
+     * GET /cases/{id}/export/preview: the draft PDF's exact bytes and images of its first pages, as data URLs,
+     * for the application screen. `pages` stops early only at the response budget; `page_count` counts all.
+     * `too_large`: the PDF alone is over the budget, so nothing of it is sent; the draft download still works.
+     */
+    exportPreview: (caseId: string, signal?: AbortSignal) =>
+      call<ExportPreview | ExportPreviewTooLarge>("GET", `/cases/${enc(caseId)}/export/preview`, undefined, signal, EXPORT_WAIT_MS),
     /** Multipart PDF upload (FormData field `file`), returning its stored id and metadata. */
     upload: (caseId: string, file: File, signal?: AbortSignal) => uploadPdf(base, caseId, file, signal),
     files: (caseId: string, signal?: AbortSignal) =>
@@ -488,6 +497,14 @@ export class ExportBlockedError extends EngineError {
 /** Bound so a slow engine cannot leave the screen on "waiting". */
 const ENGINE_WAIT_MS = 8000;
 
+/**
+ * An export, or its preview, fills the whole form and appendix. The review's 500-reference draft took 49.8 s
+ * locally before the appendix cleanup and 22.3 s (preview) to 22.9 s (download) after it; a hosted function
+ * can be slower. Shared by both so the preview's "too large" answer and the draft download it offers can
+ * finish. Still bounded, and still cancelled with the caller or the account.
+ */
+export const EXPORT_WAIT_MS = 90_000;
+
 function withTimeout(parent: AbortSignal | undefined, ms: number) {
   const scope = accountRequestSignal(parent);
   const ctl = new AbortController();
@@ -528,7 +545,7 @@ export function exportNotice(header: string | null): string {
 }
 
 async function exportPdf(base: string, caseId: string, draft: boolean, signal?: AbortSignal) {
-  const timed = withTimeout(signal, 20000);
+  const timed = withTimeout(signal, EXPORT_WAIT_MS);
   let res: Response;
   try {
     res = await fetch(`${base}/cases/${enc(caseId)}/export`, {

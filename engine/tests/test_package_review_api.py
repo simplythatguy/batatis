@@ -2,13 +2,11 @@
 from __future__ import annotations
 
 from contextlib import ExitStack
-import io
 import os
 import uuid
 
 import pytest
 from fastapi.testclient import TestClient
-from pypdf import PdfReader
 
 from engine.api import create_app
 from engine.codes import Codes
@@ -340,32 +338,32 @@ def test_official_blank_draft_cannot_mask_supplied_rationale(multi_source_scene,
     store.put(saved)
     assert clients['reviewer'].post(f'/review/{case.id}/claim', json={}).status_code == 200
     before = store.get(case.id).model_dump(mode='json')
+    route = f'/review/{case.id}/package-review' if linked else '/package-review'
+    # The draft prints no rationale placeholder. On its own the rationale is absent: an officer check,
+    # never a certain blank and never an automatic request.
+    alone = clients['reviewer'].post(route, files=multipart([('official-blank-draft.pdf', exported.content)]))
+    assert alone.status_code == 201, alone.text
+    session = alone.json()
+    reading = next(f for f in session['fields'] if f['field'] == 'rationale')
+    assert reading['status'] == 'not_found' and reading['value'] is None, reading
+    finding = next(f for f in session['findings'] if f['field'] == 'rationale')
+    assert finding['status'] == 'not_found'
+    item = next(i for i in session['information_request']['items'] if i['field'] == 'rationale')
+    assert item['officer_check'] and not item['included']
+    assert item['text'] not in session['information_request']['text']
+    # Beside the applicant's supplied passage, in either order, the draft cannot mask it: the passage is read.
     rationale = 'NBC(AE) defines the benchmark; our proposed departure is described here.'
     uploads = [('official-blank-draft.pdf', exported.content), ('supplied-rationale.pdf', text_pdf([
         'Rationale', rationale, 'Risk assessment', 'SYNTHETIC following process field.']))]
     if reverse:
         uploads.reverse()
-    route = f'/review/{case.id}/package-review' if linked else '/package-review'
-    response = clients['reviewer'].post(route, files=multipart(uploads))
-    assert response.status_code == 201, response.text
-    session = response.json()
-    reading = next(f for f in session['fields'] if f['field'] == 'rationale')
-    assert reading['status'] == 'not_found' and reading['value'] is None, reading
-    finding = next(f for f in session['findings'] if f['field'] == 'rationale')
-    assert finding['status'] == 'not_found'
-    assert {p['file'] for p in finding['pointers']} == {'official-blank-draft.pdf', 'supplied-rationale.pdf'}
-    assert any(p['file'] == 'supplied-rationale.pdf' and p['quote'] == rationale for p in finding['pointers'])
-    assert any(p['file'] == 'official-blank-draft.pdf' and 'No answer has been supplied by Batatis.' in p['quote']
-               for p in finding['pointers'])
-    item = next(i for i in session['information_request']['items'] if i['field'] == 'rationale')
-    assert item['officer_check'] and not item['included']
-    assert item['text'] not in session['information_request']['text']
-    # Once only the supplied passage remains, no rationale request survives the re-upload.
     reupload = route if linked else f'/package-review/{session["package_id"]}'
-    supplied = [upload for upload in uploads if upload[0] == 'supplied-rationale.pdf']
-    resolved = clients['reviewer'].post(reupload, files=multipart(supplied))
+    resolved = clients['reviewer'].post(reupload, files=multipart(uploads))
     assert resolved.status_code == 201, resolved.text
-    assert next(f for f in resolved.json()['fields'] if f['field'] == 'rationale')['value'] == rationale
+    reading = next(f for f in resolved.json()['fields'] if f['field'] == 'rationale')
+    assert reading['status'] == 'present' and reading['value'] == rationale, reading
+    assert reading['pointer']['file'] == 'supplied-rationale.pdf'
+    assert not any(f['field'] == 'rationale' for f in resolved.json()['findings'])
     assert not any(i['field'] == 'rationale' for i in resolved.json()['information_request']['items'])
     assert store.get(case.id).model_dump(mode='json') == before
     store.delete(case.id)
@@ -412,10 +410,8 @@ def test_official_blank_draft_retains_graphics_and_page_uncertainty(
     assert reading['status'] == finding['status'] == 'not_found', reading
     assert reading['value'] is None
     assert [(p['page'], p['quote']) for p in finding['pointers'] if p['file'] == 'supplement.pdf'] == expected_sources
-    appendix_page = int(PdfReader(io.BytesIO(exported.content)).metadata['/BatatisFormPages']) + 1
-    assert any(p['file'] == 'official-blank-draft.pdf' and p['page'] == appendix_page
-               and p['quote'] == '(Not provided or not confirmed. No answer has been supplied by Batatis.)'
-               for p in finding['pointers'])
+    # The draft prints no rationale placeholder, so it adds no passage of its own to compare.
+    assert not any(p['file'] == 'official-blank-draft.pdf' for p in finding['pointers'])
     assert next(f for f in session['files'] if f['name'] == 'supplement.pdf')['sha256'] == hashlib.sha256(data).hexdigest()
     item = next(i for i in session['information_request']['items'] if i['field'] == 'rationale')
     assert item['officer_check'] and not item['included']
