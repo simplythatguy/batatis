@@ -1,0 +1,197 @@
+{
+  "research_id": "accuracy95-calgary-more",
+  "search_date_utc": "2026-10-25",
+  "scope": "Independent Calgary source search focused on school-board/facility preplanning or project code-analysis documents and City of Calgary adaptive-reuse technical reports. No broad SPV/SCC/PAB harvesting.",
+  "constraints_observed": [
+    "No OpenAI API",
+    "No contact or payments",
+    "No synthetic facts or attachments",
+    "No evaluator prompts",
+    "No delegation"
+  ],
+  "inventory_snapshot": {
+    "source": "Data Prompts/index.json",
+    "calgary_prompts": 17,
+    "calgary_source_groups": 12
+  },
+  "prior_accuracy95_sweep": {
+    "source": "docs/research/accuracy95/new-sources.json",
+    "focused_search_queries": 26,
+    "calgary_prompts": 17,
+    "calgary_source_groups": 12,
+    "new_local_group": "Edmonton Catholic School Division Griesbach and Chambery preplanning report",
+    "new_calgary_groups": 0
+  },
+  "dedupe": {
+    "source_catalogue_rows": 4147,
+    "exact_url_matches_for_current_near_misses": 0,
+    "exact_sha256_matches": null,
+    "project_name_matches_in_index_for_current_near_misses": 0,
+    "note": "Project names and source URL/path strings were checked against the full prompt index and source catalogue. SHA-256 comparison was not possible because no original project bytes were retrieved.",
+    "sha256_match_status": "not_computable_no_original_bytes"
+  },
+  "search": {
+    "query_count": 20,
+    "queries": [
+      "site:cbe.ab.ca Calgary school \"pre-planning\" \"building code\" report PDF",
+      "site:cbe.ab.ca Calgary school \"code analysis\" PDF",
+      "site:cssd.ab.ca Calgary school \"pre-planning\" code analysis PDF",
+      "site:alberta.ca Calgary school project \"building code analysis\" pre-design PDF",
+      "site:calgary.ca \"adaptive reuse\" \"code analysis\" Calgary filetype:pdf building",
+      "site:calgary.ca \"building code analysis\" heritage facility Calgary technical report",
+      "site:calgary.ca \"code analysis\" \"adaptive reuse\" Calgary heritage feasibility report",
+      "site:calgary.ca Calgary municipal building \"building code review\" reuse report",
+      "site:cbe.ab.ca/schools/building-and-modernizing-schools/Documents \"BUILDING CODE ANALYSIS\" Calgary school PDF",
+      "site:cbe.ab.ca/schools/building-and-modernizing-schools/Documents \"PRE-DESIGN\" school Calgary PDF report",
+      "site:cssd.ab.ca \"building code analysis\" school Calgary PDF project",
+      "site:cssd.ab.ca \"pre-planning\" school Calgary report PDF project",
+      "\"John G. Diefenbaker School\" Calgary \"Pre-Design Report\" PDF",
+      "\"John G. Diefenbaker\" \"building code analysis\" Calgary PDF",
+      "\"Louise Dean Centre\" Calgary \"building code analysis\" PDF",
+      "\"Evanston Middle School\" Alberta Infrastructure \"building code\" PDF Calgary",
+      "site:calgary.ca/content/dam \"adaptive reuse\" \"technical feasibility\" Calgary building City",
+      "City of Calgary \"adaptive reuse\" \"code\" \"report\" building project feasibility",
+      "City of Calgary heritage building \"reuse options\" feasibility report PDF",
+      "Calgary City owned historic building \"building code analysis\" report adaptive reuse PDF"
+    ],
+    "primary_source_domains_targeted": [
+      "cbe.ab.ca",
+      "cssd.ab.ca",
+      "alberta.ca",
+      "infrastructure.alberta.ca",
+      "calgary.ca",
+      "pub-calgary.escribemeetings.com"
+    ]
+  },
+  "counts": {
+    "eligible_new_calgary_source_groups": 0,
+    "eligible_new_calgary_projects": 0,
+    "eligible_originals_downloaded": 0,
+    "original_bytes_sha256_recorded": 0,
+    "original_pages_verified": 0,
+    "existing_duplicate_source_groups_identified": 0,
+    "direct_source_fetches": {
+      "403": 1,
+      "404": 1
+    },
+    "newly_blocked_since_prior_sweeps": "Unknown: the saved prior sweep reports aggregate Calgary eScribe 403 counts but does not retain a URL-level block list; this pass observed one 403 eScribe URL not in the source catalogue."
+  },
+  "eligible_candidates": [],
+  "near_misses_and_leads": [
+    {
+      "id": "N01",
+      "project": "Springbank Hill School",
+      "source_type": "Calgary Board of Education project drawing index / one-page sheet",
+      "requested_url": "https://www.cbe.ab.ca/schools/building-and-modernizing-schools/Documents/Springbank-Hill-School-Elevation.pdf",
+      "final_url": "https://www.cbe.ab.ca/schools/building-and-modernizing-schools/Documents/Springbank-Hill-School-Elevation.pdf",
+      "first_party_project_publisher": true,
+      "explicit_locality": "Calgary, Alberta; 7652 26 Ave SW stated in the web-indexed PDF text",
+      "web_index_observation": {
+        "content_type": "application/pdf",
+        "web_reader_page_count": 1,
+        "pdf_page_locator": 1,
+        "supports": [
+          "Project title, project number 2015-001, street address, Calgary Board of Education owner, issued for tender March 11, 2016",
+          "Drawing list includes sheet A0.01 titled Building Code Analysis, Legends and Assembly Schedules"
+        ]
+      },
+      "direct_fetch": {
+        "method": "GET",
+        "http_status": 404,
+        "final_url": "https://www.cbe.ab.ca/schools/building-and-modernizing-schools/Documents/Springbank-Hill-School-Elevation.pdf",
+        "content_type": "text/html; charset=utf-8",
+        "response_body_bytes": 108205,
+        "original_document_bytes": 0,
+        "head_attempt": {
+          "http_status": 404,
+          "server_date_utc": "2026-10-25T19:06:05Z"
+        }
+      },
+      "classification": "excluded_not_substantive_code_analysis",
+      "reason": "The web-indexed one-page file contains a title/drawing index only. A0.01 is listed but its code-analysis content is not attached. The current direct URL returns 404, so there are no original bytes to inspect or hash.",
+      "reuse_or_redistribution_permission_verified": false
+    },
+    {
+      "id": "N02",
+      "project": "Foothills Athletic Centre and Fieldhouse (project naming visible in indexed attachment text)",
+      "source_type": "City of Calgary eScribe project/program report attachment with a building-code-analysis appendix indicated in the indexed contents",
+      "requested_url": "https://pub-calgary.escribemeetings.com/filestream.ashx?DocumentId=93287",
+      "final_url": "https://pub-calgary.escribemeetings.com/filestream.ashx?DocumentId=93287",
+      "first_party_project_publisher": true,
+      "explicit_locality": null,
+      "indexed_report_title": "FRA2019-0628 Program Overview and Update ATT 3",
+      "indexed_evidence_locators": [
+        {
+          "locator": "Appendix K, printed page 319, Building Code Analysis",
+          "locator_status": "search-index locator; not verified in downloaded source bytes"
+        },
+        {
+          "locator": "Appendices include site/building diagrams, systems descriptions, soils report, space programme, risks, preliminary LEED scorecard, outline specifications, and building code analysis",
+          "locator_status": "search-index contents only"
+        }
+      ],
+      "direct_fetch": {
+        "method": "GET",
+        "http_status": 403,
+        "final_url": "https://pub-calgary.escribemeetings.com/filestream.ashx?DocumentId=93287",
+        "content_type": "text/html; charset=UTF-8",
+        "response_body_bytes": 307665,
+        "original_document_bytes": 0,
+        "response_identified_as": "Cloudflare challenge page",
+        "head_attempt": {
+          "http_status": 403,
+          "server_date_utc": "2026-10-25T19:08:35Z"
+        }
+      },
+      "classification": "blocked_potential_facility_code_analysis_not_verified_as_adaptive_reuse",
+      "reason": "The official search-indexed attachment appears to contain a project-level building-code-analysis appendix, but original bytes could not be downloaded. The visible project naming does not establish that this is an adaptive-reuse project. Do not count it as a verified case or independent source group.",
+      "reuse_or_redistribution_permission_verified": false,
+      "locality_basis": "The indexed text names Foothills Athletic Centre and Fieldhouse and includes City of Calgary Recreation context, but the site address or an explicit project-city statement is not verified in original bytes; publisher location is not used to infer locality."
+    },
+    {
+      "id": "N03",
+      "project": "John G. Diefenbaker School modernization",
+      "source_type": "CBE school construction status report; follow-up lead to Alberta Infrastructure pre-design report",
+      "requested_url": "https://www.cbe.ab.ca/schools/building-and-modernizing-schools/Documents/Construction-Projects-Status-Report-June-24-2025.pdf",
+      "final_url": "not fetched; discovered through official CBE search result",
+      "first_party_project_publisher": true,
+      "explicit_locality": null,
+      "evidence_locator": "Search-index text for the CBE report identifies a pre-design report completed December 2023 and says the project is managed by Alberta Infrastructure. The actual pre-design report was not linked in the result.",
+      "classification": "follow_up_lead_not_project_attachment",
+      "reason": "The status report is not a project-specific technical report and does not provide the pre-design report or code analysis itself.",
+      "reuse_or_redistribution_permission_verified": false,
+      "locality_basis": "The inspected search-index text contains the school name and CBE context but no project street address or explicit city; locality is not inferred from the board publisher."
+    },
+    {
+      "id": "N04",
+      "project": "Downtown Calgary adaptive-reuse incentive program (not a building-specific project)",
+      "source_type": "City committee/program update",
+      "requested_url": "https://pub-calgary.escribemeetings.com/filestream.ashx?DocumentId=298938",
+      "first_party_project_publisher": true,
+      "evidence_locator": "Search-indexed City report discusses conversions and adaptive reuse at a program level; no project-specific code report or building attachment surfaced.",
+      "classification": "excluded_policy_report",
+      "reason": "Policy/program-level material does not document an individual Calgary building project or its technical code analysis."
+    },
+    {
+      "id": "N05",
+      "project": "Calgary cultural-space adaptive reuse (sector-wide)",
+      "source_type": "Calgary Arts Development strategic report",
+      "requested_url": "https://calgaryartsdevelopment.com/wp-content/uploads/2025/06/20250602-Final-Strategic-Update-Full-Report.pdf",
+      "first_party_project_publisher": false,
+      "evidence_locator": "Search result describes city-owned spaces at a sector/program level, not a project-level technical report.",
+      "classification": "excluded_not_first_party_project_report",
+      "reason": "The document is a third-party strategic report and does not provide a specific building-level code/evidence package."
+    }
+  ],
+  "provenance_limits": [
+    "No qualifying original document bytes were obtained, so there are no original-file byte counts, SHA-256 hashes, verified page counts, or locally verified technical-page locators.",
+    "Do not infer code compliance, safety, permit status, alternative-solution approval, or City acceptance from planning/design studies or search snippets.",
+    "No redistribution permission was verified.",
+    "The previous sweep stores only aggregate prior Calgary eScribe 403 counts, so URL-level novelty of the 403 response cannot be established."
+  ],
+  "writes": {
+    "directory": "Data Prompts/_research/accuracy95-calgary-more/",
+    "originals_saved": 0,
+    "evaluator_prompts_created": 0
+  }
+}

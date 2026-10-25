@@ -189,7 +189,8 @@ def main():
         has_non_outcome = any(a.get("role") != "outcome_reference" for a in case["attachments"])
         for i, item in enumerate(case["attachments"], 1):
             source = Path(item["path"])
-            default_input = item.get("role") != "outcome_reference" or not has_non_outcome
+            default_input = item.get("included_in_default_input",
+                                     item.get("role") != "outcome_reference" or not has_non_outcome)
             target_dir = folder if default_input else folder / "_evaluation"
             target_dir.mkdir(exist_ok=True)
             target = target_dir / source.name

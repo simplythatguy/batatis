@@ -39,9 +39,7 @@
       "sha256": "c396d5160f32b3833e38af102b865f08d4bc2b3289740dc937248dd41242de6e",
       "role": "input",
       "bytes": 1148114,
-      "filename": "KHA-typical-floor-plan-c396d5160f32.jpg",
       "included_in_default_input": true,
-      "original_collection_path": "_research/workers/L14/files/KHA-typical-floor-plan-c396d5160f32.jpg",
       "download_receipt": {
         "retrieved_at": "2026-10-25T01:51:29.817629+00:00",
         "http_status": "200",
@@ -49,16 +47,16 @@
         "content_type": "image/jpeg",
         "kind": "image",
         "status": "downloaded"
-      }
+      },
+      "filename": "KHA-typical-floor-plan-c396d5160f32.jpg",
+      "original_collection_path": "_research/workers/L14/files/KHA-typical-floor-plan-c396d5160f32.jpg"
     },
     {
       "url": "https://singlestair.ca/KHA",
       "sha256": "9d648e601877ce7b38f25cbe1baebb56ee7981ff0cfcec517425830e2f20c79f",
       "role": "outcome_reference",
       "bytes": 169974,
-      "filename": "_evaluation/singlestair-kha-9d648e601877.html",
       "included_in_default_input": false,
-      "original_collection_path": "_research/workers/L14/files/singlestair-kha-9d648e601877.html",
       "download_receipt": {
         "retrieved_at": "2026-10-25T01:17:32.155860+00:00",
         "http_status": "200",
@@ -71,7 +69,9 @@
         "filename": "_evaluation/attachment-2-source-text.txt",
         "sha256": "6d1c87cf0a24ba82aabd9c3de91b578d52d03117cf49e1e87456d986c6b15367",
         "operation": "HTML text extraction; no facts authored"
-      }
+      },
+      "filename": "_evaluation/singlestair-kha-9d648e601877.html",
+      "original_collection_path": "_research/workers/L14/files/singlestair-kha-9d648e601877.html"
     },
     {
       "url": "https://freight.cargo.site/t/original/i/1ff09e836cdfcbc74b8e6aa84a88947e60a41a5554441ae4bfea33fca9efba79/KHA_Long-section.jpg",
@@ -80,9 +80,7 @@
       "bytes": 2352301,
       "document_type": "image",
       "role": "input",
-      "filename": "kha-long-section-drawing-75b2b8c6b87a.jpg",
       "included_in_default_input": true,
-      "original_collection_path": "_research/workers/A10/files/kha-long-section-drawing-75b2b8c6b87a.jpg",
       "download_receipt": {
         "retrieved_at": "2026-10-25T02:14:24.320731+00:00",
         "http_status": "200",
@@ -90,7 +88,9 @@
         "content_type": "image/jpeg",
         "kind": "image",
         "status": "downloaded"
-      }
+      },
+      "filename": "kha-long-section-drawing-75b2b8c6b87a.jpg",
+      "original_collection_path": "_research/workers/A10/files/kha-long-section-drawing-75b2b8c6b87a.jpg"
     },
     {
       "url": "https://freight.cargo.site/t/original/i/5f4d62444a3775f01786e928d3e06d5ef8f9d67178ead6b917d589a943c9a56a/KHA_Plan-01_Ground-Floor.jpg",
@@ -99,9 +99,7 @@
       "bytes": 1221776,
       "document_type": "image",
       "role": "input",
-      "filename": "kha-plan-01-ground-floor-8c4eaef8913c.jpg",
       "included_in_default_input": true,
-      "original_collection_path": "_research/workers/A10/files/kha-plan-01-ground-floor-8c4eaef8913c.jpg",
       "download_receipt": {
         "retrieved_at": "2026-10-25T02:14:25.568485+00:00",
         "http_status": "200",
@@ -109,7 +107,9 @@
         "content_type": "image/jpeg",
         "kind": "image",
         "status": "downloaded"
-      }
+      },
+      "filename": "kha-plan-01-ground-floor-8c4eaef8913c.jpg",
+      "original_collection_path": "_research/workers/A10/files/kha-plan-01-ground-floor-8c4eaef8913c.jpg"
     }
   ],
   "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",

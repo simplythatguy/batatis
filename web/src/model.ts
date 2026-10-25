@@ -465,7 +465,7 @@ export type Action =
   /** Derived: an intake run's facts (unconfirmed, renamed for the browser) and its record. */
   | { type: "noteIntake"; result: IntakeResult; text: string }
   /** Derived: a saved case reopened; its stored intake run without adding facts (the case has its latest). */
-  | { type: "restoreIntake"; result: IntakeResult; text: string }
+  | { type: "restoreIntake"; result: IntakeResult; text: string | null }
   /** Derived: officer requests change without an applicant fact edit. */
   | { type: "restoreReviewQuestions"; questions: Case["questions"] }
   /** Derived: a newer intake record (plan after an answer, an override or code identification). */
@@ -637,7 +637,8 @@ export function reducer(c: Case, a: Action): Case {
     case "setDescription":
       return applyDescription(c, a.text);
     case "addFiles":
-      return { ...c, files: [...c.files, ...a.files.map((f) => ({ id: f.id, name: f.name, read: false }))] };
+      return { ...c, files: [...c.files, ...a.files.map((f) => ({ id: f.id, name: f.name, read: false }))],
+        intake: c.intake && a.files.length ? { ...c.intake, filesChanged: true } : c.intake };
     case "setFileResult":
       return {
         ...c,
@@ -656,7 +657,8 @@ export function reducer(c: Case, a: Action): Case {
         ),
       };
     case "removeFile":
-      return { ...c, files: c.files.filter((f) => f.id !== a.id) };
+      return { ...c, files: c.files.filter((f) => f.id !== a.id),
+        intake: c.intake && c.files.some((f) => f.id === a.id) ? { ...c.intake, filesChanged: true } : c.intake };
     case "confirmFact":
       return reducer(c, { type: "confirmFacts", ids: [a.id] });
     case "dismissFact":

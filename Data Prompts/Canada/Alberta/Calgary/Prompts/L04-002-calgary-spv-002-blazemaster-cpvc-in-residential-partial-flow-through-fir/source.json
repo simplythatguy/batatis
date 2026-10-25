@@ -46,11 +46,9 @@
     {
       "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/variance-blazemaster-chlorinated-polyviychloride-pipe-spv-002.pdf",
       "sha256": "dc80a2c63927fba8cb134de950b9a3cc599a2b636c1ce75588b082f82552b95f",
-      "role": "outcome_reference",
+      "role": "published_standing_reference",
       "bytes": 104608,
-      "filename": "_evaluation/calgary-spv-002-blazemaster-2018-dc80a2c63927.pdf",
-      "included_in_default_input": false,
-      "original_collection_path": "_research/workers/L04/files/calgary-spv-002-blazemaster-2018-dc80a2c63927.pdf",
+      "included_in_default_input": true,
       "download_receipt": {
         "retrieved_at": "2026-10-25T01:17:14.898080+00:00",
         "http_status": "200",
@@ -58,16 +56,16 @@
         "content_type": "application/pdf",
         "kind": "pdf",
         "status": "downloaded"
-      }
+      },
+      "filename": "calgary-spv-002-blazemaster-2018-dc80a2c63927.pdf",
+      "original_collection_path": "_research/workers/L04/files/calgary-spv-002-blazemaster-2018-dc80a2c63927.pdf"
     },
     {
       "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-014-new-products-materials-and-systems-in-building-construction.pdf",
       "sha256": "eab7e795172816bc47744288e5bad17a4867c2b79cf4ba37b87cd9eee9a02017",
       "role": "supporting_evidence",
       "bytes": 206601,
-      "filename": "calgary-advisory-b23-014-products-eab7e7951728.pdf",
       "included_in_default_input": true,
-      "original_collection_path": "_research/workers/L04/files/calgary-advisory-b23-014-products-eab7e7951728.pdf",
       "download_receipt": {
         "retrieved_at": "2026-10-25T01:22:36.160271+00:00",
         "http_status": "200",
@@ -75,16 +73,16 @@
         "content_type": "application/pdf",
         "kind": "pdf",
         "status": "downloaded"
-      }
+      },
+      "filename": "calgary-advisory-b23-014-products-eab7e7951728.pdf",
+      "original_collection_path": "_research/workers/L04/files/calgary-advisory-b23-014-products-eab7e7951728.pdf"
     },
     {
       "url": "https://www.calgary.ca/content/dam/www/tools-and-resources/guide-to-applying-for-an-alternative-solution.pdf",
       "sha256": "bbb0628b7b5f13499a4688089bc09484b67865ef283709d40701d823825b1399",
       "role": "supporting_evidence",
       "bytes": 172757,
-      "filename": "calgary-alternative-solution-guide-package-link-bbb0628b7b5f.pdf",
       "included_in_default_input": true,
-      "original_collection_path": "_research/workers/L04/files/calgary-alternative-solution-guide-package-link-bbb0628b7b5f.pdf",
       "download_receipt": {
         "retrieved_at": "2026-10-25T01:17:14.896815+00:00",
         "http_status": "200",
@@ -92,7 +90,9 @@
         "content_type": "application/pdf",
         "kind": "pdf",
         "status": "downloaded"
-      }
+      },
+      "filename": "calgary-alternative-solution-guide-package-link-bbb0628b7b5f.pdf",
+      "original_collection_path": "_research/workers/L04/files/calgary-alternative-solution-guide-package-link-bbb0628b7b5f.pdf"
     }
   ],
   "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",

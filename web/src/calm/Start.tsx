@@ -103,7 +103,7 @@ export function Start() {
     if (blocked) return;
     if (inCase) {
       // Explicit action: read the edited description (and any new PDF) again, then continue.
-      const changed = c.intake?.text !== c.description.trim() || session.held.length > 0;
+      const changed = c.intake?.text !== c.description.trim() || c.intake?.filesChanged || session.held.length > 0;
       if (changed) void readDescription();
       location.hash = "#/questions";
       return;

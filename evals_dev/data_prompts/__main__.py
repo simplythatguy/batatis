@@ -245,7 +245,7 @@ def _judge_case(case, result, codes, model, effort):
                    judge_unknown_cost_attempts=spent['unknown_cost_attempts'])
         return row
     invalid = {'unverified', 'missing_verdict', 'duplicate_verdict', 'invalid_verdict', 'invalid_payload',
-               'invalid_ids', 'old-validator'}
+               'invalid_ids', 'old-validator', 'cache_request_mismatch'}
     rows = [{'id': v.id, 'kind': v.kind, 'passed': v.passed, 'scored': v.note not in invalid,
              'note': v.note, 'evidence': v.evidence} for v in verdicts]
     rows += [{'id': f'A:{a}', 'kind': 'A', 'passed': ok, 'scored': True, 'note': '', 'evidence': ''}
