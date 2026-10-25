@@ -113,9 +113,9 @@ The content harness bypasses the hosted upload limit and does not verify authent
 
 ## Verification at lock-in
 
-The final `scripts/verify.sh` run passed its selected checks: **3,501 engine tests passed, 607 prerequisite-dependent tests skipped**, and web typechecking, unit checks and production build passed. The separate accounting/evaluation harness suite passed **91 tests**. The optional secrets scan did not run because `gitleaks` is not installed.
+The integrated workflow passed **3,581 tests across the engine, CodeDB and evaluation tools, with 607 prerequisite-dependent tests skipped** (`scripts/verify.sh --engine`). Web typechecking, unit checks, unwrap checks and production build passed on the identical integrated implementation. The separate accounting/evaluation harness suite passed **91 tests**. The optional secrets scan did not run because `gitleaks` is not installed.
 
-Independent scoped review found no additional actionable findings, with 388 focused offline tests and 16 synthetic checks. The later provider-fixture corrections were verified by the complete local run. This is nonvisual engine/tooling verification with simulated provider responses; it is not fresh model accuracy, a browser journey, a real-provider acceptance test or production approval.
+Independent scoped review found no additional actionable findings, with 388 focused offline tests and 16 synthetic checks. The later provider-fixture corrections were verified by the complete local run. Integration with main `8e1a497f` also passed an independent 30-check review with no additional findings. The shared PDFium lock covers the new review reader, and main’s issued/withdrawn-question behavior is retained. Ignored reference assets were restored locally before the final engine run; they are not published. This is nonvisual engine/tooling verification with simulated provider responses; it is not fresh model accuracy, a browser journey, a real-provider acceptance test or production approval.
 
 ## What to test or improve next
 
