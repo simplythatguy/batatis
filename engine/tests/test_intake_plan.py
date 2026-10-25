@@ -10,7 +10,6 @@ from __future__ import annotations
 import json
 import re
 import shutil
-import socket
 import subprocess
 from pathlib import Path
 
@@ -29,6 +28,7 @@ from engine.models import Case, Jurisdiction
 from engine.models_intake import IntakeRecord
 from engine.models_identify import ArticleDecision, BenchmarkRecord, IdentifyArticle, IdentifyResult, IdentifyTrace
 from engine.store import CaseStore
+from engine.tests._network_guard import block_network
 
 ROOT = Path(__file__).resolve().parents[2]
 BOUNDARY = ROOT / 'evals_dev' / 'boundary'
@@ -468,7 +468,7 @@ def http(tmp_path):
 def test_plan_routes_round_trip_offline(http, monkeypatch):
     def blocked(*args, **kwargs):
         raise AssertionError('network call attempted')
-    monkeypatch.setattr(socket.socket, 'connect', blocked)
+    block_network(monkeypatch, message='network call attempted')
     monkeypatch.setattr('httpx.Client.send', blocked)
     case_id = http.post('/cases', json={}).json()['id']
     body = http.post(f'/cases/{case_id}/intake', json={'text': 'Our client wants a single staircase instead of two.'}).json()

@@ -85,12 +85,12 @@ def main(argv: list[str] | None = None) -> int:
     a = ap.parse_args(argv)
     text = render()
     if a.check:
-        if not a.out.exists() or a.out.read_text() != text:
+        if not a.out.exists() or a.out.read_text(encoding='utf-8') != text:
             print(f'{a.out} is stale: run python -m engine.schema_export', file=sys.stderr)
             return 1
         return 0
     a.out.parent.mkdir(parents=True, exist_ok=True)
-    a.out.write_text(text)
+    a.out.write_text(text, encoding='utf-8')
     print(f'wrote {a.out}')
     return 0
 

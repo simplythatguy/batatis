@@ -99,7 +99,11 @@ def test_model_mismatch_never_becomes_an_active_pinned_session(transport, stage,
 
 @pytest.mark.parametrize('raw', ['not-json', '[]', '{}', '{"type":123}',
                                 '{"type":"error","message":"synthetic-server-secret PRIVATE"}',
-                                b'\0\0', '{"type":"unknown","data":"' + 'x' * 256_000 + '"}'])
+                                b'\0\0',
+                                # Short id: pytest writes the node id into PYTEST_CURRENT_TEST,
+                                # and Windows caps an environment variable at 32,767 characters.
+                                pytest.param('{"type":"unknown","data":"' + 'x' * 256_000 + '"}',
+                                             id='oversized-unknown-event')])
 def test_malformed_or_error_events_are_sanitized_and_never_returned(transport, raw):
     socket, _ = transport
     socket.events = [raw]

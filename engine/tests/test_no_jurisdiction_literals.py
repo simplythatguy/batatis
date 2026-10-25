@@ -26,7 +26,7 @@ def _code_files(engine: Path):
 def offending_lines(engine: Path = ENGINE) -> list[str]:
     found = []
     for path, rel in _code_files(engine):
-        for number, line in enumerate(path.read_text().splitlines(), start=1):
+        for number, line in enumerate(path.read_text(encoding='utf-8').splitlines(), start=1):
             if LITERAL.search(line) and (str(rel), line.strip()) not in ALLOWED:
                 found.append(f'engine/{rel}:{number}: {line.strip()}')
     return found

@@ -4,7 +4,6 @@ from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 import json
 import os
-import socket
 import ssl
 import threading
 import time
@@ -19,6 +18,7 @@ from engine.identify.commit import load_policy
 from engine.identify.config import ConfigError, load_config
 from engine.identify.screen import ELEPHANT_MODEL, GOVERN, Judge
 from engine.relevance import scoring_bands
+from engine.tests._network_guard import block_network
 
 STATE = {'proposal': 'SYNTHETIC: a blue square.'}
 QUESTIONS = {
@@ -38,7 +38,7 @@ def offline(monkeypatch):
     monkeypatch.setenv('BATATIS_LIVE', '0')
     monkeypatch.setenv('BATATIS_LIVE_ELEPHANT', '1')
     monkeypatch.setenv('OPENROUTER_API_KEY', 'synthetic-only-key')
-    monkeypatch.setattr(socket.socket, 'connect', lambda *_: pytest.fail('unexpected network'))
+    block_network(monkeypatch)
     llm_gate.reset_for_tests()
     yield
     llm_gate.reset_for_tests()
@@ -225,6 +225,22 @@ def test_total_deadline_cancels_and_cleans_up_request(monkeypatch, kind):
     with pytest.raises(runtime.ElephantError, match='timeout'):
         ask()(STATE, QUESTIONS, 0.1)
     assert len(sent) == 1 and events == ([] if kind == 'validation' else ['closed'])
+
+
+def test_tls_setup_exhausting_deadline_never_dispatches(monkeypatch):
+    context = runtime._tls_context()
+    initialized = []
+    def slow_context():
+        initialized.append(True)
+        time.sleep(0.15)
+        return context
+    monkeypatch.setattr(runtime, '_tls_context', slow_context)
+    sent, _, _ = wire(monkeypatch, lambda _: httpx.Response(200, json=reply()))
+    with pytest.raises(runtime.ElephantError, match='timeout') as caught:
+        ask()(STATE, QUESTIONS, 0.1)
+    assert initialized == [True]
+    assert sent == []
+    assert caught.value.dispatched is False
 
 
 def test_verified_tls_ignores_shared_ca_overrides_and_version_drift_fails_locally(monkeypatch):

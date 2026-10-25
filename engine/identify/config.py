@@ -160,7 +160,7 @@ def load_config(path: Path | str | None = None, env: dict | None = None) -> Iden
     source = Path(path) if path else (Path(env['BATATIS_IDENTIFY_CONFIG']) if env.get('BATATIS_IDENTIFY_CONFIG')
                                       else PIPELINE_FILE)
     if source.is_file():
-        data = json.loads(source.read_text())
+        data = json.loads(source.read_text(encoding='utf-8'))
         unknown = set(data) - names - {'comment', 'chosen_by', 'chosen_at'}
         if unknown:
             raise ConfigError(f'unknown identify config keys: {", ".join(sorted(unknown))}')

@@ -71,7 +71,7 @@ def spot_check(seed=20261018):
             'sample_size':len(checks),'mismatches':mismatch,'mismatch_pct':round(100*mismatch/len(checks),2),
             'checks':checks,'source_page_output_sha256':{str(k):hashlib.sha256(v.encode()).hexdigest() for k,v in sorted(cache.items())}}
     out=BUILD_DIR/'spot-check.json'
-    out.write_text(json.dumps(result,indent=2)+'\n')
+    out.write_text(json.dumps(result,indent=2)+'\n', encoding='utf-8')
     print(f'{len(checks)} source checks; {mismatch} mismatches ({result["mismatch_pct"]}%); {out}')
     return result
 

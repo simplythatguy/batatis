@@ -24,6 +24,7 @@ from engine.identify.providers import Transports, transports
 from engine.identify.verify import ClaudeVerifier, normalize
 from engine.models import Case, Fact, Source
 from engine.store import CaseStore
+from engine.tests._network_guard import block_network
 
 REPO = Path(__file__).resolve().parents[2]
 DEV_CASES = sorted((REPO / 'evals_dev' / 'cases').glob('dev-*.json'))
@@ -530,13 +531,11 @@ def no_network(monkeypatch):
     """Any socket connect or real HTTP request fails the test."""
     import socket
     import httpx
-    calls = []
+    calls = block_network(monkeypatch, message='network call in offline mode')
 
     def refuse(*args, **kwargs):
         calls.append(args[:2])
         raise AssertionError('network call in offline mode')
-    monkeypatch.setattr(socket.socket, 'connect', refuse)
-    monkeypatch.setattr(socket.socket, 'connect_ex', refuse)
     monkeypatch.setattr(socket, 'create_connection', refuse)
     monkeypatch.setattr(httpx.HTTPTransport, 'handle_request', refuse)
     monkeypatch.setattr(httpx.AsyncHTTPTransport, 'handle_async_request', refuse)

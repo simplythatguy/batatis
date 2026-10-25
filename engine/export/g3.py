@@ -73,7 +73,7 @@ def citation_report(result: ExportResult, *, db_path=None) -> dict:
     from codedb import validate
     with tempfile.TemporaryDirectory() as tmp:
         path = Path(tmp) / 'export.md'
-        path.write_text('\n\n'.join(result.text) + '\n')
+        path.write_text('\n\n'.join(result.text) + '\n', encoding='utf-8')
         report = validate([path], db_path=db_path)
     return report
 

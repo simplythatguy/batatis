@@ -82,7 +82,7 @@ def load_sources(root: Path = ROOT) -> list[dict]:
     manifest = root / 'codedb' / 'source_manifest.json'
     if not manifest.is_file():
         return [dict(item) for item in DEFAULTS]
-    data = json.loads(manifest.read_text())
+    data = json.loads(manifest.read_text(encoding='utf-8'))
     items = []
     for key, env in (('nbc_ae', 'CODEDB_PDF_URL'), ('intent', 'CODEDB_INTENT_PDF_URL')):
         if key not in data:
@@ -160,7 +160,9 @@ def extract_jsonl(pdf: Path, dest: Path, expect_sha: str | None) -> None:
     reader = PdfReader(str(pdf))
     dest.parent.mkdir(parents=True, exist_ok=True)
     partial = dest.with_suffix(dest.suffix + '.partial')
-    with partial.open('w', encoding='utf8') as handle:
+    # newline='\n' keeps the pinned sha256 reproducible: Windows would otherwise
+    # translate LF to CRLF and the page extract could never match its digest.
+    with partial.open('w', encoding='utf8', newline='\n') as handle:
         for number, page in enumerate(reader.pages, 1):
             # Same line as tools/extract_text.py. The pinned sha256 is of that file.
             handle.write(json.dumps({'doc': pdf.stem, 'page': number, 'text': page.extract_text() or ''}) + '\n')

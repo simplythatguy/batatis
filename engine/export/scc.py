@@ -112,7 +112,7 @@ def form_path(version: str = CURRENT_MAP) -> Path:
 
 
 def load_field_map(version: str = CURRENT_MAP) -> dict:
-    return json.loads((MAP_DIR / f'{version}.json').read_text())
+    return json.loads((MAP_DIR / f'{version}.json').read_text(encoding='utf-8'))
 
 
 def load_form(path: Path | str | None, fmap: dict) -> bytes:

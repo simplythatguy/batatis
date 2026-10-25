@@ -78,7 +78,7 @@ def is_pdf(data: bytes) -> bool:
 
 
 def _scc_fields() -> set[str]:
-    data = json.loads(SCC_MAP.read_text())
+    data = json.loads(SCC_MAP.read_text(encoding='utf-8'))
     return set(data['text_fields']) | set(data['checkboxes'])
 
 

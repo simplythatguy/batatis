@@ -77,7 +77,7 @@ def test_demo_cases_are_the_three_personas_and_exercise_na(exported):
 def test_codedb_validate_cli_reports_zero_errors(exported, tmp_path, name):
     _, result = exported[name]
     path = tmp_path / f'{name}.md'
-    path.write_text('\n\n'.join(result.text) + '\n')
+    path.write_text('\n\n'.join(result.text) + '\n', encoding='utf-8')
     run = subprocess.run([sys.executable, '-m', 'codedb', 'validate', str(path)], cwd=ROOT,
                          capture_output=True, text=True)
     assert run.returncode == 0, run.stdout + run.stderr

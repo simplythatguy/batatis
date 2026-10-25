@@ -123,7 +123,7 @@ def _crosswalks() -> tuple[dict, ...]:
     path = Path(__file__).resolve().parents[1] / 'research/precedents/index.json'
     if not path.exists():
         return ()
-    rows = json.loads(path.read_text())
+    rows = json.loads(path.read_text(encoding='utf-8'))
     return tuple(
         article for precedent in rows
         if re.search(r'\b(?:2014|2019)\b', precedent.get('code_edition', ''))

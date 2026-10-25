@@ -59,7 +59,7 @@ def build(keys=("NBC-AE",), log=print) -> dict:
     con.execute("INSERT INTO meta VALUES ('stats', ?)", (json.dumps(stats),))
     export(con)
     store.finalize(con)
-    (BUILD_DIR / "stats.json").write_text(json.dumps(stats, indent=2) + "\n")
+    (BUILD_DIR / "stats.json").write_text(json.dumps(stats, indent=2) + "\n", encoding='utf-8')
     log(f"wrote {store.DB_PATH}")
     return stats
 

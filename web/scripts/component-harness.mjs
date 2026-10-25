@@ -1,12 +1,17 @@
 /** Run a TSX component's hooks and inspect its JSX without a browser or network. */
 import { setImmediate } from "node:timers/promises";
+import { fileURLToPath } from "node:url";
 import vm from "node:vm";
 import { rolldown } from "rolldown";
 
 const compiled = new Map();
 async function compile(url) {
   if (!compiled.has(url.href)) compiled.set(url.href, (async () => {
-    const bundle = await rolldown({ input: url.pathname, external: (id) => id !== url.pathname, treeshake: false });
+    // fileURLToPath, not url.pathname: pathname keeps the leading slash and the
+    // percent-encoding, so it is not a usable path on Windows ("/C:/...") and not
+    // a usable path for a checkout whose folder name contains a space.
+    const file = fileURLToPath(url);
+    const bundle = await rolldown({ input: file, external: (id) => id !== file, treeshake: false });
     try { return (await bundle.generate({ format: "cjs" })).output[0].code; }
     finally { await bundle.close(); }
   })());
@@ -60,7 +65,7 @@ export async function componentHarness(url, name, modules, globals = {}) {
       return modules[id] ?? {};
     },
     ...globals,
-  }, { filename: url.pathname });
+  }, { filename: fileURLToPath(url) });
   function render() {
     cursor = 0; effects = []; dirty = false;
     tree = exports[name](props);
