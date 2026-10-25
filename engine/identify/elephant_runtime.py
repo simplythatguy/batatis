@@ -209,6 +209,7 @@ def _post_once(body: bytes, headers: dict, timeout: float) -> tuple[int, bytes]:
     import httpx
     import ssl
     attempted = False
+    started = time.monotonic()
     if httpcore.__version__ != '1.0.9':
         raise ElephantError('transport_version_unverified', dispatched=False)
     try:
@@ -218,15 +219,13 @@ def _post_once(body: bytes, headers: dict, timeout: float) -> tuple[int, bytes]:
     else:
         raise ElephantError('synchronous_ask_requires_worker_thread', dispatched=False)
 
-    # Building and checking the trust store is local, fixed work, so it happens
-    # before the clock starts: the deadline covers the request, not the CA parse.
+    # Reuse the trust store, but keep cold setup inside the caller's time budget.
     try:
         context = _tls_context()
     except Exception:
         raise ElephantError('transport_not_ready', dispatched=False) from None
     if context.verify_mode != ssl.CERT_REQUIRED or not context.check_hostname or not context.get_ca_certs():
         raise ElephantError('tls_not_ready', dispatched=False)
-    started = time.monotonic()
 
     async def post():
         nonlocal attempted
@@ -240,12 +239,15 @@ def _post_once(body: bytes, headers: dict, timeout: float) -> tuple[int, bytes]:
                 pending_tls = None
 
         try:
-            async with asyncio.timeout(timeout):
-                if time.monotonic() - started >= timeout:
-                    raise ElephantError('timeout', dispatched=False)
+            remaining = timeout - (time.monotonic() - started)
+            if remaining <= 0:
+                raise ElephantError('timeout', dispatched=False)
+            async with asyncio.timeout(remaining):
                 transport = httpx.AsyncHTTPTransport(verify=context, retries=0, trust_env=False)
                 async with httpx.AsyncClient(transport=transport, timeout=timeout, follow_redirects=False,
                                              trust_env=False) as http:
+                    if time.monotonic() - started >= timeout:
+                        raise ElephantError('timeout', dispatched=False)
                     attempted = True
                     async with http.stream('POST', ENDPOINT, content=body, headers=headers,
                                            extensions={'trace': trace}) as response:

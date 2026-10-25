@@ -233,6 +233,24 @@ def test_reply_after_entire_request_deadline_is_rejected(monkeypatch):
     assert llm_gate._memory.today() > 0
 
 
+def test_tls_setup_exhausting_deadline_never_dispatches(monkeypatch):
+    import httpx
+    context = jev_runtime._tls_context()
+    initialized = []
+    def slow_context():
+        initialized.append(True)
+        time.sleep(0.15)
+        return context
+    monkeypatch.setattr(jev_runtime, '_tls_context', slow_context)
+    requests, _ = wire(monkeypatch, lambda _: httpx.Response(200, json=response()))
+    with pytest.raises(JevResponseError, match='timeout') as caught:
+        metered_ask(jev_runtime.raw_ask())(STATE, QUESTIONS, 0.1)
+    assert initialized == [True]
+    assert requests == []
+    assert caught.value.dispatched is False
+    assert llm_gate._memory.today() == Decimal('0')
+
+
 def test_total_deadline_cancels_wait_for_headers_without_retry(monkeypatch):
     import asyncio
     import httpx

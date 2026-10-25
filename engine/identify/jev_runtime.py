@@ -124,6 +124,7 @@ def _post_once(body: bytes, headers: dict, timeout: float) -> tuple[int, bytes]:
     import ssl
     import time
     attempted = False
+    started = time.monotonic()
     if httpcore.__version__ != '1.0.9':
         # The trace ownership events below were verified on this installed contract.
         # Fail locally on a changed dependency instead of guessing about cleanup.
@@ -135,15 +136,13 @@ def _post_once(body: bytes, headers: dict, timeout: float) -> tuple[int, bytes]:
     else:
         raise JevResponseError('synchronous_ask_requires_worker_thread', dispatched=False)
 
-    # Local, fixed work: build and check the trust store before the clock starts, so
-    # the deadline covers the request rather than the CA parse.
+    # Reuse the trust store, but keep cold setup inside the caller's time budget.
     try:
         context = _tls_context()
     except Exception:
         raise JevResponseError('transport_not_ready', dispatched=False) from None
     if context.verify_mode != ssl.CERT_REQUIRED or not context.check_hostname or not context.get_ca_certs():
         raise JevResponseError('tls_not_ready', dispatched=False)
-    started = time.monotonic()
 
     async def post():
         nonlocal attempted
@@ -157,10 +156,15 @@ def _post_once(body: bytes, headers: dict, timeout: float) -> tuple[int, bytes]:
                 pending_tls = None  # HTTPcore now owns the successfully wrapped stream.
 
         try:
-            async with asyncio.timeout(timeout):
+            remaining = timeout - (time.monotonic() - started)
+            if remaining <= 0:
+                raise JevResponseError('timeout', dispatched=False)
+            async with asyncio.timeout(remaining):
                 transport = httpx.AsyncHTTPTransport(verify=context, retries=0, trust_env=False)
                 async with httpx.AsyncClient(transport=transport, timeout=timeout, follow_redirects=False,
                                              trust_env=False) as http:
+                    if time.monotonic() - started >= timeout:
+                        raise JevResponseError('timeout', dispatched=False)
                     attempted = True
                     async with http.stream('POST', ENDPOINT, content=body, headers=headers,
                                            extensions={'trace': trace}) as response:

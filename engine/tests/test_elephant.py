@@ -227,6 +227,22 @@ def test_total_deadline_cancels_and_cleans_up_request(monkeypatch, kind):
     assert len(sent) == 1 and events == ([] if kind == 'validation' else ['closed'])
 
 
+def test_tls_setup_exhausting_deadline_never_dispatches(monkeypatch):
+    context = runtime._tls_context()
+    initialized = []
+    def slow_context():
+        initialized.append(True)
+        time.sleep(0.15)
+        return context
+    monkeypatch.setattr(runtime, '_tls_context', slow_context)
+    sent, _, _ = wire(monkeypatch, lambda _: httpx.Response(200, json=reply()))
+    with pytest.raises(runtime.ElephantError, match='timeout') as caught:
+        ask()(STATE, QUESTIONS, 0.1)
+    assert initialized == [True]
+    assert sent == []
+    assert caught.value.dispatched is False
+
+
 def test_verified_tls_ignores_shared_ca_overrides_and_version_drift_fails_locally(monkeypatch):
     import httpcore
     monkeypatch.setenv('SSL_CERT_FILE', '/missing/synthetic.pem')
