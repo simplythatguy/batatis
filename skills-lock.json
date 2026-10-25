@@ -109,6 +109,12 @@
       "skillPath": "skills/engineering/pr/SKILL.md",
       "computedHash": "22a15d4d469344b38e03eb0e95772478393975836289393b1bad3c0febcdc679"
     },
+    "prettyme": {
+      "source": "simplythatguy/prettyme.md",
+      "sourceType": "github",
+      "skillPath": "skills/prettyme/SKILL.md",
+      "computedHash": "2804e7232f874983aec9be0c6bdff467e5fe4ec37a6d99b777a81aefb93bae7a"
+    },
     "prototype": {
       "source": "mattpocock/skills",
       "sourceType": "github",
