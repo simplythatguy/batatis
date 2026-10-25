@@ -37,7 +37,7 @@ from engine.export.sample import sample_case  # noqa: E402
 def _cli_validate(result) -> list[str]:
     with tempfile.TemporaryDirectory() as tmp:
         path = Path(tmp) / 'export.md'
-        path.write_text('\n\n'.join(result.text) + '\n')
+        path.write_text('\n\n'.join(result.text) + '\n', encoding='utf-8')
         run = subprocess.run([sys.executable, '-m', 'codedb', 'validate', str(path)], cwd=ROOT,
                              capture_output=True, text=True)
     if run.returncode == 0:
@@ -70,7 +70,7 @@ def _examples_problems() -> list[str]:
 def _bundle_problems() -> list[str]:
     from engine import ccmc
     from engine.export import scc
-    function = json.loads((ROOT / 'vercel.json').read_text())['services']['engine']['functions']['engine/api.py']
+    function = json.loads((ROOT / 'vercel.json').read_text(encoding='utf-8'))['services']['engine']['functions']['engine/api.py']
     inc, exc = (function[k].strip('{}').split(',') for k in ('includeFiles', 'excludeFiles'))
     match = lambda rel, globs: any(fnmatch(rel, g) or fnmatch(rel, g.replace('/**/', '/')) for g in globs)  # noqa: E731
     out = []

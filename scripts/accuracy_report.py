@@ -304,7 +304,7 @@ def intake_section(commit: str, today: str) -> dict:
 
 def engineer_section() -> dict:
     path = 'evals_dev/section_d_flag/metrics.json'
-    m = json.loads((ROOT / path).read_text())
+    m = json.loads((ROOT / path).read_text(encoding='utf-8'))
     shipped = m['dev']['rules_plus_unknown']
     commit = git('log', '-1', '--format=%H', '--', path)
     date = m['generated_at'][:10]
@@ -329,11 +329,11 @@ def engineer_section() -> dict:
 
 
 def _prompts(name: str) -> list[dict]:
-    return json.loads((ROOT / 'evals_dev' / 'boundary' / name).read_text())['prompts']
+    return json.loads((ROOT / 'evals_dev' / 'boundary' / name).read_text(encoding='utf-8'))['prompts']
 
 
 def _dev_cases() -> list[dict]:
-    return [json.loads(p.read_text()) for p in sorted((ROOT / 'evals_dev' / 'cases').glob('dev-*.json'))]
+    return [json.loads(p.read_text(encoding='utf-8')) for p in sorted((ROOT / 'evals_dev' / 'cases').glob('dev-*.json'))]
 
 
 DEV_REGIMES = {'dev-024': 'plumbing', 'dev-025': 'electrical', 'dev-059': 'gas', 'dev-060': 'private_sewage'}
@@ -476,7 +476,7 @@ def fork_section(commit: str, today: str) -> dict:
 
 def rules_section(commit: str, today: str) -> dict:
     from engine.rules import evaluate, golden, load_rule
-    vectors = json.loads((ROOT / 'evals_dev' / 'rules' / 'vectors.json').read_text())['vectors']
+    vectors = json.loads((ROOT / 'evals_dev' / 'rules' / 'vectors.json').read_text(encoding='utf-8'))['vectors']
     ok = 0
     for v in vectors:
         r = evaluate(load_rule(v['rule']), v['inputs'])
@@ -487,7 +487,7 @@ def rules_section(commit: str, today: str) -> dict:
         ok += got == v['expect']
     current = golden.OUTPUTS.read_text(encoding='utf-8') == golden.text()
     rule_files = sorted(p for p in (ROOT / 'engine' / 'data' / 'rules').glob('*.json') if p.name != 'index.json')
-    unreviewed = sum(1 for p in rule_files if json.loads(p.read_text()).get('reviewed') is not True)
+    unreviewed = sum(1 for p in rule_files if json.loads(p.read_text(encoding='utf-8')).get('reviewed') is not True)
     vec_unreviewed = sum(1 for v in vectors if v.get('reviewed') is not True)
     src = file_source(['evals_dev/rules/vectors.json', 'evals_dev/rules/outputs.json', 'engine/rules/'], commit,
                       'pytest engine/tests/test_rules_vectors.py; npm run test:rules', pr=63)

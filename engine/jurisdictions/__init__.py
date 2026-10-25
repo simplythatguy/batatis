@@ -52,7 +52,7 @@ def _key(value: str | None) -> str:
 
 def _read(path: Path, model):
     try:
-        return model.model_validate(json.loads(path.read_text()))
+        return model.model_validate(json.loads(path.read_text(encoding='utf-8')))
     except (ValidationError, json.JSONDecodeError) as exc:
         raise PackError(f'{path.name}: {exc}') from None
 

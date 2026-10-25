@@ -431,7 +431,7 @@ def _inline_admin(sentence: str, at: int) -> list[Hit]:
 
 @lru_cache(maxsize=1)
 def _places() -> re.Pattern:
-    names = [p['name'] for p in json.loads((Path(__file__).with_name('places.json')).read_text())['places']]
+    names = [p['name'] for p in json.loads((Path(__file__).with_name('places.json')).read_text(encoding='utf-8'))['places']]
     alt = '|'.join(re.escape(name) for name in sorted(names, key=len, reverse=True))
     return re.compile(rf'\b(?:in|at|near|for|of|from|to)\s+(?:the\s+)?(?:City\s+of\s+|Town\s+of\s+)?(?P<n>{alt})\b'
                       rf'|\b(?P<n2>{alt}),\s*(?:AB|Alberta)\b')

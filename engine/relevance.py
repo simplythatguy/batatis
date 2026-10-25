@@ -116,5 +116,5 @@ def scoring_bands(model: str, model_ids: dict, config_hash: str | None) -> Relev
     historical_config = IdentifyConfig(screen='jev', screen_model=JEV_MODEL, rerank='jev', rerank_model=JEV_MODEL)
     if model == PUBLIC_MODEL and config_hash == historical_config.config_hash \
             and all(pin in (JEV_MODEL, PUBLIC_MODEL) for pin in model_ids.values()):
-        return RelevanceBands.model_validate_json(BANDS_FILE.read_text())
+        return RelevanceBands.model_validate_json(BANDS_FILE.read_text(encoding='utf-8'))
     return RelevanceBands(x=0.0, y=1.0, status='uncalibrated; display range only')

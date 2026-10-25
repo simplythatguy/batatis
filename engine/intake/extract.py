@@ -149,7 +149,7 @@ def read_text(text: str, origin: Origin, *, codes=None, outbound: Outbound = scr
 # ---------------------------------------------------------------- files
 
 def _scc_map() -> dict[str, str]:
-    data = json.loads(SCC_MAP.read_text())
+    data = json.loads(SCC_MAP.read_text(encoding='utf-8'))
     mapped = {name: spec['fact'] for name, spec in data['text_fields'].items() if spec['section'] != 'C'}
     mapped.update({name: spec['fact'] for name, spec in data['checkboxes'].items()})
     for index, row in enumerate(data['section_c_rows']):

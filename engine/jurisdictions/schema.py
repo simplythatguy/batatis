@@ -41,11 +41,11 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
     text = render()
     if args.check:
-        if not OUT.is_file() or OUT.read_text() != text:
+        if not OUT.is_file() or OUT.read_text(encoding='utf-8') != text:
             print(f'{OUT} is stale; run python -m engine.jurisdictions.schema', file=sys.stderr)
             return 1
         return 0
-    OUT.write_text(text)
+    OUT.write_text(text, encoding='utf-8')
     print(f'wrote {OUT}')
     return 0
 

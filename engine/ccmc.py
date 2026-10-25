@@ -44,7 +44,7 @@ def bundled_snapshot_date(path: Path) -> str:
     import hashlib
     for meta_path in (BUNDLED_META, _ROOT / 'research/precedents/ccmc-summary.json'):
         try:
-            meta = json.loads(meta_path.read_text())
+            meta = json.loads(meta_path.read_text(encoding='utf-8'))
             digest = hashlib.sha256(path.read_bytes()).hexdigest()
         except (OSError, ValueError):
             continue
@@ -221,7 +221,7 @@ class CCMCRegistry:
             self._notice = 'Searched the public CCMC JSON registry. Report applicability needs review.'
         except (OSError, ValueError, TypeError, KeyError) as error:
             try:
-                parsed = self._parse(json.loads(self.snapshot_path.read_text()))
+                parsed = self._parse(json.loads(self.snapshot_path.read_text(encoding='utf-8')))
             except (OSError, ValueError, TypeError, KeyError) as fallback:
                 raise RegistryUnavailable('Live CCMC registry and a complete offline snapshot are unavailable; '
                                           'no negative search conclusion can be made.') from fallback

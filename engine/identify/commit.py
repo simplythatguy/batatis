@@ -50,7 +50,7 @@ def load_policy(config_hash: str, path: Path | str | None = None) -> CommitPolic
     if not path.is_file():
         return _uncalibrated('calibration.json is absent; automatic commits are off')
     try:
-        data = json.loads(path.read_text())
+        data = json.loads(path.read_text(encoding='utf-8'))
     except (OSError, UnicodeError, json.JSONDecodeError):
         return _uncalibrated('calibration.json is unreadable')
     if not isinstance(data, dict) or data.get('status') != 'calibrated':

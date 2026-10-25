@@ -28,10 +28,10 @@ DECIDED_AT = '2026-10-21T00:00:00Z'
 
 
 def spec(name: str) -> dict:
-    data = json.loads((DEMO_DIR / 'export' / f'{name}.json').read_text())
+    data = json.loads((DEMO_DIR / 'export' / f'{name}.json').read_text(encoding='utf-8'))
     # Preserve the journey candidate's fictional layout determinations with the
     # engine fixtures, without depending on a separately restored evals directory.
-    resolutions = json.loads((Path(__file__).parent / 'fixtures' / 'demo-professional-resolutions.json').read_text())
+    resolutions = json.loads((Path(__file__).parent / 'fixtures' / 'demo-professional-resolutions.json').read_text(encoding='utf-8'))
     if name in resolutions and 'professional_requirement_resolution' not in data:
         data['professional_requirement_resolution'] = resolutions[name]
     return data
@@ -91,7 +91,7 @@ def demo_case(name: str, codes: Codes | None = None) -> Case:
         eid = doc['id']
         case.evidence.append(EvidenceItem(id=eid, description=doc['title'], status='evidence_listed', kind='file'))
         case.facts.append(Fact(field=f'evidence.{eid}.file_ref', value=file_ref, kind='pointed', status='confirmed',
-                               source=Source(type='file', ref=file_ref, quote=path.read_text())))
+                               source=Source(type='file', ref=file_ref, quote=path.read_text(encoding='utf-8'))))
         case.facts += [_fact(f'evidence.{eid}.{key}', doc[key], ref)
                        for key in ('title', 'responsible_party', 'issuer', 'date') if doc.get(key)]
     ids = [doc['id'] for doc in data['documents']]

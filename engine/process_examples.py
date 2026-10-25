@@ -65,7 +65,7 @@ class ProcessExample(BaseModel):
 
 @lru_cache(maxsize=1)
 def _load() -> dict:
-    return json.loads(DATA.read_text())
+    return json.loads(DATA.read_text(encoding='utf-8'))
 
 
 def local_file(ref: dict | PrecedentRef) -> Path | None:
