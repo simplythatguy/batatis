@@ -250,3 +250,9 @@
   .dk-update-panel { animation: none; }
   .dk-update-arc { transition: none; }
 }
+
+.dk-runtime-version {
+  color: var(--cf-text-3);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}

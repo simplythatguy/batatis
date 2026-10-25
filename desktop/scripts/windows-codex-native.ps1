@@ -10,7 +10,7 @@ if ($env:GITHUB_ACTIONS -ne 'true' -or $env:RUNNER_OS -ne 'Windows') {
 }
 $repoPath = (Resolve-Path -LiteralPath $Repo).Path
 $resources = (Resolve-Path -LiteralPath $ResourcesDir).Path
-$exe = (Resolve-Path -LiteralPath (Join-Path $resources 'codex/codex.exe')).Path
+$exe = (Resolve-Path -LiteralPath (Join-Path $repoPath 'desktop/codex/runtime/win32-x64/codex.exe')).Path
 $node = (Get-Command node -CommandType Application | Select-Object -First 1).Source
 if ((Get-Service MpsSvc).Status -ne 'Running') { throw 'Windows Firewall service must already be running.' }
 $profiles = @(Get-NetFirewallProfile -PolicyStore ActiveStore)

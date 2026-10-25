@@ -20,10 +20,11 @@ export function workspaceDir(paths: RuntimePaths, kind: WorkspaceKind): string {
 export const codeDbPath = (paths: RuntimePaths): string => join(paths.userData, "codedb", "codedb.sqlite");
 export const webDist = (paths: RuntimePaths): string => paths.packaged ? join(paths.resources, "web") : join(paths.resources, "web", "dist");
 
+/** Where the installer keeps the Codex runtime: app data when packaged, the checkout's desktop/codex otherwise. */
+export const codexInstallRoot = (paths: RuntimePaths): string => paths.packaged ? join(paths.userData, "codex") : join(paths.resources, "desktop", "codex");
+
 export function codexRuntime(paths: RuntimePaths): RuntimeSource {
-  return bundledRuntime(paths.packaged ? {
-    executable: join(paths.resources, "codex", paths.platform === "win32" ? "codex.exe" : "codex"),
-  } : {});
+  return bundledRuntime({ runtimeRoot: codexInstallRoot(paths) });
 }
 
 /** Only what Python and the OS need; no inherited keys, hosted settings or shell configuration. */

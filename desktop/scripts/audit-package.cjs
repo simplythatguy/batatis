@@ -28,15 +28,10 @@ function audit(resources, platform) {
   assert.ok(packaged.some((name) => /reportlab\/fonts\/Vera\.ttf$/.test(name)), "PDF fonts are bundled");
   assert.ok(packaged.some((name) => /certifi\/cacert\.pem$/.test(name)), "TLS roots are bundled");
   assert.ok(packaged.some((name) => /cryptography\/.+\.(?:so|pyd)$/.test(name)), "native cryptography is bundled");
-  const runtime = join(resources, "codex", platform === "win32" ? "codex.exe" : "codex");
   const sha256 = (file) => createHash("sha256").update(readFileSync(file)).digest("hex");
-  let codex = null;
-  if (existsSync(runtime)) {
-    const manifest = JSON.parse(readFileSync(join(resources, "codex", "codex-runtime.json"), "utf8"));
-    assert.equal(sha256(runtime), manifest.executableSha256, "the bundled Codex executable matches its verified manifest");
-    for (const name of ["luna-models.json", "LICENSE", "NOTICE"]) assert.ok(existsSync(join(resources, "codex", name)), `Codex ${name} is bundled`);
-    codex = { version: manifest.version, executableSha256: manifest.executableSha256 };
-  }
+  assert.ok(!existsSync(join(resources, "codex", platform === "win32" ? "codex.exe" : "codex")), "the Codex runtime is installed on first use, not bundled");
+  for (const name of ["luna-models.json", "LICENSE", "NOTICE"]) assert.ok(existsSync(join(resources, "codex", name)), `Codex ${name} is bundled`);
+  const codex = { catalogSha256: sha256(join(resources, "codex", "luna-models.json")) };
   return { ok: true, platform, files: packaged.length, engineSha256: sha256(engine), appAsarSha256: sha256(archive), codex, forbidden };
 }
 

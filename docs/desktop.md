@@ -8,7 +8,7 @@ Applications in the desktop package stay on that computer. The package does not 
 
 Build the package on its target operating system, or download the matching portable archive from a verified desktop workflow run. The workflow saves the app and its acceptance reports as separate artifacts.
 
-The package targets Apple Silicon Macs and Windows x64. Extract the archive before opening `Batatis.app` on macOS or `Batatis.exe` on Windows. The Python engine and Codex runtime come with the package.
+The package targets Apple Silicon Macs and Windows x64. Extract the archive before opening `Batatis.app` on macOS or `Batatis.exe` on Windows. The Python engine comes with the package. The app downloads the Codex runtime when you install it from **Settings**.
 
 The macOS package uses ad hoc signing. It is not notarized. Windows release builds are signed once the signing account in [Sign the Windows build](#sign-the-windows-build) exists; until then they have no publisher signature, and Windows warns before opening them.
 
@@ -36,13 +36,15 @@ Your applications are stored separately from CodeDB. Replacing CodeDB does not r
 
 The AI connection belongs to the computer. It is separate from your Batatis account and development identity.
 
-Under **Generation** in **Settings**, choose ChatGPT or OpenAI API key after connecting that account or saving its key. ChatGPT uses the bundled local Codex runtime. An OpenAI API key uses your API account and API billing. Off is the default and makes no provider request.
+Under **Generation** in **Settings**, choose ChatGPT or OpenAI API key after connecting that account or saving its key. ChatGPT uses the local Codex runtime that the app installs. An OpenAI API key uses your API account and API billing. Off is the default and makes no provider request.
 
 A failed connection or subscription limit never selects API billing automatically. Adding a key does not sign you in to ChatGPT.
 
 ### ChatGPT through Codex
 
-Connect from **Settings**, open the official sign-in page and enter the displayed device code. Complete sign-in yourself in the browser. The app never asks for your ChatGPT password.
+Under **AI connections** in **Settings**, the ChatGPT row shows whether Codex is installed. Select **Install** to download it. The app downloads the one Codex release it was built for from [OpenAI's Codex releases](https://github.com/openai/codex/releases), checks its size and SHA-256, and keeps it in the app's data folder. When a newer Batatis pins a newer Codex, the row shows **Update**. Updating stops pending AI work first.
+
+Select **Sign in**, open the official sign-in page and enter the displayed device code. Complete sign-in yourself in the browser. The app never asks for your ChatGPT password.
 
 The managed connection uses its own Codex home and operating-system credential store. It does not import your development CLI's login, projects or conversation history.
 
@@ -50,7 +52,7 @@ Each workflow task starts a fresh temporary Codex thread. It supplies the workfl
 
 The runtime is pinned to Codex `0.164.0` and GPT-6 Luna at medium reasoning effort. Sign-in and model access depend on your account. Native request captures and offline tests do not establish account entitlement or successful live inference.
 
-Disconnecting cancels pending work and ends the managed connection. Voice is unavailable in the desktop package.
+Signing out cancels pending work and ends the managed connection. Voice is unavailable in the desktop package.
 
 ### API keys
 
@@ -87,7 +89,7 @@ The updater does not need code signing. Electron's built-in updater on macOS (Sq
 
 Windows warns before it opens an unsigned app downloaded from the internet ("Windows protected your PC"). A signed app shows a verified publisher name instead, and the warning stops once enough people have downloaded files signed with the same certificate. [Microsoft's SmartScreen guide](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation) explains this. No setting in the app removes the warning. Updates that the app installs itself are not marked as downloaded, so Windows doesn't check them again.
 
-The release workflow signs Windows builds with [Microsoft Artifact Signing](https://learn.microsoft.com/en-us/azure/artifact-signing/quickstart) once its account exists. It signs `Batatis.exe` and every program and library of the Python engine. It leaves the pinned `codex.exe` as published, because the app checks that file's checksum.
+The release workflow signs Windows builds with [Microsoft Artifact Signing](https://learn.microsoft.com/en-us/azure/artifact-signing/quickstart) once its account exists. It signs `Batatis.exe` and every program and library of the Python engine. Codex isn't in the package; the app downloads OpenAI's published `codex.exe` and checks its checksum.
 
 1. Follow the Artifact Signing quickstart. Create an Azure account of type Individual, an Artifact Signing account, an identity validation and a Public Trust certificate profile. Individual developers must be in Canada or the United States. Microsoft lists the price from US$9.99 a month.
 2. Create an app registration with a client secret. Give it the certificate profile signer role from the quickstart.

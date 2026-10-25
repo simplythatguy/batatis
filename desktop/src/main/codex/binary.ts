@@ -17,7 +17,8 @@ export async function sha256File(path: string): Promise<string> {
   return hash.digest("hex");
 }
 
-export function bundledRuntime(options: { executable?: string } = {}): RuntimeSource {
+/** The verified runtime: the catalog from the app's resources, the executable from `runtimeRoot` when given. */
+export function bundledRuntime(options: { executable?: string; runtimeRoot?: string } = {}): RuntimeSource {
   return async (context, platform, arch) => {
     const key = platformKey(platform, arch);
     if (!key) throw new AdapterError("unsupported-platform");
@@ -29,7 +30,7 @@ export function bundledRuntime(options: { executable?: string } = {}): RuntimeSo
       if (catalog.length !== CATALOG.bytes || createHash("sha256").update(catalog).digest("hex") !== CATALOG.sha256)
         throw new AdapterError("context_unverified");
       const pin = CODEX_ARCHIVES[key];
-      const executable = await realpath(options.executable ?? join(root, "runtime", key, pin.executable));
+      const executable = await realpath(options.executable ?? join(options.runtimeRoot ?? root, "runtime", key, pin.executable));
       if (!(await lstat(executable)).isFile()) throw new AdapterError("runtime-missing");
       const sha256 = await sha256File(executable);
       // A self-reported manifest digest alone must never authorize an executable.

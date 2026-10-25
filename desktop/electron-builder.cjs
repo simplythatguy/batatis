@@ -1,11 +1,4 @@
-const { existsSync } = require("node:fs");
 const { join } = require("node:path");
-
-const runtime = join("codex", "runtime", `${process.platform}-${process.arch}`);
-const hasRuntime = existsSync(join(__dirname, runtime, process.platform === "win32" ? "codex.exe" : "codex"));
-if (process.env.BATATIS_DESKTOP_REQUIRE_CODEX === "1" && !hasRuntime) {
-  throw new Error("The pinned Codex runtime must be prepared before packaging.");
-}
 
 /**
  * Windows code signing through Microsoft Artifact Signing, when its account is configured. The
@@ -42,10 +35,8 @@ module.exports = {
   extraResources: [
     { from: "../web/dist", to: "web", filter: ["**/*", "!**/*.sqlite", "!**/*.map"] },
     { from: "build/engine-dist/batatis-engine", to: "engine", filter: ["**/*"] },
-    ...(hasRuntime ? [
-      { from: runtime, to: "codex", filter: ["codex", "codex.exe", "codex-runtime.json"] },
-      { from: "codex", to: "codex", filter: ["luna-models.json", "LICENSE", "NOTICE"] },
-    ] : []),
+    // The Codex runtime itself is downloaded on first use (src/main/codex/install.ts); only its reviewed catalog ships.
+    { from: "codex", to: "codex", filter: ["luna-models.json", "LICENSE", "NOTICE"] },
   ],
   electronFuses: {
     runAsNode: false,
@@ -57,12 +48,11 @@ module.exports = {
   },
   mac: {
     target: ["zip"], category: "public.app-category.productivity", identity: "-", hardenedRuntime: false, notarize: false,
-    signIgnore: ["/Contents/Resources/codex/codex$"],
   },
   win: windowsSigning ? {
     target: [{ target: "zip", arch: ["x64"] }],
     azureSignOptions: windowsSigning,
-    // The engine's libraries are signed too; the pinned Codex executable keeps its own signature and checksum.
-    signExts: [".dll", ".pyd", "!codex.exe"],
+    // The engine's libraries are signed too.
+    signExts: [".dll", ".pyd"],
   } : { target: [{ target: "zip", arch: ["x64"] }], signAndEditExecutable: false },
 };

@@ -57,8 +57,14 @@ function ConnectionActions({ row, act }: { row: ProviderRow; act: (action: Param
     );
     return <button type="button" className="cf-btn is-xs" onClick={() => act("enterKey")}>Try again</button>;
   }
+  switch (row.runtime?.state) {
+    case "missing": return <button type="button" className="cf-btn is-xs is-primary" onClick={() => act("install")}>Install</button>;
+    case "outdated": return <button type="button" className="cf-btn is-xs is-primary" onClick={() => act("install")}>Update</button>;
+    case "failed": return <button type="button" className="cf-btn is-xs" onClick={() => act("install")}>Try again</button>;
+    case "installing": return null;
+  }
   switch (row.status.state) {
-    case "signed-out": return <button type="button" className="cf-btn is-xs" onClick={() => act("connect")}>Connect</button>;
+    case "signed-out": return <button type="button" className="cf-btn is-xs" onClick={() => act("connect")}>Sign in</button>;
     case "error": return <button type="button" className="cf-btn is-xs" onClick={() => act("connect")}>Try again</button>;
     case "pending": return (
       <>
@@ -66,7 +72,7 @@ function ConnectionActions({ row, act }: { row: ProviderRow; act: (action: Param
         <button type="button" className="cf-btn is-xs is-ghost" onClick={() => act("cancelLogin")}>Cancel</button>
       </>
     );
-    case "signed-in": return <button type="button" className="cf-btn is-xs is-ghost" onClick={() => act("disconnect")}>Disconnect</button>;
+    case "signed-in": return <button type="button" className="cf-btn is-xs is-ghost" onClick={() => act("disconnect")}>Sign out</button>;
     case "unavailable": return null;
   }
 }
@@ -77,13 +83,22 @@ function connectionValue(row: ProviderRow): ReactNode {
     if (row.status === "missing") return <span className="ac-faint-tag">Not added</span>;
     return <span className="ac-faint-tag">Secure storage unavailable</span>;
   }
+  const runtime = row.runtime;
+  const mb = (bytes: number) => Math.round(bytes / 1_000_000);
+  switch (runtime?.state) {
+    case "missing": return <span className="ac-faint-tag">Not installed</span>;
+    case "outdated": return <span className="ac-faint-tag">Update needed</span>;
+    case "installing": return <span className="ac-faint-tag" role="status">Downloading {mb(runtime.received)} of {mb(runtime.total)} MB</span>;
+    case "failed": return <span className="ac-faint-tag" role="alert">{runtime.message}</span>;
+  }
   const status = row.status;
+  const version = runtime?.state === "installed" && runtime.version ? <span className="dk-runtime-version"> · {runtime.version}</span> : null;
   switch (status.state) {
     case "signed-in": return <span>
-      <span className="ac-saved">{status.plan ? `Connected · ${status.plan}` : "Connected"}</span>
+      <span className="ac-saved">{status.plan ? `Signed in · ${status.plan}` : "Signed in"}</span>{version}
       {row.workflow && <span className="ac-help" role="status">{row.workflow}</span>}
     </span>;
-    case "signed-out": return <span className="ac-faint-tag">{status.last ?? "Not connected"}</span>;
+    case "signed-out": return <span><span className="ac-faint-tag">{status.last ?? "Signed out"}</span>{version}</span>;
     case "pending": return <span className="dk-code-line">Enter <code className="dk-code">{status.userCode}</code> at {status.address}</span>;
     case "error": return <span className="ac-faint-tag">{status.message}</span>;
     case "unavailable": return <span className="ac-faint-tag">{status.message}</span>;

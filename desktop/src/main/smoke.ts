@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { isAbsolute, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { app, type BrowserWindow } from "electron";
@@ -145,6 +145,9 @@ export async function runSmoke(deps: SmokeDeps): Promise<void> {
     assert.equal(deps.fixture?.adapterConstructed, true, "the bundled adapter factory was constructed without account access");
     const { executable, sha256 } = await deps.runtime();
     report.codexRuntime = { executable, sha256 };
+    assert.ok(executable.startsWith(realpathSync(options.userData)), "the Codex runtime runs from app data, where the installer puts it");
+    const account = (await host.providerRows()).find((row) => row.kind === "account");
+    assert.equal(account?.kind === "account" && account.runtime?.state, "installed", JSON.stringify(account));
     assert.match(process.execPath, /Application composée 100% #/, "the packaged executable runs from a URI-sensitive path");
     assert.equal(await page("typeof require"), "undefined", "Node is absent from the renderer");
     assert.equal(await page("typeof process"), "undefined", "Node process is absent from the renderer");
@@ -330,6 +333,8 @@ export async function runSmoke(deps: SmokeDeps): Promise<void> {
       assert.ok(Array.isArray(panel.links) && panel.links.length > 0
         && panel.links.every((href) => String(href).startsWith("https://github.com/simplythatguy/batatis/releases")), JSON.stringify(panel.links));
       await capture("update-panel", "A newer release appears in the rail; its panel shows the version, what changed and GitHub links. No real feed or download.");
+      assert.equal(await page("Boolean(document.querySelector('.dk-update-btn') && document.querySelector('.dk-update-panel'))"), true,
+        "the control and its panel were still on screen when the screenshot was taken");
     }
     assert.deepEqual(monitor.csp, []);
     assert.deepEqual(monitor.errors, []);

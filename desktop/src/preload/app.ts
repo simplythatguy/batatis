@@ -18,6 +18,7 @@ if (location.origin === "batatis://app") {
       selectScreening: (value: boolean) => invoke("batatis:ai-screening", value),
       enterKey: (id: string) => invoke("batatis:key-enter", id),
       removeKey: (id: string) => invoke("batatis:key-remove", id),
+      install: () => invoke("batatis:runtime-install"),
       connect: (id: string) => invoke("batatis:connect", id),
       openLogin: (id: string) => invoke("batatis:open-login", id),
       cancelLogin: (id: string) => invoke("batatis:cancel-login", id),

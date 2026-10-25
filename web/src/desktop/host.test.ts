@@ -74,3 +74,16 @@ test("update state keeps GitHub pages only and drops anything the page can't sho
   assert.deepEqual(parseUpdate({ status: "failed", current: "0.1.0", release: null, message: "Couldn’t check." }),
     { status: "failed", current: "0.1.0", release: null, message: "Couldn’t check." });
 });
+
+test("the account row carries its runtime's install state; malformed progress is dropped", () => {
+  const account = { id: "a", kind: "account", label: "Account", description: "", status: { state: "signed-out", last: null }, workflow: null };
+  const runtime = (value: unknown) => parseRows([{ ...account, runtime: value }])[0];
+  assert.deepEqual(runtime({ state: "installing", received: 5, total: 10 })?.kind === "account" && runtime({ state: "installing", received: 5, total: 10 }).runtime,
+    { state: "installing", received: 5, total: 10 });
+  const row = runtime({ state: "installing", received: 5, total: 0 });
+  assert.equal(row?.kind === "account" && row.runtime, null);
+  const outdated = runtime({ state: "outdated", installed: "0.1.0" });
+  assert.deepEqual(outdated?.kind === "account" && outdated.runtime, { state: "outdated", installed: "0.1.0" });
+  const none = parseRows([account])[0];
+  assert.equal(none?.kind === "account" && none.runtime, null);
+});

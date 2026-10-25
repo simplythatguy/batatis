@@ -78,7 +78,7 @@ async function settings(t, action: string, events: string[]) {
       const row = nodes(tree, (node) => node.type === "Row" && node.props.label === (action.endsWith("Key") ? key.label : account.label))[0];
       const controls = nodes(row.props.action, (node) => typeof node.type === "function")[0];
       const buttons = nodes(controls.type(controls.props), (node) => node.type === "button");
-      const labels = { addKey: "Add key", replaceKey: "Replace", retryKey: "Try again", removeKey: "Remove", disconnect: "Disconnect", connect: "Connect", openLogin: "Open page", cancelLogin: "Cancel" };
+      const labels = { addKey: "Add key", replaceKey: "Replace", retryKey: "Try again", removeKey: "Remove", disconnect: "Sign out", connect: "Sign in", openLogin: "Open page", cancelLogin: "Cancel" };
       const button = buttons.find((node) => text(node) === labels[action]);
       assert.ok(button, `The ${action} control remains reachable`);
       button.props.onClick();

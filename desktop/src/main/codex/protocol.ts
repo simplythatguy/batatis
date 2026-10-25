@@ -6,7 +6,7 @@ import { DEVICE_URL, EFFORT, MODEL } from "./config";
 export type AdapterFailure = CompletionFailure | "runtime-missing" | "unsupported-platform" | "keyring-unavailable" | "device-prerequisite";
 const MESSAGES: Record<AdapterFailure, string> = {
   unavailable: "The local AI runtime is unavailable.",
-  "runtime-missing": "The verified local AI runtime is missing. Reinstall the desktop app.",
+  "runtime-missing": "The verified local AI runtime isn’t installed.",
   "unsupported-platform": "This computer is not supported by the bundled AI runtime.",
   "keyring-unavailable": "Secure credential storage is unavailable. The connection requires the operating system keyring.",
   "device-prerequisite": "Enable device-code sign-in in your ChatGPT security settings or ask your workspace administrator to allow it.",

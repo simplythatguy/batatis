@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const [input, destination] = process.argv.slice(2);
 if (!input || !destination) throw new Error("Usage: npm run smoke:packaged -- <Batatis.app|win-unpacked> <prepared-output-dir>");
@@ -14,6 +15,11 @@ mkdirSync(dirname(staged), { recursive: true });
 cpSync(source, staged, { recursive: true, verbatimSymlinks: true });
 const executable = process.platform === "darwin" ? join(staged, "Contents", "MacOS", "Batatis") : join(staged, "Batatis.exe");
 assert.ok(existsSync(executable), "the native packaged executable exists");
+// The app installs its pinned Codex runtime into app data on first use; seed the same verified bytes.
+const runtimeKey = `${process.platform}-${process.arch}`;
+const fetchedRuntime = join(dirname(fileURLToPath(import.meta.url)), "..", "codex", "runtime", runtimeKey);
+assert.ok(existsSync(fetchedRuntime), "node codex/fetch.mjs runtime prepared the pinned Codex executable");
+cpSync(fetchedRuntime, join(output, "workspace données 100% #", "codex", "runtime", runtimeKey), { recursive: true });
 
 const env = {};
 const allowed = ["SystemRoot", "SYSTEMROOT", "WINDIR", "windir", "SystemDrive", "TEMP", "TMP", "TMPDIR", "HOME", "USERPROFILE", "APPDATA", "LOCALAPPDATA", "LANG", "LC_ALL", "DISPLAY", "XAUTHORITY"];

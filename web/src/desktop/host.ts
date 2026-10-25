@@ -41,8 +41,17 @@ export type Connection =
   | { state: "signed-in"; plan: string | null }
   | { state: "error"; message: string };
 
+/** The account connection's downloadable runtime, as the host reports it. */
+export type Runtime =
+  | { state: "unsupported" }
+  | { state: "missing" }
+  | { state: "outdated"; installed: string }
+  | { state: "installing"; received: number; total: number }
+  | { state: "installed"; version: string }
+  | { state: "failed"; message: string };
+
 export type ProviderRow =
-  | { id: string; kind: "account"; label: string; description: string; status: Connection; workflow: string | null }
+  | { id: string; kind: "account"; label: string; description: string; status: Connection; workflow: string | null; runtime: Runtime | null }
   | { id: string; kind: "key"; label: string; description: string; status: "missing" | "saved" | "secure-storage-unavailable" };
 
 export interface ReleaseNote { version: string; items: string[]; more: number; url: string }
@@ -64,7 +73,7 @@ interface Bridge {
   restart(): Promise<unknown>;
   switchWorkspace(kind: string): Promise<unknown>;
   switchPerson(profile: string): Promise<unknown>;
-  providers: Record<"list" | "enterKey" | "removeKey" | "connect" | "openLogin" | "cancelLogin" | "disconnect", (id?: string) => Promise<unknown>> & {
+  providers: Record<"list" | "enterKey" | "removeKey" | "install" | "connect" | "openLogin" | "cancelLogin" | "disconnect", (id?: string) => Promise<unknown>> & {
     configuration(): Promise<unknown>;
     selectGeneration(value: string): Promise<unknown>;
     selectScreening(value: boolean): Promise<unknown>;
@@ -155,6 +164,22 @@ function displayAddress(value: unknown): string | null {
   }
 }
 
+function parseRuntime(value: unknown): Runtime | null {
+  if (!isRecord(value)) return null;
+  const count = (n: unknown) => (typeof n === "number" && Number.isFinite(n) && n >= 0 ? n : null);
+  switch (value.state) {
+    case "unsupported": case "missing": return { state: value.state };
+    case "outdated": return { state: "outdated", installed: str(value.installed) ?? "" };
+    case "installed": return { state: "installed", version: str(value.version) ?? "" };
+    case "failed": return { state: "failed", message: str(value.message) ?? "The install didn’t finish." };
+    case "installing": {
+      const received = count(value.received), total = count(value.total);
+      return received !== null && total ? { state: "installing", received: Math.min(received, total), total } : null;
+    }
+    default: return null;
+  }
+}
+
 export function parseRows(value: unknown): ProviderRow[] {
   if (!Array.isArray(value)) return [];
   const rows: ProviderRow[] = [];
@@ -165,7 +190,7 @@ export function parseRows(value: unknown): ProviderRow[] {
     if (item.kind === "account") {
       const status = parseConnection(item.status);
       if (status) rows.push({ id, kind: "account", label, description, status,
-        workflow: isRecord(item.workflow) && item.workflow.ready === false ? str(item.workflow.message) : null });
+        workflow: isRecord(item.workflow) && item.workflow.ready === false ? str(item.workflow.message) : null, runtime: parseRuntime(item.runtime) });
     } else if (item.kind === "key" && isRecord(item.status)) {
       const state = item.status.state;
       if (state === "missing" || state === "saved" || state === "secure-storage-unavailable") rows.push({ id, kind: "key", label, description, status: state });
@@ -299,7 +324,7 @@ export const desktop = {
   switchWorkspace: (kind: WorkspaceKind) => call((h) => h.switchWorkspace(kind), parseOutcome, failed),
   restart: () => call((h) => h.restart(), parseOutcome, failed),
   chooseCodeDb: () => call((h) => h.codeDb.choose(), parseOutcome, failed),
-  providers: (action: "list" | "enterKey" | "removeKey" | "connect" | "openLogin" | "cancelLogin" | "disconnect", id?: string) => call((h) => h.providers[action](id), parseRows, []),
+  providers: (action: "list" | "enterKey" | "removeKey" | "install" | "connect" | "openLogin" | "cancelLogin" | "disconnect", id?: string) => call((h) => h.providers[action](id), parseRows, []),
   configuration: () => call((h) => h.providers.configuration(), parseConfiguration, null),
   selectGeneration: (value: string) => call((h) => h.providers.selectGeneration(value), parseOutcome, failed),
   selectScreening: (value: boolean) => call((h) => h.providers.selectScreening(value), parseOutcome, failed),

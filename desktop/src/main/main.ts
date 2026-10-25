@@ -10,12 +10,13 @@ import { extname, join, resolve, sep } from "node:path";
 import { DesktopHost, type Outcome } from "./controller";
 import { KeyVault, type SecretBox } from "./credentials";
 import { createAppProtocol, ORIGIN } from "./protocol";
-import { isGenerationChoice, unavailableProvider, type KeyProviderId } from "./providers";
+import { isGenerationChoice, unavailableProvider, type HostProvider, type KeyProviderId } from "./providers";
+import { CodexInstaller, pinFor } from "./codex/install";
 import { codexProviderFactory } from "./codex";
 import { reviewedContextForPlatform } from "./trusted-context";
 import { workflowFixture } from "./workflow-fixture";
 import { withProviderCancellation } from "./provider-protocol";
-import { codexRuntime, engineCommand, webDist, workspaceDir, type RuntimePaths } from "./runtime";
+import { codexInstallRoot, codexRuntime, engineCommand, webDist, workspaceDir, type RuntimePaths } from "./runtime";
 import { SealedTokenStore, type SessionBox } from "./session";
 import { startEngine, type Engine } from "./engine";
 import { monitorSmoke, runSmoke, smokeOptions } from "./smoke";
@@ -67,9 +68,36 @@ const fixture = smoke ? workflowFixture() : null;
 let providerWorkDir: string | null = null;
 const smokeEngines: Engine[] = [];
 
+const runTool = (command: string, args: string[]) => new Promise<string>((done, fail) => {
+  execFile(command, args, { windowsHide: true, maxBuffer: 1 << 20 }, (error, stdout) => (error ? fail(error) : done(stdout)));
+});
+
+/** Downloads the pinned Codex runtime into app data on request; the package no longer carries it. */
+const codexInstaller = new CodexInstaller({
+  root: codexInstallRoot(paths),
+  pin: pinFor(process.platform, process.arch),
+  fetch: (url, init) => net.fetch(url, init),
+  tar: (args) => runTool(process.platform === "win32" ? join(process.env.SystemRoot ?? "C:\\Windows", "System32", "tar.exe") : "/usr/bin/tar", args),
+  notify: () => current?.webContents.send("batatis:changed"),
+  log: (line) => process.stderr.write(`${line}\n`),
+});
+let makeProvider: (() => HostProvider) | null = null;
+
+/** The running runtime stops before the new one moves into place, and a fresh connection starts after. */
+async function installRuntime() {
+  if (!makeProvider) return;
+  let stopped = false;
+  await codexInstaller.install(async () => {
+    stopped = true;
+    await host.installProvider(unavailableProvider("The local AI runtime is being installed."));
+  });
+  if (stopped) await host.installProvider(makeProvider());
+}
+
 const host = new DesktopHost({
   paths,
   version: app.getVersion(),
+  runtime: () => codexInstaller.status(),
   ...(smoke ? { start: async (...args: Parameters<typeof startEngine>) => {
     const started = await startEngine(...args);
     if (started.kind === "ready") smokeEngines.push(started.engine);
@@ -101,9 +129,7 @@ const updater = new Updater({
   dir: join(paths.userData, "updates"),
   executable: process.execPath,
   replaceable: packaged,
-  run: (command, args) => new Promise((done, fail) => {
-    execFile(command, args, { windowsHide: true, maxBuffer: 1 << 20 }, (error, stdout) => (error ? fail(error) : done(stdout)));
-  }),
+  run: runTool,
   notify: () => current?.webContents.send("batatis:update-changed"),
   log: (line) => process.stderr.write(`${line}\n`),
 });
@@ -262,6 +288,10 @@ function registerIpc() {
     if (isKeyProvider(id)) await host.removeKey(id);
     return host.providerRows();
   }, []);
+  answer("batatis:runtime-install", async () => {
+    await installRuntime();
+    return host.providerRows();
+  }, []);
   answer("batatis:connect", async (_e, id) => {
     if (id === "chatgpt") await host.provider.startLogin();
     return host.providerRows();
@@ -376,9 +406,14 @@ if (!app.requestSingleInstanceLock()) {
       stateDir: await realpath(join(root, "codex-state")), workDir: providerWorkDir,
       resourcesDir: paths.resources, appVersion: app.getVersion(), log,
     };
-    const installed = codexProviderFactory({ runtime, verifiedContext: reviewedContextForPlatform(process.platform) })(providerContext);
+    const factory = codexProviderFactory({ runtime, verifiedContext: reviewedContextForPlatform(process.platform) });
+    const installed = factory(providerContext);
+    await codexInstaller.refresh();
     if (fixture) { fixture.adapterConstructed = true; await installed.dispose(); }
-    else await host.installProvider(installed);
+    else {
+      makeProvider = () => factory(providerContext);
+      await host.installProvider(installed);
+    }
     registerIpc();
     await host.boot();
     host.openWindow(null);
@@ -400,6 +435,7 @@ if (!app.requestSingleInstanceLock()) {
     quitting = true;
     event.preventDefault();
     updater.cancel();
+    codexInstaller.cancel();
     void host.dispose().finally(async () => {
       if (providerWorkDir) await rm(providerWorkDir, { recursive: true, force: true });
       app.quit();

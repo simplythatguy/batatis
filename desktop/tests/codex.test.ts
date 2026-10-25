@@ -429,7 +429,7 @@ test("catalog pin and binary digest reject altered resources before any executio
   const bytes = await readFile(join(REPO, "desktop/codex/luna-models.json"));
   assert.equal(bytes.length, CATALOG.bytes);
   assert.equal(createHash("sha256").update(bytes).digest("hex"), CATALOG.sha256);
-  await assert.rejects(bundledRuntime({ executable: process.execPath })(f.context, "darwin", "arm64"), /verified local AI runtime is missing/);
+  await assert.rejects(bundledRuntime({ executable: process.execPath })(f.context, "darwin", "arm64"), /verified local AI runtime isn’t installed/);
   await assert.rejects(prepareHome({ ...f.context, stateDir: join(homedir(), ".codex") }, process.env, bytes), /exact local runtime/);
 });
 
