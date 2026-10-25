@@ -25,6 +25,7 @@ from dataclasses import dataclass, field
 from functools import lru_cache
 
 from ..export import scc
+from ..pdfium_lock import pdfium_locked
 
 FORM_TITLE = 'Variance Form for Proposed Alternative Solution'
 MAX_ATTRIBUTION_ROWS = 256  # bound untrusted reconstruction hints independently of upload byte limits
@@ -65,6 +66,7 @@ class ReadFile:
     def locate(self, page: int, quote: str) -> tuple[float, float, float, float] | None:
         return locate(self.data, page, quote)
 
+    @pdfium_locked
     def passage_has_marks(self, page: int, heading: tuple[str, int] | None,
                           stop: tuple[str, int] | None) -> bool:
         """Non-text objects between passage boundaries make text-only presence uncertain.
@@ -100,6 +102,7 @@ class ReadFile:
         except Exception:  # noqa: BLE001 - unreadable graphics must not establish a blank passage
             return True
 
+    @pdfium_locked
     def unreadable_pages(self) -> list[int]:
         """Textless drawn pages, raster regions or annotation appearances in attachment/appendix pages.
 
@@ -296,6 +299,7 @@ def _page_box(page) -> tuple:
 
 
 @lru_cache(maxsize=16)
+@pdfium_locked
 def _prepared_version(version: str, source: bytes, row_count: int) -> FormVersion:
     import pypdfium2 as pdfium
     from pypdf import PdfReader
@@ -374,6 +378,7 @@ def _layout_matches(reader, doc, version: FormVersion) -> bool:
     return True
 
 
+@pdfium_locked
 def locate(data: bytes, page: int, quote: str) -> tuple[float, float, float, float] | None:
     """Bounding box of the first occurrence of `quote` on a 0-based page, or None."""
     import pypdfium2 as pdfium
@@ -558,6 +563,7 @@ def _appearance_pdf(widget, appearance):
     return output.getvalue()
 
 
+@pdfium_locked
 def _appearance_agrees(widget, value, *, checkbox=False):
     import pypdfium2 as pdfium
     from PIL import ImageChops
@@ -592,6 +598,7 @@ def _overlaps(rect, boxes):
     return any(bx0 < x1 and bx1 > x0 and by0 < y1 and by1 > y0 for bx0, by0, bx1, by1 in boxes)
 
 
+@pdfium_locked
 def _fillable(reader, data: bytes, name: str, version: FormVersion) -> ReadFile | None:
     try:
         fields = reader.get_fields() or {}
@@ -670,6 +677,7 @@ def _fillable(reader, data: bytes, name: str, version: FormVersion) -> ReadFile 
     return out
 
 
+@pdfium_locked
 def _page_texts(data: bytes, pages) -> list[PageText]:
     import pypdfium2 as pdfium
     import pypdfium2.raw as raw
@@ -723,6 +731,7 @@ def _page_texts(data: bytes, pages) -> list[PageText]:
     return out
 
 
+@pdfium_locked
 def _flattened(data: bytes, name: str, version: FormVersion) -> ReadFile:
     import pypdfium2 as pdfium
     doc = pdfium.PdfDocument(data)
@@ -776,6 +785,7 @@ def _added_marks(page, rect, template: frozenset) -> bool:
     return False
 
 
+@pdfium_locked
 def _form_read(reader, data: bytes, name: str) -> ReadFile | None:
     import pypdfium2 as pdfium
     doc = pdfium.PdfDocument(data)
@@ -805,6 +815,7 @@ def _form_read(reader, data: bytes, name: str) -> ReadFile | None:
     return out
 
 
+@pdfium_locked
 def read_pdf(data: bytes, name: str) -> ReadFile:
     """Classify and read one uploaded file. Never raises for bad input; reports it as unreadable."""
     digest = hashlib.sha256(data).hexdigest()

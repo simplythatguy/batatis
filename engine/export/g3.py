@@ -12,6 +12,7 @@ from pathlib import Path
 from ..copyright import NRC_PUBLICATION_URL
 from ..models import Case
 from ..not_applicable import LABEL as NA_LABEL
+from ..pdfium_lock import pdfium_locked
 from ..process_fields import process_fields
 from .appendix import _reflow
 from .scc import ExportResult, confirmed_values, load_field_map
@@ -82,6 +83,7 @@ def citation_problems(result: ExportResult, *, db_path=None) -> list[str]:
     return [f'{e["code"]} {e["citation"]}: {e["message"]}' for e in report['errors']]
 
 
+@pdfium_locked
 def page_texts(pdf: bytes) -> list[str]:
     import pypdfium2 as pdfium
     doc = pdfium.PdfDocument(pdf)
@@ -92,6 +94,7 @@ def appendix_text(result: ExportResult) -> str:
     return norm(' '.join(FOOTER.sub(' ', t) for t in page_texts(result.pdf)[result.form_pages:]))
 
 
+@pdfium_locked
 def render_problems(result: ExportResult) -> list[str]:
     """Every shown line of every filled field is drawn on its page with each character inside the field box,
     and every value shown only as a reference is carried in full by the appendix."""

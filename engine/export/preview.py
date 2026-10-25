@@ -10,6 +10,8 @@ from __future__ import annotations
 import io
 from dataclasses import dataclass
 
+from ..pdfium_lock import pdfium_locked
+
 SCALE = 2.0                   # image pixels per PDF point
 COLORS = 32
 MAX_PAGES = 60
@@ -23,6 +25,7 @@ class PageImage:
     png: bytes
 
 
+@pdfium_locked
 def page_images(pdf: bytes, *, budget: int = BUDGET_BYTES, max_pages: int = MAX_PAGES) -> tuple[list[PageImage], int]:
     """The first pages, in order, whose images fit `budget` together with the PDF; and the PDF's page count."""
     import pypdfium2 as pdfium
