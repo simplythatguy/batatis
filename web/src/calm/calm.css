@@ -2609,8 +2609,8 @@ body {
   min-width: 0;
 }
 
-/* The application form: the engine's own PDF in the browser's viewer. The pane stays neutral so the
-   official form keeps its own design. */
+/* The application form: the engine's own PDF pages as paper on the page background, with no viewer frame.
+   The pane stays neutral so the official form keeps its own design. */
 .cf-form-view {
   min-width: 0;
   display: flex;
@@ -2645,13 +2645,38 @@ body {
   margin-left: auto;
 }
 
-.cf-form-frame {
-  width: 100%;
+/* The pages scroll in their own column so the download panel stays put. 2px of room keeps each sheet's
+   ring and shadow inside the scroll box. */
+.cf-form-pages {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   height: calc(100vh - 170px);
   min-height: 560px;
-  border: 1px solid var(--cf-line);
-  border-radius: 12px;
-  background: #fff;
+  padding: 2px 2px 24px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: 4px;
+}
+
+.cf-form-pages:focus-visible {
+  outline: 2px solid var(--cf-focus);
+  outline-offset: 2px;
+}
+
+.cf-form-page {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: var(--cf-sheet);
+  border: 1px solid transparent; /* forced-colors mode drops the ring and keeps this edge */
+  border-radius: 2px;
+  box-shadow: 0 0 0 1px var(--cf-line), 0 1px 2px rgba(17, 24, 39, 0.06);
+}
+
+.cf-form-more {
+  align-self: center;
+  font-size: 13px;
 }
 
 .cf-form-empty {
@@ -2681,7 +2706,7 @@ body {
 }
 
 @media (max-width: 760px) {
-  .cf-form-frame {
+  .cf-form-pages {
     height: 70vh;
     min-height: 420px;
   }

@@ -503,6 +503,14 @@ export interface Explainer {
   text: string;
 }
 
+/** The draft export for the application screen: its exact bytes and images of its first pages. */
+export interface ExportPreview {
+  filename: string;
+  page_count: number;
+  pages: PreviewPage[];
+  pdf: string;
+}
+
 export interface Fact {
   confidence: number | null;
   field: string;
@@ -1052,6 +1060,12 @@ export interface PreApplicationStep {
   sources: PlanSource[];
   text: string;
   title: string;
+}
+
+export interface PreviewPage {
+  height: number;
+  image: string;
+  width: number;
 }
 
 /** A process reference listed on every case, read-only: how an alternative solution is allowed and documented. */

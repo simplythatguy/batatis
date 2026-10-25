@@ -15,7 +15,7 @@ from pathlib import Path
 
 from pydantic.json_schema import GenerateJsonSchema, models_json_schema
 
-from .api import NewCase, SectionCRequest
+from .api import ExportPreview, NewCase, SectionCRequest
 from .code_library import CodeTOC, ProvisionContext
 from .models import Case, Fact, SectionCRow
 from .account_models import ApplicationPreferences, ApplicationPreferencesPatch, UserResult, MessagesResult
@@ -44,7 +44,7 @@ RESPONSES = (Case, SectionCRow, CodeTOC, ProvisionContext, UserResult, MessagesR
              ReviewSession, PackageReviewIndex, SentInformationRequests,
              JurisdictionsResult, JurisdictionDetail, CaseJurisdictionPack, IntakeResult, CaseRules, RuleSet,
              JurisdictionChecklists, CaseChecklists, ChecklistAnswerResult,
-             ApplicationPreferences, VoiceCapability)  # responses carry every field
+             ApplicationPreferences, VoiceCapability, ExportPreview)  # responses carry every field
 REQUESTS = (Fact, NewCase, SectionCRequest, SignupRequest, LoginRequest, OnboardingRequest,
             ClaimRequest, DecisionRequest, MessageRequest, MessageReadRequest, ProfessionalRequirementRequest,
             SubmitRequest, AssistRequest, InformationRequestEdit,

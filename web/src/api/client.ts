@@ -14,6 +14,7 @@ import type {
   CaseRules,
   ChecklistAnswerRequest,
   ChecklistAnswerResult,
+  ExportPreview,
   JurisdictionDetail,
   JurisdictionsResult,
 } from "./types.gen";
@@ -234,6 +235,12 @@ export function createEngine(base: string) {
      * A missing code database is not turned into a 503 on this branch.
      */
     exportPdf: (caseId: string, draft = false, signal?: AbortSignal) => exportPdf(base, caseId, draft, signal),
+    /**
+     * GET /cases/{id}/export/preview: the draft PDF's exact bytes and images of its first pages, as data URLs,
+     * for the application screen. `pages` stops early only at the response budget; `page_count` counts all.
+     */
+    exportPreview: (caseId: string, signal?: AbortSignal) =>
+      call<ExportPreview>("GET", `/cases/${enc(caseId)}/export/preview`, undefined, signal, 20000),
     /** Multipart PDF upload (FormData field `file`), returning its stored id and metadata. */
     upload: (caseId: string, file: File, signal?: AbortSignal) => uploadPdf(base, caseId, file, signal),
     files: (caseId: string, signal?: AbortSignal) =>

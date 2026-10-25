@@ -3209,6 +3209,38 @@
       "title": "Explainer",
       "type": "object"
     },
+    "ExportPreview": {
+      "description": "The draft export for the application screen: its exact bytes and images of its first pages.",
+      "properties": {
+        "filename": {
+          "title": "Filename",
+          "type": "string"
+        },
+        "page_count": {
+          "title": "Page Count",
+          "type": "integer"
+        },
+        "pages": {
+          "items": {
+            "$ref": "#/$defs/PreviewPage"
+          },
+          "title": "Pages",
+          "type": "array"
+        },
+        "pdf": {
+          "title": "Pdf",
+          "type": "string"
+        }
+      },
+      "required": [
+        "filename",
+        "pdf",
+        "page_count",
+        "pages"
+      ],
+      "title": "ExportPreview",
+      "type": "object"
+    },
     "Fact": {
       "properties": {
         "confidence": {
@@ -6843,6 +6875,29 @@
         "sources"
       ],
       "title": "PreApplicationStep",
+      "type": "object"
+    },
+    "PreviewPage": {
+      "properties": {
+        "height": {
+          "title": "Height",
+          "type": "number"
+        },
+        "image": {
+          "title": "Image",
+          "type": "string"
+        },
+        "width": {
+          "title": "Width",
+          "type": "number"
+        }
+      },
+      "required": [
+        "width",
+        "height",
+        "image"
+      ],
+      "title": "PreviewPage",
       "type": "object"
     },
     "ProcessRef": {
