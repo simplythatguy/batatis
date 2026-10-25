@@ -36,7 +36,14 @@ reader.on('line',line=>{
   const msg = JSON.parse(line);
   if (msg.fixtureControl) { controls.get(msg.fixtureControl)?.(); controls.delete(msg.fixtureControl); return; }
   appendFileSync(capture,JSON.stringify(msg)+'\n');
-  if (msg.method === mode.errorMethod) { send({id:msg.id,error:mode.errorValue}); return; }
+  if (msg.method === mode.errorMethod) {
+    const error = () => {
+      send({id:msg.id,error:mode.errorValue});
+      appendFileSync(capture,JSON.stringify({fixtureEvent:'error-sent',error:mode.errorValue})+'\n');
+    };
+    if (mode.holdError) controls.set('error',error); else error();
+    return;
+  }
   const p = msg.params;
   switch(msg.method) {
     case 'initialize': {
@@ -144,9 +151,15 @@ for (const [name, errorValue] of [
   ["valid control", { code: -32000, message: "PRIVATE RESPONSE" }],
 ] satisfies [string, unknown][]) {
   test(`RPC error lifecycle settles initialization, queued status and disposal for ${name}`, async (t) => {
-    const f = await fixture(t, { errorMethod: "initialize", errorValue }, { requestMs: 100, completionMs: 200 });
+    const f = await fixture(t, { errorMethod: "initialize", errorValue, holdError: true }, { requestMs: 5000, completionMs: 10000 });
     const completion = f.provider.completeJson(request, new AbortController().signal);
     const status = f.provider.status();
+    await f.waitMethod("initialize");
+    assert.equal(f.children.some(f.exited), false);
+    assert.equal((await f.messages()).some((message) => message.fixtureEvent === "error-sent"), false);
+    f.control("error");
+    await f.waitFor(async () => (await f.messages()).some((message) => message.fixtureEvent === "error-sent"));
+    assert.deepEqual((await f.messages()).find((message) => message.fixtureEvent === "error-sent")?.error, errorValue);
     await f.waitFor(async () => f.children.some(f.exited));
     const values = await within(Promise.all([completion, status, f.dispose()]), 350, "malformed RPC errors must settle completion, followups and disposal after child exit");
     assertFailure(values[0], "runtime");
@@ -205,6 +218,38 @@ test("queued deadline settles independently while initialization remains active"
   assert.equal((await within(first, 500, "initialization remains usable")).length, 1);
   assert.equal((await f.provider.status()).state, "signed-in");
   assert.equal((await f.messages()).some((message) => message.method === "turn/start"), false);
+});
+
+test("a workflow deadline includes time queued behind another completion", async (t) => {
+  const completionMs = 10000;
+  const f = await fixture(t, {}, { requestMs: 5000, completionMs });
+  let activeSettled = false;
+  const activeAbort = new AbortController();
+  const active = f.provider.completeJson(request, activeAbort.signal);
+  void active.then(() => { activeSettled = true; });
+  await f.waitMethod("turn/start");
+  assert.equal(activeSettled, false);
+  const queuedAbort = new AbortController();
+  t.mock.timers.enable({ apis: ["setTimeout"] });
+  const queued = f.provider.completeJson(request, queuedAbort.signal);
+  t.mock.timers.tick(completionMs);
+  t.mock.timers.reset();
+  assertFailure(await within(queued, 250, "queued deadline must settle while the active turn remains held"), "incomplete");
+  assert.equal(getEventListeners(queuedAbort.signal, "abort").length, 0);
+  assert.equal(activeSettled, false);
+  assert.equal(f.children.some(f.exited), false);
+  assert.equal((await f.messages()).some((message) => message.method === "turn/interrupt"), false);
+  assert.equal((await f.messages()).filter((message) => message.method === "turn/start").length, 1);
+  f.control("finish");
+  assert.equal((await within(active, 500, "active completion remains usable after queued expiry")).ok, true);
+  assert.equal(getEventListeners(activeAbort.signal, "abort").length, 0);
+  assert.equal((await f.provider.status()).state, "signed-in");
+  assert.equal((await f.messages()).filter((message) => message.method === "turn/start").length, 1);
+  const next = f.provider.completeJson(request, new AbortController().signal);
+  await f.waitMethod("turn/start", 2);
+  f.control("finish");
+  assert.equal((await within(next, 500, "fresh work uses the queue after expired work was removed")).ok, true);
+  assert.equal((await f.messages()).filter((message) => message.method === "turn/start").length, 2);
 });
 
 test("repeated queued cancellation frees capacity and preserves the pending-operation bound", async (t) => {

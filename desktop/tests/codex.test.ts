@@ -388,16 +388,6 @@ test("deadline stops an uncooperative turn and dispose stops an EOF-resistant ch
   assert.ok(f.children.every((child) => child.exitCode !== null || child.signalCode !== null));
 });
 
-test("a workflow deadline includes time queued behind another completion", async (t) => {
-  const f = await setup(t, { hangTurn: true }, { timing: { completionMs: 150, interruptMs: 50, stopMs: 30 } });
-  const results = await Promise.all([complete(f.provider), complete(f.provider)]);
-  for (const result of results) {
-    assert.equal(result.ok, false);
-    if (!result.ok) assert.equal(result.reason, "incomplete");
-  }
-  assert.equal((await f.messages()).filter((message) => message.method === "turn/start").length, 1);
-});
-
 test("mismatched context proof and request model cannot start a workflow", async (t) => {
   const f = await setup(t, {}, { verifiedContext: { evidence: "fixture", runtimeSha256: "0".repeat(64), contextFingerprint: CODEX_CONTEXT_FINGERPRINT } });
   const result = await complete(f.provider);

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { constants, copyFileSync, existsSync, mkdirSync, realpathSync, writeFileSync } from "node:fs";
+import { realpath } from "node:fs/promises";
 import { join } from "node:path";
 import test from "node:test";
 import { KNOWN_EXECUTABLE_SHA256, platformKey } from "../src/main/codex/release.ts";
@@ -24,7 +25,7 @@ test("the app resolves and verifies Codex from electron-builder's flat resources
   const paths: RuntimePaths = { userData: root, resources, packaged: true, platform: process.platform };
   const context = { resourcesDir: resources, stateDir: root, workDir: root, appVersion: "test", log: () => {} };
   const resolved = await codexRuntime(paths)(context, process.platform, process.arch);
-  assert.equal(resolved.executable, executable);
+  assert.equal(resolved.executable, await realpath(executable));
   assert.ok(KNOWN_EXECUTABLE_SHA256[key]?.includes(resolved.sha256), "the actual bundled executable retains its known digest");
   writeFileSync(executable, "synthetic unapproved executable");
   await assert.rejects(codexRuntime(paths)(context, process.platform, process.arch), /verified local AI runtime is missing/);
