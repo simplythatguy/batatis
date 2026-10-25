@@ -788,6 +788,7 @@ export interface InputFile {
 }
 
 export interface IntakePlan {
+  asked: Question[];
   candidates_seen: number;
   fork: Fork;
   next: "redirect" | "questions" | "identify";

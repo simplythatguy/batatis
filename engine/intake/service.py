@@ -16,6 +16,7 @@ from ..models_intake import FactPointer, IntakeRecord
 from . import model as model_pass
 from .extract import DESCRIPTION, DESCRIPTION_REF, Extraction, Origin, Outbound, read_file, read_text, scrubbed
 from .plan import OVERRIDDEN, SCOPE_FIELD, build_plan, description, overridden
+from .questions import PROBES, question_id
 from .rules import ENUMS, FIELDS, PERSONAL, ROLES, read
 from .scope import classify
 from .text import NUMBER, number
@@ -166,8 +167,17 @@ def _value(field: str, raw: str):
 
 
 def answer(case: Case, answers: list[dict]) -> list[Fact]:
-    """Answers to the stored plan's questions only. Each fills its own field. Checked before any is written."""
-    asked = {q.id: q.field for q in (case.intake.plan.questions if case.intake and case.intake.plan else [])}
+    """Only questions issued for this case, including earlier plans. Validate the whole batch before writing."""
+    plan = case.intake.plan if case.intake else None
+    asked = {}
+    if plan and plan.scope.status != 'redirect':
+        asked = {q.id: q.field for q in [*plan.asked, *plan.questions]}
+        # Records saved before issued-question history existed still prove earlier answers.
+        answered = {f.field for f in case.facts if f.source.ref == 'intake answer' and f.status == 'confirmed'}
+        for probe in PROBES:
+            qid = question_id(probe.field)
+            if probe.field in answered or qid in plan.not_sure:
+                asked.setdefault(qid, probe.field)
     checked = []
     for item in answers:
         qid, raw = item.get('question_id'), item.get('answer') or ''
@@ -182,7 +192,12 @@ def answer(case: Case, answers: list[dict]) -> list[Fact]:
         if value is None:
             if qid not in case.intake.plan.not_sure:
                 case.intake.plan.not_sure.append(qid)
-            continue
+            # Withdrawing a saved answer must not leave its old confirmed value in force.
+            previous = _latest(case, field)
+            if previous is None or previous.value in (None, ''):
+                continue
+        else:
+            case.intake.plan.not_sure = [q for q in case.intake.plan.not_sure if q != qid]
         fact = Fact(field=field, value=value, kind='pointed', status='confirmed',
                     source=Source(type='user_text', ref='intake answer', quote=raw.strip()))
         case.facts.append(fact)

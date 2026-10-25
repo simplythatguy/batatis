@@ -220,6 +220,103 @@ def test_answers_fill_only_their_own_question_and_not_sure_never_blocks():
     assert not [f for f in case.facts if f.field == 'occupancy']           # nothing that could block export
 
 
+def test_an_answered_choice_can_be_changed_after_the_plan_moves_on(http):
+    case_id = http.post('/cases', json={}).json()['id']
+    intake = http.post(f'/cases/{case_id}/intake', json={
+        'text': 'We manufacture an insulated panel for house walls.', 'role': 'manufacturer', 'model': False,
+    }).json()
+    scope = next(q for q in intake['record']['plan']['questions'] if q['field'] == 'scope')
+    first = http.post(f'/cases/{case_id}/intake/answers', json={
+        'answers': [{'question_id': scope['id'], 'answer': 'site'}], 'expected_version': intake['case_version'],
+    })
+    assert first.status_code == 200
+    saved = first.json()
+    assert scope['id'] not in [q['id'] for q in saved['record']['plan']['questions']]
+
+    # Read the persisted record before going Back and changing the saved choice.
+    reloaded = http.get(f'/cases/{case_id}/intake').json()
+    edited = http.post(f'/cases/{case_id}/intake/answers', json={
+        'answers': [{'question_id': scope['id'], 'answer': 'jurisdiction'}],
+        'expected_version': reloaded['case_version'],
+    })
+    assert edited.status_code == 200, edited.text
+    latest = http.get(f'/cases/{case_id}').json()
+    assert [f for f in latest['facts'] if f['field'] == 'scope'][-1]['value'] == 'jurisdiction'
+    assert edited.json()['case_version'] == saved['case_version'] + 1
+
+    # An issued question remains bound to its field and to the acknowledged case version.
+    stale = http.post(f'/cases/{case_id}/intake/answers', json={
+        'answers': [{'question_id': scope['id'], 'answer': 'site'}], 'expected_version': saved['case_version'],
+    })
+    assert stale.status_code == 409
+    wrong_field = http.post(f'/cases/{case_id}/intake/answers', json={
+        'answers': [{'question_id': scope['id'], 'field': 'project.description', 'answer': 'site'}],
+        'expected_version': edited.json()['case_version'],
+    })
+    assert wrong_field.status_code == 422
+    unasked = http.post(f'/cases/{case_id}/intake/answers', json={
+        'answers': [{'question_id': 'intake.owner_name_not_asked', 'answer': 'x'}],
+        'expected_version': edited.json()['case_version'],
+    })
+    assert unasked.status_code == 422
+    assert http.get(f'/cases/{case_id}').json() == latest
+
+
+def test_a_saved_not_sure_can_be_replaced_with_a_real_answer():
+    case = _case('Our client wants a single staircase in their new building instead of two.')
+    qid = next(q.id for q in case.intake.plan.questions if q.field == 'occupancy')
+    service.answer(case, [{'question_id': qid, 'answer': 'not sure'}])
+    service.answer(case, [{'question_id': qid, 'answer': 'single_family'}])
+    assert qid not in case.intake.plan.not_sure
+    assert [f for f in case.facts if f.field == 'occupancy'][-1].value == 'single_family'
+
+
+def test_an_issued_question_survives_replanning_and_batch_validation_is_atomic():
+    case = _case('Our client wants a single staircase in their new building instead of two.')
+    question = next(q for q in case.intake.plan.questions if q.field == 'storeys')
+    from engine.models import Fact, Source
+    case.facts.append(Fact(field='storeys', value=2, kind='pointed', status='unconfirmed',
+                           source=Source(type='user_text', ref='intake:description', quote='two storeys')))
+    service.refresh(case)
+    assert question.id not in [q.id for q in case.intake.plan.questions]
+    assert question.id in [q.id for q in case.intake.plan.asked]
+    before = case.model_dump()
+    with pytest.raises(service.AnswerRejected):
+        service.answer(case, [{'question_id': question.id, 'answer': '3'},
+                              {'question_id': 'intake.never_asked', 'answer': 'x'}])
+    assert case.model_dump() == before
+    service.answer(case, [{'question_id': question.id, 'answer': '3'}])
+    assert [f for f in case.facts if f.field == 'storeys'][-1].value == 3
+    service.refresh(case)
+    assert len([q for q in case.intake.plan.asked if q.id == question.id]) == 1
+
+
+def test_legacy_answers_stay_editable_and_uncertainty_withdraws_the_old_value():
+    case = _case('Our client wants a single staircase in their new building instead of two.')
+    qid = next(q.id for q in case.intake.plan.questions if q.field == 'occupancy')
+    service.answer(case, [{'question_id': qid, 'answer': 'single_family'}])
+    case.intake.plan.asked = []  # persisted before issued-question history was added
+    service.answer(case, [{'question_id': qid, 'answer': 'not sure'}])
+    assert [f for f in case.facts if f.field == 'occupancy'][-1].value is None
+    assert qid in case.intake.plan.not_sure
+    case.intake.plan.asked = []
+    service.answer(case, [{'question_id': qid, 'answer': 'single_family'}])
+    assert qid not in case.intake.plan.not_sure
+    assert [f for f in case.facts if f.field == 'occupancy'][-1].value == 'single_family'
+
+
+def test_issued_history_does_not_bypass_a_scope_redirect():
+    case = _case('Our client wants a single staircase in their new building instead of two.')
+    qid = next(q.id for q in case.intake.plan.questions if q.field == 'storeys')
+    text = 'Can we skip AFCI breakers on the bedroom circuits?'
+    service.apply(case, text, service.run(text, []))
+    assert case.intake.plan.scope.status == 'redirect'
+    before = case.model_dump()
+    with pytest.raises(service.AnswerRejected):
+        service.answer(case, [{'question_id': qid, 'answer': '3'}])
+    assert case.model_dump() == before
+
+
 # ---------------------------------------------------------------- redirect on the case (AC2.2, AC2.3)
 
 def test_redirect_is_a_computed_fact_with_the_cue_and_blocks_export_until_overridden():

@@ -5181,6 +5181,14 @@
     },
     "IntakePlan": {
       "properties": {
+        "asked": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Question"
+          },
+          "title": "Asked",
+          "type": "array"
+        },
         "candidates_seen": {
           "default": 0,
           "title": "Candidates Seen",
@@ -5237,6 +5245,7 @@
         "scope",
         "fork",
         "questions",
+        "asked",
         "not_sure",
         "pre_application",
         "route_notice",
