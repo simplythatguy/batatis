@@ -1,5 +1,5 @@
 ---
-description: Batatis git and environment rules — GitHub has only dev and main; local app on ports 3000/8000 only
+description: Batatis git and environment rules — one permanent main branch with short-lived work branches; local app on ports 3000/8000 only
 alwaysApply: true
 ---
 
@@ -7,9 +7,11 @@ alwaysApply: true
 
 Full rules: `docs/agents/git-workflow.md`.
 
-- GitHub holds exactly two branches: `dev` (shared integration source) and `main` (production). Never push or open a PR from any other branch. Never push or merge `main`. Never force-push. Never delete `dev`.
-- Flow: verify locally (`scripts/verify.sh`) → land on `dev` (`scripts/land.sh`, fast-forward only) → the user tests locally and approves → the user merges the single release PR `dev → main`.
-- Vercel deploys only `main`; preview deployments are disabled. `dev` pushes run CI. Local verification remains required before landing.
-- Check `git merge-base --is-ancestor origin/dev HEAD` before rebasing. If true, do not rebase. Otherwise use `git -c rebase.updateRefs=false rebase --rebase-merges origin/dev`.
+- GitHub has one permanent branch, `main` (production). Each batch of work happens on a short-lived branch that becomes a pull request into `main`; GitHub deletes the branch after it merges. `dev` is retired; never recreate it.
+- Flow: branch from the latest `main` → verify locally (`scripts/verify.sh`) → open or update the pull request (`scripts/land.sh`) → the user tests it locally and merges it.
+- Never push to `main`. Never merge a pull request unless the user asks. Never force-push. Never delete `main`.
+- Every pull request into `main` uses the plain-language template: New features added, Improvements, Bug Fixes.
+- Vercel deploys only `main`; preview deployments are disabled. Pull requests into `main` run CI. Local verification remains required.
+- To catch a branch up with `main`, merge `origin/main` into it (`scripts/land.sh` does this). Never rebase a branch that is already on GitHub.
 - Local servers: web on port 3000, engine on port 8000, nothing else (`scripts/local-app.sh`). If busy, wait for the owner; never pick another port; stop what you start.
-- Children never push or open PRs; the parent lands.
+- Children never push or open pull requests; the parent does.

@@ -1,6 +1,6 @@
 # Restored development source
 
-`dev` is the shared integration source for teammate coding. `main` is production and the only Vercel deployment branch. Test locally before the user merges the single release PR `dev → main`.
+`main` is the only permanent branch: production, the only Vercel deployment branch, and the starting point for all work. Work arrives as pull requests from short-lived branches, which the user tests locally and merges.
 
 ## Included
 
@@ -22,12 +22,12 @@ All original commits and unfinished files remain preserved. The failed broad com
 
 ## Start coding
 
-Clone `dev` and install the Git hook once per clone; it covers all of that clone's worktrees:
+Clone `main` and install the Git hook once per clone; it covers all of that clone's worktrees:
 
 ```bash
-git clone --branch dev https://github.com/simplythatguy/batatis.git
+git clone https://github.com/simplythatguy/batatis.git
 cd batatis
 scripts/install-git-hooks.sh
 ```
 
-Follow [local setup](local-development.md) in an isolated local checkout or worktree. GitHub keeps only `dev` and `main`; feature branches stay local. Run `scripts/verify.sh`, then let the parent land verified work on `dev` through `scripts/land.sh`. Finish local testing before release. Only the user merges the release PR `dev → main`; never push directly to `main`. Follow the [Git workflow](agents/git-workflow.md), including ports 3000/8000 and user-only production approval.
+Follow [local setup](local-development.md) in an isolated local checkout or worktree. Start a short-lived branch from the latest `main`. Run `scripts/verify.sh`, then let the parent open the pull request into `main` with `scripts/land.sh`. Only the user merges pull requests; never push directly to `main`. Follow the [Git workflow](agents/git-workflow.md), including ports 3000/8000 and user-only production approval.

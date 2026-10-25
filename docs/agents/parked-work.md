@@ -1,11 +1,11 @@
 # Parked work
 
-On 2026-10-22 GitHub was reduced to two branches (`dev`, `main`). 51 branches that were already fully merged were deleted; their commits are in the history of `dev` and `main`. The 31 branches below were **not** merged. Their PRs were closed and the branches deleted, and nothing was lost:
+On 2026-10-22 GitHub was reduced to two branches (`dev`, `main`). 51 branches that were already fully merged were deleted; their commits are in the history of `dev` and `main`. The 31 branches below were **not** merged. Their PRs were closed and the branches deleted, and nothing was lost. On 2026-10-24 `dev` was retired as well; all of its commits are in the history of `main`, which is now the only permanent branch:
 
 - A PR's head stays fetchable from GitHub as `refs/pull/<N>/head`, even after the PR is closed and the branch deleted.
 - Every branch, including the ones without a PR, is in a local backup bundle (`~/.t3/backups/batatis-20261022/t3-clone-all-refs.bundle`).
 
-Restore a branch that had a PR into a local branch. It stays local: to ship it, rebase it onto `dev`, verify, and land it with `scripts/land.sh` (see `docs/agents/git-workflow.md`):
+Restore a branch that had a PR into a local branch. To ship it, merge the latest `main` into it, verify, and open a pull request with `scripts/land.sh` (see `docs/agents/git-workflow.md`):
 
 ```sh
 git fetch https://github.com/simplythatguy/batatis.git pull/<N>/head:parked/<name>
@@ -26,7 +26,7 @@ Rows marked **Freshest product line** or **Unlanded** need a decision. The rest 
 | `feat/wp16-accuracy` | #67 (was open) | `a93e29bdf` | 2026-10-22 | Merge refusal correspondence review fixes | Part of the freshest stack (see `work/mvp-improvement-20261022`). |
 | `feat/wp36-officer-ui` | #62 (was open) | `675a01852` | 2026-10-22 | fix: preserve refusal correspondence and refresh open-file notices | Part of the freshest stack (see `work/mvp-improvement-20261022`). |
 | `feat/wp10-11-evals` | #58 (was open) | `6a4279525` | 2026-10-21 | evals: ledger after the connection experiments | WP-10/11/12 Code ID benchmark harness and results. 16 ahead, 11 behind `dev`; its local worktree also had 8 uncommitted files. |
-| `backend/spend-cap` | #41 (was open) | `13ab58277` | 2026-10-20 | fix: require coherent chat usage before refunding reservations | **Unlanded and still needed.** Total OpenAI spend cap (`engine/spend.py`, `engine/openai_only.py`, tests). `docs/deploy.md` makes it the go-live gate for live OpenAI; `dev` only has the daily ledger in `engine/llm_gate.py`. Port it onto current `dev` before enabling `BATATIS_LIVE`. |
+| `backend/spend-cap` | #41 (was open) | `13ab58277` | 2026-10-20 | fix: require coherent chat usage before refunding reservations | **Unlanded and still needed.** Total OpenAI spend cap (`engine/spend.py`, `engine/openai_only.py`, tests). `docs/deploy.md` makes it the go-live gate for live OpenAI; `dev` only has the daily ledger in `engine/llm_gate.py`. Port it onto current `main` before enabling `BATATIS_LIVE`. |
 | `backend/answerable-gaps` | #23 (closed) | `2ca778bdd` | 2026-10-20 | Label description scores as agent-labelled, and note file_id is unchecked. |  |
 | `backend/calgary-notice-casec-gold` | #40 (was open) | `db83f841a` | 2026-10-20 | Merge branch 'dev' into backend/calgary-notice-casec-gold | Calgary form notice and Case C smoke-alarm gold. May be a head start for WP-44 (Calgary form). |
 | `backend/case-api` | #21 (was open) | `7bb0e3ab1` | 2026-10-20 | Skip the smoke upload when the files route answers 404 or 405. |  |

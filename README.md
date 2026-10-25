@@ -105,6 +105,21 @@ For both:
 - Get notified when an application changes status or a message arrives.
 - Applications and their files are deleted 7 days after they are created.
 
+## Practice cases
+
+This repository includes 653 practice cases for testing how well Batatis reads real documents. Each case pairs a request, written the way an applicant might ask, with published documents to attach, such as feasibility studies, issued variances, and appeal decisions. No document in them was made up.
+
+| Where the cases come from | Cases |
+| --- | ---: |
+| Calgary and Edmonton | 38 |
+| The rest of Alberta | 121 |
+| Product and research evidence from across Canada | 73 |
+| Outside Alberta, used only to compare documents | 421 |
+
+For example, one Calgary case hands Batatis the city's zero-lot-line variance. Page 4 limits a footing to 0.3 m into the easement, while page 5 says 0.6 m across the property line may be allowed. Batatis should flag the difference and ask, not pick one.
+
+Many published decisions state their outcome, so the cases test reading and paperwork, not whether a design should be approved. To try one, open a case folder, paste its `prompt.txt` into Batatis, and attach the documents it lists. The [practice cases guide](Data%20Prompts/README.md) explains how to restore the original documents, which Git doesn't store, and how to check the results. The Calgary example is case [L04-001](Data%20Prompts/Canada/Alberta/Calgary/Prompts/L04-001-calgary-spv-001-zero-lot-line-revision-5-with-revision-4-history/prompt.txt).
+
 ## What's next
 
 - Export Calgary's own Request for Specific Variance form next to the Council's form.
@@ -155,7 +170,7 @@ At measured source `d479e82`, the shipped facts-only `rules_plus_unknown` agreed
 
 The repository and the backend:
 
-![The main folders and backend files: engine, codedb, scripts, docs, evals, agent skills, and the root files](docs/readme/folder-structure-backend.png)
+![The main folders and backend files: engine, codedb, scripts, docs, evals, the practice cases in Data Prompts, agent skills, and the root files](docs/readme/folder-structure-backend.png)
 
 The frontend, meaning the files that build the screens and their look:
 
@@ -172,8 +187,9 @@ Open an AI coding agent, such as Claude Code, Codex, or Cursor, in an empty fold
 ```text
 Set up the Batatis app on this computer so I can run it locally.
 
-1. Unless this folder is already a clone, clone https://github.com/simplythatguy/batatis.git
-   with --branch dev. Then run scripts/install-git-hooks.sh.
+1. Unless this folder is already a clone, clone this repository:
+   https://github.com/simplythatguy/batatis.git
+   Then run scripts/install-git-hooks.sh.
 2. Check for Git, Python 3.12, and Node.js 22.12 or newer. Install only what is missing. On
    macOS, use Homebrew.
 3. Create .venv with Python 3.12. Install engine/requirements.txt, codedb/requirements.txt,
@@ -190,23 +206,44 @@ Set up the Batatis app on this computer so I can run it locally.
 
 ### Open a pull request with an AI agent
 
-When your change is ready, paste this prompt into the same agent. Replace `YOUR-USERNAME` with your GitHub username.
+When you know what you want to change, paste this prompt into the same agent and add your request at the end:
 
 ```text
-Open a pull request with my change to github.com/simplythatguy/batatis.
+Make my change to github.com/simplythatguy/batatis and open a pull request for it.
 
 1. Read AGENTS.md and the skills it names before you change any code.
-2. Work on the dev branch. Do not create a new branch, on this computer or on GitHub.
-3. If the origin remote points at simplythatguy/batatis, make my fork the origin remote:
+2. Start a short-lived branch from the latest main, named for the change. For example:
+   git switch main
+   git pull
+   git switch -c fix-intake-wording
+3. Make the change. Run scripts/verify.sh and fix anything that fails. Then commit.
+4. If I can't push to simplythatguy/batatis, make my fork the origin remote:
    gh repo fork simplythatguy/batatis --remote
-4. Run scripts/verify.sh and fix anything that fails.
-5. Commit the change and push it to my fork:
-   git push origin dev
-6. Open the pull request:
-   gh pr create --repo simplythatguy/batatis --base dev --head YOUR-USERNAME:dev
-7. Stop there. Never push to, merge into, or delete dev or main on simplythatguy/batatis.
-   Do not run scripts/land.sh, and do not merge the pull request.
+5. Push the branch:
+   git push -u origin HEAD
+6. Write the description in a file, starting from .github/pull_request_template.md. Keep
+   its three sections: New features added, Improvements, and Bug Fixes. Use short bullets
+   in everyday words, with no technical jargon, and write "None." under an empty section.
+7. Open the pull request into main:
+   gh pr create --repo simplythatguy/batatis --base main --body-file <description file>
+8. Stop there. Never push to, merge into, or delete main, and do not merge the pull request.
+
+My change:
 ```
+
+Every pull request uses the same three sections. Here is part of the description of [#72](https://github.com/simplythatguy/batatis/pull/72), which added the practice cases:
+
+> **New features added:**
+>
+> - Added 653 practice cases based on published building code documents, with instructions for using them to test how Batatis handles attachments.
+>
+> **Improvements:**
+>
+> - Organized research cases by country, province or state, and city or town, making Calgary and Edmonton cases easier to find.
+>
+> **Bug Fixes:**
+>
+> - Fixed problems restoring some publicly available source documents.
 
 ### Set it up by hand
 
@@ -214,17 +251,17 @@ If you'd rather not use an agent, follow steps 1 to 6.
 
 ### 1. Clone the repository
 
-If you plan to contribute, fork the repository on GitHub first and clone your fork instead.
+If you plan to contribute but can't push to this repository, fork it on GitHub first and clone your fork instead.
 
 ```bash
-git clone --branch dev https://github.com/simplythatguy/batatis.git
+git clone https://github.com/simplythatguy/batatis.git
 ```
 
 ```bash
 cd batatis
 ```
 
-Install the Git hook. It blocks pushes to every branch except `dev`.
+Install the Git hook. It blocks pushes to `main`, rewriting a branch, and tags.
 
 ```bash
 scripts/install-git-hooks.sh
@@ -408,33 +445,47 @@ npm run dev --prefix web
 
 ### Make a pull request
 
-Pull requests go to the `dev` branch, never to `main`. They come from the `dev` branch of your fork, so you never create a new branch.
+`main` is the only permanent branch. Every change reaches it through a pull request from a short-lived branch, and GitHub deletes that branch after the pull request merges.
 
-If you cloned this repository instead of your fork, make your fork the `origin` remote first:
+Start a branch from the latest `main`, named for your change:
 
 ```bash
-gh repo fork simplythatguy/batatis --remote
+git switch main
 ```
 
-Work on `dev`. When your change is ready, run every check:
+```bash
+git pull
+```
+
+```bash
+git switch -c fix-intake-wording
+```
+
+When your change is ready, run every check:
 
 ```bash
 scripts/verify.sh
 ```
 
-Push to your fork:
+If you can't push to this repository, make your fork the `origin` remote:
 
 ```bash
-git push origin dev
+gh repo fork simplythatguy/batatis --remote
 ```
 
-Open a pull request into our `dev` branch. Replace `YOUR-USERNAME` with your GitHub username:
+Push your branch:
 
 ```bash
-gh pr create --repo simplythatguy/batatis --base dev --head YOUR-USERNAME:dev
+git push -u origin HEAD
 ```
 
-On GitHub, you can instead click **Contribute**, then **Open pull request**, and check that the base branch is `dev`.
+Open the pull request into `main`, then fill in its three sections in everyday words:
+
+```bash
+gh pr create --repo simplythatguy/batatis --base main
+```
+
+On GitHub, you can instead click **Compare & pull request** and check that the base branch is `main`.
 
 ### Test a pull request
 
@@ -460,10 +511,10 @@ If the pull request changes `engine/requirements.txt` or `web/package.json`, rep
 scripts/local-app.sh start
 ```
 
-To go back to your own work:
+To go back to `main`:
 
 ```bash
-git switch dev
+git switch main
 ```
 
 ## For AI agents
@@ -487,8 +538,8 @@ These rules always apply:
 - On the alternative-solution path, keep the risk assessment, mitigating measures, and assumptions.
 - Cite the National Building Code, 2023 Alberta Edition, second printing, first.
 - Keep AI provider names out of everything the app shows. Tests enforce this.
-- GitHub only ever has two branches, `main` and `dev`. Never create, push, or leave any other branch there.
-- Contribute through a pull request from your fork's `dev` branch into `dev`, after `scripts/verify.sh` passes. Never push to, merge into, or delete `dev` or `main`.
+- `main` is the only permanent branch. Do each batch of work on a short-lived branch, and let GitHub delete it after its pull request merges. Never recreate `dev`.
+- Contribute through a pull request into `main`, after `scripts/verify.sh` passes, with the three-section description in everyday words. Never push to, merge into, or delete `main`.
 - Run the app with `scripts/local-app.sh`, on ports 3000 and 8000 only.
 - Subagents report only in their own task output. They never message other threads or agents.
 

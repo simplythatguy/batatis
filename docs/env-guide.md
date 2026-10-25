@@ -1,14 +1,14 @@
 # Batatis agent setup
 
-Start from the shared development branch:
+Start from `main`, the only permanent branch:
 
 ```sh
-git clone --branch dev https://github.com/simplythatguy/batatis.git
+git clone https://github.com/simplythatguy/batatis.git
 cd batatis
 scripts/install-git-hooks.sh
 ```
 
-Follow [local development](local-development.md) to run the app on localhost:3000 with the engine on `8000`. GitHub has only dev/main; agents publish verified work to dev, and the user merges the single release PR into main. Vercel deploys only main, with preview deployments disabled. Keep feature branches local.
+Follow [local development](local-development.md) to run the app on localhost:3000 with the engine on `8000`. GitHub has one permanent branch, `main`. Agents publish verified work as a pull request from a short-lived branch, and the user merges it into `main`. Vercel deploys only `main`, with preview deployments disabled.
 
 ## Engineering workflows
 

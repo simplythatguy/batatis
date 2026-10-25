@@ -4,13 +4,13 @@ Alberta **Building Codes Challenge** (Built World Tech — Venture Pilots 2026).
 
 ## Git and environments (user decisions 2026-10-22 and 2026-10-24)
 
-GitHub has exactly two branches: `dev` (shared integration source) and `main` (production). **Vercel deploys only `main`; preview deployments are disabled.** Locally the app runs on port `3000` (web) and `8000` (engine) only. Full rules: [`docs/agents/git-workflow.md`](./docs/agents/git-workflow.md).
+GitHub has one permanent branch, `main` (production). Each batch of work happens on a short-lived branch that becomes a pull request into `main`; GitHub deletes the branch after it merges. `dev` is retired. **Vercel deploys only `main`; preview deployments are disabled.** Locally the app runs on port `3000` (web) and `8000` (engine) only. Full rules: [`docs/agents/git-workflow.md`](./docs/agents/git-workflow.md).
 
-- Flow: **verify locally** (`scripts/verify.sh`) → **land on `dev`** (`scripts/land.sh`, fast-forward only) → the user tests locally and approves the release → the user merges the single release PR `dev → main`.
-- After landing, the coordinating parent updates the release PR description using the [plain-language format and update steps](./docs/agents/git-workflow.md#release-pr-descriptions). This format takes precedence over generic PR-writing skills; children return their notes to the parent through task output.
-- Never push or open a PR from any other branch, never push or merge `main`, never force-push, never delete `dev`. Children never push; the parent lands. Run `scripts/install-git-hooks.sh` in a new clone.
-- Push only verified work. Local verification is required even when GitHub Actions runs. `dev` pushes run CI; only an approved merge into `main` triggers Vercel.
-- Before rebasing run `git merge-base --is-ancestor origin/dev HEAD`; if true, do not rebase. Otherwise `git -c rebase.updateRefs=false rebase --rebase-merges origin/dev`.
+- Flow: **branch from the latest `main`** → **verify locally** (`scripts/verify.sh`) → **open or update the pull request** (`scripts/land.sh`) → the user tests it locally and merges it.
+- Every pull request into `main` uses the [plain-language format and update steps](./docs/agents/git-workflow.md#pull-request-descriptions): **New features added**, **Improvements**, **Bug Fixes**. This format takes precedence over generic PR-writing skills; children return their notes to the parent through task output.
+- Never push to `main`, never merge a pull request unless the user asks, never force-push, never delete `main`, never recreate `dev`. Children never push; the parent opens the pull request. Run `scripts/install-git-hooks.sh` in a new clone.
+- Push only verified work. Local verification is required even when GitHub Actions runs. Pull requests into `main` run CI; only a merge into `main` triggers Vercel.
+- To catch a branch up with `main`, merge `origin/main` into it (`scripts/land.sh` does this). Never rebase a branch that is already on GitHub.
 - Ports: `scripts/local-app.sh status|start|stop|wait`. If 3000 or 8000 is busy, wait for the owner. Never pick another port; stop what you start.
 
 ## Subagent communication (user decision 2026-10-23)

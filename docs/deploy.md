@@ -12,14 +12,13 @@ declarations fails with `MISSING_SERVICES`.
 
 Only `main` deploys (user decision, 2026-10-24). Keep **Production Branch = `main`**
 and **preview deployments disabled** in the Vercel project. The repository's
-`git.deploymentEnabled` allows `main` and disables every other branch. `dev` is
-shared integration source tested locally; its former stable hosted alias is retired.
+`git.deploymentEnabled` allows `main` and disables every other branch. `main` is
+the only permanent branch. The old `dev` branch and its hosted alias are retired.
 
-Agents land verified work on `dev`. Teammates can merge contribution PRs into
-`dev` with GitHub write access. The user approves the release and merges the
-single `dev → main` PR using **Create a merge commit**; that triggers production.
-A `dev` push or contribution PR does not trigger a Vercel preview. See the
-[Git workflow](agents/git-workflow.md).
+Work arrives as pull requests from short-lived branches. The user tests a pull
+request locally and merges it into `main` using **Create a merge commit**; that
+triggers production. Pushing a work branch or opening a pull request does not
+trigger a Vercel preview. See the [Git workflow](agents/git-workflow.md).
 
 The previous two-site setup was superseded. Historical preview deployments and
 their isolated data are preserved as recovery evidence. This configuration
@@ -109,11 +108,11 @@ non-Postgres storage settings. `BATATIS_CASES` selects a sqlite path for local r
 
 ## Verification and release
 
-Before landing, test locally on localhost:3000/8000 with synthetic records.
+Before opening a pull request, test locally on localhost:3000/8000 with synthetic records.
 CodeDB and PostgreSQL prerequisites must be present for the affected checks;
 record any skipped coverage. Inspect the saved PDF, not just an HTTP 200.
 
-After the user approves and merges `dev → main`, verify the production
+After the user merges a pull request into `main`, verify the production
 deployment's exact commit and both services. Use an authenticated synthetic
 account to check case creation, save/reload, code lookup, PDF export and deletion.
 Record cold/warm latency when useful. A `READY` frontend alone is not backend,
