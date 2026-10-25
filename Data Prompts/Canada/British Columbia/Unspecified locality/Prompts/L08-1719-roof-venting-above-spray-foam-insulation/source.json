@@ -1,0 +1,65 @@
+{
+  "id": "L08-1719",
+  "title": "Roof venting above spray foam insulation",
+  "jurisdiction": "British Columbia (specific local authority not named in published decision)",
+  "code_edition": "unknown (edition not stated in decision)",
+  "case_type": "appeal_decision",
+  "source_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1719",
+  "document_date": "2012-10-17",
+  "facts": [
+    {
+      "text": "A new triplex is proposed with half-pound spray foam between roof joists, applied directly to the underside of roof sheathing, without a venting space.",
+      "locator": "Project Description"
+    },
+    {
+      "text": "The appellant said building-science documentation supported the view that the assembly would be airtight; the building official said evidence was insufficient to show air leakage and condensation would be prevented.",
+      "locator": "Appellant's Position; Building Official's Position"
+    },
+    {
+      "text": "The dispute concerns Article 9.19.1.1 and the phrase allowing omission of venting where it can be shown unnecessary.",
+      "locator": "Reason for Appeal"
+    }
+  ],
+  "limitations": [
+    "Only the Board published decision page is available; the original appeal application and underlying submissions are not linked.",
+    "British Columbia case; comparative evidence only, with no asserted applicability to Alberta."
+  ],
+  "worker": "L08",
+  "prompt_number": 517,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1719",
+      "sha256": "9970c2e1f244c5adc5454ab1523dd007a53307949352ef7aa561367cff973eac",
+      "role": "outcome_reference",
+      "bytes": 1372266,
+      "filename": "bcab-1719-9970c2e1f244.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L08/files/bcab-1719-9970c2e1f244.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:20:16.966609+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1719",
+        "content_type": "text/html; charset=utf-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-1-source-text.txt",
+        "sha256": "4ae9326b631559232c9c88b25c4d4b20cdbc878c9c2452fe705e6fd6f72b6717",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "British Columbia",
+    "city_or_town": "Unspecified locality",
+    "basis": "British Columbia appeal describes a project without naming its municipality; the provincial appeal-board location is not the project location.",
+    "locator": "jurisdiction field",
+    "scope": "undisclosed"
+  }
+}

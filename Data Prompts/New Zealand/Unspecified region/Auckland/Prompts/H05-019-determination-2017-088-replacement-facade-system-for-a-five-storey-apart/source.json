@@ -1,0 +1,76 @@
+{
+  "id": "H05-019",
+  "title": "Determination 2017/088: replacement façade system for a five-storey apartment building, Howick, Auckland",
+  "jurisdiction": "New Zealand (MBIE determination under the Building Act 2004); comparative test only, not Alberta; NZ code references retained as written",
+  "code_edition": "Building Code Clause C3 (p.1 §1.7); Schedule 1, Building Regulations 1992 as cited in the determination (p.2 §1.5)",
+  "case_type": "appeal_decision",
+  "source_url": "https://www.building.govt.nz/resolving-problems/resolution-options/determinations",
+  "document_date": "22 December 2017 (header date)",
+  "facts": [
+    {
+      "text": "The architect (applicant for the proposed remediation, deemed a licensed building practitioner), Auckland City Council (authority) and Body Corporate BC 340942 (owners of the common areas) are the parties.",
+      "locator": "p.2 §1.3"
+    },
+    {
+      "text": "The replacement façade is for an existing five-storey apartment building at 12 Selwyn Road, Howick: high-pressure laminate panels on an aluminium frame, creating a 50 mm cavity in front of a lined timber-framed wall.",
+      "locator": "p.1 summary"
+    },
+    {
+      "text": "The authority's concern is the façade system's ability to prevent fire spreading over the external cladding; it said it had insufficient information on the original system to be satisfied that certain fire-safety clauses would be met (Clause C3 is the clause named in the matters to be determined).",
+      "locator": "p.1 summary; p.2 §1.5, §1.7"
+    },
+    {
+      "text": "The matters to be determined are whether the authority was correct to refuse consent on the original system's information, and whether the modified system, installed per the plans and specifications, will comply with Clause C3.",
+      "locator": "p.2 §1.7"
+    },
+    {
+      "text": "Evidence includes a 2009 NFPA 285 test report, a 2014 US consultant's extension opinion, a May 2017 fire consultant's report, the authority's engineer's report (19 September 2017), the fire scientist's report (22 September 2017), an amended proposal (25 October 2017) and an addendum (31 October 2017).",
+      "locator": "p.3 §1.9.1–1.9.2 (table 1)"
+    },
+    {
+      "text": "The determination is limited to the façade system proposed for this apartment building, though the analysis may guide similar systems in similar situations.",
+      "locator": "p.2 §1.8.2"
+    }
+  ],
+  "limitations": [
+    "Decision begins on p.22 §7.1; mask pp.22–24 for blind use.",
+    "Seven image objects (figures or photographs); not verified visually in this run.",
+    "The determination says its conclusions are limited to this building (p.2 §1.8.2)."
+  ],
+  "worker": "H05",
+  "prompt_number": 443,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://building.govt.nz/assets/Uploads/2017-088.pdf",
+      "final_url": "https://building.govt.nz/assets/Uploads/2017-088.pdf",
+      "retrieved_at": "2026-10-25T01:20:12.598081+00:00",
+      "sha256": "860516925d4339e60049909c8808f8aa3b22d93cc36037b5b118ff3d257f6dbc",
+      "bytes": 336884,
+      "pages": 24,
+      "role": "input",
+      "filename": "mbie-determination-2017-088-860516925d43.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H05/files/mbie-determination-2017-088-860516925d43.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:20:12.598081+00:00",
+        "http_status": "200",
+        "final_url": "https://building.govt.nz/assets/Uploads/2017-088.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Auckland",
+    "basis": "The title identifies Howick, Auckland and the facts give the Selwyn Road apartment-building site.",
+    "locator": "source title; p.1 summary",
+    "scope": "project"
+  }
+}

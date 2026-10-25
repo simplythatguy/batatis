@@ -1,0 +1,86 @@
+{
+  "id": "L16-023",
+  "title": "CL4Fire Code-96 and CL4Fire RED duct/pipe insulation",
+  "jurisdiction": "Canada — national CCMC product evaluation; comparative attachment only, not a Calgary/Edmonton or Alberta project application",
+  "code_edition": "NBC 2015, NBC 2020",
+  "case_type": "product_evidence",
+  "source_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14382-R&type=cert",
+  "document_date": "2025-10-22",
+  "facts": [
+    {
+      "text": "The CCMC opinion expressly covers products used as an alternative solution for thermal/fire protection of pipes, ventilation ducts and cooking-exhaust ductwork when fire ratings are required.",
+      "locator": "CCMC 14382-R PDF, p. 2, Compliance opinion"
+    },
+    {
+      "text": "The opinion classifies Determination of Ratings, Article 3.1.7.1, as Alternative in both NBC 2015 and 2020.",
+      "locator": "CCMC 14382-R PDF, p. 2, Compliance opinion tables"
+    },
+    {
+      "text": "The report says fire ratings and installation limits are based solely on QAI Building Listing Program listings F476-1, F476-3 and F476-4, and requires installation strictly to those listings.",
+      "locator": "CCMC 14382-R PDF, p. 4, Conditions and limitations"
+    }
+  ],
+  "limitations": [
+    "The evaluation applies only to the uses, listings and installation conditions stated.",
+    "It does not decide a building-specific fire rating or approve deviations from the listed system."
+  ],
+  "source_use": "comparative_attachment_content_only",
+  "worker": "L16",
+  "prompt_number": 219,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?type=cert&id=906",
+      "sha256": "8f6647a396ae305a077cd09d03a8f93ccc932c53e0a3c5ea910d326cf7cb7043",
+      "role": "input",
+      "bytes": 1777921,
+      "filename": "current-route-14382-R-8f6647a396ae.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L16/files/current-route-14382-R-8f6647a396ae.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:51:22.342164+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?type=cert&id=906",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded",
+        "entity_extraction": "Copied unchanged PDF entity from byte 433; original transport capture retained.",
+        "raw_capture_sha256": "5e18f4b2b52810204dbf73c1ada4cac8c37bd180153232b557cfffb489de66dc",
+        "raw_capture_path": "_research/workers/L16/files/transport-capture-5e18f4b2b5281020.bin"
+      }
+    },
+    {
+      "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14382-R&type=cert",
+      "sha256": "994300d7642a20c03fbb31c74d365b048f9c6c9bc40483495e5d99062e0c597a",
+      "role": "supporting_evidence",
+      "bytes": 55278,
+      "filename": "landing-14382-R-994300d7642a.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L16/files/landing-14382-R-994300d7642a.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:21:34.158524+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14382-R&type=cert",
+        "content_type": "text/html; charset=UTF-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-2-source-text.txt",
+        "sha256": "7acdcca12b96b355e50e0c2fe033d199489f6ea7d85a4b1c157a7b4d7676ea89",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "National",
+    "city_or_town": "National scope",
+    "basis": "National Canadian CCMC product assessment; no project site is identified and manufacturer or publisher addresses are not project locations.",
+    "locator": "jurisdiction field",
+    "scope": "national"
+  }
+}

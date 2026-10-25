@@ -11,7 +11,8 @@ from datetime import datetime, timezone
 from html.parser import HTMLParser
 from pathlib import Path
 from xml.etree import ElementTree
-from corpus import source_groups
+from corpus import source_groups, write_indexes
+from geography import case_folder, load_geography
 
 BASE = Path(__file__).resolve().parents[1]
 TYPES = {"actual_application", "issued_variance", "appeal_decision", "documented_design_study",
@@ -126,6 +127,7 @@ def normalize_case(case, worker, errors):
 
 def main():
     errors, cases, duplicates, excluded = [], [], [], []
+    geography = load_geography(BASE)
     override_path = BASE / "_research" / "curation_overrides.json"
     overrides = json.loads(override_path.read_text()) if override_path.exists() else {}
     for manifest in sorted((BASE / "_research" / "workers").glob("*/candidates.json")):
@@ -173,10 +175,16 @@ def main():
         seen[key] = case["id"]
         accepted.append(case)
     group_ids = source_groups(accepted)
+    if not accepted:
+        raise SystemExit("Reassembly requires the complete local worker collection; no cases were found")
+    missing = {case["id"] for case in accepted} - geography.keys()
+    if missing:
+        raise SystemExit(f"Document geography for new cases before reassembly: {sorted(missing)}")
     index = []
     for number, case in enumerate(accepted, 1):
-        folder = BASE / f"Prompt {number}"
-        folder.mkdir(exist_ok=True)
+        location = geography[case["id"]]
+        folder = BASE / case_folder(case, location)
+        folder.mkdir(parents=True, exist_ok=True)
         attachment_rows, usable = [], []
         has_non_outcome = any(a.get("role") != "outcome_reference" for a in case["attachments"])
         for i, item in enumerate(case["attachments"], 1):
@@ -240,7 +248,8 @@ def main():
         (folder / "prompt.txt").write_text(text)
         source_meta = {k: v for k, v in case.items() if k not in ("prompt", "evaluation", "attachments")}
         source_meta.update(prompt_number=number, priority_tier=tier, priority=tier_label, attachments=attachment_rows,
-                           prompt_origin="reconstructed source-derived evaluation question; not an original applicant message")
+                           prompt_origin="reconstructed source-derived evaluation question; not an original applicant message",
+                           geography=location)
         source_meta["reuse_status"] = "rights_review_required" if any(a.get("reuse_status") == "rights_review_required" for a in attachment_rows) else "publisher_terms_apply; no blanket dataset licence asserted"
         write_json(folder / "source.json", source_meta)
         evaluation = dict(case.get("evaluation", {}))
@@ -254,17 +263,13 @@ def main():
                           instruction="Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth.")
         write_json(folder / "evaluation.json", evaluation)
         source_group = group_ids[case["id"]]
-        row = {"prompt": number, "folder": folder.name, "priority_tier": tier, "priority": tier_label, "case_id": case["id"], "title": case["title"],
+        row = {"prompt": number, "folder": str(folder.relative_to(BASE)), "priority_tier": tier, "priority": tier_label, "case_id": case["id"], "title": case["title"],
                "case_type": case["case_type"], "jurisdiction": case["jurisdiction"], "code_edition": case.get("code_edition", "unknown"),
                "source_url": case["source_url"], "attachments": len(attachment_rows), "source_group": source_group,
-               "outcome_leakage": evaluation["outcome_leakage"], "reuse_status": source_meta["reuse_status"], "worker": case["worker"]}
+               "outcome_leakage": evaluation["outcome_leakage"], "reuse_status": source_meta["reuse_status"], "worker": case["worker"],
+               **{key: location[key] for key in ("country", "province_or_state", "city_or_town")}}
         index.append(row)
-    if index:
-        with (BASE / "index.csv").open("w", newline="") as stream:
-            writer = csv.DictWriter(stream, fieldnames=list(index[0]), lineterminator="\n")
-            writer.writeheader()
-            writer.writerows(index)
-    write_json(BASE / "index.json", index)
+    write_indexes(BASE, index)
     write_json(BASE / "_research" / "assembly_report.json", {"created_at": datetime.now(timezone.utc).isoformat(),
                "candidate_count": len(cases), "prompt_count": len(index), "case_types": dict(Counter(r["case_type"] for r in index)),
                "errors": errors, "duplicates": duplicates, "excluded_candidates": excluded,

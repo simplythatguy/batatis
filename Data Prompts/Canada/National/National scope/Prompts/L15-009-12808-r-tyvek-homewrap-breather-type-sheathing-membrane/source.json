@@ -1,0 +1,66 @@
+{
+  "id": "L15-009",
+  "title": "12808-R — Tyvek HomeWrap Breather-Type Sheathing Membrane",
+  "jurisdiction": "Canada (CCMC national product assessment; project AHJ not stated)",
+  "code_edition": "NBC 2015 and NBC 2020",
+  "case_type": "product_evidence",
+  "source_url": "https://www.nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=12808-R&type=cert",
+  "document_date": "2025-10-21",
+  "facts": [
+    {
+      "text": "CCMC 12808-R is marked Active in the live API snapshot; the report names NBC 2015 and NBC 2020 as its edition scope.",
+      "locator": "PDF p. 1; live API items"
+    },
+    {
+      "text": "Report describes lapping/sealing for continuity and says penetration continuity is beyond scope; tape adhesion may need validation.",
+      "locator": "PDF p. 4"
+    },
+    {
+      "text": "The CCMC report publishes its own code-specific opinion classifications for the printed edition(s); those classifications are bounded by the report conditions.",
+      "locator": "PDF p. 2"
+    }
+  ],
+  "limitations": [
+    "The evaluation is a CCMC product assessment, not an individual Alberta variance or project approval.",
+    "The report editions are NBC editions identified by the source; no equivalence to NBC(AE) 2023, 2nd printing has been established here.",
+    "No project, assembly, jurisdiction/AHJ, loads, site conditions, installation records or professional design package is supplied.",
+    "The CCMC opinion is bound by its stated conditions and limitations; read the full report before judging relevance.",
+    "Envelope sheathing membrane: Report describes lapping/sealing for continuity and says penetration continuity is beyond scope; tape adhesion may need validation."
+  ],
+  "worker": "L15",
+  "prompt_number": 184,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://www.nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?id=405&type=cert",
+      "sha256": "e5753eaa5f10490b7f465b7d59a146751382ebb1599f756a440617a69012ea7b",
+      "role": "input",
+      "bytes": 248015,
+      "filename": "ccmc-12808-R-tyvek-homewrap-membrane-evaluation-2879e522b605.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L15/files/ccmc-12808-R-tyvek-homewrap-membrane-evaluation-2879e522b605.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:19:18.945247+00:00",
+        "http_status": "200",
+        "final_url": "https://www.nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?id=405&type=cert",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded_pdf_entity_extracted",
+        "entity_extraction": "A 433-byte proxy/HTTP response prelude precedes %PDF- in the helper capture. PDF entity bytes from first %PDF- through the final byte were copied unchanged and parsed with pypdf.",
+        "raw_capture_sha256": "2879e522b605e2a2abcf1465e39dbcfa557581ec65ca97fe7e21ca09e7819445",
+        "raw_capture_path": "_research/workers/L15/files/ccmc-12808-R-tyvek-homewrap-membrane-evaluation-2879e522b605.html"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "National",
+    "city_or_town": "National scope",
+    "basis": "National Canadian CCMC product assessment; no project site is identified and manufacturer or publisher addresses are not project locations.",
+    "locator": "jurisdiction field",
+    "scope": "national"
+  }
+}

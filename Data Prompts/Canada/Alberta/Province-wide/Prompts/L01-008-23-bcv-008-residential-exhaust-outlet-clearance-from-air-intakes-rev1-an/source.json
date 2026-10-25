@@ -1,0 +1,82 @@
+{
+  "id": "L01-008",
+  "title": "23-BCV-008 — Residential exhaust outlet clearance from air intakes (REV1 and superseded 2024 issue)",
+  "jurisdiction": "Alberta, Canada (province-wide variance)",
+  "code_edition": "National Building Code – 2023 Alberta Edition",
+  "case_type": "issued_variance",
+  "source_url": "https://open.alberta.ca/publications/standata-variance-building-national-building-code-2023-alberta-edition",
+  "document_date": "June 2024; revised October 2024",
+  "facts": [
+    {
+      "text": "The variance applies to moisture-bearing kitchen, bathroom and clothes-dryer exhaust serving an individual dwelling unit or a house with a secondary suite.",
+      "locator": "REV1 PDF p.3, Application"
+    },
+    {
+      "text": "REV1 uses Figure A: minimum 900 mm clearance horizontally and above the air intake, and 1 800 mm below it; page 2 states more stringent manufacturer instructions apply.",
+      "locator": "REV1 PDF pp.1–3, Discussion/Figure A; page 3 rendered and visually inspected"
+    },
+    {
+      "text": "The June 2024 issue broadly allowed 900 mm from air intakes; the official catalogue and its PDF mark that issue superseded, and list 23-BCV-008(REV1) as the replacement.",
+      "locator": "June PDF pp.1–3; catalogue row/API metadata"
+    },
+    {
+      "text": "Both records have API resource state active; only the June title is prefixed [SUPERSEDED].",
+      "locator": "Official catalogue API resource metadata, retrieved 2026-10-24 America/Edmonton"
+    }
+  ],
+  "limitations": [
+    "This is a regulator-issued variance reference, not an applicant submission, approved project file, or evidence that any particular design meets its conditions.",
+    "No applicant facts, site dimensions, drawings, calculations, professional opinions, or permit decision are present in the catalogue record.",
+    "Catalogue labels and API resource state are recorded as published metadata; they are not an independent legal determination of current force."
+  ],
+  "worker": "L01",
+  "prompt_number": 48,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/3b792769-bcb0-4acf-a315-cefdbedac893/download/ma-standata-variance-building-23-bcv-008-rev1-2024-10.pdf",
+      "sha256": "c31ff9593cefb77c99639c120151717a80177df398271435222ee7044af56c6b",
+      "role": "outcome_reference",
+      "bytes": 115984,
+      "filename": "23-BCV-008-c31ff9593cef.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L01/files/23-BCV-008-c31ff9593cef.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:17.051652+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/3b792769-bcb0-4acf-a315-cefdbedac893/download/ma-standata-variance-building-23-bcv-008-rev1-2024-10.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/a05471ca-6da3-40e8-b070-c540ea65802f/download/ma-standata-variance-building-23-bcv-008-2024-06.pdf",
+      "sha256": "654c60054f249ce02e47992d6f67a1bacf6bf06e34fd00d339b43afc932f6cf2",
+      "role": "outcome_reference",
+      "bytes": 793143,
+      "filename": "23-BCV-008-654c60054f24.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L01/files/23-BCV-008-654c60054f24.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:17.068110+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/a05471ca-6da3-40e8-b070-c540ea65802f/download/ma-standata-variance-building-23-bcv-008-2024-06.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Alberta",
+    "city_or_town": "Province-wide",
+    "basis": "Alberta STANDATA expressly has provincewide scope; no individual project locality.",
+    "locator": "jurisdiction field",
+    "scope": "provincewide"
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "id": "L18-019",
+  "title": "NRC SIGDERS dynamic roof test — System 1 NOVB",
+  "jurisdiction": "NRC Dynamic Roofing Facility, Ottawa, Ontario, Canada (research setup; no permit jurisdiction)",
+  "code_edition": "Unknown; no project code edition is stated.",
+  "case_type": "documented_design_study",
+  "source_url": "https://nrc-publications.canada.ca/eng/view/object/?id=375f82aa-ed25-4571-b1bd-f5343899925d",
+  "document_date": "2003 (conference paper; archive metadata indexed February 2003)",
+  "facts": [
+    {
+      "text": "The NRC dynamic tests used mechanically attached single-ply TPO roofing on steel deck with 51 mm polyisocyanurate boards mechanically attached using eight fasteners per board and 45-mil, 1,981 mm-wide reinforced TPO membrane.",
+      "locator": "PDF pp. 6–8; article §§3–4, Table 1 and system-layout figures"
+    },
+    {
+      "text": "System 1 had no vapour barrier.",
+      "locator": "PDF pp. 6–8; article §4, Table 1"
+    },
+    {
+      "text": "The variable evaluated in this candidate is no vapour barrier.",
+      "locator": "PDF pp. 6–8; article §4, Table 1"
+    },
+    {
+      "text": "The report states System 1 sustained 4.3 kPa (90 psf); testing identified membrane tearing around fastener plates.",
+      "locator": "PDF pp. 8–10; article Results, Figs. 5–6"
+    }
+  ],
+  "limitations": [
+    "Three variants share the same report and test program; measured uplift values are study outcomes, not an approval or transferable design rating."
+  ],
+  "worker": "L18",
+  "prompt_number": 172,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://nrc-publications.canada.ca/eng/view/accepted/?id=375f82aa-ed25-4571-b1bd-f5343899925d",
+      "sha256": "0ad44011d8af310df90d095df51986209a5b44a23f8c24d0c91d60fd29d9e255",
+      "role": "input",
+      "bytes": 1020312,
+      "filename": "roof-wind-vapour-barrier-study-0ad44011d8af.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L18/files/roof-wind-vapour-barrier-study-0ad44011d8af.pdf",
+      "reuse_status": "rights_review_required",
+      "rights_source": "https://nrc-publications.canada.ca/eng/copyright/",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:20:28.955945+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc-publications.canada.ca/eng/view/accepted/?id=375f82aa-ed25-4571-b1bd-f5343899925d",
+        "content_type": "application/pdf;charset=UTF-8",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "rights_review_required",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Ontario",
+    "city_or_town": "Ottawa",
+    "basis": "The source jurisdiction identifies the NRC Ottawa Field Exposure of Walls or Dynamic Roofing Facility as the experimental setting; research geography, not a permit site.",
+    "locator": "jurisdiction field",
+    "scope": "research"
+  }
+}

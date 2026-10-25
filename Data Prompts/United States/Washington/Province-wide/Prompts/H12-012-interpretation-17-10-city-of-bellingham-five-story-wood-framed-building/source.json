@@ -1,0 +1,71 @@
+{
+  "id": "H12-012",
+  "title": "Interpretation 17-10 (City of Bellingham): five-story wood-framed building with pressurized stair shafts, a Group B or M first floor, and CLT in Type IV exterior walls",
+  "jurisdiction": "Washington State, requested by City of Bellingham (comparative test only; not Alberta)",
+  "code_edition": "2015 International Building Code, Sections 504, 602.1 and 602.4, with Washington amendment to 504.4.1, as cited",
+  "case_type": "regulatory_guidance",
+  "source_url": "https://sbcc.wa.gov/answers-opinions",
+  "document_date": "Not stated in document (interpretation 17-10)",
+  "facts": [
+    {
+      "text": "Document type: State Building Code Council interpretation 17-10, one page; requester City of Bellingham.",
+      "locator": "p1 header"
+    },
+    {
+      "text": "Premise stated in the question: five stories of wood-framed construction are allowed where stair shafts are pressurized and the building is fully sprinklered to NFPA 13; occupancies in five-story wood are limited to residential uses.",
+      "locator": "p1 QUESTION 1"
+    },
+    {
+      "text": "Question 1 asks whether the first floor of such a building may be Group B or Group M.",
+      "locator": "p1 QUESTION 1"
+    },
+    {
+      "text": "Question 2 asks whether the story increase may also apply to a Type IV building.",
+      "locator": "p1 QUESTION 2"
+    },
+    {
+      "text": "Question 3 asks whether cross-laminated timber (CLT) classifies as Type IV construction.",
+      "locator": "p1 QUESTION 3"
+    }
+  ],
+  "limitations": [
+    "The PDF contains the Council answer on the same page; do not present it as applicant-side input without flagging leakage.",
+    "No drawings, height or area calculations, or fire and life-safety design are in the record.",
+    "Edition as cited (2015 IBC with Washington amendments)."
+  ],
+  "original_worker_case_type": "issued_variance",
+  "parent_curation_note": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance.",
+  "worker": "H12",
+  "prompt_number": 616,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://sbcc.wa.gov/sites/default/files/2019-12/17-10_Bham.pdf",
+      "sha256": "997572143772cf29707f8029e65a17e53aea738b296f26136a4dd627eadf4961",
+      "role": "outcome_reference",
+      "bytes": 206923,
+      "filename": "sbcc-ruling-17-10-17-10-bham-997572143772.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H12/files/sbcc-ruling-17-10-17-10-bham-997572143772.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:43:42.746556+00:00",
+        "http_status": "200",
+        "final_url": "https://sbcc.wa.gov/sites/default/files/2019-12/17-10_Bham.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "United States",
+    "province_or_state": "Washington",
+    "city_or_town": "Province-wide",
+    "basis": "A Washington State Building Code Council interpretation/opinion gives state-code guidance. Named cities/counties are requesters, not documented project sites.",
+    "locator": "jurisdiction field; p1 header",
+    "scope": "provincewide"
+  }
+}

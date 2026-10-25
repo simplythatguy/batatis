@@ -1,0 +1,68 @@
+{
+  "id": "H20-002",
+  "title": "Overnight child care in licensed occupancies: NBC(AE) and NFC(AE) requirements",
+  "jurisdiction": "Alberta (province-wide STANDATA issued by Alberta Municipal Affairs)",
+  "code_edition": "NBC(AE) 2023 and NFC(AE) 2023 (National Fire Code - 2023 Alberta Edition); printing not stated in document",
+  "case_type": "regulatory_guidance",
+  "source_url": "https://open.alberta.ca/publications/standata-interpretation-building-national-building-code-2023-alberta-edition",
+  "document_date": "Date Issued: April 2024 (platform created April 2, 2024, last updated April 2, 2024)",
+  "facts": [
+    {
+      "text": "The interpretation clarifies NBC(AE) and NFC(AE) requirements for occupancies licensed to provide overnight child care services.",
+      "locator": "p.1 (Purpose)"
+    },
+    {
+      "text": "Changes to Early Learning and Child Care Act regulations in early 2021 expanded accommodations for overnight child care, and the interpretation applies the Safety Codes Act to them.",
+      "locator": "p.1 (Discussion)"
+    },
+    {
+      "text": "The Interpretation section sets out separate requirement lists, beginning with residential occupancy (dayhome) items such as smoke alarms and carbon monoxide alarms.",
+      "locator": "p.3 (Interpretation)"
+    },
+    {
+      "text": "Fire-alarm requirements quoted in the document include a child care facility, including a daycare facility, with an occupant load more than 40 in a building not sprinklered throughout.",
+      "locator": "p.2"
+    }
+  ],
+  "limitations": [
+    "A published regulator interpretation of a documented design question, not an applicant file.",
+    "Case type is the nearest enum value; this is not an issued variance, appeal or worked example.",
+    "Joint Building/Fire interpretation. The document is long; this case relies on the Interpretation section headings and the quoted fire-alarm text rather than a full line-by-line review.",
+    "Edition check: alberta.ca lists the NBC(AE) 2023 2nd printing (published 17 Aug 2026) as in force; the article wording quoted here is as the STANDATA document states it and was not checked against the 2nd printing text (not in the package)."
+  ],
+  "original_worker_case_type": "published_worked_example",
+  "parent_curation_note": "STANDATA interpretations and bulletins describe general regulated conditions; they are regulatory reference exercises, not individual applications or published project worked examples.",
+  "worker": "H20",
+  "prompt_number": 128,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/dbe79285-1847-4a1c-b62d-8343fe507f99/download/ma-standata-interpretation-building-fire-23-bci-002-23-fci-009-2024-04.pdf",
+      "sha256": "bfded65c9a6fb590b98df43fb3cb22a58a8d7772808debfe5f9a5b9be2a4ace4",
+      "role": "input",
+      "bytes": 122729,
+      "filename": "ma-standata-interpretation-building-fire-23-bci-002-23-fci-009-2024-04-bfded65c9a6f.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H20/files/pdf/ma-standata-interpretation-building-fire-23-bci-002-23-fci-009-2024-04-bfded65c9a6f.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:19:03.672041+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/dbe79285-1847-4a1c-b62d-8343fe507f99/download/ma-standata-interpretation-building-fire-23-bci-002-23-fci-009-2024-04.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Alberta",
+    "city_or_town": "Province-wide",
+    "basis": "Alberta STANDATA expressly has provincewide scope; no individual project locality.",
+    "locator": "jurisdiction field",
+    "scope": "provincewide"
+  }
+}

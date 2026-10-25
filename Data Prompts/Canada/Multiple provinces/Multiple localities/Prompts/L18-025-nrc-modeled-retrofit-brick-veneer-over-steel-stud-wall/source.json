@@ -1,0 +1,61 @@
+{
+  "id": "L18-025",
+  "title": "NRC modeled retrofit — brick veneer over steel-stud wall",
+  "jurisdiction": "National Capital Region (Ottawa-Gatineau), Canada (simulation location; no permit jurisdiction)",
+  "code_edition": "Unknown; the study does not state a project’s adopted code edition.",
+  "case_type": "research_evidence",
+  "source_url": "https://nrc-publications.canada.ca/eng/view/object/?id=6425d489-7cb1-4578-a42e-5077504ff57e",
+  "document_date": "2004-05-01",
+  "facts": [
+    {
+      "text": "The study uses hygIRC-2D to model a three-year sequence (one initiation weather year and two critical weather years) for high-rise masonry wall retrofit configurations.",
+      "locator": "PDF pp. 3, 6; article Abstract and §3.1.5"
+    },
+    {
+      "text": "The paper identifies a brick-veneer/steel-stud base wall and figures four retrofit options (two interior, one exterior, and one air-sealing option); it simulates the wall in the Ottawa-Gatineau National Capital Region.",
+      "locator": "PDF pp. 3, 6–7; article Abstract, §3 and Fig. 1"
+    },
+    {
+      "text": "The authors describe these simulations as a way to identify potentially problematic retrofit strategies for additional laboratory testing or field demonstration.",
+      "locator": "PDF p. 4; article §1.0"
+    }
+  ],
+  "limitations": [
+    "Three wall-type cases share one simulation paper; simulated results are not measurements, project approval or technical certification."
+  ],
+  "worker": "L18",
+  "prompt_number": 231,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://nrc-publications.canada.ca/eng/view/accepted/?id=6425d489-7cb1-4578-a42e-5077504ff57e",
+      "sha256": "b27d53d70f9c2b2f4ec4bfacb14be79a897bf7b4c0cc3e87fc8ce777469819f4",
+      "role": "input",
+      "bytes": 611945,
+      "filename": "retrofitted-wall-hygrothermal-model-b27d53d70f9c.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L18/files/retrofitted-wall-hygrothermal-model-b27d53d70f9c.pdf",
+      "reuse_status": "rights_review_required",
+      "rights_source": "https://nrc-publications.canada.ca/eng/copyright/",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:20:28.955983+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc-publications.canada.ca/eng/view/accepted/?id=6425d489-7cb1-4578-a42e-5077504ff57e",
+        "content_type": "application/pdf;charset=UTF-8",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "rights_review_required",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Multiple provinces",
+    "city_or_town": "Multiple localities",
+    "basis": "Simulation context is Ottawa-Gatineau in Ontario and Quebec; it is not a single project site.",
+    "locator": "PDF pp. 3, 6–7; article Abstract, §3 and Fig. 1",
+    "scope": "multiple"
+  }
+}

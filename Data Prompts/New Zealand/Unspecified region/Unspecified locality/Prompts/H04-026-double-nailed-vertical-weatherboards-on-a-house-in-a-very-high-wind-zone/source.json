@@ -1,0 +1,73 @@
+{
+  "id": "H04-026",
+  "title": "Double-nailed vertical weatherboards on a house in a very high wind zone: code compliance certificate refused",
+  "jurisdiction": "New Zealand (MBIE Chief Executive determination; Building Act 2004; comparative only, not Alberta)",
+  "scope": "comparative-only",
+  "code_edition": "NZ Building Code, First Schedule, Building Regulations 1992 (cited); edition not stated",
+  "case_type": "appeal_decision",
+  "tier": "B",
+  "document_type": "MBIE Chief Executive determination 2019/014 (PDF, 11 pages)",
+  "source_url": "https://codehub.building.govt.nz/resources/2019014",
+  "document_date": "30 April 2019",
+  "facts": [
+    {
+      "text": "A three-bedroom detached house, two storeys in part, on a steeply sloping excavated site in a very high wind zone; moderately complex; moderate to high weathertightness risk.",
+      "locator": "p.2-3 s2.1"
+    },
+    {
+      "text": "Construction is light timber frame with some engineered steel elements; the vertical weatherboards are installed over a cavity but are double-nailed.",
+      "locator": "p.1 Summary; p.2-4 s2.2"
+    },
+    {
+      "text": "Figure 1 is a weatherboard installation diagram (not to scale).",
+      "locator": "p.3 Fig.1"
+    },
+    {
+      "text": "The matter is compliance of the weatherboard cladding with E2 and B2; the authority refused the code compliance certificate because of the double nailing.",
+      "locator": "p.1 Summary"
+    }
+  ],
+  "limitations": [
+    "Comparative New Zealand record: no Alberta applicability or Alberta performance is asserted; Alberta editions are not applied.",
+    "Regulator determination under Building Act 2004 Part 3 Subpart 1 that contains the decision text, so outcome_leakage is true; the prompt omits the decision.",
+    "Prompt is a reconstructed test question grounded in the attachment, not an original applicant message.",
+    "Text extracted with pypdf; figure captions and embedded image counts are from the PDF, and only 2018-040 images were viewed.",
+    "Private names and street addresses in the source are omitted from this record.",
+    "Tier B: one numbered figure (diagram, not to scale)."
+  ],
+  "source_code": "2019-014",
+  "worker": "H04",
+  "prompt_number": 421,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2019/2019-014.pdf",
+      "sha256": "c2e6c0c5fbbcd7a6e3222b406155c3e3d522e5ff54b6a85bd43b5e0542e5de49",
+      "bytes": 200851,
+      "pages": 11,
+      "role": "input",
+      "filename": "mbie-determination-2019-014-c2e6c0c5fbbc.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H04/files/determinations/mbie-determination-2019-014-c2e6c0c5fbbc.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:46:33.957683+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2019/2019-014.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Unspecified locality",
+    "basis": "The MBIE jurisdiction identifies New Zealand, but the title, recorded facts and evaluation do not identify a project town or region.",
+    "locator": "jurisdiction field; source facts",
+    "scope": "undisclosed"
+  }
+}

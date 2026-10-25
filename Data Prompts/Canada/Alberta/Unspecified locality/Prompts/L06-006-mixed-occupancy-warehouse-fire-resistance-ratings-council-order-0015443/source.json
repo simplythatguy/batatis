@@ -1,0 +1,60 @@
+{
+  "id": "L06-006",
+  "title": "Mixed-occupancy warehouse fire-resistance ratings (Council Order 0015443)",
+  "jurisdiction": "Alberta; accredited municipality not named in the order",
+  "code_edition": "Alberta Building Code 2006 (ABC 2006)",
+  "document_date": "2014-12-09",
+  "facts": [
+    {
+      "text": "The project was a proposed two-storey, multi-bay F2 medium-hazard industrial warehouse containing D and F3 tenant occupancies.",
+      "locator": "PDF p.1, paras 1-2"
+    },
+    {
+      "text": "The appellant proposed reducing the second-storey floor/fire-separation and supporting walls/columns from two-hour to 45-minute fire resistance based on tenant rather than base-building occupancy.",
+      "locator": "PDF p.1, paras 3-4"
+    },
+    {
+      "text": "The order reproduces ABC 2006 requirements and records the parties’ competing interpretations of how the most-restricted base-building occupancy and tenant occupancy interact.",
+      "locator": "PDF pp.6-10, paras 15-36"
+    }
+  ],
+  "limitations": [
+    "Only the appeal order is attached; underlying plans and party briefs are not reproduced.",
+    "ABC 2006 is historical."
+  ],
+  "source_url": "https://safetycodes.ab.ca/council-information/appeals/appeal-decisions/",
+  "case_type": "appeal_decision",
+  "worker": "L06",
+  "prompt_number": 118,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2015/Building%20-%20Second%20Storey%20Fire%20Resistance%20Rating%20and%20Base%20Building%20Classification%20January%202015.pdf",
+      "sha256": "b6a77d39c27363b867306c66fa8d5c99e19df0014030feb0e5d92b9bfe24df12",
+      "role": "input",
+      "bytes": 323405,
+      "filename": "scc_2015_fire_resistance-b6a77d39c273.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L06/files/scc_2015_fire_resistance-b6a77d39c273.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:23.098064+00:00",
+        "http_status": "200",
+        "final_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2015/Building%20-%20Second%20Storey%20Fire%20Resistance%20Rating%20and%20Base%20Building%20Classification%20January%202015.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Alberta",
+    "city_or_town": "Unspecified locality",
+    "basis": "Alberta appeal record leaves the municipality or property location unnamed or redacted; no project locality is inferred from the tribunal or office address.",
+    "locator": "jurisdiction field",
+    "scope": "undisclosed"
+  }
+}

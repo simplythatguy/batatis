@@ -1,0 +1,65 @@
+{
+  "id": "L20-002",
+  "title": "Vauquelin three-storey mass-timber elementary school alternative-measure dossier",
+  "jurisdiction": "Longueuil, Québec",
+  "code_edition": "Code de construction du Québec, Chapter I, Building, and National Building Code of Canada 2010 (modified), as stated in the report",
+  "case_type": "documented_design_study",
+  "source_url": "https://www.quebec.ca/agriculture-environnement-et-ressources-naturelles/forets/utilisation-bois-construction/documentation-utilisation-materiau-bois-construction",
+  "document_date": "2022-06-09 report; attached RBQ response dated 2020-12-21",
+  "facts": [
+    {
+      "text": "The project report describes a three-storey primary school in Longueuil using a mixed mass-timber and concrete structure, with a stated capacity of about 700 people.",
+      "locator": "PDF pp. 4–6"
+    },
+    {
+      "text": "The report identifies an NBC 2010 Article 3.2.2.24 noncombustible-construction issue for a three-storey Group A, Division 2 building, and describes partial gypsum encapsulation and fire modelling as proposed measures.",
+      "locator": "PDF pp. 8–12"
+    },
+    {
+      "text": "The attached RBQ response letter, file BAT-04627, describes a two-block school with one-hour fire separations and states conditions including a 568-person gymnasium cap, an 8 MW combustible-load limit, and exposed-wood area limits of 153 m² on level 2 and 122 m² on level 3.",
+      "locator": "PDF pp. 79–93"
+    },
+    {
+      "text": "The RBQ letter lists a signed professional alternative-solution proposal and drawing sheets A121, A131, A221, and A231 among documents forming part of the request.",
+      "locator": "PDF pp. 91–92"
+    }
+  ],
+  "limitations": [
+    "Comparative source from outside Alberta; it cannot establish Alberta code performance or approval.",
+    "This is a promoter-prepared project report, not an Alberta submission; it includes an RBQ response letter but does not make every named drawing or source attachment separately identifiable in the combined PDF.",
+    "The report itself states that content/results are produced by the project proponent (PDF p. 2). Machine text extraction reached a parser token limit at PDF p. 22; key narrative pages 1–14 and RBQ response pages 78–93 were extracted, but the intervening appendix was not fully machine-reviewed."
+  ],
+  "worker": "L20",
+  "prompt_number": 316,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://cdn-contenu.quebec.ca/cdn-contenu/forets/documents/construction-bois/RA_Ecole_Vauquelin_Technique_MRNF.pdf",
+      "sha256": "9c0ec29b775bc2366fa35d1df07fc92c23aa0454bd2d07750d9b69f24fdcd6b7",
+      "role": "outcome_reference",
+      "bytes": 42237321,
+      "filename": "qc-ecole-vauquelin-technical-report-9c0ec29b775b.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L20/files/qc-ecole-vauquelin-technical-report-9c0ec29b775b.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:50:54.146252+00:00",
+        "http_status": "200",
+        "final_url": "https://cdn-contenu.quebec.ca/cdn-contenu/forets/documents/construction-bois/RA_Ecole_Vauquelin_Technique_MRNF.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Quebec",
+    "city_or_town": "Longueuil",
+    "basis": "The source jurisdiction identifies Longueuil, Quebec for the named project, proposal or appeal; this describes source geography.",
+    "locator": "PDF pp. 4–6",
+    "scope": "project"
+  }
+}

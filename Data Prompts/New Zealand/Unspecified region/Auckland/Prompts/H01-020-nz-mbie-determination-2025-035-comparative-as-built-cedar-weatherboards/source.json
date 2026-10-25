@@ -1,0 +1,76 @@
+{
+  "id": "H01-020",
+  "number": "2025-035",
+  "title": "NZ MBIE Determination 2025/035 (comparative): as-built cedar weatherboards with double-nail fixings",
+  "jurisdiction": "New Zealand (Building Act 2004); Auckland Council; comparative only, not Alberta",
+  "scope": "comparative_non_alberta",
+  "code_edition": "NZ Building Code (Schedule 1, Building Regulations 1992) as cited; B2/AS1 and E2/AS1 referenced (editions not stated in extracted text)",
+  "case_type": "appeal_decision",
+  "timing": "as_built_or_certificate",
+  "retrospective": "yes",
+  "source_url": "https://codehub.building.govt.nz/resources/2025035",
+  "source_url_note": "Building CodeHub resource page for the same MBIE determination (Information provider: MBIE); the building.govt.nz determination page is WAF-blocked for this worker.",
+  "document_date": "28 July 2025",
+  "facts": [
+    {
+      "text": "The dispute concerns horizontal rusticated cedar weatherboard cladding on a recently constructed detached dwelling, and whether the as-built double-nail fixings comply with B2 and E2.",
+      "locator": "p.2, para 1.3"
+    },
+    {
+      "text": "The building consent for the dwelling including the cladding was granted and issued on 6 June 2018, and building work started in August 2018.",
+      "locator": "p.3, para 2.2"
+    },
+    {
+      "text": "A minor variation approved during construction replaced the specified pine bevel-backed weatherboards with 18 mm rusticated cedar weatherboards.",
+      "locator": "p.3, para 2.2"
+    },
+    {
+      "text": "Figure 1 shows the building consent detail and Figure 2 shows the as-built construction.",
+      "locator": "p.4"
+    },
+    {
+      "text": "The weatherboard manufacturer stated that the weatherboard was installed outside the scope of its system.",
+      "locator": "p.4, para 3.1.3"
+    }
+  ],
+  "limitations": [
+    "Comparative test only: New Zealand Building Act 2004 and Building Code (Schedule 1, Building Regulations 1992). No Alberta applicability asserted; no NBC(AE) mapping.",
+    "Outcome leakage: the MBIE decision is inside the same original PDF, so the full file cannot be used as applicant-stage input without removing the decision pages.",
+    "Applicant application documents are not published; drawings and photos appear only as figures inside the determination. Figures were located by caption, not visually inspected.",
+    "The owner's and manufacturer's correspondence is summarised; the originals are not in the file."
+  ],
+  "worker": "H01",
+  "prompt_number": 370,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2025/2025-035.pdf",
+      "sha256": "6fe93ddb2f6a3e0f7ee03ee5bf00ff10c766d216b5e4d843e91829ff9d9ad0a7",
+      "role": "input",
+      "document_type": "MBIE determination PDF (original bytes)",
+      "bytes": 545277,
+      "filename": "mbie-det-2025-035-6fe93ddb2f6a.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H01/files/pdf/mbie-det-2025-035-6fe93ddb2f6a.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:42:55.917097+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2025/2025-035.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Auckland",
+    "basis": "The jurisdiction names Auckland Council as the local authority context; no separate region is documented.",
+    "locator": "jurisdiction field",
+    "scope": "local"
+  }
+}

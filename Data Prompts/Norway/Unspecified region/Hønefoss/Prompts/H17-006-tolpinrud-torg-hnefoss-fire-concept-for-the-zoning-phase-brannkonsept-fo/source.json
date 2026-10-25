@@ -1,0 +1,77 @@
+{
+  "id": "H17-006",
+  "title": "Tolpinrud Torg, Hønefoss: fire concept for the zoning phase (Brannkonsept for reguleringsfase), project AA378",
+  "jurisdiction": "Norway, Ringerike kommune plan folder 'vedtatte-planer'. Comparative only, not Alberta.",
+  "code_edition": "TEK17 § 11-2 and § 11-3 section references (pp. 3, 8); no explicit edition string captured by keyword scan",
+  "case_type": "actual_application",
+  "source_url": "https://ringerike.kommune.no/globalassets/bilder-blokker-og-filarkiv/bilder-og-dokumenter/samfunn/areal-og-byplan/pagaende-planprosesser/vedtatte-planer/477-tolpinrud-torg/brannteknisk-notat.pdf",
+  "document_date": "2021-11-16",
+  "facts": [
+    {
+      "text": "Title 'Brannkonsept for reguleringsfase'; project number AA378; dated 16.11.2021; prepared by Eivind Ekerold; quality-assured by Mikhail Antonov. Client shown as Tolpinrud Torg (full name not captured by extraction).",
+      "locator": "PDF p. 1"
+    },
+    {
+      "text": "Summary: risk classes 2, 4 and 5 for the building volumes; fire classes 2 and 3 for residential; fire class 3 for underground car park and commercial areas; sprinklers throughout; commercial areas and car park designed to NS-EN 12845.",
+      "locator": "PDF p. 2"
+    },
+    {
+      "text": "Specified requirements may not be deviated from unless agreed in writing with RIBr.",
+      "locator": "PDF p. 7"
+    },
+    {
+      "text": "The deviation analysis (fraviksanalyse) is deferred to the next phase. Candidate measures include overpressure ventilation of the fire lock in front of the car park, and/or pressurising the stairwell.",
+      "locator": "PDF p. 12"
+    },
+    {
+      "text": "A separate fire cell is required between the lift shaft and the car park.",
+      "locator": "PDF p. 12"
+    },
+    {
+      "text": "Fire site plan is referred to as 'situasjonsplan brann' in chapter 6 (p. 10) and as 'Se kap 5' (p. 11). The last PDF page is titled 'Situasjonsplan Brann'.",
+      "locator": "PDF pp. 10, 11, 15"
+    },
+    {
+      "text": "Classification follows the risk class and number of storeys (§ 11-2 / § 11-3).",
+      "locator": "PDF p. 8"
+    }
+  ],
+  "limitations": [
+    "Comparative test only (Norway, Ringerike kommune). Planning-phase document. No timber content found by keyword scan.",
+    "The consultant's name was not captured on the pages read.",
+    "The URL folder name signals adopted-plan status. Keep the URL out of any applicant-facing prompt."
+  ],
+  "worker": "H17",
+  "prompt_number": 269,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://ringerike.kommune.no/globalassets/bilder-blokker-og-filarkiv/bilder-og-dokumenter/samfunn/areal-og-byplan/pagaende-planprosesser/vedtatte-planer/477-tolpinrud-torg/brannteknisk-notat.pdf",
+      "sha256": "a36d1dde5de62e151a8d790bb3740e592c4d481a7cc1d403578bb09122ad9e1c",
+      "role": "input",
+      "bytes": 9306258,
+      "filename": "no-ringerike-tolpinrud-torg-brannteknisk-notat-a36d1dde5de6.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H17/files/no-ringerike-tolpinrud-torg-brannteknisk-notat-a36d1dde5de6.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:50:44.959459+00:00",
+        "http_status": "200",
+        "final_url": "https://www.ringerike.kommune.no/globalassets/bilder-blokker-og-filarkiv/bilder-og-dokumenter/samfunn/areal-og-byplan/pagaende-planprosesser/vedtatte-planer/477-tolpinrud-torg/brannteknisk-notat.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Norway",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Hønefoss",
+    "basis": "The project title expressly identifies Tolpinrud Torg, Hønefoss; Ringerike is the municipal context and no county is documented.",
+    "locator": "source title; jurisdiction field",
+    "scope": "project"
+  }
+}

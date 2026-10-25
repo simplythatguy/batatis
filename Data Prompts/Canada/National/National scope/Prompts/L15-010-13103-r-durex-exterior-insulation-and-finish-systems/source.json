@@ -1,0 +1,66 @@
+{
+  "id": "L15-010",
+  "title": "13103-R — Durex Exterior Insulation and Finish Systems",
+  "jurisdiction": "Canada (CCMC national product assessment; project AHJ not stated)",
+  "code_edition": "NBC 2010, NBC 2015 and NBC 2020",
+  "case_type": "product_evidence",
+  "source_url": "https://www.nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=13103-R&type=cert",
+  "document_date": "2025-10-21",
+  "facts": [
+    {
+      "text": "CCMC 13103-R is marked Active in the live API snapshot; the report names NBC 2010, NBC 2015 and NBC 2020 as its edition scope.",
+      "locator": "PDF p. 1; live API items"
+    },
+    {
+      "text": "Report limits use to vertical walls and specified substrates; framed-wall sheathing-board gaps must not exceed 3 mm.",
+      "locator": "PDF p. 32"
+    },
+    {
+      "text": "The CCMC report publishes its own code-specific opinion classifications for the printed edition(s); those classifications are bounded by the report conditions.",
+      "locator": "PDF p. 3"
+    }
+  ],
+  "limitations": [
+    "The evaluation is a CCMC product assessment, not an individual Alberta variance or project approval.",
+    "The report editions are NBC editions identified by the source; no equivalence to NBC(AE) 2023, 2nd printing has been established here.",
+    "No project, assembly, jurisdiction/AHJ, loads, site conditions, installation records or professional design package is supplied.",
+    "The CCMC opinion is bound by its stated conditions and limitations; read the full report before judging relevance.",
+    "EIFS envelope system: Report limits use to vertical walls and specified substrates; framed-wall sheathing-board gaps must not exceed 3 mm."
+  ],
+  "worker": "L15",
+  "prompt_number": 185,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://www.nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?id=436&type=cert",
+      "sha256": "d1c3eb703203760e8b0febd6b5622d53d5b9d92a24fbd1ef17f0d268e104f163",
+      "role": "input",
+      "bytes": 4118856,
+      "filename": "ccmc-13103-R-durex-eifs-evaluation-b83fce3437b7.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L15/files/ccmc-13103-R-durex-eifs-evaluation-b83fce3437b7.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:19:18.945648+00:00",
+        "http_status": "200",
+        "final_url": "https://www.nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?id=436&type=cert",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded_pdf_entity_extracted",
+        "entity_extraction": "A 433-byte proxy/HTTP response prelude precedes %PDF- in the helper capture. PDF entity bytes from first %PDF- through the final byte were copied unchanged and parsed with pypdf.",
+        "raw_capture_sha256": "b83fce3437b7486375d99ef696a7a837b70e57874b94ec7c64e99ce1304744ba",
+        "raw_capture_path": "_research/workers/L15/files/ccmc-13103-R-durex-eifs-evaluation-b83fce3437b7.html"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "National",
+    "city_or_town": "National scope",
+    "basis": "National Canadian CCMC product assessment; no project site is identified and manufacturer or publisher addresses are not project locations.",
+    "locator": "jurisdiction field",
+    "scope": "national"
+  }
+}

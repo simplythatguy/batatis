@@ -1,0 +1,82 @@
+{
+  "id": "H16-002",
+  "title": "Exeter, Longbrook Street: fire statement form for student accommodation (up to 97 beds) with ground-floor cafe",
+  "jurisdiction": "England, UK (Exeter, Devon). COMPARATIVE NON-ALBERTA RECORD; no Alberta applicability asserted.",
+  "code_edition": "Building Regulations 2010 (Regulation 7 cited). BS 9991 and 'Approved Document B vol 2' cited without edition year; BS 9251:2021 cited for residential sprinklers. ADB edition not stated: unknown if unstated.",
+  "case_type": "actual_application",
+  "source_url": "https://planningdocs.exeter.gov.uk/servlets/direct/K007s4S0joq7OwcrpZk/2/852557/1/1/AS_PDF_FILE",
+  "document_date": "15/12/2023 (form date)",
+  "facts": [
+    {
+      "text": "Application description: mixed-use development of student accommodation for up to 97 beds with communal areas and a cafe (Use Class E) on the ground floor, at 26-28 Longbrook Street, Exeter EX4 6AE.",
+      "locator": "p.1 items 1-2"
+    },
+    {
+      "text": "Consultation: 'Consultation with the approving authorities has not been undertaken to date'. The form says discussion with the approving authorities and the local fire and rescue service 'will be undertaken' as the scheme progresses.",
+      "locator": "p.1 item 4"
+    },
+    {
+      "text": "Building schedule: top floor approximately 24.15 m above ground floor level; nine storeys. Residential Levels 1-8 are to BS9991 with stay-put evacuation and full residential sprinklers. Ancillary spaces and the commercial unit are to Approved Document B Vol 2 with simultaneous evacuation.",
+      "locator": "p.3 item 6"
+    },
+    {
+      "text": "The form states that 'each flat will have access to at least two stairs for evacuation' and that 'a single firefighting shaft will be provided'. The 'issues' answer says firefighters will enter through a reception protected to shaft standard and that occupants 'will have a secondary evacuation through the other stair' if the firefighting stair is compromised.",
+      "locator": "p.3 technical complexities bullets and issues answer"
+    },
+    {
+      "text": "The form states that 'travel distance in all areas will be within the recommended limit' and that corridors approaching each stair will have smoke control to BS 9991. No travel distances or smoke calculations are given in the form.",
+      "locator": "p.3 technical complexities bullets"
+    },
+    {
+      "text": "'Local development document policies relating to fire safety' is answered 'N/A'.",
+      "locator": "p.3"
+    },
+    {
+      "text": "Siting and water supply answers: a suitable hydrant is said to be on Longbrook Street; the dry riser inlet is within 18 m of the fire vehicle parking position; the water supply is a public hydrant, usable (answered 'yes').",
+      "locator": "p.4"
+    },
+    {
+      "text": "Signature and date: a signature image appears on p.5 and the date is 15/12/2023. The same page carries an embedded 'Proposed Plans Ground Floor Plan' marked 'Planning Submission', showing the fire tender, fire service access route and firefighters' route.",
+      "locator": "p.5 (embedded drawing and signature image)"
+    }
+  ],
+  "limitations": [
+    "Comparative UK record only; not Alberta evidence.",
+    "Form-level statement; no calculations or drawings beyond the embedded plan are in the file.",
+    "The downloaded filename ('exeter-document-2-student-accommodation-candidate') was assigned before the content was read; the content is this Longbrook Street form.",
+    "Text extraction showed the signature field as blank; a rendered check found a signature image on p.5."
+  ],
+  "worker": "H16",
+  "prompt_number": 256,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://planningdocs.exeter.gov.uk/servlets/direct/K007s4S0joq7OwcrpZk/2/852557/1/1/AS_PDF_FILE",
+      "sha256": "c323e3724820334a868c79b7c910c91fa8af41f03a0e4967dfdf5db1a7ce5175",
+      "role": "input",
+      "bytes": 365951,
+      "filename": "exeter-document-2-student-accommodation-candidate-c323e3724820.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H16/files/exeter-document-2-student-accommodation-candidate-c323e3724820.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:48:15.250296+00:00",
+        "http_status": "200",
+        "final_url": "https://planningdocs.exeter.gov.uk/servlets/direct/K007s4S0joq7OwcrpZk/2/852557/1/1/AS_PDF_FILE",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "United Kingdom",
+    "province_or_state": "England",
+    "city_or_town": "Exeter",
+    "basis": "The application description expressly identifies Longbrook Street, Exeter.",
+    "locator": "p.1 items 1-2",
+    "scope": "project"
+  }
+}

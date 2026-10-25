@@ -1,0 +1,67 @@
+{
+  "id": "H05-014",
+  "title": "Determination 2014/053: two-storey commercial laboratory with accessible stairs instead of a lift, Gracefield, Lower Hutt",
+  "jurisdiction": "New Zealand (MBIE determination under the Building Act 2004); comparative test only, not Alberta; NZ code references retained as written",
+  "code_edition": "Building Code Clause D1 as cited; edition not captured on pages read",
+  "case_type": "appeal_decision",
+  "source_url": "https://www.building.govt.nz/resolving-problems/resolution-options/determinations",
+  "document_date": "3 November 2014 (header date)",
+  "facts": [
+    {
+      "text": "The owner Gemini Research Ltd (applicant, acting through a designer), Hutt City Council (authority) and tenant Arotec Diagnostics Ltd are the parties; the Office for Disability Issues was included.",
+      "locator": "p.1 §1.2–1.3"
+    },
+    {
+      "text": "The proposed two-storey commercial building has a ground-floor GFA of 835 m² (laboratory and related rooms, offices, sanitary facilities) and a first-floor GFA of 567 m² (incubation, workshop, four R&D rooms, a café/lunch room, offices, boardroom and lobby).",
+      "locator": "p.2 §2.1–2.2"
+    },
+    {
+      "text": "The consent application provided for two accessible stairs to the first floor; no lift is shown.",
+      "locator": "p.2 §2.3"
+    },
+    {
+      "text": "The application was made on 17 February 2014; the Ministry did not see the consent application itself, and understood it included an accessibility report from the designer.",
+      "locator": "p.2 §3.1"
+    }
+  ],
+  "limitations": [
+    "Decision begins on p.8 §6.1; mask p.8 for blind use.",
+    "Two image objects; plans not verified visually."
+  ],
+  "worker": "H05",
+  "prompt_number": 438,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2014/2014-053.pdf",
+      "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2014/2014-053.pdf",
+      "retrieved_at": "2026-10-25T01:44:50.975607+00:00",
+      "sha256": "9af1cc2a27cf02dae375405332617d53ef78b42c21bf218bf21da4ed8901bd95",
+      "bytes": 289352,
+      "pages": 12,
+      "role": "input",
+      "filename": "mbie-determination-2014-053-9af1cc2a27cf.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H05/files/mbie-determination-2014-053-9af1cc2a27cf.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:44:50.975607+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2014/2014-053.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Lower Hutt",
+    "basis": "The project title explicitly identifies Gracefield, Lower Hutt; the authority is Hutt City Council.",
+    "locator": "source title; p.1 §1.2–1.3",
+    "scope": "project"
+  }
+}

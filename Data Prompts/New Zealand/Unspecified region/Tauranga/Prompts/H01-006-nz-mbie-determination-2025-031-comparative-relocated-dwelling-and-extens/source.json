@@ -1,0 +1,76 @@
+{
+  "id": "H01-006",
+  "number": "2025-031",
+  "title": "NZ MBIE Determination 2025/031 (comparative): relocated dwelling and extension on a sloping site, refused consent",
+  "jurisdiction": "New Zealand (Building Act 2004); Tauranga City Council; comparative only, not Alberta",
+  "scope": "comparative_non_alberta",
+  "code_edition": "NZ Building Code (Schedule 1, Building Regulations 1992) as cited; E1/VM1 amendment 12 and E1/AS1 first edition amendment 12 as cited; B1/AS1 and B1/VM1 referenced",
+  "case_type": "appeal_decision",
+  "timing": "proposed",
+  "retrospective": "no",
+  "source_url": "https://codehub.building.govt.nz/resources/2025031",
+  "source_url_note": "Building CodeHub resource page for the same MBIE determination (Information provider: MBIE); the building.govt.nz determination page is WAF-blocked for this worker.",
+  "document_date": "1 July 2025",
+  "facts": [
+    {
+      "text": "The determination arises from the authority's refusal to grant building consent for the relocation and alteration of an existing dwelling.",
+      "locator": "p.2, para 1.3"
+    },
+    {
+      "text": "The property generally slopes downhill to the west; the relocated single-storey timber-framed dwelling is about 57 m2 excluding the new deck.",
+      "locator": "p.3, para 2.1"
+    },
+    {
+      "text": "The first refusal reason cited a lack of evidence to mitigate natural hazard on site (slippage) after the earthworks design changed.",
+      "locator": "p.2, para 1.4.1"
+    },
+    {
+      "text": "The proposed building work includes timber-piled foundations for the relocated dwelling and extension.",
+      "locator": "p.3, para 2.3"
+    },
+    {
+      "text": "Figure 2 is hazard modelling information from the authority.",
+      "locator": "p.6"
+    }
+  ],
+  "limitations": [
+    "Comparative test only: New Zealand Building Act 2004 and Building Code (Schedule 1, Building Regulations 1992). No Alberta applicability asserted; no NBC(AE) mapping.",
+    "Outcome leakage: the MBIE decision is inside the same original PDF, so the full file cannot be used as applicant-stage input without removing the decision pages.",
+    "Applicant application documents are not published; drawings and photos appear only as figures inside the determination. Figures were located by caption, not visually inspected.",
+    "The geotechnical report and hazard model are referenced in the determination; the reports themselves are not in the file."
+  ],
+  "worker": "H01",
+  "prompt_number": 356,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2025/2025-031.pdf",
+      "sha256": "c18cfa1dcbf2932c33666f6457f9752cc32075bd66062d09cb728495c0351ced",
+      "role": "input",
+      "document_type": "MBIE determination PDF (original bytes)",
+      "bytes": 1077661,
+      "filename": "mbie-det-2025-031-c18cfa1dcbf2.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H01/files/pdf/mbie-det-2025-031-c18cfa1dcbf2.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:42:47.474832+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2025/2025-031.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Tauranga",
+    "basis": "The jurisdiction names Tauranga City Council as the local authority context; no separate region is documented.",
+    "locator": "jurisdiction field",
+    "scope": "local"
+  }
+}

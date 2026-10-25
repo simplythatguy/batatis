@@ -1,0 +1,85 @@
+{
+  "id": "H18-004",
+  "title": "University College Revitalization: project planning report (heritage building, barrier-free route, limited-use elevator)",
+  "scope": "comparative_non_alberta",
+  "alberta_applicability": "not established",
+  "jurisdiction": "University of Toronto, Ontario, Canada (original jurisdiction)",
+  "code_edition": "Ontario Building Code as amended by O. Reg. 191/14 (in force January 1, 2015), per report p.36. Base edition not stated in the excerpt.",
+  "case_type": "documented_design_study",
+  "source_url": "https://governingcouncil.utoronto.ca/system/files/import-files/a0330-3i11063.pdf",
+  "source_url_note": "Attachment URL used as the source; the Governing Council agenda item page was not verified.",
+  "document_date": "2015-03-10 (report date in page headers)",
+  "facts": [
+    {
+      "text": "Project Planning Report for the University College Revitalization, Campus and Facilities Planning, dated March 10, 2015.",
+      "locator": "p.32 page header; document title metadata"
+    },
+    {
+      "text": "The report describes University College's 'significant architectural heritage' and records heritage-building constraints on the revitalization.",
+      "locator": "p.2, p.37"
+    },
+    {
+      "text": "Project list includes a limited-use/limited-application elevator in the central tower of the front (southern) wing, with additional accessible upgrades throughout the building.",
+      "locator": "p.3"
+    },
+    {
+      "text": "The report states that barrier-free washrooms are not available on the same floor level as required by the Ontario Building Code.",
+      "locator": "p.31"
+    },
+    {
+      "text": "The report states that Ontario Building Code amendments under Regulation 191/14, in force January 1, 2015, apply to new projects, major retrofits, common space and circulation areas, and change in use.",
+      "locator": "p.36"
+    },
+    {
+      "text": "Barrier-free paths of travel 'must also strive to provide' proper door width, hallway passing space, curb-ramp dimensions and signage, 'within the heritage building constraints'.",
+      "locator": "p.37"
+    },
+    {
+      "text": "The Reading Room project includes a barrier-free, gender-neutral washroom. The report notes that the existing preparation kitchen conflicts with paths of travel and that there are no accessible washrooms.",
+      "locator": "p.34"
+    },
+    {
+      "text": "Figure caption: 'Ground floor plan indicating existing barrier-free route and potential added barrier-free route'.",
+      "locator": "p.37"
+    }
+  ],
+  "limitations": [
+    "Comparative only: Ontario, non-Alberta. University capital planning report.",
+    "The base Ontario Building Code edition is not stated in the excerpt. Only the amendment and its effective date are cited.",
+    "Floor plans and figures were not read visually."
+  ],
+  "worker": "H18",
+  "prompt_number": 285,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://governingcouncil.utoronto.ca/system/files/import-files/a0330-3i11063.pdf",
+      "sha256": "91b2197c7dd99d1fceeaeef6a7b8035f1a2029141f6b1d3c4c8ae3c71a167e6c",
+      "role": "input",
+      "download_record": "_research/workers/H18/files/utoronto-university-college-planning-report-91b2197c7dd9.pdf.source.json",
+      "bytes": 2021250,
+      "filename": "utoronto-university-college-planning-report-91b2197c7dd9.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H18/files/utoronto-university-college-planning-report-91b2197c7dd9.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:50:18.360545+00:00",
+        "http_status": "200",
+        "final_url": "https://governingcouncil.utoronto.ca/system/files/import-files/a0330-3i11063.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Ontario",
+    "city_or_town": "Toronto",
+    "basis": "The source jurisdiction identifies Toronto, Ontario for the named project, proposal or appeal; this describes source geography.",
+    "locator": "jurisdiction field",
+    "scope": "project"
+  }
+}

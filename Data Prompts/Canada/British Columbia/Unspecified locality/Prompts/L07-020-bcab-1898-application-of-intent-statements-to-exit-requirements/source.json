@@ -1,0 +1,85 @@
+{
+  "id": "L07-020",
+  "title": "BCAB 1898 - Application of intent statements to exit requirements",
+  "jurisdiction": "British Columbia",
+  "code_edition": "BCBC 2018",
+  "case_type": "appeal_decision",
+  "source_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1898",
+  "document_date": "2022-10-20",
+  "facts": [
+    {
+      "text": "The subject building is a firehall, two storeys in building height. The upper storey is provided with two exits, configured as shown in the plan below. [Methods of determining travel distance are outside of the scope of this appeal.]",
+      "locator": "Project description, paragraph 1"
+    },
+    {
+      "text": "The local authority does not consider the exiting system for the second storey to be Building Code compliant, as it does not meet the intent statements attributed to Sentence 3.4.2.1.(1). The local authority considers the interior exit stair at the second floor could be blocked by fire or other emergency, leaving no access to the second required exit.",
+      "locator": "Decision being appealed / local authority position, paragraph 1"
+    },
+    {
+      "text": "The appellant considers the subject exiting system complies with the applicable acceptable solutions of the Code",
+      "locator": "Appellant position, paragraph 1"
+    }
+  ],
+  "limitations": [
+    "The public Board decision is an appeal record, not the original application package.",
+    "The published decision refers to supporting drawings or evidence in some cases, but the complete original application and attachments are not publicly linked from the decision page.",
+    "Published Board outcome appears in the input attachment; outcome leakage is intentional and flagged.",
+    "Where a figure is attached, the decision page does not consistently identify its author; Board-created figures are distinguished in the research report, and no image is treated as a complete applicant drawing set.",
+    "British Columbia decision retained for comparative attachment format/content only; it does not establish Alberta code applicability, design performance, or acceptance."
+  ],
+  "worker": "L07",
+  "prompt_number": 511,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1898",
+      "sha256": "026b78304499a4953d8a0298f4a38f43199fb5cd025c11ef86de350b8eed6160",
+      "role": "input",
+      "bytes": 1359715,
+      "filename": "bcab-1898-026b78304499.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-1898-026b78304499.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:20:29.131229+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1898",
+        "content_type": "text/html; charset=utf-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-1-source-text.txt",
+        "sha256": "75e16b8fc6724372f94a36d3592d73c795c98f17a867ba4c2f5ab068c9cd3bc6",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    },
+    {
+      "url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/construction-industry/building-codes-and-standards/building-code-appeal-board/1898_bcab.png",
+      "sha256": "c38efcf0b402e3edd30616c3a2c78f432394080dd03db48f62c51c0454b024a4",
+      "role": "supporting_evidence",
+      "bytes": 110721,
+      "filename": "bcab-1898-1898_bcab-c38efcf0b402.png",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-1898-1898_bcab-c38efcf0b402.png",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:23:08.505848+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/construction-industry/building-codes-and-standards/building-code-appeal-board/1898_bcab.png",
+        "content_type": "image/png; charset=UTF-8",
+        "kind": "image",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "British Columbia",
+    "city_or_town": "Unspecified locality",
+    "basis": "British Columbia appeal describes a project without naming its municipality; the provincial appeal-board location is not the project location.",
+    "locator": "jurisdiction field",
+    "scope": "undisclosed"
+  }
+}

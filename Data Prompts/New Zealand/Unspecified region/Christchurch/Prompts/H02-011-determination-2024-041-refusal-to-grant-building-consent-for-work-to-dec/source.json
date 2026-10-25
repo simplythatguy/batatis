@@ -1,0 +1,78 @@
+{
+  "id": "H02-011",
+  "title": "Determination 2024/041: Refusal to grant building consent for work to decommission an automatic sprinkler system in a cold store (fire load, warning system, fire rating)",
+  "jurisdiction": "New Zealand: Christchurch City Council as building consent authority; MBIE determination under the Building Act 2004. Non-Alberta comparative record.",
+  "code_edition": "NZ Building Code (Schedule 1, Building Regulations 1992); clauses C3.6 and C3.8 applied. No Acceptable Solution edition is named in the text read.",
+  "case_type": "appeal_decision",
+  "source_url": "https://codehub.building.govt.nz/resources/2024041",
+  "document_date": "13 August 2024 (PDF headed DRAFT)",
+  "facts": [
+    {
+      "text": "Two adjoining cold-store warehouses (Units A and B) on the site are fire separated by concrete fire walls and share a plant room, connected by a partially covered walkway.",
+      "locator": "p.4 §2.5"
+    },
+    {
+      "text": "Unit A (built 1996) is a single-level racked cold store of about 3,000 m2, made primarily of expanded polystyrene panels. Its warehouse area has a dry-pipe sprinkler system.",
+      "locator": "p.4 §2.3, §2.6"
+    },
+    {
+      "text": "Unit B (built 1998, extended 2001) is a single-level cold store of about 4,000 m2 with racking. It has no sprinkler system and has a manual call-point fire alarm system.",
+      "locator": "p.4 §2.4"
+    },
+    {
+      "text": "When the dry-pipe system was inspected, the in-rack sprinklers were found to be iced up.",
+      "locator": "p.4 §2.6-2.7"
+    },
+    {
+      "text": "The owner applied for building consent BCN/2019/4930. The proposal was first to reconfigure the sprinkler system and then to convert parts of it to function as an automatic thermal detection system, with the in-rack dry-pipe systems disestablished and wet-pipe sprinklers kept in ambient areas.",
+      "locator": "p.5 §3.1-3.2"
+    },
+    {
+      "text": "The authority refused the consent because of outstanding issues on fire load, the proposed replacement warning system, and fire-rating requirements.",
+      "locator": "p.1 Summary"
+    },
+    {
+      "text": "The determination consulted Fire and Emergency New Zealand under section 170(a).",
+      "locator": "p.2 §1.3"
+    }
+  ],
+  "limitations": [
+    "The PDF is headed DRAFT. The final text should be checked before any use.",
+    "The fire-load calculations and the warning-system design are referred to in the record. They were not fully read in this pass.",
+    "Owner, leaseholder and street address are omitted.",
+    "Applies to the New Zealand Building Code only. No Alberta applicability is asserted."
+  ],
+  "worker": "H02",
+  "prompt_number": 387,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2024/2024-041.pdf",
+      "sha256": "994961a831ef477a2895192416bf1b255b88cdf913d09959c31a6c4b473454f9",
+      "role": "input",
+      "bytes": 422666,
+      "filename": "mbie-det-2024-041-994961a831ef.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H02/files/mbie-det-2024-041-994961a831ef.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:49:52.896016+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2024/2024-041.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Christchurch",
+    "basis": "The jurisdiction documents Christchurch as the local context; no separate region is documented.",
+    "locator": "jurisdiction field",
+    "scope": "local"
+  }
+}

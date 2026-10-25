@@ -1,0 +1,67 @@
+{
+  "id": "H12-016",
+  "title": "Interpretation 14-23 (City of Bothell): restaurant tenant space over 3,000 sf and vestibule requirement in a five-story mixed-use building (WSEC Commercial C402.4.7)",
+  "jurisdiction": "Washington State, requested by City of Bothell (comparative test only; not Alberta)",
+  "code_edition": "2012 Washington State Energy Code, Commercial, Section C402.4.7, as cited",
+  "case_type": "regulatory_guidance",
+  "source_url": "https://sbcc.wa.gov/answers-opinions",
+  "document_date": "Not stated in document (interpretation no. 14-23)",
+  "facts": [
+    {
+      "text": "Document type: State Building Code Council interpretation no. 14-23, one page; requester City of Bothell.",
+      "locator": "p1 header"
+    },
+    {
+      "text": "Project as described: a tenant space for a proposed restaurant totals more than 3,000 sf; the eating area is 2,300 sf and the remainder is separated by partitions.",
+      "locator": "p1 QUESTION 1"
+    },
+    {
+      "text": "Building as described: five stories; ground-floor footprint 71,000 sf with a parking garage, residential units, lobby and commercial tenant spaces along the perimeter; the upper four floors are residential.",
+      "locator": "p1 QUESTION 1"
+    },
+    {
+      "text": "The commercial tenant space is fully enclosed with its own entrance; there are multiple ground-floor entrances into the various spaces.",
+      "locator": "p1 QUESTION 1"
+    }
+  ],
+  "limitations": [
+    "The PDF contains the Council answer on the same page; do not present it as applicant-side input without flagging leakage.",
+    "Facts are the requester's description; no plans, measured areas or partition details beyond the question.",
+    "Energy-code provision; comparative only."
+  ],
+  "original_worker_case_type": "issued_variance",
+  "parent_curation_note": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance.",
+  "worker": "H12",
+  "prompt_number": 620,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://sbcc.wa.gov/sites/default/files/2019-12/14_23nrg.pdf",
+      "sha256": "0bbaba13fd8b728ffcbbf0656117e7b55eb482814564e3b51c5337de60d5d5eb",
+      "role": "outcome_reference",
+      "bytes": 113166,
+      "filename": "sbcc-ruling-14-23-14-23nrg-0bbaba13fd8b.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H12/files/sbcc-ruling-14-23-14-23nrg-0bbaba13fd8b.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:43:28.337948+00:00",
+        "http_status": "200",
+        "final_url": "https://sbcc.wa.gov/sites/default/files/2019-12/14_23nrg.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "United States",
+    "province_or_state": "Washington",
+    "city_or_town": "Province-wide",
+    "basis": "A Washington State Building Code Council interpretation/opinion gives state-code guidance. Named cities/counties are requesters, not documented project sites.",
+    "locator": "jurisdiction field; p1 header",
+    "scope": "provincewide"
+  }
+}

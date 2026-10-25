@@ -1,0 +1,67 @@
+{
+  "id": "A10-004",
+  "title": "Council Order 0015442: fire-protection rating and installation evidence for exit stairwell door and frame assemblies in a ten-storey building",
+  "jurisdiction": "Alberta; accredited municipality not named in the order (respondent)",
+  "code_edition": "Alberta Building Code 2006 (cited: Division B 3.1.8.4 and 3.1.8.5; NFPA 80; CAN4-S104-M)",
+  "case_type": "appeal_decision",
+  "source_url": "https://safetycodes.ab.ca/council-information/appeals/appeal-decisions/",
+  "document_date": "2014-10-24 (Council Order 0015442); the underlying order is dated 2014-08-21",
+  "facts": [
+    {
+      "text": "The appeal concerns a ten-storey building incorporating seven levels of underground parking.",
+      "locator": "p.3, Issue para 1"
+    },
+    {
+      "text": "The issues were: whether the exit stairwell door and frame assemblies show compliance with the test standard required by ABC 2006 Div B 3.1.8.4(1)(a); whether the tested assembly is representative of those installed; and whether installation complies with 3.1.8.5(2) and NFPA 80.",
+      "locator": "p.3, Issue para 2(a)-(c)"
+    },
+    {
+      "text": "The varied order directs immediate stop-work on exit stairwell door installation (item 1); it requires full-scale test results or a published listing for the required fire-protection rating (items 2-3), NFPA 80 installation (the item before item 7) and removal and reinstallation of non-complying assemblies (item 7).",
+      "locator": "p.1-2, items 1-7"
+    },
+    {
+      "text": "The panel's reasons record a large gap between the door frames and the surrounding wall opening, filled with foam and sealant, which the decision says the installation standard does not permit.",
+      "locator": "p.9, para 26"
+    }
+  ],
+  "limitations": [
+    "Council panel decision; the municipality is not named. Second-priority Alberta record.",
+    "Text-based PDF (12 pages) read with pypdf; the item numbering in the varied directions is taken from the extracted text and should be checked against the page images before quoting.",
+    "Historical ABC 2006 edition; not current guidance."
+  ],
+  "worker": "A10",
+  "prompt_number": 103,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2014/Building_Exit_Stairwell_Door_and_FrameAssemblies_and_Compliance_with_ABC2006_and_NFPA80.pdf",
+      "retrieved_at": "2026-10-25T02:16:03.337042+00:00",
+      "sha256": "8eed808ff367159d75041b0662e0e398338b67b237a17dbe03a2dca36ae2cf69",
+      "bytes": 261487,
+      "document_type": "pdf",
+      "role": "input",
+      "filename": "scc-decision-exit-stairwell-door-2014-8eed808ff367.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/A10/files/scc-decision-exit-stairwell-door-2014-8eed808ff367.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T02:16:03.337042+00:00",
+        "http_status": "200",
+        "final_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2014/Building_Exit_Stairwell_Door_and_FrameAssemblies_and_Compliance_with_ABC2006_and_NFPA80.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Alberta",
+    "city_or_town": "Unspecified locality",
+    "basis": "Alberta appeal record leaves the municipality or property location unnamed or redacted; no project locality is inferred from the tribunal or office address.",
+    "locator": "jurisdiction field",
+    "scope": "undisclosed"
+  }
+}

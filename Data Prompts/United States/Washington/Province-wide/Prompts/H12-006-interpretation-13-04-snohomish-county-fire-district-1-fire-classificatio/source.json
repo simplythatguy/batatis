@@ -1,0 +1,63 @@
+{
+  "id": "H12-006",
+  "title": "Interpretation 13-04 (Snohomish County Fire District 1): fire classification of rooftop photovoltaic systems relative to the roof assembly (IBC 1509.7.2)",
+  "jurisdiction": "Washington State, requested by Snohomish County Fire District 1 (comparative test only; not Alberta)",
+  "code_edition": "2012 International Building Code, Section 1509.7 and 1505, as cited",
+  "case_type": "regulatory_guidance",
+  "source_url": "https://sbcc.wa.gov/answers-opinions",
+  "document_date": "Not stated in document (interpretation no. 13-04)",
+  "facts": [
+    {
+      "text": "Document type: State Building Code Council interpretation no. 13-04, one page; requester Snohomish County Fire District 1.",
+      "locator": "p1 header"
+    },
+    {
+      "text": "Section 1509.7.2 requires rooftop-mounted photovoltaic systems to have the same fire classification as the roof assembly required by Section 1505.",
+      "locator": "p1 QUESTION"
+    },
+    {
+      "text": "The question raises that a solar panel's fire classification could exceed that of the roof it is installed on.",
+      "locator": "p1 QUESTION"
+    }
+  ],
+  "limitations": [
+    "The PDF contains the Council answer on the same page; do not present it as applicant-side input without flagging leakage.",
+    "No PV product or roof assembly is identified in the record.",
+    "Edition as cited (2012 IBC); comparative only."
+  ],
+  "original_worker_case_type": "issued_variance",
+  "parent_curation_note": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance.",
+  "worker": "H12",
+  "prompt_number": 610,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://sbcc.wa.gov/sites/default/files/2019-12/1304ibc.pdf",
+      "sha256": "820858bd293bcc9affb0c527a848bf27fa211b8e7cf290df4261064f0070e6ab",
+      "role": "outcome_reference",
+      "bytes": 42977,
+      "filename": "sbcc-ruling-13-04-1304ibc-820858bd293b.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H12/files/sbcc-ruling-13-04-1304ibc-820858bd293b.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:43:11.419422+00:00",
+        "http_status": "200",
+        "final_url": "https://sbcc.wa.gov/sites/default/files/2019-12/1304ibc.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "United States",
+    "province_or_state": "Washington",
+    "city_or_town": "Province-wide",
+    "basis": "A Washington State Building Code Council interpretation/opinion gives state-code guidance. Named cities/counties are requesters, not documented project sites.",
+    "locator": "jurisdiction field; p1 header",
+    "scope": "provincewide"
+  }
+}

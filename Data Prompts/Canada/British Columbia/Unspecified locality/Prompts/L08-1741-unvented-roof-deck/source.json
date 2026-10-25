@@ -1,0 +1,65 @@
+{
+  "id": "L08-1741",
+  "title": "Unvented roof deck",
+  "jurisdiction": "British Columbia (specific local authority not named in published decision)",
+  "code_edition": "unknown (edition not stated in decision)",
+  "case_type": "appeal_decision",
+  "source_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1741",
+  "document_date": "2014-02-27",
+  "facts": [
+    {
+      "text": "A renovation to a single-family dwelling included a covered roof deck over new living space. Permit drawings showed ventilation above mineral-fibre insulation, but medium-density spray foam conforming to CAN/ULC-S705.1 was installed without venting.",
+      "locator": "Project Description"
+    },
+    {
+      "text": "The appellant cited air-tight spray foam and a monolithic assembly; the building official raised moisture accumulation and possible future roof-deck structural damage if the roofing membrane failed.",
+      "locator": "Appellant's Position; Building Official's Position"
+    },
+    {
+      "text": "The disputed provision is Sentence 9.19.1.1.(1), which requires roof-space ventilation unless shown unnecessary.",
+      "locator": "Reason for Appeal"
+    }
+  ],
+  "limitations": [
+    "Only the Board published decision page is available; the original appeal application and underlying submissions are not linked.",
+    "British Columbia case; comparative evidence only, with no asserted applicability to Alberta."
+  ],
+  "worker": "L08",
+  "prompt_number": 518,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1741",
+      "sha256": "88667d64f56f7d8499074fab8156cc447d8014a8a6767b88868accfb3570c782",
+      "role": "outcome_reference",
+      "bytes": 1371450,
+      "filename": "bcab-1741-88667d64f56f.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L08/files/bcab-1741-88667d64f56f.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:20:25.173150+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1741",
+        "content_type": "text/html; charset=utf-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-1-source-text.txt",
+        "sha256": "eabd8e0bf94e85a40cb9c38f2a31ba6ec41b40ab352de04a077286f58957a990",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "British Columbia",
+    "city_or_town": "Unspecified locality",
+    "basis": "British Columbia appeal describes a project without naming its municipality; the provincial appeal-board location is not the project location.",
+    "locator": "jurisdiction field",
+    "scope": "undisclosed"
+  }
+}

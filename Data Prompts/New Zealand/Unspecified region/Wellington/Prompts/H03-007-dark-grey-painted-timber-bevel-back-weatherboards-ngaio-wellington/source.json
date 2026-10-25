@@ -1,0 +1,76 @@
+{
+  "id": "H03-007",
+  "record_key": "2021/011",
+  "tier": "strong",
+  "title": "Dark-grey painted timber bevel-back weatherboards (Ngaio, Wellington)",
+  "jurisdiction": "New Zealand (MBIE, Building Act 2004): comparative test only; not an Alberta case; no Alberta applicability asserted",
+  "authority": "Wellington City Council",
+  "code_edition": "NZ Building Code B2/E2 with E2/AS1 as cited",
+  "case_type": "issued_variance",
+  "document_type": "MBIE determination under Building Act 2004 s188 (regulator decision on an individual matter); not an applicant's alternative-solution file",
+  "source_url": "https://codehub.building.govt.nz/resources/2021011",
+  "document_date": "2021-05-31",
+  "facts": [
+    {
+      "text": "Authority's concern: the installed weatherboards may not comply with B2.3.1 because the dark paint colour may cause cupping and splitting; the matter is whether they complied with B2 as it relates to E2 as originally installed.",
+      "locator": "p.2 §1–2"
+    },
+    {
+      "text": "Upper level re-clad with 187 × 18 mm H3.1 bevel-back Pinus radiata weatherboards (155 mm cover, 32 mm lap) on a 20 mm cavity over a 15 mm H3.2 plywood rigid air barrier.",
+      "locator": "p.3 §2"
+    },
+    {
+      "text": "Paint described by the manufacturer as a 'cool colour'; applicant reported TSR 25%, while the weatherboard manufacturer required TSR of 40% or more and a warranty statement.",
+      "locator": "p.4–5 §3–4"
+    },
+    {
+      "text": "Consent SR 442662 issued 12 July 2019; final inspection failed 13 March 2020; CCC suspended pending a manufacturer statement; house later sold and repainted before determination.",
+      "locator": "p.4 §3"
+    },
+    {
+      "text": "Discussion weighs exposure and shading, access, maintenance documentation and the E2/AS1 note on dark-painted tangentially-sawn weatherboards; decision states it is case-specific and lists factors to be considered individually.",
+      "locator": "p.12–14 §5"
+    }
+  ],
+  "recommended_input_pages": "1-13",
+  "limitations": [
+    "Comparative only: a New Zealand determination used to test attachment format and content; it cannot establish Alberta performance or applicability.",
+    "The determination's decision section is in the same PDF; outcome leakage is true. Use only pages 1-13 as applicant-side input if pages are split.",
+    "Facts are taken from the text layer (pypdf); photos, drawings and figures were not visually inspected unless stated."
+  ],
+  "alberta_applicability": "none asserted",
+  "comparative_only": true,
+  "worker": "H03",
+  "prompt_number": 323,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2021/2021-011.pdf",
+      "sha256": "5023c40d48cb583959c64e1982e9d48dc7a6dffa8a8051a2f407a3f1a3b837d2",
+      "role": "input",
+      "bytes": 1332709,
+      "filename": "2021-011-5023c40d48cb.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H03/files/2021011/2021-011-5023c40d48cb.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:42:27.637399+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2021/2021-011.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Wellington",
+    "basis": "The project title identifies Ngaio, Wellington; Wellington City Council is the authority.",
+    "locator": "source title; authority field",
+    "scope": "project"
+  }
+}

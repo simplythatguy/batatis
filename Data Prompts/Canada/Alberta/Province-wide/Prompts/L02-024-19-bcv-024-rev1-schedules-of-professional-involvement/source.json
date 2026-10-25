@@ -1,0 +1,62 @@
+{
+  "id": "L02-024",
+  "title": "19-BCV-024(REV1) - Schedules of professional involvement",
+  "jurisdiction": "Alberta (province-wide)",
+  "code_edition": "National Building Code – 2019 Alberta Edition (NBC(AE)); recognizes schedules in National Building Code – 2023 Alberta Edition",
+  "case_type": "issued_variance",
+  "source_url": "https://open.alberta.ca/publications/standata-building-code-variance-national-building-code-2019-alberta-edition",
+  "document_date": "2024-02",
+  "facts": [
+    {
+      "text": "Revision 1 recognizes 2023 Alberta Edition professional-involvement schedules as an alternative to 2019 Division C Articles 2.4.3.1., 2.4.3.2., and 2.4.4.1.",
+      "locator": "19-BCV-024(REV1) PDF, p. 1, Purpose"
+    },
+    {
+      "text": "Its application covers projects requiring schedules under those 2019 Division C articles.",
+      "locator": "Same PDF, p. 2, Application"
+    },
+    {
+      "text": "The variance permits the 2023 Appendix B schedules and lets projects already started using the earlier 19-BCV-024 Appendix A schedules complete with them; it includes a note about the coordinating professional reference in schedule fields.",
+      "locator": "Same PDF, p. 3, Variance and Note"
+    }
+  ],
+  "limitations": [
+    "This is a provincewide regulator-issued STANDATA variance, not an individual application, site-specific permit decision, or applicant-provided evidence.",
+    "Historical status as of 2026-10-24: the official 2019 catalogue is marked archived/replaced by the 2023 catalogue; Alberta lists NBC(AE) 2019 as in force from 2019-12-01 through 2024-04-30. Alberta guidance says previous-edition STANDATA are obsolete for new construction after a new code takes effect, while remaining relevant to evaluation of existing structures during renovations and retrofits. Verify current code edition and AHJ applicability.",
+    "No project drawings, owner/site facts, or project-specific professional evidence accompany this catalogue variance. The attached source is the outcome reference itself.",
+    "Earlier catalogue version(s) also downloaded and retained in references; this candidate uses the latest listed revision: [ARCHIVED] - 19-BCV-024 - Schedules of professional involvement."
+  ],
+  "worker": "L02",
+  "prompt_number": 80,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://open.alberta.ca/dataset/5a1e414d-6639-467d-b5a4-6d68454f1340/resource/91c8df43-6fa5-41a1-b50b-16b4e8837b64/download/ma-standata-variance-building-19-bcv-024-rev1-2024-02.pdf",
+      "sha256": "7c9e14181dbdf7da5c9d6da57057c17d3f57794caed0557c676e9010b6ea3821",
+      "role": "outcome_reference",
+      "bytes": 616704,
+      "filename": "catalogue-91c8df43-6fa5-41a1-b50b-16b4e8837b64-19-BCV-024-REV1----Schedules-of-professional-involvement-7c9e14181dbd.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L02/files/catalogue-91c8df43-6fa5-41a1-b50b-16b4e8837b64-19-BCV-024-REV1----Schedules-of-professional-involvement-7c9e14181dbd.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:54.053453+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/5a1e414d-6639-467d-b5a4-6d68454f1340/resource/91c8df43-6fa5-41a1-b50b-16b4e8837b64/download/ma-standata-variance-building-19-bcv-024-rev1-2024-02.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Alberta",
+    "city_or_town": "Province-wide",
+    "basis": "Alberta STANDATA expressly has provincewide scope; no individual project locality.",
+    "locator": "jurisdiction field",
+    "scope": "provincewide"
+  }
+}

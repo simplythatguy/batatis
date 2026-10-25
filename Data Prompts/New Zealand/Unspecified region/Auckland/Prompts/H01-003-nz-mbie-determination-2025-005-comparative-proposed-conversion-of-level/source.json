@@ -1,0 +1,76 @@
+{
+  "id": "H01-003",
+  "number": "2025-005",
+  "title": "NZ MBIE Determination 2025/005 (comparative): proposed conversion of Level 5 from office to apartment",
+  "jurisdiction": "New Zealand (Building Act 2004); Auckland Council; comparative only, not Alberta",
+  "scope": "comparative_non_alberta",
+  "code_edition": "NZ Building Code (Schedule 1, Building Regulations 1992) as cited; F7/AS1 referenced (edition not stated in extracted text)",
+  "case_type": "appeal_decision",
+  "timing": "proposed",
+  "retrospective": "no",
+  "source_url": "https://codehub.building.govt.nz/resources/2025005",
+  "source_url_note": "Building CodeHub resource page for the same MBIE determination (Information provider: MBIE); the building.govt.nz determination page is WAF-blocked for this worker.",
+  "document_date": "31 January 2025",
+  "facts": [
+    {
+      "text": "The owner applied on 10 October 2022 for building consent to convert Level 5 from commercial office space to a single residential apartment.",
+      "locator": "p.4, para 3.1"
+    },
+    {
+      "text": "The building is a 17-level structure with two lower parking levels and a mix of residential and commercial use.",
+      "locator": "p.3, para 2.1"
+    },
+    {
+      "text": "The building has a sprinkler system and supplementary smoke detection in some levels; the proposed Level 5 work adds a Type 5 enhanced smoke detection system.",
+      "locator": "p.4, para 3.3"
+    },
+    {
+      "text": "The owner's fire engineer completed a fire engineering design report for the proposed Level 5 conversion.",
+      "locator": "p.4, para 3.2"
+    },
+    {
+      "text": "Fire and Emergency New Zealand was consulted under section 170(a).",
+      "locator": "p.2, para 1.4"
+    }
+  ],
+  "limitations": [
+    "Comparative test only: New Zealand Building Act 2004 and Building Code (Schedule 1, Building Regulations 1992). No Alberta applicability asserted; no NBC(AE) mapping.",
+    "Outcome leakage: the MBIE decision is inside the same original PDF, so the full file cannot be used as applicant-stage input without removing the decision pages.",
+    "Applicant application documents are not published; drawings and photos appear only as figures inside the determination. Figures were located by caption, not visually inspected.",
+    "Body corporate and other owners are parties; the record includes third-party interests."
+  ],
+  "worker": "H01",
+  "prompt_number": 353,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2025/2025-005.pdf",
+      "sha256": "5f197a5b37b4878d98b2652ac568821b0f61f97eebf34d5f447fbae5b465429c",
+      "role": "input",
+      "document_type": "MBIE determination PDF (original bytes)",
+      "bytes": 288862,
+      "filename": "mbie-det-2025-005-5f197a5b37b4.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H01/files/pdf/mbie-det-2025-005-5f197a5b37b4.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:41:49.008244+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2025/2025-005.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Auckland",
+    "basis": "The jurisdiction names Auckland Council as the local authority context; no separate region is documented.",
+    "locator": "jurisdiction field",
+    "scope": "local"
+  }
+}

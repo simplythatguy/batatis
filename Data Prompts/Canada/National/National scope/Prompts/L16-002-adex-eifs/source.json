@@ -1,0 +1,86 @@
+{
+  "id": "L16-002",
+  "title": "Adex EIFS",
+  "jurisdiction": "Canada — national CCMC product evaluation; comparative attachment only, not a Calgary/Edmonton or Alberta project application",
+  "code_edition": "NBC 2020",
+  "case_type": "product_evidence",
+  "source_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=12913-R&type=cert",
+  "document_date": "2025-10-21",
+  "facts": [
+    {
+      "text": "The current CCMC opinion covers Adex EIFS used as exterior wall cladding designed to act as a weather barrier and provide thermal insulation, under stated conditions and limitations.",
+      "locator": "CCMC 12913-R PDF, p. 2, Compliance opinion"
+    },
+    {
+      "text": "The opinion classifies NBC 2020 Article 3.1.5.5, Combustible Cladding on Exterior Walls, as Acceptable.",
+      "locator": "CCMC 12913-R PDF, p. 2, Compliance opinion table"
+    },
+    {
+      "text": "The product description identifies a water-resistive barrier, adhesive or mechanical attachment, insulation board and coating/lamina; substrates are bounded by the report.",
+      "locator": "CCMC 12913-R PDF, p. 3, Product information"
+    }
+  ],
+  "limitations": [
+    "Product-level CCMC evidence only; no project assembly or application facts are attached.",
+    "The report’s own conditions and component lists bound the opinion; its classification does not establish project applicability."
+  ],
+  "source_use": "comparative_attachment_content_only",
+  "worker": "L16",
+  "prompt_number": 198,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?type=cert&id=415",
+      "sha256": "4af994d211a63f6130c9b6e5bc895ac49fee11d8afe6ae3eee5702a3b5c94949",
+      "role": "input",
+      "bytes": 1842475,
+      "filename": "current-route-12913-R-4af994d211a6.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L16/files/current-route-12913-R-4af994d211a6.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:50:50.414367+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?type=cert&id=415",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded",
+        "entity_extraction": "Copied unchanged PDF entity from byte 433; original transport capture retained.",
+        "raw_capture_sha256": "829d9cf1df4835c716968ca672853dcd8b5176ef6a6bd50f948e910d74e78e7c",
+        "raw_capture_path": "_research/workers/L16/files/transport-capture-829d9cf1df4835c7.bin"
+      }
+    },
+    {
+      "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=12913-R&type=cert",
+      "sha256": "2373cd46369c9c80e60e953a143715f40cb372e7a57faa86c007ee85be84e48c",
+      "role": "supporting_evidence",
+      "bytes": 168781,
+      "filename": "landing-12913-R-2373cd46369c.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L16/files/landing-12913-R-2373cd46369c.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:19:28.796050+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=12913-R&type=cert",
+        "content_type": "text/html; charset=UTF-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-2-source-text.txt",
+        "sha256": "215e894dbb506e8cdee98b939ba0cacbab9c989c46d2a2853a74ec6ba285a3c8",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "National",
+    "city_or_town": "National scope",
+    "basis": "National Canadian CCMC product assessment; no project site is identified and manufacturer or publisher addresses are not project locations.",
+    "locator": "jurisdiction field",
+    "scope": "national"
+  }
+}

@@ -12,7 +12,7 @@ from urllib.parse import urlsplit
 from xml.etree import ElementTree
 
 from assemble import html_text
-from corpus import BASE, attachment_files, cases, check_file, child
+from corpus import BASE, attachment_files, cases, check_file, child, select_numbers
 
 
 def derive(original, destination):
@@ -60,7 +60,7 @@ def download(attachment, destination):
 
 def restore(base, source_root=None, numbers=None, network=False, include_evaluation=False):
     if network and not numbers:
-        raise ValueError("network restoration requires explicit --prompt numbers")
+        raise ValueError("network restoration requires explicit --case IDs or --prompt numbers")
     report = {"restored": 0, "already_verified": 0, "errors": []}
     for row, folder, source in cases(base, numbers):
         for item, original, derived in attachment_files(source, include_evaluation):
@@ -105,10 +105,12 @@ def main():
     mode.add_argument("--from", dest="source_root", type=Path, help="existing local Data Prompts folder")
     mode.add_argument("--download", action="store_true", help="fetch explicitly selected prompts; publisher terms apply")
     parser.add_argument("--prompt", action="append", type=int, help="prompt number; repeat to select several")
+    parser.add_argument("--case", dest="case_ids", action="append", help="case ID; repeat to select several")
     parser.add_argument("--include-evaluation", action="store_true", help="also restore held-back evaluator references")
     args = parser.parse_args()
     try:
-        report = restore(BASE, args.source_root, args.prompt, args.download, args.include_evaluation)
+        numbers = select_numbers(BASE, args.prompt, args.case_ids)
+        report = restore(BASE, args.source_root, numbers, args.download, args.include_evaluation)
     except (OSError, ValueError) as exc:
         parser.error(str(exc))
     print(json.dumps(report, indent=2))

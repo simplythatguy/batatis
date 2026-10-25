@@ -1,6 +1,7 @@
 """Shared metadata and integrity operations for the portable prompt corpus."""
 
 import hashlib
+import csv
 import json
 import re
 from pathlib import Path
@@ -34,6 +35,30 @@ def cases(base=BASE, numbers=None):
         folder = child(base, row["folder"])
         source = json.loads((folder / "source.json").read_text())
         yield row, folder, source
+
+
+def select_numbers(base, numbers=None, case_ids=None):
+    if not case_ids:
+        return numbers
+    index = json.loads((base / "index.json").read_text())
+    by_id = {row["case_id"]: row["prompt"] for row in index}
+    missing = set(case_ids) - by_id.keys()
+    if missing:
+        raise ValueError(f"unknown case IDs: {sorted(missing)}")
+    return sorted(set(numbers or []) | {by_id[value] for value in case_ids})
+
+
+def write_indexes(base, index):
+    (base / "index.json").write_text(json.dumps(index, indent=2, ensure_ascii=False) + "\n")
+    for filename, rows in (
+        ("index.csv", index),
+        ("Alberta Prompt Index.csv", [r for r in index if r["priority_tier"] <= 2]),
+        ("Comparative Prompt Index.csv", [r for r in index if r["priority_tier"] == 4]),
+    ):
+        with (base / filename).open("w", newline="") as stream:
+            writer = csv.DictWriter(stream, fieldnames=list(index[0]), lineterminator="\n")
+            writer.writeheader()
+            writer.writerows(rows)
 
 
 def attachment_files(source, include_evaluation=True):

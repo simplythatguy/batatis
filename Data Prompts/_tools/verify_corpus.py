@@ -6,7 +6,8 @@ import json
 import re
 from collections import Counter
 
-from corpus import BASE, attachment_files, cases, check_file, child, source_groups
+from corpus import BASE, attachment_files, cases, check_file, child, source_groups, select_numbers
+from geography import case_folder, load_geography
 
 
 def require(condition, message):
@@ -17,11 +18,15 @@ def require(condition, message):
 def verify(base=BASE, numbers=None, attachments=False):
     report = {"prompts": 0, "attachment_files": 0, "priorities": {}, "errors": []}
     counts = Counter()
+    geography = load_geography(base)
     for row, folder, source in cases(base, numbers):
         report["prompts"] += 1
         counts[row["priority_tier"]] += 1
         try:
-            require(row["folder"] == f"Prompt {row['prompt']}", "folder numbering mismatch")
+            require(row["folder"] == case_folder(row, geography[row["case_id"]]), "geographic folder mismatch")
+            require(source["geography"] == geography[row["case_id"]], "source geography mismatch")
+            require(all(row[key] == source["geography"][key] for key in
+                        ("country", "province_or_state", "city_or_town")), "index geography mismatch")
             require(source["prompt_number"] == row["prompt"], "source numbering mismatch")
             require(source["id"] == row["case_id"], "case ID mismatch")
             require(source["priority_tier"] == row["priority_tier"], "priority mismatch")
@@ -51,6 +56,10 @@ def verify(base=BASE, numbers=None, attachments=False):
     index = json.loads((base / "index.json").read_text())
     if [row["prompt"] for row in index] != list(range(1, len(index) + 1)):
         report["errors"].append({"error": "index numbering is not contiguous"})
+    if set(geography) != {row["case_id"] for row in index}:
+        report["errors"].append({"error": "geography/index case membership mismatch"})
+    if list(base.glob("Prompt *")):
+        report["errors"].append({"error": "legacy numbered folders remain"})
     groups = source_groups([source for _, _, source in cases(base)])
     for row in index:
         if row["source_group"] != groups[row["case_id"]]:
@@ -64,10 +73,11 @@ def verify(base=BASE, numbers=None, attachments=False):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--prompt", action="append", type=int)
+    parser.add_argument("--case", dest="case_ids", action="append")
     parser.add_argument("--attachments", action="store_true", help="also require all originals and evaluator references")
     args = parser.parse_args()
     try:
-        report = verify(BASE, args.prompt, args.attachments)
+        report = verify(BASE, select_numbers(BASE, args.prompt, args.case_ids), args.attachments)
     except (OSError, ValueError) as exc:
         parser.error(str(exc))
     print(json.dumps(report, indent=2))

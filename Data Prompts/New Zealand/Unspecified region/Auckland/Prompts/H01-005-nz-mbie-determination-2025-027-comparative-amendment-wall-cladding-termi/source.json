@@ -1,0 +1,80 @@
+{
+  "id": "H01-005",
+  "number": "2025-027",
+  "title": "NZ MBIE Determination 2025/027 (comparative): amendment, wall cladding terminating in channel drains",
+  "jurisdiction": "New Zealand (Building Act 2004); Auckland Council; comparative only, not Alberta",
+  "scope": "comparative_non_alberta",
+  "code_edition": "NZ Building Code (Schedule 1, Building Regulations 1992) as cited; E2/AS1 third edition, amendment 11, as cited; B2/AS1 referenced",
+  "case_type": "appeal_decision",
+  "timing": "proposed",
+  "retrospective": "no",
+  "source_url": "https://codehub.building.govt.nz/resources/2025027",
+  "source_url_note": "Building CodeHub resource page for the same MBIE determination (Information provider: MBIE); the building.govt.nz determination page is WAF-blocked for this worker.",
+  "document_date": "6 June 2025",
+  "facts": [
+    {
+      "text": "The determination concerns an authority's refusal of an amendment to building consent proposing wall cladding that terminates within channel drains at the base of external walls.",
+      "locator": "p.1"
+    },
+    {
+      "text": "The question is whether the plans and specifications gave sufficient evidence of compliance with B2 Durability and E2 External moisture.",
+      "locator": "p.1"
+    },
+    {
+      "text": "The project is described as construction of 19 housing blocks across the site.",
+      "locator": "p.3, para 2.1"
+    },
+    {
+      "text": "Figure 2 is a site diagram showing the locations of the proposed channel drains.",
+      "locator": "p.4"
+    },
+    {
+      "text": "Figures 3 and 4 show channel-drain details beside brick veneer and weatherboard cladding.",
+      "locator": "p.5"
+    },
+    {
+      "text": "Acceptable Solution E2/AS1 is cited at third edition, amendment 11.",
+      "locator": "p.3, para 2.7"
+    }
+  ],
+  "limitations": [
+    "Comparative test only: New Zealand Building Act 2004 and Building Code (Schedule 1, Building Regulations 1992). No Alberta applicability asserted; no NBC(AE) mapping.",
+    "Outcome leakage: the MBIE decision is inside the same original PDF, so the full file cannot be used as applicant-stage input without removing the decision pages.",
+    "Applicant application documents are not published; drawings and photos appear only as figures inside the determination. Figures were located by caption, not visually inspected.",
+    "Plans and details are embedded figures; no separate drawing set is published."
+  ],
+  "worker": "H01",
+  "prompt_number": 355,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2025/2025-027.pdf",
+      "sha256": "4bc1ae827eac0acb2e4e6a1636f34c909a4be8f68bd9e9b52f0be47f581ace40",
+      "role": "input",
+      "document_type": "MBIE determination PDF (original bytes)",
+      "bytes": 737664,
+      "filename": "mbie-det-2025-027-4bc1ae827eac.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H01/files/pdf/mbie-det-2025-027-4bc1ae827eac.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:42:38.023244+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2025/2025-027.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Auckland",
+    "basis": "The jurisdiction names Auckland Council as the local authority context; no separate region is documented.",
+    "locator": "jurisdiction field",
+    "scope": "local"
+  }
+}

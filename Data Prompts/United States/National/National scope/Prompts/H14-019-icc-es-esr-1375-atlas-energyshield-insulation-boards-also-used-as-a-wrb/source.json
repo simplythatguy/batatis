@@ -1,0 +1,75 @@
+{
+  "id": "H14-019",
+  "title": "ICC-ES ESR-1375: Atlas EnergyShield insulation boards (also used as a WRB alternative)",
+  "jurisdiction": "United States (ICC-ES evaluation report under IBC/IRC); NON-ALBERTA COMPARATIVE ONLY: cannot establish Alberta performance, acceptance or equivalence; no Canadian or Alberta approval is claimed or implied",
+  "code_edition": "2021, 2018, 2015 and 2012 IBC, IRC and IECC (report §1.1, p1)",
+  "case_type": "product_evidence",
+  "source_url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-1375.pdf",
+  "document_date": "Reissued March 2026; subject to renewal March 2028 (p1)",
+  "facts": [
+    {
+      "text": "Report holder ATLAS ROOFING CORPORATION; subject is EnergyShield XR, CGF, PanelCast, CGF Pro and Pro insulation boards.",
+      "locator": "p1 cover"
+    },
+    {
+      "text": "Use in exterior walls of Types I through IV construction under the IBC is outside the scope of the report.",
+      "locator": "§5.2, p7"
+    },
+    {
+      "text": "Boards on the exterior face must be covered with an approved exterior wall cladding; where not used as the alternative WRB, the wall needs a WRB complying with the code.",
+      "locator": "§5.3, p7"
+    },
+    {
+      "text": "Structural resistance to transverse, racking-shear or vertical loads is outside the scope; boards may not be a nailing base for siding.",
+      "locator": "§5.4-5.5, p7"
+    },
+    {
+      "text": "Boards are manufactured at Atlas plants including Delta, British Columbia, Canada and Etobicoke, Ontario, Canada, under ICC-ES inspections (location statement only).",
+      "locator": "§5.9, p7"
+    },
+    {
+      "text": "Evidence listed: AC12 (June 2015, editorially revised December 2020); AC71 (February 2003, revised March 2021) for foam sheathing used as a WRB; NFPA 286; ASTM E2357; ASTM E2178; ASTM C272.",
+      "locator": "§6.1-6.6, p8"
+    }
+  ],
+  "limitations": [
+    "Non-Alberta comparative attachment; the report does not reference NBC(AE) 2023 and is not evidence of Alberta or Canadian acceptance.",
+    "Retrieved 2026-10-25 from the official ICC-ES report URL; current ICC-ES status was not checked live. source_url is the report PDF, not a separate listing page.",
+    "Text from pypdf extraction; figures, tables and signatures not transcribed; locators are PDF page numbers, not printed page numbers.",
+    "ICC-ES copyright; retained locally for comparison only, redistribution not licensed.",
+    "Several table values in the report were not transcribed; the R-value tables were not used."
+  ],
+  "worker": "H14",
+  "prompt_number": 646,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.icc-es.org/wp-content/uploads/report-directory/ESR-1375.pdf",
+      "sha256": "2acf6a0b6c40d32536ee8299789caa2e9e318b87a64f63e43900f6d9b160e51d",
+      "role": "input",
+      "bytes": 570266,
+      "filename": "esr-1375-energyshield-cgf-2acf6a0b6c40.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H14/files/esr-1375/esr-1375-energyshield-cgf-2acf6a0b6c40.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:47:28.189569+00:00",
+        "http_status": "200",
+        "final_url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-1375.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "United States",
+    "province_or_state": "National",
+    "city_or_town": "National scope",
+    "basis": "The jurisdiction identifies a US ICC-ES product assessment under IBC/IRC. Report-holder and manufacturing locations do not locate a project.",
+    "locator": "jurisdiction field",
+    "scope": "national"
+  }
+}

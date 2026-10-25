@@ -1,0 +1,73 @@
+{
+  "id": "H06-004",
+  "title": "University of Canterbury ENFE 682 (2017) student study: stairwell pressurisation in a ten-storey office model checked in FDS",
+  "scope": "comparative_non_alberta: NZ record kept in its original jurisdiction; attachment format and content comparison only; no Alberta performance or applicability",
+  "jurisdiction": "New Zealand, University of Canterbury student project (research; NON-ALBERTA comparative test)",
+  "code_edition": "AS/NZS 1668.1:2015 (abstract p.1; Section 10.3 scenarios p.2); NZBC Clauses C4 (p.1) and F7 (p.2) as cited; NZ Building Code edition not stated (unknown if unstated)",
+  "case_type": "documented_design_study",
+  "source_url": "https://www.canterbury.ac.nz/content/dam/uoc-main-site/documents/pdfs/d-other/C-Cheong--fire-engineering.pdf",
+  "document_date": "2017 (ENFE 682, 2017; cover p.1)",
+  "facts": [
+    {
+      "text": "Cover: 'Determining the Effectiveness of Stairwell Pressurization Systems in Multi-Story Buildings', J. Cheong, ENFE 682 (2017), Department of Civil and Natural Resources Engineering, University of Canterbury; supervisor named on the cover.",
+      "locator": "UC student study (10 pp), PDF p.1"
+    },
+    {
+      "text": "Abstract: a ten-storey building with a stairwell pressurisation system 'was designed according to' AS/NZS 1668.1:2015 and was then modelled in Fire Dynamic Simulator (FDS).",
+      "locator": "UC student study (10 pp), PDF p.1"
+    },
+    {
+      "text": "Abstract findings: the fire floor 'could not rely solely on building leakage' and needed a relief vent; the stairwell also needed a pressure relief vent for over-pressurisation; the system works as intended only if the building is designed on phased evacuation and the fire-floor stair door shuts after that floor is evacuated.",
+      "locator": "UC student study (10 pp), PDF p.1"
+    },
+    {
+      "text": "Introduction cites NZBC Clause C4 (means of escape) as the functional requirement.",
+      "locator": "UC student study (10 pp), PDF p.1"
+    },
+    {
+      "text": "Objective: determine the effectiveness of a pressurised stairwell designed in FDS to AS/NZS 1668.1:2015, with scenarios taken from Section 10.3.",
+      "locator": "UC student study (10 pp), PDF p.2"
+    },
+    {
+      "text": "An office occupancy was chosen as a common multi-storey occupancy. Fire-alarm systems modelled (smoke detection and sprinkler) are 'based on' NZBC Clause F7.",
+      "locator": "UC student study (10 pp), PDF p.2"
+    }
+  ],
+  "limitations": [
+    "Comparative only (NZ university student study, non-Alberta). A modelled design; no consent application or real project is identified in the text, so it is not a consent record and not compliance evidence.",
+    "Model inputs are summarised from the text, not validated here."
+  ],
+  "worker": "H06",
+  "prompt_number": 280,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.canterbury.ac.nz/content/dam/uoc-main-site/documents/pdfs/d-other/C-Cheong--fire-engineering.pdf",
+      "sha256": "b936a32ed0ed4e68d56c6b0329a7954a515fa70fce84b38a137e830d1d0d2594",
+      "role": "input",
+      "bytes": 526183,
+      "filename": "h06-uc-conf-cheong-stairwell-pressurisation-b936a32ed0ed.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H06/files/h06-uc-conf-cheong-stairwell-pressurisation-b936a32ed0ed.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:43:20.250413+00:00",
+        "http_status": "200",
+        "final_url": "https://www.canterbury.ac.nz/content/dam/uoc-main-site/documents/pdfs/d-other/C-Cheong--fire-engineering.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Unspecified locality",
+    "basis": "This is a modelled ten-storey office study, with no real project or site identified; the university's location is not the model's location.",
+    "locator": "UC student study (10 pp), PDF pp.1-2; limitations",
+    "scope": "research"
+  }
+}

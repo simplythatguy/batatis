@@ -1,0 +1,62 @@
+{
+  "id": "L02-014",
+  "title": "19-BCV-014(REV1) - 12-storey encapsulated mass timber construction",
+  "jurisdiction": "Alberta (province-wide)",
+  "code_edition": "National Building Code – 2019 Alberta Edition (NBC(AE)); National Fire Code – 2019 Alberta Edition (NFC(AE)); conditions based on NBCC/NFCC 2020",
+  "case_type": "issued_variance",
+  "source_url": "https://open.alberta.ca/publications/standata-building-code-variance-national-building-code-2019-alberta-edition",
+  "document_date": "2023-03",
+  "facts": [
+    {
+      "text": "The revision permits encapsulated mass-timber construction up to 12 storeys as an alternative solution to the 2019 Alberta building and fire codes.",
+      "locator": "19-BCV-014(REV1)/19-FCV-019(REV1) PDF, p. 1, Purpose"
+    },
+    {
+      "text": "The source says its conditions are based on the 2020 National Building and Fire Codes and include additional construction-phase fire-protection and ongoing-maintenance conditions.",
+      "locator": "Same PDF, p. 1, Discussion"
+    },
+    {
+      "text": "The operative condition permits buildings or parts up to 12 storeys if design and construction comply with NBCC 2020 and NFCC 2020.",
+      "locator": "Same PDF, p. 2, Application and Variance"
+    }
+  ],
+  "limitations": [
+    "This is a provincewide regulator-issued STANDATA variance, not an individual application, site-specific permit decision, or applicant-provided evidence.",
+    "Historical status as of 2026-10-24: the official 2019 catalogue is marked archived/replaced by the 2023 catalogue; Alberta lists NBC(AE) 2019 as in force from 2019-12-01 through 2024-04-30. Alberta guidance says previous-edition STANDATA are obsolete for new construction after a new code takes effect, while remaining relevant to evaluation of existing structures during renovations and retrofits. Verify current code edition and AHJ applicability.",
+    "No project drawings, owner/site facts, or project-specific professional evidence accompany this catalogue variance. The attached source is the outcome reference itself.",
+    "Earlier catalogue version(s) also downloaded and retained in references; this candidate uses the latest listed revision: [ARCHIVED] - 19-BCV-014 - 12-storey encapsulated mass timber construction."
+  ],
+  "worker": "L02",
+  "prompt_number": 70,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://open.alberta.ca/dataset/3c164a36-c30e-4676-83a2-cb4f19d5f066/resource/42f434e7-9c10-415b-b01f-35d36d91f12d/download/ma-standata-joint-variance-19-bcv-014-rev1-19-fcv-019-rev1-2023-03.pdf",
+      "sha256": "152b0e9b767286700e943900c74c2cd12d93dfa698d1e2e11414b2f7b9ce17af",
+      "role": "outcome_reference",
+      "bytes": 645896,
+      "filename": "catalogue-57f4ad4d-7f2d-4b1e-864b-49cbdd5f3ea6-19-BCV-014-REV1----12-storey-encapsulated-mass-timber-construct-152b0e9b7672.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L02/files/catalogue-57f4ad4d-7f2d-4b1e-864b-49cbdd5f3ea6-19-BCV-014-REV1----12-storey-encapsulated-mass-timber-construct-152b0e9b7672.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:46.707963+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/3c164a36-c30e-4676-83a2-cb4f19d5f066/resource/42f434e7-9c10-415b-b01f-35d36d91f12d/download/ma-standata-joint-variance-19-bcv-014-rev1-19-fcv-019-rev1-2023-03.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Alberta",
+    "city_or_town": "Province-wide",
+    "basis": "Alberta STANDATA expressly has provincewide scope; no individual project locality.",
+    "locator": "jurisdiction field",
+    "scope": "provincewide"
+  }
+}

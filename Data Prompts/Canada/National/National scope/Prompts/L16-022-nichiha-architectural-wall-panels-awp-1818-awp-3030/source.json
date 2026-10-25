@@ -1,0 +1,103 @@
+{
+  "id": "L16-022",
+  "title": "Nichiha Architectural Wall Panels AWP-1818/AWP-3030",
+  "jurisdiction": "Canada — national CCMC product evaluation; comparative attachment only, not a Calgary/Edmonton or Alberta project application",
+  "code_edition": "NBC 2015",
+  "case_type": "product_evidence",
+  "source_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14366-R&type=cert",
+  "document_date": "2025-03-12",
+  "facts": [
+    {
+      "text": "The CCMC fire table reports FSR 0 and SDC 10 under CAN/ULC-S102, with CAN/ULC-S134 flame-spread distance 2.5 m and heat flux 25.4 kW/m².",
+      "locator": "CCMC 14366-R PDF, p. 13, Fire performance table"
+    },
+    {
+      "text": "The CCMC report says the fire data is additional performance data outside its opinion and specifies a tested back-up wall of 16 mm Type X drywall, 51 × 102 mm wood studs, 16 mm plywood and 89 mm glass-fibre cavity insulation.",
+      "locator": "CCMC 14366-R PDF, p. 13, Fire performance notes"
+    },
+    {
+      "text": "Nichiha’s attached manufacturer test summary describes NRC Report A1-007541.1 and a separate CAN/ULC-S134 test assembly, including panel clips, 2×4 wood studs, gypsum, plywood, cavity insulation and Tyvek WRB.",
+      "locator": "Nichiha AWP Test Summaries, PDF p. 9 (printed p. 8)"
+    }
+  ],
+  "limitations": [
+    "Fire results are test-assembly specific and excluded from the CCMC opinion.",
+    "The original NRC report was referenced but not downloaded; the supplementary source is a manufacturer summary."
+  ],
+  "source_use": "comparative_attachment_content_only",
+  "worker": "L16",
+  "prompt_number": 218,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?type=cert&id=890",
+      "sha256": "23d2533672e035707f0958dc2a3436545abfdf78e290037b096d1676474fc652",
+      "role": "input",
+      "bytes": 2325162,
+      "filename": "current-route-14366-R-23d2533672e0.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L16/files/current-route-14366-R-23d2533672e0.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:51:20.188453+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?type=cert&id=890",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded",
+        "entity_extraction": "Copied unchanged PDF entity from byte 433; original transport capture retained.",
+        "raw_capture_sha256": "453c53940da858e5720dc5c4689bbcc05a6100531ae83db3a59d71392544ca22",
+        "raw_capture_path": "_research/workers/L16/files/transport-capture-453c53940da858e5.bin"
+      }
+    },
+    {
+      "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14366-R&type=cert",
+      "sha256": "a46ec2303bba2a8d97575aaf096c9a8bea24e8dd15327e3318474ba8daee919e",
+      "role": "supporting_evidence",
+      "bytes": 85501,
+      "filename": "landing-14366-R-a46ec2303bba.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L16/files/landing-14366-R-a46ec2303bba.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:21:29.778519+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14366-R&type=cert",
+        "content_type": "text/html; charset=UTF-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-2-source-text.txt",
+        "sha256": "e73858a80886880111e3449e579a3e1215ff5b99367fee9df61dc1369e92d93f",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    },
+    {
+      "url": "https://www.nichiha.com/docs/AWP-Test-Summaries-8-2018.pdf",
+      "sha256": "1add8e669f6a4c21905fb692e1892db1ecdafdeab264090965aab3dfa60dcf76",
+      "role": "supporting_evidence",
+      "bytes": 1013195,
+      "filename": "nichiha-awp-test-summaries-2018-1add8e669f6a.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L16/files/nichiha-awp-test-summaries-2018-1add8e669f6a.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:52:14.156783+00:00",
+        "http_status": "200",
+        "final_url": "https://www.nichiha.com/app/uploads/legacy/resources/AWP-Test-Summaries-8-2018.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "National",
+    "city_or_town": "National scope",
+    "basis": "National Canadian CCMC product assessment; no project site is identified and manufacturer or publisher addresses are not project locations.",
+    "locator": "jurisdiction field",
+    "scope": "national"
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "id": "H05-002",
+  "title": "Determination 2014/015: proposed balustrade barrier beside a car pad, Ngaio, Wellington",
+  "jurisdiction": "New Zealand (MBIE determination under the Building Act 2004); comparative test only, not Alberta; NZ code references retained as written",
+  "code_edition": "NZ Building Code, Schedule 1 of the Building Regulations 1992, as cited (Clause F4 and its Acceptable Solution paragraph)",
+  "case_type": "appeal_decision",
+  "source_url": "https://www.building.govt.nz/resolving-problems/resolution-options/determinations",
+  "document_date": "18 March 2014 (signature date)",
+  "facts": [
+    {
+      "text": "Owners G and K Wishart (applicants) and Wellington City Council (authority) for a house at 20 Rothsay Road, Ngaio.",
+      "locator": "p.1 §1.2"
+    },
+    {
+      "text": "The matter is whether the proposed barrier to a vehicle access way and hard standing complies with Clause F4 (Safety from Falling), with respect to restricting passage of children under 6.",
+      "locator": "p.1 §1.3"
+    },
+    {
+      "text": "The car pad is newly constructed on a steeply sloping site; the east timber retaining wall is 1.5 m high at its highest point, the fall to the pedestrian path exceeds 1.5 m, and a 200 mm nib wall serves as the vehicle safety barrier.",
+      "locator": "p.2 §2.2"
+    },
+    {
+      "text": "The final barrier design had not been decided; the dispute was whether balusters in a proposed design could be more than 100 mm apart.",
+      "locator": "p.2 §2.1"
+    }
+  ],
+  "limitations": [
+    "Decision begins on p.7 §5.1; mask p.7 for blind use.",
+    "Two image objects; drawings or photographs not verified visually in this run."
+  ],
+  "worker": "H05",
+  "prompt_number": 426,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2014/2014-015.pdf",
+      "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2014/2014-015.pdf",
+      "retrieved_at": "2026-10-25T01:44:06.906330+00:00",
+      "sha256": "c09d3ee2462ef913c09f9f4875cf33a1cad2f9b4bc06e127c858ad4760da619a",
+      "bytes": 237187,
+      "pages": 8,
+      "role": "input",
+      "filename": "mbie-determination-2014-015-c09d3ee2462e.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H05/files/mbie-determination-2014-015-c09d3ee2462e.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:44:06.906330+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2014/2014-015.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Wellington",
+    "basis": "The house is at Rothsay Road, Ngaio, with Wellington City Council as authority.",
+    "locator": "p.1 §1.2",
+    "scope": "project"
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "id": "H12-019",
+  "title": "Interpretation 11-05 (City of Tacoma): Group E sprinkler threshold and a church and day care sharing one fire area (IBC 903.2.3)",
+  "jurisdiction": "Washington State, requested by City of Tacoma (comparative test only; not Alberta)",
+  "code_edition": "2009 International Building Code, Section 903.2.3 with Washington State amendment, as cited",
+  "case_type": "regulatory_guidance",
+  "source_url": "https://sbcc.wa.gov/answers-opinions",
+  "document_date": "Not stated in document (interpretation no. 11-05)",
+  "facts": [
+    {
+      "text": "Document type: State Building Code Council interpretation no. 11-05, one page; requester City of Tacoma.",
+      "locator": "p1 header"
+    },
+    {
+      "text": "Question 1: whether the removal of 'fire areas' from the state amendment to Section 903.2.3 was intentional.",
+      "locator": "p1 QUESTION"
+    },
+    {
+      "text": "Scenario asked about: a church with an occupant load of 100 and a day care with an occupant load of 25 in the same fire area (occupant load 125), with no sprinkler system or fire barrier between them.",
+      "locator": "p1 QUESTION"
+    },
+    {
+      "text": "The amendment's Exception 2 (as quoted) exempts Group E occupancies with an occupant load of 50 or less.",
+      "locator": "p1 QUESTION"
+    }
+  ],
+  "limitations": [
+    "The PDF contains the Council answer on the same page; do not present it as applicant-side input without flagging leakage.",
+    "Scenario is the requester's; no building plan is in the record.",
+    "Edition as cited (2009 IBC); comparative only."
+  ],
+  "original_worker_case_type": "issued_variance",
+  "parent_curation_note": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance.",
+  "worker": "H12",
+  "prompt_number": 623,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://sbcc.wa.gov/sites/default/files/2019-12/1105ibc.pdf",
+      "sha256": "649ff58741255a5e71170a8b2fa6cff2adb8a76586d3cf2af5e20c1d0ae69f1b",
+      "role": "outcome_reference",
+      "bytes": 68974,
+      "filename": "sbcc-ruling-11-05-1105ibc-649ff5874125.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H12/files/sbcc-ruling-11-05-1105ibc-649ff5874125.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:42:59.918812+00:00",
+        "http_status": "200",
+        "final_url": "https://sbcc.wa.gov/sites/default/files/2019-12/1105ibc.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "United States",
+    "province_or_state": "Washington",
+    "city_or_town": "Province-wide",
+    "basis": "A Washington State Building Code Council interpretation/opinion gives state-code guidance. Named cities/counties are requesters, not documented project sites.",
+    "locator": "jurisdiction field; p1 header",
+    "scope": "provincewide"
+  }
+}

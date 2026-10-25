@@ -64,7 +64,7 @@ def main():
                 errors.append({"path": str(path.relative_to(BASE)), "error": "PDF parser failed", "detail": str(exc)})
     for number, row in enumerate(index, 1):
         folder = BASE / row["folder"]
-        if row["prompt"] != number or folder.name != f"Prompt {number}":
+        if row["prompt"] != number:
             errors.append({"case_id": row.get("case_id"), "error": "non-contiguous prompt numbering"})
         if row["worker"] in {f"H{n:02d}" for n in range(1, 19)} and row["priority_tier"] != 4:
             errors.append({"case_id": row["case_id"], "error": "outside-Alberta source incorrectly classified as local"})
@@ -96,7 +96,7 @@ def main():
         eval_data = json.loads((folder / "evaluation.json").read_text())
         if source["case_type"] in ("issued_variance", "appeal_decision") and not eval_data.get("outcome_leakage"):
             warnings.append({"folder": folder.name, "warning": "published decision requires an outcome leakage review"})
-    actual_folders = {p.name for p in BASE.glob("Prompt *") if p.is_dir()}
+    actual_folders = {str(p.parent.relative_to(BASE)) for p in BASE.glob("*/*/*/Prompts/*/source.json")}
     expected_folders = {r["folder"] for r in index}
     if actual_folders != expected_folders:
         errors.append({"error": "extra/missing numbered folders", "extra": sorted(actual_folders - expected_folders), "missing": sorted(expected_folders - actual_folders)})

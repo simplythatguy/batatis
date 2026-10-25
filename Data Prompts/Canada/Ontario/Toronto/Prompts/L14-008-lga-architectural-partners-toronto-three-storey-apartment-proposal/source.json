@@ -1,0 +1,105 @@
+{
+  "id": "L14-008",
+  "title": "LGA Architectural Partners — Toronto three-storey apartment proposal",
+  "jurisdiction": "Toronto, Ontario",
+  "code_edition": "2012 Ontario Building Code, Part 9 (as stated in the project profile; current City guidance notes its feasibility study used the 2012 OBC)",
+  "case_type": "documented_design_study",
+  "source_url": "https://singlestair.ca/LGA-Architectural-Partners",
+  "document_date": "unknown (undated project profile; submission/status dates are stated in the profile)",
+  "facts": [
+    {
+      "text": "The profile describes a three-storey apartment with ten dwellings: two ground-floor units and four on each of levels 2 and 3; an elevator is included.",
+      "locator": "Pilot Project / project description and unit mix"
+    },
+    {
+      "text": "The profile states that the proposal was revised from units/elevator opening directly into the exit to an upper public corridor and a ground-floor exit lobby.",
+      "locator": "Alternative-solution summary / design revision"
+    },
+    {
+      "text": "The attached original typical-level plan shows the revised corridor/stair/elevator relationship; Toronto’s official guide says each alternative solution is case-specific and the consultant study is not a guarantee of approval.",
+      "locator": "Attached typical-floor plan; Toronto Single Exit Stairs guide"
+    }
+  ],
+  "limitations": [
+    "The project profile is published by the single-stair advocacy/research site and is not the original permit application, approved alternative-solution report, stamped permit drawing set, or authority decision.",
+    "Project status and design performance claims are proponent-reported here and were not independently verified with a project-specific authority record.",
+    "The site states that alternative solutions are site-specific and not precedent; this prompt is a document-review exercise, not a compliance or safety determination."
+  ],
+  "worker": "L14",
+  "prompt_number": 310,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://freight.cargo.site/t/original/i/552c3648ed3e096346df7cc47a5d37af94ebb5a7e96518aab0cc65e37b78282d/Toronto-LGA_Plans_web_2000px-Typical-Green-May-2026.jpg",
+      "sha256": "066c8316b614090c5cf8ce270db98a14887b11cb20896c2a6036118a08466ac5",
+      "role": "input",
+      "bytes": 505743,
+      "filename": "drawing-36-066c8316b614.jpg",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L14/files/drawing-36-066c8316b614.jpg",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:24:05.657731+00:00",
+        "http_status": "200",
+        "final_url": "https://freight.cargo.site/t/original/i/552c3648ed3e096346df7cc47a5d37af94ebb5a7e96518aab0cc65e37b78282d/Toronto-LGA_Plans_web_2000px-Typical-Green-May-2026.jpg",
+        "content_type": "image/jpeg",
+        "kind": "image",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://singlestair.ca/LGA-Architectural-Partners",
+      "sha256": "220b9d6760a01f8cc4517f752440d37f347e4c4ef36e4358ec10dcacefc1aa16",
+      "role": "outcome_reference",
+      "bytes": 178857,
+      "filename": "_evaluation/singlestair-lga-architectural-partners-220b9d6760a0.html",
+      "included_in_default_input": false,
+      "original_collection_path": "_research/workers/L14/files/singlestair-lga-architectural-partners-220b9d6760a0.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:41.278984+00:00",
+        "http_status": "200",
+        "final_url": "https://singlestair.ca/LGA-Architectural-Partners",
+        "content_type": "text/html; charset=UTF-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "_evaluation/attachment-2-source-text.txt",
+        "sha256": "2ba2a930a249d261225698c27df7de9e3ed5c126a258d07c65e5820c0826f93a",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    },
+    {
+      "url": "https://www.toronto.ca/services-payments/building-construction/building-permit/before-you-apply-for-a-building-permit/building-permit-application-guides/guides-for-other-buildings/single-exit-stairs/",
+      "sha256": "04c08564c564ee4ce08f0884bdccc46cbc78feb779762feb664faaa7b0fb2497",
+      "role": "supporting_evidence",
+      "bytes": 44251,
+      "filename": "toronto-single-exit-stairs-official-guide-04c08564c564.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L14/files/toronto-single-exit-stairs-official-guide-04c08564c564.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:54:06.454142+00:00",
+        "http_status": "200",
+        "final_url": "https://www.toronto.ca/services-payments/building-construction/building-permit/before-you-apply-for-a-building-permit/building-permit-application-guides/guides-for-other-buildings/single-exit-stairs/",
+        "content_type": "text/html; charset=UTF-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-3-source-text.txt",
+        "sha256": "3550de4e1e098c340fa679e2d5943f3317f1912902a48a2d52c08c92fe6f6eca",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Ontario",
+    "city_or_town": "Toronto",
+    "basis": "The source jurisdiction identifies Toronto, Ontario for the named project, proposal or appeal; this describes source geography.",
+    "locator": "Attached typical-floor plan; Toronto Single Exit Stairs guide",
+    "scope": "project"
+  }
+}

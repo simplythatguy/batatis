@@ -1,0 +1,100 @@
+{
+  "id": "L14-004",
+  "title": "5468796 Architecture — Winnipeg six-storey mixed-use proposal",
+  "jurisdiction": "Winnipeg, Manitoba",
+  "code_edition": "2024 Manitoba Building Code, Part 3 (as stated in the project profile)",
+  "case_type": "documented_design_study",
+  "source_url": "https://singlestair.ca/5468796-Architecture",
+  "document_date": "unknown (undated project profile; submission/status dates are stated in the profile)",
+  "facts": [
+    {
+      "text": "The profile describes a six-storey mixed-use proposal with 20 dwellings on upper floors, four units per floor, and office/flexible commercial space at ground and mezzanine.",
+      "locator": "Pilot Project / typology and project description"
+    },
+    {
+      "text": "The profile describes exterior passageways as a smoke-protection measure and reports 12 occupants per upper storey.",
+      "locator": "Project description and building metrics"
+    },
+    {
+      "text": "The attached original level plan shows the single-stair scheme; the City of Winnipeg’s 2026 bulletin separately requires a project-specific MBC alternative-solution submission with coordinated design drawings and code references.",
+      "locator": "Attached level plan; Winnipeg single-exit information bulletin, p. 2"
+    }
+  ],
+  "limitations": [
+    "The project profile is published by the single-stair advocacy/research site and is not the original permit application, approved alternative-solution report, stamped permit drawing set, or authority decision.",
+    "Project status and design performance claims are proponent-reported here and were not independently verified with a project-specific authority record.",
+    "The site states that alternative solutions are site-specific and not precedent; this prompt is a document-review exercise, not a compliance or safety determination."
+  ],
+  "worker": "L14",
+  "prompt_number": 306,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://freight.cargo.site/t/original/i/9ba47adf1edb3cdeffed520756c5cf77fac8a713f90ccd48c397476f86e9e648/5468796_Plan_02_3000px.jpg",
+      "sha256": "b5c9f7abe9741836871bbddabca44ce90c67ca787422eece1bd2f35c84577def",
+      "role": "input",
+      "bytes": 551192,
+      "filename": "drawing-18-b5c9f7abe974.jpg",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L14/files/drawing-18-b5c9f7abe974.jpg",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:20:25.584066+00:00",
+        "http_status": "200",
+        "final_url": "https://freight.cargo.site/t/original/i/9ba47adf1edb3cdeffed520756c5cf77fac8a713f90ccd48c397476f86e9e648/5468796_Plan_02_3000px.jpg",
+        "content_type": "image/jpeg",
+        "kind": "image",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://singlestair.ca/5468796-Architecture",
+      "sha256": "9582b48674eefef76ef236e34e1fd99e6520dec442a1b24164c9ee92e91fcdf6",
+      "role": "outcome_reference",
+      "bytes": 196185,
+      "filename": "_evaluation/singlestair-5468796-architecture-9582b48674ee.html",
+      "included_in_default_input": false,
+      "original_collection_path": "_research/workers/L14/files/singlestair-5468796-architecture-9582b48674ee.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:34.481932+00:00",
+        "http_status": "200",
+        "final_url": "https://singlestair.ca/5468796-Architecture",
+        "content_type": "text/html; charset=UTF-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "_evaluation/attachment-2-source-text.txt",
+        "sha256": "d58f4f40d45820fd7621097bd0726946b373f0d09b32b2b5e20b072f57b8ccf8",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    },
+    {
+      "url": "https://www.winnipeg.ca/media/6858",
+      "sha256": "2196e9963ed7fa0bbda8d455697630feaaf6a713503a0b2b4ad2dd6f5781448d",
+      "role": "supporting_evidence",
+      "bytes": 258920,
+      "filename": "site-linked-23-2196e9963ed7.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L14/files/site-linked-23-2196e9963ed7.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:24:48.047401+00:00",
+        "http_status": "200",
+        "final_url": "https://www.winnipeg.ca/media/6858",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Manitoba",
+    "city_or_town": "Winnipeg",
+    "basis": "The source jurisdiction identifies Winnipeg, Manitoba for the named project, proposal or appeal; this describes source geography.",
+    "locator": "Attached level plan; Winnipeg single-exit information bulletin, p. 2",
+    "scope": "project"
+  }
+}

@@ -1,5 +1,6 @@
 # Commit research metadata and tools; keep publisher files and raw captures local.
-/*
+*
+!*/
 !/.gitignore
 !/README.md
 !/CITY_CASES.md
@@ -13,19 +14,16 @@
 !/source_catalogue.jsonl
 !/source_gaps.json
 !/validation.json
-!/Prompt */
-/Prompt */*
-!/Prompt */prompt.txt
-!/Prompt */source.json
-!/Prompt */evaluation.json
-!/_tools/
-/_tools/*
+!/geography.json
+!/GEOGRAPHY_INDEX.md
+!**/Prompts/*/prompt.txt
+!**/Prompts/*/source.json
+!**/Prompts/*/evaluation.json
 !/_tools/*.py
-!/_source_package/
-/_source_package/*
 !/_source_package/*.json
-!/_research/
-/_research/*
 !/_research/curation_overrides.json
 !/_research/assembly_report.json
 !/_research/catalogue_validation.json
+/_references/
+/_research/workers/
+/_source_package/downloads/

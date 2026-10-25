@@ -1,0 +1,94 @@
+{
+  "id": "H18-003",
+  "title": "212 Regent Avenue West interior and exterior alteration: development-permit drawing set with code analysis sheet (2025)",
+  "scope": "comparative_non_alberta",
+  "alberta_applicability": "not established",
+  "jurisdiction": "City of Winnipeg, Manitoba, Canada (original jurisdiction)",
+  "code_edition": "Manitoba Building Code 2020 (MBC 2020), Part 3 and Part 9, as written on the code analysis sheet",
+  "case_type": "actual_application",
+  "source_url": "https://dmis.winnipeg.ca/DownloadMeetingDocument/783822/Submitted%20Plans.pdf",
+  "source_url_note": "City of Winnipeg meeting document (DMIS 783822); the meeting purpose is not stated in the extracted pages.",
+  "document_date": "2025-08-19 (issued for development permit); 2025-09-08 (issued for coordination)",
+  "facts": [
+    {
+      "text": "Development-permit drawing set for interior and exterior alteration of an existing one-storey building with multi-tenant spaces. Work area 316.80 m2 (3,410 sq ft), Group D.",
+      "locator": "p.1"
+    },
+    {
+      "text": "Title blocks: 'Issued for Development Permit 08.19.2025' on sheets 1-3, and 'Issued for Coordination 09.08.2025' on the later sheet.",
+      "locator": "p.1-4"
+    },
+    {
+      "text": "Code analysis sheet (site plan sheet A1.0) lists the code basis as MBC 2020 Part 3 and MBC 2020 Part 9, and states that the Group D classification is unchanged.",
+      "locator": "p.1"
+    },
+    {
+      "text": "Exits: two exits provided. Group D maximum travel distance shown as 25 m, with 21.64 m actual, annotated as compliant by the designer.",
+      "locator": "p.1"
+    },
+    {
+      "text": "Washroom check (3.7.2.2) for 26-50 persons: minimum two water closets per sex. The sheet notes three provided.",
+      "locator": "p.1"
+    },
+    {
+      "text": "Barrier-free notes: barrier-free path of travel noted as provided throughout the building or unit. Power door operators noted as existing. Barrier-free and universal washrooms noted as provided. Minimum 850 mm clear door width noted.",
+      "locator": "p.1-2"
+    },
+    {
+      "text": "Renovation plan (A1.2) includes an enlarged washroom plan with grab-bar mounting heights. General notes require compliance with the appropriate codes and submission for building permits.",
+      "locator": "p.2"
+    },
+    {
+      "text": "Sheets carry a City 'Schedule A' stamp referring to the 'Downtown Transcona PDO-1' zoning agreement.",
+      "locator": "p.1-3"
+    },
+    {
+      "text": "The text layer of the code table is partly garbled. Figures need checking against the original sheets.",
+      "locator": "p.1 (code table)"
+    },
+    {
+      "text": "The extracted text contains no occurrence of 'heritage', 'alternative' or 'variance'.",
+      "locator": "keyword search of extracted text"
+    }
+  ],
+  "limitations": [
+    "Comparative only: Manitoba, non-Alberta, non-heritage, not an alternative solution.",
+    "Attachment is a City meeting document (DMIS 783822). The meeting purpose is not stated in the pages extracted.",
+    "Client and professional contact details on the title block were not copied into this record.",
+    "The code-table text layer is partly garbled. Only clearly legible statements are cited."
+  ],
+  "worker": "H18",
+  "prompt_number": 270,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://dmis.winnipeg.ca/DownloadMeetingDocument/783822/Submitted%20Plans.pdf",
+      "sha256": "9af6c899a9851fd3c22cd92e86b009f7d308b072d43e25f308c1524d66b2436a",
+      "role": "input",
+      "download_record": "_research/workers/H18/files/winnipeg-dmis-783822-submitted-plans-alteration-9af6c899a985.pdf.source.json",
+      "bytes": 7378218,
+      "filename": "winnipeg-dmis-783822-submitted-plans-alteration-9af6c899a985.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H18/files/winnipeg-dmis-783822-submitted-plans-alteration-9af6c899a985.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:42:45.159370+00:00",
+        "http_status": "200",
+        "final_url": "https://dmis.winnipeg.ca/DownloadMeetingDocument/783822/Submitted%20Plans.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Manitoba",
+    "city_or_town": "Winnipeg",
+    "basis": "The source jurisdiction identifies Winnipeg, Manitoba for the named project, proposal or appeal; this describes source geography.",
+    "locator": "jurisdiction field",
+    "scope": "project"
+  }
+}

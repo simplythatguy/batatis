@@ -1,0 +1,86 @@
+{
+  "id": "L16-010",
+  "title": "NovikStone composite siding",
+  "jurisdiction": "Canada — national CCMC product evaluation; comparative attachment only, not a Calgary/Edmonton or Alberta project application",
+  "code_edition": "NBC 2015",
+  "case_type": "product_evidence",
+  "source_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=13420-R&type=cert",
+  "document_date": "2025-11-06",
+  "facts": [
+    {
+      "text": "The current CCMC report lists the NovikStone DS fire-test results as FSR 105 and SDC 575 under CAN/ULC-S102, based on Exova report 17-002-246.",
+      "locator": "CCMC 13420-R PDF, p. 8, Fire performance table and notes"
+    },
+    {
+      "text": "The report expressly says data in the additional-performance section does not form part of the CCMC compliance opinion.",
+      "locator": "CCMC 13420-R PDF, p. 8, Additional performance data note"
+    },
+    {
+      "text": "The NBC 2015 opinion separately classifies Vinyl Siding under Article 9.27.12 as Alternative.",
+      "locator": "CCMC 13420-R PDF, p. 2, Compliance opinion table"
+    }
+  ],
+  "limitations": [
+    "The fire-performance table is not part of the CCMC opinion.",
+    "The cited underlying Exova test report was not independently downloaded; the CCMC summary is the attached primary accessible record."
+  ],
+  "source_use": "comparative_attachment_content_only",
+  "worker": "L16",
+  "prompt_number": 206,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?type=cert&id=496",
+      "sha256": "bc4ea96aa7400bb061335502385ba3a94a5c8465724f1d9e2f0f793a816f3937",
+      "role": "input",
+      "bytes": 551397,
+      "filename": "current-route-13420-R-bc4ea96aa740.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L16/files/current-route-13420-R-bc4ea96aa740.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:51:03.346028+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?type=cert&id=496",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded",
+        "entity_extraction": "Copied unchanged PDF entity from byte 433; original transport capture retained.",
+        "raw_capture_sha256": "42c662baf2fe52ca675b444c0a6cfdbb807f951a0e40e92d2aaec52aba9d0584",
+        "raw_capture_path": "_research/workers/L16/files/transport-capture-42c662baf2fe52ca.bin"
+      }
+    },
+    {
+      "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=13420-R&type=cert",
+      "sha256": "0997d954ee4b02cca369c8822e11252fa25e686ce7c03c26eaf2952fe7ccd18b",
+      "role": "supporting_evidence",
+      "bytes": 52816,
+      "filename": "landing-13420-R-0997d954ee4b.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L16/files/landing-13420-R-0997d954ee4b.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:20:08.148052+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=13420-R&type=cert",
+        "content_type": "text/html; charset=UTF-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-2-source-text.txt",
+        "sha256": "19682524919a6dc0cd5936d3968dee8f2ec4865a8f7dcd140c8022af13b63ebd",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "National",
+    "city_or_town": "National scope",
+    "basis": "National Canadian CCMC product assessment; no project site is identified and manufacturer or publisher addresses are not project locations.",
+    "locator": "jurisdiction field",
+    "scope": "national"
+  }
+}

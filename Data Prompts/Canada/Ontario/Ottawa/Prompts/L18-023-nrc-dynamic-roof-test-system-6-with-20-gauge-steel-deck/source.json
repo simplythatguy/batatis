@@ -1,0 +1,57 @@
+{
+  "id": "L18-023",
+  "title": "NRC dynamic roof test — System 6 with 20-gauge steel deck",
+  "jurisdiction": "NRC Dynamic Roofing Facility, Ottawa, Ontario, Canada (research setup; no permit jurisdiction)",
+  "code_edition": "Unknown; no project code edition is stated.",
+  "case_type": "documented_design_study",
+  "source_url": "https://nrc-publications.canada.ca/eng/view/object/?id=cfa55254-d8c9-4abf-8693-398bdc32cefb",
+  "document_date": "2008-10-17",
+  "facts": [
+    {
+      "text": "System 6 retained System 5’s double-sided welded TPO seam and 6-mil polyethylene vapour barrier arrangement, changing the steel deck to 20 gauge.",
+      "locator": "PDF pp. 14–15 and 19–20; article System 6 discussion and Table 1"
+    },
+    {
+      "text": "The report states System 6 passed the CSA dynamic load cycle through 8.62 kPa (180 psf) with no failure observed at that level; its fastener/deck connection was evaluated under the study protocol.",
+      "locator": "PDF pp. 15–16; article System 6 result and Fig. 11"
+    }
+  ],
+  "limitations": [
+    "The report’s test ceiling limits the result: no failure observed through the stated test level is not evidence above that level or for a different system."
+  ],
+  "worker": "L18",
+  "prompt_number": 174,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://nrc-publications.canada.ca/eng/view/accepted/?id=cfa55254-d8c9-4abf-8693-398bdc32cefb",
+      "sha256": "85d5e41f7bd34c3abad856a5c47248590a0138bd1cc0fed11c9bd50bf9da9cb8",
+      "role": "input",
+      "bytes": 1415850,
+      "filename": "dynamic-wind-roofing-assembly-test-85d5e41f7bd3.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L18/files/dynamic-wind-roofing-assembly-test-85d5e41f7bd3.pdf",
+      "reuse_status": "rights_review_required",
+      "rights_source": "https://nrc-publications.canada.ca/eng/copyright/",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:20:28.956820+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc-publications.canada.ca/eng/view/accepted/?id=cfa55254-d8c9-4abf-8693-398bdc32cefb",
+        "content_type": "application/pdf;charset=UTF-8",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "rights_review_required",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Ontario",
+    "city_or_town": "Ottawa",
+    "basis": "The source jurisdiction identifies the NRC Ottawa Field Exposure of Walls or Dynamic Roofing Facility as the experimental setting; research geography, not a permit site.",
+    "locator": "jurisdiction field",
+    "scope": "research"
+  }
+}

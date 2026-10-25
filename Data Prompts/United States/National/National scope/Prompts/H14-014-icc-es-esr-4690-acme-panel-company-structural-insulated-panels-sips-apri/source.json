@@ -1,0 +1,80 @@
+{
+  "id": "H14-014",
+  "title": "ICC-ES ESR-4690: ACME Panel Company structural insulated panels (SIPs), April 2026 copy",
+  "jurisdiction": "United States (ICC-ES evaluation report under IBC/IRC); NON-ALBERTA COMPARATIVE ONLY: cannot establish Alberta performance, acceptance or equivalence; no Canadian or Alberta approval is claimed or implied",
+  "code_edition": "2021, 2018 and 2015 IBC and IRC (report §1.0, p1)",
+  "case_type": "product_evidence",
+  "source_url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-4690.pdf",
+  "document_date": "Reissued April 2026; subject to renewal April 2027 (p1)",
+  "facts": [
+    {
+      "text": "Report holder ACME PANEL COMPANY; subject is structural insulated panels.",
+      "locator": "p1 cover"
+    },
+    {
+      "text": "SIPs are roof, floor and wall panels, combustible for construction type under IBC Chapter 6, and may be used as fire-resistance-rated assemblies per §4.3.1-4.3.3.",
+      "locator": "§2.1-2.3, p1"
+    },
+    {
+      "text": "§4.3.1 describes a one-hour limited load-bearing wall assembly using SIPs of 4 5/8, 6 1/2 or 8 1/4 inches (114, 165 or 210 mm), with the core recessed from the panel edges; further one-hour assemblies are described on p5.",
+      "locator": "§4.3.1, p4; p5"
+    },
+    {
+      "text": "A footnote states that axial-load limitations in §4.3 must be observed for fire-resistance-rated wall assemblies.",
+      "locator": "footnote, p9"
+    },
+    {
+      "text": "Installation per the report and manufacturer instructions; thicknesses listed only; no span extrapolation; shear walls in SDC D-F need sealed lateral-load calculations.",
+      "locator": "§5.1-5.3, §5.6, §5.8, p6"
+    },
+    {
+      "text": "Evidence listed: AC04 (June 2019, editorially revised December 2020); ASTM E455; cyclic shear per AC04 Appendix A; ASTM E119; NFPA 286.",
+      "locator": "§6.1-6.5, p6"
+    },
+    {
+      "text": "Label must show ESR-4690 and ACME Panel Company.",
+      "locator": "§7.1, p7"
+    }
+  ],
+  "limitations": [
+    "Non-Alberta comparative attachment; the report does not reference NBC(AE) 2023 and is not evidence of Alberta or Canadian acceptance.",
+    "Retrieved 2026-10-25 from the official ICC-ES report URL; current ICC-ES status was not checked live. source_url is the report PDF, not a separate listing page.",
+    "Text from pypdf extraction; figures, tables and signatures not transcribed; locators are PDF page numbers, not printed page numbers.",
+    "ICC-ES copyright; retained locally for comparison only, redistribution not licensed.",
+    "The sips.org (2022) copy timed out; this April 2026 ICC-ES copy is the one read.",
+    "Test-to-assembly mapping was not confirmed beyond the §4.3 text."
+  ],
+  "worker": "H14",
+  "prompt_number": 641,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-4690.pdf",
+      "sha256": "3ed942cecf63ae75670562d67d9600196bd42efb7f197c7210bbbcf06f318e4f",
+      "role": "input",
+      "bytes": 788327,
+      "filename": "esr-4690-icc-es-sip-3ed942cecf63.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H14/files/esr-4690/esr-4690-icc-es-sip-3ed942cecf63.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:52:29.586638+00:00",
+        "http_status": "200",
+        "final_url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-4690.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "United States",
+    "province_or_state": "National",
+    "city_or_town": "National scope",
+    "basis": "The jurisdiction identifies a US ICC-ES product assessment under IBC/IRC. Report-holder and manufacturing locations do not locate a project.",
+    "locator": "jurisdiction field",
+    "scope": "national"
+  }
+}

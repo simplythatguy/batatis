@@ -1,0 +1,61 @@
+{
+  "id": "L20-015",
+  "title": "Detached garage used for private fitness classes and accessibility exemption request",
+  "jurisdiction": "Saskatchewan; project municipality redacted in the published decision",
+  "code_edition": "National Building Code of Canada 2020 is cited in the decision",
+  "case_type": "appeal_decision",
+  "source_url": "https://www.saskatchewan.ca/business/housing-development-construction-and-property-management/building-and-technical-standards/saskatchewan-building-and-accessibility-standards-appeal-board",
+  "document_date": "2024-09-24",
+  "facts": [
+    {
+      "text": "The applicant described a detached garage for personal use and occasional private small-group fitness classes.",
+      "locator": "PDF p. 3"
+    },
+    {
+      "text": "The appeal refers to powered-door requirements at three locations and barrier-free parking; the applicant characterized the activity as a home-based business.",
+      "locator": "PDF p. 3"
+    },
+    {
+      "text": "The decision discusses accessibility exemptions under section 33(4) of the Construction Codes Act and the NBCC 2020.",
+      "locator": "PDF pp. 4–5"
+    }
+  ],
+  "limitations": [
+    "Comparative source from outside Alberta; it cannot establish Alberta code performance or approval.",
+    "The attached publication is the appeal decision, not the underlying application file. Exhibits named in the decision are not presumed attached unless visible in this PDF. The decision outcome is visible in the attachment.",
+    "This is an accessibility-standard exemption, not an Alberta NBC variance record."
+  ],
+  "worker": "L20",
+  "prompt_number": 567,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://publications.saskatchewan.ca/api/v1/products/125143/formats/146317/download",
+      "sha256": "4c4f0db8dda42becc5194afcd998c325b6c789c266971e562d72fea76febdd34",
+      "role": "outcome_reference",
+      "bytes": 207747,
+      "filename": "sk-scsab-appeal-no.-2024-006-4c4f0db8dda4.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L20/files/sk-scsab-appeal-no.-2024-006-4c4f0db8dda4.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:23:16.762216+00:00",
+        "http_status": "200",
+        "final_url": "https://publications.saskatchewan.ca/api/v1/products/125143/formats/146317/download",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Saskatchewan",
+    "city_or_town": "Unspecified locality",
+    "basis": "Saskatchewan appeal record leaves the municipality or property location unnamed or redacted; no project locality is inferred from the tribunal or office address.",
+    "locator": "jurisdiction field",
+    "scope": "undisclosed"
+  }
+}

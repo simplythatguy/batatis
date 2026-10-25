@@ -1,6 +1,6 @@
 # Data Prompts
 
-653 numbered source-backed attachment exercises, organized around Calgary and Edmonton first, then other Alberta records. There are 592 groups of shared original input sources; prompt count is not a count of complete applications or independent projects.
+653 source-backed attachment exercises, organized around Calgary and Edmonton first, then other Alberta records. There are 592 groups of shared original input sources; prompt count is not a count of complete applications or independent projects.
 
 | Priority | Prompts |
 | --- | ---: |
@@ -10,6 +10,25 @@
 | Outside Alberta - attachment comparison only | 421 |
 
 Start with [Calgary and Edmonton cases](CITY_CASES.md) and [Alberta Prompt Index.csv](Alberta%20Prompt%20Index.csv). [index.csv](index.csv) and [index.json](index.json) include everything. [Comparative Prompt Index.csv](Comparative%20Prompt%20Index.csv) contains outside-Alberta records for attachment format/content comparisons only.
+
+## Folder structure
+
+Browse [locations](GEOGRAPHY_INDEX.md) or open the matching country, province/state and city/town:
+
+```text
+Data Prompts/
+└── Canada/
+    └── Alberta/
+        └── Calgary/
+            └── Prompts/
+                └── A03-001-historic-fire-hall-no-1-adaptive-reuse-concepts-in-city-technical-feasib/
+                    ├── prompt.txt
+                    ├── source.json
+                    ├── evaluation.json
+                    └── original attachments (local)
+```
+
+Case folders use stable case IDs and descriptive titles. `geography.json` records the source evidence for every location. National and province-wide references, multiple-location studies, and undisclosed municipalities have explicit scope folders. Publisher or tribunal office addresses are not treated as project locations. Numeric `prompt` values remain stable index references; they do not name folders.
 
 ## Restore local attachments
 
@@ -24,19 +43,19 @@ python3 'Data Prompts/_tools/restore_attachments.py' --from '/path/to/existing/D
 python3 'Data Prompts/_tools/verify_corpus.py' --attachments
 ```
 
-Restore a single case by adding `--prompt 1`. To retrieve a selected public source again, after checking its publisher terms:
+Restore a single case by adding `--case A03-001`. To retrieve a selected public source again, after checking its publisher terms:
 
 ```sh
-python3 'Data Prompts/_tools/restore_attachments.py' --download --prompt 1
+python3 'Data Prompts/_tools/restore_attachments.py' --download --case A03-001
 ```
 
-Network restoration requires explicit prompt numbers. Archive captures use the recorded capture URL. Files marked `rights_review_required` require a permitted local copy. Any changed response, missing source, access challenge, or hash mismatch is reported as a failure; no replacement attachment is invented. Existing files with unexpected hashes are preserved and reported. Separate evaluator references are restored only with `--include-evaluation`.
+Network restoration requires explicit case IDs or prompt index numbers. Archive captures use the recorded capture URL. Files marked `rights_review_required` require a permitted local copy. Any changed response, missing source, access challenge, or hash mismatch is reported as a failure; no replacement attachment is invented. Existing files with unexpected hashes are preserved and reported. Separate evaluator references are restored only with `--include-evaluation`.
 
-HTML and DOCX text inputs are regenerated from the original bytes and checked against the recorded extraction hash. The collectors in `_tools/` document the original research process; their full audit/reassembly commands require the complete local worker collection. `verify_corpus.py` works on a fresh metadata checkout without those raw files.
+HTML and DOCX text inputs are regenerated from the original bytes and checked against the recorded extraction hash. Use `organize_by_geography.py` to apply an updated geography map and `regroup_sources.py` to update shared-evidence groups. The collectors in `_tools/` document the original research process; their full audit/reassembly commands require the complete local worker collection. `verify_corpus.py` works on a fresh metadata checkout without those raw files.
 
 ## Run a prompt
 
-1. Open a numbered folder and use its `prompt.txt` as the test message.
+1. Browse a location and open a named case folder; use its `prompt.txt` as the test message.
 2. Attach the source files listed at the bottom of that prompt. Restored original PDFs retain their recorded bytes. For web-only records, a source-text `.txt` extraction is supplied alongside the original HTML; the extraction contains source text rather than invented content.
 3. Keep `source.json`, `evaluation.json`, and any `_evaluation/` folder out of the model input. They contain provenance, source locators, known published outcomes, limitations, and review notes. Separate outcome-reference attachments are held in `_evaluation/`; a decision inside the main source PDF remains explicitly flagged as leaked.
 4. Record the system's output against the cited source facts and have the appropriate human reviewer assess unresolved technical questions. Do not treat a published outcome as complete expert ground truth for a new project.

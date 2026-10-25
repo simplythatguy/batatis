@@ -1,0 +1,85 @@
+{
+  "id": "L07-002",
+  "title": "BCAB 2006 - Fire separation of residential roof-top decks",
+  "jurisdiction": "British Columbia",
+  "code_edition": "BCBC 2024",
+  "case_type": "appeal_decision",
+  "source_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-2006",
+  "document_date": "2026-08-06",
+  "facts": [
+    {
+      "text": "The project is the design and construction of a new three-unit rowhouse under Part 9. The building will be sprinklered, and will contain no stacked units or secondary suites. During the project, the property will be subdivided into three parcels; property lines will be added between units and the walls between units will be party walls.",
+      "locator": "Project description, paragraph 1"
+    },
+    {
+      "text": "Each of the three units will have an exterior rooftop deck accessed by an internal stair leading up from the storey below. A 1.8m high privacy screen is located between two of the roof decks.",
+      "locator": "Project description, paragraph 2"
+    },
+    {
+      "text": "The configuration is generally as illustrated below:",
+      "locator": "Project description, paragraph 3"
+    }
+  ],
+  "limitations": [
+    "The decision page is a Board-published appeal record, not the original variance/application package.",
+    "The published decision refers to supporting drawings or evidence in some cases, but these were not attached to the downloaded page.",
+    "Published Board outcome appears in the input attachment; outcome leakage is intentional and flagged.",
+    "Where a figure is attached, the decision page does not consistently identify its author; Board-created figures are distinguished in the research report, and no image is treated as a complete applicant drawing set.",
+    "British Columbia decision retained for comparative attachment format/content only; it does not establish Alberta code applicability, design performance, or acceptance."
+  ],
+  "worker": "L07",
+  "prompt_number": 493,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-2006",
+      "sha256": "2731cac1cc4cc0111cccc387cdb0e166fb2a4adf164f9933a2163f1f6d9e85ce",
+      "role": "input",
+      "bytes": 1357345,
+      "filename": "bcab-2006-2731cac1cc4c.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-2006-2731cac1cc4c.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:18:14.434440+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-2006",
+        "content_type": "text/html; charset=utf-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-1-source-text.txt",
+        "sha256": "d688f04ea37ddb8b0a5ece14d568ad70939e1b698c8dae71b30a061b7784fcd2",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    },
+    {
+      "url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/construction-industry/building-codes-and-standards/building-code-appeal-board/bcab2006.jpg",
+      "sha256": "bd5326dad350b59b53acf5297aaff73886bc97ed846cf0eb61216ee15ebfb950",
+      "role": "supporting_evidence",
+      "bytes": 52767,
+      "filename": "bcab-2006-bcab2006-bd5326dad350.jpg",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-2006-bcab2006-bd5326dad350.jpg",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:23:22.669334+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/construction-industry/building-codes-and-standards/building-code-appeal-board/bcab2006.jpg",
+        "content_type": "image/jpeg; charset=UTF-8",
+        "kind": "image",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "British Columbia",
+    "city_or_town": "Unspecified locality",
+    "basis": "British Columbia appeal describes a project without naming its municipality; the provincial appeal-board location is not the project location.",
+    "locator": "jurisdiction field",
+    "scope": "undisclosed"
+  }
+}

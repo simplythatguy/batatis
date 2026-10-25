@@ -1,0 +1,87 @@
+{
+  "id": "L05-014",
+  "title": "City of Edmonton demonstration alternative solution for secondary suites in rowhouses (Policy B23-01 support)",
+  "jurisdiction": "City of Edmonton, Alberta",
+  "code_edition": "National Building Code - 2023 Alberta Edition (printing unstated in the source)",
+  "case_type": "published_worked_example",
+  "source_url": "https://www.edmonton.ca/residential_neighbourhoods/application-requirements-house-permits",
+  "document_date": "2024-07-31",
+  "facts": [
+    {
+      "text": "The City report says it was prepared as a demonstration alternative solution to NBC(AE) Sentence 9.10.11.2.(2) to inform creation of municipal policy; it states use for any other purpose is prohibited.",
+      "locator": "Alternative Solution for Secondary Suites in Rowhouses, PDF p. 3."
+    },
+    {
+      "text": "The report executive summary states its demonstration compares rowhouses with secondary suites and one-hour party-wall fire separations against the referenced acceptable solution; this is the report’s technical conclusion, not a site-specific permit decision.",
+      "locator": "Alternative Solution for Secondary Suites in Rowhouses, PDF p. 4."
+    },
+    {
+      "text": "Policy B23-01 states a defined option for row houses constructed per NBC2023(AE) Division B 9.10.15 with more than two adjacent houses with secondary suites: certain party walls on a property line may be a fire separation rated not less than one hour instead of a firewall, subject to the policy text and other NBC(AE) requirements.",
+      "locator": "Policy B23-01, PDF p. 1."
+    },
+    {
+      "text": "The policy asks applicants to show sufficient information on drawings and submit the signed Letter of Construction Intention with the permit application; it says an SCO may refuse to issue a permit incorporating the policy in exceptional circumstances.",
+      "locator": "Policy B23-01, PDF pp. 1-2."
+    },
+    {
+      "text": "The report lists conditions including other applicable secondary-suite requirements, continuous smoke-tight 12.7 mm gypsum-board protection, solid-core self-closing doors in smoke-tight barriers, smoke-alarm requirements, and assumptions about local fire-service response/intervention.",
+      "locator": "Alternative Solution for Secondary Suites in Rowhouses, PDF p. 16."
+    }
+  ],
+  "limitations": [
+    "This is a published municipal demonstration report and general policy, not an individual application, issued project variance, or site-specific permit decision.",
+    "The report expressly states that it was made to inform municipal policy and that use for any other purpose is prohibited; it must not be reused as a design solution for another building.",
+    "The policy states a limited option and reserves exceptional refusal by an SCO; project applicability and all other code requirements are unknown without project documents.",
+    "No applicant, owner, address, drawings, or site measurements were invented."
+  ],
+  "worker": "L05",
+  "prompt_number": 36,
+  "priority_tier": 1,
+  "priority": "Calgary / Edmonton",
+  "attachments": [
+    {
+      "url": "https://www.edmonton.ca/sites/default/files/public-files/Alternative-Solution-for-Secondary-Suites-in-Row-houses.pdf?cb=1755184686",
+      "sha256": "3b09cba97cbc5a974c7efa1c14718a90f3adba2544e90ebebfe11139e6d0f372",
+      "role": "input",
+      "bytes": 1935919,
+      "filename": "B23-01-alternative-solution-report-3b09cba97cbc.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L05/files/B23-01-alternative-solution-report-3b09cba97cbc.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:33.800955+00:00",
+        "http_status": "200",
+        "final_url": "https://www.edmonton.ca/sites/default/files/public-files/Alternative-Solution-for-Secondary-Suites-in-Row-houses.pdf?cb=1755184686",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://www.edmonton.ca/sites/default/files/public-files/Policy-B23-01-Secondary-Suites-in-Row-houses.pdf?cb=1755184683",
+      "sha256": "85d5c4d38be7df97f9668ea7b46640990c9f3a08ccc7bb93c5c8b74a33f4fe71",
+      "role": "supporting_evidence",
+      "bytes": 178151,
+      "filename": "policy-B23-01-85d5c4d38be7.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L05/files/policy-B23-01-85d5c4d38be7.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:33.800737+00:00",
+        "http_status": "200",
+        "final_url": "https://www.edmonton.ca/sites/default/files/public-files/Policy-B23-01-Secondary-Suites-in-Row-houses.pdf?cb=1755184683",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Alberta",
+    "city_or_town": "Edmonton",
+    "basis": "Edmonton municipal demonstration report supports Policy B23-01; its context is Edmonton but it has no individual project site.",
+    "locator": "jurisdiction field",
+    "scope": "illustrative"
+  }
+}

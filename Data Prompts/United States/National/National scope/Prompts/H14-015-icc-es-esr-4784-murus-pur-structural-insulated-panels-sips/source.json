@@ -1,0 +1,75 @@
+{
+  "id": "H14-015",
+  "title": "ICC-ES ESR-4784: Murus PUR structural insulated panels (SIPs)",
+  "jurisdiction": "United States (ICC-ES evaluation report under IBC/IRC); NON-ALBERTA COMPARATIVE ONLY: cannot establish Alberta performance, acceptance or equivalence; no Canadian or Alberta approval is claimed or implied",
+  "code_edition": "2024, 2021, 2018 and 2015 IBC and IRC (report §1.0, p1)",
+  "case_type": "product_evidence",
+  "source_url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-4784.pdf",
+  "document_date": "Reissued February 2026; subject to renewal February 2028 (p1)",
+  "facts": [
+    {
+      "text": "Report holder THE MURUS COMPANY; subject is Murus PUR SIPs with a foamed-in-place polyurethane core.",
+      "locator": "p1 cover; §3.1, p1"
+    },
+    {
+      "text": "Used as structural insulated roof and wall panels; combustible for construction type under IBC Chapter 6.",
+      "locator": "§2.1-2.2, p1"
+    },
+    {
+      "text": "'Murus PUR SIPs shall not be used as part of a fire-rated assembly unless suitable evidence and details are submitted and approved by the authority having jurisdiction.'",
+      "locator": "§2.3, p1"
+    },
+    {
+      "text": "Shear-wall configurations in Table 5 are limited to Seismic Design Categories A, B and C.",
+      "locator": "§4.1.8.1, p3"
+    },
+    {
+      "text": "Installation complies with the report and approved construction documents; thicknesses listed only; no span extrapolation; production at Mansfield, Pennsylvania under ICC-ES-inspected quality control.",
+      "locator": "§5.1-5.4, p4"
+    },
+    {
+      "text": "Evidence listed: axial, transverse and in-plane racking shear tests 'conducted in accordance with general guidelines of ASTM E72'.",
+      "locator": "§6.0, p4"
+    }
+  ],
+  "limitations": [
+    "Non-Alberta comparative attachment; the report does not reference NBC(AE) 2023 and is not evidence of Alberta or Canadian acceptance.",
+    "Retrieved 2026-10-25 from the official ICC-ES report URL; current ICC-ES status was not checked live. source_url is the report PDF, not a separate listing page.",
+    "Text from pypdf extraction; figures, tables and signatures not transcribed; locators are PDF page numbers, not printed page numbers.",
+    "ICC-ES copyright; retained locally for comparison only, redistribution not licensed.",
+    "Table 5 values were not transcribed."
+  ],
+  "worker": "H14",
+  "prompt_number": 642,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-4784.pdf",
+      "sha256": "d5bbc6f63f77ac118303e3b01d0c14ed9d47fda5bd123bdecdea6b9324f8cc06",
+      "role": "input",
+      "bytes": 481294,
+      "filename": "esr-4784-murus-pur-sip-d5bbc6f63f77.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H14/files/esr-4784/esr-4784-murus-pur-sip-d5bbc6f63f77.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:21:42.470599+00:00",
+        "http_status": "200",
+        "final_url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-4784.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "United States",
+    "province_or_state": "National",
+    "city_or_town": "National scope",
+    "basis": "The jurisdiction identifies a US ICC-ES product assessment under IBC/IRC. Report-holder and manufacturing locations do not locate a project.",
+    "locator": "jurisdiction field",
+    "scope": "national"
+  }
+}

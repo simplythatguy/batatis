@@ -18,5 +18,5 @@ regexes = ['''^(d1d96198-3866-4673-9cec-a787f71f89f5|5de58e0f-d65e-47f0-9973-cde
 description = "Ordinary planning phrase in the reconstructed BC Housing prompt."
 targetRules = ["generic-api-key"]
 condition = "AND"
-paths = ['''^Data Prompts/Prompt 314/prompt\.txt$''']
+paths = ['''^Data Prompts/(Prompt 314|Canada/British\ Columbia/Unspecified\ locality/Prompts/L14\-018\-bc\-housing\-study\-scenario\-2\-two\-combined\-33\-foot\-lots)/prompt\.txt$''']
 regexes = ['''^parking/amenity$''']

@@ -1,0 +1,69 @@
+{
+  "id": "L01-018",
+  "title": "23-BCV-018 — Vented soffit protection",
+  "jurisdiction": "Alberta, Canada (province-wide variance)",
+  "code_edition": "National Building Code – 2023 Alberta Edition",
+  "case_type": "issued_variance",
+  "source_url": "https://open.alberta.ca/publications/standata-variance-building-national-building-code-2023-alberta-edition",
+  "document_date": "September 2025",
+  "facts": [
+    {
+      "text": "The variance applies to Part 9 buildings requiring solid soffits because of projections in areas of concern, typically near a property line.",
+      "locator": "PDF p.3, Application"
+    },
+    {
+      "text": "Intumescent-coated vented fiberglass or metal substrate is an alternative only when tested by an SCC-accredited laboratory and documentation verifies performance equal to or greater than 11 mm plywood in Appendix A Table 1.",
+      "locator": "PDF p.3, Variance condition 1"
+    },
+    {
+      "text": "Installation must follow manufacturer instructions or testing documentation.",
+      "locator": "PDF p.3, Variance condition 2"
+    },
+    {
+      "text": "The source lists the relevant provisions as Sentences 9.10.14.5.(12), 9.10.15.5.(11), and 9.10.12.4.(2)–(3).",
+      "locator": "PDF pp.1–3, Code References"
+    },
+    {
+      "text": "Catalogue status at capture: the resource title has no [SUPERSEDED] marker; API resource state is active.",
+      "locator": "Official catalogue row and API resource metadata, retrieved 2026-10-24 America/Edmonton"
+    }
+  ],
+  "limitations": [
+    "This is a regulator-issued variance reference, not an applicant submission, approved project file, or evidence that any particular design meets its conditions.",
+    "No applicant facts, site dimensions, drawings, calculations, professional opinions, or permit decision are present in the catalogue record.",
+    "Catalogue labels and API resource state are recorded as published metadata; they are not an independent legal determination of current force."
+  ],
+  "worker": "L01",
+  "prompt_number": 56,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/3cd8d34e-f417-4f3e-86b6-fc106564be76/download/ma-standata-variance-building-23-bcv-018-2025-09.pdf",
+      "sha256": "7a4776b89a12e3e1141bb0247a10a74e50141d97493bf849b1f03f932e785b45",
+      "role": "outcome_reference",
+      "bytes": 188541,
+      "filename": "23-BCV-018-7a4776b89a12.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L01/files/23-BCV-018-7a4776b89a12.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:21.535434+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/3cd8d34e-f417-4f3e-86b6-fc106564be76/download/ma-standata-variance-building-23-bcv-018-2025-09.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Alberta",
+    "city_or_town": "Province-wide",
+    "basis": "Alberta STANDATA expressly has provincewide scope; no individual project locality.",
+    "locator": "jurisdiction field",
+    "scope": "provincewide"
+  }
+}

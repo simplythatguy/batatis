@@ -1,0 +1,62 @@
+{
+  "id": "L10-006",
+  "title": "BCC Ruling No. 10-01-1237 — standpipe alternative measures in manufacturing plant",
+  "jurisdiction": "Ontario — Municipality of West Nipissing",
+  "code_edition": "Ontario Building Code 2006, O. Reg. 350/06 (as cited)",
+  "source_url": "http://www.mah.gov.on.ca/Asset9384.aspx?method=1",
+  "document_date": "2010-01-14",
+  "facts": [
+    {
+      "text": "The case concerns a new one-storey, non-combustible Group F, Division 3 manufacturing plant described as about 5,300 m², with a fire alarm system and no sprinklers.",
+      "locator": "Ruling §1 and §5"
+    },
+    {
+      "text": "The applicant proposed compensating measures in place of the standpipe system required by Article 3.2.9.1., including additional extinguishers and fire-department monitoring.",
+      "locator": "Ruling §§1 and 3"
+    },
+    {
+      "text": "The ruling text identifies a system of internal piping with 65 mm hose connections as a condition in its disposition.",
+      "locator": "Ruling §5, Commission Ruling"
+    }
+  ],
+  "limitations": [
+    "The ruling is the only attached record; source fire-protection drawings and underlying reports are absent.",
+    "An Ontario site-specific disposition does not establish Alberta applicability.",
+    "This Ontario decision and its code are non-Alberta comparisons for attachment format/content only; they cannot establish Alberta performance. Check Calgary and Edmonton sources first for local authority, then other Alberta jurisdictions as needed."
+  ],
+  "case_type": "appeal_decision",
+  "document_type": "Ontario Building Code Commission dispute ruling",
+  "worker": "L10",
+  "prompt_number": 545,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://web.archive.org/web/20191029224430id_/http://www.mah.gov.on.ca/Asset9384.aspx?method=1",
+      "sha256": "350b91c8259d40a0574181636639986edcb0cdd023302c02494f92e86d7bab99",
+      "role": "outcome_reference",
+      "bytes": 71537,
+      "filename": "ONBCC-10-01-1237-350b91c8259d.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L10/files/ONBCC-10-01-1237-350b91c8259d.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:22:43.049689+00:00",
+        "http_status": "200",
+        "final_url": "https://web.archive.org/web/20190619014839id_/http://www.mah.gov.on.ca/Asset9384.aspx?method=1",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Ontario",
+    "city_or_town": "West Nipissing",
+    "basis": "The source jurisdiction identifies West Nipissing, Ontario for the named project, proposal or appeal; this describes source geography.",
+    "locator": "jurisdiction field",
+    "scope": "project"
+  }
+}

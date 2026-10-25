@@ -1,0 +1,66 @@
+{
+  "id": "H02-016",
+  "title": "Determination 2023/020: Compliance of the depositing and collection of solid waste (single common waste storage area, alternative solution)",
+  "jurisdiction": "New Zealand: Auckland Council as building consent authority; MBIE determination under the Building Act 2004. Non-Alberta comparative record.",
+  "code_edition": "NZ Building Code (Schedule 1, Building Regulations 1992), clause G15 (solid waste), with G15.3.1(b). Edition not named in the text read.",
+  "case_type": "appeal_decision",
+  "source_url": "https://codehub.building.govt.nz/resources/2023020",
+  "document_date": "21 July 2023",
+  "facts": [
+    {
+      "text": "A new residential property development relies on a single common waste storage area for the depositing and collection of solid waste under building consent BCO10340522.",
+      "locator": "p.2; p.14 §6.1"
+    },
+    {
+      "text": "The proposal was put forward as an alternative solution for the depositing and collection of solid waste.",
+      "locator": "p.2"
+    },
+    {
+      "text": "The question is whether the waste storage area under clause G15 provides reasonable access for depositing and collection of solid waste.",
+      "locator": "p.1 Summary"
+    },
+    {
+      "text": "The determination describes an alternative solution as all or part of a building design that demonstrates compliance with the performance requirements, and it considers carry distance for the alternative.",
+      "locator": "p.12 §5.20-5.21"
+    }
+  ],
+  "limitations": [
+    "The access question is for waste collection, not disabled access. It is kept as an alternative-solution case.",
+    "The record's alternative-solution argument is summarised in parts, and the parties' positions on each point should be checked in the PDF.",
+    "Owner and street address are omitted.",
+    "Applies to the New Zealand Building Code only. No Alberta applicability is asserted."
+  ],
+  "worker": "H02",
+  "prompt_number": 392,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2023/2023-020.pdf",
+      "sha256": "d37d6a880d4095aaf9976a79b4289255d4f96d86ec5083fec9da948fecca8b8b",
+      "role": "input",
+      "bytes": 826833,
+      "filename": "mbie-det-2023-020-d37d6a880d40.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H02/files/mbie-det-2023-020-d37d6a880d40.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:46:35.878217+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2023/2023-020.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Auckland",
+    "basis": "The jurisdiction documents Auckland as the local context; no separate region is documented.",
+    "locator": "jurisdiction field",
+    "scope": "local"
+  }
+}

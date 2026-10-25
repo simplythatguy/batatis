@@ -1,0 +1,76 @@
+{
+  "id": "H01-010",
+  "number": "2025-044",
+  "title": "NZ MBIE Determination 2025/044 (comparative): bedroom natural light, G7/AS1 scope in proposed townhouses",
+  "jurisdiction": "New Zealand (Building Act 2004); Auckland Council; comparative only, not Alberta",
+  "scope": "comparative_non_alberta",
+  "code_edition": "NZ Building Code (Schedule 1, Building Regulations 1992) as cited; G7/AS1 referenced (edition not stated in extracted text)",
+  "case_type": "appeal_decision",
+  "timing": "proposed",
+  "retrospective": "no",
+  "source_url": "https://codehub.building.govt.nz/resources/2025044",
+  "source_url_note": "Building CodeHub resource page for the same MBIE determination (Information provider: MBIE); the building.govt.nz determination page is WAF-blocked for this worker.",
+  "document_date": "10 September 2025",
+  "facts": [
+    {
+      "text": "The matter is whether bedroom 3 in units 2-6 of the proposed multi-unit building is within the scope of Acceptable Solution G7/AS1.",
+      "locator": "p.2, para 1.3"
+    },
+    {
+      "text": "The proposed building is a three-storey residential building with seven attached townhouse units.",
+      "locator": "p.2, para 2.1"
+    },
+    {
+      "text": "Each unit has a garage and laundry on the ground floor, three bedrooms and two bathrooms on the first floor, and kitchen and living areas on the second floor.",
+      "locator": "p.2, para 2.2"
+    },
+    {
+      "text": "The end units have additional windows installed in their external end walls.",
+      "locator": "p.2, para 2.2"
+    },
+    {
+      "text": "The authority raised the location and characteristics of a taller neighbouring building on the boundary.",
+      "locator": "p.4, para 3.1"
+    }
+  ],
+  "limitations": [
+    "Comparative test only: New Zealand Building Act 2004 and Building Code (Schedule 1, Building Regulations 1992). No Alberta applicability asserted; no NBC(AE) mapping.",
+    "Outcome leakage: the MBIE decision is inside the same original PDF, so the full file cannot be used as applicant-stage input without removing the decision pages.",
+    "Applicant application documents are not published; drawings and photos appear only as figures inside the determination. Figures were located by caption, not visually inspected.",
+    "Floorplans and elevations are not separately published; the record is the summary and figures."
+  ],
+  "worker": "H01",
+  "prompt_number": 360,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2025/2025-044.pdf",
+      "sha256": "0e6f55f42a935d56f2217ed10fe3dadd4ecaeb5c885dd6ecb8ff33039c7b2c38",
+      "role": "input",
+      "document_type": "MBIE determination PDF (original bytes)",
+      "bytes": 174994,
+      "filename": "mbie-det-2025-044-0e6f55f42a93.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H01/files/pdf/mbie-det-2025-044-0e6f55f42a93.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:43:19.705288+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2025/2025-044.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Auckland",
+    "basis": "The jurisdiction names Auckland Council as the local authority context; no separate region is documented.",
+    "locator": "jurisdiction field",
+    "scope": "local"
+  }
+}

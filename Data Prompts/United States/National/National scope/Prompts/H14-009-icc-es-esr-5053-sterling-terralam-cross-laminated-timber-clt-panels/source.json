@@ -1,0 +1,79 @@
+{
+  "id": "H14-009",
+  "title": "ICC-ES ESR-5053: Sterling TerraLam cross-laminated timber (CLT) panels",
+  "jurisdiction": "United States (ICC-ES evaluation report under IBC/IRC); NON-ALBERTA COMPARATIVE ONLY: cannot establish Alberta performance, acceptance or equivalence; no Canadian or Alberta approval is claimed or implied",
+  "code_edition": "2021, 2018 and 2015 IBC and IRC; ANSI/APA PRG 320-2019 (report §1.0, p1)",
+  "case_type": "product_evidence",
+  "source_url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-5053.pdf",
+  "document_date": "Reissued August 2026; continuous compliance through August 2027 (p1)",
+  "facts": [
+    {
+      "text": "Report holder STERLING SITE ACCESS SOLUTIONS, LLC; subject is TerraLam CLT panels.",
+      "locator": "p1 cover"
+    },
+    {
+      "text": "Under the 2021, 2018 and 2015 IBC: floors, roofs and interior walls in Type III; floors, roofs, interior and exterior walls in Types IV and V; Types I and II as allowed by IBC §603.",
+      "locator": "§2.0, p1"
+    },
+    {
+      "text": "Shear-wall use requires detailing of the load paths in accordance with Appendix B of the 2021 SDPWS.",
+      "locator": "§5.7, p3"
+    },
+    {
+      "text": "Cutting, drilling and notching of floor and roof-deck panels are outside the evaluation; wall use for gravity or out-of-plane loads needs complete detailing and wall design acceptable to the code official.",
+      "locator": "§5.5-5.6, p3"
+    },
+    {
+      "text": "Exterior wall surfaces must be protected by a weather-resistant exterior finish.",
+      "locator": "§5.9, p3"
+    },
+    {
+      "text": "Panels are fabricated at Sterling Structural's facility in Phoenix, Illinois.",
+      "locator": "§5.12, p3"
+    },
+    {
+      "text": "Evidence listed: ICC-ES AC455, dated October 2022.",
+      "locator": "§6.0, p3"
+    }
+  ],
+  "limitations": [
+    "Non-Alberta comparative attachment; the report does not reference NBC(AE) 2023 and is not evidence of Alberta or Canadian acceptance.",
+    "Retrieved 2026-10-25 from the official ICC-ES report URL; current ICC-ES status was not checked live. source_url is the report PDF, not a separate listing page.",
+    "Text from pypdf extraction; figures, tables and signatures not transcribed; locators are PDF page numbers, not printed page numbers.",
+    "ICC-ES copyright; retained locally for comparison only, redistribution not licensed.",
+    "Editions 2021/2018/2015 are the only IBC sets named; no NBC reference."
+  ],
+  "worker": "H14",
+  "prompt_number": 636,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-5053.pdf",
+      "sha256": "ce0d4605ada69997f85b94ab41699949a724c3b43bb7850f4bc7c9ecd4bf03b0",
+      "role": "input",
+      "bytes": 435056,
+      "filename": "esr-5053-sterling-terralam-clt-ce0d4605ada6.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H14/files/esr-5053/esr-5053-sterling-terralam-clt-ce0d4605ada6.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:21:22.882388+00:00",
+        "http_status": "200",
+        "final_url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-5053.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "United States",
+    "province_or_state": "National",
+    "city_or_town": "National scope",
+    "basis": "The jurisdiction identifies a US ICC-ES product assessment under IBC/IRC. Report-holder and manufacturing locations do not locate a project.",
+    "locator": "jurisdiction field",
+    "scope": "national"
+  }
+}

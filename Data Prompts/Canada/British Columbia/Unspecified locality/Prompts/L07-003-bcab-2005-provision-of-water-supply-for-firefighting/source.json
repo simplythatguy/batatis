@@ -1,0 +1,62 @@
+{
+  "id": "L07-003",
+  "title": "BCAB 2005 - Provision of water supply for firefighting",
+  "jurisdiction": "British Columbia",
+  "code_edition": "BCBC 2024",
+  "case_type": "appeal_decision",
+  "source_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-2005",
+  "document_date": "2026-08-06",
+  "facts": [
+    {
+      "text": "The project is the design and construction of an addition to an existing building supply and garden centre store. The addition will be constructed in two phases and, when complete, the building will be approximately 1 400 m2 in building area, two storeys, unsprinklered, and regulated by Part 3.",
+      "locator": "Project description, paragraph 1"
+    },
+    {
+      "text": "An adequate water supply for firefighting is required. Supply options include a water-shuttle operation by the local fire department from a hydrant located 1.2 km away from the property, or enlargement of a “swamp” located on the property to provide a fire water storage pond equipped with a dry hydrant.",
+      "locator": "Project description, paragraph 2"
+    }
+  ],
+  "limitations": [
+    "Public appeal decision summarizes the dispute but the cited fire-department plan and original application/drawings are not attached.",
+    "Published Board outcome appears in the input attachment; outcome leakage is intentional and flagged.",
+    "British Columbia decision retained for comparative attachment format/content only; it does not establish Alberta code applicability, design performance, or acceptance."
+  ],
+  "worker": "L07",
+  "prompt_number": 494,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-2005",
+      "sha256": "df351277a38a2ec10b29383cb790d983eef60df0e92d7d69789925f58aa0b12a",
+      "role": "input",
+      "bytes": 1362595,
+      "filename": "bcab-2005-df351277a38a.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-2005-df351277a38a.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:18:23.022072+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-2005",
+        "content_type": "text/html; charset=utf-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-1-source-text.txt",
+        "sha256": "ec7abd984f221dfde2db77b32f1c6cbdde180fabcded3ff182696d61bbdf904a",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "British Columbia",
+    "city_or_town": "Unspecified locality",
+    "basis": "British Columbia appeal describes a project without naming its municipality; the provincial appeal-board location is not the project location.",
+    "locator": "jurisdiction field",
+    "scope": "undisclosed"
+  }
+}

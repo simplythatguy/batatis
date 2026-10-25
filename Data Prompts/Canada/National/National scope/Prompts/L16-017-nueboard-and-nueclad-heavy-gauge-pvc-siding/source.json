@@ -1,0 +1,86 @@
+{
+  "id": "L16-017",
+  "title": "NueBoard and NueClad heavy-gauge PVC siding",
+  "jurisdiction": "Canada — national CCMC product evaluation; comparative attachment only, not a Calgary/Edmonton or Alberta project application",
+  "code_edition": "NBC 2015",
+  "case_type": "product_evidence",
+  "source_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14171-R&type=cert",
+  "document_date": "2025-03-26",
+  "facts": [
+    {
+      "text": "The fire table reports FSR 55 and SDC 470 for NueBoard siding specimens under CAN/ULC-S102.2:2018.",
+      "locator": "CCMC 14171-R PDF, p. 7, Fire performance table and notes"
+    },
+    {
+      "text": "The report says the additional-performance fire data does not form part of its CCMC compliance opinion.",
+      "locator": "CCMC 14171-R PDF, p. 7, Additional performance data note"
+    },
+    {
+      "text": "The NBC 2015 opinion classifies the evaluated product as Alternative under Article 9.27.12 Vinyl Siding.",
+      "locator": "CCMC 14171-R PDF, p. 2, Compliance opinion table"
+    }
+  ],
+  "limitations": [
+    "Fire data is additional performance information outside the code opinion.",
+    "No project drawings, building classification or location are attached."
+  ],
+  "source_use": "comparative_attachment_content_only",
+  "worker": "L16",
+  "prompt_number": 213,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?type=cert&id=720",
+      "sha256": "ae435ae3b8fd71ac0a3e7da2594bde7224838a0317bad9f7d2f1cca871672513",
+      "role": "input",
+      "bytes": 633568,
+      "filename": "current-route-14171-R-ae435ae3b8fd.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L16/files/current-route-14171-R-ae435ae3b8fd.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:51:14.483647+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?type=cert&id=720",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded",
+        "entity_extraction": "Copied unchanged PDF entity from byte 433; original transport capture retained.",
+        "raw_capture_sha256": "29346756327e6c3db68413504873cd48a28180431d11b7ceb761089bae634f30",
+        "raw_capture_path": "_research/workers/L16/files/transport-capture-29346756327e6c3d.bin"
+      }
+    },
+    {
+      "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14171-R&type=cert",
+      "sha256": "f9c44be30cd39f3d01258afbec2be6a113f2394ce4d915d602bba69ae9ce9d5d",
+      "role": "supporting_evidence",
+      "bytes": 50621,
+      "filename": "landing-14171-R-f9c44be30cd3.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L16/files/landing-14171-R-f9c44be30cd3.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:21:11.564770+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14171-R&type=cert",
+        "content_type": "text/html; charset=UTF-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-2-source-text.txt",
+        "sha256": "ec12d86e79ac886e5af3878317fe6bd6e071069760326717c3e82240a7424819",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "National",
+    "city_or_town": "National scope",
+    "basis": "National Canadian CCMC product assessment; no project site is identified and manufacturer or publisher addresses are not project locations.",
+    "locator": "jurisdiction field",
+    "scope": "national"
+  }
+}

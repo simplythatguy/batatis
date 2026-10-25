@@ -1,0 +1,60 @@
+{
+  "id": "L13-013",
+  "title": "University of Waterloo Mass Timber Engineering Building (proposed design study)",
+  "jurisdiction": "University of Waterloo, Waterloo, Ontario",
+  "code_edition": "Ontario Building Code discussed in the paper; edition unstated",
+  "case_type": "published_worked_example",
+  "source_url": "https://www.proceedings.com/content/069/069179-0571open.pdf",
+  "document_date": "Unknown; date not stated in PDF",
+  "facts": [
+    {
+      "text": "The paper proposes a seven-storey mass-timber academic design for the University of Waterloo campus and discusses large spans, future flexibility and fire resistance as design challenges.",
+      "locator": "PDF pp.1, 4"
+    },
+    {
+      "text": "The proposed systems include hollowcore mass-timber long-span floor panels, CLT flat-plate/service towers, and timber lateral-system options.",
+      "locator": "PDF pp.4-7"
+    },
+    {
+      "text": "The paper describes possible alternative-solution pathways for exposed combustible timber, but does not document an actual permit application or approval.",
+      "locator": "PDF p.1 and fire-design discussion"
+    }
+  ],
+  "limitations": [
+    "This paper is not an actual building permit, variance, or approval record and must be kept separate from built-project cases.",
+    "It offers design uncertainty evidence, not an administrative-completeness precedent."
+  ],
+  "worker": "L13",
+  "prompt_number": 595,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.proceedings.com/content/069/069179-0571open.pdf",
+      "sha256": "4444e867dc4f3f35d083d94c0c00ebbd39df8e1f323e2c2ee51c8b1f3877ff54",
+      "role": "input",
+      "bytes": 3556502,
+      "filename": "waterloo-mass-timber-engineering-building-study-4444e867dc4f.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L13/files/waterloo-mass-timber-engineering-building-study-4444e867dc4f.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:18:14.653932+00:00",
+        "http_status": "200",
+        "final_url": "https://www.proceedings.com/content/069/069179-0571open.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Ontario",
+    "city_or_town": "Waterloo",
+    "basis": "Proposed academic mass-timber design study explicitly concerns the University of Waterloo campus in Waterloo, Ontario; not an actual application.",
+    "locator": "PDF pp.1, 4",
+    "scope": "illustrative"
+  }
+}

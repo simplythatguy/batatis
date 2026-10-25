@@ -1,0 +1,85 @@
+{
+  "id": "H16-010",
+  "title": "5 Kingdom Street (Paddington Central, London): concept-stage planning fire statement organised under B1-B5 headings",
+  "jurisdiction": "England, UK (London; Paddington Central estate area per the text; borough not named in the extracted text). COMPARATIVE NON-ALBERTA RECORD; no Alberta applicability asserted.",
+  "code_edition": "BS 9999:2017 stated as principal design guidance (p.2). Building Regulations 2010 Part B. BS 5839-1:2017 and BS 5839-8:2013 cited. BS EN 12845 cited without year. London Plan Policies D5(B2) and D12(B1-6) cited.",
+  "case_type": "actual_application",
+  "source_url": "https://data.london.gov.uk/download/e6y7w/bd113460-747d-4319-9787-08edefce4a4f/Fire%20Statement.pdf",
+  "document_date": "July 2020 (topic date 08/07/2020; project P18-108)",
+  "facts": [
+    {
+      "text": "Prepared 'in support of the Planning Application'. 'The design is at concept level and the detail has not been developed.'",
+      "locator": "p.2"
+    },
+    {
+      "text": "Principal guidance is BS 9999:2017. 'Where these recommendations are unsuitable for the design or use of the building, additional engineering justifications will be provided.'",
+      "locator": "p.2-3"
+    },
+    {
+      "text": "Fire and smoke modelling 'may be undertaken to show that the proposed solutions will work'.",
+      "locator": "p.2"
+    },
+    {
+      "text": "B1: elements of structure either 120 minutes, or 90 minutes 'if, through a fire engineered approach, a time equivalence assessment determines this to be appropriate'. The text says 'full construction methods have not been determined and assessed'.",
+      "locator": "p.4 (B1)"
+    },
+    {
+      "text": "B2: a phased evacuation regime with two evacuation zones (podium and Crossrail Box as one; Tower as another). Travel distances, exit and stair widths are to be designed to BS 9999:2017.",
+      "locator": "p.4 (B2)"
+    },
+    {
+      "text": "B3: automatic fire detection Category L2 to BS 5839-1:2017 and BS 5839-8:2013; sprinklers to BS EN 12845; the building management is expected to meet an 'Enhanced' Level 1 regime from BS 9999.",
+      "locator": "p.4-5 (B3)"
+    },
+    {
+      "text": "B4: two firefighting shafts for the Tower and three for the Crossrail Box, accessed from Paddington Central Estate Road, with a fire control centre at fire-service access level.",
+      "locator": "p.5 (B4)"
+    },
+    {
+      "text": "Policy D5(B2) evacuation lifts: the statement says 'The Fire Surgery can confirm that evacuation lifts will be provided with at least one per core.'",
+      "locator": "p.3"
+    },
+    {
+      "text": "The overall strategy 'will have a reliance on sound management of the building', and specific management requirements 'will be highlighted to the client as they are developed'.",
+      "locator": "p.3"
+    }
+  ],
+  "limitations": [
+    "Comparative UK record only; not Alberta evidence.",
+    "Hosted on the London Datastore; borough and application reference are not in the extracted text. Location is inferred only from 'Paddington Central Estate Road'.",
+    "The downloaded filename ('london-data-fire-statement-example') was assigned before the content was read; the content is the 5 Kingdom Street statement."
+  ],
+  "worker": "H16",
+  "prompt_number": 262,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://data.london.gov.uk/download/e6y7w/bd113460-747d-4319-9787-08edefce4a4f/Fire%20Statement.pdf",
+      "sha256": "7dfe0915b4f4d6aedd7089809b4732f1c9be8757baf2bab1874911d0243bcc9b",
+      "role": "input",
+      "bytes": 198841,
+      "filename": "london-data-fire-statement-example-7dfe0915b4f4.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H16/files/london-data-fire-statement-example-7dfe0915b4f4.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:48:15.254434+00:00",
+        "http_status": "200",
+        "final_url": "https://data.london.gov.uk/download/e6y7w/bd113460-747d-4319-9787-08edefce4a4f/Fire%20Statement.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "United Kingdom",
+    "province_or_state": "England",
+    "city_or_town": "London",
+    "basis": "The title and jurisdiction identify Paddington Central, London; the facts name Paddington Central Estate Road. No borough is inferred.",
+    "locator": "source title; jurisdiction field; p.5 (B4)",
+    "scope": "project"
+  }
+}

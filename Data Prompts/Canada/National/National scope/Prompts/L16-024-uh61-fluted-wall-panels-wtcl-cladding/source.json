@@ -1,0 +1,90 @@
+{
+  "id": "L16-024",
+  "title": "UH61 Fluted Wall Panels (WTCL cladding)",
+  "jurisdiction": "Canada — national CCMC product evaluation; comparative attachment only, not a Calgary/Edmonton or Alberta project application",
+  "code_edition": "NBC 2020",
+  "case_type": "product_evidence",
+  "source_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14734-R&type=cert",
+  "document_date": "2026-05-12",
+  "facts": [
+    {
+      "text": "The report describes 196.5 mm WTCL planks attached with aluminum clips over furring, creating at least a 10 mm unobstructed air space.",
+      "locator": "CCMC 14734-R PDF, p. 3, Product description"
+    },
+    {
+      "text": "The NBC 2020 opinion classifies fastener size/spacing 9.27.5.4 and vinyl-siding provision 9.27.12.1.(1) as Alternative.",
+      "locator": "CCMC 14734-R PDF, p. 2, Compliance opinion table"
+    },
+    {
+      "text": "The fire table reports FSR 110 and SDC 445 under CAN/ULC-S102:2018, but the report says this additional-performance data is outside the CCMC opinion.",
+      "locator": "CCMC 14734-R PDF, p. 8, Fire performance table and note"
+    },
+    {
+      "text": "Conditions limit the product to Part 9 buildings and require at least 10 mm continuous vented air space, furring and fire blocking at each floor level.",
+      "locator": "CCMC 14734-R PDF, p. 4, Conditions and limitations"
+    }
+  ],
+  "limitations": [
+    "The report limits use to Part 9 buildings and specific installation conditions.",
+    "The fire result is additional performance data, not an independent project fire determination."
+  ],
+  "source_use": "comparative_attachment_content_only",
+  "worker": "L16",
+  "prompt_number": 220,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?type=cert&id=1308",
+      "sha256": "c68ea30b886e799f5cc689d23b981540c1ec1937cd336a9e32ce5b798e351350",
+      "role": "input",
+      "bytes": 2753866,
+      "filename": "current-route-14734-R-c68ea30b886e.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L16/files/current-route-14734-R-c68ea30b886e.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:51:24.589193+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?type=cert&id=1308",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded",
+        "entity_extraction": "Copied unchanged PDF entity from byte 433; original transport capture retained.",
+        "raw_capture_sha256": "72120dffa44dbc36ac8976dcf06842cc2ab8d86cf3dc9a1180967b5e7a15a84d",
+        "raw_capture_path": "_research/workers/L16/files/transport-capture-72120dffa44dbc36.bin"
+      }
+    },
+    {
+      "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14734-R&type=cert",
+      "sha256": "39ed518fd1799f4addce789a474b6e468c17e2290cc77015a6bfe3d968812dde",
+      "role": "supporting_evidence",
+      "bytes": 65527,
+      "filename": "landing-14734-R-39ed518fd179.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L16/files/landing-14734-R-39ed518fd179.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:21:39.622723+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14734-R&type=cert",
+        "content_type": "text/html; charset=UTF-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-2-source-text.txt",
+        "sha256": "79eec9b5818da26beacc8851aafd27ececc9272f1ff40e18108ccc444b49704c",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "National",
+    "city_or_town": "National scope",
+    "basis": "National Canadian CCMC product assessment; no project site is identified and manufacturer or publisher addresses are not project locations.",
+    "locator": "jurisdiction field",
+    "scope": "national"
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "id": "H20-031",
+  "title": "Occupancy of a building or part of a building under construction: when occupancy may be allowed",
+  "jurisdiction": "Alberta (province-wide STANDATA issued by Alberta Municipal Affairs)",
+  "code_edition": "NBC(AE) 2023 and NFC(AE) 2023 (National Fire Code - 2023 Alberta Edition); printing not stated in document",
+  "case_type": "regulatory_guidance",
+  "source_url": "https://open.alberta.ca/publications/standata-bulletin-building-national-building-code-2023-alberta-edition",
+  "document_date": "Date Issued: January 2025 (platform created January 31, 2025, last updated February 25, 2025)",
+  "facts": [
+    {
+      "text": "The bulletin gives guidance on when occupancy of a building under construction may be allowed.",
+      "locator": "p.1 (Purpose)"
+    },
+    {
+      "text": "NBC(AE) Division C Sentence 2.2.11.1.(1) allows the AHJ to issue an occupancy permit for a portion of a building before construction is finished.",
+      "locator": "p.1 (Discussion)"
+    },
+    {
+      "text": "All building services, including fire-safety, boilers, elevating devices, gas, plumbing, mechanical and electrical systems, must be considered when deciding the provisions needed to safeguard occupants.",
+      "locator": "p.1 (Discussion)"
+    },
+    {
+      "text": "Provisions for occupants and workers in buildings under construction must be adapted to the satisfaction of the fire and building AHJs.",
+      "locator": "p.1 (Discussion)"
+    }
+  ],
+  "limitations": [
+    "A published regulator interpretation of a documented design question, not an applicant file.",
+    "Case type is the nearest enum value; this is not an issued variance, appeal or worked example.",
+    "Bulletin (not an interpretation); joint Building/Fire, January 2025.",
+    "Edition check: alberta.ca lists the NBC(AE) 2023 2nd printing (published 17 Aug 2026) as in force; the article wording quoted here is as the STANDATA document states it and was not checked against the 2nd printing text (not in the package)."
+  ],
+  "original_worker_case_type": "published_worked_example",
+  "parent_curation_note": "STANDATA interpretations and bulletins describe general regulated conditions; they are regulatory reference exercises, not individual applications or published project worked examples.",
+  "worker": "H20",
+  "prompt_number": 157,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://open.alberta.ca/dataset/5cd7e000-4f7c-4188-b26f-11a16bbe43f8/resource/f54f3d31-f7bb-403f-a826-43780c3944f3/download/ma-standata-bulletin-building-fire-23-bcb-004-23-fcb-005-2025-01.pdf",
+      "sha256": "c25bb5040a290e042a1169481547db3c6cdfa006e37d311a3476e1407b48a284",
+      "role": "input",
+      "bytes": 139819,
+      "filename": "ma-standata-bulletin-building-fire-23-bcb-004-23-fcb-005-2025-01-c25bb5040a29.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H20/files/pdf/ma-standata-bulletin-building-fire-23-bcb-004-23-fcb-005-2025-01-c25bb5040a29.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:19:40.175698+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/5cd7e000-4f7c-4188-b26f-11a16bbe43f8/resource/f54f3d31-f7bb-403f-a826-43780c3944f3/download/ma-standata-bulletin-building-fire-23-bcb-004-23-fcb-005-2025-01.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Alberta",
+    "city_or_town": "Province-wide",
+    "basis": "Alberta STANDATA expressly has provincewide scope; no individual project locality.",
+    "locator": "jurisdiction field",
+    "scope": "provincewide"
+  }
+}

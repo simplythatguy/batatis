@@ -1,0 +1,65 @@
+{
+  "id": "L08-1846",
+  "title": "Determination of grade",
+  "jurisdiction": "British Columbia (specific local authority not named in published decision)",
+  "code_edition": "2012 BC Building Code",
+  "case_type": "appeal_decision",
+  "source_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1846",
+  "document_date": "2020-06-18",
+  "facts": [
+    {
+      "text": "An existing single-family house sits on the high part of a steeply sloping lot. A two-storey addition at the low part contains a garage with living space above; the south wall has an overhead and swing door and ground slopes down toward the street.",
+      "locator": "Project description"
+    },
+    {
+      "text": "The appellant characterized the full south wall as a localized depression, producing a three-storey count; the local authority used the average finished ground at that wall and counted four storeys.",
+      "locator": "Decision being appealed; Appellant’s position"
+    },
+    {
+      "text": "The cited definition of grade uses average finished ground adjoining each exterior wall, with localized depressions excluded.",
+      "locator": "Applicable Code requirements"
+    }
+  ],
+  "limitations": [
+    "Only the Board published decision page is available; the original appeal application and underlying submissions are not linked.",
+    "British Columbia case; comparative evidence only, with no asserted applicability to Alberta."
+  ],
+  "worker": "L08",
+  "prompt_number": 536,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1846",
+      "sha256": "ff83eb95d6ca896ae1c6d09a6b7d20e1ca6c3b314d4c118dfbdfbcf73873f082",
+      "role": "outcome_reference",
+      "bytes": 1359432,
+      "filename": "bcab-1846-ff83eb95d6ca.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L08/files/bcab-1846-ff83eb95d6ca.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:22:15.071605+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1846",
+        "content_type": "text/html; charset=utf-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-1-source-text.txt",
+        "sha256": "2df027b724bc566ea2ed8c26c2db0f8489a4c487fe3e615c4a730cb285871a2f",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "British Columbia",
+    "city_or_town": "Unspecified locality",
+    "basis": "British Columbia appeal describes a project without naming its municipality; the provincial appeal-board location is not the project location.",
+    "locator": "jurisdiction field",
+    "scope": "undisclosed"
+  }
+}

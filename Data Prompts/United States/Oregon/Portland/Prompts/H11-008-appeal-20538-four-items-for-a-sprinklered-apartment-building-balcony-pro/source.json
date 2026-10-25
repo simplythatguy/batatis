@@ -1,0 +1,104 @@
+{
+  "id": "H11-008",
+  "title": "Appeal 20538: four items for a sprinklered apartment building: balcony projections, egress-court windows, egress court roof cover, unvented roof",
+  "jurisdiction": "City of Portland, Oregon (USA), Bureau of Development Services Administrative Appeal Board; non-Alberta comparative record",
+  "code_edition": "2018 IBC cited for projections; 2014 OSSC cited for item 4 (1203.2); other items edition not stated",
+  "case_type": "appeal_decision",
+  "source_url": "https://efiles.portlandoregon.gov/record/15311391/file/document",
+  "document_date": "2019-06-19 (hearing)",
+  "facts": [
+    {
+      "text": "Item 1: balcony and porch projections toward the property lines, proposed as consistent with a 2018 IBC rule allowing 40-inch minimum projections; the record cites similar grants (appeal IDs 18056 and 20109).",
+      "locator": "p.1 (APPEAL INFORMATION SHEET item 1)"
+    },
+    {
+      "text": "Decision item 1: porch projections with a minimum 40-inch fire separation distance from the property line are granted as proposed.",
+      "locator": "p.3 (APPEAL DECISION item 1)"
+    },
+    {
+      "text": "Item 2: non-operable windows with sprinkler heads in an egress court less than 10 feet wide in lieu of 3/4-hour openings.",
+      "locator": "p.3 (APPEAL DECISION item 2)"
+    },
+    {
+      "text": "Item 2 decision: granted provided windows are non-operable, sprinklers are spaced not more than 6 feet apart and placed within specified distances of the openings, and a separate Fire Marshal permit is obtained.",
+      "locator": "p.3 (APPEAL DECISION item 2)"
+    },
+    {
+      "text": "Item 3: a covered 3 by 9 foot section of an egress court; decision notes the Board treated it as a partial overhead obstruction, not an open exit passageway.",
+      "locator": "p.3 (APPEAL DECISION item 3)"
+    },
+    {
+      "text": "Item 4: an unvented low-slope roof with continuous rigid insulation above the roof sheathing; the request says dew-point calculations are included in the submittal.",
+      "locator": "p.2 (APPEAL INFORMATION SHEET item 4)"
+    },
+    {
+      "text": "Decision item 4: unvented roof assembly is granted as proposed.",
+      "locator": "p.3 (APPEAL DECISION item 4)"
+    }
+  ],
+  "limitations": [
+    "Non-Alberta comparative record: City of Portland, Oregon (USA) Bureau of Development Services Administrative Appeal Board. Local Oregon/Portland code is retained as stated in each record. No Alberta applicability is asserted; the case is used only to test attachment format and content, not Alberta performance.",
+    "Summary lists [File 1]-[File 2] with no link annotation; the dew-point calculations are referenced but not retrieved.",
+    "Outcome leakage true: decision block in the same PDF.",
+    "Item numbering confirmed from the decision block; item 3 decision note is quoted as printed.",
+    "Blocked: PDF lists [File 1]-[File 2] with no link annotation; dew-point calculations referenced but not retrieved."
+  ],
+  "record_file": {
+    "path": "_research/workers/H11/files/portland-efiles-15311391/portland-efiles-15311391-97ca4a7ff91f.pdf",
+    "sha256": "97ca4a7ff91fa51a05aa35df9317503b1fc7e6af82e997da9bc67111d4519652",
+    "pages": 7,
+    "retrieved_at": "2026-10-25T01:43:59.484662+00:00"
+  },
+  "worker": "H11",
+  "prompt_number": 463,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://efiles.portlandoregon.gov/record/15311391/file/document",
+      "sha256": "97ca4a7ff91fa51a05aa35df9317503b1fc7e6af82e997da9bc67111d4519652",
+      "role": "input",
+      "locator_note": "p.1-p.3 APPEAL INFORMATION SHEET items 1-4 (Code Section, Requires, Proposed Design, Reason)",
+      "bytes": 942676,
+      "filename": "portland-efiles-15311391-97ca4a7ff91f.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H11/files/portland-efiles-15311391/portland-efiles-15311391-97ca4a7ff91f.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:43:59.484662+00:00",
+        "http_status": "200",
+        "final_url": "https://efiles.portlandoregon.gov/record/15311391/file/document",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://efiles.portlandoregon.gov/record/15311391/file/document",
+      "sha256": "97ca4a7ff91fa51a05aa35df9317503b1fc7e6af82e997da9bc67111d4519652",
+      "role": "outcome_reference",
+      "locator_note": "APPEAL DECISION block items 1-4 (page of decision block as printed in the summary)",
+      "bytes": 942676,
+      "filename": "_evaluation/portland-efiles-15311391-97ca4a7ff91f.pdf",
+      "included_in_default_input": false,
+      "original_collection_path": "_research/workers/H11/files/portland-efiles-15311391/portland-efiles-15311391-97ca4a7ff91f.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:43:59.484662+00:00",
+        "http_status": "200",
+        "final_url": "https://efiles.portlandoregon.gov/record/15311391/file/document",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "United States",
+    "province_or_state": "Oregon",
+    "city_or_town": "Portland",
+    "basis": "The jurisdiction identifies a local Portland, Oregon building-code appeal; this records local source context without deriving a site from a board office address.",
+    "locator": "jurisdiction field",
+    "scope": "local"
+  }
+}

@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """Recompute evaluation groups after changing source attachment membership."""
 
-import csv
 import json
 import re
 
-from corpus import BASE, cases, source_groups
+from corpus import BASE, cases, source_groups, write_indexes
 
 
 def main():
@@ -13,16 +12,7 @@ def main():
     groups = source_groups([source for _, _, source in cases()])
     for row in index:
         row["source_group"] = groups[row["case_id"]]
-    (BASE / "index.json").write_text(json.dumps(index, indent=2, ensure_ascii=False) + "\n")
-    for filename, rows in (
-        ("index.csv", index),
-        ("Alberta Prompt Index.csv", [r for r in index if r["priority_tier"] <= 2]),
-        ("Comparative Prompt Index.csv", [r for r in index if r["priority_tier"] == 4]),
-    ):
-        with (BASE / filename).open("w", newline="") as stream:
-            writer = csv.DictWriter(stream, fieldnames=list(index[0]), lineterminator="\n")
-            writer.writeheader()
-            writer.writerows(rows)
+    write_indexes(BASE, index)
     count = len(set(groups.values()))
     path = BASE / "_research" / "assembly_report.json"
     report = json.loads(path.read_text())

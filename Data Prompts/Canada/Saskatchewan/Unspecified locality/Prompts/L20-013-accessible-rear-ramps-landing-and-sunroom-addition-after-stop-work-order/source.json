@@ -1,0 +1,60 @@
+{
+  "id": "L20-013",
+  "title": "Accessible rear ramps, landing, and sunroom addition after stop-work order",
+  "jurisdiction": "Saskatchewan; local authority redacted in the published decision",
+  "code_edition": "Not stated in the decision",
+  "case_type": "appeal_decision",
+  "source_url": "https://www.saskatchewan.ca/business/housing-development-construction-and-property-management/building-and-technical-standards/saskatchewan-building-and-accessibility-standards-appeal-board",
+  "document_date": "2023-06-12",
+  "facts": [
+    {
+      "text": "The appeal describes a rear landing/ramp and sunroom/greenhouse added to a residence to support residents with mobility challenges.",
+      "locator": "PDF pp. 3–4"
+    },
+    {
+      "text": "The record says a permit application was made and further information was requested, while a stop-work/order-to-demolish dispute continued.",
+      "locator": "PDF pp. 3–5"
+    },
+    {
+      "text": "The board discusses the order’s specificity and authority under the construction-code appeal process.",
+      "locator": "PDF pp. 5–6"
+    }
+  ],
+  "limitations": [
+    "Comparative source from outside Alberta; it cannot establish Alberta code performance or approval.",
+    "The attached publication is the appeal decision, not the underlying application file. Exhibits named in the decision are not presumed attached unless visible in this PDF. The decision outcome is visible in the attachment."
+  ],
+  "worker": "L20",
+  "prompt_number": 565,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://publications.saskatchewan.ca/api/v1/products/122106/formats/141555/download",
+      "sha256": "835b70097b88df11ea6b9d2e205325d754970b0304bcef57632c730e2a887f33",
+      "role": "outcome_reference",
+      "bytes": 179462,
+      "filename": "sk-scsab-appeal-no.-2023-003-835b70097b88.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L20/files/sk-scsab-appeal-no.-2023-003-835b70097b88.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:23:06.991401+00:00",
+        "http_status": "200",
+        "final_url": "https://publications.saskatchewan.ca/api/v1/products/122106/formats/141555/download",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Saskatchewan",
+    "city_or_town": "Unspecified locality",
+    "basis": "Saskatchewan appeal record leaves the municipality or property location unnamed or redacted; no project locality is inferred from the tribunal or office address.",
+    "locator": "jurisdiction field",
+    "scope": "undisclosed"
+  }
+}
