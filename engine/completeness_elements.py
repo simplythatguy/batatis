@@ -12,7 +12,7 @@ from pathlib import Path
 
 from .models import INTENT_LABEL
 
-_MAP = json.loads((Path(__file__).resolve().parent / 'export/field_maps/scc_2026-10.json').read_text())
+_MAP = json.loads((Path(__file__).resolve().parent / 'export/field_maps/scc_2026-10.json').read_text(encoding='utf-8'))
 
 
 @dataclass(frozen=True)

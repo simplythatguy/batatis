@@ -23,6 +23,7 @@ from engine.codes import Codes
 from engine.models import Case, Fact, Source
 from engine.rules import evaluate, evaluate_all, fmt, load_index, load_rule, load_rules
 from engine.rules import golden
+from engine.rules.case import case_inputs
 from engine.store import CaseStore
 from engine.tests.test_accounts import onboard, signup
 
@@ -243,6 +244,69 @@ def test_case_route_reads_facts_and_asks_for_the_rest(tmp_path):
     assert used['glass_blocks']['value'] is None and used['glass_blocks']['fact_id'] is None
     assert body['notice'] and body['edition'] == 'NBC(AE) 2023, 2nd printing'
     assert [r['id'] for r in rules['rules']] == load_index()['rules']
+
+
+@pytest.mark.parametrize('count', [2, 4])
+@pytest.mark.parametrize('count_field', ['storeys', 'building.storeys'])
+def test_withdrawn_planner_count_is_missing_in_saved_rule_results(tmp_path, count, count_field):
+    store = CaseStore(tmp_path / 'cases.sqlite')
+    case = store.put(Case(facts=[
+        _fact('occupancy', 'single_family'), _fact('building_area_m2', 210),
+        _fact('limiting_distance_m', 1.2), _fact('ebf_area_m2', 30), _fact('glazed_area_m2', 4),
+        _fact('sprinklered', 'no'), _fact('fire_response_over_10_min', False),
+        _fact('glass_blocks', False), _fact('faces_own_detached_garage', False),
+    ]))
+    with TestClient(create_app(store=store)) as client:
+        intake = client.post(f'/cases/{case.id}/intake', json={
+            'text': 'We want to omit the fire separation in our new house.', 'model': False,
+        })
+        assert intake.status_code == 200
+        issued = next(q for q in intake.json()['record']['plan']['questions'] if q['field'] == 'storeys')
+        saved = client.post(f'/cases/{case.id}/intake/answers', json={
+            'answers': [{'question_id': issued['id'], 'answer': str(count)}],
+            'expected_version': intake.json()['case_version'],
+        })
+        assert saved.status_code == 200
+        version = saved.json()['case_version']
+        if count_field != 'storeys':
+            legacy = store.get(case.id)
+            next(f for f in legacy.facts if f.field == 'storeys').field = count_field
+            version = store.put(legacy, expected_version=version).version
+        before = client.get(f'/cases/{case.id}/rules').json()['results'][0]
+        assert before['state'] == ('departs' if count == 2 else 'not_applicable')
+        withdrawn = client.post(f'/cases/{case.id}/intake/answers', json={
+            'answers': [{'question_id': issued['id'], 'answer': 'not sure'}],
+            'expected_version': version,
+        })
+        assert withdrawn.status_code == 200
+        facts = client.get(f'/cases/{case.id}').json()['facts']
+        assert [f['value'] for f in facts if f['field'] in ('storeys', 'building.storeys')] == [count, None]
+        result = client.get(f'/cases/{case.id}/rules')
+        assert result.status_code == 200
+        for rule in result.json()['results']:
+            used = next((i for i in rule['inputs'] if i['field'] == 'storeys'), None)
+            if used is not None:
+                assert used['value'] is None, (rule['rule_id'], used)
+                assert used['fact_id'] is None and used['fact_status'] is None
+        glazed = result.json()['results'][0]
+        assert (glazed['state'], glazed['outcome_id']) == ('departs', 'departs')
+        assert glazed['assumptions'], 'missing storeys must keep the Part 9 assumption explicit'
+
+
+@pytest.mark.parametrize('old_field,new_field', [('storeys', 'storeys'),
+                                               ('building.storeys', 'storeys'),
+                                               ('storeys', 'building.storeys')])
+def test_rule_inputs_resolve_latest_revision_before_usability(old_field, new_field):
+    case = Case(facts=[_fact(old_field, 2)])
+    assert case_inputs(case)['storeys'].value == 2
+    case.facts.append(_fact(new_field, None))
+    assert 'storeys' not in case_inputs(case)
+    assert len(case.facts) == 2, 'withdrawal preserves the earlier ledger entry'
+    case.facts.append(_fact(new_field, 3, status='unconfirmed'))
+    assert case_inputs(case)['storeys'].value == 3
+    assert case_inputs(case)['storeys'].status == 'unconfirmed'
+    case.facts.append(_fact(new_field, 4, status='unconfirmed', kind='proposed'))
+    assert 'storeys' not in case_inputs(case), 'a newer proposal cannot revive an older value'
 
 
 def test_case_route_follows_the_case_access_policy(tmp_path, monkeypatch):

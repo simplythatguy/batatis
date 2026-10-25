@@ -1,10 +1,11 @@
 """Export a case to the Safety Codes Council variance form (Part 1, applicant fields only).
 
-Steps: check the blank form's SHA-256 against the version-keyed field map, decide what goes in each applicant
-field (short values in the cell, long ones moved to the appendix with a reference), fill with pypdf, flatten
+Steps: check the blank form's SHA-256 against the version-keyed field map, measure applicant values at normal
+size and grow or continue their supplied-form cells (legacy forms use appendix references), fill with pypdf, flatten
 (appearance streams merged into the page, every widget removed, so the help pop-ups and buttons disappear and
-every viewer shows the same thing), and append the generated appendix. Draft status stays in metadata;
-the website displays it without adding visible markings to the supplied form or generated appendix.
+every viewer shows the same thing), and append the generated appendix when it has real content. Draft
+status and the draft's open items stay in metadata and the result; the website shows them, and nothing
+adds visible markings, a to-do list or unanswered placeholders to the supplied form or the appendix.
 
 Export refuses while a fact is unconfirmed, a blocking gap is open or a required field is empty, unless
 draft=True. Only confirmed facts are ever written to the form, draft or not.
@@ -17,9 +18,10 @@ import json
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import NamedTuple
 
 from pypdf import PdfReader, PdfWriter
-from pypdf.generic import ArrayObject, NameObject, NumberObject, RectangleObject, TextStringObject
+from pypdf.generic import ArrayObject, DictionaryObject, NameObject, NumberObject, RectangleObject, TextStringObject
 
 from ..models import INTENT_LABEL, Case, SectionCRow
 from ..not_applicable import LABEL as NA_LABEL, ROWS as NA_ROWS, NotApplicable, not_applicable
@@ -30,8 +32,9 @@ from ..process_fields import PROCESS_ALIASES
 from ..section_c import section_c_rows
 from ..section_d import supporting_documents, text_evidence
 from .edition import code_or_standard_value
-from .challenge_form import prepare_form
-from .text import fit, pdf_safe
+from .challenge_form import LEGAL_ROW, ROW_KEYS, prepare_form, row_fields
+from .form_growth import CAPACITY, CELL_SIZE, CELLS, DOC_LINES, TABLE_SIZE, Layout, lines_in, text_widths
+from .text import fit, lines_at, pdf_safe
 
 DEFAULT_FORM = Path(__file__).resolve().parents[2] / 'reference' / 'guides' / 'SCC-Variance-Form.pdf'
 BUNDLE_FORM = Path(__file__).resolve().parents[2] / 'codedb' / 'build' / 'SCC-Variance-Form.pdf'
@@ -64,7 +67,8 @@ class ExportBlocked(ExportError):
 @dataclass
 class Placement:
     """One applicant field as drawn: `lines` are what the form shows; `value` is the full value, which the
-    appendix carries under `ref` when the form shows only a reference."""
+    appendix carries under `ref` when the form shows only a reference. A field the supplied form continues in
+    more boxes has one placement per box, in reading order, each with the field's full value."""
     field: str
     page: int
     rect: tuple[float, float, float, float]
@@ -108,7 +112,7 @@ def form_path(version: str = CURRENT_MAP) -> Path:
 
 
 def load_field_map(version: str = CURRENT_MAP) -> dict:
-    return json.loads((MAP_DIR / f'{version}.json').read_text())
+    return json.loads((MAP_DIR / f'{version}.json').read_text(encoding='utf-8'))
 
 
 def load_form(path: Path | str | None, fmap: dict) -> bytes:
@@ -190,7 +194,32 @@ def _codes(row: SectionCRow, attr: str) -> list[str]:
     return list(dict.fromkeys(getattr(p, attr) for p in row.pairs))
 
 
+def _intent_note(row: SectionCRow) -> str:
+    """How a row's 2020 intent was attributed, said before the intent itself."""
+    notes = {'direct': '', 'inherited from parent': f'Attribution inherited from {row.attributed_via}. ',
+             'no row in the attribution table': 'No row in the NBC(AE) attribution table. '}
+    differs = 'The 2020 intent is attributed differently from NBC(AE) 2023. ' if row.differs else ''
+    return notes[row.attribution_status] + differs
+
+
+def _checks(fmap: dict, values: dict) -> dict[str, str]:
+    out = {}
+    for name, spec in fmap['checkboxes'].items():
+        answer = values.get(spec['fact'])
+        checked = answer == spec['equals'] if 'equals' in spec else answer is True
+        out[name] = spec['on'] if checked else '/Off'
+    return out
+
+
 # ---------------------------------------------------------------- layout
+
+class _Box(NamedTuple):
+    """What one supplied-form box shows: part of `field`'s text (its own box or a continuation `field~n`)."""
+    field: str
+    lines: list[str]
+    size: float
+    top: bool       # top-aligned: several lines, the attribution table, or a box grown for its row neighbour
+
 
 @dataclass
 class _Plan:
@@ -203,6 +232,9 @@ class _Plan:
     rows_in_form: int = 0
     docs_in_form: int = 0
     na: dict[str, NotApplicable] = field(default_factory=dict)                  # field -> applicant N/A fact
+    printed: dict[str, int] = field(default_factory=dict)       # export-only cell in a printed row -> page
+    boxes: dict[str, _Box] = field(default_factory=dict)        # supplied form: widget -> the lines it shows
+
 
 
 def _plan(case: Case, values: dict, fmap: dict, rects: dict, codes=None) -> _Plan:
@@ -239,14 +271,12 @@ def _plan(case: Case, values: dict, fmap: dict, rects: dict, codes=None) -> _Pla
             ref = f'X-{len(plan.overflow) + 1}'
             put(name, f'See Appendix {ref}', ref, value)
             plan.overflow.append((ref, spec['label'], value))
-    for name, spec in fmap['checkboxes'].items():
-        answer = values.get(spec['fact'])
-        checked = answer == spec['equals'] if 'equals' in spec else answer is True
-        plan.checks[name] = spec['on'] if checked else '/Off'
+    plan.checks = _checks(fmap, values)
 
-    # The form provides structured legal-description boxes. A free-text legal description
-    # continues in the appendix; it is never split into invented lot/block/plan components.
-    if values.get('legal_description') and not all(values.get(k) for k in ('lot', 'block', 'plan')):
+    # The older form has no row for a typed legal description: it continues in the appendix, and is never
+    # split into invented lot/block/plan components.
+    legal = values.get('legal_description')
+    if legal and not all(values.get(k) for k in ('lot', 'block', 'plan')):
         ref = f'X-{len(plan.overflow) + 1}'
         value = pdf_safe(values['legal_description'])
         plan.na.pop('Lot', None)
@@ -262,28 +292,9 @@ def _plan(case: Case, values: dict, fmap: dict, rects: dict, codes=None) -> _Pla
         put(slot['article'], row.provision_id, ref, row.provision_id, see)
         put(slot['objective'], ', '.join(objs) if objs else 'No table row', ref, None, see)
         put(slot['function'], ', '.join(fns) if fns else 'No table row', ref, None, see)
-        notes = {'direct': '', 'inherited from parent': f'Attribution inherited from {row.attributed_via}. ',
-                 'no row in the attribution table': 'No row in the NBC(AE) attribution table. '}
-        intent = notes[row.attribution_status]
-        if row.differs:
-            intent += 'The 2020 intent is attributed differently from NBC(AE) 2023. '
+        intent = _intent_note(row)
         intent += f'{INTENT_LABEL}: Appendix {ref}.' if row.intents else f'No NBC 2020 intent statement; Appendix {ref}.'
-        if fmap.get('dynamic_attributions') and row.intents:
-            from ..copyright import NRC_PUBLICATION_URL
-            actual = ' '.join(pdf_safe(t) for block in row.intents for t in block.intents)
-            labelled = notes[row.attribution_status]
-            if row.differs:
-                labelled += 'The 2020 intent is attributed differently from NBC(AE) 2023. '
-            labelled += f'{INTENT_LABEL}: {actual}'
-            shown = labelled if fit(labelled, rects[slot['intent']], *SECTION_C_SIZES) is not None else intent
-            put(slot['intent'], shown, ref, labelled if shown == labelled else actual, see)
-            if shown != labelled:
-                # Preserve the complete deterministic entry and its source when
-                # it needs more room than the exact source cell provides.
-                plan.overflow.append((ref, f'Intent entry for {row.provision_id} ({INTENT_LABEL})',
-                                      f'{actual}\n{row.citation}\n{NRC_PUBLICATION_URL}'))
-        else:
-            put(slot['intent'], intent, ref, None, see)
+        put(slot['intent'], intent, ref, None, see)
     plan.rows_in_form = len(shown_rows)
     if len(rows) > len(slots):
         k0, n = len(slots), len(rows)
@@ -298,23 +309,7 @@ def _plan(case: Case, values: dict, fmap: dict, rects: dict, codes=None) -> _Pla
                 mark_na(name, NA_ROWS['section_c'])
 
     dslots = fmap['section_d_rows']
-    docs = [(pdf_safe(d.title), pdf_safe(d.responsible_party)) for d in supporting_documents(case)]
-    docs += [(pdf_safe(title), pdf_safe(who)) for title, who in text_evidence(case)]
-    if fmap.get('supporting_document_field'):
-        # The supplied source has one combined full-width field, not the legacy
-        # five-row/two-column table. Keep its exact box and use existing D refs.
-        name = fmap['supporting_document_field']
-        if docs:
-            listing = '\n'.join(f'D-{n}: {title}' + (f' - {who}' if who else '')
-                                for n, (title, who) in enumerate(docs, start=1))
-            if fit(listing, rects[name]) is not None:
-                put(name, listing)
-                plan.docs_in_form = len(docs)
-            else:
-                put(name, f'See Appendix D (D-1 to D-{len(docs)})')
-        elif NA_ROWS['section_d'] in na:
-            mark_na(name, NA_ROWS['section_d'])
-        return plan
+    docs = _documents(case)
     shown_docs = docs if len(docs) <= len(dslots) else docs[:len(dslots) - 1]
     for n, (slot, (doc, who)) in enumerate(zip(dslots, shown_docs), start=1):
         ref = f'D-{n}'
@@ -331,6 +326,97 @@ def _plan(case: Case, values: dict, fmap: dict, rects: dict, codes=None) -> _Pla
             for name in slot.values():
                 mark_na(name, NA_ROWS['section_d'])
     return plan
+
+
+def _documents(case: Case) -> list[tuple[str, str]]:
+    """Section D entries in their D-n order: attached files, then typed listings."""
+    docs = [(pdf_safe(d.title), pdf_safe(d.responsible_party)) for d in supporting_documents(case)]
+    return docs + [(pdf_safe(title), pdf_safe(who)) for title, who in text_evidence(case)]
+
+
+def _plan_supplied(case: Case, values: dict, fmap: dict, codes, widths: dict) -> tuple[_Plan, Layout, dict]:
+    """The supplied form: every cell's whole text at its normal size, and the room the form must make for it.
+
+    Returns the plan (without places yet), the `Layout` for `prepare_form`, and each field's measured lines.
+    """
+    plan, na, measured = _Plan(), not_applicable(case), {}
+
+    def put(name: str, text: str, size: float, width: float):
+        text = pdf_safe(text)
+        plan.text[name] = (text, None, text)
+        measured[name] = (lines_at(text, width, size), size)
+
+    def mark_na(name: str, key: str, size: float, width: float):
+        put(name, NA_LABEL, size, width)
+        plan.na[name] = na[key]
+
+    for name, spec in fmap['text_fields'].items():
+        value = values.get(spec['fact'], spec.get('default'))
+        if spec['fact'] == 'code_or_standard':
+            value = code_or_standard_value(value, codes)     # claims the 2nd printing only when codedb proves it
+        if value is None:
+            if spec['fact'] in na:
+                mark_na(name, spec['fact'], CELL_SIZE, widths[name])
+            continue
+        put(name, value, CELL_SIZE, widths[name])
+    plan.checks = _checks(fmap, values)
+    # A typed legal description goes in the form's printed legal-description row, beside any lot, block and
+    # plan; it is never split into invented components.
+    if values.get('legal_description'):
+        put(LEGAL_ROW, values['legal_description'], CELL_SIZE, widths[LEGAL_ROW])
+    rows = case.section_c
+    slots = [row_fields(i) for i in range(max(1, len(rows)))]
+    for k, (slot, row) in enumerate(zip(slots, rows), start=1):
+        objs, fns = _codes(row, 'objective'), _codes(row, 'function')
+        # The cell carries every deterministic passage; Appendix C-k keeps the full record with its citation and link.
+        intent = _intent_note(row) + (
+            f'{INTENT_LABEL}: ' + ' '.join(pdf_safe(t) for block in row.intents for t in block.intents)
+            if row.intents else f'No NBC 2020 intent statement; Appendix C-{k}.')
+        for key, text in (('article', row.provision_id), ('objective', ', '.join(objs) or 'No table row'),
+                          ('function', ', '.join(fns) or 'No table row'), ('intent', intent)):
+            put(slot[key], text, TABLE_SIZE, widths[key])
+    plan.rows_in_form = len(rows)
+    if not rows and NA_ROWS['section_c'] in na:
+        for key, name in slots[0].items():
+            mark_na(name, NA_ROWS['section_c'], TABLE_SIZE, widths[key])
+
+    name, docs = fmap['supporting_document_field'], _documents(case)
+    if docs:
+        put(name, '\n'.join(f'D-{n}: {title}' + (f' - {who}' if who else '')
+                            for n, (title, who) in enumerate(docs, start=1)), CELL_SIZE, widths['docs'])
+        plan.docs_in_form = len(docs)
+    elif NA_ROWS['section_d'] in na:
+        mark_na(name, NA_ROWS['section_d'], CELL_SIZE, widths['docs'])
+    layout = Layout.of([max(len(measured[slot[key]][0]) for key in ROW_KEYS) if slot['article'] in measured else 0
+                        for slot in slots],
+                       {cell: len(measured[cell][0]) for cell in CELLS if cell in measured},
+                       len(measured[name][0]) if name in measured else 0)
+    if not layout.bounded():
+        raise ExportError('The application has too much text for the bounded form layout. Split the application before exporting.')
+    return plan, layout, measured
+
+
+def _place_lines(plan: _Plan, fmap: dict, rects: dict, measured: dict) -> None:
+    """Hand each field's lines to its own box, then to its continuations (`name~2`...), in order."""
+    plan.rects = rects
+    continuations = fmap.get('continuations') or {}
+    printed = fmap.get('printed') or {}
+    for box, where in printed.items():
+        owner = box.split('~', 1)[0]
+        if owner in measured:
+            rects[box] = tuple(where['rect'])
+            plan.printed[box] = where['page']
+    for name, (lines, size) in measured.items():
+        rest = list(lines)
+        for box in [name, *continuations.get(name, [])]:
+            if not rest:
+                break
+            held = lines_in(rects[box][3] - rects[box][1], size)
+            shown, rest = rest[:held], rest[held:]
+            plan.boxes[box] = _Box(name, shown, size, len(shown) > 1 or size == TABLE_SIZE
+                                   or held > CAPACITY.get(name, DOC_LINES))
+        if rest:
+            raise ExportError(f'{name}: the form has no room for {len(rest)} more lines')
 
 
 # ---------------------------------------------------------------- PDF
@@ -353,25 +439,44 @@ def _widgets(pages):
                 yield i, str(_field(a)['/T']), a
 
 
+def _printed_cell(writer: PdfWriter, page_no: int, name: str, rect: tuple[float, float, float, float]) -> None:
+    """A text widget for a printed row the source gives no widget; flattening removes it like every other."""
+    page = writer.pages[page_no]
+    ref = writer._add_object(DictionaryObject({
+        NameObject('/Type'): NameObject('/Annot'), NameObject('/Subtype'): NameObject('/Widget'),
+        NameObject('/FT'): NameObject('/Tx'), NameObject('/F'): NumberObject(4), NameObject('/T'): TextStringObject(name),
+        NameObject('/P'): page.indirect_reference, NameObject('/Rect'): RectangleObject(rect),
+        NameObject('/DA'): TextStringObject('/Helv 10 Tf 0 g')}))
+    page['/Annots'].append(ref)
+    writer.root_object['/AcroForm']['/Fields'].append(ref)
+
+
 def _fill_and_flatten(form: bytes, plan: _Plan) -> tuple[bytes, list[Placement]]:
     """Fill each planned field at its fitted size, merge appearances into the page, then drop every widget."""
     writer = PdfWriter(clone_from=io.BytesIO(form))
+    for name, page_no in plan.printed.items():
+        _printed_cell(writer, page_no, name, plan.rects[name])
     placements: list[Placement] = []
     values: dict[str, str] = {}
     for page_no, name, widget in _widgets(writer.pages):
-        if name not in plan.text:
+        if name in plan.boxes:                      # the supplied form: measured lines at their normal size
+            owner, lines, size, top = plan.boxes[name]
+            _shown, ref, full = plan.text[owner]
+        elif name in plan.text:
+            owner, (shown, ref, full) = name, plan.text[name]
+            lines, size = fit(shown, plan.rects[name], *plan.sizes.get(name, ()))
+            top = len(lines) > 1 or name in plan.sizes
+        else:
             continue
         rect = plan.rects[name]
         widget[NameObject('/Rect')] = RectangleObject(rect)
-        shown, ref, full = plan.text[name]
-        lines, size = fit(shown, rect, *plan.sizes.get(name, ()))
         fdict = _field(widget)
-        if len(lines) > 1 or name in plan.sizes:    # top-aligned; other single lines keep pypdf's centring
+        if top:                                     # top-aligned; other single lines keep pypdf's centring
             fdict[NameObject('/Ff')] = NumberObject(int(fdict.get('/Ff', 0)) | MULTILINE)
         for d in {id(fdict): fdict, id(widget): widget}.values():   # size is read from /DA; field and kid
             d[NameObject('/DA')] = TextStringObject(f'/Helv {size:g} Tf 0 g')
         values[name] = '\n'.join(lines)
-        placements.append(Placement(name, page_no, rect, lines, size, full, ref))
+        placements.append(Placement(owner, page_no, rect, lines, size, full, ref))
     writer.update_page_form_field_values(None, {**values, **plan.checks}, auto_regenerate=False, flatten=True)
     for page in writer.pages:                       # flattened: drop every widget, keep links
         if '/Annots' in page:
@@ -390,11 +495,13 @@ def _rects(form: bytes, fmap: dict) -> dict[str, tuple[float, float, float, floa
     """Widget rectangles. The Article/Objective/Function widgets cover only the top 16 pt of their table cell;
     in the flattened copy they extend down to the bottom of the row's Intent widget, which spans the whole cell."""
     rects = {name: tuple(float(x) for x in w['/Rect']) for _, name, w in _widgets(PdfReader(io.BytesIO(form)).pages)}
+    continuations = fmap.get('continuations') or {}
     for slot in fmap['section_c_rows']:
-        bottom = rects[slot['intent']][1]
+        intents = [slot['intent'], *continuations.get(slot['intent'], [])]
         for k in ('article', 'objective', 'function'):
-            x0, _, x1, y1 = rects[slot[k]]
-            rects[slot[k]] = (x0, bottom, x1, y1)
+            for name, intent in zip([slot[k], *continuations.get(slot[k], [])], intents):
+                x0, _, x1, y1 = rects[name]
+                rects[name] = (x0, rects[intent][1], x1, y1)
     return rects
 
 
@@ -411,9 +518,15 @@ def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str
     notes = package_notes(case, codes)
     case = _canonical_case(case, codes)
     blank_form = load_form(form, fmap)
-    blank_form, fmap = prepare_form(blank_form, fmap, len(case.section_c))
     values = confirmed_values(case)
-    plan = _plan(case, values, fmap, _rects(blank_form, fmap), codes)
+    if fmap.get('dynamic_attributions'):
+        # The supplied form makes room: measure every cell at its normal size, then grow the form to fit.
+        plan, layout, measured = _plan_supplied(case, values, fmap, codes, text_widths(blank_form))
+        blank_form, fmap = prepare_form(blank_form, fmap, layout)
+        _place_lines(plan, fmap, _rects(blank_form, fmap), measured)
+    else:
+        blank_form, fmap = prepare_form(blank_form, fmap, len(case.section_c))
+        plan = _plan(case, values, fmap, _rects(blank_form, fmap), codes)
     filled, placements = _fill_and_flatten(blank_form, plan)
     # Keep a source passage separate from its field label. "Intent statement"
     # is a PDF /T name, not a claim that every cross-reference inside the quoted
@@ -427,19 +540,20 @@ def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str
         else:
             form_text.append(f'{name}: {full}')
     appendix_text: list[str] = []
-    appendix = build_appendix(case, plan, values, fmap, codes=codes,
-                              open_items=reasons if draft else [], package_notes=notes, text=appendix_text)
+    # A draft's open items stay in the result, not the document: the questions and Review show them.
+    appendix = build_appendix(case, plan, values, fmap, codes=codes, package_notes=notes, text=appendix_text)
 
     out = PdfWriter(clone_from=io.BytesIO(filled))
     form_pages = len(out.pages)
-    app_reader = PdfReader(io.BytesIO(appendix))
-    for page in app_reader.pages:
+    appendix_pages = PdfReader(io.BytesIO(appendix)).pages if appendix else []
+    for page in appendix_pages:
         out.add_page(page)
     out.add_metadata({'/Title': 'Variance Form for Proposed Alternative Solution' + (' (DRAFT)' if draft else ''),
                       '/Producer': f'Batatis export, field map {fmap["version"]}',
                       '/BatatisFormVersion': fmap['version'],
                       '/BatatisAttributionRows': str(max(1, len(case.section_c))),
-                      '/BatatisFormPages': str(form_pages)})
+                      '/BatatisFormPages': str(form_pages),
+                      **({'/BatatisLayout': fmap['layout']} if fmap.get('layout') else {})})
     buf = io.BytesIO()
     out.write(buf)
     filled_names = set(plan.text) | {k for k, v in plan.checks.items() if v != '/Off'}
@@ -449,6 +563,6 @@ def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str
              if n not in filled_names]
     visible = list(dict.fromkeys((reasons if draft else []) + notes))
     return ExportResult(pdf=buf.getvalue(), field_map=fmap['version'], form_pages=form_pages,
-                        appendix_pages=len(app_reader.pages), draft=draft, placements=placements,
+                        appendix_pages=len(appendix_pages), draft=draft, placements=placements,
                         blank_fields=blank, open_items=visible, not_applicable=list(plan.na), form_text=form_text,
                         appendix_text=appendix_text)

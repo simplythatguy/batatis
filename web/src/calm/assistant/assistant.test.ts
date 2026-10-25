@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test, beforeEach } from "node:test";
-import type { AssistRequest, AssistResponse } from "../../api/accounts.ts";
+import { AccountsError, type AssistRequest, type AssistResponse } from "../../api/accounts.ts";
 import { VoiceClient, type SocketLike, type VoiceAudio } from "../voice/session.ts";
 import {
   ask, assistantKey, assistantRouteChanged, attachExisting, attachFiles, cancelQuestion, closeAssistant, goBack, invalidateAssistantNavigation, loadVoiceCapability, openAssistant, removeAttachment, requestVoice, resetAssistant, retry,
@@ -9,6 +9,7 @@ import {
 import { bumpViewGeneration, checkPlan, offeredDestinations, registerPanel } from "./destinations.ts";
 import { clearEngineSession, engineGeneration } from "../../api/sync.ts";
 import { questionDrafts } from "../questionDrafts.ts";
+import { questionContext } from "./questionContext.ts";
 
 const state = () => getAssistantState();
 const flush = async () => { for (let i = 0; i < 5; i++) await new Promise((r) => setTimeout(r, 0)); };
@@ -319,6 +320,77 @@ test("cancel stops the request; its question stays with Retry", async () => {
   f.requests[0].reply.resolve({ answer: "late", cited: [], removed_citations: [], notice: "" });
   await flush();
   assert.ok(!state().conv.turns.some((t) => t.text === "late"));
+});
+
+test("renumbering the same question keeps its pending answer and navigation valid", async () => {
+  setAssistantBinding(caseBinding("A"));
+  void ask("I don't understand");
+  setAssistantContext({ screen: "question", focus: { kind: "card", id: "field-owner" }, label: "question 2" });
+  assert.equal(f.requests[0].signal.aborted, false, "a display number is not a new question");
+  f.requests[0].reply.resolve({ answer: "This asks who owns the site.", cited: [], removed_citations: [], notice: "" });
+  await flush();
+  assert.equal(state().conv.turns.at(-1)?.text, "This asks who owns the site.");
+  assert.equal(state().conv.error, null);
+  void ask("Open settings");
+  setAssistantContext({ screen: "question", focus: { kind: "card", id: "field-owner" }, label: "question 3" });
+  f.requests[1].reply.resolve({ answer: "", cited: [], removed_citations: [], notice: "", navigation: { destination: "settings" } });
+  await flush();
+  assert.deepEqual(f.page.went, ["#/settings"]);
+});
+
+test("retry uses the question on screen now and discards a prior card's late reply", async () => {
+  setAssistantBinding(caseBinding("A"));
+  void ask("I don't understand");
+  setAssistantContext({ screen: "question", focus: { kind: "card", id: "field-date" }, label: "question 2" });
+  assert.equal(f.requests[0].signal.aborted, true);
+  retry();
+  assert.equal(f.requests[1].req.focus?.id, "field-date");
+  assert.equal(f.requests[1].req.question, "I don't understand");
+  f.requests[0].reply.resolve({ answer: "Old owner explanation", cited: [], removed_citations: [], notice: "" });
+  f.requests[1].reply.resolve({ answer: "Enter the date of your request.", cited: [], removed_citations: [], notice: "" });
+  await flush();
+  assert.ok(!state().conv.turns.some((t) => t.text === "Old owner explanation"));
+  assert.equal(state().conv.turns.at(-1)?.text, "Enter the date of your request.");
+});
+
+test("an unavailable reply can retry with the visible detail question's prompt", async () => {
+  setAssistantBinding(caseBinding("A"));
+  setAssistantContext(questionContext({ key: "field-date", title: "Request date", why: "The date of this request.", provision: undefined }, 1));
+  void ask("I don't understand");
+  assert.deepEqual(f.requests[0].req.focus, { kind: "card", id: "field-date", prompt: "Request date", why: "The date of this request." });
+  f.requests[0].reply.reject(new AccountsError(503, "Assistant unavailable", "Synthetic outage"));
+  await flush();
+  assert.equal(state().conv.error?.status, 503);
+  assert.equal(state().conv.failed, "I don't understand");
+  retry();
+  assert.deepEqual(f.requests[1].req.focus, f.requests[0].req.focus);
+  assert.deepEqual(f.requests[1].req.history, [], "the failed question is not sent as answered history");
+  f.requests[1].reply.resolve({ answer: "This is the date you make the request.", cited: [], removed_citations: [], notice: "" });
+  await flush();
+  assert.equal(state().conv.error, null);
+  assert.equal(state().conv.turns.length, 2);
+  assert.equal(state().conv.turns.at(-1)?.text, "This is the date you make the request.");
+});
+
+test("different questions about the same provision retire an old answer and navigation plan", async () => {
+  setAssistantBinding(caseBinding("A"));
+  const item = { key: "cand-1", title: "Does this rule describe your design?", why: "Compare it with your project.", provision: "9.10.9.16.(1)" };
+  setAssistantContext(questionContext(item, 1));
+  void ask("I don't understand");
+  setAssistantContext(questionContext({ ...item, key: "rule-1", title: "Add this departure to your application?" }, 2));
+  assert.equal(f.requests[0].signal.aborted, true, "the provision alone does not identify the question");
+  f.requests[0].reply.resolve({ answer: "", cited: [], removed_citations: [], notice: "", navigation: { destination: "settings" } });
+  await flush();
+  assert.deepEqual(f.page.went, []);
+  retry();
+  assert.equal(f.requests[1].req.focus?.prompt, "Add this departure to your application?");
+});
+
+test("question context stays within the engine's input limits", () => {
+  const focus = questionContext({ key: "field-date", title: "x".repeat(900), why: "y".repeat(1700) }, 1).focus;
+  assert.equal(focus?.prompt?.length, 600);
+  assert.equal(focus?.why?.length, 1200);
+  assert.deepEqual(questionContext({ key: "empty", title: " ", why: " " }, 1).focus, { kind: "card", id: "empty" });
 });
 
 test("typed navigation opens the exact question card and returns to the exact prior card", async () => {

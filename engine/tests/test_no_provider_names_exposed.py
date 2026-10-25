@@ -216,6 +216,30 @@ def described_case(client: Recording, text: str = DESCRIPTION) -> str:
     return case_id
 
 
+def test_document_review_routes_and_legacy_records_name_no_provider(tmp_path, monkeypatch):
+    from engine.intake import model as model_pass
+    from engine.intake import review as review_pass
+
+    monkeypatch.setattr(model_pass, 'default_transport', lambda _: (None, 'off'))
+    monkeypatch.setattr(review_pass, 'default_transport', lambda _: (review_pass.fake_transport, 'live'))
+    store = CaseStore(tmp_path / 'review.sqlite')
+    with Recording(create_app(store=store, codes=Codes())) as client:
+        case_id = client.post('/cases').json()['id']
+        uploaded = client.post(f'/cases/{case_id}/files', content=text_pdf(['A two-storey building.']),
+                               headers={'content-type': 'application/pdf', 'x-filename': 'brief.pdf'})
+        assert uploaded.status_code == 201
+        reviewed = client.post(f'/cases/{case_id}/intake',
+                               json={'text': 'Read the attached brief.', 'file_ids': [uploaded.json()['id']]})
+        assert reviewed.status_code == 200
+        assert reviewed.json()['record']['review']['model'] == 'review-1'
+        assert client.get(f'/cases/{case_id}/intake').status_code == 200
+        stored = store.get(case_id)
+        stored.intake.review.model = 'gpt-6-luna'
+        store.put(stored)
+        assert client.get(f'/cases/{case_id}').json()['intake']['review']['model'] == 'review-1'
+        assert_no_provider(client, at_least=5, pattern=IDENTIFY_NAMES)
+
+
 def test_relevance_responses_name_no_provider(world, monkeypatch):
     _, client, _, ask = world
     case_id = described_case(client)
@@ -320,7 +344,7 @@ def test_identify_responses_name_no_provider(world, monkeypatch):
     assert run.status_code == 200, run.text
     result = run.json()
     assert result['mode'] == 'fake' and result['model_ids'] == {
-        'screen': 'relevance-3', 'rerank': 'relevance-3', 'verifier': 'verifier-1'}
+        'screen': 'relevance-1', 'rerank': 'relevance-1', 'verifier': 'verifier-1'}
     assert client.get(f'/cases/{case_id}/identify').status_code == 200
     stream = client.post(f'/cases/{case_id}/identify', headers={'accept': 'text/event-stream'})
     assert stream.status_code == 200 and 'event: done' in stream.text and '"method": "model"' in stream.text
@@ -336,7 +360,7 @@ def test_identify_responses_name_no_provider(world, monkeypatch):
     assert client.get(f'/cases/{case_id}/process-refs').status_code == 200
     client.get(f'/cases/{case_id}/information-request')            # the officer draft; its status depends on who asks
     case = client.get(f'/cases/{case_id}')
-    assert case.status_code == 200 and case.json()['relevance']['model'] == 'relevance-3'
+    assert case.status_code == 200 and case.json()['relevance']['model'] == 'relevance-1'
     assert_no_provider(client, at_least=12, pattern=IDENTIFY_NAMES)
 
 

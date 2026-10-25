@@ -2,7 +2,6 @@
 from dataclasses import replace
 import os
 from pathlib import Path
-import socket
 
 import pytest
 
@@ -14,6 +13,7 @@ from engine.identify.corpus import card
 from engine.identify.providers import Transports, metered_openai_json, transports
 from engine.identify.screen import ELEPHANT_MODEL, GOVERN, SELF_QUESTION, Judge, noul
 from engine.public_names import names_a_provider
+from engine.tests._network_guard import block_network
 
 
 @pytest.fixture(autouse=True)
@@ -23,7 +23,7 @@ def offline(monkeypatch):
                 'OPENROUTER_API_KEY', 'OPENAI_API_KEY', 'ANTHROPIC_API_KEY', 'JEV_API_KEY', 'TYPESAFE_API_KEY'}:
             monkeypatch.delenv(name, raising=False)
     monkeypatch.setenv('BATATIS_PROVIDER', 'fake')
-    monkeypatch.setattr(socket.socket, 'connect', lambda *_: pytest.fail('unexpected network'))
+    block_network(monkeypatch)
     llm_gate.reset_for_tests()
     yield
     llm_gate.reset_for_tests()
@@ -66,7 +66,8 @@ def source(monkeypatch):
 
 
 def config(**changes):
-    return replace(load_config(env={'BATATIS_IDENTIFY_SCREEN': 'shortlist'}), **changes)
+    return replace(load_config(env={'BATATIS_IDENTIFY_SCREEN': 'shortlist',
+                                    'BATATIS_IDENTIFY_RERANK': 'elephant'}), **changes)
 
 
 def fitted(cfg):
@@ -307,6 +308,7 @@ def test_optional_rerank_and_review_can_be_disabled_without_losing_candidates(so
 def test_shortlist_cannot_run_as_exhaustive_relevance_and_question_style_is_bound(monkeypatch):
     from engine import relevance
     monkeypatch.setenv('BATATIS_IDENTIFY_SCREEN', 'shortlist')
+    monkeypatch.setenv('BATATIS_IDENTIFY_RERANK', 'elephant')
     with pytest.raises(relevance.RelevanceUnavailable, match='requires exhaustive scoring'):
         relevance.live_judge()
     monkeypatch.setenv('BATATIS_IDENTIFY_SCREEN', 'elephant')

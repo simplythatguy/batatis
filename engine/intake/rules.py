@@ -59,6 +59,8 @@ ENUMS = {'applicant_role': ROLES, 'occupancy': OCCUPANCIES, 'sprinklered': SPRIN
 PERSONAL = frozenset({'owner_name', 'owner_rep_name', 'mailing_address', 'municipal_address', 'legal_description',
                       'lot', 'block', 'plan', 'ats_qtr', 'ats_sec', 'ats_twp', 'ats_rge', 'ats_mer',
                       'permit_number'})
+# Parts of a legal description. A short number alone (lot 12, block 3) identifies no one.
+LEGAL_PARTS = frozenset({'lot', 'block', 'ats_qtr', 'ats_sec', 'ats_twp', 'ats_rge', 'ats_mer'})
 
 
 @dataclass(frozen=True)
@@ -431,7 +433,7 @@ def _inline_admin(sentence: str, at: int) -> list[Hit]:
 
 @lru_cache(maxsize=1)
 def _places() -> re.Pattern:
-    names = [p['name'] for p in json.loads((Path(__file__).with_name('places.json')).read_text())['places']]
+    names = [p['name'] for p in json.loads((Path(__file__).with_name('places.json')).read_text(encoding='utf-8'))['places']]
     alt = '|'.join(re.escape(name) for name in sorted(names, key=len, reverse=True))
     return re.compile(rf'\b(?:in|at|near|for|of|from|to)\s+(?:the\s+)?(?:City\s+of\s+|Town\s+of\s+)?(?P<n>{alt})\b'
                       rf'|\b(?P<n2>{alt}),\s*(?:AB|Alberta)\b')

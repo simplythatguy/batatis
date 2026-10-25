@@ -7,9 +7,10 @@ so a threshold fitted on one pipeline is never applied to another.
 
 Resolution order: defaults below -> JSON file (`BATATIS_IDENTIFY_CONFIG`, else
 engine/identify/pipeline.json when present) -> `BATATIS_IDENTIFY_<FIELD>` environment overrides.
-The default is Elephant's typed Decisions for every Division B article and the
-top-60 rerank, followed by the existing OpenAI full-text verifier on the top 15. Explicit Jev
-configuration remains available. These scoring configurations have different hashes. The Anthropic
+The checked-in profile selects Jev for every Division B article and the top-60 rerank, followed by
+Luna's full-text verifier on the top 15. Historical dataclass defaults retain the Elephant profile
+for compatibility; explicit profiles and environment overrides select other configurations with
+different hashes. The Anthropic
 verifier adapter (ClaudeVerifier, claude-sonnet-5-5) is kept but off unless configured.
 Haiku models are refused.
 """
@@ -160,7 +161,7 @@ def load_config(path: Path | str | None = None, env: dict | None = None) -> Iden
     source = Path(path) if path else (Path(env['BATATIS_IDENTIFY_CONFIG']) if env.get('BATATIS_IDENTIFY_CONFIG')
                                       else PIPELINE_FILE)
     if source.is_file():
-        data = json.loads(source.read_text())
+        data = json.loads(source.read_text(encoding='utf-8'))
         unknown = set(data) - names - {'comment', 'chosen_by', 'chosen_at'}
         if unknown:
             raise ConfigError(f'unknown identify config keys: {", ".join(sorted(unknown))}')

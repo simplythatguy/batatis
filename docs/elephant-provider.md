@@ -1,16 +1,23 @@
 # Elephant article scoring
 
-Screening and the top-60 rerank default to `elephant`. The existing full-text
+The checked-in [pipeline profile](../engine/identify/pipeline.json) selects Jev for
+screening and the top-60 rerank, as the
+[workflow decision record](evaluations/workflow-decision-20261025.md) explains. This
+guide covers Elephant as an optional scorer that runs only when you configure it
+explicitly. The existing full-text
 verifier, assistant and voice configurations keep their own settings and gates.
 Scoring runs only for the existing explicit identify/relevance actions; constructing
 the app, saving a description and reading stored results do not score anything.
 
 ## Server configuration
 
-Set `OPENROUTER_API_KEY` privately in the server environment. To enable only this
-scorer while keeping unrelated providers disabled, use:
+Set `OPENROUTER_API_KEY` privately in the server environment. To choose Elephant for
+both scoring stages and enable only this scorer while keeping unrelated providers
+disabled, use:
 
 ```dotenv
+BATATIS_IDENTIFY_SCREEN=elephant
+BATATIS_IDENTIFY_RERANK=elephant
 BATATIS_LIVE=0
 BATATIS_LIVE_ELEPHANT=1
 ```
@@ -28,10 +35,13 @@ its values to the web process. An isolated worktree does not borrow another
 checkout's private `.env`. The parent owns private configuration and server restart.
 
 Existing config-file and `BATATIS_IDENTIFY_*` overrides still take precedence.
-Remove obsolete overrides or explicitly set both `BATATIS_IDENTIFY_SCREEN` and
-`BATATIS_IDENTIFY_RERANK` to `elephant`. Their model pins must both be
-`baseten/elephant-1:free`. Jev and legacy Luna Decisions remain explicit opt-ins;
-missing credentials or scoring failures never select them automatically.
+Set both `BATATIS_IDENTIFY_SCREEN` and `BATATIS_IDENTIFY_RERANK` to `elephant`, as
+above, or use a config file that selects it for both stages. Any stage you do not
+override keeps the checked-in Jev setting. Their model pins must both be
+`baseten/elephant-1:free`, and `load_config` infers them when they are omitted. Jev
+is the selected scorer in the checked-in profile, and legacy Luna Decisions remains
+an explicit opt-in. A missing credential or a scoring failure never switches to
+another scoring provider. Identify takes its labelled keyword fallback instead.
 
 ## Wire and failure policy
 

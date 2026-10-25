@@ -2,7 +2,6 @@
 import json
 import os
 import re
-import socket
 
 import pytest
 from fastapi.testclient import TestClient
@@ -16,6 +15,7 @@ from engine.identify import identify
 from engine.identify.jevkit import keystore
 from engine.relevance import live_judge
 from engine.store import CaseStore
+from engine.tests._network_guard import block_network
 from engine.tests.test_relevance import create_described, description_fact
 
 PRIVATE = re.compile(r'elephant|baseten|openrouter|jev|typesafe|openai|gpt|luna|API_KEY|BATATIS_', re.I)
@@ -28,10 +28,12 @@ def world(tmp_path, monkeypatch):
             monkeypatch.delenv(name, raising=False)
     monkeypatch.setenv('BATATIS_LIVE', '0')
     monkeypatch.setenv('BATATIS_LIVE_ELEPHANT', '1')
+    monkeypatch.setenv('BATATIS_IDENTIFY_SCREEN', 'elephant')
+    monkeypatch.setenv('BATATIS_IDENTIFY_RERANK', 'elephant')
     monkeypatch.setenv('OPENROUTER_API_KEY', 'synthetic-only-key')
     for name in ('BATATIS_RELEVANCE_RATE_LIMIT', 'BATATIS_IDENTIFY_RATE_LIMIT', 'BATATIS_RELEVANCE_DAILY_RUNS'):
         monkeypatch.setenv(name, '100')
-    monkeypatch.setattr(socket.socket, 'connect', lambda *_: pytest.fail('unexpected network'))
+    block_network(monkeypatch)
     monkeypatch.setattr(keystore, 'resolve', lambda *_: pytest.fail('Jev credential resolution'))
     monkeypatch.setattr(providers, 'raw_openai_decisions', lambda *_: pytest.fail('paid scorer fallback'))
     monkeypatch.setattr(providers, 'raw_openai_json', lambda *_, **__: pytest.fail('disabled verifier called'))

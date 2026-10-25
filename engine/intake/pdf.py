@@ -16,6 +16,7 @@ import pypdfium2 as pdfium
 from pypdf import PdfReader
 
 from ..pdfium import open_pdf
+from ..pdfium_lock import pdfium_locked
 
 MAX_PAGES = 60
 SCC_MAP = Path(__file__).resolve().parents[1] / 'export' / 'field_maps' / 'scc_2026-10.json'
@@ -78,7 +79,7 @@ def is_pdf(data: bytes) -> bool:
 
 
 def _scc_fields() -> set[str]:
-    data = json.loads(SCC_MAP.read_text())
+    data = json.loads(SCC_MAP.read_text(encoding='utf-8'))
     return set(data['text_fields']) | set(data['checkboxes'])
 
 
@@ -118,6 +119,7 @@ def _widgets(reader: PdfReader) -> list[Widget]:
     return out
 
 
+@pdfium_locked
 def _text_pages(data: bytes, limit: int) -> tuple[list[Page], list[int]]:
     pages, blank = [], []
     with open_pdf(data) as pdf:
@@ -141,6 +143,34 @@ def _text_pages(data: bytes, limit: int) -> tuple[list[Page], list[int]]:
                 textpage.close()
                 page.close()
     return pages, blank
+
+
+@pdfium_locked
+def page_texts(data: bytes, limit: int) -> tuple[int, list[tuple[int, str]]]:
+    """(page count, [(1-based page, text)]) for pages with a text layer, without character boxes."""
+    if not is_pdf(data):
+        raise NotAPdf()
+    try:
+        pdf = pdfium.PdfDocument(data)
+    except pdfium.PdfiumError as exc:
+        raise NotAPdf() from exc
+    out = []
+    try:
+        count = len(pdf)
+        for index in range(min(count, limit)):
+            page = pdf[index]
+            textpage = page.get_textpage()
+            try:
+                chars = textpage.count_chars()
+                text = textpage.get_text_range(0, chars) if chars else ''
+            finally:
+                textpage.close()
+                page.close()
+            if text.strip():
+                out.append((index + 1, text))
+    finally:
+        pdf.close()
+    return count, out
 
 
 def read_pdf(data: bytes) -> PdfContent:

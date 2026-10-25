@@ -13,8 +13,10 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .codes import CodeDbMissing, Codes
 from .intake import model as model_pass
+from .intake import review as review_pass
 from .intake import service
 from .intake.extract import scrubbed
+from .intake.questions import issued_questions
 from .intake.rules import ROLES
 from .llm_gate import client_ip_from
 from .models import Fact
@@ -78,9 +80,11 @@ class IntakeResult(BaseModel):
 
 
 def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes], *,
-                  transport_factory: Callable[[str], tuple[model_pass.Transport | None, str]] | None = None) -> APIRouter:
+                  transport_factory: Callable[[str], tuple[model_pass.Transport | None, str]] | None = None,
+                  review_factory: Callable[[str], tuple[review_pass.Transport | None, str]] | None = None) -> APIRouter:
     router = APIRouter(tags=['intake'])
     pick_transport = transport_factory or model_pass.default_transport
+    pick_review = review_factory or review_pass.default_transport
 
     def codes_or_none():
         try:
@@ -89,8 +93,10 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes], *
             return None
 
     def result(case) -> IntakeResult:
-        if case.intake is None:
+        if case.intake is None or case.intake.plan is None:
             service.refresh(case)
+        else:
+            case.intake.plan.asked = issued_questions(case.facts, case.intake.plan)
         ids = {pointer.fact_id for pointer in case.intake.pointers}
         return IntakeResult(case_id=case.id, case_version=case.version, record=case.intake,
                             facts=[fact for fact in case.facts if fact.id in ids])
@@ -110,9 +116,12 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes], *
                 raise HTTPException(404, 'file not found')
             files.append((file_id, stored['name'], stored['data']))
         transport, status = pick_transport(client_ip_from(request)) if body.model else (None, 'off')
+        review_transport, review_status = (pick_review(client_ip_from(request)) if body.model and files
+                                           else (None, 'off'))
         known = known_values(case, people_names(store, case, getattr(request.state, 'user', None)))
         extraction = service.run(body.text, files, codes=codes_or_none(), transport=transport, status=status,
-                                 outbound=lambda text, personal: scrubbed(text, [*known, *personal]))
+                                 outbound=lambda text, personal: scrubbed(text, [*known, *personal]),
+                                 review_transport=review_transport, review_status=review_status)
         # One compare-and-swap against the version the client saw, else the one read above. No retry.
         if body.expected_version is not None and body.expected_version != case.version:
             raise HTTPException(409, 'case was updated concurrently')

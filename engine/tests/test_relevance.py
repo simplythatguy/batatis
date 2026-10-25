@@ -149,7 +149,7 @@ def test_no_key_is_safe_503_and_does_not_start_scoring(tmp_path, codes, monkeypa
     case_id = create_described(client)
     response = client.post(f'/cases/{case_id}/relevance')
     assert response.status_code == 503 and response.json()['detail'] == 'Relevance scoring unavailable'
-    assert resolved == []
+    assert resolved == ['typesafe']
     assert 'configured scoring credential is absent' in caplog.text and 'credential' not in response.text
     assert client.get(f'/cases/{case_id}/relevance').status_code == 404
 

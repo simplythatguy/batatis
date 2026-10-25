@@ -29,7 +29,12 @@ async def receive(ws, timeout=2):
     return json.loads(await asyncio.wait_for(ws.recv(), timeout))
 
 
-async def collect(ws, timeout=0.03):
+async def collect(ws, timeout=0.1):
+    """Drain until the stream goes quiet for `timeout` seconds.
+
+    The gap is generous because a Windows event loop hops through the test client's
+    portal between events; at 0.03 s it returned early, mid-stream.
+    """
     events = []
     while True:
         try:

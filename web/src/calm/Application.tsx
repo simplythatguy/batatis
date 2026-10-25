@@ -242,7 +242,8 @@ function CaseApplication({ download }: { download: "" | "options" | "draft" }) {
   return (
     <div className="cf-doc">
       {/* The actual PDF the engine fills, not a drawing of it. */}
-      <FormViewer locked={locked} status={readOnly && app ? readOnlyStatus(app.status).label.split(" · ")[0] : undefined} />
+      <FormViewer locked={locked} status={readOnly && app ? readOnlyStatus(app.status).label.split(" · ")[0] : undefined}
+        draftDownload={{ run: () => void ex.prepare(true), disabled: ex.busy || Boolean(c.exampleId) }} />
       <aside className="cf-glass cf-side" aria-label="Download">
         <Eyebrow plain>Status</Eyebrow>
         {!readOnly && <div className="cf-side-big">{headline}<br /><span className="cf-muted">{sub}</span></div>}

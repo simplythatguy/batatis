@@ -13,6 +13,7 @@ from ..copyright import NRC_PUBLICATION_URL
 from ..models import Case
 from ..not_applicable import LABEL as NA_LABEL
 from ..pdfium import open_pdf
+from ..pdfium_lock import pdfium_locked
 from ..process_fields import process_fields
 from .appendix import _reflow
 from .scc import ExportResult, confirmed_values, load_field_map
@@ -73,7 +74,7 @@ def citation_report(result: ExportResult, *, db_path=None) -> dict:
     from codedb import validate
     with tempfile.TemporaryDirectory() as tmp:
         path = Path(tmp) / 'export.md'
-        path.write_text('\n\n'.join(result.text) + '\n')
+        path.write_text('\n\n'.join(result.text) + '\n', encoding='utf-8')
         report = validate([path], db_path=db_path)
     return report
 
@@ -83,6 +84,7 @@ def citation_problems(result: ExportResult, *, db_path=None) -> list[str]:
     return [f'{e["code"]} {e["citation"]}: {e["message"]}' for e in report['errors']]
 
 
+@pdfium_locked
 def page_texts(pdf: bytes) -> list[str]:
     with open_pdf(pdf) as doc:
         return [doc[i].get_textpage().get_text_range() for i in range(len(doc))]
@@ -92,16 +94,35 @@ def appendix_text(result: ExportResult) -> str:
     return norm(' '.join(FOOTER.sub(' ', t) for t in page_texts(result.pdf)[result.form_pages:]))
 
 
+def _whole_value(value: str, lines: list[str]) -> bool:
+    """Match every source character and word space, allowing a physical line break inside a long word."""
+    expected, at = norm(value), 0
+    for line in lines:
+        line = norm(line)
+        if not expected.startswith(line, at):
+            return False
+        at += len(line)
+        if at < len(expected) and expected[at] == ' ':
+            at += 1
+    return at == len(expected)
+
+
+@pdfium_locked
 def render_problems(result: ExportResult) -> list[str]:
-    """Every shown line of every filled field is drawn on its page with each character inside the field box,
-    and every value shown only as a reference is carried in full by the appendix."""
+    """Every shown line of every filled field is drawn on its page with each character inside the field box;
+    a field's boxes together show its whole value (a word wider than its box can break across lines), and every
+    value shown only as a reference is carried in full by the appendix."""
     with open_pdf(result.pdf) as doc:
         appendix = appendix_text(result)
         problems = []
+        fields: dict[str, list] = {}
         for pl in result.placements:
+            fields.setdefault(pl.field, []).append(pl)
             tp = doc[pl.page].get_textpage()
             x0, y0, x1, y1 = pl.rect
             for line in pl.lines:
+                if not line.strip():
+                    continue
                 searcher = tp.search(line, match_case=True)
                 hits = []
                 while (hit := searcher.get_next()) is not None:
@@ -111,8 +132,11 @@ def render_problems(result: ExportResult) -> list[str]:
                           for start, count in hits]
                 if not any(inside):
                     problems.append(f'{pl.field}: "{line}" is not drawn inside its box on page {pl.page + 1}')
-            if norm(' '.join(pl.lines)) != norm(pl.value) and not (pl.ref and norm(pl.value) in appendix):
-                problems.append(f'{pl.field}: the full value is not in the appendix')
+        for name, boxes in fields.items():
+            shown = [line for pl in sorted(boxes, key=lambda p: (p.page, -p.rect[3])) for line in pl.lines]
+            value, ref = boxes[0].value, boxes[0].ref
+            if not _whole_value(value, shown) and not (ref and norm(value) in appendix):
+                problems.append(f'{name}: the full value is not in its boxes or the appendix')
         return problems
 
 

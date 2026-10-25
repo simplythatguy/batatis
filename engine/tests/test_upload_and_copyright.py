@@ -448,7 +448,7 @@ def test_exported_pdf_keeps_the_full_provision_and_the_nrc_link(tmp_path):
     codes = Codes(path)
     case = Case(title='pdf budget', provisions=ids, section_c=section_c_rows(ids, codes))
     plan = SimpleNamespace(overflow=[], rows_in_form=1, docs_in_form=0)
-    pdf = build_appendix(case, plan, {}, {'version': 'test'}, codes=codes, open_items=[])
+    pdf = build_appendix(case, plan, {}, {'version': 'test'}, codes=codes)
     text = '\n'.join(page.extract_text() or '' for page in PdfReader(io.BytesIO(pdf)).pages)
     for needle in [seeded, *extras]:
         assert has_consecutive_words(text, needle)

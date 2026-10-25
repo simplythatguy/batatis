@@ -102,15 +102,14 @@ export function RuleResultView({ rule, index, onCard = false }: { rule: ShownRul
   );
 }
 
-/** A number a rule needs: the value with its unit, or Not sure. */
-export function RuleNumberInput({ id, label, unit, draft, setDraft, unsure, onUnsure, note }: { id: string; label: string; unit?: string; draft: string; setDraft: (v: string) => void; unsure: boolean; onUnsure: () => void; note: string }) {
+/** A number a rule needs, keeping any legacy uncertainty readable. */
+export function RuleNumberInput({ id, label, unit, draft, setDraft, unsure, note }: { id: string; label: string; unit?: string; draft: string; setDraft: (v: string) => void; unsure: boolean; note: string }) {
   return (
     <>
       <div className="cf-inline-answer">
         <label className="cf-sr" htmlFor={id}>{label}</label>
         <input id={id} className="cf-uline is-number" type="text" inputMode="decimal" value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="e.g. 2.5" />
         {unit && <span className="cf-unit">{unit}</span>}
-        <button type="button" className="cf-chip" aria-pressed={unsure} onClick={onUnsure}>Not sure</button>
       </div>
       {note && <p className="cf-note" role="alert"><Dot tone="warning" />{note}</p>}
       {!note && unsure && <p className="cf-note"><Dot tone="pending" />Saved as Not sure. The rule stays open and it is not asked again.</p>}

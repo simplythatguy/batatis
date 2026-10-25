@@ -99,6 +99,8 @@ export interface AssistDocumentReference {
 export interface AssistFocus {
   id: string;
   kind: string;
+  prompt?: string | null;
+  why?: string | null;
 }
 
 export interface AssistNavigation {
@@ -340,6 +342,14 @@ export interface CitationIssue {
   message: string;
 }
 
+export interface CitedProvision {
+  cited: string;
+  code: string | null;
+  division: string | null;
+  evidence: EvidenceRef[];
+  resolves_to: string | null;
+}
+
 export interface Claim {
   claimed_at: string;
   reviewer_id: string;
@@ -458,6 +468,25 @@ export interface DiffEntry {
   section: "A" | "B" | "C" | "D" | "process";
 }
 
+/** What the model read across every readable page, kept only where it checks out against the text. */
+export interface DocumentReview {
+  conflicts: ReviewConflict[];
+  documents: ReviewedDocument[];
+  dropped: number;
+  effort: string | null;
+  facts: ReviewFact[];
+  flags: ReviewFlag[];
+  input_tokens: number;
+  missing: ReviewItem[];
+  model: string | null;
+  output_tokens: number;
+  pages_sent: number;
+  provisions: CitedProvision[];
+  questions: ReviewItem[];
+  reason: string | null;
+  status: "off" | "fake" | "live" | "gate_closed" | "failed" | "not_needed";
+}
+
 export interface DocumentRow {
   date: Attribute;
   evidence_rung: Attribute;
@@ -494,11 +523,34 @@ export interface EvidenceItem {
   status: "needed" | "evidence_listed" | "not_applicable";
 }
 
+/** An exact excerpt of the request or of one page of an attached file, checked against that text. */
+export interface EvidenceRef {
+  page: number | null;
+  quote: string;
+  source_ref: string;
+}
+
 /** Short note on a Section C row. A quote is copied from codedb; the note never finds compliance. */
 export interface Explainer {
   quote: string;
   source: "ai_written" | "deterministic";
   text: string;
+}
+
+/** The draft export for the application screen: its exact bytes and images of its first pages. */
+export interface ExportPreview {
+  filename: string;
+  kind: "pages";
+  page_count: number;
+  pages: PreviewPage[];
+  pdf: string;
+}
+
+/** The draft PDF alone is too large to send as a preview, so none of it is sent; download the draft. */
+export interface ExportPreviewTooLarge {
+  kind: "too_large";
+  page_count: number;
+  pdf_bytes: number;
 }
 
 export interface Fact {
@@ -788,6 +840,7 @@ export interface InputFile {
 }
 
 export interface IntakePlan {
+  asked: Question[];
   candidates_seen: number;
   fork: Fork;
   next: "redirect" | "questions" | "identify";
@@ -805,6 +858,7 @@ export interface IntakeRecord {
   plan: IntakePlan | null;
   pointers: FactPointer[];
   ran_at: string;
+  review: DocumentReview | null;
   text_sha256: string | null;
   unresolved_citations: UnresolvedCitation[];
 }
@@ -1051,6 +1105,12 @@ export interface PreApplicationStep {
   title: string;
 }
 
+export interface PreviewPage {
+  height: number;
+  image: string;
+  width: number;
+}
+
 /** A process reference listed on every case, read-only: how an alternative solution is allowed and documented. */
 export interface ProcessRef {
   citation: string;
@@ -1222,6 +1282,11 @@ export interface ResolvedNote {
   topic: "entry_point" | "submission" | "permit_link" | "scope" | "documents" | "professional" | "review" | "decision" | "appeal" | "registration" | "authority";
 }
 
+export interface ReviewConflict {
+  evidence: EvidenceRef[];
+  text: string;
+}
+
 export interface ReviewDiff {
   new: DiffEntry[];
   previous_gaps: number;
@@ -1229,6 +1294,23 @@ export interface ReviewDiff {
   resolved: DiffEntry[];
   statement: string;
   still_open: DiffEntry[];
+}
+
+export interface ReviewFact {
+  evidence: EvidenceRef[];
+  status: "stated" | "existing" | "proposed" | "assumed" | "decided" | "argued" | "condition" | "recommended" | "tested";
+  text: string;
+}
+
+export interface ReviewFlag {
+  evidence: EvidenceRef[];
+  kind: "outside_alberta" | "code_edition" | "other_discipline" | "record_status" | "outcome_known" | "not_read";
+  text: string;
+}
+
+export interface ReviewItem {
+  text: string;
+  why: string;
 }
 
 export interface ReviewSession {
@@ -1260,6 +1342,15 @@ export interface ReviewSnapshot {
   authority: string | null;
   returned_at: string;
   values: Record<string, string>;
+}
+
+export interface ReviewedDocument {
+  author: string | null;
+  date: string | null;
+  file_id: string;
+  kind: string;
+  status: string | null;
+  title: string | null;
 }
 
 export interface ReviewerName {

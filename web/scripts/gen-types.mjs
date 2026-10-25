@@ -59,10 +59,13 @@ export function generate(schema) {
 }
 
 const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1];
+// Compare content, not line endings: a Windows checkout with Git's default
+// core.autocrlf=true stores this file with CRLF while the generator emits LF.
+const lf = (text) => text.replace(/\r\n/g, "\n");
 if (isMain) {
   const text = generate(JSON.parse(readFileSync(SCHEMA, "utf8")));
   if (process.argv.includes("--check")) {
-    if (!existsSync(OUT) || readFileSync(OUT, "utf8") !== text) {
+    if (!existsSync(OUT) || lf(readFileSync(OUT, "utf8")) !== lf(text)) {
       console.error("src/api/types.gen.ts is stale: run `npm run gen:types`");
       process.exit(1);
     }

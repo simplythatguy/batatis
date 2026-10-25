@@ -14,6 +14,7 @@ from pathlib import Path
 from ..codes import Codes
 from ..models import Case, EvidenceItem, Fact, Jurisdiction, Source
 from ..pdfium import open_pdf
+from ..pdfium_lock import pdfium_locked
 from ..section_c import section_c_rows
 from ..section_d import section_d_plan
 
@@ -76,11 +77,11 @@ def sample_case(codes: Codes, provisions: list[str] = PROVISIONS, facts: dict = 
 
     case = Case(title='SYNTHETIC BTRboard-like continuous sheathing insulation (test fixture)',
                 # Fixture data: a jurisdiction whose pack has a local-form notice, so exports exercise it.
-                jurisdiction=Jurisdiction(**json.loads((FIXTURES / 'sample-jurisdiction.json').read_text())),
+                jurisdiction=Jurisdiction(**json.loads((FIXTURES / 'sample-jurisdiction.json').read_text(encoding='utf-8'))),
                 facts=[synthetic_fact(k, v) for k, v in facts.items()],
                 provisions=provisions, section_c=section_c_rows(provisions, codes))
     source_file = FIXTURES / 'synthetic-evidence.txt'
-    text = source_file.read_text()
+    text = source_file.read_text(encoding='utf-8')
     for n in range(1, 7):
         eid = f'synthetic_{n}'
         name, who = facts.get(f'supporting_doc.{n}.name'), facts.get(f'supporting_doc.{n}.responsible')
@@ -97,6 +98,7 @@ def sample_case(codes: Codes, provisions: list[str] = PROVISIONS, facts: dict = 
     return case
 
 
+@pdfium_locked
 def main(out_dir: str = '/tmp/batatis-export') -> None:
     from . import export_case
     out = Path(out_dir)

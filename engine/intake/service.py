@@ -14,9 +14,11 @@ from ..identify.title import short_title, title_should_replace
 from ..models import Case, Fact, Source
 from ..models_intake import FactPointer, IntakeRecord
 from . import model as model_pass
+from . import review as review_pass
 from .extract import DESCRIPTION, DESCRIPTION_REF, Extraction, Origin, Outbound, read_file, read_text, scrubbed
 from .plan import OVERRIDDEN, SCOPE_FIELD, build_plan, description, overridden
-from .rules import ENUMS, FIELDS, PERSONAL, ROLES, read
+from .questions import issued_questions
+from .rules import ENUMS, FIELDS, LEGAL_PARTS, PERSONAL, ROLES, read
 from .scope import classify
 from .text import NUMBER, number
 
@@ -34,24 +36,39 @@ def _run(text, files, codes, outbound, transport, status, cache=None) -> Extract
 
 def run(text: str | None, files: list[tuple[str, str, bytes]], *, codes=None,
         outbound: Outbound = scrubbed, transport: model_pass.Transport | None = None,
-        status: str = 'off') -> Extraction:
+        status: str = 'off', review_transport: review_pass.Transport | None = None,
+        review_status: str = 'off') -> Extraction:
     """Extraction over the description and each (file id, name, bytes). No ledger change.
 
     With a model, the rules and form passes run over every source first, so a name or address read
-    from one file is scrubbed from every text the model sees."""
+    from one file is scrubbed from every text the model sees. The document review reads every page."""
     cache: dict = {}                                  # each PDF is parsed once across both passes
     first = _run(text, files, codes, outbound, None, status, cache)
-    if transport is None:
+    if transport is None and review_transport is None:
         return first
-    personal = [str(f.value) for f in first.facts if f.field in PERSONAL and len(str(f.value)) >= 3]
-    out = _run(text, files, codes, lambda s, own: outbound(s, [*own, *personal]), transport, status, cache)
-    if out.model.status == 'off':
-        out.model.status = 'not_needed'
+    sources = ([review_pass.read_source(file_id, name, data) for file_id, name, data in files]
+               if transport is not None else None)
+    candidates = [(f.field, f.value) for f in first.facts]
+    candidates += [(c.field, value) for c in first.conflicts for value in c.values]
+    personal = [str(value) for field, value in candidates if field in PERSONAL and str(value).strip()
+                and not (field in LEGAL_PARTS and str(value).isdigit() and len(str(value)) < 5)]
+    if sources is not None:
+        personal += review_pass.personal_values([text or '', *(s.name for s in sources),
+                                                *(t for s in sources for _, t in s.pages)])
+    out = first
+    if transport is not None:
+        out = _run(text, files, codes, lambda s, own: outbound(s, personal), transport, status, cache)
+        if out.model.status == 'off':
+            out.model.status = 'not_needed'
+    if review_transport is not None:
+        out.review = review_pass.run(text or '', files, outbound=lambda s, own: outbound(s, [*own, *personal]),
+                                     transport=review_transport, status=review_status, codes=codes, sources=sources)
     return out
 
 
 def _latest(case: Case, name: str) -> Fact | None:
-    return next((fact for fact in reversed(case.facts) if fact.field == name), None)
+    return next((fact for fact in reversed(case.facts)
+                 if fact.field == name or (name == 'storeys' and fact.field == 'building.storeys')), None)
 
 
 def apply(case: Case, text: str | None, extraction: Extraction, *, role: str | None = None) -> list[Fact]:
@@ -100,7 +117,7 @@ def apply(case: Case, text: str | None, extraction: Extraction, *, role: str | N
     case.intake = IntakeRecord(
         text_sha256=hashlib.sha256(text.encode()).hexdigest() if text else None,
         pointers=pointers, files=extraction.files, model=extraction.model, conflicts=extraction.conflicts,
-        unresolved_citations=extraction.unresolved, plan=previous_plan)
+        unresolved_citations=extraction.unresolved, plan=previous_plan, review=extraction.review)
     # Only sent/saved applicant context can name an untitled or legacy sentence-seeded
     # record. Keep an existing subject name, and always honor an explicit rename.
     generated = case.identify.title if case.identify else None
@@ -166,8 +183,11 @@ def _value(field: str, raw: str):
 
 
 def answer(case: Case, answers: list[dict]) -> list[Fact]:
-    """Answers to the stored plan's questions only. Each fills its own field. Checked before any is written."""
-    asked = {q.id: q.field for q in (case.intake.plan.questions if case.intake and case.intake.plan else [])}
+    """Only questions issued for this case, including earlier plans. Validate the whole batch before writing."""
+    plan = case.intake.plan if case.intake else None
+    asked = {}
+    if plan and plan.scope.status != 'redirect':
+        asked = {q.id: q.field for q in issued_questions(case.facts, plan)}
     checked = []
     for item in answers:
         qid, raw = item.get('question_id'), item.get('answer') or ''
@@ -182,7 +202,12 @@ def answer(case: Case, answers: list[dict]) -> list[Fact]:
         if value is None:
             if qid not in case.intake.plan.not_sure:
                 case.intake.plan.not_sure.append(qid)
-            continue
+            # Withdrawing a saved answer must not leave its old confirmed value in force.
+            previous = _latest(case, field)
+            if previous is None or previous.value in (None, ''):
+                continue
+        else:
+            case.intake.plan.not_sure = [q for q in case.intake.plan.not_sure if q != qid]
         fact = Fact(field=field, value=value, kind='pointed', status='confirmed',
                     source=Source(type='user_text', ref='intake answer', quote=raw.strip()))
         case.facts.append(fact)

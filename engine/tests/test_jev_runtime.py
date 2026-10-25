@@ -2,7 +2,6 @@
 from decimal import Decimal
 import json
 import os
-import socket
 import ssl
 import time
 
@@ -11,6 +10,7 @@ from engine import llm_gate
 from engine.identify.providers import GateClosed, SpendLog, metered_ask, metered_openai_json
 from engine.identify import jev_runtime
 from engine.identify.jev_runtime import JevResponseError
+from engine.tests._network_guard import block_network
 
 
 @pytest.fixture(autouse=True)
@@ -24,9 +24,7 @@ def offline_only(monkeypatch):
     monkeypatch.delenv('BATATIS_JEV_UNCAPPED', raising=False)
     for name in ('OPENAI_API_KEY','ANTHROPIC_API_KEY','XAI_API_KEY','TYPESAFE_API_KEY','JEV_API_KEY'):
         monkeypatch.delenv(name, raising=False)
-    def forbidden(*args, **kwargs):
-        pytest.fail('unexpected_network_attempt')
-    monkeypatch.setattr(socket.socket, 'connect', forbidden)
+    block_network(monkeypatch, message='unexpected_network_attempt')
     llm_gate.reset_for_tests()
     yield
     llm_gate.reset_for_tests()
@@ -233,6 +231,24 @@ def test_reply_after_entire_request_deadline_is_rejected(monkeypatch):
         metered_ask(jev_runtime.raw_ask())(STATE, QUESTIONS, 0.1)
     assert len(requests) == 1
     assert llm_gate._memory.today() > 0
+
+
+def test_tls_setup_exhausting_deadline_never_dispatches(monkeypatch):
+    import httpx
+    context = jev_runtime._tls_context()
+    initialized = []
+    def slow_context():
+        initialized.append(True)
+        time.sleep(0.15)
+        return context
+    monkeypatch.setattr(jev_runtime, '_tls_context', slow_context)
+    requests, _ = wire(monkeypatch, lambda _: httpx.Response(200, json=response()))
+    with pytest.raises(JevResponseError, match='timeout') as caught:
+        metered_ask(jev_runtime.raw_ask())(STATE, QUESTIONS, 0.1)
+    assert initialized == [True]
+    assert requests == []
+    assert caught.value.dispatched is False
+    assert llm_gate._memory.today() == Decimal('0')
 
 
 def test_total_deadline_cancels_wait_for_headers_without_retry(monkeypatch):

@@ -747,7 +747,7 @@ def load_codes(db_path: Path | str | None = None):
 def load_case_jsonl(path: Path) -> list[dict]:
     """One #8-format case per line: id, description, known_facts, gold.engineering_required."""
     cases = []
-    for line_number, line in enumerate(path.read_text().splitlines(), start=1):
+    for line_number, line in enumerate(path.read_text(encoding='utf-8').splitlines(), start=1):
         if not line.strip():
             continue
         row = json.loads(line)
@@ -791,15 +791,15 @@ def score(codes, cases: list[dict] | None = None, *,
 
 
 def load_cases() -> list[dict]:
-    return [json.loads(path.read_text()) for path in sorted(CASES.glob('dev-*.json'))]
+    return [json.loads(path.read_text(encoding='utf-8')) for path in sorted(CASES.glob('dev-*.json'))]
 
 
 def load_heldout() -> list[dict]:
-    return [json.loads(path.read_text()) for path in sorted(HELDOUT.glob('hold-*.json'))]
+    return [json.loads(path.read_text(encoding='utf-8')) for path in sorted(HELDOUT.glob('hold-*.json'))]
 
 
 def load_ngt() -> list[dict]:
-    return [json.loads(path.read_text()) for path in sorted(NGT.glob('ngt-*.json'))]
+    return [json.loads(path.read_text(encoding='utf-8')) for path in sorted(NGT.glob('ngt-*.json'))]
 
 
 def _score_line(scope: str, row: VariantScore) -> str:

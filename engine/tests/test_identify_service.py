@@ -24,6 +24,7 @@ from engine.identify.providers import Transports, transports
 from engine.identify.verify import ClaudeVerifier, normalize
 from engine.models import Case, Fact, Source
 from engine.store import CaseStore
+from engine.tests._network_guard import block_network
 
 REPO = Path(__file__).resolve().parents[2]
 DEV_CASES = sorted((REPO / 'evals_dev' / 'cases').glob('dev-*.json'))
@@ -55,7 +56,7 @@ def arts(codes):
 
 
 def calibrated(config=None, threshold=0.05):
-    return CommitPolicy('calibrated', 'test fit', {9: threshold}, 3, (config or IdentifyConfig()).config_hash)
+    return CommitPolicy('calibrated', 'test fit', {9: threshold}, 3, (config or load_config()).config_hash)
 
 
 def displayed_text_ok(result, arts):
@@ -374,15 +375,16 @@ def test_rate_limit_is_per_ip_and_before_any_provider(client, monkeypatch):
     assert limited.status_code == 429 and limited.headers['retry-after']
 
 
-def test_spend_is_settled_per_provider_for_a_run(client):
+def test_spend_is_settled_per_provider_for_a_run(client, monkeypatch):
+    monkeypatch.setenv('BATATIS_JEV_UNCAPPED', '0')
     http, _ = client
     case_id = described(http)
     trace = http.post(f'/cases/{case_id}/identify', json={}).json()['trace']
     assert set(trace['spend']) == {'scoring', 'verification'}
     scoring_stages = [s for s in trace['stages'] if s['stage'] in ('screen', 'rerank')]
     assert trace['spend']['scoring']['requests'] == sum(s['requests'] for s in scoring_stages)
-    assert trace['spend']['scoring']['requests'] > 2  # Elephant's full request budget requires batches.
-    assert trace['spend']['scoring']['usd'] == 0
+    assert trace['spend']['scoring']['requests'] > 2
+    assert trace['spend']['scoring']['usd'] > 0
     assert abs(float(llm_gate._memory.today()) - trace['usd']) < 1e-6
 
 
@@ -530,13 +532,11 @@ def no_network(monkeypatch):
     """Any socket connect or real HTTP request fails the test."""
     import socket
     import httpx
-    calls = []
+    calls = block_network(monkeypatch, message='network call in offline mode')
 
     def refuse(*args, **kwargs):
         calls.append(args[:2])
         raise AssertionError('network call in offline mode')
-    monkeypatch.setattr(socket.socket, 'connect', refuse)
-    monkeypatch.setattr(socket.socket, 'connect_ex', refuse)
     monkeypatch.setattr(socket, 'create_connection', refuse)
     monkeypatch.setattr(httpx.HTTPTransport, 'handle_request', refuse)
     monkeypatch.setattr(httpx.AsyncHTTPTransport, 'handle_async_request', refuse)

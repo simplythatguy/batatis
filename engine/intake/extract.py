@@ -16,7 +16,7 @@ from typing import Callable
 
 from ..models import Fact, Source
 from ..redact import scrub
-from ..models_intake import FactPointer, FieldConflict, FileReport, ModelPass, UnresolvedCitation
+from ..models_intake import DocumentReview, FactPointer, FieldConflict, FileReport, ModelPass, UnresolvedCitation
 from . import model as model_pass
 from .pdf import FORM_ONLY, MAX_PAGES, NO_TEXT, NOT_A_PDF, SCC_MAP, TOO_LONG, NotAPdf, read_pdf
 from .rules import PERSONAL, Hit, canonical_citation, read
@@ -40,6 +40,7 @@ class Extraction:
     unresolved: list[UnresolvedCitation] = field(default_factory=list)
     model: ModelPass = field(default_factory=lambda: ModelPass(status='off'))
     files: list[FileReport] = field(default_factory=list)
+    review: DocumentReview | None = None
 
     def merge(self, other: Extraction) -> None:
         self.facts += other.facts
@@ -149,7 +150,7 @@ def read_text(text: str, origin: Origin, *, codes=None, outbound: Outbound = scr
 # ---------------------------------------------------------------- files
 
 def _scc_map() -> dict[str, str]:
-    data = json.loads(SCC_MAP.read_text())
+    data = json.loads(SCC_MAP.read_text(encoding='utf-8'))
     mapped = {name: spec['fact'] for name, spec in data['text_fields'].items() if spec['section'] != 'C'}
     mapped.update({name: spec['fact'] for name, spec in data['checkboxes'].items()})
     for index, row in enumerate(data['section_c_rows']):

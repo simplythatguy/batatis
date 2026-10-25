@@ -1,18 +1,22 @@
 /**
- * The application as the actual PDF the engine fills (POST /cases/{id}/export with draft: true),
- * shown in the browser's own PDF viewer. It replaces a hand-drawn imitation of the form: what the
- * applicant sees is the same file they download. The draft is saved first so the PDF shows the
- * current answers; after an answer changes, Update makes a new one. Read-only applications are
- * shown as saved. Nothing here unlocks the official PDF; that gate stays in the download panel.
+ * The application as the actual PDF the engine fills (GET /cases/{id}/export/preview, a draft export), shown
+ * as its own pages on light paper. The browser's PDF viewer would frame them in a dark backdrop this page
+ * cannot restyle. The page images are drawn from the same bytes the open-in-new-tab link opens: what the
+ * applicant sees is the file they download. The draft is saved first so the PDF shows the current answers;
+ * after an answer changes, Update makes a new one. Read-only applications are shown as saved. A draft too
+ * large to send as a preview says so and offers the panel's draft download. Nothing here unlocks the
+ * official PDF; that gate stays in the download panel.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { engine, EngineError, ExportBlockedError } from "../api/client";
+import type { PreviewPage } from "../api/types.gen";
 import { useCase } from "../store";
 import { CIcon } from "./ui";
 
 type View =
   | { state: "idle" | "loading" }
-  | { state: "ready"; url: string; key: string }
+  | { state: "ready"; url: string; key: string; pages: PreviewPage[]; total: number }
+  | { state: "too_large"; key: string; total: number }
   | { state: "failed"; message: string; reasons: string[] };
 
 function failure(e: unknown): { message: string; reasons: string[] } {
@@ -22,11 +26,23 @@ function failure(e: unknown): { message: string; reasons: string[] } {
   return { message: "The form didn’t load.", reasons: [] };
 }
 
+/** The PDF bytes of a `data:` URL, for the open-in-new-tab link. */
+function pdfFile(dataUrl: string): Blob {
+  const bytes = atob(dataUrl.slice(dataUrl.indexOf(",") + 1));
+  return new Blob([Uint8Array.from(bytes, (c) => c.charCodeAt(0))], { type: "application/pdf" });
+}
+
+/** The download panel's own draft download, offered when the draft is too large to show. */
+export interface DraftDownload {
+  run: () => void;
+  disabled: boolean;
+}
+
 /**
  * `status`: a sent or closed application's own status ("Sent", "Accepted"). The file on screen is
  * always the draft export, whatever the application's status, and is labelled as such.
  */
-export function FormViewer({ locked, status }: { locked: boolean; status?: string }) {
+export function FormViewer({ locked, status, draftDownload }: { locked: boolean; status?: string; draftDownload?: DraftDownload }) {
   const { c, engineId, saveDraft } = useCase();
   // What the PDF is filled from: the answers, the applicant's own case, the authority and Section C.
   const key = useMemo(() => JSON.stringify([c.facts.map((f) => [f.field, f.value, f.status]), c.process, c.authority, c.sectionC.map((r) => r.provision)]), [c.facts, c.process, c.authority, c.sectionC]);
@@ -47,11 +63,16 @@ export function FormViewer({ locked, status }: { locked: boolean; status?: strin
       const id = locked ? engineId : (await saveDraft()) ?? engineId;
       if (ctl.signal.aborted) return;
       if (!id) { setView({ state: "failed", message: "Save your application to see the form.", reasons: [] }); return; }
-      const { blob } = await engine.exportPdf(id, true, ctl.signal);
+      const preview = await engine.exportPreview(id, ctl.signal);
       if (ctl.signal.aborted) return;
       if (url.current) URL.revokeObjectURL(url.current);
-      url.current = URL.createObjectURL(blob);
-      setView({ state: "ready", url: url.current, key: filledFrom });
+      url.current = null;
+      if (preview.kind === "too_large") {
+        setView({ state: "too_large", key: filledFrom, total: preview.page_count });
+        return;
+      }
+      url.current = URL.createObjectURL(pdfFile(preview.pdf));
+      setView({ state: "ready", url: url.current, key: filledFrom, pages: preview.pages, total: preview.page_count });
     } catch (e) {
       if (!ctl.signal.aborted) setView({ state: "failed", ...failure(e) });
     }
@@ -65,7 +86,8 @@ export function FormViewer({ locked, status }: { locked: boolean; status?: strin
   }, [engineId]);
   useEffect(() => () => { if (url.current) URL.revokeObjectURL(url.current); }, []);
 
-  const stale = view.state === "ready" && view.key !== key && !locked;
+  const stale = (view.state === "ready" || view.state === "too_large") && view.key !== key && !locked;
+  const title = status ? `Application form (${status.toLowerCase()}), draft PDF` : "Application form, draft PDF";
   return (
     <section className="cf-form-view" aria-label="Application form">
       <div className="cf-form-bar">
@@ -76,7 +98,23 @@ export function FormViewer({ locked, status }: { locked: boolean; status?: strin
         {view.state === "ready" && <a className="cf-icon-btn is-plain" href={view.url} target="_blank" rel="noreferrer" aria-label="Open the draft PDF in a new tab" title="Open the draft PDF in a new tab"><CIcon name="external" size={15} /></a>}
       </div>
       {view.state === "ready" ? (
-        <iframe className="cf-form-frame" src={`${view.url}#toolbar=0&navpanes=0&view=FitH`} title={status ? `Application form (${status.toLowerCase()}), draft PDF` : "Application form, draft PDF"} />
+        // A focusable scroll region, so the pages scroll from the keyboard too.
+        <div className="cf-form-pages" role="region" aria-label={title} tabIndex={0}>
+          {view.pages.map((page, i) => (
+            <img key={i} className="cf-form-page" src={page.image} width={page.width} height={page.height}
+              alt={`Page ${i + 1} of ${view.total}`} loading={i < 2 ? "eager" : "lazy"} decoding="async" />
+          ))}
+          {view.pages.length < view.total && (
+            <a className="cf-inline-link cf-form-more" href={view.url} target="_blank" rel="noreferrer">
+              {view.total - view.pages.length} more {view.total - view.pages.length === 1 ? "page" : "pages"} in the PDF
+            </a>
+          )}
+        </div>
+      ) : view.state === "too_large" ? (
+        <div className="cf-form-empty" role="status">
+          <p>Too large to preview: {view.total.toLocaleString()} pages.</p>
+          {draftDownload && <button type="button" className="cf-btn is-sm" disabled={draftDownload.disabled} onClick={draftDownload.run}>Download draft PDF</button>}
+        </div>
       ) : view.state === "failed" ? (
         <div className="cf-form-empty" role="alert">
           <p>{view.message}</p>
