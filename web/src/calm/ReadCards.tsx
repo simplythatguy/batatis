@@ -174,7 +174,7 @@ export function ShowCode({ cand, onMore }: { cand: Candidate; onMore: () => void
 }
 
 /** Another safety-codes regime: what triggered it, the API's copy, and the two ways on. */
-export function RedirectPage({ n }: { n: number }) {
+export function RedirectPage() {
   const { c, overrideScope, reading } = useCase();
   const [note, setNote] = useState("");
   const scope = scopeRedirect(c);
@@ -183,7 +183,6 @@ export function RedirectPage({ n }: { n: number }) {
   const busy = reading.busy === "scope";
   return (
     <div className="cf-q-wrap is-from-down cf-redirect" role="group" aria-labelledby="cf-q">
-      <div className="cf-q-num"><span className="cf-q-n">{n}</span><Icon24 name="right" size={15} stroke={2} /><span className="cf-q-sec">Before we go on</span></div>
       <h2 id="cf-q" className="cf-q-text" tabIndex={-1}>This reads as a {scope.regime.name} question.</h2>
       <figure className="cf-said">
         <Words words={words} quote={scope.cue ?? undefined} />

@@ -70,8 +70,8 @@ test("missing inputs become Section C deck questions, one card per field, in rul
   assert.deepEqual(inputs.map((i) => i.key), ["rulein-ebf_area_m2", "rulein-glazed_area_m2", "rulein-soffit_projects"]);
   assert.ok(inputs.every((i) => i.section === "C" && !i.done && !i.optional));
   assert.equal(inputs[0].title, index.inputs.ebf_area_m2.question);
-  // Yes / No / Not sure for a yes-or-no input; a number has no choices (typed).
-  assert.deepEqual(choicesFor(inputs[2]).map((x) => x.label), ["Yes", "No", "Not sure"]);
+  // Skip leaves a rule open; only confirmed choices belong in the answer controls.
+  assert.deepEqual(choicesFor(inputs[2]).map((x) => x.label), ["Yes", "No"]);
   assert.deepEqual(choicesFor(inputs[0]), []);
   // No result card while the rule still needs answers.
   assert.ok(!items.some((i) => i.kind === "rule"));

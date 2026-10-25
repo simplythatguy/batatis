@@ -4725,24 +4725,6 @@ body {
   }
 }
 
-.cf-q-num {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-  /* The question number takes its section's shade (neutral where there is no section). */
-  color: var(--hue-s, var(--cf-text-2));
-  font-size: 15px;
-  font-weight: 550;
-}
-
-.cf-q-sec {
-  margin-left: 4px;
-  color: var(--cf-text-3);
-  font-size: 13.5px;
-  font-weight: 450;
-}
-
 .cf-q-text {
   margin: 0;
   font-size: 34px;
@@ -5021,14 +5003,13 @@ body {
   transition-duration: 150ms;
 }
 
-/* Neutral everywhere but the section you are in: there, answered questions take its hue and the
-   current one a darker shade of the same hue (never the global accent). Open ones stay grey. */
+/* Only the current question takes its section's hue. Answers are grey; explicit skips are red. */
 .cf-qsec-bar i.is-done {
   background: var(--cf-text-3);
 }
 
-.cf-qsec.is-on .cf-qsec-bar i.is-done {
-  background: var(--hue, var(--cf-text-3));
+.cf-qsec-bar i.is-skipped {
+  background: var(--cf-blocking);
 }
 
 .cf-qsec.is-on .cf-qsec-bar i.is-cur,
@@ -5132,6 +5113,7 @@ body {
   max-width: calc(100vw - 32px);
   max-height: 50vh;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 6px;
   border-radius: 12px;
   background: var(--cf-raise);
@@ -5177,7 +5159,13 @@ body {
 
 .cf-qsec-done {
   align-self: center;
-  color: var(--cf-done);
+  color: var(--cf-text-3);
+  display: grid;
+}
+
+.cf-qsec-skipped {
+  align-self: center;
+  color: var(--cf-blocking);
   display: grid;
 }
 

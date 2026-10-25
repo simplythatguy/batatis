@@ -229,10 +229,10 @@ export function numbersUsed(r: ShownRule, index: RuleIndex): Row[] & { others?: 
 /** The next step for a departure, in plain words (the engine's full sentence sits behind Show the code). */
 export const DEPARTS_NEXT = "To build it this way, you prepare an alternative solution that performs at least as well, and ask for a variance. A safety codes officer decides.";
 
-/** A rule input card's answer choices (yes/no, a list, or a number), always with Not sure. */
+/** Confirmed choices only. The deck's Skip action leaves uncertainty open. */
 export function inputChoices(spec: InputSpec): { value: string; label: string }[] {
-  if (spec.type === "bool") return [{ value: "true", label: "Yes" }, { value: "false", label: "No" }, { value: NOT_SURE_RULE, label: "Not sure" }];
-  if (spec.type === "enum") return [...(spec.choices ?? []), { value: NOT_SURE_RULE, label: "Not sure" }];
+  if (spec.type === "bool") return [{ value: "true", label: "Yes" }, { value: "false", label: "No" }];
+  if (spec.type === "enum") return spec.choices ?? [];
   return [];
 }
 
