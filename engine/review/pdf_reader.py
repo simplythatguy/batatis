@@ -390,7 +390,7 @@ def _candidate_versions(reader) -> list[FormVersion]:
             return []
         if keys[5] in metadata:     # grown cells: rebuilt only from a canonical, bounded hint
             layout = Layout.parse(str(metadata[keys[5]]), int(rows))
-            if layout is None or layout.pages() > len(reader.pages):
+            if layout is None or layout.pages() > int(pages):
                 return []
     elif any(key in metadata for key in keys[3:]):
         return []  # these source-page hints do not describe the five-page legacy form

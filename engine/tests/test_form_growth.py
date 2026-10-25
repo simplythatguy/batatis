@@ -238,6 +238,24 @@ def test_untrusted_layout_hints_are_bounded_before_reconstruction(codes, monkeyp
     assert read.note and all(f.status == 'not_found' and not f.value for f in read.fields.values())
 
 
+def test_unrelated_appendix_pages_cannot_fund_an_oversized_layout_hint(codes, monkeypatch):
+    from engine.review import pdf_reader
+    result = export_case(sample_case(codes, provisions=['9.9.10.1.(1)']), codes=codes)
+    writer = PdfWriter(clone_from=io.BytesIO(result.pdf))
+    for _ in range(50):
+        writer.add_blank_page(width=612, height=792)
+    writer.add_metadata({'/BatatisLayout': 'r2000'})
+    out = io.BytesIO()
+    writer.write(out)
+
+    def must_not_rebuild(*args, **kwargs):
+        pytest.fail('Unrelated appendix pages were counted as room for the declared form layout')
+
+    monkeypatch.setattr(pdf_reader, '_version', must_not_rebuild)
+    read = read_pdf(out.getvalue(), 'padded-appendix.pdf')
+    assert read.note and all(f.status == 'not_found' and not f.value for f in read.fields.values())
+
+
 def test_covering_a_continuation_box_makes_the_entire_field_uncertain(codes):
     from reportlab.pdfgen import canvas
     value = '\n'.join(f'SYNTHETIC address {n:03d}' for n in range(1, 81))
