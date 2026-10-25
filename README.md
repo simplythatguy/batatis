@@ -127,7 +127,7 @@ Many published decisions state their outcome, so the cases test reading and pape
 - Add authorities beyond Edmonton and Calgary, then other provinces.
 - Draft the officer's Part 2 decision page from the review findings.
 - Search the CCMC product evaluation registry from inside the app.
-- Measure the code check on applications that experts have reviewed, and calibrate its relevance scores.
+- Measure how accurate the whole workflow is on applications that experts have reviewed, and calibrate its relevance scores.
 - Test the full workflow with real applicants and officers.
 
 ---
@@ -140,9 +140,9 @@ This diagram has the same steps as the one in [Our solution](#our-solution), wit
 
 For applicants:
 
-1. **Describe the project.** Rules read facts, such as the owner and the address, from the description and from the text and fields of any PDFs. If AI is on, GPT points at more facts, and each one must quote the applicant's own words.
+1. **Describe the project.** Rules read facts, such as the owner and the address, from the description and from the text and fields of any PDFs. If AI is on, GPT-6 Luna, an OpenAI model, points at more facts, and each one must quote the text it came from. When you attach files, Luna also reviews them page by page.
 2. **Answer a few questions.** A rule-based planner picks up to five questions. It starts with conflicts in what you wrote, then facts that narrow down the code articles. The website then shows one card for each item that is still open. No AI writes the questions.
-3. **Confirm the code articles.** Elephant 1 scores all 2,080 articles in Division B of the code and reranks the top 60. Elephant 1 is a model hosted on Baseten, and Batatis reaches it through OpenRouter. GPT then reads the top 15 in full and quotes the sentences that apply. You confirm each article. With AI off, a keyword search over CodeDB suggests articles instead.
+3. **Confirm the code articles.** Jev 1.13.0, a TypeSafe model that answers with a probability, scores all 2,080 articles in Division B of the code and reranks the top 60. Luna then reads the top 15 in full and quotes the sentences that apply. Batatis shows up to 10 articles, and you confirm each one. With AI off, or if scoring fails, a keyword search over CodeDB suggests articles instead.
 4. **Section C fills itself in.** The objectives, functions, and intent of each confirmed article come from the code's own tables in CodeDB. No AI is involved.
 5. **Plan the evidence.** Rules match each article to the kinds of evidence it needs, and flag when an engineer or another professional is required. No AI is involved.
 6. **Anything missing?** Completeness rules check every required part of Sections A to D. Anything missing sends you back to the questions.
@@ -155,9 +155,35 @@ For Safety Codes Officers:
 10. **Decide.** Returning the application sends the applicant a message, and they fix it and resubmit. Accepting it marks it as administratively complete.
 11. **Close-out.** The engine builds the decision's record package for the Council.
 
-CodeDB is a SQLite database of the building code. You build it on your computer from the official PDFs of the National Building Code, 2023 Alberta Edition, second printing. Applications and accounts live in SQLite on your computer, or in PostgreSQL on Neon when the app is hosted. The assistant answers with GPT. Voice uses Grok from xAI.
+Batatis checks what Luna writes before it keeps anything. The document review proposes facts, conflicts, the code provisions the files cite, what is still missing, and questions to ask next. Batatis drops a fact, conflict, or provision unless its excerpt appears in the request or the file it names. When a restated fact adds a number that its excerpt lacks, Batatis shows the excerpt instead. A wording filter removes Batatis's own sentences that say a design complies, is safe, or is approved, or that cite an article number CodeDB doesn't have.
+
+The filter catches common phrasings, not every one. The engine saves the document review with the application, but the screens don't show it yet, and step 3 doesn't use it to find articles yet.
+
+CodeDB is a SQLite database of the building code. You build it on your computer from the official PDFs of the National Building Code, 2023 Alberta Edition, second printing. Applications and accounts live in SQLite on your computer, or in PostgreSQL on Neon when the app is hosted. The assistant answers with GPT-4.1 mini by default, or with Claude Sonnet 5.5 when `ANTHROPIC_API_KEY` is set. Voice uses Grok from xAI.
 
 Before any text goes to an AI service, Batatis removes the names, contact details, and addresses that it recognizes. A daily spend cap, US$5 by default, stops AI calls when it is reached.
+
+<details>
+<summary>Why Batatis uses Luna and Jev, and what isn't measured yet</summary>
+
+The team chose this workflow on October 25, 2026, and stopped benchmarking. The [decision record](docs/evaluations/workflow-decision-20261025.md) explains the choice and its limits. The [evidence snapshot](docs/evaluations/workflow-accuracy-evidence-20261025.json) holds the saved results behind it.
+
+- Luna reviews documents with its original prompt. In the saved results, this source-checked review came with the largest improvement. A matched test of another review model, and a test of a revised prompt, showed no clear gain.
+- The team asked for Jev to score the articles. Its saved runs did not finish, so they record the setup, not a score.
+- [`engine/identify/pipeline.json`](engine/identify/pipeline.json) holds the settings for step 3. They resolve to configuration `5f1c92331550984a`. Jev reads each article as its heading and the first 700 characters of its text. [`engine/tests/test_workflow_profile.py`](engine/tests/test_workflow_profile.py) fails if a selected model, effort, or limit changes.
+
+No complete, reliable test has measured the accuracy of this combined workflow, and no result shows that it is more than 97% accurate. The record also keeps older scores from earlier code, other judges, and other workloads. None of them is the accuracy of this workflow.
+
+When testing resumes, these are the next tests, in order. None is scheduled.
+
+1. Review the source checks and the wording filter independently, and test a filter that reads meaning instead of wording.
+2. Run the whole journey in the app, from upload to export.
+3. Measure this exact workflow on the [development cases](evals_dev/data_prompts/README.md#split), then on the held-out cases without tuning on them.
+4. Have experts check the reference answers and the judge.
+5. Test smaller source chunks, and passing reviewed facts to step 3, as separate changes.
+6. Tune cost and speed only after accuracy.
+
+</details>
 
 <details>
 <summary>Measured accuracy of the engineer-needed flag</summary>
@@ -176,7 +202,12 @@ The frontend, meaning the files that build the screens and their look:
 
 ![The frontend files: the web app's entry, the screens in web/src/calm, and the design rules and tokens in docs](docs/readme/folder-structure-frontend.png)
 
-Both pictures show the main folders and files, not every one.
+Both pictures show the main folders and files, not every one. The pictures leave out these files, which hold the AI workflow:
+
+- [`engine/intake/review.py`](engine/intake/review.py) runs the document review and checks what it returns.
+- [`engine/identify/pipeline.json`](engine/identify/pipeline.json) holds the settings for finding code articles.
+- [`evals_dev/data_prompts/`](evals_dev/data_prompts/) runs the practice cases through the engine and scores the results.
+- [`docs/evaluations/workflow-decision-20261025.md`](docs/evaluations/workflow-decision-20261025.md) explains why Batatis uses this workflow, and its limits.
 
 ## Get started
 
@@ -363,22 +394,46 @@ BATATIS_LIVE_ELEPHANT=0
 BATATIS_DAILY_SPEND_CAP_USD=5
 ```
 
+The AI steps in [How Batatis works](#how-batatis-works) need your OpenAI key and a TypeSafe key. The example file has no line for the TypeSafe key, so add one. Paste each key after its `=`, and set `BATATIS_LIVE=1`:
+
+```dotenv
+OPENAI_API_KEY=
+TYPESAFE_API_KEY=
+BATATIS_LIVE=1
+```
+
+The OpenRouter key and `BATATIS_LIVE_ELEPHANT` are only for an optional alternative scorer, explained below.
+
 #### `OPENAI_API_KEY`
 
-The OpenAI API runs GPT models. Batatis uses GPT to read more facts from descriptions and PDFs, and to check and quote the top code articles. The assistant also answers with GPT. Set `BATATIS_LIVE=1` to turn it on.
+The OpenAI API runs GPT models. Batatis uses GPT-6 Luna, at medium reasoning effort, to read more facts from descriptions and PDFs, to review attached files, and to read the top 15 code articles in full. The assistant uses GPT-4.1 mini by default. If you set `ANTHROPIC_API_KEY`, which is not in the example file, the assistant uses Claude Sonnet 5.5 instead. Set `BATATIS_LIVE=1` to turn it on.
 
 Files that use it:
 
 - [`engine/llm_gate.py`](engine/llm_gate.py)
 - [`engine/intake/model.py`](engine/intake/model.py)
+- [`engine/intake/review.py`](engine/intake/review.py)
 - [`engine/identify/providers.py`](engine/identify/providers.py)
 - [`engine/routes_assist.py`](engine/routes_assist.py)
 
 Get a key at [platform.openai.com/api-keys](https://platform.openai.com/api-keys).
 
+#### `TYPESAFE_API_KEY`
+
+TypeSafe runs Jev, a model that answers questions with a probability instead of writing text. Batatis uses Jev 1.13.0 to score all 2,080 articles in Division B and to rerank the top 60. Set `BATATIS_LIVE=1` to turn it on. Batatis also accepts the same key as `JEV_API_KEY`. If neither is set, it looks in the macOS Keychain or the Linux secret store, then in `~/.config/jev/credentials`.
+
+Files that use it:
+
+- [`engine/identify/jevkit/keystore.py`](engine/identify/jevkit/keystore.py)
+- [`engine/identify/jevkit/client.py`](engine/identify/jevkit/client.py)
+- [`engine/identify/jev_runtime.py`](engine/identify/jev_runtime.py)
+- [`engine/llm_gate.py`](engine/llm_gate.py)
+
+Get a key at [console.typesafe.ai/keys](https://console.typesafe.ai/keys).
+
 #### `OPENROUTER_API_KEY`
 
-OpenRouter is one API that reaches many AI models. Batatis uses it to call Elephant 1, a model hosted on Baseten that scores how relevant each code article is to the project. Set `BATATIS_LIVE_ELEPHANT=1` to turn on only this model.
+This key is optional. OpenRouter is one API that reaches many AI models. Batatis can use it to call Elephant 1, a free model hosted on Baseten, to score the articles in place of Jev. To choose Elephant, set both `BATATIS_IDENTIFY_SCREEN=elephant` and `BATATIS_IDENTIFY_RERANK=elephant`. Then set `BATATIS_LIVE_ELEPHANT=1`, because the example file's `0` keeps Elephant off even when `BATATIS_LIVE` is `1`. The switch alone doesn't choose Elephant.
 
 The route that Batatis uses is free, but OpenRouter limits free requests per day, and one full scoring run takes about 135 requests. See the [Elephant guide](docs/elephant-provider.md).
 
@@ -387,7 +442,6 @@ Files that use it:
 - [`engine/llm_gate.py`](engine/llm_gate.py)
 - [`engine/identify/elephant_runtime.py`](engine/identify/elephant_runtime.py)
 - [`engine/identify/providers.py`](engine/identify/providers.py)
-- [`engine/identify/jevkit/keystore.py`](engine/identify/jevkit/keystore.py)
 
 Get a key at [openrouter.ai/settings/keys](https://openrouter.ai/settings/keys).
 
@@ -397,8 +451,8 @@ Get a key at [openrouter.ai/settings/keys](https://openrouter.ai/settings/keys).
 
 | Switch | What it does |
 | --- | --- |
-| `BATATIS_LIVE` | `1` turns on every AI step that has a key. `0` keeps the app offline. |
-| `BATATIS_LIVE_ELEPHANT` | `1` turns on only Elephant 1. `0` turns it off, even when `BATATIS_LIVE` is `1`. |
+| `BATATIS_LIVE` | `1` turns on every AI step that has its key, and `0` turns them off. For Elephant 1, a `BATATIS_LIVE_ELEPHANT` value of `0` or `1` wins over this switch. |
+| `BATATIS_LIVE_ELEPHANT` | `1` turns on Elephant 1, even when `BATATIS_LIVE` is `0`, but Elephant runs only when you choose it as above. `0` turns it off, even when `BATATIS_LIVE` is `1`. Left empty, it follows `BATATIS_LIVE`. |
 | `BATATIS_DAILY_SPEND_CAP_USD` | Stops AI calls for the day after this many US dollars. |
 
 Voice needs an xAI key, `XAI_API_KEY`, which is not in the example file. See the [voice notes](docs/api/voice.md).
@@ -525,6 +579,7 @@ Read [`AGENTS.md`](AGENTS.md) and the skills it names before you write any code.
 | --- | --- |
 | Start any task | [`AGENTS.md`](AGENTS.md) and [`batatis-hackathon`](.cursor/skills/batatis-hackathon/SKILL.md) |
 | Change the application flow or the engine | [`batatis-variance-workflow`](.cursor/skills/batatis-variance-workflow/SKILL.md) |
+| Change an AI model or how articles are found | The [workflow decision record](docs/evaluations/workflow-decision-20261025.md) and [`engine/tests/test_workflow_profile.py`](engine/tests/test_workflow_profile.py) |
 | Change anything on screen | [`batatis-ui-linear`](.cursor/skills/batatis-ui-linear/SKILL.md), [`batatis-ui-opus`](.cursor/skills/batatis-ui-opus/SKILL.md), [`batatis-ui-minimalist`](.cursor/skills/batatis-ui-minimalist/SKILL.md), and [`docs/design-system-calm.md`](docs/design-system-calm.md) |
 | Change a skill or a rule | [`evals/fixtures/understanding-checklist.md`](evals/fixtures/understanding-checklist.md) |
 | Plan, build, debug, or review code | The engineering skills in [`.agents/skills/`](.agents/skills/) and [pstack](docs/pstack.md) |

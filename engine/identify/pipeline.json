@@ -1,0 +1,14 @@
+{
+  "chosen_by": "User-selected Luna + Jev workflow; retained scored Luna review prompt",
+  "chosen_at": "2026-10-25",
+  "screen": "jev",
+  "card_chars": 700,
+  "rerank": "jev",
+  "rerank_n": 60,
+  "verifier": "openai",
+  "verifier_effort": "medium",
+  "verify_n": 15,
+  "fallback": "bm25",
+  "top_k": 10,
+  "choices_k": 3
+}

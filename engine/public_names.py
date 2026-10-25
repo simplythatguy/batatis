@@ -19,6 +19,8 @@ MODEL_VERSIONS = {'jev-1.13.0': PUBLIC_MODEL, 'gpt-6-luna': 'verifier-1', 'claud
                   'baseten/elephant-1:free': ELEPHANT_PUBLIC_MODEL,
                   'baseten/elephant-1-20261021': ELEPHANT_PUBLIC_MODEL}
 CUSTOM = 'custom'
+# Private: document-review model pin -> the opaque version a client sees.
+REVIEW_VERSIONS = {'gpt-6-luna': 'review-1', 'gpt-6.1-sol': 'review-2'}
 MODEL = 'model'
 # Methods that are a third-party service. The keyword arms (bm25, bm25_v3) and 'none' are not.
 PROVIDER_METHODS = frozenset({'jev', 'openai', 'anthropic', 'decisions', 'elephant'})
@@ -100,3 +102,10 @@ def public_spend(spend: dict) -> dict:
 def public_event(payload: dict) -> dict:
     """A stage event as a client reads it."""
     return {**payload, 'method': public_method(payload['method'])} if 'method' in payload else payload
+
+
+def public_review_model(pin: str | None) -> str | None:
+    """The opaque version of the document-review model. Unknown pins read as CUSTOM; neutral ids are kept."""
+    if pin is None or pin in REVIEW_VERSIONS.values() or pin == CUSTOM:
+        return pin
+    return REVIEW_VERSIONS.get(pin, CUSTOM)

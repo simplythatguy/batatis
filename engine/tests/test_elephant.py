@@ -37,6 +37,8 @@ def offline(monkeypatch):
             monkeypatch.delenv(name, raising=False)
     monkeypatch.setenv('BATATIS_LIVE', '0')
     monkeypatch.setenv('BATATIS_LIVE_ELEPHANT', '1')
+    monkeypatch.setenv('BATATIS_IDENTIFY_SCREEN', 'elephant')
+    monkeypatch.setenv('BATATIS_IDENTIFY_RERANK', 'elephant')
     monkeypatch.setenv('OPENROUTER_API_KEY', 'synthetic-only-key')
     block_network(monkeypatch)
     llm_gate.reset_for_tests()
@@ -78,8 +80,9 @@ def ask(log=None):
     return runtime.metered_ask(runtime.raw_ask(), log=log)
 
 
-def test_default_scoring_is_elephant_with_separate_existing_quote_verifier():
-    config = load_config(env={})
+def test_explicit_elephant_scoring_has_separate_existing_quote_verifier():
+    config = load_config(env={'BATATIS_IDENTIFY_SCREEN': 'elephant',
+                              'BATATIS_IDENTIFY_RERANK': 'elephant'})
     assert config.screen == config.rerank == 'elephant'
     assert config.screen_model == config.rerank_model == 'baseten/elephant-1:free'
     assert (config.verifier, config.verifier_model, config.verifier_effort) == ('openai', 'gpt-6-luna', 'medium')
@@ -87,7 +90,8 @@ def test_default_scoring_is_elephant_with_separate_existing_quote_verifier():
 
 
 def test_explicit_old_providers_keep_historical_hashes_and_no_automatic_calibration():
-    elephant = load_config(env={})
+    elephant = load_config(env={'BATATIS_IDENTIFY_SCREEN': 'elephant',
+                                'BATATIS_IDENTIFY_RERANK': 'elephant'})
     old = {provider: load_config(env={'BATATIS_IDENTIFY_SCREEN': provider, 'BATATIS_IDENTIFY_RERANK': provider})
            for provider in ('jev', 'decisions')}
     assert old['jev'].config_hash == '5f1c92331550984a'

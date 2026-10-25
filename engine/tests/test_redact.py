@@ -50,3 +50,30 @@ def test_account_names_connected_to_the_case_are_known():
     assert {'Priya Natarajan', 'priya@example.test', 'Dana Ross', 'dana@city.example'} <= set(names)
     assert scrub('Dana Ross spoke with priya natarajan.', known_values(case, names)) == \
         '[personal detail] spoke with [personal detail].'
+
+
+def test_intake_personal_field_names_remain_scrubbed_when_reused_by_identification():
+    case = Case(facts=[fact('owner_rep_name', 'Alice Smith'), fact('municipal_address', 'Unit Q, Civic Plaza'),
+                       fact('permit_number', '1234')])
+    out = scrub('Alice Smith represents the owner at Unit Q, Civic Plaza; permit 1234.', known_values(case))
+    assert 'Alice Smith' not in out and 'Civic Plaza' not in out and '1234' not in out
+
+
+def test_a_known_short_number_does_not_corrupt_an_unrelated_larger_number():
+    assert scrub('Permit 202; issued in 2025.', ['202']) == 'Permit [personal detail]; issued in 2025.'
+
+
+def test_short_personal_names_and_permits_are_still_known_values():
+    case = Case(facts=[fact('owner_name', 'Al'), fact('permit_number', 'X7')])
+    assert scrub('Owner Al; permit X7.', known_values(case)) == 'Owner [personal detail]; permit [personal detail].'
+    assert set(known_values(case, ['Bo'])) == {'Al', 'X7', 'Bo'}
+
+
+def test_a_known_number_does_not_redact_digits_from_decimals_or_grouped_numbers():
+    assert scrub('Permit 9; length 19.9 m.', ['9']) == 'Permit [personal detail]; length 19.9 m.'
+    assert scrub('Permit 999; length 1,999 m.', ['999']) == 'Permit [personal detail]; length 1,999 m.'
+    assert scrub('Permit 202; length 202.5 m.', ['202']) == 'Permit [personal detail]; length 202.5 m.'
+
+
+def test_empty_known_values_leave_the_text_alone():
+    assert scrub('A plain source statement.', ['']) == 'A plain source statement.'

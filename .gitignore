@@ -16,3 +16,6 @@ reference/guides/*.pdf
 
 # Local app data and logs (scripts/local-app.sh)
 .data/
+
+# Data Prompts eval caches and run outputs (evals_dev/data_prompts)
+/.dpe-cache/

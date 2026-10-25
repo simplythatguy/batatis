@@ -147,6 +147,34 @@ def _text_pages(data: bytes, limit: int) -> tuple[list[Page], list[int]]:
     return pages, blank
 
 
+@pdfium_locked
+def page_texts(data: bytes, limit: int) -> tuple[int, list[tuple[int, str]]]:
+    """(page count, [(1-based page, text)]) for pages with a text layer, without character boxes."""
+    if not is_pdf(data):
+        raise NotAPdf()
+    try:
+        pdf = pdfium.PdfDocument(data)
+    except pdfium.PdfiumError as exc:
+        raise NotAPdf() from exc
+    out = []
+    try:
+        count = len(pdf)
+        for index in range(min(count, limit)):
+            page = pdf[index]
+            textpage = page.get_textpage()
+            try:
+                chars = textpage.count_chars()
+                text = textpage.get_text_range(0, chars) if chars else ''
+            finally:
+                textpage.close()
+                page.close()
+            if text.strip():
+                out.append((index + 1, text))
+    finally:
+        pdf.close()
+    return count, out
+
+
 def read_pdf(data: bytes) -> PdfContent:
     """Everything this PDF lets Batatis read. Raises NotAPdf for bytes that are not a PDF."""
     if not is_pdf(data):

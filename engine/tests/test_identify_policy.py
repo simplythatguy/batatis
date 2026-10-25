@@ -24,10 +24,10 @@ def clean_gate(monkeypatch):
 
 # --- config ---------------------------------------------------------------------------------------
 
-def test_default_config_is_elephant_screen_and_rerank_with_existing_quote_verifier():
+def test_selected_config_is_jev_screen_and_rerank_with_luna_quote_verifier():
     config = load_config(env={})
     assert (config.screen, config.screen_model, config.rerank, config.rerank_n) == (
-        'elephant', 'baseten/elephant-1:free', 'elephant', 60)
+        'jev', 'jev-1.13.0', 'jev', 60)
     assert (config.verifier, config.verifier_model, config.verify_n) == ('openai', 'gpt-6-luna', 15)
     assert config.exhaustive and config.model_ids()['verifier'] == 'gpt-6-luna'
 

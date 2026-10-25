@@ -66,7 +66,8 @@ def source(monkeypatch):
 
 
 def config(**changes):
-    return replace(load_config(env={'BATATIS_IDENTIFY_SCREEN': 'shortlist'}), **changes)
+    return replace(load_config(env={'BATATIS_IDENTIFY_SCREEN': 'shortlist',
+                                    'BATATIS_IDENTIFY_RERANK': 'elephant'}), **changes)
 
 
 def fitted(cfg):
@@ -307,6 +308,7 @@ def test_optional_rerank_and_review_can_be_disabled_without_losing_candidates(so
 def test_shortlist_cannot_run_as_exhaustive_relevance_and_question_style_is_bound(monkeypatch):
     from engine import relevance
     monkeypatch.setenv('BATATIS_IDENTIFY_SCREEN', 'shortlist')
+    monkeypatch.setenv('BATATIS_IDENTIFY_RERANK', 'elephant')
     with pytest.raises(relevance.RelevanceUnavailable, match='requires exhaustive scoring'):
         relevance.live_judge()
     monkeypatch.setenv('BATATIS_IDENTIFY_SCREEN', 'elephant')

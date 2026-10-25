@@ -42,6 +42,9 @@ PRICES = {
     # reservation and the settlement use the long-context pair, an over-estimate for every identify call,
     # so the ledger never under-counts. Reasoning tokens are billed as output and arrive in completion_tokens.
     'gpt-6-luna': (Decimal('0.20'), Decimal('0.75')),
+    # GPT Sol 6.1, document review at low effort only. Standard-tier list price (same page, read 2026-10-25):
+    # $2 / $10 up to 272K input tokens and $4 / $15 above; the long-context pair is used, as for Luna.
+    'gpt-6.1-sol': (Decimal('4'), Decimal('15')),
 }
 CONSERVATIVE = (Decimal('10'), Decimal('30'))
 DEFAULT_MODEL = 'gpt-4.1-mini'
