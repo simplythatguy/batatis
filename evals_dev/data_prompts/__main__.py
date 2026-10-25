@@ -141,6 +141,68 @@ def cmd_show(args) -> int:
     return 0
 
 
+def _scored(name: str, split: str, judge_model: str, judge_effort: str) -> dict[str, dict]:
+    path = RUNS / name / f'score-{split}-{judge_model}-{judge_effort}.jsonl'
+    return {row['case_id']: row for row in score.load_rows(path)}
+
+
+def cmd_compare(args) -> int:
+    """Paired comparison on the cases both runs scored: accuracy, per-kind change, flips, bootstrap interval."""
+    import random
+    a = _scored(args.a, args.split, args.judge_model, args.judge_effort)
+    b = _scored(args.b, args.split, args.judge_model, args.judge_effort)
+    common = sorted(set(a) & set(b))
+    per_case, kinds, flips = [], {}, {'gained': 0, 'lost': 0}
+    for cid in common:
+        ca = {c['id']: c['passed'] for c in a[cid]['checks']}
+        cb = {c['id']: c['passed'] for c in b[cid]['checks']}
+        ids = sorted(set(ca) & set(cb))
+        per_case.append((sum(ca[i] for i in ids), sum(cb[i] for i in ids), len(ids)))
+        for c in a[cid]['checks']:
+            if c['id'] in cb:
+                k = kinds.setdefault(c['kind'], [0, 0, 0])
+                k[0] += ca[c['id']]
+                k[1] += cb[c['id']]
+                k[2] += 1
+                flips['gained'] += (not ca[c['id']]) and cb[c['id']]
+                flips['lost'] += ca[c['id']] and (not cb[c['id']])
+    n = sum(t for _, _, t in per_case)
+    acc_a, acc_b = sum(x for x, _, _ in per_case) / n, sum(y for _, y, _ in per_case) / n
+    rng = random.Random(0)
+    deltas = []
+    for _ in range(2000):
+        sample = [per_case[rng.randrange(len(per_case))] for _ in per_case]
+        tn = sum(t for _, _, t in sample)
+        deltas.append((sum(y for _, y, _ in sample) - sum(x for x, _, _ in sample)) / tn)
+    deltas.sort()
+    print(f'{len(common)} cases, {n} checks: {args.a} {acc_a:.4f} -> {args.b} {acc_b:.4f}  '
+          f'delta {acc_b - acc_a:+.4f} (95% CI {deltas[50]:+.4f} to {deltas[1949]:+.4f})')
+    for k, (x, y, t) in sorted(kinds.items()):
+        print(f'  {k}: {x}/{t} -> {y}/{t}  ({(y - x) / t:+.4f})')
+    print(f'  items gained {flips["gained"]}, lost {flips["lost"]}')
+    return 0
+
+
+def cmd_fails(args) -> int:
+    """Failed checks of one scored run with the reference item text, for failure analysis on dev."""
+    import random
+    from engine.codes import Codes, default_db
+    codes = Codes(default_db())
+    rows = _scored(args.name, args.split, args.judge_model, args.judge_effort)
+    by_id = {c.id: c for c in corpus.load()}
+    found = []
+    for cid, row in rows.items():
+        items = {i.id: i.text for i in gold.gold(by_id[cid], codes).items}
+        for check in row['checks']:
+            if not check['passed'] and (not args.kind or check['kind'] == args.kind):
+                found.append((cid, check['id'], check.get('note', ''), items.get(check['id'], check['id'])))
+    random.Random(args.seed).shuffle(found)
+    print(f'{len(found)} failed checks')
+    for cid, iid, note, text in found[:args.limit]:
+        print(f'{cid} {iid} {note} | {text[:220]}')
+    return 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(prog='python -m evals_dev.data_prompts')
     sub = parser.add_subparsers(dest='cmd', required=True)
@@ -160,6 +222,22 @@ def main(argv=None) -> int:
     sc.add_argument('--judge-effort', default='low')
     sc.add_argument('--workers', type=int, default=8)
     sc.set_defaults(fn=cmd_score)
+    cmp = sub.add_parser('compare')
+    cmp.add_argument('--a', required=True)
+    cmp.add_argument('--b', required=True)
+    cmp.add_argument('--split', default='dev')
+    cmp.add_argument('--judge-model', default='gpt-6.1-sol')
+    cmp.add_argument('--judge-effort', default='low')
+    cmp.set_defaults(fn=cmd_compare)
+    fails = sub.add_parser('fails')
+    fails.add_argument('--name', required=True)
+    fails.add_argument('--split', default='dev')
+    fails.add_argument('--kind', default='')
+    fails.add_argument('--limit', type=int, default=40)
+    fails.add_argument('--seed', type=int, default=0)
+    fails.add_argument('--judge-model', default='gpt-6.1-sol')
+    fails.add_argument('--judge-effort', default='low')
+    fails.set_defaults(fn=cmd_fails)
     show = sub.add_parser('show')
     show.add_argument('--name', required=True)
     show.add_argument('--case', required=True)

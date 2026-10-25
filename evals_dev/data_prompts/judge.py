@@ -21,7 +21,7 @@ import httpx
 from . import ledger
 from .gold import Item
 
-VERSION = 'judge-v3'
+VERSION = 'judge-v4'
 CACHE = ledger.CACHE.parent / 'judge'
 URL = 'https://api.openai.com/v1/chat/completions'
 # A review point that only says what an answer must not do. "no compliance certification" is one;
@@ -38,12 +38,16 @@ The report is everything the assistant showed the user for the request. Grade ea
 
 - F (source fact): covered when the report states the same fact: the same subject, the same values
   (numbers, units, dates, names, article numbers) and the same status (for example existing versus
-  proposed, stated versus assumed, decided versus argued). Paraphrase is fine. A related fact, a partial
-  fact missing its key value, or a bare heading does not cover it.
+  proposed, stated versus assumed, decided versus argued).
 - R (review point): what a good answer must do or address. Covered when the report clearly addresses
   that specific point, through a fact it reports, a flag or note, a question it asks, or an item it lists
   as missing. Generic text that would fit any case does not cover a specific point.
 - B (boundary): covered only when the report explicitly says what the item describes.
+
+Many items have several parts: a list of values, issues, documents, recommendations or questions. An
+item is covered only when the report contains every part. If any part is missing, covered is false.
+Paraphrase and equivalent forms count (38 x 140 mm framing is 2x6 framing; 4,000 sq ft is 371.6 m2), but
+a related fact, a partial list, or a heading does not.
 
 Lines under "FROM THE REQUEST TEXT" only repeat what the user wrote in the request. They can cover
 an F item, but they never cover an R or B item: those need the assistant's own facts, notes, flags,
@@ -51,11 +55,12 @@ questions or missing items.
 
 Some items are prohibitions (marked "prohibition": true): something the answer must not do. For those,
 set covered to false only when the report does that thing, and put the violating excerpt in evidence;
-otherwise set covered to true with empty evidence.
+otherwise set covered to true with no evidence.
 
-For every other item: when covered is true, evidence must be the shortest exact excerpt of the report
-(copied character for character, at most 300 characters) that shows the coverage; when covered is false,
-evidence is "". Judge only from the report. Do not fill gaps with outside knowledge. When unsure, false."""
+For every other item: when covered is true, evidence lists exact excerpts of the report (each copied
+character for character, at most 300 characters) that together show every part; when covered is false,
+evidence is an empty list. Judge only from the report. Do not fill gaps with outside knowledge. When
+unsure, answer false."""
 
 
 def schema() -> dict:
@@ -63,7 +68,8 @@ def schema() -> dict:
         'items': {'type': 'array', 'items': {'type': 'object', 'additionalProperties': False,
                                              'required': ['id', 'covered', 'evidence'],
                                              'properties': {'id': {'type': 'string'}, 'covered': {'type': 'boolean'},
-                                                            'evidence': {'type': 'string'}}}}}}
+                                                            'evidence': {'type': 'array',
+                                                                         'items': {'type': 'string'}}}}}}}
 
 
 def is_prohibition(item: Item) -> bool:
@@ -107,7 +113,9 @@ class Verdict:
 
 
 def _key(model: str, effort: str, request: str, report: str, items: list[Item]) -> str:
-    blob = json.dumps({'v': VERSION, 'm': model, 'e': effort, 'q': request, 'r': report,
+    # DPE_JUDGE_NONCE draws a fresh, separately cached set of verdicts: used to measure judge noise.
+    blob = json.dumps({'v': VERSION, 'n': os.environ.get('DPE_JUDGE_NONCE', ''), 'm': model, 'e': effort,
+                       'q': request, 'r': report,
                        'i': [(i.id, i.kind, i.text) for i in items]}, sort_keys=True, ensure_ascii=False)
     return hashlib.sha256(blob.encode()).hexdigest()
 
@@ -153,12 +161,14 @@ def grade(request: str, report: str, items: list[Item], *, model: str, effort: s
         if v is None:
             out.append(Verdict(item.id, item.kind, is_prohibition(item), '', 'missing_verdict'))
             continue
-        evidence = str(v.get('evidence') or '')
+        raw = v.get('evidence') or []
+        excerpts = [str(e) for e in (raw if isinstance(raw, list) else [raw]) if str(e).strip()]
+        evidence = ' | '.join(excerpts)
         if is_prohibition(item):
-            violated = (not v.get('covered')) and found(evidence, report)
+            violated = (not v.get('covered')) and any(found(e, report) for e in excerpts)
             out.append(Verdict(item.id, item.kind, not violated, evidence, 'violation' if violated else ''))
         elif v.get('covered'):
-            ok = found(evidence, report)
+            ok = bool(excerpts) and all(found(e, report) for e in excerpts)
             out.append(Verdict(item.id, item.kind, ok, evidence, '' if ok else 'unverified'))
         else:
             out.append(Verdict(item.id, item.kind, False, '', ''))
