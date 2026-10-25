@@ -3216,6 +3216,12 @@
           "title": "Filename",
           "type": "string"
         },
+        "kind": {
+          "const": "pages",
+          "default": "pages",
+          "title": "Kind",
+          "type": "string"
+        },
         "page_count": {
           "title": "Page Count",
           "type": "integer"
@@ -3233,12 +3239,39 @@
         }
       },
       "required": [
+        "kind",
         "filename",
         "pdf",
         "page_count",
         "pages"
       ],
       "title": "ExportPreview",
+      "type": "object"
+    },
+    "ExportPreviewTooLarge": {
+      "description": "The draft PDF alone is too large to send as a preview, so none of it is sent; download the draft.",
+      "properties": {
+        "kind": {
+          "const": "too_large",
+          "default": "too_large",
+          "title": "Kind",
+          "type": "string"
+        },
+        "page_count": {
+          "title": "Page Count",
+          "type": "integer"
+        },
+        "pdf_bytes": {
+          "title": "Pdf Bytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "kind",
+        "page_count",
+        "pdf_bytes"
+      ],
+      "title": "ExportPreviewTooLarge",
       "type": "object"
     },
     "Fact": {

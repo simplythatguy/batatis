@@ -3,7 +3,11 @@
 The browser's built-in PDF viewer draws a dark frame around the pages that the page cannot restyle, so the
 application screen shows these images on its own light background instead, beside the exact PDF bytes they
 were drawn from. PDFium draws them, as in Chrome's viewer. A 32-colour PNG at twice the PDF size keeps the
-form's text sharp; the byte budget keeps the base64 JSON response under the 4.5 MB serverless response cap.
+form's text sharp.
+
+The PDF and its images travel as base64 in one JSON response, which must stay under the 4.5 MB serverless
+response cap. `PAYLOAD_BUDGET` bounds their encoded size. A PDF whose own encoding does not fit is never
+encoded (`fits` is checked first); the screen offers the draft download instead, which sends the bytes as is.
 """
 from __future__ import annotations
 
@@ -15,7 +19,9 @@ from ..pdfium_lock import pdfium_locked
 SCALE = 2.0                   # image pixels per PDF point
 COLORS = 32
 MAX_PAGES = 60
-BUDGET_BYTES = 3_000_000      # the PDF plus its page images, before base64 (about 4 MB encoded)
+RESPONSE_CAP = 4_500_000      # serverless response body limit
+PAYLOAD_BUDGET = 4_000_000    # the base64 PDF and images; the rest of the JSON stays far inside the margin
+ENTRY_BYTES = 128             # one entry's JSON keys, numbers and data-URL prefix
 
 
 @dataclass(frozen=True)
@@ -25,14 +31,25 @@ class PageImage:
     png: bytes
 
 
+def encoded(size: int) -> int:
+    """The base64 length of `size` bytes."""
+    return 4 * -(-size // 3)
+
+
+def fits(pdf_size: int, budget: int = PAYLOAD_BUDGET) -> bool:
+    """Whether a PDF of this many bytes can travel in a preview response at all, before anything is encoded."""
+    return encoded(pdf_size) + ENTRY_BYTES <= budget
+
+
 @pdfium_locked
-def page_images(pdf: bytes, *, budget: int = BUDGET_BYTES, max_pages: int = MAX_PAGES) -> tuple[list[PageImage], int]:
-    """The first pages, in order, whose images fit `budget` together with the PDF; and the PDF's page count."""
+def page_images(pdf: bytes, *, budget: int = PAYLOAD_BUDGET,
+                max_pages: int = MAX_PAGES) -> tuple[list[PageImage], int]:
+    """The first pages, in order, whose images fit the encoded `budget` beside the PDF; and its page count."""
     import pypdfium2 as pdfium
     from PIL import Image
 
     images: list[PageImage] = []
-    used = len(pdf)
+    used = encoded(len(pdf)) + ENTRY_BYTES
     with pdfium.PdfDocument(pdf) as doc:
         count = len(doc)
         for index in range(min(count, max_pages)):
@@ -46,8 +63,9 @@ def page_images(pdf: bytes, *, budget: int = BUDGET_BYTES, max_pages: int = MAX_
                 page.close()
             buf = io.BytesIO()
             image.save(buf, 'PNG')
-            if used + buf.tell() > budget:
+            size = encoded(buf.tell()) + ENTRY_BYTES
+            if used + size > budget:
                 break
-            used += buf.tell()
+            used += size
             images.append(PageImage(width, height, buf.getvalue()))
     return images, count

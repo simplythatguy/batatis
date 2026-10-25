@@ -9,7 +9,8 @@ class ExportBlockedError extends EngineError { reasons: string[]; constructor(re
 const PDF = "%PDF-1.7 draft bytes";
 const page = (n: number) => ({ width: 612, height: 792, image: `data:image/png;base64,${Buffer.from(`page ${n}`).toString("base64")}` });
 
-async function viewer({ locked = false, fail = 0, status = undefined as string | undefined, total = 2, shown = 2 } = {}) {
+async function viewer({ locked = false, fail = 0, status = undefined as string | undefined, total = 2, shown = 2, tooLarge = false,
+  draftDownload = undefined as { run: () => void; disabled: boolean } | undefined } = {}) {
   const calls: string[] = [];
   let failures = fail, epoch = 1;
   // Saving moves the sync epoch, as the real store does; only a changed answer makes the PDF out of date.
@@ -19,16 +20,17 @@ async function viewer({ locked = false, fail = 0, status = undefined as string |
     "../api/client": { EngineError, ExportBlockedError, engine: { exportPreview: async (id: string) => {
       calls.push(`preview ${id}`);
       if (failures-- > 0) throw new EngineError(500);
-      return { filename: "x.pdf", pdf: `data:application/pdf;base64,${Buffer.from(PDF).toString("base64")}`,
+      if (tooLarge) return { kind: "too_large", page_count: total, pdf_bytes: 4_083_802 };
+      return { kind: "pages", filename: "x.pdf", pdf: `data:application/pdf;base64,${Buffer.from(PDF).toString("base64")}`,
         page_count: total, pages: Array.from({ length: shown }, (_, i) => page(i + 1)) };
     } } },
     "../store": { useCase: () => store },
     "./ui": { CIcon: "CIcon" },
   }, { URL, Blob, atob });
-  let tree = await h.render({ locked, status });
+  let tree = await h.render({ locked, status, draftDownload });
   await new Promise((r) => setTimeout(r, 0));
-  tree = await h.render({ locked, status });
-  return { h, calls, get tree() { return tree; }, async rerender() { tree = await h.render({ locked, status }); return tree; }, bump() { epoch++; c = { ...c, facts: [{ field: "owner", value: `Ada ${epoch}`, status: "confirmed" }] }; } };
+  tree = await h.render({ locked, status, draftDownload });
+  return { h, calls, get tree() { return tree; }, async rerender() { tree = await h.render({ locked, status, draftDownload }); return tree; }, bump() { epoch++; c = { ...c, facts: [{ field: "owner", value: `Ada ${epoch}`, status: "confirmed" }] }; } };
 }
 
 const pages = (tree: unknown) => nodes(tree, (n) => n.type === "img");
@@ -72,6 +74,26 @@ test("pages past the response budget stay one link away in the PDF", async () =>
   assert.equal(nodes(all.tree, (n) => n.type === "a" && text(n).includes("more")).length, 0, "nothing to add when every page is shown");
   v.h.unmount();
   all.h.unmount();
+});
+
+test("a draft too large to preview says so and offers the panel's draft download, with nothing embedded", async () => {
+  let downloads = 0;
+  const v = await viewer({ tooLarge: true, total: 1007, draftDownload: { run: () => { downloads++; }, disabled: false } });
+  assert.equal(pages(v.tree).length, 0, "no page images");
+  assert.equal(nodes(v.tree, (n) => n.type === "a").length, 0, "no PDF to open: none was sent");
+  assert.equal(nodes(v.tree, (n) => n.props?.role === "alert").length, 0, "not a failure");
+  const note = nodes(v.tree, (n) => n.props?.role === "status" && text(n).includes("Too large"))[0];
+  assert.equal(text(nodes(note, (n) => n.type === "p")[0]), `Too large to preview: ${(1007).toLocaleString()} pages.`);
+  const download = nodes(note, (n) => n.type === "button")[0];
+  assert.equal(text(download), "Download draft PDF");
+  download.props.onClick();
+  assert.equal(downloads, 1);
+  v.bump();
+  assert.ok(nodes(await v.rerender(), (n) => n.type === "button" && text(n).includes("Update"))[0], "a changed answer can still update it");
+  v.h.unmount();
+  const busy = await viewer({ tooLarge: true, draftDownload: { run: () => { downloads++; }, disabled: true } });
+  assert.equal(nodes(busy.tree, (n) => n.type === "button" && text(n) === "Download draft PDF")[0].props.disabled, true);
+  busy.h.unmount();
 });
 
 test("a read-only application is shown as saved, without saving", async () => {

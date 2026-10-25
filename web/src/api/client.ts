@@ -15,6 +15,7 @@ import type {
   ChecklistAnswerRequest,
   ChecklistAnswerResult,
   ExportPreview,
+  ExportPreviewTooLarge,
   JurisdictionDetail,
   JurisdictionsResult,
 } from "./types.gen";
@@ -238,9 +239,10 @@ export function createEngine(base: string) {
     /**
      * GET /cases/{id}/export/preview: the draft PDF's exact bytes and images of its first pages, as data URLs,
      * for the application screen. `pages` stops early only at the response budget; `page_count` counts all.
+     * `too_large`: the PDF alone is over the budget, so nothing of it is sent; the draft download still works.
      */
     exportPreview: (caseId: string, signal?: AbortSignal) =>
-      call<ExportPreview>("GET", `/cases/${enc(caseId)}/export/preview`, undefined, signal, 20000),
+      call<ExportPreview | ExportPreviewTooLarge>("GET", `/cases/${enc(caseId)}/export/preview`, undefined, signal, 20000),
     /** Multipart PDF upload (FormData field `file`), returning its stored id and metadata. */
     upload: (caseId: string, file: File, signal?: AbortSignal) => uploadPdf(base, caseId, file, signal),
     files: (caseId: string, signal?: AbortSignal) =>

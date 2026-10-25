@@ -506,9 +506,17 @@ export interface Explainer {
 /** The draft export for the application screen: its exact bytes and images of its first pages. */
 export interface ExportPreview {
   filename: string;
+  kind: "pages";
   page_count: number;
   pages: PreviewPage[];
   pdf: string;
+}
+
+/** The draft PDF alone is too large to send as a preview, so none of it is sent; download the draft. */
+export interface ExportPreviewTooLarge {
+  kind: "too_large";
+  page_count: number;
+  pdf_bytes: number;
 }
 
 export interface Fact {

@@ -3,8 +3,9 @@
  * as its own pages on light paper. The browser's PDF viewer would frame them in a dark backdrop this page
  * cannot restyle. The page images are drawn from the same bytes the open-in-new-tab link opens: what the
  * applicant sees is the file they download. The draft is saved first so the PDF shows the current answers;
- * after an answer changes, Update makes a new one. Read-only applications are shown as saved. Nothing here
- * unlocks the official PDF; that gate stays in the download panel.
+ * after an answer changes, Update makes a new one. Read-only applications are shown as saved. A draft too
+ * large to send as a preview says so and offers the panel's draft download. Nothing here unlocks the
+ * official PDF; that gate stays in the download panel.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { engine, EngineError, ExportBlockedError } from "../api/client";
@@ -15,6 +16,7 @@ import { CIcon } from "./ui";
 type View =
   | { state: "idle" | "loading" }
   | { state: "ready"; url: string; key: string; pages: PreviewPage[]; total: number }
+  | { state: "too_large"; key: string; total: number }
   | { state: "failed"; message: string; reasons: string[] };
 
 function failure(e: unknown): { message: string; reasons: string[] } {
@@ -30,11 +32,17 @@ function pdfFile(dataUrl: string): Blob {
   return new Blob([Uint8Array.from(bytes, (c) => c.charCodeAt(0))], { type: "application/pdf" });
 }
 
+/** The download panel's own draft download, offered when the draft is too large to show. */
+export interface DraftDownload {
+  run: () => void;
+  disabled: boolean;
+}
+
 /**
  * `status`: a sent or closed application's own status ("Sent", "Accepted"). The file on screen is
  * always the draft export, whatever the application's status, and is labelled as such.
  */
-export function FormViewer({ locked, status }: { locked: boolean; status?: string }) {
+export function FormViewer({ locked, status, draftDownload }: { locked: boolean; status?: string; draftDownload?: DraftDownload }) {
   const { c, engineId, saveDraft } = useCase();
   // What the PDF is filled from: the answers, the applicant's own case, the authority and Section C.
   const key = useMemo(() => JSON.stringify([c.facts.map((f) => [f.field, f.value, f.status]), c.process, c.authority, c.sectionC.map((r) => r.provision)]), [c.facts, c.process, c.authority, c.sectionC]);
@@ -58,6 +66,11 @@ export function FormViewer({ locked, status }: { locked: boolean; status?: strin
       const preview = await engine.exportPreview(id, ctl.signal);
       if (ctl.signal.aborted) return;
       if (url.current) URL.revokeObjectURL(url.current);
+      url.current = null;
+      if (preview.kind === "too_large") {
+        setView({ state: "too_large", key: filledFrom, total: preview.page_count });
+        return;
+      }
       url.current = URL.createObjectURL(pdfFile(preview.pdf));
       setView({ state: "ready", url: url.current, key: filledFrom, pages: preview.pages, total: preview.page_count });
     } catch (e) {
@@ -73,7 +86,7 @@ export function FormViewer({ locked, status }: { locked: boolean; status?: strin
   }, [engineId]);
   useEffect(() => () => { if (url.current) URL.revokeObjectURL(url.current); }, []);
 
-  const stale = view.state === "ready" && view.key !== key && !locked;
+  const stale = (view.state === "ready" || view.state === "too_large") && view.key !== key && !locked;
   const title = status ? `Application form (${status.toLowerCase()}), draft PDF` : "Application form, draft PDF";
   return (
     <section className="cf-form-view" aria-label="Application form">
@@ -96,6 +109,11 @@ export function FormViewer({ locked, status }: { locked: boolean; status?: strin
               {view.total - view.pages.length} more {view.total - view.pages.length === 1 ? "page" : "pages"} in the PDF
             </a>
           )}
+        </div>
+      ) : view.state === "too_large" ? (
+        <div className="cf-form-empty" role="status">
+          <p>Too large to preview: {view.total.toLocaleString()} pages.</p>
+          {draftDownload && <button type="button" className="cf-btn is-sm" disabled={draftDownload.disabled} onClick={draftDownload.run}>Download draft PDF</button>}
         </div>
       ) : view.state === "failed" ? (
         <div className="cf-form-empty" role="alert">

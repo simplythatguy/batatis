@@ -9,7 +9,7 @@ import secrets
 from email import policy
 from email.message import Message
 from email.parser import BytesParser
-from typing import Callable
+from typing import Annotated, Callable, Literal
 from urllib.parse import quote
 
 import psycopg
@@ -24,7 +24,7 @@ from .code_library import CodeTOC, ProvisionContext, provision_context, table_of
 from .codes import CodeDbMissing, Codes
 from .export import (EXPORT_FAILED_DETAIL, ExportBlocked, ExportError, FORM_NOT_FOUND_DETAIL, FormNotFound,
                      export_case)
-from .export.preview import page_images
+from .export.preview import fits as preview_fits, page_images
 from .http_guard import HttpGuard
 from .jurisdictions import export_notice
 from .identify import Judge
@@ -63,10 +63,21 @@ class PreviewPage(BaseModel):
 
 class ExportPreview(BaseModel):
     """The draft export for the application screen: its exact bytes and images of its first pages."""
+    kind: Literal['pages'] = 'pages'
     filename: str
     pdf: str          # data:application/pdf;base64,...
     page_count: int   # pages in the PDF; `pages` stops earlier only when the response budget is reached
     pages: list[PreviewPage]
+
+
+class ExportPreviewTooLarge(BaseModel):
+    """The draft PDF alone is too large to send as a preview, so none of it is sent; download the draft."""
+    kind: Literal['too_large'] = 'too_large'
+    page_count: int
+    pdf_bytes: int
+
+
+ExportPreviewResult = Annotated[ExportPreview | ExportPreviewTooLarge, Field(discriminator='kind')]
 
 
 async def read_capped(request: Request, limit: int = PDF_MAX_BYTES) -> bytes:
@@ -295,10 +306,14 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
             headers['X-Batatis-Jurisdiction-Notice'] = notice
         return Response(res.pdf, media_type='application/pdf', headers=headers)
 
-    @app.get('/cases/{case_id}/export/preview', response_model=ExportPreview)
+    @app.get('/cases/{case_id}/export/preview', response_model=ExportPreviewResult)
     def export_preview(case_id: str):
         """The draft export drawn as page images, with the bytes they show. A read like the export itself."""
         res = run_export(get_case(case_id), True)
+        if not preview_fits(len(res.pdf)):
+            # Checked before anything is encoded: the response stays small, and the export route still
+            # delivers the whole draft.
+            return ExportPreviewTooLarge(page_count=res.form_pages + res.appendix_pages, pdf_bytes=len(res.pdf))
         images, count = page_images(res.pdf)
 
         def data_url(kind: str, data: bytes) -> str:
