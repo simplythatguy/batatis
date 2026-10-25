@@ -17,6 +17,7 @@ def summarize(rows: list[dict]) -> dict:
     guard: dict[str, Counter] = defaultdict(Counter)
     notes = Counter()
     cost = Counter()
+    reviews = Counter(row.get('review_status', 'none') for row in rows)
     for row in rows:
         for check in row['checks']:
             for bucket in (by_kind[check['kind']], by_tier[row['tier']], by_kind['all']):
@@ -42,6 +43,7 @@ def summarize(rows: list[dict]) -> dict:
         'by_tier': {k: {'n': v['n'], 'passed': v['passed'], 'rate': rate(v)} for k, v in sorted(by_tier.items())},
         'guardrails': {k: {'n': v['n'], 'passed': v['passed'], 'rate': rate(v)} for k, v in sorted(guard.items())},
         'judge_notes': dict(notes),
+        'review_status': dict(reviews),
         'cost': {'workflow_usd_total': round(cost['usd'], 4), 'workflow_usd_per_case': round(cost['usd'] / cases, 5)
                  if cases else None, 'live_usd_this_run': round(cost['live_usd'], 4), 'provider_calls': cost['calls'],
                  'judge_usd_total': round(cost['judge_usd'], 4)},
@@ -57,7 +59,7 @@ def table(summary: dict) -> str:
         lines.append(f"  tier {k}: {v['passed']}/{v['n']} = {v['rate']}")
     for k, v in summary['guardrails'].items():
         lines.append(f"  guardrail {k}: {v['passed']}/{v['n']}")
-    lines.append(f"  judge notes {summary['judge_notes']}")
+    lines.append(f"  judge notes {summary['judge_notes']}; review status {summary.get('review_status')}")
     c = summary['cost']
     lines.append(f"  workflow cost ${c['workflow_usd_total']} total, ${c['workflow_usd_per_case']}/case; "
                  f"live this run ${c['live_usd_this_run']}; judge ${c['judge_usd_total']}")

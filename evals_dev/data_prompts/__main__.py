@@ -93,7 +93,9 @@ def _judge_case(case, result, codes, model, effort):
     rows = [{'id': v.id, 'kind': v.kind, 'passed': v.passed, 'note': v.note, 'evidence': v.evidence} for v in verdicts]
     rows += [{'id': f'A:{a}', 'kind': 'A', 'passed': ok, 'note': '', 'evidence': ''}
              for a, ok in checks.articles(g.articles, result)]
+    review = ((result.get('case') or {}).get('intake') or {}).get('review') or {}
     return {'case_id': case.id, 'tier': case.tier, 'case_type': case.case_type, 'checks': rows,
+            'review_status': review.get('status') or 'none', 'review_reason': review.get('reason'),
             'guardrails': checks.guardrails(case, result, codes), 'cost': result['cost']['summary'],
             'judge_usd': book.summary()['usd'], 'facts_unavailable': len(g.facts_unavailable)}
 
