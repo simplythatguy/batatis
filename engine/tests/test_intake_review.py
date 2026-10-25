@@ -129,3 +129,15 @@ def test_luna_and_sol_settings_are_bounded():
             else:
                 with pytest.raises(ValueError):
                     review.configured()
+
+
+def test_a_long_file_keeps_the_pages_the_request_names_and_each_files_first_pages():
+    pages = [(n, f'page {n} ' + ('filler words ' * 40)) for n in range(1, 41)]
+    pages[29] = (30, 'page 30 travel distance schedule ' + 'filler words ' * 40)
+    long = review.Source('file1', 'long.pdf', pages, 40)
+    short = review.Source('file2', 'short.pdf', [(1, 'one page')], 1)
+    assert review._select('anything', [long, short], 10**6) == [long, short]
+    kept = review._select('Read the travel distance schedule on p. 18.', [long, short], 2600)
+    numbers = [n for n, _ in kept[0].pages]
+    assert {1, 2, 18} <= set(numbers) and numbers == sorted(numbers)
+    assert 30 in numbers and kept[1].pages == short.pages
