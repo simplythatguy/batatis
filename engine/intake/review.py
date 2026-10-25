@@ -46,6 +46,17 @@ BUDGET_CHARS = 600_000                      # page text per request, about 150K 
 MAX_OUTPUT_TOKENS = 32_000
 ATTEMPTS = 3                                # transient network and server errors only
 RETRY_STATUS = {429, 500, 502, 503, 504}
+# The review runs inside the intake request, so every attempt shares one deadline; on Vercel the function
+# itself is cut off after a few minutes. BATATIS_REVIEW_DEADLINE_SECONDS changes it.
+DEADLINE_SECONDS = 240
+MIN_ATTEMPT_SECONDS = 20
+
+
+def _deadline_seconds() -> float:
+    try:
+        return max(MIN_ATTEMPT_SECONDS, float(os.environ.get('BATATIS_REVIEW_DEADLINE_SECONDS') or DEADLINE_SECONDS))
+    except ValueError:
+        return DEADLINE_SECONDS
 OPENAI_URL = 'https://api.openai.com/v1/chat/completions'
 DESCRIPTION = 'description'
 FLAG_KINDS = ('outside_alberta', 'code_edition', 'other_discipline', 'record_status', 'outcome_known', 'not_read')
@@ -511,9 +522,13 @@ def openai_transport(client_ip: str | None = None) -> Transport:
                 'response_format': {'type': 'json_schema',
                                     'json_schema': {'name': 'document_review', 'strict': True, 'schema': body_schema}}}
         data = None
+        deadline = time.monotonic() + _deadline_seconds()
         for attempt in range(ATTEMPTS):
+            remaining = deadline - time.monotonic()
+            if remaining < MIN_ATTEMPT_SECONDS:
+                raise TimeoutError('review deadline reached')
             try:
-                with httpx.Client(timeout=600, follow_redirects=False) as client:
+                with httpx.Client(timeout=remaining, follow_redirects=False) as client:
                     response = client.post(OPENAI_URL, json=body,
                                            headers={'Authorization': 'Bearer ' + os.environ['OPENAI_API_KEY']})
                 if response.status_code in RETRY_STATUS and attempt + 1 < ATTEMPTS:

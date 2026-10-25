@@ -65,3 +65,20 @@ def test_the_review_transport_retries_a_dropped_connection(monkeypatch):
     monkeypatch.setattr(httpx.Client, 'post', post)
     payload, usage = review.openai_transport()('system', 'user', {}, 'gpt-6-luna', 'medium')
     assert payload == {'documents': []} and len(attempts) == 3
+
+
+def test_the_review_never_retries_past_its_deadline(monkeypatch):
+    clock = iter([0.0, 0.0, 230.0, 230.0])
+    monkeypatch.setattr('time.monotonic', lambda: next(clock))
+    monkeypatch.setattr('time.sleep', lambda s: None)
+    monkeypatch.setenv('OPENAI_API_KEY', 'test')
+    monkeypatch.setattr('engine.llm_gate.authorize', lambda **kw: type('D', (), {'allowed': True, 'reserved_usd': 0})())
+    attempts = []
+
+    def post(self, url, **kwargs):
+        attempts.append(1)
+        raise httpx.ConnectError('dropped')
+    monkeypatch.setattr(httpx.Client, 'post', post)
+    with pytest.raises(TimeoutError):
+        review.openai_transport()('system', 'user', {}, 'gpt-6-luna', 'medium')
+    assert len(attempts) == 1
