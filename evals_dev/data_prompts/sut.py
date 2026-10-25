@@ -62,6 +62,7 @@ def run_case(case: Case) -> dict:
     from engine.identify.config import load_config
     from engine.identify.pipeline import description_hash, run as identify_run
     from engine.intake import model as model_pass
+    from engine.intake import review as review_pass
     from engine.intake import service
     from engine.intake.extract import scrubbed
     from engine.intake.plan import description
@@ -79,10 +80,12 @@ def run_case(case: Case) -> dict:
         result['over_upload_limit'] = [name for _, name, data in files if len(data) > UPLOAD_LIMIT]
         engine_case = EngineCase()
         transport, status = model_pass.default_transport('dpe')
+        review_transport, review_status = review_pass.default_transport('dpe') if files else (None, 'off')
         t = time.monotonic()
         known = known_values(engine_case, [])
         extraction = service.run(case.prompt, files, codes=codes, transport=transport, status=status,
-                                 outbound=lambda text, personal: scrubbed(text, [*known, *personal]))
+                                 outbound=lambda text, personal: scrubbed(text, [*known, *personal]),
+                                 review_transport=review_transport, review_status=review_status)
         service.apply(engine_case, case.prompt, extraction)
         stages['intake'] = time.monotonic() - t
 

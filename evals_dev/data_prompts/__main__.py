@@ -36,6 +36,7 @@ def _meta(args) -> dict:
     config = load_config()
     dirty = _git('diff', 'HEAD', '--', 'engine')
     return {'name': args.name, 'started': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()), 'commit': _git('rev-parse', 'HEAD'),
+            'engine_tree': _git('rev-parse', 'HEAD:engine'),
             'engine_diff_sha256': hashlib.sha256(dirty.encode()).hexdigest() if dirty else None,
             'identify_config': config.as_dict(), 'identify_config_hash': config.config_hash,
             'intake_model': model_pass.MODEL, 'intake_effort': model_pass.EFFORT,
@@ -52,7 +53,7 @@ def cmd_run(args) -> int:
     meta = _meta(args)
     if meta_path.exists() and not args.force:
         old = json.loads(meta_path.read_text())
-        if (old.get('commit'), old.get('engine_diff_sha256')) != (meta['commit'], meta['engine_diff_sha256']):
+        if (old.get('engine_tree'), old.get('engine_diff_sha256')) != (meta['engine_tree'], meta['engine_diff_sha256']):
             print(f'run {args.name} was made from other engine code; use a new --name or --force', file=sys.stderr)
             return 2
     meta_path.write_text(json.dumps(meta, indent=2))

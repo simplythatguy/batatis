@@ -25,6 +25,55 @@ def _origin(case: dict, fact: dict) -> str:
     return 'request text'
 
 
+def _where(case: dict, ref: dict) -> str:
+    names = {f['file_id']: f['name'] for f in (case.get('intake') or {}).get('files') or []}
+    if ref.get('source_ref') == 'description':
+        return 'request text'
+    page = f' p.{ref["page"]}' if ref.get('page') else ''
+    return f'{names.get(ref.get("source_ref"), ref.get("source_ref"))}{page}'
+
+
+def _quotes(case: dict, refs: list[dict]) -> str:
+    return ' / '.join(f'"{r["quote"]}" ({_where(case, r)})' for r in refs)
+
+
+def _review(case: dict) -> list[str]:
+    review = (case.get('intake') or {}).get('review') or {}
+    if review.get('status') not in ('live', 'fake'):
+        return []
+    names = {f['file_id']: f['name'] for f in (case.get('intake') or {}).get('files') or []}
+    out = ['DOCUMENT REVIEW (Batatis read every readable page; each fact quotes the page it comes from)']
+    for d in review.get('documents') or []:
+        parts = [d.get('kind'), d.get('title'), d.get('author'), d.get('date'), d.get('status')]
+        out.append(f'- {names.get(d["file_id"], d["file_id"])}: ' + '; '.join(x for x in parts if x))
+    if review.get('flags'):
+        out.append('Flags:')
+        out += [f'- [{f["kind"]}] {f["text"]}' for f in review['flags']]
+    if review.get('facts'):
+        out.append('Facts:')
+        for f in review['facts']:
+            quoted = '' if f['text'] == f['evidence'][0]['quote'] else f' {_quotes(case, f["evidence"])}'
+            where = f' ({_where(case, f["evidence"][0])})' if not quoted else ''
+            out.append(f'- [{f["status"]}] {f["text"]}{quoted}{where}')
+    if review.get('conflicts'):
+        out.append('Conflicts:')
+        out += [f'- {c["text"]} {_quotes(case, c["evidence"])}' for c in review['conflicts']]
+    if review.get('provisions'):
+        out.append('Provisions the documents cite:')
+        for p in review['provisions']:
+            code = f' ({p["code"]})' if p.get('code') else ''
+            match = (f'; in NBC(AE) 2023 2nd printing this resolves to {p["resolves_to"]} (Division {p["division"]})'
+                     if p.get('resolves_to') else '; not matched to an NBC(AE) 2023 provision')
+            out.append(f'- {p["cited"]}{code}{match} ({_where(case, p["evidence"][0])})')
+    if review.get('missing'):
+        out.append('Missing for a complete application or review:')
+        out += [f'- {m["text"]} (why: {m["why"]})' for m in review['missing']]
+    if review.get('questions'):
+        out.append('Questions to ask next:')
+        out += [f'- {q["text"]} (why: {q["why"]})' for q in review['questions']]
+    return out
+
+
 def report(result: dict) -> str:
     case = result.get('case')
     if not case:
@@ -39,10 +88,7 @@ def report(result: dict) -> str:
         why = f'; {f["reason"]}' if f.get('reason') else ''
         lines.append(f'- {f["name"]}: {f["status"]} ({read}){why}')
 
-    for note in case.get('review_notes') or []:
-        if not lines or lines[-1] != 'NOTES':
-            lines.append('NOTES')
-        lines.append(f'- {note}')
+    lines += _review(case)
 
     scope = plan.get('scope') or {}
     if scope:
@@ -125,7 +171,13 @@ def system_text(result: dict) -> list[str]:
     case = result.get('case') or {}
     intake = case.get('intake') or {}
     plan = intake.get('plan') or {}
-    out = [*(case.get('review_notes') or [])]
+    review = intake.get('review') or {}
+    out = [f.get('text', '') for f in review.get('flags') or []]
+    out += [f'{m.get("text", "")} {m.get("why", "")}' for m in [*(review.get('missing') or []), *(review.get('questions') or [])]]
+    out += [f.get('text', '') for f in review.get('facts') or []
+            if f.get('text') not in {e.get('quote') for e in f.get('evidence') or []}]
+    out += [c.get('text', '') for c in review.get('conflicts') or []]
+    out += [d.get('status') or '' for d in review.get('documents') or []]
     scope = plan.get('scope') or {}
     out += [scope.get('message') or '']
     out += [(plan.get('fork') or {}).get('explanation') or '']
@@ -152,8 +204,8 @@ def provisions(result: dict) -> set[str]:
                 found.add(m.group(1) + '.')
     for text in system_text(result):
         found |= {m.group(1) + '.' for m in ARTICLE.finditer(text)}
-    for cited in case.get('cited_provisions') or []:
-        m = ARTICLE.match(str(cited.get('provision') if isinstance(cited, dict) else cited))
+    for cited in ((case.get('intake') or {}).get('review') or {}).get('provisions') or []:
+        m = ARTICLE.match(str(cited.get('resolves_to') or ''))
         if m:
             found.add(m.group(1) + '.')
     return found
