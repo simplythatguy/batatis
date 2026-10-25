@@ -2,7 +2,6 @@
 from decimal import Decimal
 import json
 import os
-import socket
 import ssl
 import time
 
@@ -11,6 +10,7 @@ from engine import llm_gate
 from engine.identify.providers import GateClosed, SpendLog, metered_ask, metered_openai_json
 from engine.identify import jev_runtime
 from engine.identify.jev_runtime import JevResponseError
+from engine.tests._network_guard import block_network
 
 
 @pytest.fixture(autouse=True)
@@ -24,9 +24,7 @@ def offline_only(monkeypatch):
     monkeypatch.delenv('BATATIS_JEV_UNCAPPED', raising=False)
     for name in ('OPENAI_API_KEY','ANTHROPIC_API_KEY','XAI_API_KEY','TYPESAFE_API_KEY','JEV_API_KEY'):
         monkeypatch.delenv(name, raising=False)
-    def forbidden(*args, **kwargs):
-        pytest.fail('unexpected_network_attempt')
-    monkeypatch.setattr(socket.socket, 'connect', forbidden)
+    block_network(monkeypatch, message='unexpected_network_attempt')
     llm_gate.reset_for_tests()
     yield
     llm_gate.reset_for_tests()

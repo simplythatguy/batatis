@@ -2,7 +2,6 @@
 from dataclasses import replace
 import os
 from pathlib import Path
-import socket
 
 import pytest
 
@@ -14,6 +13,7 @@ from engine.identify.corpus import card
 from engine.identify.providers import Transports, metered_openai_json, transports
 from engine.identify.screen import ELEPHANT_MODEL, GOVERN, SELF_QUESTION, Judge, noul
 from engine.public_names import names_a_provider
+from engine.tests._network_guard import block_network
 
 
 @pytest.fixture(autouse=True)
@@ -23,7 +23,7 @@ def offline(monkeypatch):
                 'OPENROUTER_API_KEY', 'OPENAI_API_KEY', 'ANTHROPIC_API_KEY', 'JEV_API_KEY', 'TYPESAFE_API_KEY'}:
             monkeypatch.delenv(name, raising=False)
     monkeypatch.setenv('BATATIS_PROVIDER', 'fake')
-    monkeypatch.setattr(socket.socket, 'connect', lambda *_: pytest.fail('unexpected network'))
+    block_network(monkeypatch)
     llm_gate.reset_for_tests()
     yield
     llm_gate.reset_for_tests()

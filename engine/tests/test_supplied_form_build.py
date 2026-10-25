@@ -51,6 +51,8 @@ def test_each_versioned_runtime_template_is_bundled_without_an_ignored_reference
     assert 'f2749e1273e1b1d5826ac98cc0d8cfcb1204386914751d496f0d162d9014b42a' in build
 
 
+@pytest.mark.skipif(sys.platform == 'win32',
+                    reason='exercises the bash deploy script; Vercel builds on Linux')
 @pytest.mark.parametrize('state', ['valid', 'changed', 'missing'])
 def test_build_checks_the_supplied_hash_before_any_download(tmp_path, state):
     """Run the real guard; block later package/download commands in the offline fixture."""

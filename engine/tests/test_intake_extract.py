@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import json
 import re
-import socket
 from pathlib import Path
 
 import pytest
@@ -22,6 +21,7 @@ from engine.intake.rules import FIELDS, PERSONAL, read, supports
 from engine.intake.text import NUMBER, find_quote, number, sentences
 from engine.models import Case, Fact, Source
 from engine.store import CaseStore
+from engine.tests._network_guard import block_network
 from evals_dev.intake_facts import score as dev_score
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -104,7 +104,7 @@ def test_pr30_labelled_descriptions_cross_check():
     fields = ('storeys', 'building_area_m2', 'span_m', 'occupancy')
     wrong = []
     for name in ('pr30_labelled', 'pr30_held_out'):
-        for row in json.loads((ROOT / 'evals_dev' / 'intake_facts' / f'{name}.json').read_text()):
+        for row in json.loads((ROOT / 'evals_dev' / 'intake_facts' / f'{name}.json').read_text(encoding='utf-8')):
             got = {f.field: f.value for f in service.run(row['text'], []).facts if f.field in fields}
             for key in fields:
                 want = row.get(key)
@@ -296,7 +296,7 @@ def test_live_transport_is_metered_and_pins_luna_medium(monkeypatch):
 def test_offline_by_default_and_fake_mode_never_touch_the_network(monkeypatch, tmp_path):
     def blocked(*args, **kwargs):
         raise AssertionError('network call attempted')
-    monkeypatch.setattr(socket.socket, 'connect', blocked)
+    block_network(monkeypatch, message='network call attempted')
     monkeypatch.setattr('httpx.Client.send', blocked)
     monkeypatch.delenv('OPENAI_API_KEY', raising=False)
     client = TestClient(create_app(CaseStore(tmp_path / 'cases.sqlite')))
