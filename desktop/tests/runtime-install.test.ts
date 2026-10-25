@@ -5,7 +5,8 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 
 import { join } from "node:path";
 import test from "node:test";
 import { promisify } from "node:util";
-import { CodexInstaller, pinFor, type CodexPin, type InstallerDeps } from "../src/main/codex/install.ts";
+import { RuntimeInstaller, type RuntimePin, type InstallerDeps } from "../src/main/runtime-install.ts";
+import { codexPin } from "../src/main/codex/install.ts";
 import { scratch } from "./helpers.ts";
 
 const exec = promisify(execFile);
@@ -16,7 +17,7 @@ const MEMBER = "codex-synthetic-target";
 const EXECUTABLE = process.platform === "win32" ? "codex.exe" : "codex";
 
 /** A small release archive made with the system tar, pinned the way release.ts pins the real one. */
-async function release(root: string, contents = "synthetic runtime 9.9.9"): Promise<{ pin: CodexPin; bytes: Buffer }> {
+async function release(root: string, contents = "synthetic runtime 9.9.9"): Promise<{ pin: RuntimePin; bytes: Buffer }> {
   const source = join(root, "source");
   mkdirSync(source, { recursive: true });
   writeFileSync(join(source, MEMBER), contents);
@@ -28,25 +29,25 @@ async function release(root: string, contents = "synthetic runtime 9.9.9"): Prom
     bytes,
     pin: {
       version: "9.9.9", key: "test-platform", url: "https://github.com/openai/codex/releases/download/rust-v9.9.9/x",
-      archive: { asset, bytes: bytes.length, sha256: sha(bytes), member: MEMBER, executable: EXECUTABLE },
+      download: { asset, bytes: bytes.length, sha256: sha(bytes), member: MEMBER }, executable: EXECUTABLE,
       executables: [sha(contents)],
     },
   };
 }
 
-function installer(t: { after(fn: () => void): void }, pin: CodexPin | null, bytes: Buffer, deps: Partial<InstallerDeps> = {}) {
+function installer(t: { after(fn: () => void): void }, pin: RuntimePin | null, bytes: Buffer, deps: Partial<InstallerDeps> = {}) {
   const root = scratch(t);
   const events: string[] = [];
-  const instance = new CodexInstaller({
+  const instance = new RuntimeInstaller({
     root, pin, fetch: async () => new Response(bytes), tar, notify: () => events.push(JSON.stringify(instance.status())), log: (line) => events.push(`log:${line}`), ...deps,
   });
   return { instance, root, events, folder: join(root, "runtime", "test-platform") };
 }
 
 test("only supported platforms with a known executable digest can install", () => {
-  assert.equal(pinFor("linux", "x64"), null);
-  assert.equal(pinFor("darwin", "arm64")?.key, "darwin-arm64");
-  assert.match(pinFor("win32", "x64")?.url ?? "", /^https:\/\/github\.com\/openai\/codex\/releases\/download\/rust-v/);
+  assert.equal(codexPin("linux", "x64"), null);
+  assert.equal(codexPin("darwin", "arm64")?.key, "darwin-arm64");
+  assert.match(codexPin("win32", "x64")?.url ?? "", /^https:\/\/github\.com\/openai\/codex\/releases\/download\/rust-v/);
 });
 
 test("a missing runtime installs from the pinned release, with progress, and stops the old one before the swap", async (t) => {
@@ -59,7 +60,7 @@ test("a missing runtime installs from the pinned release, with progress, and sto
   assert.equal(stoppedWhileOldInPlace, true);
   assert.equal(readFileSync(join(folder, EXECUTABLE), "utf8"), "synthetic runtime 9.9.9");
   const manifest = JSON.parse(readFileSync(join(folder, "codex-runtime.json"), "utf8"));
-  assert.deepEqual(manifest, { version: "9.9.9", platform: "test-platform", archiveSha256: pin.archive.sha256, executableSha256: pin.executables[0] });
+  assert.deepEqual(manifest, { version: "9.9.9", platform: "test-platform", archiveSha256: pin.download.sha256, executableSha256: pin.executables[0] });
   assert.ok(events.some((event) => event.includes('"installing"') && event.includes(`"total":${bytes.length}`)));
   assert.deepEqual(await instance.refresh(), { state: "installed", version: "9.9.9" });
 });
@@ -79,9 +80,9 @@ test("an older runtime reads as outdated and is replaced in place", async (t) =>
 });
 
 for (const [name, change] of [
-  ["a tampered archive", (pin: CodexPin) => ({ ...pin, archive: { ...pin.archive, sha256: "0".repeat(64) } })],
-  ["an executable with an unknown digest", (pin: CodexPin) => ({ ...pin, executables: ["0".repeat(64)] })],
-  ["an archive larger than pinned", (pin: CodexPin) => ({ ...pin, archive: { ...pin.archive, bytes: pin.archive.bytes - 1 } })],
+  ["a tampered archive", (pin: RuntimePin) => ({ ...pin, download: { ...pin.download, sha256: "0".repeat(64) } })],
+  ["an executable with an unknown digest", (pin: RuntimePin) => ({ ...pin, executables: ["0".repeat(64)] })],
+  ["an archive larger than pinned", (pin: RuntimePin) => ({ ...pin, download: { ...pin.download, bytes: pin.download.bytes - 1 } })],
 ] as const) {
   test(`${name} is refused before anything running is stopped or replaced`, async (t) => {
     const { pin, bytes } = await release(scratch(t));
@@ -120,4 +121,17 @@ test("unsupported platforms report it and never download", async (t) => {
   assert.deepEqual(await instance.refresh(), { state: "unsupported" });
   assert.deepEqual(await instance.install(async () => {}), { state: "unsupported" });
   assert.equal(fetched, false);
+});
+
+test("a download that is the executable itself installs without unpacking", async (t) => {
+  const contents = Buffer.from("synthetic single-file runtime 9.9.9");
+  const pin: RuntimePin = {
+    version: "9.9.9", key: "test-platform", url: "https://downloads.example.invalid/9.9.9/test-platform/runtime",
+    download: { asset: "runtime", bytes: contents.length, sha256: sha(contents), member: null }, executable: EXECUTABLE, executables: [sha(contents)],
+  };
+  const calls: string[][] = [];
+  const { instance, folder } = installer(t, pin, contents, { tar: async (args) => { calls.push(args); return ""; } });
+  assert.deepEqual(await instance.install(async () => {}), { state: "installed", version: "9.9.9" });
+  assert.deepEqual(readFileSync(join(folder, EXECUTABLE)), contents);
+  assert.deepEqual(calls, [], "nothing is unpacked");
 });

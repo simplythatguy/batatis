@@ -11,7 +11,8 @@ import { DesktopHost, type Outcome } from "./controller";
 import { KeyVault, type SecretBox } from "./credentials";
 import { createAppProtocol, ORIGIN } from "./protocol";
 import { isGenerationChoice, unavailableProvider, type HostProvider, type KeyProviderId } from "./providers";
-import { CodexInstaller, pinFor } from "./codex/install";
+import { RuntimeInstaller } from "./runtime-install";
+import { codexPin } from "./codex/install";
 import { codexProviderFactory } from "./codex";
 import { reviewedContextForPlatform } from "./trusted-context";
 import { workflowFixture } from "./workflow-fixture";
@@ -73,9 +74,9 @@ const runTool = (command: string, args: string[]) => new Promise<string>((done, 
 });
 
 /** Downloads the pinned Codex runtime into app data on request; the package no longer carries it. */
-const codexInstaller = new CodexInstaller({
+const codexInstaller = new RuntimeInstaller({
   root: codexInstallRoot(paths),
-  pin: pinFor(process.platform, process.arch),
+  pin: codexPin(process.platform, process.arch),
   fetch: (url, init) => net.fetch(url, init),
   tar: (args) => runTool(process.platform === "win32" ? join(process.env.SystemRoot ?? "C:\\Windows", "System32", "tar.exe") : "/usr/bin/tar", args),
   notify: () => current?.webContents.send("batatis:changed"),

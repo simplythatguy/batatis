@@ -6,7 +6,9 @@
  * the labels the host sends.
  */
 
-export type ProviderId = "chatgpt" | "openai" | "jev";
+export type ProviderId = "chatgpt" | "claude" | "openai" | "jev";
+/** The managed account connections, each with its own downloadable runtime. */
+export type AccountId = Extract<ProviderId, "chatgpt" | "claude">;
 export type KeyProviderId = Extract<ProviderId, "openai" | "jev">;
 export type GenerationChoice = "off" | "chatgpt" | "openai";
 
@@ -47,7 +49,7 @@ export type LoginOutcome =
 export type ConnectionState =
   | { state: "unavailable"; reason: "adapter-missing" | "runtime-missing" | "unsupported-platform" | "keyring-unavailable"; message: string }
   | { state: "signed-out"; last: LoginOutcome | null }
-  /** Device-code login in progress: the person opens verificationUrl and enters userCode. */
+  /** Sign-in in progress: the person opens verificationUrl and, for device-code sign-in, enters userCode (empty otherwise). */
   | { state: "pending"; loginId: string; verificationUrl: string; userCode: string }
   | { state: "signed-in"; plan: string | null }
   | { state: "error"; message: string };
@@ -96,10 +98,10 @@ export type CompleteJsonResult =
  * an expected condition. Main installs it, routes settings to it and disposes of it at quit.
  */
 export interface HostProvider {
-  readonly id: "chatgpt";
+  readonly id: AccountId;
   status(): Promise<ConnectionState>;
   workflowReadiness(): Promise<WorkflowReadiness>;
-  /** Device-code login only; never a local callback listener. */
+  /** Starts sign-in. Pending state carries the page to open and, for device-code sign-in, the code to enter. */
   startLogin(): Promise<ConnectionState>;
   cancelLogin(loginId: string): Promise<ConnectionState>;
   logout(): Promise<ConnectionState>;
@@ -127,10 +129,10 @@ export interface HostProviderContext {
 export type HostProviderFactory = (context: HostProviderContext) => HostProvider;
 
 /** The truthful stand-in until an adapter is installed. */
-export function unavailableProvider(message = "This connection isn’t available in this version."): HostProvider {
+export function unavailableProvider(message = "This connection isn’t available in this version.", id: AccountId = "chatgpt"): HostProvider {
   const state: ConnectionState = { state: "unavailable", reason: "adapter-missing", message };
   return {
-    id: "chatgpt",
+    id,
     status: async () => state,
     workflowReadiness: async () => ({ ready: false, reason: "unavailable", message }),
     startLogin: async () => state,
@@ -152,6 +154,10 @@ export const PROVIDER_LABELS: Record<ProviderId, { label: string; description: s
   openai: {
     label: "OpenAI API key",
     description: "Uses API billing only when explicitly selected. Kept in this computer’s OS-protected vault. A subscription error never switches to API billing.",
+  },
+  claude: {
+    label: "Claude",
+    description: "Uses your Claude subscription through the managed Claude Code runtime when selected. Separate from your Batatis identity. Sign-in and workflow readiness are checked separately.",
   },
   jev: { label: "Jev API key", description: "Optional, separately billed screening and reranking with the pinned Jev profile. Without it, code identification shows its keyword fallback. Off disables this too." },
 };

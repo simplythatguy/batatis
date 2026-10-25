@@ -17,7 +17,7 @@ import { codeDbPath, type RuntimePaths } from "./runtime";
 import { SessionJar, type TokenStore } from "./session";
 import { ProviderDispatch, DEFAULT_SELECTION, GENERATION_CHOICES, record, type AiSelection } from "./provider-dispatch";
 import { ProviderRpc } from "./provider-rpc";
-import type { CodexInstallState } from "./codex/install";
+import type { InstallState } from "./runtime-install";
 import type { KeyProviders } from "./provider-http";
 export { parseCompleteJson } from "./provider-dispatch";
 
@@ -51,7 +51,7 @@ export interface DesktopInfo {
 }
 
 export type ProviderRow =
-  | { id: "chatgpt"; kind: "account"; label: string; description: string; status: ConnectionState; workflow: WorkflowReadiness | null; runtime: CodexInstallState | null }
+  | { id: "chatgpt"; kind: "account"; label: string; description: string; status: ConnectionState; workflow: WorkflowReadiness | null; runtime: InstallState | null }
   | { id: KeyProviderId; kind: "key"; label: string; description: string; status: { state: KeyStatus } };
 
 export type Outcome = { ok: true } | { ok: false; message: string };
@@ -80,7 +80,7 @@ export interface HostDeps {
   /** Something the window shows changed (service state, a provider's status). */
   notify: () => void;
   /** The managed connection's downloadable runtime, when this build installs one. */
-  runtime?: () => CodexInstallState;
+  runtime?: () => InstallState;
 }
 
 const BUSY_DETAIL: Record<Activity, string> = {
