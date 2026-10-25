@@ -45,6 +45,23 @@ def _meta(args) -> dict:
             'elephant': os.environ.get('BATATIS_LIVE_ELEPHANT') == '1', 'split': args.split}
 
 
+TRANSIENT = ('ConnectError', 'ReadError', 'ConnectTimeout', 'ReadTimeout', 'RemoteProtocolError', 'WriteError',
+             'PoolTimeout', 'HTTPStatusError')
+
+
+def _transient(path: Path) -> bool:
+    """A stored case whose review or run failed on the network, not on the workflow: rerun it."""
+    result = json.loads(path.read_text())
+    review = ((result.get('case') or {}).get('intake') or {}).get('review') or {}
+    if review.get('status') == 'failed' and review.get('reason') in TRANSIENT:
+        return True
+    identify = (result.get('case') or {}).get('identify') or {}
+    jev = (result.get('identify_spend') or {}).get('by_provider', {}).get('scoring')
+    if identify.get('mode') == 'bm25_fallback' and jev:          # a model screen was attempted and fell back
+        return True
+    return any('worker:' in e for e in result.get('errors') or [])
+
+
 def cmd_run(args) -> int:
     # Worker processes, not threads: pdfium (the engine's PDF reader) is not thread-safe and
     # concurrent reads in one process crash it.
@@ -60,7 +77,8 @@ def cmd_run(args) -> int:
             return 2
     meta_path.write_text(json.dumps(meta, indent=2))
     cases = corpus.select(args.split)[:args.limit or None]
-    todo = [c for c in cases if args.force or not (folder / f'{c.id}.json').exists()]
+    todo = [c for c in cases if args.force or not (folder / f'{c.id}.json').exists()
+            or (args.rerun_failed and _transient((folder / f'{c.id}.json')))]
     print(f'{len(cases)} cases, {len(todo)} to run, workers {args.workers}', flush=True)
     done, errors, usd, started = 0, 0, 0.0, time.monotonic()
     with ProcessPoolExecutor(args.workers, initializer=sut.init_worker,
@@ -223,6 +241,7 @@ def main(argv=None) -> int:
     run.add_argument('--force', action='store_true')
     run.add_argument('--offline', action='store_true', help='no provider calls: rules, forms and keyword fallback only')
     run.add_argument('--elephant', action='store_true', help='allow Elephant requests (50 free per day)')
+    run.add_argument('--rerun-failed', action='store_true', help='rerun cases that failed on the network')
     run.set_defaults(fn=cmd_run)
     sc = sub.add_parser('score')
     sc.add_argument('--name', required=True)
