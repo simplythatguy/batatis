@@ -38,7 +38,7 @@ def load_env(path: str | None = None) -> None:
             continue
         name, value = line.split('=', 1)
         name = name.strip()
-        if name in ('OPENAI_API_KEY', 'OPENROUTER_API_KEY', 'JEV_API_KEY', 'TYPESAFE_API_KEY'):
+        if name in ('OPENAI_API_KEY', 'OPENROUTER_API_KEY', 'JEV_API_KEY', 'TYPESAFE_API_KEY', 'DEEPSEEK_API_KEY'):
             os.environ.setdefault(name, value.strip().strip('"').strip("'"))
 
 
@@ -89,6 +89,9 @@ def run_case(case: Case) -> dict:
         if files and os.environ.get('DPE_REVIEW_TRANSPORT') == 'opencode':    # comparison runs only
             from .opencode_review import transport as opencode_transport
             review_transport, review_status = opencode_transport, 'live'
+        if files and os.environ.get('DPE_REVIEW_TRANSPORT') == 'deepseek':    # comparison runs only
+            from .deepseek_review import transport as deepseek_transport
+            review_transport, review_status = deepseek_transport, 'live'
         t = time.monotonic()
         known = known_values(engine_case, [])
         extraction = service.run(case.prompt, files, codes=codes, transport=transport, status=status,
