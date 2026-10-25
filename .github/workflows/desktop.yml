@@ -34,14 +34,6 @@ jobs:
       BATATIS_LIVE_JEV: "0"
       BATATIS_LIVE_ELEPHANT: "0"
       BATATIS_DESKTOP_REQUIRE_CODEX: "1"
-      # Release builds for Windows are signed once the Artifact Signing account exists (docs/desktop.md).
-      BATATIS_SIGN_ENDPOINT: ${{ startsWith(github.ref, 'refs/tags/desktop-v') && runner.os == 'Windows' && vars.BATATIS_SIGN_ENDPOINT || '' }}
-      BATATIS_SIGN_ACCOUNT: ${{ vars.BATATIS_SIGN_ACCOUNT }}
-      BATATIS_SIGN_PROFILE: ${{ vars.BATATIS_SIGN_PROFILE }}
-      BATATIS_SIGN_PUBLISHER: ${{ vars.BATATIS_SIGN_PUBLISHER }}
-      AZURE_TENANT_ID: ${{ startsWith(github.ref, 'refs/tags/desktop-v') && secrets.AZURE_TENANT_ID || '' }}
-      AZURE_CLIENT_ID: ${{ startsWith(github.ref, 'refs/tags/desktop-v') && secrets.AZURE_CLIENT_ID || '' }}
-      AZURE_CLIENT_SECRET: ${{ startsWith(github.ref, 'refs/tags/desktop-v') && secrets.AZURE_CLIENT_SECRET || '' }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -71,7 +63,7 @@ jobs:
       - name: Freeze the native Python engine
         working-directory: desktop
         run: npm run build:engine
-      - name: Prepare the pinned bundled Codex executable
+      - name: Prepare the pinned Codex executable the app installs
         working-directory: desktop
         shell: bash
         run: |
@@ -115,9 +107,18 @@ jobs:
             engine/tests/test_export_edition_paths.py engine/tests/test_multipart_upload.py
       - name: Package the native app and portable archive
         working-directory: desktop
+        env:
+          # Windows release builds are signed once the Artifact Signing account exists (docs/desktop.md).
+          BATATIS_SIGN_ENDPOINT: ${{ startsWith(github.ref, 'refs/tags/desktop-v') && runner.os == 'Windows' && vars.BATATIS_SIGN_ENDPOINT || '' }}
+          BATATIS_SIGN_ACCOUNT: ${{ vars.BATATIS_SIGN_ACCOUNT }}
+          BATATIS_SIGN_PROFILE: ${{ vars.BATATIS_SIGN_PROFILE }}
+          BATATIS_SIGN_PUBLISHER: ${{ vars.BATATIS_SIGN_PUBLISHER }}
+          AZURE_TENANT_ID: ${{ startsWith(github.ref, 'refs/tags/desktop-v') && secrets.AZURE_TENANT_ID || '' }}
+          AZURE_CLIENT_ID: ${{ startsWith(github.ref, 'refs/tags/desktop-v') && secrets.AZURE_CLIENT_ID || '' }}
+          AZURE_CLIENT_SECRET: ${{ startsWith(github.ref, 'refs/tags/desktop-v') && secrets.AZURE_CLIENT_SECRET || '' }}
         run: npm run package
       - name: Check the Windows signatures
-        if: runner.os == 'Windows' && env.BATATIS_SIGN_ENDPOINT != ''
+        if: runner.os == 'Windows' && startsWith(github.ref, 'refs/tags/desktop-v') && vars.BATATIS_SIGN_ENDPOINT != ''
         shell: pwsh
         run: |
           $app = Join-Path $env:GITHUB_WORKSPACE 'desktop/build/release/win-unpacked'
@@ -138,7 +139,7 @@ jobs:
           fi
           test -n "$package"
           node desktop/scripts/smoke-packaged.mjs "$package" "$out"
-      - name: Capture the packaged macOS Codex request boundary without authentication
+      - name: Capture the macOS Codex request boundary with the packaged catalog, without authentication
         if: runner.os == 'macOS'
         shell: bash
         run: |
@@ -149,10 +150,10 @@ jobs:
           resources="${apps[0]}/Contents/Resources"
           python3 -B desktop/codex/native-check.py \
             --resources-dir "$resources" \
-            --executable "$resources/codex/codex" \
+            --executable "$GITHUB_WORKSPACE/desktop/codex/runtime/darwin-arm64/codex" \
             --output "$RUNNER_TEMP/Batatis Codex native acceptance" \
             --deadline-seconds 150
-      - name: Capture the packaged Windows Codex request boundary without authentication
+      - name: Capture the Windows Codex request boundary with the packaged catalog, without authentication
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
