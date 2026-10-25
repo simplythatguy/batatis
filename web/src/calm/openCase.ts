@@ -149,10 +149,24 @@ function restoreSelection(c: Case, list: SelectedArticleInput[], provisions: str
  * saved id. A stored identification decision stays the answer of its card unless the saved card
  * was still waiting for the engine (pending), whose answer and state come back as they were.
  */
-export function openedCase(saved: EngineCase, type: ApplicantType, stored: { intake: IntakeResult | null; identify: IdentifyResult | null }): Case {
+/** Restore the text only when the persisted intake hash binds it to this case description. */
+export async function reviewedDescription(saved: EngineCase, record: IntakeResult["record"] | null): Promise<string | null> {
+  const value = latestFacts(saved.facts).find((fact) => fact.field === "project.description")?.value;
+  const text = typeof value === "string" ? value.trim() : "";
+  if (!record?.text_sha256 || !globalThis.crypto?.subtle) return null;
+  try {
+    const bytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
+    const hash = Array.from(new Uint8Array(bytes), (byte) => byte.toString(16).padStart(2, "0")).join("");
+    return hash === record.text_sha256 ? text : null;
+  } catch {
+    return null;
+  }
+}
+
+export function openedCase(saved: EngineCase, type: ApplicantType, stored: { intake: IntakeResult | null; identify: IdentifyResult | null; reviewedText?: string | null }): Case {
   const restored = caseFromEngine(saved, type);
   let c = restored;
-  if (stored.intake) c = reducer(c, { type: "restoreIntake", result: stored.intake, text: c.description.trim() });
+  if (stored.intake) c = reducer(c, { type: "restoreIntake", result: stored.intake, text: stored.reviewedText ?? null });
   if (stored.identify) c = reducer(c, { type: "noteIdentify", result: stored.identify });
   const list = saved.selected_articles;
   if (!list) return c;

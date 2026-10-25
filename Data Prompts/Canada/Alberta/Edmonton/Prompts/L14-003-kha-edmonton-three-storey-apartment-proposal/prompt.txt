@@ -1,5 +1,7 @@
 Review the attached original published architectural drawing images for an Edmonton apartment proposal: typical-floor plan, ground-floor plan and long section. Describe only the stair core, corridors, rooms and floor/level arrangement visibly supported by the sheets. Identify missing or ambiguous labels, dimensions, ratings, door hardware, exit discharge, occupant loads, sprinkler and fire-separation information. List the code-identification questions and original permit-set documents needed before an administrative-completeness review. Do not assume a storey count from an unlabelled section or invent article numbers. Ask focused designer questions without deciding safety, compliance, equivalence or approval.
 
+Limit factual descriptions to what is visible in the supplied drawing images. If the applicable code edition, permit status, authority acceptance, or other project conditions are not established by these drawings, request the relevant project or authority record; do not infer them.
+
 Attachments:
 - KHA-typical-floor-plan-c396d5160f32.jpg
 - kha-long-section-drawing-75b2b8c6b87a.jpg

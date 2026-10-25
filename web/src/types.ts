@@ -40,7 +40,10 @@ export interface CaseFile {
  * the facts themselves live in `Case.facts` like every other value.
  */
 export interface IntakeState {
-  text: string;
+  /** Null when a reopened record cannot be matched to the current description. */
+  text: string | null;
+  /** Visit-local file edits invalidate the last run, including removal of every file. */
+  filesChanged?: true;
   record: IntakeRecord;
   factIds: string[];
   /** This run's facts as read (browser field names), so a confirmed card still shows what it confirmed. */

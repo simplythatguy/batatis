@@ -50,11 +50,9 @@
     {
       "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/zero-lot-line-march-2026.pdf",
       "sha256": "bbe2767cfbebab533b1afa971afc9393ef56547337bd95f7996aa5d981b649de",
-      "role": "outcome_reference",
+      "role": "published_standing_reference",
       "bytes": 810908,
-      "filename": "_evaluation/calgary-spv-001-r5-2026-bbe2767cfbeb.pdf",
-      "included_in_default_input": false,
-      "original_collection_path": "_research/workers/L04/files/calgary-spv-001-r5-2026-bbe2767cfbeb.pdf",
+      "included_in_default_input": true,
       "download_receipt": {
         "retrieved_at": "2026-10-25T01:17:14.901586+00:00",
         "http_status": "200",
@@ -62,16 +60,16 @@
         "content_type": "application/pdf",
         "kind": "pdf",
         "status": "downloaded"
-      }
+      },
+      "filename": "calgary-spv-001-r5-2026-bbe2767cfbeb.pdf",
+      "original_collection_path": "_research/workers/L04/files/calgary-spv-001-r5-2026-bbe2767cfbeb.pdf"
     },
     {
       "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/advisory-zero-lot-line-variance.pdf",
       "sha256": "7a528dc00a5979299f7b4b8f5a3027f420df3a0c929490b6c807cab0a4cc1c36",
       "role": "supporting_evidence",
       "bytes": 756343,
-      "filename": "calgary-spv-001-r4-2024-7a528dc00a59.pdf",
       "included_in_default_input": true,
-      "original_collection_path": "_research/workers/L04/files/calgary-spv-001-r4-2024-7a528dc00a59.pdf",
       "download_receipt": {
         "retrieved_at": "2026-10-25T01:17:14.899132+00:00",
         "http_status": "200",
@@ -79,16 +77,16 @@
         "content_type": "application/pdf",
         "kind": "pdf",
         "status": "downloaded"
-      }
+      },
+      "filename": "calgary-spv-001-r4-2024-7a528dc00a59.pdf",
+      "original_collection_path": "_research/workers/L04/files/calgary-spv-001-r4-2024-7a528dc00a59.pdf"
     },
     {
       "url": "https://www.calgary.ca/content/dam/www/tools-and-resources/guide-to-applying-for-an-alternative-solution.pdf",
       "sha256": "bbb0628b7b5f13499a4688089bc09484b67865ef283709d40701d823825b1399",
       "role": "supporting_evidence",
       "bytes": 172757,
-      "filename": "calgary-alternative-solution-guide-package-link-bbb0628b7b5f.pdf",
       "included_in_default_input": true,
-      "original_collection_path": "_research/workers/L04/files/calgary-alternative-solution-guide-package-link-bbb0628b7b5f.pdf",
       "download_receipt": {
         "retrieved_at": "2026-10-25T01:17:14.896815+00:00",
         "http_status": "200",
@@ -96,16 +94,16 @@
         "content_type": "application/pdf",
         "kind": "pdf",
         "status": "downloaded"
-      }
+      },
+      "filename": "calgary-alternative-solution-guide-package-link-bbb0628b7b5f.pdf",
+      "original_collection_path": "_research/workers/L04/files/calgary-alternative-solution-guide-package-link-bbb0628b7b5f.pdf"
     },
     {
       "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/request-for-specific-variance.pdf",
       "sha256": "fa8881140654ac491732471a576206efce38b826b0d8f7fa84c7a47ada53cce5",
       "role": "supporting_evidence",
       "bytes": 194424,
-      "filename": "calgary-request-specific-variance-fa8881140654.pdf",
       "included_in_default_input": true,
-      "original_collection_path": "_research/workers/L04/files/calgary-request-specific-variance-fa8881140654.pdf",
       "download_receipt": {
         "retrieved_at": "2026-10-25T01:18:56.162221+00:00",
         "http_status": "200",
@@ -113,7 +111,9 @@
         "content_type": "application/pdf",
         "kind": "pdf",
         "status": "downloaded"
-      }
+      },
+      "filename": "calgary-request-specific-variance-fa8881140654.pdf",
+      "original_collection_path": "_research/workers/L04/files/calgary-request-specific-variance-fa8881140654.pdf"
     }
   ],
   "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",

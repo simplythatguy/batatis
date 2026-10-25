@@ -15,6 +15,8 @@ import re
 import time
 from collections import Counter
 from dataclasses import asdict, dataclass
+from pathlib import Path
+from typing import Callable
 
 import httpx
 
@@ -147,18 +149,23 @@ def _call(model: str, effort: str, user: str) -> dict:
 
 
 def grade(request: str, report: str, items: list[Item], *, model: str, effort: str,
-          book: ledger.Ledger | None = None) -> list[Verdict]:
+          book: ledger.Ledger | None = None, transport: Callable | None = None,
+          cache_root: Path | None = None) -> list[Verdict]:
     if not items:
         return []
     if len({i.id for i in items}) != len(items):
         raise ValueError('duplicate reference item ids')
     key = _key(model, effort, request, report, items)
-    path = CACHE / key[:2] / f'{key}.json'
+    path = (cache_root if cache_root is not None else CACHE) / key[:2] / f'{key}.json'
     active_book = book if book is not None else ledger.Ledger()
-    if path.exists():
+    # Custom transports own their request/response cache and its task binding. Always
+    # revalidate that boundary rather than accepting this generic verdict cache.
+    if transport is None and path.exists():
         cached = json.loads(path.read_text())
         if cached.get('validator_version') != VERSION:
             return [Verdict(i.id, i.kind, False, '', 'old-validator') for i in items]
+        if cached.get('request_hash') != key:
+            return [Verdict(i.id, i.kind, False, '', 'cache_request_mismatch') for i in items]
         payload = cached['payload']
         ledger.replay(cached['calls'], active_book)
     else:
@@ -169,7 +176,9 @@ def grade(request: str, report: str, items: list[Item], *, model: str, effort: s
         before = len(active_book.calls)
         token = ledger.CURRENT.set(active_book)
         try:
-            if model.startswith('deepseek'):     # a provisional judge for paired comparisons; Sol is the reference
+            if transport is not None:
+                payload, _ = transport(SYSTEM, user, schema(), model, effort)
+            elif model.startswith('deepseek'):     # a provisional judge for paired comparisons; Sol is the reference
                 from .deepseek_review import chat_json
                 instructions = (SYSTEM + '\n\nAnswer with one JSON object only, matching this JSON Schema exactly:\n'
                                 + json.dumps(schema(), separators=(',', ':')))
@@ -178,9 +187,10 @@ def grade(request: str, report: str, items: list[Item], *, model: str, effort: s
                 payload = _call(model, effort, user)
         finally:
             ledger.CURRENT.reset(token)
-        ledger.write_artifact(path, json.dumps({'validator_version': VERSION, 'request_hash': key,
-                                               'payload': payload,
-                                               'calls': [asdict(c) for c in active_book.calls[before:]]}))
+        if transport is None:
+            ledger.write_artifact(path, json.dumps({'validator_version': VERSION, 'request_hash': key,
+                                                   'payload': payload,
+                                                   'calls': [asdict(c) for c in active_book.calls[before:]]}))
     # Validate the external boundary before interpreting any verdict. Unknown ids or malformed list
     # entries make the response ambiguous; missing/duplicate individual ids never receive credit.
     if not isinstance(payload, dict) or set(payload) != {'items'} or not isinstance(payload['items'], list):

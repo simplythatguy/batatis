@@ -37,6 +37,10 @@ export DATA_PROMPTS_ROOT=/absolute/path/to/restored/Data\ Prompts
 
 `run` uses one process per worker, because the engine's PDF reader (pdfium) crashes under concurrent threads. Provider responses are cached under `.dpe-cache/`, so an unchanged rerun costs nothing. `DPE_HTTP_CACHE=refresh` forces fresh calls. Every result records its provider calls, tokens and cost at OpenAI's Standard-tier list prices. No request uses the priority tier.
 
+### Without an API key
+
+[`evals_dev/luna_accuracy.py`](../luna_accuracy.py) runs the same engine, checks and judge rules, but it never calls a model itself. Each model request is saved as a file under the run folder, and an agent in T3 Code hands it to a fresh Codex Luna task and saves the answer next to it. The commands are `freeze`, `pending`, `resume` and `grade`. [`evals_dev/model_comparison.py`](../model_comparison.py) runs Claude Haiku 5.5 on the same cases with the same Luna judge. Codex tasks also read the workspace's agent instructions, so these runs are a diagnostic, not a copy of what the hosted app sends.
+
 `python -m evals_dev.data_prompts.calibrate` checks the judge with synthetic reports: a perfect report, an empty one, another case's report, and a perfect report with its numbers changed.
 
 ## Limits

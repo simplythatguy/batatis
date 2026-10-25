@@ -324,37 +324,80 @@
       "reason": "Same KHA Edmonton project as L14-003. Original long-section and ground-floor drawings merged into L14-003; not counted as a second case."
     },
     "L14-003": {
-      "reason": "Merged original public drawing sheets from A10-002 into the existing KHA project case. Retain published-design-study classification because no actual permit set, application or AHJ decision is attached. Profile retained as evaluator-only outcome reference.",
+      "reason": "Accuracy95 input/reference correction v2: preserve the drawing-only task and keep the proponent profile excluded. Replace hidden-profile/path checks with requests for actual authority records and checks of visible drawing evidence.",
       "replace_attachments": [
         {
-          "path": "_research/workers/L14/files/KHA-typical-floor-plan-c396d5160f32.jpg",
           "url": "https://freight.cargo.site/t/original/i/27f2b5a9ecb8fd52e14a541be6563269ef2f7cafa013e6d157229e9b072fc14e/KHA_Plan-02_Typical-Floor.jpg",
           "sha256": "c396d5160f32b3833e38af102b865f08d4bc2b3289740dc937248dd41242de6e",
-          "role": "input"
+          "role": "input",
+          "bytes": 1148114,
+          "included_in_default_input": true,
+          "download_receipt": {
+            "retrieved_at": "2026-10-25T01:51:29.817629+00:00",
+            "http_status": "200",
+            "final_url": "https://freight.cargo.site/t/original/i/27f2b5a9ecb8fd52e14a541be6563269ef2f7cafa013e6d157229e9b072fc14e/KHA_Plan-02_Typical-Floor.jpg",
+            "content_type": "image/jpeg",
+            "kind": "image",
+            "status": "downloaded"
+          },
+          "path": "Data Prompts/_research/workers/L14/files/KHA-typical-floor-plan-c396d5160f32.jpg"
         },
         {
-          "path": "_research/workers/L14/files/singlestair-kha-9d648e601877.html",
           "url": "https://singlestair.ca/KHA",
           "sha256": "9d648e601877ce7b38f25cbe1baebb56ee7981ff0cfcec517425830e2f20c79f",
-          "role": "outcome_reference"
+          "role": "outcome_reference",
+          "bytes": 169974,
+          "included_in_default_input": false,
+          "download_receipt": {
+            "retrieved_at": "2026-10-25T01:17:32.155860+00:00",
+            "http_status": "200",
+            "final_url": "https://singlestair.ca/KHA",
+            "content_type": "text/html; charset=UTF-8",
+            "kind": "html",
+            "status": "downloaded"
+          },
+          "derived_text": {
+            "filename": "_evaluation/attachment-2-source-text.txt",
+            "sha256": "6d1c87cf0a24ba82aabd9c3de91b578d52d03117cf49e1e87456d986c6b15367",
+            "operation": "HTML text extraction; no facts authored"
+          },
+          "path": "Data Prompts/_research/workers/L14/files/singlestair-kha-9d648e601877.html"
         },
         {
-          "path": "_research/workers/A10/files/kha-long-section-drawing-75b2b8c6b87a.jpg",
           "url": "https://freight.cargo.site/t/original/i/1ff09e836cdfcbc74b8e6aa84a88947e60a41a5554441ae4bfea33fca9efba79/KHA_Long-section.jpg",
           "retrieved_at": "2026-10-25T02:14:24.320731+00:00",
           "sha256": "75b2b8c6b87a2fde20daae3729635e1109110706ab4ca37cb4327226c113f953",
           "bytes": 2352301,
           "document_type": "image",
-          "role": "input"
+          "role": "input",
+          "included_in_default_input": true,
+          "download_receipt": {
+            "retrieved_at": "2026-10-25T02:14:24.320731+00:00",
+            "http_status": "200",
+            "final_url": "https://freight.cargo.site/t/original/i/1ff09e836cdfcbc74b8e6aa84a88947e60a41a5554441ae4bfea33fca9efba79/KHA_Long-section.jpg",
+            "content_type": "image/jpeg",
+            "kind": "image",
+            "status": "downloaded"
+          },
+          "path": "Data Prompts/_research/workers/A10/files/kha-long-section-drawing-75b2b8c6b87a.jpg"
         },
         {
-          "path": "_research/workers/A10/files/kha-plan-01-ground-floor-8c4eaef8913c.jpg",
           "url": "https://freight.cargo.site/t/original/i/5f4d62444a3775f01786e928d3e06d5ef8f9d67178ead6b917d589a943c9a56a/KHA_Plan-01_Ground-Floor.jpg",
           "retrieved_at": "2026-10-25T02:14:25.568485+00:00",
           "sha256": "8c4eaef8913cd1fb315d85479aaed620c0c021899584179648c9ab926c80e0ed",
           "bytes": 1221776,
           "document_type": "image",
-          "role": "input"
+          "role": "input",
+          "included_in_default_input": true,
+          "download_receipt": {
+            "retrieved_at": "2026-10-25T02:14:25.568485+00:00",
+            "http_status": "200",
+            "final_url": "https://freight.cargo.site/t/original/i/5f4d62444a3775f01786e928d3e06d5ef8f9d67178ead6b917d589a943c9a56a/KHA_Plan-01_Ground-Floor.jpg",
+            "content_type": "image/jpeg",
+            "kind": "image",
+            "status": "downloaded"
+          },
+          "path": "Data Prompts/_research/workers/A10/files/kha-plan-01-ground-floor-8c4eaef8913c.jpg"
         }
       ],
       "prompt_override": "Review the attached original published architectural drawing images for an Edmonton apartment proposal: typical-floor plan, ground-floor plan and long section. Describe only the stair core, corridors, rooms and floor/level arrangement visibly supported by the sheets. Identify missing or ambiguous labels, dimensions, ratings, door hardware, exit discharge, occupant loads, sprinkler and fire-separation information. List the code-identification questions and original permit-set documents needed before an administrative-completeness review. Do not assume a storey count from an unlabelled section or invent article numbers. Ask focused designer questions without deciding safety, compliance, equivalence or approval.",
@@ -362,14 +405,19 @@
         "The images are original published design-team sheets, not a verified City permit set. Several level labels/title-block details are absent or illegible; the long section and profile require reconciliation.",
         "Original JPEG files are retained. The local Start.tsx file picker advertises PDF/TXT/MD; JPEG intake behavior has not been exercised in this collection task and needs separate verification."
       ],
-      "additional_review_focus": [
-        "Reconcile ambiguous drawing levels through a question rather than inferring the profile storey count.",
-        "The proponent profile is kept under _evaluation and must not be uploaded as default input."
-      ],
       "evaluation_override": {
         "outcome_leakage": false,
-        "known_outcome": "The proponent profile reports submission in February 2025, an updated resubmission in August 2025, and acceptance by the City of Edmonton in September 2025; no official decision or permit set is attached."
-      }
+        "known_outcome": "The proponent profile reports submission in February 2025, an updated resubmission in August 2025, and acceptance by the City of Edmonton in September 2025; no official decision or permit set is attached.",
+        "review_focus": [
+          "scope of the single-exit-served levels",
+          "what one typical plan does and does not establish",
+          "administrative evidence for the claimed measures",
+          "If prior permit submission or acceptance is relevant, request the original permit record and an authority-issued decision or acceptance record; do not assume a project claim establishes it.",
+          "Reconcile ambiguous drawing levels through a question rather than inferring the profile storey count.",
+          "Identify which conditions are visibly supported by the drawings and which require project or authority records; do not infer values absent from the supplied images."
+        ]
+      },
+      "prompt_append": "Limit factual descriptions to what is visible in the supplied drawing images. If the applicable code edition, permit status, authority acceptance, or other project conditions are not established by these drawings, request the relevant project or authority record; do not infer them."
     },
     "H18-001": {
       "reason": "Original legacy public PDF is readable with PDFium but triggers a real pypdf RC4 key-length limitation; retain untouched for comparative parser testing.",
@@ -396,6 +444,310 @@
     "A09-002": {
       "exclude": true,
       "reason": "Designer-hosted newspaper narrative mentions unspecified building-code issues but supplies no drawing, code analysis or technical report; retained as an Edmonton lead rather than padding the technical attachment prompt set."
+    },
+    "L04-001": {
+      "reason": "Accuracy95 input/reference correction v2: the prompt explicitly requests SPV-001 Revision 5 and Revision 4 context. Promote the authenticated published Revision 5 to a default historical standing reference; retain Revision 4 as version context. This is retrospective document review, not an applicant permit outcome.",
+      "replace_attachments": [
+        {
+          "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/zero-lot-line-march-2026.pdf",
+          "sha256": "bbe2767cfbebab533b1afa971afc9393ef56547337bd95f7996aa5d981b649de",
+          "role": "published_standing_reference",
+          "bytes": 810908,
+          "included_in_default_input": true,
+          "download_receipt": {
+            "retrieved_at": "2026-10-25T01:17:14.901586+00:00",
+            "http_status": "200",
+            "final_url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/zero-lot-line-march-2026.pdf",
+            "content_type": "application/pdf",
+            "kind": "pdf",
+            "status": "downloaded"
+          },
+          "path": "Data Prompts/_research/workers/L04/files/calgary-spv-001-r5-2026-bbe2767cfbeb.pdf"
+        },
+        {
+          "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/advisory-zero-lot-line-variance.pdf",
+          "sha256": "7a528dc00a5979299f7b4b8f5a3027f420df3a0c929490b6c807cab0a4cc1c36",
+          "role": "supporting_evidence",
+          "bytes": 756343,
+          "included_in_default_input": true,
+          "download_receipt": {
+            "retrieved_at": "2026-10-25T01:17:14.899132+00:00",
+            "http_status": "200",
+            "final_url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/advisory-zero-lot-line-variance.pdf",
+            "content_type": "application/pdf",
+            "kind": "pdf",
+            "status": "downloaded"
+          },
+          "path": "Data Prompts/_research/workers/L04/files/calgary-spv-001-r4-2024-7a528dc00a59.pdf"
+        },
+        {
+          "url": "https://www.calgary.ca/content/dam/www/tools-and-resources/guide-to-applying-for-an-alternative-solution.pdf",
+          "sha256": "bbb0628b7b5f13499a4688089bc09484b67865ef283709d40701d823825b1399",
+          "role": "supporting_evidence",
+          "bytes": 172757,
+          "included_in_default_input": true,
+          "download_receipt": {
+            "retrieved_at": "2026-10-25T01:17:14.896815+00:00",
+            "http_status": "200",
+            "final_url": "https://www.calgary.ca/content/dam/www/tools-and-resources/guide-to-applying-for-an-alternative-solution.pdf",
+            "content_type": "application/pdf",
+            "kind": "pdf",
+            "status": "downloaded"
+          },
+          "path": "Data Prompts/_research/workers/L04/files/calgary-alternative-solution-guide-package-link-bbb0628b7b5f.pdf"
+        },
+        {
+          "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/request-for-specific-variance.pdf",
+          "sha256": "fa8881140654ac491732471a576206efce38b826b0d8f7fa84c7a47ada53cce5",
+          "role": "supporting_evidence",
+          "bytes": 194424,
+          "included_in_default_input": true,
+          "download_receipt": {
+            "retrieved_at": "2026-10-25T01:18:56.162221+00:00",
+            "http_status": "200",
+            "final_url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/request-for-specific-variance.pdf",
+            "content_type": "application/pdf",
+            "kind": "pdf",
+            "status": "downloaded"
+          },
+          "path": "Data Prompts/_research/workers/L04/files/calgary-request-specific-variance-fa8881140654.pdf"
+        }
+      ],
+      "prompt_append": "Treat SPV-001 Revision 5 as a published standing variance for retrospective document review. Its publication and CSTIC acceptance do not establish approval or permit status for any particular building or applicant project.",
+      "evaluation_override": {
+        "outcome_leakage": true,
+        "known_outcome": "Calgary published SPV-001 Revision 5, dated and accepted by CSTIC on 2026-03-05. It is a standing posted variance; no individual application, permit, or project decision is present."
+      }
+    },
+    "L04-002": {
+      "reason": "Accuracy95 input/reference correction v2: the prompt explicitly says SPV-002 is attached. Promote the authenticated published variance to a default historical standing reference; retain outcome leakage because it is a published variance, not a project-specific permit outcome.",
+      "replace_attachments": [
+        {
+          "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/variance-blazemaster-chlorinated-polyviychloride-pipe-spv-002.pdf",
+          "sha256": "dc80a2c63927fba8cb134de950b9a3cc599a2b636c1ce75588b082f82552b95f",
+          "role": "published_standing_reference",
+          "bytes": 104608,
+          "included_in_default_input": true,
+          "download_receipt": {
+            "retrieved_at": "2026-10-25T01:17:14.898080+00:00",
+            "http_status": "200",
+            "final_url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/variance-blazemaster-chlorinated-polyviychloride-pipe-spv-002.pdf",
+            "content_type": "application/pdf",
+            "kind": "pdf",
+            "status": "downloaded"
+          },
+          "path": "Data Prompts/_research/workers/L04/files/calgary-spv-002-blazemaster-2018-dc80a2c63927.pdf"
+        },
+        {
+          "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-014-new-products-materials-and-systems-in-building-construction.pdf",
+          "sha256": "eab7e795172816bc47744288e5bad17a4867c2b79cf4ba37b87cd9eee9a02017",
+          "role": "supporting_evidence",
+          "bytes": 206601,
+          "included_in_default_input": true,
+          "download_receipt": {
+            "retrieved_at": "2026-10-25T01:22:36.160271+00:00",
+            "http_status": "200",
+            "final_url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-014-new-products-materials-and-systems-in-building-construction.pdf",
+            "content_type": "application/pdf",
+            "kind": "pdf",
+            "status": "downloaded"
+          },
+          "path": "Data Prompts/_research/workers/L04/files/calgary-advisory-b23-014-products-eab7e7951728.pdf"
+        },
+        {
+          "url": "https://www.calgary.ca/content/dam/www/tools-and-resources/guide-to-applying-for-an-alternative-solution.pdf",
+          "sha256": "bbb0628b7b5f13499a4688089bc09484b67865ef283709d40701d823825b1399",
+          "role": "supporting_evidence",
+          "bytes": 172757,
+          "included_in_default_input": true,
+          "download_receipt": {
+            "retrieved_at": "2026-10-25T01:17:14.896815+00:00",
+            "http_status": "200",
+            "final_url": "https://www.calgary.ca/content/dam/www/tools-and-resources/guide-to-applying-for-an-alternative-solution.pdf",
+            "content_type": "application/pdf",
+            "kind": "pdf",
+            "status": "downloaded"
+          },
+          "path": "Data Prompts/_research/workers/L04/files/calgary-alternative-solution-guide-package-link-bbb0628b7b5f.pdf"
+        }
+      ],
+      "prompt_append": "Treat SPV-002 as a historical published standing variance, not a general product certificate, current authorization, or approval for a particular applicant project.",
+      "evaluation_override": {
+        "outcome_leakage": true,
+        "known_outcome": "Calgary published the 2018 SPV-002 for a narrow CPVC/fire-sprinkler use, with conditional fallback language. It is a historical standing reference; no individual permit package or project decision is present."
+      }
+    },
+    "L04-005": {
+      "reason": "Accuracy95 input/reference correction v2: the prompt explicitly says SPV-006 is attached. Promote the authenticated published variance to a default historical standing reference; retain outcome leakage because it is a published variance, not a project-specific permit outcome.",
+      "replace_attachments": [
+        {
+          "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/firewall-in-a-rowhouse-with-secondary-suites-spv-006.pdf",
+          "sha256": "8df85aa592abc0272806687daf7de01c14fdc9433b97c6641192e438889e9437",
+          "role": "published_standing_reference",
+          "bytes": 450927,
+          "included_in_default_input": true,
+          "download_receipt": {
+            "retrieved_at": "2026-10-25T01:17:14.907928+00:00",
+            "http_status": "200",
+            "final_url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/firewall-in-a-rowhouse-with-secondary-suites-spv-006.pdf",
+            "content_type": "application/pdf",
+            "kind": "pdf",
+            "status": "downloaded"
+          },
+          "path": "Data Prompts/_research/workers/L04/files/calgary-spv-006-2025-8df85aa592ab.pdf"
+        },
+        {
+          "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-006-triplex-fourplex-buildings-with-secondary-suites-emergency-access.pdf",
+          "sha256": "bab06bca63b9a4f06549901f996dcdc6789a482a698c10d4ffb139dc66a76cd8",
+          "role": "supporting_evidence",
+          "bytes": 510295,
+          "included_in_default_input": true,
+          "download_receipt": {
+            "retrieved_at": "2026-10-25T01:24:15.609339+00:00",
+            "http_status": "200",
+            "final_url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-006-triplex-fourplex-buildings-with-secondary-suites-emergency-access.pdf",
+            "content_type": "application/pdf",
+            "kind": "pdf",
+            "status": "downloaded"
+          },
+          "path": "Data Prompts/_research/workers/L04/files/calgary-advisory-b23-006-fourplex-bab06bca63b9.pdf"
+        },
+        {
+          "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-005-building-permit-complete-application.pdf",
+          "sha256": "9b8f05c23ca9dc222221b5bfeb93d20e82542241bbb33cc6c197ed2d532a1198",
+          "role": "supporting_evidence",
+          "bytes": 120260,
+          "included_in_default_input": true,
+          "download_receipt": {
+            "retrieved_at": "2026-10-25T01:17:14.924952+00:00",
+            "http_status": "200",
+            "final_url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-005-building-permit-complete-application.pdf",
+            "content_type": "application/pdf",
+            "kind": "pdf",
+            "status": "downloaded"
+          },
+          "path": "Data Prompts/_research/workers/L04/files/calgary-advisory-b23-005-complete-application-9b8f05c23ca9.pdf"
+        },
+        {
+          "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-010-professional-involvement-based-on-complexity.pdf",
+          "sha256": "73110cd7ab5685fb9be345bf135f4e985230f1070686bb65b5b3fa8f2ccf6393",
+          "role": "supporting_evidence",
+          "bytes": 85681,
+          "included_in_default_input": true,
+          "download_receipt": {
+            "retrieved_at": "2026-10-25T01:18:56.158719+00:00",
+            "http_status": "200",
+            "final_url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-010-professional-involvement-based-on-complexity.pdf",
+            "content_type": "application/pdf",
+            "kind": "pdf",
+            "status": "downloaded"
+          },
+          "path": "Data Prompts/_research/workers/L04/files/calgary-advisory-b23-010-professional-73110cd7ab56.pdf"
+        },
+        {
+          "url": "https://www.calgary.ca/content/dam/www/tools-and-resources/guide-to-applying-for-an-alternative-solution.pdf",
+          "sha256": "bbb0628b7b5f13499a4688089bc09484b67865ef283709d40701d823825b1399",
+          "role": "supporting_evidence",
+          "bytes": 172757,
+          "included_in_default_input": true,
+          "download_receipt": {
+            "retrieved_at": "2026-10-25T01:17:14.896815+00:00",
+            "http_status": "200",
+            "final_url": "https://www.calgary.ca/content/dam/www/tools-and-resources/guide-to-applying-for-an-alternative-solution.pdf",
+            "content_type": "application/pdf",
+            "kind": "pdf",
+            "status": "downloaded"
+          },
+          "path": "Data Prompts/_research/workers/L04/files/calgary-alternative-solution-guide-package-link-bbb0628b7b5f.pdf"
+        }
+      ],
+      "prompt_append": "Treat SPV-006 as a published standing variance, not evidence that any particular project or permit was approved.",
+      "evaluation_override": {
+        "outcome_leakage": true,
+        "known_outcome": "Calgary published SPV-006, dated and accepted by CSTIC on 2025-06-19. It is a standing posted variance; no individual application, permit, or project decision is present."
+      }
+    },
+    "L05-003": {
+      "reason": "Accuracy95 input/reference correction v2: the expected source-attributed Design Study 2 conclusion depends on the authenticated City technical report. Include it as a named default historical technical reference; do not make a professional conclusion for Batatis or a project-specific permit claim.",
+      "replace_attachments": [
+        {
+          "url": "https://www.edmonton.ca/sites/default/files/public-files/Point-Access-Block-Design-Guide.pdf?cb=1755190409",
+          "sha256": "fd29e2084bca5467bce576a13ee65e4c2dee84615a0127699b09a6cb9ab0c79a",
+          "role": "input",
+          "bytes": 4235436,
+          "included_in_default_input": true,
+          "download_receipt": {
+            "retrieved_at": "2026-10-25T01:17:46.029156+00:00",
+            "http_status": "200",
+            "final_url": "https://www.edmonton.ca/sites/default/files/public-files/Point-Access-Block-Design-Guide.pdf?cb=1755190409",
+            "content_type": "application/pdf",
+            "kind": "pdf",
+            "status": "downloaded"
+          },
+          "path": "Data Prompts/_research/workers/L05/files/pab-design-guide-fd29e2084bca.pdf"
+        },
+        {
+          "url": "https://www.edmonton.ca/sites/default/files/public-files/Point-Access-Block-Alternative-Solution-Guide.pdf",
+          "sha256": "1546fef639376b5b363214f8ea035ef02c94abb8aa001a2d9d68a44813df0983",
+          "role": "supporting_evidence",
+          "bytes": 2241434,
+          "included_in_default_input": true,
+          "download_receipt": {
+            "retrieved_at": "2026-10-25T01:16:39.973755+00:00",
+            "http_status": "200",
+            "final_url": "https://www.edmonton.ca/sites/default/files/public-files/Point-Access-Block-Alternative-Solution-Guide.pdf",
+            "content_type": "application/pdf",
+            "kind": "pdf",
+            "status": "downloaded"
+          },
+          "path": "Data Prompts/_research/workers/L05/files/edmonton-point-access-guide-1546fef63937.pdf"
+        },
+        {
+          "url": "https://www.edmonton.ca/sites/default/files/public-files/Point-Access-Block-Building-Code-Guide.pdf?cb=1755190407",
+          "sha256": "54fc45bcb200c1b27e3f3ed9ebace61b98335729b0b80e191feb881002a68055",
+          "role": "supporting_evidence",
+          "bytes": 541037,
+          "included_in_default_input": true,
+          "download_receipt": {
+            "retrieved_at": "2026-10-25T01:17:46.029148+00:00",
+            "http_status": "200",
+            "final_url": "https://www.edmonton.ca/sites/default/files/public-files/Point-Access-Block-Building-Code-Guide.pdf?cb=1755190407",
+            "content_type": "application/pdf",
+            "kind": "pdf",
+            "status": "downloaded"
+          },
+          "path": "Data Prompts/_research/workers/L05/files/pab-building-code-guide-54fc45bcb200.pdf"
+        },
+        {
+          "url": "https://www.edmonton.ca/sites/default/files/public-files/Point-Access-Block-Technical-Report.pdf?cb=1755190412",
+          "sha256": "d2d1dcfb9feb131d537170b256780beac4a155a60d8856486afca72ba514d693",
+          "role": "published_historical_technical_reference",
+          "bytes": 4010121,
+          "included_in_default_input": true,
+          "download_receipt": {
+            "retrieved_at": "2026-10-25T01:17:46.029163+00:00",
+            "http_status": "200",
+            "final_url": "https://www.edmonton.ca/sites/default/files/public-files/Point-Access-Block-Technical-Report.pdf?cb=1755190412",
+            "content_type": "application/pdf",
+            "kind": "pdf",
+            "status": "downloaded"
+          },
+          "path": "Data Prompts/_research/workers/L05/files/pab-technical-report-d2d1dcfb9feb.pdf"
+        }
+      ],
+      "prompt_append": "Also review the attached City of Edmonton Point Access Block Technical Report, Revision 4, as a published historical reference. Attribute to that report its Design Study 2 conclusion: its analysis found equivalent resilience for the vestibule-protected single-stair exemplar compared with the code-compliant two-stair design. Keep the report’s scoped analysis and assumptions distinct from any permit decision or real project conclusion. Batatis must not make or adopt a professional technical conclusion.",
+      "evaluation_override": {
+        "outcome_leakage": true,
+        "known_outcome": "The attached City technical report states that its analysis of Design Study 2, a four-storey/16-unit exemplar with vestibule protection, demonstrated equivalent resilience to a two-stair design. This is the report’s conclusion, not a permit decision or a professional conclusion by Batatis; no site-specific permit decision or AHJ acceptance is reported.",
+        "review_focus": [
+          "Attribute the Design Study 2 conclusion to the attached technical report and keep its scope and assumptions distinct from a project-specific permit decision or conclusion by Batatis.",
+          "Keep the guide scenario separate from actual applicant, owner, civic address, survey, or permit facts.",
+          "Ask which current code edition/printing and acceptable-solution departure apply to the real proposal; verify any attributed objectives and functional statements from authoritative code sources.",
+          "Identify missing site-specific zoning, surveyed dimensions, occupancy, complete drawings and application requirements.",
+          "Identify the professional-authored alternative-solution report, risk assessment, mitigation measures, and assumptions/limits that need to be supplied or confirmed; do not write professional evidence.",
+          "Ask focused next questions and make no safety, compliance, or approval determination."
+        ]
+      }
     }
   }
 }

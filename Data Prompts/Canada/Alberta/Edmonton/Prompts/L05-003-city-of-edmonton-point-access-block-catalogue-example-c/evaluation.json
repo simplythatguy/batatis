@@ -1,8 +1,8 @@
 {
-  "known_outcome": "The City technical report states that its analysis of Design Study 2, a four-storey/16-unit exemplar with vestibule protection, demonstrated equivalent resilience to a two-stair design. No site-specific permit decision or AHJ acceptance is reported.",
+  "known_outcome": "The attached City technical report states that its analysis of Design Study 2, a four-storey/16-unit exemplar with vestibule protection, demonstrated equivalent resilience to a two-stair design. This is the report’s conclusion, not a permit decision or a professional conclusion by Batatis; no site-specific permit decision or AHJ acceptance is reported.",
   "outcome_leakage": true,
   "review_focus": [
-    "Keep the technical report’s stated study conclusion separate from any permit decision; identify its assumptions and whether they are established for a real proposal.",
+    "Attribute the Design Study 2 conclusion to the attached technical report and keep its scope and assumptions distinct from a project-specific permit decision or conclusion by Batatis.",
     "Keep the guide scenario separate from actual applicant, owner, civic address, survey, or permit facts.",
     "Ask which current code edition/printing and acceptable-solution departure apply to the real proposal; verify any attributed objectives and functional statements from authoritative code sources.",
     "Identify missing site-specific zoning, surveyed dimensions, occupancy, complete drawings and application requirements.",

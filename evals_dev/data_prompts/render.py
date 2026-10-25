@@ -48,7 +48,7 @@ def _review(case: dict) -> list[str]:
     if review.get('status') not in ('live', 'fake'):
         return []
     names = {f['file_id']: f['name'] for f in (case.get('intake') or {}).get('files') or []}
-    out = ['DOCUMENT REVIEW (Batatis read every readable page; each fact quotes the page it comes from)']
+    out = ['DOCUMENT REVIEW']
     for d in review.get('documents') or []:
         parts = [d.get('kind'), d.get('title'), d.get('author'), d.get('date'), d.get('status')]
         out.append(f'- {names.get(d["file_id"], d["file_id"])}: ' + '; '.join(x for x in parts if x))

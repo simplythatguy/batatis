@@ -1,0 +1,470 @@
+{
+  "research_id": "accuracy95-procurement-r3",
+  "scope": "Find up to five new independent Calgary or Edmonton building project groups in public-owner or procurement technical design records, with project-specific code analysis, alternative-solution evidence, drawings, or technical completeness evidence.",
+  "constraints": {
+    "source_policy": "Primary/public owner or procurement sources only.",
+    "target_localities": [
+      "Calgary, Alberta",
+      "Edmonton, Alberta"
+    ],
+    "do_not_infer_project_locality_from_publisher": true,
+    "no_synthetic_applicant_facts_or_prompts": true,
+    "no_login_signup_fees_ati_contact_or_publication": true,
+    "no_openai_api_or_model_runs": true,
+    "no_retry_of_preexisting_escribe_403_urls": true,
+    "original_bytes_rule": "Retrieve and retain original bytes only for eligible attachments."
+  },
+  "search_queries": [
+    "site:canadabuys.canada.ca/en/tender-opportunities \"Edmonton\" building drawings technical report construction",
+    "site:canadabuys.canada.ca/en/tender-opportunities \"Calgary\" building code analysis drawings",
+    "site:canadabuys.canada.ca \"Edmonton\" \"performance solution\" building tender attachment",
+    "site:canadabuys.canada.ca \"Calgary\" \"alternative solution\" building project drawings",
+    "\"A01-00-01 BUILDING CODE REVIEW & LIFE SAFETY PLAN\" Calgary",
+    "\"ncca17-0228\" Calgary RCMP DTF",
+    "site:canadabuys.canada.ca/documents/pub/att/ \"EDMONTON\" \"BUILDING CODE REVIEW\" \"ISSUED FOR TENDER\"",
+    "site:canadabuys.canada.ca/documents/pub/att/ CALGARY \"BUILDING CODE REVIEW\" \"LIFE SAFETY PLAN\"",
+    "site:canadabuys.canada.ca/documents/pub/att Calgary building \"Code Review\" drawings tender building project",
+    "site:canadabuys.canada.ca/documents/pub/att Edmonton building \"Code Review\" drawings tender building project",
+    "site:ualberta.ca filetype:pdf Edmonton university facility \"code analysis\" building project design",
+    "site:ucalgary.ca filetype:pdf Calgary university facility \"code analysis\" building project design",
+    "site:canadabuys.canada.ca/documents/pub/att/ \"University of Alberta\" \"ISSUED FOR TENDER\" drawings building",
+    "site:canadabuys.canada.ca \"University of Alberta\" \"BUILDING CODE REVIEW\" drawings tender",
+    "site:canadabuys.canada.ca \"University of Calgary\" \"building code review\" drawings tender",
+    "site:canadabuys.canada.ca \"Calgary\" \"BUILDING CODE ANALYSIS\" \"ISSUED FOR TENDER\"",
+    "site:canadabuys.canada.ca/documents/pub/att/ \"Edmonton Public Library\" drawings RFP attachment",
+    "site:canadabuys.canada.ca/documents/pub/att/ Edmonton facility architectural drawings renovation construction tender",
+    "site:canadabuys.canada.ca/documents/pub/att/ Calgary facility architectural drawings renovation construction tender",
+    "site:canadabuys.canada.ca/sites/default/files/webform/tender_notice/ Edmonton \"BUILDING CODE\" drawings"
+  ],
+  "inventory_snapshot": {
+    "index_path": "Data Prompts/index.json",
+    "indexed_prompt_count": 653,
+    "calgary_prompts": 17,
+    "calgary_source_groups": 12,
+    "edmonton_prompts": 21,
+    "edmonton_source_groups": 9,
+    "source_catalogue_path": "Data Prompts/source_catalogue.jsonl",
+    "dedupe_method": "Exact normalized URL/final URL comparisons in index and source catalogue; case-insensitive exact project-title substring checks against index titles. URLs are normalized by removing query/fragment and trailing slash."
+  },
+  "counts": {
+    "search_queries": 20,
+    "screened_records": 8,
+    "eligible_new_local_project_groups": 0,
+    "eligible_new_local_projects": 0,
+    "qualifying_original_attachments": 0,
+    "qualifying_original_bytes_saved": 0,
+    "attachment_original_sha256_values": 0,
+    "exact_index_url_matches": 0,
+    "exact_source_catalogue_url_matches": 0,
+    "exact_named_project_title_matches": 0,
+    "sha256_comparisons_possible": false,
+    "excluded_records": 8,
+    "access_gap_records": 4,
+    "access_gap_observations": 6,
+    "preexisting_escribe_403_urls_not_retried": 24,
+    "preexisting_escribe_403_breakdown": {
+      "calgary": 18,
+      "edmonton": 6
+    }
+  },
+  "screened_records": [
+    {
+      "candidate_id": "PR3-001",
+      "project_or_record": "Coronation ECO Station Expansion",
+      "source_class": "Municipal owner procurement notice; Request for Proposal",
+      "source_url": "https://canadabuys.canada.ca/en/tender-opportunities/tender-notice/ab-2026-00800",
+      "final_url": "https://canadabuys.canada.ca/en/tender-opportunities/tender-notice/ab-2026-00800",
+      "observation": {
+        "retrieval_channel": "web search and open",
+        "observed_at_utc": null,
+        "http_status": null,
+        "status_note": "The web reader exposed page content but not the origin HTTP status.",
+        "content_type": "text/html",
+        "bytes_saved_locally": 0,
+        "sha256": null,
+        "pages": null,
+        "timestamp_note": "The web tool did not expose a per-source retrieval timestamp; use the top-level ledger snapshot time only as the research snapshot.",
+        "original_response_bytes": null
+      },
+      "locality_evidence": {
+        "quote": "located within the Coronation Yard site between 114 and 115 Avenue and east of 143 Street.",
+        "locator": "CanadaBuys notice description; page lines 20-38",
+        "locality_disposition": "The notice title names City of Edmonton and the description refers to Edmontonians, but the opened text does not explicitly state the project site is in Edmonton. Publisher identity is not used as locality proof."
+      },
+      "code_or_technical_evidence_locators": [],
+      "attachment_evidence": "The notice says full tender details are on a third-party site; no project design attachment was exposed on the opened CanadaBuys notice.",
+      "access_note": "CanadaBuys leave-site wrapper for purchasing.alberta.ca/posting/AB-2026-00800 returned 403 in the web reader; the destination was separately reported not accessible via this tool. No authentication or workaround was attempted.",
+      "duplicate_comparison": {
+        "project_title_matches_in_index": [],
+        "source_url_matches_in_index": [],
+        "source_url_or_final_url_matches_in_catalogue": [],
+        "hash_comparison": "Not available: no eligible attachment was retrieved."
+      },
+      "disposition": "Excluded: notice only; no publicly downloaded technical attachment or code evidence; project locality not explicit in the inspected source.",
+      "limits": "Only the public notice was inspected; no attachment bytes or code/design locators were available. Project-site city is not explicit in the captured locality passage. The external-site web-reader failure does not establish the origin status of the attachment host."
+    },
+    {
+      "candidate_id": "PR3-002",
+      "project_or_record": "University of Alberta Construction Management Services for Telus Gallery",
+      "source_class": "University owner procurement notice; construction-management services RFP",
+      "source_url": "https://canadabuys.canada.ca/en/tender-opportunities/tender-notice/ab-2025-00595",
+      "final_url": "https://canadabuys.canada.ca/en/tender-opportunities/tender-notice/ab-2025-00595",
+      "observation": {
+        "retrieval_channel": "web search and open",
+        "observed_at_utc": null,
+        "http_status": null,
+        "status_note": "The web reader exposed page content but not the origin HTTP status.",
+        "content_type": "text/html",
+        "bytes_saved_locally": 0,
+        "sha256": null,
+        "pages": null,
+        "timestamp_note": "The web tool did not expose a per-source retrieval timestamp; use the top-level ledger snapshot time only as the research snapshot.",
+        "original_response_bytes": null
+      },
+      "locality_evidence": {
+        "quote": "The University of Alberta is inviting firms with demonstrated experience in Construction Management to submit a Proposal for Construction Management Services for Telus Gallery.",
+        "locator": "CanadaBuys notice description; page lines 28-48",
+        "locality_disposition": "The contracting organization address is in Edmonton, but the notice does not state a project site address or city; publisher location is not used as project locality."
+      },
+      "code_or_technical_evidence_locators": [],
+      "attachment_evidence": "The notice points to a third-party site for full tender details; no project-specific design attachment was exposed on the opened CanadaBuys notice.",
+      "access_note": "CanadaBuys leave-site wrapper for purchasing.alberta.ca/posting/AB-2025-00595 returned 403 in the web reader; the destination was separately reported not accessible via this tool. No authentication or workaround was attempted.",
+      "duplicate_comparison": {
+        "project_title_matches_in_index": [],
+        "source_url_matches_in_index": [],
+        "source_url_or_final_url_matches_in_catalogue": [],
+        "hash_comparison": "Not available: no eligible attachment was retrieved."
+      },
+      "disposition": "Excluded: procurement notice only; project locality and technical attachment were not established.",
+      "limits": "Only the public procurement notice was inspected; the project site address/city and technical attachments are not established. The external-site web-reader failure does not establish the origin status of the attachment host."
+    },
+    {
+      "candidate_id": "PR3-003",
+      "project_or_record": "Architectural Consultant – Theatre Upgrade – Bowness High School (2025RFP000321)",
+      "source_class": "School-board procurement notice; architectural consultant RFP",
+      "source_url": "https://canadabuys.canada.ca/en/tender-opportunities/tender-notice/ab-2025-06170",
+      "final_url": "https://canadabuys.canada.ca/en/tender-opportunities/tender-notice/ab-2025-06170",
+      "observation": {
+        "retrieval_channel": "web search and open",
+        "observed_at_utc": null,
+        "http_status": null,
+        "status_note": "The web reader exposed page content but not the origin HTTP status.",
+        "content_type": "text/html",
+        "bytes_saved_locally": 0,
+        "sha256": null,
+        "pages": null,
+        "timestamp_note": "The web tool did not expose a per-source retrieval timestamp; use the top-level ledger snapshot time only as the research snapshot.",
+        "original_response_bytes": null
+      },
+      "locality_evidence": {
+        "quote": "Calgary Board of Education - Request for Proposal - 2025RFP000321 - Architectural Consultant– Theatre Upgrade – Bowness High School",
+        "locator": "CanadaBuys page title; page lines 62-70; contracting organization address at lines 94-120",
+        "locality_disposition": "The page gives a Calgary contracting-organization address but no project site address in the inspected body. Publisher address is not used as project locality."
+      },
+      "code_or_technical_evidence_locators": [],
+      "attachment_evidence": "The notice states full tender details are on a third-party site and warns an account may be required; the public CanadaBuys notice did not expose a project technical attachment.",
+      "access_note": "Third-party full details were not accessed because the public notice warns account access may be required. No sign-up or login was attempted.",
+      "duplicate_comparison": {
+        "project_title_matches_in_index": [],
+        "source_url_matches_in_index": [],
+        "source_url_or_final_url_matches_in_catalogue": [],
+        "hash_comparison": "Not available: no eligible attachment was retrieved."
+      },
+      "disposition": "Excluded: procurement notice only; no publicly downloadable project design attachment or code evidence was surfaced.",
+      "limits": "Only the public notice was inspected; the contracting-board address is not project-site locality, and no project design attachment was exposed. The third-party portal was not opened because account access may be required."
+    },
+    {
+      "candidate_id": "PR3-004",
+      "project_or_record": "INNISFAIL PDSTC Lunchroom Expansion",
+      "source_class": "Federal procurement attachment; architectural/engineering tender drawing set marked Issued for Tender",
+      "source_url": "https://canadabuys.canada.ca/documents/pub/att/2018/05/24/35e6ef55c32770672b659eaa2cce3981/drawings_final.pdf",
+      "final_url": null,
+      "observation": {
+        "retrieval_channel": "official CanadaBuys PDF search-index extraction; original bytes not fetched",
+        "observed_at_utc": null,
+        "http_status": null,
+        "status_note": "No direct original-byte HTTP request was made because the named project is outside the target cities.",
+        "content_type": "application/pdf per official search result",
+        "bytes_saved_locally": 0,
+        "sha256": null,
+        "pages": null,
+        "timestamp_note": "The web tool did not expose a per-source retrieval timestamp; use the top-level ledger snapshot time only as the research snapshot.",
+        "original_response_bytes": null,
+        "final_url_note": "Not verified because no direct original-byte request was made."
+      },
+      "locality_evidence": {
+        "quote": "Project: INNISFAIL PDSTC / LUNCHROOM EXPANSION",
+        "locator": "Drawing title block in official CanadaBuys search-index extraction; sheet A01-00-01",
+        "locality_disposition": "The project name identifies Innisfail, outside Calgary and Edmonton. The Calgary street address in some drawing title blocks belongs to NORR's office and is not treated as project locality."
+      },
+      "code_or_technical_evidence_locators": [
+        {
+          "locator": "Sheet A01-00-01, Building Code Review & Life Safety Plan; PDF page number not established by the search-index extraction",
+          "evidence": "Indexed content describes a 2015 National Building Code review, Part 3 design, building area, storeys, major occupancy, fire access, egress, and life-safety criteria."
+        },
+        {
+          "locator": "Other indexed drawing sheets in drawings_final.pdf; sheet/page inventory not independently verified",
+          "evidence": "The official extraction identifies architectural, structural, mechanical, and electrical sheets for the lunchroom expansion."
+        }
+      ],
+      "attachment_evidence": "Public owner procurement attachment was indexed as a drawing set; original bytes were not retained because the project is outside the geographic scope.",
+      "duplicate_comparison": {
+        "project_title_matches_in_index": [],
+        "source_url_matches_in_index": [],
+        "source_url_or_final_url_matches_in_catalogue": [],
+        "hash_comparison": "Not available: original bytes were not fetched."
+      },
+      "disposition": "Excluded: promising attachment-backed building-code/tender drawing record, but the project is named Innisfail and is outside the Calgary/Edmonton target.",
+      "limits": "Evidence is limited to official search-index text; the original PDF was not downloaded, its PDF page number/page count and hash are unknown, and no full-byte or rendered inspection occurred. The named project is outside the target cities."
+    },
+    {
+      "candidate_id": "PR3-005",
+      "project_or_record": "05BG006 Waiparous Creek near the Mouth Hydrometric Cableway Rebuild",
+      "source_class": "Federal owner/procurement attachment; structural drawings marked Issued for Tender",
+      "source_url": "https://canadabuys.canada.ca/sites/default/files/webform/tender_notice/24327/5000076429---annex-b---drawings_dessins_engineering-design-services_en.pdf",
+      "final_url": "https://canadabuys.canada.ca/sites/default/files/webform/tender_notice/24327/5000076429---annex-b---drawings_dessins_engineering-design-services_en.pdf",
+      "observation": {
+        "retrieval_channel": "official CanadaBuys web PDF reader; not saved locally",
+        "observed_at_utc": null,
+        "http_status": null,
+        "status_note": "The web reader exposed a 10-page PDF; origin HTTP status and original-byte size were not exposed.",
+        "content_type": "application/pdf",
+        "bytes_saved_locally": 0,
+        "sha256": null,
+        "pages": 10,
+        "timestamp_note": "The web tool did not expose a per-source retrieval timestamp; use the top-level ledger snapshot time only as the research snapshot.",
+        "original_response_bytes": null
+      },
+      "locality_evidence": {
+        "quote": "05BG006 WAIPAROUS CREEK NEAR THE MOUTH HYDROMETRIC CABLEWAY REBUILD",
+        "locator": "PDF page 1 (zero-based page 0), title block and drawing list, lines 13-25 and 32-36 in the web reader",
+        "locality_disposition": "The project is named at Waiparous Creek, not Calgary or Edmonton."
+      },
+      "code_or_technical_evidence_locators": [],
+      "attachment_evidence": "The drawings include structural notes, site/overall plans, and cableway details. Building-code clauses appear only as generic drawing notes; no project building-code analysis is shown.",
+      "duplicate_comparison": {
+        "project_title_matches_in_index": [],
+        "source_url_matches_in_index": [],
+        "source_url_or_final_url_matches_in_catalogue": [],
+        "hash_comparison": "Not available: original bytes were not saved."
+      },
+      "disposition": "Excluded: outside the target localities and documents a cableway structure rather than a building.",
+      "limits": "The 10-page web-reader view was not saved as original bytes; HTTP response size, SHA-256, and reuse rights were not established. The cableway is outside the target cities and is not a building."
+    },
+    {
+      "candidate_id": "PR3-006",
+      "project_or_record": "Transport Canada Canada Place Hybrid Workspace furniture RFB",
+      "source_class": "Federal procurement attachment; Request for Bids for furniture supply, delivery, assembly, and installation",
+      "source_url": "https://canadabuys.canada.ca/sites/default/files/webform/tender_notice/24914/t8080-230317---rfb.pdf",
+      "final_url": "https://canadabuys.canada.ca/sites/default/files/webform/tender_notice/24914/t8080-230317---rfb.pdf",
+      "observation": {
+        "retrieval_channel": "official CanadaBuys web PDF reader; not saved locally",
+        "observed_at_utc": null,
+        "http_status": null,
+        "status_note": "The web reader exposed a 24-page PDF; origin HTTP status and original-byte size were not exposed.",
+        "content_type": "application/pdf",
+        "bytes_saved_locally": 0,
+        "sha256": null,
+        "pages": 24,
+        "timestamp_note": "The web tool did not expose a per-source retrieval timestamp; use the top-level ledger snapshot time only as the research snapshot.",
+        "original_response_bytes": null
+      },
+      "locality_evidence": {
+        "quote": "The location of work shall be at the Transport Canada office located on the 11th floor of 9700 Jasper Avenue, Canada Place, Edmonton, Alberta, T5J 4C1.",
+        "locator": "RFB Annex B, PDF page 18 in printed pagination; web-reader page 17, lines 800-815",
+        "locality_disposition": "The scope location is explicitly Edmonton."
+      },
+      "code_or_technical_evidence_locators": [],
+      "attachment_evidence": "The RFB scopes office workstation supply and installation. Its reference to detailed plans/drawings does not expose building-code review, alternative-solution evidence, or building technical design attachments.",
+      "duplicate_comparison": {
+        "project_title_matches_in_index": [],
+        "source_url_matches_in_index": [],
+        "source_url_or_final_url_matches_in_catalogue": [],
+        "hash_comparison": "Not available: no eligible building design attachment was retrieved."
+      },
+      "disposition": "Excluded: Edmonton location is explicit, but the procurement document concerns furniture installation rather than building-code or building-design technical evidence.",
+      "limits": "The 24-page web-reader view was not saved as original bytes; response size, SHA-256, and reuse rights were not established. This RFB is for furniture installation; separately referenced plans were not retrieved or assessed as building-design evidence."
+    },
+    {
+      "candidate_id": "PR3-007",
+      "project_or_record": "University of Calgary Design Standards, Section 8.1 Drawing Standard",
+      "source_class": "University owner design standard; generic, non-project guidance",
+      "source_url": "https://www.ucalgary.ca/live-uc-ucalgary-site/sites/default/files/teams/223/Design%20Standards/8.1%20Drawing%20Standard.pdf",
+      "final_url": null,
+      "observation": {
+        "retrieval_channel": "official UCalgary search-index result only",
+        "observed_at_utc": null,
+        "http_status": null,
+        "status_note": "No direct request was made.",
+        "content_type": "application/pdf per indexed result",
+        "bytes_saved_locally": 0,
+        "sha256": null,
+        "pages": null,
+        "timestamp_note": "The web tool did not expose a per-source retrieval timestamp; use the top-level ledger snapshot time only as the research snapshot.",
+        "original_response_bytes": null,
+        "final_url_note": "Not verified because no direct original-byte request was made."
+      },
+      "locality_evidence": {
+        "quote": "For small renovation projects, “group” demolition and renovation of the same area together.",
+        "locator": "Section 8.1.4 in the indexed standard; no project identified",
+        "locality_disposition": "University standard only; no project locality."
+      },
+      "code_or_technical_evidence_locators": [
+        {
+          "locator": "Section 8.1.4.3-8.1.4.4, indexed standard",
+          "evidence": "Generic sheet-type guidance mentions building-code analysis and fire-safety plans."
+        }
+      ],
+      "attachment_evidence": "No project design attachment; generic drawing conventions only.",
+      "duplicate_comparison": {
+        "project_title_matches_in_index": [],
+        "source_url_matches_in_index": [],
+        "source_url_or_final_url_matches_in_catalogue": [],
+        "hash_comparison": "Not applicable; no project attachment retrieved."
+      },
+      "disposition": "Excluded: generic checklist/standard, not a project-specific technical record.",
+      "limits": "Only the official search-index result was inspected; no project, project locality, direct retrieval metadata, or project attachment exists in the evidence seen."
+    },
+    {
+      "candidate_id": "PR3-008",
+      "project_or_record": "University of Calgary Design Standards, Section 8.4.2 Layer Naming Convention",
+      "source_class": "University owner design standard; generic, non-project guidance",
+      "source_url": "https://www.ucalgary.ca/sites/default/files/teams/223/Design%20Standards/8.4.2%20Layer%20Naming%20Convention.pdf",
+      "final_url": null,
+      "observation": {
+        "retrieval_channel": "official UCalgary search-index result only",
+        "observed_at_utc": null,
+        "http_status": null,
+        "status_note": "No direct request was made.",
+        "content_type": "application/pdf per indexed result",
+        "bytes_saved_locally": 0,
+        "sha256": null,
+        "pages": null,
+        "timestamp_note": "The web tool did not expose a per-source retrieval timestamp; use the top-level ledger snapshot time only as the research snapshot.",
+        "original_response_bytes": null,
+        "final_url_note": "Not verified because no direct original-byte request was made."
+      },
+      "locality_evidence": {
+        "quote": "Building Code Analysis",
+        "locator": "Section heading within the generic layer-naming standard",
+        "locality_disposition": "No project identified; no project locality."
+      },
+      "code_or_technical_evidence_locators": [
+        {
+          "locator": "Generic Building Code Analysis CAD-layer section; indexed standard",
+          "evidence": "Layer naming examples refer to fire-resistance ratings, fire separations, firewalls, and travel distance."
+        }
+      ],
+      "attachment_evidence": "No project design attachment; generic CAD-layer conventions only.",
+      "duplicate_comparison": {
+        "project_title_matches_in_index": [],
+        "source_url_matches_in_index": [],
+        "source_url_or_final_url_matches_in_catalogue": [],
+        "hash_comparison": "Not applicable; no project attachment retrieved."
+      },
+      "disposition": "Excluded: generic design standard, not a project-specific technical record.",
+      "limits": "Only the official search-index result was inspected; no project, project locality, direct retrieval metadata, or project attachment exists in the evidence seen."
+    }
+  ],
+  "access_gaps": [
+    {
+      "record_ids": [
+        "PR3-001"
+      ],
+      "requested_source": "Coronation ECO Station Expansion procurement details",
+      "official_notice_url": "https://canadabuys.canada.ca/en/tender-opportunities/tender-notice/ab-2026-00800",
+      "destination_url": "https://purchasing.alberta.ca/posting/AB-2026-00800",
+      "observed_errors": [
+        "CanadaBuys leave-site wrapper returned 403 Forbidden.",
+        "Direct destination open was reported as not accessible via this tool."
+      ],
+      "disposition": "No attachment bytes retrieved; no credentials or access-control workaround attempted.",
+      "failed_wrapper_url": "https://canadabuys.canada.ca/en/you-are-now-leaving-canadabuys?ariba=&destin=https%3A%2F%2Fpurchasing.alberta.ca%2Fposting%2FAB-2026-00800&source=%2Fen%2Ftender-opportunities%2Ftender-notice%2Fab-2026-00800"
+    },
+    {
+      "record_ids": [
+        "PR3-002"
+      ],
+      "requested_source": "University of Alberta Telus Gallery procurement details",
+      "official_notice_url": "https://canadabuys.canada.ca/en/tender-opportunities/tender-notice/ab-2025-00595",
+      "destination_url": "https://purchasing.alberta.ca/posting/AB-2025-00595",
+      "observed_errors": [
+        "CanadaBuys leave-site wrapper returned 403 Forbidden.",
+        "Direct destination open was reported as not accessible via this tool."
+      ],
+      "disposition": "No attachment bytes retrieved; no credentials or access-control workaround attempted.",
+      "failed_wrapper_url": "https://canadabuys.canada.ca/en/you-are-now-leaving-canadabuys?ariba=&destin=https%3A%2F%2Fpurchasing.alberta.ca%2Fposting%2FAB-2025-00595&source=%2Fen%2Ftender-opportunities%2Ftender-notice%2Fab-2025-00595"
+    },
+    {
+      "record_ids": [
+        "PR3-003"
+      ],
+      "requested_source": "Bowness High School theatre upgrade consultant procurement details",
+      "official_notice_url": "https://canadabuys.canada.ca/en/tender-opportunities/tender-notice/ab-2025-06170",
+      "destination_url": null,
+      "observed_errors": [],
+      "disposition": "The public notice points to a third-party site and says an account may be required; no sign-up or login was attempted."
+    },
+    {
+      "record_ids": [],
+      "requested_source": "Additional City of Edmonton procurement listings surfaced in CanadaBuys search result lists; project names were truncated.",
+      "observed_errors": [
+        "Both tender-notice opens returned 403 Forbidden in the web reader."
+      ],
+      "disposition": "Search-result listings were insufficient to identify a project or attachment; not counted as candidates.",
+      "observed_error_urls": [
+        "https://canadabuys.canada.ca/en/tender-opportunities/tender-notice/ab-2026-04767",
+        "https://canadabuys.canada.ca/en/tender-opportunities/tender-notice/ab-2026-03366"
+      ]
+    }
+  ],
+  "verified_eligible_originals": [],
+  "source_disposition": {
+    "none_proves_approval": true,
+    "no_new_attachment_group_added": true,
+    "no_prompt_or_applicant_facts_synthesized": true,
+    "no_existing_escribe_403_url_retried": true,
+    "new_publicly_downloadable_target_locality_attachment_found": false
+  },
+  "methods_used": [
+    {
+      "name": "Matt Pocock research",
+      "path": "/Users/aamia/.agents/skill-libraries/mattpocock/skills/engineering/research/SKILL.md",
+      "applied": "Bounded primary-source search, follow source-owned evidence, record limits; its usual background-agent step was omitted under the explicit no-delegation constraint."
+    },
+    {
+      "name": "T3 workflow research route",
+      "path": "/Users/aamia/.codex/skills/t3-workflow/references/routes.md",
+      "applied": "Used the research route and kept the deliverable within the assigned repository artifacts."
+    },
+    {
+      "name": "Batatis hackathon domain method",
+      "path": "/Users/aamia/.t3/worktrees/batatis/work-luna-accuracy-95-20261025/.cursor/skills/batatis-hackathon/SKILL.md",
+      "applied": "Classified project design/code evidence without implying technical correctness, approval, or safety."
+    }
+  ],
+  "verification": {
+    "corpus_index_or_source_catalogue_modified": false,
+    "gold_or_prompt_metadata_modified": false,
+    "original_files_saved": false,
+    "openai_api_calls": 0,
+    "model_runs": 0,
+    "browser_or_native_apps_used": false,
+    "project_ports_touched": [],
+    "access_controls_bypassed": false,
+    "downloads_paid_for": false,
+    "ati_requests_submitted": false,
+    "contacts_made": false,
+    "publication_or_sharing_performed": false
+  },
+  "ledger_snapshot_at_utc": "2026-10-25T20:03:21Z",
+  "per_source_retrieval_timestamps_available": false,
+  "prior_context": {
+    "previously_identified_ecsd_group_not_recounted": {
+      "source_groups": 1,
+      "named_edmonton_projects": 2,
+      "status": "Already quarantined in the earlier accuracy95-local report; not newly discovered or modified in r3."
+    }
+  },
+  "workspace_branch": "work/luna-accuracy-95-20261025"
+}
