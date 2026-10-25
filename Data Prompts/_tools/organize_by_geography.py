@@ -9,6 +9,18 @@ from geography import case_folder, load_geography
 from write_readme import write_navigation
 
 
+def relocate_paths(value, previous):
+    if isinstance(value, dict):
+        return {key: relocate_paths(item, previous) for key, item in value.items()}
+    if isinstance(value, list):
+        return [relocate_paths(item, previous) for item in value]
+    if isinstance(value, str):
+        for old, new in previous.items():
+            if value == old or value.startswith(old + "/"):
+                return new + value[len(old):]
+    return value
+
+
 def organize(base=BASE):
     index = json.loads((base / "index.json").read_text())
     geography = load_geography(base)
@@ -47,17 +59,7 @@ def organize(base=BASE):
     # Preserve the original verification record while updating its file pointers.
     path = base / "validation.json"
     if path.exists():
-        def relocate(value):
-            if isinstance(value, dict):
-                return {key: relocate(item) for key, item in value.items()}
-            if isinstance(value, list):
-                return [relocate(item) for item in value]
-            if isinstance(value, str):
-                first, separator, rest = value.partition("/")
-                if first in previous:
-                    return previous[first] + (separator + rest if separator else "")
-            return value
-        report = relocate(json.loads(path.read_text()))
+        report = relocate_paths(json.loads(path.read_text()), previous)
         path.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n")
     write_navigation(base, index)
     return {"cases": len(index), "country_folders": len({r["country"] for r in index}),
