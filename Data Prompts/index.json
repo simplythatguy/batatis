@@ -3768,7 +3768,7 @@
     "code_edition": "unknown; NRC FPH reports describe minimum NBCC requirements without naming the edition",
     "source_url": "https://publications-cnrc.canada.ca/eng/view/ft/?id=22266bee-deca-4ba4-aaa9-df7f37dcb356",
     "attachments": 2,
-    "source_group": "943ae9fbfc88a8f7",
+    "source_group": "cec8c107102bbedc",
     "outcome_leakage": true,
     "reuse_status": "rights_review_required",
     "worker": "L17"
@@ -3785,7 +3785,7 @@
     "code_edition": "unknown; NRC FPH reports describe minimum NBCC requirements without naming the edition",
     "source_url": "https://publications-cnrc.canada.ca/eng/view/ft/?id=ed314e16-f5e0-45a0-8074-72db85e3a599",
     "attachments": 2,
-    "source_group": "b29070a802c6c765",
+    "source_group": "cec8c107102bbedc",
     "outcome_leakage": true,
     "reuse_status": "rights_review_required",
     "worker": "L17"
@@ -3802,7 +3802,7 @@
     "code_edition": "unknown; the summary paper does not identify a code edition for this experiment",
     "source_url": "https://nrc-publications.canada.ca/eng/view/accepted/?id=0af1ee38-807d-478a-a5e2-c225855664e5",
     "attachments": 1,
-    "source_group": "bdd42c26a07d190f",
+    "source_group": "cec8c107102bbedc",
     "outcome_leakage": true,
     "reuse_status": "rights_review_required",
     "worker": "L17"
@@ -3819,7 +3819,7 @@
     "code_edition": "unknown; NRC FPH reports describe minimum NBCC requirements without naming the edition",
     "source_url": "https://publications-cnrc.canada.ca/eng/view/ft/?id=8f07dbef-7b79-4f84-9125-f9acd4fd4b73",
     "attachments": 2,
-    "source_group": "fbf0d2f087bc8938",
+    "source_group": "cec8c107102bbedc",
     "outcome_leakage": true,
     "reuse_status": "rights_review_required",
     "worker": "L17"
@@ -3836,7 +3836,7 @@
     "code_edition": "unknown; NRC FPH reports describe minimum NBCC requirements without naming the edition",
     "source_url": "https://publications-cnrc.canada.ca/eng/view/ft/?id=f0d576c9-b383-4bd1-b8fa-b1a2c4f04523",
     "attachments": 2,
-    "source_group": "1c51bc1723400d87",
+    "source_group": "cec8c107102bbedc",
     "outcome_leakage": true,
     "reuse_status": "rights_review_required",
     "worker": "L17"
@@ -3955,7 +3955,7 @@
     "code_edition": "As cited in the report: C/AS4 Public Access (Amendment 2, 19 December 2013); C/AS5 Offices (Amendment 2, 19 December 2013); F6/AS1 (10 October 2011); F7/AS1 (10 April 2012); F8/AS1 (10 April 2012); Building Act 2004 ss 17, 46, 112 and 118 as quoted; DBH Gazette Notice No 49 (written 'effective 7 May 2012' on p.5 and 'dated 3 May 2012' on p.20)",
     "source_url": "https://fyi.org.nz/request/23106",
     "attachments": 1,
-    "source_group": "8a13ae7f5c6f2b3c",
+    "source_group": "e214ced9d39c47ae",
     "outcome_leakage": true,
     "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
     "worker": "H06"
@@ -3972,7 +3972,7 @@
     "code_edition": "Clause B1 with compliance documents B1/VM1 and Acceptable Solution B1/AS1 as named on the statements (p.31); Building Regulations 1992 cited on the PS2 (p.29); statement form version not stated (unknown if unstated)",
     "source_url": "https://fyi.org.nz/request/23106",
     "attachments": 2,
-    "source_group": "8a13ae7f5c6f2b3c",
+    "source_group": "e214ced9d39c47ae",
     "outcome_leakage": true,
     "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
     "worker": "H06"
@@ -4924,7 +4924,7 @@
     "code_edition": "2012 Ontario Building Code (City page identifies the consultant report baseline); exact amendment set is not stated in the study",
     "source_url": "https://secure.toronto.ca/council/agenda-item.do?item=2024.PH14.7",
     "attachments": 2,
-    "source_group": "c56e93bc09e3cd68",
+    "source_group": "e3926c4829094185",
     "outcome_leakage": false,
     "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
     "worker": "L12"
@@ -5264,7 +5264,7 @@
     "code_edition": "2012 Ontario Building Code, Part 9 (as stated in the project profile; current City guidance notes its feasibility study used the 2012 OBC)",
     "source_url": "https://singlestair.ca/LGA-Architectural-Partners",
     "attachments": 3,
-    "source_group": "83ee78754c66505c",
+    "source_group": "e3926c4829094185",
     "outcome_leakage": true,
     "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
     "worker": "L14"
@@ -5281,7 +5281,7 @@
     "code_edition": "2024 Ontario Building Code, Part 9 (as stated in the project profile)",
     "source_url": "https://singlestair.ca/Office-Ou",
     "attachments": 3,
-    "source_group": "6865a816e320d8f5",
+    "source_group": "e3926c4829094185",
     "outcome_leakage": true,
     "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
     "worker": "L14"
@@ -5298,7 +5298,7 @@
     "code_edition": "2024 Ontario Building Code, Part 9 (as stated in the project profile)",
     "source_url": "https://singlestair.ca/Lateral-Office",
     "attachments": 3,
-    "source_group": "ecc3c7fbb7682b92",
+    "source_group": "e3926c4829094185",
     "outcome_leakage": true,
     "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
     "worker": "L14"
@@ -10126,7 +10126,7 @@
     "code_edition": "unknown (page cites NBC 3.2.2.52 but does not identify an edition)",
     "source_url": "https://singlestair.ca/Prototype-1",
     "attachments": 3,
-    "source_group": "d900e040fe5c91f3",
+    "source_group": "1637efaa240b7862",
     "outcome_leakage": false,
     "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
     "worker": "L14"
@@ -10143,7 +10143,7 @@
     "code_edition": "unknown (page cites NBC 3.2.2.52 but does not identify an edition)",
     "source_url": "https://singlestair.ca/Prototype-2",
     "attachments": 3,
-    "source_group": "570275b5edcb0e5e",
+    "source_group": "1637efaa240b7862",
     "outcome_leakage": false,
     "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
     "worker": "L14"
@@ -10160,7 +10160,7 @@
     "code_edition": "unknown (page cites NBC 3.2.2.51 and BCBC stair-width context, without a permit code edition)",
     "source_url": "https://singlestair.ca/Prototype-3",
     "attachments": 3,
-    "source_group": "243bccef8561159c",
+    "source_group": "1637efaa240b7862",
     "outcome_leakage": false,
     "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
     "worker": "L14"
@@ -10177,7 +10177,7 @@
     "code_edition": "unknown (page cites NBC 3.2.2.51 but does not identify an edition)",
     "source_url": "https://singlestair.ca/Prototype-4",
     "attachments": 3,
-    "source_group": "73ef3e60655ff941",
+    "source_group": "1637efaa240b7862",
     "outcome_leakage": false,
     "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
     "worker": "L14"
@@ -10194,7 +10194,7 @@
     "code_edition": "unknown (page cites NBC Part 9 without an edition)",
     "source_url": "https://singlestair.ca/Prototype-5",
     "attachments": 3,
-    "source_group": "7a3a20adf9ee4521",
+    "source_group": "1637efaa240b7862",
     "outcome_leakage": false,
     "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
     "worker": "L14"
@@ -10211,7 +10211,7 @@
     "code_edition": "unknown (page cites NBC Part 9 without an edition)",
     "source_url": "https://singlestair.ca/Prototype-6",
     "attachments": 3,
-    "source_group": "8c2b22a5896cd594",
+    "source_group": "1637efaa240b7862",
     "outcome_leakage": false,
     "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
     "worker": "L14"
@@ -10636,7 +10636,7 @@
     "code_edition": "NZBC Protection from Fire C3.5 and C3.7(a)-(c) and C/AS1-C/AS7 as listed on the certificate (p.73); certificate edition and date not stated in the text read; PS1 clause reference illegible (p.74)",
     "source_url": "https://fyi.org.nz/request/23106",
     "attachments": 1,
-    "source_group": "f6de21b173338721",
+    "source_group": "e214ced9d39c47ae",
     "outcome_leakage": true,
     "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
     "worker": "H06"
@@ -11095,7 +11095,7 @@
     "code_edition": "unknown (the report applies the Ontario Building Code but does not identify a project permit edition; Toronto’s guide says the study used the 2012 OBC)",
     "source_url": "https://www.toronto.ca/services-payments/building-construction/building-permit/before-you-apply-for-a-building-permit/building-permit-application-guides/guides-for-other-buildings/single-exit-stairs/",
     "attachments": 2,
-    "source_group": "c56e93bc09e3cd68",
+    "source_group": "e3926c4829094185",
     "outcome_leakage": false,
     "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
     "worker": "L14"

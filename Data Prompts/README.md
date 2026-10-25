@@ -1,6 +1,6 @@
 # Data Prompts
 
-653 numbered source-backed attachment exercises, organized around Calgary and Edmonton first, then other Alberta records. There are 605 groups of shared original input sources; prompt count is not a count of complete applications or independent projects.
+653 numbered source-backed attachment exercises, organized around Calgary and Edmonton first, then other Alberta records. There are 592 groups of shared original input sources; prompt count is not a count of complete applications or independent projects.
 
 | Priority | Prompts |
 | --- | ---: |

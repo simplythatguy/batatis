@@ -45,6 +45,38 @@ def attachment_files(source, include_evaluation=True):
             yield attachment["derived_text"], attachment, True
 
 
+def source_groups(records):
+    """Keep every shared default-input original in one evaluation split."""
+    parents = list(range(len(records)))
+
+    def root(number):
+        while parents[number] != number:
+            parents[number] = parents[parents[number]]
+            number = parents[number]
+        return number
+
+    owners = {}
+    for number, record in enumerate(records):
+        attachments = record["attachments"]
+        has_non_outcome = any(a.get("role") != "outcome_reference" for a in attachments)
+        for attachment in attachments:
+            default = attachment.get("included_in_default_input",
+                                     attachment.get("role") != "outcome_reference" or not has_non_outcome)
+            if not default:
+                continue
+            value = attachment["sha256"]
+            if value in owners:
+                parents[root(number)] = root(owners[value])
+            else:
+                owners[value] = number
+    members = {}
+    for number, record in enumerate(records):
+        members.setdefault(root(number), []).append(record["id"])
+    identifiers = {group: hashlib.sha256("|".join(sorted(ids)).encode()).hexdigest()[:16]
+                   for group, ids in members.items()}
+    return {record["id"]: identifiers[root(number)] for number, record in enumerate(records)}
+
+
 def check_file(path, expected):
     if not re.fullmatch(r"[0-9a-f]{64}", expected["sha256"]):
         raise ValueError("invalid SHA-256")

@@ -323,5 +323,6 @@
       "reason": "Permit-register entry only; no design, rationale or technical application attachment. Retained in worker references and excluded from numbered prompts."
     }
   ],
-  "distinct_source_groups": 605
+  "distinct_source_groups": 592,
+  "source_group_definition": "connected components of all shared default-input original attachments"
 }

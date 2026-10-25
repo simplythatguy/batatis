@@ -6,7 +6,7 @@ import json
 import re
 from collections import Counter
 
-from corpus import BASE, attachment_files, cases, check_file, child
+from corpus import BASE, attachment_files, cases, check_file, child, source_groups
 
 
 def require(condition, message):
@@ -51,6 +51,12 @@ def verify(base=BASE, numbers=None, attachments=False):
     index = json.loads((base / "index.json").read_text())
     if [row["prompt"] for row in index] != list(range(1, len(index) + 1)):
         report["errors"].append({"error": "index numbering is not contiguous"})
+    groups = source_groups([source for _, _, source in cases(base)])
+    for row in index:
+        if row["source_group"] != groups[row["case_id"]]:
+            report["errors"].append({"prompt": row["prompt"],
+                                     "error": "source group must include all shared default-input evidence"})
+    report["source_groups"] = len(set(groups.values()))
     report["priorities"] = dict(sorted(counts.items()))
     return report
 

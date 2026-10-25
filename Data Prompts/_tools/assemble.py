@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 from html.parser import HTMLParser
 from pathlib import Path
 from xml.etree import ElementTree
+from corpus import source_groups
 
 BASE = Path(__file__).resolve().parents[1]
 TYPES = {"actual_application", "issued_variance", "appeal_decision", "documented_design_study",
@@ -171,26 +172,7 @@ def main():
             continue
         seen[key] = case["id"]
         accepted.append(case)
-    # Keep records sharing an original input report together when selecting evaluation sets.
-    parents = list(range(len(accepted)))
-    def root(i):
-        while parents[i] != i:
-            parents[i] = parents[parents[i]]
-            i = parents[i]
-        return i
-    owner = {}
-    for i, case in enumerate(accepted):
-        primary = [a for a in case["attachments"] if a.get("role") == "input"] or case["attachments"]
-        for attachment in primary:
-            value = attachment["sha256"]
-            if value in owner:
-                parents[root(i)] = root(owner[value])
-            else:
-                owner[value] = i
-    group_members = {}
-    for i, case in enumerate(accepted):
-        group_members.setdefault(root(i), []).append(case["id"])
-    group_ids = {r: hashlib.sha256("|".join(sorted(members)).encode()).hexdigest()[:16] for r, members in group_members.items()}
+    group_ids = source_groups(accepted)
     index = []
     for number, case in enumerate(accepted, 1):
         folder = BASE / f"Prompt {number}"
@@ -271,7 +253,7 @@ def main():
                           alberta_evaluation_use="comparative attachment format/content only" if tier == 4 else "source extraction and administrative evidence exercise; not technical approval",
                           instruction="Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth.")
         write_json(folder / "evaluation.json", evaluation)
-        source_group = group_ids[root(number - 1)]
+        source_group = group_ids[case["id"]]
         row = {"prompt": number, "folder": folder.name, "priority_tier": tier, "priority": tier_label, "case_id": case["id"], "title": case["title"],
                "case_type": case["case_type"], "jurisdiction": case["jurisdiction"], "code_edition": case.get("code_edition", "unknown"),
                "source_url": case["source_url"], "attachments": len(attachment_rows), "source_group": source_group,
@@ -279,7 +261,7 @@ def main():
         index.append(row)
     if index:
         with (BASE / "index.csv").open("w", newline="") as stream:
-            writer = csv.DictWriter(stream, fieldnames=list(index[0]))
+            writer = csv.DictWriter(stream, fieldnames=list(index[0]), lineterminator="\n")
             writer.writeheader()
             writer.writerows(index)
     write_json(BASE / "index.json", index)
