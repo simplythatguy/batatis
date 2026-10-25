@@ -2,7 +2,7 @@
 
 Batatis helps builders in Alberta prepare a complete building-code variance application. It also shows Safety Codes Officers what an application is missing.
 
-[Open the app](https://batatis-vert.vercel.app) · [License](LICENSE.md)
+[Open the app](https://batatis-vert.vercel.app) · [Desktop setup](docs/desktop.md) · [License](LICENSE.md)
 
 ## The problem
 
@@ -134,9 +134,11 @@ Many published decisions state their outcome, so the cases test reading and pape
 
 ## How Batatis works
 
-![The same workflow as Our solution, with the technology under each step](docs/readme/how-it-works.png)
+![The hosted website's workflow, with the technology under each step](docs/readme/how-it-works.png)
 
-This diagram has the same steps as the one in [Our solution](#our-solution), with the technology that runs each step. The colors mark the same four stages in both diagrams. The website is React and TypeScript, built with Vite. It calls the engine, a Python API built with FastAPI. Vercel hosts both.
+This diagram shows the hosted website. It has the same steps as the one in [Our solution](#our-solution), with the technology that runs each step. The colors mark the same four stages in both diagrams. The website is React and TypeScript, built with Vite. It calls the engine, a Python API built with FastAPI. Vercel hosts the website and its engine.
+
+The desktop package uses the same screens and workflow. Electron runs the screens and a private Python engine on your computer. Desktop accounts and applications stay separate from the website. The [desktop guide](docs/desktop.md) explains local development, AI connections and building the package.
 
 For applicants:
 
@@ -159,9 +161,9 @@ Batatis checks what Luna writes before it keeps anything. The document review pr
 
 The filter catches common phrasings, not every one. The engine saves the document review with the application, but the screens don't show it yet, and step 3 doesn't use it to find articles yet.
 
-CodeDB is a SQLite database of the building code. You build it on your computer from the official PDFs of the National Building Code, 2023 Alberta Edition, second printing. Applications and accounts live in SQLite on your computer, or in PostgreSQL on Neon when the app is hosted. The assistant answers with GPT-4.1 mini by default, or with Claude Sonnet 5.5 when `ANTHROPIC_API_KEY` is set. Voice uses Grok from xAI.
+CodeDB is a SQLite database of the building code. You build it on your computer from the official PDFs of the National Building Code, 2023 Alberta Edition, second printing. Applications and accounts live in SQLite on your computer, or in PostgreSQL on Neon when the app is hosted. The web assistant answers with GPT-4.1 mini by default, or with Claude Sonnet 5.5 when `ANTHROPIC_API_KEY` is set. Web voice uses Grok from xAI.
 
-Before any text goes to an AI service, Batatis removes the names, contact details, and addresses that it recognizes. A daily spend cap, US$5 by default, stops AI calls when it is reached.
+Before any text goes to an AI service, Batatis removes the names, contact details, and addresses that it recognizes. The web engine's daily spend cap, US$5 by default, stops its AI calls when it is reached. The desktop guide explains its separate connections and billing.
 
 <details>
 <summary>Why Batatis uses Luna and Jev, and what isn't measured yet</summary>
@@ -202,14 +204,17 @@ The frontend, meaning the files that build the screens and their look:
 
 ![The frontend files: the web app's entry, the screens in web/src/calm, and the design rules and tokens in docs](docs/readme/folder-structure-frontend.png)
 
-Both pictures show the main folders and files, not every one. The pictures leave out these files, which hold the AI workflow:
+Both pictures show the main folders and files, not every one. The pictures leave out these parts:
 
 - [`engine/intake/review.py`](engine/intake/review.py) runs the document review and checks what it returns.
 - [`engine/identify/pipeline.json`](engine/identify/pipeline.json) holds the settings for finding code articles.
 - [`evals_dev/data_prompts/`](evals_dev/data_prompts/) runs the practice cases through the engine and scores the results.
 - [`docs/evaluations/workflow-decision-20261025.md`](docs/evaluations/workflow-decision-20261025.md) explains why Batatis uses this workflow, and its limits.
+- [`desktop/`](desktop/) holds the desktop host and packaging. [`engine/desktop/`](engine/desktop/) runs its private engine connection, and [`web/src/desktop/`](web/src/desktop/) adds local Settings and person switching.
 
 ## Get started
+
+The steps below run the website locally. For the desktop package, follow [Desktop setup](docs/desktop.md). Desktop builds and the complete repository checks need Node.js 24 or newer.
 
 ### Set it up with an AI agent
 

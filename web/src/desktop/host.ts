@@ -1,0 +1,213 @@
+/**
+ * The desktop host, when this page runs in the Batatis desktop app (desktop/src/preload/app.ts); absent on
+ * the web. Every answer is parsed here. Provider ids and labels are opaque host data: this file names none.
+ */
+import { useSyncExternalStore } from "react";
+
+export type WorkspaceKind = "local" | "dev";
+export type ServiceState = "starting" | "ready" | "busy" | "failed";
+
+export interface Person {
+  profile: string;
+  name: string;
+  kind: "applicant" | "reviewer";
+  authority: string | null;
+}
+
+export interface DesktopInfo {
+  version: string;
+  workspace: WorkspaceKind;
+  service: { state: ServiceState; detail: string | null };
+  person: Person | null;
+  people: Person[];
+  codeDb: { available: boolean };
+}
+
+export type Outcome = { ok: true } | { ok: false; message: string };
+export interface AiConfiguration {
+  generation: string;
+  screening: boolean;
+  choices: { value: string; label: string }[];
+  screeningLabel: string;
+  help: string;
+  note: string;
+}
+
+export type Connection =
+  | { state: "unavailable"; message: string }
+  | { state: "signed-out"; last: string | null }
+  /** Device sign-in: the person enters userCode at the address shown (the host opens it on request). */
+  | { state: "pending"; userCode: string; address: string }
+  | { state: "signed-in"; plan: string | null }
+  | { state: "error"; message: string };
+
+export type ProviderRow =
+  | { id: string; kind: "account"; label: string; description: string; status: Connection; workflow: string | null }
+  | { id: string; kind: "key"; label: string; description: string; status: "missing" | "saved" | "secure-storage-unavailable" };
+
+interface Bridge {
+  version: number;
+  info(): Promise<unknown>;
+  restart(): Promise<unknown>;
+  switchWorkspace(kind: string): Promise<unknown>;
+  switchPerson(profile: string): Promise<unknown>;
+  providers: Record<"list" | "enterKey" | "removeKey" | "connect" | "openLogin" | "cancelLogin" | "disconnect", (id?: string) => Promise<unknown>> & {
+    configuration(): Promise<unknown>;
+    selectGeneration(value: string): Promise<unknown>;
+    selectScreening(value: boolean): Promise<unknown>;
+  };
+  codeDb: { choose(): Promise<unknown> };
+  onChange(listener: () => void): () => void;
+}
+
+const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null && !Array.isArray(value);
+const str = (value: unknown): string | null => (typeof value === "string" ? value : null);
+
+function isBridge(value: unknown): value is Bridge {
+  return isRecord(value) && value.version === 1 && typeof value.info === "function" && isRecord(value.providers) && isRecord(value.codeDb);
+}
+
+function bridge(): Bridge | null {
+  const candidate: unknown = typeof window === "undefined" ? undefined : Reflect.get(window, "batatisDesktop");
+  return isBridge(candidate) ? candidate : null;
+}
+
+function parsePerson(value: unknown): Person | null {
+  if (!isRecord(value)) return null;
+  const profile = str(value.profile), name = str(value.name);
+  if (!profile || !name || (value.kind !== "applicant" && value.kind !== "reviewer")) return null;
+  return { profile, name, kind: value.kind, authority: str(value.authority) };
+}
+
+export function parseInfo(value: unknown): DesktopInfo | null {
+  if (!isRecord(value) || !isRecord(value.service) || !isRecord(value.codeDb)) return null;
+  const workspace = value.workspace, state = value.service.state;
+  if (workspace !== "local" && workspace !== "dev") return null;
+  if (state !== "starting" && state !== "ready" && state !== "busy" && state !== "failed") return null;
+  const people = Array.isArray(value.people) ? value.people.map(parsePerson).filter((p): p is Person => p !== null) : [];
+  return {
+    version: str(value.version) ?? "",
+    workspace,
+    service: { state, detail: str(value.service.detail) },
+    person: parsePerson(value.person),
+    people,
+    codeDb: { available: value.codeDb.available === true },
+  };
+}
+
+export function parseOutcome(value: unknown): Outcome {
+  if (isRecord(value) && value.ok === true) return { ok: true };
+  const message = isRecord(value) ? str(value.message) : null;
+  return { ok: false, message: message ?? "That didn’t work. Try again." };
+}
+
+export function parseConfiguration(value: unknown): AiConfiguration | null {
+  if (!isRecord(value) || typeof value.generation !== "string" || typeof value.screening !== "boolean"
+    || !Array.isArray(value.choices) || typeof value.screeningLabel !== "string" || typeof value.help !== "string") return null;
+  const choices: AiConfiguration["choices"] = [];
+  for (const item of value.choices) {
+    if (!isRecord(item) || typeof item.value !== "string" || typeof item.label !== "string") return null;
+    choices.push({ value: item.value, label: item.label });
+  }
+  if (!choices.some((item) => item.value === value.generation)) return null;
+  return { generation: value.generation, screening: value.screening, choices, screeningLabel: value.screeningLabel, help: value.help, note: str(value.note) ?? "" };
+}
+
+function parseConnection(value: unknown): Connection | null {
+  if (!isRecord(value)) return null;
+  switch (value.state) {
+    case "unavailable": return { state: "unavailable", message: str(value.message) ?? "Not available." };
+    case "pending": {
+      const userCode = str(value.userCode), address = displayAddress(value.verificationUrl);
+      return userCode && address ? { state: "pending", userCode, address } : null;
+    }
+    case "signed-in": return { state: "signed-in", plan: str(value.plan) };
+    case "error": return { state: "error", message: str(value.message) ?? "Something went wrong." };
+    case "signed-out": {
+      const last = isRecord(value.last) ? value.last : null;
+      const note = last?.result === "cancelled" ? "Sign-in cancelled." : last ? str(last.message) : null;
+      return { state: "signed-out", last: note };
+    }
+    default: return null;
+  }
+}
+
+function displayAddress(value: unknown): string | null {
+  try {
+    const url = new URL(str(value) ?? "");
+    return url.protocol === "https:" ? `${url.host}${url.pathname === "/" ? "" : url.pathname}` : null;
+  } catch {
+    return null;
+  }
+}
+
+export function parseRows(value: unknown): ProviderRow[] {
+  if (!Array.isArray(value)) return [];
+  const rows: ProviderRow[] = [];
+  for (const item of value) {
+    if (!isRecord(item)) continue;
+    const id = str(item.id), label = str(item.label), description = str(item.description) ?? "";
+    if (!id || !label) continue;
+    if (item.kind === "account") {
+      const status = parseConnection(item.status);
+      if (status) rows.push({ id, kind: "account", label, description, status,
+        workflow: isRecord(item.workflow) && item.workflow.ready === false ? str(item.workflow.message) : null });
+    } else if (item.kind === "key" && isRecord(item.status)) {
+      const state = item.status.state;
+      if (state === "missing" || state === "saved" || state === "secure-storage-unavailable") rows.push({ id, kind: "key", label, description, status: state });
+    }
+  }
+  return rows;
+}
+
+/** Live desktop info for React; null on the web and until the host first answers. */
+let info: DesktopInfo | null = null;
+let started = false;
+const listeners = new Set<() => void>();
+
+async function refresh() {
+  const host = bridge();
+  if (!host) return;
+  info = parseInfo(await host.info().catch(() => null));
+  for (const listener of listeners) listener();
+}
+
+function subscribe(listener: () => void) {
+  listeners.add(listener);
+  if (!started && bridge()) {
+    started = true;
+    bridge()?.onChange(() => void refresh());
+    void refresh();
+  }
+  return () => { listeners.delete(listener); };
+}
+
+export function useDesktop(): DesktopInfo | null {
+  return useSyncExternalStore(subscribe, () => info, () => null);
+}
+
+export const isDesktop = (): boolean => bridge() !== null;
+
+const call = async <T>(work: (host: Bridge) => Promise<unknown>, parse: (value: unknown) => T, fallback: T): Promise<T> => {
+  const host = bridge();
+  if (!host) return fallback;
+  try {
+    return parse(await work(host));
+  } catch {
+    return fallback;
+  }
+};
+
+const failed: Outcome = { ok: false, message: "That didn’t work. Try again." };
+
+export const desktop = {
+  switchPerson: (profile: string) => call((h) => h.switchPerson(profile), parseOutcome, failed),
+  switchWorkspace: (kind: WorkspaceKind) => call((h) => h.switchWorkspace(kind), parseOutcome, failed),
+  restart: () => call((h) => h.restart(), parseOutcome, failed),
+  chooseCodeDb: () => call((h) => h.codeDb.choose(), parseOutcome, failed),
+  providers: (action: "list" | "enterKey" | "removeKey" | "connect" | "openLogin" | "cancelLogin" | "disconnect", id?: string) => call((h) => h.providers[action](id), parseRows, []),
+  configuration: () => call((h) => h.providers.configuration(), parseConfiguration, null),
+  selectGeneration: (value: string) => call((h) => h.providers.selectGeneration(value), parseOutcome, failed),
+  selectScreening: (value: boolean) => call((h) => h.providers.selectScreening(value), parseOutcome, failed),
+  onChange: (listener: () => void): (() => void) => bridge()?.onChange(listener) ?? (() => {}),
+};

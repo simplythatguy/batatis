@@ -7,6 +7,7 @@ import os
 import re
 import secrets
 from email import policy
+from email.errors import UndecodableBytesDefect
 from email.message import Message
 from email.parser import BytesParser
 from typing import Annotated, Callable, Literal
@@ -123,8 +124,19 @@ def _pdf_from_body(body: bytes, content_type: str, filename: str | None) -> tupl
             raise ValueError('missing multipart framing')
         files = []
         for part in message.iter_parts():
-            if part.is_multipart() or any(getattr(value, 'defects', ()) for value in part.values()):
+            if part.is_multipart():
                 raise ValueError('invalid multipart part')
+            for name, value in part.items():
+                defects = getattr(value, 'defects', ())
+                if not defects:
+                    continue
+                if name.lower() != 'content-disposition' or not all(isinstance(d, UndecodableBytesDefect) for d in defects):
+                    raise ValueError('invalid multipart header')
+                # Browsers send UTF-8 filenames directly. The email parser flags those bytes even
+                # when they are valid UTF-8, so validate that one header's original bytes ourselves.
+                for raw_name, raw_value in part.raw_items():
+                    if raw_name.lower() == 'content-disposition':
+                        raw_value.encode('ascii', 'surrogateescape').decode('utf-8')
             if len(part.get_all('Content-Disposition', [])) != 1:
                 raise ValueError('missing or ambiguous disposition')
             if part.get_content_disposition() == 'form-data' and part.get_filename() is not None:

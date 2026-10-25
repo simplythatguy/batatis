@@ -85,8 +85,8 @@ class _Stages:
             calls = self.log.calls[before:]
             record.seconds = round(time.monotonic() - start, 3)
             record.requests = max(record.requests, len(calls))
-            record.input_tokens = sum(c['input_tokens'] for c in calls)
-            record.output_tokens = sum(c['output_tokens'] for c in calls)
+            record.input_tokens = None if any(c['input_tokens'] is None for c in calls) else sum(c['input_tokens'] for c in calls)
+            record.output_tokens = None if any(c['output_tokens'] is None for c in calls) else sum(c['output_tokens'] for c in calls)
             self.records.append(record)
 
     def emit(self, stage: str, **payload):
@@ -359,7 +359,7 @@ def run(prose: str, *, codes: Codes, config: IdentifyConfig | None = None, trans
         config=config.as_dict(), config_hash=config.config_hash, exhaustive=config.exhaustive and not fallback,
         articles_expected=DIVISION_B_ARTICLES, articles_scored=scored, ranker=ranker, fallback_reason=fallback_reason,
         verifier=verifier_state, picks=[p.article for p in picks], dropped=dropped, stages=stages.records,
-        spend=log.by_provider(), usd=round(log.usd(), 6), seconds=round(time.monotonic() - t0, 3))
+        spend=log.by_provider(), usd=None if log.usd() is None else round(log.usd(), 6), seconds=round(time.monotonic() - t0, 3))
     model_ids = {stage: public_stage_model(getattr(config, stage), pin)
                  for stage, pin in config.model_ids().items()}
     if fallback:

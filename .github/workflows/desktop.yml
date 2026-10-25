@@ -1,0 +1,142 @@
+name: Desktop native acceptance
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  packaged:
+    name: Packaged desktop (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+      OPENAI_API_KEY: ""
+      JEV_API_KEY: ""
+      ANTHROPIC_API_KEY: ""
+      TYPESAFE_API_KEY: ""
+      OPENROUTER_API_KEY: ""
+      BATATIS_LIVE: "0"
+      BATATIS_LIVE_JEV: "0"
+      BATATIS_LIVE_ELEPHANT: "0"
+      BATATIS_DESKTOP_REQUIRE_CODEX: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            desktop/package-lock.json
+            web/package-lock.json
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: desktop/engine-requirements.txt
+      - name: Install the web and desktop dependencies
+        run: |
+          npm ci --prefix web
+          npm ci --prefix desktop
+      - name: Freeze the native Python engine
+        working-directory: desktop
+        run: npm run build:engine
+      - name: Prepare the pinned bundled Codex executable
+        working-directory: desktop
+        shell: bash
+        run: |
+          target="$(node -p "process.platform + '-' + process.arch")"
+          node codex/fetch.mjs runtime "$target"
+      - name: Typecheck and test the desktop host
+        working-directory: desktop
+        run: |
+          npm run typecheck
+          npm test
+      - name: Prepare official sources for isolated test data only
+        shell: bash
+        run: |
+          set -euo pipefail
+          py="$(node -p "require('path').resolve('desktop/build/engine-venv', process.platform === 'win32' ? 'Scripts/python.exe' : 'bin/python')")"
+          "$py" -m pip install pytest==9.0.2 fonttools==4.60.1
+          "$py" scripts/fetch_sources.py
+          "$py" -m codedb build
+          echo "BATATIS_DESKTOP_PYTHON=$py" >> "$GITHUB_ENV"
+      - name: Exercise the native frozen engine and path regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          exe="$(node -p "require('path').resolve('desktop/build/engine-dist/batatis-engine', process.platform === 'win32' ? 'batatis-engine.exe' : 'batatis-engine')")"
+          BATATIS_DESKTOP_ENGINE_EXE="$exe" "$BATATIS_DESKTOP_PYTHON" -m pytest -q engine/tests/test_desktop_bridge.py engine/tests/test_desktop_workspace.py codedb/tests/test_store_paths.py engine/tests/test_export_edition_paths.py engine/tests/test_multipart_upload.py
+      - name: Package the native app and portable archive
+        working-directory: desktop
+        run: npm run package
+      - name: Launch the packaged app twice and verify its private engine
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/Batatis native acceptance"
+          "$BATATIS_DESKTOP_PYTHON" desktop/scripts/prepare-smoke.py "$out" codedb/build/codedb.sqlite
+          if [ "$RUNNER_OS" = Windows ]; then
+            package="$PWD/desktop/build/release/win-unpacked"
+          else
+            package="$(find "$PWD/desktop/build/release" -maxdepth 2 -name Batatis.app -type d -print -quit)"
+          fi
+          test -n "$package"
+          node desktop/scripts/smoke-packaged.mjs "$package" "$out"
+      - name: Capture the packaged macOS Codex request boundary without authentication
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          set -euo pipefail
+          apps=("$GITHUB_WORKSPACE"/desktop/build/release/*/Batatis.app)
+          test "${#apps[@]}" -eq 1
+          test -d "${apps[0]}"
+          resources="${apps[0]}/Contents/Resources"
+          python3 -B desktop/codex/native-check.py \
+            --resources-dir "$resources" \
+            --executable "$resources/codex/codex" \
+            --output "$RUNNER_TEMP/Batatis Codex native acceptance" \
+            --deadline-seconds 150
+      - name: Capture the packaged Windows Codex request boundary without authentication
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          & ./desktop/scripts/windows-codex-native.ps1 `
+            -Repo $env:GITHUB_WORKSPACE `
+            -ResourcesDir (Join-Path $env:GITHUB_WORKSPACE 'desktop/build/release/win-unpacked/resources') `
+            -EvidenceDir (Join-Path $env:RUNNER_TEMP 'Batatis Codex native acceptance')
+      - name: Save native reports, logs, and screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: desktop-evidence-${{ runner.os }}-${{ runner.arch }}
+          path: |
+            ${{ runner.temp }}/Batatis native acceptance/report-*.json
+            ${{ runner.temp }}/Batatis native acceptance/acceptance.json
+            ${{ runner.temp }}/Batatis native acceptance/launch-*.log
+            ${{ runner.temp }}/Batatis native acceptance/*.png
+            ${{ runner.temp }}/Batatis Codex native acceptance/**
+            ${{ runner.temp }}/Batatis Codex native acceptance.firewall-cleanup.json
+            desktop/build/release/*.audit.json
+          if-no-files-found: warn
+          include-hidden-files: true
+      - name: Save the portable app archive
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: Batatis-${{ runner.os }}-${{ runner.arch }}
+          path: desktop/build/release/*.zip
+          if-no-files-found: error

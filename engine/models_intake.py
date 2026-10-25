@@ -52,8 +52,8 @@ class ModelPass(BaseModel):
     pointed: int = 0                        # quote found and the value re-derived from it by the rules
     proposed: int = 0                       # quote found, value not re-derived: stored as `proposed`
     dropped: int = 0                        # quote not in the source: never stored
-    input_tokens: int = 0
-    output_tokens: int = 0
+    input_tokens: int | None = 0
+    output_tokens: int | None = 0
 
 
 class FieldConflict(BaseModel):
@@ -243,8 +243,8 @@ class DocumentReview(BaseModel):
     questions: list[ReviewItem] = []
     pages_sent: int = 0
     dropped: int = 0                        # model items removed because their excerpt or numbers did not check out
-    input_tokens: int = 0
-    output_tokens: int = 0
+    input_tokens: int | None = 0
+    output_tokens: int | None = 0
 
     @field_validator('model')
     @classmethod

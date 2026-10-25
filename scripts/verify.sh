@@ -1,7 +1,7 @@
 #!/bin/bash
 # Run the local gate before a pull request into main; GitHub Actions supplements these checks.
 # Docs: docs/agents/git-workflow.md
-# Usage: scripts/verify.sh [--web] [--engine]     (default: both)
+# Usage: scripts/verify.sh [--web] [--engine] [--desktop]     (default: all)
 # UI changes: also run `node evals/ui-artifacts/smoke.mjs` against the app from scripts/local-app.sh.
 set -euo pipefail
 
@@ -10,14 +10,16 @@ cd "$root"
 
 want_web=0
 want_engine=0
+want_desktop=0
 for a in "$@"; do
   case "$a" in
     --web) want_web=1 ;;
     --engine) want_engine=1 ;;
+    --desktop) want_desktop=1 ;;
     *) echo "verify: unknown option $a" >&2; exit 2 ;;
   esac
 done
-if [ $want_web = 0 ] && [ $want_engine = 0 ]; then want_web=1; want_engine=1; fi
+if [ $want_web = 0 ] && [ $want_engine = 0 ] && [ $want_desktop = 0 ]; then want_web=1; want_engine=1; want_desktop=1; fi
 
 step() { printf '\n== %s ==\n' "$*"; }
 
@@ -45,6 +47,13 @@ if [ $want_engine = 1 ]; then
   fi
   [ -x "$py" ] || py=$(command -v python3)
   "$py" -m pytest -q engine/tests codedb/tests evals_dev -rs
+fi
+
+if [ $want_desktop = 1 ]; then
+  [ -d desktop/node_modules ] || { step "desktop: install"; (cd desktop && npm ci); }
+  step "desktop: typecheck"; (cd desktop && npm run typecheck)
+  step "desktop: host and adapter tests"; (cd desktop && npm test)
+  step "desktop: main and preload build"; (cd desktop && npm run build)
 fi
 
 step "secrets scan"

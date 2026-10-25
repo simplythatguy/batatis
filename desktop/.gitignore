@@ -1,0 +1,7 @@
+node_modules/
+build/
+dist/
+artifacts/
+codex/runtime/
+.cache/
+*.log

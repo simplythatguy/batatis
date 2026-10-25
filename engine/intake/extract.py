@@ -53,8 +53,11 @@ class Extraction:
             mine.status = theirs.status if mine.status in ('off', 'not_needed') else mine.status
             mine.model = theirs.model or mine.model
             mine.reason = mine.reason or theirs.reason
-        for name in ('pointed', 'proposed', 'dropped', 'input_tokens', 'output_tokens'):
+        for name in ('pointed', 'proposed', 'dropped'):
             setattr(mine, name, getattr(mine, name) + getattr(theirs, name))
+        for name in ('input_tokens', 'output_tokens'):
+            a, b = getattr(mine, name), getattr(theirs, name)
+            setattr(mine, name, None if a is None or b is None else a + b)
 
 
 @dataclass(frozen=True)
