@@ -12,6 +12,7 @@ import hashlib
 import json
 import os
 import re
+import time
 import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
@@ -126,11 +127,22 @@ def _call(model: str, effort: str, user: str) -> dict:
             'messages': [{'role': 'system', 'content': SYSTEM}, {'role': 'user', 'content': user}],
             'response_format': {'type': 'json_schema',
                                 'json_schema': {'name': 'coverage', 'strict': True, 'schema': schema()}}}
-    with httpx.Client(timeout=300, follow_redirects=False) as client:
-        response = client.post(URL, json=body, headers={'Authorization': 'Bearer ' + key})
-        response.raise_for_status()
-        data = response.json()
-    return json.loads(data['choices'][0]['message']['content'])
+    for attempt in range(4):                    # dropped connections and 429/5xx only; verdicts never retried
+        try:
+            with httpx.Client(timeout=300, follow_redirects=False) as client:
+                response = client.post(URL, json=body, headers={'Authorization': 'Bearer ' + key})
+            if response.status_code in (429, 500, 502, 503, 504) and attempt < 3:
+                time.sleep(3 * (attempt + 1))
+                continue
+            response.raise_for_status()
+            data = response.json()
+            return json.loads(data['choices'][0]['message']['content'])
+        except (httpx.ConnectError, httpx.ConnectTimeout, httpx.ReadError, httpx.ReadTimeout,
+                httpx.RemoteProtocolError, httpx.WriteError, httpx.PoolTimeout):
+            if attempt == 3:
+                raise
+            time.sleep(3 * (attempt + 1))
+    raise RuntimeError('judge request failed')
 
 
 def grade(request: str, report: str, items: list[Item], *, model: str, effort: str,
