@@ -2317,6 +2317,67 @@
       "title": "CitationIssue",
       "type": "object"
     },
+    "CitedProvision": {
+      "properties": {
+        "cited": {
+          "title": "Cited",
+          "type": "string"
+        },
+        "code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Code"
+        },
+        "division": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Division"
+        },
+        "evidence": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/EvidenceRef"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "resolves_to": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Resolves To"
+        }
+      },
+      "required": [
+        "cited",
+        "code",
+        "resolves_to",
+        "division",
+        "evidence"
+      ],
+      "title": "CitedProvision",
+      "type": "object"
+    },
     "Claim": {
       "properties": {
         "claimed_at": {
@@ -2943,6 +3004,154 @@
       "title": "DiffEntry",
       "type": "object"
     },
+    "DocumentReview": {
+      "description": "What the model read across every readable page, kept only where it checks out against the text.\n\nFacts, conflicts and cited provisions carry excerpts that occur in the named page. Missing items,\nquestions and flags are Batatis's own words and never say that a design complies, is safe or is approved.",
+      "properties": {
+        "conflicts": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ReviewConflict"
+          },
+          "title": "Conflicts",
+          "type": "array"
+        },
+        "documents": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ReviewedDocument"
+          },
+          "title": "Documents",
+          "type": "array"
+        },
+        "dropped": {
+          "default": 0,
+          "title": "Dropped",
+          "type": "integer"
+        },
+        "effort": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Effort"
+        },
+        "facts": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ReviewFact"
+          },
+          "title": "Facts",
+          "type": "array"
+        },
+        "flags": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ReviewFlag"
+          },
+          "title": "Flags",
+          "type": "array"
+        },
+        "input_tokens": {
+          "default": 0,
+          "title": "Input Tokens",
+          "type": "integer"
+        },
+        "missing": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ReviewItem"
+          },
+          "title": "Missing",
+          "type": "array"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model"
+        },
+        "output_tokens": {
+          "default": 0,
+          "title": "Output Tokens",
+          "type": "integer"
+        },
+        "pages_sent": {
+          "default": 0,
+          "title": "Pages Sent",
+          "type": "integer"
+        },
+        "provisions": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/CitedProvision"
+          },
+          "title": "Provisions",
+          "type": "array"
+        },
+        "questions": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/ReviewItem"
+          },
+          "title": "Questions",
+          "type": "array"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "status": {
+          "enum": [
+            "off",
+            "fake",
+            "live",
+            "gate_closed",
+            "failed",
+            "not_needed"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "status",
+        "model",
+        "effort",
+        "reason",
+        "documents",
+        "flags",
+        "facts",
+        "conflicts",
+        "provisions",
+        "missing",
+        "questions",
+        "pages_sent",
+        "dropped",
+        "input_tokens",
+        "output_tokens"
+      ],
+      "title": "DocumentReview",
+      "type": "object"
+    },
     "DocumentRow": {
       "additionalProperties": false,
       "properties": {
@@ -3151,6 +3360,38 @@
         "kind"
       ],
       "title": "EvidenceItem",
+      "type": "object"
+    },
+    "EvidenceRef": {
+      "description": "An exact excerpt of the request or of one page of an attached file, checked against that text.",
+      "properties": {
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "quote": {
+          "title": "Quote",
+          "type": "string"
+        },
+        "source_ref": {
+          "title": "Source Ref",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_ref",
+        "page",
+        "quote"
+      ],
+      "title": "EvidenceRef",
       "type": "object"
     },
     "Explainer": {
@@ -5289,6 +5530,17 @@
           "title": "Ran At",
           "type": "string"
         },
+        "review": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DocumentReview"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "text_sha256": {
           "anyOf": [
             {
@@ -5318,7 +5570,8 @@
         "model",
         "conflicts",
         "unresolved_citations",
-        "plan"
+        "plan",
+        "review"
       ],
       "title": "IntakeRecord",
       "type": "object"
@@ -7851,6 +8104,27 @@
       "title": "ResolvedNote",
       "type": "object"
     },
+    "ReviewConflict": {
+      "properties": {
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/EvidenceRef"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "evidence"
+      ],
+      "title": "ReviewConflict",
+      "type": "object"
+    },
     "ReviewDiff": {
       "additionalProperties": false,
       "properties": {
@@ -7897,6 +8171,96 @@
         "statement"
       ],
       "title": "ReviewDiff",
+      "type": "object"
+    },
+    "ReviewFact": {
+      "properties": {
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/EvidenceRef"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "status": {
+          "enum": [
+            "stated",
+            "existing",
+            "proposed",
+            "assumed",
+            "decided",
+            "argued",
+            "condition",
+            "recommended",
+            "tested"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "status",
+        "evidence"
+      ],
+      "title": "ReviewFact",
+      "type": "object"
+    },
+    "ReviewFlag": {
+      "properties": {
+        "evidence": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/EvidenceRef"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "kind": {
+          "enum": [
+            "outside_alberta",
+            "code_edition",
+            "other_discipline",
+            "record_status",
+            "outcome_known",
+            "not_read"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "text",
+        "evidence"
+      ],
+      "title": "ReviewFlag",
+      "type": "object"
+    },
+    "ReviewItem": {
+      "properties": {
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "why": {
+          "title": "Why",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "why"
+      ],
+      "title": "ReviewItem",
       "type": "object"
     },
     "ReviewSession": {
@@ -8098,6 +8462,76 @@
         "values"
       ],
       "title": "ReviewSnapshot",
+      "type": "object"
+    },
+    "ReviewedDocument": {
+      "properties": {
+        "author": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Author"
+        },
+        "date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date"
+        },
+        "file_id": {
+          "title": "File Id",
+          "type": "string"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Status"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Title"
+        }
+      },
+      "required": [
+        "file_id",
+        "kind",
+        "title",
+        "author",
+        "date",
+        "status"
+      ],
+      "title": "ReviewedDocument",
       "type": "object"
     },
     "ReviewerName": {
