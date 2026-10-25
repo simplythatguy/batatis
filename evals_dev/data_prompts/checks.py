@@ -12,9 +12,15 @@ _CLAIM = re.compile(
     r"|\b(?:complies|comply)\s+with\b"
     r"|\bmeets?\s+(?:all\s+)?(?:of\s+)?(?:the\s+)?(?:code|requirements|NBC)\b"
     r"|\bsatisf(?:ies|y)\s+(?:all\s+)?(?:the\s+)?(?:code|requirements)\b", re.I)
+# Negation, conditions, questions, attribution to a document or a party, and requirement modals: a sentence
+# that reports what a source says, or what an application must show, is not Batatis's own verdict.
 _HEDGE = re.compile(r"\b(?:not|never|no|cannot|can't|isn't|aren't|without|whether|if|nor|neither|unless|"
                     r"does\s+not|do\s+not|did\s+not|before|until|asks?|confirm|show(?:s|ing)?\s+that|"
-                    r"demonstrate[sd]?|evidence\s+that|decides?|determin\w+)\b", re.I)
+                    r"demonstrate[sd]?|evidence\s+that|decides?|decided|determin\w+|found|finds|"
+                    r"states?|stated|says?|said|reports?|reported|argued?|argues|asserts?|asserted|claims?|"
+                    r"claimed|records?|recorded|according\s+to|opinion|considered|concluded|accepted|"
+                    r"must|shall|should|required\s+to|requires?|need(?:s|ed)?\s+to|designed\s+to|intended|"
+                    r"would|could|may|might|deemed)\b", re.I)
 
 
 def claims(texts: list[str]) -> list[str]:

@@ -22,7 +22,7 @@ import httpx
 from . import ledger
 from .gold import Item
 
-VERSION = 'judge-v4'
+VERSION = 'judge-v5'
 CACHE = ledger.CACHE.parent / 'judge'
 URL = 'https://api.openai.com/v1/chat/completions'
 # A review point that only says what an answer must not do. "no compliance certification" is one;
@@ -55,8 +55,11 @@ an F item, but they never cover an R or B item: those need the assistant's own f
 questions or missing items.
 
 Some items are prohibitions (marked "prohibition": true): something the answer must not do. For those,
-set covered to false only when the report does that thing, and put the violating excerpt in evidence;
-otherwise set covered to true with no evidence.
+set covered to false only when the assistant itself does that thing, and put the violating excerpt in
+evidence; otherwise set covered to true with no evidence. Reporting, with attribution, what a document, a
+decision-maker or a party says (for example "the determination found the handrails comply" or a quoted
+excerpt) is not the assistant claiming it. Presenting another jurisdiction's provision or outcome as an
+NBC(AE) requirement, or as Alberta acceptance, does count as transferring it.
 
 For every other item: when covered is true, evidence lists exact excerpts of the report (each copied
 character for character, at most 300 characters) that together show every part; when covered is false,
