@@ -544,6 +544,34 @@
           "minLength": 1,
           "title": "Kind",
           "type": "string"
+        },
+        "prompt": {
+          "anyOf": [
+            {
+              "maxLength": 600,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prompt"
+        },
+        "why": {
+          "anyOf": [
+            {
+              "maxLength": 1200,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Why"
         }
       },
       "required": [

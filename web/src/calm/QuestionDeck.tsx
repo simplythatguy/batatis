@@ -7,6 +7,7 @@ import { Recommendations } from "../screens/Recommendations";
 import { useCase } from "../store";
 import { readOnlyStatus } from "./applications";
 import { openAssistant, setAssistantContext, useAssistant } from "./assistant/assistant";
+import { questionContext } from "./assistant/questionContext";
 import { useCurrentApplication } from "./begin";
 import { CodeDrawer, type DrawerState } from "./CodeDrawer";
 import { aliasKey, alternativeChoice, buildDeck, deckCompletion, mergeQueue, rankAhead, choiceKey, choicesFor, preCaseState, questionProgress, QUESTION_PROGRESS_LABEL, SECTIONS, sourcePhrase, type DeckItem, type SectionId } from "./deck";
@@ -397,12 +398,7 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
 
 /** The assistant opened on this card: it explains; it never answers for you. */
 function askAbout(item: DeckItem, n: number) {
-  openAssistant({
-    screen: "question",
-    focus: item.provision ? { kind: "provision", id: item.provision } : { kind: "card", id: item.key },
-    label: `question ${n}${item.provision ? ` and ${item.provision}` : ""}`,
-    suggestions: item.provision ? ["Explain the code", "What does this question mean?"] : ["What does this question mean?", "What should I have ready?"],
-  });
+  openAssistant(questionContext(item, n));
 }
 
 /**
@@ -545,13 +541,8 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
       setAssistantContext({ screen: "question", label: "your remaining questions", suggestions: ["What happens at review?", "What is still missing?"] });
       return;
     }
-    setAssistantContext({
-      screen: "question",
-      focus: item.provision ? { kind: "provision", id: item.provision } : { kind: "card", id: item.key },
-      label: `question ${(all.findIndex((i) => i.key === item.key) + 1) || index + 1}${item.provision ? ` and ${item.provision}` : ""}`,
-      suggestions: item.provision ? ["Explain the code", "What does this question mean?"] : ["What does this question mean?", "What should I have ready?"],
-    });
-  }, [item?.key, index]); // eslint-disable-line react-hooks/exhaustive-deps
+    setAssistantContext(questionContext(item, (all.findIndex((i) => i.key === item.key) + 1) || index + 1));
+  }, [item?.key, item?.title, item?.why, item?.provision, index]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Land on a card from a link (?focus=) or the code-check entry, then drop the parameter.
   const mounted = useRef(false);

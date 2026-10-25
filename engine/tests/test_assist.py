@@ -37,6 +37,7 @@ def assistant(tmp_path, monkeypatch):
         calls.append(kwargs)
         return routes_assist.ModelAnswer('Read 9.10.9.16.(1). Unknown 9.99.99.99.(1) and 9.10.9.16.(999).', 100, 40)
 
+    fake.adapter = routes_assist.call_model
     monkeypatch.setattr(routes_assist, 'call_model', fake)
     yield client, store, calls
     client.close()
@@ -142,6 +143,104 @@ def test_deck_process_card_ids_resolve_to_the_canonical_requirements(assistant, 
     focused = json.loads(calls[-1]['context']).get('focused_card')
     assert focused is not None, 'The visible process question must reach the provider context'
     assert focused['id'] == field
+
+
+def test_visible_detail_prompt_reaches_the_real_openai_adapter_after_a_retry(assistant, monkeypatch):
+    client, store, _ = assistant
+    enable(monkeypatch, 'openai')
+    case = store.put(Case())
+    before = store.get(case.id).model_dump()
+    original_client = httpx.Client
+    adapter = routes_assist.call_model.adapter
+    wire = []
+
+    def respond(request):
+        assert str(request.url) == 'https://api.openai.com/v1/chat/completions'
+        wire.append(json.loads(request.content))
+        if len(wire) == 1:
+            return httpx.Response(503, json={'error': {'message': 'Synthetic outage'}})
+        return httpx.Response(200, json={
+            'choices': [{'message': {'content': 'Enter the date you make this request.'}}],
+            'usage': {'prompt_tokens': 100, 'completion_tokens': 15}})
+
+    monkeypatch.setattr(routes_assist, 'call_model', adapter)
+    monkeypatch.setattr(routes_assist.httpx, 'Client', lambda **kwargs: original_client(
+        **kwargs, transport=httpx.MockTransport(respond)))
+    request = dict(case_id=case.id, screen='question', question="I don't understand",
+                   focus={'kind': 'card', 'id': 'field-date', 'prompt': 'Request date',
+                          'why': 'The date of this variance request.'})
+    assert ask(client, **request).status_code == 503
+    result = ask(client, **request)
+    assert result.status_code == 200, result.text
+    assert result.json()['answer'] == 'Enter the date you make this request.'
+    for call in wire:
+        message = json.loads(call['messages'][1]['content'])
+        assert message['question'] == "I don't understand"
+        assert message['context']['focused_card']['on_screen'] == {
+            'prompt': 'Request date', 'why': 'The date of this variance request.'}
+        assert 'untrusted data' in call['messages'][0]['content']
+    assert store.get(case.id).model_dump() == before
+
+
+def test_visible_question_is_scrubbed_without_becoming_a_code_source(assistant, monkeypatch):
+    client, store, calls = assistant
+    enable(monkeypatch, 'openai')
+    case = store.put(Case(facts=[fact('owner_name', 'Priya Natarajan')]))
+    result = ask(client, case_id=case.id, screen='question', question="I don't understand",
+                 focus={'kind': 'card', 'id': 'field-owner', 'prompt': 'Owner: Priya Natarajan',
+                        'why': 'Call 780-555-0142 about 9.99.99.99.(1).'})
+    assert result.status_code == 200, result.text
+    sent = calls[-1]
+    for payload in (sent['context'], sent['body'].model_dump_json()):
+        assert 'Priya Natarajan' not in payload and '780-555-0142' not in payload
+    context = json.loads(sent['context'])
+    assert context['focused_card']['on_screen']['prompt'] == 'Owner: [personal detail]'
+    assert 'focused_provision' not in context and 'section_c' not in context
+
+
+@pytest.mark.parametrize('focus', [
+    {'kind': 'card', 'id': 'field-date', 'prompt': 'x' * 601},
+    {'kind': 'card', 'id': 'field-date', 'why': 'x' * 1201},
+    {'kind': 'card', 'id': 'field-date', 'prompt': ''},
+])
+def test_visible_question_context_is_bounded_before_the_provider(assistant, focus):
+    client, _, calls = assistant
+    assert ask(client, focus=focus).status_code == 422
+    assert not calls
+
+
+def test_question_prompt_keeps_the_bound_application_version_guard(assistant, monkeypatch):
+    client, store, _ = assistant
+    enable(monkeypatch, 'openai')
+    user_id = client.get('/auth/me').json()['user']['id']
+    case = store.put(Case(owner_id=user_id))
+
+    def save_during_reply(**kwargs):
+        changed = store.get(case.id)
+        changed.facts.append(fact('storeys', 2))
+        store.put(changed, expected_version=case.version)
+        return routes_assist.ModelAnswer('This answer read the older saved application.', 100, 20)
+
+    monkeypatch.setattr(routes_assist, 'call_model', save_during_reply)
+    result = ask(client, case_id=case.id, case_version=case.version,
+                 context_id='ctx_current_question_123', revision=1, screen='question',
+                 focus={'kind': 'card', 'id': 'field-date', 'prompt': 'Request date'},
+                 question="I don't understand")
+    assert result.status_code == 409, result.text
+    assert 'older saved application' not in result.text
+
+
+def test_visible_question_is_also_scrubbed_in_the_shared_voice_projection(assistant):
+    from engine.voice_context import VoiceScope, prepare_context
+    client, store, _ = assistant
+    user = store.get_user(client.get('/auth/me').json()['user']['id'])
+    case = store.put(Case(owner_id=user.id, facts=[fact('owner_name', 'Priya Natarajan')]))
+    scope = VoiceScope(context_id='ctx_current_question_123', case_id=case.id, case_version=case.version,
+                       screen='question', focus={'kind': 'card', 'id': 'field-owner',
+                           'prompt': 'Owner: Priya Natarajan', 'why': 'Call 780-555-0142.'})
+    prepared = prepare_context(scope, store=store, code=Codes, user=user)
+    focused = prepared.data['focused_card']['on_screen']
+    assert focused == {'prompt': 'Owner: [personal detail]', 'why': 'Call [phone].'}
 
 
 @pytest.mark.parametrize('change', [{'question': 'x' * 1501}, {'history': [{'role': 'user', 'text': 'hi'}] * 9},

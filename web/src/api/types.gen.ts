@@ -99,6 +99,8 @@ export interface AssistDocumentReference {
 export interface AssistFocus {
   id: string;
   kind: string;
+  prompt?: string | null;
+  why?: string | null;
 }
 
 export interface AssistNavigation {
