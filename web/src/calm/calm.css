@@ -4973,6 +4973,7 @@ body {
 
 /* Footer: progress per form section, ticks per question, popover on hover or focus. */
 .cf-qfoot {
+  --cf-skipped: #dc2626;
   position: sticky;
   bottom: 0;
   z-index: 5;
@@ -5034,7 +5035,7 @@ body {
 }
 
 .cf-qsec-bar i.is-skipped {
-  background: var(--cf-blocking);
+  background: var(--cf-skipped);
 }
 
 .cf-qsec.is-on .cf-qsec-bar i.is-cur,
@@ -5191,7 +5192,7 @@ body {
 
 .cf-qsec-skipped {
   align-self: center;
-  color: var(--cf-blocking);
+  color: var(--cf-skipped);
   display: grid;
 }
 
