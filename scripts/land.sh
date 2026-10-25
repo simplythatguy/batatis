@@ -82,12 +82,8 @@ subject=$(git log -1 --format=%s)
 pr=$(gh pr list --repo "$REPO" --base main --head dev --state open --json number --jq '.[0].number // empty')
 if [ -z "$pr" ]; then
   if [ $dry = 1 ]; then say "dry run: no open release PR; would open one"; exit 0; fi
-  url=$(gh pr create --repo "$REPO" --base main --head dev --title "Release: dev → main" --body \
-"The one standing release PR. GitHub has two branches: \`dev\` (shared integration source) and \`main\` (production).
-
-Agents land locally verified work on \`dev\` and comment here with what changed and how to test it locally. Only \`main\` deploys to Vercel; preview deployments are disabled. The user approves and merges this PR with **Create a merge commit** after local testing. Keep the \`dev\` branch afterwards.
-
-Process: docs/agents/git-workflow.md")
+  url=$(gh pr create --repo "$REPO" --base main --head dev --title "Release: dev → main" \
+    --body-file .github/pull_request_template.md)
   pr=${url##*/}
   say "opened release PR #$pr"
 fi
