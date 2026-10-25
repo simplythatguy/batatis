@@ -162,7 +162,13 @@ def grade(request: str, report: str, items: list[Item], *, model: str, effort: s
                                      for i in items]}, ensure_ascii=False)
         token = ledger.CURRENT.set(book or ledger.Ledger())
         try:
-            payload = _call(model, effort, user)
+            if model.startswith('deepseek'):     # a provisional judge for paired comparisons; Sol is the reference
+                from .deepseek_review import chat_json
+                instructions = (SYSTEM + '\n\nAnswer with one JSON object only, matching this JSON Schema exactly:\n'
+                                + json.dumps(schema(), separators=(',', ':')))
+                payload, _ = chat_json(model, effort, instructions, user, stage='judge')
+            else:
+                payload = _call(model, effort, user)
         finally:
             ledger.CURRENT.reset(token)
         path.parent.mkdir(parents=True, exist_ok=True)
