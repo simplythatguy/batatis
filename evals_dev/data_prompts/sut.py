@@ -86,6 +86,9 @@ def run_case(case: Case) -> dict:
         engine_case = EngineCase()
         transport, status = model_pass.default_transport('dpe')
         review_transport, review_status = review_pass.default_transport('dpe') if files else (None, 'off')
+        if files and os.environ.get('DPE_REVIEW_TRANSPORT') == 'opencode':    # comparison runs only
+            from .opencode_review import transport as opencode_transport
+            review_transport, review_status = opencode_transport, 'live'
         t = time.monotonic()
         known = known_values(engine_case, [])
         extraction = service.run(case.prompt, files, codes=codes, transport=transport, status=status,

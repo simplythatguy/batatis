@@ -41,7 +41,8 @@ def _meta(args) -> dict:
             'identify_config': config.as_dict(), 'identify_config_hash': config.config_hash,
             'intake_model': model_pass.MODEL, 'intake_effort': model_pass.EFFORT,
             'identify_env': {k: v for k, v in os.environ.items() if k.startswith('BATATIS_IDENTIFY_')},
-            'review': {k: os.environ.get(k) for k in ('BATATIS_REVIEW', 'BATATIS_REVIEW_MODEL', 'BATATIS_REVIEW_EFFORT')},
+            'review': {k: os.environ.get(k) for k in ('BATATIS_REVIEW', 'BATATIS_REVIEW_MODEL', 'BATATIS_REVIEW_EFFORT',
+                                                      'DPE_REVIEW_TRANSPORT', 'DPE_OPENCODE_MODEL')},
             'elephant': os.environ.get('BATATIS_LIVE_ELEPHANT') == '1', 'split': args.split}
 
 
