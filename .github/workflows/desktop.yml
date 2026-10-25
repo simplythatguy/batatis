@@ -93,7 +93,10 @@ jobs:
         run: |
           set -euo pipefail
           exe="$(node -p "require('path').resolve('desktop/build/engine-dist/batatis-engine', process.platform === 'win32' ? 'batatis-engine.exe' : 'batatis-engine')")"
-          BATATIS_DESKTOP_ENGINE_EXE="$exe" "$BATATIS_DESKTOP_PYTHON" -m pytest -q engine/tests/test_desktop_bridge.py engine/tests/test_desktop_workspace.py codedb/tests/test_store_paths.py engine/tests/test_export_edition_paths.py engine/tests/test_multipart_upload.py
+          BATATIS_DESKTOP_ENGINE_EXE="$exe" "$BATATIS_DESKTOP_PYTHON" -m pytest -q \
+            engine/tests/test_desktop_bridge.py engine/tests/test_desktop_bridge_pump.py \
+            engine/tests/test_desktop_workspace.py codedb/tests/test_store_paths.py \
+            engine/tests/test_export_edition_paths.py engine/tests/test_multipart_upload.py
       - name: Package the native app and portable archive
         working-directory: desktop
         run: npm run package

@@ -123,6 +123,20 @@ class _Request:
         self.finished = False
 
 
+class _StdinFrames:
+    def __init__(self, source: BinaryIO, reader: concurrent.futures.ThreadPoolExecutor):
+        self.source, self.reader = source, reader
+
+    async def get(self) -> tuple[dict, bytes] | ProtocolError | None:
+        try:
+            return await asyncio.get_running_loop().run_in_executor(self.reader, read_frame, self.source)
+        except ProtocolError as error:
+            print(f'bridge: {error}', file=sys.stderr)
+            return error
+        except (OSError, ValueError):
+            return None
+
+
 class Bridge:
     """Dispatches frames to the app, one task per request, and writes its responses as frames."""
 
@@ -135,7 +149,6 @@ class Bridge:
         self._call_ids = itertools.count(1)
         self._loop: asyncio.AbstractEventLoop | None = None
         self._lifespan: tuple[asyncio.Queue, asyncio.Queue] | None = None
-        self._frames: asyncio.Queue | None = None
         self._stopping = False
         self.protocol_error = False
 
@@ -144,10 +157,9 @@ class Bridge:
         with self._write_lock:
             self._write_raw(frame)
 
-    async def serve(self, frames: asyncio.Queue) -> None:
+    async def serve(self, frames: asyncio.Queue | _StdinFrames) -> None:
         """Run until EOF (None in `frames`), a shutdown control or a protocol error."""
         self._loop = asyncio.get_running_loop()
-        self._frames = frames
         self._lifespan = (asyncio.Queue(), asyncio.Queue())
         lifespan = asyncio.create_task(self._run_lifespan(*self._lifespan))
         await self._lifespan_event('startup')
@@ -203,7 +215,10 @@ class Bridge:
                 if request.task is None:
                     self._requests.pop(rid)
         elif kind == 'ctl':
-            asyncio.create_task(self._control(rid, header))
+            if header.get('op') == 'shutdown':
+                await self._control(rid, header)
+            else:
+                asyncio.create_task(self._control(rid, header))
         elif kind == 'call.res':
             future = self._calls.pop(rid, None)
             if future is not None and not future.done():
@@ -262,7 +277,6 @@ class Bridge:
         if op == 'shutdown':
             self._stopping = True
             self.write({'t': 'ctl.res', 'id': rid, 'ok': True, 'value': {}})
-            self._frames.put_nowait(None)
             return
         try:
             if self.control is None or not isinstance(op, str) or not isinstance(args, dict):
@@ -359,27 +373,13 @@ def run(app, *, hello: dict, control: Control | None, body_limit: int,
 
     async def main():
         global ACTIVE
-        loop = asyncio.get_running_loop()
-        frames: asyncio.Queue = asyncio.Queue()
-
-        def pump():
-            try:
-                while (frame := read_frame(source)) is not None:
-                    loop.call_soon_threadsafe(frames.put_nowait, frame)
-                loop.call_soon_threadsafe(frames.put_nowait, None)
-            except ProtocolError as error:
-                print(f'bridge: {error}', file=sys.stderr)
-                loop.call_soon_threadsafe(frames.put_nowait, error)
-            except (OSError, ValueError):
-                loop.call_soon_threadsafe(frames.put_nowait, None)
-
-        threading.Thread(target=pump, name='bridge-stdin', daemon=True).start()
         bridge = Bridge(app, hello=hello, write=writer, control=control, body_limit=body_limit)
         ACTIVE = bridge
-        try:
-            await bridge.serve(frames)
-        finally:
-            ACTIVE = None
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1, thread_name_prefix='bridge-stdin') as reader:
+            try:
+                await bridge.serve(_StdinFrames(source, reader))
+            finally:
+                ACTIVE = None
         return not bridge.protocol_error
 
     try:
