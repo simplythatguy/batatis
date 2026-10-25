@@ -4974,6 +4974,7 @@ body {
 /* Footer: progress per form section, ticks per question, popover on hover or focus. */
 .cf-qfoot {
   --cf-skipped: #dc2626;
+  --cf-current: #4b4b4b;
   position: sticky;
   bottom: 0;
   z-index: 5;
@@ -5029,7 +5030,7 @@ body {
   transition-duration: 150ms;
 }
 
-/* Only the current question takes its section's hue. Answers are grey; explicit skips are red. */
+/* Current is dark grey, completed answers are grey, and explicit skips are red. */
 .cf-qsec-bar i.is-done {
   background: var(--cf-text-3);
 }
@@ -5040,7 +5041,7 @@ body {
 
 .cf-qsec.is-on .cf-qsec-bar i.is-cur,
 .cf-qsec-bar i.is-cur {
-  background: var(--hue-s, var(--cf-text));
+  background: var(--cf-current);
 }
 
 /* Letter and count never truncate; only the section word does, and it goes first when narrow. */
@@ -5094,11 +5095,11 @@ body {
 }
 
 .cf-qsec.is-on .cf-qsec-name {
-  color: var(--cf-text);
+  color: var(--cf-current);
 }
 
 .cf-qsec.is-on .cf-qsec-l {
-  color: var(--hue-s, var(--cf-text-2));
+  color: var(--cf-current);
   font-weight: 550;
 }
 
@@ -5170,7 +5171,7 @@ body {
 
 .cf-qsec-row.is-cur {
   background: var(--cf-selected);
-  color: var(--cf-text);
+  color: var(--cf-current);
 }
 
 .cf-qsec-n {
