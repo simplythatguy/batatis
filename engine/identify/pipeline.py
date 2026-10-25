@@ -119,7 +119,7 @@ def _rank(prose, db, arts, ids, config, tp, stages) -> tuple[list[tuple[str, flo
     screen: dict[str, float] | None = None
     judge = None
     if config.exhaustive:
-        judge = Judge(scoring_ask(tp, config.screen), chars=config.card_chars, attempts=2,
+        judge = Judge(scoring_ask(tp, config.screen), chars=config.card_chars, attempts=3,
                       model=config.screen_model, method=config.screen,
                       question_style=config.question_style if config.screen == 'elephant' else 'shared')
 
@@ -143,7 +143,7 @@ def _rank(prose, db, arts, ids, config, tp, stages) -> tuple[list[tuple[str, flo
     rerank: dict[str, float] | None = None
     if config.rerank in ('elephant', 'decisions', 'jev'):
         if judge is None or judge.method != config.rerank:
-            judge = Judge(scoring_ask(tp, config.rerank), chars=config.card_chars, attempts=2,
+            judge = Judge(scoring_ask(tp, config.rerank), chars=config.card_chars, attempts=3,
                           model=config.rerank_model, method=config.rerank,
                           question_style=config.question_style if config.rerank == 'elephant' else 'shared')
 

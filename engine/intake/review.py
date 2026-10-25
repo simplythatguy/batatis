@@ -27,6 +27,7 @@ import io
 import json
 import os
 import re
+import time
 import unicodedata
 import zipfile
 from dataclasses import dataclass, field
@@ -43,6 +44,8 @@ DEFAULT_MODEL, DEFAULT_EFFORT = 'gpt-6-luna', 'medium'
 MAX_PAGES = 400
 BUDGET_CHARS = 600_000                      # page text per request, about 150K tokens
 MAX_OUTPUT_TOKENS = 32_000
+ATTEMPTS = 3                                # transient network and server errors only
+RETRY_STATUS = {429, 500, 502, 503, 504}
 OPENAI_URL = 'https://api.openai.com/v1/chat/completions'
 DESCRIPTION = 'description'
 FLAG_KINDS = ('outside_alberta', 'code_edition', 'other_discipline', 'record_status', 'outcome_known', 'not_read')
@@ -507,11 +510,24 @@ def openai_transport(client_ip: str | None = None) -> Transport:
                 'messages': [{'role': 'system', 'content': system}, {'role': 'user', 'content': user}],
                 'response_format': {'type': 'json_schema',
                                     'json_schema': {'name': 'document_review', 'strict': True, 'schema': body_schema}}}
-        with httpx.Client(timeout=600, follow_redirects=False) as client:
-            response = client.post(OPENAI_URL, json=body,
-                                   headers={'Authorization': 'Bearer ' + os.environ['OPENAI_API_KEY']})
-            response.raise_for_status()
-            data = response.json()
+        data = None
+        for attempt in range(ATTEMPTS):
+            try:
+                with httpx.Client(timeout=600, follow_redirects=False) as client:
+                    response = client.post(OPENAI_URL, json=body,
+                                           headers={'Authorization': 'Bearer ' + os.environ['OPENAI_API_KEY']})
+                if response.status_code in RETRY_STATUS and attempt + 1 < ATTEMPTS:
+                    time.sleep(2 * (attempt + 1))
+                    continue
+                response.raise_for_status()
+                data = response.json()
+                break
+            except (httpx.ConnectError, httpx.ConnectTimeout, httpx.ReadError, httpx.ReadTimeout,
+                    httpx.RemoteProtocolError, httpx.WriteError, httpx.PoolTimeout):
+                # The connection dropped; nothing usable came back. The gate keeps the first reservation.
+                if attempt + 1 >= ATTEMPTS:
+                    raise
+                time.sleep(2 * (attempt + 1))
         usage = data.get('usage') or {}
         tokens = {'input_tokens': usage.get('prompt_tokens', 0), 'output_tokens': usage.get('completion_tokens', 0)}
         llm_gate.record(model=model, reserved_usd=decision.reserved_usd, **tokens)

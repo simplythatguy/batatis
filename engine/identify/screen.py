@@ -29,7 +29,11 @@ Ask = Callable[[Any, Mapping[str, Mapping[str, Any]], float], Mapping[str, Any]]
 
 
 class NoRetry(Exception):
-    """A failure that retrying cannot fix (the spend gate is shut). Judge re-raises it at once."""
+    """A failure that retrying cannot fix (the spend gate is shut). Judge re-raises it at once,
+    unless its code is one of TRANSIENT."""
+
+
+TRANSIENT = frozenset({'timeout', 'network', 'rate_limited', 'http_500', 'http_502', 'http_503', 'http_504'})
 
 
 def raw_jev_ask(model: str = JEV_MODEL) -> Ask:
@@ -164,10 +168,15 @@ class Judge:
                         for i, (a, _) in enumerate(batch):
                             probs[a] = rep['answers'][f'q{i}']['noul']
                     return
-                except NoRetry:
+                except NoRetry as error:
                     with self._lock:
                         self.usage.errors += 1
-                    raise
+                    # A dropped connection, a timeout, a rate limit or a server error says nothing about the
+                    # request; one of those may be retried within `attempts`. Anything else stops at once.
+                    if getattr(error, 'code', None) not in TRANSIENT or attempt + 1 >= self.attempts:
+                        raise
+                    last_error = error
+                    time.sleep(1.5 * (attempt + 1))
                 except Exception as error:
                     last_error = error
                     with self._lock:
