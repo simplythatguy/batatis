@@ -15,6 +15,7 @@ from pathlib import Path
 import pypdfium2 as pdfium
 from pypdf import PdfReader
 
+from ..pdfium import open_pdf
 from ..pdfium_lock import pdfium_locked
 
 MAX_PAGES = 60
@@ -121,8 +122,7 @@ def _widgets(reader: PdfReader) -> list[Widget]:
 @pdfium_locked
 def _text_pages(data: bytes, limit: int) -> tuple[list[Page], list[int]]:
     pages, blank = [], []
-    pdf = pdfium.PdfDocument(data)
-    try:
+    with open_pdf(data) as pdf:
         for index in range(min(len(pdf), limit)):
             page = pdf[index]
             textpage = page.get_textpage()
@@ -142,8 +142,6 @@ def _text_pages(data: bytes, limit: int) -> tuple[list[Page], list[int]]:
             finally:
                 textpage.close()
                 page.close()
-    finally:
-        pdf.close()
     return pages, blank
 
 

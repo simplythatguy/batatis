@@ -13,6 +13,7 @@ from pathlib import Path
 
 from ..codes import Codes
 from ..models import Case, EvidenceItem, Fact, Jurisdiction, Source
+from ..pdfium import open_pdf
 from ..pdfium_lock import pdfium_locked
 from ..section_c import section_c_rows
 from ..section_d import section_d_plan
@@ -99,8 +100,6 @@ def sample_case(codes: Codes, provisions: list[str] = PROVISIONS, facts: dict = 
 
 @pdfium_locked
 def main(out_dir: str = '/tmp/batatis-export') -> None:
-    import pypdfium2 as pdfium
-
     from . import export_case
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
@@ -113,12 +112,16 @@ def main(out_dir: str = '/tmp/batatis-export') -> None:
     for name, draft, source_case in (('sample.pdf', False, case), ('sample-draft.pdf', True, incomplete)):
         res = export_case(source_case, codes=codes, draft=draft)
         (out / name).write_bytes(res.pdf)
-        doc = pdfium.PdfDocument(res.pdf)
-        stem = name.removesuffix('.pdf')
-        for label, idx in (('page1', 0), ('page2', 1), ('appendix1', res.form_pages)):
-            png = out / f'{stem}-{label}.png'
-            doc[idx].render(scale=2).to_pil().save(png)
-            print(png)
+        with open_pdf(res.pdf) as doc:
+            stem = name.removesuffix('.pdf')
+            for label, idx in (('page1', 0), ('page2', 1), ('appendix1', res.form_pages)):
+                png = out / f'{stem}-{label}.png'
+                bitmap = doc[idx].render(scale=2)
+                try:
+                    bitmap.to_pil().save(png)
+                finally:
+                    bitmap.close()
+                print(png)
         print(out / name, f'{res.form_pages} form pages + {res.appendix_pages} appendix pages;',
               'blank:', ', '.join(res.blank_fields) or 'none')
 

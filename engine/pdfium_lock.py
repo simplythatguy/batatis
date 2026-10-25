@@ -1,8 +1,9 @@
 """One process-wide lock around PDFium, which is not thread-safe, not even for separate documents.
 
 FastAPI runs synchronous routes on worker threads, so two requests that read or draw PDFs could
-otherwise call PDFium at once and crash the process. Every function that opens a PDFium document is
-`@pdfium_locked`: it holds the lock until it returns, and by then its locals, including any page,
+otherwise call PDFium at once and crash the process. Reader functions use `@pdfium_locked` and the
+`engine.pdfium.open_pdf` context manager shares this lock. The decorator holds it until the function
+returns, and by then its locals, including any page,
 text page or bitmap that it did not close, are released. The lock is reentrant, so a locked function
 can call another. A failing call's traceback would keep its frames' PDFium objects alive past the
 lock, and their finalizers could then run on another thread; those frames are cleared first.

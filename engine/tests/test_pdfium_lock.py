@@ -36,19 +36,23 @@ def test_every_pdfium_document_the_engine_opens_is_opened_under_the_lock():
             continue
         where = path.relative_to(ROOT)
 
-        def visit(node, owners):
+        def visit(node, owners, lock_held=False):
             nonlocal opened
             if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 owners = [*owners, node]
                 if _locked(node) and _yields(node):
                     generators.append(f'{where}:{node.lineno}')
+            if isinstance(node, ast.With):
+                lock_held = lock_held or any(isinstance(item.context_expr, ast.Name)
+                                            and item.context_expr.id == 'PDFIUM_LOCK' for item in node.items)
             func = getattr(node, 'func', None)
-            if isinstance(node, ast.Call) and getattr(func, 'attr', getattr(func, 'id', None)) == 'PdfDocument':
+            if (isinstance(node, ast.Call)
+                    and getattr(func, 'attr', getattr(func, 'id', None)) in ('PdfDocument', 'open_pdf')):
                 opened += 1
-                if not any(_locked(owner) for owner in owners):
+                if not lock_held and not any(_locked(owner) for owner in owners):
                     unlocked.append(f'{where}:{node.lineno}')
             for child in ast.iter_child_nodes(node):
-                visit(child, owners)
+                visit(child, owners, lock_held)
         visit(ast.parse(path.read_text()), [])
     assert opened >= 14, 'the scan no longer sees the engine PDFium call sites'
     assert not unlocked and not generators, (unlocked, generators)
