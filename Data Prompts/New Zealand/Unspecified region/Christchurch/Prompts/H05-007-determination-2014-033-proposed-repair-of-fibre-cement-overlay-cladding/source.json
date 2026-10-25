@@ -1,0 +1,67 @@
+{
+  "id": "H05-007",
+  "title": "Determination 2014/033: proposed repair of fibre-cement overlay cladding on an earthquake-damaged house, Christchurch",
+  "jurisdiction": "New Zealand (MBIE determination under the Building Act 2004); comparative test only, not Alberta; NZ code references retained as written",
+  "code_edition": "Building Code (Schedule 1, Building Regulations 1992), as cited",
+  "case_type": "appeal_decision",
+  "source_url": "https://www.building.govt.nz/resolving-problems/resolution-options/determinations",
+  "document_date": "3 November 2014 (header date)",
+  "facts": [
+    {
+      "text": "Owners M and H Carey (applicants); the Christchurch City Council is copied as the authority, and the Earthquake Commission (EQC) is identified as a person with an interest.",
+      "locator": "p.1 §1.2–1.3"
+    },
+    {
+      "text": "The question is whether the proposed building work to repair the fibre-cement overlay cladding of an earthquake-damaged house at 9 Boys Place will comply with the Building Code.",
+      "locator": "p.1 title and §1.1"
+    },
+    {
+      "text": "The detached house was built in 1955 and extended about 1961; the applicants found two earlier forms of attempted repair when they bought it in 2007; internal alterations and insulation were added in 2009 and an unreinforced masonry chimney was demolished.",
+      "locator": "p.2 §2.1"
+    },
+    {
+      "text": "The house is single-storey light timber framing on concrete piled and perimeter foundations, on a flat, low-lying site.",
+      "locator": "p.2 §2.2"
+    }
+  ],
+  "limitations": [
+    "Decision begins on p.8 §6.1; mask p.8 for blind use.",
+    "Two image objects; photographs and drawings not verified visually."
+  ],
+  "worker": "H05",
+  "prompt_number": 431,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2014/2014-033.pdf",
+      "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2014/2014-033.pdf",
+      "retrieved_at": "2026-10-25T01:44:27.679102+00:00",
+      "sha256": "2ca5b509062c552f9dd332800dda0c2b8dd9c7bccb797e7e5f0a74186bb5e563",
+      "bytes": 243402,
+      "pages": 8,
+      "role": "input",
+      "filename": "mbie-determination-2014-033-2ca5b509062c.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H05/files/mbie-determination-2014-033-2ca5b509062c.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:44:27.679102+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2014/2014-033.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Christchurch",
+    "basis": "The project title identifies Christchurch and the facts name Christchurch City Council as the authority.",
+    "locator": "source title; p.1 §1.2–1.3",
+    "scope": "project"
+  }
+}

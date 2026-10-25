@@ -1,0 +1,6 @@
+Treat the attached Council order as a historical appeal record. Reconstruct the proposed code departure and the project details that the order actually reports. Identify which referenced report, drawings and engineering letters are not included in this attachment, and list the grade, height, compartmentation, egress and emergency-response information needed for a reviewer to assess the submission. Do not determine equivalence or approval.
+
+Attachments:
+- scc_2014_residential_occupancy_alt_solution-782abbcf101d.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

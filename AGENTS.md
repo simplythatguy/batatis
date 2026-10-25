@@ -7,6 +7,7 @@ Alberta **Building Codes Challenge** (Built World Tech — Venture Pilots 2026).
 GitHub has exactly two branches: `dev` (shared integration source) and `main` (production). **Vercel deploys only `main`; preview deployments are disabled.** Locally the app runs on port `3000` (web) and `8000` (engine) only. Full rules: [`docs/agents/git-workflow.md`](./docs/agents/git-workflow.md).
 
 - Flow: **verify locally** (`scripts/verify.sh`) → **land on `dev`** (`scripts/land.sh`, fast-forward only) → the user tests locally and approves the release → the user merges the single release PR `dev → main`.
+- After landing, the coordinating parent updates the release PR description using the [plain-language format and update steps](./docs/agents/git-workflow.md#release-pr-descriptions). This format takes precedence over generic PR-writing skills; children return their notes to the parent through task output.
 - Never push or open a PR from any other branch, never push or merge `main`, never force-push, never delete `dev`. Children never push; the parent lands. Run `scripts/install-git-hooks.sh` in a new clone.
 - Push only verified work. Local verification is required even when GitHub Actions runs. `dev` pushes run CI; only an approved merge into `main` triggers Vercel.
 - Before rebasing run `git merge-base --is-ancestor origin/dev HEAD`; if true, do not rebase. Otherwise `git -c rebase.updateRefs=false rebase --rebase-merges origin/dev`.

@@ -1,0 +1,13 @@
+{
+  "known_outcome": "The Board interpreted the referenced testing standard as incorporating its test methods and pass/fail criteria for installation testing, but not its separate tester-qualification section; it limited the determination to work within the Code’s scope and excluded maintenance testing.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Exact project address, local authority and installation details are not stated.",
+    "The underlying CSA standards are referenced but not attached; do not invent their text beyond the decision’s summary."
+  ],
+  "case_id": "L08-1773",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

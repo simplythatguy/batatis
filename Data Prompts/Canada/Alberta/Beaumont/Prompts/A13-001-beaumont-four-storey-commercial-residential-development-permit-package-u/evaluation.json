@@ -1,0 +1,18 @@
+{
+  "known_outcome": "Source-backed: the file records that the amendments to Development Permit 2022-098 were conditionally approved (p.2) and includes condition 14 (p.15). The file does not record a building-permit decision or any code-review outcome for the unprotected-opening table.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Unprotected-opening table: whether provided percentages are assessed against allowed percentages by face and by floor group",
+    "Protected-opening footnotes (2% and 4% of north wall): what the analysis counts as protected and whether the calculation is shown",
+    "Missing provided value in the main-floor south row (p.34)",
+    "Occupancy labels: 'Groups A and D' table heading against 'Groups C and D' classification",
+    "Edition: analysis cites NBC(AE) 2019; the reviewer must confirm the edition that governs the permit",
+    "Part 9 assembly reference (p.33, Table 9.10.3.1.A) in a building classified under Part 3 (p.34)",
+    "Missing administrative evidence: stamped drawings or professional involvement, sprinkler design basis, fire-alarm design, and the consultant's sign-off on the code analysis"
+  ],
+  "case_id": "A13-001",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,6 @@
+A relocatable industrial accommodation (Part 10 unit) is being proposed, and existing units may be renovated. The attached STANDATA interpretation (23-BCI-021) is my only source. Using only that document, identify the certification and labelling provisions it cites, which organisation approval it refers to, what an existing-unit renovation must show, and what evidence and questions the file needs. Do not invent a unit, a certification body or a date, and do not state the unit complies.
+
+Attachments:
+- ma-standata-interpretation-building-23-bci-021-2025-10-22c647818fca.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

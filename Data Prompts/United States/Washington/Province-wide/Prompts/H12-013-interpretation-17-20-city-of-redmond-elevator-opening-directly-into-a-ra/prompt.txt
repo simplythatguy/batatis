@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from Washington State, requested by City of Redmond (comparative test only; not Alberta). It is not an Alberta application.
+
+Attached is Washington State Building Code Council interpretation 17-20 from City of Redmond. The question put to the Council is: In a sprinklered Group R building of Type VA or IIIB construction, a half-hour rated corridor is required. Where an elevator hoistway opening meets the smoke and draft exception and the elevator opens directly into the rated corridor with no lobby, do the rated-corridor smoke and draft control requirements apply to the elevator doors? Using only the attached record, identify the code provisions and edition this question turns on, the uncertainty that remains for a building official, the administrative evidence a complete submission would still need, and the next questions to ask the applicant and the reviewing official. Do not say whether any design complies or is safe, do not certify, and do not assume any owner, site, dimensions or drawings that the record does not contain. This is a Washington comparative test record and establishes nothing about Alberta.
+
+Attachments:
+- sbcc-ruling-17-20-17-20ibc-e71cfec1afdf.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

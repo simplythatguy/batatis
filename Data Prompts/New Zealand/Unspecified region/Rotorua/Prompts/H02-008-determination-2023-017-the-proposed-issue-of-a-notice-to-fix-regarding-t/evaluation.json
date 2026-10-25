@@ -1,0 +1,16 @@
+{
+  "known_outcome": "Determination (19 June 2023, s 188): the authority was correct on or about 24 January 2022 to propose a notice to fix under section 164 for a change of use under section 115 (p.37 §8.1). Reasoning: the classified use was housing (multi-unit dwelling) with a use-group change from SA to SR (p.34-36); the new use has additional or more onerous requirements, with clauses G3 and H1.3.4(c) as examples (p.35-36 §6). Fire and escape requirements are part of the statutory test and the parties' submissions, not the decision's main ground.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Whether the answer separates the use-group classification from the fire-safety submission.",
+    "Whether it names the qualified set of requirements (means of escape, fire-rating) and does not treat fire as the main ground.",
+    "Whether it asks for the occupancy, household-unit and fire-safety records.",
+    "Whether it does not treat the eight-fire statistic as evidence of a building deficiency.",
+    "Whether it avoids stating that the building is compliant or safe."
+  ],
+  "case_id": "H02-008",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,7 @@
+Using the attached historical 14-BCV-002 and 14-BCV-002R1 STANDATA only as withdrawn reference material, identify the code article and the guideline-based route described for residential tall walls. State which project-specific drawing details and guideline scope/limitations would need checking, and formulate questions needed before a reviewer could classify a real submission. Keep the withdrawn status visible; do not treat either document as current approval or claim the wall is safe/compliant.
+
+Attachments:
+- catalogue-22-cb6d9f0c1cef.pdf
+- catalogue-21-37476edff0ed.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

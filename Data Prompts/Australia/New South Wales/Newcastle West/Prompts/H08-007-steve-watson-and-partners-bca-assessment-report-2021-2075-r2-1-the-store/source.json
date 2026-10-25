@@ -1,0 +1,82 @@
+{
+  "id": "H08-007",
+  "title": "Steve Watson and Partners - BCA Assessment Report 2021/2075 R2.1, The Store, 854 Hunter Street, Newcastle West (DA2021/01530, Appendix B - BCA Report)",
+  "jurisdiction": "New South Wales, Australia - COMPARATIVE ONLY (not Alberta; NSW code text, not Alberta applicability)",
+  "code_edition": "BCA 2019 Amendment 1 (stated, p.4-5)",
+  "case_type": "actual_application",
+  "source_url": "https://www.planningportal.nsw.gov.au/planning-panel/mixed-use-development-including-shop-top-housing-365-dwellings-ground-floor-retail-premises-commercial-premises-and-basement",
+  "document_date": "Revision R2.1 'Final Report - For DA Submission' (p.2); PDF metadata created 14 Oct 2021 (no date on the pages read)",
+  "facts": [
+    {
+      "text": "Prepared for DOMA; report 2021/2075 R2.1, 'Final Report - For DA Submission'.",
+      "locator": "p.1-2"
+    },
+    {
+      "text": "States it provides an 'Alternative Solution to satisfy the Performance Requirements of the BCA'.",
+      "locator": "p.2"
+    },
+    {
+      "text": "Class of occupancy listed as Classes 2, 5, 6, 7a, 7b and 8; type of construction required: Type A.",
+      "locator": "p.2"
+    },
+    {
+      "text": "Stated code: BCA 2019 Amendment 1.",
+      "locator": "p.4-5"
+    }
+  ],
+  "limitations": [
+    "Comparative NSW material: it cannot establish Alberta performance or Alberta applicability.",
+    "The council assessment report is part of the same DA record and states the planning outcome; it is an outcome reference, not an input.",
+    "Only the cover and summary pages were read; the alternative-solution list was not summarised."
+  ],
+  "worker": "H08",
+  "prompt_number": 241,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://apps.planningportal.nsw.gov.au/prweb/PRRestService/DocMgmt/v1/PublicDocuments/DATA-WORKATTACH-FILE%20PEC-DPE-EP-WORK%20PPSHCC-104!20220614T080940.782%20GMT",
+      "sha256": "20db92915812d3e5afa502810b058b1c83c12165a80fcfaaf69df1a65ce63699",
+      "role": "input",
+      "bytes": 1516993,
+      "filename": "pp-workattach-ppshcc-104-20db92915812.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H08/files/pp-workattach-ppshcc-104/pp-workattach-ppshcc-104-20db92915812.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:22:25.005377+00:00",
+        "http_status": "200",
+        "final_url": "https://apps.planningportal.nsw.gov.au/prweb/PRRestService/DocMgmt/v1/PublicDocuments/DATA-WORKATTACH-FILE%20PEC-DPE-EP-WORK%20PPSHCC-104%2120220614T080940.782%20GMT",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://apps.planningportal.nsw.gov.au/prweb/PRRestService/DocMgmt/v1/PublicDocuments/DATA-WORKATTACH-FILE%20PEC-DPE-EP-WORK%20PPSHCC-104!20220614T082734.996%20GMT",
+      "sha256": "6ed35a707925c8feb784282b32f8c05377dbcc19847fb74d1d1f3917d4da369d",
+      "role": "outcome_reference",
+      "bytes": 2070866,
+      "filename": "_evaluation/hunter-council-assessment-report-hccrpp-da2021-01530-6ed35a707925.pdf",
+      "included_in_default_input": false,
+      "original_collection_path": "_research/workers/H08/files/hunter-council-assessment-report-hccrpp-da2021-01530/hunter-council-assessment-report-hccrpp-da2021-01530-6ed35a707925.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:53:08.947223+00:00",
+        "http_status": "200",
+        "final_url": "https://apps.planningportal.nsw.gov.au/prweb/PRRestService/DocMgmt/v1/PublicDocuments/DATA-WORKATTACH-FILE%20PEC-DPE-EP-WORK%20PPSHCC-104%2120220614T082734.996%20GMT",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Australia",
+    "province_or_state": "New South Wales",
+    "city_or_town": "Newcastle West",
+    "basis": "The project title explicitly identifies The Store at Hunter Street, Newcastle West. The state is explicit in the jurisdiction.",
+    "locator": "source title; jurisdiction field; jurisdiction field",
+    "scope": "project"
+  }
+}

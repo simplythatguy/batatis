@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from New Zealand, University of Canterbury student project (research; NON-ALBERTA comparative test). It is not an Alberta application.
+
+Attached is a university student design study of a stairwell pressurisation system for a ten-storey office building. It models a fire in software against AS/NZS 1668.1:2015 scenarios. Please explain what the study tested, which assumptions a consent reviewer would need documented before relying on similar results, and what the study cannot establish for a real building. Treat it as a research project and do not present its results as compliance evidence.
+
+Attachments:
+- h06-uc-conf-cheong-stairwell-pressurisation-b936a32ed0ed.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

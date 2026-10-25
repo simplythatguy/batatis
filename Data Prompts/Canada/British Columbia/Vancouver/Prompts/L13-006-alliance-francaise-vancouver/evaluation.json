@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The case study reports that the City approved the final AL-1 revision on December 17, 2021 after seven revisions and third-party peer review; the actual AL-1 submission and decision letter are not attached.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "permit-era code and occupancy classification",
+    "revision/approval history vs source case study",
+    "complete plans and evidence for exposed timber, sprinklers, finishes and atrium protection",
+    "third-party peer review and authority decision record"
+  ],
+  "case_id": "L13-006",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

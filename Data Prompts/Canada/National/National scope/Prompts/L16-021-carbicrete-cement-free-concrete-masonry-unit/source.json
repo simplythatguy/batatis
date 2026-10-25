@@ -1,0 +1,86 @@
+{
+  "id": "L16-021",
+  "title": "CarbiCrete cement-free concrete masonry unit",
+  "jurisdiction": "Canada — national CCMC product evaluation; comparative attachment only, not a Calgary/Edmonton or Alberta project application",
+  "code_edition": "NBC 2015",
+  "case_type": "product_evidence",
+  "source_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14346-R&type=cert",
+  "document_date": "2026-01-16",
+  "facts": [
+    {
+      "text": "The product is a cement-free CMU made from steel slag, aggregate, water, admixtures and carbon dioxide; listed units are 190 × 390 × 190 mm.",
+      "locator": "CCMC 14346-R PDF, p. 3, Product description"
+    },
+    {
+      "text": "The NBC 2015 opinion classifies masonry unit standards, unit masonry construction and a detailed ASTC calculation method as Alternative; fire-separation provisions are listed separately as Acceptable.",
+      "locator": "CCMC 14346-R PDF, p. 2, Compliance opinion table"
+    },
+    {
+      "text": "A table of product-specific masonry assembly properties includes a reported 1.5-hour fire-resistance rating for wall assemblies constructed with the product.",
+      "locator": "CCMC 14346-R PDF, p. 8, Non-structural performance of walls table"
+    }
+  ],
+  "limitations": [
+    "The reported fire rating is tied to described wall assemblies; it is not a universal block rating.",
+    "The report is not project-specific engineering or an approval decision."
+  ],
+  "source_use": "comparative_attachment_content_only",
+  "worker": "L16",
+  "prompt_number": 217,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?type=cert&id=870",
+      "sha256": "e0fa0fc7e33633f84caf827439551b70be988fcc0a12f5c61cda73fa8b485b64",
+      "role": "input",
+      "bytes": 518106,
+      "filename": "current-route-14346-R-e0fa0fc7e336.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L16/files/current-route-14346-R-e0fa0fc7e336.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:51:19.368190+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?type=cert&id=870",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded",
+        "entity_extraction": "Copied unchanged PDF entity from byte 433; original transport capture retained.",
+        "raw_capture_sha256": "366d40cf51f1d1487d2448949d026565d3d0ccd1fcec6991d60807c49ee1f718",
+        "raw_capture_path": "_research/workers/L16/files/transport-capture-366d40cf51f1d148.bin"
+      }
+    },
+    {
+      "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14346-R&type=cert",
+      "sha256": "cdfc10abd0af6820cd1aca12bf29269431c9e68acf0273ec3be148f599aad6f0",
+      "role": "supporting_evidence",
+      "bytes": 68268,
+      "filename": "landing-14346-R-cdfc10abd0af.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L16/files/landing-14346-R-cdfc10abd0af.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:21:24.854908+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14346-R&type=cert",
+        "content_type": "text/html; charset=UTF-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-2-source-text.txt",
+        "sha256": "916091528c152a567e674a6293082f6823125af029370249f459d91792c4fef1",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "National",
+    "city_or_town": "National scope",
+    "basis": "National Canadian CCMC product assessment; no project site is identified and manufacturer or publisher addresses are not project locations.",
+    "locator": "jurisdiction field",
+    "scope": "national"
+  }
+}

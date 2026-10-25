@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The STANDATA states that CSA-A277-16 certification is considered to comply with ABC 2014 Division C Article 2.4.5.1; the catalogue marks it withdrawn. The PDF page 2 header says 06-BCV-005 while the catalogue and page 1 identify 14-BCV-005.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "withdrawn status and identifier discrepancy",
+    "factory-built/off-site construction scope",
+    "certifying organization accreditation",
+    "certificate and applicable CSA-A277 edition"
+  ],
+  "case_id": "L03-005",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

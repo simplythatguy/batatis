@@ -1,0 +1,111 @@
+{
+  "id": "A12-001",
+  "title": "Rocky View County cancellation of a farm-exempt greenhouse permit (SCC Building Sub-Council Order 2025-05)",
+  "jurisdiction": "Rocky View County, Alberta (Respondent municipality that issued and then cancelled the building permit)",
+  "code_edition": "National Building Code - Alberta Edition 2023 (decision text: 'National Building Code AE 2023'; printing not stated)",
+  "case_type": "appeal_decision",
+  "source_url": "https://safetycodes.ab.ca/council-information/appeals/appeal-decisions/",
+  "document_date": "Hearing 2025-08-13 (p.1); order signature line reads '26th day of ... 2025' with the month missing from the text layer (p.10); PDF metadata created 2025-09-26; listing dated 2025-08",
+  "facts": [
+    {
+      "text": "Council Order No. 2025-05 of the Administrative Tribunal of the Building Sub-Council heard an appeal by virtual means on August 13, 2025 about a notice of cancellation sent by Rocky View County to the Appellant on June 3, 2025, for an issued building permit for a farm-exempted building to build a greenhouse on the property.",
+      "locator": "p.1 (caption)"
+    },
+    {
+      "text": "The Property is in a residential rural (R-RUR) land use district; the Appellant's written submission says R-RUR allows discretionary accessory buildings.",
+      "locator": "p.3, para 11"
+    },
+    {
+      "text": "The Appellant intends to build a greenhouse for agricultural products or related equipment for growing farm crops, described as an agricultural operation under the Agricultural Operation Practices Act.",
+      "locator": "p.3, para 12"
+    },
+    {
+      "text": "On or about February 25, 2025 the Appellant applied for a 'Farm Building Exemption' on the Respondent's advice.",
+      "locator": "p.3, para 13"
+    },
+    {
+      "text": "The plans for the greenhouse application show a fully transparent structure consistent with a greenhouse; at the hearing the Appellant's representative said it would have up to six planting areas with waist-level planting boxes.",
+      "locator": "p.4, para 23"
+    },
+    {
+      "text": "The Respondent's submission says an earlier building permit application (October 7, 2024) for an accessory building for storage of vehicles was denied because there was no primary building or dwelling on the Property.",
+      "locator": "p.5-6, para 33"
+    },
+    {
+      "text": "The Respondent's submission says a later farm-building-exemption application for a metal storage building did not meet setback requirements and lacked requested floor-plan information, and was denied. The decision dates this application 'November 13, 2025' (see limitations).",
+      "locator": "p.6, para 34"
+    },
+    {
+      "text": "A further farm-building-exemption application had plans described as 'nearly identical' to the denied one, except that the stated use was a greenhouse; the Respondent accepted it and issued the Building Permit.",
+      "locator": "p.6, para 35"
+    },
+    {
+      "text": "On May 28, 2025 the Respondent received a complaint that construction had started and that the building 'was apparent that the building was not a greenhouse' but was a six-door vehicle storage building; the complainant also reported statements about developing the Property for recreational-vehicle and vehicle storage (recorded as complaint evidence, not as a finding).",
+      "locator": "p.6, para 36; p.6-7"
+    },
+    {
+      "text": "The Respondent's Permit Cancellation Notice, under section 46 of the Safety Codes Act, said the permit was cancelled 'on reasonable and probable grounds' because the building was 'intended for the storage of cars', which the notice said was not consistent with the information submitted or the intended use disclosed in the application.",
+      "locator": "p.3, para 15"
+    },
+    {
+      "text": "The Appellant's position is that the Safety Codes Officer has no authority to issue or cancel a permit for the building because it is exempt under the National Building Code AE 2023; in the alternative the cancellation was improper and not based on reasonable and probable grounds.",
+      "locator": "p.2, para 9; p.4, para 17"
+    },
+    {
+      "text": "The appeal issues are stated as whether the building's design was truly consistent with its approved use, and whether the cancellation was based on 'reasonable and probable grounds' as the Safety Codes Act requires.",
+      "locator": "p.2, para 8"
+    },
+    {
+      "text": "The Appellant's counsel relied on Building Code section 1.1.1.1(1)(d) as quoted in the decision: the Code does not apply to a low-human-occupancy building associated with the operation of the farm on which it is located, used for housing livestock, storage or maintenance of equipment, or storage of materials or produce.",
+      "locator": "p.5, para 26-27 (quoted text, not checked against the NRC code text)"
+    },
+    {
+      "text": "The Tribunal found the building meets the definition of an agricultural operation (greenhouse) under the Agricultural Operation Practices Act and falls under the definition of a farm building under the Permit Regulations.",
+      "locator": "p.8, paras 55-56"
+    }
+  ],
+  "limitations": [
+    "Decision-only record: the Record cited throughout the decision (application plans, notices, complaint file) is not attached; dimensions, floor plans and setbacks are not available.",
+    "Not an alternative-solution application: the decision contains no alternative-solution submission or code analysis; it tests exemption applicability, permit authority and cancellation grounds.",
+    "Outcome leakage: the attachment contains the Tribunal's order and reasons; any prompt derived from it must not disclose the revocation or the exemption finding.",
+    "Code text unverified: section 1.1.1.1(1)(d) is quoted in the decision (para 26) but the NBC(AE) 2023 2nd printing is not in the package; verify the article before citing it.",
+    "Date inconsistency: para 34 dates the denied farm-exemption application 'November 13, 2025', after the August 13, 2025 hearing. Its sequence with para 13 (application on or about February 25, 2025) suggests 2024; unresolved.",
+    "Signature date incomplete: the order's signature line reads '26th day of ... 2025' with the month absent from the text layer; PDF metadata creation date is 2025-09-26.",
+    "Byte-identical duplicate: the same PDF (sha256 b03bbe23194fce617997934da8bc17926cad68c991f21f86dc3e45fed51298fd) is already in A06/files/scc_2025_building_permit_validity-b03bbe23194f.pdf and L06/files/scc_2025_permit_cancellation-b03bbe23194f.pdf. It adds no new file; keep one record at integration.",
+    "Related Rocky View references (farm building exemption application form dated 2022 and checklist) are general forms, not case evidence; they are kept in references.",
+    "Personal information: representatives and the complainant are named or described in the decision; omit or redact them in any published use."
+  ],
+  "worker": "A12",
+  "prompt_number": 109,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2025/2025-05%20Decision_Redacted.pdf",
+      "sha256": "b03bbe23194fce617997934da8bc17926cad68c991f21f86dc3e45fed51298fd",
+      "role": "input",
+      "bytes": 670175,
+      "filename": "2025-05-Decision_Redacted-b03bbe23194f.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/A12/files/appeal-01/2025-05-Decision_Redacted-b03bbe23194f.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T02:29:20.914364+00:00",
+        "http_status": "200",
+        "final_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2025/2025-05%20Decision_Redacted.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Alberta",
+    "city_or_town": "Rocky View County",
+    "basis": "The source jurisdiction identifies Rocky View County, Alberta for the named project, proposal or appeal; this describes source geography.",
+    "locator": "p.1 (caption)",
+    "scope": "project"
+  }
+}

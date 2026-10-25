@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The Commission found sufficiency of compliance for the described basement ceiling heights, including under the bulkheads.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "area coverage and contiguity",
+    "measured clearances under beams and ducts",
+    "exit-route evidence",
+    "outcome leakage"
+  ],
+  "case_id": "L10-013",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Regulator position: the charging light source for PL exit signs does not require connection to the emergency power supply; the signs must still be charged in conformance with their listing.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the internally illuminated exit-sign rules from the PL charging light",
+    "Identifies the emergency-power question the document answers",
+    "Asks for the sign listing and charging evidence the file needs",
+    "Does not claim the signs comply"
+  ],
+  "case_id": "H20-013",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

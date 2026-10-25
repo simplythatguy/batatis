@@ -1,0 +1,17 @@
+{
+  "known_outcome": "Unknown. The City-filed documents show a proposal and calculation sheet but no acceptance decision; they contain unresolved scope and numerical discrepancies.",
+  "outcome_leakage": false,
+  "review_focus": [
+    "same-project versus same-building scope",
+    "conflicting stated FUS and total fire-flow values",
+    "units and calculation arithmetic",
+    "sprinkler, hose-stream and duration assumptions",
+    "City water capacity and reviewer response",
+    "not an OBC alternative-solution decision on the present record"
+  ],
+  "case_id": "L12-005",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

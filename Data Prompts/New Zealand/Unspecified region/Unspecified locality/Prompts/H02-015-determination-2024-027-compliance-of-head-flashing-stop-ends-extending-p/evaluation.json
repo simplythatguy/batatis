@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Determination (31 May 2024, s 188, §6.1, p.8): the constructed head flashings, with the stop ends projecting through the claddings, comply with E2.3.2 by way of an alternative solution.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Whether the answer identifies E2.3.2 and the acceptable-solution cladding detail as the baseline.",
+    "Whether it spells out the evidence needed for an alternative solution and does not treat the decision as a general acceptance of projecting stop ends.",
+    "Whether it notes that the record is a short determination on a specific detail.",
+    "Whether it does not say the detail complies in other buildings."
+  ],
+  "case_id": "H02-015",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

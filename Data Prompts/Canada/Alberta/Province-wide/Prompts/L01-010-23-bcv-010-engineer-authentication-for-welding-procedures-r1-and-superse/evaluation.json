@@ -1,0 +1,17 @@
+{
+  "known_outcome": "A published regulator-issued STANDATA sets out a province-wide variance and its stated conditions; it is not an outcome for any applicant-specific project.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "revision/status control",
+    "scope difference",
+    "W47.1 and AWS D1.1 references",
+    "authenticated professional work products",
+    "quality/welding program records",
+    "owner inspector records"
+  ],
+  "case_id": "L01-010",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

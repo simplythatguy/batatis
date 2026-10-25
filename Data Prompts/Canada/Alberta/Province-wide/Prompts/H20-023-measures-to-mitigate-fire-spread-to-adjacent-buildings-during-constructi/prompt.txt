@@ -1,0 +1,6 @@
+A building project is near adjacent buildings and needs measures for fire spread, water supply and firefighting access during construction. The attached STANDATA interpretation (23-BCI-030/23-FCI-012) is my only source. Using only that document, identify the code and fire-safety-plan provisions it cites, the factors it says the measures must consider, the access and water-supply expectations, and the evidence and questions the file needs. Do not invent a site, distances or building sizes, and do not state the measures are sufficient.
+
+Attachments:
+- ma-standata-interpretation-building-fire-23-bci-030-23-fci-012-2025-03-3f55d38e9d5a.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

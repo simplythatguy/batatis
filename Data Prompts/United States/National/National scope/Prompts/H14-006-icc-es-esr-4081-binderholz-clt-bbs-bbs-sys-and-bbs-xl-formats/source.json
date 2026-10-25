@@ -1,0 +1,75 @@
+{
+  "id": "H14-006",
+  "title": "ICC-ES ESR-4081: Binderholz CLT BBS (BBS SYS and BBS XL formats)",
+  "jurisdiction": "United States (ICC-ES evaluation report under IBC/IRC); NON-ALBERTA COMPARATIVE ONLY: cannot establish Alberta performance, acceptance or equivalence; no Canadian or Alberta approval is claimed or implied",
+  "code_edition": "2021, 2018, 2015, 2012 and 2009 IBC and IRC; ANSI/APA PRG-320-2019 (report §1.1, p1)",
+  "case_type": "product_evidence",
+  "source_url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-4081.pdf",
+  "document_date": "Reissued June 2026; continuous compliance through June 2028 (p1)",
+  "facts": [
+    {
+      "text": "Report holder BINDERHOLZ BAUSYSTEME GmbH; subject is Binderholz CLT BBS, in BBS SYS and BBS XL formats.",
+      "locator": "p1 cover and §3.1"
+    },
+    {
+      "text": "Floor and roof components in Type I and II construction; roof and floor decks in Type III (interior floor decks only), IV and V; IRC use needs an engineered design.",
+      "locator": "§2.0, p1"
+    },
+    {
+      "text": "Connections between wall panels, roof and floor panels, and supports need complete detailing and design satisfactory to the code official.",
+      "locator": "§5.4, p3"
+    },
+    {
+      "text": "Cutting, drilling and notching of floor and roof-deck panels are outside the evaluation.",
+      "locator": "§5.5, p3"
+    },
+    {
+      "text": "In-plane shear values in Tables 6 and 7 apply to roof and floor diaphragms, but complete diaphragm designs have not been evaluated.",
+      "locator": "§5.6, p3"
+    },
+    {
+      "text": "Evidence listed: ICC-ES AC455, dated October 2022.",
+      "locator": "§6.0, p3"
+    }
+  ],
+  "limitations": [
+    "Non-Alberta comparative attachment; the report does not reference NBC(AE) 2023 and is not evidence of Alberta or Canadian acceptance.",
+    "Retrieved 2026-10-25 from the official ICC-ES report URL; current ICC-ES status was not checked live. source_url is the report PDF, not a separate listing page.",
+    "Text from pypdf extraction; figures, tables and signatures not transcribed; locators are PDF page numbers, not printed page numbers.",
+    "ICC-ES copyright; retained locally for comparison only, redistribution not licensed.",
+    "Table values were not transcribed; the format-to-table mapping was not checked against the tables themselves."
+  ],
+  "worker": "H14",
+  "prompt_number": 633,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-4081.pdf",
+      "sha256": "9cb872725977de0bed30fe3202fc04cc07e527df42f79a50726c458e9541eed5",
+      "role": "input",
+      "bytes": 1033333,
+      "filename": "esr-4081-binderholz-clt-9cb872725977.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H14/files/esr-4081/esr-4081-binderholz-clt-9cb872725977.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:21:31.277314+00:00",
+        "http_status": "200",
+        "final_url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-4081.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "United States",
+    "province_or_state": "National",
+    "city_or_town": "National scope",
+    "basis": "The jurisdiction identifies a US ICC-ES product assessment under IBC/IRC. Report-holder and manufacturing locations do not locate a project.",
+    "locator": "jurisdiction field",
+    "scope": "national"
+  }
+}

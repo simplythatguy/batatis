@@ -1,0 +1,6 @@
+A building sprinkler system uses or may use an antifreeze solution. The attached STANDATA bulletin (23-BCB-005/23-FCB-003) is my only source. Using only that document, identify the NFPA standards it names, the acceptance question for antifreeze solutions, when it says the fire authority must be engaged, and what the file needs to show. Do not invent a solution product, system size or hazard class, and do not state the system is accepted.
+
+Attachments:
+- ma-standata-bulletin-building-fire-23-bcb-005-23-fcb-003-2025-01-965123c38d4a.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

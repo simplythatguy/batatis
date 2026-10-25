@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Order REVOKED (p.1); reasons at pp.6-7.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "firefighting water flow and delivery documentation",
+    "trucked-water alternatives and their practical limits",
+    "occupancy classification error on a permit and its effect on the code analysis",
+    "integrated safety systems argument"
+  ],
+  "case_id": "A10-009",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The structural paper documents design/test results; CHM Fire states it developed an approved alternative solution, but the code edition, submission and decision details are not included.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "scope of experimental evidence and design changes",
+    "code edition and jurisdictional submission basis",
+    "separation of structural test findings from fire engineering",
+    "missing drawings, alternative-solution report and approval conditions"
+  ],
+  "case_id": "L13-008",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

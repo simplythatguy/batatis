@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The CCMC publishes an NBC 2015/2020 product-level alternative-solution opinion and full-scale fire-comparison results for a defined use over spray-applied polyurethane foam.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "foam type, substrate and location within the assembly",
+    "wet/dry film thickness, primer and installation records",
+    "applicable code provision, occupancy and building scope",
+    "project-specific evidence that the installed coating matches the assessed system"
+  ],
+  "case_id": "L16-013",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

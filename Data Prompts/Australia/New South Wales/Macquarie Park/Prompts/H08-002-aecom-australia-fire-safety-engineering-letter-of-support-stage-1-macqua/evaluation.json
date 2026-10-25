@@ -1,0 +1,15 @@
+{
+  "known_outcome": "unknown (no decision retrieved; the Planning Portal node page shows the file only under 'Application and Declaration')",
+  "outcome_leakage": false,
+  "review_focus": [
+    "terminology: 'alternative solution' (BCA 2013) against 'performance solution' (NCC 2022) as used in other NSW files in this set",
+    "which performance requirements each alternative solution must meet",
+    "deferral of items to a later stage and the evidence that would be required then",
+    "no compliance certification"
+  ],
+  "case_id": "H08-002",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

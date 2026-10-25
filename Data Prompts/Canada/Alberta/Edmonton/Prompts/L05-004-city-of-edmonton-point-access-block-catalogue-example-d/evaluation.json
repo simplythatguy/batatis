@@ -1,0 +1,16 @@
+{
+  "known_outcome": "No project-specific permit decision or AHJ acceptance is reported for this illustrative catalogue example. The guide expressly disclaims use of the examples for approval.",
+  "outcome_leakage": false,
+  "review_focus": [
+    "Keep the guide scenario separate from actual applicant, owner, civic address, survey, or permit facts.",
+    "Ask which current code edition/printing and acceptable-solution departure apply to the real proposal; verify any attributed objectives and functional statements from authoritative code sources.",
+    "Identify missing site-specific zoning, surveyed dimensions, occupancy, complete drawings and application requirements.",
+    "Identify the professional-authored alternative-solution report, risk assessment, mitigation measures, and assumptions/limits that need to be supplied or confirmed; do not write professional evidence.",
+    "Ask focused next questions and make no safety, compliance, or approval determination."
+  ],
+  "case_id": "L05-004",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Calgary / Edmonton",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

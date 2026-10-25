@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from New Zealand (Building Act 2004); Rotorua Lakes Council; comparative only, not Alberta. It is not an Alberta application.
+
+This is a New Zealand regulator document about a proposed house whose bracing design relies on a standards-based route, where the council proposed to refuse consent over the bracing compliance pathway. Using only the attached PDF, identify the structural provisions it treats as uncertain, list the design standards, calculations, and verification approach it refers to, flag missing or unclear administrative evidence, and list the next questions a reviewer should ask. Do not say whether the bracing complies or is safe, and do not apply Alberta or NBC(AE) rules.
+
+Attachments:
+- mbie-det-2026-014-da50bc57613c.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

@@ -1,0 +1,6 @@
+Using the attached 23-BCV-007 STANDATA as a regulator-issued reference, identify the scope facts and source documents needed to check whether its Span Book alternative is relevant: Part 9 framing member and configuration, span, loading and the cited 2020 Span Book table. The span tables are not attached here, so say what must be supplied or professionally checked; do not calculate a span or certify a design.
+
+Attachments:
+- 23-BCV-007-ef1f88138309.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

@@ -1,0 +1,62 @@
+{
+  "id": "L02-003",
+  "title": "19-BCV-003(REV1) - Elevator and passenger-elevating devices",
+  "jurisdiction": "Alberta (province-wide)",
+  "code_edition": "National Building Code – 2019 Alberta Edition (NBC(AE)); joint reference to Alberta Elevating Devices requirements",
+  "case_type": "issued_variance",
+  "source_url": "https://open.alberta.ca/publications/standata-building-code-variance-national-building-code-2019-alberta-edition",
+  "document_date": "2022-11",
+  "facts": [
+    {
+      "text": "The revision addresses use of a passenger elevator instead of a CSA B355 platform or stair lift for barrier-free access.",
+      "locator": "19-BCV-003(REV1) PDF, p. 1, Purpose"
+    },
+    {
+      "text": "The substitution applies only where a lift would meet the NBC(AE) accessibility requirements; the passenger elevator may avoid the usual stretcher dimensions only when vertical travel is no more than 7,000 mm and car dimensions meet CSA B355 Table 1 minimums.",
+      "locator": "19-BCV-003(REV1) PDF, p. 2, Application and Variance"
+    },
+    {
+      "text": "The variance requires applicants to provide the document to the AHJ and explains the Firefighters’ Emergency Operation exception for travel of 7,000 mm or less.",
+      "locator": "19-BCV-003(REV1) PDF, pp. 2–3, Variance"
+    }
+  ],
+  "limitations": [
+    "This is a provincewide regulator-issued STANDATA variance, not an individual application, site-specific permit decision, or applicant-provided evidence.",
+    "Historical status as of 2026-10-24: the official 2019 catalogue is marked archived/replaced by the 2023 catalogue; Alberta lists NBC(AE) 2019 as in force from 2019-12-01 through 2024-04-30. Alberta guidance says previous-edition STANDATA are obsolete for new construction after a new code takes effect, while remaining relevant to evaluation of existing structures during renovations and retrofits. Verify current code edition and AHJ applicability.",
+    "No project drawings, owner/site facts, or project-specific professional evidence accompany this catalogue variance. The attached source is the outcome reference itself.",
+    "Earlier catalogue version(s) also downloaded and retained in references; this candidate uses the latest listed revision: [ARCHIVED] - 19-BCV-003 - Elevator and passenger-elevating devices."
+  ],
+  "worker": "L02",
+  "prompt_number": 59,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://open.alberta.ca/dataset/3c164a36-c30e-4676-83a2-cb4f19d5f066/resource/7441c6c7-d96e-4727-9b70-93dc22e90ff9/download/ma-standata-joint-variance-19-bcv-003-rev1-19-edb-001.pdf",
+      "sha256": "11f806fe346915ad632968a203f2f66d693964a603ce4bdd0d4df286ab2a41d3",
+      "role": "outcome_reference",
+      "bytes": 661933,
+      "filename": "catalogue-dd5bb44d-aa57-450b-b55f-0145a31171af-19-BCV-003-REV1----Elevator-and-passenger-elevating-devices-11f806fe3469.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L02/files/catalogue-dd5bb44d-aa57-450b-b55f-0145a31171af-19-BCV-003-REV1----Elevator-and-passenger-elevating-devices-11f806fe3469.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:38.010906+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/3c164a36-c30e-4676-83a2-cb4f19d5f066/resource/7441c6c7-d96e-4727-9b70-93dc22e90ff9/download/ma-standata-joint-variance-19-bcv-003-rev1-19-edb-001.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Alberta",
+    "city_or_town": "Province-wide",
+    "basis": "Alberta STANDATA expressly has provincewide scope; no individual project locality.",
+    "locator": "jurisdiction field",
+    "scope": "provincewide"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "known_outcome": "p.12 §7.1: the proposed building work does not comply with Clause C of the Building Code.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the Acceptable Solution choice (C/AS1 versus C/AS2) from the compliance question",
+    "Treats unit count, bedrooms, lockable doors and the party wall as facts needing evidence",
+    "Does not assign a fire-risk group the file does not support"
+  ],
+  "case_id": "H05-005",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

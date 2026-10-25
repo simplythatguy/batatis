@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Determination: authority incorrect to issue the third notice to the owners (not specified persons).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "specified-person definitions (ss 163–164)",
+    "wall built by a neighbour and then demolished",
+    "unretained slope and remedy sequence",
+    "engineer report as evidence"
+  ],
+  "case_id": "H03-031",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

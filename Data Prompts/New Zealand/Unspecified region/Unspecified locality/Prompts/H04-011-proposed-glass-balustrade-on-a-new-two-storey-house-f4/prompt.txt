@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from New Zealand (MBIE Chief Executive determination; Building Act 2004; comparative only, not Alberta). It is not an Alberta application.
+
+Comparative test only: this attached record is from New Zealand, so use New Zealand Building Act and Building Code concepts and do not apply Alberta rules. Attached is a determination describing a proposed glass balustrade on a new two-storey house with a membrane-covered first-floor deck, with a barrier design figure, a revised handrail figure, and F4/AS1 barrier diagrams. Using only the attached document, identify the building-code uncertainties this raises, the drawings and supporting evidence a reviewer would need, the administrative items that appear to be missing, and the next questions to put to the applicant. Treat any regulator finding in the document as unavailable for this exercise, and do not say whether the work complies or is safe.
+
+Attachments:
+- mbie-determination-2019-023-14dd202f9c9f.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

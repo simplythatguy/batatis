@@ -1,0 +1,16 @@
+{
+  "known_outcome": "Approved 28/05/2025, council staff under delegated authority, Goulburn Mulwaree (Planning Portal DA page DA/0242/2425)",
+  "outcome_leakage": true,
+  "review_focus": [
+    "performance solutions named at DA stage and the evidence the letter defers",
+    "whether DA-stage and construction-stage fire engineering are distinguished",
+    "non-compliances carried over from the BCA Capability Statement",
+    "letter opinion versus stated facts",
+    "no compliance certification"
+  ],
+  "case_id": "H08-003",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

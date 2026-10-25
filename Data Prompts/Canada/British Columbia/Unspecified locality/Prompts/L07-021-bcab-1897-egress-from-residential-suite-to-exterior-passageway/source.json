@@ -1,0 +1,81 @@
+{
+  "id": "L07-021",
+  "title": "BCAB 1897 - Egress from residential suite to exterior passageway",
+  "jurisdiction": "British Columbia",
+  "code_edition": "BCBC 2018",
+  "case_type": "appeal_decision",
+  "source_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1897",
+  "document_date": "2022-10-20",
+  "facts": [
+    {
+      "text": "The project is a 5 storey mixed use building. Stories 3, 4 and 5 consist of residential suites, with an exterior passageway providing the required means of egress for each story. The building is sprinklered. At one end of a passageway, there is a residential suite egress door beyond the exit stair near the end of the passageway. The subject residential suite egress door is set back in an alcove off of the exterior passageway with a distance of approximately 4 meters to the exterior passageway and the exit stair. (see plan below)",
+      "locator": "Project description, paragraph 1"
+    },
+    {
+      "text": "The appellant considers Sentence 3.3.1.9.(7) grants permission to permit the residential suite door to enter into a dead-end corridor which is less than 6m long. The proposed corridor is 4 m in length.",
+      "locator": "Appellant position, paragraph 1"
+    }
+  ],
+  "limitations": [
+    "The public Board decision is an appeal record, not the original application package.",
+    "The published decision refers to supporting drawings or evidence in some cases, but the complete original application and attachments are not publicly linked from the decision page.",
+    "Published Board outcome appears in the input attachment; outcome leakage is intentional and flagged.",
+    "Where a figure is attached, the decision page does not consistently identify its author; Board-created figures are distinguished in the research report, and no image is treated as a complete applicant drawing set.",
+    "British Columbia decision retained for comparative attachment format/content only; it does not establish Alberta code applicability, design performance, or acceptance."
+  ],
+  "worker": "L07",
+  "prompt_number": 512,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1897",
+      "sha256": "9322b3b1dea05f7dfb1ac2c418bd4df82477a9e981f0746860128db399d34407",
+      "role": "input",
+      "bytes": 1357377,
+      "filename": "bcab-1897-9322b3b1dea0.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-1897-9322b3b1dea0.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:20:42.027340+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1897",
+        "content_type": "text/html; charset=utf-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-1-source-text.txt",
+        "sha256": "99fafacdf6ac416e3fff322b6d810812a87987d679e999951f782a041980ae61",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    },
+    {
+      "url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/construction-industry/building-codes-and-standards/building-code-appeal-board/1897_bcab.png",
+      "sha256": "d523c4245e1e99f4c532828b8b7d486fc3e7e3b436b9924075b558832ac8ef8e",
+      "role": "supporting_evidence",
+      "bytes": 126839,
+      "filename": "bcab-1897-1897_bcab-d523c4245e1e.png",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-1897-1897_bcab-d523c4245e1e.png",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:23:06.783976+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/construction-industry/building-codes-and-standards/building-code-appeal-board/1897_bcab.png",
+        "content_type": "image/png; charset=UTF-8",
+        "kind": "image",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "British Columbia",
+    "city_or_town": "Unspecified locality",
+    "basis": "British Columbia appeal describes a project without naming its municipality; the provincial appeal-board location is not the project location.",
+    "locator": "jurisdiction field",
+    "scope": "undisclosed"
+  }
+}

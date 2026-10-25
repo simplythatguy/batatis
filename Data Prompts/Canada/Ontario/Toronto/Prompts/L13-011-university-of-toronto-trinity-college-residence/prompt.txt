@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from Toronto, Ontario. It is not an Alberta application.
+
+Using the attached fire-code consultant project record, identify the facts it establishes about the college residence and the alternative-solution work. Then state what cannot be determined from this source and list the code edition, occupancy, project drawings, alternative-solution report, fire-protection program, assumptions and authority decision records required for an administrative-completeness review. Do not infer approval conditions from a service listing or certify compliance.
+
+Attachments:
+- attachment-1-source-text.txt
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

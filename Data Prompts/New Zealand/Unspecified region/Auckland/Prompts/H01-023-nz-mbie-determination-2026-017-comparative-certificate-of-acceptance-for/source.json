@@ -1,0 +1,76 @@
+{
+  "id": "H01-023",
+  "number": "2026-017",
+  "title": "NZ MBIE Determination 2026/017 (comparative): certificate of acceptance for a retrofitted shower room",
+  "jurisdiction": "New Zealand (Building Act 2004); Auckland Council; comparative only, not Alberta",
+  "scope": "comparative_non_alberta",
+  "code_edition": "NZ Building Code (Schedule 1, Building Regulations 1992) as cited; E3/AS1 second edition, amendment 7 and G13/AS1 second edition, amendment 9 as cited",
+  "case_type": "appeal_decision",
+  "timing": "as_built_or_certificate",
+  "retrospective": "yes",
+  "source_url": "https://codehub.building.govt.nz/resources/2026017",
+  "source_url_note": "Building CodeHub resource page for the same MBIE determination (Information provider: MBIE); the building.govt.nz determination page is WAF-blocked for this worker.",
+  "document_date": "14 May 2026",
+  "facts": [
+    {
+      "text": "The authority issued certificate of acceptance COA04522498 for alterations creating a new shower room where a previous bathroom existed.",
+      "locator": "p.2, para 1.3"
+    },
+    {
+      "text": "The alteration work was carried out in or about May 2023.",
+      "locator": "p.3, para 2.1"
+    },
+    {
+      "text": "A proprietary liquid waterproof membrane was applied under ceramic tiles to the shower enclosure and adjacent space, supported by a workmanship warranty.",
+      "locator": "p.3, para 2.2.1"
+    },
+    {
+      "text": "A later report from a licensed building practitioner alleged issues including the reduced size of the floor waste pipe.",
+      "locator": "p.7, para 3.2"
+    },
+    {
+      "text": "Figure 2 shows the subfloor space below the floor waste and wash hand basin; Figure 3 shows the ventilation fitting.",
+      "locator": "p.5"
+    }
+  ],
+  "limitations": [
+    "Comparative test only: New Zealand Building Act 2004 and Building Code (Schedule 1, Building Regulations 1992). No Alberta applicability asserted; no NBC(AE) mapping.",
+    "Outcome leakage: the MBIE decision is inside the same original PDF, so the full file cannot be used as applicant-stage input without removing the decision pages.",
+    "Applicant application documents are not published; drawings and photos appear only as figures inside the determination. Figures were located by caption, not visually inspected.",
+    "The licensed practitioner's report and warranty are summarised; they are not in the file."
+  ],
+  "worker": "H01",
+  "prompt_number": 373,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2026/2026-017.pdf",
+      "sha256": "2a46577a450a34f6d6f83f77c696770cdb3917399b6ea3db68d6deba4e4fab5a",
+      "role": "input",
+      "document_type": "MBIE determination PDF (original bytes)",
+      "bytes": 276607,
+      "filename": "mbie-det-2026-017-2a46577a450a.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H01/files/pdf/mbie-det-2026-017-2a46577a450a.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:44:45.707844+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2026/2026-017.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Auckland",
+    "basis": "The jurisdiction names Auckland Council as the local authority context; no separate region is documented.",
+    "locator": "jurisdiction field",
+    "scope": "local"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The appeal board revoked the order.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "which specific construction-standard provision is in issue",
+    "condition evidence and any engineer assessment",
+    "permit/inspection history and the maintenance/code distinction",
+    "what supporting records are omitted from the decision attachment"
+  ],
+  "case_id": "L20-017",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The board denied the exemption.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "which building and areas are in scope",
+    "distance/path and occupancy facts actually available",
+    "the separate plans cited but not attached",
+    "the evidence required to assess an exemption without making a safety or compliance claim"
+  ],
+  "case_id": "L20-012",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

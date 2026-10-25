@@ -1,0 +1,66 @@
+{
+  "id": "L07-025",
+  "title": "BCAB 1876 - Means of egress for fourth storey suites",
+  "jurisdiction": "British Columbia",
+  "code_edition": "BCBC 2012",
+  "case_type": "appeal_decision",
+  "source_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1876",
+  "document_date": "2021-12-16",
+  "facts": [
+    {
+      "text": "The project building is four storeys in building height with a below-grade storage garage; it includes Group A, D and E major occupancies and is sprinklered with non-combustible construction.",
+      "locator": "Project description, paragraph 1"
+    },
+    {
+      "text": "The fourth storey is divided into two suites; each is proposed to have two independent exit stairwells leading to exterior doors at grade, and the stairwells also serve the lower storeys.",
+      "locator": "Project description, paragraph 2"
+    },
+    {
+      "text": "The dispute is whether this suite exit configuration fits the prescriptive options in Sentence 3.3.1.3.(8) or requires an alternative-solution analysis.",
+      "locator": "Decision being appealed / Appellant position"
+    }
+  ],
+  "limitations": [
+    "The public Board decision is an appeal record, not the original application package; no submitted drawings or alternative-solution analysis are linked.",
+    "Published Board outcome appears in the input attachment; outcome leakage is intentional and flagged.",
+    "British Columbia decision retained for comparative attachment format/content only; it does not establish Alberta code applicability, design performance, or acceptance."
+  ],
+  "worker": "L07",
+  "prompt_number": 516,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1876",
+      "sha256": "8f878536110cfcb7cde9de54a9c69ae9f582f3f87fb04110a433939024dc80f8",
+      "role": "input",
+      "bytes": 1357066,
+      "filename": "bcab-1876-8f878536110c.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-1876-8f878536110c.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:21:25.620052+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1876",
+        "content_type": "text/html; charset=utf-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-1-source-text.txt",
+        "sha256": "1f4bebd64529eadfbb701f56840411e24a8cdbed15b65a47882531da19fa9e21",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "British Columbia",
+    "city_or_town": "Unspecified locality",
+    "basis": "British Columbia appeal describes a project without naming its municipality; the provincial appeal-board location is not the project location.",
+    "locator": "jurisdiction field",
+    "scope": "undisclosed"
+  }
+}

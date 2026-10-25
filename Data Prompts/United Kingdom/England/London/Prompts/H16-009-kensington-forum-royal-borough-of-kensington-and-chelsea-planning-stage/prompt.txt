@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from England, UK (London Borough of Kensington and Chelsea). COMPARATIVE NON-ALBERTA RECORD; no Alberta applicability asserted.. It is not an Alberta application.
+
+Attached is a planning-stage fire safety statement, dated October 2020, for a mixed-use development in London with hotel, serviced apartment and residential components across two towers and a basement. Using only the attached statement, identify which design points the statement defers to a later stage or to a fire engineering case, which code references are unversioned, which evacuation and water-supply points still need evidence, and the questions a reviewer would ask before relying on the statement for planning. Do not state that the development complies or is safe.
+
+Attachments:
+- london-kensington-forum-revised-fire-safety-statement-oct-2020-39cf10f483e7.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

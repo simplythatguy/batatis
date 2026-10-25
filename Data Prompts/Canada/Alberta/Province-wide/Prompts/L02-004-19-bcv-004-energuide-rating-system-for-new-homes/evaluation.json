@@ -1,0 +1,14 @@
+{
+  "known_outcome": "An official provincewide variance was issued and its conditional alternative is stated in the attached document; the source does not report an individual applicant or site-specific permit outcome.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Dwelling form and exclusions",
+    "ERS v15 reference-case savings and modelling limits",
+    "Required drawings, HOT2000 report, blower-door report, label, and HOIS"
+  ],
+  "case_id": "L02-004",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,6 @@
+Review the attached historical 14-BCV-001 STANDATA as a regulator-issued reference. Extract the code editions, the stated acceptance authority, the conditions and the required fire-safety-plan contents. Then list the site-specific facts, officer designation/powers, plan contents and records that would still be needed to assess a real submission, and ask focused follow-up questions. Treat this as a standing variance reference, not a particular project decision; do not invent project facts or certify safety/compliance.
+
+Attachments:
+- catalogue-23-675cd1d7e955.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

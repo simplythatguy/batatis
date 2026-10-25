@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Determination: partly completed Type 3 wall work complies with B1 and E1 (protection of other property) at the date of determination.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "partly completed work: what can be determined before completion",
+    "B1 consequences of failure (B1.3.4(a))",
+    "E1 surface-water protection of the neighbour",
+    "photographic evidence of construction stage"
+  ],
+  "case_id": "H03-023",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

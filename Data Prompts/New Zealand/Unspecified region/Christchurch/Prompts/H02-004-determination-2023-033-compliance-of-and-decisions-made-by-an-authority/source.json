@@ -1,0 +1,83 @@
+{
+  "id": "H02-004",
+  "title": "Determination 2023/033: Compliance of, and decisions made by an authority in relation to, building work encroaching on to a neighbouring property",
+  "jurisdiction": "New Zealand: Christchurch City Council as building consent authority; MBIE determination under the Building Act 2004. Non-Alberta comparative record.",
+  "code_edition": "NZ Building Code (Schedule 1, Building Regulations 1992). C/AS1 for Sleeping (residential) and Outbuildings (risk group SH): Amendment 3 (effective 1 July 2014 to 30 May 2017, current at the original consent of 4 August 2015) and Amendment 4 (effective 1 January 2017 to 3 November 2021, current at the third amendment) (p.30 fn 34).",
+  "case_type": "appeal_decision",
+  "source_url": "https://codehub.building.govt.nz/resources/2023033",
+  "document_date": "7 December 2023 (clarified under s 189; first issued 10 November 2023, per p.1 fn 1)",
+  "facts": [
+    {
+      "text": "Earthquake-damaged elements of a concrete driveway and parking bay, a concrete block retaining wall and a timber vehicle deck were repaired or rebuilt on a residential property. Some elements were built across the boundary onto the neighbouring property.",
+      "locator": "p.2-3 §1; p.3 §1.8"
+    },
+    {
+      "text": "The neighbouring owner disputes the compliance of the work with B1, B2 and C3 Fire affecting areas beyond the fire source, and disputes several authority decisions: the building consent, a third amendment, the code compliance certificate, and an alleged failure to issue a notice to fix.",
+      "locator": "p.3 §1.8.1-1.8.5"
+    },
+    {
+      "text": "The determination consulted Fire and Emergency New Zealand under section 170 on matters concerning fire safety.",
+      "locator": "p.2 §1 (FENZ consultation paragraph)"
+    },
+    {
+      "text": "The applications for the original consent and the third amendment did not indicate a proposed means of compliance with clauses C1 to C6 Protection from Fire.",
+      "locator": "p.27 (Compliance with clause C3)"
+    },
+    {
+      "text": "The authority's letter of 9 August 2016 said the work would not comply with clause C where it encroaches on other property. The authority later issued a code compliance certificate on 13 August 2018.",
+      "locator": "p.27"
+    },
+    {
+      "text": "The applicant's position is that fire spread is not limited to encroachment, that elements closer than 1.0 m need fire resistance above the 30-minute residential minimum, and that the authority did not show how C3 was met.",
+      "locator": "p.28-30 (applicant submissions)"
+    },
+    {
+      "text": "Functional requirement C3.3 reads: buildings must be designed and constructed so there is a low probability of fire spread to other property vertically or horizontally across a relevant boundary.",
+      "locator": "p.28 (Compliance with clause C3)"
+    },
+    {
+      "text": "Other evidence considered includes an expert report that concluded the work complied with B1, B2 and C3, and the consent drawings and photographs of the timber vehicle deck.",
+      "locator": "p.18 §4.11.1 (expert's conclusion on B1, B2, C3); expert's report section 5 (C3 discussion)"
+    }
+  ],
+  "limitations": [
+    "Long regulator determination with a clarification issued under s 189. The clarified paragraph (6.70 with fn 45) is the version in this PDF.",
+    "Involves cross-boundary and earthquake-repair facts. The fire question is one part of a wider dispute.",
+    "The decision (pp.39-40) is in the same PDF as the facts. Outcome leakage is true unless redacted.",
+    "Names of owners, practitioners and the engineer are left out of the prompt.",
+    "Applies to the New Zealand Building Code and C/AS1 only. No Alberta applicability is asserted."
+  ],
+  "worker": "H02",
+  "prompt_number": 380,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2023/2023-033.pdf",
+      "sha256": "40df091f3944fd348e13e8c2a717cabec02bed768e76507f8637c0b5130669a0",
+      "role": "input",
+      "bytes": 1282172,
+      "filename": "mbie-det-2023-033-40df091f3944.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H02/files/mbie-det-2023-033-40df091f3944.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:42:22.001170+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2023/2023-033.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Christchurch",
+    "basis": "The jurisdiction documents Christchurch as the local context; no separate region is documented.",
+    "locator": "jurisdiction field",
+    "scope": "local"
+  }
+}

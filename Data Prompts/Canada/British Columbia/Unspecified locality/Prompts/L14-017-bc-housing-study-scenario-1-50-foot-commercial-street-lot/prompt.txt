@@ -1,0 +1,9 @@
+Comparative attachment exercise: this source is from Metro Vancouver, British Columbia; illustrative 50 ft commercial-street lot. It is not an Alberta application.
+
+Review the attached BC Housing study pages 25–29 as a research design, not a permit package. Identify which geometry and program facts are documented, what code edition/AHJ and parcel facts are not supplied, and what project-specific evidence would be needed to assess the single-exit path, occupancy, discharge, elevator/corridor relationship, and fire/life-safety measures. Distinguish this concept from its two-stair comparison and do not treat it as an approved alternative or decide safety/equivalence.
+
+Attachments:
+- bc-housing-single-stair-residential-buildings-c09d1ad8a20e.pdf
+- attachment-2-source-text.txt
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

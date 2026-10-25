@@ -1,0 +1,6 @@
+Residential buildings must be barrier-free, and someone asks whether the elevators must be kept in operation. The attached STANDATA interpretation (23-BCI-034) is my only source. Using only that document, identify the NBC(AE) elevator provisions and the elevating devices rules it distinguishes, what it says about firefighter and occupant use, what remains uncertain, and what evidence and questions the file needs. Do not invent elevator counts, building height or occupancy, and do not state the building complies.
+
+Attachments:
+- ma-standata-interpretation-building-23-bci-034-2025-03-30f6023f1a78.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

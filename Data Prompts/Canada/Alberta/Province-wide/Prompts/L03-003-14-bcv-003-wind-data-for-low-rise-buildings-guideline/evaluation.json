@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The R1 reference accepted guideline values for specified wind load and driving-rain wind pressure for qualifying Part 9 low-rise fenestration projects; both catalogue entries are withdrawn.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "withdrawn version/status",
+    "Part 9 and low-rise applicability",
+    "site exposure/location and guideline scope",
+    "fenestration performance grades and design values"
+  ],
+  "case_id": "L03-003",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

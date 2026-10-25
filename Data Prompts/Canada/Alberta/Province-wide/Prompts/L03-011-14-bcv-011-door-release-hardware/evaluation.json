@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The historical reference allowed specified electromagnetic locks in Group B2/B3 occupancy doors only under the listed alarm, sprinkler, release, signage, reset and lighting conditions; catalogue labels it withdrawn.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "withdrawn status and occupancy",
+    "all release triggers and reset sequence",
+    "fire alarm/sprinkler and monitoring evidence",
+    "door-specific layout, signage and emergency lighting"
+  ],
+  "case_id": "L03-011",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

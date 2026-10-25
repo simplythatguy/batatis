@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The reference allows existing systems to keep their designed freeze-protection level and describes freeze-protection requirements/alternatives for new systems; it does not provide an outcome for a particular building.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "existing versus new system",
+    "sprinkler system/NFPA edition",
+    "freeze exposure and design concentration records",
+    "alternative protection and fire-alarm monitoring evidence"
+  ],
+  "case_id": "L03-020",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Appeal upheld: the tribunal replaced the assessment manager's decision not to incorporate fast-response sprinklers with a decision to accept and act on the QFES assessment advice (p. 9, para 76). Dated 16 Dec 2022 (p. 9).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Identifies the edition question for alterations: the BCA 2019 Volume 1 citation against the transitional provisions in Building Act ss 68 and 112.",
+    "Flags the revision sequence (Revision B, Revision C, the due diligence letter) and asks which version governs.",
+    "Identifies the fast-response sprinkler requirement as the disputed fire-protection measure.",
+    "Makes no compliance statement."
+  ],
+  "case_id": "H09-005",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

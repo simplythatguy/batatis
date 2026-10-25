@@ -1,0 +1,14 @@
+{
+  "known_outcome": "p.16 §12.1: the wall and deck framing of the alterations does not comply with Clauses B1 and B2; the exterior building envelope does not comply with Clauses B2 and E2; further §12.1 items are truncated in extraction.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates Matter 1 (framing and envelope) from Matter 2 (E3, F4, H1)",
+    "Checks the consent history as a documentary gap list",
+    "Does not assume a durability modification is granted"
+  ],
+  "case_id": "H05-012",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

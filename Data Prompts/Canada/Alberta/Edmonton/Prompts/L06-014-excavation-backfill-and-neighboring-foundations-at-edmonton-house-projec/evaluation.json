@@ -1,0 +1,14 @@
+{
+  "known_outcome": "The permit suspension was varied, including changes to its scope and reinstatement conditions.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Track which permit and structures the suspension applies to.",
+    "Separate geotechnical findings, structural review, survey data and operational conditions.",
+    "Notice that some reports were disputed or received late."
+  ],
+  "case_id": "L06-014",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Calgary / Edmonton",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

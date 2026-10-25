@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Granted as proposed (metal composite panels in lieu of metal panels at exterior soffits).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "NFPA 285 test requirement for the system intended for use",
+    "whether the equivalency letter covers the same assemblies",
+    "design-review finish claim as a non-fire issue"
+  ],
+  "case_id": "H11-016",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

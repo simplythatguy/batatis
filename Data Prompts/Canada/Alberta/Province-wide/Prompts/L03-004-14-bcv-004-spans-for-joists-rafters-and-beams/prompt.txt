@@ -1,0 +1,6 @@
+Use the attached historical 14-BCV-004 STANDATA as a reference. Identify the cited 2014 code article and the named Span Book edition it recognizes. List the member, span, loading, support and table conditions that would need to be supplied for a real review, plus questions needed to resolve them. Do not invent structural facts or infer that this older reference applies to a current code edition or a particular project.
+
+Attachments:
+- catalogue-18-d7d178743594.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

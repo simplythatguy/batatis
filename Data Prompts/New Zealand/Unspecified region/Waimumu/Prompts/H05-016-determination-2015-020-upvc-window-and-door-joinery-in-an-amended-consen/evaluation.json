@@ -1,0 +1,14 @@
+{
+  "known_outcome": "p.12 §7.1–7.2: the uPVC joinery system as now proposed will comply with Clauses B1, B2 and E2; the authority was correct to refuse the amendment for the original submission, and that refusal is reversed for the revised details.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the original submission from the revised details",
+    "Stays within the three clauses the file names (B1, B2, E2)",
+    "Identifies the installation-detail evidence the file discusses (fixings, flashings, junctions) without asserting it is sufficient"
+  ],
+  "case_id": "H05-016",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

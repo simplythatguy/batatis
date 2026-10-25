@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The Chief Executive reverses the authority's decision and requires it to treat the substitution as a minor variation; the refusal of the formal amendment to BC/0130/18 was correct and is confirmed; notice to fix NF/0003/18 is reversed for the reasons in the determination (decision, p.33).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "glulam versus solid timber structural equivalence",
+    "minor variation versus amendment for a material substitution",
+    "engineering and manufacturer evidence for glulam",
+    "admin trail of notices and amendments"
+  ],
+  "case_id": "H04-025",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

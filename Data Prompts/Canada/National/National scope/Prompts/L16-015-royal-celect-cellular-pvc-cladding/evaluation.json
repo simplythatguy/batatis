@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The report publishes a product-level NBC 2015 opinion, bounded moisture/install conditions and a fire-test summary for the evaluated product.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "which Royal Celect profile is proposed",
+    "site moisture/coastal conditions and required furring/capillary break",
+    "exact tested product and fire test scope",
+    "project assembly and locally applicable code edition"
+  ],
+  "case_id": "L16-015",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

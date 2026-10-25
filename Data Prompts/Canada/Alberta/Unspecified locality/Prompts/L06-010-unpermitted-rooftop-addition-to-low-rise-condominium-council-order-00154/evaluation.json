@@ -1,0 +1,14 @@
+{
+  "known_outcome": "The order was varied to change the compliance date; the decision records that demolition had started before the hearing.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separate direct observation from review of drawings/reports.",
+    "Identify what evidence is missing to resolve conflicting professional opinions.",
+    "Avoid making a variance or compliance claim from an enforcement appeal."
+  ],
+  "case_id": "L06-010",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

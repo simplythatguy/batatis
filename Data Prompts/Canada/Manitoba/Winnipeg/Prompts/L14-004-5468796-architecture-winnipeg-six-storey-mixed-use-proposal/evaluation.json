@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The proponent profile reports submission in March 2025 and conditional approval by the Winnipeg Building Code Commission in January 2026; no project-specific commission decision is attached. The attached City bulletin is general guidance, not the project decision.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "separate policy guidance from project disposition",
+    "complete MBC alternative-solution package",
+    "mixed-use and floor-by-floor egress facts",
+    "independent verification of conditional approval claim"
+  ],
+  "case_id": "L14-004",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

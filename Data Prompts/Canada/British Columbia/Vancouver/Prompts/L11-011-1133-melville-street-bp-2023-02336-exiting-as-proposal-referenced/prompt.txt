@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from City of Vancouver, British Columbia. It is not an Alberta application.
+
+Identify the exiting AS reference and local by-law edition. Does this page provide AL-2023-00146, technical analysis, or its disposition? Separate completed BP status from unknown AS status and ask for missing documents.
+
+Attachments:
+- attachment-1-source-text.txt
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

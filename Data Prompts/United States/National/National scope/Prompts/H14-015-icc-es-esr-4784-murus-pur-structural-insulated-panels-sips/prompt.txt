@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from United States (ICC-ES evaluation report under IBC/IRC); NON-ALBERTA COMPARATIVE ONLY: cannot establish Alberta performance, acceptance or equivalence; no Canadian or Alberta approval is claimed or implied. It is not an Alberta application.
+
+Comparative test on a US ICC-ES evaluation of polyurethane-core structural insulated panels. Using only the attached report, identify the uses it allows and excludes, what it says about fire-rated assemblies and what evidence it requires for them, the seismic limit on shear-wall configurations, the installation and span conditions, and the test basis. Then say what a reviewer would need from the manufacturer or an engineer and what the report does not establish for an Alberta permit.
+
+Attachments:
+- esr-4784-murus-pur-sip-d5bbc6f63f77.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

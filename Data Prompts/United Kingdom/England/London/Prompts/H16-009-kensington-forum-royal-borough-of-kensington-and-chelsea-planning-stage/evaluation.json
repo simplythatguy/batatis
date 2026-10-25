@@ -1,0 +1,17 @@
+{
+  "known_outcome": "unknown (no planning decision in file)",
+  "outcome_leakage": false,
+  "review_focus": [
+    "travel distances deferred to the next design stage (racetrack corridor above 45 m; basement rooms)",
+    "fire engineering case for open circulation stairs",
+    "management plan for mobility-impaired occupants deferred to before occupation",
+    "hydrant adequacy 'to be reviewed'",
+    "single-stair option noted while two stairs are proposed",
+    "unversioned ADB and BS references"
+  ],
+  "case_id": "H16-009",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

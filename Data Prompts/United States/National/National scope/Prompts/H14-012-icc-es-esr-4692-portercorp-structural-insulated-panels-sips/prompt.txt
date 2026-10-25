@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from United States (ICC-ES evaluation report under IBC/IRC); NON-ALBERTA COMPARATIVE ONLY: cannot establish Alberta performance, acceptance or equivalence; no Canadian or Alberta approval is claimed or implied. It is not an Alberta application.
+
+Comparative test on a US ICC-ES evaluation of structural insulated panels. Using only the attached report, identify its code editions, the uses and fire-resistance statements and where each sits, the installation and approved-documents conditions, the seismic and shear-wall conditions, the sealed-calculation requirement, and the labelling clause. Check the report's own identification numbers for consistency, then say what a reviewer would need from the holder or an engineer and what the report does not establish for an Alberta permit.
+
+Attachments:
+- esr-4692-sip-9bd0a07decb4.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

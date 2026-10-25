@@ -1,0 +1,17 @@
+{
+  "known_outcome": "A published regulator-issued STANDATA sets out a province-wide variance and its stated conditions; it is not an outcome for any applicant-specific project.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Part 9/Group C scope",
+    "named design report and its limits",
+    "project-specific permit drawings",
+    "geotechnical/building-envelope evidence",
+    "wind/seismic out-of-scope limit",
+    "professional review"
+  ],
+  "case_id": "L01-012",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

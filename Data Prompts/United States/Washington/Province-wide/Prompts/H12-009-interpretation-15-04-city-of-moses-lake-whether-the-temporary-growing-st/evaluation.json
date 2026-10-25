@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Council answer (leakage): no. The exception applies only to temporary structures with a flexible covering used for passive heat retention and frost protection; structures used year-round with other services and structural elements are not exempt; the answer also notes that RCW 82.04.213 says marijuana is not an agricultural product.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "exemption scope (temporary versus permanent structures)",
+    "services and structural elements that remove an exemption",
+    "use-based classification of a structure",
+    "evidence needed to show an exemption applies"
+  ],
+  "case_id": "H12-009",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

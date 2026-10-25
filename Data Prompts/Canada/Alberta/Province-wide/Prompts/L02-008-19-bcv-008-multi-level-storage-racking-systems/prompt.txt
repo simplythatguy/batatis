@@ -1,0 +1,6 @@
+Review the attached 19-BCV-008 on multi-level storage-racking systems. Summarize the structure classification and the fire-plan, access, structural, sprinkler, and egress conditions. Ask for the rack layout, stored commodities, access levels, occupant assumptions, fire-protection design, and egress analysis needed to check a separate request; do not invent project details or certify safety.
+
+Attachments:
+- catalogue-242289eb-d175-49f1-a65c-4323d0a5793e-19-BCV-008---Multi-level-storage-racking-systems-7bebbf1ec7ea.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

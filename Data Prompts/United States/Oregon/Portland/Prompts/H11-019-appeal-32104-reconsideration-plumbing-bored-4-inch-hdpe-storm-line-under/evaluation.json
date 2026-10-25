@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Granted as proposed (bored 4-inch HDPE storm line under the building slab).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "approved materials under the structure (701.2)",
+    "pipe sizing evidence and roof-area basis",
+    "the sketch's omission of dimensions and depths",
+    "relocation of the storm line relative to the curb"
+  ],
+  "case_id": "H11-019",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

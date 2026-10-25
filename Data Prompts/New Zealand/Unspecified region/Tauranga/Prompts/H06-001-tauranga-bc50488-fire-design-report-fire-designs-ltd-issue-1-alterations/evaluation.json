@@ -1,0 +1,17 @@
+{
+  "known_outcome": "Not a decision record. The attachment carries Tauranga City Council approval-stamp text (cover p.1; drawing and statement pages Part 1 pp.25, 29-31; Part 2 pp.74, 79). No council consent decision, code-compliance certificate or review letter is in the attachments, so the outcome is unknown.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "s 112 existing-building means-of-escape route with the C/AS4 and C/AS5 gap table (pp.4-6)",
+    "Acceptable Solution route, not an alternative solution: what an alternative-solution report would need instead",
+    "s 46 DRU trigger reasoning and conflicting gazette dates (p.5 against p.20)",
+    "Appendix A 'Fire Plans' divider with no fire-plan sheet in the text layer (p.21)",
+    "compliance-schedule entries and inspection regime (pp.6, 18-19)",
+    "footer address discrepancy (p.2 against p.3)"
+  ],
+  "case_id": "H06-001",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

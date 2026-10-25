@@ -1,0 +1,14 @@
+{
+  "known_outcome": "The Council revoked the order; it found the 604 m² area was 0.7% above a 600 m² threshold and within the stated 2% tolerance.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Check edition and the exact threshold cited by the source.",
+    "Separate as-built work and evidence from a variance proposal.",
+    "Avoid applying this historical order as a current rule."
+  ],
+  "case_id": "L06-004",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

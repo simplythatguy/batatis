@@ -1,0 +1,15 @@
+{
+  "known_outcome": "First-tier Tribunal dismissed the appeal against the Building Safety Regulator decision (p.2 para 1).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "escape from a roof-level bedroom through an open-plan ground floor",
+    "compartmentation of the staircase and alternative measures",
+    "evidence before the regulator versus new evidence on appeal",
+    "precedent cited by the regulator (APP/007/002/012) not in the file"
+  ],
+  "case_id": "H15-014",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Complies: the determination finds the part of the proposed barrier comprising the house wall with the bi-fold window complies with clause F9. [p.10, para 5.1]",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Sill height and projection limits for a window in a barrier wall under F9/AS1",
+    "Whether the house wall can form part of the barrier and what evidence the owners relied on",
+    "Authority's periodic pool-inspection role (section 162D) noted in the determination"
+  ],
+  "case_id": "H01-011",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

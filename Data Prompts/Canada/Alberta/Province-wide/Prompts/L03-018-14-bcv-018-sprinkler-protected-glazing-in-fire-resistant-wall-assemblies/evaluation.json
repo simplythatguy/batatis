@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The R1 reference conditionally permits certain sprinkler-protected glazing in fire-rated assemblies and has different evaluation/system wording from the original 2018 document; the catalogue lists both without a [WITHDRAWN] marker.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "version/date and change tracking",
+    "required wall rating and assembly location",
+    "accredited evaluation/listing and sprinkler evidence",
+    "exclusions, water supply, hydraulics, installation and maintenance evidence"
+  ],
+  "case_id": "L03-018",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

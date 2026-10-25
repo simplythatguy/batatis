@@ -1,0 +1,17 @@
+{
+  "known_outcome": "Calgary published and CSTIC accepted Revision 5 on 2026-03-05; no individual application or project decision is present.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Do not infer an edition year from the revision date.",
+    "Preserve the exact stated scope and flag missing project geometry/height/openings evidence.",
+    "Flag the 0.3 m footing projection into the easement on p.4 versus 0.6 m across the property line on p.5; ask for clarification rather than harmonizing the wording.",
+    "Recognize that the MARW/title condition is explicit and applies to adjacent parcels.",
+    "Use the current SPV revision and do not treat Revision 4 as a separate case or as current text.",
+    "Ask for permit and supporting evidence; do not certify design performance."
+  ],
+  "case_id": "L04-001",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Calgary / Edmonton",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

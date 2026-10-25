@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Secretary of State concluded and determined the proposals for the stairway do not comply with Requirement M2 (access and use) of the Building Regulations 2000 (as amended) (p.7).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Requirement M2 access and use for extensions to non-dwellings",
+    "access through the existing building versus stair in the extension",
+    "K1 compliance of the stair does not establish M2 suitability",
+    "conservation-area context"
+  ],
+  "case_id": "H15-008",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

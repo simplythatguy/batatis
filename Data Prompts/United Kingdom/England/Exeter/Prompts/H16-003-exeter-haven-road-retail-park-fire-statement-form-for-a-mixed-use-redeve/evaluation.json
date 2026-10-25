@@ -1,0 +1,18 @@
+{
+  "known_outcome": "unknown (no planning decision in file)",
+  "outcome_leakage": false,
+  "review_focus": [
+    "Block D stairway not reachable from a code-compliant appliance position",
+    "mechanical smoke ventilation trigger at more than 15 m single-direction travel",
+    "external wall protection areas from an initial assessment",
+    "basement plant room travel distance deferred to RIBA Stage 3",
+    "separate fire service site plan referenced but absent from the PDF",
+    "Regulation 7 external wall restrictions for Relevant Buildings",
+    "no consultation to date recorded"
+  ],
+  "case_id": "H16-003",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

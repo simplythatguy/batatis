@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from City of Ottawa, Ontario, Canada (original jurisdiction). It is not an Alberta application.
+
+Here is a consultant's fire-code retrofit assessment and water-supply analysis for an existing arena, prepared for a municipal client. Using only this report, identify the retrofit items that remain open, which code editions the report says apply to which part of the work, what it says about evacuation for people who need help, and what a reviewer would need to confirm next, including whether any further life-safety study or other measure is still needed. Do not say whether the building is safe or compliant.
+
+Attachments:
+- ottawa-d07-12-25-0154-fire-code-retrofit-assessment-2e5918cd32bb.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

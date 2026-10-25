@@ -1,0 +1,14 @@
+{
+  "known_outcome": "The permit refusal was confirmed.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Distinguish a proposed alternative-solution application from an issued variance.",
+    "Check height/grade assumptions, fire-compartment boundaries, exit-stair strategy, and the underlying engineering evidence.",
+    "Do not treat the order’s summary as a substitute for the referenced drawings and reports."
+  ],
+  "case_id": "L06-002",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

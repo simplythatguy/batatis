@@ -1,0 +1,6 @@
+Using the attached 23-BCV-012R1 STANDATA and its cited University of Alberta design report, identify the facts and permit materials needed to check applicability: Group C/Part 9 scope, NLT or DLT panel system, whether project-specific details and design remain within the report’s stated scope/assumptions, and separate geotechnical, building-envelope and wind/seismic design responsibilities. Ask for missing drawings and professional input; do not design or certify a foundation.
+
+Attachments:
+- ARTS-2024-01-MLTP-permanent-wood-foundations-7c0f74afc50d.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

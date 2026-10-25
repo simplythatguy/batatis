@@ -1,0 +1,6 @@
+A hydronic heating system design is needed in a building. The attached STANDATA interpretation (23-BCI-042/20-PCB-011R1) is my only source. Using only that document, identify the design-requirement provisions it cites, who it says is usually retained for design and field review, what standards it refers to, and what the file still needs to show. Do not invent system sizes or equipment, and do not state that the design complies.
+
+Attachments:
+- ma-standata-interpretation-building-plumbing-23-bci-042-20-pcb-011r1-2025-07-87bcbedbb122.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

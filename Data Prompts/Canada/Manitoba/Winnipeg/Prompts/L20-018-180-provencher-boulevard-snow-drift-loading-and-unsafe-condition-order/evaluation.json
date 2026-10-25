@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The adjudicator set aside the City order; the official page states the matter is under review by the Court of King’s Bench.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "distinguish current physical distress from predicted loading",
+    "identify the engineering reports that are mentioned but not attached",
+    "order authority, site context, and any later court status",
+    "do not treat the adjudicator’s outcome as technical or Alberta precedent"
+  ],
+  "case_id": "L20-018",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

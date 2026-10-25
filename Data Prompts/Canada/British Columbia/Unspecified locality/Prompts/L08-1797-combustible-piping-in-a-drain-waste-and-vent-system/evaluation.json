@@ -1,0 +1,13 @@
+{
+  "known_outcome": "The Board found the cited exceptions did not apply to the subject arrangement and said Sentence 3.1.9.4.(3) did not permit combustible traps and trap arms on one side of the unrated vertical wall in this context.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "The plumbing schematic, firestop listings and supporting professional analysis are not linked.",
+    "The case is a BC interpretation comparator, not an Alberta determination."
+  ],
+  "case_id": "L08-1797",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,6 @@
+Review the attached historical 14-BCV-012 STANDATA as a regulator-issued reference. Extract its eligible oil/gas building scope, 150 m² limit, engineering risk-assessment elements and other named conditions. Then list which project facts and professional/operational records are absent and formulate the questions needed to decide whether a real application is within scope. Do not invent process hazards, write the engineer’s analysis, or certify safety/compliance.
+
+Attachments:
+- catalogue-12-2275d4dcd09d.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

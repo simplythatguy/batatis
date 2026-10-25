@@ -1,0 +1,15 @@
+{
+  "known_outcome": "unknown. No authority decision is in the attachment. The URL folder 'planer-pa-horing' shows the plan was out for hearing (process status only).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "deviation documentation for ventilation fire insulation and the air-handling-unit bypass",
+    "change-of-use documentation for an existing building",
+    "drawing register versus sheets inside the PDF",
+    "independent-control role named in the report"
+  ],
+  "case_id": "H17-002",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

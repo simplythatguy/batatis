@@ -1,0 +1,14 @@
+{
+  "known_outcome": "The Board determined that alternative solutions are limited to prescribed Division B acceptable solutions and that Sentence 1.3.3.4.(2) of Division A, a method for determining construction requirements, was not eligible for the requested alternative; it said alternatives to Division B requirements were not precluded.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Distinguish the Division A building-height method from the Division B acceptable solution being replaced.",
+    "Request a building-code analysis identifying applicable objectives, functional statements and fire-separation requirements.",
+    "The published section image is only one diagram; check what additional plans, dimensions and professional evidence are missing."
+  ],
+  "case_id": "L08-1842",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

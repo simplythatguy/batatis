@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Manufacturer-stated: installation limits (roof exclusion; 180-day exposure) and fire-rated assemblies by UL listing (p17). The referenced evaluation report ESR-3373 is not attached.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Fire-rated list rests on UL listings not attached (p17); ESR-3373 excludes fire-resistance-rated construction (§5.7)",
+    "Cross-references to ESR-3373 and ER-0482 (identifier not defined in the manual text)",
+    "Editions named in tables (2015, 2018, 2021) versus the report's editions",
+    "Warranty statements are not code requirements"
+  ],
+  "case_id": "H14-022",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

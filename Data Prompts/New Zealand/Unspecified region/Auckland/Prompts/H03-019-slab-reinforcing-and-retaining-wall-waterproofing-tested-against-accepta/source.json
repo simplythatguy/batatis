@@ -1,0 +1,76 @@
+{
+  "id": "H03-019",
+  "record_key": "2022/003",
+  "tier": "strong",
+  "title": "Slab reinforcing and retaining-wall waterproofing tested against Acceptable Solutions (Mt Roskill, Auckland)",
+  "jurisdiction": "New Zealand (MBIE, Building Act 2004): comparative test only; not an Alberta case; no Alberta applicability asserted",
+  "authority": "Auckland Council",
+  "code_edition": "NZ Building Code B1 and E2 with B1/AS1 and E2/AS3 as cited",
+  "case_type": "issued_variance",
+  "document_type": "MBIE determination under Building Act 2004 s188 (regulator decision on an individual matter); not an applicant's alternative-solution file",
+  "source_url": "https://codehub.building.govt.nz/resources/2022003",
+  "document_date": "2022-04-01",
+  "facts": [
+    {
+      "text": "Owner's 1960s house has a basement double garage with concrete block walls set into a sloping bank, with retaining walls of 1,050 mm block and 300 mm timber-framed sections.",
+      "locator": "p.3 §2"
+    },
+    {
+      "text": "Two items: (1) reinforcing bars in a concrete slab floor; (2) waterproofing the retaining walls with a damp-proof membrane.",
+      "locator": "p.3 §1.5"
+    },
+    {
+      "text": "Determination limited to whether the items comply by the relevant Acceptable Solutions (B1/AS1 para 2.1.1; E2/AS3); it states that AS compliance is one, but not the only, way to comply.",
+      "locator": "p.3 §1.5"
+    },
+    {
+      "text": "Conclusion: NZS 4229 commentary C7.8.3, relied on by the owner, is not part of B1/AS1; the E2/AS3 weathertight-concrete code of practice excludes retaining walls including basement walls.",
+      "locator": "p.15 §5"
+    },
+    {
+      "text": "Decision: Item 1 does not comply with B1 by B1/AS1 para 2.1.1; Item 2 does not comply with E2 by E2/AS3 (1 April 2022).",
+      "locator": "p.16 §6.1"
+    }
+  ],
+  "recommended_input_pages": "1-14",
+  "limitations": [
+    "Comparative only: a New Zealand determination used to test attachment format and content; it cannot establish Alberta performance or applicability.",
+    "The determination's decision section is in the same PDF; outcome leakage is true. Use only pages 1-14 as applicant-side input if pages are split.",
+    "Facts are taken from the text layer (pypdf); photos, drawings and figures were not visually inspected unless stated."
+  ],
+  "alberta_applicability": "none asserted",
+  "comparative_only": true,
+  "worker": "H03",
+  "prompt_number": 335,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2022/2022-003.pdf",
+      "sha256": "76a82da1281d5331874c3de91f196a3527226f1bc1b95938a3e148481803ab1b",
+      "role": "input",
+      "bytes": 1248003,
+      "filename": "2022-003-76a82da1281d.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H03/files/2022003/2022-003-76a82da1281d.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:42:35.203223+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2022/2022-003.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Auckland",
+    "basis": "The project title identifies Mt Roskill, Auckland; Auckland Council is the authority.",
+    "locator": "source title; authority field",
+    "scope": "project"
+  }
+}

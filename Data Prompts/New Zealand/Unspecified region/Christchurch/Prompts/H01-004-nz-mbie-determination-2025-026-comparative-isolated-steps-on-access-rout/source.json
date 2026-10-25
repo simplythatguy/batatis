@@ -1,0 +1,72 @@
+{
+  "id": "H01-004",
+  "number": "2025-026",
+  "title": "NZ MBIE Determination 2025/026 (comparative): isolated steps on access routes, D1 waiver request",
+  "jurisdiction": "New Zealand (Building Act 2004); Christchurch City Council; comparative only, not Alberta",
+  "scope": "comparative_non_alberta",
+  "code_edition": "NZ Building Code (Schedule 1, Building Regulations 1992) as cited; D1/AS1 second edition, amendment 6 as cited",
+  "case_type": "appeal_decision",
+  "timing": "proposed",
+  "retrospective": "no",
+  "source_url": "https://codehub.building.govt.nz/resources/2025026",
+  "source_url_note": "Building CodeHub resource page for the same MBIE determination (Information provider: MBIE); the building.govt.nz determination page is WAF-blocked for this worker.",
+  "document_date": "5 June 2025",
+  "facts": [
+    {
+      "text": "The authority refused to grant building consent subject to a waiver from clause D1.3.3(i) for proposed isolated steps between student bedrooms and prefabricated pods.",
+      "locator": "p.1"
+    },
+    {
+      "text": "The building is a multi-storey university student accommodation building.",
+      "locator": "p.1"
+    },
+    {
+      "text": "Figure 1 shows the bedroom and ensuite pod arrangement with the isolated step.",
+      "locator": "p.1"
+    },
+    {
+      "text": "Acceptable Solution D1/AS1 is cited as second edition, amendment 6.",
+      "locator": "p.3, para 3.1.2"
+    }
+  ],
+  "limitations": [
+    "Comparative test only: New Zealand Building Act 2004 and Building Code (Schedule 1, Building Regulations 1992). No Alberta applicability asserted; no NBC(AE) mapping.",
+    "Outcome leakage: the MBIE decision is inside the same original PDF, so the full file cannot be used as applicant-stage input without removing the decision pages.",
+    "Applicant application documents are not published; drawings and photos appear only as figures inside the determination. Figures were located by caption, not visually inspected.",
+    "Waiver submissions are summarised in the determination, not published as separate files."
+  ],
+  "worker": "H01",
+  "prompt_number": 354,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2025/2025-026.pdf",
+      "sha256": "7cdca1114d4d70c20454236ea8f9a078e77bf527796809e2d56bc57dae36e7d5",
+      "role": "input",
+      "document_type": "MBIE determination PDF (original bytes)",
+      "bytes": 357295,
+      "filename": "mbie-det-2025-026-7cdca1114d4d.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H01/files/pdf/mbie-det-2025-026-7cdca1114d4d.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:42:36.173755+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2025/2025-026.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Christchurch",
+    "basis": "The jurisdiction names Christchurch City Council as the local authority context; no separate region is documented.",
+    "locator": "jurisdiction field",
+    "scope": "local"
+  }
+}

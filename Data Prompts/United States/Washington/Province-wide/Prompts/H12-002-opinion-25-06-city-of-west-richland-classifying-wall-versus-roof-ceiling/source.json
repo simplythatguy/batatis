@@ -1,0 +1,68 @@
+{
+  "id": "H12-002",
+  "title": "Opinion 25-06 (City of West Richland): classifying wall versus roof/ceiling assemblies in alternative building forms (stress-skin panels, berm housing)",
+  "jurisdiction": "Washington State, requested by City of West Richland (comparative test only; not Alberta)",
+  "code_edition": "2021 WSEC-R (R402, R201.3) and 2021 IBC (202), as cited",
+  "case_type": "regulatory_guidance",
+  "source_url": "https://sbcc.wa.gov/answers-opinions",
+  "document_date": "Not stated in document (opinion no. 25-06)",
+  "facts": [
+    {
+      "text": "Document type: State Building Code Council opinion no. 25-06, one page; requester City of West Richland.",
+      "locator": "p1 header"
+    },
+    {
+      "text": "Sections at issue: WSEC R402 Building Thermal Envelope; WSEC R201.3 Terms Defined in Other Codes; IBC 202 Definitions.",
+      "locator": "p1 SECTION"
+    },
+    {
+      "text": "The question states that alternative building options such as stress-skin panels and berm housing have increased.",
+      "locator": "p1 QUESTION"
+    },
+    {
+      "text": "The question asks how to determine which sections of such structures must meet which assembly requirements, and notes that the code gives no clear guidance beyond the vertical versus non-vertical glazing definition.",
+      "locator": "p1 QUESTION"
+    }
+  ],
+  "limitations": [
+    "The PDF contains the Council answer on the same page; do not present it as applicant-side input without flagging leakage.",
+    "The question describes building types only in general terms; no dimensions, drawings or thermal calculations are in the record.",
+    "The answer classifies by slope only and does not evaluate thermal performance.",
+    "Edition as cited (2021 WSEC-R / 2021 IBC); comparative Washington record only."
+  ],
+  "original_worker_case_type": "issued_variance",
+  "parent_curation_note": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance.",
+  "worker": "H12",
+  "prompt_number": 607,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://sbcc.wa.gov/sites/default/files/2025-12/25-06_MAY02_WSEC-R.pdf",
+      "sha256": "36bde59dcd2cd08a9fce1831f1bc6bf3f72609b00c6195996e3ab873f96611fa",
+      "role": "outcome_reference",
+      "bytes": 77571,
+      "filename": "sbcc-ruling-25-06-25-06-may02-wsec-r-36bde59dcd2c.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H12/files/sbcc-ruling-25-06-25-06-may02-wsec-r-36bde59dcd2c.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:44:44.457249+00:00",
+        "http_status": "200",
+        "final_url": "https://sbcc.wa.gov/sites/default/files/2025-12/25-06_MAY02_WSEC-R.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "United States",
+    "province_or_state": "Washington",
+    "city_or_town": "Province-wide",
+    "basis": "A Washington State Building Code Council interpretation/opinion gives state-code guidance. Named cities/counties are requesters, not documented project sites.",
+    "locator": "jurisdiction field; p1 header",
+    "scope": "provincewide"
+  }
+}

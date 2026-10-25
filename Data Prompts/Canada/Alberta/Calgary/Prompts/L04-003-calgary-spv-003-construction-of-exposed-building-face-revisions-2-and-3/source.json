@@ -1,0 +1,108 @@
+{
+  "id": "L04-003",
+  "title": "Calgary SPV-003 Construction of Exposed Building Face, Revisions 2 and 3",
+  "jurisdiction": "City of Calgary, Alberta",
+  "code_edition": "Revision 2 explicitly states NBC(AE) 2019; Revision 3 names NBC–Alberta Edition without a year",
+  "case_type": "issued_variance",
+  "source_url": "https://www.calgary.ca/development/permits/building-regulation-advisories.html",
+  "document_date": "2025-02-12 (Revision 3; Revision 2 dated 2023-08-15)",
+  "facts": [
+    {
+      "text": "Revision 3 is dated February 12, 2025, accepted by CSTIC that date, and records the first edition (August 1, 2018) plus revisions 1–3.",
+      "locator": "SPV-003 Revision 3, PDF pp.1, 4"
+    },
+    {
+      "text": "Revision 3 names Division B Article 9.10.14.2 and Article 9.10.14.5 Sentence (1); it does not state a code edition year.",
+      "locator": "SPV-003 Revision 3, PDF p.1"
+    },
+    {
+      "text": "Revision 3 addresses single-storey detached garages and other storage/accessory buildings classified as Group F, Division 3 serving multi-dwelling buildings under Subsection 9.10.15, where those buildings do not directly serve the dwelling units they face.",
+      "locator": "SPV-003 Revision 3, PDF pp.1–2"
+    },
+    {
+      "text": "Revision 3 states a minimum 1.2 m limiting distance between the dwelling unit and Group F, Division 3 building, including projections, and requires SPV-003 references in permit documents and permit conditions for the permit address.",
+      "locator": "SPV-003 Revision 3, PDF pp.2–3"
+    },
+    {
+      "text": "The attached Revision 2 expressly names NBC(AE) 2019 and describes detached garages serving two to four non-stacked dwelling units; it says a modified scope requires the prescriptive path or site-specific variance.",
+      "locator": "SPV-003 Revision 2, PDF pp.1–2"
+    },
+    {
+      "text": "Calgary's transition advisory says that from May 1, 2024, building permit applications are to comply with NBC 2023(AE)/NECB 2020, subject to stated multi-building transition conditions.",
+      "locator": "B23-001, PDF pp.1–2"
+    }
+  ],
+  "limitations": [
+    "The SPV revisions are municipal standing variances, not individual project applications.",
+    "The current Revision 3 omits a code edition year; its 2025 date is not proof of edition.",
+    "Revision 2's 2019 edition and scope cannot be assumed to govern Revision 3.",
+    "The City page states advisory materials have no legal status and posted items may be removed."
+  ],
+  "worker": "L04",
+  "prompt_number": 21,
+  "priority_tier": 1,
+  "priority": "Calgary / Edmonton",
+  "attachments": [
+    {
+      "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/construction-of-exposing-building-face-spv-003.pdf",
+      "sha256": "3201586278f2674724ca475b21312b513a210c871708bbb8384f18be6ab88f2a",
+      "role": "outcome_reference",
+      "bytes": 647391,
+      "filename": "_evaluation/calgary-spv-003-2025-3201586278f2.pdf",
+      "included_in_default_input": false,
+      "original_collection_path": "_research/workers/L04/files/calgary-spv-003-2025-3201586278f2.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:14.897296+00:00",
+        "http_status": "200",
+        "final_url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/construction-of-exposing-building-face-spv-003.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/variance-construction-of-exposing-building-face-spv-003.pdf",
+      "sha256": "1c969fa7f3524fd258a3fe6cbfb0e17af8a1f05f4a21d0f91fe9bf06494e7bfd",
+      "role": "supporting_evidence",
+      "bytes": 559423,
+      "filename": "calgary-spv-003-revision-2-2023-1c969fa7f352.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L04/files/calgary-spv-003-revision-2-2023-1c969fa7f352.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:20:19.144877+00:00",
+        "http_status": "200",
+        "final_url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/variance-construction-of-exposing-building-face-spv-003.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-001-code-transition-advisory.pdf",
+      "sha256": "fdd0652b975c8115c519697690490b980a4bf5ae2924d1e78851037b3db9b8e5",
+      "role": "supporting_evidence",
+      "bytes": 117182,
+      "filename": "calgary-advisory-b23-001-transition-fdd0652b975c.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L04/files/calgary-advisory-b23-001-transition-fdd0652b975c.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:18:56.161932+00:00",
+        "http_status": "200",
+        "final_url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-001-code-transition-advisory.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Alberta",
+    "city_or_town": "Calgary",
+    "basis": "Published municipal guidance is explicitly for Calgary, Alberta; no single project site is claimed.",
+    "locator": "B23-001, PDF pp.1–2",
+    "scope": "local"
+  }
+}

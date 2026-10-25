@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The authority was correct to issue notice to fix No. NF0312 on both matters, and the Chief Executive confirmed that decision (decision, p.10).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "bearer profile substitution against consent drawings",
+    "bolt fixing location and load path",
+    "approved splice details versus proprietary splice plate",
+    "scope of a multiple-use approval for on-site changes"
+  ],
+  "case_id": "H04-014",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

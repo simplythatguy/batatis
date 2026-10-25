@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Unknown as to any project or permit disposition; the attachment reports component and benchmark testing, not approval of an individual alternative solution.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "distinguish the benchmark from the eleven client assemblies and preserve any anonymization",
+    "identify the project’s own cladding, drainage geometry and water loads",
+    "check the study’s 2010 NBC comparator against the actual adopted code edition and provision"
+  ],
+  "case_id": "L18-016",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

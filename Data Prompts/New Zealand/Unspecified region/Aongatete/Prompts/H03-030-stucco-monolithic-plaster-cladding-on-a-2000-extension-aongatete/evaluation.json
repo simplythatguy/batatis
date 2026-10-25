@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Determination: authority correct to refuse the CCC; the stucco finish did not establish compliance and the items are construction defects (6 October 2022).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "monolithic plaster cladding durability under E2/B2",
+    "construction defects versus ageing",
+    "code edition at consent date",
+    "expert and product-evidence sufficiency"
+  ],
+  "case_id": "H03-030",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

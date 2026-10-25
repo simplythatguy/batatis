@@ -1,0 +1,6 @@
+Review the attached historical 14-BCV-019 STANDATA as a reference for under-slab insulation with a heated floor in contact with the ground. Extract the stated objective/function and the two insulation thresholds, then identify the heating type, ground contact and frost-line evidence needed for a real submission. Ask for missing drawings and measurements. Do not assume the floor’s location relative to frost line, claim current validity, or certify energy/code performance.
+
+Attachments:
+- catalogue-02-2ab1b816371d.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

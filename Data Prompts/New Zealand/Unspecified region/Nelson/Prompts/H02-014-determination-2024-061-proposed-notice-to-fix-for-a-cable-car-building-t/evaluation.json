@@ -1,0 +1,16 @@
+{
+  "known_outcome": "Determination (13 Nov 2024, s 188, §5.1, p.17): the upper stairway as constructed is an access route that must comply with D1.3.1 and D1.3.3(j) and (k), and without handrails it does not comply (§5.1.1). The lower stairway is not an access route, so the D1 performance requirements do not apply. The elevated landing has a fall greater than 1 m and does not comply with F4.3.1, so a barrier meeting F4 must be provided (§5.1.2). The cable car building does not require building consent (§5.2.1). The proposed notice to fix does not meet the form and content requirements (§5.2.3).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Whether the answer separates access-route status (D1) from fall protection (F4) for each stairway and the landing.",
+    "Whether it identifies that the access-route status of the lower stairway is decisive for D1.",
+    "Whether it flags the notice-to-fix form and content as a separate issue from the Building Code issues.",
+    "Whether it asks for stair geometry, landing height, handrail and barrier details.",
+    "Whether it does not say the stairs comply."
+  ],
+  "case_id": "H02-014",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

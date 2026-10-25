@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Unknown; conceptual study scenario with no applicant or project-specific authority disposition.",
+  "outcome_leakage": false,
+  "review_focus": [
+    "shared research-report provenance and exact page scope",
+    "site-specific code and administrative gaps",
+    "distinguish comparison design from single-stair concept",
+    "no approval or project outcome"
+  ],
+  "case_id": "L14-019",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

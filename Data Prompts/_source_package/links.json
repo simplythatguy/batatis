@@ -1,0 +1,488 @@
+[
+  {
+    "id": "PKG-01",
+    "url": "https://www.edmonton.ca/sites/default/files/public-files/Point-Access-Block-Alternative-Solution-Guide.pdf",
+    "relationship_ids": [
+      "rId40"
+    ],
+    "document_context": [
+      {
+        "label": "City of Edmonton, Point Access Block Alternative Solution Guide",
+        "paragraph": "City of Edmonton, Point Access Block Alternative Solution Guide (2025). A structured pathway for single-stair buildings, with 13 design studies. Shows an authority having jurisdiction pre-defining the shape of an acceptable argument for a recurring innovation category."
+      }
+    ]
+  },
+  {
+    "id": "PKG-02",
+    "url": "https://nrc-publications.canada.ca/eng/view/object/?id=c6504d98-2da4-43c5-a8f6-360d6e640f88",
+    "relationship_ids": [
+      "rId20"
+    ],
+    "document_context": [
+      {
+        "label": "User\u2019s Guide \u2013 NECB 2020",
+        "paragraph": "User\u2019s Guide \u2013 NECB 2020"
+      }
+    ]
+  },
+  {
+    "id": "PKG-03",
+    "url": "https://nrc-publications.canada.ca/",
+    "relationship_ids": [
+      "rId42"
+    ],
+    "document_context": [
+      {
+        "label": "NRC Publications Archive",
+        "paragraph": "NRC Publications Archive. The main free corpus of Canadian building and fire science research \u2014 occupant egress studies, tenability analyses, residential fire characterization, full-scale burn testing."
+      }
+    ]
+  },
+  {
+    "id": "PKG-04",
+    "url": "https://www.edmonton.ca/residential_neighbourhoods/application-requirements-house-permits",
+    "relationship_ids": [
+      "rId41"
+    ],
+    "document_context": [
+      {
+        "label": "City of Edmonton, Application Requirements for House Permits",
+        "paragraph": "City of Edmonton, Application Requirements for House Permits. See the \u201cPolicy Solutions\u201d section for a lists the policy solutions Edmonton offers for conditions that repeatedly require a variance \u2014 including B23-01 on fire separation between row houses with more than two secondary suites, B23-02 on window opening control devices, B23-03 on roof truss engineering, and B23-05, a policy interpretation on the application of Article 9.9.4.4."
+      }
+    ]
+  },
+  {
+    "id": "PKG-05",
+    "url": "https://edmontonunlimited.com/wp-content/uploads/2026/09/Building-Codes-Challenge-with-Appendix-.pdf",
+    "relationship_ids": [
+      "rId22",
+      "rId6"
+    ],
+    "document_context": [
+      {
+        "label": "Challenge Scope",
+        "paragraph": "Equivalent to the Variance Form in the appendix of the Challenge Scope"
+      },
+      {
+        "label": "Building Codes Challenge Scope",
+        "paragraph": "October 2026. This package is a supplement to the Building Codes Challenge Scope"
+      }
+    ]
+  },
+  {
+    "id": "PKG-06",
+    "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/PI/Variance%20Template%20final.pdf",
+    "relationship_ids": [
+      "rId21"
+    ],
+    "document_context": [
+      {
+        "label": "Safety Codes Council variance form",
+        "paragraph": "Safety Codes Council variance form (PDF)"
+      }
+    ]
+  },
+  {
+    "id": "PKG-07",
+    "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/registry.html",
+    "relationship_ids": [
+      "rId43"
+    ],
+    "document_context": [
+      {
+        "label": "CCMC Registry of Product Assessments",
+        "paragraph": "CCMC Registry of Product Assessments. Lists evaluated construction products with the standards and code editions they were assessed against, and is available through a JSON API. Directly relevant to the product-specific path and to determining whether an evaluation already exists for a given product."
+      }
+    ]
+  },
+  {
+    "id": "PKG-08",
+    "url": "https://www.alberta.ca/building-standata",
+    "relationship_ids": [
+      "rId24"
+    ],
+    "document_context": [
+      {
+        "label": "Building STANDATA index",
+        "paragraph": "Building STANDATA index \u2014 variances, interpretations, bulletins and errata."
+      }
+    ]
+  },
+  {
+    "id": "PKG-09",
+    "url": "https://www.safetycodes.ab.ca/permits-inspections/variances/",
+    "relationship_ids": [
+      "rId23"
+    ],
+    "document_context": [
+      {
+        "label": "Guideline to the Variance Form",
+        "paragraph": "Guideline to the Variance Form"
+      }
+    ]
+  },
+  {
+    "id": "PKG-10",
+    "url": "https://open.alberta.ca/publications/2003_351",
+    "relationship_ids": [
+      "rId9"
+    ],
+    "document_context": [
+      {
+        "label": "Exemption Regulation (AR 351/2003)",
+        "paragraph": "Exemption Regulation (AR 351/2003)"
+      }
+    ]
+  },
+  {
+    "id": "PKG-11",
+    "url": "https://open.alberta.ca/publications/standata-building-code-variance-national-building-code-2019-alberta-edition",
+    "relationship_ids": [
+      "rId26"
+    ],
+    "document_context": [
+      {
+        "label": "Building code variances (2019)",
+        "paragraph": "Building code variances (2019)"
+      }
+    ]
+  },
+  {
+    "id": "PKG-12",
+    "url": "https://open.alberta.ca/publications/standata-variance-building-national-building-code-2023-alberta-edition",
+    "relationship_ids": [
+      "rId25"
+    ],
+    "document_context": [
+      {
+        "label": "Building code variances (2023)",
+        "paragraph": "Building code variances (2023)"
+      }
+    ]
+  },
+  {
+    "id": "PKG-13",
+    "url": "https://open.alberta.ca/publications/standata-interpretation-building-national-building-code-2023-alberta-edition",
+    "relationship_ids": [
+      "rId28"
+    ],
+    "document_context": [
+      {
+        "label": "Building code interpretations (2023)",
+        "paragraph": "Building code interpretations (2023)."
+      }
+    ]
+  },
+  {
+    "id": "PKG-14",
+    "url": "https://open.alberta.ca/publications/standata-building-code-variance-2014",
+    "relationship_ids": [
+      "rId27"
+    ],
+    "document_context": [
+      {
+        "label": "Building code variances (2014)",
+        "paragraph": "Building code variances (2014)"
+      }
+    ]
+  },
+  {
+    "id": "PKG-15",
+    "url": "https://open.alberta.ca/publications/standata-bulletin-building-national-building-code-2023-alberta-edition",
+    "relationship_ids": [
+      "rId29"
+    ],
+    "document_context": [
+      {
+        "label": "Building code bulletins (2023)",
+        "paragraph": "Building code bulletins (2023)"
+      }
+    ]
+  },
+  {
+    "id": "PKG-16",
+    "url": "https://www.qp.alberta.ca/documents/Acts/S01.pdf",
+    "relationship_ids": [
+      "rId7"
+    ],
+    "document_context": [
+      {
+        "label": "Safety Codes Act",
+        "paragraph": "Safety Codes Act (RSA 2000, c S-1)"
+      }
+    ]
+  },
+  {
+    "id": "PKG-17",
+    "url": "https://open.alberta.ca/publications/2024_005",
+    "relationship_ids": [
+      "rId8"
+    ],
+    "document_context": [
+      {
+        "label": "Building Code Regulation (AR 5/2024)",
+        "paragraph": "Building Code Regulation (AR 5/2024)"
+      }
+    ]
+  },
+  {
+    "id": "PKG-18",
+    "url": "https://sustainablewaterlooregion.ca/frameworks/resources/national-energy-code-of-canada-for-buildings-necb-2020-online-training-navigating-and-applying-the-code-2/",
+    "relationship_ids": [
+      "rId31"
+    ],
+    "document_context": [
+      {
+        "label": "NECB 2020 navigation training",
+        "paragraph": "NECB 2020 navigation training \u2014 "
+      }
+    ]
+  },
+  {
+    "id": "PKG-19",
+    "url": "https://open.alberta.ca/publications/standata-errata-building-national-building-code-2023-alberta-edition",
+    "relationship_ids": [
+      "rId30"
+    ],
+    "document_context": [
+      {
+        "label": "Building code errata (2023)",
+        "paragraph": "Building code errata (2023)"
+      }
+    ]
+  },
+  {
+    "id": "PKG-20",
+    "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=0316d953-0d55-4311-af69-cad55efec499&dp=2&dsl=en",
+    "relationship_ids": [
+      "rId11"
+    ],
+    "document_context": [
+      {
+        "label": "National Building Code \u2013 2023 Alberta Edition, 2nd printing",
+        "paragraph": "National Building Code \u2013 2023 Alberta Edition, 2nd printing"
+      }
+    ]
+  },
+  {
+    "id": "PKG-21",
+    "url": "https://nrc-publications.canada.ca/eng/view/accepted/?id=ad81d6f2-e76c-4eff-a428-de7e001d3527",
+    "relationship_ids": [
+      "rId33"
+    ],
+    "document_context": [
+      {
+        "label": "NRC, Canada's objective-based codes",
+        "paragraph": "NRC, Canada's objective-based codes. "
+      }
+    ]
+  },
+  {
+    "id": "PKG-22",
+    "url": "https://open.alberta.ca/publications/2007_204",
+    "relationship_ids": [
+      "rId10"
+    ],
+    "document_context": [
+      {
+        "label": "Permit Regulation (AR 204/2007)",
+        "paragraph": "Permit Regulation (AR 204/2007)"
+      }
+    ]
+  },
+  {
+    "id": "PKG-23",
+    "url": "https://m.youtube.com/watch?v=jhN7isNfgoE",
+    "relationship_ids": [
+      "rId32"
+    ],
+    "document_context": [
+      {
+        "label": "FNNBOA webinar on navigating the National Building Code",
+        "paragraph": "FNNBOA webinar on navigating the National Building Code."
+      }
+    ]
+  },
+  {
+    "id": "PKG-24",
+    "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=af36747e-3eee-4024-a1b4-73833555c7fa&dp=2&dsl=en",
+    "relationship_ids": [
+      "rId13"
+    ],
+    "document_context": [
+      {
+        "label": "National Energy Code of Canada for Buildings 2020, 2nd printing",
+        "paragraph": "National Energy Code of Canada for Buildings 2020, 2nd printing."
+      }
+    ]
+  },
+  {
+    "id": "PKG-25",
+    "url": "https://cwc.ca/wp-content/uploads/2025/04/CWC-ASG-April2-2.pdf",
+    "relationship_ids": [
+      "rId35"
+    ],
+    "document_context": [
+      {
+        "label": "Canadian Wood Council, Alternative Solutions Guide (2025)",
+        "paragraph": "Canadian Wood Council, Alternative Solutions Guide (2025). "
+      }
+    ]
+  },
+  {
+    "id": "PKG-26",
+    "url": "https://nrc-publications.canada.ca/eng/view/object/?id=de0e0ec9-a452-4337-bc84-002a230c9d66",
+    "relationship_ids": [
+      "rId12"
+    ],
+    "document_context": [
+      {
+        "label": "Supplement to the NBC 2020: Intent Statements",
+        "paragraph": "Supplement to the NBC 2020: Intent Statements."
+      }
+    ]
+  },
+  {
+    "id": "PKG-27",
+    "url": "https://nrc-publications.canada.ca/eng/view/accepted/?id=e5e9e318-6e0f-4fd8-b2a4-0a7d502168bc",
+    "relationship_ids": [
+      "rId34"
+    ],
+    "document_context": [
+      {
+        "label": "NRC, Accepting alternate solutions under objective-based codes",
+        "paragraph": "NRC, Accepting alternate solutions under objective-based codes.."
+      }
+    ]
+  },
+  {
+    "id": "PKG-28",
+    "url": "https://publications.gc.ca/collections/collection_2024/cnrc-nrc/NR24-27-2-2023-eng.pdf",
+    "relationship_ids": [
+      "rId15"
+    ],
+    "document_context": [
+      {
+        "label": "National Fire Code \u2013 2023 Alberta Edition",
+        "paragraph": "National Fire Code \u2013 2023 Alberta Edition"
+      }
+    ]
+  },
+  {
+    "id": "PKG-29",
+    "url": "https://www.calgary.ca/content/dam/www/tools-and-resources/guide-to-applying-for-an-alternative-solution.pdf",
+    "relationship_ids": [
+      "rId37"
+    ],
+    "document_context": [
+      {
+        "label": "City of Calgary, Guide to Applying for an Alternative Solution (Variance)",
+        "paragraph": "City of Calgary, Guide to Applying for an Alternative Solution (Variance) "
+      }
+    ]
+  },
+  {
+    "id": "PKG-30",
+    "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=b31a0620-ee88-4e32-bf62-c40f0b6e8f73",
+    "relationship_ids": [
+      "rId14"
+    ],
+    "document_context": [
+      {
+        "label": "Supplement to NEBC 2020: Intent Statements",
+        "paragraph": "Supplement to NEBC 2020: Intent Statements"
+      }
+    ]
+  },
+  {
+    "id": "PKG-31",
+    "url": "https://singlestair.ca/",
+    "relationship_ids": [
+      "rId36"
+    ],
+    "document_context": [
+      {
+        "label": "Single Stair Canada",
+        "paragraph": "Single Stair Canada"
+      }
+    ]
+  },
+  {
+    "id": "PKG-32",
+    "url": "https://publications.gc.ca/collections/collection_2022/cnrc-nrc/NR24-29-2020-eng.pdf",
+    "relationship_ids": [
+      "rId17"
+    ],
+    "document_context": [
+      {
+        "label": "National Plumbing Code of Canada (NPC) 2020",
+        "paragraph": "National Plumbing Code of Canada (NPC) 2020"
+      }
+    ]
+  },
+  {
+    "id": "PKG-33",
+    "url": "https://www.edmonton.ca/sites/default/files/public-files/COE-IM-GUIDE-0040-v01-20250415%20Guideline%20for%20Alternative%20Solutions%20Affecting%20Emergency%20Services.pdf",
+    "relationship_ids": [
+      "rId39"
+    ],
+    "document_context": [
+      {
+        "label": "City of Edmonton, Guideline for Alternative Solutions Affecting Emergency Services",
+        "paragraph": "City of Edmonton, Guideline for Alternative Solutions Affecting Emergency Services (April 2025). Guidance for alternative solutions that touch firefighting operations, which the NBC(AE) requires applicants to consider without clearly defining. These submissions are peer-reviewed by Safety Codes, Permits and Inspections together with Edmonton Fire Rescue Services."
+      }
+    ]
+  },
+  {
+    "id": "PKG-34",
+    "url": "https://nrc-publications.canada.ca/eng/view/object/?id=c76b4965-74c1-4581-8fba-423aad79104e",
+    "relationship_ids": [
+      "rId16"
+    ],
+    "document_context": [
+      {
+        "label": "Supplement to NFC: Intent Statements",
+        "paragraph": "Supplement to NFC: Intent Statements"
+      }
+    ]
+  },
+  {
+    "id": "PKG-35",
+    "url": "https://www.calgary.ca/development/permits/building-regulation-advisories.html",
+    "relationship_ids": [
+      "rId38"
+    ],
+    "document_context": [
+      {
+        "label": "City of Calgary, building advisories, bulletins and Standing Posted Variances",
+        "paragraph": "City of Calgary, building advisories, bulletins and Standing Posted Variances. Calgary publishes Standing Posted Variances (SPVs) that any builder can reference on a permit rather than applying individually \u2014 currently covering backwater valves, firewalls in rowhouses with secondary suites, exposed building face construction, ventilation, and zero lot line. The procedure exists because 26 builders were filing the same zero lot line variance repeatedly: 382 requests in eight months of 2017, each separately written, issued and forwarded to the Safety Codes Council."
+      }
+    ]
+  },
+  {
+    "id": "PKG-36",
+    "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=a7a505fa-519c-436b-a23b-6f418df87e6a",
+    "relationship_ids": [
+      "rId19"
+    ],
+    "document_context": [
+      {
+        "label": "Illustrated User's Guide, NBC 2020 Part 9",
+        "paragraph": "Illustrated User's Guide, NBC 2020 Part 9"
+      }
+    ]
+  },
+  {
+    "id": "PKG-37",
+    "url": "https://nrc-publications.canada.ca/eng/view/object/?id=17608c17-51a4-4c4f-8baa-b5b18ca60d2b",
+    "relationship_ids": [
+      "rId18"
+    ],
+    "document_context": [
+      {
+        "label": "Supplement to NPC Intent Statements",
+        "paragraph": "Supplement to NPC Intent Statements"
+      }
+    ]
+  }
+]

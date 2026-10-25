@@ -1,0 +1,16 @@
+{
+  "known_outcome": "Determination (1 Dec 2023, s 188): the two as-built handrails, which serve as an access route to the dwelling, comply with clause D1.3.3(j) (p.11 §5.1). Reasoning: the relevant width is measured between vertical tangents at 45 mm and so meets D1/AS1 6.0.8(d); Figure 26(a) allows variations where effective grip is not reduced (p.9-10 §4.19-4.25); Determination 2017/009 (25 mm top, 21 mm sides, not graspable) is distinguished (p.10-11 §4.27-4.28).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Whether the answer identifies D1.3.3(j) and the D1/AS1 6.0.7-6.0.8 and Figure 26 wording as the governing test.",
+    "Whether it separates the disputed graspability question from smoothness and reachability, which were not disputed.",
+    "Whether it flags that the consent plans did not specify handrail size or fixings.",
+    "Whether it notes that an acceptable solution is one means of compliance (s 23) and asks about the alternative route.",
+    "Whether it avoids stating that the handrails comply."
+  ],
+  "case_id": "H02-002",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,16 @@
+{
+  "known_outcome": "Determination (16 Nov 2023, s 188): the proposed alterations to remove the internal stair and install a new lift will comply with Building Code Clause D1 Access Routes (p.10 §6.1). Reasoning: clause D1.3.3(e) does not require internal or external stairs (p.9 §5.13-5.14); a lift outage is covered by the existing driveway route, which was not shown to be inadequate (p.9 §5.16-5.18); escape in a fire does not depend on the stair or the lift because of multiple existing exits (p.9-10 §5.19-5.20).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Whether the answer identifies clause D1.3.3(e) and the upper-floors wording as the central access question.",
+    "Whether it separates access routes from means of escape from fire and from the section 112 alteration question.",
+    "Whether it notes that no alternative-solution proposal and no waiver were in the application.",
+    "Whether it asks for outage, route and slip-resistance evidence instead of asserting compliance.",
+    "Whether it avoids stating that the design complies."
+  ],
+  "case_id": "H02-001",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

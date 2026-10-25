@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from City of Portland, Oregon (USA), Bureau of Development Services Administrative Appeal Board; non-Alberta comparative record. It is not an Alberta application.
+
+A four-storey, fully sprinklered multi-family building with an elevator hoistway of 25 feet or more proposes to omit the hoistway smoke vent, citing a model-code change and a stack-effect concern from a lobby study. Using only the attached request sheet and the record it cites, identify the vent provision engaged, what evidence supports the equivalence argument, what the record does not show (hoistway smoke control analysis, the study pages), and the questions to ask the applicant. Do not state that the design is safe.
+
+Attachments:
+- portland-efiles-15298189-b9f075e17e3d.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

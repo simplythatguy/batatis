@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from New Zealand (MBIE determination under the Building Act 2004); comparative test only, not Alberta; NZ code references retained as written. It is not an Alberta application.
+
+Attached is a New Zealand determination about a proposed footing detail for a new single-storey timber-framed house in Mosgiel, Dunedin, which the authority said needed assessment as an alternative solution. Read its code references as New Zealand references only and do not map them to Alberta. Using only the attached file, identify the footing and structural points the dispute depends on, the comparison the file says is made, the information the authority requested, the information still missing, and what you would ask the designer. Do not state that the footing complies or is adequate.
+
+Attachments:
+- mbie-determination-2017-007-e60b93fd85bb.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

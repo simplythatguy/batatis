@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Unknown; proposed alternative solution states subject to AHJ acceptance.",
+  "outcome_leakage": false,
+  "review_focus": [
+    "Attribute proposal claims",
+    "Use cover site address, not portal/contact label",
+    "Ask for decision and evidence"
+  ],
+  "case_id": "L11-013",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

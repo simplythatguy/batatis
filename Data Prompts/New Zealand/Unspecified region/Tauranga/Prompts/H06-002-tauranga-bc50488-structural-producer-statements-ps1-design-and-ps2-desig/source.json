@@ -1,0 +1,96 @@
+{
+  "id": "H06-002",
+  "title": "Tauranga BC50488 structural producer statements: PS1 design and PS2 design review, seismic strengthening (shared file)",
+  "scope": "comparative_non_alberta: NZ record kept in its original jurisdiction; attachment format and content comparison only; no Alberta performance or applicability",
+  "jurisdiction": "New Zealand, Tauranga City Council (Building Regulations 1992 / NZ Building Code clause B1; NON-ALBERTA comparative test)",
+  "code_edition": "Clause B1 with compliance documents B1/VM1 and Acceptable Solution B1/AS1 as named on the statements (p.31); Building Regulations 1992 cited on the PS2 (p.29); statement form version not stated (unknown if unstated)",
+  "case_type": "actual_application",
+  "source_url": "https://fyi.org.nz/request/23106",
+  "document_date": "PS statements undated in the extracted text; calculations cover dated 30 July 2014 (Part 1 p.30)",
+  "facts": [
+    {
+      "text": "PS2 (design review), 'PRODUCER STATEMENT - PS2 - DESIGN REVIEW': review firm to the owner, to be supplied to Tauranga City Council, 'in respect of' seismic strengthening at 46 Spring Street. The page carries council approval-stamp text (garbled in extraction).",
+      "locator": "Part 1 file (101 pp), PDF p.29"
+    },
+    {
+      "text": "PS2 says the review concerns Building Regulations 1992 clause B1 (verification method B1/VM1, text partly garbled) for a design prepared by Arnold & Johnstone Ltd.",
+      "locator": "Part 1 file (101 pp), PDF p.29"
+    },
+    {
+      "text": "Calculations cover sheet: 'SEISMIC STRENGTHENING, 46 SPRING STREET', job no. 11413, dated 30 July 2014.",
+      "locator": "Part 1 file (101 pp), PDF p.30"
+    },
+    {
+      "text": "PS1 (design), issued by Arnold & Johnstone Ltd and addressed to the building consent authority, covers structural design under Clause B1 (Structure) for items marked and countersigned on the drawings.",
+      "locator": "Part 1 file (101 pp), PDF p.31"
+    },
+    {
+      "text": "PS1 says the design follows compliance documents B1/VM1 and Acceptable Solution B1/AS1 issued by the Department of Building & Housing.",
+      "locator": "Part 1 file (101 pp), PDF p.31"
+    },
+    {
+      "text": "PS1 conditions: (i) site verification that the ultimate bearing capacity of the ground beneath the building is at least 300 kPa; (ii) all proprietary products meet their performance specification requirements.",
+      "locator": "Part 1 file (101 pp), PDF p.31"
+    },
+    {
+      "text": "Second PS2 design-review copy in the Part 2 file: 'Seismic Strengthening to 71% NBS', at 46 Spring Street, with Tauranga City Council approval-stamp text.",
+      "locator": "Part 2 file (79 pp), PDF p.79"
+    }
+  ],
+  "limitations": [
+    "Comparative only (NZ, non-Alberta). These are structural producer statements, not fire evidence.",
+    "Part 1 and Part 2 are separate files from the same release; distinct pages are used. Part 2 is shared with H06-003 and H06-006.",
+    "Text layer partly garbled (notably the PS2 clause text and the drawing references); verify against page images before quoting.",
+    "Engineers' names are omitted from this record."
+  ],
+  "worker": "H06",
+  "prompt_number": 234,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://fyi.org.nz/request/23106/response/87459/attach/5/BC50488%20Minor%20Refurbishment%20Of%20Toilets%20Seismic%20Strengthening%20Of%20Ground%20And%20First%20Floor%20Shops%20And%20Offices%20Technical%20Reports%20Part%201%20of%202%20Optimized.pdf",
+      "sha256": "4fe57e1598068287ef27e67f09cb057baa8a98ac6b248b061616137c04553b51",
+      "role": "input",
+      "bytes": 24010813,
+      "filename": "h06-fyi-bc50488-fire-design-part1-4fe57e159806.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H06/files/h06-fyi-bc50488-fire-design-part1-4fe57e159806.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:47:00.864695+00:00",
+        "http_status": "200",
+        "final_url": "https://fyi.org.nz/request/23106/response/87459/attach/5/BC50488%20Minor%20Refurbishment%20Of%20Toilets%20Seismic%20Strengthening%20Of%20Ground%20And%20First%20Floor%20Shops%20And%20Offices%20Technical%20Reports%20Part%201%20of%202%20Optimized.pdf",
+        "content_type": "application/pdf; charset=utf-8",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://fyi.org.nz/request/23106/response/87460/attach/4/BC50488%20Minor%20Refurbishment%20Of%20Toilets%20Seismic%20Strengthening%20Of%20Ground%20And%20First%20Floor%20Shops%20And%20Offices%20Technical%20Reports%20Part%202%20of%202%20Optimized.pdf",
+      "sha256": "164ca7bd786d456b3bc39539a760b7ed6ad2c61896cc46a56940e5b768aed9a7",
+      "role": "supporting_evidence",
+      "bytes": 23312638,
+      "filename": "h06-fyi-bc50488-technical-reports-part2-164ca7bd786d.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H06/files/h06-fyi-bc50488-technical-reports-part2-164ca7bd786d.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:54:03.778855+00:00",
+        "http_status": "200",
+        "final_url": "https://fyi.org.nz/request/23106/response/87460/attach/4/BC50488%20Minor%20Refurbishment%20Of%20Toilets%20Seismic%20Strengthening%20Of%20Ground%20And%20First%20Floor%20Shops%20And%20Offices%20Technical%20Reports%20Part%202%20of%202%20Optimized.pdf",
+        "content_type": "application/pdf; charset=utf-8",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Tauranga",
+    "basis": "The PS2 identifies Spring Street and Tauranga City Council; this is project evidence for the Tauranga seismic-strengthening case.",
+    "locator": "Part 1 file (101 pp), PDF p.29; jurisdiction field",
+    "scope": "project"
+  }
+}

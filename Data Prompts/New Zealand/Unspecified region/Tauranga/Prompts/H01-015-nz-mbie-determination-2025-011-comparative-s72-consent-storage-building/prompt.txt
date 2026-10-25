@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from New Zealand (Building Act 2004); Tauranga City Council; comparative only, not Alberta. It is not an Alberta application.
+
+This is a New Zealand regulator document about a new storage building on a level industrial site next to a steep, densely vegetated slope, where a natural-hazard (slippage) condition was attached to the building consent. Using only the attached PDF, identify the slippage and geotechnical provisions it treats as uncertain, list the reports, factor-of-safety results, and plans it relies on, note missing or unclear administrative facts, and list the next questions a reviewer should ask. Do not say whether the site is stable or the building complies, and do not apply Alberta or NBC(AE) rules.
+
+Attachments:
+- mbie-det-2025-011-aed41b31e7f9.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

@@ -1,0 +1,73 @@
+{
+  "id": "H04-020",
+  "title": "Modular house with overseas-prefabricated modules and a MultiProof certificate (consent refused)",
+  "jurisdiction": "New Zealand (MBIE Chief Executive determination; Building Act 2004; comparative only, not Alberta)",
+  "scope": "comparative-only",
+  "code_edition": "NZ Building Code, First Schedule, Building Regulations 1992 not stated in extracted text; MultiProof certificate referred to",
+  "case_type": "appeal_decision",
+  "tier": "B",
+  "document_type": "MBIE Chief Executive determination 2018/058 (PDF, 12 pages)",
+  "source_url": "https://codehub.building.govt.nz/resources/2018058",
+  "document_date": "23 November 2018",
+  "facts": [
+    {
+      "text": "Proposed house of 64 m2 with two bedrooms, a bathroom and an open-plan kitchen, living and dining area, on a sloping rural site; surrounded by 120 m2 of raised timber decking and a swimming pool.",
+      "locator": "p.2 s2.2-2.3"
+    },
+    {
+      "text": "Two prefabricated building modules manufactured overseas are delivered to the site; the modules are constructed from a heavy steel alloy.",
+      "locator": "p.2-3 s2.3-2.4"
+    },
+    {
+      "text": "The module design was not supported by a MultiProof certificate when the consent application was made; the authority maintained its refusal after one was issued.",
+      "locator": "p.1 Summary"
+    },
+    {
+      "text": "Figure 1 shows the detail of the proposed dwelling layout submitted for stage 2.",
+      "locator": "p.3 Fig.1"
+    }
+  ],
+  "limitations": [
+    "Comparative New Zealand record: no Alberta applicability or Alberta performance is asserted; Alberta editions are not applied.",
+    "Regulator determination under Building Act 2004 Part 3 Subpart 1 that contains the decision text, so outcome_leakage is true; the prompt omits the decision.",
+    "Prompt is a reconstructed test question grounded in the attachment, not an original applicant message.",
+    "Text extracted with pypdf; figure captions and embedded image counts are from the PDF, and only 2018-040 images were viewed.",
+    "Private names and street addresses in the source are omitted from this record.",
+    "Tier B: one numbered figure; MultiProof certificate A10067 is referred to but not attached."
+  ],
+  "source_code": "2018-058",
+  "worker": "H04",
+  "prompt_number": 415,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2018/2018-058.pdf",
+      "sha256": "2deb9ab34f6f10297408d9dc235c1cec1d86a9d6a9b179e3d9c8e7236ac3df01",
+      "bytes": 334107,
+      "pages": 12,
+      "role": "input",
+      "filename": "mbie-determination-2018-058-2deb9ab34f6f.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H04/files/determinations/mbie-determination-2018-058-2deb9ab34f6f.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:45:24.744055+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2018/2018-058.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Unspecified locality",
+    "basis": "The MBIE jurisdiction identifies New Zealand, but the title, recorded facts and evaluation do not identify a project town or region.",
+    "locator": "jurisdiction field; source facts",
+    "scope": "undisclosed"
+  }
+}

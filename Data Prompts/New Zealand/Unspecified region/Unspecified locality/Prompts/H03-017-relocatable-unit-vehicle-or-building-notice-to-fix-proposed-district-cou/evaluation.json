@@ -1,0 +1,15 @@
+{
+  "known_outcome": "MBIE determination: notice to fix correctly proposed. Companion District Court judgment (read on pp.1 and 22 only): building status confirmed at filing; building-work and notice-to-fix findings reversed (see limitations).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "definition of building (s8) versus vehicle",
+    "immovability and permanence tests",
+    "building work and notice-to-fix proposals after relocation",
+    "appeal outcome on definitional and building-work findings"
+  ],
+  "case_id": "H03-017",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Document-stated guidance (not a determination): capillary break, ridge stack-effect sealing, spline installation, and referral to the manufacturer or an engineer; IRC 2021 §R610.5.2 named (p7).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Guidance versus enforceable requirement",
+    "IRC 2021 reference is a US code citation",
+    "Ridge sealing defers to the manufacturer's detail",
+    "Any performance claim needs the product's ICC-ES report or manufacturer instructions"
+  ],
+  "case_id": "H14-020",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

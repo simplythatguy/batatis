@@ -1,0 +1,14 @@
+{
+  "known_outcome": "The NRC test reported a 7.56 kPa maximum and fastener/deck engagement failure for System 5 under its dynamic protocol; no project approval or code disposition is reported.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "check that proposed membrane, weld, battens, fastener layout, deck and barrier match the tested system",
+    "compare the report’s design pressure and CSA load sequence with project conditions",
+    "request engineer-supported calculations and project-specific connection details"
+  ],
+  "case_id": "L18-022",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

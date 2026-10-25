@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Regulator position (R2, May 2026): professional involvement is not required for a multiple-family dwelling of four or fewer units; for other buildings, drawings and specifications must be authenticated by the registered professionals qualified for the applicable disciplines; secondary suites need not be counted as dwelling units for Sentence (1).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the four-unit threshold from the five-unit rowhouse case",
+    "Asks which disciplines (building, plumbing, gas, electrical) the file must cover",
+    "Flags the authentication evidence the document requires",
+    "Uses R2 (current); the January 2025 and April 2025 versions are kept as superseded references"
+  ],
+  "case_id": "H20-009",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

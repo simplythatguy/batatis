@@ -1,0 +1,60 @@
+{
+  "id": "L20-010",
+  "title": "Former school converted to a licensed childcare centre and fire-alarm order",
+  "jurisdiction": "Saskatchewan; local authority redacted in the published decision",
+  "code_edition": "National Building Code of Canada 2015 (as stated in the decision)",
+  "case_type": "appeal_decision",
+  "source_url": "https://www.saskatchewan.ca/business/housing-development-construction-and-property-management/building-and-technical-standards/saskatchewan-building-and-accessibility-standards-appeal-board",
+  "document_date": "2023-11-02",
+  "facts": [
+    {
+      "text": "The case concerns a renovated former school used as a child-care centre licensed for 38 children and six staff.",
+      "locator": "PDF pp. 3–5"
+    },
+    {
+      "text": "The building official’s order required a fire-alarm system/panel; the appellant cited a $43,200 cost.",
+      "locator": "PDF pp. 4–6"
+    },
+    {
+      "text": "The decision identifies NBC 2015 and discusses the order under the construction-code appeal provisions.",
+      "locator": "PDF pp. 5–8"
+    }
+  ],
+  "limitations": [
+    "Comparative source from outside Alberta; it cannot establish Alberta code performance or approval.",
+    "The attached publication is the appeal decision, not the underlying application file. Exhibits named in the decision are not presumed attached unless visible in this PDF. The decision outcome is visible in the attachment."
+  ],
+  "worker": "L20",
+  "prompt_number": 562,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://publications.saskatchewan.ca/api/v1/products/122902/formats/142983/download",
+      "sha256": "9cd42d53e7b360203733c572b4c84e0d4cc327d1aaeed9441d00d39cb4072f40",
+      "role": "outcome_reference",
+      "bytes": 304299,
+      "filename": "sk-scsab-appeal-no.-2023-005-9cd42d53e7b3.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L20/files/sk-scsab-appeal-no.-2023-005-9cd42d53e7b3.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:23:09.642291+00:00",
+        "http_status": "200",
+        "final_url": "https://publications.saskatchewan.ca/api/v1/products/122902/formats/142983/download",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Saskatchewan",
+    "city_or_town": "Unspecified locality",
+    "basis": "Saskatchewan appeal record leaves the municipality or property location unnamed or redacted; no project locality is inferred from the tribunal or office address.",
+    "locator": "jurisdiction field",
+    "scope": "undisclosed"
+  }
+}

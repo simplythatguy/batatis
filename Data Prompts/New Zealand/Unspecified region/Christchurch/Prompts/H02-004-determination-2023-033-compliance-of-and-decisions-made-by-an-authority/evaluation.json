@@ -1,0 +1,16 @@
+{
+  "known_outcome": "Determination (7 Dec 2023, s 188): the driveway, retaining wall and timber vehicle deck comply with B1 and B2 (p.39 §7.1.1); the timber vehicle deck and barrier comply with C3 to the extent required by the Act (p.40 §7.1.2); the authority was incorrect to grant consent BCN/2015/2452 and its third amendment for work on the neighbouring property, but the Chief Executive elected not to reverse or confirm those decisions (p.40 §7.1.3-7.1.4); the code compliance certificate was reversed (p.40 §7.1.5); the authority did not fail to issue a notice to fix (p.40 §7.1.6). Reasoning: C3.4-C3.9 do not apply to the deck and barrier (p.29 Table 1); C/AS1 §5.5 carport conditions are not met (p.30); C/AS1 §5.1.1 concerns external walls (p.30-31). Clarified under s 189 (p.1 fn 1).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Whether the answer identifies C3.3 as the functional test and separates encroachment from fire spread generally.",
+    "Whether it notes that an acceptable solution is one means of compliance and that the acceptable-solution conditions must be checked.",
+    "Whether it flags missing C1-C6 means-of-compliance documents on consent and CCC records.",
+    "Whether it separates the building-work compliance question from the consent-decision and CCC questions.",
+    "Whether it avoids stating that the work is safe or compliant."
+  ],
+  "case_id": "H02-004",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

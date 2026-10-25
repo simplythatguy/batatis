@@ -1,0 +1,73 @@
+{
+  "id": "H04-008",
+  "title": "Foam insulation installed in the walls and roof underside of a house; notice to fix",
+  "jurisdiction": "New Zealand (MBIE Chief Executive determination; Building Act 2004; comparative only, not Alberta)",
+  "scope": "comparative-only",
+  "code_edition": "NZ Building Code, First Schedule, Building Regulations 1992 (cited); H1 energy efficiency in scope",
+  "case_type": "appeal_decision",
+  "tier": "A",
+  "document_type": "MBIE Chief Executive determination 2019/002 (PDF, 16 pages)",
+  "source_url": "https://codehub.building.govt.nz/resources/2019002",
+  "document_date": "4 February 2019",
+  "facts": [
+    {
+      "text": "Partly completed single-storey detached house on a near-level rural site in a high wind zone; the floor plan is H-shaped with bedrooms in one wing and living areas in another.",
+      "locator": "p.2 s2.1-2.2"
+    },
+    {
+      "text": "The consent detailed fibreglass batts; foam insulation was installed into the walls and the underside of the roof before a consent amendment was sought.",
+      "locator": "p.1 s1.2.2"
+    },
+    {
+      "text": "Figure 1 is a north elevation annotated with a change to vertical fibre cement weatherboards on a drained cavity (p.1); Figure 2 is a simplified consent section (p.2); Figure 3 shows roof insulation to the east-wing sloping ceilings (p.3).",
+      "locator": "p.1-3 Figs.1-3"
+    },
+    {
+      "text": "The matter covers E2 for the as-built walls and roof insulated with foam, and H1 for the building as a whole.",
+      "locator": "p.2 s1.2.3"
+    }
+  ],
+  "limitations": [
+    "Comparative New Zealand record: no Alberta applicability or Alberta performance is asserted; Alberta editions are not applied.",
+    "Regulator determination under Building Act 2004 Part 3 Subpart 1 that contains the decision text, so outcome_leakage is true; the prompt omits the decision.",
+    "Prompt is a reconstructed test question grounded in the attachment, not an original applicant message.",
+    "Text extracted with pypdf; figure captions and embedded image counts are from the PDF, and only 2018-040 images were viewed.",
+    "Private names and street addresses in the source are omitted from this record.",
+    "H1 was left undetermined for lack of information (s8.2)."
+  ],
+  "source_code": "2019-002",
+  "worker": "H04",
+  "prompt_number": 403,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2019/2019-002.pdf",
+      "sha256": "e34717d70521ba6f634c7bfa1cb69eacfdd683d9c91733cac9034b67bc312731",
+      "bytes": 388952,
+      "pages": 16,
+      "role": "input",
+      "filename": "mbie-determination-2019-002-e34717d70521.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H04/files/determinations/mbie-determination-2019-002-e34717d70521.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:45:53.999765+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2019/2019-002.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Unspecified locality",
+    "basis": "The MBIE jurisdiction identifies New Zealand, but the title, recorded facts and evaluation do not identify a project town or region.",
+    "locator": "jurisdiction field; source facts",
+    "scope": "undisclosed"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "known_outcome": "unknown (design-stage report; no council decision in file)",
+  "outcome_leakage": false,
+  "review_focus": [
+    "Table 2 BS 9991 variations and whether each is treated as resolved or pending",
+    "'design risk' items awaiting approval-body agreement",
+    "Appendix A drawing comments referenced throughout but absent from the PDF",
+    "external wall A2-s1,d0 recommendation tied to anticipated ADB changes",
+    "Level 5 single-direction travel distance and mechanical smoke ventilation deferred to BCB approval",
+    "ADB edition not stated"
+  ],
+  "case_id": "H16-001",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

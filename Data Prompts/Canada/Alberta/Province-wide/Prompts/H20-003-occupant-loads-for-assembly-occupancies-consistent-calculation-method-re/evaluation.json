@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Regulator position: sets one consistent method for assembly occupant loads across NBC(AE) and NFC(AE), because jurisdictions had calculated them differently; a design occupant load must be indicated for other professionals.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Recognises the occupant load as a design input for other systems (exits, fire alarm, sanitary)",
+    "Notes the jurisdictional inconsistency the document cites as the reason for the method",
+    "Asks for the assumed use, area and load basis in the drawings and calculations",
+    "Does not produce an occupant load figure for any building"
+  ],
+  "case_id": "H20-003",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

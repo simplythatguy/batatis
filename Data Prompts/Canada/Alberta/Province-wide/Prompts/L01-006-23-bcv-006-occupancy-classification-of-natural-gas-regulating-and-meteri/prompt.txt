@@ -1,0 +1,6 @@
+Using the attached 23-BCV-006 STANDATA as a regulator-issued reference, identify the facts needed before deciding whether its occupancy-classification variance could be relevant: equipment housed, current classification, floor area and storey count, human occupancy, and the ventilation design/evidence. Preserve the exact “55 m² or one storey” wording for human review, state what remains unclear, and do not assign a classification.
+
+Attachments:
+- 23-BCV-006-46f457912d6a.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

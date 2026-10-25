@@ -1,0 +1,62 @@
+{
+  "id": "L10-004",
+  "title": "BCC Ruling No. 08-01-1175 — school sewage-system design flow and jurisdiction",
+  "jurisdiction": "Ontario — Township of South Glengarry; respondent was Eastern Ontario Health Unit",
+  "code_edition": "Ontario Building Code, Regulation 403 (as cited; edition label unspecified)",
+  "source_url": "http://www.mah.gov.on.ca/Asset10352.aspx?method=1",
+  "document_date": "2008-01-17",
+  "facts": [
+    {
+      "text": "The application concerns replacement of a 1953 Class 4 onsite sewage system serving a single-storey secondary school supplied by a private well.",
+      "locator": "Ruling §1, Particulars of Dispute"
+    },
+    {
+      "text": "The applicant proposed using metered water-flow records collected from 2004 through 2007 to estimate the system’s daily design flow.",
+      "locator": "Ruling §1, Particulars of Dispute"
+    },
+    {
+      "text": "The cited provisions are Sentence 8.2.1.3.(2) and Table 8.2.1.3.B; the ruling discusses the Ontario Water Resources Act jurisdiction boundary.",
+      "locator": "Ruling §§2 and 6"
+    }
+  ],
+  "limitations": [
+    "This is a jurisdictional decision rather than an accepted alternative-solution example.",
+    "The attachment is the Commission ruling; the underlying flow logs and system design report are not included.",
+    "This Ontario decision and its code are non-Alberta comparisons for attachment format/content only; they cannot establish Alberta performance. Check Calgary and Edmonton sources first for local authority, then other Alberta jurisdictions as needed."
+  ],
+  "case_type": "appeal_decision",
+  "document_type": "Ontario Building Code Commission dispute ruling",
+  "worker": "L10",
+  "prompt_number": 543,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://web.archive.org/web/20191029224430id_/http://www.mah.gov.on.ca/Asset10352.aspx?method=1",
+      "sha256": "20c86e6ac2012e99fb263cb0ea1cdd982288ce7597be41d537c35aef14baeb5e",
+      "role": "outcome_reference",
+      "bytes": 73446,
+      "filename": "ONBCC-08-01-1175-20c86e6ac201.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L10/files/ONBCC-08-01-1175-20c86e6ac201.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:22:40.141882+00:00",
+        "http_status": "200",
+        "final_url": "https://web.archive.org/web/20190619021748id_/http://www.mah.gov.on.ca/Asset10352.aspx?method=1",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Ontario",
+    "city_or_town": "South Glengarry",
+    "basis": "The source jurisdiction identifies South Glengarry, Ontario for the named project, proposal or appeal; this describes source geography.",
+    "locator": "jurisdiction field",
+    "scope": "project"
+  }
+}

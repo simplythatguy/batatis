@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from British Columbia (specific local authority not named in published decision). It is not an Alberta application.
+
+Review this proposed roof assembly for a new triplex: half-pound spray foam is placed between roof joists directly against the sheathing, with no ventilation gap. Identify the code question and the evidence needed to assess whether venting can be shown unnecessary. Ask for the assembly details, air-leakage and moisture analysis, and any relevant testing; do not infer acceptance from a material claim.
+
+Attachments:
+- attachment-1-source-text.txt
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

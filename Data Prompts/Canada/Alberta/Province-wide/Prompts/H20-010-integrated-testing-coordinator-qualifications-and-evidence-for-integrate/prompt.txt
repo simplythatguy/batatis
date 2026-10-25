@@ -1,0 +1,6 @@
+An integrated fire-protection and life-safety testing requirement has come up for a building project. The attached STANDATA interpretation (23-BCI-014) is my only source. Using only that document, explain what qualifications it expects of the integrated testing coordinator, which professional and owner evidence it says the authority needs, what remains open, and what documents to request. Do not invent people, credentials or a system, and do not claim the testing arrangement is compliant.
+
+Attachments:
+- ma-standata-interpretation-building-23-bci-014-2025-03-cf41afe40cb0.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

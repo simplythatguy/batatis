@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The CNL case study describes alternative measures but does not state a formal approval decision or attach the referenced 2019 code-compliance report.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "federal review authority and applicable code editions",
+    "grade reference and building-height measurement evidence",
+    "separation of building design information from municipal permit assumptions",
+    "requesting cited consultant report and review/decision records"
+  ],
+  "case_id": "L13-004",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

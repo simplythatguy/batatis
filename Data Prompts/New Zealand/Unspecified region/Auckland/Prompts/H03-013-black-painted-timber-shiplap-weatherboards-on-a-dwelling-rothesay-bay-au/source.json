@@ -1,0 +1,76 @@
+{
+  "id": "H03-013",
+  "record_key": "2021/025",
+  "tier": "strong",
+  "title": "Black-painted timber shiplap weatherboards on a dwelling (Rothesay Bay, Auckland)",
+  "jurisdiction": "New Zealand (MBIE, Building Act 2004): comparative test only; not an Alberta case; no Alberta applicability asserted",
+  "authority": "Auckland Council",
+  "code_edition": "NZ Building Code B2/E2 as cited",
+  "case_type": "issued_variance",
+  "document_type": "MBIE determination under Building Act 2004 s188 (regulator decision on an individual matter); not an applicant's alternative-solution file",
+  "source_url": "https://codehub.building.govt.nz/resources/2021025",
+  "document_date": "2021-11-04",
+  "facts": [
+    {
+      "text": "Existing timber-frame dwelling with concrete block ground floor and vertical timber shiplap weatherboards at first floor, painted black; a new entranceway replaced a former conservatory.",
+      "locator": "p.3–4 §2"
+    },
+    {
+      "text": "Authority's proposed decision was to refuse a CCC because dark paint may cause the weatherboards to cup or split; matter is whether black-painted weatherboards comply with B2 as relates to E2.",
+      "locator": "p.3 §1; p.12 §4"
+    },
+    {
+      "text": "Paint is a proprietary formula with a reported TSR of 23.8%; no TSR rating is available for the weatherboards; factors include orientation, shading, exposure, board size, drained and ventilated cavity, low thermal stress and maintenance documentation.",
+      "locator": "p.21 §7"
+    },
+    {
+      "text": "Absence of a manufacturer warranty does not by itself show non-compliance.",
+      "locator": "p.21 §7"
+    },
+    {
+      "text": "Draft determination accepted by the owner, the authority ('extremely reluctantly'), the LBP builder, the LBP supervisor and the registered architect.",
+      "locator": "p.12 §5"
+    }
+  ],
+  "recommended_input_pages": "1-20",
+  "limitations": [
+    "Comparative only: a New Zealand determination used to test attachment format and content; it cannot establish Alberta performance or applicability.",
+    "The determination's decision section is in the same PDF; outcome leakage is true. Use only pages 1-20 as applicant-side input if pages are split.",
+    "Facts are taken from the text layer (pypdf); photos, drawings and figures were not visually inspected unless stated."
+  ],
+  "alberta_applicability": "none asserted",
+  "comparative_only": true,
+  "worker": "H03",
+  "prompt_number": 329,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2021/2021-025.pdf",
+      "sha256": "bcebe1eabd9cf209db8d0da2c980f4040948138462fbf929f8dba89e3f1c5b21",
+      "role": "input",
+      "bytes": 1516571,
+      "filename": "2021-025-bcebe1eabd9c.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H03/files/2021025/2021-025-bcebe1eabd9c.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:42:30.766224+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2021/2021-025.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Auckland",
+    "basis": "The title identifies Rothesay Bay, Auckland; Auckland Council is the authority.",
+    "locator": "source title; authority field",
+    "scope": "project"
+  }
+}

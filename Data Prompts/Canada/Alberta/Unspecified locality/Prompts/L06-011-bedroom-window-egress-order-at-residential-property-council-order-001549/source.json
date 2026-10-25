@@ -1,0 +1,57 @@
+{
+  "id": "L06-011",
+  "title": "Bedroom-window egress order at residential property (Council Order 0015496)",
+  "jurisdiction": "Alberta; accredited municipality not named in the redacted order",
+  "code_edition": "Alberta Building Code 2006 (ABC 2006)",
+  "document_date": "2019-10-28",
+  "facts": [
+    {
+      "text": "The order identifies a property-specific bedroom-window issue under Division C 2.2.9.9 of the Alberta Building Code 2006.",
+      "locator": "PDF p.1"
+    },
+    {
+      "text": "The stated direction was to change a bedroom window so it meets the minimum egress requirements and complete a required re-inspection.",
+      "locator": "PDF p.1"
+    }
+  ],
+  "limitations": [
+    "The PDF is image-based; the first page was rendered and visually inspected.",
+    "Only first-page facts are included; detailed exhibits are not attached.",
+    "ABC 2006 is historical."
+  ],
+  "source_url": "https://safetycodes.ab.ca/council-information/appeals/appeal-decisions/",
+  "case_type": "appeal_decision",
+  "worker": "L06",
+  "prompt_number": 123,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2019/Building%20-%20Bedroom%20Windows%20-%20October%202019.pdf",
+      "sha256": "a66881049c8fe89437068df45d7dc8992abd2f549626dc29002e582f1e0e4c13",
+      "role": "input",
+      "bytes": 2211688,
+      "filename": "scc_2019_bedroom_windows-a66881049c8f.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L06/files/scc_2019_bedroom_windows-a66881049c8f.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:21:41.183457+00:00",
+        "http_status": "200",
+        "final_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2019/Building%20-%20Bedroom%20Windows%20-%20October%202019.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Alberta",
+    "city_or_town": "Unspecified locality",
+    "basis": "Alberta appeal record leaves the municipality or property location unnamed or redacted; no project locality is inferred from the tribunal or office address.",
+    "locator": "jurisdiction field",
+    "scope": "undisclosed"
+  }
+}

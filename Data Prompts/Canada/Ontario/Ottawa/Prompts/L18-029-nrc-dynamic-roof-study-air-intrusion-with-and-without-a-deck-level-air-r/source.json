@@ -1,0 +1,65 @@
+{
+  "id": "L18-029",
+  "title": "NRC dynamic roof study — air intrusion with and without a deck-level air retarder",
+  "jurisdiction": "NRC Dynamic Roofing Facility, Ottawa, Ontario, Canada (research setup; no permit jurisdiction)",
+  "code_edition": "Unknown; no project code edition is stated.",
+  "case_type": "documented_design_study",
+  "source_url": "https://nrc-publications.canada.ca/eng/view/object/?id=de1ba6e7-b02a-4ff0-97f2-fb7dbb595b8e",
+  "document_date": "2009-05-06",
+  "facts": [
+    {
+      "text": "The paper compares mechanically attached low-slope roof assemblies with and without an air retarder at deck level; it distinguishes wind-driven air intrusion into the roof assembly from air leakage through a building envelope.",
+      "locator": "PDF pp. 3–6; Abstract, §§1–2 and Figs. 1–3"
+    },
+    {
+      "text": "The tested assembly uses a 0.76 mm (22-gauge) corrugated steel deck, 50 mm polyisocyanurate boards attached with eight fasteners per board, and a 45-mil reinforced PVC membrane 1,981 mm wide, fastened at 305 mm spacing along seams.",
+      "locator": "PDF pp. 7–8; §2 and Fig. 4"
+    },
+    {
+      "text": "The specimens were tested at NRC’s Dynamic Roofing Facility under the CSA A123.21 dynamic wind uplift protocol.",
+      "locator": "PDF pp. 6–8; §2"
+    },
+    {
+      "text": "The authors attribute air intrusion to membrane billowing and pressure changes in the space beneath the membrane; they identify a deck-level air retarder as a way to reduce it.",
+      "locator": "PDF pp. 5–8; §§1–3"
+    }
+  ],
+  "limitations": [
+    "The source compares two NRC test assemblies and protocols; it does not evaluate any actual building or establish a code acceptance decision."
+  ],
+  "worker": "L18",
+  "prompt_number": 175,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://nrc-publications.canada.ca/eng/view/accepted/?id=de1ba6e7-b02a-4ff0-97f2-fb7dbb595b8e",
+      "sha256": "4d69a9637d8a9320fee6cee9cfd7f4ad42a485e6a021106771757836e068a07f",
+      "role": "input",
+      "bytes": 689869,
+      "filename": "low-slope-roof-air-intrusion-4d69a9637d8a.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L18/files/low-slope-roof-air-intrusion-4d69a9637d8a.pdf",
+      "reuse_status": "rights_review_required",
+      "rights_source": "https://nrc-publications.canada.ca/eng/copyright/",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:20:28.957078+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc-publications.canada.ca/eng/view/accepted/?id=de1ba6e7-b02a-4ff0-97f2-fb7dbb595b8e",
+        "content_type": "application/pdf;charset=UTF-8",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "rights_review_required",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Ontario",
+    "city_or_town": "Ottawa",
+    "basis": "The source jurisdiction identifies the NRC Ottawa Field Exposure of Walls or Dynamic Roofing Facility as the experimental setting; research geography, not a permit site.",
+    "locator": "PDF pp. 6–8; §2",
+    "scope": "research"
+  }
+}

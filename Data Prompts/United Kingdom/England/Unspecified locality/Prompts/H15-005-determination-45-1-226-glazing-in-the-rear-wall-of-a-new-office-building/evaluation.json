@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Secretary of State determined the plans do not comply with Requirement B4 (External Fire Spread) of the Building Regulations 2000 (as amended) (p.3).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Requirement B4 external fire spread at a close boundary",
+    "fire-engineered alternative and modelling assumptions (6 mm glazing, 600 C threshold)",
+    "adequacy of the fire engineer's report",
+    "approved-inspector route under section 50(2)"
+  ],
+  "case_id": "H15-005",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

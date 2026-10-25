@@ -1,0 +1,86 @@
+{
+  "id": "A15-004",
+  "title": "Fire Technical Council Council Order No. 0015449: storage areas, clearances and site hazards at a pallet recycling facility",
+  "jurisdiction": "Alberta (order issued by an accredited municipality; the municipality is not named in the decision text)",
+  "code_edition": "Alberta Fire Code 2006 (stated on p.1 and p.6)",
+  "case_type": "appeal_decision",
+  "source_url": "https://safetycodes.ab.ca/council-information/appeals/appeal-decisions/",
+  "document_date": "2015-07-13 (dated; Chair signature block; hearing 2015-06-22; order dated 2015-01-29)",
+  "facts": [
+    {
+      "text": "The accredited municipality issued an order dated 29 January 2015 against a pallet recycling facility. The appeal was heard on 22 June 2015.",
+      "locator": "p.1 header"
+    },
+    {
+      "text": "The order's listed requirements (quoted after 'FROM:') were storage-area sizes and clearances conforming to Table 3.3.3.2 of AFC 2006, with a compliance date of 1 May 2015, and a clear space of at least 30 m between stored products and brush or forested areas.",
+      "locator": "p.1-2"
+    },
+    {
+      "text": "The Council ordered that the Order is VARIED. The varied terms are set out in the lettered findings (a)-(m), not in one consolidated list.",
+      "locator": "p.1; pp.12-14"
+    },
+    {
+      "text": "The panel stated that a parcel with partial tree coverage would not constitute a forest, and found that the area bordering two lots is better defined as 'uncontrolled grass or weeds' under AFC 3.3.2.3(2).",
+      "locator": "p.12 findings (a)-(b)"
+    },
+    {
+      "text": "The panel found the storage area exceeds 6,000 m2 on the evidence, which requires access from a public thoroughfare.",
+      "locator": "p.13 finding (e)"
+    },
+    {
+      "text": "The panel found the Respondent's demand for spill-control provisions for waste oils and dangerous goods appropriate, given wrecked vehicles on site.",
+      "locator": "p.14 finding (l)"
+    },
+    {
+      "text": "The panel found that the property owner is responsible under AFC 3.3.2.8 for smoking and ignition sources, and that enforcement against any violation is for the Respondent.",
+      "locator": "p.14 finding (m)"
+    },
+    {
+      "text": "The panel recorded the Act's variance power: a written variance may be issued where it provides approximately equivalent or greater safety performance.",
+      "locator": "p.6"
+    },
+    {
+      "text": "The decision is dated 13 July 2015 and carries a Chair signature block for the Fire Technical Council Appeal Panel.",
+      "locator": "p.14 signature block"
+    }
+  ],
+  "limitations": [
+    "Fire Code domain (AFC 2006), not the NBC(AE) building code. Use as an adjacent Alberta case for classification and clearance uncertainty.",
+    "The varied terms are not consolidated in the text; the lettered findings must be read to know what changed.",
+    "The municipality is not named in the decision text.",
+    "Any current-edition comparison needs the National Fire Code 2023 Alberta Edition, which the SCC bulletin reference file says came into force on 1 May 2024."
+  ],
+  "worker": "A15",
+  "prompt_number": 110,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2015/Fire%20-%20Alberta%20Fire%20Code%20Compliance%20of%20Storage%20Areas%20Fire%20Route%20Water%20Supply%20and%20Safety%20Plan%20July%202015.pdf",
+      "sha256": "ff229cab80a185cafcb9e2fe8ad1fc0f87e499bfbf30952952a1cfc1732a6a1a",
+      "role": "outcome_reference",
+      "bytes": 381633,
+      "filename": "scc-appeal-2015-fire-storage-areas-fire-route-water-supply-ff229cab80a1.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/A15/files/scc-appeal-2015-fire-storage-areas-fire-route-water-supply-ff229cab80a1.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T02:30:05.002027+00:00",
+        "http_status": "200",
+        "final_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2015/Fire%20-%20Alberta%20Fire%20Code%20Compliance%20of%20Storage%20Areas%20Fire%20Route%20Water%20Supply%20and%20Safety%20Plan%20July%202015.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Alberta",
+    "city_or_town": "Unspecified locality",
+    "basis": "Alberta appeal record leaves the municipality or property location unnamed or redacted; no project locality is inferred from the tribunal or office address.",
+    "locator": "jurisdiction field",
+    "scope": "undisclosed"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Regulator position: NFPA 33 installations fall under the Safety Codes Act and Permit Regulation; the HVAC, fire suppression, electrical and gas systems serving them require safety-code permits; a spray booth system is designed by a registered professional under good engineering practice.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates building, fire, electrical and gas permit questions for one installation",
+    "Identifies the NFPA 33 scope as the trigger for the permit analysis",
+    "Asks for the professional design evidence the document says a spray booth needs",
+    "Does not claim the installation is safe or compliant"
+  ],
+  "case_id": "H20-004",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

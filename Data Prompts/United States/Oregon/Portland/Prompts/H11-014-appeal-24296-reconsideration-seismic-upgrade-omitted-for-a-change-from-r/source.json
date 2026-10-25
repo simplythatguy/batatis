@@ -1,0 +1,88 @@
+{
+  "id": "H11-014",
+  "title": "Appeal 24296 (reconsideration): seismic upgrade omitted for a change from residential to business occupancy (City Code 24.85.060)",
+  "jurisdiction": "City of Portland, Oregon (USA), Bureau of Development Services Administrative Appeal Board; non-Alberta comparative record",
+  "code_edition": "City Code Title 24, 24.85.060 (edition not stated)",
+  "case_type": "appeal_decision",
+  "source_url": "https://efiles.portlandoregon.gov/record/15536102/file/document",
+  "document_date": "2020-11-25 (hearing)",
+  "facts": [
+    {
+      "text": "Appeal item: City Code 24.85.060 says a change of occupancy or use may require a seismic upgrade; the request is for an omission of the seismic upgrade for a change from R to B/M occupancy.",
+      "locator": "p.1 (APPEAL INFORMATION SHEET)"
+    },
+    {
+      "text": "The applicant says a 1965 permit changed the occupancy from R-3 to B, but no final completion record was found in city records.",
+      "locator": "p.1 (APPEAL INFORMATION SHEET, proposed design)"
+    },
+    {
+      "text": "Decision: omission of seismic upgrades is granted as proposed.",
+      "locator": "p.1 (APPEAL DECISION)"
+    }
+  ],
+  "limitations": [
+    "Non-Alberta comparative record: City of Portland, Oregon (USA) Bureau of Development Services Administrative Appeal Board. Local Oregon/Portland code is retained as stated in each record. No Alberta applicability is asserted; the case is used only to test attachment format and content, not Alberta performance.",
+    "Summary is 15 pages with 13 image-only pages; the referenced additional information (three files) is not linked and was not retrieved.",
+    "The 'Code Section' is a city code provision, not a model-code section.",
+    "Outcome leakage true: decision on page 1.",
+    "Blocked: PDF lists [File 1]-[File 3] with no link annotation; additional information referenced but not retrieved."
+  ],
+  "record_file": {
+    "path": "_research/workers/H11/files/portland-efiles-15536102/portland-efiles-15536102-2fe014d00aa0.pdf",
+    "sha256": "2fe014d00aa059c1e15f2ff1a303b9a8fbc431003954e844402ca341beb6b1d8",
+    "pages": 15,
+    "retrieved_at": "2026-10-25T01:51:59.230952+00:00"
+  },
+  "worker": "H11",
+  "prompt_number": 469,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://efiles.portlandoregon.gov/record/15536102/file/document",
+      "sha256": "2fe014d00aa059c1e15f2ff1a303b9a8fbc431003954e844402ca341beb6b1d8",
+      "role": "input",
+      "locator_note": "p.1 APPEAL INFORMATION SHEET fields (Code Section, Requires, Proposed Design, reconsideration text)",
+      "bytes": 2858498,
+      "filename": "portland-efiles-15536102-2fe014d00aa0.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H11/files/portland-efiles-15536102/portland-efiles-15536102-2fe014d00aa0.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:51:59.230952+00:00",
+        "http_status": "200",
+        "final_url": "https://efiles.portlandoregon.gov/record/15536102/file/document",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://efiles.portlandoregon.gov/record/15536102/file/document",
+      "sha256": "2fe014d00aa059c1e15f2ff1a303b9a8fbc431003954e844402ca341beb6b1d8",
+      "role": "outcome_reference",
+      "locator_note": "p.1 APPEAL DECISION",
+      "bytes": 2858498,
+      "filename": "_evaluation/portland-efiles-15536102-2fe014d00aa0.pdf",
+      "included_in_default_input": false,
+      "original_collection_path": "_research/workers/H11/files/portland-efiles-15536102/portland-efiles-15536102-2fe014d00aa0.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:51:59.230952+00:00",
+        "http_status": "200",
+        "final_url": "https://efiles.portlandoregon.gov/record/15536102/file/document",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "United States",
+    "province_or_state": "Oregon",
+    "city_or_town": "Portland",
+    "basis": "The jurisdiction identifies a local Portland, Oregon building-code appeal; this records local source context without deriving a site from a board office address.",
+    "locator": "jurisdiction field",
+    "scope": "local"
+  }
+}

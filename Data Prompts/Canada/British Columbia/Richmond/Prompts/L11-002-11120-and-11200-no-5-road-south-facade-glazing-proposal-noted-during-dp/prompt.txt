@@ -1,0 +1,9 @@
+Comparative attachment exercise: this source is from City of Richmond, British Columbia. It is not an Alberta application.
+
+Review as a comparative design-uncertainty case. Identify the stated glazing issue and distinguish it from land-use/development-permit matters. Is an AS submission or decision actually attached? List missing code edition, spatial-separation inputs, analysis, and decision evidence; ask source-grounded questions.
+
+Attachments:
+- attachment-1-source-text.txt
+- richmond-11120-no5-dp13-630238-9f4205c48f3f.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

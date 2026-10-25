@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The proponent profile reports submission in November 2024 and acceptance in May 2026; no official permit/alternative-solution decision is attached.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "version control and revision history",
+    "suite/elevator openings into exit versus corridor/lobby",
+    "current permit code versus cited 2012 OBC",
+    "independent confirmation of reported acceptance"
+  ],
+  "case_id": "L14-008",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

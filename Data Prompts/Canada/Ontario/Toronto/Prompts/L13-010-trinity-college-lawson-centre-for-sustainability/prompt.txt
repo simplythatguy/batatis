@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from University of Toronto St. George Campus, Toronto, Ontario. It is not an Alberta application.
+
+Using the attached Lawson Centre feature and fire-engineering project record, identify the stated building uses and the fire-separation issue described. List the applicable code/edition and project details a reviewer would need to establish, then identify the drawings, fire-bay ratings, structural separation/fall-away details, calculations/test evidence, assumptions, fire-engineering report and authority records needed to assess administrative completeness. Treat published project summaries as leads, not approval documents; do not certify performance.
+
+Attachments:
+- attachment-1-source-text.txt
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

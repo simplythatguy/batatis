@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Secretary of State concluded and determined the plans do not comply with Requirement B1 (means of warning and escape) of the Building Regulations 2010 (as amended) (p.4).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Requirement B1 travel distance from a new mezzanine to the exit",
+    "listed-building constraints on adding a second stair",
+    "approved-inspector refusal basis versus applicant's position",
+    "scope limited to the question put to the Secretary of State"
+  ],
+  "case_id": "H15-010",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

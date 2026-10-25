@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Calgary issued SPV-004 under Safety Codes Act authority in 2020 for later ASHRAE 62 versions subject to the stated engineer and permit conditions; no project-specific permit is present.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Read the exact 2019 edition and distinguish the 2025 NBC(AE) advisory.",
+    "Capture the required PE signature/seal and written statements exactly.",
+    "Identify missing occupancy, intended standard version, and permit-reference information without inventing facts.",
+    "Do not treat an older direct-download SPV as proof of current acceptance or a determination of ventilation adequacy."
+  ],
+  "case_id": "L04-004",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Calgary / Edmonton",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

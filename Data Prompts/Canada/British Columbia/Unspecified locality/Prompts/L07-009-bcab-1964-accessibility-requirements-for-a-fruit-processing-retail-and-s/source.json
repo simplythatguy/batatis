@@ -1,0 +1,62 @@
+{
+  "id": "L07-009",
+  "title": "BCAB 1964 - Accessibility requirements for a fruit processing, retail, and storage building on a farm",
+  "jurisdiction": "British Columbia",
+  "code_edition": "BCBC 2024; National Farm Building Code of Canada 1995; National Building Code of Canada 1995",
+  "case_type": "appeal_decision",
+  "source_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1964",
+  "document_date": "2025-05-01",
+  "facts": [
+    {
+      "text": "The project is the design and construction of a new building, approximately 40 m2 in building area. The building will be used to store, sort, weigh, and sell fruit in season, and to store supplies and equipment for the rest of the year.",
+      "locator": "Project description, paragraph 1"
+    },
+    {
+      "text": "The building will be located on land that is located within the Agricultural Land Reserve and is zoned for agricultural uses. The land is adjacent to a highway that does not contain a public or municipal water main. It is proposed that the building will not have a plumbing system. Portable toilets and hand-wash stations will be provided in season for “u-pick” customers. Farm employees will have access to a washroom in another building on the property.",
+      "locator": "Project description, paragraph 2"
+    }
+  ],
+  "limitations": [
+    "Public decision does not identify the local authority or provide the original application/drawings.",
+    "Published Board outcome appears in the input attachment; outcome leakage is intentional and flagged.",
+    "British Columbia decision retained for comparative attachment format/content only; it does not establish Alberta code applicability, design performance, or acceptance."
+  ],
+  "worker": "L07",
+  "prompt_number": 500,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1964",
+      "sha256": "7b9041019e5dc9cb8e2640ba03307c770bd693ff359e60d4ebe1eaae732d7685",
+      "role": "input",
+      "bytes": 1370944,
+      "filename": "bcab-1964-7b9041019e5d.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-1964-7b9041019e5d.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:18:51.202906+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1964",
+        "content_type": "text/html; charset=utf-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-1-source-text.txt",
+        "sha256": "026790eeec5abf14f82845422896f7149bd531c047e3c6ce7ea0131e38966395",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "British Columbia",
+    "city_or_town": "Unspecified locality",
+    "basis": "British Columbia appeal describes a project without naming its municipality; the provincial appeal-board location is not the project location.",
+    "locator": "jurisdiction field",
+    "scope": "undisclosed"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The profile reports renovation phases and consultant-reported systems changes, including a statement that life-safety lighting was up to code. No underlying code analysis, alternative-solution submission, permit decision, or approval record is attached.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "distinguish article quotes from underlying technical evidence",
+    "identify uncertainty in concealed conditions and service routing",
+    "request code/permit/approval and commissioning records",
+    "do not use project-profile statements as proof of compliance"
+  ],
+  "case_id": "A03-004",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Calgary / Edmonton",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

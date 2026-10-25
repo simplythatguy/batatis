@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The case study says the RBQ accepted the project's equivalent-measures request and describes later RBQ guidance; the original request, full test reports and decision letter are not attached.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "code edition and historical timing",
+    "complete evidence package for fire resistance, joints and penetrations",
+    "distinguishing project-reported authority action from a supplied decision instrument",
+    "French-language source comprehension and page-level traceability"
+  ],
+  "case_id": "L13-002",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

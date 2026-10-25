@@ -1,0 +1,16 @@
+{
+  "known_outcome": "partial: one sub-item is recorded as 'agreed with Newcastle Building Control' (p.12); the Building Control concern on the rooftop plantroom is answered by consultant opinion (p.14); no final Building Control decision is in the file",
+  "outcome_leakage": true,
+  "review_focus": [
+    "single-stair travel distance departure justified against BS 9991",
+    "Building Control concern on rooftop plantroom and stair core",
+    "PUR/PIR cladding and limited-combustibility recommendation for blocks above 18 m",
+    "partial, documented agreement with Building Control",
+    "code editions not stated"
+  ],
+  "case_id": "H16-004",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

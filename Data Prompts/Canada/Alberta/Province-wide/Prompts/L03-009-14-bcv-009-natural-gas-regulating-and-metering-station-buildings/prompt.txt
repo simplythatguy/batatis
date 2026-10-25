@@ -1,0 +1,6 @@
+Review the attached historical 14-BCV-013 STANDATA as a reference for natural-gas regulating and metering station buildings. Extract the Group F2 classification conditions and ventilation requirement. List the building area/height, occupancy, equipment, leak/ventilation design and supporting records that would need to be established for a real proposal, and ask questions about unknowns. Do not assume the facility matches the scope or certify safety/compliance.
+
+Attachments:
+- catalogue-13-99b03fe1bdcc.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

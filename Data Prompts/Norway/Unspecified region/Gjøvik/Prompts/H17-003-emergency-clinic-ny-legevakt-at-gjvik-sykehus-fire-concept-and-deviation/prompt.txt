@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from Norway, Gjøvik kommune as client and owner. Comparative only, not Alberta.. It is not an Alberta application.
+
+Read the attached Norwegian fire concept report for a new municipal emergency clinic, revision 01. This is a comparison document, so use only the rules the report itself names. From the attachment alone, list: (1) the requirements it applies and the editions it cites; (2) what it says about the existing building and the existing drawings; (3) its deviation chapter: what it contains, and what it still lacks; (4) the roles and independent control it describes; (5) the questions you would send back to the authors. Do not say whether the design complies or is safe, do not add facts that are not in the attachment, and do not judge the fire engineering.
+
+Attachments:
+- no-gjovik-emergency-clinic-brann-dfaa0e7ae667.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

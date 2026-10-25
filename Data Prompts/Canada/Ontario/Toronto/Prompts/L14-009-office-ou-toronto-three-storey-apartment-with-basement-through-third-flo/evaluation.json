@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The proponent profile reports submission in March 2025 and acceptance in November 2025; no official permit or decision is attached.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "basement-to-third-storey scope and building-height classification",
+    "which suites are within alternative-solution scope",
+    "limits of a second-floor-only drawing",
+    "independent verification of reported acceptance"
+  ],
+  "case_id": "L14-009",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from New Zealand: Auckland Council as building consent authority; MBIE determination under the Building Act 2004. Non-Alberta comparative record.. It is not an Alberta application.
+
+We want to alter an existing house in Auckland and clad part of it with a proprietary product that is outside the standard cladding acceptable solution. The council has refused the consent because it says it has not got enough documentation, and it has also raised compliance and conflicting-information concerns. Attached is the determination record for this refusal. Using only that record, please: (1) identify the clause and the baseline acceptable solution the record compares against; (2) explain how the appraisal's scope is used as evidence for an alternative solution, and what the record says about the product and its scope; (3) list the documentation the record says was missing; and (4) list the questions to ask the council before resubmitting. Do not say whether the cladding complies.
+
+Attachments:
+- mbie-det-2024-023-d76edae783b0.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

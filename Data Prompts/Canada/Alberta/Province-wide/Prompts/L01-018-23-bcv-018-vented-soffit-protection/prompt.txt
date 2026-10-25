@@ -1,0 +1,6 @@
+Using the attached 23-BCV-018 STANDATA as a regulator-issued reference, identify the missing facts and documents needed to consider its vented-soffit alternative: Part 9 scope, which solid-soffit provision applies, distance/projection context, substrate and coating, accredited laboratory test results against the Appendix A plywood benchmark, and installation instructions. Keep performance conclusions out of the response and do not certify the material or assembly.
+
+Attachments:
+- 23-BCV-018-7a4776b89a12.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

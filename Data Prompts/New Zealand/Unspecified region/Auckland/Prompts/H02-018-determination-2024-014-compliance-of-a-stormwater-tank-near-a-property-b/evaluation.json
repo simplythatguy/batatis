@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Determination (28 March 2024, s 188, §5.1, p.11): the stormwater tank near the boundary of the property is not required to comply with clauses C3.6 and C3.7 of Clause C3 Fire affecting areas beyond the fire source. The reasoning in §§3-4 was not summarised in this pass.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Whether the answer identifies C3.6 and C3.7 as radiation and external-wall tests and asks whether the tank is within the test.",
+    "Whether it notes the material change from plastic to metal and separates the original proposal from the amended one.",
+    "Whether it asks for radiant-heat and fire-rating evidence for the tank.",
+    "Whether it does not say the tank complies."
+  ],
+  "case_id": "H02-018",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

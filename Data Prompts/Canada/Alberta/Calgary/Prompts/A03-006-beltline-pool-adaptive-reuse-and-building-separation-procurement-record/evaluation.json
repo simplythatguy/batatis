@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The City listing states the facilities are not deemed safe for occupancy and that pre-application work is ongoing. The public OREOI reports building-condition-assessment dates and rough upgrade/demolition estimates, but the underlying reports are not attached. No applicant alternative-solution submission or approval is attached.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "identify the shared mechanical/building-separation dependency",
+    "distinguish estimates from confirmed code findings",
+    "request underlying BCA, approved drawings, fire/accessibility and occupancy records",
+    "do not infer actual deficiencies or a safe/unsafe technical conclusion"
+  ],
+  "case_id": "A03-006",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Calgary / Edmonton",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Reasons insufficient: the authority's reasons for the proposed refusal of BC24-011449 were insufficient and did not meet section 50; the decision addresses the adequacy of the reasons, not the bracing design's compliance. [p.8, para 5.1]",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Bracing-demand derivation under NZS 3604 and NZS 4229 against B1/AS1",
+    "Whether the verification method and acceptable solution were mixed appropriately",
+    "Specific reasons the authority gave for the proposed refusal"
+  ],
+  "case_id": "H01-012",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Unknown. The attachments contain planning scenarios and proposed interventions, but no actual alternative-solution submission, code review decision, building permit, or occupancy authorization.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "distinguish existing conditions, conceptual proposals, and operator-dependent assumptions",
+    "identify missing current egress, fire separation, occupant-load, accessibility, heritage, and permit records",
+    "do not infer approval from code citations or a proposed elevator/stair"
+  ],
+  "case_id": "A03-001",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Calgary / Edmonton",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

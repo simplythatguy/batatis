@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Report-stated: ICC-ES evaluation reissued February 2025 (IBC/IRC 2024-2018) with listed thicknesses, no span extrapolation (§5.2-5.3), fire-rated use per §4.2.11, and ICC-ES production inspection (§5.4).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Thickness and span limits; no extrapolation (§5.2-5.3)",
+    "Fire-rated use depends on §4.2.11 (not transcribed here)",
+    "Installation must match the approved construction documents (§5.1)"
+  ],
+  "case_id": "H14-011",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

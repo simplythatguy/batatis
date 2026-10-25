@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Regulator position: the coordinator must be knowledgeable and experienced in the design, installation and operation of the systems tested; the owner must give the AHJ evidence before construction that a registered professional is retained for design, field review and witnessing of the test.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the coordinator's qualifications from the professional-retention evidence",
+    "Asks for the coordinator and professional credentials the file would need to show",
+    "Flags the timing of the owner's evidence submission",
+    "Does not claim the testing arrangement is compliant"
+  ],
+  "case_id": "H20-010",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

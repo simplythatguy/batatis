@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The active CCMC product opinion identifies a specific Alternative classification for concrete-formwork provisions and limits all listed outcomes to the evaluated flat ICF wall system and conditions.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "exact block configuration, concrete, reinforcement and tie details",
+    "project-specific structural drawings and professional responsibility",
+    "building code edition and fire-protection assembly details",
+    "evidence addressing the listed Alternative provision"
+  ],
+  "case_id": "L16-009",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

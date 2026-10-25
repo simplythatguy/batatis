@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Granted as proposed (omission of hoistway vent per 2015 IBC).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "OSSC 3004.1 text in the excerpt versus the 2015 IBC claim",
+    "whether the lobby-study excerpt supports the stack-effect claim",
+    "the list of similar prior appeals as precedent, without treating them as proof"
+  ],
+  "case_id": "H11-011",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

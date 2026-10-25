@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Regulator position: the damper must close on a signal from an adjacent smoke detector (Sentence 3.1.8.11.(3)); the document states this provision does not itself require additional fire alarm system requirements to be met.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the damper-closing requirement from the fire alarm system requirements",
+    "Asks which detector and damper arrangement the drawings show",
+    "Flags the inspection and testing evidence a reviewer would expect",
+    "Does not state that a design complies"
+  ],
+  "case_id": "H20-005",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

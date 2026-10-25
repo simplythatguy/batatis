@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Determination: complied with F2.3.3(a); did not comply with B1.3.1, B1.3.4(a), F4.3.4(c) and F4.3.4(d).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "laminated toughened glass performance under load and after breakage",
+    "producer statements and manufacturer documentation for an innovative glazing system",
+    "F4 barrier geometry versus B1 structural performance",
+    "use of post-failure evidence"
+  ],
+  "case_id": "H03-005",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

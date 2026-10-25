@@ -1,0 +1,61 @@
+{
+  "id": "L18-024",
+  "title": "NRC roof uplift modeling — membrane-width and fastener-spacing configurations",
+  "jurisdiction": "NRC Dynamic Roofing Facility numerical and experimental research, Ottawa, Ontario, Canada (no permit jurisdiction)",
+  "code_edition": "Unknown; no project code edition is stated.",
+  "case_type": "research_evidence",
+  "source_url": "https://nrc-publications.canada.ca/eng/view/object/?id=deb9ae3d-761c-4ab5-b99f-3012bab9fde8",
+  "document_date": "2005-05-01",
+  "facts": [
+    {
+      "text": "The paper combines more than 400 numerical simulations and experiments across mechanically attached roof-system configurations and investigates test-table edge effects for wider thermoplastic and thermoset membranes.",
+      "locator": "PDF pp. 4–7; article §2"
+    },
+    {
+      "text": "The report describes a 3,658 mm (144 in) thermoplastic membrane and 3,048 mm (120 in) reinforced thermoset membrane; its model represents fasteners and plastic plates and benchmarks predicted force against Dynamic Roofing Facility measurements.",
+      "locator": "PDF pp. 6–8; article §§2–3 and Figs. 3–4"
+    },
+    {
+      "text": "For cited fastener-row/spacing configurations Fr/Fs = 67/12, 48/18 and 72/18, the paper reports finite-element fastener-force deviations of 7% underestimation, 2% overestimation and 10% overestimation, respectively, relative to measured values.",
+      "locator": "PDF p. 6; article model-validation discussion"
+    }
+  ],
+  "limitations": [
+    "Numerical validation is configuration-specific; report cautions test-table geometry can affect response."
+  ],
+  "worker": "L18",
+  "prompt_number": 230,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://nrc-publications.canada.ca/eng/view/accepted/?id=deb9ae3d-761c-4ab5-b99f-3012bab9fde8",
+      "sha256": "b2b9fe8cebde6a5fe8d7af4581b8473375389df491e6cdd59fd2d1253547fce4",
+      "role": "input",
+      "bytes": 983075,
+      "filename": "roof-wind-uplift-model-part2-b2b9fe8cebde.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L18/files/roof-wind-uplift-model-part2-b2b9fe8cebde.pdf",
+      "reuse_status": "rights_review_required",
+      "rights_source": "https://nrc-publications.canada.ca/eng/copyright/",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:20:28.957789+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc-publications.canada.ca/eng/view/accepted/?id=deb9ae3d-761c-4ab5-b99f-3012bab9fde8",
+        "content_type": "application/pdf;charset=UTF-8",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "rights_review_required",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Ontario",
+    "city_or_town": "Ottawa",
+    "basis": "The source jurisdiction identifies the NRC Ottawa Field Exposure of Walls or Dynamic Roofing Facility as the experimental setting; research geography, not a permit site.",
+    "locator": "jurisdiction field",
+    "scope": "research"
+  }
+}

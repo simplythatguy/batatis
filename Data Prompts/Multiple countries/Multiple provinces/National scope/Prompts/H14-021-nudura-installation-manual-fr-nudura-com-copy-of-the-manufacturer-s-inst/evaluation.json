@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Manufacturer-stated: installation guidance with a 'Guide Only' disclaimer; approval and evaluation claims in §2.3-2.4 (pp45-46) are not verified here; typical document list §2.5 (p47).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Manufacturer approval claims (USA, Canada, Europe, Middle East) are unverified and are not an Alberta approval",
+    "Older IRC edition references (2003/2006/2009) versus ESR-2092's 2024-2012 scope",
+    "Disclaimer: guide only; engineering needed outside prescriptive scope (p1)",
+    "Provenance: the primary nudura.com path returned 404; the fr.nudura.com copy is used"
+  ],
+  "case_id": "H14-021",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The Chief Executive confirmed the authority's decision to refuse a code compliance certificate for stage two (decision, p.21).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "rammed-earth walls as structure and cladding",
+    "cracking and moisture ingress evidence with photographs",
+    "maintenance regime as part of compliance evidence",
+    "stage boundaries and the consent documents for each stage"
+  ],
+  "case_id": "H04-004",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

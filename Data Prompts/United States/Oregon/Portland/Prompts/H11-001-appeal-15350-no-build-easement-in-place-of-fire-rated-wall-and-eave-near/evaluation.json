@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Denied: the proposed no-build easement for lot confirmation does not provide equivalent life-safety protection (appeal decision block).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "identify R302.1 (projections, openings, penetrations) and Table R302.1 as engaged",
+    "whether the alternate shows equivalent fire separation, not only a land-division outcome",
+    "covenant enforceability, recording and BDS approval terms",
+    "missing dimensions for eaves and the easement relative to the line"
+  ],
+  "case_id": "H11-001",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

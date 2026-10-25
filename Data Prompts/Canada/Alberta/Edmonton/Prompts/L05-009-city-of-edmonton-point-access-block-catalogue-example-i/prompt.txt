@@ -1,0 +1,8 @@
+Review the attached City of Edmonton Point Access Block Design Guide, Example I (PDF p. 22). Treat the catalogue values only as facts about this illustrative guide scenario, not as facts about an applicant or a specific property. Identify what the source states and what remains unknown before a project-specific Alberta building-permit and alternative-solution submission could be prepared. Flag code-edition and acceptable-solution/attribution questions that must be confirmed, list missing site-specific plans and administrative evidence, and ask the next focused questions, including about professional risk analysis, mitigation, and assumptions/limits. Keep the guide's conceptual status clear; do not claim safety, compliance, or approval.
+
+Attachments:
+- pab-design-guide-fd29e2084bca.pdf
+- edmonton-point-access-guide-1546fef63937.pdf
+- pab-building-code-guide-54fc45bcb200.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

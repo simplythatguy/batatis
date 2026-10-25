@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Council answer (leakage): 'firm and stable' is not defined and no specific material or method is specified; ADAAG guidance could allow compacted gravel or grass if the enforcing jurisdiction determines the surface is regular and will not be displaced by wheels, crutch or cane tips.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "undefined performance term 'firm and stable'",
+    "who decides equivalence (the enforcing jurisdiction)",
+    "surface regularity evidence",
+    "difference between accessible parking and accessible routes"
+  ],
+  "case_id": "H12-007",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,66 @@
+{
+  "id": "L15-020",
+  "title": "14820-R — AvenEx Opal Breathable Building Wrap Air Barrier",
+  "jurisdiction": "Canada (CCMC national product assessment; project AHJ not stated)",
+  "code_edition": "NBC 2020",
+  "case_type": "product_evidence",
+  "source_url": "https://www.nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14820-R&type=cert",
+  "document_date": "2026-01-07",
+  "facts": [
+    {
+      "text": "CCMC 14820-R is marked Active in the live API snapshot; the report names NBC 2020 as its edition scope.",
+      "locator": "PDF p. 1; live API items"
+    },
+    {
+      "text": "Report gives a vapour-barrier condition for use as the main airtight element and addresses other low-permeance layers.",
+      "locator": "PDF p. 5"
+    },
+    {
+      "text": "The CCMC report publishes its own code-specific opinion classifications for the printed edition(s); those classifications are bounded by the report conditions.",
+      "locator": "PDF p. 2"
+    }
+  ],
+  "limitations": [
+    "The evaluation is a CCMC product assessment, not an individual Alberta variance or project approval.",
+    "The report editions are NBC editions identified by the source; no equivalence to NBC(AE) 2023, 2nd printing has been established here.",
+    "No project, assembly, jurisdiction/AHJ, loads, site conditions, installation records or professional design package is supplied.",
+    "The CCMC opinion is bound by its stated conditions and limitations; read the full report before judging relevance.",
+    "Air barrier material: Report gives a vapour-barrier condition for use as the main airtight element and addresses other low-permeance layers."
+  ],
+  "worker": "L15",
+  "prompt_number": 195,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://www.nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?id=1394&type=cert",
+      "sha256": "6876eb9c7b7a3d4031b2e3e58a590b6f48ccfcd10857e6002d168473141132f2",
+      "role": "input",
+      "bytes": 563126,
+      "filename": "ccmc-14820-R-avenex-opal-air-barrier-evaluation-fc41e008ded6.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L15/files/ccmc-14820-R-avenex-opal-air-barrier-evaluation-fc41e008ded6.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:23:00.921435+00:00",
+        "http_status": "200",
+        "final_url": "https://www.nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?id=1394&type=cert",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded_pdf_entity_extracted",
+        "entity_extraction": "A 433-byte proxy/HTTP response prelude precedes %PDF- in the helper capture. PDF entity bytes from first %PDF- through the final byte were copied unchanged and parsed with pypdf.",
+        "raw_capture_sha256": "fc41e008ded67f81c9e8932943c55ef84b1c2b68fa55761707bf1656a9e36d33",
+        "raw_capture_path": "_research/workers/L15/files/ccmc-14820-R-avenex-opal-air-barrier-evaluation-fc41e008ded6.html"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "National",
+    "city_or_town": "National scope",
+    "basis": "National Canadian CCMC product assessment; no project site is identified and manufacturer or publisher addresses are not project locations.",
+    "locator": "jurisdiction field",
+    "scope": "national"
+  }
+}

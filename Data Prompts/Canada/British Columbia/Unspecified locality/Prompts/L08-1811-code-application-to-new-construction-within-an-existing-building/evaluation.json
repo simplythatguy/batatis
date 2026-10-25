@@ -1,0 +1,12 @@
+{
+  "known_outcome": "The Board determined that newly constructed or directly altered parts must meet current Code requirements; untouched parts need not be upgraded if they complied with the Code in force when built.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Original and proposed drawings, construction date records and scope-of-work markups are not linked."
+  ],
+  "case_id": "L08-1811",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

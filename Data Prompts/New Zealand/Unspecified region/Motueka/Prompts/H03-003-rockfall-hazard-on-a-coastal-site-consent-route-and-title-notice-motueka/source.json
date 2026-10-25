@@ -1,0 +1,68 @@
+{
+  "id": "H03-003",
+  "record_key": "2021/004",
+  "tier": "supporting",
+  "title": "Rockfall hazard on a coastal site: consent route and title notice (Motueka)",
+  "jurisdiction": "New Zealand (MBIE, Building Act 2004): comparative test only; not an Alberta case; no Alberta applicability asserted",
+  "authority": "Tasman District Council",
+  "code_edition": "Building Act natural-hazard provisions ss71–74 with NZ Building Code references",
+  "case_type": "issued_variance",
+  "document_type": "MBIE determination under Building Act 2004 s188 (regulator decision on an individual matter); not an applicant's alternative-solution file",
+  "source_url": "https://codehub.building.govt.nz/resources/2021004",
+  "document_date": "2021-02-26",
+  "facts": [
+    {
+      "text": "Authority proposed to grant a building consent under s72 subject to a s73 notice on the title because of a rockfall natural hazard; mitigation relies on passive protection structures.",
+      "locator": "p.1–2 §1–2"
+    },
+    {
+      "text": "The determination cites the Ministry's rockfall design guidance (2016) for passive protection structures.",
+      "locator": "p.13 footnote 13"
+    },
+    {
+      "text": "Conclusion: s71(2)(a) is satisfied because adequate provision has been made to protect land and buildings from the rockfall hazard.",
+      "locator": "p.12 §6.1"
+    }
+  ],
+  "recommended_input_pages": "1-11",
+  "limitations": [
+    "Comparative only: a New Zealand determination used to test attachment format and content; it cannot establish Alberta performance or applicability.",
+    "The determination's decision section is in the same PDF; outcome leakage is true. Use only pages 1-11 as applicant-side input if pages are split.",
+    "Facts are taken from the text layer (pypdf); photos, drawings and figures were not visually inspected unless stated."
+  ],
+  "alberta_applicability": "none asserted",
+  "comparative_only": true,
+  "worker": "H03",
+  "prompt_number": 319,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2021/2021-004.pdf",
+      "sha256": "d3e88db0d8583c899249fb9ddf3a8895723eae5cee47f17ec4d0c778cfcb0ff6",
+      "role": "input",
+      "bytes": 666881,
+      "filename": "2021-004-d3e88db0d858.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H03/files/2021004/2021-004-d3e88db0d858.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:45:01.281075+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2021/2021-004.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Motueka",
+    "basis": "The title places the coastal project at Motueka; Tasman District Council is the authority.",
+    "locator": "source title; authority field",
+    "scope": "project"
+  }
+}

@@ -1,0 +1,6 @@
+Electromagnetic locks are proposed for doors in an Alberta building. The attached joint STANDATA interpretation (23-FCI-010/23-BCI-043) is my only source. Using only that document, identify the Act and code provisions it uses, the fail-safe and fire-protection integration requirements it states, the installation, maintenance and verification questions it raises, and what the file needs next. Do not invent door counts, hardware models or building use, and do not say the installation complies.
+
+Attachments:
+- ma-standata-joint-interpretation-23-fci-010-23-bci-043-2025-11-5311b343e2ed.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

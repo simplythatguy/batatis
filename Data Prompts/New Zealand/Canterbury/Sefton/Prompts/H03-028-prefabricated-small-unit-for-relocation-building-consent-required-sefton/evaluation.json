@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Determination: building consent required for prefabrication of this unit; authority's proposed decision confirmed.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "off-site prefabrication and the modular component manufacturer scheme",
+    "building status and relocation of a portable unit",
+    "exemption route (Schedule 1) versus consent",
+    "manufacturer certification evidence"
+  ],
+  "case_id": "H03-028",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

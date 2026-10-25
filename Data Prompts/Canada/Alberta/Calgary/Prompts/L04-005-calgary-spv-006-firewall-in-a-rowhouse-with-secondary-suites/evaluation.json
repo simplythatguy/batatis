@@ -1,0 +1,16 @@
+{
+  "known_outcome": "Calgary published SPV-006 and CSTIC accepted it on 2025-06-19; B23-006 is a separate municipal advisory. No individual permit application is present.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Use the figure’s explicit NBC 2023(AE) label while noting that the operative text omits the year; do not infer the edition from the 2025 issue date alone.",
+    "Keep SPV scope and B23-006 emergency-access guidance distinct.",
+    "Preserve all stated fire-separation, egress, sprinkler, HVAC and other-Code conditions.",
+    "Ask for drawings and permit facts; flag professional involvement when the record requires it.",
+    "Do not claim technical equivalence, safe design, or code compliance."
+  ],
+  "case_id": "L04-005",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Calgary / Edmonton",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

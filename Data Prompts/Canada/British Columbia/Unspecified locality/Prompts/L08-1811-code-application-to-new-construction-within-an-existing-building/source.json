@@ -1,0 +1,65 @@
+{
+  "id": "L08-1811",
+  "title": "Code application to new construction within an existing building",
+  "jurisdiction": "British Columbia (specific local authority not named in published decision)",
+  "code_edition": "2012 BC Building Code",
+  "case_type": "appeal_decision",
+  "source_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1811",
+  "document_date": "2018-06-21",
+  "facts": [
+    {
+      "text": "The project alters the basement of one side of an existing duplex, reconfiguring rooms and adding a room, changing stairs and interior wall finishes, and including structural modifications, framing and finishing.",
+      "locator": "Project description"
+    },
+    {
+      "text": "The local authority required current-code treatment for several matters including exterior-wall and joist-space insulation, vapour barrier, interconnected smoke/CO detectors and bathroom exhaust; the appellant said the work would not reduce existing performance.",
+      "locator": "Decision being appealed; Appellant’s position"
+    },
+    {
+      "text": "The cited existing-building provision is Sentence 1.1.1.2.(1) of Division A.",
+      "locator": "Applicable Code requirement"
+    }
+  ],
+  "limitations": [
+    "Only the Board published decision page is available; the original appeal application and underlying submissions are not linked.",
+    "British Columbia case; comparative evidence only, with no asserted applicability to Alberta."
+  ],
+  "worker": "L08",
+  "prompt_number": 529,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1811",
+      "sha256": "ed603bc31118d790f8dd264404000993e237d37efb23f821b29fc0b22453d827",
+      "role": "outcome_reference",
+      "bytes": 1356958,
+      "filename": "bcab-1811-ed603bc31118.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L08/files/bcab-1811-ed603bc31118.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:24:33.763161+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1811",
+        "content_type": "text/html; charset=utf-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-1-source-text.txt",
+        "sha256": "f999b90e1aab60253e7aa46028af4c3423f9c0bb18c7deadf09394d23afe5efc",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "British Columbia",
+    "city_or_town": "Unspecified locality",
+    "basis": "British Columbia appeal describes a project without naming its municipality; the provincial appeal-board location is not the project location.",
+    "locator": "jurisdiction field",
+    "scope": "undisclosed"
+  }
+}

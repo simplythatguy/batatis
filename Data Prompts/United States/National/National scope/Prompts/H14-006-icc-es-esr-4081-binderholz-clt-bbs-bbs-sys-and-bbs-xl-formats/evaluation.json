@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Report-stated: ICC-ES evaluation reissued June 2026 (IBC/IRC 2021-2009) for floor and roof components, with connection and diaphragm design outside the evaluation, in two panel formats.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Which format (BBS SYS or BBS XL) each shear table applies to",
+    "Shear tables 6-7 versus complete diaphragm design (§5.6)",
+    "Edition list spans 2009-2021"
+  ],
+  "case_id": "H14-006",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

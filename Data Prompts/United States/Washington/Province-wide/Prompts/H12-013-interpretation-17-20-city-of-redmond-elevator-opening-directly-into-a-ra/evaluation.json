@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Council answer (leakage): yes. The answer says the hoistway-opening exception in IBC 3006.2 does not supersede the corridor-protection requirement or the openings in fire partitions covered by IBC Sections 708 and 716, so the rated-corridor smoke and draft control requirements of IBC 716.5.3.1 apply to the elevator doors.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "conflict between an exception in one section and corridor rating in another",
+    "absence of an elevator lobby",
+    "smoke and draft control door requirements",
+    "evidence needed for door ratings and corridor openings"
+  ],
+  "case_id": "H12-013",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

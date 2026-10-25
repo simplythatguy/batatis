@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from New Zealand (MBIE Chief Executive determination; Building Act 2004; comparative only, not Alberta). It is not an Alberta application.
+
+Comparative test only: this attached record is from New Zealand, so use New Zealand Building Act and Building Code concepts and do not apply Alberta rules. Attached is a determination describing a 20-year-old six-bedroom two-storey house with monolithic cladding in a high wind zone, with a site plan, a window installation figure, and a sequence of council letters and an inspection record. Using only the attached document, identify the building-code uncertainties this raises, the drawings and supporting evidence a reviewer would need, the administrative items that appear to be missing, and the next questions to put to the applicant. Treat any regulator finding in the document as unavailable for this exercise, and do not say whether the work complies or is safe.
+
+Attachments:
+- mbie-determination-2020-008-2bfc9b875eae.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

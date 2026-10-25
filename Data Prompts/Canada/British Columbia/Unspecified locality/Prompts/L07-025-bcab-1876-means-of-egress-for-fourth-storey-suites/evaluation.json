@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The Board determined that the proposed egress design does not comply with the prescriptive options in Sentence 3.3.1.3.(8) and should be submitted for alternative-solution analysis.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "identify the code edition and provision stated in the record",
+    "trace each described suite exit and clarify suite boundaries and the route to exterior",
+    "identify drawings and alternative-solution analysis referenced but not attached",
+    "do not transfer this British Columbia appeal outcome or code interpretation to Alberta"
+  ],
+  "case_id": "L07-025",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

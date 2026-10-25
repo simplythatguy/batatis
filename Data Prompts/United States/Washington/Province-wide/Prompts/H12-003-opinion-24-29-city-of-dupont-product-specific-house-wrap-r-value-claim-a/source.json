@@ -1,0 +1,67 @@
+{
+  "id": "H12-003",
+  "title": "Opinion 24-29 (City of DuPont): product-specific house-wrap R-value claim and alternate test procedure (WSEC R303.1.4)",
+  "jurisdiction": "Washington State, requested by City of DuPont (comparative test only; not Alberta)",
+  "code_edition": "2021 Washington State Energy Code, Residential, R303.1.4 Insulation Product Rating, as cited",
+  "case_type": "product_evidence",
+  "source_url": "https://sbcc.wa.gov/answers-opinions",
+  "document_date": "Not stated in document (opinion no. 24-29)",
+  "facts": [
+    {
+      "text": "Document type: State Building Code Council opinion no. 24-29, two pages; requester City of DuPont.",
+      "locator": "p1 header"
+    },
+    {
+      "text": "Section named in the header: R303.1.4 Insulation Product Rating.",
+      "locator": "p1 SECTION"
+    },
+    {
+      "text": "The question names a specific product (Insultex House Wrap, Innovative Designs, Inc.) and asks whether it meets the 2021 WSEC.",
+      "locator": "p1 QUESTION"
+    },
+    {
+      "text": "The product's test report is not reproduced in the PDF; the record contains only the question and the Council answer.",
+      "locator": "p1-p2"
+    }
+  ],
+  "limitations": [
+    "The PDF contains the Council answer on the same page; do not present it as applicant-side input without flagging leakage.",
+    "Product-specific record; it does not approve or reject the product for any project.",
+    "The page 2 footer reads 'STATE BUILDING CODE OPINION NO. 24-02'; the page 1 header reads 24-29. Treat the footer as a source typo.",
+    "No product test report is in the PDF; the description of the modified test comes only from the Council's answer.",
+    "Edition as cited (2021 WSEC Residential); comparative only."
+  ],
+  "worker": "H12",
+  "prompt_number": 627,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://sbcc.wa.gov/sites/default/files/2024-11/24_29_WSEC_R303.pdf",
+      "sha256": "16e4722cbd3927fce6355e4231aa053a81c3bb751a418c1528e3b4cfd3b97184",
+      "role": "outcome_reference",
+      "bytes": 181710,
+      "filename": "sbcc-ruling-24-29-24-29-wsec-r303-16e4722cbd39.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H12/files/sbcc-ruling-24-29-24-29-wsec-r303-16e4722cbd39.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:44:41.253894+00:00",
+        "http_status": "200",
+        "final_url": "https://sbcc.wa.gov/sites/default/files/2024-11/24_29_WSEC_R303.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "United States",
+    "province_or_state": "Washington",
+    "city_or_town": "Province-wide",
+    "basis": "A Washington State Building Code Council interpretation/opinion gives state-code guidance. Named cities/counties are requesters, not documented project sites.",
+    "locator": "jurisdiction field; p1 header",
+    "scope": "provincewide"
+  }
+}

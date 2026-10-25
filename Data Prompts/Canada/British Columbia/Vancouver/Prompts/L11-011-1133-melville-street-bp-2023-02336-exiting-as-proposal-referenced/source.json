@@ -1,0 +1,67 @@
+{
+  "id": "L11-011",
+  "title": "1133 Melville Street BP-2023-02336: exiting AS proposal referenced",
+  "jurisdiction": "City of Vancouver, British Columbia",
+  "code_edition": "Vancouver Building By-law 2019",
+  "case_type": "documented_case_summary",
+  "source_url": "https://plposweb.vancouver.ca/Public/Default.aspx?PosseObjectId=206430764&PossePresentation=Guest",
+  "document_date": "2023-2024 permit record",
+  "facts": [
+    {
+      "text": "Permit concerns tenant improvements on floors 24 and 25 in an existing 38-storey commercial building for Canaccord Genuity.",
+      "locator": "Permit page, Work Description"
+    },
+    {
+      "text": "City notes VBBL 2019 and “Alternative solution proposal for exiting AL-2023-00146.”",
+      "locator": "Permit page, Building Review Branch Notes"
+    },
+    {
+      "text": "Permit status is Completed; record lists revisions dated 2024-02-09 and 2024-08-23.",
+      "locator": "Permit page, heading/Work Description"
+    }
+  ],
+  "limitations": [
+    "British Columbia comparative material only; it cannot establish Alberta code performance or applicability.",
+    "Public HTML permit page only; no drawings or AS acceptance record."
+  ],
+  "original_worker_case_type": "actual_application",
+  "parent_curation_note": "Public permit work description references an exiting proposal; original drawings/report are not attached.",
+  "worker": "L11",
+  "prompt_number": 579,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://plposweb.vancouver.ca/Public/Default.aspx?PosseObjectId=206430764&PossePresentation=Guest",
+      "sha256": "5c60123ad3919cf7270dbcae1fae1a5ba53c98d4c1df72060fba610e6d5a9e42",
+      "role": "input",
+      "bytes": 82933,
+      "filename": "vancouver-bp-2023-02336-public-record-5c60123ad391.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L11/files/vancouver-bp-2023-02336-public-record-5c60123ad391.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:23:37.614568+00:00",
+        "http_status": "200",
+        "final_url": "https://plposweb.vancouver.ca/Public/Default.aspx?PosseObjectId=206430764&PossePresentation=Guest",
+        "content_type": "text/html; charset=utf-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-1-source-text.txt",
+        "sha256": "9f9e7ef4047101dbf2813f8b67a6b8ac0fda4baaae317f11f905878f5100e639",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "British Columbia",
+    "city_or_town": "Vancouver",
+    "basis": "The source jurisdiction identifies Vancouver, British Columbia for the named project, proposal or appeal; this describes source geography.",
+    "locator": "jurisdiction field",
+    "scope": "project"
+  }
+}

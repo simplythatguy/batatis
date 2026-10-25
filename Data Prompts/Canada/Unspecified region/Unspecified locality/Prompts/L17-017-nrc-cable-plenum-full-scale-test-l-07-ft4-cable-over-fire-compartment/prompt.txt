@@ -1,0 +1,6 @@
+The attached NRC paper reports full-scale cable-plenum fire research, including L-07. Use it only as background for a possible building-code alternative-solution or variance submission. State what this source tested, what code edition and AHJ remain unknown, what project-specific cable, plenum/HVAC, fire, occupancy, egress, smoke-control and measurement details are missing, and what evidence/questions are needed next. Keep modeled research endpoints distinct from project evidence. Do not invent applicant or site facts, extrapolate to an unidentified design, author professional evidence, or claim safety, compliance, equivalence, or approval.
+
+Attachments:
+- cable-plenum-full-scale-6bf3f5ab71b9.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

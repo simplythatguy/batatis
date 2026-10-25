@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Regulator position: existing buildings are subject to the no-decrease rule for alterations; FEO requirements apply to alterations of elevating devices; a variance extending the FEO upgrade timeline may be considered where a fire alarm upgrade is planned.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the existing-building rule from the FEO alteration requirement",
+    "Flags the timeline variance as a conditional option, not a right",
+    "Asks which fire alarm upgrade date the file would rely on",
+    "Does not state the design complies"
+  ],
+  "case_id": "H20-028",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

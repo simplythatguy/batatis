@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Council answer (leakage): ratings are determined either by testing under the Washington amendment to Section 703.2 where the connection is part of the fire-resistance test, or by engineering analysis approved by the code official; for this purpose the connection includes connectors, fasteners and the wood portions included in the structural design; officials may use ICC 2021 Group B proposal S170-19 for guidance.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "testing route versus engineering-analysis route",
+    "definition of the connection that the rating covers",
+    "approval of the analysis by the code official",
+    "administrative evidence a submission would need"
+  ],
+  "case_id": "H12-010",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

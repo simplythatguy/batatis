@@ -1,0 +1,14 @@
+{
+  "known_outcome": "p.4 §5.1: the authority incorrectly exercised its powers in refusing to grant building consent with respect to the proposed foundation detail.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Identifies the alternative-solution framing and the Clause B1 comparison without asserting either result",
+    "Treats the flexural and shear comparisons as inputs needing evidence",
+    "Flags the authority's request for information as the record of what was missing"
+  ],
+  "case_id": "H05-018",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

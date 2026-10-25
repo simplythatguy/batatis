@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The overview documents a site-specific regulatory framework and design measures; no complete permit/alternative-solution submission or approval instrument is attached.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "historical governing framework vs current code applicability",
+    "project-specific regulation and authority documentation",
+    "scope and completeness of structural/fire plans and supporting evidence",
+    "distinguishing monitoring data from design acceptance"
+  ],
+  "case_id": "L13-001",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

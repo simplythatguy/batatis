@@ -1,0 +1,99 @@
+{
+  "id": "H02-003",
+  "title": "Determination 2023/040: An authority's decision to refuse a waiver or modification of the building code for two isolated steps",
+  "jurisdiction": "New Zealand: Auckland Council as building consent authority; MBIE determination under the Building Act 2004. Non-Alberta comparative record.",
+  "code_edition": "NZ Building Code (Schedule 1, Building Regulations 1992), applied to a consent application lodged 31 August 2021. The determination names no D1/AS1 edition in the text read. The s 4(2)(b) version in force at application is quoted (p.16 fn 32).",
+  "case_type": "appeal_decision",
+  "source_url": "https://codehub.building.govt.nz/resources/2023040",
+  "document_date": "11 December 2023",
+  "facts": [
+    {
+      "text": "The consent application (31 August 2021) was for the fit-out of a pharmacy in an existing shopping-centre retail unit.",
+      "locator": "p.3 §2.1"
+    },
+    {
+      "text": "The dispensary area is 46 m2, at the rear of the unit, on a raised platform 150 mm above the adjacent floor level.",
+      "locator": "p.3 §2.2"
+    },
+    {
+      "text": "The application proposed, as an alternative solution, isolated steps at either end of the dispensary area (Figure 1). It noted the steps did not comply with clause D1.3.3(i) and asked for a waiver or modification of that clause with no conditions.",
+      "locator": "p.3 §2.3; p.4 Figure 1"
+    },
+    {
+      "text": "The lessee said the raised platform was specified to meet pharmacy regulations (for example Medicines Act section 42A).",
+      "locator": "p.14 §4.20"
+    },
+    {
+      "text": "The authority's response: A waiver could not be considered under section 67(3), i.e. relating to access and facilities for people with disabilities. It suggested a ramp and said the lessee could apply for a determination.",
+      "locator": "p.4 §2.4"
+    },
+    {
+      "text": "The lessee revised the plans to replace both isolated steps with ramps. Consent was granted on 21 October 2021. The application for determination was received on 8 November 2021.",
+      "locator": "p.4-5 §2.5-2.6"
+    },
+    {
+      "text": "The lessee submitted that the steps are an access route but not an accessible route, so section 67(3) does not stop the authority considering a waiver.",
+      "locator": "p.5 §3.2"
+    },
+    {
+      "text": "Clause D1.3.3(i): access routes shall not contain isolated steps. Section 67(3): the territorial authority cannot grant a building consent subject to a waiver or modification of the building code relating to access and facilities for people with disabilities.",
+      "locator": "p.11 §4.4-4.5"
+    },
+    {
+      "text": "Clause A2 definitions quoted for access route and accessible route (usable by people with disabilities, negotiable unaided by a wheelchair user).",
+      "locator": "p.12 §4.7"
+    },
+    {
+      "text": "The authority and ODI considered that wheelchair users may be expected to work in the dispensary area. The parties disagreed about which access route must be accessible under section 118.",
+      "locator": "p.16 §4.31-4.32; p.16 fn 35"
+    },
+    {
+      "text": "The matter was determined under sections 177(1)(b) and (3)(a). The Office for Disability Issues was consulted under section 170 because the determination concerns clauses for disabled people.",
+      "locator": "p.2 §1.4; p.3 §1.6"
+    },
+    {
+      "text": "The legal test cited for a waiver under section 67(1) (from Determination 2015/010): objective and functional requirements; extent and consequences of non-compliance; other reasonably practicable solutions; special circumstances; consistency with the purposes and principles of the Act.",
+      "locator": "p.13 §4.13-4.14"
+    }
+  ],
+  "limitations": [
+    "Regulator determination on a waiver request. The ODI comments and the lessee's expert report are summarised, not attached.",
+    "The determination says it is focused on wheelchair users, and that other disabilities should also be considered (p.16 fn 34).",
+    "The decision (p.21 §5.1) is in the same PDF as the facts. Outcome leakage is true unless redacted.",
+    "Party names and the lessee's staffing evidence are left out of the prompt.",
+    "Applies to the New Zealand Building Code and section 67 of the NZ Building Act only. No Alberta applicability is asserted."
+  ],
+  "worker": "H02",
+  "prompt_number": 379,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2023/2023-040.pdf",
+      "sha256": "c580bb7a9316253396bd819f6175b214f89b185c69ed3c94a50fb3667c0882c1",
+      "role": "input",
+      "bytes": 910229,
+      "filename": "mbie-det-2023-040-c580bb7a9316.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H02/files/mbie-det-2023-040-c580bb7a9316.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:42:33.210578+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2023/2023-040.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Auckland",
+    "basis": "The jurisdiction documents Auckland as the local context; no separate region is documented.",
+    "locator": "jurisdiction field",
+    "scope": "local"
+  }
+}

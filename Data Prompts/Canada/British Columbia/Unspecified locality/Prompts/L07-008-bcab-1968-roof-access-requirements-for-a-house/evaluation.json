@@ -1,0 +1,17 @@
+{
+  "known_outcome": "The Board confirms the decision of the local authority.; It is the determination of the Board that firefighting access to the roof must be provided in accordance with the prescriptive acceptable solution or the requirement might be addressed by an alternative solution.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "identify the code edition and provision stated in the record",
+    "separate project facts from party positions and identify supporting documents absent from the public record",
+    "draft focused follow-up questions for unresolved design or administrative facts",
+    "clarify access or stair location, dimensions, role, and referenced design/as-built details",
+    "clarify fire-protection scope, calculations, and operational assumptions",
+    "do not transfer this British Columbia appeal outcome or code interpretation to Alberta"
+  ],
+  "case_id": "L07-008",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

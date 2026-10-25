@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from Prince George, British Columbia. It is not an Alberta application.
+
+Using the attached WIDC technical case study and fire-engineering project record, identify the site-specific code framework and documented building/fire-design questions. List the project-specific documents needed to review administrative completeness, including the site-specific regulation, occupancy/area/height schedule, CLT and connection details, fire-resistance calculations, penetration/joint test reports, shaft coating evidence, firefighting-access drawings and authority decision records. Treat the engineer's project page as a status reference, not as the alternative-solution report; do not certify technical performance.
+
+Attachments:
+- widc-technical-case-study-084bba286a32.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

@@ -1,0 +1,6 @@
+Review the attached historical 14-BCV-007 STANDATA as a reference for alternate roof access. Identify which cited roof-access trigger is relevant only if supported by a real submission, and summarize the listed access types and limits. List the roof/equipment conditions, access geometry, OHS details, handrails and landing evidence needed, and ask targeted questions. Do not invent a roof or access design or certify it.
+
+Attachments:
+- catalogue-15-ff5dca94d736.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

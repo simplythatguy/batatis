@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Reversed: the determination finds there were grounds to refuse on the information provided, but the refusal letter did not meet section 50, so the refusal is reversed on that basis. [p.22, para 5.1]",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Moisture pathway at channel drains and cladding termination (B2/E2)",
+    "Whether the plans and specifications give enough evidence for the proposed detail",
+    "Adequacy of the authority's written reasons (section 50)"
+  ],
+  "case_id": "H01-005",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

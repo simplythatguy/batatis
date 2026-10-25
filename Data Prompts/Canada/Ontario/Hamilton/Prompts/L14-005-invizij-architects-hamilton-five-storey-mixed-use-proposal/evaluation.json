@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The proponent profile reports submission in October 2024 and rejection in February 2025; no City decision, permit record, or submitted alternative-solution package is attached.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Ontario versus BC code basis",
+    "submission completeness under Hamilton process",
+    "single-exit conditions shown versus claimed",
+    "proponent status is not official disposition evidence"
+  ],
+  "case_id": "L14-005",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

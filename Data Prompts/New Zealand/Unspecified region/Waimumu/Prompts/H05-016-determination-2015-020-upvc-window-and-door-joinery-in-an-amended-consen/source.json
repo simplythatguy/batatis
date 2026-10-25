@@ -1,0 +1,67 @@
+{
+  "id": "H05-016",
+  "title": "Determination 2015/020: uPVC window and door joinery in an amended consent, Waimumu, Gore",
+  "jurisdiction": "New Zealand (MBIE determination under the Building Act 2004); comparative test only, not Alberta; NZ code references retained as written",
+  "code_edition": "Building Code Clauses B1, B2 and E2 named (p.2 §1.7); edition not stated on pages read",
+  "case_type": "appeal_decision",
+  "source_url": "https://www.building.govt.nz/resolving-problems/resolution-options/determinations",
+  "document_date": "6 May 2015 (page-2 header date)",
+  "facts": [
+    {
+      "text": "A Copland (owner, applicant) and Southland District Council (authority) dispute an amendment to a building consent to use uPVC window and door joinery for a house at 101 Copland Road, Waimumu, Gore.",
+      "locator": "p.1 §1.2"
+    },
+    {
+      "text": "The uPVC joinery scope covers windows and doors, fixings and supports, flashings, junctions with adjacent walls and claddings, and how the components are intended to be installed and work together.",
+      "locator": "p.2 §1.6"
+    },
+    {
+      "text": "The authority's concerns are in respect of Clauses B1, B2 and E2 only; other amendments to the consent are not considered.",
+      "locator": "p.2 §1.7"
+    },
+    {
+      "text": "The applicant's consultant made a submission on behalf of the applicant that includes technical information (the list is cut off in extraction).",
+      "locator": "p.2 §1.8"
+    }
+  ],
+  "limitations": [
+    "Decision begins on p.12 §7.1; mask p.12 for blind use.",
+    "Eleven image objects; not verified visually; installation details may sit in figures."
+  ],
+  "worker": "H05",
+  "prompt_number": 440,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2015/2015-020.pdf",
+      "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2015/2015-020.pdf",
+      "retrieved_at": "2026-10-25T01:42:35.331193+00:00",
+      "sha256": "55cd323f8341b6604c4b71a7f1fd5f7e1f4d732782308b3cdf531f01482fc7c1",
+      "bytes": 333914,
+      "pages": 12,
+      "role": "input",
+      "filename": "mbie-determination-2015-020-55cd323f8341.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H05/files/mbie-determination-2015-020-55cd323f8341.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:42:35.331193+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2015/2015-020.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Waimumu",
+    "basis": "The facts locate the house at Copland Road, Waimumu, Gore; Gore is retained as context rather than substituted for Waimumu.",
+    "locator": "p.1 §1.2",
+    "scope": "project"
+  }
+}

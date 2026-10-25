@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Modified: the section 72 decision on BC240410 is modified under section 72(c) to include a B1.3.3(r) modification, which the authority is to record on the property file. [p.22, para 6.1]",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Mass-movement zone risk and the natural-hazard test in sections 71 to 74",
+    "Whether the B1.3.3(r) modification is the right tool for the stated hazard",
+    "Record-of-title and property-file steps tied to the modification"
+  ],
+  "case_id": "H01-016",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

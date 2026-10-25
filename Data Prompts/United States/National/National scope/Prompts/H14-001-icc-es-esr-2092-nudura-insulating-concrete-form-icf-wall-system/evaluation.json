@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Report-stated: ICC-ES evaluation reissued November 2025 with IBC/IRC 2024-2012 scope, structural and fire-resistance-rated use under §4.4, and conditions §5.1-5.13. No Alberta or Canadian determination in source.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Edition gap: US IBC/IRC 2024-2012 only; NBC(AE) 2023 not referenced",
+    "Fire-resistance-rated use only under the §4.4 installation",
+    "ASTM E2126 values are not design values (§5.10)",
+    "Granby, Quebec plant is a location fact only"
+  ],
+  "case_id": "H14-001",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

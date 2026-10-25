@@ -1,0 +1,16 @@
+{
+  "known_outcome": "No project permit or alternative-solution decision is reported. The consultant study expressly does not prepare an alternative solution.",
+  "outcome_leakage": false,
+  "review_focus": [
+    "case-study assumptions versus project-specific facts",
+    "exit count, route, corridor and occupant-load details",
+    "risk and mitigation coverage",
+    "system reliability and maintenance evidence",
+    "2012 OBC baseline versus later code in force"
+  ],
+  "case_id": "L12-003",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

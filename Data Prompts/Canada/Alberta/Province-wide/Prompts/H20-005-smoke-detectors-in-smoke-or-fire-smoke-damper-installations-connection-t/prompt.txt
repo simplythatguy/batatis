@@ -1,0 +1,6 @@
+A design uses a smoke or fire/smoke damper with an adjacent smoke detector. The attached STANDATA interpretation (23-BCI-008) is my only source. Using only that document, identify the damper and detector provisions it cites, what it says about connection to the fire alarm system, what remains unclear for drawings and inspection, and what questions to put to the authority having jurisdiction. Do not invent building details, and do not state that the design complies.
+
+Attachments:
+- ma-23-bci-008-smoke-detectors-in-smoke-or-fire-smoke-damper-installations-6eb7eef969b3.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

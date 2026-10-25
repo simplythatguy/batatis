@@ -1,0 +1,18 @@
+{
+  "known_outcome": "It is the determination of the Board that from the point where the subject suite door opens onto the exterior passageway it is not possible to go in opposite directions to each of 2 separate exits. This is not in compliance with the acceptable solutions of the Code.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "identify the code edition and provision stated in the record",
+    "separate project facts from party positions and identify supporting documents absent from the public record",
+    "draft focused follow-up questions for unresolved design or administrative facts",
+    "trace the described route to each required exit and distinguish disputed routes from alternatives",
+    "clarify access or stair location, dimensions, role, and referenced design/as-built details",
+    "clarify fire-protection scope, calculations, and operational assumptions",
+    "do not transfer this British Columbia appeal outcome or code interpretation to Alberta"
+  ],
+  "case_id": "L07-021",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

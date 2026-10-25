@@ -1,0 +1,9 @@
+Comparative attachment exercise: this source is from Ottawa, Ontario, Canada. It is not an Alberta application.
+
+Review the attached Rosefellow Kanata fire-flow proposal and calculation sheet. First determine whether the two documents clearly identify the same building and scope; separate their stated areas, heights, methods, and values without silently correcting discrepancies. Identify the City criteria, sprinkler design, water-supply model, site plans, and building-by-building records needed to resolve the proposal. Ask follow-up questions and distinguish the water-flow analysis from any OBC alternative-solution decision. Do not claim acceptance or adequacy.
+
+Attachments:
+- ottawa_rosefellow_fire_flow_letter-f4b33de73051.pdf
+- ottawa_rosefellow_fire_flow_assessment-d70e413065ca.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

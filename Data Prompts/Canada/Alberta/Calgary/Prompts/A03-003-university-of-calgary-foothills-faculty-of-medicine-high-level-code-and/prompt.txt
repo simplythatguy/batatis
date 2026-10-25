@@ -1,0 +1,6 @@
+Review the attached 2013 GEC Architecture Faculty of Medicine spatial-planning report as a historical high-level facility and code-review record. Identify which conditions are reported observations or institutional statements and which records the report says were unavailable. Prepare a concise list of current documents and questions needed before assessing any proposed renovation or alternative-solution package, including building-specific occupant/use assumptions, current approved plans and prior code/inspection reports, exits/travel distances, dead ends/lobby egress, fire separations and penetrations, alarms, emergency lighting/power, accessible washrooms, and evacuation mapping. The report is dated and explicitly high-level; do not treat it as a current code analysis or a compliance finding.
+
+Attachments:
+- ucalgary-foothills-faculty-medicine-spatial-master-plan-b9d759df29f9.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

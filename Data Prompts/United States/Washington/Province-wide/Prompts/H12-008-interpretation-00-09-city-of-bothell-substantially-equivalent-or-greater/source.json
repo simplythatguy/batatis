@@ -1,0 +1,76 @@
+{
+  "id": "H12-008",
+  "title": "Interpretation 00-09 (City of Bothell): 'substantially equivalent or greater accessibility' under the UBC alternate-methods section 1101.4 (ADAAG comparisons)",
+  "jurisdiction": "Washington State, requested by City of Bothell (comparative test only; not Alberta)",
+  "code_edition": "1997 UBC, State Regulations for Barrier-Free Facilities, Sections 1101.4, 1106.11.6, 1106.11.7.3.1, 1106.16.3, as cited",
+  "case_type": "regulatory_guidance",
+  "source_url": "https://sbcc.wa.gov/answers-opinions",
+  "document_date": "Not stated in document (interpretation no. 00-09)",
+  "facts": [
+    {
+      "text": "Document type: State Building Code Council interpretation no. 00-09, two pages; requester City of Bothell; five questions.",
+      "locator": "p1 header"
+    },
+    {
+      "text": "Question 1: how 'substantially equivalent or greater accessibility' under the alternate-methods provision (Section 1101.4) is determined where numerical or physical differences result from the state rules and ADAAG.",
+      "locator": "p1 QUESTION 1"
+    },
+    {
+      "text": "Question 2: whether ADAAG Section 4.19.2 lavatory clearances compliance provides equivalent accessibility to Section 1106.11.7.3.1.",
+      "locator": "p1 QUESTION 2"
+    },
+    {
+      "text": "Question 3: whether black stencil international symbol signs on brushed aluminum (ADAAG 4.30.5) are equivalent to the white-on-blue requirement of Section 1106.16.3.",
+      "locator": "p1 QUESTION 3"
+    },
+    {
+      "text": "Question 4: whether urinal screens may extend beyond the front edge of the urinal rim where the clear space between screens is 30 inches or more (ADAAG 4.18.3).",
+      "locator": "p1 QUESTION 4"
+    },
+    {
+      "text": "Question 5: whether sinks in kitchenettes or lounges are subject to Section 1106.",
+      "locator": "p1-p2 QUESTION 5"
+    }
+  ],
+  "limitations": [
+    "The PDF contains the Council answer on the same page; do not present it as applicant-side input without flagging leakage.",
+    "Old edition (1997 UBC barrier-free regulations); comparative only.",
+    "Multi-question record; the answers are advisory.",
+    "The answers cite earlier SBCC interpretations (92-33-1, 92-90) that are not in this download."
+  ],
+  "original_worker_case_type": "issued_variance",
+  "parent_curation_note": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance.",
+  "worker": "H12",
+  "prompt_number": 612,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://sbcc.wa.gov/sites/default/files/2019-12/0009bf.pdf",
+      "sha256": "ec59cd21fc36fb9f1f01a2bb6b1ad60f00c255dafaee1e1d556f4de0adc7b4bc",
+      "role": "outcome_reference",
+      "bytes": 44406,
+      "filename": "sbcc-ruling-00-09-0009bf-ec59cd21fc36.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H12/files/sbcc-ruling-00-09-0009bf-ec59cd21fc36.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:42:25.306897+00:00",
+        "http_status": "200",
+        "final_url": "https://sbcc.wa.gov/sites/default/files/2019-12/0009bf.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "United States",
+    "province_or_state": "Washington",
+    "city_or_town": "Province-wide",
+    "basis": "A Washington State Building Code Council interpretation/opinion gives state-code guidance. Named cities/counties are requesters, not documented project sites.",
+    "locator": "jurisdiction field; p1 header",
+    "scope": "provincewide"
+  }
+}

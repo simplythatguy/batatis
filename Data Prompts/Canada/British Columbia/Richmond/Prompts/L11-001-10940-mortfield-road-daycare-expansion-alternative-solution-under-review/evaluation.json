@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Preliminary general approach appeared acceptable; final AS/permit completion status is unknown.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separate zoning/licensing/code processes",
+    "Identify absent AS and permit evidence",
+    "Do not elevate preliminary review to final acceptance"
+  ],
+  "case_id": "L11-001",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

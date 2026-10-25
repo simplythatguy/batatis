@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Secretary of State determined the work is a material change of use under regulation 5(g); regularisation of the loft conversion cannot be required; the conservatory work needs no regularisation application (p.11).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "classification as a material change of use (regulation 5(g))",
+    "missing records for earlier loft and glazed extension works (regulation 14 queries)",
+    "escape windows, boundary, sound-test and heat-loss requests",
+    "whether regularisation is required for parts of the existing work"
+  ],
+  "case_id": "H15-009",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

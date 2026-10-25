@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from United States (ICC-ES evaluation report under IBC/IRC); NON-ALBERTA COMPARATIVE ONLY: cannot establish Alberta performance, acceptance or equivalence; no Canadian or Alberta approval is claimed or implied. It is not an Alberta application.
+
+Comparative test on a US ICC-ES/APA evaluation of a CLT panel whose holder address and fabrication plant are both in Quebec. Using only the attached report, list the uses by construction type, the IBC and IRC editions it is written against, the conditions on connections, diaphragms and shear walls, and the evidence listed. Then say what, if anything, the Quebec address and plant establish for an Alberta permit, and set out what a reviewer would need from the engineer or the code official.
+
+Attachments:
+- esr-4875-nordic-xlam-clt-34bcca3fb994.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

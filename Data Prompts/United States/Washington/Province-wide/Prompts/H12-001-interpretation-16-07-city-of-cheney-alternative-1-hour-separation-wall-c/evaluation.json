@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Council answer (leakage): 'Yes.' Its tested assembly appears to meet the 1-hour rating of 2015 IRC R302.3 in the configuration shown, and the assembly is tested to ASTM E 119 in that configuration; the code requires the assembly to extend to and be tight against the exterior wall, which the test configuration would satisfy.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "equivalence of an alternative floor-cavity assembly to a prescribed separation (IRC R302.3)",
+    "whether the tested configuration matches the as-built configuration",
+    "continuity to the exterior wall",
+    "missing applicant documentation (the question refers to attached documentation that is not in the record)"
+  ],
+  "case_id": "H12-001",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

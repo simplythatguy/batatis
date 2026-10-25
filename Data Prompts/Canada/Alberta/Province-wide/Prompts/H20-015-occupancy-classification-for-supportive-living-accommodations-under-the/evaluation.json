@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Regulator position: supportive living residences regulated under continuing-care rules may be Group B, Division 3 care or Group C residential, and each regulation has its own context; an assessment by a case manager or health-care professional is required in the placement decision process.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the Safety Codes Act and the continuing-care regulation as sources of the classification",
+    "Asks which care-level evidence the file needs from the placing assessment",
+    "Flags Group B Division 3 versus Group C as the open classification question",
+    "Does not state that a classification is correct"
+  ],
+  "case_id": "H20-015",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

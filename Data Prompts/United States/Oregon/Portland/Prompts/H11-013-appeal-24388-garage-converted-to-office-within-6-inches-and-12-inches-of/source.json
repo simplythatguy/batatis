@@ -1,0 +1,87 @@
+{
+  "id": "H11-013",
+  "title": "Appeal 24388: garage converted to office within 6 inches and 12 inches of two property lines (Table 302, one-hour walls)",
+  "jurisdiction": "City of Portland, Oregon (USA), Bureau of Development Services Administrative Appeal Board; non-Alberta comparative record",
+  "code_edition": "Table 302 (edition not stated)",
+  "case_type": "appeal_decision",
+  "source_url": "https://efiles.portlandoregon.gov/record/15536066/file/document",
+  "document_date": "2020-11-25 (hearing)",
+  "facts": [
+    {
+      "text": "Appeal item: the converted garage is 6 inches from the south property line and 12 inches from the west; the request asks for an alternate to increase the wall to one-hour fire rating.",
+      "locator": "p.1 (APPEAL INFORMATION SHEET)"
+    },
+    {
+      "text": "Proposal: two layers of 5/8-inch gypsum on the interior garage wall up to the roof sheathing.",
+      "locator": "p.1 (APPEAL INFORMATION SHEET, proposed design)"
+    },
+    {
+      "text": "Decision: alternate one-hour assembly for the south and west walls is granted provided Type X on the interior continuous to the top plate, blocking, no openings within 3 feet, a 5/8-inch roof-underside layer, and no built elements or stormwater crossing the line.",
+      "locator": "p.1 (APPEAL DECISION)"
+    }
+  ],
+  "limitations": [
+    "Non-Alberta comparative record: City of Portland, Oregon (USA) Bureau of Development Services Administrative Appeal Board. Local Oregon/Portland code is retained as stated in each record. No Alberta applicability is asserted; the case is used only to test attachment format and content, not Alberta performance.",
+    "Summary lists [File 1] with no link annotation; not retrieved.",
+    "Outcome leakage true: decision on page 1.",
+    "Blocked: PDF lists [File 1] with no link annotation."
+  ],
+  "record_file": {
+    "path": "_research/workers/H11/files/portland-efiles-15536066/portland-efiles-15536066-2fd8f8bfafc5.pdf",
+    "sha256": "2fd8f8bfafc5c884b3aa1a78d94bbf9f90ecbf3c53d646ff218842f027562a9a",
+    "pages": 5,
+    "retrieved_at": "2026-10-25T01:43:14.052377+00:00"
+  },
+  "worker": "H11",
+  "prompt_number": 468,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://efiles.portlandoregon.gov/record/15536066/file/document",
+      "sha256": "2fd8f8bfafc5c884b3aa1a78d94bbf9f90ecbf3c53d646ff218842f027562a9a",
+      "role": "input",
+      "locator_note": "p.1 APPEAL INFORMATION SHEET fields",
+      "bytes": 1352163,
+      "filename": "portland-efiles-15536066-2fd8f8bfafc5.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H11/files/portland-efiles-15536066/portland-efiles-15536066-2fd8f8bfafc5.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:43:14.052377+00:00",
+        "http_status": "200",
+        "final_url": "https://efiles.portlandoregon.gov/record/15536066/file/document",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://efiles.portlandoregon.gov/record/15536066/file/document",
+      "sha256": "2fd8f8bfafc5c884b3aa1a78d94bbf9f90ecbf3c53d646ff218842f027562a9a",
+      "role": "outcome_reference",
+      "locator_note": "p.1-p.2 APPEAL DECISION conditions a-e",
+      "bytes": 1352163,
+      "filename": "_evaluation/portland-efiles-15536066-2fd8f8bfafc5.pdf",
+      "included_in_default_input": false,
+      "original_collection_path": "_research/workers/H11/files/portland-efiles-15536066/portland-efiles-15536066-2fd8f8bfafc5.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:43:14.052377+00:00",
+        "http_status": "200",
+        "final_url": "https://efiles.portlandoregon.gov/record/15536066/file/document",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "United States",
+    "province_or_state": "Oregon",
+    "city_or_town": "Portland",
+    "basis": "The jurisdiction identifies a local Portland, Oregon building-code appeal; this records local source context without deriving a site from a board office address.",
+    "locator": "jurisdiction field",
+    "scope": "local"
+  }
+}

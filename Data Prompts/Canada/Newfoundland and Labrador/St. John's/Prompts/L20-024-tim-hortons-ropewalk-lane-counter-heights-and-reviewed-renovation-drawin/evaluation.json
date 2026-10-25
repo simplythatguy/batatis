@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The summary records the tribunal’s view that the agency’s interpretation was unfair and that previously reviewed drawings and permit issuance mattered; no separate formal order is included in the two-page summary.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "number and function of public counters",
+    "counter-height measurements and drawing scope",
+    "which drawings were actually approved and what permit conditions applied",
+    "treat the final disposition as limited because the publication is summary notes"
+  ],
+  "case_id": "L20-024",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

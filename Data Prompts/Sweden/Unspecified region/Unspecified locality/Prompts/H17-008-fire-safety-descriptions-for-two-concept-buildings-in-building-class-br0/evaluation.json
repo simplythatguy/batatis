@@ -1,0 +1,15 @@
+{
+  "known_outcome": "not applicable. Design study; no applicant, site or authority decision.",
+  "outcome_leakage": false,
+  "review_focus": [
+    "analytical dimensioning requirement for Br0 buildings",
+    "absence of a European CLT fire-design standard, as the report states",
+    "concept buildings versus a real building",
+    "edition references and the table cited as C-7a"
+  ],
+  "case_id": "H17-008",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

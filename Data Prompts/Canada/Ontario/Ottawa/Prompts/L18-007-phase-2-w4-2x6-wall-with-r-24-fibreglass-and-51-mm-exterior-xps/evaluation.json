@@ -1,0 +1,14 @@
+{
+  "known_outcome": "The protocol used a deliberate 3 mm air-barrier slit; the report observed condensation in Phase 2 walls under the defect condition, followed by drying during a later period. No project or permit outcome is reported.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "separate the deliberate-defect protocol from normal construction",
+    "compare actual proposed airtightness and vapour-control details to the tested wall",
+    "obtain project-specific boundary conditions, risks, assumptions and professional evidence"
+  ],
+  "case_id": "L18-007",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

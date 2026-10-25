@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from British Columbia (specific local authority not named in published decision). It is not an Alberta application.
+
+Review the spatial-separation calculation for attached Part 9 townhouses with opaque, unglazed overhead garage doors. Identify which openings and dimensions must be shown, and ask for the exposing-building-face drawings, limiting distances, opening schedule and selected calculation route. Do not count an opening without establishing which Code provision applies.
+
+Attachments:
+- attachment-1-source-text.txt
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

@@ -1,0 +1,17 @@
+{
+  "known_outcome": "unknown in the attachment (no Board decision in the packet; hearing printed as 2026-10-07).",
+  "outcome_leakage": true,
+  "leakage_detail": "No decision in packet, but respondent, Planning and DBI briefs state positions. Treat those positions as evaluator-only.",
+  "review_focus": [
+    "permit description (patio) vs NOV description (room)",
+    "unstamped drawing set vs issued plans",
+    "two-set plan submission required by the NOV",
+    "fire-resistance and exit items listed in the NOV",
+    "legalize vs restore paths and the plans each needs"
+  ],
+  "case_id": "H13-004",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

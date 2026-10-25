@@ -1,0 +1,14 @@
+{
+  "known_outcome": "p.9 §8.1: the three schist cladding systems (Types 1 to 3), as described, will comply with Clauses B1, B2 and E2 if adequately documented for each future building-consent application.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Notes that a general-basis system was not tied to one building or site, and that structure is left to specific engineering",
+    "Identifies the per-type build-up (battens, drainage, membrane, insulation) as points that need documentation",
+    "Shows that any outcome depends on per-application documentation, without endorsing it"
+  ],
+  "case_id": "H05-003",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

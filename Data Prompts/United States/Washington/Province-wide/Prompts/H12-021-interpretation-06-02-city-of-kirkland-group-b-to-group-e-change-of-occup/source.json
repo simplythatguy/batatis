@@ -1,0 +1,63 @@
+{
+  "id": "H12-021",
+  "title": "Interpretation 06-02 (City of Kirkland): Group B to Group E change of occupancy, sprinklers and the meaning of 'newly constructed' (IFC 903.2.2; IBC 3403, 3406)",
+  "jurisdiction": "Washington State, requested by City of Kirkland (comparative test only; not Alberta)",
+  "code_edition": "2003 International Fire Code (903.2.2) and 2003 International Building Code (3403, 3406, 903.2.2), as cited",
+  "case_type": "regulatory_guidance",
+  "source_url": "https://sbcc.wa.gov/answers-opinions",
+  "document_date": "Not stated in document (interpretation no. 06-02)",
+  "facts": [
+    {
+      "text": "Document type: State Building Code Council interpretation no. 06-02, one page; requester City of Kirkland.",
+      "locator": "p1 header"
+    },
+    {
+      "text": "Scenario: an existing Group B occupancy converted to Group E with an occupant load over 50; alterations are also being made under IBC 3403.",
+      "locator": "p1 QUESTIONS 1 and 3"
+    },
+    {
+      "text": "Question 2 asks for the definition of 'newly constructed'; Question 3 asks whether the new Group E occupancy must then conform to 'newly constructed' requirements.",
+      "locator": "p1 QUESTIONS 2-3"
+    }
+  ],
+  "limitations": [
+    "The PDF contains the Council answer on the same page; do not present it as applicant-side input without flagging leakage.",
+    "No building or cost data are in the record; 2003 editions as cited.",
+    "Advisory interpretation; comparative only."
+  ],
+  "original_worker_case_type": "issued_variance",
+  "parent_curation_note": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance.",
+  "worker": "H12",
+  "prompt_number": 625,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://sbcc.wa.gov/sites/default/files/2019-12/0602ifc.pdf",
+      "sha256": "40d25b1e8ea9a11cbf8976d78f3ef54ee77582d84b23836785be13b1071d8513",
+      "role": "outcome_reference",
+      "bytes": 42135,
+      "filename": "sbcc-ruling-06-02-0602ifc-40d25b1e8ea9.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H12/files/sbcc-ruling-06-02-0602ifc-40d25b1e8ea9.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:42:40.215787+00:00",
+        "http_status": "200",
+        "final_url": "https://sbcc.wa.gov/sites/default/files/2019-12/0602ifc.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "United States",
+    "province_or_state": "Washington",
+    "city_or_town": "Province-wide",
+    "basis": "A Washington State Building Code Council interpretation/opinion gives state-code guidance. Named cities/counties are requesters, not documented project sites.",
+    "locator": "jurisdiction field; p1 header",
+    "scope": "provincewide"
+  }
+}

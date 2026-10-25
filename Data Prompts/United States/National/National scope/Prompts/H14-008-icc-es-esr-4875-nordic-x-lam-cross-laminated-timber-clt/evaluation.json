@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Report-stated: ICC-ES/APA evaluation reissued September 2026 (IBC/IRC 2021-2009); walls, floors and roofs by construction type; diaphragm, shear-wall and connection design outside the evaluation.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Quebec holder address and plant are location statements, not approval",
+    "Walls restricted to interior use in Type III (§2.0)",
+    "Diaphragm and shear-wall detailing, and RDP connection design (§5.4, §5.6)"
+  ],
+  "case_id": "H14-008",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

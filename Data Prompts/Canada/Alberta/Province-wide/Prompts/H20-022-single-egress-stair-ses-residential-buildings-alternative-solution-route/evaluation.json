@@ -1,0 +1,16 @@
+{
+  "known_outcome": "Regulator position: an SES building that does not meet the Division B acceptable solutions can comply with NBC(AE) through alternative solutions that achieve at least the Division B minimum performance; alternative-solution applications must be accepted by the AHJ; the building SCO may refuse for incomplete information, incorrect assumptions, unshown intent or unclear or impractical recommendations.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the Division A alternative-solution basis from the variance issuance decision",
+    "Lists the refusal grounds the document gives as file-quality questions",
+    "Asks for the objectives and functional statements the analysis must address",
+    "Flags prescriptive SES requirements as not yet adopted (open)",
+    "Does not say the building is safe or compliant"
+  ],
+  "case_id": "H20-022",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

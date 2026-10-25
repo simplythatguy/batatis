@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Tribunal varied the City order: removed one named individual as a party, reissued it to two numbered companies, moved the compliance date to 1 June 2026, found administrative deficiencies but no basis to revoke (paras 70-72, p.12). It rejected the narrowing of the Annex shingle classes (para 69).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Whether the classification question under the Fire Code via NFPA 13 is flagged as uncertain, without asserting compliance",
+    "Whether administrative defects in an order (party identity, compliance date, timelines) are separated from the substantive classification question",
+    "Whether the variance power under s.52(2) (approximately equivalent or greater safety) is identified as a route, and its limits",
+    "Whether the Fire Code edition is flagged as unstated in the source"
+  ],
+  "case_id": "A15-001",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Calgary / Edmonton",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

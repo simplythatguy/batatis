@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Insufficient reasons: the authority did not give clear reasons under section 50 for its purported refusal of BCO10387092 in relation to the bamboo system; the determination decides the adequacy of the reasons, not the system's compliance. [p.9, para 5.1]",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Product appraisal and alternative-solution evidence for a bamboo cladding system on a cavity",
+    "Whether the authority's reasons identified the performance requirement at issue",
+    "Designer-owner and agent submissions as administrative context"
+  ],
+  "case_id": "H01-009",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

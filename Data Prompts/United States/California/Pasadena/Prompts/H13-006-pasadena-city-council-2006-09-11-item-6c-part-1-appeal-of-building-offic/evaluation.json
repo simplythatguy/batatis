@@ -1,0 +1,17 @@
+{
+  "known_outcome": "Council decision is not in this file (Part 1 of item 6C). The staff report recommends that Council uphold the building official's denial (p.2).",
+  "outcome_leakage": true,
+  "leakage_detail": "Staff recommendation (p.2) and City Attorney memo position are in the attachment. Keep both out of the evaluation prompt.",
+  "review_focus": [
+    "alternate-material pathway (State Historical Building Code) vs local fire-hazard prohibition",
+    "approved plans vs as-built roofing (after-the-fact request)",
+    "fire-hazard mitigation list and the staff finding on sufficiency",
+    "building official's authority to approve a prohibited material (City Attorney position)",
+    "what the attachment set does and does not contain"
+  ],
+  "case_id": "H13-006",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

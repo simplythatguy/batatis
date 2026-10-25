@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The authority's refusal to issue a code compliance certificate for the building work under consent R418374 was correct, and the Chief Executive confirmed that decision (decision, p.22).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "what was built on the re-used slab and foundations",
+    "plywood bracing and cladding evidence",
+    "historical consent records and as-built evidence",
+    "administrative gaps for a retrospective code compliance certificate"
+  ],
+  "case_id": "H04-018",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

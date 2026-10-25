@@ -1,0 +1,14 @@
+{
+  "known_outcome": "p.10 §5.1: the authority was correct to refuse the Schedule 1(k) exemption for the proposed greenhouse, and that decision is confirmed.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the exemption-criteria question from Building Code compliance",
+    "Records footings and rainwater discharge as work the file mentions, without assessing them",
+    "Treats intermittent occupancy and farm-gate sale as recorded facts, not findings"
+  ],
+  "case_id": "H05-006",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

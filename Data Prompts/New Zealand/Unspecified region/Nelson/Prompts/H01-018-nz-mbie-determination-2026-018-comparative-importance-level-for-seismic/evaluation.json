@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Confirmed: the building is Importance Level 2 under AS/NZS 1170.0 and the authority's decision to grant BC250300 is confirmed. [p.7, para 4.1]",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Importance level assignment and its effect on structural design requirements",
+    "Consequence-of-failure facts used to set the level",
+    "Whether the strengthening design route and verification method are stated in the consent"
+  ],
+  "case_id": "H01-018",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

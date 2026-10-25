@@ -1,0 +1,16 @@
+{
+  "known_outcome": "Determination (19 June 2023, s 188): the level-threshold showers constructed without inbuilt seating or handrails do not comply with clause G1.3.4 and so do not comply to the extent required by the Act (p.10 §6.1). Reasoning: a removable seat relies on management practice, which cannot establish compliance (p.9-10 §4.23-4.24, citing Determination 2011/112); the level threshold alone does not meet G1.3.4 (p.10 §4.25); movable shower chairs may be added in addition to the required fixtures (p.10 §4.26).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Whether the answer identifies G1.3.4 as the performance test and treats the alternative-solution route as a performance argument, not a clause exemption.",
+    "Whether it flags that management practices such as removable furniture were not accepted as building features.",
+    "Whether it notes the consent plans' accessible-shower annotation and asks for the accessibility report.",
+    "Whether it asks about ODI or disability-agency consultation for resubmission.",
+    "Whether it avoids stating that the showers comply."
+  ],
+  "case_id": "H02-005",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

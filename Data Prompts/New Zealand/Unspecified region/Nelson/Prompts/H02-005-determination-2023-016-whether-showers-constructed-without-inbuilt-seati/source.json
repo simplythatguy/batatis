@@ -1,0 +1,83 @@
+{
+  "id": "H02-005",
+  "title": "Determination 2023-016: Whether showers constructed without inbuilt seating or handrails comply with clause G1.3.4 of the Building Code",
+  "jurisdiction": "New Zealand: Nelson City Council as building consent authority; MBIE determination under the Building Act 2004. Non-Alberta comparative record.",
+  "code_edition": "NZ Building Code (Schedule 1, Building Regulations 1992). G1/AS1 Amendment 6 (issued 10 October 2011) is cited for the sanitary-fixture table (p.9 fn 13). The building consent was issued in June 2017 (p.3 §2.1).",
+  "case_type": "appeal_decision",
+  "source_url": "https://codehub.building.govt.nz/resources/2023016",
+  "document_date": "19 June 2023",
+  "facts": [
+    {
+      "text": "The internal fit-out of a wellness centre in Nelson included float rooms with a toilet, a level-threshold shower and a float pod. The showers in these rooms are the only showers available to the public.",
+      "locator": "p.3 §2.3"
+    },
+    {
+      "text": "Building consent BC170335 for the fit-out was issued in June 2017, and an amendment was issued in November 2017.",
+      "locator": "p.3 §2.1"
+    },
+    {
+      "text": "The approved plans annotated one float room shower fitted off as accessible unit. The accessibility report said one shower would be fitted with seat and grab rails.",
+      "locator": "p.3 §2.2"
+    },
+    {
+      "text": "In May 2021 the authority listed the outstanding items for a code compliance certificate, including the fixtures for the accessible bathroom.",
+      "locator": "p.3 §2.4"
+    },
+    {
+      "text": "In place of the inbuilt fold-down seat and handrail shown in the consent, the lessee proposed a removable shower seat designed for people needing support. The authority refused it in place of the fixed features.",
+      "locator": "p.3 §2.5"
+    },
+    {
+      "text": "Clause G1.3.4 reads: personal hygiene facilities provided for people with disabilities shall be accessible. The matter is determined under section 177(1)(a) and the Office for Disability Issues was consulted under section 170.",
+      "locator": "p.2 §1.3-1.5"
+    },
+    {
+      "text": "The lessee's submission: removable shower seats are found in almost every care facility and benefit clients, and the lessee disputes the outstanding requirement.",
+      "locator": "p.3 §3.2"
+    },
+    {
+      "text": "The lessee proposed, as an alternative solution, a removable shower seat that could be moved between rooms.",
+      "locator": "p.9 §4.20"
+    }
+  ],
+  "limitations": [
+    "Regulator determination on an accessibility fixtures dispute. The lessee made no formal submission to the determination and its position is taken from correspondence.",
+    "The determination is about one wellness-centre fit-out. It is not a general ruling on movable fixtures.",
+    "The decision (p.10 §6.1) is in the same PDF as the facts. Outcome leakage is true unless redacted.",
+    "Owner and tenant names and the street address are left out of the prompt.",
+    "Applies to the New Zealand Building Code only. No Alberta applicability is asserted."
+  ],
+  "worker": "H02",
+  "prompt_number": 381,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2023/2023-016.pdf",
+      "sha256": "aa789414a16031e802ddb7f9d13690f0dafad09040403b9c207b2def39f3cd40",
+      "role": "input",
+      "bytes": 317987,
+      "filename": "mbie-det-2023-016-aa789414a160.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H02/files/mbie-det-2023-016-aa789414a160.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:42:38.118843+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2023/2023-016.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Nelson",
+    "basis": "The facts place the wellness centre in Nelson; no separate region is documented.",
+    "locator": "p.3 §2.3",
+    "scope": "project"
+  }
+}

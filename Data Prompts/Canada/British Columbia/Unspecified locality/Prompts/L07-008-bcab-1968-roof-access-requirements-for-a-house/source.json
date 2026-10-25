@@ -1,0 +1,85 @@
+{
+  "id": "L07-008",
+  "title": "BCAB 1968 - Roof access requirements for a house",
+  "jurisdiction": "British Columbia",
+  "code_edition": "BCBC 2018",
+  "case_type": "appeal_decision",
+  "source_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1968",
+  "document_date": "2025-05-29",
+  "facts": [
+    {
+      "text": "The project is the design and construction of a new, sprinklered, house containing a single dwelling unit on a steeply sloping site. The house has a nominally flat roof and is four storeys in building height based on the level of the finished ground adjoining the building at the bottom of the site. However, the finished ground adjoining the building at the top of the site, along the location where the required fire department access route is located, is only one storey below the roof level. The configuration is generally as illustrated below:",
+      "locator": "Project description, paragraph 1"
+    },
+    {
+      "text": "Roof access from the floor area is required because the building exceeds three storeys in building height.",
+      "locator": "Decision being appealed / local authority position, paragraph 1"
+    },
+    {
+      "text": "Fire department access is from the high side and so the fire department approach is, effectively, to a one-storey building. The building is fully sprinklered. A roof hatch and ladder will serve no purpose and will not assist fire fighters. Internal roof access should not be required.",
+      "locator": "Appellant position, paragraph 1"
+    }
+  ],
+  "limitations": [
+    "The public Board decision is an appeal record, not the original application package.",
+    "The published decision refers to supporting drawings or evidence in some cases, but the complete original application and attachments are not publicly linked from the decision page.",
+    "Published Board outcome appears in the input attachment; outcome leakage is intentional and flagged.",
+    "Where a figure is attached, the decision page does not consistently identify its author; Board-created figures are distinguished in the research report, and no image is treated as a complete applicant drawing set.",
+    "British Columbia decision retained for comparative attachment format/content only; it does not establish Alberta code applicability, design performance, or acceptance."
+  ],
+  "worker": "L07",
+  "prompt_number": 499,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1968",
+      "sha256": "46cf42ba9e57f43ea0d6dc966bce9d7e5daccc9b13b83be04e5a6dd574a09116",
+      "role": "input",
+      "bytes": 1353734,
+      "filename": "bcab-1968-46cf42ba9e57.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-1968-46cf42ba9e57.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:47:30.051147+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1968",
+        "content_type": "text/html; charset=utf-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-1-source-text.txt",
+        "sha256": "c735ef5c063f458e4f020fdb196e93729f39b50c8989a1cef83256f3ffa58a74",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    },
+    {
+      "url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/construction-industry/building-codes-and-standards/building-code-appeal-board/bcab1968.jpg",
+      "sha256": "ef39be1a4bc82ab436ac7ccbdf35d4180f96b5e37a5aad4576fded409ad8fe1e",
+      "role": "supporting_evidence",
+      "bytes": 38053,
+      "filename": "bcab-1968-bcab1968-ef39be1a4bc8.jpg",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-1968-bcab1968-ef39be1a4bc8.jpg",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:48:19.073957+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/construction-industry/building-codes-and-standards/building-code-appeal-board/bcab1968.jpg",
+        "content_type": "image/jpeg; charset=UTF-8",
+        "kind": "image",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "British Columbia",
+    "city_or_town": "Unspecified locality",
+    "basis": "British Columbia appeal describes a project without naming its municipality; the provincial appeal-board location is not the project location.",
+    "locator": "jurisdiction field",
+    "scope": "undisclosed"
+  }
+}

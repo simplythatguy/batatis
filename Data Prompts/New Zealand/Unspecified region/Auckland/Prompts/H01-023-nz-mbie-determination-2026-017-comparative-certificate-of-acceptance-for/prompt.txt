@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from New Zealand (Building Act 2004); Auckland Council; comparative only, not Alberta. It is not an Alberta application.
+
+This is a New Zealand regulator document about a certificate of acceptance for a retrofitted shower room, where later reports dispute the waterproofing, waste-pipe, and ventilation details. Using only the attached PDF, identify the wet-area and ventilation provisions it treats as uncertain, list the reports, photos, and warranties it relies on, flag missing or unclear administrative items (including what the authority relied on when it issued the certificate), and list the next questions a reviewer should ask. Do not say whether the room complies or is safe, and do not apply Alberta or NBC(AE) rules.
+
+Attachments:
+- mbie-det-2026-017-2a46577a450a.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

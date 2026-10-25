@@ -1,0 +1,69 @@
+{
+  "id": "L12-002",
+  "title": "Toronto laneway-suite fire-access generic alternatives (City technical study summary)",
+  "jurisdiction": "Toronto, Ontario, Canada",
+  "code_edition": "2012 Ontario Building Code (edition context stated in the City report); underlying project code edition not applicable",
+  "case_type": "documented_design_study",
+  "source_url": "https://secure.toronto.ca/council/agenda-item.do?item=2020.PH16.10",
+  "document_date": "2020-09-08",
+  "facts": [
+    {
+      "text": "Toronto Building and Toronto Fire Services commissioned fire-protection engineering review of ways to address laneway-suite access routes longer than 45 m.",
+      "locator": "City report, PDF p. 7"
+    },
+    {
+      "text": "The report records a consultant proposal to allow a route up to 90 m when the apparatus is within 45 m of a hydrant, subject to additional fire-safety measures.",
+      "locator": "City report, PDF p. 7"
+    },
+    {
+      "text": "Two described options use either automatic sprinklers with an exterior strobe, or passive exposure/fire-protection measures with an exterior strobe; the report describes examples and conditions rather than a site-specific permit design.",
+      "locator": "City report, PDF pp. 7-8"
+    },
+    {
+      "text": "The report says the Chief Building Official and Fire Chief agreed that the consultant proposals should form the basis of a generic alternative solution; a public guide was still being developed at that report date.",
+      "locator": "City report, PDF p. 8"
+    },
+    {
+      "text": "Toronto Fire Services is reported to have reduced its clear-path width requirement from 1.0 m to 0.9 m and to allow limited existing protrusions.",
+      "locator": "City report, PDF p. 8"
+    }
+  ],
+  "limitations": [
+    "The 10-page City staff report summarizes consultant recommendations; the underlying fire-engineering report and example project drawings are not attached.",
+    "The report describes work in progress as of September 2020; later implementation status is not established by this attachment.",
+    "The attachment exposes the study recommendation; no individual approval is available."
+  ],
+  "worker": "L12",
+  "prompt_number": 289,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.toronto.ca/legdocs/mmis/2020/ph/bgrd/backgroundfile-156421.pdf",
+      "sha256": "532a8189c28c9737719b83324ae278f05abc5a7ec3729ddbab4b2bad1ec19773",
+      "role": "input",
+      "bytes": 118310,
+      "filename": "laneway_fire_access_report-532a8189c28c.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L12/files/laneway_fire_access_report-532a8189c28c.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:27.535151+00:00",
+        "http_status": "200",
+        "final_url": "https://www.toronto.ca/legdocs/mmis/2020/ph/bgrd/backgroundfile-156421.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Ontario",
+    "city_or_town": "Toronto",
+    "basis": "Published municipal guidance is explicitly for Toronto, Ontario; no single project site is claimed.",
+    "locator": "City report, PDF p. 7",
+    "scope": "local"
+  }
+}

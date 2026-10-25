@@ -1,0 +1,81 @@
+{
+  "id": "L13-006",
+  "title": "Alliance Française Vancouver",
+  "jurisdiction": "Vancouver, British Columbia",
+  "code_edition": "2019 Vancouver Building By-law, as in force at the time of the building permit application",
+  "case_type": "documented_design_study",
+  "source_url": "https://www.naturallywood.com/resources/alliance-francaise-design-and-alternative-solutions/",
+  "document_date": "Unknown; project approval is stated as December 17, 2021, with completion Summer 2024",
+  "facts": [
+    {
+      "text": "The case study identifies a four-storey, 2,760 m² Group A-2 assembly building in Vancouver under the 2019 VBBL.",
+      "locator": "Alternative Solutions case study, PDF p.6"
+    },
+    {
+      "text": "It describes an AL-1 set of alternative-solution proposals submitted in February 2021, revised seven times, with the final revision submitted October 7, 2021 and approval stated as December 17, 2021.",
+      "locator": "Alternative Solutions case study, PDF p.9"
+    },
+    {
+      "text": "The companion design-features case study includes project floor plans, sections and structural details.",
+      "locator": "Design Features case study, PDF pp.11, 14-15"
+    },
+    {
+      "text": "The case study discusses char analysis, fire suppression, fire-retardant finish, and atrium closure as design subjects.",
+      "locator": "Alternative Solutions case study, PDF pp.10-13"
+    }
+  ],
+  "limitations": [
+    "The reports are published case studies, not the signed AL-1 application or permit drawings.",
+    "The by-law and code context is historical and must not be applied to current projects without separate verification."
+  ],
+  "worker": "L13",
+  "prompt_number": 298,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.naturallywood.com/wp-content/uploads/Alliance-francaise-case-study-2-alternative-solutions.pdf",
+      "sha256": "6a15ee567b9879a2dc7cb29a5d9cc7a74fb766a767a97cd694d5641d1c627a5a",
+      "role": "input",
+      "bytes": 1524699,
+      "filename": "alliance-francaise-alternative-solutions-6a15ee567b98.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L13/files/alliance-francaise-alternative-solutions-6a15ee567b98.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:18:14.654321+00:00",
+        "http_status": "200",
+        "final_url": "https://www.naturallywood.com/wp-content/uploads/Alliance-francaise-case-study-2-alternative-solutions.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://www.naturallywood.com/wp-content/uploads/Alliance-francaise-case-study-1-design-features.pdf",
+      "sha256": "1e9719e384a27d6815d0c63db507d02aa72646b0724fb70d2248e7764e369b4e",
+      "role": "supporting_evidence",
+      "bytes": 7552139,
+      "filename": "alliance-francaise-design-features-1e9719e384a2.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L13/files/alliance-francaise-design-features-1e9719e384a2.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:18:14.653101+00:00",
+        "http_status": "200",
+        "final_url": "https://www.naturallywood.com/wp-content/uploads/Alliance-francaise-case-study-1-design-features.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "British Columbia",
+    "city_or_town": "Vancouver",
+    "basis": "The source jurisdiction identifies Vancouver, British Columbia for the named project, proposal or appeal; this describes source geography.",
+    "locator": "Alternative Solutions case study, PDF p.6",
+    "scope": "project"
+  }
+}

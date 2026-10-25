@@ -1,0 +1,10 @@
+{
+  "known_outcome": "The report records flashover at 6.4 min and burnout/self-extinguishment at 150 min, with data collection ended at 167 min.",
+  "outcome_leakage": true,
+  "review_focus": "baseline fire load, room geometry, encapsulation and instrumentation",
+  "case_id": "L17-012",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

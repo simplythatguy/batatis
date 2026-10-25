@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The reference accepts CAN/ULC-S531-certified smoke alarms using wireless interconnection as an alternative to the cited ABC wired-interconnection requirement, subject to its stated scope.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "dwelling and secondary-suite scope",
+    "CAN/ULC-S531 certification",
+    "interconnection cause/effect",
+    "permanent power and backup evidence"
+  ],
+  "case_id": "L03-012",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

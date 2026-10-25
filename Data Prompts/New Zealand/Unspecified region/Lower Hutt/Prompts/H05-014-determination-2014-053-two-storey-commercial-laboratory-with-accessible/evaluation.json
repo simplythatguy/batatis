@@ -1,0 +1,14 @@
+{
+  "known_outcome": "p.8 §6.1: the proposed building without a lift to the upper floor does not comply with Clause D1 to the extent required by the Act.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the stairs-instead-of-lift design from the accessibility-report evidence",
+    "Records that the Ministry did not see the application itself as a documentary gap",
+    "Treats tenant and Office for Disability Issues involvement as context, not compliance"
+  ],
+  "case_id": "H05-014",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

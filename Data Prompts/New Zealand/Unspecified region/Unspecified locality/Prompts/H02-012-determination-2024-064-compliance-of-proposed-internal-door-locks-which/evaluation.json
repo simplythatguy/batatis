@@ -1,0 +1,16 @@
+{
+  "known_outcome": "Determination (20 Nov 2024, s 188, §6.1, p.10): there is insufficient information to establish compliance with C4 of the proposed alteration to the means of escape from fire by adding internal door locks. Reasoning: the classified use is communal residential (§4.11, p.7); C4.3(a) and C4.5 are the applicable performance criteria (p.7); the locks cannot be assessed on their own and need an alternative-solution demonstration of the building's overall means of escape (§4.16, p.8); there is insufficient evidence to determine compliance (§4.25, p.9).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Whether the answer identifies C4.2 and C4.5 and treats the A1 classified-use question as the threshold.",
+    "Whether it notes that a design guide was used as the framework and what alternative-solution evidence was missing.",
+    "Whether it asks for lock-type, resident-capability and fire-engineer scope evidence.",
+    "Whether it treats the decision as insufficient information, not a finding that the locks fail.",
+    "Whether it does not say the locks comply."
+  ],
+  "case_id": "H02-012",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Council answer (leakage): no. Adult family homes are within the R101.2 scope and do not need one of those exceptions; Washington has a separate section, R330, for adult family homes, and sprinklers would appear there if they were intended.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "scope exception classification",
+    "the special section (R330) as the controlling requirement",
+    "source of any sprinkler requirement",
+    "evidence needed for occupancy type"
+  ],
+  "case_id": "H12-020",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,86 @@
+{
+  "id": "H16-006",
+  "title": "Epsom (Guild Living Epsom): fire strategy covering letter for a fire-engineered later-living development (planning inquiry)",
+  "jurisdiction": "England, UK (Epsom and Ewell, Surrey), filed in the council's planning inquiry 'additional information' folder. COMPARATIVE NON-ALBERTA RECORD; no Alberta applicability asserted.",
+  "code_edition": "Building Regulations 2010 (as amended). BS 9991:2015; BS 9999:2017; HTM 05-02:2015; BS 7974:2019. Approved Document B (2019, incorporating 2020 amendments) stated as the latest guidance followed.",
+  "case_type": "actual_application",
+  "source_url": "https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/Epsom_hospital_inquiry/Additional_info/Hoare%20Lea%20-%20Note%20on%20Fire%20Strategy%20-%2024%20August%202021%28656771119_1%29.pdf",
+  "document_date": "24 August 2021",
+  "facts": [
+    {
+      "text": "One-page letter from a fire engineering consultancy (Hoare Lea) to Guild Living, headed 'Re: GUILD LIVING EPSOM - FIRE STRATEGY', reference LET-1920260-2A-CR-20210824-GL.",
+      "locator": "p.1"
+    },
+    {
+      "text": "The development 'provides a variety of later living residences and on-site facilities'. The fire strategy is 'designed to comply with the functional requirements of the Building Regulations 2010 (As Amended) as this is a fire engineered building'.",
+      "locator": "p.1"
+    },
+    {
+      "text": "Guidance followed: BS 9991:2015, BS 9999:2017, HTM 05-02:2015 and BS 7974:2019. Where those are superseded by Approved Document B (2019, incorporating 2020 amendments, including external walls and residential sprinklers), 'the latest guidance has been followed'.",
+      "locator": "p.1"
+    },
+    {
+      "text": "'The evacuation strategy outlined in the fire strategy will be supported by the management plan which will be produced by the building operators and conditioned as necessary.'",
+      "locator": "p.1"
+    },
+    {
+      "text": "The letter attaches no drawings or calculations. Its reference 'LET-1920260' matches the project number 19/20260 on the Stage 2 draft report, which is a separate file in this set (H16-007).",
+      "locator": "p.1 reference line; H16-007 p.2"
+    }
+  ],
+  "limitations": [
+    "Comparative UK record only; not Alberta evidence.",
+    "A covering letter, not the fire strategy itself. The letter does not state which application it supports; the file sits in an Epsom and Ewell inquiry folder.",
+    "The appeal decision is attached as an outcome reference only; do not give it to a model under test."
+  ],
+  "worker": "H16",
+  "prompt_number": 259,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/Epsom_hospital_inquiry/Additional_info/Hoare%20Lea%20-%20Note%20on%20Fire%20Strategy%20-%2024%20August%202021%28656771119_1%29.pdf",
+      "sha256": "f95fefa61a98d99e18c33e950fa0ba289937cb4bf0ff6366bbe95cdb14897730",
+      "role": "input",
+      "bytes": 426245,
+      "filename": "epsom-hoare-lea-note-on-fire-strategy-2021-f95fefa61a98.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H16/files/epsom-hoare-lea-note-on-fire-strategy-2021-f95fefa61a98.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:48:15.251223+00:00",
+        "http_status": "200",
+        "final_url": "https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/Epsom_hospital_inquiry/Additional_info/Hoare%20Lea%20-%20Note%20on%20Fire%20Strategy%20-%2024%20August%202021%28656771119_1%29.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://insight.epsom-ewell.gov.uk/assets/1/appeal_decisions_3272074_and_3276483.pdf",
+      "sha256": "f2f680ecda22b66954414278c71cf4fb6e0893ff0252896065706d7e40b135eb",
+      "role": "outcome_reference",
+      "bytes": 405237,
+      "filename": "_evaluation/epsom-planning-inspectorate-appeal-decisions-3272074-3276483-f2f680ecda22.pdf",
+      "included_in_default_input": false,
+      "original_collection_path": "_research/workers/H16/files/epsom-planning-inspectorate-appeal-decisions-3272074-3276483-f2f680ecda22.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:53:15.522401+00:00",
+        "http_status": "200",
+        "final_url": "https://insight.epsom-ewell.gov.uk/assets/1/appeal_decisions_3272074_and_3276483.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "United Kingdom",
+    "province_or_state": "England",
+    "city_or_town": "Epsom",
+    "basis": "The project is explicitly Guild Living Epsom, with Epsom and Ewell, Surrey stated in the jurisdiction.",
+    "locator": "p.1; jurisdiction field",
+    "scope": "project"
+  }
+}

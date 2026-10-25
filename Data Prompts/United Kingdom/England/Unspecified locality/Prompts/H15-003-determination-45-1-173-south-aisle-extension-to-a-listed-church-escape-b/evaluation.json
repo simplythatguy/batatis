@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Secretary of State determined the proposals comply with Requirement B1 (1991 regulations, as amended), accepting the fire exit door on the east elevation as a satisfactory alternative escape route (p.4 para 17).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Requirement B1 means of escape with an alternative exit on one elevation",
+    "occupancy profile and fire-risk assumptions",
+    "listed-building constraints on alterations",
+    "scope limit: only B1 was determined"
+  ],
+  "case_id": "H15-003",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,7 @@
+Here is a consultant's profile of a 1954 Edmonton school modernization at 11712 - 130 Avenue (attached). Using only this document, list the building-code questions a reviewer would need to answer for an existing school with mixed structural systems, occupied-school phasing, and the fire-resistance and accessibility matters the profile raises. Separate what the profile states from what it leaves open: the code edition, the specific provisions relied on, the authority having jurisdiction, permit or inspection records, and any alternative-solution or equivalency argument. Then list the missing administrative evidence and the next questions for the design team. Do not say whether the work complies or is safe.
+
+Attachments:
+- rjc-st-edmund-school-modernization-profile-2020-912b0893ace0.pdf
+- attachment-2-source-text.txt
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

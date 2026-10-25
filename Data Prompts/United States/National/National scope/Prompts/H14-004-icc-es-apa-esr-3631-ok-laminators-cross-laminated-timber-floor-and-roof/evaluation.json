@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Report-stated: ICC-ES/APA evaluation reissued October 2025 (IBC/IRC 2018-2009) for floor and roof components with a dry-service limit; connections, cutting and diaphragm design excluded. The printed renewal month (September 2026) had passed by retrieval; current status not verified.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Floor and roof scope only (§2.0); wall use not stated",
+    "Connections and diaphragm design excluded (§5.4-5.7)",
+    "Renewal month passed at retrieval",
+    "Okanagan Falls, BC plant is a location statement only"
+  ],
+  "case_id": "H14-004",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Order VARIED (p.1); the cessation direction is replaced by a sequence of engineer letters, feasibility determination and permits (pp.1-2).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "change of occupancy of an existing building",
+    "structural and environmental pre-conditions before reoccupancy",
+    "fire ratings at property lines and egress from windows",
+    "permit sequencing for a change of use"
+  ],
+  "case_id": "A10-005",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

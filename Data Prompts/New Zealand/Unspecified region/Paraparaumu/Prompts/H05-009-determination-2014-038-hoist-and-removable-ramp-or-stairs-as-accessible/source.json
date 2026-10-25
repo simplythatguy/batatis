@@ -1,0 +1,67 @@
+{
+  "id": "H05-009",
+  "title": "Determination 2014/038: hoist and removable ramp or stairs as accessible route to the main pool, Coastlands Aquatic Centre, Paraparaumu",
+  "jurisdiction": "New Zealand (MBIE determination under the Building Act 2004); comparative test only, not Alberta; NZ code references retained as written",
+  "code_edition": "Building Code Clause D1 (Schedule 1 of the Building Regulations 1992) with Building Act section 118, as cited",
+  "case_type": "appeal_decision",
+  "source_url": "https://www.building.govt.nz/resolving-problems/resolution-options/determinations",
+  "document_date": "8 September 2014 (header date)",
+  "facts": [
+    {
+      "text": "Kāpiti Coast District Council is the owner (applicant, through the Aquatic Facilities Manager) and also the building consent authority for the new Coastlands Aquatic Centre pool.",
+      "locator": "p.1 §1.2"
+    },
+    {
+      "text": "The matters are whether the hoist as installed to the main pool is sufficient by itself for Clause D1 under section 118, and whether the hoist with a removable ramp, or with removable stairs, complies with Clause D1.",
+      "locator": "p.2 §1.6"
+    },
+    {
+      "text": "The determination does not consider the stairs or ramp as constructed, other than as providing an accessible route into the pool.",
+      "locator": "p.2 §1.7"
+    },
+    {
+      "text": "REACT and WPPDT made a joint application for a second determination on the access provision (the consent-and-amendments matter is 2014/040 in this set).",
+      "locator": "p.2 §1.8"
+    }
+  ],
+  "limitations": [
+    "Decision begins on p.16 §7.1; mask p.16 for blind use.",
+    "One image object; no drawings verified visually."
+  ],
+  "worker": "H05",
+  "prompt_number": 433,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2014/2014-038.pdf",
+      "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2014/2014-038.pdf",
+      "retrieved_at": "2026-10-25T01:44:33.719101+00:00",
+      "sha256": "82fe8809778b3907bded20a7d9e56e970b413528af49fdde6c352d4229cc00ae",
+      "bytes": 313008,
+      "pages": 22,
+      "role": "input",
+      "filename": "mbie-determination-2014-038-82fe8809778b.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H05/files/mbie-determination-2014-038-82fe8809778b.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:44:33.719101+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2014/2014-038.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Paraparaumu",
+    "basis": "The project title explicitly identifies the Coastlands Aquatic Centre in Paraparaumu.",
+    "locator": "source title; p.1 §1.2",
+    "scope": "project"
+  }
+}

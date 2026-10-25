@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Determination: consented design complied with E3; as-built roof did not comply with the consent or E3; CCC decision reversed (21 June 2021).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "as-built deviation from consent on an insulated roof",
+    "moisture risk under E3 (internal moisture)",
+    "reliance on guidance versus the acceptable solution",
+    "specialist report evidence and its limits"
+  ],
+  "case_id": "H03-008",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

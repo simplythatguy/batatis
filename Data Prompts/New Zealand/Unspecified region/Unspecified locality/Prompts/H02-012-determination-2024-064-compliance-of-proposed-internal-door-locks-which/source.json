@@ -1,0 +1,78 @@
+{
+  "id": "H02-012",
+  "title": "Determination 2024/064: Compliance of proposed internal door locks which alter the building's means of escape from fire (residential housing facility)",
+  "jurisdiction": "New Zealand: Tasman District Council as territorial authority; MBIE determination under the Building Act 2004. Non-Alberta comparative record.",
+  "code_edition": "NZ Building Code (Schedule 1, Building Regulations 1992), clauses C4 and A1. The Fire Safety Residential Community Housing Design Guide (RCHDG, MBIE, April 2018) is cited as the framework for an alternative solution.",
+  "case_type": "appeal_decision",
+  "source_url": "https://codehub.building.govt.nz/resources/2024064",
+  "document_date": "20 November 2024",
+  "facts": [
+    {
+      "text": "The building is a standalone two-storey former house, built in 1970, with seven bedrooms, a study and an open-plan living, dining and kitchen area.",
+      "locator": "p.3 §2.1"
+    },
+    {
+      "text": "The building houses up to four young people aged 16-18, with mixed genders, who receive care and assistance for mental health, addiction and wellbeing. Limited day-only support is given to former residents.",
+      "locator": "p.3 §2.2"
+    },
+    {
+      "text": "Staff are on site 24/7. At least two daytime staff and one night staff member are present. Residents can come and go, including to school, training or work.",
+      "locator": "p.3 §2.3-2.4"
+    },
+    {
+      "text": "The property owner and the lessee propose to install bedroom door locks at the facility. The matter is whether this alteration to the means of escape from fire complies with C4 Movement to a place of safety, with the classified use under A1 considered.",
+      "locator": "p.2 §1.4-1.6"
+    },
+    {
+      "text": "The property owner's submission: the locks comply with the intent of C4.2. The locks are simple apparatus, or a key from the outside, and all residents are physically able and have the cognitive ability to manage them.",
+      "locator": "p.4 §3.1.1-3.1.3"
+    },
+    {
+      "text": "The fire engineer's report used the Fire Safety Residential Community Housing Design Guide (RCHDG, MBIE 2018) as the framework for the alternative solution.",
+      "locator": "p.4 fn 3; p.8 §4.19"
+    },
+    {
+      "text": "The RCHDG is guidance for preparing an alternative solution. The report gave no evidence on the locking devices.",
+      "locator": "p.8 §4.20-4.21"
+    }
+  ],
+  "limitations": [
+    "The decision is about insufficient information. It is not a finding of non-compliance by the locks.",
+    "The resident description is generalised from the record. Names and the street address are omitted.",
+    "The RCHDG itself is cited, not attached. It is a MBIE guide and was not downloaded in this pass.",
+    "Applies to the New Zealand Building Code only. No Alberta applicability is asserted."
+  ],
+  "worker": "H02",
+  "prompt_number": 388,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2024/2024-064.pdf",
+      "sha256": "dfdb42518cefe31e073744d503ecbab0f37e320896be72b76364c1bc65323f0d",
+      "role": "input",
+      "bytes": 300643,
+      "filename": "mbie-det-2024-064-dfdb42518cef.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H02/files/mbie-det-2024-064-dfdb42518cef.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:51:19.337952+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2024/2024-064.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Unspecified locality",
+    "basis": "Only Tasman District Council is named; no project town or separate region is documented.",
+    "locator": "jurisdiction field",
+    "scope": "undisclosed"
+  }
+}

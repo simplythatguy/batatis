@@ -1,0 +1,7 @@
+Using the attached manufacturer product page, installation guide and CCMC registry export, prepare a product-evidence inventory for a possible Alberta alternative-solution submission. Identify the exact BTRboard variant(s), distinguish manufacturer statements/instructions from independent evaluation evidence, and state which code edition or evaluation scope is documented. List missing product-specific evaluations, test reports, assembly conditions, installation records and project/AHJ facts; ask the next questions. Do not invent applicant/site/dimensions/installed conditions and do not claim compliance, safety or equivalence.
+
+Attachments:
+- attachment-1-source-text.txt
+- attachment-2-source-text.txt
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

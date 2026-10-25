@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Unknown. The City study describes future-use scenarios and reports an existing sprinkler condition, but no applicant alternative-solution submission, decision, permit, or occupancy record is attached.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "separate reported conditions from verified/current evidence and proposed scenarios",
+    "identify missing latest approved drawings, occupancy/use, accessibility and fire-protection records",
+    "request evidence for the claimed elevator and sprinkler conditions",
+    "avoid treating this planning package as a code approval"
+  ],
+  "case_id": "A03-002",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Calgary / Edmonton",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

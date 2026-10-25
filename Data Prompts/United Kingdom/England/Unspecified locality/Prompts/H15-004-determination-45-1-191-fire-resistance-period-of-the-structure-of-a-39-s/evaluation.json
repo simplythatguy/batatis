@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Secretary of State concluded and determined the proposals do not comply with Requirement B3 (internal fire spread, structure) of the Building Regulations 1991 (as amended) (p.7).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Requirement B3 structural fire resistance for a very tall building",
+    "safety of persons in and about the building",
+    "evidence basis for the fire-resistance period (not reproduced in the excerpts)",
+    "middle pages not summarised in this record"
+  ],
+  "case_id": "H15-004",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from New Zealand: Auckland Council as building consent authority; MBIE determination under the Building Act 2004. Non-Alberta comparative record.. It is not an Alberta application.
+
+We want to clad a building in Auckland with direct-fixed plywood. Our designer plans to show compliance with the external moisture requirement by citing a BRANZ appraisal, and the appraisal covers a limited risk-score range. The designer and the council also disagree about how the roof-to-wall flashings are classified. Attached is the determination record for this cladding question. Using only that record, please: (1) identify the clause and evidence route it treats as applicable; (2) say what the appraisal's scope requires us to show about the design; (3) list the points where the designer and the council disagree; (4) list the information missing from our file; and (5) list the questions we should put to the council. Please do not say whether the cladding complies.
+
+Attachments:
+- mbie-det-2023-027-07e347bf52bf.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

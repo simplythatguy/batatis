@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from Montréal, Québec. It is not an Alberta application.
+
+Using the attached Arbora case study and later fire-event report as historical evidence, identify the stated code context, occupancy/building facts that are actually documented, and the unanswered questions about exposed timber, fire-load comparison, fire separations and supporting tests. List the project-specific documents, drawings, calculations, assumptions and authority records needed for an administrative-completeness review. Separate a case-study narrative and later incident report from an applicant's technical submission; do not infer compliance or certify safety.
+
+Attachments:
+- arbora-case-study-en-d461fabc01f9.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

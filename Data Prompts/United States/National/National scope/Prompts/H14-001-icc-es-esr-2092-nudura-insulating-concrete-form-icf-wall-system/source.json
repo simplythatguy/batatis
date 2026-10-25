@@ -1,0 +1,83 @@
+{
+  "id": "H14-001",
+  "title": "ICC-ES ESR-2092: Nudura insulating concrete form (ICF) wall system",
+  "jurisdiction": "United States (ICC-ES evaluation report under IBC/IRC); NON-ALBERTA COMPARATIVE ONLY: cannot establish Alberta performance, acceptance or equivalence; no Canadian or Alberta approval is claimed or implied",
+  "code_edition": "2024, 2021, 2018, 2015 and 2012 IBC and IRC (report §1.1, p1); 2025 CALGreen (§1.2, p1)",
+  "case_type": "product_evidence",
+  "source_url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-2092.pdf",
+  "document_date": "Reissued November 2025; supplements revised September 2026; continuous compliance through November 2026 (p1)",
+  "facts": [
+    {
+      "text": "Report holder shown as TREMCO CPG INC.; evaluation subject is the Nudura Insulating Concrete Form (ICF) System.",
+      "locator": "p1 cover"
+    },
+    {
+      "text": "Forms are stay-in-place formwork for load-bearing and non-load-bearing, below- and above-grade walls; they may be used in fire-resistance-rated construction provided installation follows §4.4, in Type V construction, and in Types I-IV (noncombustible) construction under §4.5.",
+      "locator": "§2.0, p1"
+    },
+    {
+      "text": "ICFs must be manufactured, identified and installed per the report and Nudura's published installation instructions; the report governs a conflict.",
+      "locator": "§5.1, p6"
+    },
+    {
+      "text": "Calculations for the §4.1.1 design must be submitted when the code official requires them, and must be prepared by a registered design professional where the jurisdiction's statutes require.",
+      "locator": "§5.7, p6"
+    },
+    {
+      "text": "Calculations for IRC Sections R404.1.3.3.6 and R608.5.3 must be submitted when the code official requires them.",
+      "locator": "§5.8, p6"
+    },
+    {
+      "text": "Ultimate shear values in Table 2 from ASTM E2126 testing 'are not intended for use as design values'; applicability is for the registered design professional, subject to building official approval.",
+      "locator": "§5.10, p7"
+    },
+    {
+      "text": "Forms are produced in Columbus, Georgia, USA, and Granby, Quebec, Canada, under quality control (manufacturing-location statement only).",
+      "locator": "§5.13, p7"
+    },
+    {
+      "text": "Evidence listed: AC353 (24), published April 2025, and cyclic shear wall testing per ASTM E2126.",
+      "locator": "§6.1-6.2, p7"
+    }
+  ],
+  "limitations": [
+    "Non-Alberta comparative attachment; the report does not reference NBC(AE) 2023 and is not evidence of Alberta or Canadian acceptance.",
+    "Retrieved 2026-10-25 from the official ICC-ES report URL; current ICC-ES status was not checked live. source_url is the report PDF, not a separate listing page.",
+    "Text from pypdf extraction; figures, tables and signatures not transcribed; locators are PDF page numbers, not printed page numbers.",
+    "ICC-ES copyright; retained locally for comparison only, redistribution not licensed.",
+    "Continuous compliance is printed through November 2026 (p1); the current status was not checked live."
+  ],
+  "worker": "H14",
+  "prompt_number": 628,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-2092.pdf",
+      "sha256": "3fccf4ebb48111513de64d23c385f4b8ef5bd9df685f47d50df7525d30abe258",
+      "role": "input",
+      "bytes": 2277802,
+      "filename": "esr-2092-nudura-icf-3fccf4ebb481.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H14/files/esr-2092/esr-2092-nudura-icf-3fccf4ebb481.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:21:00.985055+00:00",
+        "http_status": "200",
+        "final_url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-2092.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "United States",
+    "province_or_state": "National",
+    "city_or_town": "National scope",
+    "basis": "The jurisdiction identifies a US ICC-ES product assessment under IBC/IRC. Report-holder and manufacturing locations do not locate a project.",
+    "locator": "jurisdiction field",
+    "scope": "national"
+  }
+}

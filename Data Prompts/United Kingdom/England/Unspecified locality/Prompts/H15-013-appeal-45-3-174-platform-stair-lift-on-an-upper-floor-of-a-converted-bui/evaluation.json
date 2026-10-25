@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Secretary of State dismissed the appeal; relaxing the escape requirement was neither necessary nor appropriate (p.4).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Requirement B1 means of escape with a stair lift in a multi-storey older building",
+    "disability-access alternatives (relocation to the lower level)",
+    "existing passenger and goods lift arrangements",
+    "DDA context noted by the council"
+  ],
+  "case_id": "H15-013",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,7 @@
+Roof-mounted HVAC equipment in a building needs access, and the question is what the access provisions require when gas components are involved. The attached STANDATA bulletin (23-BCB-008/25-GCB-002) is my only source. Using only that document, identify the access provisions and CSA B149.1 references it discusses, the edition caveat it states, the reason it gives for the guidance, and what the file needs next. Do not invent roof details or equipment, and do not state the access arrangement complies.
+
+Attachments:
+- ma-standata-bulletin-joint-23bcb008-25gcb002-2026-06-3786f4f875a0.pdf
+- ma-notice-second-printing-available-2023-alberta-edition-building-fire-code-77c571d8b6e7.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

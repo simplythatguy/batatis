@@ -1,0 +1,6 @@
+An existing elevating device is being altered, and someone asks what firefighters' emergency operation requirements apply to a building that legally existed before May 2024. The attached STANDATA interpretation (19-EDI-013/23-BCI-038) is my only source. Using only that document, identify the existing-building provisions it cites, the alteration requirements it describes, the variance or timeline option it mentions, and the evidence and questions the file needs. Do not invent building details, elevator specifications or dates beyond the document, and do not state the design complies.
+
+Attachments:
+- ma-standata-interpretation-elevating-devices-building-19-edi-013-23-bci-038-2025-04-dafee9bb6f9e.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

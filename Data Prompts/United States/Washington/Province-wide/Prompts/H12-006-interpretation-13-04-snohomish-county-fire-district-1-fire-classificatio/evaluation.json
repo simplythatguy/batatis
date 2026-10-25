@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Council answer (leakage): yes. The answer says the section may be amended to read 'same or greater fire classification' as the roof assembly, so a rooftop PV system may not be rated below the roof.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "fire classification of an added system relative to the roof assembly",
+    "whether a code text change is needed to express the intent",
+    "fire-classification documentation for the PV product"
+  ],
+  "case_id": "H12-006",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

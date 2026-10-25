@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Report-stated: ICC-ES evaluation reissued March 2026 (IBC/IRC/IECC 2021-2012) for insulation boards; exterior walls of Types I-IV and structural loads outside scope (§5.2, §5.4).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Types I-IV exterior-wall use outside scope (§5.2)",
+    "Structural load resistance outside scope (§5.4)",
+    "Canadian plant locations are location statements only (§5.9)"
+  ],
+  "case_id": "H14-019",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

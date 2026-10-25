@@ -1,0 +1,16 @@
+{
+  "known_outcome": "The City published SPV-003 revisions 2 and 3, with Revision 3 accepted by CSTIC on 2025-02-12; no individual application or permit decision is present.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Do not treat revisions as separate applicant cases.",
+    "Notice the expressly stated 2019 edition in Revision 2 and missing year in Revision 3.",
+    "Compare the scope clauses and identify project facts that are not supplied.",
+    "Preserve permit reference/address conditions and listed minimum distance.",
+    "Use the municipal transition advisory only as edition context, not as proof of current SPV applicability."
+  ],
+  "case_id": "L04-003",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Calgary / Edmonton",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

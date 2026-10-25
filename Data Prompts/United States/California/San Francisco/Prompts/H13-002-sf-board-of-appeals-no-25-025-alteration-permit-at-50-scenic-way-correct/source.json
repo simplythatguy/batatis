@@ -1,0 +1,105 @@
+{
+  "id": "H13-002",
+  "title": "SF Board of Appeals No. 25-025: alteration permit at 50 Scenic Way correcting an NOV; granted on a condition",
+  "jurisdiction": "City and County of San Francisco, California (comparative, non-Alberta)",
+  "code_edition": "unknown if unstated in packet text; permit-set cover sheet (image) appears to list 2022 California codes; low-resolution read, verify before use",
+  "case_type": "actual_application",
+  "source_url": "https://www.sfgov.org/boa",
+  "document_date": "2025-07-08 notice of appeal (permit issued 2025-07-01); Board action 2025-08-27 per minutes",
+  "comparative_scope": "non-Alberta comparative only",
+  "alberta_applicability": "none",
+  "facts": [
+    {
+      "text": "Notice of appeal: DBI issuance on 2025-07-01 of an Alteration Permit (correction to NOV No. 202536052: exterior deck scope; repair part of NW corner low wall; remove existing non-fire-rated lattice on top of exterior low wall; new rainwater leader/scupper) at 50 Scenic Way; application 2025/05/29/7531; hearing 2025-08-27.",
+      "locator": "packet p.1; minutes p.2"
+    },
+    {
+      "text": "Permit scope text repeats 'REMOVE (E) NON-FIRE RATED LATTICE ON TOP OF EXTERIOR LOW WALL' and lists Occupancy Code R-3.",
+      "locator": "packet p.4"
+    },
+    {
+      "text": "Appellant says the permit 'completely disregards item number 2' of the NOV, which the appellant says concerns damage the owner was shown (appellant's claim).",
+      "locator": "packet p.3"
+    },
+    {
+      "text": "Image-only permit-set cover sheet A0.0 for 50 Scenic Way, with a demolition key note for the lattice on the exterior low wall and a received stamp that appears dated 2025-05-29 (low-resolution read).",
+      "locator": "packet pp.23 and 27 (rendered)"
+    },
+    {
+      "text": "Board minutes 2025-08-27, Item (6): 'the Board voted 4-0 to grant the appeal and issue the permit on the condition it be revised to require that Item No. 2 of Notice of Violation No. 202536052 is addressed, more specifically repair the damaged garage level wall below the deck.'",
+      "locator": "minutes p.2 (attachment 2)"
+    },
+    {
+      "text": "The minutes record the basis for the motion: the revision 'will be Code compliant and meet the full requirements of the Notice of Violation that was issued.'",
+      "locator": "minutes p.3"
+    },
+    {
+      "text": "Permit holder brief and appellant brief are included.",
+      "locator": "packet p.6 (appellant); p.16 (permit holder)"
+    }
+  ],
+  "limitations": [
+    "Cover-sheet text and stamp dates were read from low-resolution renders; confirm before use.",
+    "Packet is 27 pages with 2 image-only pages.",
+    "Outcome comes from minutes that cover other appeals; those were not analyzed.",
+    "Comparative, non-Alberta only."
+  ],
+  "worker": "H13",
+  "prompt_number": 251,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://media.api.sf.gov/documents/Item_6_Appeal_No._25-025__50_Scenic_Way.pdf",
+      "final_url": "https://media.api.sf.gov/documents/Item_6_Appeal_No._25-025__50_Scenic_Way.pdf",
+      "retrieved_at": "2026-10-25T01:53:51.799118+00:00",
+      "http_status": "200",
+      "content_type": "application/pdf",
+      "sha256": "33c1acd53be040b7065c5ac5d9e75fd085956c3fe5ddff25fb0384386f2500a5",
+      "bytes": 6062234,
+      "role": "input",
+      "filename": "sf-boa-item6-appeal-25-025-50-scenic-way-33c1acd53be0.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H13/files/sf-boa/sf-boa-item6-appeal-25-025-50-scenic-way-33c1acd53be0.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:53:51.799118+00:00",
+        "http_status": "200",
+        "final_url": "https://media.api.sf.gov/documents/Item_6_Appeal_No._25-025__50_Scenic_Way.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://media.api.sf.gov/documents/Board_Minutes_for_8_27_25_adopted.pdf",
+      "final_url": "https://media.api.sf.gov/documents/Board_Minutes_for_8_27_25_adopted.pdf",
+      "retrieved_at": "2026-10-25T01:54:10.689872+00:00",
+      "http_status": "200",
+      "content_type": "application/pdf",
+      "sha256": "0ba46e84bb24b9be71e3dc281dd0f2954f0b396303ab66d8ffb74e6c6802d811",
+      "bytes": 117242,
+      "role": "outcome_reference",
+      "filename": "_evaluation/sf-boa-minutes-2025-08-27-adopted-0ba46e84bb24.pdf",
+      "included_in_default_input": false,
+      "original_collection_path": "_research/workers/H13/files/sf-boa/sf-boa-minutes-2025-08-27-adopted-0ba46e84bb24.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:54:10.689872+00:00",
+        "http_status": "200",
+        "final_url": "https://media.api.sf.gov/documents/Board_Minutes_for_8_27_25_adopted.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "United States",
+    "province_or_state": "California",
+    "city_or_town": "San Francisco",
+    "basis": "The jurisdiction and case title identify a San Francisco building-permit appeal; the project address is stated in the title.",
+    "locator": "jurisdiction field; source title",
+    "scope": "project"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "known_outcome": "Appeal upheld: the amended decision notice dated 17 Jun 2003 was set aside and a new decision by the building certifier was required (p. 2). Decision dated 8 Aug 2003 (p. 5).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Identifies the substitution of a fire-rated wall (Specification C1.1) with a sprinkler-based proposal as the performance question.",
+    "Flags that an alternative solution must cover all relevant BCA performance requirements, not only the one substituted.",
+    "Lists the certificate of classification and the special fire service as administrative items.",
+    "Treats BCA Amendment 12 as cited and dated (2003), and does not apply it to any other jurisdiction.",
+    "Makes no compliance statement."
+  ],
+  "case_id": "H09-008",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

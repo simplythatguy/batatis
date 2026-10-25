@@ -1,0 +1,7 @@
+Use the attached Calgary SPV-004 and current ventilation advisory as published references. Identify the 2019 code edition and cited clauses, the ASHRAE version condition, and the exact professional statements and permit references the SPV requires. Flag the edition/scope difference with the later advisory and what facts are missing before an officer can assess whether either reference relates to a particular permit; ask next questions. Do not infer a proposed occupancy, select a standard, or certify design adequacy.
+
+Attachments:
+- calgary-advisory-b23-011-ventilation-5a8db97c34d4.pdf
+- calgary-advisory-b23-001-transition-fdd0652b975c.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

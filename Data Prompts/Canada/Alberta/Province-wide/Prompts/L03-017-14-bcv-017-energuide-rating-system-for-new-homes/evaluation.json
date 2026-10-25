@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The reference recognizes ERS v15 subject to its house-type and modeling conditions, a stated 5% annual energy-savings threshold, and listed documentation before occupancy.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "eligible house type",
+    "ERS version and reference case",
+    "energy savings calculation assumptions/exclusions",
+    "drawings, HOT2000 report, blower door and label/HOIS"
+  ],
+  "case_id": "L03-017",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

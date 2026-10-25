@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from New Zealand (Building Act 2004); Christchurch City Council; comparative only, not Alberta. It is not an Alberta application.
+
+This is a New Zealand regulator document about two proposed multi-unit buildings, where the fire-spread design of the external walls is in question under the acceptable solution for external fire spread. Using only the attached PDF, identify the provisions it treats as uncertain, the drawings and site information it relies on, any administrative evidence that is missing or unclear, and the next questions a reviewer should ask. Do not say whether the design complies or is safe, and do not apply Alberta or NBC(AE) rules.
+
+Attachments:
+- mbie-det-2025-002-5357479762c9.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The Commission found that the proposed combustible-component wall system did not provide sufficiency of compliance for the ten-storey building under the cited sentence.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "wall assembly scope and height limit",
+    "test report and thermal barrier evidence",
+    "separating party argument from verified report",
+    "outcome leakage"
+  ],
+  "case_id": "L10-009",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

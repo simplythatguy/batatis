@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The Commission found the proposed closures, treatments, and outlined exit path did not provide sufficiency of compliance with the cited acceptable solutions.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "whole-building classification and construction type",
+    "adjacent openings and fire separation evidence",
+    "as-built conditions versus proposed measures",
+    "outcome leakage"
+  ],
+  "case_id": "L10-010",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

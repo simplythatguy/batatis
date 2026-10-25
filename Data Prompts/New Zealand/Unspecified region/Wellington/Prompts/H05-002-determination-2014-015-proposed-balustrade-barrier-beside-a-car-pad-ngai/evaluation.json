@@ -1,0 +1,14 @@
+{
+  "known_outcome": "p.7 §5.1: the proposed barrier with balusters at 275 mm spacing does not comply with Clause F4.3.4(g).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the proposed baluster spacing from the open design choice the file describes",
+    "Notes the children's-passage purpose and the fall heights as context, not as findings",
+    "Does not assert any spacing as compliant"
+  ],
+  "case_id": "H05-002",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

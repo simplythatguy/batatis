@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Does not comply: the as-built horizontal rusticated cedar weatherboards with the double-nail fixing pattern do not comply with clause B2.3.2(b), in respect of E2.3.2, for the minimum required durability period in the areas identified. [p.13, para 5.1]",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Durability period and fixing pattern for as-built cedar weatherboards under B2 and E2",
+    "Manufacturer scope statement and whether the variation was approved within the system",
+    "Inspection and producer evidence available for as-built fixings"
+  ],
+  "case_id": "H01-020",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

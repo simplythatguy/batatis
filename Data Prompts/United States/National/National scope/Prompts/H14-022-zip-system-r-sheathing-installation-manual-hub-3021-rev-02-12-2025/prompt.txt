@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from Manufacturer installation manual (US-origin; IRC/IBC references); NON-ALBERTA COMPARATIVE ONLY: cannot establish Alberta performance, acceptance or equivalence; no Canadian or Alberta approval is claimed or implied. It is not an Alberta application.
+
+Comparative test on a manufacturer's installation manual for insulated sheathing that is also a water-resistive barrier. Using only the attached manual, list the code references it makes and the editions named in its tables, the limits it sets on cladding, roofs and exposure time, the fire-rated assemblies it lists and what they depend on, and every document it refers to that is not attached. Then say which statements a reviewer would need to check against the report or listing itself, and what the manual cannot establish for an Alberta permit.
+
+Attachments:
+- huber-zip-r-sheathing-installation-manual-9fa20fe0bc0e.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

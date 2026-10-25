@@ -1,0 +1,6 @@
+Treat the attached order as an appeal record of a proposed special-event use. Identify the stated occupancy/use, code discipline, referenced variance submission and professional evidence. List the code edition, acceptable-solution benchmark, objective/function mapping, operational conditions, event scope and supporting calculations a reviewer would need. Keep the Building Code and Fire Code paths distinct and do not conclude the proposal is safe or equivalent.
+
+Attachments:
+- scc_2025_bridgeland_distillery_fire_variance-1de210f46791.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

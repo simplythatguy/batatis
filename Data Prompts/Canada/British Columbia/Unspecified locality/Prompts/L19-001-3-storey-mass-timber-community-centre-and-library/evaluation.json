@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The guide says the example demonstrated performance at least equivalent to the Division B solution. It contains no application identifier or AHJ decision, so that statement is only the guide's worked-example conclusion.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Distinguish the guide's conclusion from an authority decision",
+    "Identify the stated code edition and the missing project jurisdiction/AHJ",
+    "Identify absent project drawings and underlying fire-safety records",
+    "Keep known facts separate from required follow-up"
+  ],
+  "case_id": "L19-001",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

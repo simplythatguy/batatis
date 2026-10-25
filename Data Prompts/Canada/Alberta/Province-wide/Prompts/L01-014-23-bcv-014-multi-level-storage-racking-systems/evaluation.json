@@ -1,0 +1,17 @@
+{
+  "known_outcome": "A published regulator-issued STANDATA sets out a province-wide variance and its stated conditions; it is not an outcome for any applicant-specific project.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "special/unusual structure scope",
+    "permitted occupancy and access",
+    "Fire Safety Plan submission",
+    "structural/fire protection evidence",
+    "egress calculations and records",
+    "professional review"
+  ],
+  "case_id": "L01-014",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

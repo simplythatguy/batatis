@@ -1,0 +1,6 @@
+I'm assessing whether shipping containers could be used for material storage on an Alberta permit file. The attached STANDATA interpretation (23-BCI-001/23-FCI-001) is my only source. Using only that document, identify the code route it places the question on, what it says the authority may ask for, what it raises about the contents and location of the container, the administrative evidence the file would still need, and what I should ask the authority having jurisdiction next. Do not invent a site, container count, dimensions or owner, and do not say whether any arrangement complies or is safe.
+
+Attachments:
+- ma-standata-interpretation-building-fire-23-bci-001-23-fci-001-2024-04-9c127b7b3989.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

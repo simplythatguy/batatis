@@ -1,0 +1,94 @@
+{
+  "id": "H15-015",
+  "title": "First-tier Tribunal LON/00AG/BUM/2025/0001: appeal against a Building Safety Regulator decision on a regularisation certificate for works near a public sewer",
+  "jurisdiction": "England (UK): Secretary of State determination / appeal / tribunal under the Building Act 1984 and Building Regulations; comparative test only, not Alberta",
+  "code_edition": "Building Regulations 2010 (as amended): Requirements A1/A2 (structure), H1 and H4 (drainage, building over sewers); regulation 18A and s.18A(5)",
+  "case_type": "appeal_decision",
+  "source_url": "https://assets.publishing.service.gov.uk/media/69382f647a605b2d61cd8f8a/251128_30_Burstock_Road_Decision_CORRECTED.docx",
+  "document_date": "2025-12-02",
+  "facts": [
+    {
+      "text": "The case is an appeal against a Building Safety Regulator decision under section 18A(5) of the Building Regulations 2010 about a regularisation certificate.",
+      "locator": "cover page; decision section (docx text line 40)"
+    },
+    {
+      "text": "The decision of 2 December 2025 is corrected under the slip rule on 9 December 2025.",
+      "locator": "cover page (docx text line 35)"
+    },
+    {
+      "text": "The works include a side extension, loft conversion and refurbishment project.",
+      "locator": "docx text line 89"
+    },
+    {
+      "text": "The local authority's decision recorded that the works did not comply with standards A1, H1 and H4.",
+      "locator": "docx text line 160"
+    },
+    {
+      "text": "The reasons recorded in the decision state that the foundations are close to the public sewer with their underside above the sewer invert, and that drainage details (bedding, backfill, proximity to the pipe) are insufficient.",
+      "locator": "docx text lines 178-179"
+    },
+    {
+      "text": "The Building Safety Regulator's summary of outcome: appeal upheld in respect of requirement A2 and refused in respect of requirements H1 and H4.",
+      "locator": "docx text line 204"
+    },
+    {
+      "text": "The Thames Water build-over agreement provided relates only to proximity to the public sewer and does not confirm compliance with building regulations, according to the reasons summary.",
+      "locator": "docx text lines 196-198"
+    },
+    {
+      "text": "The tribunal records that the regulator's best evidence was that it was 'not sure' whether H1 and H4 were complied with, and that there is no finding that there is a breach of those standards.",
+      "locator": "docx text line 506"
+    },
+    {
+      "text": "Decision: the regulator's decision of 14 August 2025 is varied; the appeal from the local authority's decision of 21 June 2025 is upheld; the decision is varied to grant the required regularisation certificate.",
+      "locator": "docx decision section, text lines 36-40"
+    }
+  ],
+  "limitations": [
+    "Record type: tribunal decision on an appeal against a Building Safety Regulator decision; case_type mapped to appeal_decision as the nearest schema value.",
+    "Comparative test only: England (UK); Building Regulations 2010 (as amended): Requirements A1/A2 (structure), H1 and H4 (drainage, building over sewers); regulation 18A and s.18A(5). Not an Alberta record; no applicability to NBC(AE) or Alberta is asserted.",
+    "Attachment is the original public file; gov.uk live asset (HTTP 200). Live URL status is recorded in references and blocked.",
+    "outcome_leakage true: the decision is inside this attachment (decision section (docx text lines 36-40) and reasons); use only earlier pages as input if a leak-free variant is required.",
+    "Personal names and contact details appear in the original attachment and are omitted from this record.",
+    "Original is a Word .docx (not a PDF). Text was extracted from word/document.xml with the standard library; locators are approximate text-line numbers, not page numbers."
+  ],
+  "worker": "H15",
+  "prompt_number": 490,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://assets.publishing.service.gov.uk/media/69382f647a605b2d61cd8f8a/251128_30_Burstock_Road_Decision_CORRECTED.docx",
+      "sha256": "2805ac03b10db5b1d64a8515aa44f9943ef0911ef0e6245b044816251addeb08",
+      "role": "input",
+      "retrieved_via": "gov.uk live asset (HTTP 200)",
+      "bytes": 150093,
+      "filename": "30-burstock-road-2025-2805ac03b10d.docx",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H15/files/tribunal/30-burstock-road-2025/30-burstock-road-2025-2805ac03b10d.docx",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:58:55.912966+00:00",
+        "http_status": "200",
+        "final_url": "https://assets.publishing.service.gov.uk/media/69382f647a605b2d61cd8f8a/251128_30_Burstock_Road_Decision_CORRECTED.docx",
+        "content_type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "kind": "zip_container",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-1-source-text.txt",
+        "sha256": "65a03d66ccaa8e8cfa4512401996d8415b86af05f07b6733edb2d9964c5f97fa",
+        "operation": "DOCX body/footnote/endnote paragraph text extraction; layout and list numbering not reproduced; original retained"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "United Kingdom",
+    "province_or_state": "England",
+    "city_or_town": "Unspecified locality",
+    "basis": "The jurisdiction establishes England, but the recorded case facts and evaluation do not identify a project locality; no place is inferred from tribunal codes, offices or service providers.",
+    "locator": "jurisdiction field; source facts",
+    "scope": "undisclosed"
+  }
+}

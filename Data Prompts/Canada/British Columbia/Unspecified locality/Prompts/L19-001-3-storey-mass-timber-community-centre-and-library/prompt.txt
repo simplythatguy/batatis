@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from British Columbia code context; project location and AHJ are not stated. It is not an Alberta application.
+
+Review the attached published short-form example. Extract the deviation, the code provision and edition actually stated, and the rationale the guide reports. Separate those statements from facts the source leaves unstated. List the project-specific administrative information and records an SCO would still need for a real submission, including the project location and AHJ, permit drawings, the applicable local code edition, and the referenced fire-safety materials. Ask concise follow-up questions. Do not infer an approval, Alberta applicability, technical correctness, or safety.
+
+Attachments:
+- CWC-Alternative-Solutions-Guide-2025-38b185cc7923.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

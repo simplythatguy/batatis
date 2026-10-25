@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The board denied the exemption.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "actual use and occupancy classification",
+    "door/parking requirements and the submitted drawings",
+    "evidence supporting impracticality, inappropriateness, hardship, or an equivalent proposal",
+    "keep privacy/public-access assertions distinct from supporting design evidence"
+  ],
+  "case_id": "L20-015",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

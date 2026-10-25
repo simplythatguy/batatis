@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from New Zealand (Building Act 2004); Auckland Council; comparative only, not Alberta. It is not an Alberta application.
+
+This is a New Zealand regulator document about converting one level of an existing multi-storey building from office use to a residential apartment, with fire-safety and consultation questions. Using only the attached PDF, identify the fire-safety and change-of-use provisions it treats as uncertain, list the reports and consultations it relies on, flag missing or unclear administrative items, and list the next questions a reviewer should ask. Do not say whether the conversion complies or is safe, and do not apply Alberta or NBC(AE) rules.
+
+Attachments:
+- mbie-det-2025-005-5f197a5b37b4.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

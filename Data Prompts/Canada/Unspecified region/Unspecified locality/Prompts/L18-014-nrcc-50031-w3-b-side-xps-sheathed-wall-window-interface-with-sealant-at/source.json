@@ -1,0 +1,61 @@
+{
+  "id": "L18-014",
+  "title": "NRCC-50031 W3 B-side — XPS-sheathed wall-window interface with sealant at the flange",
+  "jurisdiction": "NRC full-scale laboratory wall-window experiment; test location not stated in the article’s selected pages (no permit jurisdiction)",
+  "code_edition": "Unknown; the article discusses CSA A440 window ratings but states no project code edition.",
+  "case_type": "documented_design_study",
+  "source_url": "https://nrc-publications.canada.ca/eng/view/object/?id=c966d7b0-b7f3-46d4-8f9e-30e116a2b853",
+  "document_date": "2009-10-01 (journal issue; NRC cover says February 2010)",
+  "facts": [
+    {
+      "text": "The experiment used one 2.44 m x 2.44 m wood-frame specimen with two identical fixed PVC flange windows, 25 mm XPS sheathing and hardboard siding installed directly over XPS without furring.",
+      "locator": "PDF pp. 10–11; report Fig. 1 and Table 1"
+    },
+    {
+      "text": "The B-side applies non-hardening sealant behind the fixed window flange at the head and jambs; it also uses a sloped sill pan and self-adhered flashing.",
+      "locator": "PDF pp. 10–13; report Table 1 and Figs. 3–4"
+    },
+    {
+      "text": "The protocol simulated wind-driven rain and measured water collected at the sloped sill/rough opening and behind the cladding; deficiencies were deliberately introduced in test stages.",
+      "locator": "PDF pp. 8–10; report test-protocol description"
+    }
+  ],
+  "limitations": [
+    "Two candidate cases share a single report and specimen; B-side and V-side are comparison details, not independent project files."
+  ],
+  "worker": "L18",
+  "prompt_number": 169,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://nrc-publications.canada.ca/eng/view/accepted/?id=c966d7b0-b7f3-46d4-8f9e-30e116a2b853",
+      "sha256": "2b75300845b0d8415ab4e72d587cc19f96ccd8e3c6e33eb397d849f93e38f4bf",
+      "role": "input",
+      "bytes": 1226049,
+      "filename": "wall-window-water-management-2b75300845b0.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L18/files/wall-window-water-management-2b75300845b0.pdf",
+      "reuse_status": "rights_review_required",
+      "rights_source": "https://nrc-publications.canada.ca/eng/copyright/",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:20:28.956353+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc-publications.canada.ca/eng/view/accepted/?id=c966d7b0-b7f3-46d4-8f9e-30e116a2b853",
+        "content_type": "application/pdf;charset=UTF-8",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "rights_review_required",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Unspecified locality",
+    "basis": "Canadian NRC experimental specimens have no stated test-site locality in the saved metadata; publisher address is not used as experimental geography.",
+    "locator": "jurisdiction field",
+    "scope": "research"
+  }
+}

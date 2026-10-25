@@ -1,0 +1,17 @@
+{
+  "known_outcome": "Appeal decision of 13 Sept 2021 (separate attachment, outcome_reference): fire safety considered appropriately at planning stage subject to a Fire Safety Management Plan condition (decision p.24, para 124). The report itself records no decision.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "HTM 05-02 departures and their compensation (stair and evacuation lift per compartment)",
+    "assisted and progressive horizontal evacuation for dependency categories",
+    "report status 'not suitable for Building Regulations submission'",
+    "car stacker, childcare and ancillary design deferred",
+    "appendices listed but sparse in the file",
+    "editions stated: BS 9991:2015, BS 9999:2017, HTM 05-02 (2015)"
+  ],
+  "case_id": "H16-007",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

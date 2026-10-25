@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The active CCMC L-series record reports standard compliance to CAN/ULC-S717.1:2017 based solely on a recognized certification, and points to certificate B1061-2. It does not publish a project-specific NBC code opinion.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "obtain the referenced current certification and exact product variant",
+    "wall geometry, concrete, reinforcement and connections",
+    "proposed occupancy/building scope, code edition and fire-protection details",
+    "project-specific design responsibility and evidence"
+  ],
+  "case_id": "L16-004",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

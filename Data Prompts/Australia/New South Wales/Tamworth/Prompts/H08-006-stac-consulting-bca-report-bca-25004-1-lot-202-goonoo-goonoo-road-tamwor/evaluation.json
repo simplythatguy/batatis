@@ -1,0 +1,15 @@
+{
+  "known_outcome": "unknown (no decision retrieved; DA landing page not located)",
+  "outcome_leakage": false,
+  "review_focus": [
+    "separation of DtS compliance, performance solutions and fire-engineer-required items",
+    "limitations and exclusions and what they hand to the certifier",
+    "drawing reference currency (revision and date)",
+    "no compliance certification"
+  ],
+  "case_id": "H08-006",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

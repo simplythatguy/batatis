@@ -1,0 +1,14 @@
+{
+  "known_outcome": "p.22 §7.1–7.2: the authority was correct to refuse consent for the original façade system on Clause C3; the modified system as described will comply with Clause C3 except for fire stopping at each floor level.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the original and modified systems and the reasons given for each",
+    "Treats the NFPA 285 test and the extension opinion as evidence with limited scope, not as proof for this building",
+    "Identifies the fire stopping at floor levels as an open item the file names"
+  ],
+  "case_id": "H05-019",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

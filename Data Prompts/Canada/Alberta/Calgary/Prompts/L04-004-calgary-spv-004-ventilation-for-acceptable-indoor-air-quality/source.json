@@ -1,0 +1,104 @@
+{
+  "id": "L04-004",
+  "title": "Calgary SPV-004 Ventilation for Acceptable Indoor Air Quality",
+  "jurisdiction": "City of Calgary, Alberta",
+  "code_edition": "National Building Code – Alberta Edition 2019",
+  "case_type": "issued_variance",
+  "source_url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/ventilation-for-acceptable-indoor-air-quality.pdf",
+  "document_date": "2020-02-25",
+  "facts": [
+    {
+      "text": "SPV-004 is dated February 25, 2020 and names NBC(AE) 2019 Division B Sentence 1.3.1.2(1), and Article 6.2.1.1 on good engineering practice.",
+      "locator": "SPV-004, PDF p.1"
+    },
+    {
+      "text": "The subject is ANSI/ASHRAE 62-2001, except addendum n; the variance permits more recent versions of that referenced standard under its stated criteria.",
+      "locator": "SPV-004, PDF pp.1–2"
+    },
+    {
+      "text": "The Engineer of Record must review, sign and seal mechanical drawings; identify in writing the proposed ASHRAE 62 version and state ventilation rates are sufficient for intended occupancy; and state the selected standard will be used in full for the entire project scope.",
+      "locator": "SPV-004, PDF p.2"
+    },
+    {
+      "text": "The document requires SPV-004 references in permit documents and permit conditions, and says it applies to the building-permit address.",
+      "locator": "SPV-004, PDF p.2"
+    },
+    {
+      "text": "Calgary's 2025 ventilation advisory addresses smoking rooms under NBC(AE) 2023 and identifies a different standard version and specific scope; it is not the text of SPV-004.",
+      "locator": "B23-011, PDF pp.1–2"
+    }
+  ],
+  "limitations": [
+    "The City current standing-variance table does not list SPV-004, although its official direct URL remains downloadable.",
+    "Current posting and applicability are not established; the Calgary page says posted documents may be removed.",
+    "B23-011 is a separate 2025 advisory and has a different stated scope; it is context, not an update to SPV-004.",
+    "This is an issued reference, not an individual application or professional mechanical design."
+  ],
+  "worker": "L04",
+  "prompt_number": 22,
+  "priority_tier": 1,
+  "priority": "Calgary / Edmonton",
+  "attachments": [
+    {
+      "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/ventilation-for-acceptable-indoor-air-quality.pdf",
+      "sha256": "5c48061e45b79a924b041d75718e1e9aa0f8d2891812cb94777421dad6c71ec5",
+      "role": "outcome_reference",
+      "bytes": 491667,
+      "filename": "_evaluation/calgary-spv-004-2020-5c48061e45b7.pdf",
+      "included_in_default_input": false,
+      "original_collection_path": "_research/workers/L04/files/calgary-spv-004-2020-5c48061e45b7.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:14.900963+00:00",
+        "http_status": "200",
+        "final_url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/ventilation-for-acceptable-indoor-air-quality.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-011-ventilation-requirements-for-smoking-areas-in-buildings.pdf",
+      "sha256": "5a8db97c34d4d47401c1f9c1691cb6e12beb60b2c74d050e9cef61dea8727404",
+      "role": "supporting_evidence",
+      "bytes": 111671,
+      "filename": "calgary-advisory-b23-011-ventilation-5a8db97c34d4.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L04/files/calgary-advisory-b23-011-ventilation-5a8db97c34d4.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:18:56.161321+00:00",
+        "http_status": "200",
+        "final_url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-011-ventilation-requirements-for-smoking-areas-in-buildings.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-001-code-transition-advisory.pdf",
+      "sha256": "fdd0652b975c8115c519697690490b980a4bf5ae2924d1e78851037b3db9b8e5",
+      "role": "supporting_evidence",
+      "bytes": 117182,
+      "filename": "calgary-advisory-b23-001-transition-fdd0652b975c.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L04/files/calgary-advisory-b23-001-transition-fdd0652b975c.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:18:56.161932+00:00",
+        "http_status": "200",
+        "final_url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-001-code-transition-advisory.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Alberta",
+    "city_or_town": "Calgary",
+    "basis": "Published municipal guidance is explicitly for Calgary, Alberta; no single project site is claimed.",
+    "locator": "B23-011, PDF pp.1–2",
+    "scope": "local"
+  }
+}

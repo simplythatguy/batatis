@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Regulator position: hydronic heating systems must be designed to good practice; the interpretation identifies the design and field-review expectations, which usually involve a registered engineering professional.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the good-practice standards from the professional-involvement expectation",
+    "Asks which standards (ASHRAE, HRAI, hydronic handbook) the design cites",
+    "Flags the field-review evidence",
+    "Does not state the design complies"
+  ],
+  "case_id": "H20-029",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

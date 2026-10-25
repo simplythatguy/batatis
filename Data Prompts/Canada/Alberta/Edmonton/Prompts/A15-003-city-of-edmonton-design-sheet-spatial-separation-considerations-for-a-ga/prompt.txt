@@ -1,0 +1,6 @@
+I am considering a garden suite on a lot where a house already has an attached garage that would serve the principal house. Using only the attached City of Edmonton spatial separation sheet, identify which requirements it describes, what documentation it says the permit may need, which requirements rely on a code edition other than the current Alberta edition, and what a current-code check would have to confirm before relying on it. Do not say the design complies or is safe.
+
+Attachments:
+- edmonton-spatial-separation-garden-suite-820ac30e1ddc.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

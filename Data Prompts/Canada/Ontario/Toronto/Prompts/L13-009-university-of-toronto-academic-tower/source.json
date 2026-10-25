@@ -1,0 +1,83 @@
+{
+  "id": "L13-009",
+  "title": "University of Toronto Academic Tower",
+  "jurisdiction": "University of Toronto St. George Campus, Toronto, Ontario",
+  "code_edition": "Unknown in the attached sources",
+  "case_type": "product_evidence",
+  "source_url": "https://cwc.ca/wp-content/uploads/2025/09/829-download-this-case-study-academic-tower-university-of-toronto.pdf",
+  "document_date": "PDF states project was ongoing and acoustic testing incomplete; exact report date not printed",
+  "facts": [
+    {
+      "text": "The supplier case study describes a 14-storey academic tower, about 97,000 sq. ft., with 175 mm CLT and approximately 20% exposed ceilings.",
+      "locator": "PDF p.1"
+    },
+    {
+      "text": "The supplier's report says project testing had not yet been completed and presents acoustic results as expected rather than measured.",
+      "locator": "PDF p.2"
+    },
+    {
+      "text": "CHM Fire's project page identifies Toronto and states it developed the approved alternative solution supporting exposed mass timber.",
+      "locator": "CHM Fire project page, project description"
+    }
+  ],
+  "limitations": [
+    "The principal PDF is an acoustics product case study, not the fire or code submission.",
+    "The source statements have different time/status scopes; the acoustic testing statement should not be treated as contradicting or proving the fire approval.",
+    "No project-specific alternative-solution report or test package was located."
+  ],
+  "worker": "L13",
+  "prompt_number": 650,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://cwc.ca/wp-content/uploads/2025/09/829-download-this-case-study-academic-tower-university-of-toronto.pdf",
+      "sha256": "8b7ca06b4a6d724a9c36ac535af4aef7a78d1553daf174f569e28a1f22383a53",
+      "role": "input",
+      "bytes": 174305,
+      "filename": "academic-tower-project-case-study-8b7ca06b4a6d.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L13/files/academic-tower-project-case-study-8b7ca06b4a6d.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:23:35.007005+00:00",
+        "http_status": "200",
+        "final_url": "https://cwc.ca/wp-content/uploads/2025/09/829-download-this-case-study-academic-tower-university-of-toronto.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://chmfire.ca/portfolio/university-of-toronto-academic-tower/",
+      "sha256": "65999379028252702ab41fc82856a6f7b1cabd6edc7cccf2317c201ac88435fa",
+      "role": "outcome_reference",
+      "bytes": 77152,
+      "filename": "_evaluation/academic-tower-fire-engineer-project-record-659993790282.html",
+      "included_in_default_input": false,
+      "original_collection_path": "_research/workers/L13/files/academic-tower-fire-engineer-project-record-659993790282.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:23:35.007372+00:00",
+        "http_status": "200",
+        "final_url": "https://chmfire.ca/portfolio/university-of-toronto-academic-tower/",
+        "content_type": "text/html; charset=UTF-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "_evaluation/attachment-2-source-text.txt",
+        "sha256": "80002b7bc795fec4cfb49651187b8ba1d193ce8faaba65c805e777856f147af0",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Ontario",
+    "city_or_town": "Toronto",
+    "basis": "The source jurisdiction identifies Toronto, Ontario for the named project, proposal or appeal; this describes source geography.",
+    "locator": "CHM Fire project page, project description",
+    "scope": "project"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Secretary of State determined the plans do not comply with Requirement A2 (Ground Movement) of the Building Regulations 2000 (as amended) (p.6 para 27).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Requirement A2 ground movement near trees",
+    "foundation depth and heave protection evidence",
+    "engineer calculation sheet and reference guidance (NHBC Chapter 4.2, Zurich manual as cited)",
+    "changes of scheme between submissions"
+  ],
+  "case_id": "H15-002",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

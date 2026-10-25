@@ -1,0 +1,81 @@
+{
+  "id": "H16-011",
+  "title": "57 Prince Street, Bristol (listed hostel refurbishment): fire strategy initial issue to support a Building Regulations application",
+  "jurisdiction": "England, UK (Bristol). Listed building ('Grade 2' with a listing number, as printed in the text). COMPARATIVE NON-ALBERTA RECORD; no Alberta applicability asserted.",
+  "code_edition": "Approved Document B Vol 2 (Fire Safety, 2019 edition, as amended 2020 and 2022) stated (p.5). BS 9999:2017 and BS 9991:2015 (p.6). BS 5839-1:2017 (p.7). Fire Safety (England) Regulations 2022 and Building Safety Act 2022 referred to (p.6).",
+  "case_type": "actual_application",
+  "source_url": "https://assets.publishing.service.gov.uk/media/66506cfec86b0c383ef64f8c/Fire_Strategy_checked.pdf",
+  "document_date": "March 2024 (initial issue; 'Initial Draft')",
+  "facts": [
+    {
+      "text": "FRaMS Associates (PM) Ltd was commissioned by 3bd Architects to produce the strategy 'to support an application for Building Regulations (2010) approval in respect of the refurbishment of floors three and four of 57 Prince Street'.",
+      "locator": "p.5"
+    },
+    {
+      "text": "Statements 'highlighted in yellow are for further client consideration and discussion'. The strategy 'may require amendment' as the project progresses.",
+      "locator": "p.5"
+    },
+    {
+      "text": "Departures from AD B are said to be 'provided with suitable compensatory features based on risk assessment and/or fire engineering principles'. The legislation section records 'Variation Compensation: None'.",
+      "locator": "p.5-6"
+    },
+    {
+      "text": "Use: hostel accommodation (purpose group 2(b)) in a five-storey building of 10.6 m, formerly a seed warehouse, later offices and a pub. The text records it as a 'Grade 2' listed building and states that 'Two staircases serve the upper floors'.",
+      "locator": "p.7"
+    },
+    {
+      "text": "The building is said not to be a higher-risk building under the Building Safety Act because its height is less than 18 m (or fewer than seven storeys).",
+      "locator": "p.6"
+    },
+    {
+      "text": "Life-safety electrical supplies are to have a secondary supply, as BS 9999 clause 38.2.3.3 recommends. The lining table allows a variation for parts of walls 'but can be no lower than D-s3,d2'.",
+      "locator": "p.12-13"
+    },
+    {
+      "text": "'Mechanical and electrical service plans are yet to be confirmed.'",
+      "locator": "p.17"
+    },
+    {
+      "text": "The strategy is to be read with architectural fire strategy plans 388-PLA 110 to 114, and the plan revisions used are listed in an appendix.",
+      "locator": "p.5; p.23 appendix A"
+    }
+  ],
+  "limitations": [
+    "Comparative UK record only; not Alberta evidence.",
+    "Hosted on GOV.UK asset storage. The publishing context and reason for upload are not identified in the file, so provenance is unverified in this pass.",
+    "Initial draft; drawings 388-PLA 110 to 114 are not in the PDF."
+  ],
+  "worker": "H16",
+  "prompt_number": 263,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://assets.publishing.service.gov.uk/media/66506cfec86b0c383ef64f8c/Fire_Strategy_checked.pdf",
+      "sha256": "2b47d17eb5deb6fd41d3b67273e4e52b507f0a70663ac961b31f13c7c0c9da0b",
+      "role": "input",
+      "bytes": 1228879,
+      "filename": "gov-uk-assets-fire-strategy-checked-57-prince-street-bristol-2b47d17eb5de.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H16/files/gov-uk-assets-fire-strategy-checked-57-prince-street-bristol-2b47d17eb5de.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:48:15.252876+00:00",
+        "http_status": "200",
+        "final_url": "https://assets.publishing.service.gov.uk/media/66506cfec86b0c383ef64f8c/Fire_Strategy_checked.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "United Kingdom",
+    "province_or_state": "England",
+    "city_or_town": "Bristol",
+    "basis": "The jurisdiction and project title identify Bristol and the facts identify the Prince Street refurbishment.",
+    "locator": "jurisdiction field; source title; p.5",
+    "scope": "project"
+  }
+}

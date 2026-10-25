@@ -1,0 +1,15 @@
+{
+  "known_outcome": "No application, construction or approval outcome is identified; this is a proposed design study only.",
+  "outcome_leakage": false,
+  "review_focus": [
+    "proposed design vs actual permit case",
+    "code edition and occupancy absent",
+    "structural/fire calculations and test evidence needed",
+    "not converting research evidence into approval ground truth"
+  ],
+  "case_id": "L13-013",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

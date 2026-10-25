@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The current active L-series record publishes standard-compliance evidence to CAN/ULC-S717.1:2017 based solely on recognized certification 81216; it is not a project-specific NBC opinion.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "obtain and verify the current Intertek certification and scope",
+    "identify exact ICF version and wall configuration",
+    "ask for concrete/reinforcement/design drawings and fire-protection details",
+    "confirm project code edition and proposed building context"
+  ],
+  "case_id": "L16-005",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

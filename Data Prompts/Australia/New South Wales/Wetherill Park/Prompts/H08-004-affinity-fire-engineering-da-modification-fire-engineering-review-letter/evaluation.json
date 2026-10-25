@@ -1,0 +1,15 @@
+{
+  "known_outcome": "unknown (no decision retrieved)",
+  "outcome_leakage": false,
+  "review_focus": [
+    "modification scope: whether the review covers only the amendments",
+    "deferral of the fire engineering assessment to construction certificate and the evidence needed at DA stage",
+    "drawing references and revision control",
+    "no compliance certification"
+  ],
+  "case_id": "H08-004",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

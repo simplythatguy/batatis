@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Determination: paint finish as applied complies with B2 as it relates to E2 (conclusion p.21; signed 4 November 2021).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "paint TSR data for the coated product, not only the substrate",
+    "warranty versus compliance evidence",
+    "maintenance documentation for the owner",
+    "orientation and shading assumptions"
+  ],
+  "case_id": "H03-013",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

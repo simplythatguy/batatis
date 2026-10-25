@@ -1,0 +1,102 @@
+{
+  "id": "H02-001",
+  "title": "Determination 2023/035: Whether proposed alterations to a dwelling to replace internal stairs with a lift comply with Clause D1 Access routes",
+  "jurisdiction": "New Zealand: Auckland Council as building consent authority; MBIE determination under the Building Act 2004. Non-Alberta comparative record.",
+  "code_edition": "NZ Building Code (Schedule 1, Building Regulations 1992). The consent application named Acceptable Solution D1/AS1 Amendment 6, effective 1 January 2017 (p.4 fn 6).",
+  "case_type": "appeal_decision",
+  "source_url": "https://codehub.building.govt.nz/resources/2023035",
+  "document_date": "16 November 2023",
+  "facts": [
+    {
+      "text": "The proposed work removes an existing internal stair between the two floors of a dwelling and installs a new lift in its place.",
+      "locator": "p.1 Summary; p.2 §1.3"
+    },
+    {
+      "text": "The dwelling was built in the 1970s on a sloping section. The ground floor is at road level and the lower floor is below the east end of the dwelling.",
+      "locator": "p.3 §2.1"
+    },
+    {
+      "text": "The ground floor has external double doors that open from a rumpus/office room onto the driveway at road level. The lower floor has three separate external doors on its east side.",
+      "locator": "p.4 §2.4, §2.6"
+    },
+    {
+      "text": "The existing internal stair has two flights and a landing. The lift manufacturer gives a footprint of 1278 mm long by 1046 mm wide and a capacity of 2-3 people.",
+      "locator": "p.4 §2.7-2.8"
+    },
+    {
+      "text": "The consent application (lodged 29 November 2022) named Acceptable Solution D1/AS1 Amendment 6 as the means of compliance for clause D1. The owners did not seek a waiver or modification for clause D1.",
+      "locator": "p.4 §3.1; p.4 fn 6"
+    },
+    {
+      "text": "On 16 January 2023 the authority asked the owners to revise the floor plans to show compliance with clause D1.3.3(e). On 27 January 2023 it said stairs between floors were a requirement of clause D1 and that external access through the outside was not accepted.",
+      "locator": "p.4 §3.2-3.4"
+    },
+    {
+      "text": "The authority said the stair was required for this building and that an external stair would not comply with the functional requirements and objective of clause D1.",
+      "locator": "p.5 §3.6-3.7"
+    },
+    {
+      "text": "The owners said the stairs are unusable for casual use and in an emergency, and that the lift is a basic amenity to move between floors.",
+      "locator": "p.5 §3.8"
+    },
+    {
+      "text": "The owners argued that clause D1.3.3(e) is intended to provide egress in a fire or emergency, that both floors have direct egress to the outside, and that the stair is steep and narrow.",
+      "locator": "p.5-6 §4.1.1; p.6 §4.1.3-4.1.5, §4.1.7"
+    },
+    {
+      "text": "The authority said there are other locations where a lift could be installed that would leave the stair in place, and that it had not received a proposal for an alternative solution that would meet clause D1.3.3.",
+      "locator": "p.7 §4.2.3-4.2.4"
+    },
+    {
+      "text": "The authority's position was that section 112(1)(b)(i) would not be satisfied because the work would make a building that complies now non-compliant.",
+      "locator": "p.3 §1.7; p.7 §4.2.5"
+    },
+    {
+      "text": "Clause D1.3.3(e) reads: include stairs to allow access to upper floors irrespective of whether an escalator or lift has been provided. Clause A2 defines access route as a continuous route between the apron or construction edge and spaces within a building.",
+      "locator": "p.8 §5.7-5.8"
+    },
+    {
+      "text": "The matter to be determined under section 177(1)(a) is whether the proposed alterations (remove an internal stair and install a new lift) will comply with clause D1 Access routes.",
+      "locator": "p.2 §1.4"
+    }
+  ],
+  "limitations": [
+    "Regulator determination on the authority's position, not the applicant's full consent package. No consent plans are in the attachment, only photographs and figures reproduced from Google Maps and the owners' agent (p.1 fn 1; p.3 fn 5).",
+    "The decision and reasoning (pp.8-10) are in the same PDF as the facts. Outcome leakage is true unless those pages are redacted.",
+    "Owner names, street address and consent number are left out of the prompt and facts.",
+    "Applies to the New Zealand Building Code only. No Alberta applicability is asserted."
+  ],
+  "worker": "H02",
+  "prompt_number": 377,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2023/2023-035.pdf",
+      "sha256": "ee7498811bc8a9c5c369a8c3ecb4a4e555f435df33aa451a9d957f7a86cfa622",
+      "role": "input",
+      "bytes": 671733,
+      "filename": "mbie-det-2023-035-ee7498811bc8.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H02/files/mbie-det-2023-035-ee7498811bc8.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:42:24.975829+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2023/2023-035.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Auckland",
+    "basis": "The jurisdiction documents Auckland as the local context; no separate region is documented.",
+    "locator": "jurisdiction field",
+    "scope": "local"
+  }
+}

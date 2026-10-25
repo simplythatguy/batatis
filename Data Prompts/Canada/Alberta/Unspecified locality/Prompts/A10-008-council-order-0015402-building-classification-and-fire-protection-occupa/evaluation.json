@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Operative clauses as extracted (pp.1-2): ABC 1997 Section 3.4 'Exits' revoked; fire-alarm determination varied to require an alarm system; fixed fire suppression and detection ordered around the pumps.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "occupancy classification of low-occupant industrial buildings",
+    "exit requirements where occupant load is very low",
+    "fire-alarm requirement determination",
+    "engineering fire-protection evidence for a process building"
+  ],
+  "case_id": "A10-008",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

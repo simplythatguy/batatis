@@ -1,0 +1,13 @@
+{
+  "known_outcome": "The Board determined that without evidence of an original Section 2.5 equivalency, Part 3 construction requirements including sprinklers applied; it noted variances could be developed through an alternative solution.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Original permit, equivalency approval, plans, professional analysis and sprinkler proposal are not linked.",
+    "This BC determination does not establish Alberta requirements."
+  ],
+  "case_id": "L08-1805",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

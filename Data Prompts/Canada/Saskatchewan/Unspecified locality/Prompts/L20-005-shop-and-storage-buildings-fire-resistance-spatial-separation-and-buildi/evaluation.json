@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The appeal board revoked the order.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "classification evidence for each building and its use",
+    "wall assembly evidence supporting the stated two-hour rating",
+    "site plan, limiting distance, openings, and which code path is relied upon",
+    "distinguish evidence in the decision from underlying plans/reports not attached"
+  ],
+  "case_id": "L20-005",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

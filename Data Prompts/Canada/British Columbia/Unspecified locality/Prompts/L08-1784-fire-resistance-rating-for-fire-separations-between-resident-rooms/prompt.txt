@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from British Columbia (specific local authority not named in published decision). It is not an Alberta application.
+
+Review the classification question for a three-storey care occupancy with individual sleeping rooms and washrooms but no in-room cooking or laundry. Identify the occupancy, tenure/control and room-use information needed to decide which fire-separation provisions should be considered, and request plans or operating documents where needed. Do not infer the room classification from the owner’s description alone.
+
+Attachments:
+- attachment-1-source-text.txt
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

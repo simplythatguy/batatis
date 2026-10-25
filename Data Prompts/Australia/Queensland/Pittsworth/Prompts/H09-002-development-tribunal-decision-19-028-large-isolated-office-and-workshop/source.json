@@ -1,0 +1,78 @@
+{
+  "id": "H09-002",
+  "title": "Development Tribunal decision 19-028: large isolated office and workshop building; fire engineering report amended for smoke ventilation and sprinkler removal (Pittsworth)",
+  "jurisdiction": "Queensland, Australia. COMPARATIVE TEST ONLY: not Alberta; no Alberta applicability asserted.",
+  "code_edition": "BCA 2015 as cited (Table E1.5, p. 2; Part E Table E2.2a, p. 3); other citations not stated",
+  "case_type": "appeal_decision",
+  "document_type": "Development Tribunal decision notice (Planning Act 2016 s 255), Queensland",
+  "source_url": "https://www.qld.gov.au/__data/assets/pdf_file/0023/115736/19-028-fire-safety.pdf",
+  "document_date": "Decision notice dated 21 Oct 2019 (PDF p. 7); hearing 15 Aug 2019 (p. 1)",
+  "facts": [
+    {
+      "text": "Queensland Fire and Emergency Services (appellant) appealed a Building Act 1975 development decision notice for a building at a Pittsworth site; the assessment manager was a building certifier.",
+      "locator": "p. 1, Appeal"
+    },
+    {
+      "text": "The notice describes the subject building as a large isolated building with floor area 14,150 m2 and volume greater than 108,000 m3.",
+      "locator": "p. 6, reasons para 1; p. 3 ('Large Isolated Building')"
+    },
+    {
+      "text": "The works are described as Class 5 (office, boardroom and staff room) and Class 8 (workshop and mezzanine); the notice also lists Class 7b (p. 3).",
+      "locator": "p. 2; p. 3"
+    },
+    {
+      "text": "The development relied on Omnii Consulting Fire Engineers report, Project 7305100 Rev B, which the notice says proposed removing some sprinklers and natural smoke venting.",
+      "locator": "p. 3"
+    },
+    {
+      "text": "The tribunal set the decision aside and replaced it with approval subject to amending the fire engineering report to include smoke-ventilation modelling referencing as-constructed readily openable vents, and a qualitative approach under s 1.2.9.2 of the International Fire Engineering Guidelines.",
+      "locator": "p. 2, Decision"
+    },
+    {
+      "text": "The notice cites Table E1.5 of the BCA 2015 (deemed-to-satisfy smoke exhaust and sprinkler systems) and BCA Part E Table E2.2a for large isolated buildings.",
+      "locator": "p. 2; p. 3"
+    }
+  ],
+  "limitations": [
+    "Comparative test only: a Queensland decision under Queensland law and the NCC or QDC as cited. It cannot establish Alberta requirements, practice or performance.",
+    "Source URL is the direct qld.gov.au PDF asset; no landing page was visited. Text read from the original PDF with pypdf (no OCR); locators are PDF page numbers.",
+    "Prompt is a reconstructed test question, not an applicant message. The decision outcome is in the attachment and is not stated in the prompt (outcome_leakage true).",
+    "Individual names, licence numbers and lot/plan identifiers are omitted from the facts and prompt.",
+    "Decision notice only: the Omnii fire engineering report and the GMA decision notice are referred to but not attached.",
+    "The BCA 2015 edition is as cited in the notice."
+  ],
+  "worker": "H09",
+  "prompt_number": 445,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.qld.gov.au/__data/assets/pdf_file/0023/115736/19-028-fire-safety.pdf",
+      "sha256": "af99f03ffa5b55c7bc9a8b13f51ae7d14e6e94b84cccd7f6ea55f745beab8689",
+      "role": "outcome_reference",
+      "retrieved_at": "2026-10-25T01:53:31.731332+00:00",
+      "bytes": 180603,
+      "filename": "dt-19-028-fire-safety-af99f03ffa5b.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H09/files/qld-tribunal-decisions/dt-19-028-fire-safety-af99f03ffa5b.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:53:31.731332+00:00",
+        "http_status": "200",
+        "final_url": "https://www.qld.gov.au/__data/assets/pdf_file/0023/115736/19-028-fire-safety.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Australia",
+    "province_or_state": "Queensland",
+    "city_or_town": "Pittsworth",
+    "basis": "The facts expressly identify the building application as a Pittsworth site.",
+    "locator": "p. 1, Appeal",
+    "scope": "project"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Appeal decision of 13 Sept 2021 (separate attachment, outcome_reference) treats fire safety as appropriately considered at planning stage subject to a Fire Safety Management Plan condition (decision p.24, para 124). The decision does not name this letter; the link between them is not established by the documents.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "management plan 'conditioned as necessary' as the evacuation basis",
+    "guidance versions stated, and the rule that the latest ADB is followed where superseded",
+    "no drawings or calculations attached",
+    "healthcare guidance (HTM 05-02) cited for a later-living use"
+  ],
+  "case_id": "H16-006",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

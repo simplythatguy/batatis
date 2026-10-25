@@ -1,0 +1,16 @@
+{
+  "known_outcome": "The reference permits qualifying multi-level storage racking systems to be classified as special and unusual structures under Article 3.2.2.2 only when the extensive listed construction, fire-protection and egress conditions are met.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "definition/configuration and stored commodity",
+    "occupancy and public access",
+    "Part 4 structural documentation",
+    "fire safety plan, sprinklers, alarm and emergency power",
+    "egress distances/stairs and any time-based analysis"
+  ],
+  "case_id": "L03-015",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

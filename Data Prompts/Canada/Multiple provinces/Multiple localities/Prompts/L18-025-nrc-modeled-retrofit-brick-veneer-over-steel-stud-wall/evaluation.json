@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Unknown as to any project or permit decision; the source reports simulated thermal/moisture behavior and recommends further testing or field demonstration for promising measures.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "identify the base wall and exact retrofit option shown in the relevant figure",
+    "check assumed air-leakage path and weather years against actual building conditions",
+    "request project-specific drawings, model inputs, code provision, risks and professional review"
+  ],
+  "case_id": "L18-025",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

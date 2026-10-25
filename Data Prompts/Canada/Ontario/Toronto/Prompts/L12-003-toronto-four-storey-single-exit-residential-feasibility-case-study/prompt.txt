@@ -1,0 +1,9 @@
+Comparative attachment exercise: this source is from Toronto, Ontario, Canada. It is not an Alberta application.
+
+Review the attached Toronto-commissioned feasibility study for a four-storey single-exit residential case study. Separate the study’s analytical findings and possible measures from facts that would be required in a later project application. Identify missing building plans, occupancy and occupant-load information, exit and corridor geometry, fire-system details, and applicable code edition; list the next questions a qualified designer and reviewer should resolve. Do not treat the study as an application or approval, and do not certify the design.
+
+Attachments:
+- single_exit_study-c035016a4d07.pdf
+- single_exit_staff_report-b3e78c420e1d.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

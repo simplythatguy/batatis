@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Regulator position: a storage container is either an acceptable solution under Division B or an alternative solution under Division A. Because containers do not meet prescriptive NBC(AE) requirements, the AHJ may request an engineering review and certified plans; storage of dangerous goods must be disclosed to the AHJ; items stored in the container are considered when setting spacing.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the Division B acceptable-solution route from the Division A alternative-solution route",
+    "Flags the engineering-review and certified-plans request as an AHJ option, not a fixed requirement",
+    "Notes dangerous-goods disclosure and stored-content spacing as open questions for the file",
+    "Does not state that a container arrangement complies or is safe"
+  ],
+  "case_id": "H20-001",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

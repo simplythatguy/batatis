@@ -1,0 +1,15 @@
+{
+  "known_outcome": "partly recorded: Heritage Advisory Committee votes are recorded (p.2). The Regional Council decision is not recorded in the report text. No permit outcome.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Schedule D alternate-compliance item relied on, and its dependence on the existing sprinkler system",
+    "second means of egress for the upper units",
+    "Building Code Analysis deferred to the permit stage",
+    "heritage constraints on demolition of the attached structure and on restoration"
+  ],
+  "case_id": "H18-008",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

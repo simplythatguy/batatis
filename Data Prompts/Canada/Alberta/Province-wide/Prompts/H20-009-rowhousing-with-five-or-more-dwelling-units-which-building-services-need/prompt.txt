@@ -1,0 +1,6 @@
+A project has a multiple-family rowhouse with five or more dwelling units, and the question is who must authenticate the building services design. The attached STANDATA interpretation (23-BCI-012R2/20-PCB-014R1/25-GCB-018/24-ECB-009R2) is the only source. Using only that document, identify the professional-involvement provisions it relies on, what remains uncertain for each building service, what drawings or authentications a file would need, and what to ask the authority having jurisdiction. Do not invent unit counts or designers, and do not say the design complies.
+
+Attachments:
+- ma-standata-interpretation-joint-23bci012r1-20pcb014r1-25gcb018-24ecb009r2-2026-be5911775676.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

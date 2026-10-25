@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Within scope: the determination finds bedroom 3 in units 2-6 is within the scope of G7/AS1 as a means to establish compliance with G7; other assessment is left to the parties. [p.11, para 5.1]",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Scope of G7/AS1 for a bedroom facing a boundary with a taller neighbour",
+    "Window location and recessed-window facts in the layout",
+    "Whether the authority's objections were about scope or about performance"
+  ],
+  "case_id": "H01-010",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

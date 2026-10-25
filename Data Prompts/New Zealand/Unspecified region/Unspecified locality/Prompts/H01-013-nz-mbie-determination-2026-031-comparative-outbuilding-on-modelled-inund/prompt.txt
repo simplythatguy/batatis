@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from New Zealand (Building Act 2004); Tararua District Council; comparative only, not Alberta. It is not an Alberta application.
+
+This is a New Zealand regulator document about a proposed steel-framed outbuilding on a site with modelled inundation (flood) hazard, where the council sought further information on natural-hazard effects and stormwater. Using only the attached PDF, identify the natural-hazard and drainage provisions it treats as uncertain, list the hazard, stormwater, and design information it relies on, flag missing evidence, and list the next questions a reviewer should ask. Do not say whether the site is safe or the work complies, and do not apply Alberta or NBC(AE) rules.
+
+Attachments:
+- mbie-det-2026-031-e3cd1fc41302.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

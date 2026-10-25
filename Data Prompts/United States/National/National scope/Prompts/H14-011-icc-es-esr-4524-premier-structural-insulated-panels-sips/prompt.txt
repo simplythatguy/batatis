@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from United States (ICC-ES evaluation report under IBC/IRC); NON-ALBERTA COMPARATIVE ONLY: cannot establish Alberta performance, acceptance or equivalence; no Canadian or Alberta approval is claimed or implied. It is not an Alberta application.
+
+Comparative test on a US ICC-ES evaluation of structural insulated panels for walls, roofs and floors. Using only the attached report, identify the panel thicknesses and spans it limits, the editions it is written against, what it says about fire-rated assemblies and where that is stated, the installation and approved-documents condition, and the evidence and labelling it lists. Then say what a reviewer would still need from the manufacturer or an engineer and what the report does not establish for an Alberta permit.
+
+Attachments:
+- esr-4524-premier-extreme-panel-sip-6824f129440d.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

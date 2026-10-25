@@ -1,0 +1,77 @@
+{
+  "id": "H18-006",
+  "title": "Heritage Impact Assessment, 1495 Heron Road, Ottawa (designated Campanile Campus / Federal Study Centre)",
+  "scope": "comparative_non_alberta",
+  "alberta_applicability": "not established",
+  "jurisdiction": "City of Ottawa, Ontario, Canada (original jurisdiction). Property designated under Part IV of the Ontario Heritage Act.",
+  "code_edition": "Ontario Building Code, edition not stated in the cited passages. Accessibility deficiencies are described generally.",
+  "case_type": "documented_design_study",
+  "source_url": "https://webcast.ottawa.ca/plan/All_Image%20Referencing_Ontario%20Heritage%20Act_Image%20Reference_D09-04-26-0041%20Heritage%20Impact%20Assessment%201495%20Heron%20Road.PDF",
+  "source_url_note": "City of Ottawa webcast file for an Ontario Heritage Act application (file name D09-04-26-0041). The file name is the only link to the application.",
+  "document_date": "2026-07-31 (Final Report)",
+  "facts": [
+    {
+      "text": "Final report dated July 31, 2026, prepared by Stantec Consulting Ltd. for Canada Lands Company Limited. Project/file 1609410368.",
+      "locator": "p.1"
+    },
+    {
+      "text": "The subject property is a designated heritage property under Part IV of the Ontario Heritage Act (Campanile Campus, also known as the Federal Study Centre).",
+      "locator": "p.3"
+    },
+    {
+      "text": "Adaptive-reuse considerations: the buildings 'require extensive upgrades to meet contemporary standards including building code deficiencies, barrier-free accessibility, mechanical and electrical upgrades, seismic upgrades, and remediation of hazardous and designated substances'.",
+      "locator": "p.13"
+    },
+    {
+      "text": "Accessibility: alterations needed to make the heritage buildings fully accessible 'may include the installation of elevators, ramps, modifications to doors'.",
+      "locator": "p.21"
+    },
+    {
+      "text": "The proposed design 'considers barrier-free access throughout the site'.",
+      "locator": "p.82"
+    },
+    {
+      "text": "Section 7, 'Alternatives and Mitigation Strategies', covers heritage options (for example 'Retention In Situ'), not Building Code alternative solutions.",
+      "locator": "p.7 (contents lists section 7 at p.75)"
+    }
+  ],
+  "limitations": [
+    "Comparative only: Ontario, non-Alberta. A heritage planning report, not a Building Code analysis.",
+    "Drawings and photographs were not read visually.",
+    "The consultant's impact conclusions are in the attachment. Keep them out of any applicant-facing prompt."
+  ],
+  "worker": "H18",
+  "prompt_number": 287,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://webcast.ottawa.ca/plan/All_Image%20Referencing_Ontario%20Heritage%20Act_Image%20Reference_D09-04-26-0041%20Heritage%20Impact%20Assessment%201495%20Heron%20Road.PDF",
+      "sha256": "d8f434989ca99856ad9921ab7b9b8ba591bc86cac0173073a84fbd9c555043cf",
+      "role": "input",
+      "download_record": "_research/workers/H18/files/ottawa-d09-04-26-0041-heritage-impact-1495-heron-road-d8f434989ca9.pdf.source.json",
+      "bytes": 11165220,
+      "filename": "ottawa-d09-04-26-0041-heritage-impact-1495-heron-road-d8f434989ca9.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H18/files/ottawa-d09-04-26-0041-heritage-impact-1495-heron-road-d8f434989ca9.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:50:21.703896+00:00",
+        "http_status": "200",
+        "final_url": "https://webcast.ottawa.ca/plan/All_Image%20Referencing_Ontario%20Heritage%20Act_Image%20Reference_D09-04-26-0041%20Heritage%20Impact%20Assessment%201495%20Heron%20Road.PDF",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Ontario",
+    "city_or_town": "Ottawa",
+    "basis": "The source jurisdiction identifies Ottawa, Ontario for the named project, proposal or appeal; this describes source geography.",
+    "locator": "jurisdiction field",
+    "scope": "project"
+  }
+}

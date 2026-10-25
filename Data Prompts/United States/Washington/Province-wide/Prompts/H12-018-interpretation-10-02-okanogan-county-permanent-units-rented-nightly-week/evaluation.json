@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Council answer (leakage): the local code official classifies the structure from its specifics; a single unit that is not accessory to a single-family home and meets the dwelling-unit definition could be permitted under the IRC; where units are offered with nightly or weekly stays, R-1 is most appropriate; the IBC commentary keeps R-1 for extended-stay units except those that require a stay of more than 30 days.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "occupancy classification by transient status",
+    "dwelling-unit definition",
+    "rental-term threshold of 30 days",
+    "evidence needed to support a classification"
+  ],
+  "case_id": "H12-018",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

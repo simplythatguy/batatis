@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Regulator position: a building SCO reviews and inspects the design and construction of an ESS room where the room provisions are in CE Code Part 1; a building permit is required for construction in the building discipline; alternative wall, ceiling and floor locations may be considered with AHJ acceptance.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the discipline question from the permit question",
+    "Asks which CE Code Part 1 rule and NBC(AE) assemblies the room design relies on",
+    "Flags AHJ acceptance for alternative assembly locations",
+    "Does not state the room complies"
+  ],
+  "case_id": "H20-021",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,79 @@
+{
+  "id": "H14-017",
+  "title": "ICC-ES ESR-3373: ZIP System R-Sheathing (insulated sheathing with factory-bonded WRB facer)",
+  "jurisdiction": "United States (ICC-ES evaluation report under IBC/IRC); NON-ALBERTA COMPARATIVE ONLY: cannot establish Alberta performance, acceptance or equivalence; no Canadian or Alberta approval is claimed or implied",
+  "code_edition": "2024, 2021 and 2018 IBC, IRC and IECC (report §1.1, p1)",
+  "case_type": "product_evidence",
+  "source_url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-3373.pdf",
+  "document_date": "Reissued June 2025; supplements revised October 2025; subject to renewal June 2027 (p1, p7)",
+  "facts": [
+    {
+      "text": "Report holder HUBER ENGINEERED WOODS, LLC; subject is ZIP System R-Sheathing, evaluated for structural, thermal resistance, air leakage and weather resistance.",
+      "locator": "p1"
+    },
+    {
+      "text": "Panels must be manufactured, identified and installed per the report and the manufacturer's installation instructions; the report governs a conflict.",
+      "locator": "§5.1, p4"
+    },
+    {
+      "text": "When required by the code official, the report and installation instructions must be submitted at permit application.",
+      "locator": "§5.2, p4"
+    },
+    {
+      "text": "'Fire-resistance-rated construction is outside the scope of this report.'",
+      "locator": "§5.7, p4"
+    },
+    {
+      "text": "Special inspection for sheathing in shear walls per 2024 and 2021 IBC §§1704.3 and 1705.12 for listed exposures and wind speeds; combined wind uplift and shear use must be approved by the code official.",
+      "locator": "§5.8 and §5.11, p4"
+    },
+    {
+      "text": "Panels are laminated at facilities in Camp Hill, Pennsylvania; Diboll, Texas; East Moline, Illinois; Hazle Township, Pennsylvania; and Northglenn, Colorado.",
+      "locator": "§5.12, p5"
+    },
+    {
+      "text": "Evidence listed: AC310 (January 2024) for water-resistive membranes factory-bonded to structural sheathing used as WRBs; AC269.2 (24) (May 2025) for shear walls; an IRC intermittent-braced-wall alternative.",
+      "locator": "§6.1-6.3, p5"
+    }
+  ],
+  "limitations": [
+    "Non-Alberta comparative attachment; the report does not reference NBC(AE) 2023 and is not evidence of Alberta or Canadian acceptance.",
+    "Retrieved 2026-10-25 from the official ICC-ES report URL; current ICC-ES status was not checked live. source_url is the report PDF, not a separate listing page.",
+    "Text from pypdf extraction; figures, tables and signatures not transcribed; locators are PDF page numbers, not printed page numbers.",
+    "ICC-ES copyright; retained locally for comparison only, redistribution not licensed.",
+    "Cladding and fastening tables are in the report and manual; they were not transcribed in full."
+  ],
+  "worker": "H14",
+  "prompt_number": 644,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-3373.pdf",
+      "sha256": "1ed9ba4e196369b78fc61462d584234ecc43e8791b578d92c63a72979ae6f7df",
+      "role": "input",
+      "bytes": 381776,
+      "filename": "esr-3373-zip-r-sheathing-1ed9ba4e1963.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H14/files/esr-3373/esr-3373-zip-r-sheathing-1ed9ba4e1963.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:47:21.457785+00:00",
+        "http_status": "200",
+        "final_url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-3373.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "United States",
+    "province_or_state": "National",
+    "city_or_town": "National scope",
+    "basis": "The jurisdiction identifies a US ICC-ES product assessment under IBC/IRC. Report-holder and manufacturing locations do not locate a project.",
+    "locator": "jurisdiction field",
+    "scope": "national"
+  }
+}

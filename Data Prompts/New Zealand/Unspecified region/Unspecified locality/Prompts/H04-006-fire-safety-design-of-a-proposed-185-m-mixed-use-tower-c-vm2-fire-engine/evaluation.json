@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The Chief Executive determined that, based on the fire design described in the fire engineering report, the proposed building does not comply with Clauses C1 to C6 by Verification Method C/VM2 (decision, p.41).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "compartmentation and separation of residential floors",
+    "egress and stair/lift arrangement in a tall building",
+    "basis and assumptions of the fire engineering report",
+    "documentation that a reviewer needs before accepting a verification-method route"
+  ],
+  "case_id": "H04-006",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

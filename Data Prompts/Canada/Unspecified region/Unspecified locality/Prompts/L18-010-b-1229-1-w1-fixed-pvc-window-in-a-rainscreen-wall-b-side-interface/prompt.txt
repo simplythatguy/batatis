@@ -1,0 +1,6 @@
+Use the attached NRC report on B-1229.1 W1 — fixed PVC window in a rainscreen wall, B-side interface as the available technical attachment in an administrative-completeness review for a possible building-code alternative-solution file. State what the report actually tested or modelled about this configuration and what its reported evidence can and cannot establish. Separate study facts from unknown facts about any proposed project. Identify missing jurisdiction and adopted code edition plus the exact acceptable-solution provision, proposed assembly drawings/materials/junctions, site climate and use, project-specific calculations or test evidence, assumptions and limits, risk assessment and mitigation, and required professional evidence. Ask concise follow-up questions. Treat this as research evidence only; do not conclude that any project is safe, complies, or is approved.
+
+Attachments:
+- window-interface-phase1-test-35d2f4d7e5ac.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

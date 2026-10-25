@@ -1,0 +1,83 @@
+{
+  "id": "L14-019",
+  "title": "BC Housing study scenario 3 — five combined 33-foot lots and point-access blocks",
+  "jurisdiction": "Metro Vancouver, British Columbia; illustrative assembly of five 33 ft lots",
+  "code_edition": "unknown (study does not identify a permit code edition for an actual project)",
+  "case_type": "documented_design_study",
+  "source_url": "https://research-library.bchousing.org/Home/ResearchItemDetails/8813",
+  "document_date": "2023 (report copyright stated on p. 2)",
+  "facts": [
+    {
+      "text": "The report describes two connected point-access blocks, each with its own single stair/elevator, in a six-storey mixed-residential concept.",
+      "locator": "PDF p. 35, Design Investigation 3"
+    },
+    {
+      "text": "Page 35 narrative says up to 45 units may be achieved with ground-floor amenity, while page 37 plan table lists 48 units including separate townhomes.",
+      "locator": "PDF pp. 35, 37"
+    },
+    {
+      "text": "The concept is a five-lot Metro Vancouver scenario; plan notes include assumed typical lot dimensions and residential unit targets.",
+      "locator": "PDF p. 37 drawing notes"
+    }
+  ],
+  "limitations": [
+    "BC Housing-funded research and conceptual design study prepared by Public Architecture; not an actual permit submission, application, issued variance, or approval.",
+    "The report’s scenarios are Metro Vancouver typologies and may not match any particular municipality, adopted code edition, parcel, or project.",
+    "Scenarios share one report; page locators identify the distinct concept record rather than implying separate standalone drawings."
+  ],
+  "worker": "L14",
+  "prompt_number": 315,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.bchousing.org/sites/default/files/media/documents/Single-Stair-Residential-Buildings-PUBLIC.pdf",
+      "sha256": "c09d1ad8a20e71260fae9172128f18d4e1028c9dd11582e14d64f56bdbfaff3f",
+      "role": "input",
+      "bytes": 11969386,
+      "filename": "bc-housing-single-stair-residential-buildings-c09d1ad8a20e.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L14/files/bc-housing-single-stair-residential-buildings-c09d1ad8a20e.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:49:27.586983+00:00",
+        "http_status": "200",
+        "final_url": "https://www.bchousing.org/sites/default/files/media/documents/Single-Stair-Residential-Buildings-PUBLIC.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://research-library.bchousing.org/Home/ResearchItemDetails/8813",
+      "sha256": "cd6b32d550f3ce579291dae765b791da2a7fa3e13aa71393bda04a910bb837bf",
+      "role": "supporting_evidence",
+      "bytes": 14431,
+      "filename": "bc-housing-single-stair-report-record-cd6b32d550f3.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L14/files/bc-housing-single-stair-report-record-cd6b32d550f3.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:48:14.429048+00:00",
+        "http_status": "200",
+        "final_url": "https://research-library.bchousing.org/Home/ResearchItemDetails/8813",
+        "content_type": "text/html; charset=utf-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-2-source-text.txt",
+        "sha256": "6905379f6c83f8417fda4c38c3a7101c73e35006caccdfddcc163ede691b7fc8",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "British Columbia",
+    "city_or_town": "Unspecified locality",
+    "basis": "Illustrative Metro Vancouver regional typology identifies no municipality or real parcel; it is not assigned to the City of Vancouver.",
+    "locator": "jurisdiction field",
+    "scope": "illustrative"
+  }
+}

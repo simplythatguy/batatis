@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The weatherboard fixing system as constructed complies with B2 and E2; the Chief Executive reverses the refusal of the code compliance certificate and requires a new decision (decision, p.11).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "fixing pattern and nail count for weatherboards over a cavity",
+    "cavity and drained-cavity details",
+    "manufacturer installation instructions",
+    "fixing evidence a reviewer requests before a certificate"
+  ],
+  "case_id": "H04-026",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

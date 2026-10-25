@@ -1,0 +1,62 @@
+{
+  "id": "L10-001",
+  "title": "BCC Ruling No. 05-53-1067 — stair riser uniformity",
+  "jurisdiction": "Ontario — City of Vaughan",
+  "code_edition": "Ontario Building Code, Regulation 403 (as cited; edition label unspecified)",
+  "source_url": "http://www.mah.gov.on.ca/Asset7596.aspx?method=1",
+  "document_date": "2005-11-17",
+  "facts": [
+    {
+      "text": "The record describes an as-installed basement stair in a one-storey Group C dwelling; the top and bottom risers were each about 6 mm taller than the other risers.",
+      "locator": "Ruling §1, Particulars of Dispute"
+    },
+    {
+      "text": "The dispute cites Sentence 9.8.2.1.(1), requiring uniform tread rise and run within one flight.",
+      "locator": "Ruling §2, Provisions of the Building Code in Dispute"
+    },
+    {
+      "text": "The applicant said alterations to address the variation could create a tripping hazard at the nosing.",
+      "locator": "Ruling §3, Applicant’s Position"
+    }
+  ],
+  "limitations": [
+    "The attachment is the Commission ruling and reveals the outcome; no original permit drawings or hearing exhibits are included.",
+    "Ontario code and a site-specific ruling are comparative only; they do not establish Alberta requirements.",
+    "This Ontario decision and its code are non-Alberta comparisons for attachment format/content only; they cannot establish Alberta performance. Check Calgary and Edmonton sources first for local authority, then other Alberta jurisdictions as needed."
+  ],
+  "case_type": "appeal_decision",
+  "document_type": "Ontario Building Code Commission dispute ruling",
+  "worker": "L10",
+  "prompt_number": 540,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://web.archive.org/web/20191029224430id_/http://www.mah.gov.on.ca/Asset7596.aspx?method=1",
+      "sha256": "93632a10ceed94c03f22d33cc217488ecc454f4f10d46fdc60704d89e8da03a0",
+      "role": "outcome_reference",
+      "bytes": 52661,
+      "filename": "ONBCC-05-53-1067-93632a10ceed.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L10/files/ONBCC-05-53-1067-93632a10ceed.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:22:40.141039+00:00",
+        "http_status": "200",
+        "final_url": "https://web.archive.org/web/20190117005939id_/http://www.mah.gov.on.ca/Asset7596.aspx?method=1",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Ontario",
+    "city_or_town": "Vaughan",
+    "basis": "The source jurisdiction identifies Vaughan, Ontario for the named project, proposal or appeal; this describes source geography.",
+    "locator": "jurisdiction field",
+    "scope": "project"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Regulator position: the interpretation sets out which NBC(AE)/NFC(AE) requirements apply to licensed overnight child care, organised by occupancy type; the dayhome list begins with smoke alarm, carbon monoxide alarm and egress requirements; fire-alarm triggers for child care facilities are quoted.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Identifies the occupancy classification question (residential dayhome versus assembly daycare, as framed in the Discussion)",
+    "Lists the smoke, carbon monoxide and egress items the document gives for residential child care",
+    "Flags the fire-alarm occupant-load trigger as a permit-file question",
+    "Does not claim the program or building is compliant"
+  ],
+  "case_id": "H20-002",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

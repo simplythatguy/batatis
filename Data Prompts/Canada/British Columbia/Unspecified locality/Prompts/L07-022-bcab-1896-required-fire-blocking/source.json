@@ -1,0 +1,85 @@
+{
+  "id": "L07-022",
+  "title": "BCAB 1896 - Required fire blocking",
+  "jurisdiction": "British Columbia",
+  "code_edition": "BCBC 2018",
+  "case_type": "appeal_decision",
+  "source_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1896",
+  "document_date": "2022-09-15",
+  "facts": [
+    {
+      "text": "The project is a residential building (house) constructed under Part 9 of the BC Building Code. The exterior 3.37 m high wood frame walls of the walk out basement consists of 2X6 studs @ 16” O.C. with the top of the wall extending to the underside of the floor sheathing. The main floor system is 11 7/8” wood I-joists which are mounted to the exterior wall with top mounted hangers. The wall is filled with R24 batt insulation. (See detail below). Materials within the exterior walls and ceiling spaces have a flame spread rating greater than 25.",
+      "locator": "Project description, paragraph 1"
+    },
+    {
+      "text": "The local authority has determined Clause 9.10 16 1.(1)(b) requires fire blocks to be installed to separate vertical concealed spaces from horizontal concealed spaces. The local authority considers the fire blocks required by Sentence 9.10.16.2.(1) and the permission to use insulation in Clause 9.10.16.2.(2)(d) are to block concealed spaces within the vertical wall assembly and not a connection between the vertical and horizontal concealed spaces.",
+      "locator": "Decision being appealed / local authority position, paragraph 1"
+    },
+    {
+      "text": "The appellant contends that as the wall assembly cavity is fully insulated in accordance with Clause 9.10.16.2.(2)(d) that the requirement for fire blocks in Sentence 9.10.16.1.(1) has been met.",
+      "locator": "Appellant position, paragraph 1"
+    }
+  ],
+  "limitations": [
+    "The public Board decision is an appeal record, not the original application package.",
+    "The published decision refers to supporting drawings or evidence in some cases, but the complete original application and attachments are not publicly linked from the decision page.",
+    "Published Board outcome appears in the input attachment; outcome leakage is intentional and flagged.",
+    "Where a figure is attached, the decision page does not consistently identify its author; Board-created figures are distinguished in the research report, and no image is treated as a complete applicant drawing set.",
+    "British Columbia decision retained for comparative attachment format/content only; it does not establish Alberta code applicability, design performance, or acceptance."
+  ],
+  "worker": "L07",
+  "prompt_number": 513,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1896",
+      "sha256": "d8bc04229bb366b1349fa179b2631e39142c9c3f289c9b86e99a12921333eb66",
+      "role": "input",
+      "bytes": 1363600,
+      "filename": "bcab-1896-d8bc04229bb3.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-1896-d8bc04229bb3.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:20:54.529411+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1896",
+        "content_type": "text/html; charset=utf-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-1-source-text.txt",
+        "sha256": "39aab3170dbccf03e871d94ed11ddc29b7b75d8b05643d0e6ac0e99e290595f1",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    },
+    {
+      "url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/construction-industry/building-codes-and-standards/building-code-appeal-board/2022/bcab_1896_y.png",
+      "sha256": "df66b6457235adce177ce118e32e3c64dc9febce638e6f8a4bf8afc854e037a2",
+      "role": "supporting_evidence",
+      "bytes": 99709,
+      "filename": "bcab-1896-bcab_1896_y-df66b6457235.png",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-1896-bcab_1896_y-df66b6457235.png",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:23:05.608204+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/construction-industry/building-codes-and-standards/building-code-appeal-board/2022/bcab_1896_y.png",
+        "content_type": "image/png; charset=UTF-8",
+        "kind": "image",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "British Columbia",
+    "city_or_town": "Unspecified locality",
+    "basis": "British Columbia appeal describes a project without naming its municipality; the provincial appeal-board location is not the project location.",
+    "locator": "jurisdiction field",
+    "scope": "undisclosed"
+  }
+}

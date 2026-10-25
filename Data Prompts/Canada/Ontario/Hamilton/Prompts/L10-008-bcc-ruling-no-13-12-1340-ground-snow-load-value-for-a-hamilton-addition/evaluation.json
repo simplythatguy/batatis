@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The Commission found that using Supplementary Standard SB-1 for the addition provided sufficiency of compliance with the cited provisions.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "edition and SB-1 citation",
+    "local policy versus cited code source",
+    "structural calculation provenance",
+    "outcome leakage"
+  ],
+  "case_id": "L10-008",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

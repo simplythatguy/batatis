@@ -1,0 +1,6 @@
+Use the attached NRC study as technical evidence in an administrative-completeness review for a possible building-code alternative-solution file involving a low-slope roof. Explain the report’s distinction between air leakage and air intrusion and identify the two tested roof configurations. State which evidence is measured under the cited dynamic protocol and what remains unknown about any proposed project. Identify missing jurisdiction, adopted code edition/provision, full roof section and connection details, pressure and climate demands, project-specific analysis, assumptions/limitations, risk controls and required professional evidence. Ask concise follow-up questions. Do not claim compliance, safety, or approval.
+
+Attachments:
+- low-slope-roof-air-intrusion-4d69a9637d8a.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

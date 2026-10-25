@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Council varied the compliance order and required compliance with the cited clause before occupancy; it did not issue a variance in this order.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Recognize this as a documented variance proposal and appeal, not a standalone accepted variance.",
+    "Separate order text from the unprovided report and appendices.",
+    "Check egress release sequence, occupancy context, and missing performance comparison."
+  ],
+  "case_id": "L06-001",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

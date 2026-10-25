@@ -1,0 +1,15 @@
+{
+  "known_outcome": "unknown: the report gives recommendations only; the City's decision is not in the attachment",
+  "outcome_leakage": false,
+  "review_focus": [
+    "code edition by part of the work (1986 OBC for existing, 2012 OBC for the addition)",
+    "mandatory retrofit items and the trigger for a life-safety study",
+    "evacuation assistance that relies on elevator access and an adjacent stair",
+    "water-supply analysis dependencies"
+  ],
+  "case_id": "H18-007",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

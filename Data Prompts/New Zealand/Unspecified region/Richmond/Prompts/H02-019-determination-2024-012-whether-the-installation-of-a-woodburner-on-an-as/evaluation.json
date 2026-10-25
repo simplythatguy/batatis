@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Determination (19 March 2024, s 188, §7, p.11): the installation of the woodburner does not comply with clause C2.2 of the Building Code. The alternative-solution test against C2.2 is addressed at pp.8-10.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Whether the answer identifies C2.2 as the test and the hearth clearance as the issue.",
+    "Whether it asks for the manufacturer's clearance data and the as-built hearth details.",
+    "Whether it treats the alternative-solution route as needing evidence that the installation meets C2.2 by other means.",
+    "Whether it does not say the woodburner complies."
+  ],
+  "case_id": "H02-019",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

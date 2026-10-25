@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Both reversed: the refusal reasons for the code compliance certificate (BC220095) did not meet section 95A(b), and the reasons for refusing certificate of acceptance CA240035 did not meet section 99A(b); the authority must make new decisions. [p.11, para 5.1.1]",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Whether the authority's refusal letter met sections 95A(b) and 99A(b)",
+    "Photos and plans of the lean-to as evidence of as-built work",
+    "Owners' responses to the six main issues as administrative context"
+  ],
+  "case_id": "H01-022",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

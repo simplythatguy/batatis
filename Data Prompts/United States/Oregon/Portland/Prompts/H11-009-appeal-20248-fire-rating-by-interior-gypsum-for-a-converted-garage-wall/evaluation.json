@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Granted with conditions (two layers of Type X inside, blocking to roof sheathing, no openings within 3 feet, no built elements across the line).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "R302 requirement for walls under 3 feet from the line",
+    "roof-to-wall junction and eave detail not described in the request",
+    "whether the converted use changes the requirement"
+  ],
+  "case_id": "H11-009",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

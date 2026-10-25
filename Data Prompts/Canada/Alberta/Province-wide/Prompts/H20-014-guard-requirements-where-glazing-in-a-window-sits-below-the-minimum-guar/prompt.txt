@@ -1,0 +1,6 @@
+A window sits low in a wall where there is a drop of 600 mm or more, and someone asks whether a guard is needed. The attached STANDATA interpretation (23-BCI-018) is my only source. Using only that document, identify the guard and window provisions it relies on, what it says about glazing in the guard, what is still undecided, and what drawing and product evidence the file would need. Do not invent window sizes or heights, and do not say the window complies.
+
+Attachments:
+- ma-standata-interpretation-building-23-bci-018-2026-01-ae9e10b59488.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

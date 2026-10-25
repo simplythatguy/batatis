@@ -1,0 +1,72 @@
+{
+  "id": "H03-006",
+  "record_key": "2021/008",
+  "tier": "strong",
+  "title": "House with 2013 CCC: envelope and perimeter-foundation non-compliance found later (Te Atatu, Auckland)",
+  "jurisdiction": "New Zealand (MBIE, Building Act 2004): comparative test only; not an Alberta case; no Alberta applicability asserted",
+  "authority": "Auckland Council",
+  "code_edition": "clauses current when the consent was issued (App. A, p.14)",
+  "case_type": "issued_variance",
+  "document_type": "MBIE determination under Building Act 2004 s188 (regulator decision on an individual matter); not an applicant's alternative-solution file",
+  "source_url": "https://codehub.building.govt.nz/resources/2021008",
+  "document_date": "2021-04-30",
+  "facts": [
+    {
+      "text": "Split-level two-storey house, unit 1 of a two-unit development, in a low wind zone; authority issued a CCC in 2013 for consent ABA 2012-1351.",
+      "locator": "p.2 §1.3, §2.1"
+    },
+    {
+      "text": "Scope limited to garage block walls and plaster, building envelope ground clearances, perimeter foundation, bathroom slab, kitchen/living floor and shower; other items were workmanship or outside the consent.",
+      "locator": "p.2 §1.6–1.8"
+    },
+    {
+      "text": "Determination asks what the building work was when the authority decided, whether non-compliance would then have been apparent, and takes later evidence into account.",
+      "locator": "p.2 §1.5"
+    },
+    {
+      "text": "Decision: authority correct to issue the CCC on information then available; on current information the work does not comply with E2.3.2 and E3.3.6, and the perimeter foundation does not comply with B2.3.1 insofar as it relates to B1 without remediation; decision reversed (30 April 2021).",
+      "locator": "p.13 §7.1"
+    }
+  ],
+  "recommended_input_pages": "1-12",
+  "limitations": [
+    "Comparative only: a New Zealand determination used to test attachment format and content; it cannot establish Alberta performance or applicability.",
+    "The determination's decision section is in the same PDF; outcome leakage is true. Use only pages 1-12 as applicant-side input if pages are split.",
+    "Facts are taken from the text layer (pypdf); photos, drawings and figures were not visually inspected unless stated."
+  ],
+  "alberta_applicability": "none asserted",
+  "comparative_only": true,
+  "worker": "H03",
+  "prompt_number": 322,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2021/2021-008.pdf",
+      "sha256": "bc7480314436227cefd81bffa0695755870c7cb1c38a736e04521a640b595ccd",
+      "role": "input",
+      "bytes": 1420956,
+      "filename": "2021-008-bc7480314436.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H03/files/2021008/2021-008-bc7480314436.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:43:46.575010+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2021/2021-008.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Auckland",
+    "basis": "The project title identifies Te Atatu, Auckland; Auckland Council is the authority.",
+    "locator": "source title; authority field",
+    "scope": "project"
+  }
+}

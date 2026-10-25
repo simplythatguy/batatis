@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Regulator position: the firefighter-availability requirement for high-rise elevators does not itself govern occupant access; the elevating devices rules do not require a device to be operational.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the firefighter elevator requirement from occupant-use and barrier-free access",
+    "Asks which elevator provisions the barrier-free path depends on",
+    "Flags the elevating-devices operation question as separate from building design",
+    "Does not state the building complies"
+  ],
+  "case_id": "H20-025",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

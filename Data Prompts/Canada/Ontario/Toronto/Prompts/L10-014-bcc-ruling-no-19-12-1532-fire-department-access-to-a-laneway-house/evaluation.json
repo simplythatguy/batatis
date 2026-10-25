@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The Commission found that the proposed fire-fighting access did not provide sufficiency of compliance with Article 9.10.20.3.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "clear access width and obstructions",
+    "fire-service operational requirements",
+    "sprinklers versus access function",
+    "outcome leakage"
+  ],
+  "case_id": "L10-014",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

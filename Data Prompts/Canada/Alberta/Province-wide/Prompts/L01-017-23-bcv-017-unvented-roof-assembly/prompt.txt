@@ -1,0 +1,6 @@
+Using the attached 23-BCV-017 STANDATA and cited RDH report as references, identify what an intake would need before the variance conditions can be checked: Part 9 scope, roof type and climate/thermal zone, insulation type and effective value, air/vapour control, interior humidity assumption, installation records, water-management details and the report’s assembly-specific conditions. Point out missing engineering or project evidence; do not design or certify a roof.
+
+Attachments:
+- 32139-000-alberta-unvented-roofs-evaluation-report-3511fab3b332.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

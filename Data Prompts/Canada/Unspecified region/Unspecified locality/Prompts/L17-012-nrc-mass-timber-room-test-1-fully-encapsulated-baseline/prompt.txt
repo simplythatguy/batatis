@@ -1,0 +1,6 @@
+The attached NRC report contains Test 1 in a controlled room-fire series and is offered as background for a possible alternative-solution or variance submission involving exposed mass timber. Using only this research record, describe what it tested and identify what code adoption, authority having jurisdiction, project geometry, timber/encapsulation details, fire scenario, sprinkler assumptions, egress basis, and professional evidence would need to be established before assessing relevance. Do not invent a project or applicant facts, extrapolate a result, author professional evidence, or claim safety, compliance, equivalence, or approval.
+
+Attachments:
+- mass-timber-room-tests-2a40c6b1cb10.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

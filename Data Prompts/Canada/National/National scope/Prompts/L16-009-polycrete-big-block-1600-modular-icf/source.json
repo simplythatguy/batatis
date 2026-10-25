@@ -1,0 +1,82 @@
+{
+  "id": "L16-009",
+  "title": "Polycrete Big Block 1600 modular ICF",
+  "jurisdiction": "Canada — national CCMC product evaluation; comparative attachment only, not a Calgary/Edmonton or Alberta project application",
+  "code_edition": "NBC 2015",
+  "case_type": "product_evidence",
+  "source_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=13354-R&type=cert",
+  "document_date": "2023-11-08",
+  "facts": [
+    {
+      "text": "The CCMC describes a foldable modular flat ICF with EPS panels, embedded wire mesh and metal ties, stacked in a running configuration and filled with concrete.",
+      "locator": "CCMC 13354-R PDF, p. 3, Product description"
+    },
+    {
+      "text": "The NBC 2015 opinion classifies CAN/CSA-S269.3-M Concrete Formwork under 4.1.1.3.(4)(c) as Alternative while listing multiple ICF and fire-protection provisions as Acceptable.",
+      "locator": "CCMC 13354-R PDF, p. 2, Compliance opinion table"
+    }
+  ],
+  "limitations": [
+    "The report is not a project-specific structural or fire review.",
+    "Its Alternative classification cannot be generalized to other ICF products or installations."
+  ],
+  "source_use": "comparative_attachment_content_only",
+  "worker": "L16",
+  "prompt_number": 205,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?type=cert&id=488",
+      "sha256": "21f7e52b0d53a8215aad2c4dd2f641ab23e2a20e5ca7391c086e30b3dcc89851",
+      "role": "input",
+      "bytes": 211785,
+      "filename": "current-route-13354-R-21f7e52b0d53.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L16/files/current-route-13354-R-21f7e52b0d53.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:51:02.390717+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?type=cert&id=488",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded",
+        "entity_extraction": "Copied unchanged PDF entity from byte 433; original transport capture retained.",
+        "raw_capture_sha256": "b47a12678efa04ec3ed0162a0c65d547e910dbd61f38a3b31da4c3827a77c46c",
+        "raw_capture_path": "_research/workers/L16/files/transport-capture-b47a12678efa04ec.bin"
+      }
+    },
+    {
+      "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=13354-R&type=cert",
+      "sha256": "90d3c93f7706e299864e05bab66e843b24b3e1eea130cea4b0e4cf98de5c8099",
+      "role": "supporting_evidence",
+      "bytes": 104324,
+      "filename": "landing-13354-R-90d3c93f7706.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L16/files/landing-13354-R-90d3c93f7706.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:20:02.696587+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=13354-R&type=cert",
+        "content_type": "text/html; charset=UTF-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-2-source-text.txt",
+        "sha256": "d1d1f120fdfc8c911dab8e6e4a2912bdfcb89ca02e33966a940a8c111314b4f5",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "National",
+    "city_or_town": "National scope",
+    "basis": "National Canadian CCMC product assessment; no project site is identified and manufacturer or publisher addresses are not project locations.",
+    "locator": "jurisdiction field",
+    "scope": "national"
+  }
+}

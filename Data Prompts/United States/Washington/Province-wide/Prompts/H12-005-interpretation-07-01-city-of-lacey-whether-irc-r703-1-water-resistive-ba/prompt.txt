@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from Washington State, requested by City of Lacey (comparative test only; not Alberta). It is not an Alberta application.
+
+Attached is Washington State Building Code Council interpretation no. 07-01 from City of Lacey. The question put to the Council is: Does the requirement in IRC R703.1 for a water-resistive barrier behind the exterior veneer and a means of draining water that enters the assembly to the exterior prohibit single-wall construction? Using only the attached record, identify the code provisions and edition this question turns on, the uncertainty that remains for a building official, the administrative evidence a complete submission would still need, and the next questions to ask the applicant and the reviewing official. Do not say whether any design complies or is safe, do not certify, and do not assume any owner, site, dimensions or drawings that the record does not contain. This is a Washington comparative test record and establishes nothing about Alberta.
+
+Attachments:
+- sbcc-ruling-07-01-0701irc-c3f79d72c596.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

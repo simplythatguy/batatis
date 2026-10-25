@@ -1,0 +1,76 @@
+{
+  "id": "H01-025",
+  "number": "2026-020",
+  "title": "NZ MBIE Determination 2026/020 (comparative): notice to fix for huts built without consent, Schedule 1 exemption",
+  "jurisdiction": "New Zealand (Building Act 2004); Marlborough District Council; comparative only, not Alberta",
+  "scope": "comparative_non_alberta",
+  "code_edition": "NZ Building Code (Schedule 1, Building Regulations 1992) as cited; Building Act Schedule 1 exemption and section 40 as cited",
+  "case_type": "appeal_decision",
+  "timing": "enforcement_notice",
+  "retrospective": "yes",
+  "source_url": "https://codehub.building.govt.nz/resources/2026020",
+  "source_url_note": "Building CodeHub resource page for the same MBIE determination (Information provider: MBIE); the building.govt.nz determination page is WAF-blocked for this worker.",
+  "document_date": "7 July 2026",
+  "facts": [
+    {
+      "text": "The determination concerns a notice to fix for building work carried out to construct two huts and associated structures without a building consent.",
+      "locator": "p.1"
+    },
+    {
+      "text": "The building work commenced in January 2020 and continued through that year; no building consents were applied for or granted.",
+      "locator": "p.3, para 2.1"
+    },
+    {
+      "text": "The matter is the authority's decision to issue the notice to fix dated 9 February 2026, referred to as the second notice.",
+      "locator": "p.2, para 1.3"
+    },
+    {
+      "text": "Figure 1 is a photo of the building work dated 10 September 2025; Figure 2 is a layout of the huts and associated structures.",
+      "locator": "p.1"
+    },
+    {
+      "text": "The owners state that before the second notice, work removed physical attachments of the deck and veranda from the eastern hut.",
+      "locator": "p.5, para 3.1.1"
+    }
+  ],
+  "limitations": [
+    "Comparative test only: New Zealand Building Act 2004 and Building Code (Schedule 1, Building Regulations 1992). No Alberta applicability asserted; no NBC(AE) mapping.",
+    "Outcome leakage: the MBIE decision is inside the same original PDF, so the full file cannot be used as applicant-stage input without removing the decision pages.",
+    "Applicant application documents are not published; drawings and photos appear only as figures inside the determination. Figures were located by caption, not visually inspected.",
+    "Photos and layouts are embedded; the LBP's supervision records are described but not in the file."
+  ],
+  "worker": "H01",
+  "prompt_number": 375,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2026/2026-020.pdf",
+      "sha256": "51440d6735479eec6e26ccd0ba68c448bd8273625b128cfc97b710d73200c49a",
+      "role": "input",
+      "document_type": "MBIE determination PDF (original bytes)",
+      "bytes": 326869,
+      "filename": "mbie-det-2026-020-51440d673547.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H01/files/pdf/mbie-det-2026-020-51440d673547.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:44:48.873794+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2026/2026-020.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Unspecified locality",
+    "basis": "Only Marlborough District Council is named; the project town and separate region are not documented.",
+    "locator": "jurisdiction field",
+    "scope": "undisclosed"
+  }
+}

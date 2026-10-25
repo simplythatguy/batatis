@@ -1,0 +1,65 @@
+{
+  "id": "H08-011",
+  "title": "Matt Shuter + Associates - BCA and Accessibility (DDA) Design Compliance Report, Lindfield Village Living mixed-use development, Pacific Highway, Lindfield (MSA1668_REV03)",
+  "jurisdiction": "New South Wales, Australia - COMPARATIVE ONLY (not Alberta; NSW code text, not Alberta applicability)",
+  "code_edition": "Building Code of Australia 2016 (stated, p.5)",
+  "case_type": "actual_application",
+  "source_url": "https://apps.planningportal.nsw.gov.au/prweb/PRRestService/DocMgmt/v1/PublicDocuments/DATA-WORKATTACH-FILE%20PEC-DPE-EP-WORK%20PPS-2018SNH076!20200810T055359.139%20GMT",
+  "document_date": "04.12.2018 (date of issue, p.1); revision history shows a draft for DA dated 14.11.2018 (p.2)",
+  "facts": [
+    {
+      "text": "'Building Code of Australia & Accessibility (DDA) Design Compliance Report - Development Application', Pacific Highway, Lindfield; report MSA1668_REV03; issued 04.12.2018.",
+      "locator": "p.1"
+    },
+    {
+      "text": "Project described as the 'Lindfield Village Living (LVL) Project' assessed under the BCA and its access provisions.",
+      "locator": "p.3"
+    },
+    {
+      "text": "States matters that will not comply with DTS provisions 'will need to be addressed by Performance Solution at Construction Certificate (CC) stage'.",
+      "locator": "p.3"
+    },
+    {
+      "text": "Cites Ku-ring-gai Council Development Control Plan No. 31 - Access.",
+      "locator": "p.5"
+    }
+  ],
+  "limitations": [
+    "Comparative NSW material: it cannot establish Alberta performance or Alberta applicability.",
+    "Landing page not located; decision unknown.",
+    "The stated edition (BCA 2016) is older than the 2019 and 2022 editions cited by other NSW files here; comparative only."
+  ],
+  "worker": "H08",
+  "prompt_number": 245,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://apps.planningportal.nsw.gov.au/prweb/PRRestService/DocMgmt/v1/PublicDocuments/DATA-WORKATTACH-FILE%20PEC-DPE-EP-WORK%20PPS-2018SNH076!20200810T055359.139%20GMT",
+      "sha256": "f64c53b84c2a2b641cff65dde1796f3b056f94fa838b7266f489c7eec575171d",
+      "role": "input",
+      "bytes": 1125058,
+      "filename": "pp-workattach-2018snh076-f64c53b84c2a.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H08/files/pp-workattach-2018snh076/pp-workattach-2018snh076-f64c53b84c2a.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:23:32.994968+00:00",
+        "http_status": "200",
+        "final_url": "https://apps.planningportal.nsw.gov.au/prweb/PRRestService/DocMgmt/v1/PublicDocuments/DATA-WORKATTACH-FILE%20PEC-DPE-EP-WORK%20PPS-2018SNH076%2120200810T055359.139%20GMT",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Australia",
+    "province_or_state": "New South Wales",
+    "city_or_town": "Lindfield",
+    "basis": "The recorded report cover identifies Pacific Highway, Lindfield as the project location. The state is explicit in the jurisdiction.",
+    "locator": "p.1; jurisdiction field",
+    "scope": "project"
+  }
+}

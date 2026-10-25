@@ -1,0 +1,8 @@
+Use Calgary SPV-001 Revision 5 as an issued reference, with Revision 4 and the City's guide/form for version context. Extract its stated jurisdiction, code edition and article, scope, permit references, and recorded-title conditions. Explicitly flag the projection wording on pages 4 and 5: p.4 gives a 0.3 m maximum footing projection into the easement, while p.5 says the MARW may allow a 0.6 m footing projection across the property line. Do not choose an interpretation; ask what measurement basis or clarification is needed. Also flag unstated edition and project facts, list the drawings and administrative evidence needed before an officer could determine whether this SPV is relevant, and ask concise next questions. No applicant site or owner facts are supplied: do not invent them, treat the SPV as an application, or claim technical equivalence, safety, or compliance.
+
+Attachments:
+- calgary-spv-001-r4-2024-7a528dc00a59.pdf
+- calgary-alternative-solution-guide-package-link-bbb0628b7b5f.pdf
+- calgary-request-specific-variance-fa8881140654.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

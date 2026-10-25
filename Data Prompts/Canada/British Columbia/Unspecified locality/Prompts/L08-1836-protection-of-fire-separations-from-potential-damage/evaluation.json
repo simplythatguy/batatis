@@ -1,0 +1,12 @@
+{
+  "known_outcome": "The Board determined Clause 3.1.10.2.(4)(a) protection was not required for the gypsum-board assembly in the described location, explaining the storage-garage provision’s protection scope.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "No wall-section drawing, tested assembly report or damage-resistance data is linked."
+  ],
+  "case_id": "L08-1836",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

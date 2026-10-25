@@ -1,0 +1,76 @@
+{
+  "id": "H01-026",
+  "number": "2025-033",
+  "title": "NZ MBIE Determination 2025/033 (comparative): notice to fix for roof flashings and wall cladding, form and content",
+  "jurisdiction": "New Zealand (Building Act 2004); Dunedin City Council; comparative only, not Alberta",
+  "scope": "comparative_non_alberta",
+  "code_edition": "NZ Building Code (Schedule 1, Building Regulations 1992) as cited; E2/AS1 third edition, amendment 10 as cited in Appendix A",
+  "case_type": "appeal_decision",
+  "timing": "enforcement_notice",
+  "retrospective": "yes",
+  "source_url": "https://codehub.building.govt.nz/resources/2025033",
+  "source_url_note": "Building CodeHub resource page for the same MBIE determination (Information provider: MBIE); the building.govt.nz determination page is WAF-blocked for this worker.",
+  "document_date": "17 July 2025",
+  "facts": [
+    {
+      "text": "The determination considers a notice to fix for roof flashings and wall cladding systems on a new two-storey detached dwelling.",
+      "locator": "p.1"
+    },
+    {
+      "text": "The notice to fix NTF-2024-257 is challenged for its form, content, specified persons, remedy and timeframe.",
+      "locator": "p.2, para 1.3"
+    },
+    {
+      "text": "The owner and the first and second licensed building practitioners are specified persons under section 163.",
+      "locator": "p.10, para 6.1.1"
+    },
+    {
+      "text": "The notice did not fairly or fully inform recipients of the particulars of the contravention or include an appropriate remedy.",
+      "locator": "p.10, para 6.1.2"
+    },
+    {
+      "text": "Appendix A summarises the roofing and cladding issues, such as sagging window support, weatherboard fixing at floor joists and sealing.",
+      "locator": "p.11"
+    }
+  ],
+  "limitations": [
+    "Comparative test only: New Zealand Building Act 2004 and Building Code (Schedule 1, Building Regulations 1992). No Alberta applicability asserted; no NBC(AE) mapping.",
+    "Outcome leakage: the MBIE decision is inside the same original PDF, so the full file cannot be used as applicant-stage input without removing the decision pages.",
+    "Applicant application documents are not published; drawings and photos appear only as figures inside the determination. Figures were located by caption, not visually inspected.",
+    "Appendix A is a list in the determination; the inspection records behind it are not in the file."
+  ],
+  "worker": "H01",
+  "prompt_number": 376,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2025/2025-033.pdf",
+      "sha256": "73ad68fa8e0ebe488a7bfb05a2412be4c81b4731c1b02b11d4de49dbb77b45e0",
+      "role": "input",
+      "document_type": "MBIE determination PDF (original bytes)",
+      "bytes": 292086,
+      "filename": "mbie-det-2025-033-73ad68fa8e0e.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H01/files/pdf/mbie-det-2025-033-73ad68fa8e0e.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:42:53.412043+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2025/2025-033.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Dunedin",
+    "basis": "The jurisdiction names Dunedin City Council as the local authority context; no separate region is documented.",
+    "locator": "jurisdiction field",
+    "scope": "local"
+  }
+}

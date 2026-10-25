@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from Norway, Trondheim kommune (municipal detailed-plan folder R20160012). Comparative only, not Alberta.. It is not an Alberta application.
+
+Read the attached Norwegian fire concept report (Brannkonsept) and its appended fire drawings. This is a comparison document, so use only the rules the report itself names. From the attachment alone, list: (1) which requirements the report says it applies, and whether it states an edition; (2) each analysis-based solution or deviation it names, including any solid-timber items, and what it says must still be documented; (3) administrative items the report marks as unresolved, undecided or pending, including responsible parties and independent control; (4) which drawings the report relies on, and whether the attachment contains them; (5) the questions you would send back to the authors. Do not say whether the design complies or is safe, do not add facts that are not in the attachment, and do not judge the fire engineering.
+
+Attachments:
+- no-trondheim-olav-tryggvasons-brannkonsept-og-branntegninger-80242a4f468b.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

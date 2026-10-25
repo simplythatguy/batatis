@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from British Columbia (specific local authority not named in published decision). It is not an Alberta application.
+
+Review the proposed elevator-shaft wall in the storage garage of this apartment building. Identify the assembly, fire-resistance evidence and exact protection requirement that apply to this wall, and ask whether the proposed wall is part of the separation described in the cited Code sentence. Request section details and tested assembly documentation; do not assume a fire-resistance rating answers a separate damage-protection question.
+
+Attachments:
+- attachment-1-source-text.txt
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

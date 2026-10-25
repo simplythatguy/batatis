@@ -1,0 +1,14 @@
+{
+  "known_outcome": "The paper concludes that wind-driven membrane billowing can draw indoor air into the assembly (air intrusion) and that a deck-level air retarder can reduce this effect; no project or permit disposition is reported.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "distinguish the paper’s definition of air intrusion from air leakage",
+    "verify that deck, insulation, membrane, fastener layout and air-retarder continuity match the actual proposed roof",
+    "identify the dynamic test protocol and project-specific loading gaps"
+  ],
+  "case_id": "L18-029",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

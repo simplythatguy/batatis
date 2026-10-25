@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Determination: Type 4 and 5 walls' design and construction comply with B1; construction to date complies with F5 (protection of other property).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "design by two engineers and their disagreement",
+    "neighbour protection (F5) during construction",
+    "as-built versus consented wall types",
+    "drawing and expert-evidence sufficiency"
+  ],
+  "case_id": "H03-018",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

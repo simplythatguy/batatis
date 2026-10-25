@@ -1,0 +1,16 @@
+{
+  "known_outcome": "unknown. The package holds no council or Building Authority decision. It holds a practitioner's compliance statements (PDF p.9) and a Form 55 certificate that states Deemed-to-Satisfy compliance (PDF p.19). Treat both as claims, not outcomes.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Deemed-to-Satisfy pathway against the performance-solution trigger as reproduced in the report (BAL-40 / BAL-FZ, PDF p.9)",
+    "Traceability of cited text: Determination v2.3 itself was not retrieved, so its wording is unverified",
+    "Administrative completeness: appendix plans (Appendix C is a heading page), certificate signature and number fields, BHMP cross-reference",
+    "Label consistency for the BAL method: section 2 'Simplified Procedure' (PDF p.5) vs Form 55 'Method 1' (PDF p.19); confirm they name the same method",
+    "Separation of planning-scheme material (Rural Resource zoning; Kingborough Interim Planning Scheme) from building-code material"
+  ],
+  "case_id": "H10-001",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

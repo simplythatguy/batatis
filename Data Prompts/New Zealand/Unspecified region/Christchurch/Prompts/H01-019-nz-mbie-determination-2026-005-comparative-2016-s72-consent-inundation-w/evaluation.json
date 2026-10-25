@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Modified: the building consent should have been granted under section 49; the section 72 condition is removed and the authority notifies the Registrar-General. [p.16, para 6.1]",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Inundation test under section 71 for a riverside site, and adequate provision for the dwelling",
+    "Flood mitigation and ground-improvement evidence in the consent",
+    "Whether the section 73 notice was needed once mitigation was in place"
+  ],
+  "case_id": "H01-019",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

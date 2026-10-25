@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Regulator position: consolidates access-to-roof guidance for roof-mounted HVAC equipment because of inconsistent application; it relies on CSA B149.1:25 (in force 1 March 2026), and notes the NBC(AE) 1st printing references the B149.1:20 edition.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the NBC(AE) Article 3.6.4.7 access rule from the CSA B149.1 gas-code edition question",
+    "Flags the edition caveat (1st printing; B149.1:20 versus :25) for the file",
+    "Asks which gas-code edition the design relies on",
+    "Does not state the access arrangement complies"
+  ],
+  "case_id": "H20-033",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,18 @@
+{
+  "known_outcome": "unknown in the attachment (no Board decision in the packet). Planning and DBI briefs state positions on the parapet and property-line issues.",
+  "outcome_leakage": true,
+  "leakage_detail": "DBI brief (pp.64-66) states the parapet location is not approvable as drawn and lists required plan corrections; Planning brief defers to DBI on the property-line issue (p.59). Positions are agency arguments, not the Board decision. Evaluator-only.",
+  "review_focus": [
+    "property-line identification on drawings (legend or notation)",
+    "firewall or parapet location relative to the property line",
+    "1-hour fire-rated parapet requirement (appellant's claim)",
+    "Planning Code Section 136 encroachment calculations (zoning-adjacent, not a variance)",
+    "completeness of the drawing set (side elevations omitted, per appellant)",
+    "companion Appeal No. 26-056 referenced in the briefs"
+  ],
+  "case_id": "H13-005",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

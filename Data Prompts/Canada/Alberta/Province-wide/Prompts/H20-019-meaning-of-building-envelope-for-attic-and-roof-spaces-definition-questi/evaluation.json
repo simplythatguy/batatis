@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Regulator position: for attic and roof spaces, the NBC(AE) meaning of building envelope is set out in the interpretation; the assemblies need not be thermally insulated to serve the envelope purpose of keeping out precipitation.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the definition question from the thermal-insulation question",
+    "Asks which definition source the file relies on",
+    "Flags attic and roof assembly evidence as open",
+    "Does not state the assembly complies"
+  ],
+  "case_id": "H20-019",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

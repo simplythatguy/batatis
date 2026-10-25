@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The authority did not correctly exercise its powers in refusing a code compliance certificate for the wall cladding; the wall claddings as installed comply with B2 and E2 of the Building Code in force when the house was constructed; the tiled shower areas comply with E3 (decision, p.14).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "named cellulose-fibre sheet cladding and its junctions",
+    "owner-commissioned performance assessment and its weight",
+    "tiled shower areas and wet-area evidence",
+    "product literature and installation records for the sheet cladding"
+  ],
+  "case_id": "H04-028",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

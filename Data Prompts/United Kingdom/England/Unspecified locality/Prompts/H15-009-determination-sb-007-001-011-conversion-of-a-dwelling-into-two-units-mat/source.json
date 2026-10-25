@@ -1,0 +1,75 @@
+{
+  "id": "H15-009",
+  "title": "Determination SB/007/001/011: conversion of a dwelling into two units; material change of use and regularisation",
+  "jurisdiction": "England (UK): Secretary of State determination / appeal / tribunal under the Building Act 1984 and Building Regulations; comparative test only, not Alberta",
+  "code_edition": "Building Regulations 2010 (as amended): regulation 5(g) material change of use; regulations 4 and 14 (as cited)",
+  "case_type": "appeal_decision",
+  "source_url": "https://www.gov.uk/guidance/building-regulations-determinations",
+  "document_date": "undated in extracted text",
+  "facts": [
+    {
+      "text": "A full plans application made on 6 January 2014 was rejected by the Council on 12 May 2014 on the grounds that the proposals are a material change of use and do not comply with regulation 6 of the Building Regulations 2010.",
+      "locator": "p.1"
+    },
+    {
+      "text": "The applicant's position is that earlier extensions were carried out under full building regulation and planning consents.",
+      "locator": "p.2"
+    },
+    {
+      "text": "The council's list of items, as quoted in the letter, includes escape windows for ground-floor inner rooms, a legal boundary confirmation, a sound test, heat-loss calculations and upgrade items.",
+      "locator": "pp.3-4 numbered items B1, B4, E1, L1, L1B"
+    },
+    {
+      "text": "The Council states it has no record of the loft conversion and the glazed front extension and asks for details of when they were built and what permissions applied.",
+      "locator": "p.5 items Reg 14"
+    },
+    {
+      "text": "Determination: the work constitutes a material change of use under regulation 5(g); regularisation of the loft conversion cannot be required; the conservatory work needs no application for regularisation.",
+      "locator": "p.11 final paragraph"
+    }
+  ],
+  "limitations": [
+    "Record type: Secretary of State determination under s.16 Building Act 1984 (dispute on plan compliance); case_type mapped to appeal_decision as the nearest schema value.",
+    "Comparative test only: England (UK); Building Regulations 2010 (as amended): regulation 5(g) material change of use; regulations 4 and 14 (as cited). Not an Alberta record; no applicability to NBC(AE) or Alberta is asserted.",
+    "Attachment is the original public file; Internet Archive capture 20260214014002 (live gov.uk URL redirects). Live URL status is recorded in references and blocked.",
+    "outcome_leakage true: the decision is inside this attachment (p.11); use only earlier pages as input if a leak-free variant is required.",
+    "Personal names and contact details appear in the original attachment and are omitted from this record.",
+    "The letter itself carries no decision date in the extracted text; dates in the body refer to 2014 correspondence.",
+    "The gov.uk listing for the determinations (guidance/building-regulations-determinations) is available only as a 2024-02-28 Internet Archive snapshot; the live URL redirects to the current appeals guide."
+  ],
+  "worker": "H15",
+  "prompt_number": 484,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://assets.publishing.service.gov.uk/media/5a7d949aed915d3fb959499c/150108_DET_007-001-011_exp.pdf",
+      "sha256": "486b06adaad85e29648811a5b1cf9b2166f0c2f3df2aa1672b7b188b57465db3",
+      "role": "input",
+      "retrieved_via": "Internet Archive capture 20260214014002 (live gov.uk URL redirects)",
+      "archive_url": "https://web.archive.org/web/20260214014002id_/https://assets.publishing.service.gov.uk/media/5a7d949aed915d3fb959499c/150108_DET_007-001-011_exp.pdf",
+      "bytes": 214079,
+      "filename": "determination-SB-007-001-011-486b06adaad8.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H15/files/determinations/SB-007-001-011/determination-SB-007-001-011-486b06adaad8.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:58:00.463137+00:00",
+        "http_status": "200",
+        "final_url": "https://web.archive.org/web/20260214014002id_/https://assets.publishing.service.gov.uk/media/5a7d949aed915d3fb959499c/150108_DET_007-001-011_exp.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "United Kingdom",
+    "province_or_state": "England",
+    "city_or_town": "Unspecified locality",
+    "basis": "The jurisdiction establishes England, but the recorded case facts and evaluation do not identify a project locality; no place is inferred from tribunal codes, offices or service providers.",
+    "locator": "jurisdiction field; source facts",
+    "scope": "undisclosed"
+  }
+}

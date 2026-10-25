@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The tribunal denied the appeal because it said it lacked authority to grant the requested variance at that time.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "what geometry and handrail details are actually provided",
+    "existing stair route versus proposed ramp evidence",
+    "current status/effective date of cited legislation",
+    "distinguish a building-accessibility appeal from an NBC alternative-solution file"
+  ],
+  "case_id": "L20-019",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

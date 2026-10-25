@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from New Zealand (Building Act 2004); Tauranga City Council; comparative only, not Alberta. It is not an Alberta application.
+
+This is a New Zealand regulator document about relocating and altering an existing dwelling on a sloping site, where natural-hazard (slippage) evidence after a design change is in question. Using only the attached PDF, identify the natural-hazard and structural provisions it treats as uncertain, list the site plans, hazard information, and reports it relies on, flag missing geotechnical or administrative information, and list the next questions a reviewer should ask. Do not say whether the site is safe or the work complies, and do not apply Alberta or NBC(AE) rules.
+
+Attachments:
+- mbie-det-2025-031-c18cfa1dcbf2.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

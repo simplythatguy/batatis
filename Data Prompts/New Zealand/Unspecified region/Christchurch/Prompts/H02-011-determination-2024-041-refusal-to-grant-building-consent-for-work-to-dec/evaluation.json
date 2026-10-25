@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Determination (13 Aug 2024, s 188, §6.1, p.20; PDF headed DRAFT): there are grounds under section 49 to refuse building consent BCN/2019/4930 because the work will not comply with clauses C3.6 and C3.8 to the extent required, if completed to the plans (§6.1.1); the 21 October 2021 refusal letter did not adequately and specifically detail the reasons, as section 50 requires (§6.1.2); the authority's decision is reversed and it must make a new decision (§6.2, p.20).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Whether the answer separates the sprinkler-to-detection change from the C3.6 and C3.8 fire-separation and radiation tests.",
+    "Whether it lists the fire-load and warning-system items as open evidence questions.",
+    "Whether it notes the section 50 requirement for specific refusal reasons, and that the record is a draft.",
+    "Whether it does not say the change is safe."
+  ],
+  "case_id": "H02-011",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

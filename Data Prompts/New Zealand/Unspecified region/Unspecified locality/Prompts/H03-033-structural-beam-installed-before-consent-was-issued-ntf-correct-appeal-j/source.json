@@ -1,0 +1,90 @@
+{
+  "id": "H03-033",
+  "record_key": "2022/028",
+  "tier": "supporting",
+  "title": "Structural beam installed before consent was issued; NTF correct; appeal judgment attached (locality truncated in record)",
+  "jurisdiction": "New Zealand (MBIE, Building Act 2004): comparative test only; not an Alberta case; no Alberta applicability asserted",
+  "authority": "not verified in this pass",
+  "code_edition": "Building Act ss 40, 41 as cited",
+  "case_type": "issued_variance",
+  "document_type": "MBIE determination under Building Act 2004 s188 (regulator decision on an individual matter); not an applicant's alternative-solution file",
+  "source_url": "https://codehub.building.govt.nz/resources/2022028",
+  "document_date": "2022-12-16",
+  "facts": [
+    {
+      "text": "Owners installed a new structural beam across a garage door opening; the authority had processed a consent application but did not issue the consent because some fees were unpaid.",
+      "locator": "p.17 §6.1; CodeHub record"
+    },
+    {
+      "text": "The building work had already been carried out before the consent was granted and issued.",
+      "locator": "p.17 §6.1–6.2"
+    },
+    {
+      "text": "Decision: authority correct to refuse building consent 468097 because the work was already carried out, and correct to issue the notice to fix because the work breached s40; remedies appropriate (16 December 2022).",
+      "locator": "p.17 §6.2–6.3; p.18 §7.1"
+    },
+    {
+      "text": "Practicability test under s41(1)(c): a consent could practicably have been obtained in advance.",
+      "locator": "p.17 §6.1"
+    }
+  ],
+  "recommended_input_pages": "1-16",
+  "limitations": [
+    "Comparative only: a New Zealand determination used to test attachment format and content; it cannot establish Alberta performance or applicability.",
+    "The determination's decision section is in the same PDF; outcome leakage is true. Use only pages 1-16 as applicant-side input if pages are split.",
+    "Facts are taken from the text layer (pypdf); photos, drawings and figures were not visually inspected unless stated.",
+    "Companion appeal judgment (4 pages, no text layer) was not read in this pass."
+  ],
+  "alberta_applicability": "none asserted",
+  "comparative_only": true,
+  "worker": "H03",
+  "prompt_number": 349,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2022/2022-028.pdf",
+      "sha256": "419afe068374a4d082b4f85242498ae05bf023c5ee6cae261143b03ded27aa16",
+      "role": "input",
+      "bytes": 1044922,
+      "filename": "2022-028-419afe068374.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H03/files/2022028/2022-028-419afe068374.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:49:31.933208+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2022/2022-028.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/Appeals/2022-028-appeal-judgement.pdf",
+      "sha256": "7937ef8b4f8e8d53a2956cb7e1f266b45d190b5033520db089a025cd1c56e906",
+      "role": "outcome_reference",
+      "bytes": 204241,
+      "filename": "_evaluation/2022-028-appeal-judgement-7937ef8b4f8e.pdf",
+      "included_in_default_input": false,
+      "original_collection_path": "_research/workers/H03/files/2022028/2022-028-appeal-judgement-7937ef8b4f8e.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:49:35.414557+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/Appeals/2022-028-appeal-judgement.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Unspecified locality",
+    "basis": "The locality is explicitly truncated in the title and the authority was not verified; the beam facts do not recover a place.",
+    "locator": "source title; authority field; p.17 §6.1; CodeHub record",
+    "scope": "undisclosed"
+  }
+}

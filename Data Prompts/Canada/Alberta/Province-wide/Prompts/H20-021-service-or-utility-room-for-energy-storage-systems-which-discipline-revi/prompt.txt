@@ -1,0 +1,6 @@
+A room containing an energy storage system is part of a building project, and it is unclear whether the building or electrical discipline reviews it. The attached STANDATA interpretation (23-BCI-025/24-ECI-009) is my only source. Using only that document, identify the discipline the document assigns review and inspection to, the permit basis it cites, the fire-resistance and location questions it mentions, and what evidence and questions the file needs. Do not invent a room size, storage capacity or location, and do not state the room complies.
+
+Attachments:
+- ma-standata-interpretation-joint-23bci025-24eci009-2026-10-9f81abcb87b2.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

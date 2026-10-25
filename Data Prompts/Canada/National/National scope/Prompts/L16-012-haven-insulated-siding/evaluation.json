@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The current CCMC record publishes a bounded fire-test summary and an NBC 2015 product opinion; the additional fire-performance section is expressly outside the opinion.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "confirm exact product series/model and siding/insulation configuration",
+    "identify the full substrate and installation assembly",
+    "determine which project fire provisions apply",
+    "request source test report and project-specific details if needed"
+  ],
+  "case_id": "L16-012",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

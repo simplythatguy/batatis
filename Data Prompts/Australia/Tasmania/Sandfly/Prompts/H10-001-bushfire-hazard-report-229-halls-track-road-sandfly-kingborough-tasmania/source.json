@@ -1,0 +1,111 @@
+{
+  "id": "H10-001",
+  "title": "Bushfire Hazard Report, 229 Halls Track Road, Sandfly (Kingborough, Tasmania): supporting report for a building permit for two dwellings, with BHMP sheet and Form 55 certificate (BushfireWise BW051v1, May 2025)",
+  "jurisdiction": "Tasmania, Australia (Kingborough municipality). NON-ALBERTA comparative record.",
+  "code_edition": "NCC edition not stated in the report (cites 'National Construction Code, Building Code of Australia'). AS 3959-2018. Tasmanian Director's Determination - Bushfire Hazard Areas (transitional) v2.3, 16 July 2024, as cited in the report.",
+  "case_type": "actual_application",
+  "source_url": "https://assets.kingborough.tas.gov.au/uploads/2025/10/DA-2025-177-02-Bushfire-Hazard-Assessment-Report.pdf",
+  "document_date": "Report dated May 2025 (PDF p.1, p.3). Version 1 dated 25/09/2025 (footers, PDF p.3-19). Form 55 certificate dated 26/05/2025 (PDF p.19). PDF creation date 2025-09-25 (metadata).",
+  "facts": [
+    {
+      "text": "Cover block: 'BushfireWise - Development Planning', 'Bushfire Hazard Report'. Location 229 Halls track Road, Sandfly. Applicant R. Saunders. Date May 2025. Certification number BW051v1. Author Mark Van den Berg, BFP-108. Version 1, version date 25/09/2025.",
+      "locator": "PDF p.1 (cover block)"
+    },
+    {
+      "text": "Purpose: the report addresses a new primary dwelling and an ancillary dwelling in a bushfire-prone area. It states that it demonstrates compliance with the Director's Determination - Bushfire Hazard Areas (transitional) v2.3 dated 16 July 2024, and that it includes a Form 55 Certificate of Qualified Person.",
+      "locator": "PDF p.3, section 1.0 Purpose (report page 3 of 10)"
+    },
+    {
+      "text": "Site details as printed: title reference 223516/1; municipality Kingborough; Kingborough Interim Planning Scheme 2015; zoning Rural Resource; land size about 44 ha; compliance pathway stated as 'Deemed to Satisfy'.",
+      "locator": "PDF p.3, section 2.0 Site Details; PDF p.4, section 5.0 Site Description"
+    },
+    {
+      "text": "The report says it 'will form part of supporting documentation for a building permit application for the construction of two new dwellings'.",
+      "locator": "PDF p.3, section 3.0 Introduction"
+    },
+    {
+      "text": "BAL was assessed 'in accordance with Section 2 of AS 3959-2018: Simplified Procedure'. Stated BAL-29 for the primary dwelling and BAL-19 for the ancillary dwelling. The BAL tables are in Appendix A.",
+      "locator": "PDF p.5, section 6.0; PDF p.11-12 (Appendix A tables)"
+    },
+    {
+      "text": "Construction standard as written: 'In accordance with the National Construction Code and the Directors Determination s4.1', the two dwellings are to be built to AS3959 specifications for BAL-29 and BAL-19 respectively.",
+      "locator": "PDF p.6, section 7.1"
+    },
+    {
+      "text": "The compliance table reproduces the Determination row 'If BAL-40 or BAL-FZ, a Performance Solution is required (not DtS).' The same table records the practitioner's statements that the proposal complies with s4.1 and with s4.2 to s4.3. Those are the practitioner's statements, not a building authority's decision.",
+      "locator": "PDF p.8, section 8.0 (Table 3 heading: Determination 16 July 2024, version 2.3); PDF p.9 (Table 3 continued)"
+    },
+    {
+      "text": "Reference list cites the National Construction Code (Building Code of Australia) with no edition, Standards Australia AS3959-2018, the Building Amendment (Bushfire-Prone Areas) Regulations 2016, the Kingborough Interim Planning Scheme 2015, and the Director's Determination v2.3 of 16 July 2024.",
+      "locator": "PDF p.10, section 9.0 References"
+    },
+    {
+      "text": "Bushfire Hazard Management Plan sheet titled 'Bushfire Hazard Management Plan 229 Halls Track Road, Sandfly. May 2025. BW051v1.' It lists property-access and water-supply compliance requirements and 'Building Specifications as marked to AS3959-2018', and says it is to be read with the associated Bushfire Hazard Report.",
+      "locator": "PDF p.17"
+    },
+    {
+      "text": "Form 55 (Director of Building Control approved form, approved 1 July 2017): Certificate of Qualified Person - Assessable Item, certificate type 'Bushfire Hazard'. Qualified person Mark Van den Berg, licence BFP-108. Assessable item 'Bushfire hazard management plan for two new class 1a buildings'. Listed calculations 'AS 3959:2018 - Method 1 BAL assessment'.",
+      "locator": "PDF p.18-19"
+    },
+    {
+      "text": "Form 55 substance (the practitioner's certified statement): the building work, if built according to the referenced BHMP, 'will comply with the applicable Deemed-to-Satisfy requirements' of Determination v2.3. The BAL is stated as BAL-29 (primary) and BAL-19 (ancillary). Certificate date 26/05/2025.",
+      "locator": "PDF p.19 (Substance of Certificate, items 1-2)"
+    },
+    {
+      "text": "Form 55 scope and limitations: scope limited to compliance with Determination v2.3; effectiveness depends on correct implementation and maintenance for the life of the development; 'No guarantee can be provided that the building work will survive every bushfire event.'",
+      "locator": "PDF p.19 (Scope and/or Limitations, items 1-3)"
+    },
+    {
+      "text": "Appendix C is a heading page ('Appendix C - proposal plans') with no drawing text in the extracted layer. The plan content was not verified.",
+      "locator": "PDF p.16"
+    },
+    {
+      "text": "Form 55 signature and certificate-number fields: the text layer shows the labels 'Signed:' and 'Certificate No:' with no visible name beside them. The text 'BW051.v1. 26/05/2025' sits on the qualified-person line. Whether a signature image is present was not verified.",
+      "locator": "PDF p.19"
+    }
+  ],
+  "limitations": [
+    "COMPARATIVE ONLY. Tasmanian Building Act 2016 framework and Director's Determination. Not an Alberta record. It supports no Alberta applicability or performance claim.",
+    "Supporting report package, not the full application. No permit application form, no council or building-surveyor decision, no drawing text (Appendix C is a heading page).",
+    "Text extracted with pypdf 6.21.1 from the original bytes. No visual rendering was possible here (no pdftoppm or tesseract installed). Image-only content and signatures are unverified.",
+    "The cited Director's Determination (v2.3, 16 July 2024) was not retrieved. The CBOS host returned HTTP 403 to the collection helper. The BAL-40/BAL-FZ trigger comes only from the report's reproduction (PDF p.9).",
+    "The 'DA-2025-177-02' label appears only in the source URL file name. The document text carries no DA number.",
+    "No council DA landing page was visited. The source_url is the direct PDF host.",
+    "The practitioner's compliance statements (PDF p.8-9, p.19) are unverified and are not an authority decision. The NCC edition is not stated in the report, and none is assumed.",
+    "Owner and applicant identity are used only as printed in the report. The prompt uses the site address the report prints, and no other owner or site facts."
+  ],
+  "comparative_only": true,
+  "worker": "H10",
+  "prompt_number": 249,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://assets.kingborough.tas.gov.au/uploads/2025/10/DA-2025-177-02-Bushfire-Hazard-Assessment-Report.pdf",
+      "sha256": "3adf994f8836734cc8d65e95070b438dad1ba478e241a8456e338d0f4b6f035e",
+      "role": "input",
+      "bytes": 1960494,
+      "filename": "kingborough-da-2025-177-bushfire-hazard-report-3adf994f8836.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H10/files/tas-council/kingborough-da-2025-177-bushfire-hazard-report-3adf994f8836.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:45:59.779247+00:00",
+        "http_status": "200",
+        "final_url": "https://assets.kingborough.tas.gov.au/uploads/2025/10/DA-2025-177-02-Bushfire-Hazard-Assessment-Report.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Australia",
+    "province_or_state": "Tasmania",
+    "city_or_town": "Sandfly",
+    "basis": "The cover identifies the Sandfly site; the jurisdiction names Tasmania and Kingborough municipality.",
+    "locator": "PDF p.1 (cover block); jurisdiction field",
+    "scope": "project"
+  }
+}

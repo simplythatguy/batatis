@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from British Columbia (specific local authority not named in published decision). It is not an Alberta application.
+
+Review whether the stated basement conditions answer the Code trigger for a floor drain where gravity drainage is possible. Ask for a site/plumbing plan, elevations of the basement slab and sewer inverts, and details showing whether a proposed drain would discharge by gravity or require pumping. Do not infer a drainage route from the existence of a building lift pump.
+
+Attachments:
+- attachment-1-source-text.txt
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

@@ -1,0 +1,9 @@
+Comparative attachment exercise: this source is from British Columbia. It is not an Alberta application.
+
+Using only the attached published BC Building Code Appeal Board decision and any accompanying Board-page figure(s), identify the disputed code issue and the project facts, documents, calculations, or operational details that remain unclear. Treat figures as illustrations of only the depicted arrangement, not as a complete drawing set. Separate stated facts from assumptions and draft focused follow-up questions. Do not make a compliance or safety determination.
+
+Attachments:
+- attachment-1-source-text.txt
+- bcab-1896-bcab_1896_y-df66b6457235.png
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

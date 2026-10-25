@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from New Zealand (Building Act 2004); Tauranga City Council; comparative only, not Alberta. It is not an Alberta application.
+
+This is a New Zealand regulator document about a new dwelling on a sloping site near a gully, where a building restriction line applies and the consent was issued under a slippage pathway. Using only the attached PDF, identify the slippage, retaining, and foundation provisions it treats as uncertain, list the geotechnical analysis, contour, and restriction-line information it relies on, flag missing administrative items, and list the next questions a reviewer should ask. Do not say whether the site is stable or the dwelling complies, and do not apply Alberta or NBC(AE) rules.
+
+Attachments:
+- mbie-det-2026-012-ada53fc7f4b5.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

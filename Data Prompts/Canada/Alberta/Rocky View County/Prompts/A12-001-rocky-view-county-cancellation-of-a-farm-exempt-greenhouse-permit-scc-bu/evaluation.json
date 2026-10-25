@@ -1,0 +1,16 @@
+{
+  "known_outcome": "The Tribunal ordered the Notice of Cancellation revoked (p.1; para 68). Reasoning: the building falls under the farm-building exemption and does not require a permit (paras 55-59, 67).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Whether the farm-building exemption quoted at para 26 applies to a greenhouse with planting boxes as described, versus a building for vehicle storage.",
+    "Whether a Safety Codes Officer has authority to issue or cancel a permit for a building claimed to be exempt (Appellant's argument, para 9).",
+    "Whether the stated use, the plans and the complaint evidence are consistent, and what verification the file shows.",
+    "Setback and floor-plan completeness raised in the denied application (para 34) and whether the accepted application addressed them (para 35 does not say).",
+    "Separation of land-use questions (primary-dwelling and bylaw points raised in the decision) from building-code questions."
+  ],
+  "case_id": "A12-001",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Determination: authority correct to refuse the CCC under the 1998 Code; canopy-roof and laundry-toilet items removed from the non-compliance findings (17 September 2021).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "code edition applied to a 1998 consent",
+    "EIFS/monolithic plaster durability and moisture",
+    "expert report and photographs as evidence",
+    "modification of individual items within a refusal"
+  ],
+  "case_id": "H03-010",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

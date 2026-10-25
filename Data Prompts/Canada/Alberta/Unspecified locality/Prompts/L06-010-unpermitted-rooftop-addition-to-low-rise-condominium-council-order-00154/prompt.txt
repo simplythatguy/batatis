@@ -1,0 +1,6 @@
+Treat the attached order as a historical evidence record, not as a design approval. Summarize the reported roof-addition dimensions and the differing professional observations. Identify the inspection access, as-built details, calculations, permit history and code edition that are not established by the order. Do not resolve the structural disagreement or state that the structure is safe.
+
+Attachments:
+- scc_2018_rooftop_addition-02496ab29492.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

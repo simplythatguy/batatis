@@ -1,0 +1,13 @@
+{
+  "known_outcome": "The Board determined that attachment through an acceptable intervening capillary-break material to compliant sheathing can meet the cited attachment requirements, but expressly did not approve the product itself; professional design and review were not considered.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "No product evaluation, fastening schedule, test report or drawing is linked.",
+    "The decision did not assess approval of the material or professional design/review."
+  ],
+  "case_id": "L08-1780",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

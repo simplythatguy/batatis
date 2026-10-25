@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The report publishes bounded fire-test values and a product-level NBC 2015 opinion; the fire table is explicitly additional data outside the compliance opinion.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "exact Novik profile and tested specimen identity",
+    "complete proposed wall assembly and attachment",
+    "whether the fire data is relevant to the applicable code provision",
+    "project code edition and required supporting evidence"
+  ],
+  "case_id": "L16-010",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

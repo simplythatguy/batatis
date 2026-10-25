@@ -1,0 +1,124 @@
+{
+  "id": "H06-001",
+  "title": "Tauranga BC50488 fire design report (Fire Designs Ltd, Issue 1): alterations to an existing building, Acceptable Solutions route",
+  "scope": "comparative_non_alberta: NZ record kept in its original jurisdiction; attachment format and content comparison only; no Alberta performance or applicability",
+  "jurisdiction": "New Zealand, Tauranga City Council (NZ Building Code; NON-ALBERTA comparative test)",
+  "code_edition": "As cited in the report: C/AS4 Public Access (Amendment 2, 19 December 2013); C/AS5 Offices (Amendment 2, 19 December 2013); F6/AS1 (10 October 2011); F7/AS1 (10 April 2012); F8/AS1 (10 April 2012); Building Act 2004 ss 17, 46, 112 and 118 as quoted; DBH Gazette Notice No 49 (written 'effective 7 May 2012' on p.5 and 'dated 3 May 2012' on p.20)",
+  "case_type": "actual_application",
+  "source_url": "https://fyi.org.nz/request/23106",
+  "document_date": "7 February 2014 (Issue 1; reference 1400020)",
+  "facts": [
+    {
+      "text": "Cover: fire design report for 'alterations to an existing building' at 46 Spring Street, Tauranga; Fire Designs Limited; Issue 1, 7 February 2014; reference N° 1400020.",
+      "locator": "Part 1 file (101 pp), PDF p.1"
+    },
+    {
+      "text": "Cover carries Tauranga City Council approval-stamp text ('These plans are approved in accordance with the NZ Building Code. These plans must remain on site.').",
+      "locator": "Part 1 file (101 pp), PDF p.1"
+    },
+    {
+      "text": "Document control shows Issue 1 dated 07/02/2014. The text-layer footer reads '45 Spring St, Tauranga' while the cover and p.3 read '46 Spring St': possible OCR error, check the page image.",
+      "locator": "Part 1 file (101 pp), PDF p.2"
+    },
+    {
+      "text": "Table of contents lists the gap analysis (p.6), the Fire Service Design Review Unit section (p.20) and Appendix A 'Fire Plans' (p.21).",
+      "locator": "Part 1 file (101 pp), PDF p.3"
+    },
+    {
+      "text": "Purpose: to 'satisfy the Tauranga City Council that the proposed alterations to the existing building will comply with' Building Act 2004 provisions on means of escape from fire, protection of other property, fire-rating performance, and access and facilities for persons with disabilities.",
+      "locator": "Part 1 file (101 pp), PDF p.4"
+    },
+    {
+      "text": "Quotes Building Act s 112 (alterations to existing buildings): the consent authority must be satisfied that, as nearly as is reasonably practicable, means of escape and accessibility provisions are complied with, and the other provisions continue to be complied with to at least the same extent (paraphrase of quoted text).",
+      "locator": "Part 1 file (101 pp), PDF p.4"
+    },
+    {
+      "text": "States that the NZ Building Code fire-safety clauses are demonstrated using Approved Documents: C/AS4 (Amendment 2, 19 December 2013), C/AS5 (Amendment 2, 19 December 2013), F6/AS1 (10 October 2011), F7/AS1 (10 April 2012), F8/AS1 (10 April 2012). The pages read describe no alternative solution.",
+      "locator": "Part 1 file (101 pp), PDF p.4"
+    },
+    {
+      "text": "Limits: unless specifically stated, the report does not address matters beyond the Building Code provisions it covers.",
+      "locator": "Part 1 file (101 pp), PDF p.4"
+    },
+    {
+      "text": "Scope: seismic strengthening of 'the existing three level building', treated as alterations assessed for means of escape under s 112. The report 'deals specifically with the requirements of this project and this client'.",
+      "locator": "Part 1 file (101 pp), PDF p.5"
+    },
+    {
+      "text": "Section 46(1) referral: the works 'do not fit within the criteria' of DBH Gazette Notice No 49, 'effective 7 May 2012', so the application 'is NOT required to be forwarded' to the Fire Service Design Review Unit.",
+      "locator": "Part 1 file (101 pp), PDF p.5"
+    },
+    {
+      "text": "Specified systems are listed as set out in the Compliance Schedule Handbook (sprinkler system, alarm, emergency lighting, mechanical ventilation, emergency power and other fire-safety systems).",
+      "locator": "Part 1 file (101 pp), PDF p.6"
+    },
+    {
+      "text": "Gap analysis: a table summarises non-compliance with C/AS4 and C/AS5 and the actions to reach a 'nearly as reasonably practicable (ANARP)' solution, for example smoke control in the air-handling system and fire-alarm upgrade actions.",
+      "locator": "Part 1 file (101 pp), PDF p.6"
+    },
+    {
+      "text": "C/AS5 Part 1 s 1.2: for an 'alteration' to an existing building, Parts 2, 3, 4 and 6 are to be considered 'to the extent' applicable (text truncated in extraction).",
+      "locator": "Part 1 file (101 pp), PDF p.7"
+    },
+    {
+      "text": "Part 6: F6/AS1 visibility in escape routes is extended 'to all levels of the building, ensuring compliance with NZBC F6'.",
+      "locator": "Part 1 file (101 pp), PDF p.16"
+    },
+    {
+      "text": "Compliance schedule: 'Existing Compliance Schedule Number: 226, Expiry Date: 02/06/2014'. The designer states it does not guarantee that the listed specified systems are the only systems pertaining to the building.",
+      "locator": "Part 1 file (101 pp), PDF p.18"
+    },
+    {
+      "text": "Schedule items 15/2 to 15/4 cite NZBC performance standards (F6, C1-C6, F8) with inspection regimes (daily for crowd-type occupancies; monthly or six-monthly otherwise, with annual maintenance by an IQP).",
+      "locator": "Part 1 file (101 pp), PDF p.19"
+    },
+    {
+      "text": "The DRU checklist repeats the s 46 test and cites 'DBH Gazette Notice No 49 dated 3 May 2012', a different date from 'effective 7 May 2012' on p.5.",
+      "locator": "Part 1 file (101 pp), PDF p.20"
+    },
+    {
+      "text": "Appendix A is headed 'Fire Plans' (divider page). The next page is a protective coatings specification. A text search found no fire-plan sheet carrying the report's 'Fire Designs' header in either part.",
+      "locator": "Part 1 file (101 pp), PDF p.21"
+    }
+  ],
+  "limitations": [
+    "Comparative only: New Zealand, NZ Building Code and Building Act 2004 as cited in the document. Not Alberta evidence; no Alberta applicability asserted.",
+    "Acceptable Solution route: the report does not use an alternative solution. It is the only real NZ consent fire-design report recovered in this bounded pass, so it is a format comparator, not an alternative-solution example.",
+    "Read from the PDF text layer (pypdf). Pages are scan-derived and partly garbled; locators are PDF page numbers of the 101-page Part 1 file. The report's own footers read 'Page x of 21'.",
+    "Shares its original Part 1 file with H06-002 and H06-005 (distinct pages).",
+    "Preparers' personal names are omitted. The report is a consultant's document; this record makes no compliance or safety finding."
+  ],
+  "worker": "H06",
+  "prompt_number": 233,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://fyi.org.nz/request/23106/response/87459/attach/5/BC50488%20Minor%20Refurbishment%20Of%20Toilets%20Seismic%20Strengthening%20Of%20Ground%20And%20First%20Floor%20Shops%20And%20Offices%20Technical%20Reports%20Part%201%20of%202%20Optimized.pdf",
+      "sha256": "4fe57e1598068287ef27e67f09cb057baa8a98ac6b248b061616137c04553b51",
+      "role": "input",
+      "bytes": 24010813,
+      "filename": "h06-fyi-bc50488-fire-design-part1-4fe57e159806.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H06/files/h06-fyi-bc50488-fire-design-part1-4fe57e159806.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:47:00.864695+00:00",
+        "http_status": "200",
+        "final_url": "https://fyi.org.nz/request/23106/response/87459/attach/5/BC50488%20Minor%20Refurbishment%20Of%20Toilets%20Seismic%20Strengthening%20Of%20Ground%20And%20First%20Floor%20Shops%20And%20Offices%20Technical%20Reports%20Part%201%20of%202%20Optimized.pdf",
+        "content_type": "application/pdf; charset=utf-8",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "New Zealand",
+    "province_or_state": "Unspecified region",
+    "city_or_town": "Tauranga",
+    "basis": "The report cover expressly locates the alteration project at Spring Street, Tauranga.",
+    "locator": "Part 1 file (101 pp), PDF p.1",
+    "scope": "project"
+  }
+}

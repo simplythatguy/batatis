@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Reversed: the authority's refusal of building consent BCO10358023 was reversed; its reasons were found not valid under section 50(b), and the authority may make a new decision. [p.13, para 6.1]",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Change of use from office to residential in an existing multi-storey building, including the section 115 test referenced in the determination",
+    "Fire-engineering report and FENZ consultation as evidence for the conversion",
+    "Whether the refusal reasons were valid under section 50(b)"
+  ],
+  "case_id": "H01-003",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

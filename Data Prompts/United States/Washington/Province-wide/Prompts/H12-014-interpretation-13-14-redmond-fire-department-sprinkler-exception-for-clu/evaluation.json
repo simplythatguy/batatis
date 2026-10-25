@@ -1,0 +1,16 @@
+{
+  "known_outcome": "Council answers (leakage, summary): portables not separated by the minimum IBC separation are aggregated into clusters (Q1, Q2 yes); the space between portables is not counted (Q3); separated portables are not counted in the aggregate (Q4 no); under the 2012 amendment portables with occupant load over 50 are sprinklered (Q5 yes); Exception 2 does not apply to portable buildings (Q6 no); connected portables may be split by fire barriers under IFC 901.4.3, but the resulting cluster still counts toward the 5,000 sf limit (Q7).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "cluster definition and separation",
+    "area aggregation of portables",
+    "occupant-load rule versus portable exception",
+    "use of fire barriers to reduce occupant load",
+    "sprinkler evidence for the cluster"
+  ],
+  "case_id": "H12-014",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

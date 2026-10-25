@@ -1,0 +1,68 @@
+{
+  "id": "A03-004",
+  "title": "Calgary Centennial Planetarium heritage retrofit project profile",
+  "jurisdiction": "Calgary, Alberta",
+  "code_edition": "Unknown (the profile refers to current building codes but names no edition)",
+  "case_type": "documented_case_summary",
+  "source_url": "https://rjcca.b-cdn.net/rjc-media/published.html?start=230",
+  "document_date": "2018-12 (RJC-hosted Award magazine profile, p. 69)",
+  "facts": [
+    {
+      "text": "The profile identifies the 1967 Centennial Planetarium at 701 11th Street SW, City of Calgary as owner, and describes conversion to a contemporary art gallery with heritage conservation. It says the renovation was intended to address current building codes but does not identify an edition or attach the code analysis.",
+      "locator": "PDF p. 1 (magazine p. 69)"
+    },
+    {
+      "text": "The article reports unknown concealed/as-built structural conditions; following a roof leak, 3D laser scanning was used to model a damaged atrium ceiling.",
+      "locator": "PDF p. 1 (magazine p. 69)"
+    },
+    {
+      "text": "RJC’s quoted structural consultant says it assessed the structural impact of cutting more than 200 service cores. The article says tracing existing services and pathways involved experienced guesswork and testing.",
+      "locator": "PDF p. 1 (magazine p. 69)"
+    },
+    {
+      "text": "The article describes heating/HVAC and electrical upgrades and quotes a lighting designer reporting modern fire alarms and life-safety lighting “now up to code”; that is a project-profile statement, not a supplied approval or independent code finding.",
+      "locator": "PDF p. 1 (magazine p. 69)"
+    }
+  ],
+  "limitations": [
+    "This is a consultant-published magazine profile, not the original application or technical report.",
+    "The PDF is hosted by RJC but is not an approval record; named code edition and actual code analysis are absent.",
+    "The profile is a 2018 snapshot; no current operational state is inferred."
+  ],
+  "original_worker_case_type": "documented_design_study",
+  "parent_curation_note": "Published consultant project profile or City procurement/condition summary, rather than a technical design study or original application; underlying code/condition reports are not attached.",
+  "worker": "A03",
+  "prompt_number": 32,
+  "priority_tier": 1,
+  "priority": "Calgary / Edmonton",
+  "attachments": [
+    {
+      "url": "https://rjcca.b-cdn.net/uploads/published/calgary-centennial-planetarium-renovation_award-december_2018.pdf",
+      "sha256": "627ed7bef275f74a67ebcd5b89aa7f67c376fd4072dc057f560271a203506e1d",
+      "role": "input",
+      "locator": "PDF p. 1 (magazine p. 69)",
+      "bytes": 404031,
+      "filename": "centennial-planetarium-rjc-project-profile-627ed7bef275.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/A03/files/centennial-planetarium-rjc-project-profile-627ed7bef275.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:57:26.749111+00:00",
+        "http_status": "200",
+        "final_url": "https://rjcca.b-cdn.net/uploads/published/calgary-centennial-planetarium-renovation_award-december_2018.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Alberta",
+    "city_or_town": "Calgary",
+    "basis": "The source jurisdiction identifies Calgary, Alberta for the named project, proposal or appeal; this describes source geography.",
+    "locator": "PDF p. 1 (magazine p. 69)",
+    "scope": "project"
+  }
+}

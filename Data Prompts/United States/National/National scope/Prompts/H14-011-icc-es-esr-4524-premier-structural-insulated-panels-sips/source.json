@@ -1,0 +1,75 @@
+{
+  "id": "H14-011",
+  "title": "ICC-ES ESR-4524: Premier structural insulated panels (SIPs)",
+  "jurisdiction": "United States (ICC-ES evaluation report under IBC/IRC); NON-ALBERTA COMPARATIVE ONLY: cannot establish Alberta performance, acceptance or equivalence; no Canadian or Alberta approval is claimed or implied",
+  "code_edition": "2024, 2021 and 2018 IBC and IRC (report §1.0, p1)",
+  "case_type": "product_evidence",
+  "source_url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-4524.pdf",
+  "document_date": "Reissued February 2025; subject to renewal February 2027 (p1)",
+  "facts": [
+    {
+      "text": "Report holder PREMIER BUILDING SYSTEMS, LLC; additional listees Big Sky Insulation, Inc. and Extreme Panel Technologies.",
+      "locator": "p1 cover"
+    },
+    {
+      "text": "Premier SIPs are intended for load-bearing or non-load-bearing wall, roof, floor panels and headers; they are combustible for construction type under IBC Chapter 6 and may be used in fire-rated assemblies when installed per §4.2.11.",
+      "locator": "§2.0 and §3.1, p1"
+    },
+    {
+      "text": "Installation must comply with the report and the approved construction documents; only the listed thicknesses apply; heights and spans may not be extrapolated.",
+      "locator": "§5.1-5.3, p6"
+    },
+    {
+      "text": "Panels are produced in Puyallup, Washington; Belgrade, Montana; and Cottonwood, Minnesota under ICC-ES-inspected quality control.",
+      "locator": "§5.4, p6"
+    },
+    {
+      "text": "Evidence listed: AC04 (June 2019, editorially revised December 2020); ASTM E119; ASTM E455; NFPA 286.",
+      "locator": "§6.0, p7"
+    },
+    {
+      "text": "Each panel is labelled with the ESR number, a quality-assurance stamp, and a project or batch number.",
+      "locator": "§7.1, p7"
+    }
+  ],
+  "limitations": [
+    "Non-Alberta comparative attachment; the report does not reference NBC(AE) 2023 and is not evidence of Alberta or Canadian acceptance.",
+    "Retrieved 2026-10-25 from the official ICC-ES report URL; current ICC-ES status was not checked live. source_url is the report PDF, not a separate listing page.",
+    "Text from pypdf extraction; figures, tables and signatures not transcribed; locators are PDF page numbers, not printed page numbers.",
+    "ICC-ES copyright; retained locally for comparison only, redistribution not licensed.",
+    "The sips.org copy of this report returned HTTP 524; the ICC-ES copy is the one read."
+  ],
+  "worker": "H14",
+  "prompt_number": 638,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-4524.pdf",
+      "sha256": "6824f129440d43bb441150ddfbff71a6a215df824fd3590a049790baad80d8fe",
+      "role": "input",
+      "bytes": 801943,
+      "filename": "esr-4524-premier-extreme-panel-sip-6824f129440d.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H14/files/esr-4524/esr-4524-premier-extreme-panel-sip-6824f129440d.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:21:59.639130+00:00",
+        "http_status": "200",
+        "final_url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-4524.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "United States",
+    "province_or_state": "National",
+    "city_or_town": "National scope",
+    "basis": "The jurisdiction identifies a US ICC-ES product assessment under IBC/IRC. Report-holder and manufacturing locations do not locate a project.",
+    "locator": "jurisdiction field",
+    "scope": "national"
+  }
+}

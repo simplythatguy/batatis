@@ -1,0 +1,14 @@
+{
+  "known_outcome": "pp.8–10: the determination does not reverse the authority's decision to issue the building consent as amended; the amended design includes a compliant ramp (reasoning p.8 §5.12; decision text on p.10, partly garbled in extraction).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the original consent from the later amendments",
+    "Identifies the ramp amendment as a recorded change without asserting that it complies",
+    "Flags the reliance on companion determination 2014/038 for the hoist questions"
+  ],
+  "case_id": "H05-011",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

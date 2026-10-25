@@ -1,0 +1,62 @@
+{
+  "id": "L11-012",
+  "title": "1042 Richardson Street: exterior exit-path sprinkler AS design",
+  "jurisdiction": "City of Victoria, British Columbia",
+  "code_edition": "British Columbia Building Code 2024",
+  "case_type": "actual_application",
+  "source_url": "https://tender.victoria.ca/WebApps/OurCity/Prospero/FileDownload.aspx?fileId=6D07CD1B-DCAB-489A-A79A-F8FE714F6EDC&folderId=61303C201001092155276953",
+  "document_date": "2025 drawing set",
+  "facts": [
+    {
+      "text": "Cover identifies a new 20-unit five-storey project at 1042/1044 Richardson Street and BCBC 2024.",
+      "locator": "PDF p.1"
+    },
+    {
+      "text": "Code analysis identifies sprinkler protection of an exterior exit path and references BCBC 3.2.3.13.",
+      "locator": "PDF pp.3-5"
+    },
+    {
+      "text": "Alternative-solution table identifies east-wall balcony-door/opening locations and marks sprinkler-protected openings as the proposal.",
+      "locator": "PDF p.4"
+    }
+  ],
+  "limitations": [
+    "British Columbia comparative material only; it cannot establish Alberta code performance or applicability.",
+    "Proposal/design analysis; no acceptance decision."
+  ],
+  "original_worker_case_type": "documented_design_study",
+  "parent_curation_note": "Original case-specific architectural/code-analysis drawing sheets for a named project are attached; this is a submission component, not an approval or full application package.",
+  "worker": "L11",
+  "prompt_number": 272,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://tender.victoria.ca/WebApps/OurCity/Prospero/FileDownload.aspx?fileId=6D07CD1B-DCAB-489A-A79A-F8FE714F6EDC&folderId=61303C201001092155276953",
+      "sha256": "aa3501f10022516fe2ce793a523695223cfae6ebc0cdf8854c193d74dd232919",
+      "role": "input",
+      "bytes": 34532990,
+      "filename": "victoria-1042-richardson-code-analysis-aa3501f10022.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L11/files/victoria-1042-richardson-code-analysis-aa3501f10022.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:07.771620+00:00",
+        "http_status": "200",
+        "final_url": "https://tender.victoria.ca/WebApps/OurCity/Prospero/FileDownload.aspx?fileId=6D07CD1B-DCAB-489A-A79A-F8FE714F6EDC&folderId=61303C201001092155276953",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "British Columbia",
+    "city_or_town": "Victoria",
+    "basis": "The source jurisdiction identifies Victoria, British Columbia for the named project, proposal or appeal; this describes source geography.",
+    "locator": "jurisdiction field",
+    "scope": "project"
+  }
+}

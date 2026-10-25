@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Council answer (leakage): no. R703.1 does not require a rain-shield or similar construction and does not prevent single-wall construction; drainage of water that penetrates the exterior covering is provided by the water-resistive barrier under the final wall covering, which sheds water down to the bottom of the wall.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "whether a prescribed assembly type is required or only a performance outcome",
+    "the water-resistive barrier as the drainage element",
+    "alternative wall construction under the residential code",
+    "evidence needed to show drainage performance"
+  ],
+  "case_id": "H12-005",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The building envelope does not comply with Clauses E2 and B2 of the Building Code in force when the original consent was issued in 1997; the refusal to issue a code compliance certificate is confirmed (decision, p.24).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "monolithic cladding and window-installation junctions",
+    "envelope risk assessment for a complex plan",
+    "refusal letters and inspection records as the admin trail",
+    "which code edition applies to an older consent"
+  ],
+  "case_id": "H04-015",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,14 @@
+{
+  "known_outcome": "The order was varied to allow acceptable alternative-solution submissions and additional information for the proposed board.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Keep the glazing/fire-shutter question separate from the siding/board assembly question.",
+    "Identify product testing, assembly configuration and exact site dimensions needed.",
+    "Do not claim that the product alternative was accepted."
+  ],
+  "case_id": "L06-008",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

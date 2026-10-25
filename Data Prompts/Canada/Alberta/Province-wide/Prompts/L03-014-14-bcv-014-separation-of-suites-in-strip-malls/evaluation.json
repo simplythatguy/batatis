@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The 14-BCV-014 STANDATA gives a province-wide conditional exception for specified strip-mall suite separations; the catalogue row itself is not marked withdrawn, while its PDF carries an Archived watermark. A separate 14-BCV-008 entry is marked withdrawn.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "distinguish 14-BCV-014 from withdrawn 14-BCV-008",
+    "suite occupancies and building height",
+    "sprinkler and fire-alarm evidence",
+    "direct exterior exits and assembly separation"
+  ],
+  "case_id": "L03-014",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

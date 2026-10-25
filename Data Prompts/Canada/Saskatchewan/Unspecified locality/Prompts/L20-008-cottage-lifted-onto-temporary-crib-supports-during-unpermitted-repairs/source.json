@@ -1,0 +1,60 @@
+{
+  "id": "L20-008",
+  "title": "Cottage lifted onto temporary crib supports during unpermitted repairs",
+  "jurisdiction": "Saskatchewan; local authority redacted in the published decision",
+  "code_edition": "Not stated in the decision",
+  "case_type": "appeal_decision",
+  "source_url": "https://www.saskatchewan.ca/business/housing-development-construction-and-property-management/building-and-technical-standards/saskatchewan-building-and-accessibility-standards-appeal-board",
+  "document_date": "2022-10-31",
+  "facts": [
+    {
+      "text": "The orders state that work began without a building permit, the dwelling was raised and temporarily placed on piers, decks were demolished, and floor-assembly repairs were underway.",
+      "locator": "PDF pp. 3–4"
+    },
+    {
+      "text": "The remedy order identifies ungraded crib blocking on grade with a plywood base, damaged floor joists without mid-span support, and building-envelope damage.",
+      "locator": "PDF p. 4"
+    },
+    {
+      "text": "The decision notes that the authority lacked design drawings and that a complete building-permit application with design drawings was needed for review.",
+      "locator": "PDF pp. 5–7"
+    }
+  ],
+  "limitations": [
+    "Comparative source from outside Alberta; it cannot establish Alberta code performance or approval.",
+    "The attached publication is the appeal decision, not the underlying application file. Exhibits named in the decision are not presumed attached unless visible in this PDF. The decision outcome is visible in the attachment."
+  ],
+  "worker": "L20",
+  "prompt_number": 560,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://publications.saskatchewan.ca/api/v1/products/120269/formats/138891/download",
+      "sha256": "e882c024b6b8788c32534c534d7a27161acaa988407fe45acfb645f07626491a",
+      "role": "outcome_reference",
+      "bytes": 236185,
+      "filename": "sk-scsab-appeal-no.-2022-007-e882c024b6b8.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L20/files/sk-scsab-appeal-no.-2022-007-e882c024b6b8.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:23:06.434033+00:00",
+        "http_status": "200",
+        "final_url": "https://publications.saskatchewan.ca/api/v1/products/120269/formats/138891/download",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Saskatchewan",
+    "city_or_town": "Unspecified locality",
+    "basis": "Saskatchewan appeal record leaves the municipality or property location unnamed or redacted; no project locality is inferred from the tribunal or office address.",
+    "locator": "jurisdiction field",
+    "scope": "undisclosed"
+  }
+}

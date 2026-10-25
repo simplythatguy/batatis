@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from United States (ICC-ES evaluation report under IBC/IRC); NON-ALBERTA COMPARATIVE ONLY: cannot establish Alberta performance, acceptance or equivalence; no Canadian or Alberta approval is claimed or implied. It is not an Alberta application.
+
+Comparative test on a US ICC-ES report for an insulating concrete form. Using only the attached report, set out the code editions it is written against, including any addressed in a separate section, the construction-type and fire-resistance limits, the labelling and calculation requirements, and the evidence it cites. Then identify which requirements an Alberta reviewer would need separately evidenced, what the report does not establish for an Alberta permit, and what to ask the report holder before relying on any part of it.
+
+Attachments:
+- esr-1147-integraspec-icf-b948c7f36265.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

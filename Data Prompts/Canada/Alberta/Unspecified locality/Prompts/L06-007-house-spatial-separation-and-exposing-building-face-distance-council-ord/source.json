@@ -1,0 +1,60 @@
+{
+  "id": "L06-007",
+  "title": "House spatial separation and exposing-building-face distance (Council Order 0015471)",
+  "jurisdiction": "Alberta; accredited municipality not named in the order",
+  "code_edition": "Alberta Building Code 2006 (ABC 2006)",
+  "document_date": "2016-11-17",
+  "facts": [
+    {
+      "text": "The appeal concerned a residence and application of Articles 9.10.15.5.(2) and 9.10.15.4.(1), including an exposing building face within 1.2 m of a property line.",
+      "locator": "PDF pp.1, 4-5, paras 1-2, 12"
+    },
+    {
+      "text": "The appellant described two likely 48-by-36-inch bedroom windows and two basement windows along the wall in question; the order reports distances of 1.09 m from siding and 1.15 m from foundation at the northwest corner.",
+      "locator": "PDF p.6, paras 16-20"
+    },
+    {
+      "text": "The appellant said a survey pin was bent and cited a small measurement discrepancy; the appeal record included an as-built survey and two respondent exhibits.",
+      "locator": "PDF pp.2, 6, paras 9-10, 16-19"
+    }
+  ],
+  "limitations": [
+    "The order’s underlying plans and complete survey exhibits are not separate attachments.",
+    "ABC 2006 is historical."
+  ],
+  "source_url": "https://safetycodes.ab.ca/council-information/appeals/appeal-decisions/",
+  "case_type": "appeal_decision",
+  "worker": "L06",
+  "prompt_number": 119,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2016/Building%20-%20Meeting%20the%20requirements%20of%20exposing%20building%20face%20-%20November%202016.pdf",
+      "sha256": "4419e8ddfb07b24f83eca613960c5f587ed6764d16245c843e97131f69c1a262",
+      "role": "input",
+      "bytes": 239419,
+      "filename": "scc_2016_exposed_building_face-4419e8ddfb07.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L06/files/scc_2016_exposed_building_face-4419e8ddfb07.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:20.379786+00:00",
+        "http_status": "200",
+        "final_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2016/Building%20-%20Meeting%20the%20requirements%20of%20exposing%20building%20face%20-%20November%202016.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Alberta",
+    "city_or_town": "Unspecified locality",
+    "basis": "Alberta appeal record leaves the municipality or property location unnamed or redacted; no project locality is inferred from the tribunal or office address.",
+    "locator": "jurisdiction field",
+    "scope": "undisclosed"
+  }
+}

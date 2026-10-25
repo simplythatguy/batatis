@@ -1,0 +1,96 @@
+{
+  "id": "H13-003",
+  "title": "SF Board of Appeals No. 25-053: site permit at 436 Eureka Street (basement, skylight, windows); alleged conflict with Board decision 22-013",
+  "jurisdiction": "City and County of San Francisco, California (comparative, non-Alberta)",
+  "code_edition": "unknown if unstated; appellant states the plans use 2016 building code standards (appellant's claim, unverified)",
+  "case_type": "actual_application",
+  "source_url": "https://www.sfgov.org/boa",
+  "document_date": "2025-11-24 notice of appeal (permit issued 2025-11-10); hearing date printed as both 2026-02-18 and 2026-01-21",
+  "comparative_scope": "non-Alberta comparative only",
+  "alberta_applicability": "none",
+  "facts": [
+    {
+      "text": "Notice of appeal: DBI issuance on 2025-11-10 of an altered site permit (ref. 2018-1009-2526) to expand the basement, add a skylight and change window sizes at 436 Eureka Street; application 2025/08/14/3077; hearing printed as 2026-02-18.",
+      "locator": "packet p.1"
+    },
+    {
+      "text": "The briefing text prints a different hearing date (2026-01-21). The two dates conflict in the packet.",
+      "locator": "packet p.2"
+    },
+    {
+      "text": "Appellant says the permit violates the Board decision in Appeal No. 22-013 (appellant's claim).",
+      "locator": "packet p.3"
+    },
+    {
+      "text": "DBI plan-review routing comments refer to a 'REV5 drawing', 'duplicate sheet A1.04 & A1.40', and a 'slope protection checklist on sheet A-0.03'.",
+      "locator": "packet p.5"
+    },
+    {
+      "text": "Appellant says the plans use 2016 building code standards and do not meet building code size limits for single dwelling units (appellant's claims).",
+      "locator": "packet pp.12, 14"
+    },
+    {
+      "text": "Appellant cites California Building Code Section 705.11 as requiring a 30-inch parapet where a skylight is within five feet of a roof edge (appellant's citation, not verified).",
+      "locator": "packet p.26"
+    },
+    {
+      "text": "Image-only page: affidavit of service certifying service of the Notice of Decision for Appeal No. 22-013 on 2022-05-12.",
+      "locator": "packet p.44 (rendered)"
+    },
+    {
+      "text": "Image-only page: 'Existing Second Level Plan' drawing, scale 3/16in = 1ft-0in.",
+      "locator": "packet p.50 (rendered)"
+    },
+    {
+      "text": "Image-only page: architect's letter dated 2025-05-07 requesting a second extension for PA 2018-1009-2526 and stating PA 2022-0628-7312 was issued to conform to the Board decision.",
+      "locator": "packet p.63 (rendered)"
+    },
+    {
+      "text": "Permit-holder brief and a DBI brief are included in the packet.",
+      "locator": "packet p.33 (permit holder); pp.68-69 (DBI)"
+    }
+  ],
+  "limitations": [
+    "Two hearing dates are printed in the packet and conflict.",
+    "Code citations and edition claims are the appellant's and were not verified.",
+    "Image pages 44 and 50 were rendered; the remaining image-only pages (45-49, 51-63) were not inspected.",
+    "Comparative, non-Alberta only."
+  ],
+  "worker": "H13",
+  "prompt_number": 252,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://media.api.sf.gov/documents/Item_4_Appeal_No._25-053_at_436_Eureka_Street.pdf",
+      "final_url": "https://media.api.sf.gov/documents/Item_4_Appeal_No._25-053_at_436_Eureka_Street.pdf",
+      "retrieved_at": "2026-10-25T01:48:45.343959+00:00",
+      "http_status": "200",
+      "content_type": "application/pdf",
+      "sha256": "a733de030a30a669c0eab651030707a57fbf70115acd504457abf4b3f294db80",
+      "bytes": 8291426,
+      "role": "input",
+      "filename": "sf-boa-item4-appeal-25-053-436-eureka-st-a733de030a30.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H13/files/sf-boa/sf-boa-item4-appeal-25-053-436-eureka-st-a733de030a30.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:48:45.343959+00:00",
+        "http_status": "200",
+        "final_url": "https://media.api.sf.gov/documents/Item_4_Appeal_No._25-053_at_436_Eureka_Street.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "United States",
+    "province_or_state": "California",
+    "city_or_town": "San Francisco",
+    "basis": "The jurisdiction and case title identify a San Francisco building-permit appeal; the project address is stated in the title.",
+    "locator": "jurisdiction field; source title",
+    "scope": "project"
+  }
+}

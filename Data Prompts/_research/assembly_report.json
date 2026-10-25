@@ -1,0 +1,328 @@
+{
+  "created_at": "2026-10-25T03:00:10.847294+00:00",
+  "candidate_count": 679,
+  "prompt_count": 653,
+  "case_types": {
+    "documented_design_study": 71,
+    "issued_variance": 100,
+    "appeal_decision": 259,
+    "documented_case_summary": 22,
+    "published_worked_example": 12,
+    "regulatory_guidance": 55,
+    "actual_application": 49,
+    "product_evidence": 71,
+    "research_evidence": 14
+  },
+  "errors": [],
+  "duplicates": [
+    {
+      "duplicate_id": "L18-005",
+      "kept_id": "L18-004",
+      "reason": "same original source set and case location"
+    },
+    {
+      "duplicate_id": "L18-006",
+      "kept_id": "L18-004",
+      "reason": "same original source set and case location"
+    },
+    {
+      "duplicate_id": "L18-008",
+      "kept_id": "L18-007",
+      "reason": "same original source set and case location"
+    },
+    {
+      "duplicate_id": "L18-009",
+      "kept_id": "L18-007",
+      "reason": "same original source set and case location"
+    },
+    {
+      "duplicate_id": "L18-015",
+      "kept_id": "L18-014",
+      "reason": "same original source set and case location"
+    },
+    {
+      "duplicate_id": "L18-018",
+      "kept_id": "L18-017",
+      "reason": "same original source set and case location"
+    },
+    {
+      "duplicate_id": "L18-020",
+      "kept_id": "L18-019",
+      "reason": "same original source set and case location"
+    },
+    {
+      "duplicate_id": "L18-021",
+      "kept_id": "L18-019",
+      "reason": "same original source set and case location"
+    },
+    {
+      "duplicate_id": "L17-002",
+      "kept_id": "L17-001",
+      "reason": "same original source set and case location"
+    },
+    {
+      "duplicate_id": "L17-004",
+      "kept_id": "L17-003",
+      "reason": "same original source set and case location"
+    },
+    {
+      "duplicate_id": "L17-006",
+      "kept_id": "L17-005",
+      "reason": "same original source set and case location"
+    },
+    {
+      "duplicate_id": "L17-008",
+      "kept_id": "L17-007",
+      "reason": "same original source set and case location"
+    },
+    {
+      "duplicate_id": "L17-009",
+      "kept_id": "L17-007",
+      "reason": "same original source set and case location"
+    },
+    {
+      "duplicate_id": "L17-011",
+      "kept_id": "L17-010",
+      "reason": "same original source set and case location"
+    },
+    {
+      "duplicate_id": "L17-013",
+      "kept_id": "L17-012",
+      "reason": "same original source set and case location"
+    },
+    {
+      "duplicate_id": "L17-014",
+      "kept_id": "L17-012",
+      "reason": "same original source set and case location"
+    },
+    {
+      "duplicate_id": "L17-015",
+      "kept_id": "L17-012",
+      "reason": "same original source set and case location"
+    },
+    {
+      "duplicate_id": "L17-016",
+      "kept_id": "L17-012",
+      "reason": "same original source set and case location"
+    },
+    {
+      "duplicate_id": "L17-018",
+      "kept_id": "L17-017",
+      "reason": "same original source set and case location"
+    },
+    {
+      "duplicate_id": "L17-019",
+      "kept_id": "L17-017",
+      "reason": "same original source set and case location"
+    },
+    {
+      "duplicate_id": "L17-020",
+      "kept_id": "L17-017",
+      "reason": "same original source set and case location"
+    },
+    {
+      "duplicate_id": "L18-026",
+      "kept_id": "L18-025",
+      "reason": "same original source set and case location"
+    },
+    {
+      "duplicate_id": "L18-027",
+      "kept_id": "L18-025",
+      "reason": "same original source set and case location"
+    },
+    {
+      "duplicate_id": "H06-005",
+      "kept_id": "H06-001",
+      "reason": "same original source set and case location"
+    },
+    {
+      "duplicate_id": "L19-003",
+      "kept_id": "L19-002",
+      "reason": "same original source set and case location"
+    },
+    {
+      "duplicate_id": "H06-006",
+      "kept_id": "H06-003",
+      "reason": "same original source set and case location"
+    }
+  ],
+  "excluded_candidates": [
+    {
+      "case_id": "A08-001",
+      "worker": "A08",
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    {
+      "case_id": "A08-002",
+      "worker": "A08",
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    {
+      "case_id": "A08-003",
+      "worker": "A08",
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    {
+      "case_id": "A08-004",
+      "worker": "A08",
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    {
+      "case_id": "A08-005",
+      "worker": "A08",
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    {
+      "case_id": "A08-006",
+      "worker": "A08",
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    {
+      "case_id": "A08-007",
+      "worker": "A08",
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    {
+      "case_id": "A08-008",
+      "worker": "A08",
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    {
+      "case_id": "A08-009",
+      "worker": "A08",
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    {
+      "case_id": "A08-010",
+      "worker": "A08",
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    {
+      "case_id": "A08-011",
+      "worker": "A08",
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    {
+      "case_id": "A08-012",
+      "worker": "A08",
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    {
+      "case_id": "A08-013",
+      "worker": "A08",
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    {
+      "case_id": "A08-014",
+      "worker": "A08",
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    {
+      "case_id": "A08-015",
+      "worker": "A08",
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    {
+      "case_id": "A08-016",
+      "worker": "A08",
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    {
+      "case_id": "A08-017",
+      "worker": "A08",
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    {
+      "case_id": "A08-018",
+      "worker": "A08",
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    {
+      "case_id": "A08-019",
+      "worker": "A08",
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    {
+      "case_id": "A08-020",
+      "worker": "A08",
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    {
+      "case_id": "A08-021",
+      "worker": "A08",
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    {
+      "case_id": "A08-022",
+      "worker": "A08",
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    {
+      "case_id": "A09-002",
+      "worker": "A09",
+      "reason": "Designer-hosted newspaper narrative mentions unspecified building-code issues but supplies no drawing, code analysis or technical report; retained as an Edmonton lead rather than padding the technical attachment prompt set."
+    },
+    {
+      "case_id": "A10-002",
+      "worker": "A10",
+      "reason": "Same KHA Edmonton project as L14-003. Original long-section and ground-floor drawings merged into L14-003; not counted as a second case."
+    },
+    {
+      "case_id": "A15-006",
+      "worker": "A15",
+      "reason": "The underground-tank order varies only a compliance deadline, not a building design or alternative technical solution; retained as a process reference."
+    },
+    {
+      "case_id": "H12-022",
+      "worker": "H12",
+      "reason": "Rulemaking-petition appeal, not a building design/application case; preserved as a comparative process reference."
+    },
+    {
+      "case_id": "H13-007",
+      "worker": "H13",
+      "reason": "Demolition/CEQA decision peripheral to building-code alternative design, retained as a reference rather than a numbered technical case."
+    },
+    {
+      "case_id": "L11-003",
+      "worker": "L11",
+      "reason": "Permit-register entry only; no design, rationale or technical application attachment. Retained in worker references and excluded from numbered prompts."
+    },
+    {
+      "case_id": "L11-004",
+      "worker": "L11",
+      "reason": "Permit-register entry only; no design, rationale or technical application attachment. Retained in worker references and excluded from numbered prompts."
+    },
+    {
+      "case_id": "L11-005",
+      "worker": "L11",
+      "reason": "Permit-register entry only; no design, rationale or technical application attachment. Retained in worker references and excluded from numbered prompts."
+    },
+    {
+      "case_id": "L11-006",
+      "worker": "L11",
+      "reason": "Permit-register entry only; no design, rationale or technical application attachment. Retained in worker references and excluded from numbered prompts."
+    },
+    {
+      "case_id": "L11-007",
+      "worker": "L11",
+      "reason": "Permit-register entry only; no design, rationale or technical application attachment. Retained in worker references and excluded from numbered prompts."
+    },
+    {
+      "case_id": "L11-008",
+      "worker": "L11",
+      "reason": "Permit-register entry only; no design, rationale or technical application attachment. Retained in worker references and excluded from numbered prompts."
+    },
+    {
+      "case_id": "L11-009",
+      "worker": "L11",
+      "reason": "Permit-register entry only; no design, rationale or technical application attachment. Retained in worker references and excluded from numbered prompts."
+    },
+    {
+      "case_id": "L11-010",
+      "worker": "L11",
+      "reason": "Permit-register entry only; no design, rationale or technical application attachment. Retained in worker references and excluded from numbered prompts."
+    }
+  ],
+  "distinct_source_groups": 592,
+  "source_group_definition": "connected components of all shared default-input original attachments"
+}

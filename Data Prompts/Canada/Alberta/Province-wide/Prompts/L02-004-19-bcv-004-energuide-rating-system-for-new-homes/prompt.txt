@@ -1,0 +1,6 @@
+Review the attached 19-BCV-004 on ERS v15 energy modelling. Identify its eligible dwelling types, energy-savings threshold, modelling limits, and pre-occupancy records. Ask what dwelling form, model output, qualified-advisor report, blower-door result, and label are available for a separate request; do not infer performance or current-code acceptance.
+
+Attachments:
+- catalogue-88457d64-baa7-432d-ab06-ed643cf0a919-19-BCV-004---EnerGuide-rating-system-for-new-homes-680d702e80a5.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

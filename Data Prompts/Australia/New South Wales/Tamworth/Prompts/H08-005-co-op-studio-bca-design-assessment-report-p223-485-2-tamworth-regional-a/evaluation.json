@@ -1,0 +1,16 @@
+{
+  "known_outcome": "Approved; determination date 29/04/2025 (Sydney/Regional Planning Panel; Planning Portal determined-DA page, DA2024-0039 with other identification DA2025-0039)",
+  "outcome_leakage": true,
+  "review_focus": [
+    "how the performance argument for fire compartment size is framed against the prescriptive limit",
+    "unit and figure consistency between text and table",
+    "which items are DtS, which are performance solutions, and which are deferred",
+    "scope and limitations statement",
+    "no compliance certification"
+  ],
+  "case_id": "H08-005",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

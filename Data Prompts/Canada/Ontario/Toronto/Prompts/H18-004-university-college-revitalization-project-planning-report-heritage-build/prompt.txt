@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from University of Toronto, Ontario, Canada (original jurisdiction). It is not an Alberta application.
+
+Here is a university planning report for revitalizing a heritage college building, with barrier-free route, elevator and washroom items. Using only the attached report, identify the code requirements it relies on and the effective dates it gives, the heritage constraints it names, the barrier-free improvements it proposes, and what a reviewer would need to confirm before design. Separate the items that depend on heritage approval from those that depend on code interpretation, and list what the report leaves out. Do not say whether the proposals comply.
+
+Attachments:
+- utoronto-university-college-planning-report-91b2197c7dd9.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

@@ -1,0 +1,129 @@
+{
+  "id": "L04-001",
+  "title": "Calgary SPV-001 Zero Lot Line, Revision 5 (with Revision 4 history)",
+  "jurisdiction": "City of Calgary, Alberta",
+  "code_edition": "NBC–Alberta Edition; edition year unstated in Revision 5",
+  "case_type": "issued_variance",
+  "source_url": "https://www.calgary.ca/development/permits/building-regulation-advisories.html",
+  "document_date": "2026-03-05 (Revision 5; original dated 2017-10-01)",
+  "facts": [
+    {
+      "text": "SPV-001 is dated October 1, 2017 and identifies Revision 5 as March 5, 2026; Calgary says Revision 5 was accepted by CSTIC on March 5, 2026.",
+      "locator": "SPV-001 Revision 5, PDF pp.1, 5"
+    },
+    {
+      "text": "The document names National Building Code – Alberta Edition, Division B, Article 9.10.15.5 and reproduces Sentences (8) and (9) on roof soffit projection; it does not print an edition year.",
+      "locator": "SPV-001 Revision 5, PDF p.1"
+    },
+    {
+      "text": "Its stated design context is single-family homes up to three storeys with 1.5 m on the easement side and a zero side at or crossing the property line; the text says the SPV cannot be altered or deviated from and a changed scope requires a site-specific variance or prescriptive path.",
+      "locator": "SPV-001 Revision 5, PDF p.1"
+    },
+    {
+      "text": "The current Revision 5 contains projection wording on two pages: page 4 states maximum soffit and footing projection into the easement of 0.3 m each; page 5 says the MARW agreement can allow 0.3 m eave and 0.6 m footing projection across the property line. The measurement basis and relationship between these statements are not reconciled in the text.",
+      "locator": "SPV-001 Revision 5, PDF pp.4–5"
+    },
+    {
+      "text": "The permit condition applies the SPV to the building-permit address and requires a MARW agreement satisfactory to Calgary on the parcel and adjacent parcel over a 1.5 m width parallel to the property line; p.5 states the buildings including eaves must remain at least 0.9 m apart.",
+      "locator": "SPV-001 Revision 5, PDF p.5"
+    },
+    {
+      "text": "The 2023 Calgary guide says a formal variance request is submitted with the Request for Specific Variance form and supporting documentation; the form includes permit number, code/standard, details, reason, supporting documentation, property address/legal description, and owner/agent declaration/signature fields.",
+      "locator": "2023 Calgary Guide, PDF pp.2–4; Request for Specific Variance form, PDF p.1"
+    },
+    {
+      "text": "The attached Revision 4 is dated June 17, 2024 and is the prior published version of this same SPV number, not an individual permit decision.",
+      "locator": "SPV-001 Revision 4, PDF pp.1, 5"
+    }
+  ],
+  "limitations": [
+    "This is a standing posted municipal variance, not an individual applicant's package or original applicant message.",
+    "Revision 5 does not name the NBC(AE) edition year.",
+    "The Calgary page says posted variances are subject to removal; direct posting and continued applicability are time-sensitive.",
+    "SPV-001 Revision 5 has different projection wording on pp.4–5 (0.3 m into the easement versus 0.6 m across the property line for footing projection); the measurement bases are unclear and were not reconciled."
+  ],
+  "worker": "L04",
+  "prompt_number": 19,
+  "priority_tier": 1,
+  "priority": "Calgary / Edmonton",
+  "attachments": [
+    {
+      "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/zero-lot-line-march-2026.pdf",
+      "sha256": "bbe2767cfbebab533b1afa971afc9393ef56547337bd95f7996aa5d981b649de",
+      "role": "outcome_reference",
+      "bytes": 810908,
+      "filename": "_evaluation/calgary-spv-001-r5-2026-bbe2767cfbeb.pdf",
+      "included_in_default_input": false,
+      "original_collection_path": "_research/workers/L04/files/calgary-spv-001-r5-2026-bbe2767cfbeb.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:14.901586+00:00",
+        "http_status": "200",
+        "final_url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/zero-lot-line-march-2026.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/advisory-zero-lot-line-variance.pdf",
+      "sha256": "7a528dc00a5979299f7b4b8f5a3027f420df3a0c929490b6c807cab0a4cc1c36",
+      "role": "supporting_evidence",
+      "bytes": 756343,
+      "filename": "calgary-spv-001-r4-2024-7a528dc00a59.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L04/files/calgary-spv-001-r4-2024-7a528dc00a59.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:14.899132+00:00",
+        "http_status": "200",
+        "final_url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/advisory-zero-lot-line-variance.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://www.calgary.ca/content/dam/www/tools-and-resources/guide-to-applying-for-an-alternative-solution.pdf",
+      "sha256": "bbb0628b7b5f13499a4688089bc09484b67865ef283709d40701d823825b1399",
+      "role": "supporting_evidence",
+      "bytes": 172757,
+      "filename": "calgary-alternative-solution-guide-package-link-bbb0628b7b5f.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L04/files/calgary-alternative-solution-guide-package-link-bbb0628b7b5f.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:14.896815+00:00",
+        "http_status": "200",
+        "final_url": "https://www.calgary.ca/content/dam/www/tools-and-resources/guide-to-applying-for-an-alternative-solution.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/request-for-specific-variance.pdf",
+      "sha256": "fa8881140654ac491732471a576206efce38b826b0d8f7fa84c7a47ada53cce5",
+      "role": "supporting_evidence",
+      "bytes": 194424,
+      "filename": "calgary-request-specific-variance-fa8881140654.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L04/files/calgary-request-specific-variance-fa8881140654.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:18:56.162221+00:00",
+        "http_status": "200",
+        "final_url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/request-for-specific-variance.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted",
+  "geography": {
+    "country": "Canada",
+    "province_or_state": "Alberta",
+    "city_or_town": "Calgary",
+    "basis": "Published municipal guidance is explicitly for Calgary, Alberta; no single project site is claimed.",
+    "locator": "SPV-001 Revision 5, PDF pp.1, 5",
+    "scope": "local"
+  }
+}

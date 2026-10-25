@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Report-stated: ICC-ES evaluation reissued December 2025 (IBC/IRC 2018-2009; 2006 and ADIBC addressed separately); Type V and nonfire-rated IRC use with listed exceptions; conditions §5.1-5.12. No Alberta determination in source.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Four IBC/IRC edition sets plus 2006 and ADIBC; NBC(AE) 2023 not referenced",
+    "Type V default; Types I-IV route through §4.3 and labels",
+    "Plant in California (§5.12); holder contact in Waterville, Quebec (§7.2, contact only)"
+  ],
+  "case_id": "H14-003",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

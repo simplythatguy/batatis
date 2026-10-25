@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Reversed: the authority's notice to fix NTF-2024-257 is reversed; the determination finds the builder's details inadequately described and the notice did not fully inform recipients of the particulars or an appropriate remedy. [p.10, para 7.1]",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Roofing and cladding items listed in Appendix A and whether they are compliance issues or repair items",
+    "Specified persons and the builder's details under section 163",
+    "Particulars and remedy in the notice (section 165)"
+  ],
+  "case_id": "H01-026",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

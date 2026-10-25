@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The active report contains product-level opinions for three NBC editions and publishes component and system evidence. Its acceptance applies only to named systems and conditions.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "which Durex system and insulation/basecoat are proposed",
+    "exact NBC edition and relevant building classification",
+    "full wall composition and installation correspondence",
+    "whether test evidence covers the proposed system configuration"
+  ],
+  "case_id": "L16-006",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

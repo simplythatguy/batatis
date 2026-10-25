@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Council answer (leakage): the IBC defines an exterior wall as sloped 60 degrees or more from horizontal; through WSEC R201.3 that definition applies, so a surface steeper than 60 degrees is a wall assembly and a surface below 60 degrees is a roof/ceiling assembly.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "which assembly category applies to non-standard building surfaces",
+    "borrowing definitions from other codes (WSEC R201.3)",
+    "the 60-degree slope threshold as the deciding test",
+    "what the applicant must still show for each assembly class"
+  ],
+  "case_id": "H12-002",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

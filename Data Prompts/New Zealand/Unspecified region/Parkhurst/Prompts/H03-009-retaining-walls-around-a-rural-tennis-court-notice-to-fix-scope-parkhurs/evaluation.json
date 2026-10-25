@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Determination: authority incorrectly included the south and west sections; the notice modified by removing that item (17 August 2021).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "retaining-wall exemption thresholds",
+    "surcharge from driveways",
+    "notice-to-fix scope and item-level modification"
+  ],
+  "case_id": "H03-009",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Granted as proposed (omission of hoistway venting per 2015 IBC).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "OSSC 3004.1 vent requirement and the claim the 2015 IBC removed it",
+    "evidence quality of the cited lobby-study concern",
+    "the missing study pages and hoistway smoke-control details"
+  ],
+  "case_id": "H11-007",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

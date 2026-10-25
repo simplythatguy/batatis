@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The consultant says it provided an alternative solution and negotiated approval of a fire-protection program, but the actual submission and approval record are not attached.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "distinguishing a consultant project listing from technical evidence",
+    "code edition and building scope",
+    "missing alternative-solution/report and authority records",
+    "administrative completeness versus technical acceptance"
+  ],
+  "case_id": "L13-011",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}
