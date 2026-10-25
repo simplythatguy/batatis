@@ -40,6 +40,7 @@ def _meta(args) -> dict:
             'engine_diff_sha256': hashlib.sha256(dirty.encode()).hexdigest() if dirty else None,
             'identify_config': config.as_dict(), 'identify_config_hash': config.config_hash,
             'intake_model': model_pass.MODEL, 'intake_effort': model_pass.EFFORT,
+            'review': {k: os.environ.get(k) for k in ('BATATIS_REVIEW', 'BATATIS_REVIEW_MODEL', 'BATATIS_REVIEW_EFFORT')},
             'elephant': os.environ.get('BATATIS_LIVE_ELEPHANT') == '1', 'split': args.split}
 
 

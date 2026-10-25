@@ -14,6 +14,7 @@ from ..identify.title import short_title, title_should_replace
 from ..models import Case, Fact, Source
 from ..models_intake import FactPointer, IntakeRecord
 from . import model as model_pass
+from . import review as review_pass
 from .extract import DESCRIPTION, DESCRIPTION_REF, Extraction, Origin, Outbound, read_file, read_text, scrubbed
 from .plan import OVERRIDDEN, SCOPE_FIELD, build_plan, description, overridden
 from .rules import ENUMS, FIELDS, PERSONAL, ROLES, read
@@ -34,19 +35,25 @@ def _run(text, files, codes, outbound, transport, status, cache=None) -> Extract
 
 def run(text: str | None, files: list[tuple[str, str, bytes]], *, codes=None,
         outbound: Outbound = scrubbed, transport: model_pass.Transport | None = None,
-        status: str = 'off') -> Extraction:
+        status: str = 'off', review_transport: review_pass.Transport | None = None,
+        review_status: str = 'off') -> Extraction:
     """Extraction over the description and each (file id, name, bytes). No ledger change.
 
     With a model, the rules and form passes run over every source first, so a name or address read
-    from one file is scrubbed from every text the model sees."""
+    from one file is scrubbed from every text the model sees. The document review reads every page."""
     cache: dict = {}                                  # each PDF is parsed once across both passes
     first = _run(text, files, codes, outbound, None, status, cache)
-    if transport is None:
+    if transport is None and review_transport is None:
         return first
     personal = [str(f.value) for f in first.facts if f.field in PERSONAL and len(str(f.value)) >= 3]
-    out = _run(text, files, codes, lambda s, own: outbound(s, [*own, *personal]), transport, status, cache)
-    if out.model.status == 'off':
-        out.model.status = 'not_needed'
+    out = first
+    if transport is not None:
+        out = _run(text, files, codes, lambda s, own: outbound(s, [*own, *personal]), transport, status, cache)
+        if out.model.status == 'off':
+            out.model.status = 'not_needed'
+    if review_transport is not None:
+        out.review = review_pass.run(text or '', files, outbound=lambda s: outbound(s, personal),
+                                     transport=review_transport, status=review_status, codes=codes)
     return out
 
 
@@ -100,7 +107,7 @@ def apply(case: Case, text: str | None, extraction: Extraction, *, role: str | N
     case.intake = IntakeRecord(
         text_sha256=hashlib.sha256(text.encode()).hexdigest() if text else None,
         pointers=pointers, files=extraction.files, model=extraction.model, conflicts=extraction.conflicts,
-        unresolved_citations=extraction.unresolved, plan=previous_plan)
+        unresolved_citations=extraction.unresolved, plan=previous_plan, review=extraction.review)
     # Only sent/saved applicant context can name an untitled or legacy sentence-seeded
     # record. Keep an existing subject name, and always honor an explicit rename.
     generated = case.identify.title if case.identify else None
