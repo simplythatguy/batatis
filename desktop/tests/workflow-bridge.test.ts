@@ -8,7 +8,7 @@ import { ProviderRpc } from "../src/main/provider-rpc.ts";
 import { KeyVault } from "../src/main/credentials.ts";
 import { KeyProviders } from "../src/main/provider-http.ts";
 import { unavailableProvider, type CompleteJsonRequest, type HostProvider } from "../src/main/providers.ts";
-import { pythonCommand, REPO, scratch, text } from "./helpers.ts";
+import { both, pythonCommand, REPO, scratch, text } from "./helpers.ts";
 
 const program = String.raw`
 import asyncio, hashlib, json, os
@@ -77,8 +77,8 @@ test("real Python choosers cross the private pipe with exact context, chunked do
     const body = JSON.parse(raw); assert.equal(body.model, "jev-1.13.0"); assert.deepEqual(Object.keys(body).sort(), ["model", "questions", "state"]);
     return { status: 200, body: JSON.stringify({ model: body.model, answers: { wall: { type: "noul", noul: 0.7 } }, usage: { input_tokens: 7, output_tokens: 3 } }) };
   });
-  const dispatch = new ProviderDispatch({ provider: () => provider, vault, keys, accepting: () => true });
-  dispatch.select({ generation: "chatgpt", screening: true });
+  const dispatch = new ProviderDispatch({ account: () => provider, vault, keys, accepting: () => true });
+  dispatch.select(both("chatgpt", true));
   const rpc = new ProviderRpc(dispatch.call, (lease) => dispatch.valid(lease));
   const command = pythonCommand(userData, "local");
   const started = await startEngine({ ...command, args: ["-c", program], cwd: REPO }, { onCall: rpc.call, log: () => {} });

@@ -3,6 +3,13 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import type { EngineCommand, WorkspaceKind } from "../src/main/engine.ts";
 import { engineCommand, type RuntimePaths } from "../src/main/runtime.ts";
+import { defaultPick, OFF, type AiSelection, type Source } from "../src/main/models.ts";
+
+/** The same pick for the workflow and chat, as the single choice before the two pickers. */
+export function both(source: Source | "off", screening = false): AiSelection {
+  const pick = source === "off" ? OFF : defaultPick(source);
+  return { workflow: pick, chat: pick, screening };
+}
 
 export const DESKTOP = resolve(import.meta.dirname, "..");
 export const REPO = resolve(DESKTOP, "..");

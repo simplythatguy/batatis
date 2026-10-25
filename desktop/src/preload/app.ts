@@ -14,11 +14,11 @@ if (location.origin === "batatis://app") {
     providers: {
       list: () => invoke("batatis:providers"),
       configuration: () => invoke("batatis:ai-configuration"),
-      selectGeneration: (value: string) => invoke("batatis:ai-generation", value),
+      selectModel: (slot: string, pick: unknown) => invoke("batatis:ai-model", { slot, pick }),
       selectScreening: (value: boolean) => invoke("batatis:ai-screening", value),
       enterKey: (id: string) => invoke("batatis:key-enter", id),
       removeKey: (id: string) => invoke("batatis:key-remove", id),
-      install: () => invoke("batatis:runtime-install"),
+      install: (id: string) => invoke("batatis:runtime-install", id),
       connect: (id: string) => invoke("batatis:connect", id),
       openLogin: (id: string) => invoke("batatis:open-login", id),
       cancelLogin: (id: string) => invoke("batatis:cancel-login", id),

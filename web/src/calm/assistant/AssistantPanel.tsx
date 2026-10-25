@@ -12,6 +12,7 @@ import { AttachButton, Attachments, MicGlyph, VoiceBar, VoiceButton, VoiceNotice
 import { ChatFollow, savedPosition, savePosition } from "./follow";
 import { ToolButton } from "./ToolButton";
 import "./assistant.css";
+import { ModelPicker } from "../../desktop/ModelPicker";
 
 const DISCLAIMER = "Plain-language explanation, not code text. It doesn’t say whether your design complies or is safe.";
 
@@ -136,6 +137,7 @@ export function AssistantPanel() {
             ))}
           </div>
           <div className="cf-av-tools">
+            {!signedOut && <ModelPicker slot="chat" label="Chat model" compact />}
             {!signedOut && <AttachButton a={a} />}
             {!signedOut && <VoiceButton a={a} />}
             <ToolButton type="submit" className="cf-icon-btn is-plain" aria-label="Send" disabled={!c.draft.trim() || busy}>

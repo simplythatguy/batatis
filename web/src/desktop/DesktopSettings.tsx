@@ -3,6 +3,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Chips, Row } from "../calm/settings/rows";
 import { desktop, useDesktop, useUpdate, type AiConfiguration, type DesktopInfo, type ProviderRow, type UpdateView, type WorkspaceKind } from "./host";
 import { personLabel, useSaveBeforeSwitch, useSwitchPerson } from "./People";
+import { ModelPicker } from "./ModelPicker";
 
 const WORKSPACES: { value: WorkspaceKind; label: string }[] = [
   { value: "local", label: "This computer" },
@@ -142,7 +143,7 @@ function ConnectionsSection() {
     if (action === "enterKey" || action === "removeKey" || action === "disconnect") void change(work);
     else void work();
   };
-  const select = (work: () => ReturnType<typeof desktop.selectGeneration>) => change(async () => {
+  const select = (work: () => ReturnType<typeof desktop.selectScreening>) => change(async () => {
     const outcome = await work();
     if (!outcome.ok) setError(outcome.message);
     setConfiguration(await desktop.configuration());
@@ -151,12 +152,8 @@ function ConnectionsSection() {
     <section className="ac-section" aria-labelledby="dk-s-ai" aria-busy={busy}>
       <h2 id="dk-s-ai" className="ac-section-title">AI connections</h2>
       {configuration && <>
-        <Row label="Generation">
-          <fieldset className="dk-choice" disabled={busy}>
-            <Chips label="AI generation" options={configuration.choices} value={configuration.generation}
-              onPick={(value) => void select(() => desktop.selectGeneration(value))} />
-          </fieldset>
-        </Row>
+        <Row label="Workflow"><ModelPicker slot="workflow" label="Workflow model" onError={setError} /></Row>
+        <Row label="Chat"><ModelPicker slot="chat" label="Chat model" onError={setError} /></Row>
         <Row label={configuration.screeningLabel}>
           <fieldset className="dk-choice" disabled={busy}>
             <Chips label="Optional screening" options={[{ value: "off", label: "Off" }, { value: "on", label: "On" }]}

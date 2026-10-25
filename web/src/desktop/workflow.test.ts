@@ -2,16 +2,22 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { desktop, parseConfiguration, parseRows } from "./host.ts";
 
-test("generation choices are opaque host data, with an explicit selection and separate screening", () => {
-  const configured = { generation: "a", screening: false, choices: [{ value: "off", label: "Off" }, { value: "a", label: "Account" }], screeningLabel: "Optional screening", help: "Separate billing choices.", note: "" };
+const sources = [
+  { value: "a", label: "Account", models: [{ id: "m1", label: "Model one", efforts: ["low", "high"] }], default: { model: "m1", effort: "low" } },
+];
+
+test("model picks are opaque host data: a pick must name a model and effort on the host's menu", () => {
+  const configured = { workflow: { source: "a", model: "m1", effort: "high" }, chat: { source: "off" }, screening: false, sources,
+    screeningLabel: "Optional screening", help: "Separate billing choices.", note: "" };
   assert.deepEqual(parseConfiguration(configured), configured);
-  assert.equal(parseConfiguration({ ...configured, generation: "missing" }), null);
+  assert.equal(parseConfiguration({ ...configured, workflow: { source: "a", model: "m1", effort: "medium" } }), null);
+  assert.equal(parseConfiguration({ ...configured, chat: { source: "missing", model: "m1", effort: "low" } }), null);
   assert.equal(parseConfiguration({ ...configured, screening: "yes" }), null);
 });
 
-test("web has no local provider selection and cannot invoke it", async () => {
+test("web has no local model selection and cannot invoke it", async () => {
   assert.equal(await desktop.configuration(), null);
-  assert.equal((await desktop.selectGeneration("a")).ok, false);
+  assert.equal((await desktop.selectModel("chat", { source: "a", model: "m1", effort: "low" })).ok, false);
   assert.equal((await desktop.selectScreening(true)).ok, false);
 });
 

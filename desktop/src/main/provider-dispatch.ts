@@ -2,7 +2,8 @@ import { randomUUID } from "node:crypto";
 import type { CallReply, HostCall } from "./engine";
 import type { KeyVault } from "./credentials";
 import { checkCompletion, KeyProviders } from "./provider-http";
-import { isModelId, isReasoningEffort, type CompleteJsonRequest, type GenerationChoice, type HostProvider } from "./providers";
+import { DEFAULT_SELECTION, MENU, isSlot, slotForTask, type AiSelection, type Pick } from "./models";
+import { isModelId, isReasoningEffort, type AccountId, type CompleteJsonRequest, type HostProvider, type ModelId, type ReasoningEffort } from "./providers";
 
 const MAX_TEXT = 2_500_000;
 const TASKS = new Set(["intake", "document-review", "identify-picks", "assistant"]);
@@ -18,46 +19,42 @@ function abortable<T>(work: Promise<T>, signal: AbortSignal): Promise<T | null> 
   });
 }
 
-export interface AiSelection { generation: GenerationChoice; screening: boolean }
-export const DEFAULT_SELECTION: AiSelection = { generation: "off", screening: false };
-export const GENERATION_CHOICES = [
-  { value: "off", label: "Off" }, { value: "chatgpt", label: "ChatGPT" }, { value: "openai", label: "OpenAI API key" },
-];
+const billingOf = (pick: Pick) => (pick.source === "off" ? "none" : MENU[pick.source].billing);
 
 /** One lease per selection/person/workspace. No ambient routing across engine worker threads. */
 export class ProviderDispatch {
   #lease = randomUUID();
   #pending = new Set<AbortController>();
   #selection: AiSelection = { ...DEFAULT_SELECTION };
-  #provider: () => HostProvider;
+  #account: (id: AccountId) => HostProvider;
   #vault: KeyVault;
   #keys: KeyProviders;
   #accepting: () => boolean;
-  constructor(deps: { provider: () => HostProvider; vault: KeyVault; keys?: KeyProviders; accepting: () => boolean }) {
-    this.#provider = deps.provider; this.#vault = deps.vault; this.#keys = deps.keys ?? new KeyProviders(deps.vault); this.#accepting = deps.accepting;
+  constructor(deps: { account: (id: AccountId) => HostProvider; vault: KeyVault; keys?: KeyProviders; accepting: () => boolean }) {
+    this.#account = deps.account; this.#vault = deps.vault; this.#keys = deps.keys ?? new KeyProviders(deps.vault); this.#accepting = deps.accepting;
   }
-  get selection(): AiSelection { return { ...this.#selection }; }
-  select(value: AiSelection) { this.invalidate(); this.#selection = { ...value }; }
+  get selection(): AiSelection { return structuredClone(this.#selection); }
+  select(value: AiSelection) { this.invalidate(); this.#selection = structuredClone(value); }
   invalidate() {
     this.#lease = randomUUID();
     for (const pending of this.#pending) pending.abort();
     this.#pending.clear();
   }
-  async profile(): Promise<CallReply> {
+  /** What the engine may do for one kind of work: whether AI is on for it, its billing, and screening. */
+  async profile(args: unknown): Promise<CallReply> {
     if (!this.#accepting()) return cancelled();
     const lease = this.#lease;
-    const selection = this.selection;
-    const screening = selection.generation !== "off" && selection.screening && await this.#vault.status("jev") === "saved";
+    const slot = record(args) && isSlot(args.slot) ? args.slot : "workflow";
+    const pick = this.#selection[slot];
+    const screening = slot === "workflow" && pick.source !== "off" && this.#selection.screening && await this.#vault.status("jev") === "saved";
     if (lease !== this.#lease || !this.#accepting()) return cancelled();
-    return { ok: true, value: { lease, generation: selection.generation, screening,
-      billing: selection.generation === "chatgpt" ? "subscription" : selection.generation === "openai" ? "api" : "none" } };
+    return { ok: true, value: { lease, generation: pick.source, screening, billing: billingOf(pick) } };
   }
   valid(lease: unknown): boolean { return lease === this.#lease && this.#accepting(); }
 
   readonly call: HostCall = async (op, args, signal) => {
-    if (op === "provider.profile") return this.profile();
+    if (op === "provider.profile") return this.profile(args);
     if (!record(args) || !this.valid(args.lease) || signal.aborted) return cancelled();
-    if (this.#selection.generation === "off") return { ok: false, reason: "unavailable", message: "AI is off in Settings." };
     const lease = this.#lease;
     const abort = new AbortController();
     const detach = () => signal.removeEventListener("abort", cancel);
@@ -73,21 +70,25 @@ export class ProviderDispatch {
         if (!TASKS.has(request.task) || request.model !== "gpt-6-luna" || request.effort !== "medium") {
           return { ok: false, reason: "model_unavailable", message: "The request does not match the pinned desktop workflow profile." };
         }
-        const selected = this.#selection.generation;
-        const provider = this.#provider();
-        if (selected === "chatgpt") {
-          const readiness = await abortable(provider.workflowReadiness(), abort.signal);
-          if (!this.valid(lease) || abort.signal.aborted) return cancelled();
-          if (!readiness) return cancelled();
+        // The engine asks for its one workflow profile; the person's pick for this kind of work answers it.
+        const pick = this.#selection[slotForTask(request.task)];
+        if (pick.source === "off") return { ok: false, reason: "unavailable", message: "AI is off in Settings." };
+        const routed: CompleteJsonRequest = { ...request, model: pick.model as ModelId, effort: pick.effort as ReasoningEffort };
+        let completed;
+        if (pick.source === "openai") completed = await abortable(this.#keys.complete(routed, abort.signal), abort.signal);
+        else {
+          const account = this.#account(pick.source);
+          const readiness = await abortable(account.workflowReadiness(), abort.signal);
+          if (!this.valid(lease) || abort.signal.aborted || !readiness) return cancelled();
           if (!readiness.ready) return { ok: false, reason: readiness.reason, message: readiness.message };
+          completed = await abortable(account.completeJson(routed, abort.signal), abort.signal);
         }
-        const completed = await abortable(selected === "chatgpt" ? provider.completeJson(request, abort.signal) : this.#keys.complete(request, abort.signal), abort.signal);
         if (!completed) return cancelled();
-        const result = checkCompletion(request, completed);
-        reply = result.ok ? { ok: true, value: { json: result.json, model: result.model, effort: result.effort, usage: result.usage,
-          billing: selected === "chatgpt" ? "subscription" : "api" } } : result;
+        const result = checkCompletion(routed, completed);
+        reply = result.ok ? { ok: true, value: { json: result.json, model: request.model, effort: request.effort, usage: result.usage,
+          served: { source: pick.source, model: result.model, effort: result.effort }, billing: billingOf(pick) } } : result;
       } else if (op === "provider.jev") {
-        if (!this.#selection.screening || typeof args.body !== "string" || typeof args.timeout !== "number"
+        if (this.#selection.workflow.source === "off" || !this.#selection.screening || typeof args.body !== "string" || typeof args.timeout !== "number"
           || !Number.isFinite(args.timeout) || args.timeout <= 0 || args.timeout > 180) return { ok: false, reason: "unavailable", message: "Optional screening is off or the request was invalid." };
         const body: unknown = JSON.parse(args.body);
         if (!record(body) || body.model !== "jev-1.13.0" || !record(body.questions) || Object.keys(body.questions).length < 1

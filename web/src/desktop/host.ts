@@ -24,10 +24,19 @@ export interface DesktopInfo {
 }
 
 export type Outcome = { ok: true } | { ok: false; message: string };
+export type Slot = "workflow" | "chat";
+/** What answers one kind of AI work. Sources and models are opaque host data. */
+export interface PickOn { source: string; model: string; effort: string }
+export type Pick = { source: "off" } | PickOn;
+export const isOn = (pick: Pick): pick is PickOn => pick.source !== "off";
+export interface MenuModel { id: string; label: string; efforts: string[] }
+export interface SourceMenu { value: string; label: string; models: MenuModel[]; default: { model: string; effort: string } }
+
 export interface AiConfiguration {
-  generation: string;
+  workflow: Pick;
+  chat: Pick;
   screening: boolean;
-  choices: { value: string; label: string }[];
+  sources: SourceMenu[];
   screeningLabel: string;
   help: string;
   note: string;
@@ -75,7 +84,7 @@ interface Bridge {
   switchPerson(profile: string): Promise<unknown>;
   providers: Record<"list" | "enterKey" | "removeKey" | "install" | "connect" | "openLogin" | "cancelLogin" | "disconnect", (id?: string) => Promise<unknown>> & {
     configuration(): Promise<unknown>;
-    selectGeneration(value: string): Promise<unknown>;
+    selectModel(slot: Slot, pick: Pick): Promise<unknown>;
     selectScreening(value: boolean): Promise<unknown>;
   };
   codeDb: { choose(): Promise<unknown> };
@@ -124,16 +133,66 @@ export function parseOutcome(value: unknown): Outcome {
   return { ok: false, message: message ?? "That didn’t work. Try again." };
 }
 
-export function parseConfiguration(value: unknown): AiConfiguration | null {
-  if (!isRecord(value) || typeof value.generation !== "string" || typeof value.screening !== "boolean"
-    || !Array.isArray(value.choices) || typeof value.screeningLabel !== "string" || typeof value.help !== "string") return null;
-  const choices: AiConfiguration["choices"] = [];
-  for (const item of value.choices) {
-    if (!isRecord(item) || typeof item.value !== "string" || typeof item.label !== "string") return null;
-    choices.push({ value: item.value, label: item.label });
+function parseSources(value: unknown): SourceMenu[] | null {
+  if (!Array.isArray(value)) return null;
+  const sources: SourceMenu[] = [];
+  for (const item of value) {
+    if (!isRecord(item) || !Array.isArray(item.models) || !isRecord(item.default)) return null;
+    const source = str(item.value), label = str(item.label), model = str(item.default.model), effort = str(item.default.effort);
+    if (!source || !label || !model || !effort) return null;
+    const models: MenuModel[] = [];
+    for (const entry of item.models) {
+      const id = isRecord(entry) ? str(entry.id) : null, name = isRecord(entry) ? str(entry.label) : null;
+      if (!isRecord(entry) || !id || !name || !Array.isArray(entry.efforts)) return null;
+      models.push({ id, label: name, efforts: entry.efforts.filter((e): e is string => typeof e === "string") });
+    }
+    sources.push({ value: source, label, models, default: { model, effort } });
   }
-  if (!choices.some((item) => item.value === value.generation)) return null;
-  return { generation: value.generation, screening: value.screening, choices, screeningLabel: value.screeningLabel, help: value.help, note: str(value.note) ?? "" };
+  return sources;
+}
+
+/** A pick is kept only when it names a model and effort on the host's own menu. */
+function parsePick(value: unknown, sources: SourceMenu[]): Pick | null {
+  if (!isRecord(value)) return null;
+  if (value.source === "off") return { source: "off" };
+  const menu = sources.find((item) => item.value === value.source);
+  const model = menu?.models.find((item) => item.id === value.model);
+  return menu && model && typeof value.effort === "string" && model.efforts.includes(value.effort)
+    ? { source: menu.value, model: model.id, effort: value.effort } : null;
+}
+
+export function parseConfiguration(value: unknown): AiConfiguration | null {
+  if (!isRecord(value) || typeof value.screening !== "boolean" || typeof value.screeningLabel !== "string" || typeof value.help !== "string") return null;
+  const sources = parseSources(value.sources);
+  const workflow = sources && parsePick(value.workflow, sources), chat = sources && parsePick(value.chat, sources);
+  if (!sources || !workflow || !chat) return null;
+  return { workflow, chat, screening: value.screening, sources, screeningLabel: value.screeningLabel, help: value.help, note: str(value.note) ?? "" };
+}
+
+/** Live AI configuration for React, so the chat picker follows Settings; null on the web. */
+let configuration: AiConfiguration | null = null;
+let configurationStarted = false;
+const configurationListeners = new Set<() => void>();
+
+async function refreshConfiguration() {
+  const host = bridge();
+  if (!host) return;
+  configuration = parseConfiguration(await host.providers.configuration().catch(() => null));
+  for (const listener of configurationListeners) listener();
+}
+
+function subscribeConfiguration(listener: () => void) {
+  configurationListeners.add(listener);
+  if (!configurationStarted && bridge()) {
+    configurationStarted = true;
+    bridge()?.onChange(() => void refreshConfiguration());
+    void refreshConfiguration();
+  }
+  return () => { configurationListeners.delete(listener); };
+}
+
+export function useAiConfiguration(): AiConfiguration | null {
+  return useSyncExternalStore(subscribeConfiguration, () => configuration, () => null);
 }
 
 function parseConnection(value: unknown): Connection | null {
@@ -326,7 +385,12 @@ export const desktop = {
   chooseCodeDb: () => call((h) => h.codeDb.choose(), parseOutcome, failed),
   providers: (action: "list" | "enterKey" | "removeKey" | "install" | "connect" | "openLogin" | "cancelLogin" | "disconnect", id?: string) => call((h) => h.providers[action](id), parseRows, []),
   configuration: () => call((h) => h.providers.configuration(), parseConfiguration, null),
-  selectGeneration: (value: string) => call((h) => h.providers.selectGeneration(value), parseOutcome, failed),
+  refreshConfiguration,
+  selectModel: async (slot: Slot, pick: Pick) => {
+    const outcome = await call((h) => h.providers.selectModel(slot, pick), parseOutcome, failed);
+    await refreshConfiguration();
+    return outcome;
+  },
   selectScreening: (value: boolean) => call((h) => h.providers.selectScreening(value), parseOutcome, failed),
   onChange: (listener: () => void): (() => void) => bridge()?.onChange(listener) ?? (() => {}),
   updates: {

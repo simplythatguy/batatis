@@ -12,9 +12,9 @@ def local_active() -> bool:
     return getattr(bridge, 'ACTIVE', None) is not None or os.environ.get('BATATIS_DESKTOP_WORKSPACE') in ('local', 'dev')
 
 
-def local_profile():
+def local_profile(slot: str = 'workflow'):
     from .desktop.composition import profile
-    return profile()
+    return profile(slot)
 
 
 def local_transport(*args, **kwargs):

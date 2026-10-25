@@ -9,6 +9,7 @@ import { createAppProtocol } from "../src/main/protocol.ts";
 import { unavailableProvider, type CompleteJsonRequest, type CompleteJsonResult, type HostProvider } from "../src/main/providers.ts";
 import { MODEL, EFFORT } from "../src/main/codex/config.ts";
 import { fakeCommand, scratch, waitFor } from "./helpers.ts";
+import { defaultPick } from "../src/main/models.ts";
 
 const log = () => {};
 const onCall = async () => ({ ok: false as const, reason: "unavailable", message: "none" });
@@ -191,7 +192,7 @@ async function selected(t: Parameters<typeof host>[0], provider: HostProvider = 
   const instance = host(t, { provider });
   await instance.desktop.boot();
   await instance.desktop.switchWorkspace("dev");
-  await instance.desktop.selectGeneration("chatgpt");
+  await instance.desktop.selectModel("workflow", defaultPick("chatgpt"));
   const profile = await instance.desktop.onCall("provider.profile", {}, new AbortController().signal);
   assert.ok(profile.ok && typeof profile.value === "object" && profile.value !== null && "lease" in profile.value);
   return { ...instance, leased: { ...call, lease: profile.value.lease } };
@@ -207,7 +208,7 @@ test("engine model calls fail closed unless the connection says workflows may us
   const exact = readyProvider((r) => ({ ok: true, json: { facts: [] }, model: r.model, effort: r.effort, usage: null }));
   const working = await selected(t, exact);
   assert.deepEqual(await working.desktop.onCall("provider.completeJson", working.leased, new AbortController().signal),
-    { ok: true, value: { json: { facts: [] }, model: MODEL, effort: EFFORT, usage: null, billing: "subscription" } });
+    { ok: true, value: { json: { facts: [] }, model: MODEL, effort: EFFORT, usage: null, served: { source: "chatgpt", model: MODEL, effort: EFFORT }, billing: "subscription" } });
   assert.deepEqual(exact.asked, [call]);
   const different = parseCompleteJson({ ...call, model: "model-b" });
   assert.ok(different);

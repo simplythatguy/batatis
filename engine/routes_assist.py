@@ -287,7 +287,7 @@ def create_router(cases, code):
                 return AssistResult(answer=NO_READABLE_TEXT, cited=[], removed_citations=[], notice='',
                                     context=bound, attachments=documents.attachments)
         from . import provider_routing
-        desktop_profile = provider_routing.local_profile() if provider_routing.local_active() else None
+        desktop_profile = provider_routing.local_profile('chat') if provider_routing.local_active() else None
         provider = ('desktop' if desktop_profile is not None else
                     'anthropic' if (os.environ.get('ANTHROPIC_API_KEY') or '').strip() else 'openai')
         if (desktop_profile is not None and desktop_profile.generation == 'off') or (desktop_profile is None and not llm_gate.live_enabled(provider)):

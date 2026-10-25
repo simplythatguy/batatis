@@ -256,3 +256,115 @@
   font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
+
+/* Model picker (ModelPicker.tsx), after T3 Code's composer picker. */
+.dk-picker {
+  position: relative;
+  display: inline-flex;
+}
+
+.dk-picker-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--cf-line-2);
+  border-radius: 9px;
+  background: var(--cf-surface);
+  color: var(--cf-text);
+  font: 500 13px/1 var(--cf-font);
+  cursor: pointer;
+  transition: background-color 150ms ease-out;
+}
+
+.dk-picker.is-compact .dk-picker-btn {
+  height: 28px;
+  padding: 0 8px;
+  border-color: transparent;
+  background: none;
+  color: var(--cf-text-2);
+  font-size: 12px;
+}
+
+@media (hover: hover) {
+  .dk-picker-btn:not(:disabled):hover {
+    background: var(--cf-hover);
+  }
+}
+
+.dk-picker-menu {
+  position: absolute;
+  z-index: 1000;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 220px;
+  max-height: min(26rem, 70vh);
+  overflow-y: auto;
+  padding: 6px;
+  border-radius: 12px;
+  background: var(--cf-surface);
+  border: 1px solid var(--cf-line-2);
+  box-shadow: 0 20px 50px -16px rgba(17, 24, 39, 0.18);
+}
+
+.dk-picker.is-compact .dk-picker-menu {
+  top: auto;
+  bottom: calc(100% + 6px);
+  left: auto;
+  right: 0;
+}
+
+.dk-picker-group {
+  margin: 8px 8px 2px;
+  font-size: 11.5px;
+  font-weight: 550;
+  color: var(--cf-text-3);
+}
+
+.dk-picker-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 30px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 7px;
+  background: none;
+  color: var(--cf-text);
+  font: 400 13px/1 var(--cf-font);
+  text-align: left;
+  cursor: pointer;
+}
+
+.dk-picker-item:hover,
+.dk-picker-item:focus-visible {
+  background: var(--cf-hover);
+  outline: none;
+}
+
+.dk-picker-effort {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+  padding: 8px 4px 2px;
+  border-top: 1px solid var(--cf-line);
+}
+
+.dk-picker-chip {
+  flex: 1;
+  height: 26px;
+  border: 1px solid var(--cf-line-2);
+  border-radius: 7px;
+  background: none;
+  color: var(--cf-text-2);
+  font: 500 12px/1 var(--cf-font);
+  cursor: pointer;
+}
+
+.dk-picker-chip[aria-checked="true"] {
+  background: var(--cf-selected);
+  color: var(--cf-text);
+  border-color: var(--cf-line-ctl);
+}

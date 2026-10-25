@@ -12,10 +12,11 @@ import { importCodeDb, inspectCodeDb } from "./codedb";
 import type { KeyVault, KeyStatus, SaveOutcome } from "./credentials";
 import { isDevProfileId, startEngine, type CallReply, type DevProfile, type DevProfileId, type Engine, type EngineCommand, type EngineStart, type HostCall, type WorkspaceKind } from "./engine";
 import type { ApiGate } from "./protocol";
-import { isGenerationChoice, PROVIDER_LABELS, type GenerationChoice, type ConnectionState, type HostProvider, type KeyProviderId, type ProviderId, type WorkflowReadiness } from "./providers";
+import { PROVIDER_LABELS, unavailableProvider, type AccountId, type ConnectionState, type HostProvider, type KeyProviderId, type ProviderId, type WorkflowReadiness } from "./providers";
 import { codeDbPath, type RuntimePaths } from "./runtime";
 import { SessionJar, type TokenStore } from "./session";
-import { ProviderDispatch, DEFAULT_SELECTION, GENERATION_CHOICES, record, type AiSelection } from "./provider-dispatch";
+import { ProviderDispatch } from "./provider-dispatch";
+import { DEFAULT_SELECTION, MENU, defaultPick, parseSelection, type AiSelection, type Pick, type Slot, type Source } from "./models";
 import { ProviderRpc } from "./provider-rpc";
 import type { InstallState } from "./runtime-install";
 import type { KeyProviders } from "./provider-http";
@@ -51,7 +52,7 @@ export interface DesktopInfo {
 }
 
 export type ProviderRow =
-  | { id: "chatgpt"; kind: "account"; label: string; description: string; status: ConnectionState; workflow: WorkflowReadiness | null; runtime: InstallState | null }
+  | { id: AccountId; kind: "account"; label: string; description: string; status: ConnectionState; workflow: WorkflowReadiness | null; runtime: InstallState | null }
   | { id: KeyProviderId; kind: "key"; label: string; description: string; status: { state: KeyStatus } };
 
 export type Outcome = { ok: true } | { ok: false; message: string };
@@ -72,15 +73,18 @@ export interface HostDeps {
   vault: KeyVault;
   /** The normal workspace's persisted session; Local development never persists one. */
   localSession: TokenStore & { load(): Promise<string | null> };
+  /** The managed ChatGPT connection. */
   provider: HostProvider;
+  /** The managed Claude connection; unavailable when omitted. */
+  claude?: HostProvider;
   keys?: KeyProviders;
   log: (line: string) => void;
   /** Replace the window with a fresh one for `generation`, opening `route` (or the current one when null). */
   remount: (generation: number, route: string | null) => void;
   /** Something the window shows changed (service state, a provider's status). */
   notify: () => void;
-  /** The managed connection's downloadable runtime, when this build installs one. */
-  runtime?: () => InstallState;
+  /** Each managed connection's downloadable runtime, when this build installs one. */
+  runtime?: (id: AccountId) => InstallState | null;
 }
 
 const BUSY_DETAIL: Record<Activity, string> = {
@@ -96,12 +100,13 @@ export class DesktopHost {
   #state: HostState = { kind: "starting", workspace: "local" };
   #generation = 0;
   #changing = false;
-  #provider: HostProvider;
+  #accounts: Record<AccountId, HostProvider>;
   #dispatch: ProviderDispatch;
   #rpc: ProviderRpc;
-  #providerStop: () => void;
+  #accountStops: Record<AccountId, () => void>;
   #engineRun = 0;
   #aiNote = "";
+  #picking: Promise<unknown> = Promise.resolve();
   #authReset = false;
   #disposed = false;
   #starting: Promise<EngineStart> | null = null;
@@ -111,11 +116,12 @@ export class DesktopHost {
 
   constructor(deps: HostDeps) {
     this.#deps = deps;
-    this.#provider = deps.provider;
-    this.#dispatch = new ProviderDispatch({ provider: () => this.#provider, vault: deps.vault, keys: deps.keys,
+    this.#accounts = { chatgpt: deps.provider, claude: deps.claude ?? unavailableProvider("This connection isn’t available in this version.", "claude") };
+    this.#dispatch = new ProviderDispatch({ account: (id) => this.#accounts[id], vault: deps.vault, keys: deps.keys,
       accepting: () => !this.#disposed && !this.#changing && !this.#authReset && this.#state.kind === "ready" && this.#state.jar.token !== null });
     this.#rpc = new ProviderRpc(this.#dispatch.call, (lease) => this.#dispatch.valid(lease));
-    this.#providerStop = this.#provider.onChange(() => { this.#invalidate(); deps.notify(); });
+    const watch = (provider: HostProvider) => provider.onChange(() => { this.#invalidate(); deps.notify(); });
+    this.#accountStops = { chatgpt: watch(this.#accounts.chatgpt), claude: watch(this.#accounts.claude) };
   }
 
   get generation(): number {
@@ -246,43 +252,69 @@ export class DesktopHost {
 
   async providerRows(): Promise<ProviderRow[]> {
     const row = <T extends ProviderId>(id: T) => ({ id, ...PROVIDER_LABELS[id] });
-    const status = await this.#provider.status();
-    const workflow = status.state === "signed-in" ? await this.#provider.workflowReadiness() : null;
+    const account = async (id: AccountId): Promise<ProviderRow> => {
+      const status = await this.#accounts[id].status();
+      const workflow = status.state === "signed-in" ? await this.#accounts[id].workflowReadiness() : null;
+      return { ...row(id), kind: "account", status, workflow, runtime: this.#deps.runtime?.(id) ?? null };
+    };
     return [
-      { ...row("chatgpt"), kind: "account", status, workflow, runtime: this.#deps.runtime?.() ?? null },
+      await account("chatgpt"),
+      await account("claude"),
       { ...row("openai"), kind: "key", status: { state: await this.#deps.vault.status("openai") } },
       { ...row("jev"), kind: "key", status: { state: await this.#deps.vault.status("jev") } },
     ];
   }
 
-  get provider(): HostProvider {
-    return this.#provider;
+  account(id: AccountId): HostProvider {
+    return this.#accounts[id];
   }
 
-  /** Replace the managed connection (an installed adapter); the old one is disposed. */
+  /** Replace a managed connection (an installed adapter); the old one is disposed. */
   async installProvider(next: HostProvider): Promise<void> {
     if (this.#disposed) { await next.dispose(); return; }
-    const previous = this.#provider;
+    const previous = this.#accounts[next.id];
     this.#invalidate();
-    this.#providerStop();
-    this.#provider = next;
-    this.#providerStop = next.onChange(() => { this.#invalidate(); this.#deps.notify(); });
+    this.#accountStops[next.id]();
+    this.#accounts[next.id] = next;
+    this.#accountStops[next.id] = next.onChange(() => { this.#invalidate(); this.#deps.notify(); });
     await previous.dispose();
     this.#deps.notify();
   }
 
   configuration() {
-    return { ...this.#dispatch.selection, choices: GENERATION_CHOICES, note: this.#aiNote,
-      screeningLabel: "Optional Jev screening", help: "Off sends no AI work. ChatGPT uses the subscription; an API key uses separate API billing only when selected. Missing optional screening uses the labeled keyword fallback. Errors never change your billing choice." };
+    const sources = (Object.keys(MENU) as Source[]).map((source) => ({
+      value: source, label: MENU[source].label, models: MENU[source].models, default: MENU[source].default,
+    }));
+    return { ...this.#dispatch.selection, sources, note: this.#aiNote,
+      screeningLabel: "Optional Jev screening", help: "Off sends no AI work. A subscription is used only when chosen; an API key uses separate API billing only when chosen. Missing optional screening uses the labeled keyword fallback. Errors never change your choice." };
   }
 
-  selectGeneration(generation: GenerationChoice): Promise<Outcome> {
-    return this.#changeAI(async () => {
-      const ai = { ...this.#dispatch.selection, generation };
+  /**
+   * Picks what answers one kind of work. Choosing a source while the other kind is off picks it for both,
+   * with that source's default model, so one choice turns the app on.
+   *
+   * Unlike a key or screening change this keeps the engine and window: the engine reads the pick per
+   * request, and the new lease cancels work still running under the old one.
+   */
+  selectModel(slot: Slot, pick: Pick): Promise<Outcome> {
+    const run = async (): Promise<Outcome> => {
+      if (this.#disposed) return refuse("Batatis is closing.");
+      if (this.#changing) return refuse("Another change is still running.");
+      const current = this.#dispatch.selection;
+      const other: Slot = slot === "workflow" ? "chat" : "workflow";
+      const ai: AiSelection = { ...current, [slot]: pick,
+        ...(pick.source !== "off" && current[other].source === "off" ? { [other]: defaultPick(pick.source) } : {}) };
       const settings = { ...this.#settings, ai };
       await writeSettings(this.#settingsFile(), settings);
-      this.#settings = settings; this.#dispatch.select(ai);
-    });
+      this.#settings = settings;
+      this.#dispatch.select(ai);
+      this.#aiNote = "";
+      this.#deps.notify();
+      return { ok: true };
+    };
+    const next = this.#picking.then(run, run).catch((): Outcome => refuse("The AI change could not be saved. Try again."));
+    this.#picking = next;
+    return next;
   }
 
   selectScreening(screening: boolean): Promise<Outcome> {
@@ -304,8 +336,8 @@ export class DesktopHost {
     return saved;
   }
 
-  disconnectProvider(): Promise<Outcome> {
-    return this.#changeAI(async () => { await this.#provider.logout(); });
+  disconnectProvider(id: AccountId): Promise<Outcome> {
+    return this.#changeAI(async () => { await this.#accounts[id].logout(); });
   }
 
   readonly onCall: HostCall = (op, args, signal): Promise<CallReply> => this.#rpc.call(op, args, signal);
@@ -347,7 +379,8 @@ export class DesktopHost {
     this.#engineRun += 1;
     this.#changing = true;
     this.#invalidate();
-    this.#providerStop();
+    this.#accountStops.chatgpt();
+    this.#accountStops.claude();
     if ((state.kind === "ready" || state.kind === "busy") && state.engine) {
       await this.#stopEngine(state.engine);
     }
@@ -356,7 +389,7 @@ export class DesktopHost {
       const started = await starting;
       if (started.kind === "ready") await this.#stopEngine(started.engine);
     }
-    await this.#provider.dispose();
+    await Promise.all([this.#accounts.chatgpt.dispose(), this.#accounts.claude.dispose()]);
   }
 
   async #stopEngine(engine: Engine): Promise<void> {
@@ -500,7 +533,7 @@ export async function readSettings(file: string): Promise<DesktopSettings> {
     if (!isRecord(raw) || raw.version !== 1) throw new Error("unknown settings");
     const workspace = raw.workspace === "dev" ? "dev" : "local";
     return { version: 1, workspace, devProfile: isDevProfileId(raw.devProfile) ? raw.devProfile : null,
-      ...(record(raw.ai) && isGenerationChoice(raw.ai.generation) ? { ai: { generation: raw.ai.generation, screening: raw.ai.screening === true } } : {}) };
+      ...(parseSelection(raw.ai) ? { ai: parseSelection(raw.ai) ?? undefined } : {}) };
   } catch {
     return { version: 1, workspace: "local", devProfile: null };
   }

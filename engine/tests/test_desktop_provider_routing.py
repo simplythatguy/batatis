@@ -211,3 +211,37 @@ def test_desktop_assistant_keeps_redaction_history_as_data_and_post_dispatch_aut
         response = client.post('/assist', json=body)
         assert response.status_code == 503
         assert all(op == 'provider.profile' for op, _ in host.calls[before:])
+
+
+class SlotHost(Host):
+    """Answers each kind of work with its own pick, as the desktop host does."""
+
+    def __init__(self, picks):
+        super().__init__()
+        self.picks = picks
+
+    def call_host(self, op, args, timeout, *, request_id):
+        if op == 'provider.profile':
+            self.calls.append((op, args))
+            generation = self.picks[args.get('slot', 'workflow')]
+            billing = {'off': 'none', 'chatgpt': 'subscription', 'claude': 'subscription', 'openai': 'api'}.get(generation, 'subscription')
+            return {'ok': True, 'value': {'lease': 'offline-lease', 'generation': generation, 'screening': False, 'billing': billing}}
+        return super().call_host(op, args, timeout, request_id=request_id)
+
+
+def test_workflow_and_chat_read_their_own_slot_and_claude_is_a_subscription(monkeypatch):
+    from engine import provider_routing
+    host = SlotHost({'workflow': 'claude', 'chat': 'off'})
+    bind_host(monkeypatch, host)
+    assert provider_routing.local_profile().generation == 'claude'
+    assert provider_routing.local_profile().billing == 'subscription'
+    assert provider_routing.local_profile('chat').generation == 'off'
+    assert [args for _, args in host.calls] == [{'slot': 'workflow'}, {'slot': 'workflow'}, {'slot': 'chat'}]
+    transport, status = model.default_transport()
+    assert status == 'live' and transport is not None
+
+
+def test_an_unknown_source_or_mismatched_billing_closes_the_slot(monkeypatch):
+    from engine import provider_routing
+    bind_host(monkeypatch, SlotHost({'workflow': 'gemini', 'chat': 'off'}))
+    assert provider_routing.local_profile().generation == 'off'

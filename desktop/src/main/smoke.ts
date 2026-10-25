@@ -229,9 +229,29 @@ export async function runSmoke(deps: SmokeDeps): Promise<void> {
 
       await page("location.hash = '#/settings'");
       await until(async () => /Workspace/.test(await text()) && /AI connections/.test(await text()), "desktop settings");
-      await until(async () => /ChatGPT/.test(await text()), "explicit generation choices");
-      await replaced(() => click("ChatGPT"));
-      assert.equal(host.configuration().generation, "chatgpt");
+      const pick = async (picker: string, item: string) => {
+        const done = await page(`(() => {
+          const button = [...document.querySelectorAll('.dk-picker-btn')].find((el) => el.getAttribute('aria-label').startsWith(${JSON.stringify(`${picker}:`)}));
+          if (!button) return false;
+          button.click();
+          return true;
+        })()`);
+        assert.equal(done, true, `picker exists: ${picker}`);
+        const chosen = await until(async () => page(`(() => {
+          const menu = document.querySelector('.dk-picker-menu');
+          const el = menu && [...menu.querySelectorAll('[role=menuitemradio]')].find((el) => (el.getAttribute('aria-label') ?? el.textContent.trim()) === ${JSON.stringify(item)});
+          if (!el) return false;
+          el.click();
+          return true;
+        })()`), `picker item: ${item}`);
+        assert.equal(chosen, true);
+      };
+      await until(async () => (await page("document.querySelectorAll('.dk-picker-btn').length")) === 2, "workflow and chat pickers");
+      const generationBefore = host.generation;
+      await pick("Workflow model", "ChatGPT Luna");
+      await until(() => host.configuration().workflow.source === "chatgpt", "the workflow pick saved");
+      assert.deepEqual(host.configuration().chat, host.configuration().workflow, "the first pick also sets chat");
+      assert.equal(host.generation, generationBefore, "a model pick keeps the window");
       const fixtureBefore = await json(`/cases/${caseId}`);
       const fixtureIntake = await json(`/cases/${caseId}/intake`, "POST", {
         text: "SYNTHETIC offline workflow. We propose a cladding alternative with no supporting test report.",
@@ -246,12 +266,14 @@ export async function runSmoke(deps: SmokeDeps): Promise<void> {
       assert.ok(deps.fixture.calls.some((call) => call.task === "document-review"));
       assert.ok(deps.fixture.calls.some((call) => call.task === "assistant"));
       const fixtureCount = deps.fixture.calls.length;
-      await replaced(() => click("Off"));
+      await pick("Workflow model", "Off");
+      await pick("Chat model", "Off");
+      await until(() => host.configuration().workflow.source === "off" && host.configuration().chat.source === "off", "both picks off");
       const offBefore = await json(`/cases/${caseId}`);
       const off = await json(`/cases/${caseId}/intake`, "POST", { text: "SYNTHETIC offline model-off check.", file_ids: [fileId], model: true, expected_version: offBefore.version });
       assert.equal(record(record(off.record).model).status, "off");
       assert.equal(deps.fixture.calls.length, fixtureCount, "Off makes no generation or screening dispatch");
-      steps.push({ name: "selected-workflows", note: "Visible settings selected subscription generation, actual engine intake/document-review/assistant used the offline host fixture, usage stayed null, then Off made no dispatch. No account was checked." });
+      steps.push({ name: "selected-workflows", note: "The visible workflow picker selected subscription generation (and set chat with it), actual engine intake/document-review/assistant used the offline host fixture, usage stayed null, then Off made no dispatch. No account was checked." });
       await click("Applicant");
       await sleep(50);
       await replaced(() => click("Reviewer · Calgary"));

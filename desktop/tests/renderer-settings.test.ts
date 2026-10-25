@@ -46,6 +46,7 @@ async function settings(t, action: string, events: string[]) {
   };
   const h = await componentHarness(new URL("../../web/src/desktop/DesktopSettings.tsx", import.meta.url), "DesktopSettings", {
     "../calm/settings/rows": { Chips: "Chips", Row: "Row" },
+    "./ModelPicker": { ModelPicker: "ModelPicker" },
     "./People": { useSaveBeforeSwitch: preparation.exports.useSaveBeforeSwitch, useSwitchPerson: () => ({}), personLabel: () => "Applicant" },
     "./host": {
       useDesktop: () => state.host.info(),
@@ -54,12 +55,11 @@ async function settings(t, action: string, events: string[]) {
           if (operation !== "list") await track(operation, async () => {
             if (operation === "enterKey") await state.host.saveKey(id, "synthetic-test-only");
             if (operation === "removeKey") await state.host.removeKey(id);
-            if (operation === "disconnect") await state.host.disconnectProvider();
+            if (operation === "disconnect") await state.host.disconnectProvider(id);
           });
           return rows;
         },
         configuration: async () => state.host.configuration(), onChange: () => () => {},
-        selectGeneration: (value) => track("generation", () => state.host.selectGeneration(value)),
         selectScreening: (value) => track("screening", () => state.host.selectScreening(value)),
       },
     },
@@ -71,9 +71,8 @@ async function settings(t, action: string, events: string[]) {
   h.exports.DesktopSettings = connections.type;
   const render = () => h.render();
   function invoke(tree) {
-    if (action === "generation" || action === "screening") {
-      const label = action === "generation" ? "AI generation" : "Optional screening";
-      nodes(tree, (node) => node.type === "Chips" && node.props.label === label)[0].props.onPick(action === "generation" ? "openai" : "on");
+    if (action === "screening") {
+      nodes(tree, (node) => node.type === "Chips" && node.props.label === "Optional screening")[0].props.onPick("on");
     } else {
       const row = nodes(tree, (node) => node.type === "Row" && node.props.label === (action.endsWith("Key") ? key.label : account.label))[0];
       const controls = nodes(row.props.action, (node) => typeof node.type === "function")[0];
@@ -92,7 +91,7 @@ async function settings(t, action: string, events: string[]) {
   };
 }
 
-for (const action of ["generation", "screening", "addKey", "replaceKey", "retryKey", "removeKey", "disconnect"]) {
+for (const action of ["screening", "addKey", "replaceKey", "retryKey", "removeKey", "disconnect"]) {
   test(`${action} preserves the renderer on a failed save and changes the host only after a confirmed retry`, { timeout: 5000 }, async (t) => {
     const events: string[] = [];
     const s = await settings(t, action, events);
@@ -121,7 +120,6 @@ for (const action of ["generation", "screening", "addKey", "replaceKey", "retryK
     assert.equal(events.at(-1), "remount");
     assert.equal(s.host.generation, generation + 1);
     assert.equal(nodes(tree, (node) => node.props?.role === "alert" && /didn’t save/.test(text(node))).length, 0);
-    if (action === "generation") assert.equal(s.host.configuration().generation, "openai");
     if (action === "screening") assert.equal(s.host.configuration().screening, true);
   });
 }
@@ -140,9 +138,9 @@ for (const action of ["connect", "openLogin", "cancelLogin"]) {
   });
 }
 
-test("an unstarted description blocks a generation change without discarding its text", async (t) => {
+test("an unstarted description blocks a screening change without discarding its text", async (t) => {
   const events: string[] = [];
-  const s = await settings(t, "generation", events);
+  const s = await settings(t, "screening", events);
   s.store.phase = "who";
   s.store.saveStatus = "idle";
   s.session.draft = "My unsaved application description";
@@ -153,4 +151,10 @@ test("an unstarted description blocks a generation change without discarding its
   assert.equal(s.host.generation, generation);
   assert.equal(s.session.draft, "My unsaved application description");
   assert.match(text(nodes(tree, (node) => node.props?.role === "alert")), /Start or clear/);
+});
+
+test("Settings offers a workflow picker and a chat picker", async (t) => {
+  const s = await settings(t, "screening", []);
+  const pickers = nodes(await s.render(), (node) => node.type === "ModelPicker").map((node) => [node.props.slot, node.props.label]);
+  assert.deepEqual(pickers, [["workflow", "Workflow model"], ["chat", "Chat model"]]);
 });

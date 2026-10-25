@@ -10,7 +10,9 @@ import { extname, join, resolve, sep } from "node:path";
 import { DesktopHost, type Outcome } from "./controller";
 import { KeyVault, type SecretBox } from "./credentials";
 import { createAppProtocol, ORIGIN } from "./protocol";
-import { isGenerationChoice, unavailableProvider, type HostProvider, type KeyProviderId } from "./providers";
+import { unavailableProvider, type AccountId, type HostProvider, type KeyProviderId } from "./providers";
+import { isSlot, parsePick } from "./models";
+import { record } from "./provider-dispatch";
 import { RuntimeInstaller } from "./runtime-install";
 import { codexPin } from "./codex/install";
 import { codexProviderFactory } from "./codex";
@@ -98,7 +100,7 @@ async function installRuntime() {
 const host = new DesktopHost({
   paths,
   version: app.getVersion(),
-  runtime: () => codexInstaller.status(),
+  runtime: (id) => (id === "chatgpt" ? codexInstaller.status() : null),
   ...(smoke ? { start: async (...args: Parameters<typeof startEngine>) => {
     const started = await startEngine(...args);
     if (started.kind === "ready") smokeEngines.push(started.engine);
@@ -267,6 +269,7 @@ function fromApp(event: IpcMainInvokeEvent): boolean {
 
 const refused: Outcome = { ok: false, message: "Not allowed." };
 const isKeyProvider = (value: unknown): value is KeyProviderId => value === "openai" || value === "jev";
+const isAccount = (value: unknown): value is AccountId => value === "chatgpt" || value === "claude";
 
 function answer<T>(channel: string, work: (event: IpcMainInvokeEvent, arg: unknown) => Promise<T> | T, fallback: T) {
   ipcMain.handle(channel, (event, arg: unknown) => (fromApp(event) ? work(event, arg) : fallback));
@@ -279,7 +282,10 @@ function registerIpc() {
   answer("batatis:switch-person", (_e, profile) => (typeof profile === "string" ? host.switchPerson(profile) : refused), refused);
   answer("batatis:providers", () => host.providerRows(), []);
   answer("batatis:ai-configuration", () => host.configuration(), null);
-  answer("batatis:ai-generation", (_e, value) => isGenerationChoice(value) ? host.selectGeneration(value) : refused, refused);
+  answer("batatis:ai-model", (_e, value) => {
+    const slot = record(value) ? value.slot : null, pick = record(value) ? parsePick(value.pick) : null;
+    return isSlot(slot) && pick ? host.selectModel(slot, pick) : refused;
+  }, refused);
   answer("batatis:ai-screening", (_e, value) => typeof value === "boolean" ? host.selectScreening(value) : refused, refused);
   answer("batatis:key-enter", async (_e, id) => {
     if (isKeyProvider(id)) await enterKey(id);
@@ -289,27 +295,27 @@ function registerIpc() {
     if (isKeyProvider(id)) await host.removeKey(id);
     return host.providerRows();
   }, []);
-  answer("batatis:runtime-install", async () => {
-    await installRuntime();
+  answer("batatis:runtime-install", async (_e, id) => {
+    if (id === "chatgpt") await installRuntime();
     return host.providerRows();
   }, []);
   answer("batatis:connect", async (_e, id) => {
-    if (id === "chatgpt") await host.provider.startLogin();
+    if (isAccount(id)) await host.account(id).startLogin();
     return host.providerRows();
   }, []);
   answer("batatis:open-login", async (_e, id) => {
-    const status = id === "chatgpt" ? await host.provider.status() : null;
+    const status = isAccount(id) ? await host.account(id).status() : null;
     const page = status?.state === "pending" ? httpsUrl(status.verificationUrl) : null;
     if (page) await shell.openExternal(page);
     return null;
   }, null);
   answer("batatis:cancel-login", async (_e, id) => {
-    const status = id === "chatgpt" ? await host.provider.status() : null;
-    if (status?.state === "pending") await host.provider.cancelLogin(status.loginId);
+    const status = isAccount(id) ? await host.account(id).status() : null;
+    if (isAccount(id) && status?.state === "pending") await host.account(id).cancelLogin(status.loginId);
     return host.providerRows();
   }, []);
   answer("batatis:disconnect", async (_e, id) => {
-    if (id === "chatgpt") await host.disconnectProvider();
+    if (isAccount(id)) await host.disconnectProvider(id);
     return host.providerRows();
   }, []);
   answer("batatis:update", () => updater.view(), null);

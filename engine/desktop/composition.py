@@ -15,15 +15,19 @@ class Profile:
     billing: str
 
 
-def profile() -> Profile:
+BILLING = {'off': 'none', 'chatgpt': 'subscription', 'claude': 'subscription', 'openai': 'api'}
+
+
+def profile(slot: str = 'workflow') -> Profile:
+    """The host's choice for one kind of work: 'workflow' (intake, review, code picks) or 'chat' (assistant)."""
     from .host_provider import private_call
     try:
-        reply = private_call('provider.profile', {}, context=bridge.REQUEST_CONTEXT.get(), timeout=15)
+        reply = private_call('provider.profile', {'slot': slot}, context=bridge.REQUEST_CONTEXT.get(), timeout=15)
         value = reply.get('value') if reply.get('ok') else None
         if (isinstance(value, dict) and isinstance(value.get('lease'), str) and value['lease']
-                and value.get('generation') in ('off', 'chatgpt', 'openai')
+                and value.get('generation') in BILLING
                 and type(value.get('screening')) is bool and value.get('billing') in ('none', 'subscription', 'api')):
-            expected = {'off': 'none', 'chatgpt': 'subscription', 'openai': 'api'}[value['generation']]
+            expected = BILLING[value['generation']]
             if value['billing'] == expected:
                 return Profile(value['lease'], value['generation'], value['screening'], expected)
     except (bridge.HostUnavailable, ValueError, TypeError):

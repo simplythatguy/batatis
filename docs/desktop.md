@@ -36,9 +36,11 @@ Your applications are stored separately from CodeDB. Replacing CodeDB does not r
 
 The AI connection belongs to the computer. It is separate from your Batatis account and development identity.
 
-Under **Generation** in **Settings**, choose ChatGPT or OpenAI API key after connecting that account or saving its key. ChatGPT uses the local Codex runtime that the app installs. An OpenAI API key uses your API account and API billing. Off is the default and makes no provider request.
+Two pickers choose what answers AI work. **Workflow** in **Settings** covers reading descriptions and documents, document review and code picks. **Chat** covers the assistant; the same picker sits in the assistant's message box, so you can change it while you chat. Each picker lists the models of every connection: ChatGPT (Luna at medium effort), Claude (Haiku 5.5, Sonnet 5.5 or Opus 5.5, at low, medium or high effort) and the OpenAI API key (Luna at medium effort). Off is the default and makes no provider request.
 
-A failed connection or subscription limit never selects API billing automatically. Adding a key does not sign you in to ChatGPT.
+The first connection you pick sets both pickers to its default: Luna at medium effort for ChatGPT or the API key, Haiku 5.5 at low effort for Claude. After that, each picker changes on its own. A change applies to the next request; work still running under the old choice is cancelled.
+
+A failed connection or subscription limit never selects another connection or API billing. Adding a key does not sign you in to ChatGPT or Claude.
 
 ### ChatGPT through Codex
 
@@ -53,6 +55,14 @@ Each workflow task starts a fresh temporary Codex thread. It supplies the workfl
 The runtime is pinned to Codex `0.164.0` and GPT-6 Luna at medium reasoning effort. Sign-in and model access depend on your account. Native request captures and offline tests do not establish account entitlement or successful live inference.
 
 Signing out cancels pending work and ends the managed connection. Voice is unavailable in the desktop package.
+
+### Claude through Claude Code
+
+The Claude row works like the ChatGPT row. Select **Install** to download Claude Code `2.1.309` from [Anthropic's release downloads](https://downloads.claude.ai/claude-code-releases/2.1.309/manifest.json). The app checks its size and SHA-256 against the values it was built with and keeps it in the app's data folder. **Update** appears when a newer Batatis pins a newer release.
+
+Select **Sign in** to sign in with your Claude subscription. Claude Code opens the official sign-in page in your browser; **Open page** opens it again. Sign-in uses the app's own Claude Code settings folder, so it does not use or change the login of a Claude Code you installed yourself.
+
+Each request runs Claude Code once with the workflow's instructions and output schema, with every tool, plugin, hook, project file and saved session turned off. Signing out cancels pending work.
 
 ### API keys
 
