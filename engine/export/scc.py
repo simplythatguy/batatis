@@ -3,8 +3,9 @@
 Steps: check the blank form's SHA-256 against the version-keyed field map, decide what goes in each applicant
 field (short values in the cell, long ones moved to the appendix with a reference), fill with pypdf, flatten
 (appearance streams merged into the page, every widget removed, so the help pop-ups and buttons disappear and
-every viewer shows the same thing), and append the generated appendix. Draft status stays in metadata;
-the website displays it without adding visible markings to the supplied form or generated appendix.
+every viewer shows the same thing), and append the generated appendix when it has real content. Draft
+status and the draft's open items stay in metadata and the result; the website shows them, and nothing
+adds visible markings, a to-do list or unanswered placeholders to the supplied form or the appendix.
 
 Export refuses while a fact is unconfirmed, a blocking gap is open or a required field is empty, unless
 draft=True. Only confirmed facts are ever written to the form, draft or not.
@@ -456,13 +457,13 @@ def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str
         else:
             form_text.append(f'{name}: {full}')
     appendix_text: list[str] = []
-    appendix = build_appendix(case, plan, values, fmap, codes=codes,
-                              open_items=reasons if draft else [], package_notes=notes, text=appendix_text)
+    # A draft's open items stay in the result, not the document: the questions and Review show them.
+    appendix = build_appendix(case, plan, values, fmap, codes=codes, package_notes=notes, text=appendix_text)
 
     out = PdfWriter(clone_from=io.BytesIO(filled))
     form_pages = len(out.pages)
-    app_reader = PdfReader(io.BytesIO(appendix))
-    for page in app_reader.pages:
+    appendix_pages = PdfReader(io.BytesIO(appendix)).pages if appendix else []
+    for page in appendix_pages:
         out.add_page(page)
     out.add_metadata({'/Title': 'Variance Form for Proposed Alternative Solution' + (' (DRAFT)' if draft else ''),
                       '/Producer': f'Batatis export, field map {fmap["version"]}',
@@ -478,6 +479,6 @@ def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str
              if n not in filled_names]
     visible = list(dict.fromkeys((reasons if draft else []) + notes))
     return ExportResult(pdf=buf.getvalue(), field_map=fmap['version'], form_pages=form_pages,
-                        appendix_pages=len(app_reader.pages), draft=draft, placements=placements,
+                        appendix_pages=len(appendix_pages), draft=draft, placements=placements,
                         blank_fields=blank, open_items=visible, not_applicable=list(plan.na), form_text=form_text,
                         appendix_text=appendix_text)

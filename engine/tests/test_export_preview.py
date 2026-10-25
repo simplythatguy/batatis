@@ -73,21 +73,22 @@ def test_whether_a_pdf_fits_is_its_base64_size_decided_before_encoding():
 
 
 def test_a_saved_application_whose_pdf_alone_is_over_the_budget_gets_no_embedded_preview(tmp_path):
-    """Public save path and default budget: the 400 longest Division B sentences, as a size boundary only."""
+    """Public save path and default budget: the 500 longest Division B sentences (the review's size case),
+    as a size boundary only."""
     codes = Codes()
     with sqlite3.connect(f'file:{codes.db_path}?mode=ro', uri=True) as con:
         ids = [row[0] for row in con.execute("SELECT id FROM provisions WHERE division='B' AND level='sentence' "
-                                             'ORDER BY length(text) DESC, id LIMIT 400')]
+                                             'ORDER BY length(text) DESC, id LIMIT 500')]
     with TestClient(create_app(store=CaseStore(tmp_path / 'cases.sqlite'), codes=codes)) as client:
         case = client.post('/cases', json={'title': 'SYNTHETIC response-size boundary'}).json()
         saved = client.post(f'/cases/{case["id"]}/section-d', json={'provisions': ids,
                                                                    'expected_version': case['version']})
         assert saved.status_code == 200, saved.text[:300]
         response = client.get(f'/cases/{case["id"]}/export/preview')
-        assert response.status_code == 200 and len(response.content) < 2_000
+        assert response.status_code == 200
         body = response.json()
-        assert not fits(body['pdf_bytes']), 'this fixture no longer makes a PDF over the preview budget'
-        assert body['kind'] == 'too_large' and body['page_count'] > 500
+        assert body['kind'] == 'too_large', 'this fixture no longer makes a PDF over the preview budget'
+        assert len(response.content) < 2_000 and not fits(body['pdf_bytes']) and body['page_count'] > 500
         assert 'pdf' not in body and 'pages' not in body
         # The fallback, the draft download, still sends the whole PDF that was measured.
         draft = client.post(f'/cases/{case["id"]}/export', json={'draft': True})

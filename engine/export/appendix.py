@@ -1,9 +1,12 @@
 """Generated appendix pages (reportlab, BSD licence) and the DRAFT stamp.
 
-Sections: X (form values too long for their cell), C (one entry per Section C row: citation, attribution
-pairs with their Division A text and table source, provision text, NBC 2020 intent statements labelled as
-explanatory only), D (every supporting document) and, for drafts, the open items that block a final export.
-NRC prose in section C is the full provision text, with its citation and the NRC publication link.
+Sections, each only when it has real content: the pack's notices and officer-routed open items, X (form values
+too long for their cell), N (the applicant's N/A reasons), B (the confirmed proposed alternative and scope),
+P (confirmed applicant passages), C (one entry per Section C row: citation, attribution pairs with their
+Division A text and table source, provision text, NBC 2020 intent statements labelled as explanatory only)
+and D (every listed document). NRC prose in section C is the full provision text, with its citation and the
+NRC publication link. A draft's to-do list and unanswered placeholders are not printed: they belong to the
+questions and Review, and `ExportResult.open_items` keeps the list. With no real content there is no appendix.
 """
 from __future__ import annotations
 
@@ -194,27 +197,15 @@ def story_text(story: list) -> list[str]:
     return out
 
 
-def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, open_items: list[str],
-                   package_notes: list[str] | None = None, text: list[str] | None = None) -> bytes:
-    """Render the appendix PDF. When ``text`` is a list, the appendix's plain text is appended to it."""
-    printing = ', 2nd printing' if codes is not None and second_printing_proven(codes) else ''
-    story: list = [Paragraph('Appendix to the Variance Form for Proposed Alternative Solution', H1),
-                   _p(f'Case {case.title or ""} ({case.id}). Generated {date.today().isoformat()} by Batatis with '
-                      f'field map {fmap["version"]}. Code references are to the National Building Code - 2023 '
-                      f'Alberta Edition{printing} (NBC(AE) 2023).', SMALL),
-                   _p(PACKAGE_NOTE, SMALL)]
+def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None,
+                   package_notes: list[str] | None = None, text: list[str] | None = None) -> bytes | None:
+    """Render the appendix PDF, or None when nothing real belongs in it. When ``text`` is a list, the
+    appendix's plain text is appended to it."""
+    story: list = []
 
     # Draft and final both carry the pack's notices. They inform; they never block an export.
     for notice in notices_for(case, 'export_appendix'):
         story += [Paragraph(escape(notice.heading), H2), _p(notice.message)]
-
-    if open_items:
-        story += [Paragraph('Open items (draft export)', H2),
-                  _p('This draft was exported before these items were resolved. Unconfirmed values are not shown '
-                     'on the form.')]
-        story += [_p(f'- {r}') for r in open_items]
-        story.append(_p('Section C below was rebuilt from verified confirmed provisions. Unverified or changed '
-                        'source text has been excluded; rebuilding does not resolve the listed open items.', SMALL))
 
     if package_notes:
         story += [Paragraph('Open items', H2),
@@ -238,33 +229,33 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, op
                          [['; '.join(dict.fromkeys(names)), entry.reason, f'{entry.via} ({entry.source_ref})']
                           for entry, names in groups.values()], [2.2 * inch, 3.0 * inch, 1.8 * inch])]
 
-    story.append(Paragraph('B. Request for variance: proposed alternative and scope', H2))
-    for label, key in (('Proposed alternative', 'alternative_description'), ('Scope', 'scope')):
-        story.append(_kv(label, str(values.get(key, '(not provided or not confirmed)'))))
+    request = [_kv(label, str(values[key])) for label, key in
+               (('Proposed alternative', 'alternative_description'), ('Scope', 'scope')) if key in values]
     if case.jurisdiction:
-        story.append(_kv('Reviewing jurisdiction', case.jurisdiction.name))
-    if codes is not None:
+        request.append(_kv('Reviewing jurisdiction', case.jurisdiction.name))
+    if request:
+        story += [Paragraph('B. Request for variance: proposed alternative and scope', H2), *request]
+    # Only confirmed passages, each under its own P-number; an unanswered field stays a question, not a page.
+    answered = [(n, field) for n, field in enumerate(process_fields(case, codes), start=1)
+                if field.answer] if codes is not None else []
+    if answered:
         story.append(Paragraph('P. Alternative solution (Div C 2.3.1): applicant-written documentation', H2))
         story.append(_p('The following passages were supplied and confirmed by the applicant, each with its source. '
                         'Batatis supplies prompts and checks that each item is present; it does not write, assess or '
                         'validate the analysis.', SMALL))
-        for n, field in enumerate(process_fields(case, codes), start=1):
-            block = [Paragraph(f'P-{n}&nbsp;&nbsp;{escape(field.label)}', H3)]
-            if field.answer:
-                block.append(_p(field.answer.value))
-                source = field.answer.source
-                block.append(_kv('Applicant source', source.ref + (f', page {source.page}' if source.page else '')))
-                block.append(_kv('Provenance', f'{_SOURCE_KIND.get(source.type, source.type)}; confirmed by the '
-                                               'applicant; not written by Batatis'))
-            else:
-                block.append(_p('(Not provided or not confirmed. No answer has been supplied by Batatis.)'))
-            block.append(_p(field.citation, SMALL))
-            story.append(KeepTogether(block))
+        for n, field in answered:
+            source = field.answer.source
+            story.append(KeepTogether([
+                Paragraph(f'P-{n}&nbsp;&nbsp;{escape(field.label)}', H3), _p(field.answer.value),
+                _kv('Applicant source', source.ref + (f', page {source.page}' if source.page else '')),
+                _kv('Provenance', f'{_SOURCE_KIND.get(source.type, source.type)}; confirmed by the '
+                                  'applicant; not written by Batatis'),
+                _p(field.citation, SMALL)]))
 
-    story.append(Paragraph('C. Attributions to acceptable solutions', H2))
-    if not case.section_c:
-        story.append(_p('No provisions identified.'))
-    else:
+    bench = benchmark(case, codes)
+    if case.section_c or bench:
+        story.append(Paragraph('C. Attributions to acceptable solutions', H2))
+    if case.section_c:
         story.append(_p('Each row is a Division B acceptable solution the proposal departs from. Its objectives and '
                         'functional statements come from the NBC(AE) 2023 attribution tables by lookup, not from a '
                         'model.', SMALL))
@@ -274,7 +265,6 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, op
                               ', '.join(dict.fromkeys(p.function for p in row.pairs)) or 'no table row']
                              for k, row in enumerate(case.section_c, start=1)],
                             [0.5 * inch, 1.1 * inch, 2.6 * inch, 1.4 * inch, 1.4 * inch]))
-    bench = benchmark(case, codes)
     if bench:
         story.append(Paragraph('Benchmark acceptable solution', H3))
         story.append(_kv('Benchmark', bench['citation']))
@@ -293,7 +283,8 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, op
     typed_titles = {title for title, _ in typed}
     text_items = [item for item in case.evidence if item.kind == 'text' and item.id not in attached
                   and item.description.strip() not in typed_titles]
-    story.append(Paragraph('D. Supporting documentation', H2))
+    if docs or typed or text_items:
+        story.append(Paragraph('D. Supporting documentation', H2))
     if docs or typed:
         on_form = lambda n: f'row {n}' if n <= plan.docs_in_form else 'appendix only'  # noqa: E731
         story.append(_table(['Ref', 'Name of supporting documentation', 'Responsible', 'On the form'],
@@ -326,9 +317,14 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None, op
             Paragraph(escape(item.description), H3),
             _p('listed by applicant, no file attached, not reviewed'),
         ]))
-    if not docs and not typed and not text_items:
-        story.append(_p('No supporting documents listed.'))
-
+    if not story:
+        return None
+    printing = ', 2nd printing' if codes is not None and second_printing_proven(codes) else ''
+    story[:0] = [Paragraph('Appendix to the Variance Form for Proposed Alternative Solution', H1),
+                 _p(f'Case {case.title or ""} ({case.id}). Generated {date.today().isoformat()} by Batatis with '
+                    f'field map {fmap["version"]}. Code references are to the National Building Code - 2023 '
+                    f'Alberta Edition{printing} (NBC(AE) 2023).', SMALL),
+                 _p(PACKAGE_NOTE, SMALL)]
     if text is not None:
         text.extend(story_text(story))
     buf = io.BytesIO()

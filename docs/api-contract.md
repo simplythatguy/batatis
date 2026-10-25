@@ -220,7 +220,7 @@ The Section D professional fields `engineer_engaged` and `architect_engaged` (en
 
 `professional_status` is `not_engaged` when a confirmed applicant fact (`user_text` or `user_click`) states `not_engaged` or `No professional engaged yet`. A file or an officer note does not set it. That statement does not confirm a professional and does not write a registration number or a seal. The blocking professional-involvement gaps (named professional, qualifications, authentication) become one gap: `Professional involvement not yet confirmed; the officer decides whether it is required.`, severity `warning`, `routed_to` `officer`. Official export stays allowed. The exported package lists that sentence under open items. When this statement is absent, the officer gap sentence above is unchanged.
 
-This exception covers professional identity and involvement only. Independently unresolved source chains remain blocking `professional_source` findings for official export. Draft exports remain available and include the unresolved reference and reviewer action.
+This exception covers professional identity and involvement only. Independently unresolved source chains remain blocking `professional_source` findings for official export. Draft exports remain available; the unresolved reference and reviewer action stay in the completeness report's `export_reasons` and the export's `409` reasons, not in the draft PDF, which prints no to-do list.
 
 The issues route maps the same screen: `yes` → `true`, `no` → `false`, `depends` → `"unknown"`. `"unknown"` requires a question. Those two tokens are not the same. An `"unknown"` issue `reason` and the professional-requirement gap name the deciding question and who decides. They do not render the unresolved token.
 

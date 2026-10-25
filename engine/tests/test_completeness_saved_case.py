@@ -410,9 +410,12 @@ def test_report_reasons_match_official_export_while_professional_handoff_is_unre
         assert found['professional_source']['severity'] == 'blocking'
         draft = client.post(f'/api/cases/{case.id}/export', json={'draft': True})
         assert draft.status_code == 200
-        text = '\n'.join(page.extract_text() for page in PdfReader(io.BytesIO(draft.content)).pages)
-        assert '9.15.3.3.(2)' in text
-        assert 'professional' in text.casefold()
+        # The unresolved reference and reviewer action are the review's reasons; the draft document is not
+        # a to-do list, so it does not print them.
+        assert any('9.15.3.3.(2)' in reason for reason in reasons)
+        assert any('professional' in reason.casefold() for reason in reasons)
+        text = ' '.join(' '.join(page.extract_text().split()) for page in PdfReader(io.BytesIO(draft.content)).pages)
+        assert not any(' '.join(reason.split())[:60] in text for reason in reasons)
         (tmp_path / 'failed-source-draft.pdf').write_bytes(draft.content)
     assert store.get(case.id).model_dump() == before
     assert store.get_file(case.id, upload['id'])['data'] == bytes_before

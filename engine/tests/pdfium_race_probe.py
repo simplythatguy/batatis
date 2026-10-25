@@ -19,8 +19,10 @@ from pathlib import Path
 
 def main(threads: int, jobs: int) -> None:
     import base64
+    import io
 
     from fastapi.testclient import TestClient
+    from pypdf import PdfReader
 
     from engine.api import create_app
     from engine.codes import Codes
@@ -68,7 +70,7 @@ def main(threads: int, jobs: int) -> None:
     body = json.loads(serial_preview)
     print(json.dumps({'jobs': len(results), 'same_as_serial': all(same for _, same in results),
                       'kinds': sorted({name for name, _ in results}), 'pages': body['page_count'],
-                      'images': len(body['pages'])}))
+                      'images': len(body['pages']), 'pdf_pages': len(PdfReader(io.BytesIO(pdf)).pages)}))
 
 
 if __name__ == '__main__':

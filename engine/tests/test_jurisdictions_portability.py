@@ -58,7 +58,9 @@ class _Plan:
 
 
 def _appendix_text(case):
-    pdf = build_appendix(case, _Plan(), {}, {'version': 'test'}, codes=None, open_items=[])
+    pdf = build_appendix(case, _Plan(), {}, {'version': 'test'}, codes=None)
+    if pdf is None:                         # nothing real to print: no appendix
+        return ''
     return ' '.join(' '.join((p.extract_text() or '') for p in PdfReader(io.BytesIO(pdf)).pages).split())
 
 

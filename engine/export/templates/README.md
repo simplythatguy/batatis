@@ -47,8 +47,13 @@ Consent, signatures and their dates are not automatically filled.
 
 `export_case` preserves the flattened public response: zero widgets and no
 AcroForm tree. Drafts still bypass official completeness blocking, exclude
-unconfirmed values and retain open items, result/API metadata and the draft
-filename. They have no added visible draft stamp or label on any PDF page.
+unconfirmed values and retain open items (`ExportResult.open_items`), result/API
+metadata and the draft filename. They have no added visible draft stamp or
+label on any PDF page, and no printed to-do list: the open items, their fix
+hints and placeholders for unanswered passages belong to the questions and
+Review. The appendix prints only real content (notices, continued values,
+N/A reasons, confirmed answers and passages, Section C, listed documents), and
+a draft with none of it has no appendix pages.
 
 The legacy `scc_2026-10` map remains available explicitly, with its original
 five-page bytes and SHA-256

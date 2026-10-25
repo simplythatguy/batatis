@@ -118,9 +118,10 @@ def test_official_export_rationale_round_trip(codes, present):
         assert reading.pointer.file == 'official-export.pdf' and reading.pointer.page > result.form_pages
         assert not any(f.field == 'rationale' for f in parts.findings)
     else:
-        assert reading.status == 'blank' and reading.value is None
-        finding = next(f for f in parts.findings if f.field == 'rationale')
-        assert finding.status == 'blank' and ir.build([finding]).items[0].included
+        # A draft prints no placeholder for a missing passage, so the reader cannot call it blank: the absent
+        # rationale stays an officer check rather than a certain applicant gap.
+        assert not any('Rationale' in line for line in result.appendix_text)
+        _assert_officer_check(parts)
 
 
 def _assert_officer_check(parts):
@@ -393,18 +394,22 @@ def test_single_readable_rationale_stays_present_beside_an_unreadable_other_file
 
 def test_additional_recognized_forms_cannot_hide_a_supplied_rationale(codes):
     supplied = sample_case(codes)
+    rationale = next(f.value for f in supplied.facts if f.field == 'rationale')
     blank = supplied.model_copy(deep=True)
     blank.facts = [f for f in blank.facts if f.field != 'rationale']
     uploads = [('blank-draft.pdf', export_case(blank, codes=codes, draft=True).pdf),
                ('supplied-form.pdf', export_case(supplied, codes=codes).pdf)]
+    # The draft alone has no rationale passage at all: absent, so an officer check.
+    _assert_officer_check(review_uploads(uploads[:1], codes))
     before = None
     for ordered in (uploads, list(reversed(uploads))):
         parts = review_uploads(ordered, codes)
         assert all(file.role == 'scc_form_flattened' for file in parts.files)
-        finding = _assert_officer_check(parts)
-        assert {p.file for p in finding.pointers} == {'blank-draft.pdf', 'supplied-form.pdf'}
-        assert any(p.file == 'supplied-form.pdf' and p.quote == next(
-            f.value for f in supplied.facts if f.field == 'rationale') for p in finding.pointers)
+        # Whatever the order, the other form's passage is read; the draft has no placeholder to compete with it.
+        reading = next(f for f in parts.fields if f.field == 'rationale')
+        assert reading.status == 'present' and reading.value == rationale
+        assert reading.pointer.file == 'supplied-form.pdf'
+        assert not any(f.field == 'rationale' for f in parts.findings)
         if before is not None:
-            assert finding.model_dump() == before
-        before = finding.model_dump()
+            assert reading.model_dump() == before
+        before = reading.model_dump()

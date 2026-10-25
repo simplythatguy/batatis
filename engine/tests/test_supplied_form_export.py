@@ -262,4 +262,7 @@ def test_draft_pdf_has_no_added_visible_draft_marks_but_keeps_the_validation_con
     for page in reader.pages:
         text = page.extract_text()
         assert 'DRAFT' not in text and 'not for submission; see appendix' not in text
-    assert any('Open items (draft export)' in p.extract_text() for p in reader.pages[result.form_pages:])
+    # The draft's open items stay in the result for the questions and Review; the document never lists them.
+    pdf_text = ' '.join(' '.join(p.extract_text().split()) for p in reader.pages)
+    assert 'Open items' not in pdf_text and 'Not provided or not confirmed' not in pdf_text
+    assert not any(' '.join(item.split())[:60] in pdf_text for item in result.open_items)

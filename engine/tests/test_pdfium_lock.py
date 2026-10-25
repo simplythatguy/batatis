@@ -61,5 +61,6 @@ def test_concurrent_previews_and_pdf_reads_finish_and_match_their_serial_results
                          cwd=ROOT, capture_output=True, text=True, timeout=300)
     assert run.returncode == 0, f'exit {run.returncode}\n{run.stderr[-3000:]}'
     summary = json.loads(run.stdout.strip().splitlines()[-1])
-    assert summary == {'jobs': 24, 'same_as_serial': True, 'kinds': ['intake', 'preview', 'review'],
-                       'pages': 11, 'images': 11}
+    assert (summary['jobs'], summary['same_as_serial'], summary['kinds']) == (24, True, ['intake', 'preview', 'review'])
+    # Every page of the serial draft was drawn, the appended pages after the seven form pages included.
+    assert summary['images'] == summary['pages'] == summary['pdf_pages'] > 7

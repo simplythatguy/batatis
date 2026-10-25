@@ -18,6 +18,7 @@ from engine.export import ExportBlocked, FormMismatch, export_case, form_path, l
 from engine.export.sample import FACTS, sample_case
 from engine.export.text import faithful_font_text, pdf_safe
 from engine.process_fields import process_fields
+from engine.section_c import section_c_rows
 from engine.section_d import supporting_documents
 from engine.models import INTENT_LABEL, Fact, Gap, Source
 
@@ -107,7 +108,9 @@ def test_blocks_on_unconfirmed_facts_and_blocking_gaps(case, codes):
     texts = page_texts(draft.pdf)
     assert draft.draft is True
     assert pypdf.PdfReader(io.BytesIO(draft.pdf)).metadata.title.endswith(' (DRAFT)')
-    assert 'risk assessment not written' in appendix_text(draft.pdf, draft.form_pages)
+    # The draft keeps its open items in the result; the document itself carries no to-do list.
+    assert any('risk assessment not written' in item for item in draft.open_items)
+    assert 'risk assessment not written' not in ' '.join(texts)
     assert '99' not in norm(texts[0]).split()          # proposed value never reaches the form
     assert 'Lot' not in {p.field for p in draft.placements}  # the older lot value must not silently return
 
@@ -248,7 +251,8 @@ def test_stale_section_c_blocks_final_and_draft_rebuilds_from_database(codes, ch
     result = export_case(case, codes=codes, draft=True)
     text = appendix_text(result.pdf, result.form_pages)
     assert 'FORGED INTENT CONTENT' not in text and 'FORGED-OBJECTIVE' not in text
-    assert 'rebuilt from verified confirmed provisions' in text and result.open_items
+    fresh = section_c_rows(['9.25.2.2.(1)'], codes)[0]                 # what the database says, not the case
+    assert result.open_items and norm(faithful_font_text(fresh.intents[0].intents[0])) in text
     assert codes.citation('9.25.2.2.(1)', 'B') in text
     assert case.model_dump_json() == before
 

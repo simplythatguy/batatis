@@ -171,6 +171,16 @@ def test_appendix_without_a_code_database_claims_no_printing():
     from engine.export.appendix import build_appendix
     from engine.models import Case
     text: list[str] = []
-    build_appendix(Case(), SimpleNamespace(overflow=[], rows_in_form=0, docs_in_form=0), {}, {'version': 't'},
-                   codes=None, open_items=[], text=text)
+    plan = SimpleNamespace(overflow=[('X-1', 'Mailing Address', 'SYNTHETIC long value')], rows_in_form=0,
+                           docs_in_form=0)
+    assert build_appendix(Case(), plan, {}, {'version': 't'}, codes=None, text=text) is not None
     assert '2nd printing' not in text[1]
+
+
+def test_nothing_real_to_print_makes_no_appendix_rather_than_a_page_of_headings():
+    from types import SimpleNamespace
+    from engine.export.appendix import build_appendix
+    from engine.models import Case
+    text: list[str] = []
+    plan = SimpleNamespace(overflow=[], rows_in_form=0, docs_in_form=0)
+    assert build_appendix(Case(), plan, {}, {'version': 't'}, codes=None, text=text) is None and text == []
