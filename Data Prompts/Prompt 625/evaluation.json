@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Council answers (leakage): yes, Group E is more hazardous than Group B and must meet new-construction requirements including sprinklers under IFC 903.2.2(3); 'newly constructed' is defined in 903.2.2 as an addition, alteration or remodel costing 100% of the building value over one year, and change of occupancy is not addressed by that definition; yes, a change to a more hazardous occupancy must conform to the IBC for that occupancy (IBC 3406.1).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "change-of-occupancy hazard test",
+    "definition of 'newly constructed'",
+    "sprinkler trigger for a more hazardous occupancy",
+    "alteration cost threshold"
+  ],
+  "case_id": "H12-021",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from Norway, Sarpsborg kommune (planning-announcement folder dated 2024-07-16). Client Grand Terrasse AS. Comparative only, not Alberta.. It is not an Alberta application.
+
+Read the attached Norwegian fire concept report at zoning level, version B03. This is a comparison document, so use only the rules the report itself names. From the attachment alone, list: (1) the requirements applied and the editions cited; (2) the design rules it states at plan level, such as escape routes, separation distances and fire-site-plan references, and what it leaves for later design; (3) which drawings or sketches it refers to, and whether they appear in the attachment; (4) what its planning-level checklist covers and what it does not; (5) the questions you would send back to the authors. Do not say whether the design complies or is safe, do not add facts that are not in the attachment, and do not judge the fire engineering.
+
+Attachments:
+- no-sarpsborg-grandhjornet-brannkonsept-reguleringsniva-3f0d546532da.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

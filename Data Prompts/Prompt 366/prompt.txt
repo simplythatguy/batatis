@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from New Zealand (Building Act 2004); Napier City Council; comparative only, not Alberta. It is not an Alberta application.
+
+This is a New Zealand regulator document about a building consent issued under a land-stability (slippage) pathway for work on an elevated property with mass-movement zones shown on a site plan. Using only the attached PDF, identify the natural-hazard and structural provisions it treats as uncertain, list the geotechnical reports, zones, and site information it relies on, note the administrative records it refers to, and list the next questions a reviewer should ask. Do not say whether the land is stable or the work complies, and do not apply Alberta or NBC(AE) rules.
+
+Attachments:
+- mbie-det-2025-041-61303dec5266.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

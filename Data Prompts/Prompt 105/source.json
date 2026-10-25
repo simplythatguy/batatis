@@ -1,0 +1,62 @@
+{
+  "id": "A10-006",
+  "title": "Council Order 0015494: change of use of a farm-building addition to living quarters; whether a dwelling unit exists",
+  "jurisdiction": "Alberta; accredited municipality not named in the order (respondent)",
+  "code_edition": "Alberta Building Code 2014 (defined terms cited in the decision: Division A 1.1.1.1 and 1.4.1.2)",
+  "case_type": "appeal_decision",
+  "source_url": "https://safetycodes.ab.ca/council-information/appeals/appeal-decisions/",
+  "document_date": "2019-06-26 (Council Order 0015494); the underlying order is dated 2019-04-04",
+  "facts": [
+    {
+      "text": "The order dated 2019-04-04, issued under section 49 of the Safety Codes Act by the accredited municipality against the property owner, was varied; the owner was directed to submit a building permit application and drawings for the change of use of the shop to include living quarters.",
+      "locator": "p.1, 'FROM' and 'TO' directions"
+    },
+    {
+      "text": "The issue is an addition to a farm building possibly containing living quarters and whether a building permit is required for the change in use.",
+      "locator": "p.2, Issue para 1"
+    },
+    {
+      "text": "The safety codes officer attended on 2019-01-23 and observed a two-storey interior development that he considered residential; a large amount of stored furniture gave an impression of residential occupancy.",
+      "locator": "p.4, para 27 region"
+    },
+    {
+      "text": "The addition contained two kitchens, three bathrooms with showers and toilets, two laundry rooms and a lift; the second level contained an emergency egress stairwell.",
+      "locator": "p.6, para 52 region"
+    },
+    {
+      "text": "The question before the Tribunal is whether the building contains a dwelling unit as defined in the ABC; the decision notes people were sleeping in the building before the January inspection.",
+      "locator": "p.11, paras 94-95"
+    }
+  ],
+  "limitations": [
+    "Scanned image PDF (12 pages) with OCR text (macOS Vision); verify before quoting. Municipality not named; second-priority Alberta record.",
+    "Edition: the decision cites ABC 2014 defined terms, which are historical and not current NBC(AE) 2023 text."
+  ],
+  "worker": "A10",
+  "prompt_number": 105,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2019/Building%20-%20Change%20of%20Use%20-%20June%202019.pdf",
+      "retrieved_at": "2026-10-25T02:07:13.232022+00:00",
+      "sha256": "7876e4bd7907320b07748c22ae36a0c0515e770349a04c0d99d425bf850f32a2",
+      "bytes": 2659988,
+      "document_type": "pdf",
+      "role": "input",
+      "filename": "scc-decision-change-of-use-june-2019-7876e4bd7907.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/A10/files/scc-decision-change-of-use-june-2019-7876e4bd7907.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T02:07:13.232022+00:00",
+        "http_status": "200",
+        "final_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2019/Building%20-%20Change%20of%20Use%20-%20June%202019.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

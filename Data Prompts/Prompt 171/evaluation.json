@@ -1,0 +1,14 @@
+{
+  "known_outcome": "The paper reports potential moisture accumulation at the wood-based sheathing behind XPS during year one and continued year-two monitoring of W2 and an unretrofitted comparison wall.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "check the source wall layers and indoor/exterior exposure against the proposed project",
+    "separate controlled/chamber protocol from local site weather and construction",
+    "request code edition, actual retrofit section/details and qualified project-specific moisture review"
+  ],
+  "case_id": "L18-017",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

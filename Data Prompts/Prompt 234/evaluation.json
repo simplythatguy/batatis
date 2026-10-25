@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Not a decision record. The PS2 (Part 1 p.29; Part 2 p.79) and the PS1 (Part 1 p.31) carry approval-stamp text. No building consent authority acceptance record is in the attachments; outcome unknown.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "structural (B1) scope only: these statements do not address fire clauses",
+    "PS1 conditions (300 kPa ground-bearing verification; proprietary products) and what evidence would close them (p.31)",
+    "PS2 relies on named calculations and drawings that are not in the attachments",
+    "two PS2 copies, one in each part; the Part 2 copy describes 71% NBS"
+  ],
+  "case_id": "H06-002",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

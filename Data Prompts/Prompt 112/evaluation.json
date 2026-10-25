@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Council ordered the Order varied (p.1). Items 2 and 3 were varied to specify the verification and compatibility documents (p.8 paras 21-22). Findings on the music rooms (pp.8-9) record sound-insulated rooms with no line of sight to a visual indicator. Dated 24 Jul 2012.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Dependence of visual signal devices on room use and acoustic design",
+    "Documentation chain: maintenance report, verification report, notifier compatibility certificate",
+    "Edition: AFC 2006 and ABC 1997 are both dated; flag rather than apply",
+    "CAN/ULC-S536 and CAN/ULC-S537 references as standards the order cites"
+  ],
+  "case_id": "A15-007",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

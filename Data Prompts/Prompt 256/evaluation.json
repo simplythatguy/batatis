@@ -1,0 +1,17 @@
+{
+  "known_outcome": "unknown (no planning decision in file)",
+  "outcome_leakage": false,
+  "review_focus": [
+    "two-stair statement versus a single firefighting shaft and secondary escape via the other stair",
+    "'travel distance within recommended limit' asserted without figures",
+    "consultation with approving authorities not yet undertaken",
+    "local policy answer 'N/A'",
+    "BS 9991 and ADB editions not stated",
+    "embedded ground-floor drawing used as fire-service evidence"
+  ],
+  "case_id": "H16-002",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,13 @@
+{
+  "known_outcome": "The Board determined an alternative solution was not required if the paint met the stated performance criterion on a substrate other than gypsum board, but evidence of the combined system’s characteristics could be required.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "No product data, permeance test report or compatibility evidence is linked.",
+    "Roof application was expressly outside the appeal scope."
+  ],
+  "case_id": "L08-1849",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

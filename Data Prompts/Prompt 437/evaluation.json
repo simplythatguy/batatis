@@ -1,0 +1,14 @@
+{
+  "known_outcome": "p.6 §6.1: the authority incorrectly exercised its powers in issuing the notice to fix, and that decision is reversed.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the consent (BLD/2014/49356/1) from the later notice to fix",
+    "Treats the manufacturer clearances and flue-kit conflict as evidence questions, not compliance findings",
+    "Does not assert the clearances are safe"
+  ],
+  "case_id": "H05-013",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

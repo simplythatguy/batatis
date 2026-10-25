@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Regulator position: exemptions from Section 9.36 and NECB are case-by-case, based on use, occupancy and building type; the designer must give the AHJ, when asked, sufficient information with energy-code references.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the exemption category from the case-by-case decision",
+    "Asks for the energy-code references the designer must provide",
+    "Flags the use and occupancy facts needed for the decision",
+    "Does not say an exemption applies"
+  ],
+  "case_id": "H20-018",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

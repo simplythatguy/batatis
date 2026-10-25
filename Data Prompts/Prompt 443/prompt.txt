@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from New Zealand (MBIE determination under the Building Act 2004); comparative test only, not Alberta; NZ code references retained as written. It is not an Alberta application.
+
+Attached is a New Zealand determination about a replacement façade system on a five-storey apartment building in Howick, Auckland. The cladding is a laminate-panel system on an aluminium frame with a cavity behind, and the question is fire spread across the cladding. Read its code references as New Zealand references only and do not map them to Alberta. Using only the attached file, identify the fire-related points the question depends on, the test and consultant evidence the file lists and how it was used, the evidence gaps it records, and what you would ask the architect and the authority. Do not state that the façade is compliant or safe.
+
+Attachments:
+- mbie-determination-2017-088-860516925d43.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

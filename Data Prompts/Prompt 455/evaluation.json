@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Refusal confirmed: the tribunal confirmed the assessment manager's refusal (p. 1). Decision notice dated 26 May 2026 (p. 8).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates QDC boundary-clearance acceptable solutions from the planning-scheme road-frontage setback.",
+    "Flags the 500 mm frontage and side setbacks and the garage boundary length as issues to evidence.",
+    "Flags the sewer-line alignment as an infrastructure question.",
+    "Makes no compliance statement."
+  ],
+  "case_id": "H09-012",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

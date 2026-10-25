@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from New Zealand (MBIE determination under the Building Act 2004); comparative test only, not Alberta; NZ code references retained as written. It is not an Alberta application.
+
+This is a New Zealand file (Determination 2014/011, Wellington), so read its code references as New Zealand references only and do not map them to Alberta. Using only the attached determination, identify which code points the proposed subsoil-class interpolation depends on, what the file says the authority would need before accepting a different subsoil class, which administrative evidence is missing or unclear, and what you would ask the applicants next. Do not say the approach complies or is safe.
+
+Attachments:
+- mbie-determination-2014-011-143b60b3e29a.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The reference describes minimum insulation values that depend on whether the heated floor is fully below or above the frost line; it does not remove the insulation requirement.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "heated hydronic/radiant floor and ground contact",
+    "floor position relative to frost line",
+    "RSI/R-value and insulation layout evidence",
+    "objective/function citation and edition"
+  ],
+  "case_id": "L03-019",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

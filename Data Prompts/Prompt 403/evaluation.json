@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The as-built external walls insulated with the foam comply with E2 insofar as it relates to the foam; the as-built roof insulated with the foam does not comply with E2 insofar as it relates to the foam; there is insufficient information to decide H1.3.1(a) (s8.1-8.2, p.15-16).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "substitution of foam for consented fibreglass batts",
+    "wall and roof moisture and condensation risk",
+    "thermal performance evidence for H1",
+    "consent amendment process for a material change"
+  ],
+  "case_id": "H04-008",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Regulator position: electromagnetic locks must be integrated so they do not compromise fire protection or obstruct exits, must be fail-safe on alarm, power loss or manual override, and must be compatible with fire-rated doors; the Act, NBC(AE) and NFC(AE) govern installation, maintenance, testing and verification.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the fire-protection integration rule from the installation and verification process",
+    "Asks which doors and fire-rated assemblies the locks affect",
+    "Flags the verification evidence the file needs",
+    "Does not state the installation complies"
+  ],
+  "case_id": "H20-030",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

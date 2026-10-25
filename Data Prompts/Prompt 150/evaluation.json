@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Regulator position: tank-vehicle parking buildings with flammable or combustible vapours are Group F, Division 1; repair and servicing are restricted to conforming repairs; the most restricted occupancy governs a mixed building; fuel-fired appliances and service rooms are constrained.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates parking from repair and servicing in the occupancy question",
+    "Flags the mixed-occupancy rule as a whole-building question",
+    "Asks for vapour and appliance location evidence",
+    "Does not state the use is permitted"
+  ],
+  "case_id": "H20-024",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

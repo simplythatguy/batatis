@@ -1,0 +1,6 @@
+Using the attached regulator-issued 23-BCV-001 STANDATA as a reference, identify which project facts are still needed to check whether its window-control conditions are relevant: Part 9/residential scope, opening height and exterior drop, bedroom-egress role, device documentation, and adaptable or barrier-free status. Separate source facts from unknown project facts, ask targeted follow-up questions, and do not issue a safety or acceptance conclusion.
+
+Attachments:
+- 23-BCV-001-75d019bcdfee.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Reversed: the authority's refusal of building consent BC331285 was reversed; the lift route under D1.3.4(c)(iv) is left for the parties to consider when the consent is applied for and granted. [p.12, para 5.1]",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Whether clause D1.3.4 triggers clause D2 for the lift and which compliance route applies",
+    "Whether a waiver or modification request is supported by evidence in the record",
+    "Use of elevations and floor plans as evidence of access arrangements"
+  ],
+  "case_id": "H01-002",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,62 @@
+{
+  "id": "A10-005",
+  "title": "Council Order 0015495: existing building ordered out of Group C occupancy pending structural and environmental engineer letters before change of occupancy",
+  "jurisdiction": "Alberta; accredited municipality not named in the order (acting through an accredited agency)",
+  "code_edition": "Alberta Building Code 2014 (stated in the order)",
+  "case_type": "appeal_decision",
+  "source_url": "https://safetycodes.ab.ca/council-information/appeals/appeal-decisions/",
+  "document_date": "2019-09-20 (Council Order 0015495); the underlying order is dated 2019-05-01",
+  "facts": [
+    {
+      "text": "The Tribunal varied an order dated 2019-05-01, issued under section 49 of the Safety Codes Act by an accredited agency for an accredited municipality against the property owner under the Alberta Building Code 2014.",
+      "locator": "p.1 (caption)"
+    },
+    {
+      "text": "The original direction was to cease occupying the building as a Group C occupancy and, within 60 days, to provide structural and environmental (mould) letters of conformance before any renovation to a Group D, E or F-3 occupancy.",
+      "locator": "p.1, 'Action to be taken'"
+    },
+    {
+      "text": "The varied order requires a structural engineer's report on integrity, a determination of feasible occupancy group(s) within 120 days, and permit applications; option 1 pairs essential structural remediation under engineer direction with establishing a change of use to the selected occupancy.",
+      "locator": "p.2, varied directions 2-3"
+    },
+    {
+      "text": "The order requires the proper fire ratings of exterior walls to adjacent property lines to be ensured before the building is renovated for another occupancy.",
+      "locator": "p.1, 'Action to be taken'"
+    },
+    {
+      "text": "The findings of fact record fire-chief observations on the need for a fire alarm and smoke detectors, and that there is no secondary egress through a window in certain areas.",
+      "locator": "p.8 and p.10, findings of fact"
+    }
+  ],
+  "limitations": [
+    "Scanned image PDF (15 pages); text recovered with macOS Vision OCR. Verify against page images before quoting.",
+    "Municipality not named; second-priority Alberta record. Regulatory appeal, not an alternative-solution submission."
+  ],
+  "worker": "A10",
+  "prompt_number": 104,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2019/Building%20-%20Change%20of%20Occupancy%20-%20September%202019%20updated.pdf",
+      "retrieved_at": "2026-10-25T02:07:16.738740+00:00",
+      "sha256": "2ef52d727ffe3f3bafe89d9612796e528db77ec02b364da8e5ef9722b9d8ec0a",
+      "bytes": 3429347,
+      "document_type": "pdf",
+      "role": "input",
+      "filename": "scc-decision-change-of-occupancy-sept-2019-2ef52d727ffe.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/A10/files/scc-decision-change-of-occupancy-sept-2019-2ef52d727ffe.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T02:07:16.738740+00:00",
+        "http_status": "200",
+        "final_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2019/Building%20-%20Change%20of%20Occupancy%20-%20September%202019%20updated.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

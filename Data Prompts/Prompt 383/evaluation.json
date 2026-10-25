@@ -1,0 +1,16 @@
+{
+  "known_outcome": "Determination (15 Nov 2023, s 188): the building underwent a change of use contrary to sections 114 and 115 by 17 October 2019, and the authority's notice to fix is confirmed (p.23 §7.1). Reasoning turns on the use-group classification, with clause F6.2 (escape-route lighting) applying to Community Service but not to the detached-dwelling classification (p.22-23).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Whether the answer separates the change-of-use status question from the building-compliance question.",
+    "Whether it identifies the SH to SA/SM fire-risk-group change and F6.2 as the escape-related consequence.",
+    "Whether it notes that assistance-in-fire evidence was disputed.",
+    "Whether it asks for occupancy and tenancy records rather than asserting the classification.",
+    "Whether it avoids stating that the building complies."
+  ],
+  "case_id": "H02-007",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

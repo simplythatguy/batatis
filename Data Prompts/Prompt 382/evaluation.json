@@ -1,0 +1,16 @@
+{
+  "known_outcome": "Determination (19 Oct 2023, s 188, PDF headed DRAFT): the proposed direct-fixed plywood cladding system does not comply with E2.3.2, based on the scope of BRANZ Appraisal no 765 (2017) with regard to the risk score (p.15 §5.1).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Whether the answer identifies the appraisal's scope conditions as the test rather than the cladding product in general.",
+    "Whether it notes that the record is headed DRAFT and that the final text should be checked.",
+    "Whether it separates the risk-score dispute from the roof-to-wall flashing classification.",
+    "Whether it asks for the risk-score calculation and the scope limits of the appraisal.",
+    "Whether it avoids stating that the cladding complies."
+  ],
+  "case_id": "H02-006",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

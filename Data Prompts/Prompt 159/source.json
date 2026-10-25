@@ -1,0 +1,78 @@
+{
+  "id": "H20-033",
+  "title": "Access to roof-mounted HVAC equipment: guidance across NBC(AE) Article 3.6.4.7 and CSA B149.1:25",
+  "jurisdiction": "Alberta (province-wide STANDATA issued by Alberta Municipal Affairs)",
+  "code_edition": "NBC(AE) 2023; the document states the NBC(AE) 1st printing currently references CSA B149.1:20 (edition control: project rule requires 2nd printing; treat as a caveat)",
+  "case_type": "regulatory_guidance",
+  "source_url": "https://open.alberta.ca/publications/standata-bulletin-building-national-building-code-2023-alberta-edition",
+  "document_date": "Date Issued: June 2026 (platform created June 1, 2026, last updated June 1, 2026)",
+  "facts": [
+    {
+      "text": "The bulletin provides guidance on access to roof-mounted HVAC equipment installed under NBC(AE) and the CSA B149.1 gas-code references.",
+      "locator": "p.1 (Purpose)"
+    },
+    {
+      "text": "The document states that the NBC(AE) 1st printing currently references the CSA B149.1:20 edition.",
+      "locator": "p.1 (Purpose)"
+    },
+    {
+      "text": "Building Safety Codes Officers, designers and contractors reported confusion and inconsistent application of these code provisions across the province.",
+      "locator": "p.1 (Discussion)"
+    },
+    {
+      "text": "The CSA B149.1:25 came into force on March 1, 2026.",
+      "locator": "p.1 (Discussion)"
+    }
+  ],
+  "limitations": [
+    "A published regulator interpretation of a documented design question, not an applicant file.",
+    "Case type is the nearest enum value; this is not an issued variance, appeal or worked example.",
+    "Joint Building/Gas bulletin. Edition-control caveat: the document itself says the NBC(AE) 1st printing references CSA B149.1:20; project rule prefers the 2nd printing, which is not stated in the document.",
+    "Edition check: the Aug 2026 second-printing notice (attached as supporting evidence) says the NBC(AE) 2nd printing includes revisions and errata released 17 Aug 2026. This bulletin (June 2026) refers to the 1st printing; whether the 2nd printing changed the CSA B149.1 reference was not checked.",
+    "Edition check: alberta.ca lists the NBC(AE) 2023 2nd printing (published 17 Aug 2026) as in force; the article wording quoted here is as the STANDATA document states it and was not checked against the 2nd printing text (not in the package)."
+  ],
+  "original_worker_case_type": "published_worked_example",
+  "parent_curation_note": "STANDATA interpretations and bulletins describe general regulated conditions; they are regulatory reference exercises, not individual applications or published project worked examples.",
+  "worker": "H20",
+  "prompt_number": 159,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://open.alberta.ca/dataset/5cd7e000-4f7c-4188-b26f-11a16bbe43f8/resource/8b436047-1937-4439-8d0d-cc40ab79d37a/download/ma-standata-bulletin-joint-23bcb008-25gcb002-2026-06.pdf",
+      "sha256": "3786f4f875a090381d8b9e6c1f98788c68105f54ba2fcf045c94aebaa14d6fca",
+      "role": "input",
+      "bytes": 268962,
+      "filename": "ma-standata-bulletin-joint-23bcb008-25gcb002-2026-06-3786f4f875a0.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H20/files/pdf/ma-standata-bulletin-joint-23bcb008-25gcb002-2026-06-3786f4f875a0.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:19:41.175680+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/5cd7e000-4f7c-4188-b26f-11a16bbe43f8/resource/8b436047-1937-4439-8d0d-cc40ab79d37a/download/ma-standata-bulletin-joint-23bcb008-25gcb002-2026-06.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://open.alberta.ca/dataset/adf8cfe1-dfb6-4b75-95f5-c691fd8fd236/resource/2f679de4-dd94-4ad9-b0eb-40bfe5ebc9c7/download/ma-notice-second-printing-available-2023-alberta-edition-building-fire-code.pdf",
+      "sha256": "77c571d8b6e7fe5a2e56fb7ad2f5bc2f911ca80b8d74799d486dd20603e14264",
+      "role": "supporting_evidence",
+      "bytes": 30521,
+      "filename": "ma-notice-second-printing-available-2023-alberta-edition-building-fire-code-77c571d8b6e7.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H20/files/pdf-notices/ma-notice-second-printing-available-2023-alberta-edition-building-fire-code-77c571d8b6e7.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:53:00.855450+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/adf8cfe1-dfb6-4b75-95f5-c691fd8fd236/resource/2f679de4-dd94-4ad9-b0eb-40bfe5ebc9c7/download/ma-notice-second-printing-available-2023-alberta-edition-building-fire-code.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

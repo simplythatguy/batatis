@@ -1,0 +1,6 @@
+A building under construction may be partly occupied, and someone asks when occupancy of part of the building may be allowed. The attached STANDATA bulletin (23-BCB-004/23-FCB-005) is my only source. Using only that document, identify the provisions it cites, the services it says must be considered, the occupant and worker provisions it requires, and what the file needs to show before the authority decides. Do not invent phases, floor areas or dates, and do not state occupancy is permitted.
+
+Attachments:
+- ma-standata-bulletin-building-fire-23-bcb-004-23-fcb-005-2025-01-c25bb5040a29.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

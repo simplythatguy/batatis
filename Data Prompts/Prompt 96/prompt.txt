@@ -1,0 +1,6 @@
+Review the attached historical 14-BCV-015 STANDATA as a reference for a multi-level storage racking system. Identify the special/unusual-structure route, occupancy and employee-access limits, then build a missing-information list for configuration, stored commodities, fire safety plan, structural design, suppression/alarm, egress and emergency power. Ask targeted questions without inventing rack heights, loads, commodity classes or occupancy facts. Do not certify the design.
+
+Attachments:
+- catalogue-07-ca7d9d77c494.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

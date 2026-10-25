@@ -1,0 +1,74 @@
+{
+  "id": "L16-011",
+  "title": "Cedar Impressions polypropylene siding",
+  "jurisdiction": "Canada — national CCMC product evaluation; comparative attachment only, not a Calgary/Edmonton or Alberta project application",
+  "code_edition": "NBC 2015",
+  "case_type": "product_evidence",
+  "source_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=13508-R&type=cert",
+  "document_date": "2025-10-23",
+  "facts": [
+    {
+      "text": "The CCMC opinion classifies the evaluated product as Alternative for NBC 2015 provisions on protection from precipitation, second plane of protection, cladding attachment and vinyl-siding attachment.",
+      "locator": "CCMC 13508-R PDF, p. 2, Compliance opinion table"
+    },
+    {
+      "text": "The report describes the evaluated product as Cedar Impressions polypropylene siding and bounds the opinion by its conditions and limitations.",
+      "locator": "CCMC 13508-R PDF, pp. 1–2, Product names and Compliance opinion"
+    }
+  ],
+  "limitations": [
+    "Product-level evidence only; no project assembly or application is supplied.",
+    "The report’s classifications must be read with its installation conditions and tested configuration."
+  ],
+  "source_use": "comparative_attachment_content_only",
+  "worker": "L16",
+  "prompt_number": 207,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?type=cert&id=520",
+      "sha256": "eaf4d42c02fe6e90093dee0c032b32874fd43af1d0aa27cf55dc6c9cc1eead4d",
+      "role": "input",
+      "bytes": 153777,
+      "filename": "current-route-13508-R-eaf4d42c02fe.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L16/files/current-route-13508-R-eaf4d42c02fe.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:51:04.957639+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?type=cert&id=520",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded",
+        "entity_extraction": "Copied unchanged PDF entity from byte 433; original transport capture retained.",
+        "raw_capture_sha256": "ef1405d45b10d6b6aebeb8421399d61098d98327d99f2ac776c3682927fa1e15",
+        "raw_capture_path": "_research/workers/L16/files/transport-capture-ef1405d45b10d6b6.bin"
+      }
+    },
+    {
+      "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=13508-R&type=cert",
+      "sha256": "2c93c78e35094a95ff943206a41d35fcb79882e97df8912f6097790e1c3f800e",
+      "role": "supporting_evidence",
+      "bytes": 42841,
+      "filename": "landing-13508-R-2c93c78e3509.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L16/files/landing-13508-R-2c93c78e3509.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:20:12.752162+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=13508-R&type=cert",
+        "content_type": "text/html; charset=UTF-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-2-source-text.txt",
+        "sha256": "e9e6dc80768ce67ef501fbce639c51051776c1a3583abffbde8ea534ec9324b3",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

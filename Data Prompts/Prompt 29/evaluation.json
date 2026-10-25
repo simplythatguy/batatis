@@ -1,0 +1,14 @@
+{
+  "known_outcome": "The permit refusal was upheld.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separate the applicant’s occupancy position from the authority’s refusal reasons.",
+    "Track which requested documents were submitted and which remain disputed.",
+    "Do not turn summarized expert evidence into an independent engineering conclusion."
+  ],
+  "case_id": "L06-017",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Calgary / Edmonton",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

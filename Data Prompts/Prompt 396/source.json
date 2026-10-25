@@ -1,0 +1,69 @@
+{
+  "id": "H04-001",
+  "title": "Refused building consent: custom fixed glazing system on a proposed two-storey house (Auckland)",
+  "jurisdiction": "New Zealand (MBIE Chief Executive determination; Building Act 2004; comparative only, not Alberta)",
+  "scope": "comparative-only",
+  "code_edition": "NZ Building Code, First Schedule, Building Regulations 1992 (cited in s1.3); verification-method and acceptable-solution editions not stated in the extracted text",
+  "case_type": "appeal_decision",
+  "tier": "A",
+  "document_type": "MBIE Chief Executive determination 2018/040 (PDF, 20 pages, Building Act 2004 s177/s188)",
+  "source_url": "https://codehub.building.govt.nz/resources/2018040",
+  "document_date": "30 August 2018",
+  "facts": [
+    {
+      "text": "Proposed two-storey house in an Extra High wind zone; cladding is vertical shiplap cedar weatherboards with fixed glazing panels; upper floor is cross-laminated timber walls and floors on concrete piles and retaining walls.",
+      "locator": "p.2 s2.1"
+    },
+    {
+      "text": "Fixed glazing was intended for all elevations, with panels 3.0 to 3.8 m high and 1.0 to 2.4 m wide; the glazing manufacturer designed the insulated units and structural sealant bite; the applicant designed the joinery and fixings.",
+      "locator": "p.3 s2.2.1"
+    },
+    {
+      "text": "Consent drawings show a proprietary silicone sealant on polyethylene-foam rod at the glazing edges; the producer statement PS1 from the glazing manufacturer covers structural tape and structural silicone.",
+      "locator": "p.3 s2.2.2"
+    },
+    {
+      "text": "Figure 1 shows the elevations with the fixed glazing (p.2); Figure 2 is a head and sill detail of the original system (p.3). The PDF embeds consent elevation sheet A1-011 at 1:100 and a junction detail with dimensions (viewed as extracted images).",
+      "locator": "p.2 Fig.1; p.3 Fig.2; embedded images p.2 and p.4"
+    },
+    {
+      "text": "A WANZ weathertightness test was run on a scaled version with vertical timber cladding and photographs of the test are included; the determination notes the test is not designed to assess facade prototypes.",
+      "locator": "p.17 s6.4.4-6.4.6"
+    }
+  ],
+  "limitations": [
+    "Comparative New Zealand record: no Alberta applicability or Alberta performance is asserted; Alberta editions are not applied.",
+    "Regulator determination under Building Act 2004 Part 3 Subpart 1 that contains the decision text, so outcome_leakage is true; the prompt omits the decision.",
+    "Prompt is a reconstructed test question grounded in the attachment, not an original applicant message.",
+    "Text extracted with pypdf; figure captions and embedded image counts are from the PDF, and only 2018-040 images were viewed.",
+    "Private names and street addresses in the source are omitted from this record.",
+    "The determination records that drawings were revised during the dispute; the file contains the original design material and the later revision discussion."
+  ],
+  "source_code": "2018-040",
+  "worker": "H04",
+  "prompt_number": 396,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2018/2018-040.pdf",
+      "sha256": "0a33978a08895b10f0ff79418df7556d57b41fa5134ec8f95958ba638666d2da",
+      "bytes": 593996,
+      "pages": 20,
+      "role": "input",
+      "filename": "mbie-determination-2018-040-0a33978a0889.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H04/files/determinations/mbie-determination-2018-040-0a33978a0889.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:44:54.873728+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2018/2018-040.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

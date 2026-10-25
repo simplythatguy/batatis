@@ -1,0 +1,18 @@
+{
+  "known_outcome": "Source-backed: the revised notice records that the amendments to Development Permit 2021-338 were conditionally approved (p.1) and includes condition 21 (p.28). The file does not record a building-permit or inspection outcome.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Basis for halved limiting distances (for example 4.72 m / 2, 2.4 m / 2, 13.6 m / 2) and the rule that permits halving",
+    "Entries where the total glazed or unprotected percentage is close to the permitted percentage (for example 9% against 9%)",
+    "Entries that state a 45-minute fire rating 'PROVIDED' alongside a glazing limit, and what the schedule claims that rating does",
+    "Whether the approved and proposed sheets (pp.3-10 and pp.31-34) reconcile",
+    "Edition: NBC-2019AE on the drawing notes against the 2023 edition the reviewer must apply",
+    "Fire-response basis for halving under the City's December 2021 fire-response notice, if applicable",
+    "Missing evidence: stamped elevations, wall fire-resistance documentation, glazing product or listing evidence, and the designer's calculation method"
+  ],
+  "case_id": "A13-002",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

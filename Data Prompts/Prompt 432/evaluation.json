@@ -1,0 +1,14 @@
+{
+  "known_outcome": "p.10 §6.1: the as-built foundations installed in 1998 under building consent No. 27202, along the western and southern sides of the dwelling, do not comply with the Building Code in force when that consent was issued.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the consented design from the as-built condition",
+    "Treats the producer statements' scope (design PS1, no required site inspection) as an administrative gap, not a finding",
+    "Uses only the figures and text for ground conditions; asserts nothing beyond them"
+  ],
+  "case_id": "H05-008",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

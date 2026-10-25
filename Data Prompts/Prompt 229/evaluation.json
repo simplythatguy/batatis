@@ -1,0 +1,17 @@
+{
+  "known_outcome": "RR-209 estimates total RSET from 120 s (best case) to 970 s (worst case), based on component assumptions; its 25-person self-reported evacuation observations give a mean travel time of 47 s and mean distance of 16.6 m. These are general research estimates, not a prediction for a particular building.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "estimated versus observed quantities",
+    "occupant profile and mobility",
+    "alarm/detection and pre-movement assumptions",
+    "fire location and egress route",
+    "applicable code/AHJ",
+    "project-specific evidence and uncertainty"
+  ],
+  "case_id": "L17-021",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

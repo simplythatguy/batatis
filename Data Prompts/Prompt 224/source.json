@@ -1,0 +1,56 @@
+{
+  "id": "L17-005",
+  "title": "NRC FPH test UF-04 — unprotected steel C-joist floor, open basement doorway",
+  "jurisdiction": "Canada (NRC research facility; no project jurisdiction or AHJ identified)",
+  "code_edition": "unknown; the summary paper does not identify a code edition for this experiment",
+  "case_type": "research_evidence",
+  "source_url": "https://nrc-publications.canada.ca/eng/view/accepted/?id=0af1ee38-807d-478a-a5e2-c225855664e5",
+  "document_date": "2010-07-05",
+  "facts": [
+    {
+      "text": "The test-series table identifies a steel C-joist floor assembly and an open basement doorway.",
+      "locator": "Tenability paper, PDF p. 14, Table 4"
+    },
+    {
+      "text": "The attached NRC paper reports first alarm at 30 s and the listed sequence for UF-04 in Table 4.",
+      "locator": "Tenability paper, PDF p. 14, Table 4"
+    },
+    {
+      "text": "The paper reports OD=2 m⁻¹ at 195 s, FED 0.3–1 at 207–215 s (first storey) and 245–280 s (second storey), and structural failure at 462 s.",
+      "locator": "Tenability paper, PDF p. 14, Table 4"
+    }
+  ],
+  "limitations": [
+    "The detailed test report is not attached; the evidence is the NRC tenability paper table and bibliography.",
+    "This is NRC research evidence, not an application, adjudication, or local approval.",
+    "The paper describes a full-scale test house and specific fire scenarios; its results do not establish performance of an unidentified project.",
+    "Code edition is not specified in the paper for this test-series baseline."
+  ],
+  "worker": "L17",
+  "prompt_number": 224,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://nrc-publications.canada.ca/eng/view/accepted/?id=0af1ee38-807d-478a-a5e2-c225855664e5",
+      "sha256": "c41f12ff37a96cdc90a363bdaff28a228b9eb442da93c5b415170243cd29cb6a",
+      "role": "input",
+      "bytes": 342829,
+      "filename": "FPH-tenability-analysis-c41f12ff37a9.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L17/files/FPH-tenability-analysis-c41f12ff37a9.pdf",
+      "reuse_status": "rights_review_required",
+      "rights_source": "https://nrc-publications.canada.ca/eng/copyright/",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:48:05.696429+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc-publications.canada.ca/eng/view/accepted/?id=0af1ee38-807d-478a-a5e2-c225855664e5",
+        "content_type": "application/pdf;charset=UTF-8",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "rights_review_required"
+}

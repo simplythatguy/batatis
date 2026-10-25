@@ -1,0 +1,65 @@
+{
+  "id": "H04-016",
+  "title": "Amendment refused: window joinery flashing and timber remediation on a three-storey timber building",
+  "jurisdiction": "New Zealand (MBIE Chief Executive determination; Building Act 2004; comparative only, not Alberta)",
+  "scope": "comparative-only",
+  "code_edition": "NZ Building Code, First Schedule, Building Regulations 1992 (cited); edition not stated",
+  "case_type": "appeal_decision",
+  "tier": "A",
+  "document_type": "MBIE Chief Executive determination 2020/014 (PDF, 14 pages)",
+  "source_url": "https://codehub.building.govt.nz/resources/2020014",
+  "document_date": "14 July 2020",
+  "facts": [
+    {
+      "text": "The subject building is now a three-storey timber-framed residential building; the amendment application incorporates a revised timber remediation methodology and a proposed window flashing system for the existing window joinery.",
+      "locator": "p.2 s2.1"
+    },
+    {
+      "text": "The existing windows would be left in place instead of being removed and reinstalled as the original consent provided, with a proposed flashing system around them.",
+      "locator": "p.2-3 s2.2.1"
+    },
+    {
+      "text": "Figure 1 shows the jamb detail of the flashing system (p.2); Figure 2 shows the head and sill detail (p.3); both are marked not to scale.",
+      "locator": "p.2 Fig.1; p.3 Fig.2"
+    },
+    {
+      "text": "The determination considers whether sufficient information was provided to the authority during the building consenting process.",
+      "locator": "p.1 Summary"
+    }
+  ],
+  "limitations": [
+    "Comparative New Zealand record: no Alberta applicability or Alberta performance is asserted; Alberta editions are not applied.",
+    "Regulator determination under Building Act 2004 Part 3 Subpart 1 that contains the decision text, so outcome_leakage is true; the prompt omits the decision.",
+    "Prompt is a reconstructed test question grounded in the attachment, not an original applicant message.",
+    "Text extracted with pypdf; figure captions and embedded image counts are from the PDF, and only 2018-040 images were viewed.",
+    "Private names and street addresses in the source are omitted from this record.",
+    "The original consent is not attached; the amendment is the subject."
+  ],
+  "source_code": "2020-014",
+  "worker": "H04",
+  "prompt_number": 411,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2020/2020-014.pdf",
+      "sha256": "114bc894c89b96c6108a8b4211e3d16584addadd41dce55f0feeadf63cd93b32",
+      "bytes": 952261,
+      "pages": 14,
+      "role": "input",
+      "filename": "mbie-determination-2020-014-114bc894c89b.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H04/files/determinations/mbie-determination-2020-014-114bc894c89b.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:46:27.732115+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2020/2020-014.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

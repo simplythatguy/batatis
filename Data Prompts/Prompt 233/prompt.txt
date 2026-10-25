@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from New Zealand, Tauranga City Council (NZ Building Code; NON-ALBERTA comparative test). It is not an Alberta application.
+
+Attached is a fire engineering report for alterations to an existing three-level building in Tauranga, New Zealand, with the related technical reports in the same release. Please review it the way a building consent reviewer would at intake: identify which New Zealand Building Code fire-safety provisions and Building Act 2004 sections the report relies on, what it leaves unresolved for the existing building, where its own statements conflict or look unclear, which items are referenced but not included, and what questions the applicant would need to answer. Do not say whether the design complies or is safe.
+
+Attachments:
+- h06-fyi-bc50488-fire-design-part1-4fe57e159806.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

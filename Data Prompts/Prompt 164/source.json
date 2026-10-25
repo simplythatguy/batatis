@@ -1,0 +1,57 @@
+{
+  "id": "L18-007",
+  "title": "Phase 2 W4 — 2x6 wall with R-24 fibreglass and 51 mm exterior XPS",
+  "jurisdiction": "NRC Field Exposure of Walls facility, Ottawa, Ontario, Canada (research specimen; no permit jurisdiction)",
+  "code_edition": "Unknown; the study reports NBC references but not a project’s adopted edition.",
+  "case_type": "documented_design_study",
+  "source_url": "https://nrc-publications.canada.ca/eng/view/object/?id=c20992ee-c99f-4f95-8094-58800da59849",
+  "document_date": "2016-01-08",
+  "facts": [
+    {
+      "text": "Phase 2 used a common exterior arrangement including vinyl siding, polymer-based sheathing membrane and 11 mm OSB, with interior 6-mil polyethylene and drywall; the report provides fabrication figures and appendices.",
+      "locator": "PDF pp. 20–23; report §2.2, Figs. 10–17 and fabrication appendices"
+    },
+    {
+      "text": "W4 is a 2x6 R-24 glass-fibre wall with 51 mm exterior XPS (reported overall R-34), within the report’s common Phase 2 exterior/interior layers.",
+      "locator": "PDF pp. 20–23; report §2.2 and Figs. 10–17"
+    },
+    {
+      "text": "The report’s Phase 2 protocol included a deliberate 3 mm slit and controlled indoor conditions (about 21°C, 50% RH and 10 Pa) during a test period.",
+      "locator": "PDF pp. 24–26; report §2.3"
+    },
+    {
+      "text": "The protocol used a deliberate 3 mm air-barrier slit; the report observed condensation in Phase 2 walls under the defect condition, followed by drying during a later period. No project or permit outcome is reported.",
+      "locator": "PDF pp. 30–34; report §3.2"
+    }
+  ],
+  "limitations": [
+    "Shared report with cases L18-004–L18-006; each candidate identifies one exact W-series configuration. Results are only for NRC’s test conditions."
+  ],
+  "worker": "L18",
+  "prompt_number": 164,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=c20992ee-c99f-4f95-8094-58800da59849",
+      "sha256": "452d8dc315986cb9c9a19ed2e8332812dcc175d8a6616d2df09a7e7b7b8f217f",
+      "role": "input",
+      "bytes": 5447019,
+      "filename": "high-insulation-wood-wall-phase12-452d8dc31598.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L18/files/high-insulation-wood-wall-phase12-452d8dc31598.pdf",
+      "reuse_status": "rights_review_required",
+      "rights_source": "https://nrc-publications.canada.ca/eng/copyright/",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:18:23.603737+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc-publications.canada.ca/eng/view/ft/?id=c20992ee-c99f-4f95-8094-58800da59849",
+        "content_type": "application/pdf;charset=UTF-8",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "rights_review_required"
+}

@@ -1,0 +1,57 @@
+{
+  "id": "L02-008",
+  "title": "19-BCV-008 - Multi-level storage racking systems",
+  "jurisdiction": "Alberta (province-wide)",
+  "code_edition": "National Building Code – 2019 Alberta Edition (NBC(AE)); National Fire Code – 2019 Alberta Edition (NFC(AE))",
+  "case_type": "issued_variance",
+  "source_url": "https://open.alberta.ca/publications/standata-building-code-variance-national-building-code-2019-alberta-edition",
+  "document_date": "2019-12",
+  "facts": [
+    {
+      "text": "The variance allows a multi-level storage-racking system to be considered a special and unusual structure under Sentence 3.2.2.2.(1), rather than treating its access levels as ordinary individual storeys/mezzanines.",
+      "locator": "19-BCV-008 PDF, p. 1, Purpose and Discussion; p. 2, Variance"
+    },
+    {
+      "text": "A fire safety plan is to be submitted with the building permit application, and the system must be arranged to prevent access by people other than employees.",
+      "locator": "19-BCV-008 PDF, p. 2, Variance, items 1.2–1.3"
+    },
+    {
+      "text": "Conditions include Part 4 design of structural/supporting elements, guarded access levels, specified open-area rules, and required signage.",
+      "locator": "19-BCV-008 PDF, p. 3, Variance, sections 2–3"
+    },
+    {
+      "text": "The document specifies automatic sprinkler protection under platforms/access levels and detailed egress, travel-distance, and occupant-load controls.",
+      "locator": "19-BCV-008 PDF, pp. 4–6, Variance, sections 5–6"
+    }
+  ],
+  "limitations": [
+    "This is a provincewide regulator-issued STANDATA variance, not an individual application, site-specific permit decision, or applicant-provided evidence.",
+    "Historical status as of 2026-10-24: the official 2019 catalogue is marked archived/replaced by the 2023 catalogue; Alberta lists NBC(AE) 2019 as in force from 2019-12-01 through 2024-04-30. Alberta guidance says previous-edition STANDATA are obsolete for new construction after a new code takes effect, while remaining relevant to evaluation of existing structures during renovations and retrofits. Verify current code edition and AHJ applicability.",
+    "No project drawings, owner/site facts, or project-specific professional evidence accompany this catalogue variance. The attached source is the outcome reference itself."
+  ],
+  "worker": "L02",
+  "prompt_number": 64,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://open.alberta.ca/dataset/5a1e414d-6639-467d-b5a4-6d68454f1340/resource/242289eb-d175-49f1-a65c-4323d0a5793e/download/ma-standata-19-bcv-008-multi-level-storage-racking-systems.pdf",
+      "sha256": "7bebbf1ec7ea05540f5ae0b70ff277e7941147e86605fea92f6156e281537834",
+      "role": "outcome_reference",
+      "bytes": 657296,
+      "filename": "catalogue-242289eb-d175-49f1-a65c-4323d0a5793e-19-BCV-008---Multi-level-storage-racking-systems-7bebbf1ec7ea.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L02/files/catalogue-242289eb-d175-49f1-a65c-4323d0a5793e-19-BCV-008---Multi-level-storage-racking-systems-7bebbf1ec7ea.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:36.475040+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/5a1e414d-6639-467d-b5a4-6d68454f1340/resource/242289eb-d175-49f1-a65c-4323d0a5793e/download/ma-standata-19-bcv-008-multi-level-storage-racking-systems.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

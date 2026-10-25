@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The active CCMC report publishes an NBC 2020 product-level opinion and marks Article 3.1.5.5 Acceptable within the stated EIFS scope. No specific proposed building is evaluated.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "identify the exact Adex product variant and complete layer schedule",
+    "substrate and attachment correspondence",
+    "building occupancy, height and construction classification",
+    "project-specific fire and exterior-wall evidence"
+  ],
+  "case_id": "L16-002",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

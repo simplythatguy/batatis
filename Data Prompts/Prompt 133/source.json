@@ -1,0 +1,60 @@
+{
+  "id": "H20-007",
+  "title": "Indoor and outdoor special events: permits, occupant loads and emergency plans",
+  "jurisdiction": "Alberta (province-wide STANDATA issued by Alberta Municipal Affairs)",
+  "code_edition": "NBC(AE) 2023 and NFC(AE) 2023 (National Fire Code - 2023 Alberta Edition); printing not stated in document",
+  "case_type": "regulatory_guidance",
+  "source_url": "https://open.alberta.ca/publications/standata-interpretation-building-national-building-code-2023-alberta-edition",
+  "document_date": "Date Issued: January 2025 (platform created January 16, 2025, last updated January 16, 2025)",
+  "facts": [
+    {
+      "text": "The Discussion says SCOs, owners, facilitators and other ministries asked for guidance on the requirements and enforcement of permits and occupant loads for indoor and outdoor special events.",
+      "locator": "p.1 (Discussion)"
+    },
+    {
+      "text": "The process for special events is at the discretion of the municipality in which the event occurs.",
+      "locator": "p.1 (Discussion)"
+    },
+    {
+      "text": "The document provides guidance on the minimum safety-code standards needed for an acceptable level of life safety during a special event.",
+      "locator": "p.1 (Discussion)"
+    },
+    {
+      "text": "The document notes that other regulatory bodies have minimum standards that must also be met.",
+      "locator": "p.1 (Discussion)"
+    }
+  ],
+  "limitations": [
+    "A published regulator interpretation of a documented design question, not an applicant file.",
+    "Case type is the nearest enum value; this is not an issued variance, appeal or worked example.",
+    "The document is long (14 pages) and largely guidance; the case relies on the Discussion and the first Interpretation section, not each page's detail.",
+    "Edition check: alberta.ca lists the NBC(AE) 2023 2nd printing (published 17 Aug 2026) as in force; the article wording quoted here is as the STANDATA document states it and was not checked against the 2nd printing text (not in the package)."
+  ],
+  "original_worker_case_type": "published_worked_example",
+  "parent_curation_note": "STANDATA interpretations and bulletins describe general regulated conditions; they are regulatory reference exercises, not individual applications or published project worked examples.",
+  "worker": "H20",
+  "prompt_number": 133,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/588ff9fd-c751-4326-afd9-d61569d9c4e4/download/ma-standata-interpretation-building-fire-23-bci-010-23-fci-013-2025-01.pdf",
+      "sha256": "993538c935f84aa7df7370f9fb5a5fccc1f92726b1f7c888753fe85381482eee",
+      "role": "input",
+      "bytes": 158291,
+      "filename": "ma-standata-interpretation-building-fire-23-bci-010-23-fci-013-2025-01-993538c935f8.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H20/files/pdf/ma-standata-interpretation-building-fire-23-bci-010-23-fci-013-2025-01-993538c935f8.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:19:06.395814+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/588ff9fd-c751-4326-afd9-d61569d9c4e4/download/ma-standata-interpretation-building-fire-23-bci-010-23-fci-013-2025-01.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

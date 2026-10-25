@@ -1,0 +1,14 @@
+{
+  "known_outcome": "p.6 §6.1: the authority correctly exercised its powers in respect of the proposed building consent; the authority's decision to refuse to consider the application is confirmed.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Treats the interpolation method as an alternative solution needing its own analysis, not as an Acceptable Solution route",
+    "Identifies the NZS 1170.5 subsoil-class dependency and the geotechnical justification the file describes, without asserting a class",
+    "Keeps the NZ comparison scope and makes no Alberta claim"
+  ],
+  "case_id": "H05-001",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

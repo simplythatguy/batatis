@@ -1,0 +1,58 @@
+{
+  "id": "A10-007",
+  "title": "Council Order 0015480: information required for a home care facility; Care Occupancy B3 and fire alarm and sprinkler question under ABC 2014",
+  "jurisdiction": "Alberta; accredited municipality not named in the order (respondent)",
+  "code_edition": "Alberta Building Code 2014 (Division C 2.2.10.8; Care Occupancy as stated in the decision)",
+  "case_type": "appeal_decision",
+  "source_url": "https://safetycodes.ab.ca/council-information/appeals/appeal-decisions/",
+  "document_date": "2017-11-15 (Council Order 0015480); the underlying order is dated 2017-08-16; development permit application dated 2017-05-15 (as cited)",
+  "facts": [
+    {
+      "text": "The order issued 2017-08-16 under section 43 of the Safety Codes Act and ABC 2014 Division C 2.2.10.8 required information adequate to determine compliance; the Tribunal varied it to require information adequate to determine compliance or to allow the AHJ to consider an application.",
+      "locator": "p.1, 'FROM' and 'TO' directions"
+    },
+    {
+      "text": "The Panel records that the 2014 ABC introduced Care Occupancy and that the 2006 ABC did not recognise the level of care provided.",
+      "locator": "p.8, para 32"
+    },
+    {
+      "text": "The residents are described as ambulatory and cognitive and able to self-evacuate; the Panel found the residence as proposed to be a B3 care facility requiring a fire alarm and sprinkler system or equivalent.",
+      "locator": "p.8, paras 34 and 36"
+    },
+    {
+      "text": "The Panel encouraged the appellant to contact the building safety codes officer about variance or alternative-solution routes for the fire alarm, sprinkler and fire-separation concerns, and said professional help may be needed.",
+      "locator": "p.8, paras 38-39"
+    }
+  ],
+  "limitations": [
+    "Scanned image PDF (9 pages); OCR text (macOS Vision). Verify before quoting. Municipality not named; second-priority Alberta record.",
+    "Naming mismatch: the SCC index title describes a change of use of a single detached dwelling (November 2017), but the order text concerns a home care facility. The decision text does not in the extracted pages confirm the building's prior use, so the title is not used as a fact."
+  ],
+  "worker": "A10",
+  "prompt_number": 106,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2017/Building%20-%20Change%20of%20the%20use%20of%20a%20single%20detached%20dwelling%20-%20November%202017.pdf",
+      "retrieved_at": "2026-10-25T02:07:26.031487+00:00",
+      "sha256": "5421bbe8563cdaf3ac647f8c4ec9eb98d64c139f816025ad8a759b93889b008d",
+      "bytes": 1696285,
+      "document_type": "pdf",
+      "role": "input",
+      "filename": "scc-decision-change-of-use-single-detached-nov-2017-5421bbe8563c.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/A10/files/scc-decision-change-of-use-single-detached-nov-2017-5421bbe8563c.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T02:07:26.031487+00:00",
+        "http_status": "200",
+        "final_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2017/Building%20-%20Change%20of%20the%20use%20of%20a%20single%20detached%20dwelling%20-%20November%202017.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

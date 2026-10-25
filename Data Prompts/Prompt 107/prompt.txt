@@ -1,0 +1,6 @@
+Attached is a Council order on a set of building-code orders for a turbine building at an oil facility, including building classification and fire-protection questions. Using only the attached text, identify the classification positions each party took, the fire-protection directions in the decision, the exit and fire-alarm provisions the decision addresses, and the engineering evidence a reviewer would need to decide a similar classification question. Do not decide the classification and do not state whether the building is safe.
+
+Attachments:
+- scc-decision-building-classification-occupant-safety-2012-6dc8172f3043.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

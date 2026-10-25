@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The current CCMC opinion is an NBC 2020 product evaluation with Article 3.1.5.5 classified Acceptable. It is limited to the assessed DuROCK systems and conditions.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "which DuROCK product and substrate are proposed",
+    "component-specific material and thickness schedule",
+    "building/fire provisions and applicable local code edition",
+    "whether assembly-level fire testing or additional design evidence is needed"
+  ],
+  "case_id": "L16-003",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

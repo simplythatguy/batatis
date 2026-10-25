@@ -1,0 +1,69 @@
+{
+  "id": "H18-007",
+  "title": "Larry Robinson Arena: fire code retrofit assessment and water supply analysis for an existing assembly building",
+  "scope": "comparative_non_alberta",
+  "alberta_applicability": "not established",
+  "jurisdiction": "City of Ottawa, Ontario, Canada (original jurisdiction)",
+  "code_edition": "Ontario Fire Code retrofit provisions (Section 9.2, as cited). 2012 Ontario Building Code (O. Reg. 332/12, amended to O. Reg. 163/24) applies to the addition. Existing-building safety requirements are referenced to the 1986 Building Code (O. Reg. 419/86), as stated in the report (p.5).",
+  "case_type": "documented_design_study",
+  "source_url": "https://webcast.ottawa.ca/plan/All_Image%20Referencing_Site%20Plan%20Application_Image%20Reference_2025-11-25%20-%20Fire%20Code%20Retrofit%20Assessment%20and%20Water%20Supply%20Analysis%20-%20D07-12-25-0154.PDF",
+  "source_url_note": "City of Ottawa webcast file. The site-plan application link comes from the file name only; the report text does not state it.",
+  "document_date": "2025-11-17 (report date)",
+  "facts": [
+    {
+      "text": "Fire Code Retrofit Assessment and Water Supply Analysis for Larry Robinson Arena, prepared by Stantec Consulting Ltd. for the City of Ottawa. Report date November 17, 2025. Project/file 131601302.",
+      "locator": "p.1-2"
+    },
+    {
+      "text": "Scope: deficiencies of the existing building relative to the mandatory retrofit provisions of the Ontario Fire Code (Section 9.2). A Life Safety Study would follow if the deficiencies are not readily rectified.",
+      "locator": "p.4"
+    },
+    {
+      "text": "Scope also covers water-supply requirements under the Ontario Fire Code and the Ontario Building Code, with options and recommendations.",
+      "locator": "p.4"
+    },
+    {
+      "text": "Code basis as stated: existing-building safety requirements referenced to the 1986 Building Code (O. Reg. 419/86). The 2012 Ontario Building Code (O. Reg. 332/12, amended up to O. Reg. 163/24) applies to the addition.",
+      "locator": "p.5"
+    },
+    {
+      "text": "Section 3, 'Ontario Building Code Analysis', states the project is required to comply with the 2012 OBC, because substantially complete drawings were submitted.",
+      "locator": "p.17"
+    },
+    {
+      "text": "Evacuation note: persons with mobility impairments who may need help to evacuate could be located on the second floor 'since it has elevator access'. The adjacent stair is expected to be used to assist evacuation.",
+      "locator": "p.22"
+    }
+  ],
+  "limitations": [
+    "Comparative only: Ontario, non-Alberta. Non-heritage.",
+    "The link to a planning-application file is inferred from the file name only.",
+    "Consultant assessment; figures and site drawings were not read visually."
+  ],
+  "worker": "H18",
+  "prompt_number": 288,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://webcast.ottawa.ca/plan/All_Image%20Referencing_Site%20Plan%20Application_Image%20Reference_2025-11-25%20-%20Fire%20Code%20Retrofit%20Assessment%20and%20Water%20Supply%20Analysis%20-%20D07-12-25-0154.PDF",
+      "sha256": "2e5918cd32bb68eed880ca9dacdd9149c012c5116bdeb9a85fdf7cfd63835d44",
+      "role": "input",
+      "download_record": "_research/workers/H18/files/ottawa-d07-12-25-0154-fire-code-retrofit-assessment-2e5918cd32bb.pdf.source.json",
+      "bytes": 1538235,
+      "filename": "ottawa-d07-12-25-0154-fire-code-retrofit-assessment-2e5918cd32bb.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H18/files/ottawa-d07-12-25-0154-fire-code-retrofit-assessment-2e5918cd32bb.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:50:20.237974+00:00",
+        "http_status": "200",
+        "final_url": "https://webcast.ottawa.ca/plan/All_Image%20Referencing_Site%20Plan%20Application_Image%20Reference_2025-11-25%20-%20Fire%20Code%20Retrofit%20Assessment%20and%20Water%20Supply%20Analysis%20-%20D07-12-25-0154.PDF",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

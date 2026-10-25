@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from Chalk River, Ontario; federal site administered by Canadian Nuclear Laboratories. It is not an Alberta application.
+
+Using the attached CNL Science Collaboration Centre case study, identify the stated federal code and review context, the grade/height issue described, and the project facts that are established. Then list the project-specific documents an administrative reviewer would need to see, including the applicable code basis, site/grade and height drawings, occupancy/storey data, structural and fire plans, sprinkler/fire-department access information, consultant rationale, review records, assumptions and unresolved questions. Do not treat the case study's described measures as a supplied approval or technical certification.
+
+Attachments:
+- cnl-science-collaboration-case-study-59f556a4219c.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

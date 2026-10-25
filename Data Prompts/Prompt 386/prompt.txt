@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from New Zealand: Auckland Council as building consent authority; MBIE determination under the Building Act 2004. Non-Alberta comparative record.. It is not an Alberta application.
+
+We are re-cladding a three-storey townhouse in Auckland. A second-floor dormer window is pushed out from the wall, and the push-out's side wall is about 950 mm from the boundary with the neighbouring townhouse. The walls and dormer roof were not built with fire protection. The council wants the side walls fire-rated to the full standard because it treats the reclad as new work, while we say the work only replaces failed cladding and the walls only need to comply to the same extent as before. Attached is the determination record for this question. Using only that record, please: (1) identify which fire-spread and alteration requirements it applies and how it reads the same-extent test; (2) list the evidence the record shows was requested and whether it was resolved; (3) identify what is still open for us to document; and (4) list the questions I should ask the council before resubmitting. Do not say whether the design complies.
+
+Attachments:
+- mbie-det-2024-018-102ff6ea0365.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

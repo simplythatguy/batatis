@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from Washington State, requested by City of Kirkland (comparative test only; not Alberta). It is not an Alberta application.
+
+Attached is Washington State Building Code Council interpretation no. 06-02 from City of Kirkland. The question put to the Council is: An existing Group B occupancy with an occupant load over 50 is converted to Group E while alterations are made. Must it be sprinklered, what does 'newly constructed' mean, and must the new Group E occupancy then conform to the newly constructed requirements? Using only the attached record, identify the code provisions and edition this question turns on, the uncertainty that remains for a building official, the administrative evidence a complete submission would still need, and the next questions to ask the applicant and the reviewing official. Do not say whether any design complies or is safe, do not certify, and do not assume any owner, site, dimensions or drawings that the record does not contain. This is a Washington comparative test record and establishes nothing about Alberta.
+
+Attachments:
+- sbcc-ruling-06-02-0602ifc-40d25b1e8ea9.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

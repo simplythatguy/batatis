@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from British Columbia (specific local authority not named in published decision). It is not an Alberta application.
+
+Review the limiting-distance issue for this non-sprinklered six-unit townhouse project. Ask for the fire department’s turnout-time dataset, travel-time assumptions, time period, call sample and calculation showing the percentage above ten minutes. Explain why a station-distance measure alone may not answer the cited response-time test; do not determine the local response percentage without the records.
+
+Attachments:
+- attachment-1-source-text.txt
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

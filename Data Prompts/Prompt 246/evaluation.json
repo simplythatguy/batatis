@@ -1,0 +1,15 @@
+{
+  "known_outcome": "unknown (no decision retrieved; the DA page was not located)",
+  "outcome_leakage": false,
+  "review_focus": [
+    "structure of the performance-based design section",
+    "whether each performance solution is tied to a named performance requirement",
+    "admin: report reference, revision, date and the stage at which it applies",
+    "no compliance certification"
+  ],
+  "case_id": "H08-012",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

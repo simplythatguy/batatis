@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The authority incorrectly exercised its powers in declining the Schedule 1(2) exemption for the proposed horse shelter (decision, p.10).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "exemption criteria for a discretionary exemption",
+    "risk to people and other buildings from an open shelter",
+    "clarity of the drawings submitted",
+    "what an authority may consider in an exemption decision"
+  ],
+  "case_id": "H04-027",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

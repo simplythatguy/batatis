@@ -1,0 +1,6 @@
+Review the attached historical 14-BCV-005 STANDATA as a withdrawn regulator reference. Identify its factory-built assembly context and the certification route it describes under Division C Article 2.4.5.1. Flag the catalogue/PDF identifier discrepancy, and list the project, off-site review, standard edition and accredited certification evidence a real file would need. Do not treat the document as current permission or certify the assembly.
+
+Attachments:
+- catalogue-17-c9b827a33914.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

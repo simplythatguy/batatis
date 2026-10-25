@@ -1,0 +1,56 @@
+{
+  "id": "H20-013",
+  "title": "Photoluminescent exit signs: illumination, charging light and emergency power",
+  "jurisdiction": "Alberta (province-wide STANDATA issued by Alberta Municipal Affairs)",
+  "code_edition": "NBC(AE) 2023 (National Building Code - 2023 Alberta Edition); printing not stated in document",
+  "case_type": "regulatory_guidance",
+  "source_url": "https://open.alberta.ca/publications/standata-interpretation-building-national-building-code-2023-alberta-edition",
+  "document_date": "Date Issued: March 2025 (platform created March 6, 2025, last updated March 6, 2025)",
+  "facts": [
+    {
+      "text": "The interpretation clarifies the required illumination of photoluminescent (PL) exit signs under Articles 3.4.5.1 and 9.9.11.3.",
+      "locator": "p.1 (Purpose)"
+    },
+    {
+      "text": "An external lighting source is required to properly charge photoluminescent signs, and they must be lit in conformance with the charging requirements on the sign.",
+      "locator": "p.2"
+    },
+    {
+      "text": "The interpretation states that the charging light source provided for PL exit signs does not require connection to the emergency power supply.",
+      "locator": "p.3 (Interpretation)"
+    }
+  ],
+  "limitations": [
+    "A published regulator interpretation of a documented design question, not an applicant file.",
+    "Case type is the nearest enum value; this is not an issued variance, appeal or worked example.",
+    "Interpretation is short; the Articles cited are from NBC(AE) 2023. Printing not stated.",
+    "Edition check: alberta.ca lists the NBC(AE) 2023 2nd printing (published 17 Aug 2026) as in force; the article wording quoted here is as the STANDATA document states it and was not checked against the 2nd printing text (not in the package)."
+  ],
+  "original_worker_case_type": "published_worked_example",
+  "parent_curation_note": "STANDATA interpretations and bulletins describe general regulated conditions; they are regulatory reference exercises, not individual applications or published project worked examples.",
+  "worker": "H20",
+  "prompt_number": 139,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/d2851ca8-3883-498c-9293-d71665299098/download/ma-standata-interpretation-building-23-bci-017-2025-03.pdf",
+      "sha256": "ec2f79336ad5d89f1211159e78003424d3fb65f1864d5b32808ed696542a2e3f",
+      "role": "input",
+      "bytes": 157451,
+      "filename": "ma-standata-interpretation-building-23-bci-017-2025-03-ec2f79336ad5.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H20/files/pdf/ma-standata-interpretation-building-23-bci-017-2025-03-ec2f79336ad5.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:19:09.250742+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/d2851ca8-3883-498c-9293-d71665299098/download/ma-standata-interpretation-building-23-bci-017-2025-03.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

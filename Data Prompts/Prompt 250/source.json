@@ -1,0 +1,121 @@
+{
+  "id": "H13-001",
+  "title": "SF Board of Appeals No. 25-024: alteration permit at 14 Wilder Street issued to comply with an NOV; appeal denied, permit upheld",
+  "jurisdiction": "City and County of San Francisco, California (comparative, non-Alberta)",
+  "code_edition": "unknown if unstated; packet cites SF Building Code and California Mechanical Code sections without stating an edition",
+  "case_type": "actual_application",
+  "source_url": "https://www.sfgov.org/boa",
+  "document_date": "2025-06-24 notice of appeal (permit issued 2025-06-12); Board action 2025-09-03 per minutes",
+  "comparative_scope": "non-Alberta comparative only",
+  "alberta_applicability": "none",
+  "facts": [
+    {
+      "text": "Notice of appeal: DBI issuance on 2025-06-12 of an Alteration Permit (revision to Permit No. 202501178595; reconfiguration of wall between kitchen, living room and dining room to comply with NOV No. 202536257) at 14 Wilder Street; application no. 2025/03/17/2402; hearing 2025-09-03.",
+      "locator": "packet p.1; minutes p.2"
+    },
+    {
+      "text": "Appellant's brief says the scope of the belated earlier application was narrower than the work observed (appellant's characterization).",
+      "locator": "packet pp.8-10"
+    },
+    {
+      "text": "Appellant quotes the alteration permit as describing only a wall reconfiguration to comply with the NOV, and calls that description misleading (appellant's characterization).",
+      "locator": "packet p.10"
+    },
+    {
+      "text": "Appellant says a kitchen exhaust is not noted, described, or shown on any plans or permit application, although the California Mechanical Code and the NOV required it (appellant's claim).",
+      "locator": "packet p.13"
+    },
+    {
+      "text": "Appellant cites SF Building Code sections 102A (unsafe building), 106A.3.1(1) (applications) and 106A.4.1 (work shown on approved plans); these are the appellant's citations, not verified against the code text.",
+      "locator": "packet pp.11, 14"
+    },
+    {
+      "text": "Appellant cites Mechanical Code sections 104.1 and 102.5 (appellant's citations).",
+      "locator": "packet p.16"
+    },
+    {
+      "text": "Appellant states there are no structural drawings, no electrical or plumbing plans, and no kitchen plans for the alteration permit (appellant's claim).",
+      "locator": "packet p.17"
+    },
+    {
+      "text": "Appellant says a second NOV and final warning letter issued 2025-05-14 (appellant's account of the NOV sequence).",
+      "locator": "packet p.11"
+    },
+    {
+      "text": "Packet exhibit index: Exhibit 1 (alteration permit), Exhibit 6 (photographs of kitchen exhaust vent), Exhibit 10 (Plans Regarding 14 Wilder St.; divider p.128).",
+      "locator": "packet pp.19, 20, 76, 128"
+    },
+    {
+      "text": "Packet p.250 is an image-only structural sheet titled S3.0 '2nd Floor Framing Plan' (title block: Interior Remodel, 14 Wilder Street). The packet does not state whether this sheet was part of the permit under review.",
+      "locator": "packet p.250 (rendered; text not extracted)"
+    },
+    {
+      "text": "Packet p.244 is an image-only excerpt of the 2022 California Green Building Standards Code (residential mandatory measures, sheet 2); it is general code text, not case-specific.",
+      "locator": "packet p.244 (rendered)"
+    },
+    {
+      "text": "Respondent-side briefs are included: permit holder brief and Planning Department brief.",
+      "locator": "packet p.188 (permit holder); pp.254-256 (Planning)"
+    },
+    {
+      "text": "Board minutes, 2025-09-03, Item (5), Appeal No. 25-024: 'Upon motion by Vice President Lopez, the Board voted 4-0 to deny the appeal and uphold the permit on the basis that it was properly issued.'",
+      "locator": "minutes p.2 (attachment 2)"
+    }
+  ],
+  "limitations": [
+    "Appellant's code citations and characterizations are unverified and are not code text.",
+    "Packet is 256 pages; 25 image-only pages; only pp.121, 124, 244 and 250 were rendered and inspected.",
+    "Outcome comes from minutes that cover several other appeals; those other items were not analyzed.",
+    "Comparative, non-Alberta only."
+  ],
+  "worker": "H13",
+  "prompt_number": 250,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://media.api.sf.gov/documents/Item_5_Appeal_No._25-024__14_Wilder_Street_bFlVBka.pdf",
+      "final_url": "https://media.api.sf.gov/documents/Item_5_Appeal_No._25-024__14_Wilder_Street_bFlVBka.pdf",
+      "retrieved_at": "2026-10-25T01:53:28.809074+00:00",
+      "http_status": "200",
+      "content_type": "application/pdf",
+      "sha256": "67e15ef88f9a26bb8ecdc1ffd5d7090053ea9b3eda8787f27e509a96725dd328",
+      "bytes": 81483436,
+      "role": "input",
+      "filename": "sf-boa-item5-appeal-25-024-14-wilder-st-67e15ef88f9a.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H13/files/sf-boa/sf-boa-item5-appeal-25-024-14-wilder-st-67e15ef88f9a.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:53:28.809074+00:00",
+        "http_status": "200",
+        "final_url": "https://media.api.sf.gov/documents/Item_5_Appeal_No._25-024__14_Wilder_Street_bFlVBka.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://media.api.sf.gov/documents/Board_Minutes_for_9_3_25_adopted.pdf",
+      "final_url": "https://media.api.sf.gov/documents/Board_Minutes_for_9_3_25_adopted.pdf",
+      "retrieved_at": "2026-10-25T01:54:11.597142+00:00",
+      "http_status": "200",
+      "content_type": "application/pdf",
+      "sha256": "fd631e894d97f441bb269b93107af68bba90983ece5c3238afbbd6efa8317aa0",
+      "bytes": 122178,
+      "role": "outcome_reference",
+      "filename": "_evaluation/sf-boa-minutes-2025-09-03-adopted-fd631e894d97.pdf",
+      "included_in_default_input": false,
+      "original_collection_path": "_research/workers/H13/files/sf-boa/sf-boa-minutes-2025-09-03-adopted-fd631e894d97.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:54:11.597142+00:00",
+        "http_status": "200",
+        "final_url": "https://media.api.sf.gov/documents/Board_Minutes_for_9_3_25_adopted.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

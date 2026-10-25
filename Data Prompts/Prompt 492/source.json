@@ -1,0 +1,107 @@
+{
+  "id": "L07-001",
+  "title": "BCAB 2002 - Loft access and ceiling height, and definition of storey",
+  "jurisdiction": "British Columbia",
+  "code_edition": "BCBC 2024",
+  "case_type": "appeal_decision",
+  "source_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-2002",
+  "document_date": "2026-09-03",
+  "facts": [
+    {
+      "text": "A loft has been constructed within an over-height vaulted-ceiling space in an existing dwelling. The dwelling unit is in a multi-storey and multi-family residential building. The floor assembly of the loft is attached to and is supported by the building structure and is approximately 9.6 m2 in area, measured at the floor level. The sloped ceiling above the loft ranges from 0.0 m on the low side to 1.4 m on the high side. The loft is accessed through a hatch equipped with a retractable ladder having an approximate width of 760 mm.",
+      "locator": "Project description, paragraph 1"
+    },
+    {
+      "text": "The general configuration is as illustrated below. The new loft and the access ladder are shown within Unit A.",
+      "locator": "Project description, paragraph 2"
+    }
+  ],
+  "limitations": [
+    "The public Board decision is an appeal record, not the original application package.",
+    "The published decision refers to supporting drawings or evidence in some cases, but the complete original application and attachments are not publicly linked from the decision page.",
+    "Published Board outcome appears in the input attachment; outcome leakage is intentional and flagged.",
+    "Where a figure is attached, the decision page does not consistently identify its author; Board-created figures are distinguished in the research report, and no image is treated as a complete applicant drawing set.",
+    "British Columbia decision retained for comparative attachment format/content only; it does not establish Alberta code applicability, design performance, or acceptance."
+  ],
+  "worker": "L07",
+  "prompt_number": 492,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-2002",
+      "sha256": "d158e9755547770a375c9e97eba377e44db949ee0c40a74b7464327bf6fb2401",
+      "role": "input",
+      "bytes": 1356145,
+      "filename": "bcab-2002-d158e9755547.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-2002-d158e9755547.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:47:32.921549+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-2002",
+        "content_type": "text/html; charset=utf-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-1-source-text.txt",
+        "sha256": "09c1db4d67ab8c47a9be05228d2582b82ea4e87b6d0a8feafb6d66958eb00516",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    },
+    {
+      "url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/construction-industry/building-codes-and-standards/building-code-appeal-board/bcab_2002_-_1.jpg",
+      "sha256": "43934f368a2a772a12832726ef2f88d5d2813c1833db6d504041aad469c02d25",
+      "role": "supporting_evidence",
+      "bytes": 38268,
+      "filename": "bcab-2002-bcab_2002_-_1-43934f368a2a.jpg",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-2002-bcab_2002_-_1-43934f368a2a.jpg",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:48:19.829292+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/construction-industry/building-codes-and-standards/building-code-appeal-board/bcab_2002_-_1.jpg",
+        "content_type": "image/jpeg; charset=UTF-8",
+        "kind": "image",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/construction-industry/building-codes-and-standards/building-code-appeal-board/bcab_2002_-_2.png",
+      "sha256": "2a0ee4a2b26776478d4a2618a8e4d3340af43d1ce850fce62919e343eec39010",
+      "role": "supporting_evidence",
+      "bytes": 246825,
+      "filename": "bcab-2002-bcab_2002_-_2-2a0ee4a2b267.png",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-2002-bcab_2002_-_2-2a0ee4a2b267.png",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:48:20.350562+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/construction-industry/building-codes-and-standards/building-code-appeal-board/bcab_2002_-_2.png",
+        "content_type": "image/png; charset=UTF-8",
+        "kind": "image",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/construction-industry/building-codes-and-standards/building-code-appeal-board/bcab_2002_-_3.png",
+      "sha256": "4fb0817740ad2cafeaee6878717b51d4f1ead2b8cc827f9a711f7325316402a5",
+      "role": "supporting_evidence",
+      "bytes": 97877,
+      "filename": "bcab-2002-bcab_2002_-_3-4fb0817740ad.png",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-2002-bcab_2002_-_3-4fb0817740ad.png",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:48:21.398239+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/construction-industry/building-codes-and-standards/building-code-appeal-board/bcab_2002_-_3.png",
+        "content_type": "image/png; charset=UTF-8",
+        "kind": "image",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

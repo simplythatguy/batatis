@@ -1,0 +1,16 @@
+{
+  "known_outcome": "unknown (policy guidance; no application or decision)",
+  "outcome_leakage": false,
+  "review_focus": [
+    "Edition control: the policy cites ABC 2014 and is dated 10 Jan 2019; the project edition is NBC(AE) 2023 2nd printing, so the tool should flag the mismatch and not cite 2014 as current",
+    "The alternative-solution trigger (eaves projecting toward the side lot line) and what the policy does and does not decide",
+    "Deemed limiting distance mechanics and the 2.4 m threshold, with the source stated",
+    "Assurance and drawing documents the policy calls for, versus documents the tool would ask for",
+    "Dependence on Standata G-01-10-Rev1, which is cited but not in the file"
+  ],
+  "case_id": "A15-002",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Calgary / Edmonton",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

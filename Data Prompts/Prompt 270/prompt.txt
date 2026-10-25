@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from City of Winnipeg, Manitoba, Canada (original jurisdiction). It is not an Alberta application.
+
+Here is a development-permit drawing set for alterations to an existing one-storey multi-tenant building, including a code analysis sheet. Using only the attached drawings, identify which code items the sheet asserts, which assertions the drawings do not show well enough to check, which exit and accessibility items need a reviewer's attention, and what questions and supporting documents you would ask for next. Do not say the design complies or is safe.
+
+Attachments:
+- winnipeg-dmis-783822-submitted-plans-alteration-9af6c899a985.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

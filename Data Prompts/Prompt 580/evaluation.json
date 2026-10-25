@@ -1,0 +1,16 @@
+{
+  "known_outcome": "The City report states that the Building Code Commission ruled for the permit applicant and directed permit issuance; the original application and Commission decision are not included here.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "actual route geometry and measurement endpoints",
+    "distinguish OBC text from Toronto Fire Services operational criteria",
+    "supporting drawings and fire-protection analysis",
+    "site-specific limits and mitigation conditions",
+    "permit record and professional responsibility"
+  ],
+  "case_id": "L12-001",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Report-stated: ICC-ES evaluation reissued February 2026 (IBC/IRC 2024-2015) for roof and wall SIPs; fire-rated assemblies excluded unless suitable evidence is approved by the AHJ (§2.3); shear walls limited to SDC A-C (§4.1.8.1).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Fire-rated assemblies excluded unless the AHJ approves evidence (§2.3)",
+    "Shear walls in SDC A-C only (§4.1.8.1)",
+    "Test basis is 'general guidelines' of ASTM E72 (§6.0)"
+  ],
+  "case_id": "H14-015",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

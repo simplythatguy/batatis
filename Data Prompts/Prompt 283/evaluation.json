@@ -1,0 +1,16 @@
+{
+  "known_outcome": "unknown: the study compares two options with schematic drawings and a cost scope; no selected option, permit or approval appears in the attachment",
+  "outcome_leakage": false,
+  "review_focus": [
+    "code edition currency: 2010 NBC with 2011 Manitoba Amendments as stated, versus the code in force",
+    "heritage constraints on exterior and interior changes",
+    "barrier-free entrance, washroom-count and control-height deficiencies",
+    "ramp-plus-lift versus elevator-addition trade-offs and the approval evidence each would need",
+    "If the attachment reader fails, report that source-reading limit instead of inventing document content. A different reader can display the original."
+  ],
+  "case_id": "H18-001",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from City and County of San Francisco, California (comparative, non-Alberta). It is not an Alberta application.
+
+Attached is a notice of appeal, the appellant's brief, the other parties' briefs and exhibits from a San Francisco Board of Appeals matter about an alteration permit at 14 Wilder Street. Using only these attachments, list the building-code and mechanical-code provisions the packet relies on, say which drawings or permit documents the packet says are missing or not shown, identify any conflict between the permit description and the work the packet describes, and write the questions a reviewer should ask next. Do not say whether the work complies or is safe.
+
+Attachments:
+- sf-boa-item5-appeal-25-024-14-wilder-st-67e15ef88f9a.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

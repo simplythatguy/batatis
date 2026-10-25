@@ -1,0 +1,6 @@
+An industrial project wants to include a restaurant or beverage use in a building classed as F-1. The attached STANDATA interpretation (23-BCI-024/23-FCI-008) is my only source. Using only that document, identify the variance process it describes for the authority and designer, the limits it places on the engineering analysis, what evidence and review steps the file would need, and the questions to put to the AHJ. Do not invent an occupancy, hazard analysis or building area, and do not say the change is acceptable.
+
+Attachments:
+- ma-standata-interpretation-joint-23bci024-23fci008-2026-08-b8ef8b558f0f.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

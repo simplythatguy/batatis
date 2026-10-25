@@ -1,0 +1,14 @@
+{
+  "known_outcome": "The permit cancellation was confirmed.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separate applicant assertions from measured or authenticated evidence.",
+    "Check vibration, adjacent-building and snow-drift evidence separately.",
+    "Keep the source’s 2019 Alberta edition distinct from current code editions."
+  ],
+  "case_id": "L06-012",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,6 @@
+A lightning protection system is being installed, altered or added to in an Alberta building. The attached STANDATA interpretation (23-BCI-037/24-ECI-009) is my only source. Using only that document, identify the standards and codes it cites, which permit applies, what it says about recommended practice versus requirement, and what the file needs next. Do not invent a building, system design or grounding details, and do not state the system is compliant.
+
+Attachments:
+- ma-standata-interpretation-building-electrical-23-bci-037-24-eci-009-2025-04-dda7b0b558b6.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

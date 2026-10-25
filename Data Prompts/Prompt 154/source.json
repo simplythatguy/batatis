@@ -1,0 +1,60 @@
+{
+  "id": "H20-028",
+  "title": "Firefighters' emergency operation for alterations to existing elevating devices (FEO), with timeline variance option",
+  "jurisdiction": "Alberta (province-wide STANDATA issued by Alberta Municipal Affairs)",
+  "code_edition": "NBC(AE) 2023 (National Building Code - 2023 Alberta Edition); printing not stated in document",
+  "case_type": "regulatory_guidance",
+  "source_url": "https://open.alberta.ca/publications/standata-interpretation-building-national-building-code-2023-alberta-edition",
+  "document_date": "Date Issued: April 2025 (platform created April 15, 2025, last updated April 15, 2025)",
+  "facts": [
+    {
+      "text": "The interpretation clarifies FEO requirements when alterations are made to existing elevating devices.",
+      "locator": "p.1 (Purpose)"
+    },
+    {
+      "text": "The existing-building provisions apply to a building that legally existed before 01 May 2024.",
+      "locator": "p.2 (Code References)"
+    },
+    {
+      "text": "If a building is altered, rehabilitated, refurbished, renovated or repaired, the level of life safety and building performance shall not be decreased.",
+      "locator": "p.2 (Code References)"
+    },
+    {
+      "text": "If the fire alarm system is planned for upgrading at a future date, a variance extending the timeline for a FEO upgrade may be considered.",
+      "locator": "p.1 (Discussion)"
+    }
+  ],
+  "limitations": [
+    "A published regulator interpretation of a documented design question, not an applicant file.",
+    "Case type is the nearest enum value; this is not an issued variance, appeal or worked example.",
+    "Joint Elevating Devices/Building interpretation; the earlier elevating-devices number (19-EDI-013) is part of the joint reference.",
+    "Edition check: alberta.ca lists the NBC(AE) 2023 2nd printing (published 17 Aug 2026) as in force; the article wording quoted here is as the STANDATA document states it and was not checked against the 2nd printing text (not in the package)."
+  ],
+  "original_worker_case_type": "published_worked_example",
+  "parent_curation_note": "STANDATA interpretations and bulletins describe general regulated conditions; they are regulatory reference exercises, not individual applications or published project worked examples.",
+  "worker": "H20",
+  "prompt_number": 154,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://open.alberta.ca/dataset/edbadb98-05a1-416b-a7a8-ee7a08615458/resource/2df3ab22-2771-4aee-8f25-2e28b54c6167/download/ma-standata-interpretation-elevating-devices-building-19-edi-013-23-bci-038-2025-04.pdf",
+      "sha256": "dafee9bb6f9e8cf13142ede01addb84dbf737684b5905c29ee4e0e9c16cdf222",
+      "role": "input",
+      "bytes": 318871,
+      "filename": "ma-standata-interpretation-elevating-devices-building-19-edi-013-23-bci-038-2025-04-dafee9bb6f9e.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H20/files/pdf/ma-standata-interpretation-elevating-devices-building-19-edi-013-23-bci-038-2025-04-dafee9bb6f9e.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:19:27.968018+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/edbadb98-05a1-416b-a7a8-ee7a08615458/resource/2df3ab22-2771-4aee-8f25-2e28b54c6167/download/ma-standata-interpretation-elevating-devices-building-19-edi-013-23-bci-038-2025-04.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

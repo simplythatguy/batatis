@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The historical variance removed specified suite-to-suite fire separations only under its stated strip-mall conditions; it is explicitly marked withdrawn in the catalogue.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "withdrawn status",
+    "occupancy classification and storeys",
+    "sprinkler/fire alarm records",
+    "suite exit paths and assembly-suite separation"
+  ],
+  "case_id": "L03-008",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,97 @@
+{
+  "id": "L14-009",
+  "title": "Office Ou — Toronto three-storey apartment with basement through third floor",
+  "jurisdiction": "Toronto, Ontario",
+  "code_edition": "2024 Ontario Building Code, Part 9 (as stated in the project profile)",
+  "case_type": "documented_design_study",
+  "source_url": "https://singlestair.ca/Office-Ou",
+  "document_date": "unknown (undated project profile; submission/status dates are stated in the profile)",
+  "facts": [
+    {
+      "text": "The profile describes six dwellings and 15 bedrooms distributed from basement to third storey, while labelling the building three storeys.",
+      "locator": "Pilot Project / unit distribution and classification"
+    },
+    {
+      "text": "The profile says a single-storey main-level unit, plus units on levels 2 and 3, are within the proposed alternative-solution scope; another unit spans basement and ground.",
+      "locator": "Egress discussion / scope of proposed alternative"
+    },
+    {
+      "text": "The attached original second-floor plan depicts an upper level only and cannot resolve the main-level single-exit condition or basement relationship.",
+      "locator": "Attached second-floor plan image"
+    }
+  ],
+  "limitations": [
+    "The project profile is published by the single-stair advocacy/research site and is not the original permit application, approved alternative-solution report, stamped permit drawing set, or authority decision.",
+    "Project status and design performance claims are proponent-reported here and were not independently verified with a project-specific authority record.",
+    "The site states that alternative solutions are site-specific and not precedent; this prompt is a document-review exercise, not a compliance or safety determination."
+  ],
+  "worker": "L14",
+  "prompt_number": 311,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://freight.cargo.site/t/original/i/4beffcbdb71f97cecdd561f9f9f1d11956e05f812c7307d0655a3ee96f9cd755/OfficeOu_Plan2_Second_2000px.jpg",
+      "sha256": "6b1b65b5cc90d9abfc0a0ebaab83b8e42d3a9ce1b428e26774aee304b47fd881",
+      "role": "input",
+      "bytes": 351102,
+      "filename": "drawing-39-6b1b65b5cc90.jpg",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L14/files/drawing-39-6b1b65b5cc90.jpg",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:24:13.696541+00:00",
+        "http_status": "200",
+        "final_url": "https://freight.cargo.site/t/original/i/4beffcbdb71f97cecdd561f9f9f1d11956e05f812c7307d0655a3ee96f9cd755/OfficeOu_Plan2_Second_2000px.jpg",
+        "content_type": "image/jpeg",
+        "kind": "image",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://singlestair.ca/Office-Ou",
+      "sha256": "c37f565239f5422b65a86407c7fe60c2388eb693ea7e85d56e659f0b3ca2f731",
+      "role": "outcome_reference",
+      "bytes": 194704,
+      "filename": "_evaluation/singlestair-office-ou-c37f565239f5.html",
+      "included_in_default_input": false,
+      "original_collection_path": "_research/workers/L14/files/singlestair-office-ou-c37f565239f5.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:42.729147+00:00",
+        "http_status": "200",
+        "final_url": "https://singlestair.ca/Office-Ou",
+        "content_type": "text/html; charset=UTF-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "_evaluation/attachment-2-source-text.txt",
+        "sha256": "1d155da6f5a08a77529af6e5bd0757b926f4c8939ffd48a37d1d61dee0a339c2",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    },
+    {
+      "url": "https://www.toronto.ca/services-payments/building-construction/building-permit/before-you-apply-for-a-building-permit/building-permit-application-guides/guides-for-other-buildings/single-exit-stairs/",
+      "sha256": "04c08564c564ee4ce08f0884bdccc46cbc78feb779762feb664faaa7b0fb2497",
+      "role": "supporting_evidence",
+      "bytes": 44251,
+      "filename": "toronto-single-exit-stairs-official-guide-04c08564c564.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L14/files/toronto-single-exit-stairs-official-guide-04c08564c564.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:54:06.454142+00:00",
+        "http_status": "200",
+        "final_url": "https://www.toronto.ca/services-payments/building-construction/building-permit/before-you-apply-for-a-building-permit/building-permit-application-guides/guides-for-other-buildings/single-exit-stairs/",
+        "content_type": "text/html; charset=UTF-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-3-source-text.txt",
+        "sha256": "3550de4e1e098c340fa679e2d5943f3317f1912902a48a2d52c08c92fe6f6eca",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

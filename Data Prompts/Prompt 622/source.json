@@ -1,0 +1,55 @@
+{
+  "id": "H12-018",
+  "title": "Interpretation 10-02 (Okanogan County): permanent units rented nightly, weekly or monthly to transient occupants, classified as R-1 or under the IRC",
+  "jurisdiction": "Washington State, requested by Okanogan County (comparative test only; not Alberta)",
+  "code_edition": "2006 International Building Code (101.2, 310.1) and 2006 International Residential Code (101.2), as cited",
+  "case_type": "regulatory_guidance",
+  "source_url": "https://sbcc.wa.gov/answers-opinions",
+  "document_date": "Not stated in document (interpretation no. 10-02)",
+  "facts": [
+    {
+      "text": "Document type: State Building Code Council interpretation no. 10-02, one page; requester Okanogan County.",
+      "locator": "p1 header"
+    },
+    {
+      "text": "Structure as described: permanent provisions for living, sleeping, eating, cooking and sanitation, intended for rental on a nightly, weekly or monthly basis to occupants who are primarily transient.",
+      "locator": "p1 QUESTION"
+    },
+    {
+      "text": "Question: whether such a structure is classified as R-1 under the IBC or as a single-family dwelling under the IRC.",
+      "locator": "p1 QUESTION"
+    }
+  ],
+  "limitations": [
+    "The PDF contains the Council answer on the same page; do not present it as applicant-side input without flagging leakage.",
+    "Generic classification question; no owner, site or drawings.",
+    "Edition as cited (2006 IBC/IRC); comparative only."
+  ],
+  "original_worker_case_type": "issued_variance",
+  "parent_curation_note": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance.",
+  "worker": "H12",
+  "prompt_number": 622,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://sbcc.wa.gov/sites/default/files/2019-12/10-March-02-IBCfinal.pdf",
+      "sha256": "559c74b438539f55fa27472c05b012e3a5de59d9f931c9b3420e2f6fd52112d9",
+      "role": "outcome_reference",
+      "bytes": 65271,
+      "filename": "sbcc-ruling-10-02-10-march-02-ibcfinal-559c74b43853.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H12/files/sbcc-ruling-10-02-10-march-02-ibcfinal-559c74b43853.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:42:55.434611+00:00",
+        "http_status": "200",
+        "final_url": "https://sbcc.wa.gov/sites/default/files/2019-12/10-March-02-IBCfinal.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

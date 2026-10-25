@@ -1,0 +1,65 @@
+{
+  "id": "A03-005",
+  "title": "Historic YWCA rehabilitation procurement record and code-status uncertainty",
+  "jurisdiction": "Calgary, Alberta",
+  "code_edition": "Unknown (the City OREOI requires current building/fire/accessibility requirements but gives no edition)",
+  "case_type": "documented_case_summary",
+  "source_url": "https://www.calgary.ca/realestate/detailstab.html?name=item_2115214873",
+  "document_date": "2025-09-16 OREOI listing; attached brochure deadline revised to 2026-03-02",
+  "facts": [
+    {
+      "text": "The City OREOI identifies 223 12 Avenue SW as the 1911, three-storey-plus-basement YWCA, a provincially protected heritage resource; it records City renovations during 2019–2025 and says the building requires substantial rehabilitation.",
+      "locator": "OREOI PDF pp. 4–5"
+    },
+    {
+      "text": "The City estimates about $3.8 million for base code/building-service requirements to separate the two buildings; it says base upgrades could trigger full modern-code requirements including accessibility, estimated at about $12.4 million subject to Development Permit stage confirmation.",
+      "locator": "OREOI PDF p. 5, “The YWCA – key highlights”"
+    },
+    {
+      "text": "The OREOI says a YWCA Building Condition Assessment was completed in 2024 and lifecycle costs are estimates; it also says the City’s building reports will be provided to pre-approved applicants and do not replace due diligence.",
+      "locator": "OREOI PDF p. 5, “Key Findings report” and “The YWCA – key highlights”"
+    },
+    {
+      "text": "The current City listing says the facilities are not deemed safe for occupancy, that investment is required before occupancy from the Development Authority, and that the City is working through a pre-application to understand occupancy requirements.",
+      "locator": "Official City listing, Overview"
+    },
+    {
+      "text": "The OREOI p. 2 describes the YWCA as tenant-occupied at the time of that document, while the later City listing describes the facilities as not deemed safe for occupancy. The public materials do not reconcile the dates, scopes or meanings of these statements.",
+      "locator": "OREOI PDF p. 2; official City listing, Overview"
+    }
+  ],
+  "limitations": [
+    "This is a City procurement/property summary, not an applicant submission, design report or variance decision; it is categorized as documented_design_study only to fit the supplied case taxonomy.",
+    "The underlying YWCA BCA and other City reports are not public in this package; the OREOI says they are provided to pre-approved applicants.",
+    "The status statements differ by document date/context and require clarification.",
+    "The City is owner and listing authority; the specific code/permit AHJ determination is not included."
+  ],
+  "original_worker_case_type": "documented_design_study",
+  "parent_curation_note": "Published consultant project profile or City procurement/condition summary, rather than a technical design study or original application; underlying code/condition reports are not attached.",
+  "worker": "A03",
+  "prompt_number": 33,
+  "priority_tier": 1,
+  "priority": "Calgary / Edmonton",
+  "attachments": [
+    {
+      "url": "https://www.calgary.ca/content/dam/www/realestate/documents/221-223-12-ave-sw/Beltline-EOI_propertySheet_March2026.pdf",
+      "sha256": "03ef5273790f5886a84f10e7a33056928f07fc5d4e9da4dec6e01f1a311fd699",
+      "role": "input",
+      "locator": "OREOI PDF pp. 2, 4–5",
+      "bytes": 6246925,
+      "filename": "beltline-2026-oreoi-property-brochure-03ef5273790f.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/A03/files/beltline-2026-oreoi-property-brochure-03ef5273790f.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T02:07:29.403063+00:00",
+        "http_status": "200",
+        "final_url": "https://www.calgary.ca/content/dam/www/realestate/documents/221-223-12-ave-sw/Beltline-EOI_propertySheet_March2026.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

@@ -1,0 +1,14 @@
+{
+  "known_outcome": "The order was confirmed; the panel found the wall was within 1.2 m and the dimensional-tolerance provision did not authorize the claimed change.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Keep siding, foundation and property-line measurement references distinct.",
+    "Check window opening area, face area, limiting distance and fire-resistance evidence.",
+    "Identify that the applicant chose appeal rather than further developing an alternative solution."
+  ],
+  "case_id": "L06-007",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

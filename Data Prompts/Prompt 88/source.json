@@ -1,0 +1,50 @@
+{
+  "id": "L03-007",
+  "title": "14-BCV-007 - Interior stairways for roof access",
+  "jurisdiction": "Alberta (province-wide, as stated by the STANDATA)",
+  "code_edition": "Alberta Building Code 2014",
+  "case_type": "issued_variance",
+  "source_url": "https://open.alberta.ca/publications/standata-building-code-variance-2014",
+  "document_date": "June 2017",
+  "catalogue_status": "Catalogue row is not marked [WITHDRAWN]; PDF carries an Archived watermark.",
+  "facts": [
+    {
+      "text": "The STANDATA addresses alternate access for roof access required by ABC Articles 3.2.5.3 and 3.6.4.7.",
+      "locator": "14-BCV-007 PDF, pp.1-2, PURPOSE and CODE REFERENCES"
+    },
+    {
+      "text": "It lists fixed industrial/ship’s ladders, suitable folding stairs and rung-type fixed ladders; its stated maximum vertical height for the first two types is 3.7 m, and different access methods require a landing.",
+      "locator": "14-BCV-007 PDF, p.2, VARIANCE; p.3, APPENDIX A"
+    }
+  ],
+  "limitations": [
+    "This is a provincial regulator-issued STANDATA/standing variance, not an individual application, applicant statement, project drawing, permit record or site-specific decision.",
+    "The records address the Alberta Building Code 2014 and, where noted, Alberta Fire Code 2014; do not treat them as proof of applicability under the Alberta 2023 code edition or current law.",
+    "Catalogue status is recorded as displayed on the retrieved official page. A missing [WITHDRAWN] label is not evidence of current validity; PDFs display an Archived watermark."
+  ],
+  "worker": "L03",
+  "prompt_number": 88,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://open.alberta.ca/dataset/27900157-f850-4138-a964-b813f0921a3b/resource/6f053a48-995f-47ae-97dc-e6192c7257cb/download/14-bcv-007-interiorstairwaysforroofaccess.pdf",
+      "sha256": "ff5dca94d736a099b540fe14a177c31836e4b0e0183303add455824395e047b6",
+      "role": "supporting_evidence",
+      "bytes": 1452910,
+      "filename": "catalogue-15-ff5dca94d736.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L03/files/catalogue-15-ff5dca94d736.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:18:09.113836+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/27900157-f850-4138-a964-b813f0921a3b/resource/6f053a48-995f-47ae-97dc-e6192c7257cb/download/14-bcv-007-interiorstairwaysforroofaccess.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Council ordered the Order varied with conditions (p.1). Panel found revised practices sufficient for the AFC 2014 objective (p.9 para 20), current practices an acceptable solution (p.10 para 22), and approximately equivalent or greater safety performance (p.10 para 23). The company name was added (p.10 para 24). Dated 3 Dec 2015.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Equivalent-safety finding and the acceptable-solution route under the Fire Code",
+    "Changed circumstances and revised practices as evidence",
+    "Group F Division 2 classification and the Sentence 4.11.2.3.(1) requirement",
+    "Party identity (lease and company name) as an administrative question separate from the safety question"
+  ],
+  "case_id": "A15-005",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Council answers (leakage): Question 1 yes, because the door serves a tenant space over 3,000 sf; Question 2 yes, because the 3,000 sf test uses the total area served by the entrance door, not only the open area.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "3,000 sf area-served test for an entrance vestibule",
+    "vestibule exception logic",
+    "separation of ground-floor tenant spaces",
+    "evidence of tenant-space area and partition layout"
+  ],
+  "case_id": "H12-016",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

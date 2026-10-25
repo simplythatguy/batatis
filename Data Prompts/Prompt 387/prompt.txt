@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from New Zealand: Christchurch City Council as building consent authority; MBIE determination under the Building Act 2004. Non-Alberta comparative record.. It is not an Alberta application.
+
+We are changing the fire protection in an existing cold-store warehouse in Christchurch. The in-rack dry-pipe sprinklers were found iced up, and the owner wants to replace part of the sprinkler system with thermal detection and a manual call-point alarm. The council refused the consent over fire load, the proposed warning system and fire-rating requirements. Attached is the determination record for this question. Using only that record, please: (1) identify the fire-spread and fire-protection requirements the record treats as engaged; (2) say what it shows about the change from sprinklers to detection and which fire-load and warning-system questions were still open; (3) list what a refusal must state for it to be valid; and (4) list the questions to put to the council and the fire service before resubmitting. Please do not say whether the design complies or is safe.
+
+Attachments:
+- mbie-det-2024-041-994961a831ef.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

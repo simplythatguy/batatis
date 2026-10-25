@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Regulator position: the AHJ may issue an occupancy permit for a portion of a building before construction finishes (for example, phased or altered buildings that remain in use); all building services are considered; occupant and worker provisions are adapted to the AHJs' satisfaction.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the occupancy-permit provision from the safety-of-occupants requirement",
+    "Asks which portions and phases the permit would cover",
+    "Flags the fire and building AHJ approval for worker and occupant provisions",
+    "Does not state occupancy is permitted"
+  ],
+  "case_id": "H20-031",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,67 @@
+{
+  "id": "H14-021",
+  "title": "Nudura Installation Manual (fr.nudura.com copy of the manufacturer's installation manual)",
+  "jurisdiction": "Manufacturer installation manual (North American residential guidance; approval claims as stated inside, not verified); NON-ALBERTA COMPARATIVE ONLY: cannot establish Alberta performance, acceptance or equivalence; no Canadian or Alberta approval is claimed or implied",
+  "code_edition": "No single edition stated. §2.3 (p45) cites 2003, 2006 and 2009 international residential codes; §2.4 (p46) cross-references ICC-ES ESR-2092 (2024-2012 editions)",
+  "case_type": "product_evidence",
+  "source_url": "https://fr.nudura.com/resource/download/nudura_installation_manual-compressed-compressed.pdf",
+  "document_date": "No revision date located in the extracted text; unknown if unstated",
+  "facts": [
+    {
+      "text": "Disclaimer: the information is a 'Guide Only' and 'SHALL NOT be used as a substitute for professional engineering consultation' where a design strays outside prescriptive scope.",
+      "locator": "p1"
+    },
+    {
+      "text": "§2.3 lists documents to give the building official: the installation manual and 'the applicable Nudura evaluation report or Intertek Product Certification Documentation for your region' (USA: ICC-ES ESR-2092; CAN: Intertek to CAN/ULC S717.1; Europe: EOTA ETA-07/0034).",
+      "locator": "p45"
+    },
+    {
+      "text": "§2.3 says 'Since 2005, prescriptive structural design tables ... have also been provided under ... Part 9 of the Ontario, Quebec, Alberta and British Columbia Building Codes.' This is the manufacturer's statement and is not verified here.",
+      "locator": "p45"
+    },
+    {
+      "text": "The USA paragraph in §2.3 refers to 'the 2003, 2006 and 2009 international residential Building Codes', which does not match the 2024-2012 editions of ESR-2092.",
+      "locator": "p45"
+    },
+    {
+      "text": "§2.4 lists manufacturer-claimed approvals: ICC-ES (AC-353) ESR-2092; State of Florida FL1585-R3; Miami-Dade NOA 16-0627-01; City of New York; CAN/ULC S717.1 via Intertek SDID 21903; EOTA ETA-07/0034. None of these source documents is attached.",
+      "locator": "p46"
+    },
+    {
+      "text": "§2.5 lists typical building-department documents: working drawings showing ICF use and reinforcing steel size and spacing, elevations and sections, and floor and roof connection details.",
+      "locator": "p47"
+    }
+  ],
+  "limitations": [
+    "Non-Alberta comparative attachment; this is a manufacturer or industry guide, not a code or an evaluation report.",
+    "Retrieved 2026-10-25; the current revision was not checked against the publisher's index.",
+    "Text from pypdf extraction; figures and drawings not transcribed; locators are PDF page numbers.",
+    "Publisher copyright; retained locally for comparison only.",
+    "The copy hosted on fr.nudura.com has the same title; the publisher's current revision was not confirmed."
+  ],
+  "worker": "H14",
+  "prompt_number": 648,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://fr.nudura.com/resource/download/nudura_installation_manual-compressed-compressed.pdf",
+      "sha256": "eb96569202c7221b703c2fa98485c242c44af9637c4d3739e44371ca637b4758",
+      "role": "input",
+      "bytes": 14799456,
+      "filename": "nudura-installation-manual-compressed-fr-copy-eb96569202c7.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H14/files/nudura-installation-manual-fr-copy/nudura-installation-manual-compressed-fr-copy-eb96569202c7.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:50:11.309342+00:00",
+        "http_status": "200",
+        "final_url": "https://fr.nudura.com/resource/download/nudura_installation_manual-compressed-compressed.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

@@ -1,0 +1,13 @@
+{
+  "known_outcome": "The Board determined the rooms were residents’ sleeping rooms rather than suites and that Sentence 3.3.3.5.(9) applied, based on the absence of separate tenancy.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Care-occupancy comparator; this is not a Part 9 house case.",
+    "No room plans, operating policy or tenancy documents are linked."
+  ],
+  "case_id": "L08-1784",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

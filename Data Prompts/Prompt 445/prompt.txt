@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from Queensland, Australia. COMPARATIVE TEST ONLY: not Alberta; no Alberta applicability asserted.. It is not an Alberta application.
+
+This is a Queensland Development Tribunal decision notice about a large isolated building with office and workshop uses, where a fire engineering report was relied on to change smoke ventilation and sprinkler arrangements. Using only the attached notice, identify the code provisions and performance requirements it turns on, what the notice says the fire engineering report needed to model or add, which administrative records (report revision, certifier's decision, referral advice) a reviewer would still need, and the questions to put to the applicant. Do not say whether the design complies or is safe.
+
+Attachments:
+- dt-19-028-fire-safety-af99f03ffa5b.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

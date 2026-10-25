@@ -1,0 +1,16 @@
+{
+  "known_outcome": "Calgary issued a variance under Safety Codes Act authority for a narrow CPVC/fire-sprinkler use in 2018, with conditional fallback language; no individual permit package is present.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Keep NPC 2015 edition and clauses distinct from current NBC(AE) guidance.",
+    "Identify product, residential partial-flow-through system and DuCF scope without generalizing it.",
+    "Capture conditional DCVAF fallback and permit-address requirement.",
+    "Flag that the record is historical and does not establish a current project/product approval.",
+    "Ask for source-supported missing permit and product documentation; do not certify performance."
+  ],
+  "case_id": "L04-002",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Calgary / Edmonton",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

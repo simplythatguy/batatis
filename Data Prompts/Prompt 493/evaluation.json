@@ -1,0 +1,17 @@
+{
+  "known_outcome": "The Board reverses the decision of the local authority.; It is the determination of the Board that the privacy divider is not subject to party wall or firewall requirements, is not required to be a fire separation, and is not required to have a fire-resistance rating.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "identify the specific code edition and provision stated in the record",
+    "separate project facts from party positions and identify unprovided supporting documents",
+    "draft focused questions for unresolved design or administrative facts",
+    "clarify stair location, dimensions, role, and referenced design/as-built drawings",
+    "clarify fire-protection system scope, source/capacity calculations, and operational assumptions",
+    "do not transfer this British Columbia appeal outcome or code interpretation to Alberta"
+  ],
+  "case_id": "L07-002",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

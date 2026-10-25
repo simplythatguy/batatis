@@ -1,0 +1,14 @@
+{
+  "known_outcome": "p.18 §9.1: the alterations comply with the Building Code current when the consent was issued; the authority's refusal to issue the code compliance certificate is reversed.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the envelope scope (cladding, windows, roof, decks, flashings) from the durability question",
+    "Treats the B2.3.1 durability-period modification as an open administrative step the file leaves to the parties",
+    "Does not assert a durability period or compliance"
+  ],
+  "case_id": "H05-004",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

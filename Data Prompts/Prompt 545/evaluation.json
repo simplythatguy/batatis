@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The Commission found sufficiency of compliance on condition that a system of piping with 65 mm hose connections be installed for fire-department use.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "standpipe threshold and building facts",
+    "compensating fire measures versus missing system",
+    "condition tracking",
+    "outcome leakage"
+  ],
+  "case_id": "L10-006",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

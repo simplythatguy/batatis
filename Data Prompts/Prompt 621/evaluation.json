@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Council answer (leakage): the commercial portion follows C101.4.6 and C402.4.1.2.3 and the residential portion follows R101.4.6 and R402.4 unless the code official approves a single path under C102 or R102; if the whole building uses C102 or R102, the more stringent commercial test may be used provided the whole building passes; where an R-2 occupancy has sleeping units, the commercial code applies.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "split occupancy compliance path",
+    "alternate means approval under C102 or R102",
+    "choice of whole-building test standard",
+    "evidence of a whole-building test result"
+  ],
+  "case_id": "H12-017",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

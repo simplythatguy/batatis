@@ -1,0 +1,53 @@
+{
+  "id": "L20-024",
+  "title": "Tim Hortons Ropewalk Lane counter heights and reviewed renovation drawings",
+  "jurisdiction": "St. John’s, Newfoundland and Labrador",
+  "code_edition": "Buildings Accessibility Regulations, section 33; edition not stated",
+  "case_type": "appeal_decision",
+  "source_url": "https://www.gov.nl.ca/gs/licences/building/",
+  "document_date": "2018-01-29",
+  "facts": [
+    {
+      "text": "The appeal concerns Inspector Order 20549 about lowering public service counters at a restaurant at 30 Ropewalk Lane.",
+      "locator": "PDF p. 1"
+    },
+    {
+      "text": "The decision summary quotes a 865 mm maximum height for a barrier-free counter section under section 33 of the Buildings Accessibility Regulations.",
+      "locator": "PDF p. 1"
+    },
+    {
+      "text": "The appellant said renovation drawings had been reviewed and a permit issued; the summary says the tribunal treated those drawings/permit as relevant, but the drawings are not attached.",
+      "locator": "PDF pp. 1–2"
+    }
+  ],
+  "limitations": [
+    "Comparative source from outside Alberta; it cannot establish Alberta code performance or approval.",
+    "This is a Newfoundland and Labrador accessibility-regulation appeal, not an NBC or Alberta decision.",
+    "The two-page summary does not append drawings and does not state a formal order in a distinct decision section."
+  ],
+  "worker": "L20",
+  "prompt_number": 576,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.gov.nl.ca/gs/files/BAAT-TimHortons-RopewalkLane-January2018.pdf",
+      "sha256": "59415e15457988305ce9ff1b4759d765468fc30915e1c1cac1fea70c03933331",
+      "role": "outcome_reference",
+      "bytes": 492626,
+      "filename": "nl-baat-tim-hortons-ropewalk-lane-2018-59415e154579.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L20/files/nl-baat-tim-hortons-ropewalk-lane-2018-59415e154579.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:50:07.877226+00:00",
+        "http_status": "200",
+        "final_url": "https://www.gov.nl.ca/gs/files/BAAT-TimHortons-RopewalkLane-January2018.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

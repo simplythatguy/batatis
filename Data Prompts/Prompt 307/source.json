@@ -1,0 +1,97 @@
+{
+  "id": "L14-005",
+  "title": "Invizij Architects — Hamilton five-storey mixed-use proposal",
+  "jurisdiction": "Hamilton, Ontario",
+  "code_edition": "2024 Ontario Building Code, Part 3 (as stated in the project profile)",
+  "case_type": "documented_design_study",
+  "source_url": "https://singlestair.ca/Invizij-Architects",
+  "document_date": "unknown (undated project profile; submission/status dates are stated in the profile)",
+  "facts": [
+    {
+      "text": "The profile describes a five-storey mixed-use building with 14 dwellings on a 12.3 m by 23 m site.",
+      "locator": "Pilot Project / typology and project description"
+    },
+    {
+      "text": "The profile says the design team used BCBC single-exit conditions as a basis for an Ontario alternative-solution proposal.",
+      "locator": "Project description / design approach"
+    },
+    {
+      "text": "The attached original second-level drawing shows a single-stair arrangement; the City of Hamilton’s published process page calls for code/objective analysis, professional conclusion, and supporting drawings/reports in an alternative-solution submission.",
+      "locator": "Attached second-level plan; Hamilton Building Permit Review and Approval / Alternative Solution Submission"
+    }
+  ],
+  "limitations": [
+    "The project profile is published by the single-stair advocacy/research site and is not the original permit application, approved alternative-solution report, stamped permit drawing set, or authority decision.",
+    "Project status and design performance claims are proponent-reported here and were not independently verified with a project-specific authority record.",
+    "The site states that alternative solutions are site-specific and not precedent; this prompt is a document-review exercise, not a compliance or safety determination."
+  ],
+  "worker": "L14",
+  "prompt_number": 307,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://freight.cargo.site/t/original/i/3ea8337fd9003b87bda407588738fae2f06fb43f505cbf85d068708967bd15e3/3---95-Dundurn-Single-Stair---Second-Level.png",
+      "sha256": "0c05a134c98cb078a2879f601cff3bfaa65f1a9d1c9adab7d230759fbfe41c48",
+      "role": "input",
+      "bytes": 80948,
+      "filename": "drawing-29-0c05a134c98c.png",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L14/files/drawing-29-0c05a134c98c.png",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:20:16.078576+00:00",
+        "http_status": "200",
+        "final_url": "https://freight.cargo.site/t/original/i/3ea8337fd9003b87bda407588738fae2f06fb43f505cbf85d068708967bd15e3/3---95-Dundurn-Single-Stair---Second-Level.png",
+        "content_type": "image/png",
+        "kind": "image",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://singlestair.ca/Invizij-Architects",
+      "sha256": "e7928432cf70b67e31a8e4c5c1216498cb28e465a3925dcc81a63463bf44bd8f",
+      "role": "outcome_reference",
+      "bytes": 193461,
+      "filename": "_evaluation/singlestair-invizij-architects-e7928432cf70.html",
+      "included_in_default_input": false,
+      "original_collection_path": "_research/workers/L14/files/singlestair-invizij-architects-e7928432cf70.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:36.401832+00:00",
+        "http_status": "200",
+        "final_url": "https://singlestair.ca/Invizij-Architects",
+        "content_type": "text/html; charset=UTF-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "_evaluation/attachment-2-source-text.txt",
+        "sha256": "f24290163e750cd8bc3392481af8417027db6c11588c6852174c8fe1ff545569",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    },
+    {
+      "url": "https://www.hamilton.ca/build-invest-grow/construction-renovation/residential-building-renovation/building-permit-review",
+      "sha256": "d82cc3b519cc26048ce88656cc4833ec74418980e7db82d2dd3482a29c692ff1",
+      "role": "supporting_evidence",
+      "bytes": 1031869,
+      "filename": "hamilton-alternative-solution-official-process-d82cc3b519cc.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L14/files/hamilton-alternative-solution-official-process-d82cc3b519cc.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:54:06.452966+00:00",
+        "http_status": "200",
+        "final_url": "https://www.hamilton.ca/build-invest-grow/construction-renovation/residential-building-renovation/building-permit-review",
+        "content_type": "text/html; charset=UTF-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-3-source-text.txt",
+        "sha256": "35dc7222cb86ad343f232c695459f6fcda2d9828d1c068e547fbb99268644c21",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

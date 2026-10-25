@@ -1,0 +1,6 @@
+A project needs a barrier-free relaxation request in Alberta. The attached STANDATA interpretation (23-BCI-016R1) is my only source. Using only that document, identify when it says a relaxation may be appropriate, which administrator decides, what the owner must demonstrate, and what evidence and questions the request still needs. Do not invent a building use, site or accessibility feature, and do not say a relaxation would be granted.
+
+Attachments:
+- ma-standata-interpretation-building-23-bci-016r1-2025-11-95dbb4e4b2ab.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

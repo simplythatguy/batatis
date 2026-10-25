@@ -1,0 +1,6 @@
+The attached NRC report is general egress-time research offered as background for a possible alternative-solution or variance submission. Based only on this report, explain which egress assumptions it estimates and which it does not establish for an unidentified building. Identify the code edition/AHJ, occupant characteristics, alarm/warning, fire location, travel routes, mobility, season/clothing and project-specific egress evidence that must be clarified, and formulate next questions. Separate literature-derived estimates from measured data. Do not invent a project or applicant, treat generic RSET estimates as a code requirement, author professional evidence, or claim safety, compliance, equivalence, or approval.
+
+Attachments:
+- egress-times-single-family-houses-b59172f65101.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

@@ -1,0 +1,17 @@
+{
+  "known_outcome": "unknown in the attachment (no Board decision in the packet; hearing date printed as 2026-02-18 and 2026-01-21). 2026 minutes were not retrieved.",
+  "outcome_leakage": true,
+  "leakage_detail": "No decision in packet, but permit-holder and DBI briefs state positions on the disputed issues. Treat those positions as evaluator-only.",
+  "review_focus": [
+    "consistency with the earlier Board decision (22-013) and related permits",
+    "plan revision control (REV5, duplicate sheets, checklist sheet)",
+    "skylight and parapet requirement (appellant's CBC 705.11 citation)",
+    "single dwelling unit size-limit claim",
+    "code edition used by the plans (2016 claim)"
+  ],
+  "case_id": "H13-003",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

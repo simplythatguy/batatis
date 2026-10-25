@@ -1,0 +1,77 @@
+{
+  "id": "L07-024",
+  "title": "BCAB 1884 - Reduction of required doorway width and obstruction of access to the doorway",
+  "jurisdiction": "British Columbia",
+  "code_edition": "BCBC 2018",
+  "case_type": "appeal_decision",
+  "source_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1884",
+  "document_date": "2022-03-17",
+  "facts": [
+    {
+      "text": "The subject is a proposed water- closet room to be constructed in a dwelling unit. The dimensions of the water-closet room space are 0.76 m x 1.34 m, (1.02 m2), with a ceiling height of 2.1 m for the entire area. The water-closet room doorway is closed by a sliding door (barn door) outside the room. Shown in the sketch below, the front edge of the water-closet projects past the doorway opening.",
+      "locator": "Project description, paragraph 1"
+    },
+    {
+      "text": "The local authority has determined there are two non-compliant matters:",
+      "locator": "Decision being appealed / local authority position, paragraph 1"
+    },
+    {
+      "text": "The appellant does not consider the protrusion of the water-closet impairs the entry, use, maintenance or cleaning and exiting from the area. The appellant is unaware of any Building Code requirements that support the local authority’s determinations of non-compliance.",
+      "locator": "Appellant position, paragraph 1"
+    }
+  ],
+  "limitations": [
+    "The public Board decision is an appeal record, not the original application package.",
+    "The published decision refers to supporting drawings or evidence in some cases, but the complete original application and attachments are not publicly linked from the decision page.",
+    "Published Board outcome appears in the input attachment; outcome leakage is intentional and flagged.",
+    "Where a figure is attached, the decision page does not consistently identify its author; Board-created figures are distinguished in the research report, and no image is treated as a complete applicant drawing set.",
+    "British Columbia decision retained for comparative attachment format/content only; it does not establish Alberta code applicability, design performance, or acceptance."
+  ],
+  "worker": "L07",
+  "prompt_number": 515,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1884",
+      "sha256": "0bdbca645db1fc730460eaed09b4b796eb3669136e5d7c1933b149db5aefbd7d",
+      "role": "input",
+      "bytes": 1361400,
+      "filename": "bcab-1884-0bdbca645db1.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-1884-0bdbca645db1.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:21:15.595823+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1884",
+        "content_type": "text/html; charset=utf-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-1-source-text.txt",
+        "sha256": "f6def76d750ab4088d0ca58d8ad1a51249bb9cb01fb97422bba8c559796a7a76",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    },
+    {
+      "url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/construction-industry/building-codes-and-standards/building-code-appeal-board/2022/bcab_1884.jpg",
+      "sha256": "c07279e658107f801f59dbdfa35c9f932668e711c9d0adb75cc6d5c83ee5ea9b",
+      "role": "supporting_evidence",
+      "bytes": 110275,
+      "filename": "bcab-1884-bcab_1884-c07279e65810.jpg",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-1884-bcab_1884-c07279e65810.jpg",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:23:04.949037+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/construction-industry/building-codes-and-standards/building-code-appeal-board/2022/bcab_1884.jpg",
+        "content_type": "image/jpeg; charset=UTF-8",
+        "kind": "image",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

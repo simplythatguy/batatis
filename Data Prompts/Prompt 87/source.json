@@ -1,0 +1,50 @@
+{
+  "id": "L03-006",
+  "title": "14-BCV-006 - Elevator and passenger-elevating devices",
+  "jurisdiction": "Alberta (province-wide, as stated by the STANDATA)",
+  "code_edition": "Alberta Building Code 2014",
+  "case_type": "issued_variance",
+  "source_url": "https://open.alberta.ca/publications/standata-building-code-variance-2014",
+  "document_date": "June 2017",
+  "catalogue_status": "Catalogue row is not marked [WITHDRAWN]; PDF carries an Archived watermark.",
+  "facts": [
+    {
+      "text": "The STANDATA concerns a passenger elevator substituted for a lift for persons with physical disabilities (LPPD) on a barrier-free path; it cites ABC Articles 3.5.4.1 and 3.8.3.5.",
+      "locator": "14-BCV-006 PDF, p.1, PURPOSE and CODE REFERENCES"
+    },
+    {
+      "text": "The exception to stretcher dimensions is conditioned on maximum rise of 7,000 mm and elevator car dimensions no smaller than the CSA-B355 Table 1 minimums.",
+      "locator": "14-BCV-006 PDF, p.2, VARIANCE"
+    }
+  ],
+  "limitations": [
+    "This is a provincial regulator-issued STANDATA/standing variance, not an individual application, applicant statement, project drawing, permit record or site-specific decision.",
+    "The records address the Alberta Building Code 2014 and, where noted, Alberta Fire Code 2014; do not treat them as proof of applicability under the Alberta 2023 code edition or current law.",
+    "Catalogue status is recorded as displayed on the retrieved official page. A missing [WITHDRAWN] label is not evidence of current validity; PDFs display an Archived watermark."
+  ],
+  "worker": "L03",
+  "prompt_number": 87,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://open.alberta.ca/dataset/27900157-f850-4138-a964-b813f0921a3b/resource/39ef32ec-a76c-4143-9c0c-58acc0fc2c70/download/14-bcv-006-elevatorsandpassengerelevatingdevices.pdf",
+      "sha256": "a9981f71cbbf4fd006472bc9aba5f2554cc99139cbcabe2bc1e913b2e93d4749",
+      "role": "supporting_evidence",
+      "bytes": 1352215,
+      "filename": "catalogue-16-a9981f71cbbf.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L03/files/catalogue-16-a9981f71cbbf.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:18:13.337160+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/27900157-f850-4138-a964-b813f0921a3b/resource/39ef32ec-a76c-4143-9c0c-58acc0fc2c70/download/14-bcv-006-elevatorsandpassengerelevatingdevices.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

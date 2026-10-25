@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Items 1, 3 and 4 granted as proposed; item 2 granted with conditions (non-operable windows, sprinkler spacing and placement, Fire Marshal permit).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "four separate provisions, not one",
+    "whether the dew-point calculations described in item 4 are attached",
+    "precedent citations to other appeal IDs",
+    "the egress-court overhead-cover definition"
+  ],
+  "case_id": "H11-008",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

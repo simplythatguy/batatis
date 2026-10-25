@@ -1,0 +1,53 @@
+{
+  "id": "L20-021",
+  "title": "1073 Topsail Road: level entrance area and accessible service counter",
+  "jurisdiction": "Mount Pearl, Newfoundland and Labrador",
+  "code_edition": "Buildings Accessibility Act and Regulations, including O.C. 96-865; edition not stated",
+  "case_type": "appeal_decision",
+  "source_url": "https://www.gov.nl.ca/gs/licences/building/",
+  "document_date": "2019-06-06",
+  "facts": [
+    {
+      "text": "The building was constructed in 1988 with a 1991 addition; the decision says no new construction/additions had occurred since 1991.",
+      "locator": "PDF pp. 2–3"
+    },
+    {
+      "text": "A 2019 order required a 1,500 mm by 1,500 mm level area at the front door and an accessible public-counter section.",
+      "locator": "PDF pp. 1–3"
+    },
+    {
+      "text": "The inspector described the adjacent area as approximately 1,375 mm; the tribunal also discusses a 13 mm change-in-level limit and ramp treatment.",
+      "locator": "PDF pp. 6–8"
+    }
+  ],
+  "limitations": [
+    "Comparative source from outside Alberta; it cannot establish Alberta code performance or approval.",
+    "This is a Newfoundland and Labrador accessibility-regulation appeal, not a building-code variance or Alberta decision.",
+    "The decision refers to application materials and inspection evidence that are not attached as separate plans."
+  ],
+  "worker": "L20",
+  "prompt_number": 573,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.gov.nl.ca/gs/files/BAAT-CastorRiverHoldingsLimited-June2019.pdf",
+      "sha256": "9065719d2cfe17eec180d9c98573d30724797ba475550b8b62e0598bea1bbc9b",
+      "role": "outcome_reference",
+      "bytes": 6399576,
+      "filename": "nl-baat-castor-river-holdings-2019-9065719d2cfe.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L20/files/nl-baat-castor-river-holdings-2019-9065719d2cfe.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:50:07.877799+00:00",
+        "http_status": "200",
+        "final_url": "https://www.gov.nl.ca/gs/files/BAAT-CastorRiverHoldingsLimited-June2019.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

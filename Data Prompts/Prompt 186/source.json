@@ -1,0 +1,58 @@
+{
+  "id": "L15-011",
+  "title": "13422-R — Knauf JetStream MAX Blown Insulation Wall System",
+  "jurisdiction": "Canada (CCMC national product assessment; project AHJ not stated)",
+  "code_edition": "NBC 2015 and NBC 2020",
+  "case_type": "product_evidence",
+  "source_url": "https://www.nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=13422-R&type=cert",
+  "document_date": "2024-05-07",
+  "facts": [
+    {
+      "text": "CCMC 13422-R is marked Active in the live API snapshot; the report names NBC 2015 and NBC 2020 as its edition scope.",
+      "locator": "PDF p. 1; live API items"
+    },
+    {
+      "text": "Report requires Knauf installers, unopened packages at delivery and mesh bulge under 13 mm as installation indicator.",
+      "locator": "PDF p. 5"
+    },
+    {
+      "text": "The CCMC report publishes its own code-specific opinion classifications for the printed edition(s); those classifications are bounded by the report conditions.",
+      "locator": "PDF p. 2"
+    }
+  ],
+  "limitations": [
+    "The evaluation is a CCMC product assessment, not an individual Alberta variance or project approval.",
+    "The report editions are NBC editions identified by the source; no equivalence to NBC(AE) 2023, 2nd printing has been established here.",
+    "No project, assembly, jurisdiction/AHJ, loads, site conditions, installation records or professional design package is supplied.",
+    "The CCMC opinion is bound by its stated conditions and limitations; read the full report before judging relevance.",
+    "Insulated wall system: Report requires Knauf installers, unopened packages at delivery and mesh bulge under 13 mm as installation indicator."
+  ],
+  "worker": "L15",
+  "prompt_number": 186,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://www.nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?id=498&type=cert",
+      "sha256": "aa2e92aafa31e37083514820a96478cbda35bcafa69ae0400d89727732facf9a",
+      "role": "input",
+      "bytes": 246924,
+      "filename": "ccmc-13422-R-knauf-jetstream-wall-system-evaluation-87e0482c4829.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L15/files/ccmc-13422-R-knauf-jetstream-wall-system-evaluation-87e0482c4829.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:19:18.942901+00:00",
+        "http_status": "200",
+        "final_url": "https://www.nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?id=498&type=cert",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded_pdf_entity_extracted",
+        "entity_extraction": "A 433-byte proxy/HTTP response prelude precedes %PDF- in the helper capture. PDF entity bytes from first %PDF- through the final byte were copied unchanged and parsed with pypdf.",
+        "raw_capture_sha256": "87e0482c482966317c54dd1118e7c17030af7b91779b4ad636a403bcc6b57957",
+        "raw_capture_path": "_research/workers/L15/files/ccmc-13422-R-knauf-jetstream-wall-system-evaluation-87e0482c4829.html"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

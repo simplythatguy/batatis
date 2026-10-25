@@ -1,0 +1,6 @@
+Use the attached NRC report on FEWF W1 — 2x6 wood-frame wall with exterior XPS and interior polyethylene vapour barrier as the available technical attachment in an administrative-completeness review for a possible building-code alternative-solution file. State what the report actually tested or modelled about this configuration and what its reported evidence can and cannot establish. Separate study facts from unknown facts about any proposed project. Identify missing jurisdiction and adopted code edition plus the exact acceptable-solution provision, proposed assembly drawings/materials/junctions, site climate and use, project-specific calculations or test evidence, assumptions and limits, risk assessment and mitigation, and required professional evidence. Ask concise follow-up questions. Treat this as research evidence only; do not conclude that any project is safe, complies, or is approved.
+
+Attachments:
+- fef-wall-moisture-phase-report-c8363d9022f2.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

@@ -1,0 +1,14 @@
+{
+  "known_outcome": "The permit refusal was confirmed.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Distinguish a classification dispute from an alternative-solution request.",
+    "Check which report details are summarized and which underlying calculations/data are missing.",
+    "Keep NBC and NFC references, editions and scope distinct."
+  ],
+  "case_id": "L06-016",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Regulator position: existing systems requiring inspection, testing, maintenance or new devices are addressed by the NBC(AE), NFC(AE) and electrical permit rules the document cites; the document defines who may install, verify, inspect, test and maintain an FAS; electrical permits apply to electrical work.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the building, fire and electrical disciplines for one system",
+    "Asks who holds the qualifications the document names for install and verification",
+    "Flags the permit questions for electrical and fire-system work",
+    "Does not state the system is adequate"
+  ],
+  "case_id": "H20-008",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

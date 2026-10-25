@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Council answers (leakage): (1) periodic special inspection is required where the Washington amendment to 1705.5.3 requires it and the adhesive anchors do not resist sustained tension loads (Washington amendment to Table 1705.5.3, item 3b); (2) periodic special inspection is required for all concealed mass-timber connections, proprietary or not, where the Washington amendment to 1705.5.3 requires special inspection.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "trigger for special inspection under the Washington amendment",
+    "sustained tension loads on adhesive anchors",
+    "proprietary versus non-proprietary concealed connections",
+    "inspection evidence required before close-out"
+  ],
+  "case_id": "H12-011",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

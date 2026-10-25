@@ -1,0 +1,13 @@
+{
+  "known_outcome": "Permit page says Completed; referenced AL proposal and decision are not included.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Distinguish permit from AS outcome",
+    "Request exact referenced file and decision"
+  ],
+  "case_id": "L11-011",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

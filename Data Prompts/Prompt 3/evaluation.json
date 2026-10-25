@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Unknown. The report identifies review needs and recommendations but includes no current renovation application or code-authority decision.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "preserve the report’s explicit high-level and historical scope",
+    "separate institutional statements from verified records",
+    "identify missing records and building-specific evidence needed for an administrative review",
+    "do not claim that any listed issue is resolved or currently present"
+  ],
+  "case_id": "A03-003",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Calgary / Edmonton",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

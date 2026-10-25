@@ -1,0 +1,94 @@
+{
+  "id": "L07-019",
+  "title": "BCAB 1902 - Corridor within an interconnected floor space",
+  "jurisdiction": "British Columbia",
+  "code_edition": "BCBC 2018",
+  "case_type": "appeal_decision",
+  "source_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1902",
+  "document_date": "2023-01-19",
+  "facts": [
+    {
+      "text": "The project is a five-story mixed-use sprinklered building of combustible construction, 1259 m2 in building area. The upper four storeys of the building contain residential suites. The first storey is mixed use including residential suites, commercial units, storage areas, and lounge/amenity area.",
+      "locator": "Project description, paragraph 1"
+    },
+    {
+      "text": "There is an interconnected floor space area connecting the first and second storeys with an open stairway. The interconnected floor space on the first storey is primarily a lounge/lobby and amenity room.",
+      "locator": "Project description, paragraph 2"
+    },
+    {
+      "text": "The interconnected floor space on the second story is primarily an open stairway connecting with the first storey. Also included within the interconnected space is an “extension” of the public corridor serving the residential suites in the remainder of the floor area. It is necessary to pass through the interconnected space to access the second required exit for the residential suites on the second storey. The interconnected space is separated from the remainder of the second storey floor area by a vertical fire separation with a 1 hour fire resistance rating. The travel distance from any point in the second storey floor area to an exit is less than 45 m.",
+      "locator": "Project description, paragraph 3"
+    }
+  ],
+  "limitations": [
+    "The decision page is a Board-published appeal record, not the original variance/application package.",
+    "The published decision refers to supporting drawings or evidence in some cases, but these were not attached to the downloaded page.",
+    "Published Board outcome appears in the input attachment; outcome leakage is intentional and flagged.",
+    "Where a figure is attached, the decision page does not consistently identify its author; Board-created figures are distinguished in the research report, and no image is treated as a complete applicant drawing set.",
+    "British Columbia decision retained for comparative attachment format/content only; it does not establish Alberta code applicability, design performance, or acceptance."
+  ],
+  "worker": "L07",
+  "prompt_number": 510,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1902",
+      "sha256": "e9565f6c422fb368ff48902b4d5dcd646798e0d370966c6edc6c95b2a35cafd3",
+      "role": "input",
+      "bytes": 1362277,
+      "filename": "bcab-1902-e9565f6c422f.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-1902-e9565f6c422f.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:20:20.193607+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1902",
+        "content_type": "text/html; charset=utf-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-1-source-text.txt",
+        "sha256": "05dc68f980c42cd6ed5224d01e0e836b2f0490e6583a5f5c1a15e70c60803f2d",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    },
+    {
+      "url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/construction-industry/building-codes-and-standards/building-code-appeal-board/1902_bcab_1.png",
+      "sha256": "bb109982f2e2fbb31f974df08f6e97757cdcd6bd84dcc8e3df37cd18ea2b5927",
+      "role": "supporting_evidence",
+      "bytes": 133366,
+      "filename": "bcab-1902-1902_bcab_1-bb109982f2e2.png",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-1902-1902_bcab_1-bb109982f2e2.png",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:23:09.892912+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/construction-industry/building-codes-and-standards/building-code-appeal-board/1902_bcab_1.png",
+        "content_type": "image/png; charset=UTF-8",
+        "kind": "image",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/construction-industry/building-codes-and-standards/building-code-appeal-board/1902_bcab_2.png",
+      "sha256": "675cc6d7dbd30b7412454ec66a4754eb71bd347895dc86038da3dbff467301ad",
+      "role": "supporting_evidence",
+      "bytes": 195133,
+      "filename": "bcab-1902-1902_bcab_2-675cc6d7dbd3.png",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-1902-1902_bcab_2-675cc6d7dbd3.png",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:23:12.016733+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/construction-industry/building-codes-and-standards/building-code-appeal-board/1902_bcab_2.png",
+        "content_type": "image/png; charset=UTF-8",
+        "kind": "image",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

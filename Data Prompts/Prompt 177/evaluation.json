@@ -1,0 +1,15 @@
+{
+  "known_outcome": "CCMC marks selected NBC 2010 structural/foundation provisions including 9.4.1, 9.4.4, 9.15.3 and 9.15.4 Alternative (PDF p. 2). This is not a project-specific Alberta decision.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separate the printed NBC edition and solution table from Alberta 2023 Edition applicability.",
+    "Match exact product, variant, role, assembly and conditions before treating the report as relevant.",
+    "Identify missing project-specific administrative facts and professional evidence without filling them in.",
+    "Keep technical equivalence and approval with the responsible professional and AHJ."
+  ],
+  "case_id": "L15-002",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

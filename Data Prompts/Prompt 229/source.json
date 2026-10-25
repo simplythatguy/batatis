@@ -1,0 +1,53 @@
+{
+  "id": "L17-021",
+  "title": "NRC report RR-209 — egress-time estimates for single-family houses",
+  "jurisdiction": "Canada (NRC research report; no project jurisdiction or AHJ identified)",
+  "code_edition": "not assessed; the report reviews egress-time research and is not a code analysis",
+  "case_type": "research_evidence",
+  "source_url": "https://publications-cnrc.canada.ca/eng/view/ft/?id=871f1f61-7fe0-43eb-9ea0-7b9305749a58",
+  "document_date": "2006-07-12",
+  "facts": [
+    {
+      "text": "The report says its estimates use literature review and prior studies; it notes that house egress time depends on fire location, occupant characteristics, alarms, building design and actions that delay egress.",
+      "locator": "PDF pp. 9 and 21–23, §§2 and 6"
+    },
+    {
+      "text": "A report table gives best-case and worst-case RSET estimates of 120 s and 970 s, composed of separate detection, alarm, pre-movement and travel assumptions.",
+      "locator": "PDF p. 23, Table 3"
+    },
+    {
+      "text": "The report describes 25 subjects asked about evacuation from their own homes; it reports a mean travel distance of 16.6 m and mean evacuation time of 47 s, with 30–60 s used as travel-time estimates after the decision to evacuate.",
+      "locator": "PDF p. 23, §6.2"
+    }
+  ],
+  "limitations": [
+    "This is a literature review and estimation report, not a full-scale building evacuation test or application.",
+    "The worst-case component table includes estimates assembled from multiple sources and report assumptions; use the stated uncertainty.",
+    "No project/AHJ or code edition is identified; generic estimates are not a local code requirement."
+  ],
+  "worker": "L17",
+  "prompt_number": 229,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://publications-cnrc.canada.ca/eng/view/ft/?id=871f1f61-7fe0-43eb-9ea0-7b9305749a58",
+      "sha256": "b59172f651010c9503b81c444c081773890899298052292d584c3a9dbfe01d12",
+      "role": "input",
+      "bytes": 3087078,
+      "filename": "egress-times-single-family-houses-b59172f65101.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L17/files/egress-times-single-family-houses-b59172f65101.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:55:08.310331+00:00",
+        "http_status": "200",
+        "final_url": "https://publications-cnrc.canada.ca/eng/view/ft/?id=871f1f61-7fe0-43eb-9ea0-7b9305749a58",
+        "content_type": "application/pdf;charset=UTF-8",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

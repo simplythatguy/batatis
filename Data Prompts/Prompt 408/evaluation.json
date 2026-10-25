@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The authority was incorrect to issue the code compliance certificate because the departures from the approved consent did not constitute a minor variation, so an amendment was required; some as-built aspects do not comply with B1 and then B2; there is insufficient information on other aspects of B1 and B2; the alterations comply with E2 and F7 (s12.1, p.34).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "minor variation versus amendment for departures from consent",
+    "beam and wall changes shown in revised drawings",
+    "as-built checks for structure and durability",
+    "documents needed to show what was built"
+  ],
+  "case_id": "H04-013",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

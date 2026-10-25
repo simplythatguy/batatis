@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Report-stated: ICC-ES evaluation reissued October 2025 (IBC/IRC 2018-2009; PRG 320-2019) for floor and roof components, with connections and complete diaphragm designs outside the evaluation. Printed renewal month October 2026.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Diaphragm and connection design outside the report (§5.4, §5.6)",
+    "Table 3 shear values need the matching edition and loading check",
+    "Renewal month due at retrieval"
+  ],
+  "case_id": "H14-005",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

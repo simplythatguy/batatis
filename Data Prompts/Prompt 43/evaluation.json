@@ -1,0 +1,17 @@
+{
+  "known_outcome": "A published regulator-issued STANDATA sets out a province-wide variance and its stated conditions; it is not an outcome for any applicant-specific project.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Part 9 applicability",
+    "heated floor and ground contact",
+    "insulation value documentation",
+    "code baseline/zone uncertainty",
+    "source-attributed objective/function",
+    "no fabricated energy analysis"
+  ],
+  "case_id": "L01-003",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

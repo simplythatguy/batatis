@@ -1,0 +1,16 @@
+{
+  "known_outcome": "Refusal confirmed: the tribunal confirmed the refusal decisions (p. 2). Decision notice dated 13 May 2024 (p. 5).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Identifies QDC MP1.2 Acceptable Solution A2(a)(i) and the 1.5 m clearance against the 0.5 m setback.",
+    "Separates the planning-scheme amenity reasons from the building-code boundary clearance.",
+    "Notes the concurrence-agency direction and the certifier's role.",
+    "Asks for setbacks and referral responses rather than deciding them.",
+    "Makes no compliance statement."
+  ],
+  "case_id": "H09-010",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

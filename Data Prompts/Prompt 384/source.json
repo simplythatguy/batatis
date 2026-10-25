@@ -1,0 +1,67 @@
+{
+  "id": "H02-008",
+  "title": "Determination 2023/017: The proposed issue of a notice to fix regarding the change of use of motel units",
+  "jurisdiction": "New Zealand: Rotorua Lakes Council as territorial authority; MBIE determination under the Building Act 2004. Non-Alberta comparative record.",
+  "code_edition": "NZ Building Act 2004 ss 114-115 and Change of Use Regulations (use groups SA and SR); Building Code clauses G3 and H1.3.4(c) are discussed. The Building Code edition is not stated in the text read.",
+  "case_type": "appeal_decision",
+  "source_url": "https://codehub.building.govt.nz/resources/2023017",
+  "document_date": "19 June 2023",
+  "facts": [
+    {
+      "text": "A motel in Rotorua was previously used as tourist accommodation and was later used for emergency housing.",
+      "locator": "p.1 Summary"
+    },
+    {
+      "text": "The question is whether the use group changed from sleeping accommodation (SA) to sleeping residential (SR) and, if so, whether that created additional or more onerous Building Code requirements.",
+      "locator": "p.1 Summary"
+    },
+    {
+      "text": "The authority's submission listed the fire-safety requirements under clause C for SR as additional or more onerous requirements.",
+      "locator": "p.11"
+    },
+    {
+      "text": "The authority submitted that there had been at least eight fires in motels used as emergency housing in the past two years in Rotorua.",
+      "locator": "p.12"
+    },
+    {
+      "text": "For a change not incorporating household units, compliance is measured against a qualified set of Building Code requirements: means of escape from fire, protection of other property, sanitary facilities, structural performance, fire-rating performance, and access for disabled people where section 118 applies.",
+      "locator": "p.12"
+    },
+    {
+      "text": "On or about 24 January 2022 the authority proposed to issue a notice to fix under section 164 to the landlord.",
+      "locator": "p.36-37 §6, §8.1"
+    }
+  ],
+  "limitations": [
+    "Change-of-use classification is the main ground. The fire and escape content is in the statutory test and the parties' submissions.",
+    "The council's fire-incident statistic is a submission, not a finding in this determination.",
+    "The decision (p.37 §8.1) is in the same PDF as the facts. Outcome leakage is true unless redacted.",
+    "Owner and operator names are left out of the prompt.",
+    "Applies to the New Zealand Building Act and Building Code only. No Alberta applicability is asserted."
+  ],
+  "worker": "H02",
+  "prompt_number": 384,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2023/2023-017.pdf",
+      "sha256": "ba2425fbe963ea4b94bbe011c71a2a8db63f9194ce19b57350ddeec90bdb3d55",
+      "role": "input",
+      "bytes": 1641729,
+      "filename": "mbie-det-2023-017-ba2425fbe963.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H02/files/mbie-det-2023-017-ba2425fbe963.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:42:41.311970+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2023/2023-017.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

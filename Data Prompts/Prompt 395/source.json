@@ -1,0 +1,66 @@
+{
+  "id": "H02-019",
+  "title": "Determination 2024/012: Whether the installation of a woodburner (on an as-built hearth) complies with the Building Code (clause C2.2)",
+  "jurisdiction": "New Zealand: Tasman District Council as building consent authority (Richmond); MBIE determination under the Building Act 2004. Non-Alberta comparative record.",
+  "code_edition": "NZ Building Code (Schedule 1, Building Regulations 1992), clause C2.2 as cited in the record. The manufacturer's hearth-clearance specification is part of the record. No Acceptable Solution edition is named.",
+  "case_type": "appeal_decision",
+  "source_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2024/2024-012.pdf",
+  "document_date": "19 March 2024",
+  "facts": [
+    {
+      "text": "A woodburner has been installed on an existing as-built hearth at a dwelling in Richmond. The hearth is a necessary element of the installation.",
+      "locator": "p.1 Summary; p.2 §1"
+    },
+    {
+      "text": "The authority refused to issue a code compliance certificate for the building work and sought a determination on whether the woodburner installation complies with the Building Code.",
+      "locator": "p.1 Summary"
+    },
+    {
+      "text": "The question is whether the woodburner on the existing as-built hearth complies with clause C2.2 of the Building Code.",
+      "locator": "p.2 §1"
+    },
+    {
+      "text": "The woodburner has a pedestal or drawer base. The woodburner and hearth combination specification requires a front hearth clearance of 470 mm from the woodburner to a combustible surface.",
+      "locator": "p.2 §1.3.2; p.3 §2.2"
+    },
+    {
+      "text": "The record refers to a wood-burner operation guide, and its cross-section shows the woodburner installed on the existing hearth.",
+      "locator": "p.4"
+    },
+    {
+      "text": "The record considers whether the work complies by way of an alternative solution with the performance requirement in clause C2.2.",
+      "locator": "p.8-10"
+    }
+  ],
+  "limitations": [
+    "The C2.2 text is not quoted in this pass. Check the NZBC clause before relying on the wording.",
+    "The CodeHub landing page does not carry this determination. The official PDF path was used directly, so the source_url is the PDF.",
+    "Owner and street address are omitted.",
+    "Applies to the New Zealand Building Code only. No Alberta applicability is asserted."
+  ],
+  "worker": "H02",
+  "prompt_number": 395,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2024/2024-012.pdf",
+      "sha256": "2e420cb3391a461777e036582b71d36cadfe96ba9f47df2090b46309f5592a34",
+      "role": "input",
+      "bytes": 566879,
+      "filename": "gap-check-2024-012-2e420cb3391a.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H02/files/gap-check-2024-012-2e420cb3391a.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:59:23.308511+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2024/2024-012.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

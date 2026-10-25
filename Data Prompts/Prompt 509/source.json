@@ -1,0 +1,77 @@
+{
+  "id": "L07-018",
+  "title": "BCAB 1912 - Egress from mezzanine",
+  "jurisdiction": "British Columbia",
+  "code_edition": "BCBC 2018",
+  "case_type": "appeal_decision",
+  "source_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1912",
+  "document_date": "2023-08-24",
+  "facts": [
+    {
+      "text": "The project is the construction of an open mezzanine in a suite in an existing sprinklered building of Group F, Division 2 major occupancy. The 231m² open mezzanine, which will be used for storage, will overlook the warehouse. The mezzanine will be served by an exit at the mezzanine level and a means of egress in the form of an open stair leading to multiple exits at the floor area below.",
+      "locator": "Project description, paragraph 1"
+    },
+    {
+      "text": "Article 3.4.2.2. contains the mezzanine egress requirements. The subject mezzanine exceeds Table 3.4.2.2's maximum area for F-2 major occupancy, so the relaxed egress provisions in 3.4.2.2.(2) does not apply. The mezzanine must have exits at the mezzanine level on the same basis as floor areas, as per 3.4.2.2.(1).",
+      "locator": "Decision being appealed / local authority position, paragraph 1"
+    },
+    {
+      "text": "The appellant contends that the mezzanine meets Sentence 3.4.2.2.(3), it is served by one exit at the mezzanine level and one means of egress in the form of an open stair leading to multiple exits at the floor area below.",
+      "locator": "Appellant position, paragraph 1"
+    }
+  ],
+  "limitations": [
+    "The decision page is a Board-published appeal record, not the original variance/application package.",
+    "The published decision refers to supporting drawings or evidence in some cases, but these were not attached to the downloaded page.",
+    "Published Board outcome appears in the input attachment; outcome leakage is intentional and flagged.",
+    "Where a figure is attached, the decision page does not consistently identify its author; Board-created figures are distinguished in the research report, and no image is treated as a complete applicant drawing set.",
+    "British Columbia decision retained for comparative attachment format/content only; it does not establish Alberta code applicability, design performance, or acceptance."
+  ],
+  "worker": "L07",
+  "prompt_number": 509,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1912",
+      "sha256": "4ae5b6c7a58de631ef0600ed8a2ca02e6371f23831c61ca4f415f2923f2b4a06",
+      "role": "input",
+      "bytes": 1358037,
+      "filename": "bcab-1912-4ae5b6c7a58d.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-1912-4ae5b6c7a58d.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:20:05.286983+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1912",
+        "content_type": "text/html; charset=utf-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-1-source-text.txt",
+        "sha256": "ec7102b7d91b5f41e9e2db02a2b78a2518c5b2f2e123fe0f4fab5717f66babdc",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    },
+    {
+      "url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/construction-industry/building-codes-and-standards/building-code-appeal-board/1912_bcab.png",
+      "sha256": "34b6314a1baa7ef4dd8195f3e7746dde00bc6b57c3dbcc17b4859de3a8a4470f",
+      "role": "supporting_evidence",
+      "bytes": 48711,
+      "filename": "bcab-1912-1912_bcab-34b6314a1baa.png",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-1912-1912_bcab-34b6314a1baa.png",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:23:17.323271+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/construction-industry/building-codes-and-standards/building-code-appeal-board/1912_bcab.png",
+        "content_type": "image/png; charset=UTF-8",
+        "kind": "image",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

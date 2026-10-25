@@ -1,0 +1,15 @@
+{
+  "known_outcome": "unknown: a planning report that recommends projects; approvals and construction outcomes are not in the attachment",
+  "outcome_leakage": false,
+  "review_focus": [
+    "code amendment timing (Regulation 191/14) and which project types it covers",
+    "limited-use/limited-application elevator versus a full elevator",
+    "heritage constraints on door width, passing space, curb ramps and signage",
+    "barrier-free washroom placement on a different floor level"
+  ],
+  "case_id": "H18-004",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

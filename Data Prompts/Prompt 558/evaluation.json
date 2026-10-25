@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The board varied the compliance deadline to 2025-06-30 while retaining the order conditions.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "what engineer reports and drawings are actually in the attachment",
+    "the structural condition and root-cause evidence",
+    "whether the proposed alternative is documented and professionally reviewed",
+    "distinguish deadline relief from acceptance of a technical design"
+  ],
+  "case_id": "L20-006",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

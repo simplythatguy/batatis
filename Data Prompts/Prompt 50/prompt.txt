@@ -1,0 +1,7 @@
+Compare the attached 23-BCV-010 historical issue with R1. Identify the revision to use as the listed current catalogue record, the narrower R1 fabrication scope, and the professional-authentication, AWS D1.1, quality-program, shop-inspection and submission evidence described in R1. List which facts a project record would need and keep professional welding judgments human-owned; do not infer that a fabricator or weld is qualified.
+
+Attachments:
+- 23-BCV-010-48da7837f935.pdf
+- 23-BCV-010-73541a6e282f.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Regulator position: the NBC(AE) and NFC(AE) reference the NFPA 13 family for sprinkler systems; where an antifreeze solution is not listed and must remain in place, the local fire authority must be engaged.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the listed-solution question from the engagement requirement",
+    "Asks for the solution listing and the reasons it must remain in place",
+    "Flags NFPA 13D/13R/13 scope as a file check",
+    "Does not state the system is accepted"
+  ],
+  "case_id": "H20-032",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

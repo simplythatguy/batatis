@@ -1,0 +1,9 @@
+Comparative attachment exercise: this source is from New Zealand, Tauranga City Council (Building Regulations 1992 / NZ Building Code clause B1; NON-ALBERTA comparative test). It is not an Alberta application.
+
+Attached are two producer statements (a design statement and a design-review statement) for seismic strengthening of an existing building in Tauranga, New Zealand, with the job's calculations cover sheet. Please explain what each statement covers and what it relies on, which conditions it attaches, which documents it refers to that are not in the attachments, and what a building consent reviewer would still need to confirm. Do not certify the design.
+
+Attachments:
+- h06-fyi-bc50488-fire-design-part1-4fe57e159806.pdf
+- h06-fyi-bc50488-technical-reports-part2-164ca7bd786d.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

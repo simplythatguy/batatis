@@ -1,0 +1,106 @@
+{
+  "id": "L15-021",
+  "title": "BTRboard insulated sheathing product and installation evidence",
+  "jurisdiction": "Unstated project jurisdiction (Canadian manufacturer documents; no AHJ identified)",
+  "code_edition": "unknown",
+  "case_type": "product_evidence",
+  "source_url": "https://www.btrboard.com/products/",
+  "document_date": "unknown (undated manufacturer webpages retrieved 2026-10-25 UTC)",
+  "facts": [
+    {
+      "text": "The manufacturer page describes BTRboard OSB, FIRE-X and RESIST as distinct variants with different substrate and foam-core combinations.",
+      "locator": "Products page, BTRboard OSB / FIRE-X / RESIST sections"
+    },
+    {
+      "text": "The installation page gives different nailing schedules for OSB/RESIST and FIRE-X and says fastening is product-specific.",
+      "locator": "Installation Guide page, BTRboard Nailing Patterns / Fastening"
+    },
+    {
+      "text": "The installation page requires FIRE-X panel joints to be supported and installed tight with no gaps.",
+      "locator": "Installation Guide page, Framing & Layout / Backing, Blocking & Corners"
+    },
+    {
+      "text": "The complete live CCMC API snapshot has 462 active published records and no BTRboard/BTR Board product or holder match.",
+      "locator": "Live API snapshot: all 462 items; count=462; hasMore=false"
+    }
+  ],
+  "limitations": [
+    "The attached product pages are manufacturer sources and are not an independent assessment.",
+    "No BTRboard entry appears in the captured live 462-record CCMC response; this is not a universal search of all registries.",
+    "Intertek directory/report pages appeared in search results but direct collection returned a redirect loop; no Intertek report bytes are attached or used as ground truth.",
+    "No project, installation, jurisdiction/AHJ, code edition or professional design package is supplied."
+  ],
+  "worker": "L15",
+  "prompt_number": 196,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://www.btrboard.com/products/",
+      "sha256": "96220cb49a01814a0611951e71504377fbdfc2a98325bf5b9263553b2a50c999",
+      "role": "input",
+      "bytes": 195938,
+      "filename": "btrboard-manufacturer-products-96220cb49a01.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L15/files/btrboard-manufacturer-products-96220cb49a01.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:19:44.372161+00:00",
+        "http_status": "200",
+        "final_url": "https://www.btrboard.com/products/",
+        "content_type": "text/html; charset=UTF-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-1-source-text.txt",
+        "sha256": "566f8d85c9f206dff306c4b84196a10ffde4f63a13f71c16bfec7defc6500f08",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    },
+    {
+      "url": "https://www.btrboard.com/installation-guide/",
+      "sha256": "c5d22e0c0cd90f2f7d87ca9c5e4122810a5ef3325a6cfe53ca5601af0c0e508b",
+      "role": "input",
+      "bytes": 117180,
+      "filename": "btrboard-manufacturer-installation-guide-c5d22e0c0cd9.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L15/files/btrboard-manufacturer-installation-guide-c5d22e0c0cd9.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:19:44.372110+00:00",
+        "http_status": "200",
+        "final_url": "https://www.btrboard.com/installation-guide/",
+        "content_type": "text/html; charset=UTF-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-2-source-text.txt",
+        "sha256": "a8ee7d59d92b70e4fa66822a556a57b7d9b80ab6f593a9e51b85723610a8904b",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    },
+    {
+      "url": "https://www.nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/published_evaluations.html",
+      "sha256": "d6dc39c767d0283890729f3e610446219d1820f32efe046f41edee0a233956c4",
+      "role": "outcome_reference",
+      "bytes": 255108,
+      "filename": "_evaluation/ccmc-live-published-evaluations-api-d6dc39c767d0.json",
+      "included_in_default_input": false,
+      "original_collection_path": "_research/workers/L15/files/ccmc-live-published-evaluations-api-d6dc39c767d0.json",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:09.326401+00:00",
+        "http_status": "200",
+        "content_type": "application/json; charset=utf-8",
+        "kind": "json",
+        "status": "downloaded_byte_identical_copy"
+      },
+      "derived_text": {
+        "filename": "_evaluation/attachment-3-source-data.txt",
+        "sha256": "d6dc39c767d0283890729f3e610446219d1820f32efe046f41edee0a233956c4",
+        "operation": "Byte-identical text copy using .txt extension; original data file retained"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

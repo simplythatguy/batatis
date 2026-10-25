@@ -1,0 +1,67 @@
+{
+  "id": "H14-002",
+  "title": "ICC-ES ESR-1269: Amvic Standard and Amvic Plus 3.30 expanded polystyrene insulating concrete forms",
+  "jurisdiction": "United States (ICC-ES evaluation report under IBC/IRC); NON-ALBERTA COMPARATIVE ONLY: cannot establish Alberta performance, acceptance or equivalence; no Canadian or Alberta approval is claimed or implied",
+  "code_edition": "2024, 2021, 2018 and 2015 IBC and IRC (report §1.1, p1); 2013 ADIBC (p1); 2025 CALGreen (§1.2, p1)",
+  "case_type": "product_evidence",
+  "source_url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-1269.pdf",
+  "document_date": "Reissued May 2026; subject to renewal May 2027 (p1)",
+  "facts": [
+    {
+      "text": "Report holder AMVIC CORPORATION; evaluation subject is Amvic Standard and Amvic Plus 3.30 expanded polystyrene ICFs.",
+      "locator": "p1 cover"
+    },
+    {
+      "text": "The system is limited to combustible Type V (IBC) construction and to IRC construction as applicable, except as described in §4.4; fire-resistance-rated construction follows §4.3.",
+      "locator": "§5.2-5.3, p6"
+    },
+    {
+      "text": "Forms must be separated from the building interior with an approved 15-minute thermal barrier, except for attic and crawl space construction in §4.2.2.2.",
+      "locator": "§5.1, p6"
+    },
+    {
+      "text": "Noncombustible-construction use requires at least one label visible in every 160 sq ft (15 m2) of wall area before wall covering.",
+      "locator": "§5.5, p6"
+    },
+    {
+      "text": "Forms are manufactured 'in Toronto, Ontario, Canada; Calgary, Alberta, Canada; and Salt Lake City, Utah' under ICC-ES inspections (manufacturing-location statement only).",
+      "locator": "§5.11, p6"
+    },
+    {
+      "text": "Evidence listed: ICC-ES AC353 (24), published April 2025.",
+      "locator": "§6.0, p6"
+    }
+  ],
+  "limitations": [
+    "Non-Alberta comparative attachment; the report does not reference NBC(AE) 2023 and is not evidence of Alberta or Canadian acceptance.",
+    "Retrieved 2026-10-25 from the official ICC-ES report URL; current ICC-ES status was not checked live. source_url is the report PDF, not a separate listing page.",
+    "Text from pypdf extraction; figures, tables and signatures not transcribed; locators are PDF page numbers, not printed page numbers.",
+    "ICC-ES copyright; retained locally for comparison only, redistribution not licensed.",
+    "Superseded copies of ESR-1269 (2016) appeared in search; only the May 2026 copy is used here."
+  ],
+  "worker": "H14",
+  "prompt_number": 629,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-1269.pdf",
+      "sha256": "161b9aa303b130facf11db181a7c0cbeb789e8b57c6f101a5be158798c9681d3",
+      "role": "input",
+      "bytes": 2854309,
+      "filename": "esr-1269-amvic-icf-161b9aa303b1.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H14/files/esr-1269/esr-1269-amvic-icf-161b9aa303b1.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:21:11.470313+00:00",
+        "http_status": "200",
+        "final_url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-1269.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

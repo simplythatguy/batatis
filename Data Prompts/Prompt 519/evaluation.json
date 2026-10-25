@@ -1,0 +1,13 @@
+{
+  "known_outcome": "The Board found the documentation described in the appeal sufficient to show that a vented space was unnecessary under the cited acceptable solution.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Underlying research, handbook excerpts, test data and calculations are not linked; their contents cannot be independently reviewed here.",
+    "Distinguish the Board’s decision on this case from approval of a product or other roof assembly."
+  ],
+  "case_id": "L08-1762",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

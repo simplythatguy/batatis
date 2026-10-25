@@ -1,0 +1,16 @@
+{
+  "known_outcome": "unknown. No authority decision is in the attachment.",
+  "outcome_leakage": false,
+  "review_focus": [
+    "no-deviation statement compared with the rest of the report",
+    "responsible-party split (RIB, RIV, RIE) and independent-control statement",
+    "change control to SØK",
+    "background drawings listed but not in the PDF",
+    "reliance on a standard detail sheet for floor build-ups"
+  ],
+  "case_id": "H17-004",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

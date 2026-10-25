@@ -1,0 +1,105 @@
+{
+  "id": "A09-001",
+  "title": "St. Edmund School Modernization, 11712 - 130 Avenue, Edmonton (1954 school; Edmonton Catholic School Division)",
+  "jurisdiction": "City of Edmonton, Alberta (owner: Edmonton Catholic School Division; AHJ not stated in source)",
+  "code_edition": "unknown if unstated",
+  "case_type": "documented_case_summary",
+  "source_url": "https://rjc.ca/rjc-media/published/st-edmund-school-modernization-project-profile.html",
+  "document_date": "February 2020 (magazine issue; PDF created 2020-02-20)",
+  "facts": [
+    {
+      "text": "Location 11712 - 130 Avenue, Edmonton; owner/developer Edmonton Catholic School Division; architect ACI Architects Inc.; structural consultant RJC Engineers; mechanical consultant Arrow Engineering Inc.; electrical consultant AECOM Engineering Inc.; general contractor Whitson Contracting Ltd.",
+      "locator": "PDF p.1, project sidebar"
+    },
+    {
+      "text": "Building dates from 1954; total size 4,814 m2 main and 3,195 m2 second floor; total cost $14.9 million.",
+      "locator": "PDF p.1, sidebar TOTAL SIZE and TOTAL COST; lede"
+    },
+    {
+      "text": "Scope included replacement of the roof, mechanical and electrical systems, parking, utility connections and landscaping. Quoted project manager: 'a complete gut and refurbish ... the only thing that stayed were the foundations and walls.'",
+      "locator": "PDF p.1, paragraph quoting Jade Sawchuk"
+    },
+    {
+      "text": "Corridors were widened for accessibility and windows were replaced for energy efficiency (quoted project manager).",
+      "locator": "PDF p.1, paragraph beginning 'Sawchuk adds that all the corridors'"
+    },
+    {
+      "text": "The original building was wood frame. The quoted team said they added 'construction parameters to make the building as fire proof as possible' and 're-boarded the entire building with an additional layer of drywall to meet the fire rating.' The speaker is not named in the text.",
+      "locator": "PDF p.1, unattributed quotation after the 'three different structural systems' sentence"
+    },
+    {
+      "text": "The building had three structural systems: wood frame; concrete block, given 'a fairly extensive gut and redo'; and post-and-beam steel with concrete floors.",
+      "locator": "PDF p.1, same quotation group"
+    },
+    {
+      "text": "In the CTS lab the planned rooftop air handling unit was 'too heavy for the roof structure'; the article describes structural piles and beams for support and new upgrades that can 'roughly support four 70-ton tanks in lieu of the new AHU and associated snow loads.'",
+      "locator": "PDF p.1, paragraphs quoting Connor Whitson and following narrative"
+    },
+    {
+      "text": "Existing sewer utilities were '20-feet below slab, plugged, or partially collapsed'; new services were tunnelled in and connected over summer to keep the school operating.",
+      "locator": "PDF p.1, paragraph quoting Connor Whitson"
+    },
+    {
+      "text": "Work proceeded with the school open. Phasing 'had to be adjusted three times' (Kevin Osborne, ACI); over 40 percent of the school was renovated in the four summer months, which the article says was 15 percent of the schedule (Connor Whitson).",
+      "locator": "PDF p.1, quotations from Osborne and Whitson near the end of the article"
+    },
+    {
+      "text": "The profile names no building code, code edition, provision, authority having jurisdiction, permit, or equivalency (alternative solution) argument. A keyword search of the extracted PDF text found no code citation.",
+      "locator": "PDF p.1 (whole document)"
+    }
+  ],
+  "limitations": [
+    "Trade-magazine profile prepared with project-team quotations, not a code analysis, drawing set, permit, or report.",
+    "Outcome leakage: the attachment states the as-built fire-rating and accessibility measures and completion status. Use a redacted or pre-completion variant for an unbiased test.",
+    "Fire-rating statement is an unattributed quotation; the speaker is not named.",
+    "No AHJ, code edition, or permit path in source. Do not infer them.",
+    "Landing page (second attachment) carries only the title and a link to the PDF; its HTML has no article text."
+  ],
+  "worker": "A09",
+  "prompt_number": 35,
+  "priority_tier": 1,
+  "priority": "Calgary / Edmonton",
+  "attachments": [
+    {
+      "url": "https://rjc.ca/uploads/published/St_Edmund_School_Oct_2020.pdf",
+      "sha256": "912b0893ace04166918ecb90e9644b452b0f4f8f3b0f43d2fc00f2a9e4bf9b96",
+      "role": "input",
+      "bytes": 535660,
+      "filename": "rjc-st-edmund-school-modernization-profile-2020-912b0893ace0.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/A09/files/pdf/rjc-st-edmund-school-modernization-profile-2020-912b0893ace0.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T02:40:55.585807+00:00",
+        "http_status": "200",
+        "final_url": "http://www.rjc.ca/uploads/published/St_Edmund_School_Oct_2020.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://rjc.ca/rjc-media/published/st-edmund-school-modernization-project-profile.html",
+      "sha256": "48b0924eab528f29712b846aa87c8ffc8a9437e24fc91f209f7d95d8c6233f01",
+      "role": "supporting_evidence",
+      "bytes": 288050,
+      "filename": "rjc-st-edmund-profile-landing-page-48b0924eab52.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/A09/files/references/rjc-st-edmund-profile-landing-page-48b0924eab52.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T02:44:08.186229+00:00",
+        "http_status": "200",
+        "final_url": "https://www.rjc.ca/rjc-media/published/st-edmund-school-modernization-project-profile.html",
+        "content_type": "text/html; charset=utf-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-2-source-text.txt",
+        "sha256": "ac661181265e3706a6856d54f6917fbfd66e2b0f3804437905ac9cc5cca5b9ea",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

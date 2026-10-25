@@ -1,0 +1,6 @@
+Using only the attached order, summarize the stated facility uses and the F1/F2 classification dispute. Separate party positions from the reports’ contents as summarized by the tribunal, and list the chemical inventories, flashpoints, quantities, processes, compartmentation and professional/code-analysis details needed for a reviewer. Do not select an occupancy classification.
+
+Attachments:
+- scc_2023_property_hazard_classification-39046d54fe08.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

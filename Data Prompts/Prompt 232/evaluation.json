@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Unknown as to any project or permit disposition; the attachment contains hygrothermal simulation results under selected historic climate data.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "identify the exact simulated drainage cavity and comparator before applying results",
+    "compare climate inputs and simulated boundary conditions with the proposed project",
+    "verify the adopted code edition and request project-specific test/model evidence, limitations and professional input"
+  ],
+  "case_id": "L18-028",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,69 @@
+{
+  "id": "H09-001",
+  "title": "Development Tribunal decision 25-032: classrooms in a bushfire-prone area; fire engineering report disputed under NCC 2022 Part G5 (G5P2)",
+  "jurisdiction": "Queensland, Australia. COMPARATIVE TEST ONLY: not Alberta; no Alberta applicability asserted.",
+  "code_edition": "NCC 2022 Part G5 and G5P2, as cited in the notice",
+  "case_type": "appeal_decision",
+  "document_type": "Development Tribunal decision notice (Planning Act 2016 s 255), Queensland",
+  "source_url": "https://www.qld.gov.au/__data/assets/pdf_file/0023/924035/25-032.pdf",
+  "document_date": "Decision notice dated 19 May 2026 (PDF p. 8); hearings 29 Oct 2025 and 24 Feb 2026 (p. 1)",
+  "facts": [
+    {
+      "text": "Queensland Fire Department (appellant) appealed the assessment manager's development application decision notice dated 3 Sept 2025, which approved the application's NCC 2022 Part G5 bushfire requirements.",
+      "locator": "p. 1, Appeal"
+    },
+    {
+      "text": "The application is for new classroom construction at a school outside Mareeba, Far North Queensland.",
+      "locator": "p. 2, para 2"
+    },
+    {
+      "text": "The QFD amended advice (20 Aug 2025), as recorded, said the fire engineering report did not demonstrate compliance with G5P2 generally, citing sheltering for occupants who cannot evacuate (G5P2(a)), partial perimeter vehicle access (G5P2(b)), water supply and an AS 2419 hydrant system (G5P2(c)), and safe access within the site (G5P2(d)).",
+      "locator": "pp. 2-3, para 3"
+    },
+    {
+      "text": "The notice records that the report deleted fire mains (booster and/or pumps) and vehicular access for large isolated buildings, which the QFD said were required under the NCC 2022 G5P2 additional requirements for certain Class 9 buildings.",
+      "locator": "p. 3, para 3(b)-(c)"
+    },
+    {
+      "text": "The decision notice included a 'notice of performance solution' that no alterations shall occur in the fire-engineered areas without approval of a competent building certifier.",
+      "locator": "p. 3, para 4(b)"
+    },
+    {
+      "text": "The tribunal set aside the decision notice dated 3 Sept 2025 and ordered the assessment manager to remake it in line with the QFD amended advice of 20 Aug 2025.",
+      "locator": "p. 1, Decision"
+    }
+  ],
+  "limitations": [
+    "Comparative test only: a Queensland decision under Queensland law and the NCC or QDC as cited. It cannot establish Alberta requirements, practice or performance.",
+    "Source URL is the direct qld.gov.au PDF asset; no landing page was visited. Text read from the original PDF with pypdf (no OCR); locators are PDF page numbers.",
+    "Prompt is a reconstructed test question, not an applicant message. The decision outcome is in the attachment and is not stated in the prompt (outcome_leakage true).",
+    "Individual names, licence numbers and lot/plan identifiers are omitted from the facts and prompt.",
+    "Decision notice only: the fire engineering report, the QFD advice letters and the plans are described in the notice but are not attached."
+  ],
+  "worker": "H09",
+  "prompt_number": 444,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.qld.gov.au/__data/assets/pdf_file/0023/924035/25-032.pdf",
+      "sha256": "992dc9e54485e167065dfc444355b4d3221df23f493da66b60a6f7b7fa4c4c18",
+      "role": "outcome_reference",
+      "retrieved_at": "2026-10-25T01:21:43.591258+00:00",
+      "bytes": 600126,
+      "filename": "development-tribunal-appeal-25-032-992dc9e54485.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H09/files/qld-development-tribunal/development-tribunal-appeal-25-032-992dc9e54485.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:21:43.591258+00:00",
+        "http_status": "200",
+        "final_url": "https://www.qld.gov.au/__data/assets/pdf_file/0023/924035/25-032.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

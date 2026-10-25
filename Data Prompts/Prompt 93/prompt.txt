@@ -1,0 +1,6 @@
+Review the attached historical 14-BCV-010 STANDATA as a reference for wireless smoke-alarm interconnection. Identify the cited dwelling/secondary-suite scope, required certification and power provisions. List the alarm count/layout, product certification, interconnection and power/back-up records needed for a real application, and ask questions where the file is silent. Do not assume a dwelling layout or certify current compliance.
+
+Attachments:
+- catalogue-10-c3ffdf4b5047.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

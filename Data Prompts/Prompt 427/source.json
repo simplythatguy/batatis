@@ -1,0 +1,68 @@
+{
+  "id": "H05-003",
+  "title": "Determination 2014/017: three schist wall-cladding systems proposed for future houses, Queenstown and Arrowtown",
+  "jurisdiction": "New Zealand (MBIE determination under the Building Act 2004); comparative test only, not Alberta; NZ code references retained as written",
+  "code_edition": "Building Code (Schedule 1, Building Regulations 1992), as cited; clauses B1, B2, E2",
+  "case_type": "appeal_decision",
+  "source_url": "https://www.building.govt.nz/resolving-problems/resolution-options/determinations",
+  "document_date": "8 April 2014 (page-header date; signature date not captured)",
+  "facts": [
+    {
+      "text": "The applicant is the licensed building practitioner who designed existing and proposed houses; the authority is Queenstown Lakes District Council.",
+      "locator": "p.1 §1.2"
+    },
+    {
+      "text": "The authority had issued consents and code compliance certificates for existing houses with similar schist wall cladding, and the reason for the application is the authority's proposed refusal of a further consent.",
+      "locator": "p.1 §1.3.1"
+    },
+    {
+      "text": "No documentation for specific building work was supplied; the cladding systems are considered on a general basis, and Clause B1 compliance will rely on engineering design at building-consent stage.",
+      "locator": "p.2 §1.5.1"
+    },
+    {
+      "text": "Type 1 (timber-framed): drainage sheets and fibre-cement backing fixed through 20 mm H3 cavity battens and building wrap, with stonework tied by engineered galvanised steel ties.",
+      "locator": "p.3 §2.2.2"
+    },
+    {
+      "text": "Type 2 (insulated concrete block): bituminous damp-proof membrane, 50 x 50 mm H3.2 battens at 600 mm centres, drainage sheets and EPS insulation, with stonework tied by engineered ties. Type 3 (uninsulated concrete block) uses a liquid bituminous membrane and drainage sheets.",
+      "locator": "p.3 §2.2.2"
+    },
+    {
+      "text": "Other houses (a 2004 garage/sleepout, a 2010 house, a 2013 house and a 2014 design) informed the analysis but are outside the matter to be determined.",
+      "locator": "p.2 §1.5.3"
+    }
+  ],
+  "limitations": [
+    "Decision begins on p.9 §8.1; mask p.9 for blind use.",
+    "Figure 1 (cladding types) is referred to in text; one image object, not verified visually.",
+    "Date is from the page header; the decision signature date was not captured."
+  ],
+  "worker": "H05",
+  "prompt_number": 427,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2014/2014-017.pdf",
+      "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2014/2014-017.pdf",
+      "retrieved_at": "2026-10-25T01:44:08.497613+00:00",
+      "sha256": "c0e38c1a179ee535daa3e1f0a33c4912ef34aaf30aa86af17b466cba507d0e66",
+      "bytes": 112027,
+      "pages": 9,
+      "role": "input",
+      "filename": "mbie-determination-2014-017-c0e38c1a179e.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H05/files/mbie-determination-2014-017-c0e38c1a179e.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:44:08.497613+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2014/2014-017.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

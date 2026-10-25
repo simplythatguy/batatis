@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from New Zealand (MBIE determination under the Building Act 2004); comparative test only, not Alberta; NZ code references retained as written. It is not an Alberta application.
+
+Attached is a New Zealand determination about a proposed balustrade barrier beside a newly built car pad and retaining walls at a house in Ngaio, Wellington. Read its code references as New Zealand references only and do not map them to Alberta. Using only the attached file, identify the safety-from-falling points the proposed barrier depends on, which design details the file records and which it leaves open, what administrative evidence is still needed, and what you would ask the owners before a design could be accepted. Do not say the barrier complies or is safe.
+
+Attachments:
+- mbie-determination-2014-015-c09d3ee2462e.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

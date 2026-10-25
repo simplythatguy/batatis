@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Regulator position: SCO judgement can settle many occupancy-classification questions without a variance, but for the F-1 and F-2 distinction the STANDATA reaffirms the variance application, review and enforcement process; it is not a guide to the engineering analysis.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the SCO's discretion from the variance route the document names",
+    "Flags the engineering analysis the file would need as outside the STANDATA's scope",
+    "Asks why an AHJ might reject the application at the outset, and what the file should show",
+    "Does not say the change is acceptable"
+  ],
+  "case_id": "H20-020",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

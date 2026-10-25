@@ -1,0 +1,17 @@
+{
+  "known_outcome": "The City technical report states that its analysis of Design Study 2, a four-storey/16-unit exemplar with vestibule protection, demonstrated equivalent resilience to a two-stair design. No site-specific permit decision or AHJ acceptance is reported.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Keep the technical report’s stated study conclusion separate from any permit decision; identify its assumptions and whether they are established for a real proposal.",
+    "Keep the guide scenario separate from actual applicant, owner, civic address, survey, or permit facts.",
+    "Ask which current code edition/printing and acceptable-solution departure apply to the real proposal; verify any attributed objectives and functional statements from authoritative code sources.",
+    "Identify missing site-specific zoning, surveyed dimensions, occupancy, complete drawings and application requirements.",
+    "Identify the professional-authored alternative-solution report, risk assessment, mitigation measures, and assumptions/limits that need to be supplied or confirmed; do not write professional evidence.",
+    "Ask focused next questions and make no safety, compliance, or approval determination."
+  ],
+  "case_id": "L05-003",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Calgary / Edmonton",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

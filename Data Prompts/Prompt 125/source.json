@@ -1,0 +1,52 @@
+{
+  "id": "L06-013",
+  "title": "Shipping containers used for site storage and Building Code scope (Council Order 2021-01)",
+  "jurisdiction": "Alberta; parties and municipality redacted",
+  "code_edition": "National Building Code – 2019 Alberta Edition (NBC(AE) 2019)",
+  "document_date": "2021-06-07",
+  "facts": [
+    {
+      "text": "The issue was whether shipping containers on the site, as used, were buildings under NBC(AE) 2019 and needed a building permit.",
+      "locator": "PDF pp.2-3, paras 8-10"
+    },
+    {
+      "text": "The appellant described the containers as storage boxes used for their intended storage purpose; the respondent raised ventilation and spatial-separation requirements.",
+      "locator": "PDF p.3, paras 9-10"
+    },
+    {
+      "text": "The respondent stated that no formal alternative solution had been sought; it said submitted U.S. Coast Guard and fire-investigation reports did not address spatial separation or airtightness.",
+      "locator": "PDF p.5, paras 31-35"
+    }
+  ],
+  "limitations": [
+    "The case expressly says a formal alternative solution had not been sought.",
+    "The underlying reports are named in the appeal record but not attached as separate files."
+  ],
+  "source_url": "https://safetycodes.ab.ca/council-information/appeals/appeal-decisions/",
+  "case_type": "appeal_decision",
+  "worker": "L06",
+  "prompt_number": 125,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2021/Redacted-Order-2021-01.pdf",
+      "sha256": "4a7dbe571865afaf56ed76a96c2c2d8bdc9a229226984b3ed52a533ae2357f8f",
+      "role": "input",
+      "bytes": 595959,
+      "filename": "scc_2021_shipping_container-4a7dbe571865.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L06/files/scc_2021_shipping_container-4a7dbe571865.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:28.685241+00:00",
+        "http_status": "200",
+        "final_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2021/Redacted-Order-2021-01.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

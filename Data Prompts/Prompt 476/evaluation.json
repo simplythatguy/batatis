@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Secretary of State determined the proposals (design and on-site manufacture of two plywood web beams) do not comply with Regulation 7 or Requirement A1 of the Building Regulations 2000 (as amended) (p.4 para 21).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Requirement A1 loading and Regulation 7 materials/workmanship for glued timber components",
+    "site manufacture versus factory/third-party quality control evidence",
+    "calculation basis (BS 5268 Part 2) and load-path dependence on the glueline",
+    "adequacy of method statement and finger-joint detailing"
+  ],
+  "case_id": "H15-001",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

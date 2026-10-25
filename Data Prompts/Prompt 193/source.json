@@ -1,0 +1,58 @@
+{
+  "id": "L15-018",
+  "title": "14096-R — Wrapsulate Foam Jacket Air Barrier System",
+  "jurisdiction": "Canada (CCMC national product assessment; project AHJ not stated)",
+  "code_edition": "NBC 2015",
+  "case_type": "product_evidence",
+  "source_url": "https://www.nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14096-R&type=cert",
+  "document_date": "2023-11-08",
+  "facts": [
+    {
+      "text": "CCMC 14096-R is marked Active in the live API snapshot; the report names NBC 2015 as its edition scope.",
+      "locator": "PDF p. 1; live API items"
+    },
+    {
+      "text": "Report describes 38-50 mm thickness and 17 kg/m3 density for its stated A1 air-leakage result; it includes separate structural conditions.",
+      "locator": "PDF p. 4"
+    },
+    {
+      "text": "The CCMC report publishes its own code-specific opinion classifications for the printed edition(s); those classifications are bounded by the report conditions.",
+      "locator": "PDF p. 2"
+    }
+  ],
+  "limitations": [
+    "The evaluation is a CCMC product assessment, not an individual Alberta variance or project approval.",
+    "The report editions are NBC editions identified by the source; no equivalence to NBC(AE) 2023, 2nd printing has been established here.",
+    "No project, assembly, jurisdiction/AHJ, loads, site conditions, installation records or professional design package is supplied.",
+    "The CCMC opinion is bound by its stated conditions and limitations; read the full report before judging relevance.",
+    "Spray-applied air barrier system: Report describes 38-50 mm thickness and 17 kg/m3 density for its stated A1 air-leakage result; it includes separate structural conditions."
+  ],
+  "worker": "L15",
+  "prompt_number": 193,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://www.nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?id=649&type=cert",
+      "sha256": "d8db157a2d4f810961885e4b2a8efd35161b7c5a75b88eaa22d8f50b0666c2b4",
+      "role": "input",
+      "bytes": 699332,
+      "filename": "ccmc-14096-R-wrapsulate-air-barrier-system-evaluation-46b30cbf5675.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L15/files/ccmc-14096-R-wrapsulate-air-barrier-system-evaluation-46b30cbf5675.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:23:00.922211+00:00",
+        "http_status": "200",
+        "final_url": "https://www.nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?id=649&type=cert",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded_pdf_entity_extracted",
+        "entity_extraction": "A 433-byte proxy/HTTP response prelude precedes %PDF- in the helper capture. PDF entity bytes from first %PDF- through the final byte were copied unchanged and parsed with pypdf.",
+        "raw_capture_sha256": "46b30cbf5675fd3ccbdec1f2890445cd2bc26756eda854c8e54faaf9349d0406",
+        "raw_capture_path": "_research/workers/L15/files/ccmc-14096-R-wrapsulate-air-barrier-system-evaluation-46b30cbf5675.html"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

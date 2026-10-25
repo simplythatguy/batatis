@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The active CCMC report publishes a product-level NBC 2020 opinion with an Alternative classification and a separate specimen-specific fire table for CertaPlank.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "which siding profile and rigid backing are proposed",
+    "whether product is being claimed for thermal resistance",
+    "furring, air space, sheathing membrane and flashing details",
+    "Part 9 scope and project-specific fire evidence"
+  ],
+  "case_id": "L16-025",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

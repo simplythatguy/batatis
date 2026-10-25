@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Determination: authority incorrect to refuse consent because the PS1 author was not a registered CPEng; decision reversed; design compliance not determined (6 October 2021).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "producer statement authorship and professional registration",
+    "PS1/PS2 review chain",
+    "design compliance not decided in this determination",
+    "retaining-wall barrier and boundary issues"
+  ],
+  "case_id": "H03-012",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,7 @@
+Compare the attached historical 23-BCV-008 issue with its listed REV1. Using only those regulator documents, identify the applicable revision label, exhaust source/suite scope, relative position of the air intake, Figure A clearance direction, and manufacturer-instruction condition. List the facts a project submission would still need (including intake connection and measurements), flag that the earlier broad 900 mm text is superseded, and do not decide the installation is acceptable.
+
+Attachments:
+- 23-BCV-008-c31ff9593cef.pdf
+- 23-BCV-008-654c60054f24.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The CWC sample concludes that its proposed design would maintain fire-separation continuity and says the described system would provide the required performance. This is the sample author's conclusion, not a documented AHJ decision. The attached listing describes its own listed configuration and does not document acceptance of the sample's relocated anchors.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Notice and report the mismatch between Sentence 3.1.8.3.(4) and the sample's 3.1.18.2.(1) objective/function attribution",
+    "Do not treat the sample's modified anchor location as covered by the listed configuration without supporting documentation",
+    "Request the exact code edition, AHJ, project drawings and listing-version confirmation",
+    "Distinguish the guide's conclusion from an authority decision"
+  ],
+  "case_id": "L19-005",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

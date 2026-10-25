@@ -1,0 +1,58 @@
+{
+  "id": "L15-013",
+  "title": "12935-R — FOAMULAR NGX CodeBord Air Barrier System",
+  "jurisdiction": "Canada (CCMC national product assessment; project AHJ not stated)",
+  "code_edition": "NBC 2020",
+  "case_type": "product_evidence",
+  "source_url": "https://www.nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=12935-R&type=cert",
+  "document_date": "2025-10-21",
+  "facts": [
+    {
+      "text": "CCMC 12935-R is marked Active in the live API snapshot; the report names NBC 2020 as its edition scope.",
+      "locator": "PDF p. 1; live API items"
+    },
+    {
+      "text": "Report conditions stated performance on 20 C indoor temperature and winter design RH no greater than 35%; wind limits vary by system thickness/stud spacing.",
+      "locator": "PDF p. 5"
+    },
+    {
+      "text": "The CCMC report publishes its own code-specific opinion classifications for the printed edition(s); those classifications are bounded by the report conditions.",
+      "locator": "PDF p. 2"
+    }
+  ],
+  "limitations": [
+    "The evaluation is a CCMC product assessment, not an individual Alberta variance or project approval.",
+    "The report editions are NBC editions identified by the source; no equivalence to NBC(AE) 2023, 2nd printing has been established here.",
+    "No project, assembly, jurisdiction/AHJ, loads, site conditions, installation records or professional design package is supplied.",
+    "The CCMC opinion is bound by its stated conditions and limitations; read the full report before judging relevance.",
+    "Air barrier system: Report conditions stated performance on 20 C indoor temperature and winter design RH no greater than 35%; wind limits vary by system thickness/stud spacing."
+  ],
+  "worker": "L15",
+  "prompt_number": 188,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://www.nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?id=416&type=cert",
+      "sha256": "910208b4cc1dc9b154768de0df202c446f5dd530aa6588ad83c82d404cbfd63a",
+      "role": "input",
+      "bytes": 1001208,
+      "filename": "ccmc-12935-R-foamular-codebord-air-barrier-system-evaluation-acc83bed49ab.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L15/files/ccmc-12935-R-foamular-codebord-air-barrier-system-evaluation-acc83bed49ab.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:19:18.946489+00:00",
+        "http_status": "200",
+        "final_url": "https://www.nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?id=416&type=cert",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded_pdf_entity_extracted",
+        "entity_extraction": "A 433-byte proxy/HTTP response prelude precedes %PDF- in the helper capture. PDF entity bytes from first %PDF- through the final byte were copied unchanged and parsed with pypdf.",
+        "raw_capture_sha256": "acc83bed49abdf0190b583c0063a7ce1d18ccd53d1e5441d04961302a8ab4513",
+        "raw_capture_path": "_research/workers/L15/files/ccmc-12935-R-foamular-codebord-air-barrier-system-evaluation-acc83bed49ab.html"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

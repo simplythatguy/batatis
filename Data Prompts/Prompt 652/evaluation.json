@@ -1,0 +1,15 @@
+{
+  "known_outcome": "source-backed only for completion: the thesis says the building was completed in 2019. No authority decision on fire protection is in the attachment.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "secondary source: not the project's own fire report",
+    "authority-required mock-up fire test at the wall-to-floor node",
+    "fire-protection measures in section 7.2, to be checked against primary sources",
+    "author statements versus cited sources"
+  ],
+  "case_id": "H17-009",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

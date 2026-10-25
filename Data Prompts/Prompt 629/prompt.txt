@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from United States (ICC-ES evaluation report under IBC/IRC); NON-ALBERTA COMPARATIVE ONLY: cannot establish Alberta performance, acceptance or equivalence; no Canadian or Alberta approval is claimed or implied. It is not an Alberta application.
+
+Comparative test. The attached ICC-ES report covers a US evaluation of an expanded polystyrene insulating concrete form, and it lists a manufacturing plant in Calgary, Alberta. Using only the report, identify the code editions and the construction-type limits it sets, the thermal-barrier and labelling conditions, and the evidence it lists. Then explain what a plant location in Alberta does and does not establish for NBC(AE) 2023, and list the questions a registered professional or the manufacturer would have to answer.
+
+Attachments:
+- esr-1269-amvic-icf-161b9aa303b1.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

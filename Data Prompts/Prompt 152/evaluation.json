@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Regulator position: Sentence 9.10.9.18.(3) can be applied to a house with a secondary suite because the attached garage serves both the primary unit and the suite; the document links this to whether professional involvement is required.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the garage-serves-two-units reasoning from the sentence's requirement",
+    "Asks which professional-involvement provisions the suite triggers",
+    "Flags the suite and garage arrangement evidence the file would need",
+    "Does not state the design complies"
+  ],
+  "case_id": "H20-026",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

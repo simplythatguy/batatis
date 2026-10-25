@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Determination: authority correct to refuse consent 468097 (work already carried out) and correct to issue the notice to fix; appeal judgment not read in this pass.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "structural alteration carried out before consent issue",
+    "s41(1)(c) practicability of obtaining consent in advance",
+    "unpaid fees versus consent issue",
+    "remedies in a notice to fix"
+  ],
+  "case_id": "H03-033",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

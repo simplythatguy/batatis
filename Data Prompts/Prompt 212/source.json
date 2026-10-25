@@ -1,0 +1,78 @@
+{
+  "id": "L16-016",
+  "title": "CANAROCK lightweight pre-finished insulated panel",
+  "jurisdiction": "Canada — national CCMC product evaluation; comparative attachment only, not a Calgary/Edmonton or Alberta project application",
+  "code_edition": "NBC 2015",
+  "case_type": "product_evidence",
+  "source_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14088-R&type=cert",
+  "document_date": "2025-04-14",
+  "facts": [
+    {
+      "text": "The CCMC describes the product as a prefabricated, horizontally installed, non-loadbearing EIFS-type cladding panel with modular EPS cores, a drainage-cavity design and factory-applied coating/mesh.",
+      "locator": "CCMC 14088-R PDF, p. 3, Product description"
+    },
+    {
+      "text": "The NBC 2015 opinion classifies several cladding and drainage-related provisions as Alternative and ties its opinion to stated conditions.",
+      "locator": "CCMC 14088-R PDF, p. 2, Compliance opinion"
+    },
+    {
+      "text": "The limitations require fire blocks and protection of foam plastic and reference the specific evaluated construction and listing details.",
+      "locator": "CCMC 14088-R PDF, p. 14, Conditions and limitations"
+    }
+  ],
+  "limitations": [
+    "The report’s performance is limited to its stated system and installation conditions.",
+    "This panel assessment is not a project-specific code or fire-safety determination."
+  ],
+  "source_use": "comparative_attachment_content_only",
+  "worker": "L16",
+  "prompt_number": 212,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?type=cert&id=617",
+      "sha256": "3908231d52cba9d4dac41ba8d25e08a316ed15f94e77e5bcfa8654d4b8d1f228",
+      "role": "input",
+      "bytes": 3437124,
+      "filename": "current-route-14088-R-3908231d52cb.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L16/files/current-route-14088-R-3908231d52cb.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:51:12.663688+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?type=cert&id=617",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded",
+        "entity_extraction": "Copied unchanged PDF entity from byte 433; original transport capture retained.",
+        "raw_capture_sha256": "1311171c21e28802fffd2ddb0babc6dc45eb24cb0e4d26ed71c797d9a4e1cfe8",
+        "raw_capture_path": "_research/workers/L16/files/transport-capture-1311171c21e28802.bin"
+      }
+    },
+    {
+      "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14088-R&type=cert",
+      "sha256": "d5d34c703cbc23e016bc8afc9cc07782bc8019a6b525fd06d4962f621a8da054",
+      "role": "supporting_evidence",
+      "bytes": 122990,
+      "filename": "landing-14088-R-d5d34c703cbc.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L16/files/landing-14088-R-d5d34c703cbc.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:21:03.252598+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14088-R&type=cert",
+        "content_type": "text/html; charset=UTF-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-2-source-text.txt",
+        "sha256": "858c8c992d5c020211fab046b21fd39471c7123db04528b9b232107f286db969",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

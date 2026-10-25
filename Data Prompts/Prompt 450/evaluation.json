@@ -1,0 +1,16 @@
+{
+  "known_outcome": "Confirmed: the tribunal confirmed the QFRS appeal against the decision notice dated 14 Mar 2008 and directed completion of due process on outstanding fire-safety matters (p. 1; p. 3). Decision dated 6 Aug 2008 (p. 3).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Recognises that a fire engineering scope needs documented stakeholder agreement before approval.",
+    "Flags the plan-versus-site mismatch (additional fire wall, escape route) as a question.",
+    "Notes that a fire-engineered approval for an earlier stage does not by itself cover an extension.",
+    "Notes that the BCA edition is not stated in the text read.",
+    "Makes no compliance statement."
+  ],
+  "case_id": "H09-007",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

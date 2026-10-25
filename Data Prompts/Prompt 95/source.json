@@ -1,0 +1,50 @@
+{
+  "id": "L03-014",
+  "title": "14-BCV-014 - Separation of suites in strip malls",
+  "jurisdiction": "Alberta (province-wide, as stated by the STANDATA)",
+  "code_edition": "Alberta Building Code 2014",
+  "case_type": "issued_variance",
+  "source_url": "https://open.alberta.ca/publications/standata-building-code-variance-2014",
+  "document_date": "June 2017",
+  "catalogue_status": "Catalogue row is explicitly marked [WITHDRAWN].",
+  "facts": [
+    {
+      "text": "The catalogue marks 14-BCV-008 as withdrawn. This distinct record, 14-BCV-014, addresses fire separations between business/personal-services and mercantile suites in a strip mall and cites ABC Articles 3.3.1.1 and 9.10.9.13.",
+      "locator": "Official 2014 catalogue, row 14-BCV-014; 14-BCV-014 PDF, pp.1-2, PURPOSE and CODE REFERENCES"
+    },
+    {
+      "text": "Its conditions include one storey, an automatic sprinkler system, fire alarm, at least two exits from each suite directly to the exterior, no residential or institutional occupancy, and retained separation around an assembly occupancy.",
+      "locator": "14-BCV-014 PDF, p.2, VARIANCE"
+    }
+  ],
+  "limitations": [
+    "This is a provincial regulator-issued STANDATA/standing variance, not an individual application, applicant statement, project drawing, permit record or site-specific decision.",
+    "The records address the Alberta Building Code 2014 and, where noted, Alberta Fire Code 2014; do not treat them as proof of applicability under the Alberta 2023 code edition or current law.",
+    "Catalogue status is recorded as displayed on the retrieved official page. A missing [WITHDRAWN] label is not evidence of current validity; PDFs display an Archived watermark."
+  ],
+  "worker": "L03",
+  "prompt_number": 95,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://open.alberta.ca/dataset/27900157-f850-4138-a964-b813f0921a3b/resource/fd2f044a-2e9b-4b57-882e-39946b0c7da3/download/14-bcv-014-loweredworkspacesinservicegarages.pdf",
+      "sha256": "9c7df60c6aac33b597081469348ed270edd3f2418bd4e41cab13a48bf7b64702",
+      "role": "supporting_evidence",
+      "bytes": 1349099,
+      "filename": "catalogue-08-9c7df60c6aac.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L03/files/catalogue-08-9c7df60c6aac.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:48.852031+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/27900157-f850-4138-a964-b813f0921a3b/resource/fd2f044a-2e9b-4b57-882e-39946b0c7da3/download/14-bcv-014-loweredworkspacesinservicegarages.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

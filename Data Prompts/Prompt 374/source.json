@@ -1,0 +1,68 @@
+{
+  "id": "H01-024",
+  "number": "2026-036",
+  "title": "NZ MBIE Determination 2026/036 (comparative): as-built modular dwelling, multi-clause compliance review (45 pages)",
+  "jurisdiction": "New Zealand (Building Act 2004); Gore District Council (foundations and site services) and Invercargill City Council (modules); comparative only, not Alberta",
+  "scope": "comparative_non_alberta",
+  "code_edition": "NZ Building Code (Schedule 1, Building Regulations 1992) as cited; E2/AS1 third edition, amendment 10 and G9/VM1 first edition, amendment 7 as cited",
+  "case_type": "appeal_decision",
+  "timing": "as_built_or_certificate",
+  "retrospective": "yes",
+  "source_url": "https://codehub.building.govt.nz/resources/2026036",
+  "source_url_note": "Building CodeHub resource page for the same MBIE determination (Information provider: MBIE); the building.govt.nz determination page is WAF-blocked for this worker.",
+  "document_date": "7 October 2026",
+  "facts": [
+    {
+      "text": "The matter is the compliance of some elements of the as-built work with Building Code clauses B1, B2, E1, E2, E3 and G9.",
+      "locator": "p.3, para 1.3"
+    },
+    {
+      "text": "The modular dwelling was constructed partly off-site and partly on the owners' property under two separate building consents granted by two authorities.",
+      "locator": "p.1"
+    },
+    {
+      "text": "The dwelling sits on 53 driven timber piles; the approved plans show 32 of them as cantilever piles for sub-floor bracing.",
+      "locator": "p.6, para 3.1"
+    },
+    {
+      "text": "The as-built piles differ from the layout in the approved plans, with some piles out of plumb by up to 60 mm per metre.",
+      "locator": "p.6, para 3.2"
+    },
+    {
+      "text": "Photos show gaps of 1-2 mm between vinyl tiles in the bathrooms.",
+      "locator": "p.7"
+    }
+  ],
+  "limitations": [
+    "Comparative test only: New Zealand Building Act 2004 and Building Code (Schedule 1, Building Regulations 1992). No Alberta applicability asserted; no NBC(AE) mapping.",
+    "Outcome leakage: the MBIE decision is inside the same original PDF, so the full file cannot be used as applicant-stage input without removing the decision pages.",
+    "Applicant application documents are not published; drawings and photos appear only as figures inside the determination. Figures were located by caption, not visually inspected.",
+    "Two consenting authorities and the builder's and engineer's records are referenced; the originals are not in the file."
+  ],
+  "worker": "H01",
+  "prompt_number": 374,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2026/2026-036.pdf",
+      "sha256": "cd1686524ba50682a093feffd07a3f5b5b2b4e0d585cca368742512273e66c30",
+      "role": "input",
+      "document_type": "MBIE determination PDF (original bytes)",
+      "bytes": 430672,
+      "filename": "mbie-det-2026-036-cd1686524ba5.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H01/files/pdf/mbie-det-2026-036-cd1686524ba5.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:45:10.047760+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2026/2026-036.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

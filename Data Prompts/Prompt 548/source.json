@@ -1,0 +1,59 @@
+{
+  "id": "L10-009",
+  "title": "BCC Ruling No. 14-01-1364 — combustible cladding on a ten-storey building",
+  "jurisdiction": "Ontario — City of Ottawa",
+  "code_edition": "Ontario Building Code, O. Reg. 350/06 (as cited)",
+  "source_url": "http://www.mah.gov.on.ca/Page11345.aspx",
+  "document_date": "2014-01-23",
+  "facts": [
+    {
+      "text": "The proposal describes a ten-storey, approximately 3,300 m² mixed-use/residential condominium with three Group C towers, mixed-use podium space, underground parking, sprinklers, standpipe, and fire alarm.",
+      "locator": "§1, Particulars of Dispute"
+    },
+    {
+      "text": "The dispute concerns combustible components in exterior non-loadbearing wall assemblies in a building required to be noncombustible.",
+      "locator": "§1, Particulars of Dispute"
+    },
+    {
+      "text": "The applicant referred to thermal barriers and CAN/ULC-S134 testing; the cited Sentence 3.1.5.5.(1) includes a building-height condition.",
+      "locator": "§§2–3"
+    }
+  ],
+  "limitations": [
+    "The archived Ministry ruling summarizes test claims but does not include the full test report or wall drawings.",
+    "The decision is tied to an Ontario building and O. Reg. 350/06.",
+    "This Ontario decision and its code are non-Alberta comparisons for attachment format/content only; they cannot establish Alberta performance. Check Calgary and Edmonton sources first for local authority, then other Alberta jurisdictions as needed."
+  ],
+  "case_type": "appeal_decision",
+  "document_type": "Ontario Building Code Commission dispute ruling",
+  "worker": "L10",
+  "prompt_number": 548,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://web.archive.org/web/20190922170345id_/http://www.mah.gov.on.ca/Page11345.aspx",
+      "sha256": "bc01a52ef7b0930df1cef5162655b33f065f14e2058e4c2c6db1608b5325c75c",
+      "role": "outcome_reference",
+      "bytes": 36288,
+      "filename": "ONBCC-14-01-1364-bc01a52ef7b0.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L10/files/ONBCC-14-01-1364-bc01a52ef7b0.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:23:55.960299+00:00",
+        "http_status": "200",
+        "final_url": "https://web.archive.org/web/20190922074529id_/http://www.mah.gov.on.ca/Page11345.aspx",
+        "content_type": "text/html; charset=utf-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-1-source-text.txt",
+        "sha256": "343e9d4b6b53b8e7467959f3d95d6c5b9a091d970d3f274821be1ef3aef946f6",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

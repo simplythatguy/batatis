@@ -1,0 +1,7 @@
+The attached NRC record documents UF-06 and is offered only as research context for a possible building-code alternative-solution or variance submission. Based solely on the attachments, identify what the study directly tested, what code edition and authority having jurisdiction would still need to be established, what project-specific facts and administrative evidence are missing, and what questions should be asked next. Separate measured research evidence from assumptions. Do not invent an applicant, site, dimensions, or design; do not extrapolate the experiment to an unidentified project or claim safety, compliance, equivalence, or approval.
+
+Attachments:
+- FPH-RR-250-a9dbf3fa4dd0.pdf
+- FPH-tenability-analysis-c41f12ff37a9.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

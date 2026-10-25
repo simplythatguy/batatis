@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Set aside and remade: the tribunal set aside the assessment manager's decision notice dated 3 Sept 2025 and ordered it remade in line with the QFD amended advice dated 20 Aug 2025 (p. 1). Signed 19 May 2026 (p. 8).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Identifies NCC 2022 Part G5 and G5P2 as the operative bushfire performance requirement, and the fire engineering report as a performance-solution document.",
+    "Treats the disputed G5P2 sub-items (sheltering, perimeter and internal access, water supply and AS 2419 hydrant, deleted fire mains) as open questions, not resolved findings.",
+    "Lists the performance-solution notice and certifier approval for later alterations as administrative items.",
+    "Does not say the design complies or is safe; asks for the fire engineering report, the QFD advice and the assessment manager's notice."
+  ],
+  "case_id": "H09-001",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

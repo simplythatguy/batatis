@@ -1,0 +1,73 @@
+{
+  "id": "A15-007",
+  "title": "Fire Technical Council Council Order No. 0015423: annual fire alarm verification and visual signal devices in sound-insulated music rooms at a recreation facility",
+  "jurisdiction": "Alberta (order issued by an accredited municipality; the municipality is not named in the decision text)",
+  "code_edition": "Alberta Fire Code 2006 and Alberta Building Code 1997 (stated on p.2 and p.6)",
+  "case_type": "appeal_decision",
+  "source_url": "https://safetycodes.ab.ca/council-information/appeals/appeal-decisions/",
+  "document_date": "2012-07-24 (dated; Chair signature block; hearing 2012-06-21; order dated 2012-03-14)",
+  "facts": [
+    {
+      "text": "The accredited municipality issued an order dated 14 March 2012 against a recreation association. The hearing was on 21 June 2012.",
+      "locator": "p.1 header"
+    },
+    {
+      "text": "The order required an annual fire alarm maintenance inspection report to the fire safety codes officer, showing the system is maintained to CAN/ULC-S536 and is deficiency free.",
+      "locator": "p.1 (quoted order)"
+    },
+    {
+      "text": "The quoted order also set sub-requirements (a)-(c): documentation that a notifier fire alarm sub-panel in the deluge system of a theatre stage area is installed and verified to ABC 1997 and CAN/ULC-S537-97; documentation of the deluge flow monitoring device; and visual signal devices in any floor area within sound-insulating enclosures, including partly insulated ones.",
+      "locator": "p.2-3 (quoted order, sub-items a-c)"
+    },
+    {
+      "text": "The Council ordered that the Order is VARIED.",
+      "locator": "p.1"
+    },
+    {
+      "text": "The panel varied item 2 to include the verification report for the fire alarm system, and varied item 3 on the original verification certificate, which should establish compatibility of the notifier with the MXL system.",
+      "locator": "p.8 paras 21-22"
+    },
+    {
+      "text": "The panel determined that the music rooms were designed for music practice and are sound insulated, and recorded that there is no line of sight to a visual fire alarm indication device.",
+      "locator": "p.8-9"
+    },
+    {
+      "text": "The applicable codes are the Alberta Fire Code 2006 (AFC 2006) and the Alberta Building Code 1997 (ABC 97).",
+      "locator": "p.6"
+    },
+    {
+      "text": "The decision is dated 24 July 2012 and carries a Chair signature block for the Fire Technical Council Appeal Panel.",
+      "locator": "p.9 signature block"
+    }
+  ],
+  "limitations": [
+    "Fire Code (AFC 2006) and building code (ABC 1997) editions are both dated relative to the current NBC(AE) 2023 and Alberta Fire Code; use for structure and documentation questions only.",
+    "The municipality is not named in the decision text. The room layout and device list are not in the file.",
+    "The quoted order mixes the theatre-stage deluge requirements and the music-room visual-device requirement under sub-items (a)-(c). The panel's varied items 2 and 3 are summarised from paras 21-22; the music-room disposition is in pp.8-9 and is summarised, not quoted in full."
+  ],
+  "worker": "A15",
+  "prompt_number": 112,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2012/REDACTED_Fire_Fire%20Alarm%20Maintenance%20Report%20and%20Fire%20Alarm%20System%20Compatibility%20July%202012_0015423.pdf",
+      "sha256": "a658ce985b9018564a8325f515baee4a1fd1199e01e855d7c4f390d9bdd90d7d",
+      "role": "outcome_reference",
+      "bytes": 186005,
+      "filename": "scc-appeal-2012-fire-alarm-maintenance-compatibility-a658ce985b90.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/A15/files/scc-appeal-2012-fire-alarm-maintenance-compatibility-a658ce985b90.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T02:30:06.728208+00:00",
+        "http_status": "200",
+        "final_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2012/REDACTED_Fire_Fire%20Alarm%20Maintenance%20Report%20and%20Fire%20Alarm%20System%20Compatibility%20July%202012_0015423.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

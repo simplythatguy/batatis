@@ -1,0 +1,52 @@
+{
+  "id": "L20-017",
+  "title": "Existing dwelling envelope, rear-door level change, and retaining-wall order",
+  "jurisdiction": "Saskatchewan; local authority redacted in the published decision",
+  "code_edition": "The dwelling permit was issued in 2008; code edition for the 2022 order is not clearly stated",
+  "case_type": "appeal_decision",
+  "source_url": "https://www.saskatchewan.ca/business/housing-development-construction-and-property-management/building-and-technical-standards/saskatchewan-building-and-accessibility-standards-appeal-board",
+  "document_date": "2022-10 (day unclear in OCR)",
+  "facts": [
+    {
+      "text": "The appeal concerns a dwelling with reported exterior cladding/envelope damage, a rear door level change, and a leaning retaining wall.",
+      "locator": "PDF pp. 3–5"
+    },
+    {
+      "text": "The record discusses a building permit from 2008 and an engineer report concerning the retaining wall.",
+      "locator": "PDF pp. 3–5"
+    },
+    {
+      "text": "The appeal decision distinguishes the current order from prior inspections and maintenance history.",
+      "locator": "PDF pp. 5–6"
+    }
+  ],
+  "limitations": [
+    "Comparative source from outside Alberta; it cannot establish Alberta code performance or approval.",
+    "The attached publication is the appeal decision, not the underlying application file. Exhibits named in the decision are not presumed attached unless visible in this PDF. The decision outcome is visible in the attachment."
+  ],
+  "worker": "L20",
+  "prompt_number": 569,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://publications.saskatchewan.ca/api/v1/products/119798/formats/138150/download",
+      "sha256": "4799e3a8e468ee9c4ff9ba6fb42b688de215a8bfe541ca8a8f8ad75f074f7985",
+      "role": "outcome_reference",
+      "bytes": 213319,
+      "filename": "sk-scsab-appeal-no.-2022-006-4799e3a8e468.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L20/files/sk-scsab-appeal-no.-2022-006-4799e3a8e468.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:23:03.535587+00:00",
+        "http_status": "200",
+        "final_url": "https://publications.saskatchewan.ca/api/v1/products/119798/formats/138150/download",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

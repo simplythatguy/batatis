@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Granted as proposed with fire blocking per OSSC 718.2.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "OSSC Table 602 one-hour requirement and the stated reason (cost)",
+    "whether the proposal states the fire distance and openings",
+    "assembly evidence for one-sided gypsum protection"
+  ],
+  "case_id": "H11-004",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

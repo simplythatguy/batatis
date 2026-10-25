@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The current CCMC record publishes favorable numerical fire-test results for specified test assemblies, but marks the fire section as outside its code opinion. Nichiha’s document is a manufacturer summary, not the original NRC test report.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "which panel model/size and attachment are proposed",
+    "compare the project wall to each test assembly, including backing and WRB",
+    "determine the relevant code provision and whether more evidence is needed",
+    "request the original laboratory reports if decisive"
+  ],
+  "case_id": "L16-022",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

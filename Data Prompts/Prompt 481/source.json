@@ -1,0 +1,74 @@
+{
+  "id": "H15-006",
+  "title": "Determination 45/1/239: egress windows onto land outside occupant control in a listed-building conversion (Requirement B1)",
+  "jurisdiction": "England (UK): Secretary of State determination / appeal / tribunal under the Building Act 1984 and Building Regulations; comparative test only, not Alberta",
+  "code_edition": "Building Regulations 2000 (as amended): Requirement B1 (means of warning and escape)",
+  "case_type": "appeal_decision",
+  "source_url": "https://www.gov.uk/guidance/building-regulations-determinations",
+  "document_date": "2009-09-30",
+  "facts": [
+    {
+      "text": "The building work changes the use of a Grade II listed building from an arts centre into a dwelling.",
+      "locator": "p.1 para 4"
+    },
+    {
+      "text": "The egress windows are in a wall forming the legal boundary of the property and adjoin an enclosed courtyard garden of an adjoining Grade II listed cottage.",
+      "locator": "p.1 para 5"
+    },
+    {
+      "text": "The full plans application was rejected by the Council on 23 January 2009 because the egress window proposals did not comply with Requirement B1.",
+      "locator": "p.1 para 6"
+    },
+    {
+      "text": "The Council's position is that it is inappropriate to accept egress windows leading to an area outside the ownership or control of the occupiers.",
+      "locator": "p.2 para 7"
+    },
+    {
+      "text": "The Council identified alternative design options, including a connecting door between the two first-floor bedrooms, for which the land question would not arise.",
+      "locator": "p.2 para 11"
+    },
+    {
+      "text": "The Secretary of State concludes that the unusual context of the two buildings and their listed status bears on the likelihood of further development that would prevent use of the egress windows.",
+      "locator": "p.2 para 12"
+    },
+    {
+      "text": "Determination: the plans comply with Requirement B1.",
+      "locator": "p.3 para 13"
+    }
+  ],
+  "limitations": [
+    "Record type: Secretary of State determination under s.16 Building Act 1984 (dispute on plan compliance); case_type mapped to appeal_decision as the nearest schema value.",
+    "Comparative test only: England (UK); Building Regulations 2000 (as amended): Requirement B1 (means of warning and escape). Not an Alberta record; no applicability to NBC(AE) or Alberta is asserted.",
+    "Attachment is the original public file; Internet Archive capture 20260214020955 (live gov.uk URL redirects). Live URL status is recorded in references and blocked.",
+    "outcome_leakage true: the decision is inside this attachment (p.3 (para 13)); use only earlier pages as input if a leak-free variant is required.",
+    "Personal names and contact details appear in the original attachment and are omitted from this record.",
+    "The gov.uk listing for the determinations (guidance/building-regulations-determinations) is available only as a 2024-02-28 Internet Archive snapshot; the live URL redirects to the current appeals guide."
+  ],
+  "worker": "H15",
+  "prompt_number": 481,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://assets.publishing.service.gov.uk/media/5a78a42840f0b62b22cbb9da/Building_regulations_determination_45-1-239.pdf",
+      "sha256": "8ed85136ce829f6bfc2b64cdd241933ac40c6d4a1ec6b72d0825eeae1e945d8e",
+      "role": "input",
+      "retrieved_via": "Internet Archive capture 20260214020955 (live gov.uk URL redirects)",
+      "archive_url": "https://web.archive.org/web/20260214020955id_/https://assets.publishing.service.gov.uk/media/5a78a42840f0b62b22cbb9da/Building_regulations_determination_45-1-239.pdf",
+      "bytes": 18183,
+      "filename": "determination-45-1-239-8ed85136ce82.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H15/files/determinations/45-1-239/determination-45-1-239-8ed85136ce82.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:48:41.219068+00:00",
+        "http_status": "200",
+        "final_url": "https://web.archive.org/web/20260214020955id_/https://assets.publishing.service.gov.uk/media/5a78a42840f0b62b22cbb9da/Building_regulations_determination_45-1-239.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

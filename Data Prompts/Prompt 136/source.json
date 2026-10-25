@@ -1,0 +1,56 @@
+{
+  "id": "H20-010",
+  "title": "Integrated testing coordinator: qualifications and evidence for integrated fire and life-safety systems testing",
+  "jurisdiction": "Alberta (province-wide STANDATA issued by Alberta Municipal Affairs)",
+  "code_edition": "NBC(AE) 2023 (National Building Code - 2023 Alberta Edition); printing not stated in document",
+  "case_type": "regulatory_guidance",
+  "source_url": "https://open.alberta.ca/publications/standata-interpretation-building-national-building-code-2023-alberta-edition",
+  "document_date": "Date Issued: March 2025 (platform created March 11, 2025, last updated March 11, 2025)",
+  "facts": [
+    {
+      "text": "The interpretation clarifies the expectation for qualifications of an integrated testing coordinator.",
+      "locator": "p.1 (Purpose)"
+    },
+    {
+      "text": "CAN/ULC-S1001 requires an integrated testing coordinator who is knowledgeable and experienced in the design, installation and operation of the fire protection and life safety systems.",
+      "locator": "p.1 (Discussion)"
+    },
+    {
+      "text": "Before construction begins, the owner must submit evidence to the authority having jurisdiction that a registered professional has been retained to design the system and to field review and witness its testing.",
+      "locator": "p.2 (Code References)"
+    }
+  ],
+  "limitations": [
+    "A published regulator interpretation of a documented design question, not an applicant file.",
+    "Case type is the nearest enum value; this is not an issued variance, appeal or worked example.",
+    "Administrative-qualification question rather than a design question; included because it tests missing admin evidence.",
+    "Edition check: alberta.ca lists the NBC(AE) 2023 2nd printing (published 17 Aug 2026) as in force; the article wording quoted here is as the STANDATA document states it and was not checked against the 2nd printing text (not in the package)."
+  ],
+  "original_worker_case_type": "published_worked_example",
+  "parent_curation_note": "STANDATA interpretations and bulletins describe general regulated conditions; they are regulatory reference exercises, not individual applications or published project worked examples.",
+  "worker": "H20",
+  "prompt_number": 136,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/7342f4c1-5c7f-4aee-901e-3388d5464cfc/download/ma-standata-interpretation-building-23-bci-014-2025-03.pdf",
+      "sha256": "cf41afe40cb0041bc3575fa7edcbe66039bf08a0b04cc55866e2737720fda95c",
+      "role": "input",
+      "bytes": 160242,
+      "filename": "ma-standata-interpretation-building-23-bci-014-2025-03-cf41afe40cb0.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H20/files/pdf/ma-standata-interpretation-building-23-bci-014-2025-03-cf41afe40cb0.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:19:07.782038+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/7342f4c1-5c7f-4aee-901e-3388d5464cfc/download/ma-standata-interpretation-building-23-bci-014-2025-03.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Regulator position as written: a window in a wall with a 600 mm or greater elevation difference and a sill below the minimum guard height must be a guard or be protected by one. Catalogue status: listed as 'ON HOLD - UNDER REVIEW' on the open.alberta.ca landing page; the PDF text itself carries no such label.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the window-as-wall-part rule from the guard requirement",
+    "Flags the catalogue ON HOLD status as a reason not to treat the answer as settled",
+    "Asks for the sill height, drop and glazing product evidence",
+    "Does not say the window complies"
+  ],
+  "case_id": "H20-014",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

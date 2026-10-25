@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The newly issued CCMC evaluation publishes an NBC 2020 product opinion with two Alternative classifications, defined installation conditions and additional fire-test data outside the opinion.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "confirm product source/plant and installation-manual version",
+    "proposed furring, cavity, fire blocks, flashing and fastener spacing",
+    "Part 9 applicability, building classification and local code edition",
+    "whether the tested siding specimen matches project assembly needs"
+  ],
+  "case_id": "L16-024",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

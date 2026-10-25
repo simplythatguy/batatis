@@ -1,0 +1,14 @@
+{
+  "known_outcome": "p.16 §7.1: the hoist as installed would not by itself be sufficient to comply with Clause D1 to the extent required under section 118; the combinations with a removable ramp and removable stairs are addressed in the same paragraph.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates a hoist-based accessible-route method from the wider accessibility of the building",
+    "Identifies the section 118 and Clause D1 question as the question the file answers",
+    "Does not assert the pool's accessibility"
+  ],
+  "case_id": "H05-009",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

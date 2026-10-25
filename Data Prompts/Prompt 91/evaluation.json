@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The reference permits Group F2 classification for the specified low-human-occupancy oil/gas facilities only subject to the size limit, engineer-prepared risk assessment, operational measures and listed fire/egress conditions.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "building use, location and occupancy",
+    "area limit",
+    "registered professional risk assessment and stated components",
+    "operating/training measures and permit evidence"
+  ],
+  "case_id": "L03-010",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

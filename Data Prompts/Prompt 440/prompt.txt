@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from New Zealand (MBIE determination under the Building Act 2004); comparative test only, not Alberta; NZ code references retained as written. It is not an Alberta application.
+
+Attached is a New Zealand determination about an amendment to a building consent to use uPVC windows and doors in a house near Gore, Southland, where the authority questioned the original submission and the details were later revised. Read its code references as New Zealand references only and do not map them to Alberta. Using only the attached file, identify the joinery scope the file defines, the clauses the file limits itself to, what the file says about the revised details, and the administrative evidence and questions still needed for the amended joinery. Do not state that the joinery complies or is durable.
+
+Attachments:
+- mbie-determination-2015-020-55cd323f8341.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

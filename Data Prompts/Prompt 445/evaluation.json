@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Set aside and replaced: the tribunal approved the application subject to amending the fire engineering report (smoke-ventilation modelling; qualitative approach under s 1.2.9.2 of the International Fire Engineering Guidelines) (p. 2). Signed 21 Oct 2019 (p. 7).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Identifies the performance-solution scope: smoke ventilation and sprinkler changes in a large isolated building.",
+    "Flags the fire engineering report revision (Rev B) and the required amendments as open items.",
+    "Notes that the BCA 2015 citations are as cited in the notice and have not been checked against an edition printing.",
+    "Makes no compliance statement."
+  ],
+  "case_id": "H09-002",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

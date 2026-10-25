@@ -1,0 +1,62 @@
+{
+  "id": "H08-002",
+  "title": "AECOM Australia - fire safety engineering letter of support, Stage 1 Macquarie Park Village, 110-114 Herring Road, Macquarie Park (Section 75W application)",
+  "jurisdiction": "New South Wales, Australia - COMPARATIVE ONLY (not Alberta; NSW code text, not Alberta applicability)",
+  "code_edition": "BCA 2013 (stated, p.2)",
+  "case_type": "actual_application",
+  "source_url": "https://www.planningportal.nsw.gov.au/fire-engineering-report-60248510-ltfe-0001apdf-0",
+  "document_date": "20 June 2013 (letter, p.1)",
+  "facts": [
+    {
+      "text": "AECOM letter dated 20 June 2013 for Stage 1 Macquarie Park Village, 110-114 Herring Road, Macquarie Park, to accompany a Stage 1 s75W application.",
+      "locator": "p.1"
+    },
+    {
+      "text": "Reviewed a BCA assessment report (ref. CF10606-RP02A-Stage 1-120613, dated 12 June 2013, by another consultant) and the DA architectural drawings listed in Table 1.",
+      "locator": "p.1-2"
+    },
+    {
+      "text": "States the alternative solutions in Table 2 are variations from BCA 2013 deemed-to-satisfy provisions, to be formulated to meet the relevant performance requirements.",
+      "locator": "p.2"
+    },
+    {
+      "text": "Table 2, basement car park: travel distance to a point of choice 25 m (DtS limit 20 m); travel to the nearest exit 70 m (DtS 40 m); between alternative exits 130 m (DtS 60 m); clauses D1.4 and D1.5 against DP4 and EP2.2.",
+      "locator": "p.2"
+    },
+    {
+      "text": "Table 2 also lists a fire control centre not located at the front entrance (Specification E1.8; EP1.6) and residential-tower travel-distance items under clause D1.4.",
+      "locator": "p.2"
+    }
+  ],
+  "limitations": [
+    "Comparative NSW material: it cannot establish Alberta performance or Alberta applicability.",
+    "Letter only: the referenced BCA assessment report and drawings are not in hand.",
+    "The stated code is BCA 2013, an older edition than the 2019 and 2022 editions cited by other NSW files in this set.",
+    "Section 75W is the pre-2018 NSW planning pathway named in the letter; it is described, not applied, here."
+  ],
+  "worker": "H08",
+  "prompt_number": 236,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://dpeeplanningsitbackdata.blob.core.windows.net/pdfmapsdata/assets/151975/Fire%2520Engineering%2520Report%252060248510-LTFE-0001_A.pdf",
+      "sha256": "68ba05e30a794ff217f4210b9e60c966b94442c132961e0af10c2e19e890ad84",
+      "role": "input",
+      "bytes": 121658,
+      "filename": "fire-engineering-report-60248510-ltfe-0001a-68ba05e30a79.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H08/files/fire-engineering-report-60248510-ltfe-0001a/fire-engineering-report-60248510-ltfe-0001a-68ba05e30a79.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:50:45.108398+00:00",
+        "http_status": "200",
+        "final_url": "https://dpeeplanningsitbackdata.blob.core.windows.net/pdfmapsdata/assets/151975/Fire%2520Engineering%2520Report%252060248510-LTFE-0001_A.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

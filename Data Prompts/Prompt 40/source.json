@@ -1,0 +1,86 @@
+{
+  "id": "A13-002",
+  "title": "Beaumont revised development permit notice with consultant elevation schedule for limiting distance and permitted glazing (multi-attached residential)",
+  "jurisdiction": "City of Beaumont, Alberta (development authority named on the notice; building-permit AHJ not stated)",
+  "code_edition": "NBC-2019AE named in drawing note 7 (p.3). Schedule rows cite 9.10.15.4 without an edition statement. The 2023 edition is not stated in the file.",
+  "case_type": "actual_application",
+  "source_url": "https://www.beaumont.ab.ca/resource/notice-of-development-permits/",
+  "document_date": "Revised notice dated January 30, 2025. Original date of decision August 13, 2021 (cover, p.1).",
+  "facts": [
+    {
+      "text": "The revised notice of decision (January 30, 2025) concerns a multi-attached dwelling of 85 apartments and 42 townhouses, amendment 'Change in Design Features and Wall Openings for Buildings 1-9', permit application 2021-338, status 'Approved with conditions'.",
+      "locator": "p.1 (cover block)"
+    },
+    {
+      "text": "The applicant is a consultant architecture firm (EFG Architects Inc., Edmonton), and the district is Integrated Neighbourhood.",
+      "locator": "p.1 (addressee and district)"
+    },
+    {
+      "text": "The notice states that the amendments to Development Permit 2021-338 have been conditionally approved.",
+      "locator": "p.1 (conditions preamble)"
+    },
+    {
+      "text": "Drawing note 7 reads 'ALL WINDOWS ARE CONSIDERED TO BE GUARDS AND MUST COMPLY NBC-2019AE'.",
+      "locator": "p.3 (drawing notes)"
+    },
+    {
+      "text": "Each elevation entry cites 9.10.15.4 and lists exposed building face, limiting distance, exterior wall face area, permitted glazing percentage, total glazed or unprotected glazing (m2 and %), required fire rating and wall or cladding type.",
+      "locator": "pp.3-4 (elevation schedule format)"
+    },
+    {
+      "text": "East elevation, unit T1: limiting distance 13.87 m (between buildings); exterior wall face 9.75 m x 8.40 m = 81.90 m2; permitted glazing 100%; total glazed openings 1.12 m2 (= 1.38%); 'REQ. FIRE RATING: NONE (45 MIN PROVIDED)'.",
+      "locator": "p.3 (east, unit T1)"
+    },
+    {
+      "text": "North elevation, unit T1: limiting distance 4.72 m / 2 = 2.36 m (between buildings); exterior wall face 6.13 m x 8.71 m = 53.39 m2; permitted glazing 9%; total unprotected glazing 4.84 m2 (= 9%).",
+      "locator": "p.3 (north, unit T1)"
+    },
+    {
+      "text": "Other entries halve the limiting distance to a property line or between buildings, for example west elevation, unit T3: 2.4 m / 2 = 1.2 m (property line) with permitted glazing 7%.",
+      "locator": "p.4 (west, unit T3)"
+    },
+    {
+      "text": "Condition 21 states the proposed development must meet or exceed the requirements of the current Alberta Building Codes, Alberta Fire Codes and NFPA1141.",
+      "locator": "p.28 (condition 21)"
+    },
+    {
+      "text": "The same elevation schedule format recurs on pp.31-34 with different unit values. Which sheets are approved and which are proposed was not reconciled in this lane.",
+      "locator": "pp.31-34 (repeated schedule)"
+    }
+  ],
+  "limitations": [
+    "Revised notice with City conditions in the same PDF (pp.1, 28); outcome leakage is flagged and the prompt omits the conditions.",
+    "Schedule values come from text extraction of drawing sheets. Some rows were not fully captured (for example a West T3 total), so numeric entries must be checked against the images.",
+    "The schedule recurs on pp.31-34 with different values; this lane did not establish which sheet governs.",
+    "Edition is only named in drawing note 7 (NBC-2019AE). No edition is stated for the 9.10.15.4 rows.",
+    "PDF title metadata 'DP with BLLP Comments (B3425563).DOCX' is identical to the A13-001 file. Identification relies on SHA-256 and page content.",
+    "No declared alternative solution or variance is present; the case is a limiting-distance and glazing-limit question, not a setback variance.",
+    "Reconstructed test question, not a designer message. The consultant's personal names in the source are not reproduced.",
+    "source_url is the search-indexed Beaumont notices landing page; the association between this file and that page was not confirmed by a direct fetch."
+  ],
+  "worker": "A13",
+  "prompt_number": 40,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://beaumont.ab.ca/wp-content/uploads/2025/01/4701-4703-32-Avenue-Notice-of-Decision.pdf?x10353=",
+      "sha256": "5f3686341f04246e71cc5276cc6f6e25132a4922c248402f6d80cce5616f2b0d",
+      "role": "input",
+      "bytes": 15896677,
+      "filename": "beaumont-4701-4703-32-avenue-nod-5f3686341f04.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/A13/files/A13-beaumont-4701-4703-32ave-nod/beaumont-4701-4703-32-avenue-nod-5f3686341f04.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T02:34:54.483536+00:00",
+        "http_status": "200",
+        "final_url": "https://www.beaumont.ab.ca/wp-content/uploads/2025/01/4701-4703-32-Avenue-Notice-of-Decision.pdf?x10353=",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

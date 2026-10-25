@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Granted with conditions (minimum 4-foot width and specified length and start position; BDS approval before recording; no fences or eaves in the easement).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "edition: request silent, drawing cover says 2017 ORSC",
+    "easement dimensions versus the 6-foot clear-width claim",
+    "the drawing set's coverage of the eave and the easement"
+  ],
+  "case_id": "H11-017",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,14 @@
+{
+  "known_outcome": "The order was varied to allow the listed window/balcony route or another acceptable alternative solution.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Distinguish a prescriptive egress route from an alternative solution.",
+    "Check which bedroom and floor the order addresses.",
+    "Recognize that the source is an old appeal order with the outcome visible."
+  ],
+  "case_id": "L06-009",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The reference allows a passenger elevator substituted for a CSA-B355 lift to use the stated exception from ABC 3.5.4.1 stretcher dimensions only when rise is at most 7,000 mm and minimum CSA-B355 Table 1 car dimensions are met.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "whether an elevator replaces an LPPD",
+    "travel/rise measurement",
+    "car dimensions and CSA-B355 Table 1",
+    "barrier-free path and permit documentation"
+  ],
+  "case_id": "L03-006",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

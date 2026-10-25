@@ -1,0 +1,58 @@
+{
+  "id": "H02-018",
+  "title": "Determination 2024/014: Compliance of a stormwater tank near a property boundary with Building Code clauses concerning fire affecting other areas",
+  "jurisdiction": "New Zealand: Consentium as building consent authority for a site at Henderson, Auckland; MBIE determination under the Building Act 2004. Non-Alberta comparative record.",
+  "code_edition": "NZ Building Code (Schedule 1, Building Regulations 1992), clauses C3.6 and C3.7 (fire affecting areas beyond the fire source). No Acceptable Solution edition is named in the text read.",
+  "case_type": "appeal_decision",
+  "source_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2024/2024-014.pdf",
+  "document_date": "28 March 2024",
+  "facts": [
+    {
+      "text": "A new two-storey detached building is to be built on a future lot at Henderson, Auckland. The owner applied for building consent, and a stormwater tank was proposed near the property boundary.",
+      "locator": "p.3 §2.1; p.2 §1.6"
+    },
+    {
+      "text": "The stormwater tank originally proposed was a particular plastic tank. The building consent application was amended to a metal tank to enable the consent to be granted.",
+      "locator": "p.2 §1.3, §1.6"
+    },
+    {
+      "text": "The determination arises from the authority's view about the stormwater tank proposed near the boundary, in relation to fire between properties.",
+      "locator": "p.2 §1.6"
+    },
+    {
+      "text": "The matter is whether the tank near the boundary, as proposed, complies with clauses C3.6 and C3.7 of Clause C3 Fire affecting areas beyond the fire source.",
+      "locator": "p.2-3 §1.6-1.8"
+    }
+  ],
+  "limitations": [
+    "The CodeHub landing page does not carry this determination. The official PDF path was used directly, so the source_url is the PDF.",
+    "The reasoning in §§3-4 was not read in full in this pass. The tank supplier is an interested person in the record (p.2 §1.3).",
+    "Owner, supplier and street address are omitted.",
+    "Applies to the New Zealand Building Code only. No Alberta applicability is asserted."
+  ],
+  "worker": "H02",
+  "prompt_number": 394,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2024/2024-014.pdf",
+      "sha256": "815ed1cfd092aeda992af7f46bdb99b319c47926775f4903b1ae897e891e3618",
+      "role": "input",
+      "bytes": 374363,
+      "filename": "gap-check-2024-014-815ed1cfd092.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H02/files/gap-check-2024-014-815ed1cfd092.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:59:29.585298+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2024/2024-014.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

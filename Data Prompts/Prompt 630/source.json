@@ -1,0 +1,67 @@
+{
+  "id": "H14-003",
+  "title": "ICC-ES ESR-1147: Integraspec insulating concrete forms (ICF)",
+  "jurisdiction": "United States (ICC-ES evaluation report under IBC/IRC); NON-ALBERTA COMPARATIVE ONLY: cannot establish Alberta performance, acceptance or equivalence; no Canadian or Alberta approval is claimed or implied",
+  "code_edition": "2018, 2015, 2012 and 2009 IBC and IRC (report §1.1, p1); 2006 IBC/IRC addressed in §8.0; 2013 ADIBC (p1)",
+  "case_type": "product_evidence",
+  "source_url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-1147.pdf",
+  "document_date": "Reissued December 2025; CA supplement revised August 2026; continuous compliance through December 2026 (p1)",
+  "facts": [
+    {
+      "text": "Report holder INTEGRASPEC CORPORATION; evaluation subject is the Integraspec ICF system.",
+      "locator": "p1 cover"
+    },
+    {
+      "text": "Use is limited to Type V construction (IBC Chapter 6) and to nonfire-resistance-rated construction under the IRC, 'except as described in Section 4.3'.",
+      "locator": "§5.5, p6"
+    },
+    {
+      "text": "Types I-IV (noncombustible) use requires a label visible in every 160 sq ft (14.7 m2) of wall area before wall covering.",
+      "locator": "§5.6, p6"
+    },
+    {
+      "text": "When the code official requires it, calculations for the §4.1.1 design must be submitted, prepared by a registered design professional where the jurisdiction's statutes require.",
+      "locator": "§5.7, p6"
+    },
+    {
+      "text": "Integraspec ICFs are produced for Integraspec Corporation by APTCO LLC in McFarland, California.",
+      "locator": "§5.12, p6"
+    },
+    {
+      "text": "Evidence: AC353 (October 2012, ed. December 2018) for the 2018/2015/2012 IBC and IRC; AC353 (October 2010) for the 2009 IBC and IRC.",
+      "locator": "§6.1-6.2, p6"
+    }
+  ],
+  "limitations": [
+    "Non-Alberta comparative attachment; the report does not reference NBC(AE) 2023 and is not evidence of Alberta or Canadian acceptance.",
+    "Retrieved 2026-10-25 from the official ICC-ES report URL; current ICC-ES status was not checked live. source_url is the report PDF, not a separate listing page.",
+    "Text from pypdf extraction; figures, tables and signatures not transcribed; locators are PDF page numbers, not printed page numbers.",
+    "ICC-ES copyright; retained locally for comparison only, redistribution not licensed.",
+    "The 2006 IBC/IRC and ADIBC items are addressed in separate sections and were not fully transcribed."
+  ],
+  "worker": "H14",
+  "prompt_number": 630,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-1147.pdf",
+      "sha256": "b948c7f36265e72292f0fdef23bb34199e60abdbe6deef4f8cfebeaca336ca07",
+      "role": "input",
+      "bytes": 963640,
+      "filename": "esr-1147-integraspec-icf-b948c7f36265.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H14/files/esr-1147/esr-1147-integraspec-icf-b948c7f36265.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:21:05.435093+00:00",
+        "http_status": "200",
+        "final_url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-1147.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

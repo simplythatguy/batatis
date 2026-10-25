@@ -1,0 +1,58 @@
+{
+  "id": "L15-019",
+  "title": "14241-R — Boreal Nature Elite Air Barrier System",
+  "jurisdiction": "Canada (CCMC national product assessment; project AHJ not stated)",
+  "code_edition": "NBC 2015 and NBC 2020",
+  "case_type": "product_evidence",
+  "source_url": "https://www.nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14241-R&type=cert",
+  "document_date": "2024-09-10",
+  "facts": [
+    {
+      "text": "CCMC 14241-R is marked Active in the live API snapshot; the report names NBC 2015 and NBC 2020 as its edition scope.",
+      "locator": "PDF p. 1; live API items"
+    },
+    {
+      "text": "Stated air-permeance condition depends on 50 mm minimum thickness at 32 kg/m3 in the report's listed wall assemblies.",
+      "locator": "PDF p. 6"
+    },
+    {
+      "text": "The CCMC report publishes its own code-specific opinion classifications for the printed edition(s); those classifications are bounded by the report conditions.",
+      "locator": "PDF p. 2"
+    }
+  ],
+  "limitations": [
+    "The evaluation is a CCMC product assessment, not an individual Alberta variance or project approval.",
+    "The report editions are NBC editions identified by the source; no equivalence to NBC(AE) 2023, 2nd printing has been established here.",
+    "No project, assembly, jurisdiction/AHJ, loads, site conditions, installation records or professional design package is supplied.",
+    "The CCMC opinion is bound by its stated conditions and limitations; read the full report before judging relevance.",
+    "Air barrier system: Stated air-permeance condition depends on 50 mm minimum thickness at 32 kg/m3 in the report's listed wall assemblies."
+  ],
+  "worker": "L15",
+  "prompt_number": 194,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://www.nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?id=765&type=cert",
+      "sha256": "01395671a09e94644d2031225fae693636c10660917ba73b306f82c059636569",
+      "role": "input",
+      "bytes": 6574367,
+      "filename": "ccmc-14241-R-boreal-nature-elite-air-barrier-system-evaluation-f2d78e625586.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L15/files/ccmc-14241-R-boreal-nature-elite-air-barrier-system-evaluation-f2d78e625586.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:23:00.922447+00:00",
+        "http_status": "200",
+        "final_url": "https://www.nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?id=765&type=cert",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded_pdf_entity_extracted",
+        "entity_extraction": "A 433-byte proxy/HTTP response prelude precedes %PDF- in the helper capture. PDF entity bytes from first %PDF- through the final byte were copied unchanged and parsed with pypdf.",
+        "raw_capture_sha256": "f2d78e6255867365696453d021596ff1fe0b22c0106d073530f6437dc1fe4769",
+        "raw_capture_path": "_research/workers/L15/files/ccmc-14241-R-boreal-nature-elite-air-barrier-system-evaluation-f2d78e625586.html"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

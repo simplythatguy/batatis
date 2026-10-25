@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The Commission found the respondent did not comply with the cited permit-processing requirements and required the statutory response.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "application receipt and completeness timeline",
+    "written refusal and reasons record",
+    "distinguishing administrative dispute from technical merits",
+    "outcome leakage"
+  ],
+  "case_id": "L10-012",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

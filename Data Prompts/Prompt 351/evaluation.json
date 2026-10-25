@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Reversed: the proposed refusal was reversed under section 188 on the reading of C/AS1 paragraph 5.1.1; the determination states the plans meet paragraph 5.1.1(b). [p.10, para 6.1]",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Fire-spread interpretation of C/AS1 paragraph 5.1.1 for external walls near boundaries",
+    "Boundary-distance and FRR wall evidence shown on the site plan and in the refusal reasoning",
+    "Whether the authority's refusal identified the specific clause and evidence it relied on"
+  ],
+  "case_id": "H01-001",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

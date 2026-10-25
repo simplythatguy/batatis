@@ -1,0 +1,17 @@
+{
+  "known_outcome": "The paper reports the smoke FEC, irritant-gas FIC and FIN including CO₂ effects all exceeded the modeled tenability limit of 1 at approximately 400 s for L-07.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "cable type/rating, quantity, routing and plenum loading",
+    "HVAC connectivity, flow, openings and smoke movement",
+    "target-room geometry and occupant/egress assumptions",
+    "hazard model endpoints and measured versus inferred data",
+    "sprinkler conditions",
+    "applicable code edition/AHJ and qualified professional review"
+  ],
+  "case_id": "L17-017",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

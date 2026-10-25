@@ -1,0 +1,84 @@
+{
+  "id": "L19-005",
+  "title": "Curtain Wall Firestop System",
+  "jurisdiction": "British Columbia code context; sample says its format follows the City of Vancouver template, but does not identify the project jurisdiction or AHJ",
+  "code_edition": "unknown",
+  "case_type": "published_worked_example",
+  "source_url": "https://cwc.ca/publication/alternative-solutions-guide/",
+  "document_date": "2025-04 (PDF metadata creation date 2025-04-08; no issue date printed)",
+  "facts": [
+    {
+      "text": "The guide calls this a long-form sample alternative solution and says its format follows the City of Vancouver alternative-solution template.",
+      "locator": "printed p. 27; PDF p. 29"
+    },
+    {
+      "text": "The described building is a new 12-storey mixed-use office tower over a 3-level below-grade parkade, with encapsulated mass timber above grade, noncombustible below grade, the listed occupancies and fire protection systems. The guide does not name a project location.",
+      "locator": "printed p. 27; PDF p. 29"
+    },
+    {
+      "text": "The described prefabricated curtain wall leaves a gap up to 200 mm between the CLT floor slab edge and the curtain wall from the second to twelfth storeys. The sample cites Sentence 3.1.8.3.(4) for maintaining fire-separation continuity and proposes a custom firestop detail.",
+      "locator": "printed pp. 27-28; PDF pp. 29-30"
+    },
+    {
+      "text": "The sample compares its proposed firestop to Intertek Design No. STI/BPF 120-11 and describes 5-ply CLT at least 175 mm thick, a minimum 150 mm mineral-wool depth, at least 25% compression, 3 mm firestop spray and 12.7 mm overlap. It also describes moving curtain-wall anchors from the top of the slab to steel plates at the slab-edge mid-depth.",
+      "locator": "printed pp. 29-33; PDF pp. 31-35"
+    },
+    {
+      "text": "The guide contains an internal reference mismatch: it identifies Sentence 3.1.8.3.(4) as the applicable provision but says the listed objective/function pairs are attributed to Sentence 3.1.18.2.(1), and repeats that sentence in the table.",
+      "locator": "printed pp. 28-29; PDF pp. 30-31"
+    },
+    {
+      "text": "An accessible manufacturer-hosted listing marked 'Reproduced courtesy of Intertek Testing Services NA Ltd.' identifies Design No. STI/BPF 120-11, a 2-hour F-rating, 3/4-hour T-rating and a minimum 5-ply, 175 mm CLT floor assembly. The retrieved copy is a seven-page listing dated July 31, 2023.",
+      "locator": "listing PDF pp. 1, 4-7"
+    }
+  ],
+  "limitations": [
+    "This is explicitly a published sample, not an actual application or issued variance.",
+    "The project location, AHJ and sample-specific code edition are unstated; the City of Vancouver template reference does not establish the project's jurisdiction.",
+    "The guide's objective/function attribution appears internally inconsistent with its stated applicable provision; this has been flagged rather than repaired by inference.",
+    "The attached seven-page copy is hosted by the product manufacturer and says it is reproduced courtesy of Intertek. Direct retrieval of the Intertek document viewer redirected repeatedly, and web open timed out; the exact current Intertek-hosted file was not captured.",
+    "The guide's generic 12-storey project description closely resembles the preceding ceiling-finish sample; the guide does not say whether the two are the same example building."
+  ],
+  "worker": "L19",
+  "prompt_number": 605,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://cwc.ca/wp-content/uploads/2025/04/CWC-ASG-April2-2.pdf",
+      "sha256": "38b185cc7923b0c49605af1d264631d321ef151269d8d7c4aeae44d159bb255b",
+      "role": "input",
+      "bytes": 2632347,
+      "filename": "CWC-Alternative-Solutions-Guide-2025-38b185cc7923.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L19/files/CWC-Alternative-Solutions-Guide-2025-38b185cc7923.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:16:51.137569+00:00",
+        "http_status": "200",
+        "final_url": "https://cwc.ca/wp-content/uploads/2025/04/CWC-ASG-April2-2.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://files.stifirestop.com/1.%20System%20PDF%20Files%2F2.%20Intertek%20OPL%20Systems%2FSTI-BPF-120-11.pdf",
+      "sha256": "e63b4b2d0846069c6b54b418f5f617ae1f812390dceada14a057d717b59fc53e",
+      "role": "supporting_evidence",
+      "bytes": 2885518,
+      "filename": "STI-BPF-120-11-Intertek-listing-e63b4b2d0846.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L19/files/STI-BPF-120-11-Intertek-listing-e63b4b2d0846.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:19:57.040020+00:00",
+        "http_status": "200",
+        "final_url": "https://files.stifirestop.com/1.%20System%20PDF%20Files%2F2.%20Intertek%20OPL%20Systems%2FSTI-BPF-120-11.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

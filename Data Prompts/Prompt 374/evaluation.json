@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Partly non-compliant: some aspects of the as-built work, as described, do not comply with B1, B2, E1, E2, E3 and G9; the determination also records which elements comply (decision 10.1 and the paragraphs before it). [p.43, para 10.1]",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Pile layout, bracing, and foundation performance against B1 for the as-built piles",
+    "Cladding and linings, wet-area finishes, and gutter detail against B2, E1, E2 and E3",
+    "Electrical fittings against G9 and the producer or inspection records for each module"
+  ],
+  "case_id": "H01-024",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

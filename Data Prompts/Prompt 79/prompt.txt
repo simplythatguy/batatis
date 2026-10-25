@@ -1,0 +1,6 @@
+Review the attached 19-BCV-023 on residential garage roofs. Identify when the variance permits Section 9.36 values for flat/cathedral roofs and which table inputs matter. Ask whether the garage is attached or heated detached, the roof form, climate-zone/degree-day basis, heat-recovery ventilation status, and proposed RSI documentation; do not infer an insulation value.
+
+Attachments:
+- catalogue-e53f4a36-ab31-4c5b-9b27-a76064a77555-19-BCV-023---Insulation-values-for-flat-or-cathedral-roofs-serv-5c392a6c206a.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

@@ -1,0 +1,16 @@
+{
+  "known_outcome": "Set aside and replaced: the tribunal set aside the assessment manager's decision and replaced it with a decision refusing the application (p. 2). Dated 24 Jan 2018 (p. 8).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Identifies the performance-solution scope (corridor openings) and whether it covers all affected BCA performance requirements.",
+    "Flags the Building Act s 61 route for the remainder of the building as a legal question.",
+    "Notes that approval under QDC MP2.1 does not by itself establish BCA compliance.",
+    "Notes the atrium definition and Specification G3.8 point as an item to check, without resolving it.",
+    "Makes no compliance statement."
+  ],
+  "case_id": "H09-006",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

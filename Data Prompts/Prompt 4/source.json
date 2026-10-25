@@ -1,0 +1,105 @@
+{
+  "id": "A05-001",
+  "title": "Rossdale Power Plant adaptive-reuse code and structural assessments",
+  "jurisdiction": "City of Edmonton, Alberta (the Building and Fire Code Assessment explicitly names the City of Edmonton as AHJ)",
+  "code_edition": "The Building and Fire Code Assessment uses the National Building Code – 2019 Alberta Edition and National Fire Code – 2019 Alberta Edition. The related RJC Structural Evaluation uses the National Building Code – 2019 Alberta Edition. These are historical editions; the challenge package basis is NBC(AE) 2023, 2nd printing.",
+  "case_type": "documented_design_study",
+  "source_url": "https://www.edmonton.ca/projects_plans/communities_neighbourhoods/west_rossdale/rossdale-power-plant-history",
+  "document_date": "Building and Fire Code Assessment submitted 2021-03-05, revised 2021-12-09; RJC Structural Evaluation dated 2022-08-08",
+  "facts": [
+    {
+      "text": "The City landing page lists the Building and Fire Code Assessment and Structural Evaluation among the Rossdale Power Plant project documents.",
+      "locator": "Official City of Edmonton project page, Project Documents accordion (landing-page HTML)"
+    },
+    {
+      "text": "The code assessment cover identifies the City of Edmonton as owner/client, Jensen Hughes as code consultant, and the architectural, heritage, structural/civil, and mechanical/electrical consultant team.",
+      "locator": "Building and Fire Code Assessment, PDF p. 2 (report p. i)"
+    },
+    {
+      "text": "The project covers the Low Pressure Power Plant (Switch House, Turbine Hall, Boiler Hall), Pump Houses 1 and 2, and the ATCO Gas Building at 9469 Rossdale Ave W and 10155 96 Ave NW, Edmonton.",
+      "locator": "Building and Fire Code Assessment, PDF p. 10 (report p. 2), §2.1"
+    },
+    {
+      "text": "The code assessment says it is conceptual and high-level, benchmarks against the 2019 Alberta code editions, and names the City of Edmonton as AHJ. It notes that design/construction must use the documents applicable at that later time.",
+      "locator": "Building and Fire Code Assessment, PDF p. 11 (report p. 3), §§2.2–2.3"
+    },
+    {
+      "text": "The report evaluates a range of potential future major occupancies (Groups A1, A2, D, and E); it does not identify a selected future occupancy.",
+      "locator": "Building and Fire Code Assessment, PDF pp. 9–10 (report pp. 1–2), §1.1 and §2.1"
+    },
+    {
+      "text": "Performance-based alternative approaches are described as options that could be considered later; they were outside the current scope, were not guaranteed to progress, require further evaluation, and remain subject to AHJ review.",
+      "locator": "Building and Fire Code Assessment, PDF p. 12 (report p. 4), §2.7"
+    },
+    {
+      "text": "Potential investigations named by the code consultant include rationalizing exits, vestibules/pressurization, protected floor space, draft stops, combustible-content limits, and smoke ventilation analysis. They are exploratory possibilities, not selected or accepted solutions.",
+      "locator": "Building and Fire Code Assessment, PDF p. 12 (report p. 4), §2.7; PDF p. 39 (report p. 31), Table 10-1"
+    },
+    {
+      "text": "The RJC report says available structural information was limited; its evaluation compared the existing Low Pressure Plant against the 2019 Alberta code and identifies change of use, higher expected snow loads, condition/load-path deficiencies, equipment removal, limited original-code information, and code changes as factors.",
+      "locator": "RJC Structural Evaluation, PDF p. 4 (printed report p. i), Executive Summary"
+    },
+    {
+      "text": "The RJC executive summary reports that some parts of the Low Pressure Plant did not meet the evaluated load demands and names the roofs, east-west lateral support, steel connections, and steel-plate floor areas among the deficiencies. It says the structure is not suitable for occupancy except very short-term controlled conditions, and describes repair/reinforcement and future City/AHJ decisions as next steps.",
+      "locator": "RJC Structural Evaluation, PDF pp. 4–5 (printed report pp. i–ii), Executive Summary"
+    },
+    {
+      "text": "The code assessment says existing exit-width measurements are approximate because doors were locked or padlocked during the site visit; it also records non-compliant exit conditions requiring further exploration.",
+      "locator": "Building and Fire Code Assessment, PDF p. 47 (report p. 39), exiting notes"
+    }
+  ],
+  "limitations": [
+    "This is one City of Edmonton adaptive-reuse project represented by two distinct consultant reports, not two separate projects or an original applicant submission.",
+    "Neither report is an alternative-solution application or permit decision. No accepted project-specific solution or approval was located.",
+    "The code assessment is expressly conceptual, covers potential rather than selected occupancies, and says alternative approaches are outside its current scope and subject to further analysis and AHJ review.",
+    "The reports use 2019 Alberta code editions; they do not establish requirements under the challenge package's NBC(AE) 2023 2nd printing basis or a later permit date.",
+    "The code assessment records approximate exiting measurements and locked/padlocked doors during the site visit. Some existing conditions and future project choices remain uncertain.",
+    "The RJC Structural Evaluation covers the Low Pressure Plant (Switch House, Turbine Hall, and Boiler Hall), not every Rossdale building; it identifies limited information and assumptions that later project phases must verify.",
+    "The source-visible structural findings are outcome leakage for evaluation purposes; they must be treated as the engineer's reported findings, not as independent model conclusions.",
+    "Parent PDF extraction of drawing sheets at original PDF pages 65, 70 and 80 contains garbled glyphs. Plan graphics were visually confirmed in rossdale-drawings.jpg (pages 61, 65, 70, 80); extracted text alone must not be treated as reliable dimensions or annotations."
+  ],
+  "original_worker_case_type": "documented_design_study",
+  "parent_curation_note": "Parent visually reviewed the real local report and plan appendices; preserve conceptual scope and note a real attachment-reading challenge.",
+  "worker": "A05",
+  "prompt_number": 4,
+  "priority_tier": 1,
+  "priority": "Calgary / Edmonton",
+  "attachments": [
+    {
+      "url": "https://www.edmonton.ca/sites/default/files/public-files/rpp-building-and-fire-code-assessment.pdf",
+      "sha256": "8459bfcadbdb28cb7aeca115d8b97d0df1ca40bf628219c844890b931275b404",
+      "role": "input",
+      "bytes": 17814621,
+      "filename": "edmonton-rossdale-power-plant-building-fire-code-assessment-8459bfcadbdb.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/A05/files/edmonton-rossdale-power-plant-building-fire-code-assessment-8459bfcadbdb.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T02:00:02.227034+00:00",
+        "http_status": "200",
+        "final_url": "https://www.edmonton.ca/sites/default/files/public-files/rpp-building-and-fire-code-assessment.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://www.edmonton.ca/sites/default/files/public-files/rpp-detailed-structural-investigation.pdf",
+      "sha256": "b496dddfb3797af5feddd81576632ab5e1e1ea13c0ed78a46842fe1c33798d6e",
+      "role": "input",
+      "bytes": 10155767,
+      "filename": "edmonton-rossdale-structural-evaluation-b496dddfb379.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/A05/files/edmonton-rossdale-structural-evaluation-b496dddfb379.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T02:03:05.296339+00:00",
+        "http_status": "200",
+        "final_url": "https://www.edmonton.ca/sites/default/files/public-files/rpp-detailed-structural-investigation.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

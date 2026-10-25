@@ -1,0 +1,57 @@
+{
+  "id": "L08-1797",
+  "title": "Combustible piping in a drain, waste and vent system",
+  "jurisdiction": "British Columbia (specific local authority not named in published decision)",
+  "code_edition": "unknown (edition not stated in decision)",
+  "case_type": "appeal_decision",
+  "source_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1797",
+  "document_date": "2017-05-18",
+  "facts": [
+    {
+      "text": "A high-rise multi-unit residential building has mostly non-combustible DWV piping that penetrates rated horizontal and vertical separations. Combustible p-traps and trap arms are proposed within unrated suite partition walls for sinks and clothes washers.",
+      "locator": "Project description"
+    },
+    {
+      "text": "The local authority raised concern that failure or lack of firestopping could create conduits between fire compartments; the appellant sought permission for the combustible transitions.",
+      "locator": "Decision being appealed; Appellant's position"
+    },
+    {
+      "text": "The dispute cites Sentences 3.1.9.4.(3), (4) and (5).",
+      "locator": "Applicable Code requirement"
+    }
+  ],
+  "limitations": [
+    "Only the Board published decision page is available; the original appeal application and underlying submissions are not linked.",
+    "British Columbia case; comparative evidence only, with no asserted applicability to Alberta."
+  ],
+  "worker": "L08",
+  "prompt_number": 526,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1797",
+      "sha256": "f2556983b746721383dd083acdffcfef6a7d74ea5849111debba84652b3f99a7",
+      "role": "outcome_reference",
+      "bytes": 1360225,
+      "filename": "bcab-1797-f2556983b746.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L08/files/bcab-1797-f2556983b746.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:21:04.072086+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1797",
+        "content_type": "text/html; charset=utf-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-1-source-text.txt",
+        "sha256": "5c1da104afa9bbff7259f02fed0583a5214aa87d189507a088963a82b14f4af0",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

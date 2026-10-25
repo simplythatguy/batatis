@@ -1,0 +1,74 @@
+{
+  "id": "L01-017",
+  "title": "23-BCV-017 — Unvented roof assembly",
+  "jurisdiction": "Alberta, Canada (province-wide variance)",
+  "code_edition": "National Building Code – 2023 Alberta Edition",
+  "case_type": "issued_variance",
+  "source_url": "https://open.alberta.ca/publications/standata-variance-building-national-building-code-2023-alberta-edition",
+  "document_date": "September 2025",
+  "facts": [
+    {
+      "text": "The variance applies to roof assemblies in Part 9 residential buildings and refers to Sentences 9.19.1.1.(1) and 9.19.1.4.(1).",
+      "locator": "STANDATA PDF pp.1–2, Code References/Application"
+    },
+    {
+      "text": "The permit application is to include the design requirements from the named 32139.000 Alberta Unvented Roofs Evaluation Report.",
+      "locator": "STANDATA PDF p.2, Variance"
+    },
+    {
+      "text": "The cited report covers three assembly strategies and identifies design conditions including thermal resistance, air/vapour control, winter interior relative humidity, spray-foam installation standards and roof-water management.",
+      "locator": "RDH report pp.6–8 and 16–17, tables/options/conclusions; downloaded original"
+    },
+    {
+      "text": "Catalogue status at capture: the resource title has no [SUPERSEDED] marker; API resource state is active.",
+      "locator": "Official catalogue row and API resource metadata, retrieved 2026-10-24 America/Edmonton"
+    }
+  ],
+  "limitations": [
+    "This is a regulator-issued variance reference, not an applicant submission, approved project file, or evidence that any particular design meets its conditions.",
+    "No applicant facts, site dimensions, drawings, calculations, professional opinions, or permit decision are present in the catalogue record.",
+    "Catalogue labels and API resource state are recorded as published metadata; they are not an independent legal determination of current force."
+  ],
+  "worker": "L01",
+  "prompt_number": 55,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/2aa7678c-c476-4523-b0c3-36e71256e11b/download/ma-standata-variance-building-23-bcv-017-2025-09.pdf",
+      "sha256": "366f3ac998b8457f84ffe6f7f4075c4b07d8424cae262e22bf66a25ad753cf63",
+      "role": "outcome_reference",
+      "bytes": 125260,
+      "filename": "_evaluation/23-BCV-017-366f3ac998b8.pdf",
+      "included_in_default_input": false,
+      "original_collection_path": "_research/workers/L01/files/23-BCV-017-366f3ac998b8.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:21.431272+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/2aa7678c-c476-4523-b0c3-36e71256e11b/download/ma-standata-variance-building-23-bcv-017-2025-09.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://sprayfoamcoalition.org/wp-content/uploads/32139_000-2025-09-10-RDH-Alberta-Unvented-Roofs-Report.pdf",
+      "sha256": "3511fab3b332e01065f4413b294caa0662ab42c82c6b733eb784982e866af743",
+      "role": "supporting_evidence",
+      "bytes": 738056,
+      "filename": "32139-000-alberta-unvented-roofs-evaluation-report-3511fab3b332.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L01/files/32139-000-alberta-unvented-roofs-evaluation-report-3511fab3b332.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:19:34.250768+00:00",
+        "http_status": "200",
+        "final_url": "https://sprayfoamcoalition.org/wp-content/uploads/32139_000-2025-09-10-RDH-Alberta-Unvented-Roofs-Report.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

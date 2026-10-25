@@ -1,0 +1,16 @@
+{
+  "known_outcome": "unknown in the attachment. The URL folder names the notice as 'vedtatt' (adopted), dated 2024-07-16; plan status only.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "code edition stated",
+    "5.0 m shielding requirement and the through-apartment note",
+    "fire site plan and sketches referred to but not identified in the PDF",
+    "planning-level checklist versus later design stages",
+    "cover says 'Kvartal 62 B' while the URL says 'kv. 64b'"
+  ],
+  "case_id": "H17-005",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

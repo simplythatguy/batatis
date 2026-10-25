@@ -1,0 +1,6 @@
+A building uses photoluminescent exit signs, and the reviewer asks about illumination and emergency power. The attached STANDATA interpretation (23-BCI-017) is my only source. Using only that document, identify the exit-sign and emergency-lighting provisions it cites, the charging-light question it addresses, what evidence the file should show, and what to ask next. Do not invent sign counts or layout, and do not state the signs comply.
+
+Attachments:
+- ma-standata-interpretation-building-23-bci-017-2025-03-ec2f79336ad5.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

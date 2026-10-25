@@ -1,0 +1,59 @@
+{
+  "id": "L10-011",
+  "title": "BCC Ruling No. 16-26-1454 — vertical cable guard openings",
+  "jurisdiction": "Ontario — Township of Muskoka Lakes",
+  "code_edition": "Ontario Building Code 2012, O. Reg. 332/12 (as cited)",
+  "source_url": "http://www.mah.gov.on.ca/Page16639.aspx",
+  "document_date": "2016-09-08",
+  "facts": [
+    {
+      "text": "The dispute concerns a pre-engineered vertical cable guard on an elevated deck of a new one-storey, 210 m² dwelling at 1667-1 Acton Island Road.",
+      "locator": "§1, Particulars of Dispute"
+    },
+    {
+      "text": "The question is whether the cable openings prevent passage of a 100 mm sphere under Article 9.8.8.5.",
+      "locator": "§§1–2"
+    },
+    {
+      "text": "The applicant described an Intertek test report at 200 lb and 300 lb cable tensions, with reported maximum loads of 5.1 lb and 14.8 lb before sphere passage.",
+      "locator": "§3, Applicant’s Position"
+    }
+  ],
+  "limitations": [
+    "The official archived HTML ruling is the case attachment; it summarizes an Intertek report but does not attach the report.",
+    "An additional PDF mirror was downloaded for comparison but is not used as the case attachment.",
+    "This Ontario decision and its code are non-Alberta comparisons for attachment format/content only; they cannot establish Alberta performance. Check Calgary and Edmonton sources first for local authority, then other Alberta jurisdictions as needed."
+  ],
+  "case_type": "appeal_decision",
+  "document_type": "Ontario Building Code Commission dispute ruling",
+  "worker": "L10",
+  "prompt_number": 550,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://web.archive.org/web/20190922170345id_/http://www.mah.gov.on.ca/Page16639.aspx",
+      "sha256": "375a6dc6070b608691ee64165886d5d197e0b2c5af876b9f2fea43582f924466",
+      "role": "outcome_reference",
+      "bytes": 35086,
+      "filename": "ONBCC-16-26-1454-official-375a6dc6070b.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L10/files/ONBCC-16-26-1454-official-375a6dc6070b.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:24:05.101991+00:00",
+        "http_status": "200",
+        "final_url": "https://web.archive.org/web/20190830170301id_/http://www.mah.gov.on.ca/Page16639.aspx",
+        "content_type": "text/html; charset=utf-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-1-source-text.txt",
+        "sha256": "c20d8b79ba2490de5955cf36d094837dca5922b31408a8300cbc40a45d67aaca",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

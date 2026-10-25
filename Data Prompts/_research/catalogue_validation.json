@@ -1,0 +1,16 @@
+{
+  "source_url_hash_records": 4147,
+  "unique_source_hashes": 4087,
+  "formats": {
+    "pdf": 2595,
+    "html": 1358,
+    "zip_container": 5,
+    "other": 37,
+    "json": 50,
+    "image": 102
+  },
+  "access_gap_records": 427,
+  "unvisited_lead_records": 480,
+  "rejected_empty_captures": 10,
+  "integrity_issues": []
+}

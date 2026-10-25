@@ -1,0 +1,90 @@
+{
+  "id": "H08-001",
+  "title": "INCODE Solutions - BCA Performance Solution Report, attached dual occupancy, 17 Hillview Avenue, Bankstown (DA-209/2018/1/B, modification)",
+  "jurisdiction": "New South Wales, Australia - COMPARATIVE ONLY (not Alberta; NSW code text, not Alberta applicability)",
+  "code_edition": "BCA 2019 Amendment 1 (stated, p.3)",
+  "case_type": "actual_application",
+  "source_url": "https://www.planningportal.nsw.gov.au/daex/under-consideration/da-20920181b",
+  "document_date": "20 April 2022 (report number 01, p.2)",
+  "facts": [
+    {
+      "text": "Titled 'Building Code of Australia Performance Solution Report' for 17 Hillview Avenue, Bankstown; report number 01, final issued 20 April 2022.",
+      "locator": "p.1-2"
+    },
+    {
+      "text": "Consent authority named as Canterbury Bankstown Council; development described as an attached dual occupancy building.",
+      "locator": "p.4"
+    },
+    {
+      "text": "'Table 2 - Summary of matter' lists the variations for which a performance solution is proposed; performance solution 1 concerns window openings to an external wall, assessed by radiant-heat analysis.",
+      "locator": "p.5-6; radiant-panel calculations p.8"
+    },
+    {
+      "text": "States the code as BCA 2019, Amendment 1.",
+      "locator": "p.3"
+    },
+    {
+      "text": "Report basis and limitations: the author does not verify information supplied by others and assumes it is true and correct.",
+      "locator": "p.3"
+    },
+    {
+      "text": "Conclusion: gives the author's opinion that the performance solution satisfies the relevant performance requirement, with conditions 'to ensure the effectiveness of the performance solution'.",
+      "locator": "p.9"
+    },
+    {
+      "text": "Drawing sheet notes say 'REFER TO FIRE ENGINEER'S PERFORMANCE SOLUTION REPORT'; drawing revision 1 dated 20/04/2022.",
+      "locator": "supporting drawing set p.1"
+    },
+    {
+      "text": "The Planning Portal DA page lists this PDF as 'Fire Engineering Report_17 Hillview Avenue, Bankstown' under the category 'BCA Performance Requirements Compliance Statement'.",
+      "locator": "landing page 'Application Documents' list (not the PDF itself)"
+    }
+  ],
+  "limitations": [
+    "Comparative NSW material: it cannot establish Alberta performance or Alberta applicability.",
+    "The consent document and determined plans are not in hand; the decision comes from the Planning Portal DA page, not from the attachments.",
+    "The portal labels this PDF 'Fire Engineering Report' under a BCA compliance category; the file's own title is 'Building Code of Australia Performance Solution Report'. The file title is used here."
+  ],
+  "worker": "H08",
+  "prompt_number": 235,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://apps.planningportal.nsw.gov.au/prweb/PRRestService/DocMgmt/v1/PublicDocuments/DATA-WORKATTACH-FILE%20PEC-DPE-EP-WORK%20PAN-217602!20220421T092155.320%20GMT",
+      "sha256": "e370d799ecb97e2c9ee5236d56fc7b24a229f9cc7ec3615e27926b3d87df9d42",
+      "role": "input",
+      "bytes": 303163,
+      "filename": "pp-workattach-pan-217602-e370d799ecb9.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H08/files/pp-workattach-pan-217602/pp-workattach-pan-217602-e370d799ecb9.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:22:45.835566+00:00",
+        "http_status": "200",
+        "final_url": "https://apps.planningportal.nsw.gov.au/prweb/PRRestService/DocMgmt/v1/PublicDocuments/DATA-WORKATTACH-FILE%20PEC-DPE-EP-WORK%20PAN-217602%2120220421T092155.320%20GMT",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://apps.planningportal.nsw.gov.au/prweb/PRRestService/DocMgmt/v1/PublicDocuments/DATA-WORKATTACH-FILE%20PEC-DPE-EP-WORK%20AI-457609!20220506T060641.407%20GMT",
+      "sha256": "fbbb009db998af3fc568322a8fc14e9cbe2acabe616dde5a265e49c6bfd0915b",
+      "role": "supporting_evidence",
+      "bytes": 249078,
+      "filename": "hillview-architectural-documentation-da-209-2018-1b-fbbb009db998.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H08/files/hillview-architectural-documentation-da-209-2018-1b/hillview-architectural-documentation-da-209-2018-1b-fbbb009db998.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:53:11.876478+00:00",
+        "http_status": "200",
+        "final_url": "https://apps.planningportal.nsw.gov.au/prweb/PRRestService/DocMgmt/v1/PublicDocuments/DATA-WORKATTACH-FILE%20PEC-DPE-EP-WORK%20AI-457609%2120220506T060641.407%20GMT",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

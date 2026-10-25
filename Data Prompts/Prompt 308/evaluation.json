@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The proponent profile reports submission to Hamilton in December 2024 and acceptance in October 2025; no official approval record or permit set is attached.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "basement/storey and Part classification",
+    "interaction of parking, lobby, and exit path",
+    "which drawings are absent from the packet",
+    "independent confirmation of reported disposition"
+  ],
+  "case_id": "L14-006",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

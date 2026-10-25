@@ -1,0 +1,57 @@
+{
+  "id": "L01-009",
+  "title": "23-BCV-009 — CSA B52:23 Mechanical refrigeration code",
+  "jurisdiction": "Alberta, Canada (province-wide variance)",
+  "code_edition": "National Building Code – 2023 Alberta Edition",
+  "case_type": "issued_variance",
+  "source_url": "https://open.alberta.ca/publications/standata-variance-building-national-building-code-2023-alberta-edition",
+  "document_date": "October 2024",
+  "facts": [
+    {
+      "text": "The variance applies to equipment required to conform to CSA B52 under Sentences 6.2.1.5.(1) and 9.33.5.2.(1).",
+      "locator": "PDF p.2, Application"
+    },
+    {
+      "text": "It permits conformance with CSA B52:23 to satisfy the NBC(AE) installation-standard requirements.",
+      "locator": "PDF p.2, Variance"
+    },
+    {
+      "text": "The source states that Division B Table 1.3.1.2. referenced CSA B52:18.",
+      "locator": "PDF p.2, Code References/Table 1.3.1.2."
+    },
+    {
+      "text": "Catalogue status at capture: the resource title has no [SUPERSEDED] marker; API resource state is active.",
+      "locator": "Official catalogue row and API resource metadata, retrieved 2026-10-24 America/Edmonton"
+    }
+  ],
+  "limitations": [
+    "This is a regulator-issued variance reference, not an applicant submission, approved project file, or evidence that any particular design meets its conditions.",
+    "No applicant facts, site dimensions, drawings, calculations, professional opinions, or permit decision are present in the catalogue record.",
+    "Catalogue labels and API resource state are recorded as published metadata; they are not an independent legal determination of current force."
+  ],
+  "worker": "L01",
+  "prompt_number": 49,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/21316179-6a6c-4ed0-b888-c151c7a57281/download/ma-standata-variance-building-23-bcv-009-2024-10.pdf",
+      "sha256": "6045599b785df69f46eb50aea14516934a2651a680231e102ef6c52d130e00be",
+      "role": "outcome_reference",
+      "bytes": 61572,
+      "filename": "23-BCV-009-6045599b785d.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L01/files/23-BCV-009-6045599b785d.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:17.070189+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/21316179-6a6c-4ed0-b888-c151c7a57281/download/ma-standata-variance-building-23-bcv-009-2024-10.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

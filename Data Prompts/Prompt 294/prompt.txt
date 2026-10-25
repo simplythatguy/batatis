@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from Québec City, Québec. It is not an Alberta application.
+
+Using the attached French Origine case study as historical evidence, extract the stated jurisdiction, code-at-project-start context, building scope, and types of fire and structural evidence described. Identify what an administrative-completeness reviewer would still need from an actual project submission: the applicable code text/edition, drawings and assembly schedules, test reports, calculations, penetration details, assumptions, and the authority's decision record. Keep the case study's reported RBQ history separate from any conclusion about another design; do not certify safety or equivalence.
+
+Attachments:
+- origine-case-study-fr-a323749ce8b8.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

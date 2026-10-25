@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The Board varies the decision of the local authority.; It is the determination of the Board that the side of the new building (i.e. the outside edge of the RV shelter posts) facing the existing RV shelter is an exposing building face and that the spatial separation requirements outlined in Subsection 9.10.14., Division B, apply. In this case, the roof over the deck is considered to be a combustible projection located more than 1 m above the ground.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "identify the specific code edition and provision stated in the record",
+    "separate project facts from party positions and identify unprovided supporting documents",
+    "draft focused questions for unresolved design or administrative facts",
+    "do not transfer this British Columbia appeal outcome or code interpretation to Alberta"
+  ],
+  "case_id": "L07-006",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

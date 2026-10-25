@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from British Columbia (specific local authority not named in published decision). It is not an Alberta application.
+
+Review the record for a single-family renovation where the approved drawing showed a ventilated roof deck assembly but medium-density spray foam was installed without a ventilation space. Identify what changed from the submitted design and what plans, inspection records, moisture analysis, independent research or calculations are needed before an officer can assess the claim that ventilation is unnecessary.
+
+Attachments:
+- attachment-1-source-text.txt
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

@@ -1,0 +1,67 @@
+{
+  "id": "H15-010",
+  "title": "Determination SB/007/001/012: mezzanine and extension in a Grade II listed building; travel distance to exit (Requirement B1, section 50(2))",
+  "jurisdiction": "England (UK): Secretary of State determination / appeal / tribunal under the Building Act 1984 and Building Regulations; comparative test only, not Alberta",
+  "code_edition": "Building Regulations 2010 (as amended): Requirement B1 (means of warning and escape)",
+  "case_type": "appeal_decision",
+  "source_url": "https://www.gov.uk/guidance/building-regulations-determinations",
+  "document_date": "undated letter; gov.uk index lists it as the latest decision published 24 February 2015",
+  "facts": [
+    {
+      "text": "The application letter and form are dated 13 November 2014 and enclose plans and drawings; the determination is limited solely to the question put to the Secretary of State.",
+      "locator": "p.1"
+    },
+    {
+      "text": "The approved inspector refused a Plans Certificate on 12 September 2014 because the travel distance of 44 metres from the new mezzanine to the exit was considered an inadequate means of escape.",
+      "locator": "p.2"
+    },
+    {
+      "text": "The building is Grade II listed; construction is stated to have begun around 1450 and to have been completed about 100 years later.",
+      "locator": "p.2"
+    },
+    {
+      "text": "The applicant considers the proposals as they stand comply with requirement B1; the letter says a second spiral stair in the south aisle, to shorten travel distance, is 'wanted neither by the client nor' (the sentence continues in the source).",
+      "locator": "p.2"
+    },
+    {
+      "text": "Determination: the proposals as submitted do not make adequate provision for means of escape in case of fire and do not comply with Requirement B1.",
+      "locator": "p.4"
+    }
+  ],
+  "limitations": [
+    "Record type: Secretary of State determination under s.16 Building Act 1984 (dispute on plan compliance); case_type mapped to appeal_decision as the nearest schema value.",
+    "Comparative test only: England (UK); Building Regulations 2010 (as amended): Requirement B1 (means of warning and escape). Not an Alberta record; no applicability to NBC(AE) or Alberta is asserted.",
+    "Attachment is the original public file; Internet Archive capture 20260214015820 (live gov.uk URL redirects). Live URL status is recorded in references and blocked.",
+    "outcome_leakage true: the decision is inside this attachment (p.4); use only earlier pages as input if a leak-free variant is required.",
+    "Personal names and contact details appear in the original attachment and are omitted from this record.",
+    "The letter is undated in the extracted text; the gov.uk archived index lists this as the latest decision published on 24 February 2015.",
+    "The gov.uk listing for the determinations (guidance/building-regulations-determinations) is available only as a 2024-02-28 Internet Archive snapshot; the live URL redirects to the current appeals guide."
+  ],
+  "worker": "H15",
+  "prompt_number": 485,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://assets.publishing.service.gov.uk/media/5a81833c40f0b62305b8f5ad/150217_DET_007-001-012_exp.pdf",
+      "sha256": "3c9f991c4e76da53016e0598e1a72891a5d99e29e7f8d00f311869338cdb1de9",
+      "role": "input",
+      "retrieved_via": "Internet Archive capture 20260214015820 (live gov.uk URL redirects)",
+      "archive_url": "https://web.archive.org/web/20260214015820id_/https://assets.publishing.service.gov.uk/media/5a81833c40f0b62305b8f5ad/150217_DET_007-001-012_exp.pdf",
+      "bytes": 150771,
+      "filename": "determination-SB-007-001-012-3c9f991c4e76.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H15/files/determinations/SB-007-001-012/determination-SB-007-001-012-3c9f991c4e76.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:48:23.165292+00:00",
+        "http_status": "200",
+        "final_url": "https://web.archive.org/web/20260214015820id_/https://assets.publishing.service.gov.uk/media/5a81833c40f0b62305b8f5ad/150217_DET_007-001-012_exp.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

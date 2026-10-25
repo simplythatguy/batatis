@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The reference allows specified polyethylene film on qualifying commercial plant-growing greenhouses without public access when the film flame-spread rating is at most 25; other purposes are excluded.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "plant-growing use and no-public-access condition",
+    "film product identification",
+    "flame-spread evidence",
+    "other uses/sales areas"
+  ],
+  "case_id": "L03-013",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

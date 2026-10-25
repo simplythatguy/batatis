@@ -1,0 +1,53 @@
+{
+  "id": "L20-014",
+  "title": "Remote summer-camp washroom/shower facility exemption request",
+  "jurisdiction": "Saskatchewan; camp property location redacted in the published decision",
+  "code_edition": "Construction Codes Act and Saskatchewan accessibility construction standards; NBC edition not stated in the decision",
+  "case_type": "appeal_decision",
+  "source_url": "https://www.saskatchewan.ca/business/housing-development-construction-and-property-management/building-and-technical-standards/saskatchewan-building-and-accessibility-standards-appeal-board",
+  "document_date": "2024-10-16",
+  "facts": [
+    {
+      "text": "The application describes a replacement washroom/shower facility in a valley along camp trails, accessible mainly on foot or by ATV/side-by-side.",
+      "locator": "PDF p. 3"
+    },
+    {
+      "text": "The applicant sought an exemption and stated that the proposed facility design included a universal washroom/shower space; the decision says no building permit had yet been issued.",
+      "locator": "PDF pp. 3–4"
+    },
+    {
+      "text": "The board discusses the exemption criteria and recommends coordinating entrance access and the universal washroom with the local authority.",
+      "locator": "PDF pp. 4–5"
+    }
+  ],
+  "limitations": [
+    "Comparative source from outside Alberta; it cannot establish Alberta code performance or approval.",
+    "The attached publication is the appeal decision, not the underlying application file. Exhibits named in the decision are not presumed attached unless visible in this PDF. The decision outcome is visible in the attachment.",
+    "This is an accessibility-standard exemption, not an Alberta NBC variance record."
+  ],
+  "worker": "L20",
+  "prompt_number": 566,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://publications.saskatchewan.ca/api/v1/products/125142/formats/146316/download",
+      "sha256": "0bfb7d184baadacf2bdbe050d6140002f79724c5e8993dd37862040fc4a72058",
+      "role": "outcome_reference",
+      "bytes": 197407,
+      "filename": "sk-scsab-appeal-no.-2024-005-0bfb7d184baa.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L20/files/sk-scsab-appeal-no.-2024-005-0bfb7d184baa.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:23:16.759494+00:00",
+        "http_status": "200",
+        "final_url": "https://publications.saskatchewan.ca/api/v1/products/125142/formats/146316/download",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

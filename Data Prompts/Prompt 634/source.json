@@ -1,0 +1,71 @@
+{
+  "id": "H14-007",
+  "title": "ICC-ES ESR-4733: SmartLam cross-laminated timber (CLT)",
+  "jurisdiction": "United States (ICC-ES evaluation report under IBC/IRC); NON-ALBERTA COMPARATIVE ONLY: cannot establish Alberta performance, acceptance or equivalence; no Canadian or Alberta approval is claimed or implied",
+  "code_edition": "2018, 2015, 2012 and 2009 IBC and IRC (report §1.1, p1); CALGreen 2022 and ICC 700 (§1.2, p1)",
+  "case_type": "product_evidence",
+  "source_url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-4733.pdf",
+  "document_date": "Reissued December 2024; subject to renewal December 2026 (p1)",
+  "facts": [
+    {
+      "text": "Report holder SMARTLAM, LLC; subject is SmartLam CLT.",
+      "locator": "p1 cover"
+    },
+    {
+      "text": "Components in floors, roofs and walls in Type III (interior floors only), Types IV and V, and roofs in Type I and II (IBC); IRC use requires an engineered design.",
+      "locator": "§2.0, p1"
+    },
+    {
+      "text": "Connections of wall, floor and roof panels must be designed by a registered design professional per the NDS or ICC-ES-recognized connectors.",
+      "locator": "§5.4, p3"
+    },
+    {
+      "text": "Cutting, drilling and notching are outside the evaluation; beams or lintels loaded parallel to glue lines are outside the report.",
+      "locator": "§5.5, §5.7, p3"
+    },
+    {
+      "text": "Out-of-plane wall use requires complete detailing and wall design acceptable to the code official.",
+      "locator": "§5.6, p3"
+    },
+    {
+      "text": "Unbalanced layups must be installed per §4.2; panels are manufactured at a SmartLam LLC facility.",
+      "locator": "§5.8 and §5.12, p3"
+    },
+    {
+      "text": "Evidence listed: ICC-ES AC455, dated February 2019, editorially revised June 2020.",
+      "locator": "§6.0, p3"
+    }
+  ],
+  "limitations": [
+    "Non-Alberta comparative attachment; the report does not reference NBC(AE) 2023 and is not evidence of Alberta or Canadian acceptance.",
+    "Retrieved 2026-10-25 from the official ICC-ES report URL; current ICC-ES status was not checked live. source_url is the report PDF, not a separate listing page.",
+    "Text from pypdf extraction; figures, tables and signatures not transcribed; locators are PDF page numbers, not printed page numbers.",
+    "ICC-ES copyright; retained locally for comparison only, redistribution not licensed.",
+    "The facility name on §5.12 was truncated in extraction; only 'a SmartLam LLC facility' is cited."
+  ],
+  "worker": "H14",
+  "prompt_number": 634,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-4733.pdf",
+      "sha256": "301477831a42391a1e9fd993da71d589c7fff01bcee504335f47920b9929ba19",
+      "role": "input",
+      "bytes": 477059,
+      "filename": "esr-4733-smartlam-clt-301477831a42.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H14/files/esr-4733/esr-4733-smartlam-clt-301477831a42.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:21:25.502381+00:00",
+        "http_status": "200",
+        "final_url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-4733.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

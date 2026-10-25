@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from North American industry best-practice guide (SIPA member manufacturers; Premier-hosted copy) with US code references; NON-ALBERTA COMPARATIVE ONLY: cannot establish Alberta performance, acceptance or equivalence; no Canadian or Alberta approval is claimed or implied. It is not an Alberta application.
+
+Comparative test on a manufacturer-hosted installation guide from an industry association. It is general builder guidance, not a code document or an evaluation report. Using only the attached guide, list the installation items it treats as essential, the items it refers to the manufacturer or an engineer, and the code references it names with their editions. Then say which items a reviewer could check on drawings, which need the product's own instructions or evaluation report, and what the guide does not establish for an Alberta permit.
+
+Attachments:
+- premier-sip-builder-bp7-installation-a1d7d732119a.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

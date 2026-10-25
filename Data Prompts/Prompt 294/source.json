@@ -1,0 +1,74 @@
+{
+  "id": "L13-002",
+  "title": "Origine Eco-condos de la Pointe-aux-Lièvres",
+  "jurisdiction": "Québec City, Québec",
+  "code_edition": "Québec Construction Code in force at project start in 2014 (edition unstated); RBQ 2015 guide for mass-timber buildings up to 12 storeys is cited",
+  "case_type": "documented_design_study",
+  "source_url": "https://cecobois.com/docs_techniques/origine/",
+  "document_date": "Unknown; the project case study describes the 2014 project start and 2016-2017 construction",
+  "facts": [
+    {
+      "text": "The French case study says the code's acceptable solutions at project start in 2014 required a building above four storeys to use noncombustible construction, leading the design team to seek equivalent measures from the RBQ.",
+      "locator": "PDF p.5"
+    },
+    {
+      "text": "It states that the RBQ accepted the equivalent-measures request and later recorded many measures in its 2015 guide for mass-timber buildings up to 12 storeys.",
+      "locator": "PDF p.6"
+    },
+    {
+      "text": "The study describes a 12-storey timber structure and fire-resistance design work involving complete wall/floor assemblies, connections and penetrations.",
+      "locator": "PDF pp.8-9, 14-15"
+    },
+    {
+      "text": "The report describes CAN/ULC-S101 fire-resistance testing and CAN/ULC-S115 joint/penetration testing, with a 1-hour char-design plus gypsum encapsulation strategy for a 2-hour structural rating.",
+      "locator": "PDF pp.15, 19"
+    }
+  ],
+  "limitations": [
+    "Primary case study is in French; facts in this record are translated summaries.",
+    "The fire-rehabilitation report supplies a later sprinkler-activation case reference, not an approval record.",
+    "No original RBQ submission, approval letter, full laboratory test reports or permit drawings were located."
+  ],
+  "worker": "L13",
+  "prompt_number": 294,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://cecobois.com/wp-content/uploads/2020/04/CECO-11410_Etude_Cas_Origine_WEB-2.pdf",
+      "sha256": "a323749ce8b8713879b4d7eb25369af43c76298a276ab0016e1908852e313674",
+      "role": "input",
+      "bytes": 5717004,
+      "filename": "origine-case-study-fr-a323749ce8b8.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L13/files/origine-case-study-fr-a323749ce8b8.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:18:14.652436+00:00",
+        "http_status": "200",
+        "final_url": "https://cecobois.com/wp-content/uploads/2020/04/CECO-11410_Etude_Cas_Origine_WEB-2.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://cwc.ca/wp-content/uploads/2021/03/Rehabilitation-of-Mass-Timber-Following-Fire-and-Sprinkler-Activation2019-Ranger-.pdf",
+      "sha256": "11a9fe28b7e26e5ce2c79b0d87295f5d2a63a8bf0ccad2d1be97264b4f7ede40",
+      "role": "outcome_reference",
+      "bytes": 1903506,
+      "filename": "_evaluation/mass-timber-fire-rehabilitation-study-11a9fe28b7e2.pdf",
+      "included_in_default_input": false,
+      "original_collection_path": "_research/workers/L13/files/mass-timber-fire-rehabilitation-study-11a9fe28b7e2.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:18:14.656733+00:00",
+        "http_status": "200",
+        "final_url": "https://cwc.ca/wp-content/uploads/2021/03/Rehabilitation-of-Mass-Timber-Following-Fire-and-Sprinkler-Activation2019-Ranger-.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

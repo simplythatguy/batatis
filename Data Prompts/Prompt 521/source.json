@@ -1,0 +1,57 @@
+{
+  "id": "L08-1777",
+  "title": "Required visual openness of a mezzanine",
+  "jurisdiction": "British Columbia (specific local authority not named in published decision)",
+  "code_edition": "unknown (edition not stated in decision)",
+  "case_type": "appeal_decision",
+  "source_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1777",
+  "document_date": "2015-12-17",
+  "facts": [
+    {
+      "text": "A multi-storey building with multiple major occupancies includes a sales gallery with a mezzanine. A guard/partition at the edge uses vertical panels 50–300 mm wide, spaced no more than 100 mm apart, and extends nearly continuously to the ceiling.",
+      "locator": "Project description"
+    },
+    {
+      "text": "The dispute is whether construction above 1,070 mm satisfies the visual-openness criterion in Clause 3.2.1.1.(3)(b).",
+      "locator": "Reason for appeal"
+    },
+    {
+      "text": "The appellant compared the partition to a 1,070 mm solid guard with open area above; the local authority said the area above 1,070 mm was not visually open.",
+      "locator": "Appellant's position; Local authority's position"
+    }
+  ],
+  "limitations": [
+    "Only the Board published decision page is available; the original appeal application and underlying submissions are not linked.",
+    "British Columbia case; comparative evidence only, with no asserted applicability to Alberta."
+  ],
+  "worker": "L08",
+  "prompt_number": 521,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1777",
+      "sha256": "4716c962c87a1bba99110e5f53424de3561a19a38a9e217b69649f1e189520b5",
+      "role": "outcome_reference",
+      "bytes": 1354108,
+      "filename": "bcab-1777-4716c962c87a.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L08/files/bcab-1777-4716c962c87a.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:24:16.045813+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1777",
+        "content_type": "text/html; charset=utf-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-1-source-text.txt",
+        "sha256": "caa871da4063fee58e8988c1049688c002592c58157c283a2334c0fe6ea1f1be",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

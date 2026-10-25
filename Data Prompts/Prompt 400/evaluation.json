@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The Chief Executive determined that the remedial base detail in s2.3, pending verification under s4.2.6, means the building as a whole will comply with E2 External moisture (decision, p.11).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "wall-base flashing and slab-edge detail",
+    "air path and moisture control above the slab",
+    "evidence needed to verify a remedial detail in place",
+    "consented detail versus as-built detail"
+  ],
+  "case_id": "H04-005",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

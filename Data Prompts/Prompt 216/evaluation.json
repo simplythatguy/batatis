@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The current CCMC report publishes test data and an S134 “meets requirement” result tied only to the specified Intertek design listing. The attached public listing copy is dated June 3, 2024 and may not be the latest listing revision.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "match the proposed panel width and entire listed wall assembly",
+    "confirm current listing revision and product/assembly identity",
+    "supply project fire-separation, height and exterior-wall context",
+    "identify all departures from the listed assembly and supporting evidence"
+  ],
+  "case_id": "L16-020",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

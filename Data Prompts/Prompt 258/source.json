@@ -1,0 +1,82 @@
+{
+  "id": "H16-005",
+  "title": "Wandsworth, Battersea Park Road (Booker site): planning fire statement form for Block BC (49.0 m, student and residential)",
+  "jurisdiction": "England, UK (London Borough of Wandsworth, Nine Elms). COMPARATIVE NON-ALBERTA RECORD; no Alberta applicability asserted.",
+  "code_edition": "London Plan Policies D12(A), D12(B) and D5(B)(5) cited (edition not stated on form). BS 9991:2015 cited in section 10; BS 9991 and BS 9999 otherwise cited without year. BS 8629:2019, BS EN 81-20 and BS EN 81-70 cited without context. Building Regulations edition not stated.",
+  "case_type": "actual_application",
+  "source_url": "https://www.wandsworth.gov.uk/media/z0almb2a/cda25_booker_fire-statement_form_block_bc.pdf",
+  "document_date": "01/07/2024 (form date)",
+  "facts": [
+    {
+      "text": "Site: 41-49 and 49-59 Battersea Park Road, Nine Elms, London SW8 5AL. Application for phased full planning permission for demolition and three new buildings with residential (Use Class C3) and student accommodation (sui generis), plus Class E and F1 floorspace.",
+      "locator": "p.1 items 1-2"
+    },
+    {
+      "text": "Item 4 (consultation on fire safety issues) is answered 'N/A'.",
+      "locator": "p.1 item 4"
+    },
+    {
+      "text": "An embedded site layout plan shows Plots 1-3 with buildings A to F, with the red application boundary.",
+      "locator": "p.3 (embedded drawing)"
+    },
+    {
+      "text": "Block BC: topmost occupied storey 49.0 m, 16 storeys above ground, student accommodation with WCH studios and student amenity. The standards column reads BS9991 against the student accommodation rows (p.6) and BS9999 against the amenity and commercial rows (p.8). External walls concrete and steel with plasterboard partitions, class A2-s1,d0 or better, no balconies.",
+      "locator": "p.6-8 item 6 building schedule"
+    },
+    {
+      "text": "Item 7 (specific technical complexities): 'Plots BC - There are certain studio flats where the travel distance in the corridors and from the flats departs from the guidance.' No quantified departure is given.",
+      "locator": "p.9 item 7"
+    },
+    {
+      "text": "Item 8: means of escape is stay put, with an evacuation alert system for the fire and rescue service (to BS 8629:2019) and one evacuation lift 'to benefit occupants who require assistance', following BS 9999 Annex G and BS EN 81-20 and 81-70.",
+      "locator": "p.9 item 8"
+    },
+    {
+      "text": "Item 9 (local policies): Block BC follows GLA London Plan Guidance Fire Safety Policy D12(A) and D12(B) and London Plan Policy D5 (B)(5) on evacuation lifts.",
+      "locator": "p.9 item 9"
+    },
+    {
+      "text": "Items 10-13 (fire service): access 'follows the guidance within BS 9991:2015'; tender access is within 18 m of the fire main inlets; hydrants are within 90 m of the fire main inlets; nature of supply 'hydrant- private'; asked whether existing hydrants are usable, the form answers 'don't know'.",
+      "locator": "p.10 items 10-13"
+    },
+    {
+      "text": "Several cells in the building schedule still show the default prompt 'Choose an item.'",
+      "locator": "p.9 (rendered page; table cells)"
+    },
+    {
+      "text": "Item 15 (signature) is a typed name, 'Scott Hall', with no signature image on the page; item 16 date is 01/07/2024.",
+      "locator": "p.13 items 15-16"
+    }
+  ],
+  "limitations": [
+    "Comparative UK record only; not Alberta evidence.",
+    "Shared application: sibling block forms for the same Booker application (cda24 block A; cda28 and cda29 London Plan Guidance forms) were not downloaded in this pass and are not separate cases here.",
+    "Typed signature name with no signature image on the page.",
+    "Placeholder cells verified on the rendered page 9."
+  ],
+  "worker": "H16",
+  "prompt_number": 258,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.wandsworth.gov.uk/media/z0almb2a/cda25_booker_fire-statement_form_block_bc.pdf",
+      "sha256": "ad8b590175a2a877bb9572e767841f57b7bd42afdf7a77a71db7ccffacfd0203",
+      "role": "input",
+      "bytes": 1817930,
+      "filename": "wandsworth-cda25-booker-fire-statement-block-bc-ad8b590175a2.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H16/files/wandsworth-cda25-booker-fire-statement-block-bc-ad8b590175a2.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:48:15.251501+00:00",
+        "http_status": "200",
+        "final_url": "https://www.wandsworth.gov.uk/media/z0almb2a/cda25_booker_fire-statement_form_block_bc.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

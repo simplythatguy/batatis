@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Determination (21 July 2023, s 188, §6.1, p.14): the original proposal in building consent BCO10340522 for a single common waste storage area did not provide reasonable access for the depositing of solid waste, and so did not comply with clause G15.3.1(b). The alternative-solution and carry-distance discussion is at pp.5-7 and p.12.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Whether the answer identifies G15.3.1(b) and the reasonable-access test as the threshold, and separates depositing from collection.",
+    "Whether it explains what an alternative solution must show and treats the carry-distance evidence as the open item.",
+    "Whether it asks for the layout, distances and collection arrangement.",
+    "Whether it does not say the proposal complies."
+  ],
+  "case_id": "H02-016",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

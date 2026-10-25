@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from British Columbia. It is not an Alberta application.
+
+Using only the attached published British Columbia Building Code Appeal Board decision (comparative attachment format/content only; do not apply its code interpretation or outcome to Alberta), identify the disputed code issue and the project facts, documents, calculations, or operational details that remain unclear. Separate stated facts from assumptions and draft focused follow-up questions for the applicant and local authority. Do not make a compliance or safety determination.
+
+Attachments:
+- attachment-1-source-text.txt
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

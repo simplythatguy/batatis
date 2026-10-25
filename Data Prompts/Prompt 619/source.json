@@ -1,0 +1,55 @@
+{
+  "id": "H12-015",
+  "title": "Interpretation 14-22 (City of Bellingham Building Department): single-room dwelling unit and the 120 sq ft room rule (IBC 1208.3 and 1208.4)",
+  "jurisdiction": "Washington State, requested by City of Bellingham Building Department (comparative test only; not Alberta)",
+  "code_edition": "2012 International Building Code, Sections 1208.3 and 1208.4, as cited",
+  "case_type": "regulatory_guidance",
+  "source_url": "https://sbcc.wa.gov/answers-opinions",
+  "document_date": "Not stated in document (interpretation no. 14-22)",
+  "facts": [
+    {
+      "text": "Document type: State Building Code Council interpretation no. 14-22, one page; requester City of Bellingham Building Department.",
+      "locator": "p1 header"
+    },
+    {
+      "text": "Question 1: if all features of a legal dwelling are present, must the unit have habitable rooms beyond the one 120 sq ft room; can living, sleeping, eating and cooking all be in that room; must the bathroom be in a separate room.",
+      "locator": "p1 QUESTION 1"
+    },
+    {
+      "text": "Question 2: the efficiency dwelling unit (IBC 1208.4, 220 sq ft minimum) is not defined in the IBC; if a unit has no other habitable room, must it meet the 1208.4 size requirement?",
+      "locator": "p1 QUESTION 2"
+    }
+  ],
+  "limitations": [
+    "The PDF contains the Council answer on the same page; do not present it as applicant-side input without flagging leakage.",
+    "No unit plan; the only dimensions are the 120 sq ft and 220 sq ft thresholds quoted in the question.",
+    "Edition as cited (2012 IBC); comparative only."
+  ],
+  "original_worker_case_type": "issued_variance",
+  "parent_curation_note": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance.",
+  "worker": "H12",
+  "prompt_number": 619,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://sbcc.wa.gov/sites/default/files/2019-12/14_22-IBC.pdf",
+      "sha256": "8672e4d44aebb817fd5df632b55e0ef869e3c0a4da80db08024034c5b633e442",
+      "role": "outcome_reference",
+      "bytes": 111463,
+      "filename": "sbcc-ruling-14-22-14-22-ibc-8672e4d44aeb.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H12/files/sbcc-ruling-14-22-14-22-ibc-8672e4d44aeb.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:43:28.117927+00:00",
+        "http_status": "200",
+        "final_url": "https://sbcc.wa.gov/sites/default/files/2019-12/14_22-IBC.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

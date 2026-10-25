@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The active CCMC report publishes a product-level NBC 2015 opinion for a specific prefabricated insulated cladding system, with multiple Alternative classifications and fire-protection conditions.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "panel type, dimensions and exact wall build-up",
+    "fire-blocking, foam protection and building scope",
+    "project code provisions, occupancy and building height",
+    "whether underlying product listing/testing matches the proposed installation"
+  ],
+  "case_id": "L16-016",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

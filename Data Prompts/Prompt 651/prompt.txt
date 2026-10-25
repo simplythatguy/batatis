@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from Norway. Research report by SINTEF Community for Oslobygg KF; the school case is 'Skole A, Oslo kommune' as named in the report. Comparative only, not Alberta.. It is not an Alberta application.
+
+Read the attached Norwegian research report (SINTEF 2022:00394) on fire development and ventilation in schools, which includes a described school fire concept. This is a comparison document, so use only the rules the report itself names. From the attachment alone, list: (1) the rules it cites and their editions; (2) the school-level fire concept it describes, each deviation it names from pre-accepted solutions, and how the report says that deviation is documented; (3) which parts are research method and which describe a building; (4) what evidence the attachment gives for the safety effect it claims, and what it does not give; (5) the questions you would send back to the authors. Do not say whether any design complies or is safe, do not add facts that are not in the attachment, and do not judge the fire engineering.
+
+Attachments:
+- no-sintef-bravent-brannforlop-ventilasjon-skoler-21bca8fd0953.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

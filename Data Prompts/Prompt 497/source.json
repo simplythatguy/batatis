@@ -1,0 +1,77 @@
+{
+  "id": "L07-006",
+  "title": "BCAB 1981 - Spatial separation requirements for an RV shelter",
+  "jurisdiction": "British Columbia",
+  "code_edition": "BCBC 2024",
+  "case_type": "appeal_decision",
+  "source_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1981",
+  "document_date": "2025-09-04",
+  "facts": [
+    {
+      "text": "The project is the design and construction of a post-and-beam, roofed, structure without walls to shelter a recreational vehicle (“RV”). A roofed deck, without walls, is attached to one side of the shelter. The building will be located on a rural property that has seasonal RV sites. The RV in the shelter will be used intermittently during three seasons and stored in the shelter for the remainder of the time.",
+      "locator": "Project description, paragraph 1"
+    },
+    {
+      "text": "The new RV shelter and deck are proposed to be located parallel to, partially offset but still overlapping, and 3.7 m away from an existing RV shelter. A line identified as an “RV pad separation line – not a legal property line” runs between the buildings; the exact location of the line is unknown.",
+      "locator": "Project description, paragraph 2"
+    },
+    {
+      "text": "The configuration is generally as illustrated below.",
+      "locator": "Project description, paragraph 3"
+    }
+  ],
+  "limitations": [
+    "The decision page is a Board-published appeal record, not the original variance/application package.",
+    "The published decision refers to supporting drawings or evidence in some cases, but these were not attached to the downloaded page.",
+    "Published Board outcome appears in the input attachment; outcome leakage is intentional and flagged.",
+    "Where a figure is attached, the decision page does not consistently identify its author; Board-created figures are distinguished in the research report, and no image is treated as a complete applicant drawing set.",
+    "British Columbia decision retained for comparative attachment format/content only; it does not establish Alberta code applicability, design performance, or acceptance."
+  ],
+  "worker": "L07",
+  "prompt_number": 497,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1981",
+      "sha256": "cbfd52ed00b1f22dac11584c8612065d504f86ffe54784370f67262f44609ebf",
+      "role": "input",
+      "bytes": 1369190,
+      "filename": "bcab-1981-cbfd52ed00b1.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-1981-cbfd52ed00b1.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:18:35.412284+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1981",
+        "content_type": "text/html; charset=utf-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-1-source-text.txt",
+        "sha256": "44db093e735af73c8f9af651d0421836e79d3060fcec7f45000f0b61dcf1fb4b",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    },
+    {
+      "url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/construction-industry/building-codes-and-standards/building-code-appeal-board/bcab1981.jpg",
+      "sha256": "f91c6505ddcb8a661048c56366ac46b32b183280238758c5758c6a808c3baff6",
+      "role": "supporting_evidence",
+      "bytes": 38620,
+      "filename": "bcab-1981-bcab1981-f91c6505ddcb.jpg",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-1981-bcab1981-f91c6505ddcb.jpg",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:23:22.283891+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/construction-industry/building-codes-and-standards/building-code-appeal-board/bcab1981.jpg",
+        "content_type": "image/jpeg; charset=UTF-8",
+        "kind": "image",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

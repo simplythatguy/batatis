@@ -1,0 +1,97 @@
+{
+  "id": "H11-003",
+  "title": "Appeal 15376 (reconsideration of 15334): revised Exhibit D no-build easement strip to omit fire-rated construction within 3 feet of a property line",
+  "jurisdiction": "City of Portland, Oregon (USA), Bureau of Development Services Administrative Appeal Board; non-Alberta comparative record",
+  "code_edition": "ORSC 302.1 as cited; edition not stated in the info sheet",
+  "case_type": "appeal_decision",
+  "source_url": "https://efiles.portlandoregon.gov/record/15210418/file/document",
+  "document_date": "2017-07-12 (hearing)",
+  "facts": [
+    {
+      "text": "Revised Exhibit D proposes a no-build easement strip on the adjoining lot (Lot 11) so the existing house on Lot 10 meets the 3-foot setback to the fire separation line.",
+      "locator": "p.1 (APPEAL INFORMATION SHEET, proposed design)"
+    },
+    {
+      "text": "Revised Exhibit D (file 17466) is a hand-drawn site plan showing a hatched no-build easement area, the fire separation line and eave and setback dimension notes (visually read; image-only file).",
+      "locator": "p.1 (revised Exhibit D, page 1; image-only, read visually)"
+    },
+    {
+      "text": "Decision: omission of fire-rated construction within 3 feet of the property line is granted with a 4-foot no-build easement; the easement must prohibit fences and eaves and be approved by BDS before recording.",
+      "locator": "p.1 (APPEAL DECISION)"
+    }
+  ],
+  "limitations": [
+    "Non-Alberta comparative record: City of Portland, Oregon (USA) Bureau of Development Services Administrative Appeal Board. Local Oregon/Portland code is retained as stated in each record. No Alberta applicability is asserted; the case is used only to test attachment format and content, not Alberta performance.",
+    "Summary shows [File 1]; the PDF has no link annotation for it, so the file is the separately retrieved Exhibit D (file 17466).",
+    "Drawing read by rendering only; no OCR; dimensions are read from the image and are not independently verified.",
+    "Outcome leakage true: decision on the same page as the request."
+  ],
+  "record_file": {
+    "path": "_research/workers/H11/files/portland-efiles-15210418/portland-efiles-15210418-8ea3b396d36f.pdf",
+    "sha256": "8ea3b396d36f6a0eb0f9d59ce21d3b1d1d1ac49e87bfb1b93996853f421da32c",
+    "pages": 3,
+    "retrieved_at": "2026-10-25T01:44:00.998824+00:00"
+  },
+  "worker": "H11",
+  "prompt_number": 458,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://efiles.portlandoregon.gov/record/15210418/file/document",
+      "sha256": "8ea3b396d36f6a0eb0f9d59ce21d3b1d1d1ac49e87bfb1b93996853f421da32c",
+      "role": "input",
+      "locator_note": "p.1 APPEAL INFORMATION SHEET fields (Requires, Proposed Design); file 17466 exhibit drawing",
+      "bytes": 413848,
+      "filename": "portland-efiles-15210418-8ea3b396d36f.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H11/files/portland-efiles-15210418/portland-efiles-15210418-8ea3b396d36f.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:44:00.998824+00:00",
+        "http_status": "200",
+        "final_url": "https://efiles.portlandoregon.gov/record/15210418/file/document",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://efiles.portlandoregon.gov/record/15210418/file/document",
+      "sha256": "8ea3b396d36f6a0eb0f9d59ce21d3b1d1d1ac49e87bfb1b93996853f421da32c",
+      "role": "outcome_reference",
+      "locator_note": "p.1 APPEAL DECISION block",
+      "bytes": 413848,
+      "filename": "_evaluation/portland-efiles-15210418-8ea3b396d36f.pdf",
+      "included_in_default_input": false,
+      "original_collection_path": "_research/workers/H11/files/portland-efiles-15210418/portland-efiles-15210418-8ea3b396d36f.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:44:00.998824+00:00",
+        "http_status": "200",
+        "final_url": "https://efiles.portlandoregon.gov/record/15210418/file/document",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://www.portlandoregon.gov/bds/appeals/index.cfm?action=getfile&appeal_id=15376&file_id=17466",
+      "sha256": "8f051cd4e2ee75251e410105ab97d70e8d384bd90ef94aa9a8e803438f15490a",
+      "role": "input",
+      "locator_note": "Exhibit D hand-drawn site plan, image-only file, visually read (rendered page 1)",
+      "bytes": 261674,
+      "filename": "portland-appeal-15376-file-17466-8f051cd4e2ee.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H11/files/portland-appeal-15376-file-17466/portland-appeal-15376-file-17466-8f051cd4e2ee.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:54:25.057693+00:00",
+        "http_status": "200",
+        "final_url": "https://www.portlandoregon.gov/bds/appeals/index.cfm?action=getfile&appeal_id=15376&file_id=17466",
+        "content_type": "application/pdf;charset=UTF-8",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

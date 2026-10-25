@@ -1,0 +1,17 @@
+{
+  "known_outcome": "unknown in this pass (a planning committee report for the scheme appeared in search results but was not retrieved)",
+  "outcome_leakage": false,
+  "review_focus": [
+    "unquantified travel-distance departure for studio flats in Plots BC",
+    "stay-put with an evacuation alert and one evacuation lift as the assisted-evacuation basis",
+    "hydrant adequacy answered 'don't know' with a private hydrant",
+    "consultation answered 'N/A'",
+    "placeholder cells left in the building schedule",
+    "standards cited with inconsistent years (BS 9991:2015 versus BS 9991, BS 9999)"
+  ],
+  "case_id": "H16-005",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

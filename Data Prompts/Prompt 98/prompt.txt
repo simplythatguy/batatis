@@ -1,0 +1,6 @@
+Review the attached historical 14-BCV-017 STANDATA as an energy-modeling reference. Extract the ERS version, eligible house types, 5% condition, modeling exclusions and documents listed before occupancy. Identify which house form, model, reference-case, renewable-energy, plug-load, drawing, blower-door and qualified-advisor evidence must be confirmed, and ask questions for missing facts. Do not calculate an unprovided performance result or certify compliance.
+
+Attachments:
+- catalogue-05-96c0bdc21f7c.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

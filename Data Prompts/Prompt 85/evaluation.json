@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The STANDATA recognizes values from The Span Book (2009 Edition) for spans referenced by ABC 2014 Article 9.23.4.2; it contains no individual project outcome.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "member type and span",
+    "loading/support assumptions and applicable table",
+    "code edition and guideline edition",
+    "missing project drawings/calculations"
+  ],
+  "case_id": "L03-004",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

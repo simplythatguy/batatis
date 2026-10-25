@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from United States (ICC-ES evaluation report under IBC/IRC); NON-ALBERTA COMPARATIVE ONLY: cannot establish Alberta performance, acceptance or equivalence; no Canadian or Alberta approval is claimed or implied. It is not an Alberta application.
+
+Comparative test, not an Alberta file. The attached ICC-ES evaluation report covers a US insulating concrete form wall system. Using only that report, list the building-code editions it is written against, the uses and construction types it covers, the conditions a permit reviewer would need to see met, and the test evidence it cites. Then say what the report does not establish for an Alberta permit under NBC(AE) 2023, which items would need a registered professional's calculations or a local decision, and which questions to put to the report holder first. Do not describe the system as approved, compliant or safe anywhere.
+
+Attachments:
+- esr-2092-nudura-icf-3fccf4ebb481.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

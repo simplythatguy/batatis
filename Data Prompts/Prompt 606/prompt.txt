@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from Washington State, requested by City of Cheney (comparative test only; not Alberta). It is not an Alberta application.
+
+Attached is Washington State Building Code Council interpretation no. 16-07 from City of Cheney. The question put to the Council is: Do the details in alternative-method documentation provide an equivalent way of meeting the separation required by IRC R302.3 for a separation wall continuing through the floor cavity of a multi-story two-family dwelling, with joists perpendicular to the wall? Using only the attached record, identify the code provisions and edition this question turns on, the uncertainty that remains for a building official, the administrative evidence a complete submission would still need, and the next questions to ask the applicant and the reviewing official. Do not say whether any design complies or is safe, do not certify, and do not assume any owner, site, dimensions or drawings that the record does not contain. This is a Washington comparative test record and establishes nothing about Alberta.
+
+Attachments:
+- sbcc-ruling-16-07-16-07irc-5f1b6078802f.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

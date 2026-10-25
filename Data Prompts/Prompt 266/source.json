@@ -1,0 +1,77 @@
+{
+  "id": "H17-003",
+  "title": "Emergency clinic (ny Legevakt) at Gjøvik Sykehus: fire concept and deviation chapter, rev. 01",
+  "jurisdiction": "Norway, Gjøvik kommune as client and owner. Comparative only, not Alberta.",
+  "code_edition": "TEK17 with VTEK17 guidance (p. 5); SAK10 § 9-4 (p. 5)",
+  "case_type": "actual_application",
+  "source_url": "https://www.gjovik.kommune.no/api/presentation/v2/nye-innsyn/filer/v-ee0f97cc__bfb2__4549__9555__c2dcc5131630-1781946_1_A!d-2020047564!m4jQAb?pid=2",
+  "document_date": "2019-12-17 (Rev. 01); first issue 2019-10-23 (Rev. 00)",
+  "facts": [
+    {
+      "text": "Report 'Rapport Brannkonsept for ny Legevakt ved Gjøvik Sykehus'; client Gjøvik kommune; project number 10214684; document RIBr 00, Rev. 01.",
+      "locator": "PDF p. 1"
+    },
+    {
+      "text": "Status box marked 'Endelig' (final). Revision history: Rev. 00 on 23.10.2019 (first issue); Rev. 01 on 17.12.2019 (adjustments after independent control).",
+      "locator": "PDF p. 2"
+    },
+    {
+      "text": "Stated purpose: help Gjøvik kommune prepare fire-technical design basis in the form of a fire concept and fire drawings for the new emergency clinic.",
+      "locator": "PDF p. 2"
+    },
+    {
+      "text": "New work must satisfy TEK17 with VTEK17 guidance (downloaded 01.10.2019).",
+      "locator": "PDF p. 5, 1.3"
+    },
+    {
+      "text": "Project class 3 under SAK10 § 9-4, so independent control applies. Owner is Gjøvik kommune; responsible applicant is JAF arkitektkontor AS.",
+      "locator": "PDF p. 5"
+    },
+    {
+      "text": "States that PBL § 31-2 governs formal fire-technical requirements for this type of work.",
+      "locator": "PDF p. 5, 1.3 Formelle forhold"
+    },
+    {
+      "text": "Basis documents list existing fire drawings as varying ('Eksisterende Branntegninger varierer') and architect plans by JAF arkitekt.",
+      "locator": "PDF p. 4"
+    },
+    {
+      "text": "Says it is not practically possible to section off the new emergency clinic on Plan 00 from the rest of the building (translated).",
+      "locator": "PDF p. 6"
+    },
+    {
+      "text": "Contains section 4 'Dokumentasjon av fravik' (deviation documentation), pp. 19 to 20; the chapter opens by saying it documents fire-technical performance.",
+      "locator": "PDF pp. 3, 20"
+    }
+  ],
+  "limitations": [
+    "Comparative test only (Norway, Gjøvik kommune). Local rules are as the report cites them. No Alberta applicability is asserted.",
+    "Consultant design-basis report, not a permit decision. The drawings it refers to are not in the PDF (text scan found no plan sheets).",
+    "The URL is an innsyn file endpoint; its landing page was not separately verified."
+  ],
+  "worker": "H17",
+  "prompt_number": 266,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.gjovik.kommune.no/api/presentation/v2/nye-innsyn/filer/v-ee0f97cc__bfb2__4549__9555__c2dcc5131630-1781946_1_A!d-2020047564!m4jQAb?pid=2",
+      "sha256": "dfaa0e7ae66770110b063a0c42bbe93ec4852892556998757a8561074bc2e5d3",
+      "role": "input",
+      "bytes": 1178639,
+      "filename": "no-gjovik-emergency-clinic-brann-dfaa0e7ae667.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H17/files/no-gjovik-emergency-clinic-brann-dfaa0e7ae667.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:43:32.708189+00:00",
+        "http_status": "200",
+        "final_url": "https://www.gjovik.kommune.no/api/presentation/v2/nye-innsyn/filer/v-ee0f97cc__bfb2__4549__9555__c2dcc5131630-1781946_1_A%21d-2020047564%21m4jQAb?pid=2",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

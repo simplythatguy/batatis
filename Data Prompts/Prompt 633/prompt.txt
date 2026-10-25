@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from United States (ICC-ES evaluation report under IBC/IRC); NON-ALBERTA COMPARATIVE ONLY: cannot establish Alberta performance, acceptance or equivalence; no Canadian or Alberta approval is claimed or implied. It is not an Alberta application.
+
+Comparative test on a US ICC-ES evaluation of a CLT product sold in two panel formats. Using only the attached report, identify which formats and uses it covers, the editions it is written against, the connection and diaphragm conditions, the dry-service limit and the evidence listed. Then say which parts a reviewer would need from the engineer, the manufacturer or another evaluation, and what the report does not establish for an Alberta permit.
+
+Attachments:
+- esr-4081-binderholz-clt-9cb872725977.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

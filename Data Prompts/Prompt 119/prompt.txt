@@ -1,0 +1,6 @@
+From the attached order, extract the measurements, window locations and code provisions reported for the exposing building face. Identify what the survey and plans establish, what remains uncertain about measurement reference points and openings, and what alternate-solution documentation would be needed if the prescriptive path is not followed. Do not infer that a small measurement difference is acceptable.
+
+Attachments:
+- scc_2016_exposed_building_face-4419e8ddfb07.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

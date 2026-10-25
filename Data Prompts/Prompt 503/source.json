@@ -1,0 +1,59 @@
+{
+  "id": "L07-012",
+  "title": "BCAB 1954 - Means of egress from a house with a secondary suite",
+  "jurisdiction": "British Columbia",
+  "code_edition": "BCBC 2024",
+  "case_type": "appeal_decision",
+  "source_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1954",
+  "document_date": "2025-03-06",
+  "facts": [
+    {
+      "text": "The project is the alteration of an existing house to include a secondary suite. The secondary suite will occupy a portion of the first storey and the primary dwelling unit will occupy a portion of the first storey as well as the second and third storeys. The primary dwelling unit and the secondary suite each have a main entrance / exit door at the first storey. There will be no shared egress facilities.",
+      "locator": "Project description, paragraph 1"
+    },
+    {
+      "text": "As part of the project, balconies at the third storey will be enclosed. Prior to the alterations, the travel limit from the third floor of the primary dwelling unit down to the egress door was permitted to exceed one storey because the third storey had balconies. That Code permission no longer applies due to the enclosure of the balconies.",
+      "locator": "Project description, paragraph 2"
+    },
+    {
+      "text": "Alternate arrangements for egress from the primary dwelling unit are proposed. Large openable windows will be added on the third floor. Also, a balcony at the second storey will be equipped with a new stair down to grade and will be upgraded to include a 45 minute fire-resistance rating. The balcony is proposed to then function as a single-direction exterior exit passageway providing egress from the primary dwelling unit’s third floor within the one-storey travel limit.",
+      "locator": "Project description, paragraph 3"
+    }
+  ],
+  "limitations": [
+    "The decision page is a Board-published appeal record, not the original variance/application package.",
+    "The published decision refers to supporting drawings or evidence in some cases, but these were not attached to the downloaded page.",
+    "Published Board outcome appears in the input attachment; outcome leakage is intentional and flagged.",
+    "British Columbia decision retained for comparative attachment format/content only; it does not establish Alberta code applicability, design performance, or acceptance."
+  ],
+  "worker": "L07",
+  "prompt_number": 503,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1954",
+      "sha256": "b0d982e2bebe71ed3237599c034010edd84198c2348d54bc4f3c244b87a3e598",
+      "role": "input",
+      "bytes": 1367347,
+      "filename": "bcab-1954-b0d982e2bebe.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-1954-b0d982e2bebe.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:19:01.207964+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1954",
+        "content_type": "text/html; charset=utf-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-1-source-text.txt",
+        "sha256": "6e5a00589dd91937fd56789226d535102453e614eb93b1e2a03636a0df1c8a0d",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

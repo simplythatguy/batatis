@@ -1,0 +1,68 @@
+{
+  "id": "H01-009",
+  "number": "2025-040",
+  "title": "NZ MBIE Determination 2025/040 (comparative): bamboo cladding system with appraisal, purported refusal",
+  "jurisdiction": "New Zealand (Building Act 2004); Auckland Council; comparative only, not Alberta",
+  "scope": "comparative_non_alberta",
+  "code_edition": "NZ Building Code (Schedule 1, Building Regulations 1992) as cited; acceptable-solution edition not stated in extracted text",
+  "case_type": "appeal_decision",
+  "timing": "proposed",
+  "retrospective": "no",
+  "source_url": "https://codehub.building.govt.nz/resources/2025040",
+  "source_url_note": "Building CodeHub resource page for the same MBIE determination (Information provider: MBIE); the building.govt.nz determination page is WAF-blocked for this worker.",
+  "document_date": "12 August 2025",
+  "facts": [
+    {
+      "text": "The authority's purported refusal concerned building consent for a single-level three-bedroom detached dwelling.",
+      "locator": "p.3, para 2.1"
+    },
+    {
+      "text": "The dwelling was to be clad in sealed masonry blocks, vertical profiled metal, fibre cement panels and a vertical bamboo weatherboard system on a cavity.",
+      "locator": "p.3, para 2.2"
+    },
+    {
+      "text": "The bamboo cladding system is an alternative solution accompanied by a building product appraisal certificate.",
+      "locator": "p.2, para 1.3"
+    },
+    {
+      "text": "On 5 September 2024 the owners lodged building consent application BCO10387092.",
+      "locator": "p.3, para 2.1"
+    },
+    {
+      "text": "The determination examines whether the authority gave clear reasons under section 50 for the purported refusal.",
+      "locator": "p.9, para 4.23"
+    }
+  ],
+  "limitations": [
+    "Comparative test only: New Zealand Building Act 2004 and Building Code (Schedule 1, Building Regulations 1992). No Alberta applicability asserted; no NBC(AE) mapping.",
+    "Outcome leakage: the MBIE decision is inside the same original PDF, so the full file cannot be used as applicant-stage input without removing the decision pages.",
+    "Applicant application documents are not published; drawings and photos appear only as figures inside the determination. Figures were located by caption, not visually inspected.",
+    "Appraisal certificate and test reports are referenced; the appraisal file itself is not in the record."
+  ],
+  "worker": "H01",
+  "prompt_number": 359,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2025/2025-040.pdf",
+      "sha256": "54d2ca6dec3fbbd4f0161010c91b70496410cc8de86739633ad016e3a650bc51",
+      "role": "input",
+      "document_type": "MBIE determination PDF (original bytes)",
+      "bytes": 230212,
+      "filename": "mbie-det-2025-040-54d2ca6dec3f.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H01/files/pdf/mbie-det-2025-040-54d2ca6dec3f.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:43:10.700839+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2025/2025-040.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

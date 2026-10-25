@@ -1,0 +1,52 @@
+{
+  "id": "L11-017",
+  "title": "1114 Rockland Avenue hotel: exit-facility AS referenced",
+  "jurisdiction": "City of Victoria, British Columbia",
+  "code_edition": "British Columbia Building Code 2024",
+  "case_type": "actual_application",
+  "source_url": "https://tender.victoria.ca/webapps/ourcity/Prospero/FileDownload.aspx?fileId=EE22D74F-4FAB-4DBE-83ED-C430C43B7EDB&folderId=34832C230623094052584819",
+  "document_date": "2026-04-27",
+  "facts": [
+    {
+      "text": "Memo concerns Rockland Redevelopment hotel at 1114 Rockland Ave, project 25-001.",
+      "locator": "PDF p.1"
+    },
+    {
+      "text": "City comment requests BCBC 2024 spatial-separation calculations under 3.2.3.",
+      "locator": "PDF p.2"
+    },
+    {
+      "text": "Applicant says an AS will be provided for exit-facility protection under BCBC 3.2.3.13.",
+      "locator": "PDF p.2"
+    }
+  ],
+  "limitations": [
+    "British Columbia comparative material only; it cannot establish Alberta code performance or applicability.",
+    "Referenced A5/AS not attached."
+  ],
+  "worker": "L11",
+  "prompt_number": 277,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://tender.victoria.ca/webapps/ourcity/Prospero/FileDownload.aspx?fileId=EE22D74F-4FAB-4DBE-83ED-C430C43B7EDB&folderId=34832C230623094052584819",
+      "sha256": "0713ee124e2dfa8011aaa8713447bbc028bab1383e8144cd63292904e7a8d540",
+      "role": "input",
+      "bytes": 154198,
+      "filename": "victoria-rockland-re-memo-0713ee124e2d.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L11/files/victoria-rockland-re-memo-0713ee124e2d.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:24:32.762463+00:00",
+        "http_status": "200",
+        "final_url": "https://tender.victoria.ca/webapps/ourcity/Prospero/FileDownload.aspx?fileId=EE22D74F-4FAB-4DBE-83ED-C430C43B7EDB&folderId=34832C230623094052584819",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

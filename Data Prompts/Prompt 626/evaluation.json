@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Not a decision record. The PS1 page carries approval-stamp text (Part 2 p.74). The certificate and statement do not name a building or BCA decision; the PS1 address is garbled and appears to read 'Non Specific'.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "whether the certified variant (FRB1 or FRA2) matches the product used on a given project",
+    "C3 fire-spread claims and certificate conditions, which are truncated in the text layer",
+    "what a PS1 with a non-specific address does and does not establish",
+    "whether the cladding relies on the Acceptable Solution route; these documents do not decide that"
+  ],
+  "case_id": "H06-003",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

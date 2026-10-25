@@ -1,0 +1,55 @@
+{
+  "id": "H12-009",
+  "title": "Interpretation 15-04 (City of Moses Lake): whether the temporary growing-structure exemption (WAC 51-50-007) covers large polycarbonate greenhouses for year-round production",
+  "jurisdiction": "Washington State, requested by City of Moses Lake (comparative test only; not Alberta)",
+  "code_edition": "2012 International Building Code, WAC 51-50-007, as cited",
+  "case_type": "regulatory_guidance",
+  "source_url": "https://sbcc.wa.gov/answers-opinions",
+  "document_date": "Not stated in document (interpretation no. 15-04)",
+  "facts": [
+    {
+      "text": "Document type: State Building Code Council interpretation no. 15-04, one page; requester City of Moses Lake.",
+      "locator": "p1 header"
+    },
+    {
+      "text": "The question quotes WAC 51-50-007 on temporary growing structures with flexible polyethylene, polyvinyl or similar covers used for frost protection or heat retention.",
+      "locator": "p1 QUESTION"
+    },
+    {
+      "text": "Structures in question: large-scale greenhouses built from polycarbonate panels, used for year-round production of marijuana, with mechanical ventilation, grow lights and a supplemental heat source for winter growing.",
+      "locator": "p1 QUESTION"
+    }
+  ],
+  "limitations": [
+    "The PDF contains the Council answer on the same page; do not present it as applicant-side input without flagging leakage.",
+    "No structural, mechanical or site information beyond the question's description.",
+    "Edition as cited (2012 IBC); comparative only."
+  ],
+  "original_worker_case_type": "issued_variance",
+  "parent_curation_note": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance.",
+  "worker": "H12",
+  "prompt_number": 613,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://sbcc.wa.gov/sites/default/files/2019-12/15_04ibc.pdf",
+      "sha256": "e639d993dbe732e19ebc17b3a5787b59afb542bbe412aa1494d91e3dffda49fb",
+      "role": "outcome_reference",
+      "bytes": 40214,
+      "filename": "sbcc-ruling-15-04-15-04ibc-e639d993dbe7.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H12/files/sbcc-ruling-15-04-15-04ibc-e639d993dbe7.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:43:29.865763+00:00",
+        "http_status": "200",
+        "final_url": "https://sbcc.wa.gov/sites/default/files/2019-12/15_04ibc.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

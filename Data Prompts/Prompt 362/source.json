@@ -1,0 +1,68 @@
+{
+  "id": "H01-012",
+  "number": "2026-014",
+  "title": "NZ MBIE Determination 2026/014 (comparative): proposed refusal over bracing compliance pathway (B1/AS1)",
+  "jurisdiction": "New Zealand (Building Act 2004); Rotorua Lakes Council; comparative only, not Alberta",
+  "scope": "comparative_non_alberta",
+  "code_edition": "NZ Building Code (Schedule 1, Building Regulations 1992) as cited; B1/AS1 first edition, amendment 21 (effective 2 November 2023 until 31 July 2026) as cited",
+  "case_type": "appeal_decision",
+  "timing": "proposed",
+  "retrospective": "no",
+  "source_url": "https://codehub.building.govt.nz/resources/2026014",
+  "source_url_note": "Building CodeHub resource page for the same MBIE determination (Information provider: MBIE); the building.govt.nz determination page is WAF-blocked for this worker.",
+  "document_date": "22 April 2026",
+  "facts": [
+    {
+      "text": "The authority's proposed decision to refuse a building consent for a new dwelling related to the compliance pathway for the bracing design.",
+      "locator": "p.1"
+    },
+    {
+      "text": "Building consent BC24-011449 for a horseshoe-shaped single-level dwelling around a central courtyard was lodged in 2024.",
+      "locator": "p.2, para 2.1"
+    },
+    {
+      "text": "The applicant designed the bracing using NZS 3604 and NZS 4229 to derive bracing demands and resistance.",
+      "locator": "p.4, para 3.1"
+    },
+    {
+      "text": "Acceptable Solution B1/AS1 is cited as first edition, amendment 21.",
+      "locator": "p.2, para 2.1"
+    },
+    {
+      "text": "The determination notes that using the Verification Method alongside the Acceptable Solution is common practice.",
+      "locator": "p.8, para 4.13"
+    }
+  ],
+  "limitations": [
+    "Comparative test only: New Zealand Building Act 2004 and Building Code (Schedule 1, Building Regulations 1992). No Alberta applicability asserted; no NBC(AE) mapping.",
+    "Outcome leakage: the MBIE decision is inside the same original PDF, so the full file cannot be used as applicant-stage input without removing the decision pages.",
+    "Applicant application documents are not published; drawings and photos appear only as figures inside the determination. Figures were located by caption, not visually inspected.",
+    "Structural calculations and bracing schedules are not in the file; they are summarised in the determination."
+  ],
+  "worker": "H01",
+  "prompt_number": 362,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2026/2026-014.pdf",
+      "sha256": "da50bc57613c386564cee4d74dd0747b92c263c2b4d6a335a15c94a3e63852d9",
+      "role": "input",
+      "document_type": "MBIE determination PDF (original bytes)",
+      "bytes": 147387,
+      "filename": "mbie-det-2026-014-da50bc57613c.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H01/files/pdf/mbie-det-2026-014-da50bc57613c.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:44:42.583034+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2026/2026-014.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

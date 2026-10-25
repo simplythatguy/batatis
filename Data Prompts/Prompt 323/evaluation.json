@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Determination: weatherboards as originally painted dark grey and installed complied with B2 with respect to E2 (case-specific; 31 May 2021).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "paint coating performance evidence (TSR/LRV) and whether tests covered the actual product",
+    "manufacturer warranty versus compliance evidence",
+    "exposure, shading, access and maintenance for timber cladding",
+    "sequence of inspection, CCC and remediation"
+  ],
+  "case_id": "H03-007",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

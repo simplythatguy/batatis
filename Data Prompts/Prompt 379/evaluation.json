@@ -1,0 +1,16 @@
+{
+  "known_outcome": "Determination (11 Dec 2023, s 188(1)(a)): a waiver or modification of clause D1.3.3(i) is not appropriate, and the authority's refusal to grant consent subject to the requested waiver is confirmed (p.21 §5.1), for different reasons from the authority's (p.16 §4.29 and fn 33). Reasoning: the objective and functional requirements are not met (p.13-14 §4.15-4.18); a floor-level dispensary or ramps are reasonably practicable alternatives (p.14-15 §4.22-4.23); the waiver is inconsistent with section 3(a)(i) and section 4(2)(b) (p.15 §4.27-4.28). Separately, wheelchair users may be expected to work and visit the dispensary, so clauses D1.3.2(c) and D1.3.4(d) apply and neither step complies (p.20-21 §4.50-4.57).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Whether the answer identifies the waiver power, the section 67(3) bar, and the D1.3.2(c) and D1.3.4(d) wheelchair-route clauses as separate questions.",
+    "Whether it lists the waiver factors and notes that the record discusses floor-level and ramp alternatives.",
+    "Whether it notes that the alternative-solution route was pursued and then replaced by ramps in the consent.",
+    "Whether it asks about staff and visitor use, mitigations, and the pharmacy regulatory platform requirement.",
+    "Whether it avoids stating that the design complies."
+  ],
+  "case_id": "H02-003",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

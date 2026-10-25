@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The sliding door cannot readily be opened by children, but the sliding and hinged doors fail the criteria in F9.3.4(a); the proposed barrier that incorporates the external wall does not comply with F9 (s6.1, p.16).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "self-closing and latching of doors in a barrier",
+    "child-resistance evidence and test records",
+    "the wall as part of the barrier and its interaction with the pool area",
+    "drawings and product data for the door hardware"
+  ],
+  "case_id": "H04-009",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

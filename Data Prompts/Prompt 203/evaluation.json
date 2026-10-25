@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The active CCMC report publishes NBC 2015 and 2020 product opinions and component details; the stated code provision classifications are not project-specific determinations.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "confirm exact system and board/basecoat variant",
+    "match substrate, thickness, fire barrier and attachment to report conditions",
+    "provide building classification, height and local code edition",
+    "identify assembly-level evidence needed for the proposed design"
+  ],
+  "case_id": "L16-007",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,6 @@
+Using the attached appeal decision only, separate the parties’ disagreement about whether the racks are portable from the engineering evidence summarized in the order. Identify what the report did and did not test, what rack configuration is used, and which loading, connection, manufacturer and site data a reviewer would need. Do not infer structural adequacy from the order’s summary or treat its result as design approval.
+
+Attachments:
+- scc_2023_storage_racks-1651b5958040.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

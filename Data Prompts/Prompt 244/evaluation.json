@@ -1,0 +1,14 @@
+{
+  "known_outcome": "unknown (no decision retrieved; DA landing page not located)",
+  "outcome_leakage": false,
+  "review_focus": [
+    "limitations clause and whether the performance solutions are in scope",
+    "a named performance-solution list and who must confirm each item",
+    "no compliance certification"
+  ],
+  "case_id": "H08-010",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,16 @@
+{
+  "known_outcome": "Board voted 4-0 on 2025-08-27 to grant the appeal and issue the permit conditioned on revising it to address NOV item 2 (repair of damaged garage-level wall below the deck) (minutes pp.2-3, separate attachment).",
+  "outcome_leakage": true,
+  "leakage_detail": "Board minutes attached as outcome_reference; packet also includes a permit-holder brief.",
+  "review_focus": [
+    "permit scope vs NOV item 2",
+    "removal of a non-fire-rated lattice on an exterior low wall",
+    "drawing set completeness (cover, demolition and proposed deck plans)",
+    "code edition shown on the permit-set cover vs edition cited in the packet"
+  ],
+  "case_id": "H13-002",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

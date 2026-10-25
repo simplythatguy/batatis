@@ -1,0 +1,67 @@
+{
+  "id": "H14-020",
+  "title": "SIP Builder Best Practices #7: SIP installation guide (SIPA member manufacturers; Premier-hosted copy)",
+  "jurisdiction": "North American industry best-practice guide (SIPA member manufacturers; Premier-hosted copy) with US code references; NON-ALBERTA COMPARATIVE ONLY: cannot establish Alberta performance, acceptance or equivalence; no Canadian or Alberta approval is claimed or implied",
+  "code_edition": "IRC 2021 §R610.5.2 cited (p7); no other edition stated in the extracted text",
+  "case_type": "product_evidence",
+  "source_url": "https://sips.premierbuildingsystems.com/hubfs/Premier%20SIPS/Content%20Offers/SIPS%20-%20SIP%20Design%20Best%20Practices%20-%20Overview%20-%20Design%20Considerations%20-%20Aug%202023/SIP-BUILDER-BP-7-SIP-Installation-v1%20%2809-23-24%29.pdf",
+  "document_date": "Copyright 2023 Premier Building Systems, LLC (p33); file name marks v1 (09-23-24)",
+  "facts": [
+    {
+      "text": "Written 'specifically for builders by the manufacturing members of the Structural Insulated Panel Association (SIPA)'.",
+      "locator": "p2"
+    },
+    {
+      "text": "'A Premier representative is recommended during the initial stages of installation for a first-time SIP user.'",
+      "locator": "p2"
+    },
+    {
+      "text": "'When installing roof SIPs, install splines and \"chicken sticks\" on the ground, to make the process easier.'",
+      "locator": "p2 installation overview"
+    },
+    {
+      "text": "'IRC 2021, section R610.5.2 ... requires that a capillary break be installed between the SIP wall and the concrete or masonry foundation wall or slab.'",
+      "locator": "p7"
+    },
+    {
+      "text": "For foundations out of square, the guide says 'Contact your SIP manufacturer for an engineered solution.'",
+      "locator": "p7"
+    },
+    {
+      "text": "'Due to the \"stack effect,\" the ridge joint is the most important joint'; the guide says to follow Premier's ridge-sealing detail and refers to Section 8.8 of SIP BUILDER-BP 8 for taping.",
+      "locator": "p23"
+    }
+  ],
+  "limitations": [
+    "Non-Alberta comparative attachment; this is a manufacturer or industry guide, not a code or an evaluation report.",
+    "Retrieved 2026-10-25; the current revision was not checked against the publisher's index.",
+    "Text from pypdf extraction; figures and drawings not transcribed; locators are PDF page numbers.",
+    "Publisher copyright; retained locally for comparison only.",
+    "Industry guide hosted on a manufacturer domain; it is not itself a product evaluation."
+  ],
+  "worker": "H14",
+  "prompt_number": 647,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://sips.premierbuildingsystems.com/hubfs/Premier%20SIPS/Content%20Offers/SIPS%20-%20SIP%20Design%20Best%20Practices%20-%20Overview%20-%20Design%20Considerations%20-%20Aug%202023/SIP-BUILDER-BP-7-SIP-Installation-v1%20(09-23-24).pdf",
+      "sha256": "a1d7d732119a50dc0ddf0d318377ea9db3a1fa8a1616963ac47c20e81045c53c",
+      "role": "input",
+      "bytes": 13716624,
+      "filename": "premier-sip-builder-bp7-installation-a1d7d732119a.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H14/files/premier-sip-bp7-installation/premier-sip-builder-bp7-installation-a1d7d732119a.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:47:09.132659+00:00",
+        "http_status": "200",
+        "final_url": "https://sips.premierbuildingsystems.com/hubfs/Premier%20SIPS/Content%20Offers/SIPS%20-%20SIP%20Design%20Best%20Practices%20-%20Overview%20-%20Design%20Considerations%20-%20Aug%202023/SIP-BUILDER-BP-7-SIP-Installation-v1%20%2809-23-24%29.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

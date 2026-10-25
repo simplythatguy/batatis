@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Council answer (leakage): the code does not specifically require an additional room under 1208.3; the 1208.3 intent addresses room area where a unit has more than one habitable room; as an alternate, a single-room unit can be treated as an efficiency dwelling unit under 1208.4 and need not meet 1208.3.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "single-room unit classification",
+    "minimum room and area rules",
+    "bathroom separation question",
+    "undefined term 'efficiency dwelling unit'"
+  ],
+  "case_id": "H12-015",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from Chalk River, Ontario; federal site administered by Canadian Nuclear Laboratories. It is not an Alberta application.
+
+Using the attached CNL Support Facility case study, identify the stated National Fire Code context and the documented hot-work/timber conflict. List the administrative records and project-specific evidence needed to review a real submission, including workshop and hot-work layouts, distances, protection details, product/test documentation, fire-safety plan and operating assumptions, drawings, consultant rationale, and authority review records. Distinguish the case study's summary of measures from an attached approval or complete fire-protection package; do not certify acceptability.
+
+Attachments:
+- cnl-science-collaboration-case-study-59f556a4219c.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

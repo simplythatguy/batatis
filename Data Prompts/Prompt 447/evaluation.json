@@ -1,0 +1,16 @@
+{
+  "known_outcome": "Set aside: the assessment manager conceded the appeal, and the tribunal set the decision aside and ordered a remake within 60 days (pp. 1, 3). Signed 23 May 2023 (p. 4).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Recognises the fire engineering report version sequence (Rev 1, Rev 4, Rev 5) and the amended decision notice as an administrative risk.",
+    "Flags the QFES 'not suitable' performance-solution assessment as an open question.",
+    "Notes that the code edition is not stated in the text read, and asks for it rather than assuming one.",
+    "Notes the certificate of occupancy date as a question without interpreting it.",
+    "Makes no compliance statement."
+  ],
+  "case_id": "H09-004",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

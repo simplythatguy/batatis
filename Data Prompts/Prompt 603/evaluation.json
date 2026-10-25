@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The guide says the rationale was based primarily on relevant fire tests, but it supplies no test reports, test identifiers, actual application record or AHJ decision.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Identify the stated edition, reference and proposed material change",
+    "Do not treat the guide's mention of fire tests as a supplied test record",
+    "Request the project drawings and the listed firewall details",
+    "Do not convert the worked-example rationale into an approval"
+  ],
+  "case_id": "L19-002",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

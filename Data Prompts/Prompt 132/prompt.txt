@@ -1,0 +1,6 @@
+A commercial kitchen ventilation and fire-suppression question has come up for an Alberta building. The attached STANDATA interpretation (23-BCI-009/23-FCI-004) is my only source. Using only that document, list the codes and standards it names for cooking exhaust and fixed suppression, identify which decisions it sends to the building AHJ, identify what is still uncertain for an assembly or care occupancy, and list the evidence and questions the file would need. Do not invent a kitchen, equipment list or occupancy, and do not state that any system complies.
+
+Attachments:
+- ma-standata-interpretation-fire-building-23-fci-004-23-bci-009-2024-12-81eb6064c507.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

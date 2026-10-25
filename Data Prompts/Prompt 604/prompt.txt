@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from British Columbia code context; sample says its format follows the City of Vancouver template, but does not identify the project jurisdiction or AHJ. It is not an Alberta application.
+
+Review the attached published long-form sample. Extract the proposed ceiling finish, the code references and objectives it actually states, and the documents it says support the proposal. Flag that Product X is anonymized and the underlying data sheet and test-report excerpt are not attached. List the project-specific administrative records still needed, including the exact AHJ and code edition, drawings, product identity, reports and inspection/maintenance documentation. Ask concise questions; do not treat the sample's claims as independent verification or an authority decision, and do not certify performance or safety.
+
+Attachments:
+- CWC-Alternative-Solutions-Guide-2025-38b185cc7923.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

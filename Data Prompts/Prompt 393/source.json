@@ -1,0 +1,58 @@
+{
+  "id": "H02-017",
+  "title": "Determination 2024/023: Refusal to grant a building consent for alterations to an existing dwelling (proposed alternative-solution cladding)",
+  "jurisdiction": "New Zealand: Auckland Council as building consent authority; MBIE determination under the Building Act 2004. Non-Alberta comparative record.",
+  "code_edition": "NZ Building Code (Schedule 1, Building Regulations 1992), clause E2 (external moisture) and Acceptable Solution E2/AS1 as the baseline. Edition not named in the text read.",
+  "case_type": "appeal_decision",
+  "source_url": "https://codehub.building.govt.nz/resources/2024023",
+  "document_date": "15 May 2024",
+  "facts": [
+    {
+      "text": "Alterations to an existing dwelling in Kohimarama, Auckland were refused a building consent. The authority cited a lack of documentation, non-compliance with the Building Code, and conflicting information.",
+      "locator": "p.1 Summary"
+    },
+    {
+      "text": "The design proposes alternative-solution cladding outside the scope of E2/AS1, and full supporting construction details had not been provided to assess the architectural details.",
+      "locator": "p.4"
+    },
+    {
+      "text": "The cladding system is a proprietary product outside the scope of E2/AS1. It has a BRANZ appraisal that sets out the scope in which the product was tested and appraised.",
+      "locator": "p.8 §4.7"
+    },
+    {
+      "text": "The design is to comply with the Building Code as an alternative solution, by providing evidence about the product's performance. The record states that work outside the scope of the consent has been clearly marked as such.",
+      "locator": "p.6-7; p.6 §3.10"
+    }
+  ],
+  "limitations": [
+    "The record is summarised from the facts and the decision. The alternative-solution analysis between pp.5-8 was not read in full.",
+    "The BRANZ appraisal is referred to in the record and is not attached.",
+    "Owner and street address are omitted.",
+    "Applies to the New Zealand Building Code only. No Alberta applicability is asserted."
+  ],
+  "worker": "H02",
+  "prompt_number": 393,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2024/2024-023.pdf",
+      "sha256": "d76edae783b064568ddcd1e21accc53c7b2f12b82df3311ab58bf4e47b6c5f70",
+      "role": "input",
+      "bytes": 440623,
+      "filename": "mbie-det-2024-023-d76edae783b0.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H02/files/mbie-det-2024-023-d76edae783b0.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:48:42.591430+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2024/2024-023.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

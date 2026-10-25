@@ -1,0 +1,53 @@
+{
+  "id": "L02-006",
+  "title": "19-BCV-006 - Interconnected smoke alarms",
+  "jurisdiction": "Alberta (province-wide)",
+  "code_edition": "National Building Code – 2019 Alberta Edition (NBC(AE))",
+  "case_type": "issued_variance",
+  "source_url": "https://open.alberta.ca/publications/standata-building-code-variance-national-building-code-2019-alberta-edition",
+  "document_date": "2019-12",
+  "facts": [
+    {
+      "text": "The variance accepts certified wireless interconnection as an alternative to wired interconnection of required smoke alarms.",
+      "locator": "19-BCV-006 PDF, p. 1, Purpose and Discussion; p. 2, Variance"
+    },
+    {
+      "text": "It applies where interconnected alarms are required in a dwelling unit or a house with a secondary suite so one alarm activation causes the required alarms to sound.",
+      "locator": "19-BCV-006 PDF, p. 2, Application"
+    },
+    {
+      "text": "The source identifies CAN/ULC-S531 certification and the applicable permanent-power and battery-backup conditions.",
+      "locator": "19-BCV-006 PDF, pp. 1–2, Code References and Variance"
+    }
+  ],
+  "limitations": [
+    "This is a provincewide regulator-issued STANDATA variance, not an individual application, site-specific permit decision, or applicant-provided evidence.",
+    "Historical status as of 2026-10-24: the official 2019 catalogue is marked archived/replaced by the 2023 catalogue; Alberta lists NBC(AE) 2019 as in force from 2019-12-01 through 2024-04-30. Alberta guidance says previous-edition STANDATA are obsolete for new construction after a new code takes effect, while remaining relevant to evaluation of existing structures during renovations and retrofits. Verify current code edition and AHJ applicability.",
+    "No project drawings, owner/site facts, or project-specific professional evidence accompany this catalogue variance. The attached source is the outcome reference itself."
+  ],
+  "worker": "L02",
+  "prompt_number": 62,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://open.alberta.ca/dataset/5a1e414d-6639-467d-b5a4-6d68454f1340/resource/b1783fb3-1884-45a8-9287-efd0e459597e/download/ma-standata-19-bcv-006-interconnected-smoke-alarms.pdf",
+      "sha256": "6a8d5a854d6e47ed3e2350f2e1d2820288bfccb46e0b0d0a205c9168869e790c",
+      "role": "outcome_reference",
+      "bytes": 619648,
+      "filename": "catalogue-b1783fb3-1884-45a8-9287-efd0e459597e-19-BCV-006---Interconnected-smoke-alarms-6a8d5a854d6e.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L02/files/catalogue-b1783fb3-1884-45a8-9287-efd0e459597e-19-BCV-006---Interconnected-smoke-alarms-6a8d5a854d6e.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:41.988686+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/5a1e414d-6639-467d-b5a4-6d68454f1340/resource/b1783fb3-1884-45a8-9287-efd0e459597e/download/ma-standata-19-bcv-006-interconnected-smoke-alarms.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

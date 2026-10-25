@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Determination: authority incorrect in its purported refusal; decision reversed (16 December 2021).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "resource-consent prerequisite before building consent",
+    "reasons for refusal must be explicit",
+    "administrative completeness before a consent decision"
+  ],
+  "case_id": "H03-014",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

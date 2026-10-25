@@ -1,0 +1,50 @@
+{
+  "id": "L03-020",
+  "title": "14-BCV-020 - Sprinkler systems with antifreeze solutions",
+  "jurisdiction": "Alberta (province-wide, as stated by the STANDATA)",
+  "code_edition": "Alberta Building Code 2014 and Alberta Fire Code 2014",
+  "case_type": "issued_variance",
+  "source_url": "https://open.alberta.ca/publications/standata-building-code-variance-2014",
+  "document_date": "January 2019",
+  "catalogue_status": "Catalogue row is not marked [WITHDRAWN]; PDF carries an Archived watermark.",
+  "facts": [
+    {
+      "text": "The joint 14-FCV-022/14-BCV-020 STANDATA concerns sprinkler freeze protection for buildings requiring systems under the cited 2014 codes and NFPA editions.",
+      "locator": "14-BCV-020 PDF, pp.1-2, PURPOSE and APPLICATION"
+    },
+    {
+      "text": "It permits existing systems to maintain their designed freeze-protection level and says concentrations must not be reduced without alternative freeze protection; new systems must be designed for a typical Alberta climate or use alternatives listed in the document.",
+      "locator": "14-BCV-020 PDF, pp.2-3, VARIANCE"
+    }
+  ],
+  "limitations": [
+    "This is a provincial regulator-issued STANDATA/standing variance, not an individual application, applicant statement, project drawing, permit record or site-specific decision.",
+    "The records address the Alberta Building Code 2014 and, where noted, Alberta Fire Code 2014; do not treat them as proof of applicability under the Alberta 2023 code edition or current law.",
+    "Catalogue status is recorded as displayed on the retrieved official page. A missing [WITHDRAWN] label is not evidence of current validity; PDFs display an Archived watermark."
+  ],
+  "worker": "L03",
+  "prompt_number": 101,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://open.alberta.ca/dataset/81151ff6-c2fa-405f-af4e-f80f2922766d/resource/3e6b54d5-ee9c-42aa-91fc-5953ad13e055/download/14-fcv-022-14-bcv-020.pdf",
+      "sha256": "7d5a85b6d7452a411da0cc40ed8ccc0704823fda5a4be5e31eba02c44a2f4eb6",
+      "role": "supporting_evidence",
+      "bytes": 980428,
+      "filename": "catalogue-01-7d5a85b6d745.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L03/files/catalogue-01-7d5a85b6d745.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:16.628657+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/81151ff6-c2fa-405f-af4e-f80f2922766d/resource/3e6b54d5-ee9c-42aa-91fc-5953ad13e055/download/14-fcv-022-14-bcv-020.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

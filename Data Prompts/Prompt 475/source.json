@@ -1,0 +1,89 @@
+{
+  "id": "H13-006",
+  "title": "Pasadena City Council, 2006-09-11, item 6C Part 1: appeal of building official's denial of wood-shake roofing (3 South Grand Avenue)",
+  "jurisdiction": "City of Pasadena, California (comparative, non-Alberta)",
+  "code_edition": "California Building Code 2001 with Pasadena modifications (stated in staff report p.3)",
+  "case_type": "appeal_decision",
+  "source_url": "https://ww2.cityofpasadena.net/2006%20agendas/Sep_11_06/6C%20Part%201.pdf",
+  "document_date": "2006-09-11 hearing (printed on p.1); attachment memo dated 2006-07-24 (rendered p.9)",
+  "comparative_scope": "non-Alberta comparative only",
+  "alberta_applicability": "none",
+  "facts": [
+    {
+      "text": "Agenda subject line (text layer clipped at line ends): appeal of the building official's denial of alternative roofing materials at the Vista del Arroyo Bungalows, 3 South Grand Avenue; hearing date printed as 2006-09-11; Council may uphold the denial or overturn it.",
+      "locator": "p.1"
+    },
+    {
+      "text": "Executive summary: wood-shake roofing was installed on four structures in violation of City ordinance and of the approved building plans and permits (the text layer is clipped at line ends; 'approved' is inferred from context); the developer requested after-the-fact approval as an alternate material under the State Historical Building Code.",
+      "locator": "p.2 (text layer, degraded)"
+    },
+    {
+      "text": "Approved plans showed a new cementitious shingle-type roof; the City adopted the 2001 CBC with modifications, and PMC 14.04.020 #6 prohibits wood shake or wood roof covering in high fire hazard zones.",
+      "locator": "p.3 (Attachment B cited)"
+    },
+    {
+      "text": "Developer's proposed mitigation (fire-retardant shingles, sprinklers, hydrants, electrical updates, spark arresters, HOA landscape maintenance) and the staff finding that none of these factors is proven sufficient for wood roofing in this zone.",
+      "locator": "p.3"
+    },
+    {
+      "text": "Fire Chief letter (Attachment E) states the Fire Chief lacks authority to grant an exemption to the Municipal Code.",
+      "locator": "p.3"
+    },
+    {
+      "text": "SHBSB letter of 2006-04-27 (Attachment F) indicated wood shake is allowed on state-historic structures; SHBSB determined the Glendale case should be reconsidered (Attachments G and H); the report says that case remains pending.",
+      "locator": "pp.3-4"
+    },
+    {
+      "text": "Attachment index lists A (City Attorney memo), B (PMC 14.04.020 #6), C (historical fire facts), D (letter to Fire Chief), E (denial), F (SHBSB approval), G (Glendale documentation), H (reconsideration request), I (site photos).",
+      "locator": "p.5 (rendered)"
+    },
+    {
+      "text": "City Attorney memo continuation (rendered; dated 2006-07-24): 'The Building Official Does Not Have Authority To Allow That Which Is Prohibited.'",
+      "locator": "p.9 (rendered)"
+    },
+    {
+      "text": "Attachment C (rendered): a web printout, 'Shingles and Shakes', dated 2006-06-22.",
+      "locator": "p.13 (rendered)"
+    },
+    {
+      "text": "Attachment H (rendered): Building Official letter of 2006-06-15 to the SHBSB executive director, stating the City will continue to enforce its building code prohibition on wood roofing in high fire hazard zones.",
+      "locator": "p.21 (rendered)"
+    }
+  ],
+  "limitations": [
+    "The text layer is degraded OCR; quotes were taken from the printed text layer and from rendered images only where marked.",
+    "Pages 5-25 are image-only; 4 of 21 (pp.5, 9, 13, 21) were rendered. No drawings appeared in those pages. Attachment I (site photos) was not inspected.",
+    "Part 2 of item 6C was not retrieved; any council vote is not in this file.",
+    "2006 record; edition is the 2001 CBC as stated in the report.",
+    "Comparative, non-Alberta only."
+  ],
+  "worker": "H13",
+  "prompt_number": 475,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://ww2.cityofpasadena.net/2006%20agendas/Sep_11_06/6C%20Part%201.pdf",
+      "final_url": "https://ww2.cityofpasadena.net/2006%20agendas/Sep_11_06/6C%20Part%201.pdf",
+      "retrieved_at": "2026-10-25T01:43:28.493278+00:00",
+      "http_status": "200",
+      "content_type": "application/pdf",
+      "sha256": "59ab1d05f287e02033859ed871a38da4866b1f60c9efc284f72ffdb04b1ed467",
+      "bytes": 8778776,
+      "role": "input",
+      "filename": "pasadena-council-2006-09-11-item6c-part1-59ab1d05f287.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H13/files/pasadena/pasadena-council-2006-09-11-item6c-part1-59ab1d05f287.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:43:28.493278+00:00",
+        "http_status": "200",
+        "final_url": "https://ww2.cityofpasadena.net/2006%20agendas/Sep_11_06/6C%20Part%201.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

@@ -1,0 +1,6 @@
+Review the attached historical 14-BCV-016 STANDATA as a reference for manufactured structural components in one- or two-family dwellings. Identify its scope and the application documents it names, then list which system, product evaluation, design program, component interface, supplier, permit drawing and site-specific footing records remain to be supplied for a real file. Ask questions where details are absent. Do not generate engineering evidence or claim structural safety/compliance.
+
+Attachments:
+- catalogue-06-8957f70e3c2e.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

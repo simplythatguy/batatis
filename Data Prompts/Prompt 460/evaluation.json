@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Granted as proposed (alternate one-hour roof/ceiling detail over an ADU).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Appendix K and R302 provisions engaged by the deck above an ADU",
+    "whether the substituted layers are compared on the same test basis as the listed assembly",
+    "the missing ESR-2994 report and product data sheets"
+  ],
+  "case_id": "H11-005",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

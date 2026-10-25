@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Council answer (leakage): yes. Section 104 of the 2018 IBC and IFC lets the building or fire official evaluate proposed modifications or alternative methods for Group I occupancies built as R-4; approval is allowed only if the proposal keeps the code's intent, does not lessen health, accessibility, life-safety, fire or structural requirements, and meets the criteria of IBC Section 104.11.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "authority of the official to approve alternative methods (IBC 104.11)",
+    "the intent-and-purpose test",
+    "occupancy classification of small Group I facilities",
+    "what safety evidence the official would require"
+  ],
+  "case_id": "H12-004",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

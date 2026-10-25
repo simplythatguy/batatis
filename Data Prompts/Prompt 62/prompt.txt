@@ -1,0 +1,6 @@
+Review the attached 19-BCV-006 on wireless smoke-alarm interconnection. Identify the required coverage and certification described in the document, then ask about the dwelling/suite arrangement, alarm certification, interconnection behavior, and power backup for a separate request. Keep unknowns explicit and do not certify the system.
+
+Attachments:
+- catalogue-b1783fb3-1884-45a8-9287-efd0e459597e-19-BCV-006---Interconnected-smoke-alarms-6a8d5a854d6e.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

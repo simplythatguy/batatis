@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The board granted the exemption request.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "unit/building counts and eligibility basis",
+    "the stated hardship and accessibility proposal",
+    "what design plans or accessible-suite schedules are attached versus referenced",
+    "limits of aggregating requirements across buildings in this foreign code regime"
+  ],
+  "case_id": "L20-011",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Set aside: the tribunal set aside the assessment manager's approval dated 14 Mar 2022 and ordered a remake having regard to A2.2(3) of NCC 2019 Amendment 1 (p. 2). Signed 9 Apr 2024 (p. 11).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Identifies NCC 2019 Amendment 1 and the existing-building context (Class 7b; bringing the building into compliance).",
+    "Flags AS 2419.1 hydrant compliance and the fire detection and alarm system as the disputed items.",
+    "Treats the Building Act s 68 hydrant point and the 'lawful existing' treatment as questions, not conclusions.",
+    "Makes no compliance statement."
+  ],
+  "case_id": "H09-003",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

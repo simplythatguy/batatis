@@ -1,0 +1,75 @@
+{
+  "id": "L14-007",
+  "title": "mcCallumSather — Waterloo four-storey apartment proposal",
+  "jurisdiction": "Waterloo, Ontario",
+  "code_edition": "2024 Ontario Building Code, Part 3 (as stated in the project profile)",
+  "case_type": "documented_design_study",
+  "source_url": "https://singlestair.ca/mcCallumSather",
+  "document_date": "unknown (undated project profile; submission/status dates are stated in the profile)",
+  "facts": [
+    {
+      "text": "The profile describes a four-storey, seven-dwelling apartment on a narrow lot, with dwelling units on all four levels.",
+      "locator": "Pilot Project / typology and unit arrangement"
+    },
+    {
+      "text": "The profile says levels 2, 3, and 4 are served by one exit stair and identifies provisions concerning suite egress and number of exits.",
+      "locator": "Egress analysis / proposed alternative solution"
+    },
+    {
+      "text": "The attached original level 2–3 drawing depicts one representative upper-level layout; full floor-by-floor plans and professional reports are not attached.",
+      "locator": "Attached Level 2–3 plan image"
+    }
+  ],
+  "limitations": [
+    "The project profile is published by the single-stair advocacy/research site and is not the original permit application, approved alternative-solution report, stamped permit drawing set, or authority decision.",
+    "Project status and design performance claims are proponent-reported here and were not independently verified with a project-specific authority record.",
+    "The site states that alternative solutions are site-specific and not precedent; this prompt is a document-review exercise, not a compliance or safety determination."
+  ],
+  "worker": "L14",
+  "prompt_number": 309,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://freight.cargo.site/t/original/i/44145aa26035b00db34081fed0a7396a3994287fa6432d98c5411c99d6c4ccbf/2025.04.07_mcCallumSather_Plan_Level2-3_3000px.jpg",
+      "sha256": "5f0370c7193155b42b4ff83d0e8d35892fa17848fa9b3c3dd98d68acf7656d7a",
+      "role": "input",
+      "bytes": 598109,
+      "filename": "drawing-32-5f0370c71931.jpg",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L14/files/drawing-32-5f0370c71931.jpg",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:24:00.754954+00:00",
+        "http_status": "200",
+        "final_url": "https://freight.cargo.site/t/original/i/44145aa26035b00db34081fed0a7396a3994287fa6432d98c5411c99d6c4ccbf/2025.04.07_mcCallumSather_Plan_Level2-3_3000px.jpg",
+        "content_type": "image/jpeg",
+        "kind": "image",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://singlestair.ca/mcCallumSather",
+      "sha256": "c5a072a94c2a2b1567db2be9f547e4812745fc435c22abddf4e96563c0791c4f",
+      "role": "outcome_reference",
+      "bytes": 180898,
+      "filename": "_evaluation/singlestair-mccallumsather-c5a072a94c2a.html",
+      "included_in_default_input": false,
+      "original_collection_path": "_research/workers/L14/files/singlestair-mccallumsather-c5a072a94c2a.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:39.773920+00:00",
+        "http_status": "200",
+        "final_url": "https://singlestair.ca/mcCallumSather",
+        "content_type": "text/html; charset=UTF-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "_evaluation/attachment-2-source-text.txt",
+        "sha256": "29981fa004e1198502b32a0039482547eca8669055d708471183cefa7b11f229",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

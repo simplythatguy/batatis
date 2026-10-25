@@ -1,0 +1,78 @@
+{
+  "id": "L16-025",
+  "title": "CertainTeed CertaPlank and related rigid-backed sidings",
+  "jurisdiction": "Canada — national CCMC product evaluation; comparative attachment only, not a Calgary/Edmonton or Alberta project application",
+  "code_edition": "NBC 2020",
+  "case_type": "product_evidence",
+  "source_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14769-R&type=cert",
+  "document_date": "2025-09-10",
+  "facts": [
+    {
+      "text": "The CCMC report lists FSR 100 and smoke development 510 under CAN/ULC-S102.2-18 for CertaPlank Single 7-inch horizontal siding specimens.",
+      "locator": "CCMC 14769-R PDF, p. 9, Fire performance table and notes"
+    },
+    {
+      "text": "The NBC 2020 opinion classifies Article 9.27.12.1.(1) as Alternative for the evaluated products.",
+      "locator": "CCMC 14769-R PDF, p. 2, Compliance opinion"
+    },
+    {
+      "text": "The report limits use to Part 9 buildings, excludes evaluation as insulated vinyl siding, requires EPS/XPS compliant with CAN/ULC-S701.1 and specifies an air space/furring installation.",
+      "locator": "CCMC 14769-R PDF, p. 3, Conditions and limitations"
+    }
+  ],
+  "limitations": [
+    "The fire results are specimen-specific additional performance data, outside the CCMC opinion.",
+    "The record does not address a project-specific assembly or building."
+  ],
+  "source_use": "comparative_attachment_content_only",
+  "worker": "L16",
+  "prompt_number": 221,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?type=cert&id=1343",
+      "sha256": "ecd9eca894bbae10322154c3d788d28203267254e39d33bf6f9d6050651c3c06",
+      "role": "input",
+      "bytes": 190602,
+      "filename": "current-route-14769-R-ecd9eca894bb.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L16/files/current-route-14769-R-ecd9eca894bb.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:51:29.947466+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?type=cert&id=1343",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded",
+        "entity_extraction": "Copied unchanged PDF entity from byte 433; original transport capture retained.",
+        "raw_capture_sha256": "9c28404bd446f2e519766fde1f7c7fce024ed69e4b5a2cc2eaa1f8ee3f576fbd",
+        "raw_capture_path": "_research/workers/L16/files/transport-capture-9c28404bd446f2e5.bin"
+      }
+    },
+    {
+      "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14769-R&type=cert",
+      "sha256": "a7e67b0f4af50c276a536eb84a0c88de8f735e68fe5d9c4bfd70a2de7c63bd9f",
+      "role": "supporting_evidence",
+      "bytes": 68085,
+      "filename": "landing-14769-R-a7e67b0f4af5.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L16/files/landing-14769-R-a7e67b0f4af5.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:21:44.158994+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14769-R&type=cert",
+        "content_type": "text/html; charset=UTF-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-2-source-text.txt",
+        "sha256": "80bc84ed99711fe5db87607aca62590da0a3e227aa30510cb28e189c48171966",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

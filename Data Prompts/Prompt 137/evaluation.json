@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Regulator position (R1): a wood-truss roof assembly must be designed by a registered engineering professional, including truss interconnection where applicable; the layout plan need not be authenticated if interconnection information is in a separate authenticated document.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the truss design professional from the layout-plan authentication question",
+    "Asks for the separate authenticated interconnection document",
+    "Flags the Part 9 scope question for the reviewer",
+    "Uses R1 (current); the February 2025 original is superseded"
+  ],
+  "case_id": "H20-011",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The CCMC report publishes a bounded fire-test summary for NueBoard specimens and a separate NBC 2015 product opinion with an Alternative classification.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "distinguish NueBoard from NueClad and identify exact profile",
+    "confirm substrate, attachment and drainage-plane details",
+    "determine whether fire table is relevant to the proposed assembly",
+    "request test documents and project context needed for a complete review"
+  ],
+  "case_id": "L16-017",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

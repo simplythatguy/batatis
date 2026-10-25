@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Order VARIED (p.1); the varied directions require stop-work, test or listing evidence, NFPA 80 installation and reinstallation of non-complying assemblies (pp.1-2).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "fire-protection rating evidence for exit door assemblies (test standard versus listing)",
+    "representative testing of the assembly actually installed",
+    "installation details that defeat fire-door performance (gaps, foam, sealant)",
+    "stop-work and inspection sequencing in a tall building"
+  ],
+  "case_id": "A10-004",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

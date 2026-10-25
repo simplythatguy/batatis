@@ -1,0 +1,53 @@
+{
+  "id": "L18-011",
+  "title": "B-1229.1 W2 — fixed PVC flange window in a concealed-barrier wall",
+  "jurisdiction": "NRC/IRC experimental wall-window specimens; test site not stated in the cited configuration pages (no permit jurisdiction)",
+  "code_edition": "Unknown; no project code edition or variance decision is stated.",
+  "case_type": "documented_design_study",
+  "source_url": "https://nrc-publications.canada.ca/eng/view/object/?id=45778707-13d0-48bb-b4cd-82fd054455a0",
+  "document_date": "2008-03-18",
+  "facts": [
+    {
+      "text": "The CMHC-commissioned NRC client report describes four 2.44 m x 2.44 m laboratory wall specimens and compares paired base/variation window-interface details.",
+      "locator": "PDF pp. 4, 31–39; report §§2–3"
+    },
+    {
+      "text": "W2 is a fixed PVC flange-window arrangement without a clear rainscreen cavity. The B-side shows a sill back dam and waterproof membranes at the head, jambs and sill; the V-side removes those protections.",
+      "locator": "PDF pp. 79–82; report Ch. 5, Figs. 5-1–5-2 and Table 5-2"
+    },
+    {
+      "text": "The report measures water entry under stated water application, air leakage and pressure conditions; deficiencies were deliberately introduced in some test steps.",
+      "locator": "PDF pp. 64–66 (W1 protocol), 82–83 (W2 protocol), 126–128 (W4 protocol); report Chapters 4–7"
+    }
+  ],
+  "limitations": [
+    "The attachment is an experimental report on specified specimens, not an application or accepted variance."
+  ],
+  "worker": "L18",
+  "prompt_number": 166,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=45778707-13d0-48bb-b4cd-82fd054455a0",
+      "sha256": "35d2f4d7e5acf8bc4cebe29788438e0a61f50df7f55f88774ee8d2eac2b69ff8",
+      "role": "input",
+      "bytes": 9502237,
+      "filename": "window-interface-phase1-test-35d2f4d7e5ac.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L18/files/window-interface-phase1-test-35d2f4d7e5ac.pdf",
+      "reuse_status": "rights_review_required",
+      "rights_source": "https://nrc-publications.canada.ca/eng/copyright/",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:18:23.631810+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc-publications.canada.ca/eng/view/ft/?id=45778707-13d0-48bb-b4cd-82fd054455a0",
+        "content_type": "application/pdf;charset=UTF-8",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "rights_review_required"
+}

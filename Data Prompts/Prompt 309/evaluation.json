@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The proponent profile reports submission in March 2025 and rejection in October 2025; it also reports concerns about the process. No official decision, peer-review record, or submitted design package is attached.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "floor-by-floor count and continuity of exits",
+    "what level 2–3 plan cannot establish",
+    "separate process allegations from technical evidence",
+    "independent confirmation of reported rejection"
+  ],
+  "case_id": "L14-007",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

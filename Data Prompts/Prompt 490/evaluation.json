@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Tribunal varied the Building Safety Regulator decision of 14 August 2025 so that the regularisation certificate is granted; the appeal from the local authority's decision of 21 June 2025 is upheld (docx decision section, text lines 36-40).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Requirements A (foundations) and H1/H4 (drainage and building over sewers) in a regularisation application",
+    "build-over agreement as evidence of building-regulation compliance",
+    "absence of site inspection notes and technical confirmation",
+    "BSR power to substitute grounds of non-compliance on appeal"
+  ],
+  "case_id": "H15-015",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

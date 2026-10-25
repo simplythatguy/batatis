@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from New Zealand (Building Act 2004); Nelson City Council; comparative only, not Alberta. It is not an Alberta application.
+
+This is a New Zealand regulator document about a lean-to built during alterations to a house, where a code compliance certificate and a certificate of acceptance were refused and the reasons are in dispute. Using only the attached PDF, identify the certificate tests and provisions it treats as uncertain, list the photos, plans, and records it relies on, flag missing or unclear administrative items (including the refusal reasons), and list the next questions a reviewer should ask. Do not say whether the lean-to complies or is safe, and do not apply Alberta or NBC(AE) rules.
+
+Attachments:
+- mbie-det-2025-061-37174b140378.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

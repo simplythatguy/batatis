@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The current report publishes an NBC 2020 product opinion and separate fire-test values for specific face types; the fire data is outside the opinion.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "which face type and backing are proposed",
+    "what the project wall assembly and furring look like",
+    "exact applicable code provision and building context",
+    "whether a project-specific evidence package matches the evaluated product"
+  ],
+  "case_id": "L16-018",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

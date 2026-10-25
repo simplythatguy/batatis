@@ -1,0 +1,53 @@
+{
+  "id": "L20-022",
+  "title": "Ferryland folk-arts building addition, tea-room ramp, and principal entrance",
+  "jurisdiction": "Ferryland, Newfoundland and Labrador",
+  "code_edition": "Buildings Accessibility Act and Buildings Accessibility Regulations; edition not stated",
+  "case_type": "appeal_decision",
+  "source_url": "https://www.gov.nl.ca/gs/licences/building/",
+  "document_date": "2019-03",
+  "facts": [
+    {
+      "text": "The decision analyzes a 2017 project described as a new entrance and addition for a staircase, with a ramp connecting a tea room and the rest of the building.",
+      "locator": "PDF pp. 3–5"
+    },
+    {
+      "text": "It cites Buildings Accessibility Act section 7(3) and Buildings Accessibility Regulations sections 7 and 9(3)(a) regarding alterations and principal entrances.",
+      "locator": "PDF p. 3"
+    },
+    {
+      "text": "The board distinguishes the 2017 renovation from a claimed simple replacement of a 2004 ramp.",
+      "locator": "PDF pp. 4–5"
+    }
+  ],
+  "limitations": [
+    "Comparative source from outside Alberta; it cannot establish Alberta code performance or approval.",
+    "This is a Newfoundland and Labrador buildings-accessibility appeal, not an NBC or Alberta decision.",
+    "The published PDF is a tribunal decision and does not include the underlying drawings."
+  ],
+  "worker": "L20",
+  "prompt_number": 574,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.gov.nl.ca/snl/files/licenses-building-baa-findings-southern-shore-folk-vs-snl.pdf",
+      "sha256": "b6c4c1bf3845b647c6e0e6ccdcc0631dcb3b5e5a20d40745f0fee5a5cb438b38",
+      "role": "outcome_reference",
+      "bytes": 2968057,
+      "filename": "nl-baat-southern-shore-folk-2019-b6c4c1bf3845.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L20/files/nl-baat-southern-shore-folk-2019-b6c4c1bf3845.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:50:07.878117+00:00",
+        "http_status": "200",
+        "final_url": "https://www.gov.nl.ca/gs/files/licenses-building-baa-findings-southern-shore-folk-vs-snl.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

@@ -1,0 +1,57 @@
+{
+  "id": "L18-004",
+  "title": "Phase 1 W1 — wood-frame wall with 25 mm EPS exterior insulation",
+  "jurisdiction": "NRC Field Exposure of Walls facility, Ottawa, Ontario, Canada (research specimen; no permit jurisdiction)",
+  "code_edition": "Unknown; the study reports NBC references but not a project’s adopted edition.",
+  "case_type": "documented_design_study",
+  "source_url": "https://nrc-publications.canada.ca/eng/view/object/?id=c20992ee-c99f-4f95-8094-58800da59849",
+  "document_date": "2016-01-08",
+  "facts": [
+    {
+      "text": "The six specimens were 1,219 x 1,829 mm (4 x 6 ft) wall sections tested at NRC’s Ottawa FEWF; Phase 1 used common 12.7 mm interior drywall, 6-mil polyethylene air/vapour layer, 2x6 framing with R-24 glass-fibre batt, and 11 mm OSB.",
+      "locator": "PDF pp. 17–20; report §2.2 and Figs. 3–9"
+    },
+    {
+      "text": "W1 adds 25 mm EPS (reported overall R-27) with sheathing membrane, furring and vinyl siding to the common Phase 1 wall.",
+      "locator": "PDF pp. 17–20; report §2.2 and Figs. 3–9"
+    },
+    {
+      "text": "The report describes approximately nine months of monitored Phase 1 exposure and instrumentation at multiple wall layers.",
+      "locator": "PDF pp. 23–28; report §§2.3–2.4"
+    },
+    {
+      "text": "No condensation was observed in any Phase 1 specimen during monitoring or teardown; the result applies only to the reported test period and assembly.",
+      "locator": "PDF pp. 27–29; report §3.1"
+    }
+  ],
+  "limitations": [
+    "The report is a laboratory/field-exposure research study; results do not establish performance of another wall or code acceptance."
+  ],
+  "worker": "L18",
+  "prompt_number": 163,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=c20992ee-c99f-4f95-8094-58800da59849",
+      "sha256": "452d8dc315986cb9c9a19ed2e8332812dcc175d8a6616d2df09a7e7b7b8f217f",
+      "role": "input",
+      "bytes": 5447019,
+      "filename": "high-insulation-wood-wall-phase12-452d8dc31598.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L18/files/high-insulation-wood-wall-phase12-452d8dc31598.pdf",
+      "reuse_status": "rights_review_required",
+      "rights_source": "https://nrc-publications.canada.ca/eng/copyright/",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:18:23.603737+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc-publications.canada.ca/eng/view/ft/?id=c20992ee-c99f-4f95-8094-58800da59849",
+        "content_type": "application/pdf;charset=UTF-8",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "rights_review_required"
+}

@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Does not comply: the 50A and 52A retaining-wall sections, as strengthened and extended, do not comply with B1.3.1 and B1.3.3 (the 52A section in regard to protection of other property), and the surface-water system above the wall does not comply with E1.3.1. [p.16, para 5.1.2]",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Wall strengthening and extension against B1.3.1 and B1.3.3 and the design basis of the engineer's detail",
+    "Surface-water system above the wall and its effect on other property under E1.3.1",
+    "Responsibility and records for the PS4 and for the wall on each property"
+  ],
+  "case_id": "H01-021",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

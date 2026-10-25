@@ -1,0 +1,77 @@
+{
+  "id": "H16-009",
+  "title": "Kensington Forum (Royal Borough of Kensington and Chelsea): planning-stage fire safety statement for hotel, serviced apartments and residential",
+  "jurisdiction": "England, UK (London Borough of Kensington and Chelsea). COMPARATIVE NON-ALBERTA RECORD; no Alberta applicability asserted.",
+  "code_edition": "London Plan 'Intend to Publish' Policy D12 cited (2020 draft). Approved Document B, BS 9999 and BS 9991 cited without year. External walls 'to the latest guidance in the Approved Document B'. Unknown if unstated.",
+  "case_type": "actual_application",
+  "source_url": "https://data.london.gov.uk/download/v8w77/da3fafa5-869f-42f7-b70d-01357e7ad939/Revised%20Fire%20Safety%20Statement_October%202020.pdf",
+  "document_date": "8 October 2020 (technical note ref AL4793/prm/38rock; file titled 'Revised Fire Safety Statement, October 2020')",
+  "facts": [
+    {
+      "text": "Mixed-use development in the London Borough of Kensington and Chelsea: hotel and serviced apartments across two towers (north tower to Level 28, south tower to Level 21), two basement levels including a ballroom at B2, and a separate residential apartment building on the Courtfield Road side.",
+      "locator": "p.1 s.1.0"
+    },
+    {
+      "text": "The statement 'is to form part of the documentation submitted for planning' and is to demonstrate compliance with Policy D12 of the Intend to Publish London Plan.",
+      "locator": "p.1 s.1.0"
+    },
+    {
+      "text": "Sprinklers: there is no Building Regulations requirement for hotels to be sprinklered, but the hotel strategy 'has been developed based on the entire building being sprinklered'.",
+      "locator": "p.2 s.3.0"
+    },
+    {
+      "text": "Basement: a racetrack corridor about 150 m long, with escape distances 'exceed 45 m'. This 'can be justified' on the basis of a protected corridor and sprinklers, but 'the travel distances in this area will be evaluated further in the next stage of design'. Some basement room escape distances 'need review and may require some adjustment as the design develops after planning'.",
+      "locator": "p.4 s.4.3"
+    },
+    {
+      "text": "Mobility-impaired occupants: refuges at each stair with two-way communication, and a lift per core for management assistance. 'A management plan for the evacuation of mobility impaired occupants will be developed prior to occupation.'",
+      "locator": "p.4 s.4.1-4.2"
+    },
+    {
+      "text": "Open circulation stairs between basement, ground, mezzanine and first floors: 'A fire engineering case will be developed to permit this', on the basis of sprinklers and compartment floors.",
+      "locator": "p.6 s.5.2"
+    },
+    {
+      "text": "Hydrants: existing hydrants in the adjacent public roads are 'anticipated' to serve the building adequately; 'this will be reviewed and if necessary additional hydrants will be provided'.",
+      "locator": "p.8 s.6.5"
+    },
+    {
+      "text": "Residential: 'The apartment building could be designed with a single escape stair. However, it is proposed that two stairs are provided'. The mezzanine and roof levels have access to a single stair only.",
+      "locator": "p.8 s.7.3"
+    },
+    {
+      "text": "External walls: 'all parts of the external wall will be constructed of either A1 or A2-s1, d0 materials'; designed to Regulation 7 and 'the latest guidance in the Approved Document B'.",
+      "locator": "p.9"
+    }
+  ],
+  "limitations": [
+    "Comparative UK record only; the London Plan Policy D12 'Intend to Publish' text was the planning hook at the time.",
+    "Hosted on the London Datastore (data.london.gov.uk); the publishing context and application reference are not in the extracted text.",
+    "Figure 1 (site plan) is referenced but was not checked visually in this pass."
+  ],
+  "worker": "H16",
+  "prompt_number": 261,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://data.london.gov.uk/download/v8w77/da3fafa5-869f-42f7-b70d-01357e7ad939/Revised%20Fire%20Safety%20Statement_October%202020.pdf",
+      "sha256": "39cf10f483e7eaaae7e8e1c449ac37e4a0cca67e76e21d6db4eb218397b44ff4",
+      "role": "input",
+      "bytes": 1519646,
+      "filename": "london-kensington-forum-revised-fire-safety-statement-oct-2020-39cf10f483e7.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H16/files/london-kensington-forum-revised-fire-safety-statement-oct-2020-39cf10f483e7.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:53:15.522732+00:00",
+        "http_status": "200",
+        "final_url": "https://data.london.gov.uk/download/v8w77/da3fafa5-869f-42f7-b70d-01357e7ad939/Revised%20Fire%20Safety%20Statement_October%202020.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

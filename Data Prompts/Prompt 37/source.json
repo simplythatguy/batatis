@@ -1,0 +1,74 @@
+{
+  "id": "A15-002",
+  "title": "City of Edmonton Policy 14-01-G: reduced or zero lot line side yard wall and gable construction for a detached garage",
+  "jurisdiction": "Edmonton, Alberta (City of Edmonton Safety Codes, Permits and Inspections policy)",
+  "code_edition": "Policy cites Alberta Building Code 2014 (ABC 2014) sentences and Standata G-01-10-Rev1; policy dated 10 January 2019",
+  "case_type": "regulatory_guidance",
+  "source_url": "https://www.edmonton.ca/residential_neighbourhoods/application-requirements-house-permits",
+  "document_date": "2019-01-10 (policy footer date)",
+  "facts": [
+    {
+      "text": "The policy addresses reduced or zero lot line side yard wall and gable construction on a detached garage or accessory building serving a single detached or semi-detached house.",
+      "locator": "p.1 title and INTENT"
+    },
+    {
+      "text": "The policy states that an alternative solution is often required because building eaves are typically proposed projecting too close to, or over, a side property line. Code-compliant RZLL proposals do not need one.",
+      "locator": "p.1 INTENT"
+    },
+    {
+      "text": "The policy proposes a 'deemed limiting distance' and an option for acceptable construction details for side yard walls and gables, and states it does not preclude other solutions.",
+      "locator": "p.1 INTENT"
+    },
+    {
+      "text": "Under the POLICY paragraph, where the buildings would be less than 2.4 m apart, a deemed limiting distance line is set midway between the buildings instead of the property line. A minimum 1 h fire-resistance rated wall with Type X gypsum board on both sides applies in one described configuration.",
+      "locator": "p.1 POLICY"
+    },
+    {
+      "text": "The policy cites Standata G-01-10-Rev1 in a window-related requirement, and Alberta Building Code 2014 sentences including 1.4.1.2 (limiting distance definition) and Division C 2.2.5.2 (drawings must show enough detail to demonstrate conformance).",
+      "locator": "p.2 (Standata); p.3 (1.4.1.2); p.4 (2.2.5.2)"
+    },
+    {
+      "text": "The policy lists options for construction other than in conformance with it, including a prescriptive compliant construction intention.",
+      "locator": "p.3 'Options to construct other than in conformance'"
+    },
+    {
+      "text": "The footer reads 'Content subject to periodic update. Ensure use of the most recent version.' with the date 10 January 2019.",
+      "locator": "footer on pp.1-4"
+    },
+    {
+      "text": "The policy quotes an owner's or constructor's duty to provide written assurance from the person supervising construction, when the authority having jurisdiction requires it.",
+      "locator": "p.4 (closing text)"
+    }
+  ],
+  "limitations": [
+    "Municipal policy, not a permit application or decision. The prompt is a scenario based on the policy's own intent; no owner, site or dimension is supplied.",
+    "The policy cites ABC 2014 and is dated 10 Jan 2019. Any current-edition conclusion needs an NBC(AE) 2023 2nd-printing check that this file cannot provide.",
+    "The policy says its content is subject to periodic update; the current City version may differ from this copy.",
+    "Standata G-01-10-Rev1 and the Zoning Bylaw are cited but not attached."
+  ],
+  "worker": "A15",
+  "prompt_number": 37,
+  "priority_tier": 1,
+  "priority": "Calgary / Edmonton",
+  "attachments": [
+    {
+      "url": "https://www.edmonton.ca/sites/default/files/public-files/assets/Policy_B14-01G_Reduced_or_Zero_Lot_Line_Detached_Garage.pdf?cb=1755135908",
+      "sha256": "679bae3c2e1e87b0e6355e0e0fa7d0253524122cc25d94a213234eec61883624",
+      "role": "input",
+      "bytes": 658314,
+      "filename": "edmonton-policy-b14-01g-reduced-zero-lot-line-garage-679bae3c2e1e.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/A15/files/edmonton-policy-b14-01g-reduced-zero-lot-line-garage-679bae3c2e1e.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T02:14:10.583669+00:00",
+        "http_status": "200",
+        "final_url": "https://www.edmonton.ca/sites/default/files/public-files/assets/Policy_B14-01G_Reduced_or_Zero_Lot_Line_Detached_Garage.pdf?cb=1755135908",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

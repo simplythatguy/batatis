@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from New Zealand: Auckland Council as building consent authority; MBIE determination under the Building Act 2004. Non-Alberta comparative record.. It is not an Alberta application.
+
+I am replacing a deck and the external stair that is the main entry route to a single-storey house. The stair has two timber handrails, each 140 mm deep and 45 mm wide, bolted inside 90 mm posts, with 42 mm balusters. The consent plans say the stair must comply with D1/AS1, but they do not specify the handrail size, type or fixings. The building inspector failed the handrails as not graspable and said the width exceeds 80 mm. Attached is the determination record for this handrail question. Using only that record, please: (1) identify the access-route requirement and the acceptable-solution paragraphs that govern handrail graspability; (2) explain where the parties disagree and which reading of the figures is contested; (3) list the measurements, photos and fixing details I would need to provide; and (4) list the questions I should put to the council before I resubmit. Do not say whether my handrails comply, and do not invent dimensions or owner details beyond what is written here.
+
+Attachments:
+- mbie-det-2023-039-24afa94fd1a1.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

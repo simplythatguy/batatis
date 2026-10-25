@@ -1,0 +1,75 @@
+{
+  "id": "L14-006",
+  "title": "SvN — Hamilton three-storey apartment with lower-level dwelling",
+  "jurisdiction": "Hamilton, Ontario",
+  "code_edition": "2012 Ontario Building Code, Part 9 (as stated in the project profile)",
+  "case_type": "documented_design_study",
+  "source_url": "https://singlestair.ca/SvN",
+  "document_date": "unknown (undated project profile; submission/status dates are stated in the profile)",
+  "facts": [
+    {
+      "text": "The profile describes nine dwellings: four on each of levels 2 and 3 and one grade-accessible basement unit; the ground floor contains lobby, service rooms, and secure parking.",
+      "locator": "Pilot Project / proposed arrangement"
+    },
+    {
+      "text": "The profile describes a three-storey building, 595 m² building area, 31 m depth, and 32 occupants served by the single exit.",
+      "locator": "Building metrics"
+    },
+    {
+      "text": "The attached original typical-floor drawing illustrates an upper residential level; it does not show the full lower-level/parking relationship or site-specific fire systems.",
+      "locator": "Attached typical-floor plan image"
+    }
+  ],
+  "limitations": [
+    "The project profile is published by the single-stair advocacy/research site and is not the original permit application, approved alternative-solution report, stamped permit drawing set, or authority decision.",
+    "Project status and design performance claims are proponent-reported here and were not independently verified with a project-specific authority record.",
+    "The site states that alternative solutions are site-specific and not precedent; this prompt is a document-review exercise, not a compliance or safety determination."
+  ],
+  "worker": "L14",
+  "prompt_number": 308,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://freight.cargo.site/t/original/i/e0e10bc9893f5f671f2eba4d5baab6cb62c841a5e4b2cda6fe99d92b3ef4dc09/SvN_02_Typical-Floor-Plan.png",
+      "sha256": "6d412e6df6ae2df9ed01f1a41f1e54436d11507a05ec4ebd165903dbc638737b",
+      "role": "input",
+      "bytes": 294107,
+      "filename": "drawing-28-6d412e6df6ae.png",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L14/files/drawing-28-6d412e6df6ae.png",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:23:54.622513+00:00",
+        "http_status": "200",
+        "final_url": "https://freight.cargo.site/t/original/i/e0e10bc9893f5f671f2eba4d5baab6cb62c841a5e4b2cda6fe99d92b3ef4dc09/SvN_02_Typical-Floor-Plan.png",
+        "content_type": "image/png",
+        "kind": "image",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://singlestair.ca/SvN",
+      "sha256": "78f8ca3f344bc3eb18408d7de6a5c8465485b815463f6a610dbf7750b15684fc",
+      "role": "outcome_reference",
+      "bytes": 192701,
+      "filename": "_evaluation/singlestair-svn-78f8ca3f344b.html",
+      "included_in_default_input": false,
+      "original_collection_path": "_research/workers/L14/files/singlestair-svn-78f8ca3f344b.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:38.224011+00:00",
+        "http_status": "200",
+        "final_url": "https://singlestair.ca/SvN",
+        "content_type": "text/html; charset=UTF-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "_evaluation/attachment-2-source-text.txt",
+        "sha256": "c0b869326cf69f72d5536461a20b7ecb0fdbc70c2a4a123c5dbce2f73c317842",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

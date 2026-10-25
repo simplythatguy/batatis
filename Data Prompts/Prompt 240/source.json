@@ -1,0 +1,61 @@
+{
+  "id": "H08-006",
+  "title": "STAC Consulting - BCA Report BCA-25004-1, Lot 202 Goonoo Goonoo Road, Tamworth (Tenancy 3 and 4)",
+  "jurisdiction": "New South Wales, Australia - COMPARATIVE ONLY (not Alberta; NSW code text, not Alberta applicability)",
+  "code_edition": "NCC 2022 Volume One / BCA 2022 (stated, p.2 and p.5)",
+  "case_type": "actual_application",
+  "source_url": "https://apps.planningportal.nsw.gov.au/prweb/PRRestService/DocMgmt/v1/PublicDocuments/DATA-WORKATTACH-FILE%20PEC-DPE-EP-WORK%20PAN-508694!20250227T084811.010%20GMT",
+  "document_date": "05.02.2025 (report BCA-25004-1, p.1)",
+  "facts": [
+    {
+      "text": "Report No. BCA-25004-1 dated 05.02.2025 for Lot 202 Goonoo Goonoo Rd, Tamworth (Tenancy 3 and 4).",
+      "locator": "p.1"
+    },
+    {
+      "text": "'Table 1.1 - Fire Engineered Performance Solutions Identified' lists items, such as D1P4 and E2P2, that need a performance solution from a fire engineer.",
+      "locator": "p.2"
+    },
+    {
+      "text": "Drawing list refers to DA-series sheets at Revision A dated 04.02.2025.",
+      "locator": "p.2 and p.5"
+    },
+    {
+      "text": "Section 2.6 'Limitations & Exclusions' sets the report's scope.",
+      "locator": "contents p.4; heading p.6"
+    },
+    {
+      "text": "'Table 3.1 - Compliance Assessment' tabulates the DtS compliance check.",
+      "locator": "p.8"
+    }
+  ],
+  "limitations": [
+    "Comparative NSW material: it cannot establish Alberta performance or Alberta applicability.",
+    "Planning Portal DA page not located; council and outcome unverified.",
+    "The 'Lot 202' reference is taken from the report text and not reconciled to a DA number from the sources retrieved."
+  ],
+  "worker": "H08",
+  "prompt_number": 240,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://apps.planningportal.nsw.gov.au/prweb/PRRestService/DocMgmt/v1/PublicDocuments/DATA-WORKATTACH-FILE%20PEC-DPE-EP-WORK%20PAN-508694!20250227T084811.010%20GMT",
+      "sha256": "4d65642d976f087a7eee629112d1dc4e88094f087f5fb3cade1a6a700f1a4de1",
+      "role": "input",
+      "bytes": 1604113,
+      "filename": "pp-workattach-pan-508694-4d65642d976f.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H08/files/pp-workattach-pan-508694/pp-workattach-pan-508694-4d65642d976f.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:22:50.012683+00:00",
+        "http_status": "200",
+        "final_url": "https://apps.planningportal.nsw.gov.au/prweb/PRRestService/DocMgmt/v1/PublicDocuments/DATA-WORKATTACH-FILE%20PEC-DPE-EP-WORK%20PAN-508694%2120250227T084811.010%20GMT",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

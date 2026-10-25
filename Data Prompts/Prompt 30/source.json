@@ -1,0 +1,52 @@
+{
+  "id": "L06-018",
+  "title": "Basement use and secondary-suite classification (Council Order 2024-01)",
+  "jurisdiction": "City of Calgary, Alberta",
+  "code_edition": "unknown",
+  "document_date": "2024-03-25",
+  "facts": [
+    {
+      "text": "The appeal concerned whether a Calgary basement constituted a secondary suite and therefore required permits/upgrades.",
+      "locator": "PDF pp.1-2, paras 8-12"
+    },
+    {
+      "text": "The order reports a basement bedroom and bathroom, shared access between floors and disagreement over whether food-preparation features amounted to a cooking facility.",
+      "locator": "PDF pp.4-7, paras 23-29, 49-55"
+    },
+    {
+      "text": "The respondent’s observations included bedroom-window egress and smoke-separation concerns; the appellant disputed that a secondary suite existed.",
+      "locator": "PDF pp.6-8, paras 45-54"
+    }
+  ],
+  "limitations": [
+    "Underlying plans, inspection photographs and permit records are not attached separately.",
+    "The inspected decision text did not establish a specific code edition."
+  ],
+  "source_url": "https://safetycodes.ab.ca/council-information/appeals/appeal-decisions/",
+  "case_type": "appeal_decision",
+  "worker": "L06",
+  "prompt_number": 30,
+  "priority_tier": 1,
+  "priority": "Calgary / Edmonton",
+  "attachments": [
+    {
+      "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2024/2024-01%20DECISION%20Signed_Redacted.pdf",
+      "sha256": "48991a05dd45e1aa9b825e1316cca4fed27536146d9fce955546c12f13e81ae8",
+      "role": "input",
+      "bytes": 264814,
+      "filename": "scc_2024_secondary_suite-48991a05dd45.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L06/files/scc_2024_secondary_suite-48991a05dd45.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:20.379669+00:00",
+        "http_status": "200",
+        "final_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2024/2024-01%20DECISION%20Signed_Redacted.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

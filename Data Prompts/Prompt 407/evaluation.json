@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The proposed staircase complies to the extent required in its intended use in relation to Clause D1 Access Routes (decision, p.12).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "classified use of the building and mezzanine use",
+    "stair geometry and handrail and balustrade detail",
+    "access route limits for a non-public building",
+    "drawings required for a stair in a farm shed"
+  ],
+  "case_id": "H04-012",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

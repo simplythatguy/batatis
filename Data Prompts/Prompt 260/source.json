@@ -1,0 +1,99 @@
+{
+  "id": "H16-007",
+  "title": "Epsom (Guild Living Epsom): RIBA Stage 2 fire engineering report, draft Rev 00 (later living, care and commercial uses)",
+  "jurisdiction": "England, UK (Epsom and Ewell, Surrey). COMPARATIVE NON-ALBERTA RECORD; no Alberta applicability asserted.",
+  "code_edition": "BS 9991:2015, BS 9999:2017 and Firecode HTM 05-02 (2015) stated (p.5). Building Regulations functional requirements B1-B5 referenced (p.17). Approved Document B edition not stated: unknown if unstated.",
+  "case_type": "actual_application",
+  "source_url": "https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/Epsom_hospital_inquiry/copies_docs_LPA/Fire%20Strategy%201%2030.pdf",
+  "document_date": "13 December 2019 (draft Rev 00, 'draft issue for comment')",
+  "facts": [
+    {
+      "text": "Title: Guild Living Epsom Fire Engineering Stage 2 Report, draft issue for comment, Revision 00, 13 December 2019. Document reference REP-1920260-05-CR-20191213-GL Epsom S2 FSS-Rev00; project number 19/20260.",
+      "locator": "p.1-2 cover and audit sheet"
+    },
+    {
+      "text": "Scope: a RIBA Stage 2 outline fire safety strategy for the development in Epsom, Surrey, to be read with architectural plans by Marchese Partners (Table 1; drawings dated 22/11/2019, revisions A to M).",
+      "locator": "p.5 s.1, Table 1"
+    },
+    {
+      "text": "Status: the principles are 'subject to, and approval by, the Statutory Authorities', and the report is stated to be 'not suitable for Building Regulations submission' (wording as printed in the PDF).",
+      "locator": "p.5 s.1"
+    },
+    {
+      "text": "Default assumption: where not explicitly described, the building 'will be designed to comply with the relevant sections in BS 9991:2015 [1], BS 9999:2017 [2] and Firecode HTM 05-02 2015 [3]'.",
+      "locator": "p.5 s.1"
+    },
+    {
+      "text": "Occupancy types include independent living, supporting living, 24-hour care, shared ancillary accommodation and commercial units. For some occupants, 'It cannot be assumed that occupants are capable of independent escape', so the strategy uses assisted or progressive horizontal evacuation.",
+      "locator": "p.7; p.17 s.8"
+    },
+    {
+      "text": "Fire-engineered solutions are allowed by HTM 05-02 paragraphs 1.20 and 1.21 (as cited). For remote-end compartments connected to only one other compartment, 'which departs from the HTM 05-02 guidance'. The compensation proposed is a stair and an evacuation lift (with refuge point) for each such compartment.",
+      "locator": "p.7; p.12"
+    },
+    {
+      "text": "Where BS 9991 is more onerous than HTM, BS 9991 is to be followed. Firefighting shaft elements are to be 60 minutes with FD30S lift doors.",
+      "locator": "p.13; p.15"
+    },
+    {
+      "text": "Section 8: 'This Stage 2 report is not suitable for a Building Regulations application.' Items for the next stage include detailed design of the GCS 'to ensure fire engineered solution is followed and shared fire service access routes are suitable', 'Car stacker design to be developed', and commercial units (particularly childcare) and ancillary accommodation 'to be further developed'.",
+      "locator": "p.17 s.8, s.8.1"
+    },
+    {
+      "text": "Key features listed: automatic detection throughout; residential or commercial sprinklers throughout; non-combustible external walls; 60 minutes fire resistance to the structure; firefighting shafts to residential accommodation except key-worker apartments on the ground to second floors.",
+      "locator": "p.17 s.8"
+    },
+    {
+      "text": "Appendix A (comments on GAs, p.19) and Appendix B (external fire spread requirements, p.20) are listed in the contents. The appendix pages carry little text in this PDF and were not checked in detail.",
+      "locator": "p.4 contents; p.19-20"
+    }
+  ],
+  "limitations": [
+    "Comparative UK record only; not Alberta evidence.",
+    "Draft Rev 00 issued for comment; not the final planning submission. The file name suggests a council copy, but the text does not state the application reference.",
+    "Appendix drawings in the PDF were not analysed in detail.",
+    "The appeal decision is attached as an outcome reference; do not give it to a model under test."
+  ],
+  "worker": "H16",
+  "prompt_number": 260,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/Epsom_hospital_inquiry/copies_docs_LPA/Fire%20Strategy%201%2030.pdf",
+      "sha256": "769d4ebaa24f9f48237176c6668345f3e847dc0fbf1ffca038bc3715269c2860",
+      "role": "input",
+      "bytes": 8454193,
+      "filename": "epsom-guild-living-fire-engineering-stage-2-draft-769d4ebaa24f.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H16/files/epsom-guild-living-fire-engineering-stage-2-draft-769d4ebaa24f.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:53:15.523511+00:00",
+        "http_status": "200",
+        "final_url": "https://www.epsom-ewell.gov.uk/sites/default/files/documents/residents/planning/Epsom_hospital_inquiry/copies_docs_LPA/Fire%20Strategy%201%2030.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://insight.epsom-ewell.gov.uk/assets/1/appeal_decisions_3272074_and_3276483.pdf",
+      "sha256": "f2f680ecda22b66954414278c71cf4fb6e0893ff0252896065706d7e40b135eb",
+      "role": "outcome_reference",
+      "bytes": 405237,
+      "filename": "_evaluation/epsom-planning-inspectorate-appeal-decisions-3272074-3276483-f2f680ecda22.pdf",
+      "included_in_default_input": false,
+      "original_collection_path": "_research/workers/H16/files/epsom-planning-inspectorate-appeal-decisions-3272074-3276483-f2f680ecda22.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:53:15.522401+00:00",
+        "http_status": "200",
+        "final_url": "https://insight.epsom-ewell.gov.uk/assets/1/appeal_decisions_3272074_and_3276483.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

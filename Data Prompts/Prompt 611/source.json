@@ -1,0 +1,55 @@
+{
+  "id": "H12-007",
+  "title": "Interpretation 00-16 (Spokane County): 'firm and stable' accessible surfaces for a public park using gravel and grass",
+  "jurisdiction": "Washington State, requested by Spokane County (comparative test only; not Alberta)",
+  "code_edition": "1997 Uniform Building Code, State Regulations for Barrier-Free Facilities (Chapter 11), Sections 1106.7.1 and 1107.2.5, as cited",
+  "case_type": "regulatory_guidance",
+  "source_url": "https://sbcc.wa.gov/answers-opinions",
+  "document_date": "November 2000 (header)",
+  "facts": [
+    {
+      "text": "Document type: State Building Code Council interpretation no. 00-16, one page; requester Spokane County.",
+      "locator": "p1 header"
+    },
+    {
+      "text": "Project as described: a public park project proposes gravel and grass as the surface materials for accessible parking stalls and for exterior accessible routes connecting structures and site facilities.",
+      "locator": "p1 QUESTIONS"
+    },
+    {
+      "text": "Question 1 asks which materials or methods satisfy 'firm and stable' surfaces for public park routes in urban, suburban or rural settings; Question 2 asks the same for accessible parking.",
+      "locator": "p1 QUESTIONS 1-2"
+    }
+  ],
+  "limitations": [
+    "The PDF contains the Council answer on the same page; do not present it as applicant-side input without flagging leakage.",
+    "Old edition (1997 UBC barrier-free regulations); comparative only.",
+    "No site plan, material specification or surface test is in the record."
+  ],
+  "original_worker_case_type": "issued_variance",
+  "parent_curation_note": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance.",
+  "worker": "H12",
+  "prompt_number": 611,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://sbcc.wa.gov/sites/default/files/2019-12/0016bf.pdf",
+      "sha256": "43960d0f1f7f58bff65df480e9b31e042e1da6a5a790db9fb97343c9029bcbe3",
+      "role": "outcome_reference",
+      "bytes": 41745,
+      "filename": "sbcc-ruling-00-16-0016bf-43960d0f1f7f.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H12/files/sbcc-ruling-00-16-0016bf-43960d0f1f7f.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:42:26.799836+00:00",
+        "http_status": "200",
+        "final_url": "https://sbcc.wa.gov/sites/default/files/2019-12/0016bf.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

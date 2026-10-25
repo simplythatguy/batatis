@@ -1,0 +1,16 @@
+{
+  "known_outcome": "Unknown; the report records the classification question but no answer or permit result.",
+  "outcome_leakage": false,
+  "review_focus": [
+    "rooming-house versus dwelling-unit classification",
+    "building boundary and number of dwelling units",
+    "room count, use, tenancy and shared/private facilities",
+    "applicable OBC/OFC provisions and edition",
+    "underlying plans and permit record"
+  ],
+  "case_id": "L12-006",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,78 @@
+{
+  "id": "L16-001",
+  "title": "StoTherm ci EIFS",
+  "jurisdiction": "Canada — national CCMC product evaluation; comparative attachment only, not a Calgary/Edmonton or Alberta project application",
+  "code_edition": "NBC 2020",
+  "case_type": "product_evidence",
+  "source_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=12416-R&type=cert",
+  "document_date": "2026-04-20",
+  "facts": [
+    {
+      "text": "The CCMC evaluation describes StoTherm ci as a non-loadbearing exterior insulation and finish system made from a water-resistive barrier, adhesive, insulation board and coating/lamina.",
+      "locator": "CCMC 12416-R PDF, p. 4, Product information"
+    },
+    {
+      "text": "The current compliance opinion lists NBC 2020 and classifies the cited combustible-cladding provision 3.1.5.5 as Acceptable, subject to the evaluation conditions and limitations.",
+      "locator": "CCMC 12416-R PDF, p. 2, Compliance opinion"
+    },
+    {
+      "text": "The fire-performance section reports an FSR range of 25–500 under CAN/ULC-S102.2 testing and ties the rated product combinations to listed assembly conditions.",
+      "locator": "CCMC 12416-R PDF, p. 7, Fire performance"
+    }
+  ],
+  "limitations": [
+    "Product evaluation only; no project plans, building classification, jurisdiction adoption evidence, or site-specific wall assembly is supplied.",
+    "Fire-performance data are product/configuration specific and do not decide the performance of an unprovided project assembly."
+  ],
+  "source_use": "comparative_attachment_content_only",
+  "worker": "L16",
+  "prompt_number": 197,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?type=cert&id=390",
+      "sha256": "71e0b7104de67a71a6b6bdcbc6ff2b59db556f571bcbc460dae877e4a14b1d67",
+      "role": "input",
+      "bytes": 757027,
+      "filename": "current-route-12416-R-71e0b7104de6.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L16/files/current-route-12416-R-71e0b7104de6.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:50:48.751754+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?type=cert&id=390",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded",
+        "entity_extraction": "Copied unchanged PDF entity from byte 433; original transport capture retained.",
+        "raw_capture_sha256": "3110e748513f492fb0af882b7dbfa19bc994c678528984d6216686b699f1883f",
+        "raw_capture_path": "_research/workers/L16/files/transport-capture-3110e748513f492f.bin"
+      }
+    },
+    {
+      "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=12416-R&type=cert",
+      "sha256": "8ff381e228c5c89f881849957f19391df8e49437e17a870814a14993c39cb325",
+      "role": "supporting_evidence",
+      "bytes": 126041,
+      "filename": "landing-12416-R-8ff381e228c5.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L16/files/landing-12416-R-8ff381e228c5.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:19:15.545191+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=12416-R&type=cert",
+        "content_type": "text/html; charset=UTF-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-2-source-text.txt",
+        "sha256": "51e15e9a25a499f51626f51a005df796081dbc4e4218a0c857c941fe34a8cca9",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

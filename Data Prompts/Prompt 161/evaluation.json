@@ -1,0 +1,14 @@
+{
+  "known_outcome": "The report reports faster moisture dissipation in W2 and a mould-index reduction about twice that reported for W1 over the study period. This is a research comparison, not a project or permit decision.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "differentiate tested deliberate defects from an intact project assembly",
+    "check the report’s exposure duration, sensors and climate boundary conditions",
+    "request exact proposed wall layers and a professional project-specific hygrothermal assessment"
+  ],
+  "case_id": "L18-002",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

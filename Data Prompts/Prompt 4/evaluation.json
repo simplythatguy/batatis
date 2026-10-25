@@ -1,0 +1,18 @@
+{
+  "known_outcome": "No permit decision, accepted project-specific alternative solution, or variance is included in the collected documents. The code assessment is conceptual and leaves future alternatives for evaluation and AHJ review. The RJC report's structural conclusions are source-visible findings: it says the evaluated as-is Low Pressure Plant was not suitable for occupancy except very short-term controlled conditions and recommends repair/reinforcement and continued verification. These consultant conclusions are not an approval or certification outcome.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separate the report's actual statements from assumptions, options, and unresolved conditions.",
+    "Do not mistake a conceptual assessment or consultant recommendation for an application, accepted alternative solution, variance, permit, or AHJ decision.",
+    "Keep the 2019 editions attached to this historical report distinct from the challenge's NBC(AE) 2023 2nd printing basis.",
+    "Check that any future alternative path is tied to selected occupancy, specific applicable requirements, an acceptable-solution benchmark, and supporting analysis.",
+    "Identify missing/current drawings, field verification, accessibility details, structural design basis, and AHJ input without inferring technical adequacy.",
+    "Keep all professional judgments and engineering evidence with qualified professionals.",
+    "When a drawing annotation or dimension is unavailable/garbled in text extraction, flag visual-review uncertainty rather than inventing or confidently interpreting a value. Preserve the source page and distinguish visible drawing content from text-layer extraction."
+  ],
+  "case_id": "A05-001",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Calgary / Edmonton",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

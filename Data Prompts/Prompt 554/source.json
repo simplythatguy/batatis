@@ -1,0 +1,52 @@
+{
+  "id": "L20-001",
+  "title": "Grain mill elevated platforms and egress travel distances",
+  "jurisdiction": "Saskatchewan; local authority redacted in the published decision",
+  "code_edition": "National Building Code of Canada 2015 (as stated in the decision)",
+  "case_type": "appeal_decision",
+  "source_url": "https://www.saskatchewan.ca/business/housing-development-construction-and-property-management/building-and-technical-standards/saskatchewan-building-and-accessibility-standards-appeal-board",
+  "document_date": "2023-04-12",
+  "facts": [
+    {
+      "text": "The appeal concerns three elevated industrial equipment platforms in a grain mill described as a high-hazard industrial occupancy.",
+      "locator": "PDF pp. 3–5"
+    },
+    {
+      "text": "The decision records platform travel distances of 28.2 m and 27 m, against a stated 25 m limit under NBC 2015 Article 3.4.2.5(1).",
+      "locator": "PDF pp. 5–6"
+    },
+    {
+      "text": "Platform identifiers include drawing references 4/G6.2 and 5/G6.2; the record describes maintenance/operator use and an alternative-solution submission.",
+      "locator": "PDF pp. 5–7"
+    }
+  ],
+  "limitations": [
+    "Comparative source from outside Alberta; it cannot establish Alberta code performance or approval.",
+    "The attached publication is the appeal decision, not the underlying application file. Exhibits named in the decision are not presumed attached unless visible in this PDF. The decision outcome is visible in the attachment."
+  ],
+  "worker": "L20",
+  "prompt_number": 554,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://publications.saskatchewan.ca/api/v1/products/122105/formats/141554/download",
+      "sha256": "a705c1edff9431f0570000643bc334609ad836a8ddc00e772cc5da5bc8120d53",
+      "role": "outcome_reference",
+      "bytes": 258301,
+      "filename": "sk-scsab-appeal-no.-2023-002-a705c1edff94.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L20/files/sk-scsab-appeal-no.-2023-002-a705c1edff94.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:23:06.968380+00:00",
+        "http_status": "200",
+        "final_url": "https://publications.saskatchewan.ca/api/v1/products/122105/formats/141554/download",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

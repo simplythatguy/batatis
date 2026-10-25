@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Granted as proposed (roof projections at 40-inch minimum fire separation distance per 2018 IBC).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "OSSC 705.2 projection limits and the reference to a 2018 IBC rule",
+    "whether an edition mismatch is stated and resolved in the record",
+    "the missing projection dimensions and opening protection"
+  ],
+  "case_id": "H11-006",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

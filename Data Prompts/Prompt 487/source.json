@@ -1,0 +1,66 @@
+{
+  "id": "H15-012",
+  "title": "Appeal 45/3/162: cow byre converted to office use; relaxation of Requirements K1 and M2 refused",
+  "jurisdiction": "England (UK): Secretary of State determination / appeal / tribunal under the Building Act 1984 and Building Regulations; comparative test only, not Alberta",
+  "code_edition": "Building Regulations 2000 (as amended): Requirements K1 (stairs, ladders and ramps) and M2 (access and use)",
+  "case_type": "appeal_decision",
+  "source_url": "https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/3061/Building_regulations_appeal_45-3-162.pdf",
+  "document_date": "2003-11-10",
+  "facts": [
+    {
+      "text": "The building work comprises material alterations to a disused cow byre within the clients' property, to convert it to an office or study with kitchen and toilet facilities.",
+      "locator": "p.1 para 3"
+    },
+    {
+      "text": "The appeal is against the District Council's refusal to relax or dispense with Requirement K1 and Requirement M2.",
+      "locator": "p.1 header"
+    },
+    {
+      "text": "The Secretary of State considers a ramp between the two ground-floor levels is not required to comply with Requirement M2, although the two steps should meet acceptable ambulant standards.",
+      "locator": "p.3 para 10"
+    },
+    {
+      "text": "On K1, the Secretary of State concludes it would not be appropriate to relax the stair requirement to permit ladders or steps, given the carrying of items for storage.",
+      "locator": "p.5 para 17"
+    },
+    {
+      "text": "Determination: the appeal is dismissed in respect of the refusal to relax or dispense with Requirements M2 and K1.",
+      "locator": "p.5 para 18"
+    }
+  ],
+  "limitations": [
+    "Record type: appeal decision; case_type mapped to appeal_decision as the nearest schema value.",
+    "Comparative test only: England (UK); Building Regulations 2000 (as amended): Requirements K1 (stairs, ladders and ramps) and M2 (access and use). Not an Alberta record; no applicability to NBC(AE) or Alberta is asserted.",
+    "Attachment is the original public file; Internet Archive capture 20240613155917 (live gov.uk URL redirects). Live URL status is recorded in references and blocked.",
+    "outcome_leakage true: the decision is inside this attachment (p.3 para 10 and p.5 paras 17-18); use only earlier pages as input if a leak-free variant is required.",
+    "Personal names and contact details appear in the original attachment and are omitted from this record.",
+    "No live index for the 45/3 appeal series was found; the source_url is the original gov.uk file URL."
+  ],
+  "worker": "H15",
+  "prompt_number": 487,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/3061/Building_regulations_appeal_45-3-162.pdf",
+      "sha256": "6625763f6a865a92d329190d7b779a0171172e1d25127a90651e51c76c16461d",
+      "role": "input",
+      "retrieved_via": "Internet Archive capture 20240613155917 (live gov.uk URL redirects)",
+      "archive_url": "https://web.archive.org/web/20240613155917id_/https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/3061/Building_regulations_appeal_45-3-162.pdf",
+      "bytes": 20260,
+      "filename": "45-3-162-6625763f6a86.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H15/files/appeals/45-3-162/45-3-162-6625763f6a86.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:58:18.097556+00:00",
+        "http_status": "200",
+        "final_url": "https://web.archive.org/web/20240613155917id_/https://assets.publishing.service.gov.uk/government/uploads/system/uploads/attachment_data/file/3061/Building_regulations_appeal_45-3-162.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

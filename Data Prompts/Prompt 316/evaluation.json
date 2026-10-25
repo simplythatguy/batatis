@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The dossier reports that RBQ accepted the project-specific request subject to stated conditions; the attached response is part of the combined report.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "separate applicant/consultant analysis from the attached regulator response",
+    "identify stated base code, alternative measures, model inputs and quantified conditions",
+    "check whether named proposal/drawing sheets are actually included as viewable attachments",
+    "record the local approval scope and conditions without transferring them to Alberta"
+  ],
+  "case_id": "L20-002",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

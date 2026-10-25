@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The board varied the order and reset the compliance deadline to April 30, 2022; the certification/remediation requirement remained.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "measured result versus design specification",
+    "the exact engineer opinion and test report required",
+    "which exhibits are listed but absent",
+    "who must supply the missing certification or correction plan"
+  ],
+  "case_id": "L20-003",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

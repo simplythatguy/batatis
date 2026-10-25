@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from City of Victoria, British Columbia. It is not an Alberta application.
+
+Identify the project configuration and listed anticipated AS topics. Separate preliminary assumptions from complete submissions or AHJ decisions. What detailed design, code evidence, and authority records are missing? Do not certify the design or apply BCBC outcomes in Alberta.
+
+Attachments:
+- victoria-johnson-st-gateway-alt-code-analysis-40f00a238b12.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

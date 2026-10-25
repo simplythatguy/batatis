@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The Chief Executive determined the original and modified barrier designs do not comply with Clause F4 (decision, p.8).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "fall-protection barrier geometry and openings for a public walkway",
+    "alternative-solution evidence for a barrier design",
+    "site plan and diagrams as the design record",
+    "owner and authority responsibility for the design record"
+  ],
+  "case_id": "H04-003",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

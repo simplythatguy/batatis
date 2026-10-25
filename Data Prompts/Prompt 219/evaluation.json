@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The active CCMC report publishes an alternative-solution product opinion for defined duct and piping applications; it relies on named QAI listings and strict installation conditions.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "duct/pipe type, diameter, base material and application",
+    "identify the exact QAI listing and installation detail",
+    "project fire-rating requirement and code edition",
+    "document any departure from listing and required professional evidence"
+  ],
+  "case_id": "L16-023",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

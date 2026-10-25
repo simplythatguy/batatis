@@ -1,0 +1,15 @@
+{
+  "known_outcome": "unknown in the attachment. The URL folder 'vedtatte-planer' (adopted plans) signals plan status only.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "deferred deviation analysis and its candidate measures",
+    "cross-reference for the fire site plan: 'kap 6' versus 'kap 5'",
+    "deviation only with written RIBr agreement",
+    "code edition not stated"
+  ],
+  "case_id": "H17-006",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

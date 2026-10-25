@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Modified: the determination finds the building consent should have been granted under section 49 and modifies the authority's decision by removing the section 72 condition; the authority communicates this to the Registrar-General. [p.11, para 6.1]",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Slippage risk from the neighbouring slope and the factor-of-safety basis",
+    "Whether a section 72 condition is needed when the geotechnical evidence says good ground",
+    "Notice and record-of-title steps under section 73"
+  ],
+  "case_id": "H01-015",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

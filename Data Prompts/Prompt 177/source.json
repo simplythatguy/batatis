@@ -1,0 +1,58 @@
+{
+  "id": "L15-002",
+  "title": "13628-R — Superior Walls Xi Precast Concrete Insulated Wall Panels",
+  "jurisdiction": "Canada (CCMC national product assessment; project AHJ not stated)",
+  "code_edition": "NBC 2010",
+  "case_type": "product_evidence",
+  "source_url": "https://www.nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=13628-R&type=cert",
+  "document_date": "2025-03-06",
+  "facts": [
+    {
+      "text": "CCMC 13628-R is marked Active in the live API snapshot; the report names NBC 2010 as its edition scope.",
+      "locator": "PDF p. 1; live API items"
+    },
+    {
+      "text": "Report requires soil type, drainage, frost depth and loadbearing capacity to be determined before use, and limits height, floor height and unit count.",
+      "locator": "PDF p. 5"
+    },
+    {
+      "text": "The CCMC report publishes its own code-specific opinion classifications for the printed edition(s); those classifications are bounded by the report conditions.",
+      "locator": "PDF p. 2"
+    }
+  ],
+  "limitations": [
+    "The evaluation is a CCMC product assessment, not an individual Alberta variance or project approval.",
+    "The report editions are NBC editions identified by the source; no equivalence to NBC(AE) 2023, 2nd printing has been established here.",
+    "No project, assembly, jurisdiction/AHJ, loads, site conditions, installation records or professional design package is supplied.",
+    "The CCMC opinion is bound by its stated conditions and limitations; read the full report before judging relevance.",
+    "Precast insulated foundation panels: Report requires soil type, drainage, frost depth and loadbearing capacity to be determined before use, and limits height, floor height and unit count."
+  ],
+  "worker": "L15",
+  "prompt_number": 177,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://www.nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?id=546&type=cert",
+      "sha256": "116c2279cb0fbc9b69475efd6c6c32231c57b21dbf22feef57c915a8b5e3e62e",
+      "role": "input",
+      "bytes": 368964,
+      "filename": "ccmc-13628-R-superior-walls-xi-evaluation-6f4c57c45037.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L15/files/ccmc-13628-R-superior-walls-xi-evaluation-6f4c57c45037.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:19:08.186531+00:00",
+        "http_status": "200",
+        "final_url": "https://www.nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?id=546&type=cert",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded_pdf_entity_extracted",
+        "entity_extraction": "A 433-byte proxy/HTTP response prelude precedes %PDF- in the helper capture. PDF entity bytes from first %PDF- through the final byte were copied unchanged and parsed with pypdf.",
+        "raw_capture_sha256": "6f4c57c450378669caa99b19c128f6ae5e507dc6522b3f889090bf0ea8c72e71",
+        "raw_capture_path": "_research/workers/L15/files/ccmc-13628-R-superior-walls-xi-evaluation-6f4c57c45037.html"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

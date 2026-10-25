@@ -1,0 +1,14 @@
+{
+  "known_outcome": "The report compares this one side of a single full-scale assembly with the V-side; measured drainage and entry are reported but no permit decision exists.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "check whether the project window, XPS, siding, sill drainage and sealant detail match this specimen",
+    "identify the test’s air leakage and water exposure conditions",
+    "request project-specific drawings, site exposure, code provision, uncertainty and professional analysis"
+  ],
+  "case_id": "L18-014",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

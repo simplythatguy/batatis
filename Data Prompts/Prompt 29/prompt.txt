@@ -1,0 +1,6 @@
+Review the attached order as a permit and occupancy-classification record. Extract the proposed manufacturing process, disputed F1/F2 labels and the document requests summarized in the plans-review deficiency list. Organize the next questions around chemical inventory, process rooms, hydrogen, fire separations, building-wide code analysis and authenticated professional drawings. Do not classify the building or decide that the design performs adequately.
+
+Attachments:
+- scc_2024_medium_hazard-bed6e0ef83e5.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

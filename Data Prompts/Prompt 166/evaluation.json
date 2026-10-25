@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Unknown as to any project or permit disposition; this client research report contains specimen-specific water-entry test results but no approval decision.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "check the exact specimen, base/variation detail and test condition before comparing results",
+    "identify whether actual proposed window, cladding, cavity and flashing details match the test",
+    "request project exposure, current adopted code provision and professional evidence"
+  ],
+  "case_id": "L18-011",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

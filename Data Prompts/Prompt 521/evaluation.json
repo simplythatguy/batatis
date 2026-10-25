@@ -1,0 +1,13 @@
+{
+  "known_outcome": "The Board determined that the panel elements extending above 1,070 mm obscure the required visual openness and do not comply with the cited clause.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "This is an interpretation case for a sales gallery, not a residential or submitted alternative-solution case.",
+    "No panel layout drawing or submitted visual analysis is linked."
+  ],
+  "case_id": "L08-1777",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The profile reports a March 2025 submission and a January 2026 Vancouver Building By-law change; it states no project-specific permit disposition.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "date and applicability of adopted by-law",
+    "exterior stair/passageway classification and discharge",
+    "mixed-use occupancy and fire-protection details",
+    "no project-specific authority disposition"
+  ],
+  "case_id": "L14-002",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

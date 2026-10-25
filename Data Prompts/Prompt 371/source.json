@@ -1,0 +1,68 @@
+{
+  "id": "H01-021",
+  "number": "2025-051",
+  "title": "NZ MBIE Determination 2025/051 (comparative): strengthened and extended retaining wall with surface-water channel",
+  "jurisdiction": "New Zealand (Building Act 2004); Porirua City Council; comparative only, not Alberta",
+  "scope": "comparative_non_alberta",
+  "code_edition": "NZ Building Code (Schedule 1, Building Regulations 1992) as cited; B1 and E1 referenced (editions not stated in extracted text)",
+  "case_type": "appeal_decision",
+  "timing": "as_built_or_certificate",
+  "retrospective": "yes",
+  "source_url": "https://codehub.building.govt.nz/resources/2025051",
+  "source_url_note": "Building CodeHub resource page for the same MBIE determination (Information provider: MBIE); the building.govt.nz determination page is WAF-blocked for this worker.",
+  "document_date": "13 October 2025",
+  "facts": [
+    {
+      "text": "The question is whether a retaining wall on two properties complies with B1 after strengthening and additions, and whether an associated surface-water system complies with E1.",
+      "locator": "p.1"
+    },
+    {
+      "text": "A building consent for a new dwelling at 52A Jackson Terrace was issued in November 2017; its documents did not show the original retaining wall on the eastern boundary.",
+      "locator": "p.6, para 3.1"
+    },
+    {
+      "text": "Figure 3 is a structural engineer's detail for the strengthening and addition to the original wall.",
+      "locator": "p.5"
+    },
+    {
+      "text": "Figure 4 shows the surface-water dish channel falling from two directions; Figure 5 shows separation of the channel.",
+      "locator": "p.6"
+    },
+    {
+      "text": "The structural engineer provided a Producer Statement - Construction Review (\"PS4\") for the retaining wall work.",
+      "locator": "p.2, para 1.3"
+    }
+  ],
+  "limitations": [
+    "Comparative test only: New Zealand Building Act 2004 and Building Code (Schedule 1, Building Regulations 1992). No Alberta applicability asserted; no NBC(AE) mapping.",
+    "Outcome leakage: the MBIE decision is inside the same original PDF, so the full file cannot be used as applicant-stage input without removing the decision pages.",
+    "Applicant application documents are not published; drawings and photos appear only as figures inside the determination. Figures were located by caption, not visually inspected.",
+    "Engineering details and PS4 are referenced as figures and summaries; the producer statement itself is not in the file."
+  ],
+  "worker": "H01",
+  "prompt_number": 371,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2025/2025-051.pdf",
+      "sha256": "c1c9976712827ae3937553f8385d496fcd167de613f1698a4ca01d0601c8dfbe",
+      "role": "input",
+      "document_type": "MBIE determination PDF (original bytes)",
+      "bytes": 1055235,
+      "filename": "mbie-det-2025-051-c1c997671282.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H01/files/pdf/mbie-det-2025-051-c1c997671282.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:43:39.917596+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2025/2025-051.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

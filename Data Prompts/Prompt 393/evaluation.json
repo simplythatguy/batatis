@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Determination (15 May 2024, s 188, §5.1, p.18): the authority had grounds to refuse the building consent, because it could not be satisfied the work would comply with the Building Code if completed in accordance with the plans and specifications. The authority's letter of 7 June 2021 refusing the consent did not adequately detail its reasons as section 50 requires.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Whether the answer identifies E2 and the acceptable-solution scope as the baseline, and treats the appraisal's scope as evidence to be tested.",
+    "Whether it separates the documentation gap from the Building Code compliance question.",
+    "Whether it notes the section 50 requirement for specific refusal reasons.",
+    "Whether it does not say the cladding complies."
+  ],
+  "case_id": "H02-017",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

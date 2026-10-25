@@ -1,0 +1,6 @@
+Using the attached 23-BCV-002 STANDATA as a regulator-issued reference, list the unknown facts and records needed to determine which off-site review route could be relevant: building type, whether it is a relocatable industrial camp, construction date, steel-module status, CSA A277/A660 certification, professional-authenticated documents, and available AHJ inspection arrangements. Keep the routes distinct, ask follow-up questions, and do not decide project compliance.
+
+Attachments:
+- 23-BCV-002-f547db05df23.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

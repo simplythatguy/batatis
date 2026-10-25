@@ -1,0 +1,97 @@
+{
+  "id": "L14-012",
+  "title": "Prototype 2 — 4-storey / 4-unit concept on a 25-foot lot",
+  "jurisdiction": "Canada; illustrative typical-lot concept, no specific municipality",
+  "code_edition": "unknown (page cites NBC 3.2.2.52 but does not identify an edition)",
+  "case_type": "published_worked_example",
+  "source_url": "https://singlestair.ca/Prototype-2",
+  "document_date": "unknown (page publication date not stated; drawing filenames carry 2024/2025 design dates)",
+  "facts": [
+    {
+      "text": "The page describes a four-storey concept on a 25 ft × 100 ft mixed-use-street lot with four dwellings and a proposed 1100 mm exit.",
+      "locator": "Prototype page / typology and design description"
+    },
+    {
+      "text": "The profile says the unit mix could be rearranged and estimates 18 occupants served by the stair.",
+      "locator": "Prototype page / occupant-load and comparison metrics"
+    },
+    {
+      "text": "The attached original typical-floor plan is a conceptual design drawing; the site-wide prototypes page says concepts are not based on any specific by-law requirements for coverage, depth, or setbacks.",
+      "locator": "Attached typical-floor plan; prototypes overview / scope disclaimer"
+    }
+  ],
+  "limitations": [
+    "Publisher describes the prototypes as typical-lot concepts, not designs for a specific municipal by-law or parcel.",
+    "Code articles and all cost/occupancy/design calculations are publisher-reported and are not independently validated here.",
+    "No applicant, owner, actual site, submission, or authority decision is identified."
+  ],
+  "worker": "L14",
+  "prompt_number": 597,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://freight.cargo.site/t/original/i/0dd5aecee5b8499c99e9cd7ac7ffb27e3c342da002febe7f447e142dc77d0a39/25.03.10_SES-Prototype02_Typical-SES-5000px.jpg",
+      "sha256": "005daea02b0fcff0e403a9697f9a0c06ede9924dc3cbecf6f8b267c3e66681ed",
+      "role": "input",
+      "bytes": 1124254,
+      "filename": "prototype-design-03-005daea02b0f.jpg",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L14/files/prototype-design-03-005daea02b0f.jpg",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:48:03.959128+00:00",
+        "http_status": "200",
+        "final_url": "https://freight.cargo.site/t/original/i/0dd5aecee5b8499c99e9cd7ac7ffb27e3c342da002febe7f447e142dc77d0a39/25.03.10_SES-Prototype02_Typical-SES-5000px.jpg",
+        "content_type": "image/jpeg",
+        "kind": "image",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://singlestair.ca/Prototype-2",
+      "sha256": "3b3909fb1ee5c65e26e0c086417c22cf2900b74eddc6f5a4e715e39462ee8c8b",
+      "role": "supporting_evidence",
+      "bytes": 179964,
+      "filename": "singlestair-prototype-2-3b3909fb1ee5.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L14/files/singlestair-prototype-2-3b3909fb1ee5.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:50.070293+00:00",
+        "http_status": "200",
+        "final_url": "https://singlestair.ca/Prototype-2",
+        "content_type": "text/html; charset=UTF-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-2-source-text.txt",
+        "sha256": "96fe767b1e944157d15082333a7d2b37b3141138569e952bbe4b78013c924838",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    },
+    {
+      "url": "https://singlestair.ca/Prototypes",
+      "sha256": "30430c558005e4fe968ce7ed9697eda71f77c3952ad252b0a62d85db5cc86515",
+      "role": "supporting_evidence",
+      "bytes": 210645,
+      "filename": "singlestair-prototypes-30430c558005.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L14/files/singlestair-prototypes-30430c558005.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:46.836139+00:00",
+        "http_status": "200",
+        "final_url": "https://singlestair.ca/Prototypes",
+        "content_type": "text/html; charset=UTF-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-3-source-text.txt",
+        "sha256": "1d2feefa2e391840869b6ae73f2cb920cb1c730eeef96b0c12d27617010bad0b",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

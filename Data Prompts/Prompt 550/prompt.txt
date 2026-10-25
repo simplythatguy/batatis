@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from Ontario — Township of Muskoka Lakes. It is not an Alberta application.
+
+Review the attached record about a vertical cable guard on an elevated residential deck and a 100 mm sphere test. Identify the code question and distinguish the summarized Intertek test conditions from the as-installed guard evidence; list the complete test report, installation/tension records, opening measurements, and site photographs that should be requested. Ask what evidence is missing. Do not certify the guard as safe or compliant, and do not apply this Ontario ruling to Alberta. Use this decision only to compare record format and evidence themes. It cannot establish Alberta performance; identify which Calgary or Edmonton source must be checked first before applying any question locally, then consider other Alberta authorities as needed.
+
+Attachments:
+- attachment-1-source-text.txt
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

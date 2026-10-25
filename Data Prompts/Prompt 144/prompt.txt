@@ -1,0 +1,6 @@
+Some equipment is housed in a building that may be exempt from energy-efficiency requirements. The attached STANDATA interpretation (23-BCI-022) is my only source. Using only that document, identify the energy provisions it names, how it says exemptions are decided, what information the designer must give the authority, and what is still open. Do not invent a building type or equipment list, and do not say an exemption applies.
+
+Attachments:
+- ma-standata-interpretation-building-23-bci-022-2025-05-71c26a6a497c.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

@@ -1,0 +1,16 @@
+{
+  "known_outcome": "Policy B23-01 states a municipal construction option for its stated rowhouse/secondary-suite conditions. The attached report is expressly a demonstration to inform the policy and does not contain an individual applicant, site, or permit decision.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Classify the attachment as a City demonstration and policy reference, never an individual application or permit approval.",
+    "Check the specific rowhouse/suite configuration and property-line conditions against the policy scope; ask for missing details rather than assuming scope.",
+    "Identify the policy’s drawing and signed Letter of Construction Intention requirements and all-other-code-conditions clause.",
+    "Keep the report’s use limitation visible and do not transfer its technical conclusion to another project.",
+    "List unresolved professional or jurisdictional questions without supplying professional judgment or an approval conclusion."
+  ],
+  "case_id": "L05-014",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Calgary / Edmonton",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

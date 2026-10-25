@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Determination: CCC was correct on information then available; current work does not comply with E2.3.2, E3.3.6 and (perimeter foundation) B2.3.1 as relates to B1; authority decision reversed.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "CCC issued on information then available versus later evidence",
+    "ground clearance and envelope detail",
+    "perimeter foundation durability and structural performance",
+    "expert evidence of defects"
+  ],
+  "case_id": "H03-006",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

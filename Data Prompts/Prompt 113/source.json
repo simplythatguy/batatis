@@ -1,0 +1,52 @@
+{
+  "id": "L06-001",
+  "title": "Magnetic locks and impeded egress in supportive-living building (Council Order 0015437)",
+  "jurisdiction": "Alberta; accredited municipality not named in the redacted order",
+  "code_edition": "Alberta Building Code 2006 (ABC 2006)",
+  "document_date": "2013-12-10",
+  "facts": [
+    {
+      "text": "The case describes a 3,930 m², sprinklered, two-storey combustible building divided into four buildings by two-hour firewalls, intended for Supportive Living Level 4 and Level 4 Dementia residents.",
+      "locator": "PDF p.1, paras 1-2"
+    },
+    {
+      "text": "Door magnetic locks did not release after 15 seconds under applied pressure; the applicant proposed an alternative to Clause 3.4.6.15.(4)(e).",
+      "locator": "PDF p.2, para 2"
+    },
+    {
+      "text": "The Council record listed a Request for Specific Variance and a Mag Lock Alternative Solution Report with Appendices A–E, but this downloaded file is the decision only.",
+      "locator": "PDF p.3, para 8(g)"
+    }
+  ],
+  "limitations": [
+    "The underlying Request for Specific Variance and engineering report are referenced in the order but not separately attached to the public PDF.",
+    "Older ABC 2006 edition."
+  ],
+  "source_url": "https://safetycodes.ab.ca/council-information/appeals/appeal-decisions/",
+  "case_type": "appeal_decision",
+  "worker": "L06",
+  "prompt_number": 113,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2013/Redacted_Building_Electromagnetic_Locking_Devices_and_Impeded_Egress_Zone_December_2013.pdf",
+      "sha256": "6c21c8740c6b10c5ff7d9fb3afcc90441cdcd9a650fa7cd3cdd6d327dc4b4646",
+      "role": "input",
+      "bytes": 246131,
+      "filename": "scc_2013_electromagnetic_locks-6c21c8740c6b.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L06/files/scc_2013_electromagnetic_locks-6c21c8740c6b.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:27.213781+00:00",
+        "http_status": "200",
+        "final_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/appeals/decisions-2013/Redacted_Building_Electromagnetic_Locking_Devices_and_Impeded_Egress_Zone_December_2013.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

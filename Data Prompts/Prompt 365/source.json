@@ -1,0 +1,68 @@
+{
+  "id": "H01-015",
+  "number": "2025-011",
+  "title": "NZ MBIE Determination 2025/011 (comparative): s72 consent, storage building beside steep vegetated slope",
+  "jurisdiction": "New Zealand (Building Act 2004); Tauranga City Council; comparative only, not Alberta",
+  "scope": "comparative_non_alberta",
+  "code_edition": "NZ Building Code (Schedule 1, Building Regulations 1992) as cited; acceptable-solution edition not stated in extracted text",
+  "case_type": "appeal_decision",
+  "timing": "consent_decision_review",
+  "retrospective": "not_stated",
+  "source_url": "https://codehub.building.govt.nz/resources/2025011",
+  "source_url_note": "Building CodeHub resource page for the same MBIE determination (Information provider: MBIE); the building.govt.nz determination page is WAF-blocked for this worker.",
+  "document_date": "14 March 2025",
+  "facts": [
+    {
+      "text": "The decision under review is the authority's grant of building consent BC331457 under section 72, subject to notice to the Registrar-General of Land under section 73(1)(c).",
+      "locator": "p.2, para 1.3"
+    },
+    {
+      "text": "The consent is for a new 1,256m2 storage facility on a level industrial property of about 2.1 hectares.",
+      "locator": "p.3, para 2.1"
+    },
+    {
+      "text": "The neighbouring property to the east includes a 30 m high densely vegetated slope with an average slope angle of 33 degrees.",
+      "locator": "p.3, para 2.3"
+    },
+    {
+      "text": "The consent application included a geotechnical report confirming there was good ground on the storage facility site.",
+      "locator": "p.4, para 3.2"
+    },
+    {
+      "text": "Table 1 gives site-specific factor-of-safety results; Figure 1 is a property and storage facility site plan.",
+      "locator": "p.5"
+    }
+  ],
+  "limitations": [
+    "Comparative test only: New Zealand Building Act 2004 and Building Code (Schedule 1, Building Regulations 1992). No Alberta applicability asserted; no NBC(AE) mapping.",
+    "Outcome leakage: the MBIE decision is inside the same original PDF, so the full file cannot be used as applicant-stage input without removing the decision pages.",
+    "Applicant application documents are not published; drawings and photos appear only as figures inside the determination. Figures were located by caption, not visually inspected.",
+    "Geotechnical report and factor-of-safety calculations are summarised; the originals are not published."
+  ],
+  "worker": "H01",
+  "prompt_number": 365,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2025/2025-011.pdf",
+      "sha256": "aed41b31e7f951ef833d2bbe67e8cdd267e30295a9eddf75bb15d24498a8f246",
+      "role": "input",
+      "document_type": "MBIE determination PDF (original bytes)",
+      "bytes": 357026,
+      "filename": "mbie-det-2025-011-aed41b31e7f9.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H01/files/pdf/mbie-det-2025-011-aed41b31e7f9.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:42:08.655581+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2025/2025-011.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

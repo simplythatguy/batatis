@@ -1,0 +1,64 @@
+{
+  "id": "H03-010",
+  "record_key": "2021/020",
+  "tier": "strong",
+  "title": "Alterations under a 1998 consent: CCC refused under the 1998 Code (Auckland)",
+  "jurisdiction": "New Zealand (MBIE, Building Act 2004): comparative test only; not an Alberta case; no Alberta applicability asserted",
+  "authority": "Auckland Council (successor to North Shore City Council)",
+  "code_edition": "NZ Building Code in force January 1998 (App. A, p.30)",
+  "case_type": "issued_variance",
+  "document_type": "MBIE determination under Building Act 2004 s188 (regulator decision on an individual matter); not an applicant's alternative-solution file",
+  "source_url": "https://codehub.building.govt.nz/resources/2021020",
+  "document_date": "2021-09-17",
+  "facts": [
+    {
+      "text": "Two-storey detached dwelling built in 1967 on a large, gently sloping site in a low wind zone; 1998 consent covered garage enclosure, first- and ground-floor extensions, a large deck and a tiled entrance roof.",
+      "locator": "p.3 §2.1–2.3; p.4 Fig. 1–2"
+    },
+    {
+      "text": "Cladding is a mix that includes monolithic EIFS (modified acrylic plaster over expanded polystyrene) and other systems.",
+      "locator": "p.4 §2.4"
+    },
+    {
+      "text": "Determination applies the Building Code in force in January 1998; Appendix A quotes B2 Durability and related clauses.",
+      "locator": "p.30 App. A"
+    },
+    {
+      "text": "Decision: authority correct to refuse the CCC for the 1998 consent; decision modified to remove the non-compliance references for the entrance canopy roof and the laundry toilet installation.",
+      "locator": "p.29 §8.1"
+    }
+  ],
+  "recommended_input_pages": "1-28",
+  "limitations": [
+    "Comparative only: a New Zealand determination used to test attachment format and content; it cannot establish Alberta performance or applicability.",
+    "The determination's decision section is in the same PDF; outcome leakage is true. Use only pages 1-28 as applicant-side input if pages are split.",
+    "Facts are taken from the text layer (pypdf); photos, drawings and figures were not visually inspected unless stated."
+  ],
+  "alberta_applicability": "none asserted",
+  "comparative_only": true,
+  "worker": "H03",
+  "prompt_number": 326,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2021/2021-020.pdf",
+      "sha256": "adcc8337dcec63b24318e8fbf38b6833695daf8987afd5e9dc857b679ee47784",
+      "role": "input",
+      "bytes": 1939064,
+      "filename": "2021-020-adcc8337dcec.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H03/files/2021020/2021-020-adcc8337dcec.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:43:43.470432+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2021/2021-020.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

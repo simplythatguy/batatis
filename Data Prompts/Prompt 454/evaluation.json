@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Refusal set aside: the tribunal set aside the refusal and ordered a remake as if the concurrence agency had no requirements; conditions attach to any approval (pp. 1-2). Decision dated 16 Nov 2022 (p. 12).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates concurrence-agency requirements from the building-code question.",
+    "Identifies the boundary-component and infrastructure conditions as items to evidence.",
+    "Notes the plan revision referred to in the conditions, which is not attached.",
+    "Makes no compliance statement."
+  ],
+  "case_id": "H09-011",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

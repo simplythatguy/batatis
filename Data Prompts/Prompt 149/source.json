@@ -1,0 +1,64 @@
+{
+  "id": "H20-023",
+  "title": "Measures to mitigate fire spread to adjacent buildings during construction, with water supply and firefighting access",
+  "jurisdiction": "Alberta (province-wide STANDATA issued by Alberta Municipal Affairs)",
+  "code_edition": "NBC(AE) 2023 and NFC(AE) 2023 (National Fire Code - 2023 Alberta Edition); printing not stated in document",
+  "case_type": "regulatory_guidance",
+  "source_url": "https://open.alberta.ca/publications/standata-interpretation-building-national-building-code-2023-alberta-edition",
+  "document_date": "Date Issued: March 2025 (platform created March 14, 2025, last updated March 14, 2025)",
+  "facts": [
+    {
+      "text": "The interpretation clarifies requirements for measures to mitigate fire spread to adjacent buildings, water supply and access for firefighting.",
+      "locator": "p.1 (Purpose)"
+    },
+    {
+      "text": "These measures must consider the size, type and configuration of the project, the methods of construction or demolition, and the distance to and stage of completion of adjacent exposures.",
+      "locator": "p.1 (Discussion)"
+    },
+    {
+      "text": "The owner, developer or contractor must submit the mandatory fire safety plan to the AHJ before construction, alteration or demolition begins.",
+      "locator": "p.1 (Discussion)"
+    },
+    {
+      "text": "The owner, developer or contractor must ensure the fire department has unobstructed access to the site and that water supply for firefighting is sufficient.",
+      "locator": "p.1 (Discussion)"
+    },
+    {
+      "text": "There is no single solution that is appropriate for all projects.",
+      "locator": "p.1 (Discussion)"
+    }
+  ],
+  "limitations": [
+    "A published regulator interpretation of a documented design question, not an applicant file.",
+    "Case type is the nearest enum value; this is not an issued variance, appeal or worked example.",
+    "Joint Building/Fire interpretation; cites NFC(AE) Section 5.6, which is not in the package.",
+    "Edition check: alberta.ca lists the NBC(AE) 2023 2nd printing (published 17 Aug 2026) as in force; the article wording quoted here is as the STANDATA document states it and was not checked against the 2nd printing text (not in the package)."
+  ],
+  "original_worker_case_type": "published_worked_example",
+  "parent_curation_note": "STANDATA interpretations and bulletins describe general regulated conditions; they are regulatory reference exercises, not individual applications or published project worked examples.",
+  "worker": "H20",
+  "prompt_number": 149,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/699821b7-26ed-40ec-a5a0-6ba344cdc514/download/ma-standata-interpretation-building-fire-23-bci-030-23-fci-012-2025-03.pdf",
+      "sha256": "3f55d38e9d5abe5fc62dae1c4442ffd0ed183f3770d03209e167e23759602105",
+      "role": "input",
+      "bytes": 217353,
+      "filename": "ma-standata-interpretation-building-fire-23-bci-030-23-fci-012-2025-03-3f55d38e9d5a.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H20/files/pdf/ma-standata-interpretation-building-fire-23-bci-030-23-fci-012-2025-03-3f55d38e9d5a.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:19:17.643146+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/cb3d1662-1354-45c8-aab8-29b91f2a6c35/resource/699821b7-26ed-40ec-a5a0-6ba344cdc514/download/ma-standata-interpretation-building-fire-23-bci-030-23-fci-012-2025-03.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

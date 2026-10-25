@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The R1 reference allowed the cited tall-wall guideline in place of project-specific engineering only within its scope and with project-specific details shown on permit drawings; the catalogue marks both versions withdrawn.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "document version and withdrawn status",
+    "wall type, support conditions and project dimensions",
+    "guideline scope/limitations",
+    "drawing details and when site-specific engineering is required"
+  ],
+  "case_id": "L03-002",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

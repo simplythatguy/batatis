@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The complete live CCMC API snapshot has no matching BTRboard/BTR Board product or assessment-holder entry among 462 records. This finding is limited to that snapshot and does not establish whether another evaluation exists.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Distinguish manufacturer claims/instructions from a third-party evaluation or code assessment.",
+    "Check the exact OSB, FIRE-X or RESIST variant and its documented layers and fastening details.",
+    "Do not infer a CCMC assessment, code edition, listing scope or performance from product marketing.",
+    "Ask for the project assembly, jurisdiction/code edition and complete product-specific independent evidence."
+  ],
+  "case_id": "L15-021",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

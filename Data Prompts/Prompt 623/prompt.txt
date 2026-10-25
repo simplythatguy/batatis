@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from Washington State, requested by City of Tacoma (comparative test only; not Alberta). It is not an Alberta application.
+
+Attached is Washington State Building Code Council interpretation no. 11-05 from City of Tacoma. The question put to the Council is: The state amendment to IBC 903.2.3 does not use the term 'fire areas', and its Exception 2 exempts Group E occupancies with an occupant load of 50 or less. Was removing 'fire areas' intentional, and may a church with an occupant load of 100 and a day care with an occupant load of 25 share one fire area of 125 without sprinklers or a fire barrier between them? Using only the attached record, identify the code provisions and edition this question turns on, the uncertainty that remains for a building official, the administrative evidence a complete submission would still need, and the next questions to ask the applicant and the reviewing official. Do not say whether any design complies or is safe, do not certify, and do not assume any owner, site, dimensions or drawings that the record does not contain. This is a Washington comparative test record and establishes nothing about Alberta.
+
+Attachments:
+- sbcc-ruling-11-05-1105ibc-649ff5874125.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

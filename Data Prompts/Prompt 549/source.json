@@ -1,0 +1,59 @@
+{
+  "id": "L10-010",
+  "title": "BCC Ruling No. 15-01-1390 — rooftop patio fire protection and exit route",
+  "jurisdiction": "Ontario — City of Hamilton",
+  "code_edition": "Ontario Building Code, O. Reg. 350/06 (as cited)",
+  "source_url": "http://www.mah.gov.on.ca/Page11323.aspx",
+  "document_date": "2015-01-15",
+  "facts": [
+    {
+      "text": "The record describes a multi-storey complex with office towers, retail and live-event venues connected by a podium; the tallest tower is 13 storeys.",
+      "locator": "§1 and §6"
+    },
+    {
+      "text": "The dispute concerns as-constructed structures for a podium-roof restaurant patio adjacent to existing building windows.",
+      "locator": "§1, Particulars of Dispute"
+    },
+    {
+      "text": "The proposal included rated closures at the windows, fire-retardant treatment of combustible/heavy-timber patio components, and a marked path to an exit; Sentences 3.2.2.23.(2) and 3.2.2.57.(2) are cited.",
+      "locator": "§1 and Commission Ruling"
+    }
+  ],
+  "limitations": [
+    "The archived ruling summarizes a dispute about as-constructed patio structures but supplies no full as-built drawings, material listings, or test reports.",
+    "Ontario-specific code provisions are not Alberta requirements.",
+    "This Ontario decision and its code are non-Alberta comparisons for attachment format/content only; they cannot establish Alberta performance. Check Calgary and Edmonton sources first for local authority, then other Alberta jurisdictions as needed."
+  ],
+  "case_type": "appeal_decision",
+  "document_type": "Ontario Building Code Commission dispute ruling",
+  "worker": "L10",
+  "prompt_number": 549,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://web.archive.org/web/20190922170345id_/http://www.mah.gov.on.ca/Page11323.aspx",
+      "sha256": "f63c45059371a7d456dfc98f903a53fae947e96e1ba369875c1d72ab27bf7d17",
+      "role": "outcome_reference",
+      "bytes": 26779,
+      "filename": "ONBCC-15-01-1390-f63c45059371.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L10/files/ONBCC-15-01-1390-f63c45059371.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:24:01.839349+00:00",
+        "http_status": "200",
+        "final_url": "https://web.archive.org/web/20190922084436id_/http://www.mah.gov.on.ca/Page11323.aspx",
+        "content_type": "text/html; charset=utf-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-1-source-text.txt",
+        "sha256": "5d76f44bd5449e12dd2212244c84eee950130a418979bd4aece9896fc0bf46bd",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

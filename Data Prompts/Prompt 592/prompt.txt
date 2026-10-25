@@ -1,0 +1,9 @@
+Comparative attachment exercise: this source is from Toronto, Ontario, Canada. It is not an Alberta application.
+
+Review the attached Toronto consultant report’s Appendix A summary for Building No. 13. Separate documented inspection facts from assumptions; identify which original inspection, plans, system records, fire-safety documents and remediation evidence a reviewer would need to establish the scope and status of the reported issue. Ask follow-up questions and do not say deficiencies were corrected or that the building is compliant.
+
+Attachments:
+- multi_tenant_code_report-68f9ff81ee29.pdf
+- multi_tenant_staff_report-0b783a801ed8.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

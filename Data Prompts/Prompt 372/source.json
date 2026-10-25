@@ -1,0 +1,68 @@
+{
+  "id": "H01-022",
+  "number": "2025-061",
+  "title": "NZ MBIE Determination 2025/061 (comparative): refused CCC and certificate of acceptance for a lean-to",
+  "jurisdiction": "New Zealand (Building Act 2004); Nelson City Council; comparative only, not Alberta",
+  "scope": "comparative_non_alberta",
+  "code_edition": "NZ Building Code (Schedule 1 of the Building Regulations 1992) as cited; Building Act ss 95A and 99A",
+  "case_type": "appeal_decision",
+  "timing": "as_built_or_certificate",
+  "retrospective": "yes",
+  "source_url": "https://codehub.building.govt.nz/resources/2025061",
+  "source_url_note": "Building CodeHub resource page for the same MBIE determination (Information provider: MBIE); the building.govt.nz determination page is WAF-blocked for this worker.",
+  "document_date": "10 December 2025",
+  "facts": [
+    {
+      "text": "The determination reviews the refusal of a code compliance certificate for alterations to a house and the refusal of a certificate of acceptance for a lean-to.",
+      "locator": "p.1"
+    },
+    {
+      "text": "The authority granted building consent on 27 May 2022 for alterations to an existing two-storey dwelling with an attached garage.",
+      "locator": "p.2, para 2.1"
+    },
+    {
+      "text": "The code compliance certificate was refused on 31 May 2024 and the certificate of acceptance on 23 December 2024.",
+      "locator": "p.2, para 1.3"
+    },
+    {
+      "text": "Figure 1 shows the lean-to during construction, as at 11 January 2023.",
+      "locator": "p.1"
+    },
+    {
+      "text": "The owners contend that the refusal reasons were not specific enough for the statutory test.",
+      "locator": "p.5, para 3.1"
+    }
+  ],
+  "limitations": [
+    "Comparative test only: New Zealand Building Act 2004 and Building Code (Schedule 1, Building Regulations 1992). No Alberta applicability asserted; no NBC(AE) mapping.",
+    "Outcome leakage: the MBIE decision is inside the same original PDF, so the full file cannot be used as applicant-stage input without removing the decision pages.",
+    "Applicant application documents are not published; drawings and photos appear only as figures inside the determination. Figures were located by caption, not visually inspected.",
+    "The authority's refusal letters are described by the determination; they are not in the file."
+  ],
+  "worker": "H01",
+  "prompt_number": 372,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2025/2025-061.pdf",
+      "sha256": "37174b140378540fe3ad6e74ed1fd6e5724e0a2ce3ed810306a389d081402e84",
+      "role": "input",
+      "document_type": "MBIE determination PDF (original bytes)",
+      "bytes": 207410,
+      "filename": "mbie-det-2025-061-37174b140378.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H01/files/pdf/mbie-det-2025-061-37174b140378.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:43:54.311869+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2025/2025-061.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

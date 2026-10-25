@@ -1,0 +1,14 @@
+{
+  "known_outcome": "p.8 §6.1: the proposed scope of work to repair the cladding will comply with the relevant clauses of the Building Code.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the existing-building condition from the proposed repair scope",
+    "Identifies repair details the file leaves unspecified, without filling them in",
+    "Does not assume weathertightness or insurance scope the file does not state"
+  ],
+  "case_id": "H05-007",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

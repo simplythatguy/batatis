@@ -1,0 +1,16 @@
+{
+  "known_outcome": "The full-scale facility simulated a two-storey single-family house with basement and a severe, fast-growing basement fire; the report does not establish transfer to another assembly or project.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "joist geometry/material, subfloor and loading match",
+    "basement-door and ventilation condition",
+    "fire load and growth assumptions",
+    "applicable code edition/AHJ",
+    "project-specific egress and professional analysis"
+  ],
+  "case_id": "L17-003",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

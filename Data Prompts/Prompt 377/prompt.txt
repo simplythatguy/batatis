@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from New Zealand: Auckland Council as building consent authority; MBIE determination under the Building Act 2004. Non-Alberta comparative record.. It is not an Alberta application.
+
+I am planning to replace the internal stair in our two-level house with a lift. The ground floor is at road level and the lower floor is below the east end of the house. Both floors have external doors to the outside, and the existing stair has two flights and a landing. The lift I am considering is 1278 mm long by 1046 mm wide and carries 2-3 people. The council has asked us to show compliance with the access-route rules for upper floors, and it has said that stairs are needed between the floors even with a lift. Attached is the determination record for this question. Using only that record, please: (1) identify the access-route and means-of-escape requirements it treats as applicable and where the wording is open to more than one reading; (2) list the consent or design evidence that the record shows was not provided, such as an alternative-solution proposal; and (3) list the questions I should put to the council before I file. Do not say whether the design complies or is safe, and do not invent dimensions, owners or site details beyond what is written here.
+
+Attachments:
+- mbie-det-2023-035-ee7498811bc8.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

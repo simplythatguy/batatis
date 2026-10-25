@@ -1,0 +1,6 @@
+Review the attached order as a record of a building permit and fire-water installation issue. Extract the stated occupancy, existing water-supply arrangement, drawing/report types, distance condition and interim operating measure. Identify the plan, water-source, access-under-weather, inspection and close-out evidence still needed; do not claim the installation is safe or approved.
+
+Attachments:
+- scc_2013_equestrian_centre_hydrant-0b8c1a673dde.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

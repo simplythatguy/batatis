@@ -1,0 +1,60 @@
+{
+  "id": "H03-009",
+  "record_key": "2021/016",
+  "tier": "supporting",
+  "title": "Retaining walls around a rural tennis court: notice-to-fix scope (Parkhurst, Auckland)",
+  "jurisdiction": "New Zealand (MBIE, Building Act 2004): comparative test only; not an Alberta case; no Alberta applicability asserted",
+  "authority": "Auckland Council",
+  "code_edition": "Schedule 1 exemptions as cited",
+  "case_type": "issued_variance",
+  "document_type": "MBIE determination under Building Act 2004 s188 (regulator decision on an individual matter); not an applicant's alternative-solution file",
+  "source_url": "https://codehub.building.govt.nz/resources/2021016",
+  "document_date": "2021-08-17",
+  "facts": [
+    {
+      "text": "Notice to fix issued for building work to the south and west sections of a retaining wall around a proposed tennis court on a 3.2 ha rural property near Kaipara Harbour.",
+      "locator": "p.2 §1.6, §2.1"
+    },
+    {
+      "text": "Applicants argued that the wall was exempt under clause 41 of Schedule 1 (retaining walls, exemption 20).",
+      "locator": "p.2 §1.5"
+    },
+    {
+      "text": "Notice described a retaining wall about 1.5 m high supporting slope surcharge and a driveway.",
+      "locator": "p.14 §6.2"
+    }
+  ],
+  "recommended_input_pages": "1-13",
+  "limitations": [
+    "Comparative only: a New Zealand determination used to test attachment format and content; it cannot establish Alberta performance or applicability.",
+    "The determination's decision section is in the same PDF; outcome leakage is true. Use only pages 1-13 as applicant-side input if pages are split.",
+    "Facts are taken from the text layer (pypdf); photos, drawings and figures were not visually inspected unless stated."
+  ],
+  "alberta_applicability": "none asserted",
+  "comparative_only": true,
+  "worker": "H03",
+  "prompt_number": 325,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2021/2021-016.pdf",
+      "sha256": "56726db7fb0e2075631771ce71a1494ccc1b90ab90a95668590818d556bb051c",
+      "role": "input",
+      "bytes": 852854,
+      "filename": "2021-016-56726db7fb0e.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H03/files/2021016/2021-016-56726db7fb0e.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:44:02.258120+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2021/2021-016.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

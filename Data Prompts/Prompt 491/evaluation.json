@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Appeal A dismissed; Appeal B allowed (13 Sept 2021). Fire safety considered at planning stage subject to a Fire Safety Management Plan condition (para 124).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "whether fire safety is treated as a planning matter or deferred to building regulations",
+    "management plan condition as the control",
+    "concern about extra care in multi-storey buildings",
+    "no building-code edition stated"
+  ],
+  "case_id": "H16-008",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,6 @@
+Someone asks whether the term building envelope applies to an attic or roof space in Alberta. The attached STANDATA interpretation (23-BCI-023) is my only source. Using only that document, explain what the definition question is, which code and definition sources it discusses, what meaning it adopts for attic and roof spaces, and what design or review questions remain. Do not invent an assembly or insulation value, and do not state the assembly complies.
+
+Attachments:
+- ma-standata-interpretation-building-23-bci-023-2026-01-42f1a9af3518.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

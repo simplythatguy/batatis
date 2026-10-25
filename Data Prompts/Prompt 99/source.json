@@ -1,0 +1,71 @@
+{
+  "id": "L03-018",
+  "title": "14-BCV-018 - Sprinkler-protected glazing in fire-resistant wall assemblies",
+  "jurisdiction": "Alberta (province-wide, as stated by the STANDATA)",
+  "code_edition": "Alberta Building Code 2014",
+  "case_type": "issued_variance",
+  "source_url": "https://open.alberta.ca/publications/standata-building-code-variance-2014",
+  "document_date": "March 2018 (14-BCV-018); January 2019 (14-BCV-018R1)",
+  "catalogue_status": "Neither catalogue row is marked [WITHDRAWN]; both PDFs carry Archived watermarks. R1 is the later catalogue-listed version; current legal applicability was not determined.",
+  "facts": [
+    {
+      "text": "The catalogue lists original 14-BCV-018 and revised 14-BCV-018R1. The R1 PDF is dated January 2019 and cites ABC Sentences 3.1.7.1.(1), 9.10.3.1.(1) and 3.2.5.12.(1).",
+      "locator": "Official 2014 catalogue, rows 14-BCV-018 and 14-BCV-018R1; R1 PDF, pp.1-2"
+    },
+    {
+      "text": "R1 permits specified sprinkler-protected interior/exterior fire-rated glazing subject to accredited evaluation to ULC/ORD C263.1-99 (reaffirmed 2018), NFPA 13 installation, listed window sprinklers, glazing, rating, location exclusions and additional system conditions.",
+      "locator": "14-BCV-018R1 PDF, pp.2-3, VARIANCE"
+    },
+    {
+      "text": "The earlier 2018 PDF has six pages including installation guidelines and different stated conditions, including a wet-pipe system and a cited document edition; it should not be silently merged with R1.",
+      "locator": "14-BCV-018 PDF, pp.1-6, VARIANCE and Appendix A"
+    }
+  ],
+  "limitations": [
+    "This is a provincial regulator-issued STANDATA/standing variance, not an individual application, applicant statement, project drawing, permit record or site-specific decision.",
+    "The records address the Alberta Building Code 2014 and, where noted, Alberta Fire Code 2014; do not treat them as proof of applicability under the Alberta 2023 code edition or current law.",
+    "Catalogue status is recorded as displayed on the retrieved official page. A missing [WITHDRAWN] label is not evidence of current validity; PDFs display an Archived watermark."
+  ],
+  "worker": "L03",
+  "prompt_number": 99,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://open.alberta.ca/dataset/27900157-f850-4138-a964-b813f0921a3b/resource/8f23004a-f919-4a51-be11-3e5b93daa6c1/download/14-bcv-018-sprinkler-protectedglazinginfire-resistantwallassemblies.pdf",
+      "sha256": "95051c8cd2ec4206ea21d15bfca2ce8e89f6750c377d892c221d86223db4a7de",
+      "role": "supporting_evidence",
+      "bytes": 2008976,
+      "filename": "catalogue-04-95051c8cd2ec.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L03/files/catalogue-04-95051c8cd2ec.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:35.672820+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/27900157-f850-4138-a964-b813f0921a3b/resource/8f23004a-f919-4a51-be11-3e5b93daa6c1/download/14-bcv-018-sprinkler-protectedglazinginfire-resistantwallassemblies.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://open.alberta.ca/dataset/27900157-f850-4138-a964-b813f0921a3b/resource/b22679c0-e78b-4b64-b809-48a98136c973/download/14-bcv-018r1-sprinklerprotectedglazinginfireresistantwallassemblies.pdf",
+      "sha256": "998c419c653b442916719a1a3b241d8ae39da3a4aaaa473b725f1197c6788dfc",
+      "role": "supporting_evidence",
+      "bytes": 1391728,
+      "filename": "catalogue-03-998c419c653b.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L03/files/catalogue-03-998c419c653b.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:30.540334+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/27900157-f850-4138-a964-b813f0921a3b/resource/b22679c0-e78b-4b64-b809-48a98136c973/download/14-bcv-018r1-sprinklerprotectedglazinginfireresistantwallassemblies.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

@@ -1,0 +1,61 @@
+{
+  "id": "H08-004",
+  "title": "Affinity Fire Engineering - DA modification fire engineering review letter, 74-94 Newton Road, Wetherill Park (Fairfield City Council)",
+  "jurisdiction": "New South Wales, Australia - COMPARATIVE ONLY (not Alberta; NSW code text, not Alberta applicability)",
+  "code_edition": "NCC 2022 / BCA 2022 (stated, p.1)",
+  "case_type": "actual_application",
+  "source_url": "https://apps.planningportal.nsw.gov.au/prweb/PRRestService/DocMgmt/v1/PublicDocuments/DATA-WORKATTACH-FILE%20PEC-DPE-EP-WORK%20PPSSWC-442!20250522T005009.953%20GMT",
+  "document_date": "04 February 2025 (ref. 232071_DA-MOD_ltr_02, p.1)",
+  "facts": [
+    {
+      "text": "Letter to Fairfield City Council titled 'DA Modification | 74-94 Newton Road, Wetherill Park | Fire Engineering Review'; dated 04 February 2025.",
+      "locator": "p.1"
+    },
+    {
+      "text": "Reviews amended architectural drawings listed by number (SBA Architects; DA100-P7, DA201-P2, DA202-P2).",
+      "locator": "p.1"
+    },
+    {
+      "text": "States the majority of the architectural amendments are minor in relation to fire life safety and do not compromise the expected fire safety strategy.",
+      "locator": "p.1"
+    },
+    {
+      "text": "States the fire safety engineering assessment at Construction Certificate stage is expected to 'readily achieve' the BCA 2022 performance requirements.",
+      "locator": "p.1"
+    },
+    {
+      "text": "The letter does not list performance solutions by clause; its support is stated at a general level.",
+      "locator": "p.1-2"
+    }
+  ],
+  "limitations": [
+    "Comparative NSW material: it cannot establish Alberta performance or Alberta applicability.",
+    "Two-page letter; the cited drawings are not in hand and the Planning Portal listing was not located.",
+    "The signature block email domain differs from the letterhead domain; not relied on."
+  ],
+  "worker": "H08",
+  "prompt_number": 238,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://apps.planningportal.nsw.gov.au/prweb/PRRestService/DocMgmt/v1/PublicDocuments/DATA-WORKATTACH-FILE%20PEC-DPE-EP-WORK%20PPSSWC-442!20250522T005009.953%20GMT",
+      "sha256": "1167f581dc1df8249b050e34ddea2daf64dc9493ab8883afe81471c30839b8d8",
+      "role": "input",
+      "bytes": 115231,
+      "filename": "pp-workattach-ppsswc-442-1167f581dc1d.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H08/files/pp-workattach-ppsswc-442/pp-workattach-ppsswc-442-1167f581dc1d.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:23:02.272787+00:00",
+        "http_status": "200",
+        "final_url": "https://apps.planningportal.nsw.gov.au/prweb/PRRestService/DocMgmt/v1/PublicDocuments/DATA-WORKATTACH-FILE%20PEC-DPE-EP-WORK%20PPSSWC-442%2120250522T005009.953%20GMT",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

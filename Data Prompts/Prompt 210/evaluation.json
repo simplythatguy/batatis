@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The CCMC report publishes a Pass result for its specified CAN/ULC-S134 test assembly and a product-level NBC 2015 opinion. It does not establish performance of an unprovided wall.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "proposed backup-wall layers, framing and furring",
+    "exact Sagiwall profile, fasteners and installation",
+    "building use/classification and code edition",
+    "whether tested assembly matches the design and whether further engineering is needed"
+  ],
+  "case_id": "L16-014",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

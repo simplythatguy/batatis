@@ -1,0 +1,58 @@
+{
+  "id": "L02-020",
+  "title": "19-BCV-020(REV1) - Structural insulated panels",
+  "jurisdiction": "Alberta (province-wide)",
+  "code_edition": "National Building Code – 2019 Alberta Edition (NBC(AE))",
+  "case_type": "issued_variance",
+  "source_url": "https://open.alberta.ca/publications/standata-building-code-variance-national-building-code-2019-alberta-edition",
+  "document_date": "2021-10",
+  "facts": [
+    {
+      "text": "The revision allows Structural Insulated Panels (SIPs) in buildings constructed under Part 9.",
+      "locator": "19-BCV-020(REV1) PDF, p. 1, Purpose"
+    },
+    {
+      "text": "CCMC-evaluated SIPs are recognized when used within the evaluation’s conditions and limitations; the report must be given to the AHJ and AHJ field inspections apply.",
+      "locator": "Same PDF, pp. 2 and 4, Discussion and Variance, item 1"
+    },
+    {
+      "text": "A non-CCMC alternative requires a Division C Section 2.3 alternative solution submitted by a registered professional, with approved plans/specifications and field reviews under Sentence 2.4.2.1.(9).",
+      "locator": "Same PDF, pp. 2 and 4, Discussion and Variance, items 2–3"
+    },
+    {
+      "text": "Appendix A lists example information: product/material/use, panel sizes/faces, supporting standards/testing, design details, limitations/maintenance, and code analysis.",
+      "locator": "Same PDF, pp. 5–6, Appendix A"
+    }
+  ],
+  "limitations": [
+    "This is a provincewide regulator-issued STANDATA variance, not an individual application, site-specific permit decision, or applicant-provided evidence.",
+    "Historical status as of 2026-10-24: the official 2019 catalogue is marked archived/replaced by the 2023 catalogue; Alberta lists NBC(AE) 2019 as in force from 2019-12-01 through 2024-04-30. Alberta guidance says previous-edition STANDATA are obsolete for new construction after a new code takes effect, while remaining relevant to evaluation of existing structures during renovations and retrofits. Verify current code edition and AHJ applicability.",
+    "No project drawings, owner/site facts, or project-specific professional evidence accompany this catalogue variance. The attached source is the outcome reference itself.",
+    "Earlier catalogue version(s) also downloaded and retained in references; this candidate uses the latest listed revision: [ARCHIVED] - 19-BCV-020 - Structural insulated panels."
+  ],
+  "worker": "L02",
+  "prompt_number": 76,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://open.alberta.ca/dataset/5a1e414d-6639-467d-b5a4-6d68454f1340/resource/6b78ae61-1304-42b3-846c-3a67044ab349/download/ma-standata-building-code-variance-19-bcv-020rev1.pdf",
+      "sha256": "d0499f64dd5427a490e955c2b3884d5d64afdfd2754731cde292c9144f713db5",
+      "role": "outcome_reference",
+      "bytes": 790767,
+      "filename": "catalogue-6b78ae61-1304-42b3-846c-3a67044ab349-19-BCV-020-REV1----Structural-insulated-panels-d0499f64dd54.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L02/files/catalogue-6b78ae61-1304-42b3-846c-3a67044ab349-19-BCV-020-REV1----Structural-insulated-panels-d0499f64dd54.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:50.581428+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/5a1e414d-6639-467d-b5a4-6d68454f1340/resource/6b78ae61-1304-42b3-846c-3a67044ab349/download/ma-standata-building-code-variance-19-bcv-020rev1.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

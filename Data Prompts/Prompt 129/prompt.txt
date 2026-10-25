@@ -1,0 +1,6 @@
+I need to show an occupant load for an assembly space in an Alberta permit file. The attached STANDATA interpretation (23-BCI-003R1/23-FCI-002R1) is my only source. Using only that document, explain which calculation approach it sets out, which numbers other professionals need from the design, what remains open for the reviewer, and what evidence and questions I should put to the authority having jurisdiction. Do not invent a room, use or occupant count, and do not state that any design complies.
+
+Attachments:
+- ma-standata-interpretation-building-fire-23-bci-003r1-23-fci-002r1-2025-01-f7e7f1c3c1c1.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

@@ -1,0 +1,57 @@
+{
+  "id": "L12-004",
+  "title": "Ottawa Fastfrate warehouse fire-water supply proposal",
+  "jurisdiction": "Ottawa, Ontario, Canada",
+  "code_edition": "Unknown; the report discusses Fire Underwriters Survey 2020 and Ottawa water-distribution guidance, not a stated OBC edition",
+  "case_type": "documented_design_study",
+  "source_url": "https://webcast.ottawa.ca/plan/All_Image%20Referencing_Site%20Plan%20Application_Image%20Reference_2023-02-13%20-%20Water%20Supply%20Letter%20-%20D07-12-21-0127.PDF",
+  "document_date": "2022-09-28 letter; City portal file dated 2023-02-13",
+  "facts": [
+    {
+      "text": "The City-hosted letter is a revised fire-flow proposal for the Fastfrate Warehouse and says it addresses City comments and supersedes prior versions.",
+      "locator": "Letter, PDF p. 1; portal URL includes site-plan file D07-12-21-0127"
+    },
+    {
+      "text": "The attached assessment sheet lists a one-storey gross floor area of 92,376 sq ft (8,582 m²).",
+      "locator": "Fire-flow assessment sheet, PDF p. 8"
+    },
+    {
+      "text": "The letter lists ESFR sprinkler flow of 5,610 L/min, a 1,892 L/min hose allowance, a 90-minute duration, and 675,000 L stored fire-water volume as its engineered proposal.",
+      "locator": "Letter, PDF p. 6"
+    },
+    {
+      "text": "The assessment sheet identifies FUS 2020, Ottawa Design Guidelines for Water Distribution (2010), ISTB-2018-02 and Technical Bulletin ISTB-2021-03; its final sheet reports 7,500 L/min total required fire flow after a 25% Step I reduction for ESFR sprinklers.",
+      "locator": "Fire-flow assessment sheet, PDF pp. 8-10"
+    }
+  ],
+  "limitations": [
+    "This is a fire-water engineering proposal in an Ottawa site-plan file, not a documented OBC alternative-solution decision.",
+    "No architectural or fire-protection plans are included in this downloaded file.",
+    "The report’s code edition and City acceptance status are unstated."
+  ],
+  "worker": "L12",
+  "prompt_number": 291,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://webcast.ottawa.ca/plan/All_Image%20Referencing_Site%20Plan%20Application_Image%20Reference_2023-02-13%20-%20Water%20Supply%20Letter%20-%20D07-12-21-0127.PDF",
+      "sha256": "f6bb5a0e2e4fd27e7066474429fed37bd4a443f38a8406add06bf07be5222de2",
+      "role": "input",
+      "bytes": 270172,
+      "filename": "ottawa_fire_water_letter-f6bb5a0e2e4f.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L12/files/ottawa_fire_water_letter-f6bb5a0e2e4f.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:20:12.916797+00:00",
+        "http_status": "200",
+        "final_url": "https://webcast.ottawa.ca/plan/All_Image%20Referencing_Site%20Plan%20Application_Image%20Reference_2023-02-13%20-%20Water%20Supply%20Letter%20-%20D07-12-21-0127.PDF",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

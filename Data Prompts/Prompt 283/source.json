@@ -1,0 +1,94 @@
+{
+  "id": "H18-001",
+  "title": "St. John's Library Facility Refurbishment Study: accessibility, life safety and functional layout (2012)",
+  "scope": "comparative_non_alberta",
+  "alberta_applicability": "not established",
+  "jurisdiction": "City of Winnipeg, Manitoba, Canada (original jurisdiction)",
+  "code_edition": "2010 National Building Code of Canada with 2011 Manitoba Amendments and 2010 City of Winnipeg Accessibility Design Standards, as stated in the study (p.10). Not NBC(AE) 2023.",
+  "case_type": "documented_design_study",
+  "source_url": "https://legacy.winnipeg.ca/finance/findata/matmgt/documents/2015/17-2015/17-2015_Appendix_B_St%20Johns_Refurbishment_Study.pdf",
+  "source_url_note": "Attachment URL used as the source; the official RFP 17-2015 landing page was not verified.",
+  "document_date": "2012-12-21 (cover date)",
+  "facts": [
+    {
+      "text": "Appendix B to City of Winnipeg RFP No. 17-2015. Library at 500 Salter Street. Consultant MCM Architects. Cover dated December 21, 2012.",
+      "locator": "p.1-2, p.9-10"
+    },
+    {
+      "text": "Library originally constructed in 1915 and designated as a historical building, Grade 2 classification, on the City of Winnipeg Heritage Conservation List.",
+      "locator": "p.11"
+    },
+    {
+      "text": "Existing main floor sits about 6'-0\" above sidewalk grade. The only access to floor levels is an exterior grand stair and interior stairs.",
+      "locator": "p.11"
+    },
+    {
+      "text": "Scope reviews the existing building against the 2010 NBC with 2011 Manitoba Amendments and the 2010 City of Winnipeg Accessibility Design Standards. Where the two overlapped, the more stringent was followed.",
+      "locator": "p.9-10"
+    },
+    {
+      "text": "Preliminary options were presented to Winnipeg Heritage so that historical significance would not be compromised. The study records Heritage Winnipeg's willingness to provide universal access and no major concerns with the options presented.",
+      "locator": "p.10-11"
+    },
+    {
+      "text": "The life-safety and accessibility review records that existing entrances are not barrier-free. It quotes the altered-building clause requiring at least one barrier-free entrance where full compliance is impractical (the study's wording of the clause).",
+      "locator": "p.18"
+    },
+    {
+      "text": "Washroom review: the study states 3 water closets are required for females and 2 for males. Existing provides 1 for both sexes plus 1 staff-only, and no washrooms are on the main floor level.",
+      "locator": "p.18"
+    },
+    {
+      "text": "Controls within a barrier-free path of travel are recorded as varying in height throughout the building, with most exceeding the maximum dimension the study cites for the 1'-4\" to 4'-0\" control range.",
+      "locator": "p.18"
+    },
+    {
+      "text": "Two options are drawn and compared: a 'Ramp & Interior Lift System' option and an 'Elevator Addition' option, each with main- and basement-floor schematic drawings. Scope includes cost estimates.",
+      "locator": "p.4-5 (contents); p.9 (scope)"
+    },
+    {
+      "text": "Code review headings cover interior fire separations, doors and hardware, access to exit and egress, washrooms, accessibility and universal access, fire alarm, and emergency lighting and signage.",
+      "locator": "p.4"
+    },
+    {
+      "text": "The extracted text contains no occurrence of 'variance'. The phrase 'alternate second means of exit from the basement floor area' appears only in a mechanical-room exit note.",
+      "locator": "p.24 (keyword search of extracted text)"
+    }
+  ],
+  "limitations": [
+    "Comparative only: Manitoba, non-Alberta. Cannot establish Alberta applicability or performance.",
+    "The study cites the 2010 NBC with 2011 Manitoba amendments. That is not the current edition; flagged under edition control.",
+    "A consultant options study, not a permit submission. No variance or alternative-solution filing is in the attachment.",
+    "Schematic drawings are image content and were not read visually; findings rest on the text layer.",
+    "Text extracted with pypdf using its pure-Python RC4 fallback, because the PDF uses 104-bit RC4 that the cryptography backend rejects.",
+    "Parent observed pypdf error: Invalid key size (104) for RC4. PDFium opened the unchanged original, extracted text and rendered its cover. This is a reader-compatibility issue, not a fabricated or silently repaired attachment."
+  ],
+  "original_worker_case_type": "documented_design_study",
+  "parent_curation_note": "Original legacy public PDF is readable with PDFium but triggers a real pypdf RC4 key-length limitation; retain untouched for comparative parser testing.",
+  "worker": "H18",
+  "prompt_number": 283,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://legacy.winnipeg.ca/finance/findata/matmgt/documents/2015/17-2015/17-2015_Appendix_B_St%20Johns_Refurbishment_Study.pdf",
+      "sha256": "5d1faf701966c9ad000a100bfa7e625bf8dc9d71d8fb47e21d2db9cf95c87557",
+      "role": "input",
+      "download_record": "_research/workers/H18/files/winnipeg-17-2015-appB-stjohns-refurbishment-study-5d1faf701966.pdf.source.json",
+      "bytes": 22404645,
+      "filename": "winnipeg-17-2015-appB-stjohns-refurbishment-study-5d1faf701966.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H18/files/winnipeg-17-2015-appB-stjohns-refurbishment-study-5d1faf701966.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:42:22.873027+00:00",
+        "http_status": "200",
+        "final_url": "https://legacy.winnipeg.ca/finance/findata/matmgt/documents/2015/17-2015/17-2015_Appendix_B_St%20Johns_Refurbishment_Study.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

@@ -1,0 +1,64 @@
+{
+  "id": "H14-022",
+  "title": "ZIP System R-Sheathing Installation Manual (HUB 3021, Rev 02/12/2025)",
+  "jurisdiction": "Manufacturer installation manual (US-origin; IRC/IBC references); NON-ALBERTA COMPARATIVE ONLY: cannot establish Alberta performance, acceptance or equivalence; no Canadian or Alberta approval is claimed or implied",
+  "code_edition": "IRC and IBC; editions named in tables include 2015, 2018 and 2021 IRC/IBC (pp19, 36-39); no single edition set stated for the whole manual",
+  "case_type": "product_evidence",
+  "source_url": "https://www.huberwood.com/uploads/documents/technical/ZIP-System-R-sheathing-Installation-Manual.pdf",
+  "document_date": "HUB 3021 REV 02/12/2025 (p1, p6)",
+  "facts": [
+    {
+      "text": "The manual describes ZIP System R-sheathing as an alternative to the water-resistive barrier 'prescribed in the International Residential Code (IRC) and International Building Code (IBC)', and points to ESR-3373 and ER-0482 for more information.",
+      "locator": "p6"
+    },
+    {
+      "text": "Footnote: 'EIFS should NOT be installed over ZIP System R-sheathing. Doing so will void the 30-year limited ZIP System warranty.'",
+      "locator": "p6"
+    },
+    {
+      "text": "Notes and limitations: not warranted or recommended for roof applications; 'not recommended for manufactured housing projects built under the federal building code administered by ... HUD'; cover within 180 days, after which a mechanically fastened WRB must be installed.",
+      "locator": "p7"
+    },
+    {
+      "text": "The fire-rated assemblies section says R-sheathing 'is limited to' listed assemblies: UL V302, UL V303 and UL V318 (1-hour interior) and UL U364 (1-hour exterior and interior). These UL listings are not attached.",
+      "locator": "p17"
+    },
+    {
+      "text": "The prescriptive IRC/IBC method applies 'when installed per Table 1'; ESR-3373 is cited for the allowable design values.",
+      "locator": "p18-19"
+    }
+  ],
+  "limitations": [
+    "Non-Alberta comparative attachment; this is a manufacturer or industry guide, not a code or an evaluation report.",
+    "Retrieved 2026-10-25; the current revision was not checked against the publisher's index.",
+    "Text from pypdf extraction; figures and drawings not transcribed; locators are PDF page numbers.",
+    "Publisher copyright; retained locally for comparison only.",
+    "ER-0482 is cited without a definition in the manual; it was not retrieved.",
+    "Tables and figures in the manual were not transcribed."
+  ],
+  "worker": "H14",
+  "prompt_number": 649,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://huberwood.com/uploads/documents/technical/ZIP-System-R-sheathing-Installation-Manual.pdf",
+      "sha256": "9fa20fe0bc0e604db63281efdc59426ecfc0203cabbf95507de61147e2e54afe",
+      "role": "input",
+      "bytes": 7109597,
+      "filename": "huber-zip-r-sheathing-installation-manual-9fa20fe0bc0e.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H14/files/huber-zip-r-sheathing-installation-manual/huber-zip-r-sheathing-installation-manual-9fa20fe0bc0e.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:52:26.694183+00:00",
+        "http_status": "200",
+        "final_url": "https://www.huberwood.com/uploads/documents/technical/ZIP-System-R-sheathing-Installation-Manual.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

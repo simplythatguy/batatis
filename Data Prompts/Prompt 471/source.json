@@ -1,0 +1,80 @@
+{
+  "id": "H11-016",
+  "title": "Appeal 24636: metal composite panels in place of metal panels at exterior soffits (NFPA 285 test requirement, OSSC 1407.10.4)",
+  "jurisdiction": "City of Portland, Oregon (USA), Bureau of Development Services Administrative Appeal Board; non-Alberta comparative record",
+  "code_edition": "Code section 1407.10.4 (edition not stated); the record refers to an equivalency letter",
+  "case_type": "appeal_decision",
+  "source_url": "https://efiles.portlandoregon.gov/record/15731384/file/document",
+  "document_date": "2021-02-24 (hearing)",
+  "facts": [
+    {
+      "text": "Appeal item: OSSC 1407.10.4 requires NFPA 285 testing of the metal composite material panel system intended for use; the request substitutes metal composite panels for metal panels at exterior soffit assemblies 3C.1 and 3C.7.",
+      "locator": "p.1 (APPEAL INFORMATION SHEET)"
+    },
+    {
+      "text": "The applicant cites an equivalency letter prepared by an engineering firm and says the alternate product matches the design-review mirrored finish of the soffit.",
+      "locator": "p.1 (APPEAL INFORMATION SHEET, reason)"
+    },
+    {
+      "text": "Decision: use of metal composite panels in lieu of metal panel at exterior soffits is granted as proposed.",
+      "locator": "p.1 (APPEAL DECISION)"
+    }
+  ],
+  "limitations": [
+    "Non-Alberta comparative record: City of Portland, Oregon (USA) Bureau of Development Services Administrative Appeal Board. Local Oregon/Portland code is retained as stated in each record. No Alberta applicability is asserted; the case is used only to test attachment format and content, not Alberta performance.",
+    "Text extracted with pypdfium2 after pypdf raised a stream error on this 7.5 MB file; text is complete per page count (16 pages).",
+    "Summary lists [File 1] with no link annotation; the equivalency letter is not retrieved.",
+    "Outcome leakage true: decision in the same PDF.",
+    "Blocked: PDF lists [File 1] with no link annotation; the equivalency letter is not retrieved."
+  ],
+  "record_file": {
+    "path": "_research/workers/H11/files/portland-efiles-15731384/portland-efiles-15731384-883f66c5b9b4.pdf",
+    "sha256": "883f66c5b9b47da70239dad6726c6218417c3c0219c7a063680033912300ec7a",
+    "pages": 16,
+    "retrieved_at": "2026-10-25T01:43:51.106791+00:00"
+  },
+  "worker": "H11",
+  "prompt_number": 471,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://efiles.portlandoregon.gov/record/15731384/file/document",
+      "sha256": "883f66c5b9b47da70239dad6726c6218417c3c0219c7a063680033912300ec7a",
+      "role": "input",
+      "locator_note": "p.1 APPEAL INFORMATION SHEET (Code Section, Requires, Proposed Design, Reason)",
+      "bytes": 7519852,
+      "filename": "portland-efiles-15731384-883f66c5b9b4.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H11/files/portland-efiles-15731384/portland-efiles-15731384-883f66c5b9b4.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:43:51.106791+00:00",
+        "http_status": "200",
+        "final_url": "https://efiles.portlandoregon.gov/record/15731384/file/document",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://efiles.portlandoregon.gov/record/15731384/file/document",
+      "sha256": "883f66c5b9b47da70239dad6726c6218417c3c0219c7a063680033912300ec7a",
+      "role": "outcome_reference",
+      "locator_note": "APPEAL DECISION block",
+      "bytes": 7519852,
+      "filename": "_evaluation/portland-efiles-15731384-883f66c5b9b4.pdf",
+      "included_in_default_input": false,
+      "original_collection_path": "_research/workers/H11/files/portland-efiles-15731384/portland-efiles-15731384-883f66c5b9b4.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:43:51.106791+00:00",
+        "http_status": "200",
+        "final_url": "https://efiles.portlandoregon.gov/record/15731384/file/document",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

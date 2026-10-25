@@ -1,0 +1,59 @@
+{
+  "id": "H12-011",
+  "title": "Interpretation 19-07 (City of Seattle request): special inspections for mass timber adhesive anchors and concealed connections (IBC 1705)",
+  "jurisdiction": "Seattle, Washington State, requested by City of Seattle (comparative test only; not Alberta)",
+  "code_edition": "2015 International Building Code, Section 1705 and Table 1705.5.3, with Washington State amendments, as cited",
+  "case_type": "regulatory_guidance",
+  "source_url": "https://sbcc.wa.gov/answers-opinions",
+  "document_date": "Not stated in document (interpretation no. 19-07)",
+  "facts": [
+    {
+      "text": "Document type: State Building Code Council interpretation no. 19-07, one page; requester City of Seattle.",
+      "locator": "p1 header"
+    },
+    {
+      "text": "Code and section: 2015 IBC Section 1705, Mass Timber Special Inspections.",
+      "locator": "p1 SECTION"
+    },
+    {
+      "text": "Question 1: what special inspections are required for adhesive anchors in mass timber that do not resist sustained tension loads.",
+      "locator": "p1 QUESTION 1"
+    },
+    {
+      "text": "Question 2: what special inspections are required for non-proprietary concealed connections in mass timber.",
+      "locator": "p1 QUESTION 2"
+    }
+  ],
+  "limitations": [
+    "The PDF contains the Council answer on the same page; do not present it as applicant-side input without flagging leakage.",
+    "Generic question with no project facts; carried as issued_variance per the package grouping of interpretations.",
+    "Limited to the 2015 IBC with the cited Washington amendments; Seattle relevance does not establish Alberta applicability."
+  ],
+  "original_worker_case_type": "issued_variance",
+  "parent_curation_note": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance.",
+  "worker": "H12",
+  "prompt_number": 615,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://sbcc.wa.gov/sites/default/files/2020-05/19-07IBC_sp.pdf",
+      "sha256": "33e0b77333389808a5d43063926a9e99024310f85e7282b07caf8ce3fcfd0275",
+      "role": "outcome_reference",
+      "bytes": 35428,
+      "filename": "sbcc-ruling-19-07-19-07ibc-sp-33e0b7733338.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H12/files/sbcc-ruling-19-07-19-07ibc-sp-33e0b7733338.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:44:09.949553+00:00",
+        "http_status": "200",
+        "final_url": "https://sbcc.wa.gov/sites/default/files/2020-05/19-07IBC_sp.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

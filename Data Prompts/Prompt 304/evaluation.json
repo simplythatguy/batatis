@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The proponent profile reports submission in December 2024 and acceptance by the City of Vancouver in February 2025; no permit file, approved alternative-solution report, or authority decision is attached.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "two-building scope and distinct Part classifications",
+    "single-exit service scope by level",
+    "current adopted code and permit set",
+    "independent confirmation of reported disposition"
+  ],
+  "case_id": "L14-001",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

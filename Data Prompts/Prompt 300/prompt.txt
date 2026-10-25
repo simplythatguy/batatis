@@ -1,0 +1,9 @@
+Comparative attachment exercise: this source is from George Brown College Waterfront Campus, Toronto, Ontario. It is not an Alberta application.
+
+Using the attached Limberlost design paper and project records, identify which structural and fire/code facts are actually documented and which records are absent. List the drawings, design-basis/code edition, test protocols and reports, connection details, fire-engineering narrative, alternative-solution scope, assumptions and authority records required before administrative-completeness review. Keep the slab-band research results separate from fire approval evidence; do not certify strength, fire performance or equivalence.
+
+Attachments:
+- limberlost-slabband-design-paper-11fcd6ed12f9.pdf
+- limberlost-design-engineer-overview-2685834b84f2.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

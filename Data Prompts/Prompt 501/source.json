@@ -1,0 +1,59 @@
+{
+  "id": "L07-010",
+  "title": "BCAB 1958 - Alteration of an existing school to replace a lift with a ramp",
+  "jurisdiction": "British Columbia",
+  "code_edition": "BCBC 2024",
+  "case_type": "appeal_decision",
+  "source_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1958",
+  "document_date": "2025-04-17",
+  "facts": [
+    {
+      "text": "The project is the alteration of an existing secondary school to change the accessible path of travel from a main floor of the school to the elevated theatre stage. It is proposed to replace an existing stair lift with a new ramp.",
+      "locator": "Project description, paragraph 1"
+    },
+    {
+      "text": "The existing stair lift does not accommodate some newer power wheelchairs. Further, a replacement lift will not readily fit in the available space.",
+      "locator": "Project description, paragraph 2"
+    },
+    {
+      "text": "A proposed new ramp is considered by the owner, staff, and users, to be the optimal alternative to a stair lift. However, to fit the ramp within the available space without significantly impacting stage usability and school security, the proposed ramp length exceeds the allowable length between landings and the width of the lower landing is less than required.",
+      "locator": "Project description, paragraph 3"
+    }
+  ],
+  "limitations": [
+    "The public Board decision is an appeal record, not the original application package.",
+    "The published decision refers to supporting drawings or evidence in some cases, but the complete original application and attachments are not publicly linked from the decision page.",
+    "Published Board outcome appears in the input attachment; outcome leakage is intentional and flagged.",
+    "British Columbia decision retained for comparative attachment format/content only; it does not establish Alberta code applicability, design performance, or acceptance."
+  ],
+  "worker": "L07",
+  "prompt_number": 501,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1958",
+      "sha256": "d632404ca8877e08eec9ade4b04126fab5a5479bcc5988a648c09c542456f17e",
+      "role": "input",
+      "bytes": 1363049,
+      "filename": "bcab-1958-d632404ca887.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-1958-d632404ca887.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:47:49.675123+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1958",
+        "content_type": "text/html; charset=utf-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-1-source-text.txt",
+        "sha256": "60a4eebdc2971b67aa0213d19fe4df4db36e310d989dc190e62953dfccb4d2c3",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

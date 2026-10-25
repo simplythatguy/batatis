@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from Ontario — City of Ottawa. It is not an Alberta application.
+
+Review the attached record about a ten-storey mixed-use/residential building proposing combustible components in exterior non-loadbearing walls. Identify the cited construction and height questions; list the wall assembly drawings, thermal-barrier details, CAN/ULC-S134 test report, sprinkler information, and building-classification facts that should be obtained. Ask focused questions about what the record does and does not establish. Do not certify fire performance or compliance, and do not apply the Ontario ruling in Alberta. Use this decision only to compare record format and evidence themes. It cannot establish Alberta performance; identify which Calgary or Edmonton source must be checked first before applying any question locally, then consider other Alberta authorities as needed.
+
+Attachments:
+- attachment-1-source-text.txt
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

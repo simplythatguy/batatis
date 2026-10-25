@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Report-stated: ICC-ES evaluation reissued February 2026 (IBC/IRC/IECC 2024-2021); wall-only coatings and StoEnergy Guard with cover and special-inspection conditions (§5.1-5.7); NFPA 285 basis for the listed Types I-IV assemblies (§4.8).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "NFPA 285 basis applies only to the listed assemblies in Tables 1-2 (§4.8)",
+    "StoEnergy Guard foam must match ESR-2142 or ESR-4755 (§5.6)",
+    "Special-inspection exception depends on a certificate (§5.2)"
+  ],
+  "case_id": "H14-018",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

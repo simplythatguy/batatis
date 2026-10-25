@@ -1,0 +1,67 @@
+{
+  "id": "H14-016",
+  "title": "ICC-ES ESR-4725: Boxabl structural insulated panels (Casita use only)",
+  "jurisdiction": "United States (ICC-ES evaluation report under IBC/IRC); NON-ALBERTA COMPARATIVE ONLY: cannot establish Alberta performance, acceptance or equivalence; no Canadian or Alberta approval is claimed or implied",
+  "code_edition": "2021 and 2018 IBC and IRC (report §1.0, p1)",
+  "case_type": "product_evidence",
+  "source_url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-4725.pdf",
+  "document_date": "Reissued July 2026; continuous compliance through May 2028 (p1, p10)",
+  "facts": [
+    {
+      "text": "Report holder BOXABL; subject is Boxabl structural insulated panels.",
+      "locator": "p1 cover"
+    },
+    {
+      "text": "Used only in Boxabl Casitas, factory-built structures using the proprietary Boxabl connection system.",
+      "locator": "§2.1, p1"
+    },
+    {
+      "text": "'Structural Insulated Panels have not been evaluated in fire-resistance-rated construction.'",
+      "locator": "§2.3, p1"
+    },
+    {
+      "text": "Limited to buildings of Type V construction; wood-based materials protected from decay and termites per IBC §2304.12 and IRC §R317.",
+      "locator": "§5.4-5.5, p4"
+    },
+    {
+      "text": "Shear walls in SDC C through F require special inspection; for SDC D through F, collectors, connections and anchorage use the ASCE/SEI 7 §12.4.3 special load combinations with Em.",
+      "locator": "§5.6-5.7, p4"
+    },
+    {
+      "text": "Evidence listed: AC04 (June 2019); NFPA 286; ASTM E331 water penetration; ASTM E2126 cyclic racking.",
+      "locator": "§6.1-6.4, p4"
+    }
+  ],
+  "limitations": [
+    "Non-Alberta comparative attachment; the report does not reference NBC(AE) 2023 and is not evidence of Alberta or Canadian acceptance.",
+    "Retrieved 2026-10-25 from the official ICC-ES report URL; current ICC-ES status was not checked live. source_url is the report PDF, not a separate listing page.",
+    "Text from pypdf extraction; figures, tables and signatures not transcribed; locators are PDF page numbers, not printed page numbers.",
+    "ICC-ES copyright; retained locally for comparison only, redistribution not licensed.",
+    "Its use is limited to one manufacturer's building system; it is a boundary case for the comparison set."
+  ],
+  "worker": "H14",
+  "prompt_number": 643,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-4725.pdf",
+      "sha256": "313b23a494743b383f81c4ea0757a9914960b2f8e639712856d46b4d42640f81",
+      "role": "input",
+      "bytes": 657193,
+      "filename": "esr-4725-boxabl-sip-313b23a49474.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H14/files/esr-4725/esr-4725-boxabl-sip-313b23a49474.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:21:57.203625+00:00",
+        "http_status": "200",
+        "final_url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-4725.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

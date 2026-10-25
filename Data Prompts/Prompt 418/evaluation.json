@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The Chief Executive confirmed the authority's decision to refuse to issue the building consent in respect of these matters (decision, p.15).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "retrofit insulation behind existing weatherboards and eaves",
+    "moisture and condensation in retrofit wall build-ups",
+    "durability of the existing timber and cladding",
+    "product certificates and installation details for the board"
+  ],
+  "case_id": "H04-023",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

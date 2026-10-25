@@ -1,0 +1,7 @@
+A Part 9 house roof will use wood trusses. The attached STANDATA interpretation (23-BCI-015R1) is my only source. Using only that document, say who must design the truss system, what the layout plan must show or may leave out, what separate authenticated documentation is required, and what questions remain for the reviewer. Do not invent truss spans, dimensions or designers, and do not state that the roof complies.
+
+Attachments:
+- ma-standata-interpretation-building-23-bci-015r1-2025-05-cf66d1160700.pdf
+- ma-notice-standata-building-code-interpretation-23-bci-015r1-2026-02-32062f995774.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

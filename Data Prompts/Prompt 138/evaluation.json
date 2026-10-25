@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Regulator position (R1): a relaxation may be issued where compliance is unnecessary or extraordinary circumstances prevent conformance, and only if the applicant demonstrates valid conditions to the satisfaction of the administrator.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the two situations named for relaxation from the administrator's decision",
+    "Identifies the demonstration the applicant must make as a file item",
+    "Asks which Division B Section 3.8 requirements the request would address",
+    "Uses R1 (current); the March 2025 original is superseded"
+  ],
+  "case_id": "H20-012",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

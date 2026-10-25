@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Regulator position: the fire safety plan is mandatory and is submitted to the AHJ before construction, alteration or demolition; measures must reflect project size, type, configuration, method and adjacent exposures; fire-department access and firefighting water supply are required; no single solution fits all projects.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the mandatory fire safety plan from the performance measures",
+    "Asks which adjacent exposures and distances the plan documents",
+    "Flags fire-department access and water-supply evidence",
+    "Does not state the measures are sufficient"
+  ],
+  "case_id": "H20-023",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

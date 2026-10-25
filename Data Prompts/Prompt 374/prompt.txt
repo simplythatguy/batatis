@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from New Zealand (Building Act 2004); Gore District Council (foundations and site services) and Invercargill City Council (modules); comparative only, not Alberta. It is not an Alberta application.
+
+This is a New Zealand regulator document about a modular dwelling built partly off-site and partly on site under two consents, with as-built questions about foundations, cladding and linings, wet-area finishes, and electrical fittings. Using only the attached PDF, identify the structural, moisture, and electrical provisions it treats as uncertain, list the photos, layout diagrams, and standards references it relies on, flag missing or unclear records (such as producer statements or inspection records), and list the next questions a reviewer should ask. Do not say whether the dwelling complies or is safe, and do not apply Alberta or NBC(AE) rules.
+
+Attachments:
+- mbie-det-2026-036-cd1686524ba5.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

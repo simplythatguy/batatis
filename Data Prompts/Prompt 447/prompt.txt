@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from Queensland, Australia. COMPARATIVE TEST ONLY: not Alberta; no Alberta applicability asserted.. It is not an Alberta application.
+
+This is a Queensland Development Tribunal decision notice about alterations to an existing tenancy, where a fire engineering report went through several revisions and the fire service found the proposed performance solution unsuitable. Using only the attached notice, identify the fire engineering evidence and the revision sequence the notice refers to, the approvals and amended notices in the record, the open administrative items a reviewer would need to resolve, the code questions the notice leaves unanswered (including which code edition applies), and the next questions for the applicant. Do not say whether the design complies or is safe.
+
+Attachments:
+- dt-22-020-decision-32a0f16de1b1.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

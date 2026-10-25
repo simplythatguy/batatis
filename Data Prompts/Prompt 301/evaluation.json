@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The magazine describes the fire-bay concept and CHM Fire states an approved alternative solution exists; neither source contains the complete report or approval instrument.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "code edition and occupancy/use details",
+    "fire separation and structural stability drawings",
+    "test/calculation evidence and assumptions",
+    "distinguishing project summaries from approval records"
+  ],
+  "case_id": "L13-010",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

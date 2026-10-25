@@ -1,0 +1,55 @@
+{
+  "id": "H12-013",
+  "title": "Interpretation 17-20 (City of Redmond): elevator opening directly into a rated corridor in Group R, Type VA or IIIB construction (IBC 1020 and 3006.2)",
+  "jurisdiction": "Washington State, requested by City of Redmond (comparative test only; not Alberta)",
+  "code_edition": "2015 International Building Code, Sections 1020, 3006.2 and 716.5.3.1, as cited",
+  "case_type": "regulatory_guidance",
+  "source_url": "https://sbcc.wa.gov/answers-opinions",
+  "document_date": "Not stated in document (interpretation 17-20)",
+  "facts": [
+    {
+      "text": "Document type: State Building Code Council interpretation 17-20, one page; requester City of Redmond.",
+      "locator": "p1 header"
+    },
+    {
+      "text": "Setting: Group R occupancy, Type VA or IIIB construction, sprinklered; IBC Table 1020.1 requires a half-hour fire-rated corridor.",
+      "locator": "p1 QUESTION"
+    },
+    {
+      "text": "Elevator condition: the hoistway opening meets the smoke and draft exception of IBC 3006.2, and the elevator opens directly into the rated corridor with no elevator lobby.",
+      "locator": "p1 QUESTION"
+    }
+  ],
+  "limitations": [
+    "The PDF contains the Council answer on the same page; do not present it as applicant-side input without flagging leakage.",
+    "No plans or door schedules; the question's description is the only building information.",
+    "Edition as cited (2015 IBC); comparative only."
+  ],
+  "original_worker_case_type": "issued_variance",
+  "parent_curation_note": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance.",
+  "worker": "H12",
+  "prompt_number": 617,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://sbcc.wa.gov/sites/default/files/2019-12/17_20ibc.pdf",
+      "sha256": "e71cfec1afdfaab222905d56561ec4869cdee9d5e3a9a6f4b05bac0ee8d3ea67",
+      "role": "outcome_reference",
+      "bytes": 82532,
+      "filename": "sbcc-ruling-17-20-17-20ibc-e71cfec1afdf.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H12/files/sbcc-ruling-17-20-17-20ibc-e71cfec1afdf.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:43:50.570203+00:00",
+        "http_status": "200",
+        "final_url": "https://sbcc.wa.gov/sites/default/files/2019-12/17_20ibc.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

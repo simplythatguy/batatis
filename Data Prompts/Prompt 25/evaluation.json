@@ -1,0 +1,16 @@
+{
+  "known_outcome": "Tribunal: 'the subject of appeal is UPHELD' (p.1); the Varied Second Order is upheld and the appeal must fail (paras 94-95, p.19), with dated steps to vacate, secure, obtain permits and complete inspections.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "fire alarm status and exit signage in an existing assembly building",
+    "exit stair obstruction and fire-separation completeness after later additions",
+    "undocumented basement assembly use and the permit history of the addition",
+    "occupant-load condition on a permit and how it is enforced",
+    "administrative evidence needed to resolve an enforcement order (permits, inspections, field reviews, professional schedules)"
+  ],
+  "case_id": "A10-001",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Calgary / Edmonton",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

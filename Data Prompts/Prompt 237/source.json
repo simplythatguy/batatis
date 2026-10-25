@@ -1,0 +1,61 @@
+{
+  "id": "H08-003",
+  "title": "ADP Consulting - Development Application Fire Engineering Statement, SES Incident Control Centre expansion, 56-58 Knox Street, Goulburn (DA/0242/2425)",
+  "jurisdiction": "New South Wales, Australia - COMPARATIVE ONLY (not Alberta; NSW code text, not Alberta applicability)",
+  "code_edition": "NCC Volume One (2022) (stated, p.1)",
+  "case_type": "actual_application",
+  "source_url": "https://www.planningportal.nsw.gov.au/daex/under-consideration/56-knox-street-alterations-and-additions-nsw-state-emergency-service-headquarters-facility",
+  "document_date": "31 January 2025 (Revision 01, p.1)",
+  "facts": [
+    {
+      "text": "Letter 'Development Application (DA) Fire Engineering Statement' for SYD3513 SES ICC expansion, 56-58 Knox Street, Goulburn; dated 31 January 2025; Revision 01.",
+      "locator": "p.1"
+    },
+    {
+      "text": "States the design will meet the NCC Volume One fire safety performance requirements through a combination of fire engineering performance solutions and DtS provisions.",
+      "locator": "p.1"
+    },
+    {
+      "text": "Named performance-based items: a non-required (DtS) fire detection and alarm system for extended travel distances; performance-based separation of openings using toughened glazing or heat-attenuating mesh; performance-based discharge using the existing sloped driveway.",
+      "locator": "p.1"
+    },
+    {
+      "text": "Outstanding non-compliances in the BCA Capability Statement are to be addressed by a DtS-compliant AS 2419.1 hydrant system and fire-rating of external columns within 3 m of the side boundary.",
+      "locator": "p.1"
+    },
+    {
+      "text": "Letter states its view that no significant fire safety design issue would prevent lodging the DA, and that compliance is achievable 'as the design develops'.",
+      "locator": "p.1"
+    }
+  ],
+  "limitations": [
+    "Comparative NSW material: it cannot establish Alberta performance or Alberta applicability.",
+    "One-page letter; the BCA Capability Statement and the drawings it cites are not in hand.",
+    "The letter's own view is not a finding of compliance and is not treated as one here."
+  ],
+  "worker": "H08",
+  "prompt_number": 237,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://apps.planningportal.nsw.gov.au/prweb/PRRestService/DocMgmt/v1/PublicDocuments/DATA-WORKATTACH-FILE%20PEC-DPE-EP-WORK%20PAN-517186!20250309T221319.101%20GMT",
+      "sha256": "8f11b6396447efbdf8855eaa1148c9b0695dbc0515a0c8155832b3e9eb89fabd",
+      "role": "input",
+      "bytes": 98136,
+      "filename": "pp-workattach-pan-517186-8f11b6396447.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H08/files/pp-workattach-pan-517186/pp-workattach-pan-517186-8f11b6396447.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:23:22.093824+00:00",
+        "http_status": "200",
+        "final_url": "https://apps.planningportal.nsw.gov.au/prweb/PRRestService/DocMgmt/v1/PublicDocuments/DATA-WORKATTACH-FILE%20PEC-DPE-EP-WORK%20PAN-517186%2120250309T221319.101%20GMT",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

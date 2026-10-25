@@ -1,0 +1,55 @@
+{
+  "id": "L07-004",
+  "title": "BCAB 1997 - Movable or removable armrest for an adaptable seat in an assembly occupancy",
+  "jurisdiction": "British Columbia",
+  "code_edition": "BCBC 2024",
+  "case_type": "appeal_decision",
+  "source_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1997",
+  "document_date": "2026-03-19",
+  "facts": [
+    {
+      "text": "The project is the construction of a new outdoor grandstand Accessible paths of travel have been included and there are designated wheelchair spaces along the lower level with companion seating. Four aisles with stairs lead up to general seating and a press/media booth at the top. The grandstand has a total occupant load of approximately 1300 persons.",
+      "locator": "Project description, paragraph 1"
+    },
+    {
+      "text": "Grandstand seating is provided by fixed, bench-style, aluminum seating planks with continuous aluminum backrest planks. The design does not include armrests.",
+      "locator": "Project description, paragraph 2"
+    }
+  ],
+  "limitations": [
+    "The public Board decision is an appeal record, not the original application package.",
+    "The published decision refers to supporting drawings or evidence in some cases, but the complete original application and attachments are not publicly linked from the decision page.",
+    "Published Board outcome appears in the input attachment; outcome leakage is intentional and flagged.",
+    "British Columbia decision retained for comparative attachment format/content only; it does not establish Alberta code applicability, design performance, or acceptance."
+  ],
+  "worker": "L07",
+  "prompt_number": 495,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1997",
+      "sha256": "40d58cff04c549abdaec443d922118539892077c05cf28ad341301680d13b03b",
+      "role": "input",
+      "bytes": 1357623,
+      "filename": "bcab-1997-40d58cff04c5.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-1997-40d58cff04c5.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:46:55.738445+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1997",
+        "content_type": "text/html; charset=utf-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-1-source-text.txt",
+        "sha256": "d235a29649029c73d45d27b4feb19ec41c352bd0a34a3e2b4dad6f7f53365b0e",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

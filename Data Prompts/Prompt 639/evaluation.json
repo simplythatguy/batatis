@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Report-stated: ICC-ES evaluation reissued April 2026 (IBC/IRC 2024-2018) for SIP roof, floor and wall panels, with fire-resistance-rated use per §4.3 and load and shear-wall conditions (§5.4-5.8). Identification cross-reference discrepancy (ESR-4689) at §7.1.1.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Identification clause cites ESR-4689, not ESR-4692 (§7.1.1, p6)",
+    "Fire-rated use per §4.3.1-4.3.3",
+    "SDC D-F shear-wall proportioning (§5.6)",
+    "Canadian facility addresses on p14 are location statements only"
+  ],
+  "case_id": "H14-012",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

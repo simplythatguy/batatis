@@ -1,0 +1,55 @@
+{
+  "id": "L18-002",
+  "title": "FEWF W2 — Passive House variant using wood-fibre insulation and smart vapour retarder",
+  "jurisdiction": "NRC Field Exposure of Walls facility, Ottawa, Ontario, Canada (research specimen; no permit jurisdiction)",
+  "code_edition": "Unknown; no project code edition is stated.",
+  "case_type": "documented_design_study",
+  "source_url": "https://nrc-publications.canada.ca/eng/view/object/?id=e47b00e3-d684-427d-8468-840b09756157",
+  "document_date": "2016-10-31",
+  "facts": [
+    {
+      "text": "The NRC report monitored three highly insulated wood-frame wall specimens at the Ottawa Field Exposure of Walls facility for approximately eight months.",
+      "locator": "PDF pp. 16–18; report §§2.1–2.2"
+    },
+    {
+      "text": "W2 is the report’s Passive House variant, with wood-fibre insulation and an OSB smart vapour retarder; its cross-section and sensor locations are shown in the report.",
+      "locator": "PDF pp. 6–8, 18–19, 31–33; report Figs. 4, 7 and Results §3"
+    },
+    {
+      "text": "The protocols introduced deliberate openings in air-barrier/sheathing layers to examine air leakage; the report says these deficiencies are not representative of correctly constructed in-service walls.",
+      "locator": "PDF pp. 21–25; report §2.3 and test-protocol figures"
+    },
+    {
+      "text": "The report reports faster moisture dissipation in W2 and a mould-index reduction about twice that reported for W1 over the study period. This is a research comparison, not a project or permit decision.",
+      "locator": "PDF pp. 6–8, 18–19, 31–33; report Figs. 4, 7 and Results §3"
+    }
+  ],
+  "limitations": [],
+  "worker": "L18",
+  "prompt_number": 161,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=e47b00e3-d684-427d-8468-840b09756157",
+      "sha256": "c8363d9022f2365e80ae453fac35835729aa43436bed0f4ac86c845f4cd7f31e",
+      "role": "input",
+      "bytes": 5948698,
+      "filename": "fef-wall-moisture-phase-report-c8363d9022f2.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L18/files/fef-wall-moisture-phase-report-c8363d9022f2.pdf",
+      "reuse_status": "rights_review_required",
+      "rights_source": "https://nrc-publications.canada.ca/eng/copyright/",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:18:23.597534+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc-publications.canada.ca/eng/view/ft/?id=e47b00e3-d684-427d-8468-840b09756157",
+        "content_type": "application/pdf;charset=UTF-8",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "rights_review_required"
+}

@@ -1,0 +1,54 @@
+{
+  "id": "L17-012",
+  "title": "NRC mass-timber room Test 1 — fully encapsulated baseline",
+  "jurisdiction": "Canada (NRC test facility; no local AHJ or project jurisdiction identified)",
+  "code_edition": "NBCC 2020 proposed Article 3.1.18.4 EMTC context in report; local adoption is not established",
+  "case_type": "research_evidence",
+  "source_url": "https://publications-cnrc.canada.ca/eng/view/ft/?id=f444b1ba-c6f5-49fd-8bd1-d8269c3717cf",
+  "document_date": "2021-10-07 (second edition; test performed 2018-02-12)",
+  "facts": [
+    {
+      "text": "Test 1 used a fully encapsulated CLT room with three Type X gypsum-board layers: 15.9 mm base layer and two 12.7 mm layers; all wall and ceiling CLT surfaces were protected.",
+      "locator": "PDF p. 30, §3.1"
+    },
+    {
+      "text": "The report records flashover at 6.4 min and burnout/self-extinguishment at 150 min, with data collection ended at 167 min.",
+      "locator": "PDF p. 30, §3.1"
+    },
+    {
+      "text": "The report describes these as room fire tests without sprinklers and as data supporting development of a technical basis for exposed mass timber in encapsulated mass timber construction.",
+      "locator": "PDF p. 74, §4 Conclusions"
+    }
+  ],
+  "limitations": [
+    "One controlled NRC test series, not a building-code approval or project-specific design assessment.",
+    "Report states the tests were conducted without sprinklers; a different protection system or geometry requires separate evidence.",
+    "The proposed NBCC 2020 context in the report does not establish current local adoption or applicability.",
+    "The same original report is attached for each individually named test; each case points to its distinct test section."
+  ],
+  "worker": "L17",
+  "prompt_number": 227,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://publications-cnrc.canada.ca/eng/view/ft/?id=f444b1ba-c6f5-49fd-8bd1-d8269c3717cf",
+      "sha256": "2a40c6b1cb10dd6b415e91e4db2dbf6c6102d3d7a4e9170c517bec2ff98fb758",
+      "role": "input",
+      "bytes": 4129642,
+      "filename": "mass-timber-room-tests-2a40c6b1cb10.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L17/files/mass-timber-room-tests-2a40c6b1cb10.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:22:44.820166+00:00",
+        "http_status": "200",
+        "final_url": "https://publications-cnrc.canada.ca/eng/view/ft/?id=f444b1ba-c6f5-49fd-8bd1-d8269c3717cf",
+        "content_type": "application/pdf;charset=UTF-8",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

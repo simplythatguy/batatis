@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from United States (ICC-ES evaluation report under IBC/IRC); NON-ALBERTA COMPARATIVE ONLY: cannot establish Alberta performance, acceptance or equivalence; no Canadian or Alberta approval is claimed or implied. It is not an Alberta application.
+
+Comparative test on a US ICC-ES evaluation of a CLT panel. Using only the attached report, list the building-code editions it covers, the uses by construction type it allows, what it says about connections and diaphragm shear, the dry-service limit, and the evidence it lists. Then identify which parts would have to come from an engineer or from another evaluation, and what the report cannot establish for an Alberta permit file.
+
+Attachments:
+- esr-4381-stora-enso-clt-f023173ac8bf.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

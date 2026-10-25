@@ -1,0 +1,12 @@
+{
+  "known_outcome": "The Board found the projected response time exceeded ten minutes in at least 10% of calls based on turnout data from all building-fire calls over the prior 18 months, plus travel time.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "The turnout dataset, travel-time route analysis and limiting-distance calculations are not linked."
+  ],
+  "case_id": "L08-1853",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

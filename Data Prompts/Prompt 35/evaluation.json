@@ -1,0 +1,16 @@
+{
+  "known_outcome": "Profile reports the project 'on track for completion in March' 2020. It records no permit, inspection, code-review or equivalency decision.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Identify the existing-building alteration framework for an occupied school; the source gives no edition or clause.",
+    "Fire-resistance upgrade by re-boarding the whole building (original structure wood frame), stated only as a quotation ('re-boarded ... to meet the fire rating').",
+    "Accessibility via corridor widening, with no provision cited.",
+    "Structural adequacy of the CTS roof for the rooftop unit and snow loads.",
+    "Occupied-school phasing and construction-period life safety."
+  ],
+  "case_id": "A09-001",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Calgary / Edmonton",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

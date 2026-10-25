@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Determination: neither item complies by the cited Acceptable Solution; no finding on other compliance routes.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Acceptable Solution scope and the status of commentary",
+    "waterproofing retaining walls outside an AS's scope",
+    "what other route (verification method or alternative solution) would need to show",
+    "basement retaining-wall conditions"
+  ],
+  "case_id": "H03-019",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

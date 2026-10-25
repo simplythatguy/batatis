@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Determination (9 May 2023, s 188, §6, p.19): the authority was correct to refuse building consent BC211504 under section 49 and to issue the written notification under section 50, and the authority's decision is confirmed. The determination assessed only the original plans of 1 December 2021 (p.3 §1.8). The reasoning on the sufficiency of plans and specifications is at p.13.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Whether the answer distinguishes a section 49 insufficient-information refusal from a finding that the design fails the Building Code.",
+    "Whether it lists the fire items the plan is said to show (risk group, firecell size, escape routes, escape path lengths) and flags the unlabelled escape routes and the unconfirmed existing door type as evidence gaps.",
+    "Whether it notes that revised plans supplied after refusal were not assessed.",
+    "Whether it does not state that the garage design is compliant."
+  ],
+  "case_id": "H02-009",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

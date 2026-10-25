@@ -1,0 +1,6 @@
+Using the attached 23-BCV-009 STANDATA as a regulator-issued reference, identify what equipment and installation context must be established before considering the CSA B52:23 alternative: equipment type, applicable NBC(AE) sentence, manufacturer documentation, and edition of the mechanical-refrigeration standard relied on. Separate source facts from unknown project details, ask targeted questions, and do not certify the installation.
+
+Attachments:
+- 23-BCV-009-6045599b785d.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

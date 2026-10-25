@@ -1,0 +1,56 @@
+{
+  "id": "H05-017",
+  "title": "Determination 2016/023: proposed bracing system for a single-storey shed, Stewart Island (Southland)",
+  "jurisdiction": "New Zealand (MBIE determination under the Building Act 2004); comparative test only, not Alberta; NZ code references retained as written",
+  "code_edition": "NZ Building Code requirements referred to generally; no clause numbers identified in extracted text; edition unknown if unstated",
+  "case_type": "appeal_decision",
+  "source_url": "https://www.building.govt.nz/resolving-problems/resolution-options/determinations",
+  "document_date": "4 July 2016 (signature date)",
+  "facts": [
+    {
+      "text": "The applicant (owner of the property) and Southland District Council (authority) concern a building consent application and a bracing system designed by the applicant.",
+      "locator": "p.1 summary and §1.2"
+    },
+    {
+      "text": "The applicant proposes two store rooms on adjacent sites: the single-storey shed on the Rankin Street property (the subject of the determination) and a two-storey building on the Thule Street property.",
+      "locator": "p.2 §2.1 (p.1 title text shows 'Ra_nkin' from OCR)"
+    },
+    {
+      "text": "The shed is 5.5 m x 4 m for storage; the applicant's 4 May 2015 email describes a firewall of 200 x 75 mm solid-profile T&G on the entrance-side wall, internal and external support posts, through-bolts at 600 mm centres and L brackets bolted to the 200 x 75 either side of the external posts.",
+      "locator": "p.2 §2.2"
+    }
+  ],
+  "limitations": [
+    "Decision begins on p.12 §7.1; mask p.12 for blind use.",
+    "Sixteen image objects (possibly drawings or figures); not verified visually in this run.",
+    "No Building Code clause numbers were identified in extracted text."
+  ],
+  "worker": "H05",
+  "prompt_number": 441,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2016/2016-023.pdf",
+      "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2016/2016-023.pdf",
+      "retrieved_at": "2026-10-25T01:21:49.311384+00:00",
+      "sha256": "16096b81f3291caf68f6a8209ff463aa9471ca1ad2484ab65dce234025d48c8c",
+      "bytes": 2071154,
+      "pages": 12,
+      "role": "input",
+      "filename": "mbie-determination-2016-023-16096b81f329.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H05/files/mbie-determination-2016-023-16096b81f329.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:21:49.311384+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2016/2016-023.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

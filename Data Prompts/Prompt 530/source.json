@@ -1,0 +1,53 @@
+{
+  "id": "L08-1830",
+  "title": "Exterior guards at a house",
+  "jurisdiction": "British Columbia (specific local authority not named in published decision)",
+  "code_edition": "2018 BC Building Code",
+  "case_type": "appeal_decision",
+  "source_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1830",
+  "document_date": "2019-08-27 (revised 2019-09-09)",
+  "facts": [
+    {
+      "text": "A single-family house lot has grade changes and retaining walls. A front walkway runs parallel to the building; adjacent landscape strip ends at a retaining wall with a drop greater than 600 mm. Planters are positioned at the walkway end and stair landing; a rear entry stairwell is about 700 mm below a concrete patio.",
+      "locator": "Project description"
+    },
+    {
+      "text": "The dispute concerns whether access is provided to edges requiring guards under Sentence 9.8.8.1.(1), including the role of adjacent landscaping and planters.",
+      "locator": "Applicable Code requirements; Decision being appealed"
+    }
+  ],
+  "limitations": [
+    "Only the Board published decision page is available; the original appeal application and underlying submissions are not linked.",
+    "British Columbia case; comparative evidence only, with no asserted applicability to Alberta."
+  ],
+  "worker": "L08",
+  "prompt_number": 530,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1830",
+      "sha256": "1c29ddc4cd697c79ba6da5795aa48cc623c82f3d914c04132776cb51b028963c",
+      "role": "outcome_reference",
+      "bytes": 1361551,
+      "filename": "bcab-1830-1c29ddc4cd69.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L08/files/bcab-1830-1c29ddc4cd69.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:22:04.857984+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1830",
+        "content_type": "text/html; charset=utf-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-1-source-text.txt",
+        "sha256": "38fadc9130733c56bde56e38d24b41a7abc5006e084e85d03124ffe25d387933",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

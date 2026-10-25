@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Council answers (leakage): Question 1 yes, since the amendment can apply to a mixed-use building with an A, B or M first-floor classification; Question 2 no, the story increase applies only to Type VA construction; Question 3 yes, CLT is permitted in exterior walls of Type IV buildings where protected as specified in 602.4.2.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "height and story increase conditions and occupancy limits",
+    "Type IV versus Type VA construction",
+    "CLT classification and protection of exterior walls",
+    "evidence for pressurization and sprinkler design"
+  ],
+  "case_id": "H12-012",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

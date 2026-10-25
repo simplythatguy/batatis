@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Report-stated: ICC-ES evaluation reissued May 2026 (IBC/IRC 2024-2015), use limited to combustible Type V and IRC except §4.4, conditions §5.1-5.11. No Alberta determination in source.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Calgary, Alberta plant is a manufacturing-location statement only (§5.11)",
+    "Type V and IRC limit, plus the noncombustible labelling route (§5.2, §5.5)",
+    "Fire-resistance-rated use depends on §4.3 (not transcribed here)",
+    "Thermal barrier requirement (§5.1)"
+  ],
+  "case_id": "H14-002",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

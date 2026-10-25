@@ -1,0 +1,60 @@
+{
+  "id": "H05-006",
+  "title": "Determination 2014/031: Schedule 1(k) exemption refused for a proposed greenhouse, Motueka",
+  "jurisdiction": "New Zealand (MBIE determination under the Building Act 2004); comparative test only, not Alberta; NZ code references retained as written",
+  "code_edition": "Building Act 2004 Schedule 1 (exemption paragraphs read as current at the time of the authority's decision, per determination wording); Building Code not the focus",
+  "case_type": "appeal_decision",
+  "source_url": "https://www.building.govt.nz/resolving-problems/resolution-options/determinations",
+  "document_date": "22 July 2014 (signature date)",
+  "facts": [
+    {
+      "text": "The owner (applicant, acting through an agent) and Tasman District Council (authority); the authority refused an exemption under Schedule 1(k) for a proposed greenhouse at 2075 Motueka Valley Highway, Motueka.",
+      "locator": "p.1 §1.2–1.3"
+    },
+    {
+      "text": "Building work to erect the greenhouse includes new footings for the steel-frame posts and discharge of roof rainwater to a holding tank; figures 1 and 2 show a floor plan and north and south elevations.",
+      "locator": "p.2 §2.2"
+    },
+    {
+      "text": "The greenhouse protects vegetables grown in cultivated ground, produce is sold at the farm gate, and the greenhouse is occupied intermittently by very few people.",
+      "locator": "p.2 §2.3"
+    },
+    {
+      "text": "The 17 June 2013 application described an importance level 1 greenhouse in a rural lot under Schedule 1(k); the applicant also wrote to the authority on 19 August 2013 about handling of the application.",
+      "locator": "p.2 §2.4–2.5"
+    }
+  ],
+  "limitations": [
+    "Decision begins on p.10 §5.1; mask p.10 for blind use.",
+    "Three image objects; figures not verified visually.",
+    "Page of the 'current at the time' wording about Schedule 1 was not captured."
+  ],
+  "worker": "H05",
+  "prompt_number": 430,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2014/2014-031.pdf",
+      "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2014/2014-031.pdf",
+      "retrieved_at": "2026-10-25T01:44:25.895275+00:00",
+      "sha256": "3bca24b833bf98dfc5f81dc31faea34941ca90bd81b3effe2458cbd24fd4494e",
+      "bytes": 322857,
+      "pages": 11,
+      "role": "input",
+      "filename": "mbie-determination-2014-031-3bca24b833bf.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H05/files/mbie-determination-2014-031-3bca24b833bf.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:44:25.895275+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2014/2014-031.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

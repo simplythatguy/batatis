@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Report-stated: ICC-ES evaluation reissued April 2026 (IBC/IRC 2024 and 2021); walls, floors and roofs; in-plane, cutting and beam uses outside scope (§5.7-5.9).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "In-plane forces outside scope (§5.7)",
+    "Connection design by RDP per NDS or recognized connectors (§5.5)",
+    "Newest edition set in this group (2024 and 2021 IBC)"
+  ],
+  "case_id": "H14-010",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

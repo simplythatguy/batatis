@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Mixed: the veranda and porch work contravened section 40 when the second notice was issued, but the second notice did not meet section 165 and is reversed. [p.10, para 5.1]",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Whether the huts were exempt under Schedule 1 when the notice was issued",
+    "Whether the veranda and porch work contravened section 40 and what the notice must say",
+    "Form and content of the notice (section 165)"
+  ],
+  "case_id": "H01-025",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

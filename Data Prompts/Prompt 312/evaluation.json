@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The proponent profile reports submission in December 2024 and acceptance in April 2025; no official permit or alternative-solution decision is attached.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "single exit serving upper units and direct discharge",
+    "source support for mitigation claims",
+    "current permit code and site-specific facts",
+    "independent confirmation of reported acceptance"
+  ],
+  "case_id": "L14-010",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

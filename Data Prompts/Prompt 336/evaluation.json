@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Determination: retaining wall complies with B1; boundary structures do not comply with B1 or B2-as-B1; deck extension complies with E1.3.1 for protection of other property.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "boundary structures and their interaction with retaining-wall loads",
+    "surface-water redirection and mitigation measures",
+    "expert addendum reasoning",
+    "neighbour-protection evidence"
+  ],
+  "case_id": "H03-020",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

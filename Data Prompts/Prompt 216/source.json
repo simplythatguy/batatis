@@ -1,0 +1,96 @@
+{
+  "id": "L16-020",
+  "title": "ChamClad Classic Wall Panel",
+  "jurisdiction": "Canada — national CCMC product evaluation; comparative attachment only, not a Calgary/Edmonton or Alberta project application",
+  "code_edition": "NBC 2020",
+  "case_type": "product_evidence",
+  "source_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14323-R&type=cert",
+  "document_date": "2026-04-20",
+  "facts": [
+    {
+      "text": "The CCMC fire table reports FSR/SDC 15/320 for the 6-inch panel and 120/450 for the 12-inch panel under CAN/ULC-S102:2018; the S134 table says each panel meets the stated requirement.",
+      "locator": "CCMC 14323-R PDF, p. 9, Additional performance data / fire table"
+    },
+    {
+      "text": "The report says only wall assemblies meeting Intertek Listing SPEC ID 63668, Design CWL/SI 25-01, carry the cited S134 rating and lists the principal sheathing, wrap and furring conditions.",
+      "locator": "CCMC 14323-R PDF, p. 9, Fire-performance notes"
+    },
+    {
+      "text": "The attached June 2024 Intertek design listing specifies at least 20-gauge steel or wood studs at no more than 406 mm spacing, R-11 batts, 15.9 mm ASTM C1177 exterior gypsum, Tyvek Commercial Wrap and specified 20-gauge hat channel.",
+      "locator": "Intertek Spec ID 63668, Design CWL/SI 25-01, pp. 1–2"
+    }
+  ],
+  "limitations": [
+    "CCMC labels this fire-performance section as additional data outside its opinion.",
+    "The available Intertek design copy is dated 2024; the current directory viewer could not be retrieved.",
+    "The CCMC report says the S134 rating applies only to assemblies matching the listing."
+  ],
+  "source_use": "comparative_attachment_content_only",
+  "worker": "L16",
+  "prompt_number": 216,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?type=cert&id=847",
+      "sha256": "6e5b21d2d1f7d0759bcca8c59189e30a5018e18c88a3c663c75303bb6a672db0",
+      "role": "input",
+      "bytes": 449108,
+      "filename": "current-route-14323-R-6e5b21d2d1f7.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L16/files/current-route-14323-R-6e5b21d2d1f7.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:51:18.574392+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?type=cert&id=847",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded",
+        "entity_extraction": "Copied unchanged PDF entity from byte 433; original transport capture retained.",
+        "raw_capture_sha256": "a5f0c1d9433aab7e7842da475bf0a8c0f98b5e9c64814459e7867126e41a5b7f",
+        "raw_capture_path": "_research/workers/L16/files/transport-capture-a5f0c1d9433aab7e.bin"
+      }
+    },
+    {
+      "url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14323-R&type=cert",
+      "sha256": "f48148cb4223b17daac285c60e25b5592bc229180582dfc3186ba7d87a4ed11d",
+      "role": "supporting_evidence",
+      "bytes": 59541,
+      "filename": "landing-14323-R-f48148cb4223.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L16/files/landing-14323-R-f48148cb4223.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:21:20.795261+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14323-R&type=cert",
+        "content_type": "text/html; charset=UTF-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-2-source-text.txt",
+        "sha256": "43bc55756cfa7d39675915478b8db51dfbcc373d8edc73741905f644c8825ec9",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    },
+    {
+      "url": "https://chamclad.com/wp-content/uploads/2024/06/SDDocument_CWLSI2501-S134.pdf",
+      "sha256": "ed16be7858b1d7f15850e3e5b8c25b808c479db7cb2e8b0201bc221914fd0dd6",
+      "role": "supporting_evidence",
+      "bytes": 188429,
+      "filename": "intertek-chamclad-spec63668-2024-ed16be7858b1.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L16/files/intertek-chamclad-spec63668-2024-ed16be7858b1.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:49:46.951878+00:00",
+        "http_status": "200",
+        "final_url": "https://chamclad.com/wp-content/uploads/2024/06/SDDocument_CWLSI2501-S134.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

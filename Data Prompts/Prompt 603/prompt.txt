@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from British Columbia code context; project location and AHJ are not stated. It is not an Alberta application.
+
+Review the attached published short-form example. Extract the stated building description, proposed firewall deviation, code reference and edition. Identify which project and evidence details are not supplied, especially the AHJ/location, drawings, the referenced fire-test reports and details for independence, penetrations, openings, connections and shrinkage. Ask focused questions that would complete a real submission record. Do not infer what the tests showed, an authority decision, Alberta applicability, technical correctness, or safety.
+
+Attachments:
+- CWC-Alternative-Solutions-Guide-2025-38b185cc7923.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

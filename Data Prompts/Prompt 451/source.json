@@ -1,0 +1,70 @@
+{
+  "id": "H09-008",
+  "title": "Integrated Planning Act appeal 03-03-036: sole-occupancy units and a caretaker's residence; alternative solution replaced a fire-rated wall with sprinklers; QFRS appeal upheld (Raceview)",
+  "jurisdiction": "Queensland, Australia. COMPARATIVE TEST ONLY: not Alberta; no Alberta applicability asserted.",
+  "code_edition": "Building Code of Australia Amendment 12, as cited (p. 3)",
+  "case_type": "appeal_decision",
+  "document_type": "Integrated Planning Act 1997 Building and Development Tribunal decision, Queensland",
+  "source_url": "https://www.qld.gov.au/__data/assets/pdf_file/0017/111932/3-03-036.pdf",
+  "document_date": "Decision dated 8 Aug 2003 (PDF p. 5); date line 17 Jul 2003 (p. 1)",
+  "facts": [
+    {
+      "text": "QFRS, as advice agency, appealed under IPA s 4.2.10. It disputed the certifier's decision notice and certificate of classification, and said its referral advice was not fully accepted, which it said produced a less safe approval.",
+      "locator": "p. 1, Nature of appeal"
+    },
+    {
+      "text": "The development application included an alternative solution and was assessed under BCA A0.8, 'Alternative Solutions' (p. 2).",
+      "locator": "p. 2"
+    },
+    {
+      "text": "The alternative solution replaced the deemed-to-satisfy fire-rated wall (BCA Specification C1.1) with an engineer's proposal that included a residential-standard sprinkler system to AS 2118.4.",
+      "locator": "p. 2"
+    },
+    {
+      "text": "The units were assessed as Class 3 (sole-occupancy unit parts) and the caretaker's residence as Class 4.",
+      "locator": "p. 2"
+    },
+    {
+      "text": "The tribunal upheld the QFRS appeal and set aside the amended decision notice dated 17 Jun 2003; a new decision by the building certifier was required, and any alternative solution must examine all relevant BCA performance requirements.",
+      "locator": "p. 2, Decision"
+    },
+    {
+      "text": "The alternative solution involved a special fire service, and the notice lists BCA Amendment 12 as applicable to the application.",
+      "locator": "pp. 2-3"
+    }
+  ],
+  "limitations": [
+    "Comparative test only: a Queensland decision under Queensland law and the NCC or QDC as cited. It cannot establish Alberta requirements, practice or performance.",
+    "Source URL is the direct qld.gov.au PDF asset; no landing page was visited. Text read from the original PDF with pypdf (no OCR); locators are PDF page numbers.",
+    "Prompt is a reconstructed test question, not an applicant message. The decision outcome is in the attachment and is not stated in the prompt (outcome_leakage true).",
+    "Individual names, licence numbers and lot/plan identifiers are omitted from the facts and prompt.",
+    "Historical record: the 2003 BCA Amendment 12 and the Integrated Planning Act 1997 are superseded.",
+    "Decision only: the alternative solution report and the plans are referred to but not attached."
+  ],
+  "worker": "H09",
+  "prompt_number": 451,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.qld.gov.au/__data/assets/pdf_file/0017/111932/3-03-036.pdf",
+      "sha256": "eae6a9080859d4ca84447e78937176173eea226fcf67d098e9e04c48440c0722",
+      "role": "outcome_reference",
+      "retrieved_at": "2026-10-25T01:50:40.013378+00:00",
+      "bytes": 72381,
+      "filename": "ipa-3-03-036-decision-eae6a9080859.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H09/files/qld-tribunal-decisions/ipa-3-03-036-decision-eae6a9080859.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:50:40.013378+00:00",
+        "http_status": "200",
+        "final_url": "https://www.qld.gov.au/__data/assets/pdf_file/0017/111932/3-03-036.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

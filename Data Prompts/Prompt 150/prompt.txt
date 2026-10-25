@@ -1,0 +1,6 @@
+A building is being considered for parking, repairing or servicing tank vehicles. The attached STANDATA interpretation (23-BCI-032/23-FCI-005) is my only source. Using only that document, identify the occupancy classifications and restrictions it cites, what changes when more than one major occupancy is in a building, what fuel-fired appliance and vapour questions it raises, and what the file needs next. Do not invent vehicle types, quantities or a building layout, and do not state the use is permitted.
+
+Attachments:
+- ma-standata-interpretation-building-fire-23-bci-032-fci-005-2025-07-300ac9f86691.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

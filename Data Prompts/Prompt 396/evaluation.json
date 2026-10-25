@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The Chief Executive determined the authority correctly exercised its power in purportedly refusing consent for the original fixed glazing system on Clauses B1 and E2, based on insufficient information at the time (s8.1, p.19). The determination also says the modified system should comply with B1 and E2 once the revisions are resolved (s7.1, p.19).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "structural sealant and glazing support at the sealed joints",
+    "wind-driven-rain weathertightness evidence for a joinery and glazing system in a high wind zone",
+    "producer statements and test reports for the glazing units and system",
+    "consistency between specified sealant on drawings and sealant in the structural design"
+  ],
+  "case_id": "H04-001",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

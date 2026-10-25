@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Secretary of State dismissed the appeal; the council came to the correct decision in refusing to relax Requirement K1 (p.4).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Requirement K1 relaxation for completed building work",
+    "accommodation stair design in a visitors' centre",
+    "exceptional-circumstances test for relaxation",
+    "absence of design evidence in the excerpts"
+  ],
+  "case_id": "H15-011",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

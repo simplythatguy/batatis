@@ -1,0 +1,6 @@
+Using the attached 23-BCV-003 STANDATA as a regulator-issued reference, identify what an intake would still need before the alternative could be checked: Part 9 applicability, whether the floor is heated and ground-contact, heating system, insulation product and effective RSI, and any information needed to establish the code baseline. Separate known source conditions from missing project facts and do not conclude that a design qualifies.
+
+Attachments:
+- 23-BCV-003-c31496391f9c.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

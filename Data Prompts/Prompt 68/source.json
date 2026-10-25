@@ -1,0 +1,49 @@
+{
+  "id": "L02-012",
+  "title": "19-BCV-012 - Spans for joists, rafters and beams",
+  "jurisdiction": "Alberta (province-wide)",
+  "code_edition": "National Building Code – 2019 Alberta Edition (NBC(AE))",
+  "case_type": "issued_variance",
+  "source_url": "https://open.alberta.ca/publications/standata-building-code-variance-national-building-code-2019-alberta-edition",
+  "document_date": "2019-12",
+  "facts": [
+    {
+      "text": "The variance recognizes The Span Book, 2009 Edition, for maximum permissible spans of joists, rafters, and beams referenced in Article 9.23.4.2.",
+      "locator": "19-BCV-012 PDF, p. 1, Purpose and Variance"
+    },
+    {
+      "text": "The source identifies the publication as issued by the Canadian Wood Council.",
+      "locator": "19-BCV-012 PDF, p. 1, Variance"
+    }
+  ],
+  "limitations": [
+    "This is a provincewide regulator-issued STANDATA variance, not an individual application, site-specific permit decision, or applicant-provided evidence.",
+    "Historical status as of 2026-10-24: the official 2019 catalogue is marked archived/replaced by the 2023 catalogue; Alberta lists NBC(AE) 2019 as in force from 2019-12-01 through 2024-04-30. Alberta guidance says previous-edition STANDATA are obsolete for new construction after a new code takes effect, while remaining relevant to evaluation of existing structures during renovations and retrofits. Verify current code edition and AHJ applicability.",
+    "No project drawings, owner/site facts, or project-specific professional evidence accompany this catalogue variance. The attached source is the outcome reference itself."
+  ],
+  "worker": "L02",
+  "prompt_number": 68,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://open.alberta.ca/dataset/5a1e414d-6639-467d-b5a4-6d68454f1340/resource/b51607d3-ca83-4998-996f-8fd7b22002d6/download/ma-standata-19-bcv-012-spans-for-joists-rafters-and-beams.pdf",
+      "sha256": "5964f14f83f83c1ea2ec0f3141d18c51c499ec90b3d5a1237bea9af5d710028b",
+      "role": "outcome_reference",
+      "bytes": 605886,
+      "filename": "catalogue-b51607d3-ca83-4998-996f-8fd7b22002d6-19-BCV-012---Spans-for-joists--rafters-and-beams-5964f14f83f8.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L02/files/catalogue-b51607d3-ca83-4998-996f-8fd7b22002d6-19-BCV-012---Spans-for-joists--rafters-and-beams-5964f14f83f8.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:44.007552+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/5a1e414d-6639-467d-b5a4-6d68454f1340/resource/b51607d3-ca83-4998-996f-8fd7b22002d6/download/ma-standata-19-bcv-012-spans-for-joists-rafters-and-beams.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

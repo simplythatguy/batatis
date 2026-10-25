@@ -1,0 +1,62 @@
+{
+  "id": "H06-003",
+  "title": "Tauranga BC50488 (Part 2): CodeMark certificate for an aluminium composite cladding panel and a cladding PS1 design statement",
+  "scope": "comparative_non_alberta: NZ record kept in its original jurisdiction; attachment format and content comparison only; no Alberta performance or applicability",
+  "jurisdiction": "New Zealand (NZBC Protection from Fire; NON-ALBERTA comparative test)",
+  "code_edition": "NZBC Protection from Fire C3.5 and C3.7(a)-(c) and C/AS1-C/AS7 as listed on the certificate (p.73); certificate edition and date not stated in the text read; PS1 clause reference illegible (p.74)",
+  "case_type": "product_evidence",
+  "source_url": "https://fyi.org.nz/request/23106",
+  "document_date": "Undated in the extracted text (CodeMark certificate and PS1)",
+  "facts": [
+    {
+      "text": "CodeMark Certificate of Conformity for an aluminium composite panel (Alubond family, including Alubond FRB1 and FRA2); certificate holder Symonite Panels Limited; CodeMark body CertMark Australasia Ltd.",
+      "locator": "Part 2 file (79 pp), PDF p.73"
+    },
+    {
+      "text": "Stated purpose: external decorative wall cladding for timber-frame or timber-frame infill construction, as partial or complete cladding.",
+      "locator": "Part 2 file (79 pp), PDF p.73"
+    },
+    {
+      "text": "States that Alubond FRB1 and FRA2 'also comply with' NZBC Protection from Fire C3.5 and C3.7(a)-(c), and lists C/AS1-C/AS7 (Acceptable Solution). Subject-to conditions follow but are truncated in extraction.",
+      "locator": "Part 2 file (79 pp), PDF p.73"
+    },
+    {
+      "text": "PS1 'Design' statement with garbled text: engagement wording refers to structural engineering review and posts with connections to beams. The address field is garbled and appears to read 'Non Specific'.",
+      "locator": "Part 2 file (79 pp), PDF p.74"
+    },
+    {
+      "text": "The PS1 page carries approval-stamp text: 'These plans are approved in accordance with The NZ Building Code. These plans must remain on site.'",
+      "locator": "Part 2 file (79 pp), PDF p.74"
+    }
+  ],
+  "limitations": [
+    "Comparative only (NZ, non-Alberta). Product certificate and producer statement, not site-specific evidence.",
+    "Shares the Part 2 file with H06-002 and H06-006 (distinct pages). The PS1 page text is heavily degraded; clause and address fields are uncertain.",
+    "Certificate conditions are truncated in extraction; do not quote them without the page image."
+  ],
+  "worker": "H06",
+  "prompt_number": 626,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://fyi.org.nz/request/23106/response/87460/attach/4/BC50488%20Minor%20Refurbishment%20Of%20Toilets%20Seismic%20Strengthening%20Of%20Ground%20And%20First%20Floor%20Shops%20And%20Offices%20Technical%20Reports%20Part%202%20of%202%20Optimized.pdf",
+      "sha256": "164ca7bd786d456b3bc39539a760b7ed6ad2c61896cc46a56940e5b768aed9a7",
+      "role": "input",
+      "bytes": 23312638,
+      "filename": "h06-fyi-bc50488-technical-reports-part2-164ca7bd786d.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H06/files/h06-fyi-bc50488-technical-reports-part2-164ca7bd786d.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:54:03.778855+00:00",
+        "http_status": "200",
+        "final_url": "https://fyi.org.nz/request/23106/response/87460/attach/4/BC50488%20Minor%20Refurbishment%20Of%20Toilets%20Seismic%20Strengthening%20Of%20Ground%20And%20First%20Floor%20Shops%20And%20Offices%20Technical%20Reports%20Part%202%20of%202%20Optimized.pdf",
+        "content_type": "application/pdf; charset=utf-8",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

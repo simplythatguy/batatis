@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The Commission found that omitting a barrier-free washroom from the ground-floor hair salon did not provide sufficiency of compliance.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "major occupancy and live/work classification",
+    "washroom and accessible-path evidence",
+    "separating building layout facts from owner claims",
+    "outcome leakage"
+  ],
+  "case_id": "L10-002",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,64 @@
+{
+  "id": "H03-023",
+  "record_key": "2022/008",
+  "tier": "strong",
+  "title": "Partly completed timber retaining wall (Remuera, Auckland)",
+  "jurisdiction": "New Zealand (MBIE, Building Act 2004): comparative test only; not an Alberta case; no Alberta applicability asserted",
+  "authority": "Auckland Council",
+  "code_edition": "NZ Building Code B1 and E1 as cited",
+  "case_type": "issued_variance",
+  "document_type": "MBIE determination under Building Act 2004 s188 (regulator decision on an individual matter); not an applicant's alternative-solution file",
+  "source_url": "https://codehub.building.govt.nz/resources/2022008",
+  "document_date": "2022-06-23",
+  "facts": [
+    {
+      "text": "Property at Remuera, Auckland: the previous owner carried out the building work as builder; the current owner and a neighbouring owner (the applicant) are parties; Auckland Council is the authority.",
+      "locator": "p.2 §1.2"
+    },
+    {
+      "text": "Matter: partly completed Type 3 timber retaining wall and associated sitework under building consent BCO10257508.",
+      "locator": "p.35 §9.1"
+    },
+    {
+      "text": "Background (§3, pp.10–18) and submissions (§4, pp.19–24) describe the wall's construction and the neighbour's concerns; discussion §7 at pp.25–34.",
+      "locator": "p.10–34 headings"
+    },
+    {
+      "text": "Decision: the partly completed Type 3 retaining wall and associated sitework comply with B1 Structure and E1 Surface Water as they relate to protection of other property (23 June 2022).",
+      "locator": "p.35 §9.1"
+    }
+  ],
+  "recommended_input_pages": "1-34",
+  "limitations": [
+    "Comparative only: a New Zealand determination used to test attachment format and content; it cannot establish Alberta performance or applicability.",
+    "The determination's decision section is in the same PDF; outcome leakage is true. Use only pages 1-34 as applicant-side input if pages are split.",
+    "Facts are taken from the text layer (pypdf); photos, drawings and figures were not visually inspected unless stated."
+  ],
+  "alberta_applicability": "none asserted",
+  "comparative_only": true,
+  "worker": "H03",
+  "prompt_number": 339,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2022/2022-008.pdf",
+      "sha256": "8a786dae33fa600f59831e0b5581f9bc0ce8e9ecb8964209c8a86f4adfa1f7b5",
+      "role": "input",
+      "bytes": 3990129,
+      "filename": "2022-008-8a786dae33fa.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H03/files/2022008/2022-008-8a786dae33fa.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:44:22.113730+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2022/2022-008.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

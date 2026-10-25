@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Confirmed: the determination finds the authority had grounds to grant BC340112 under section 72 for slippage and confirms that decision. [p.18, para 7.1]",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Slippage risk and whether adequate provision is made to protect land and building work",
+    "Building restriction line and the dwelling's position relative to it",
+    "Stability analysis and the reliability of contour information"
+  ],
+  "case_id": "H01-017",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

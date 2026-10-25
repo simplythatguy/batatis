@@ -1,0 +1,6 @@
+Here is a revised development permit package for a multi-building residential development in an Alberta municipality. The drawing notes include a per-elevation schedule with limiting distance, permitted glazing percentage and provided glazed or unprotected openings. Identify which schedule entries would need checking against the applicable limiting-distance rules, what information is missing from the schedule to verify them, which edition question the drawing notes raise, and what a reviewer would ask the designer. Do not say whether any elevation complies, and do not supply professional judgment.
+
+Attachments:
+- beaumont-4701-4703-32-avenue-nod-5f3686341f04.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

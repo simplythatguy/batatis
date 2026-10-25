@@ -1,0 +1,70 @@
+{
+  "id": "H15-007",
+  "title": "Determination CI/45/1/238: multi-foil insulation in a loft-conversion roof (Requirement L1(a)(i))",
+  "jurisdiction": "England (UK): Secretary of State determination / appeal / tribunal under the Building Act 1984 and Building Regulations; comparative test only, not Alberta",
+  "code_edition": "Building Regulations 2000 (as amended): Requirement L1(a)(i), Part L (conservation of fuel and power)",
+  "case_type": "appeal_decision",
+  "source_url": "https://www.gov.uk/guidance/building-regulations-determinations",
+  "document_date": "2010-09-29",
+  "facts": [
+    {
+      "text": "The building is described as a two-bedroom late 1950s bungalow; the insulation is proposed in the roof construction forming part of a loft conversion.",
+      "locator": "p.1 para 5 and header"
+    },
+    {
+      "text": "Regulation 4(1)(a) requires building work to be carried out so that it complies with the applicable Schedule 1 requirements; the requirement in question is Requirement L1(a)(i).",
+      "locator": "p.1 para 7"
+    },
+    {
+      "text": "The determination records the guidance U-value for this roof construction as no greater than 0.20 W/m2K.",
+      "locator": "p.3 para 19"
+    },
+    {
+      "text": "The Secretary of State concludes that the proposed use of multi-foil insulation will not achieve a U-value of 0.20 W/m2K.",
+      "locator": "p.6 para 34"
+    },
+    {
+      "text": "The determination records that compliance with Approved Document guidance is not definitive under section 7(1) of the Building Act 1984.",
+      "locator": "p.7 para 37"
+    },
+    {
+      "text": "Determination: the plans relating to the use of multi-foil insulation in the proposed roof are not in conformity with Requirement L1(a)(i).",
+      "locator": "p.7 para 38"
+    }
+  ],
+  "limitations": [
+    "Record type: Secretary of State determination under s.16 Building Act 1984 (dispute on plan compliance); case_type mapped to appeal_decision as the nearest schema value.",
+    "Comparative test only: England (UK); Building Regulations 2000 (as amended): Requirement L1(a)(i), Part L (conservation of fuel and power). Not an Alberta record; no applicability to NBC(AE) or Alberta is asserted.",
+    "Attachment is the original public file; Internet Archive capture 20260214020020 (live gov.uk URL redirects). Live URL status is recorded in references and blocked.",
+    "outcome_leakage true: the decision is inside this attachment (p.6 para 34 and p.7 paras 37-38); use only earlier pages as input if a leak-free variant is required.",
+    "Personal names and contact details appear in the original attachment and are omitted from this record.",
+    "The gov.uk listing for the determinations (guidance/building-regulations-determinations) is available only as a 2024-02-28 Internet Archive snapshot; the live URL redirects to the current appeals guide."
+  ],
+  "worker": "H15",
+  "prompt_number": 482,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://assets.publishing.service.gov.uk/media/5a79e476ed915d6b1deb41b6/Building_regulations_determination_CI-45-1-238.pdf",
+      "sha256": "5ec99af6277b2306e458497f4fcc3da67f8cf9d8586ea79eeca0575ccecbac86",
+      "role": "input",
+      "retrieved_via": "Internet Archive capture 20260214020020 (live gov.uk URL redirects)",
+      "archive_url": "https://web.archive.org/web/20260214020020id_/https://assets.publishing.service.gov.uk/media/5a79e476ed915d6b1deb41b6/Building_regulations_determination_CI-45-1-238.pdf",
+      "bytes": 45162,
+      "filename": "determination-45-1-238-5ec99af6277b.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H15/files/determinations/45-1-238/determination-45-1-238-5ec99af6277b.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:56:18.943939+00:00",
+        "http_status": "200",
+        "final_url": "https://web.archive.org/web/20260214020020id_/https://assets.publishing.service.gov.uk/media/5a79e476ed915d6b1deb41b6/Building_regulations_determination_CI-45-1-238.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

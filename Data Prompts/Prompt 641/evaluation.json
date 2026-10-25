@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Report-stated: ICC-ES evaluation reissued April 2026 (IBC/IRC 2021-2015) with one-hour fire-resistance-rated wall assemblies (§4.3), an axial-load footnote (p9), and shear-wall and sealed-calculation conditions (§5.6-5.8).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Fire-resistance-rated wall assemblies in §4.3 (pp4-5)",
+    "Axial-load limit footnote (p9)",
+    "Which §6 test supports which assembly is not stated in the extracted text",
+    "The sips.org 2022 copy is superseded by this April 2026 copy"
+  ],
+  "case_id": "H14-014",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

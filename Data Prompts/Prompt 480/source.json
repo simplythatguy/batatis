@@ -1,0 +1,74 @@
+{
+  "id": "H15-005",
+  "title": "Determination 45/1/226: glazing in the rear wall of a new office building near the boundary (Requirement B4; section 50(2))",
+  "jurisdiction": "England (UK): Secretary of State determination / appeal / tribunal under the Building Act 1984 and Building Regulations; comparative test only, not Alberta",
+  "code_edition": "Building Regulations 2000 (as amended): Requirement B4 (external fire spread)",
+  "case_type": "appeal_decision",
+  "source_url": "https://www.gov.uk/guidance/building-regulations-determinations",
+  "document_date": "2007-08-08",
+  "facts": [
+    {
+      "text": "The proposed building is a new office building of basement, ground and four upper floors (six storeys in total); its rear wall is 215mm from the site boundary and has several large windows.",
+      "locator": "p.1 paras 4-5"
+    },
+    {
+      "text": "The approved inspector considered that the fire engineer's report did not adequately demonstrate compliance with Requirement B4 for the rear-wall glazing and rejected the proposals on that basis.",
+      "locator": "p.1 para 6"
+    },
+    {
+      "text": "The fire engineer's modelling assumes standard 6mm double glazing keeps its integrity while the glazing stays below 600 C (the source text reads '600oC').",
+      "locator": "p.2 para 8"
+    },
+    {
+      "text": "The approved inspector's case is that the glazing should give 60 minutes integrity and insulation given the boundary proximity; the applicant relies on computer modelling.",
+      "locator": "p.2 paras 9 and 11"
+    },
+    {
+      "text": "The Secretary of State's view is that to comply with Requirement B4 the external walls should be constructed so that the risk of ignition from an external source is controlled.",
+      "locator": "p.2 para 10"
+    },
+    {
+      "text": "Determination: the plans do not comply with Requirement B4 (External Fire Spread) of Schedule 1 to the Building Regulations 2000 (as amended).",
+      "locator": "p.3"
+    },
+    {
+      "text": "The determination is made under section 50(2) of the Building Act 1984 (approved inspectors), not section 16.",
+      "locator": "p.1 header"
+    }
+  ],
+  "limitations": [
+    "Record type: Secretary of State determination under s.16 Building Act 1984 (dispute on plan compliance); case_type mapped to appeal_decision as the nearest schema value.",
+    "Comparative test only: England (UK); Building Regulations 2000 (as amended): Requirement B4 (external fire spread). Not an Alberta record; no applicability to NBC(AE) or Alberta is asserted.",
+    "Attachment is the original public file; Internet Archive capture 20260214010922 (live gov.uk URL redirects). Live URL status is recorded in references and blocked.",
+    "outcome_leakage true: the decision is inside this attachment (p.3 (determination paragraph)); use only earlier pages as input if a leak-free variant is required.",
+    "Personal names and contact details appear in the original attachment and are omitted from this record.",
+    "The gov.uk listing for the determinations (guidance/building-regulations-determinations) is available only as a 2024-02-28 Internet Archive snapshot; the live URL redirects to the current appeals guide."
+  ],
+  "worker": "H15",
+  "prompt_number": 480,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://assets.publishing.service.gov.uk/media/5a79defbe5274a18ba50f6ce/Building_regulations_determination_45-1-226.pdf",
+      "sha256": "cd8735cc2272edfd151fd26fc536fc760093e79e13c97c34dca8c0b5845c33d4",
+      "role": "input",
+      "retrieved_via": "Internet Archive capture 20260214010922 (live gov.uk URL redirects)",
+      "archive_url": "https://web.archive.org/web/20260214010922id_/https://assets.publishing.service.gov.uk/media/5a79defbe5274a18ba50f6ce/Building_regulations_determination_45-1-226.pdf",
+      "bytes": 28770,
+      "filename": "determination-45-1-226-cd8735cc2272.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H15/files/determinations/45-1-226/determination-45-1-226-cd8735cc2272.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:55:04.261073+00:00",
+        "http_status": "200",
+        "final_url": "https://web.archive.org/web/20260214010922id_/https://assets.publishing.service.gov.uk/media/5a79defbe5274a18ba50f6ce/Building_regulations_determination_45-1-226.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

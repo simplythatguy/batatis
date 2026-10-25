@@ -1,0 +1,75 @@
+{
+  "id": "L14-001",
+  "title": "Haeccity Studio Architecture — North building single-exit proposal",
+  "jurisdiction": "Vancouver, British Columbia",
+  "code_edition": "2019 Vancouver Building By-law, Part 9 (as stated in the project profile)",
+  "case_type": "documented_design_study",
+  "source_url": "https://singlestair.ca/Haeccity-Studio-Architecture",
+  "document_date": "unknown (undated project profile; submission/status dates are stated in the profile)",
+  "facts": [
+    {
+      "text": "The profile describes two separate buildings sharing a courtyard: a 3-storey North building classified Part 9 and a 4-storey South building classified Part 3.",
+      "locator": "Pilot Project / project description and classification"
+    },
+    {
+      "text": "The profile says the proposed single exit serves six dwellings on levels 2 and 3 of the North building; the North building contains seven dwellings including one ground-floor unit.",
+      "locator": "Pilot Project / summary and dwelling-unit counts"
+    },
+    {
+      "text": "The attached original second-floor plan shows the stair and unit arrangement for one level; it does not establish conditions on every level or construction/fire-protection performance.",
+      "locator": "Attached second-floor plan image"
+    }
+  ],
+  "limitations": [
+    "The project profile is published by the single-stair advocacy/research site and is not the original permit application, approved alternative-solution report, stamped permit drawing set, or authority decision.",
+    "Project status and design performance claims are proponent-reported here and were not independently verified with a project-specific authority record.",
+    "The site states that alternative solutions are site-specific and not precedent; this prompt is a document-review exercise, not a compliance or safety determination."
+  ],
+  "worker": "L14",
+  "prompt_number": 304,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://freight.cargo.site/t/original/i/6e114ef99715d4108365d18a62412f947fb25a9df1300f9b94f687e7c530e17a/250123_Haeccity_Plan_1-Second_3000px-Blue.jpg",
+      "sha256": "fee8cfd2dee8a5545c0fd9dcd2e3d27c3e765ea89568e2238728590ed36d3d8c",
+      "role": "input",
+      "bytes": 1151905,
+      "filename": "drawing-06-fee8cfd2dee8.jpg",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L14/files/drawing-06-fee8cfd2dee8.jpg",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:20:03.331718+00:00",
+        "http_status": "200",
+        "final_url": "https://freight.cargo.site/t/original/i/6e114ef99715d4108365d18a62412f947fb25a9df1300f9b94f687e7c530e17a/250123_Haeccity_Plan_1-Second_3000px-Blue.jpg",
+        "content_type": "image/jpeg",
+        "kind": "image",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://singlestair.ca/Haeccity-Studio-Architecture",
+      "sha256": "06a02a0369fa0e336107408c5c2e979bceb66c39123d01adfb6c503e343de320",
+      "role": "outcome_reference",
+      "bytes": 193117,
+      "filename": "_evaluation/singlestair-haeccity-studio-architecture-06a02a0369fa.html",
+      "included_in_default_input": false,
+      "original_collection_path": "_research/workers/L14/files/singlestair-haeccity-studio-architecture-06a02a0369fa.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:22.518329+00:00",
+        "http_status": "200",
+        "final_url": "https://singlestair.ca/Haeccity-Studio-Architecture",
+        "content_type": "text/html; charset=UTF-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "_evaluation/attachment-2-source-text.txt",
+        "sha256": "213607e8c6b1563ce160dd5b5888bdcd980f1cd741e9299264f2a8410449d47a",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

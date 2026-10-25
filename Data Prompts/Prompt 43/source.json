@@ -1,0 +1,61 @@
+{
+  "id": "L01-003",
+  "title": "23-BCV-003 — Insulation below a heated floor",
+  "jurisdiction": "Alberta, Canada (province-wide variance)",
+  "code_edition": "National Building Code – 2023 Alberta Edition",
+  "case_type": "issued_variance",
+  "source_url": "https://open.alberta.ca/publications/standata-variance-building-national-building-code-2023-alberta-edition",
+  "document_date": "May 2024",
+  "facts": [
+    {
+      "text": "The variance applies to Part 9 buildings with a heated floor in contact with the ground, above or below the frost line.",
+      "locator": "PDF p.3, Application"
+    },
+    {
+      "text": "The stated alternative is minimum RSI 1.32 (R-7.5) insulation below the heated floor.",
+      "locator": "PDF p.3, Variance"
+    },
+    {
+      "text": "The source cites Sentence 9.36.2.8.(1), whose table values for heated floors are RSI 2.32 or 2.84 depending on heating-degree-day zone and ventilation system.",
+      "locator": "PDF pp.1–2, Code References and Tables 9.36.2.8.-A/B"
+    },
+    {
+      "text": "The source attributes function F92 and objective OE1.1 to limiting uncontrolled thermal transfer and excessive energy use.",
+      "locator": "PDF p.3, Functional Statements/Objectives"
+    },
+    {
+      "text": "Catalogue status at capture: the resource title has no [SUPERSEDED] marker; API resource state is active.",
+      "locator": "Official catalogue row and API resource metadata, retrieved 2026-10-24 America/Edmonton"
+    }
+  ],
+  "limitations": [
+    "This is a regulator-issued variance reference, not an applicant submission, approved project file, or evidence that any particular design meets its conditions.",
+    "No applicant facts, site dimensions, drawings, calculations, professional opinions, or permit decision are present in the catalogue record.",
+    "Catalogue labels and API resource state are recorded as published metadata; they are not an independent legal determination of current force."
+  ],
+  "worker": "L01",
+  "prompt_number": 43,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/3915ba54-96dd-4c54-a9c1-63df5c917836/download/ma-standata-variance-building-23-bcv-003-2024-05.pdf",
+      "sha256": "c31496391f9c0cab63d88ca778dae1fcae5401e31b5f99a21afb4c94df2f0b03",
+      "role": "outcome_reference",
+      "bytes": 91458,
+      "filename": "23-BCV-003-c31496391f9c.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L01/files/23-BCV-003-c31496391f9c.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:15.999703+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/3915ba54-96dd-4c54-a9c1-63df5c917836/download/ma-standata-variance-building-23-bcv-003-2024-05.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

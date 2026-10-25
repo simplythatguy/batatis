@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The current CCMC report publishes a product-level opinion with two Alternative classifications for the evaluated Part 9 masonry veneer system; other listed provisions have their own classifications.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "proposed substrate and attachment details",
+    "how the thin masonry units, ties, joints and flashing are installed",
+    "building scope and local code edition",
+    "what project-specific supporting engineering or evidence accompanies an alternative classification"
+  ],
+  "case_id": "L16-008",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

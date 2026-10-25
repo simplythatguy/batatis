@@ -1,0 +1,63 @@
+{
+  "id": "H02-006",
+  "title": "Determination 2023/027: The compliance with clause E2 of a proposed direct-fixed plywood cladding system (pathway using BRANZ Appraisal no 765)",
+  "jurisdiction": "New Zealand: Auckland Council as building consent authority; MBIE determination under the Building Act 2004. Non-Alberta comparative record.",
+  "code_edition": "NZ Building Code (Schedule 1, Building Regulations 1992). E2/AS1 is cited (edition not named in the text read). BRANZ Appraisal no 765 (2017) is relied on for the pathway.",
+  "case_type": "appeal_decision",
+  "source_url": "https://codehub.building.govt.nz/resources/2023027",
+  "document_date": "19 October 2023 (PDF is headed DRAFT)",
+  "facts": [
+    {
+      "text": "The proposed direct-fixed plywood cladding system is on a building at Forrest Hill, Auckland. The question is whether it complies with E2.3.2.",
+      "locator": "p.1 Summary"
+    },
+    {
+      "text": "The designer relies on BRANZ Appraisal no 765 (2017) as evidence of compliance. The appraisal's scope requires a risk score between 0 and 6, calculated in E2/AS1.",
+      "locator": "p.1 Summary; p.2 §1"
+    },
+    {
+      "text": "The parties disagree about the risk score. The designer challenges the authority's decision that the apron flashings at roof/wall junctions are very high risk.",
+      "locator": "p.5"
+    },
+    {
+      "text": "The designer says the roof/wall junction does not match the examples in E2/AS1 paragraph 3.4.2 or Figure 7, where a cavity is needed for the wall below the flashing.",
+      "locator": "p.5"
+    },
+    {
+      "text": "The document is headed DRAFT and is dated 19 October 2023.",
+      "locator": "p.1 header"
+    }
+  ],
+  "limitations": [
+    "The published PDF is headed DRAFT. The final determination may differ and the published version should be checked.",
+    "Outside the four focus topics (fire, egress, access, alternative solutions). It is kept as an alternative-pathway (product evidence) case.",
+    "The decision (p.15 §5.1) is in the same PDF as the facts. Outcome leakage is true unless redacted.",
+    "Designer and owner names and the street address are left out of the prompt.",
+    "Applies to the New Zealand Building Code only. No Alberta applicability is asserted."
+  ],
+  "worker": "H02",
+  "prompt_number": 382,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2023/2023-027.pdf",
+      "sha256": "07e347bf52bf9f98e3e569cf44a6ea9e5f164f9fe6806ca392436a83deeda83e",
+      "role": "input",
+      "bytes": 1671522,
+      "filename": "mbie-det-2023-027-07e347bf52bf.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H02/files/mbie-det-2023-027-07e347bf52bf.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:42:46.849523+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2023/2023-027.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

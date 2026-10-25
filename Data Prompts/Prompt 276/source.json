@@ -1,0 +1,52 @@
+{
+  "id": "L11-016",
+  "title": "956 Heywood Avenue: exterior stair and sprinkler-glazing responses",
+  "jurisdiction": "City of Victoria, British Columbia",
+  "code_edition": "British Columbia Building Code 2018",
+  "case_type": "actual_application",
+  "source_url": "https://tender.victoria.ca/webapps/ourcity/Prospero/FileDownload.aspx?fileId=B2E88A5C-399E-4123-8222-C563CB326F80&folderId=58133C190905153234045738",
+  "document_date": "2020-01-02 applicant response",
+  "facts": [
+    {
+      "text": "Response identifies 956 Heywood Avenue and says BCBC 2018 applies.",
+      "locator": "PDF pp.1, 8"
+    },
+    {
+      "text": "City asks about residential suites opening directly into exits and the exterior-stair rationale in a four-storey building.",
+      "locator": "PDF p.6"
+    },
+    {
+      "text": "Applicant says GHL Consultants will provide an AS for north-wall sprinkler-protected glazing; the report is absent.",
+      "locator": "PDF p.6"
+    }
+  ],
+  "limitations": [
+    "British Columbia comparative material only; it cannot establish Alberta code performance or applicability.",
+    "GHL AS and supporting drawings absent."
+  ],
+  "worker": "L11",
+  "prompt_number": 276,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://tender.victoria.ca/webapps/ourcity/Prospero/FileDownload.aspx?fileId=B2E88A5C-399E-4123-8222-C563CB326F80&folderId=58133C190905153234045738",
+      "sha256": "3f16cde31a3b1907826677fd7ada2db8702bf2f8a5cd9eb75bf5f1469c3fa895",
+      "role": "input",
+      "bytes": 82697,
+      "filename": "victoria-hey-application-review-summary-3f16cde31a3b.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L11/files/victoria-hey-application-review-summary-3f16cde31a3b.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:24:32.762529+00:00",
+        "http_status": "200",
+        "final_url": "https://tender.victoria.ca/webapps/ourcity/Prospero/FileDownload.aspx?fileId=B2E88A5C-399E-4123-8222-C563CB326F80&folderId=58133C190905153234045738",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

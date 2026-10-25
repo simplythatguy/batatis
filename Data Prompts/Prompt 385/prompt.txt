@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from New Zealand: Tasman District Council as building consent authority; MBIE determination under the Building Act 2004. Non-Alberta comparative record.. It is not an Alberta application.
+
+We want to enclose an existing carport on the side of a detached industrial building (about 15.2 m by 4.8 m) to make a new garage, with two roller shutter doors and fire exit signs above them. The building consent authority refused the application because it did not have enough information to be satisfied the Building Code would be met. Attached is the determination record for this refusal. Using only that record, please: (1) identify which fire-safety, escape and documentation requirements it treats as relevant; (2) list what it says was missing or unclear in the plans and specifications, including the existing door type; (3) explain how the later revised plans were treated and why that matters; and (4) list the information I would need to supply and the questions to put to the council. Do not say whether the design complies.
+
+Attachments:
+- mbie-det-2023-010-cd16207b1404.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

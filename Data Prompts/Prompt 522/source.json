@@ -1,0 +1,57 @@
+{
+  "id": "L08-1779",
+  "title": "Building Code application to a change of occupancy in an existing building",
+  "jurisdiction": "British Columbia (specific local authority not named in published decision)",
+  "code_edition": "unknown (edition not stated in decision)",
+  "case_type": "appeal_decision",
+  "source_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1779",
+  "document_date": "2016-02-18",
+  "facts": [
+    {
+      "text": "An existing three-storey timber-frame barn was built in 2011 as an agricultural building under Part 9, with permit plans stating “not to be used for habitation – farm use only.” It was later used as a wedding assembly hall on the first storey and short-term residential use on upper storeys, with unsanctioned modifications.",
+      "locator": "Project description"
+    },
+    {
+      "text": "The local authority requested a detailed professional analysis of deficiencies for assembly and residential uses and proposals to correct them; it found an initial code analysis inadequate.",
+      "locator": "Reason for appeal"
+    },
+    {
+      "text": "The parties disputed how the existing-building provisions applied to the occupancy change.",
+      "locator": "Reason for appeal; Appellant’s position"
+    }
+  ],
+  "limitations": [
+    "Only the Board published decision page is available; the original appeal application and underlying submissions are not linked.",
+    "British Columbia case; comparative evidence only, with no asserted applicability to Alberta."
+  ],
+  "worker": "L08",
+  "prompt_number": 522,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1779",
+      "sha256": "9b3ad5c33003b9948a27659615c6519d79d13b68c76b1b6b1778d58f82845d1b",
+      "role": "outcome_reference",
+      "bytes": 1363716,
+      "filename": "bcab-1779-9b3ad5c33003.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L08/files/bcab-1779-9b3ad5c33003.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:20:56.484388+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1779",
+        "content_type": "text/html; charset=utf-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-1-source-text.txt",
+        "sha256": "c476b019ea7b33a9ae7460cd3cc2019135be47ae34d35d1099694e97d787a856",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Determination: authority correct to refuse BC200367 under s50 (insufficient information).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "sufficiency of information for a s50 refusal",
+    "structural design for a container foundation and roof",
+    "solid fuel heater installation details",
+    "completeness of owner-supplied drawings"
+  ],
+  "case_id": "H03-025",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

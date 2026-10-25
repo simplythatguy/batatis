@@ -1,0 +1,69 @@
+{
+  "id": "H17-007",
+  "title": "BRAVENT: fire development and ventilation in schools (SINTEF report 2022:00394), with a described Oslo school fire concept",
+  "jurisdiction": "Norway. Research report by SINTEF Community for Oslobygg KF; the school case is 'Skole A, Oslo kommune' as named in the report. Comparative only, not Alberta.",
+  "code_edition": "TEK 17 cited as current minimum requirements (p. 13); VTEK referred to for pre-accepted solutions (p. 15)",
+  "case_type": "research_evidence",
+  "source_url": "https://www.sintef.no/contentassets/958660f3a9df4945943246a31c289679/bravent-rapport---brannforlop-og-ventilasjon-i-skoler.pdf",
+  "document_date": "2022-10-29 (version 1.0)",
+  "facts": [
+    {
+      "text": "Report 2022:00394 (open access), version 1.0 dated 2022-10-29; commissioned by Oslobygg KF; keywords include literature study, field investigation and teaching buildings.",
+      "locator": "PDF pp. 1 to 2"
+    },
+    {
+      "text": "Project explores an alternative 'trekk ut' (exhaust) ventilation strategy that relies only on the existing comfort-ventilation system, as an option for older school buildings.",
+      "locator": "PDF p. 9"
+    },
+    {
+      "text": "Section 5.1 'Skole A, Oslo kommune' describes the school's fire concept: glazed atrium (Glassgård) smoke vents of 6 m² on level 1; exhaust strategy 'Trekk ut' without fire-insulated ducts or a bypass fan.",
+      "locator": "PDF p. 15, 5.1 and 5.1.1"
+    },
+    {
+      "text": "Because of sprinklers, fire insulation of ventilation ducts can be omitted. The report calls this a deviation from VTEK, and says the solution is documented.",
+      "locator": "PDF p. 15"
+    },
+    {
+      "text": "Section 5.1.2: the school is fully sprinklered to NS EN 12845 and FG rules because of large fire compartments.",
+      "locator": "PDF p. 15, 5.1.2"
+    },
+    {
+      "text": "States that minimum air-change requirements remain in TEK 17, the current version of the regulation.",
+      "locator": "PDF p. 13"
+    },
+    {
+      "text": "Keyword scan found no architectural drawing sheets in the PDF; figures are charts and photographs.",
+      "locator": "PDF text scan, all pages"
+    }
+  ],
+  "limitations": [
+    "Comparative test only (Norway, Oslo school). A research report, not a permit application; the school's own fire drawings are not in the PDF.",
+    "The report is open access; no redistribution assumed beyond this local research folder.",
+    "Not timber-specific."
+  ],
+  "worker": "H17",
+  "prompt_number": 651,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.sintef.no/contentassets/958660f3a9df4945943246a31c289679/bravent-rapport---brannforlop-og-ventilasjon-i-skoler.pdf",
+      "sha256": "21bca8fd0953466a079199b01824f6577db46c269342e0f977ae46e12bd68421",
+      "role": "input",
+      "bytes": 2485569,
+      "filename": "no-sintef-bravent-brannforlop-ventilasjon-skoler-21bca8fd0953.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H17/files/no-sintef-bravent-brannforlop-ventilasjon-skoler-21bca8fd0953.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:43:39.049620+00:00",
+        "http_status": "200",
+        "final_url": "https://www.sintef.no/contentassets/958660f3a9df4945943246a31c289679/bravent-rapport---brannforlop-og-ventilasjon-i-skoler.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

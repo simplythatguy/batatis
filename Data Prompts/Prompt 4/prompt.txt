@@ -1,0 +1,7 @@
+Using the attached City of Edmonton Rossdale Power Plant Building and Fire Code Assessment and RJC Structural Evaluation, prepare an administrative-completeness and code-uncertainty triage for the proposed adaptive reuse. Identify the code editions, named AHJ, project scope, potential occupancies, and which statements are consultant observations, assumptions, or unresolved items. Cite the source page for each point. Identify what would need confirmation before review of a specific permit design, including selected occupancy and scope, current applicable code basis, verified existing conditions and exit measurements, structural design assumptions and required upgrades, accessibility design scope, and any selected alternative-solution proposal with its applicable acceptable-solution benchmark and supporting analysis. Treat the listed performance-based strategies as exploratory only. Ask focused next questions and name the drawings, reports, or AHJ input needed. Do not conclude compliance, safety, equivalence, or approval, and do not author professional engineering evidence.
+
+Attachments:
+- edmonton-rossdale-power-plant-building-fire-code-assessment-8459bfcadbdb.pdf
+- edmonton-rossdale-structural-evaluation-b496dddfb379.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

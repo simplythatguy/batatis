@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from New Zealand (MBIE determination under the Building Act 2004); comparative test only, not Alberta; NZ code references retained as written. It is not an Alberta application.
+
+Attached is a New Zealand determination about three proposed schist wall-cladding systems for future houses in the Queenstown and Arrowtown areas. The file is comparative New Zealand material, so do not map its code references to Alberta. Using only the attached file, identify which code points each cladding type depends on, what the file leaves to later building-consent documentation, what administrative evidence a general (not site-specific) system would still need, and what you would ask the designer. Do not say any system complies or is safe.
+
+Attachments:
+- mbie-determination-2014-017-c0e38c1a179e.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

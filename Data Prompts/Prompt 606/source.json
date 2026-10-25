@@ -1,0 +1,61 @@
+{
+  "id": "H12-001",
+  "title": "Interpretation 16-07 (City of Cheney): alternative 1-hour separation-wall continuity assembly in a two-family dwelling (IRC R302.3)",
+  "jurisdiction": "Washington State, requested by City of Cheney (comparative test only; not Alberta)",
+  "code_edition": "2015 International Residential Code, R302.3, as cited in the record",
+  "case_type": "regulatory_guidance",
+  "source_url": "https://sbcc.wa.gov/answers-opinions",
+  "document_date": "Not stated in document (interpretation no. 16-07)",
+  "facts": [
+    {
+      "text": "Document type: formal State Building Code Council interpretation no. 16-07, one page; requester City of Cheney.",
+      "locator": "p1 header"
+    },
+    {
+      "text": "Code and section: 2015 IRC, R302.3 Two Family Dwellings.",
+      "locator": "p1 CODE/SECTION"
+    },
+    {
+      "text": "A requester was asked to evaluate documentation for an alternative method of providing separation-wall continuity within the floor cavity between floors of multi-story two-family dwellings; joists run perpendicular to the wall.",
+      "locator": "p1 QUESTION"
+    },
+    {
+      "text": "The question says the documentation is attached, but the attachment in this record is the Council reply only; the applicant documentation is not reproduced in the PDF.",
+      "locator": "p1 QUESTION"
+    }
+  ],
+  "limitations": [
+    "The PDF contains the Council answer on the same page; do not present it as applicant-side input without flagging leakage.",
+    "Interpretation, not a variance or approval of any building; SBCC interpretations are advisory.",
+    "The applicant documentation and the test report the answer relies on are not reproduced in the PDF; the SBCC listing says supporting documents are not posted online and must be requested from Council staff.",
+    "Edition as cited (2015 IRC); not checked against the Washington adoption in force.",
+    "Comparative Washington record; no Alberta applicability; NBC(AE) edition control not applied."
+  ],
+  "original_worker_case_type": "issued_variance",
+  "parent_curation_note": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance.",
+  "worker": "H12",
+  "prompt_number": 606,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://sbcc.wa.gov/sites/default/files/2019-12/16_07irc.pdf",
+      "sha256": "5f1b6078802f9b3fb649bdf07e8bb51036267612f691aa1c4ca917e7f34c887b",
+      "role": "outcome_reference",
+      "bytes": 182422,
+      "filename": "sbcc-ruling-16-07-16-07irc-5f1b6078802f.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H12/files/sbcc-ruling-16-07-16-07irc-5f1b6078802f.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:43:41.264730+00:00",
+        "http_status": "200",
+        "final_url": "https://sbcc.wa.gov/sites/default/files/2019-12/16_07irc.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

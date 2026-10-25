@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from New Zealand (MBIE determination under the Building Act 2004); comparative test only, not Alberta; NZ code references retained as written. It is not an Alberta application.
+
+Attached is a New Zealand determination about a proposed bracing system designed by the applicant for a small single-storey storage shed on Stewart Island, where the authority questioned whether the information supplied was enough to establish compliance. Read its references as New Zealand references only and do not map them to Alberta. Using only the attached file, identify the bracing details the file records, the information the file says was or was not provided, the points that remain unclear for a designer-led bracing method, and what you would ask the applicant. Do not state that the bracing complies or is safe.
+
+Attachments:
+- mbie-determination-2016-023-16096b81f329.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

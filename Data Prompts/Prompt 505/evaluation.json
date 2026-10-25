@@ -1,0 +1,16 @@
+{
+  "known_outcome": "The Board confirms the decision of the local authority.; It is the determination of the Board that both the interior and exterior handrails consist of regular profiles, containing no graspable recesses, that are too large in cross-sectional dimension to allow a person’s fingers and thumb to curl under part or all of the handrails.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "identify the specific code edition and provision stated in the record",
+    "separate project facts from party positions and identify unprovided supporting documents",
+    "draft focused questions for unresolved design or administrative facts",
+    "clarify stair location, dimensions, role, and referenced design/as-built drawings",
+    "do not transfer this British Columbia appeal outcome or code interpretation to Alberta"
+  ],
+  "case_id": "L07-014",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

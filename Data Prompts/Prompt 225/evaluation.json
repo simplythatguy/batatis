@@ -1,0 +1,16 @@
+{
+  "known_outcome": "The report describes good repeatability among these three tests under the same scenario, not universal performance or a project match.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "joist series and flange details",
+    "fire-load/door/ventilation comparability",
+    "repeatability versus project variability",
+    "egress assumptions",
+    "code edition/AHJ"
+  ],
+  "case_id": "L17-007",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,14 @@
+{
+  "known_outcome": "The paper reports model-to-measurement fastener-force deviations of -7%, +2% and +10% for three cited configurations; it makes no project-specific approval finding.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "distinguish model validation from a design rating for a proposed roof",
+    "compare table aspect ratio, membrane width and Fr/Fs layout with the project",
+    "request project-specific wind loading, calculations and structural professional review"
+  ],
+  "case_id": "L18-024",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

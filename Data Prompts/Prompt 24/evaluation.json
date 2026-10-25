@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The Tribunal confirmed the City’s refusal to treat the basement as an eligible existing secondary suite because incorrect or insufficient information was submitted; it encouraged a new-suite permit application and noted alternative solutions may be applicable (PDF p.9, paras. 65–66).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separate applicant-reported history from City evidence and Tribunal findings.",
+    "Identify the exact pre-cutoff eligibility elements and the post-cutoff alteration question.",
+    "Request missing dated records rather than treating the order summary as the original application or plans.",
+    "Do not turn this permit-refusal appeal into a variance approval or current-code conclusion."
+  ],
+  "case_id": "A06-001",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Calgary / Edmonton",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

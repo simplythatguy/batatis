@@ -1,0 +1,6 @@
+Review the attached historical joint 14-FCV-022/14-BCV-020 STANDATA as a sprinkler freeze-protection reference. Distinguish the stated treatment of existing and new systems, identify the code/NFPA editions and alternatives listed, then ask what system type, design basis, temperature exposure, existing concentration records, monitoring and alternative-protection evidence would be needed for an actual file. Do not invent a concentration or design and do not certify safety/current compliance.
+
+Attachments:
+- catalogue-01-7d5a85b6d745.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

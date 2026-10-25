@@ -1,0 +1,60 @@
+{
+  "id": "H12-004",
+  "title": "Opinion 22-03 (Department of Health, Construction Review Services): AHJ use of IBC/IFC Section 104 to evaluate alternative methods for small Group I facilities treated as R-4",
+  "jurisdiction": "Washington State, requested by Department of Health, Construction Review Services (comparative test only; not Alberta)",
+  "code_edition": "2018 International Building Code and 2018 International Fire Code, Section 104, as cited",
+  "case_type": "regulatory_guidance",
+  "source_url": "https://sbcc.wa.gov/answers-opinions",
+  "document_date": "Not stated in document (opinion no. 22-03)",
+  "facts": [
+    {
+      "text": "Document type: State Building Code Council opinion no. 22-03, one page; requester Department of Health, Construction Review Services.",
+      "locator": "p1 header"
+    },
+    {
+      "text": "Occupancies in question: Institutional Group I with more than five and not more than 16 persons, excluding staff.",
+      "locator": "p1 QUESTION"
+    },
+    {
+      "text": "Proposed treatment: those occupancies to be constructed as Residential Group R-4 under 2018 IBC Section 310.5.",
+      "locator": "p1 QUESTION"
+    },
+    {
+      "text": "Background states that Washington struck the R-4 designation while the ICC model has since added a building-science R-4 model with active and passive fire and life-safety mitigations.",
+      "locator": "p1 BACKGROUND"
+    }
+  ],
+  "limitations": [
+    "The PDF contains the Council answer on the same page; do not present it as applicant-side input without flagging leakage.",
+    "Occupancy-classification question; no building, site or drawings are in the record.",
+    "The answer depends on the official's own determination; SBCC answers are advisory.",
+    "Edition as cited (2018 IBC/IFC); comparative only."
+  ],
+  "original_worker_case_type": "issued_variance",
+  "parent_curation_note": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance.",
+  "worker": "H12",
+  "prompt_number": 608,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://sbcc.wa.gov/sites/default/files/2022-11/22_03_IBC_0.pdf",
+      "sha256": "e0d1ac52a04d03646204632b977d1385ed88f52108163c1dd90815f41215a640",
+      "role": "outcome_reference",
+      "bytes": 48726,
+      "filename": "sbcc-ruling-22-03-22-03-ibc-0-e0d1ac52a04d.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H12/files/sbcc-ruling-22-03-22-03-ibc-0-e0d1ac52a04d.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:44:26.425627+00:00",
+        "http_status": "200",
+        "final_url": "https://sbcc.wa.gov/sites/default/files/2022-11/22_03_IBC_0.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

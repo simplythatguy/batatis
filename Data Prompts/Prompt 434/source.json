@@ -1,0 +1,56 @@
+{
+  "id": "H05-010",
+  "title": "Determination 2014/039: accessible car parking for Lot 6 in a car-parking building, Grey Lynn, Auckland",
+  "jurisdiction": "New Zealand (MBIE determination under the Building Act 2004); comparative test only, not Alberta; NZ code references retained as written",
+  "code_edition": "Building Code Clause D1, as cited in the decision (p.14 §8.1); edition not captured",
+  "case_type": "appeal_decision",
+  "source_url": "https://www.building.govt.nz/resolving-problems/resolution-options/determinations",
+  "document_date": "8 September 2014 (header date)",
+  "facts": [
+    {
+      "text": "The applicants are Progressive Enterprises Ltd (owner of the development) and S Marlo (purchaser of Lot 6); Auckland City Council is the authority.",
+      "locator": "p.1 §1.2"
+    },
+    {
+      "text": "The matter is access for people with disabilities to a proposed building that forms part of a large urban development at 4 Williamson Avenue, Grey Lynn.",
+      "locator": "p.1 title and §1.1"
+    },
+    {
+      "text": "Paragraph 1.3 begins 'This determination arises from a building c…' and is cut off in extraction; the rest of it is not relied on here.",
+      "locator": "p.1 §1.3"
+    }
+  ],
+  "limitations": [
+    "Decision begins on p.14 §8.1; mask p.14 for blind use.",
+    "94 image objects; page images not visually verified in this run.",
+    "Only p.1 facts were used because the two-column text on p.2 extracts garbled."
+  ],
+  "worker": "H05",
+  "prompt_number": 434,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2014/2014-039.pdf",
+      "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2014/2014-039.pdf",
+      "retrieved_at": "2026-10-25T01:44:36.344567+00:00",
+      "sha256": "b1a4d1c2de3dd7480233c1093a9b686124a70e1c380a5f8b273b6db55dc53891",
+      "bytes": 476220,
+      "pages": 16,
+      "role": "input",
+      "filename": "mbie-determination-2014-039-b1a4d1c2de3d.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H05/files/mbie-determination-2014-039-b1a4d1c2de3d.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:44:36.344567+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2014/2014-039.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

@@ -1,0 +1,401 @@
+{
+  "worker_case_type_overrides": {
+    "H20": {
+      "case_type": "regulatory_guidance",
+      "reason": "STANDATA interpretations and bulletins describe general regulated conditions; they are regulatory reference exercises, not individual applications or published project worked examples."
+    }
+  },
+  "case_overrides": {
+    "L12-001": {
+      "case_type": "documented_case_summary",
+      "reason": "Attachment is a City staff account of a historical application, not the original applicant submission."
+    },
+    "L12-006": {
+      "case_type": "documented_case_summary",
+      "reason": "Anonymized permit-application summary in a technical report."
+    },
+    "L12-007": {
+      "case_type": "documented_case_summary",
+      "reason": "Anonymized fire-inspection summary in a technical report."
+    },
+    "L12-008": {
+      "case_type": "documented_case_summary",
+      "reason": "Anonymized fire-inspection summary in a technical report."
+    },
+    "L12-009": {
+      "case_type": "documented_case_summary",
+      "reason": "Anonymized permit-application summary in a technical report."
+    },
+    "L12-010": {
+      "case_type": "documented_case_summary",
+      "reason": "Anonymized permit-application summary in a technical report."
+    },
+    "L12-011": {
+      "case_type": "documented_case_summary",
+      "reason": "Anonymized permit-application summary in a technical report."
+    },
+    "L12-012": {
+      "case_type": "documented_case_summary",
+      "reason": "Anonymized permit-application summary in a technical report."
+    },
+    "L12-013": {
+      "case_type": "documented_case_summary",
+      "reason": "Anonymized permit-application summary in a technical report."
+    },
+    "L12-014": {
+      "case_type": "documented_case_summary",
+      "reason": "Anonymized permit-application summary in a technical report."
+    },
+    "L12-015": {
+      "case_type": "documented_case_summary",
+      "reason": "Anonymized permit-application summary in a technical report."
+    },
+    "L12-016": {
+      "case_type": "documented_case_summary",
+      "reason": "Anonymized fire-inspection summary in a technical report."
+    },
+    "L12-017": {
+      "case_type": "documented_case_summary",
+      "reason": "Anonymized fire-inspection summary in a technical report."
+    },
+    "L12-018": {
+      "case_type": "documented_case_summary",
+      "reason": "Anonymized permit-application summary in a technical report."
+    },
+    "L12-019": {
+      "case_type": "documented_case_summary",
+      "reason": "Anonymized permit-application summary in a technical report."
+    },
+    "L11-001": {
+      "case_type": "documented_case_summary",
+      "reason": "Original attachment is a City staff report about an alternative-solution proposal; the underlying applicant report is not attached."
+    },
+    "L11-002": {
+      "case_type": "documented_case_summary",
+      "reason": "City panel minutes and review records summarize a proposal; not the original alternative-solution application."
+    },
+    "L11-003": {
+      "exclude": true,
+      "reason": "Permit-register entry only; no design, rationale or technical application attachment. Retained in worker references and excluded from numbered prompts."
+    },
+    "L11-004": {
+      "exclude": true,
+      "reason": "Permit-register entry only; no design, rationale or technical application attachment. Retained in worker references and excluded from numbered prompts."
+    },
+    "L11-005": {
+      "exclude": true,
+      "reason": "Permit-register entry only; no design, rationale or technical application attachment. Retained in worker references and excluded from numbered prompts."
+    },
+    "L11-006": {
+      "exclude": true,
+      "reason": "Permit-register entry only; no design, rationale or technical application attachment. Retained in worker references and excluded from numbered prompts."
+    },
+    "L11-007": {
+      "exclude": true,
+      "reason": "Permit-register entry only; no design, rationale or technical application attachment. Retained in worker references and excluded from numbered prompts."
+    },
+    "L11-008": {
+      "exclude": true,
+      "reason": "Permit-register entry only; no design, rationale or technical application attachment. Retained in worker references and excluded from numbered prompts."
+    },
+    "L11-009": {
+      "exclude": true,
+      "reason": "Permit-register entry only; no design, rationale or technical application attachment. Retained in worker references and excluded from numbered prompts."
+    },
+    "L11-010": {
+      "exclude": true,
+      "reason": "Permit-register entry only; no design, rationale or technical application attachment. Retained in worker references and excluded from numbered prompts."
+    },
+    "L11-011": {
+      "case_type": "documented_case_summary",
+      "reason": "Public permit work description references an exiting proposal; original drawings/report are not attached."
+    },
+    "L11-012": {
+      "case_type": "actual_application",
+      "reason": "Original case-specific architectural/code-analysis drawing sheets for a named project are attached; this is a submission component, not an approval or full application package."
+    },
+    "L11-013": {
+      "case_type": "actual_application",
+      "reason": "Original case-specific architectural/code-analysis drawing sheets for a named project are attached; this is a submission component, not an approval or full application package."
+    },
+    "L11-019": {
+      "case_type": "actual_application",
+      "reason": "Original case-specific architectural/code-analysis drawing sheets for a named project are attached; this is a submission component, not an approval or full application package."
+    },
+    "A05-001": {
+      "reason": "Parent visually reviewed the real local report and plan appendices; preserve conceptual scope and note a real attachment-reading challenge.",
+      "additional_limitations": [
+        "Parent PDF extraction of drawing sheets at original PDF pages 65, 70 and 80 contains garbled glyphs. Plan graphics were visually confirmed in rossdale-drawings.jpg (pages 61, 65, 70, 80); extracted text alone must not be treated as reliable dimensions or annotations."
+      ],
+      "additional_review_focus": [
+        "When a drawing annotation or dimension is unavailable/garbled in text extraction, flag visual-review uncertainty rather than inventing or confidently interpreting a value. Preserve the source page and distinguish visible drawing content from text-layer extraction."
+      ]
+    },
+    "A08-001": {
+      "exclude": true,
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    "A08-002": {
+      "exclude": true,
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    "A08-003": {
+      "exclude": true,
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    "A08-004": {
+      "exclude": true,
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    "A08-005": {
+      "exclude": true,
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    "A08-006": {
+      "exclude": true,
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    "A08-007": {
+      "exclude": true,
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    "A08-008": {
+      "exclude": true,
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    "A08-009": {
+      "exclude": true,
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    "A08-010": {
+      "exclude": true,
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    "A08-011": {
+      "exclude": true,
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    "A08-012": {
+      "exclude": true,
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    "A08-013": {
+      "exclude": true,
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    "A08-014": {
+      "exclude": true,
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    "A08-015": {
+      "exclude": true,
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    "A08-016": {
+      "exclude": true,
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    "A08-017": {
+      "exclude": true,
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    "A08-018": {
+      "exclude": true,
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    "A08-019": {
+      "exclude": true,
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    "A08-020": {
+      "exclude": true,
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    "A08-021": {
+      "exclude": true,
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    "A08-022": {
+      "exclude": true,
+      "reason": "The only case attachment is a permit-register JSON work description, not a drawing, technical report or applicant evidence file. Retained as an authentic Edmonton lead; excluded from numbered attachment exercises to avoid repackaging description-only tests."
+    },
+    "H12-001": {
+      "case_type": "regulatory_guidance",
+      "reason": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance."
+    },
+    "H12-002": {
+      "case_type": "regulatory_guidance",
+      "reason": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance."
+    },
+    "H12-004": {
+      "case_type": "regulatory_guidance",
+      "reason": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance."
+    },
+    "H12-005": {
+      "case_type": "regulatory_guidance",
+      "reason": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance."
+    },
+    "H12-006": {
+      "case_type": "regulatory_guidance",
+      "reason": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance."
+    },
+    "H12-007": {
+      "case_type": "regulatory_guidance",
+      "reason": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance."
+    },
+    "H12-008": {
+      "case_type": "regulatory_guidance",
+      "reason": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance."
+    },
+    "H12-009": {
+      "case_type": "regulatory_guidance",
+      "reason": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance."
+    },
+    "H12-010": {
+      "case_type": "regulatory_guidance",
+      "reason": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance."
+    },
+    "H12-011": {
+      "case_type": "regulatory_guidance",
+      "reason": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance."
+    },
+    "H12-012": {
+      "case_type": "regulatory_guidance",
+      "reason": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance."
+    },
+    "H12-013": {
+      "case_type": "regulatory_guidance",
+      "reason": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance."
+    },
+    "H12-014": {
+      "case_type": "regulatory_guidance",
+      "reason": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance."
+    },
+    "H12-015": {
+      "case_type": "regulatory_guidance",
+      "reason": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance."
+    },
+    "H12-016": {
+      "case_type": "regulatory_guidance",
+      "reason": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance."
+    },
+    "H12-017": {
+      "case_type": "regulatory_guidance",
+      "reason": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance."
+    },
+    "H12-018": {
+      "case_type": "regulatory_guidance",
+      "reason": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance."
+    },
+    "H12-019": {
+      "case_type": "regulatory_guidance",
+      "reason": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance."
+    },
+    "H12-020": {
+      "case_type": "regulatory_guidance",
+      "reason": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance."
+    },
+    "H12-021": {
+      "case_type": "regulatory_guidance",
+      "reason": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance."
+    },
+    "A03-004": {
+      "case_type": "documented_case_summary",
+      "reason": "Published consultant project profile or City procurement/condition summary, rather than a technical design study or original application; underlying code/condition reports are not attached."
+    },
+    "A03-005": {
+      "case_type": "documented_case_summary",
+      "reason": "Published consultant project profile or City procurement/condition summary, rather than a technical design study or original application; underlying code/condition reports are not attached."
+    },
+    "A03-006": {
+      "case_type": "documented_case_summary",
+      "reason": "Published consultant project profile or City procurement/condition summary, rather than a technical design study or original application; underlying code/condition reports are not attached."
+    },
+    "H12-022": {
+      "exclude": true,
+      "reason": "Rulemaking-petition appeal, not a building design/application case; preserved as a comparative process reference."
+    },
+    "H13-007": {
+      "exclude": true,
+      "reason": "Demolition/CEQA decision peripheral to building-code alternative design, retained as a reference rather than a numbered technical case."
+    },
+    "A10-002": {
+      "exclude": true,
+      "reason": "Same KHA Edmonton project as L14-003. Original long-section and ground-floor drawings merged into L14-003; not counted as a second case."
+    },
+    "L14-003": {
+      "reason": "Merged original public drawing sheets from A10-002 into the existing KHA project case. Retain published-design-study classification because no actual permit set, application or AHJ decision is attached. Profile retained as evaluator-only outcome reference.",
+      "replace_attachments": [
+        {
+          "path": "_research/workers/L14/files/KHA-typical-floor-plan-c396d5160f32.jpg",
+          "url": "https://freight.cargo.site/t/original/i/27f2b5a9ecb8fd52e14a541be6563269ef2f7cafa013e6d157229e9b072fc14e/KHA_Plan-02_Typical-Floor.jpg",
+          "sha256": "c396d5160f32b3833e38af102b865f08d4bc2b3289740dc937248dd41242de6e",
+          "role": "input"
+        },
+        {
+          "path": "_research/workers/L14/files/singlestair-kha-9d648e601877.html",
+          "url": "https://singlestair.ca/KHA",
+          "sha256": "9d648e601877ce7b38f25cbe1baebb56ee7981ff0cfcec517425830e2f20c79f",
+          "role": "outcome_reference"
+        },
+        {
+          "path": "_research/workers/A10/files/kha-long-section-drawing-75b2b8c6b87a.jpg",
+          "url": "https://freight.cargo.site/t/original/i/1ff09e836cdfcbc74b8e6aa84a88947e60a41a5554441ae4bfea33fca9efba79/KHA_Long-section.jpg",
+          "retrieved_at": "2026-10-25T02:14:24.320731+00:00",
+          "sha256": "75b2b8c6b87a2fde20daae3729635e1109110706ab4ca37cb4327226c113f953",
+          "bytes": 2352301,
+          "document_type": "image",
+          "role": "input"
+        },
+        {
+          "path": "_research/workers/A10/files/kha-plan-01-ground-floor-8c4eaef8913c.jpg",
+          "url": "https://freight.cargo.site/t/original/i/5f4d62444a3775f01786e928d3e06d5ef8f9d67178ead6b917d589a943c9a56a/KHA_Plan-01_Ground-Floor.jpg",
+          "retrieved_at": "2026-10-25T02:14:25.568485+00:00",
+          "sha256": "8c4eaef8913cd1fb315d85479aaed620c0c021899584179648c9ab926c80e0ed",
+          "bytes": 1221776,
+          "document_type": "image",
+          "role": "input"
+        }
+      ],
+      "prompt_override": "Review the attached original published architectural drawing images for an Edmonton apartment proposal: typical-floor plan, ground-floor plan and long section. Describe only the stair core, corridors, rooms and floor/level arrangement visibly supported by the sheets. Identify missing or ambiguous labels, dimensions, ratings, door hardware, exit discharge, occupant loads, sprinkler and fire-separation information. List the code-identification questions and original permit-set documents needed before an administrative-completeness review. Do not assume a storey count from an unlabelled section or invent article numbers. Ask focused designer questions without deciding safety, compliance, equivalence or approval.",
+      "additional_limitations": [
+        "The images are original published design-team sheets, not a verified City permit set. Several level labels/title-block details are absent or illegible; the long section and profile require reconciliation.",
+        "Original JPEG files are retained. The local Start.tsx file picker advertises PDF/TXT/MD; JPEG intake behavior has not been exercised in this collection task and needs separate verification."
+      ],
+      "additional_review_focus": [
+        "Reconcile ambiguous drawing levels through a question rather than inferring the profile storey count.",
+        "The proponent profile is kept under _evaluation and must not be uploaded as default input."
+      ],
+      "evaluation_override": {
+        "outcome_leakage": false,
+        "known_outcome": "The proponent profile reports submission in February 2025, an updated resubmission in August 2025, and acceptance by the City of Edmonton in September 2025; no official decision or permit set is attached."
+      }
+    },
+    "H18-001": {
+      "reason": "Original legacy public PDF is readable with PDFium but triggers a real pypdf RC4 key-length limitation; retain untouched for comparative parser testing.",
+      "additional_limitations": [
+        "Parent observed pypdf error: Invalid key size (104) for RC4. PDFium opened the unchanged original, extracted text and rendered its cover. This is a reader-compatibility issue, not a fabricated or silently repaired attachment."
+      ],
+      "additional_review_focus": [
+        "If the attachment reader fails, report that source-reading limit instead of inventing document content. A different reader can display the original."
+      ]
+    },
+    "H18-002": {
+      "reason": "Original legacy public PDF is readable with PDFium but triggers a real pypdf RC4 key-length limitation; retain untouched for comparative parser testing.",
+      "additional_limitations": [
+        "Parent observed pypdf error: Invalid key size (104) for RC4. PDFium opened the unchanged original, extracted text and rendered its cover. This is a reader-compatibility issue, not a fabricated or silently repaired attachment."
+      ],
+      "additional_review_focus": [
+        "If the attachment reader fails, report that source-reading limit instead of inventing document content. A different reader can display the original."
+      ]
+    },
+    "A15-006": {
+      "exclude": true,
+      "reason": "The underground-tank order varies only a compliance deadline, not a building design or alternative technical solution; retained as a process reference."
+    },
+    "A09-002": {
+      "exclude": true,
+      "reason": "Designer-hosted newspaper narrative mentions unspecified building-code issues but supplies no drawing, code analysis or technical report; retained as an Edmonton lead rather than padding the technical attachment prompt set."
+    }
+  }
+}

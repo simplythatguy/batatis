@@ -1,0 +1,14 @@
+{
+  "known_outcome": "No condensation was observed in any Phase 1 specimen during monitoring or teardown; the result applies only to the reported test period and assembly.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "confirm the applicant assembly matches every layer and interface, not only the insulation type",
+    "check test exposure, sensor placement and duration",
+    "identify missing project climate, code edition, code provision and design professional analysis"
+  ],
+  "case_id": "L18-004",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The appeal board revoked the order.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "permit application and requested information",
+    "site/building plans distinguishing the ramp, landing, and enclosed addition",
+    "who occupies/uses the home as stated in the record",
+    "avoid treating the appeal outcome as a construction approval"
+  ],
+  "case_id": "L20-013",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

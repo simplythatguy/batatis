@@ -1,0 +1,59 @@
+{
+  "id": "L11-019",
+  "title": "1314-1318 and 1324 Wharf Street Johnson Street Gateway: preliminary code review",
+  "jurisdiction": "City of Victoria, British Columbia",
+  "code_edition": "2012 British Columbia Building Code Part 3",
+  "case_type": "actual_application",
+  "source_url": "https://tender.victoria.ca/webapps/ourcity/Prospero/FileDownload.aspx?fileId=A6EF9FE2-6542-48E7-B5F4-1626B191593A&folderId=70059C100825093140920000",
+  "document_date": "2017-08-04 application; code review 2017-06-13",
+  "facts": [
+    {
+      "text": "Project is at 1314-1318 and 1324 Wharf Street, Victoria.",
+      "locator": "PDF pp.1, 43"
+    },
+    {
+      "text": "Review describes new eight-storey building interfacing with two existing two-storey heritage buildings; governing code 2012 BCBC Part 3.",
+      "locator": "PDF pp.80-81"
+    },
+    {
+      "text": "Anticipated AS topics include combustible construction, floor FRR, number of exits, dead-end corridor, exposure to exit, and live-work use.",
+      "locator": "PDF p.81"
+    },
+    {
+      "text": "Report says full AS details require later design refinement for building-permit submission.",
+      "locator": "PDF pp.80-81"
+    }
+  ],
+  "limitations": [
+    "British Columbia comparative material only; it cannot establish Alberta code performance or applicability.",
+    "Cited code review is pp.80-83 of the 141-page package.",
+    "No final AS report or acceptance is attached."
+  ],
+  "original_worker_case_type": "documented_design_study",
+  "parent_curation_note": "Original case-specific architectural/code-analysis drawing sheets for a named project are attached; this is a submission component, not an approval or full application package.",
+  "worker": "L11",
+  "prompt_number": 279,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://tender.victoria.ca/webapps/ourcity/Prospero/FileDownload.aspx?fileId=A6EF9FE2-6542-48E7-B5F4-1626B191593A&folderId=70059C100825093140920000",
+      "sha256": "40f00a238b123046fe2ae75531e0809c40a442244b612a72ff0140b61908762d",
+      "role": "input",
+      "bytes": 66815423,
+      "filename": "victoria-johnson-st-gateway-alt-code-analysis-40f00a238b12.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L11/files/victoria-johnson-st-gateway-alt-code-analysis-40f00a238b12.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:50:30.804261+00:00",
+        "http_status": "200",
+        "final_url": "https://tender.victoria.ca/webapps/ourcity/Prospero/FileDownload.aspx?fileId=A6EF9FE2-6542-48E7-B5F4-1626B191593A&folderId=70059C100825093140920000",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

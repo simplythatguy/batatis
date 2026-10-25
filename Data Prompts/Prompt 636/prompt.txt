@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from United States (ICC-ES evaluation report under IBC/IRC); NON-ALBERTA COMPARATIVE ONLY: cannot establish Alberta performance, acceptance or equivalence; no Canadian or Alberta approval is claimed or implied. It is not an Alberta application.
+
+Comparative test on a US ICC-ES evaluation of a CLT panel with wall uses. Using only the attached report, list the construction types and components it allows under each IBC edition it names, the shear-wall and wall-design conditions, the exterior protection requirement, and the evidence listed. Then identify what a reviewer would still need from the engineer or the manufacturer, and what the report does not establish for an Alberta permit.
+
+Attachments:
+- esr-5053-sterling-terralam-clt-ce0d4605ada6.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

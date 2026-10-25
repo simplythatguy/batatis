@@ -1,0 +1,51 @@
+{
+  "id": "L03-005",
+  "title": "14-BCV-005 - CSA-A277-16 procedure for certification of prefabricated buildings, modules and panels",
+  "jurisdiction": "Alberta (province-wide, as stated by the STANDATA)",
+  "code_edition": "Alberta Building Code 2014",
+  "case_type": "issued_variance",
+  "source_url": "https://open.alberta.ca/publications/standata-building-code-variance-2014",
+  "document_date": "May 2017",
+  "catalogue_status": "Catalogue row is explicitly marked [WITHDRAWN].",
+  "facts": [
+    {
+      "text": "The catalogue labels the item 14-BCV-005 and marks it withdrawn. The downloaded two-page PDF page 2 instead prints the legacy identifier “06-BCV-005”.",
+      "locator": "Official 2014 catalogue, row 14-BCV-005; downloaded PDF, p.2, header"
+    },
+    {
+      "text": "The PDF recognizes CSA-A277-16 certification as satisfying ABC 2014 Division C Article 2.4.5.1 for factory-built assemblies.",
+      "locator": "14-BCV-005 PDF, pp.1-2, CODE REFERENCE and VARIANCE"
+    }
+  ],
+  "limitations": [
+    "This is a provincial regulator-issued STANDATA/standing variance, not an individual application, applicant statement, project drawing, permit record or site-specific decision.",
+    "The records address the Alberta Building Code 2014 and, where noted, Alberta Fire Code 2014; do not treat them as proof of applicability under the Alberta 2023 code edition or current law.",
+    "Catalogue status is recorded as displayed on the retrieved official page. A missing [WITHDRAWN] label is not evidence of current validity; PDFs display an Archived watermark.",
+    "The PDF page 2 header prints '06-BCV-005' although the catalogue and page 1 identify '14-BCV-005'; preserve and flag this source discrepancy."
+  ],
+  "worker": "L03",
+  "prompt_number": 86,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://open.alberta.ca/dataset/27900157-f850-4138-a964-b813f0921a3b/resource/75e5df37-c9a9-4f0f-9874-c24f67818815/download/14-bcv-005-csa-a277procedureforcertificationofprefabricatedbuildings.pdf",
+      "sha256": "c9b827a33914176df3c09a69c23b1cd48f930a969b48f90519e9e5302c2574ca",
+      "role": "supporting_evidence",
+      "bytes": 2068278,
+      "filename": "catalogue-17-c9b827a33914.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L03/files/catalogue-17-c9b827a33914.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:18:42.081520+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/27900157-f850-4138-a964-b813f0921a3b/resource/75e5df37-c9a9-4f0f-9874-c24f67818815/download/14-bcv-005-csa-a277procedureforcertificationofprefabricatedbuildings.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

@@ -1,0 +1,68 @@
+{
+  "id": "H01-013",
+  "number": "2026-031",
+  "title": "NZ MBIE Determination 2026/031 (comparative): outbuilding on modelled inundation land, purported refusal",
+  "jurisdiction": "New Zealand (Building Act 2004); Tararua District Council; comparative only, not Alberta",
+  "scope": "comparative_non_alberta",
+  "code_edition": "NZ Building Code (Schedule 1, Building Regulations 1992) as cited; acceptable-solution edition not stated in extracted text",
+  "case_type": "appeal_decision",
+  "timing": "proposed",
+  "retrospective": "no",
+  "source_url": "https://codehub.building.govt.nz/resources/2026031",
+  "source_url_note": "Building CodeHub resource page for the same MBIE determination (Information provider: MBIE); the building.govt.nz determination page is WAF-blocked for this worker.",
+  "document_date": "04 September 2026",
+  "facts": [
+    {
+      "text": "The determination arises from requests for further information during processing of a building consent for an outbuilding on land with modelled inundation.",
+      "locator": "p.2, para 1.3"
+    },
+    {
+      "text": "The owners propose a new outbuilding at the northwest corner of the site, to the rear of the existing dwelling.",
+      "locator": "p.3, para 2.1"
+    },
+    {
+      "text": "The outbuilding is to be steel framed and clad, with a concrete foundation slab and no internal linings.",
+      "locator": "p.3, para 2.1"
+    },
+    {
+      "text": "Stormwater is to be managed with attenuation tanks against the northwest external wall, with a slow feed to a disposal system.",
+      "locator": "p.3, para 2.1"
+    },
+    {
+      "text": "The natural hazard in question is inundation under section 71(3)(d); the site has modelled inundation in a 0.5% AEP event.",
+      "locator": "p.2, para 1.3"
+    }
+  ],
+  "limitations": [
+    "Comparative test only: New Zealand Building Act 2004 and Building Code (Schedule 1, Building Regulations 1992). No Alberta applicability asserted; no NBC(AE) mapping.",
+    "Outcome leakage: the MBIE decision is inside the same original PDF, so the full file cannot be used as applicant-stage input without removing the decision pages.",
+    "Applicant application documents are not published; drawings and photos appear only as figures inside the determination. Figures were located by caption, not visually inspected.",
+    "Hazard model and stormwater design are referenced; the underlying files are not in the record."
+  ],
+  "worker": "H01",
+  "prompt_number": 363,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2026/2026-031.pdf",
+      "sha256": "e3cd1fc41302ab34f2e080e93e7d64ec207938815484fe999967a30270710189",
+      "role": "input",
+      "document_type": "MBIE determination PDF (original bytes)",
+      "bytes": 187188,
+      "filename": "mbie-det-2026-031-e3cd1fc41302.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H01/files/pdf/mbie-det-2026-031-e3cd1fc41302.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:45:03.097967+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2026/2026-031.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

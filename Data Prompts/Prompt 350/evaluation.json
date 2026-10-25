@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Determination: authority's CCC refusal on the remaining B2/E2 items is reversed (20 December 2022).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "evidence sufficiency for E2/B2 after remediation",
+    "moisture-content readings as evidence",
+    "changes in parties between owners",
+    "limits of the determination to the remaining items"
+  ],
+  "case_id": "H03-034",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

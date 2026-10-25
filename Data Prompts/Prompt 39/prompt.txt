@@ -1,0 +1,6 @@
+Here is a development permit package for a four-storey commercial and residential building in Alberta. It includes the consultant's building code analysis. Identify the code uncertainties a reviewer would need to resolve before a building permit decision. Focus on the unprotected-opening table for the exposing walls (allowed versus provided percentages, and the protected-opening footnotes), the occupancy and sprinkler classification, any references that mix Part 3 and Part 9 provisions or editions, and any table rows or labels that do not agree. List the administrative evidence a reviewer would ask for, and the next questions to put to the designer. Do not say whether the design complies or is safe, and do not fill in any professional judgment.
+
+Attachments:
+- beaumont-6206-29-avenue-dp-application-2026-b44bf2615cdf.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

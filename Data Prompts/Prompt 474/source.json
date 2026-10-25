@@ -1,0 +1,105 @@
+{
+  "id": "H11-019",
+  "title": "Appeal 32104 (reconsideration, plumbing): bored 4-inch HDPE storm line under a building slab instead of an open trench (701.2 approved materials)",
+  "jurisdiction": "City of Portland, Oregon (USA), Bureau of Development Services Administrative Appeal Board; non-Alberta comparative record",
+  "code_edition": "Plumbing Code section 701.2 (edition not stated)",
+  "case_type": "appeal_decision",
+  "source_url": "https://efiles.portlandoregon.gov/record/17395176/file/document",
+  "document_date": "2024-01-31 (hearing)",
+  "facts": [
+    {
+      "text": "Appeal item: section 701.2 requires approved materials under the structure; the request is for SDR 17 / ASTM F714 4-inch HDPE storm pipe bored about 40 feet to 70 feet under the building slab.",
+      "locator": "p.1 (APPEAL INFORMATION SHEET)"
+    },
+    {
+      "text": "Reason: boring avoids an open-cut trench through about 30 linear feet of slab; the request also says the existing storm line is improperly located parallel to the curb and that the building sits on the property line.",
+      "locator": "p.1 (APPEAL INFORMATION SHEET, reason)"
+    },
+    {
+      "text": "Reconsideration: the request says the 1,360 square-foot addition's roof run-off is adequately served by 4-inch pipe, that the original catch basin was removed, and the driveway will be replaced with pervious pavers.",
+      "locator": "p.2 (APPEAL INFORMATION SHEET, reconsideration text (p.2))"
+    },
+    {
+      "text": "Decision: granted as proposed.",
+      "locator": "p.2 (APPEAL DECISION (p.2))"
+    },
+    {
+      "text": "Attached hand-drawn sketch (file 41415) shows a proposed 4-inch HDPE storm line, an existing 4-inch concrete storm line marked for abandonment, an existing 6-inch lateral, and the existing building sewer line.",
+      "locator": "p.1 (hand-drawn sketch, page 1; image-only, read visually)"
+    }
+  ],
+  "limitations": [
+    "Non-Alberta comparative record: City of Portland, Oregon (USA) Bureau of Development Services Administrative Appeal Board. Local Oregon/Portland code is retained as stated in each record. No Alberta applicability is asserted; the case is used only to test attachment format and content, not Alberta performance.",
+    "Plumbing edition not stated in the record.",
+    "Sketch read by rendering only; the record's fax-style header and contact details are omitted.",
+    "Outcome leakage true: decision on page 2 of the same PDF."
+  ],
+  "record_file": {
+    "path": "_research/workers/H11/files/portland-efiles-17395176/portland-efiles-17395176-e011258aa732.pdf",
+    "sha256": "e011258aa732f909c47aa6838c48fde2066a6eba861be9467b74637e994d960a",
+    "pages": 3,
+    "retrieved_at": "2026-10-25T01:43:48.072187+00:00"
+  },
+  "worker": "H11",
+  "prompt_number": 474,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://efiles.portlandoregon.gov/record/17395176/file/document",
+      "sha256": "e011258aa732f909c47aa6838c48fde2066a6eba861be9467b74637e994d960a",
+      "role": "input",
+      "locator_note": "p.1-p.2 APPEAL INFORMATION SHEET fields and reconsideration text; file 41415 sketch",
+      "bytes": 135888,
+      "filename": "portland-efiles-17395176-e011258aa732.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H11/files/portland-efiles-17395176/portland-efiles-17395176-e011258aa732.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:43:48.072187+00:00",
+        "http_status": "200",
+        "final_url": "https://efiles.portlandoregon.gov/record/17395176/file/document",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://efiles.portlandoregon.gov/record/17395176/file/document",
+      "sha256": "e011258aa732f909c47aa6838c48fde2066a6eba861be9467b74637e994d960a",
+      "role": "outcome_reference",
+      "locator_note": "p.2 APPEAL DECISION",
+      "bytes": 135888,
+      "filename": "_evaluation/portland-efiles-17395176-e011258aa732.pdf",
+      "included_in_default_input": false,
+      "original_collection_path": "_research/workers/H11/files/portland-efiles-17395176/portland-efiles-17395176-e011258aa732.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:43:48.072187+00:00",
+        "http_status": "200",
+        "final_url": "https://efiles.portlandoregon.gov/record/17395176/file/document",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://www.portlandoregon.gov/bds/appeals/index.cfm?action=getfile&appeal_id=32104&file_id=41415",
+      "sha256": "b098fd03fd1be3d03841eff24d4a31e76a47ce66b4e39c5849e94d35923ad51b",
+      "role": "input",
+      "locator_note": "hand-drawn storm-line sketch (1 page, image-only; visually read)",
+      "bytes": 22573,
+      "filename": "portland-appeal-32104-file-41415-b098fd03fd1b.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H11/files/portland-appeal-32104-file-41415/portland-appeal-32104-file-41415-b098fd03fd1b.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:54:28.972798+00:00",
+        "http_status": "200",
+        "final_url": "https://www.portlandoregon.gov/bds/appeals/index.cfm?action=getfile&appeal_id=32104&file_id=41415",
+        "content_type": "application/pdf;charset=UTF-8",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

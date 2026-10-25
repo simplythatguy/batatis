@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Report-stated: ICC-ES evaluation reissued August 2026 (IBC/IRC 2021-2015) with uses by construction type (§2.0) and wall, shear-wall and cutting exclusions (§5.5-5.7).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Uses differ by IBC edition (2021, 2018, 2015); confirm which edition the design uses",
+    "Shear-wall load path per 2021 SDPWS Appendix B (§5.7)",
+    "Exterior wall protection (§5.9)"
+  ],
+  "case_id": "H14-009",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,60 @@
+{
+  "id": "H20-016",
+  "title": "Mechanically vented and direct-vented appliances: when make-up air is needed in a dwelling unit",
+  "jurisdiction": "Alberta (province-wide STANDATA issued by Alberta Municipal Affairs)",
+  "code_edition": "NBC(AE) 2023; printing not stated in document; CSA B149.1 natural gas and propane code cited in the coderefs (not in package)",
+  "case_type": "regulatory_guidance",
+  "source_url": "https://open.alberta.ca/publications/standata-interpretation-building-national-building-code-2023-alberta-edition",
+  "document_date": "Date Issued: March 2026 (platform created March 30, 2026, last updated April 2, 2026)",
+  "facts": [
+    {
+      "text": "The interpretation clarifies which appliances meet the NBC(AE) definitions of mechanically vented and direct-vented, and when make-up air is needed in a dwelling unit to protect against depressurization.",
+      "locator": "p.1 (Purpose)"
+    },
+    {
+      "text": "Dwelling units with fuel-fired space-heating or water-heating appliances do not require make-up air if the appliances are mechanically vented or direct-vented as defined in NBC(AE).",
+      "locator": "p.1 (Discussion)"
+    },
+    {
+      "text": "Category III and IV appliances are less sensitive to depressurization than Category I and II appliances.",
+      "locator": "p.1 (Discussion)"
+    },
+    {
+      "text": "Systems referred to as forced draft, power vented or induced draft may be covered by the mechanically vented definition.",
+      "locator": "p.3"
+    }
+  ],
+  "limitations": [
+    "A published regulator interpretation of a documented design question, not an applicant file.",
+    "Case type is the nearest enum value; this is not an issued variance, appeal or worked example.",
+    "Joint Gas/Building interpretation. Depends on CSA B149.1 (gas code), which is cited but not in the package.",
+    "Edition check: alberta.ca lists the NBC(AE) 2023 2nd printing (published 17 Aug 2026) as in force; the article wording quoted here is as the STANDATA document states it and was not checked against the 2nd printing text (not in the package)."
+  ],
+  "original_worker_case_type": "published_worked_example",
+  "parent_curation_note": "STANDATA interpretations and bulletins describe general regulated conditions; they are regulatory reference exercises, not individual applications or published project worked examples.",
+  "worker": "H20",
+  "prompt_number": 142,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://open.alberta.ca/dataset/4e7c13c7-081e-4e40-83e5-f8ae7162581c/resource/8283de1f-9edb-4d63-91de-de7faa77396f/download/ma-standata-interpretation-gas-building-25-gci-003-23-bci-020-2026-03.pdf",
+      "sha256": "f2cd595a39f743c44c7b5c9e7c3c35b9eb33000e0034bbd6f25573980504852f",
+      "role": "input",
+      "bytes": 270215,
+      "filename": "ma-standata-interpretation-gas-building-25-gci-003-23-bci-020-2026-03-f2cd595a39f7.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H20/files/pdf/ma-standata-interpretation-gas-building-25-gci-003-23-bci-020-2026-03-f2cd595a39f7.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:19:11.171860+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/4e7c13c7-081e-4e40-83e5-f8ae7162581c/resource/8283de1f-9edb-4d63-91de-de7faa77396f/download/ma-standata-interpretation-gas-building-25-gci-003-23-bci-020-2026-03.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

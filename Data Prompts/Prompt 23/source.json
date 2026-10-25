@@ -1,0 +1,142 @@
+{
+  "id": "L04-005",
+  "title": "Calgary SPV-006 Firewall in a Rowhouse with Secondary Suites",
+  "jurisdiction": "City of Calgary, Alberta",
+  "code_edition": "National Building Code 2023 (Alberta Edition), identified in SPV-006 Figure 1 on PDF p.5; the operative text on pp.1–4 says NBC–Alberta Edition without a year.",
+  "case_type": "issued_variance",
+  "source_url": "https://www.calgary.ca/development/permits/building-regulation-advisories.html",
+  "document_date": "2025-06-19",
+  "facts": [
+    {
+      "text": "SPV-006 is dated June 19, 2025; Calgary says CSTIC accepted it on that date.",
+      "locator": "SPV-006, PDF pp.1, 4"
+    },
+    {
+      "text": "The operative text names NBC–Alberta Edition Division B Sentences 9.10.11.2(2) and 9.10.13.13(1) without a year; Figure 1 on PDF page 5 is labelled National Building Code 2023 (Alberta Edition).",
+      "locator": "SPV-006, PDF p.1 (operative text) and p.5, Figure 1"
+    },
+    {
+      "text": "Its stated alternative is for designs in rowhouses with secondary suites that include the specified fire-safety features; it says a firewall otherwise required by Sentence 9.10.11.2(2) need not be provided within that scope.",
+      "locator": "SPV-006, PDF pp.1–2"
+    },
+    {
+      "text": "Requirements include separation of exits and dwelling units, prescribed fire-resistance conditions or sprinkler-related exceptions, specified egress provisions, and HVAC duct/fire-damper constraints; drawings must show HVAC system elements listed in the variance.",
+      "locator": "SPV-006, PDF pp.2–3"
+    },
+    {
+      "text": "A site-specific variance to vary the firewall provision requires professional involvement; other acceptable solutions and technical requirements for secondary suites remain to be satisfied.",
+      "locator": "SPV-006, PDF pp.1, 3"
+    },
+    {
+      "text": "The separate B23-006 advisory, developed with Calgary Fire Department, addresses triplex/fourplex secondary-suite application completeness and emergency access; it lists responder path/access conditions and is not SPV-006 itself.",
+      "locator": "B23-006, PDF pp.1–4"
+    },
+    {
+      "text": "Calgary's B23-010 advisory lists alternative solutions among examples where registered professional involvement may be required based on complexity.",
+      "locator": "B23-010, PDF p.1"
+    },
+    {
+      "text": "PDF page 5 includes an illustrative figure contrasting the NBC 2023(AE) firewall pattern with the SPV-006 fire-separation arrangement; it is a schematic reference, not project-specific drawings.",
+      "locator": "SPV-006, PDF p.5, Figures 1–2"
+    }
+  ],
+  "limitations": [
+    "SPV-006 and B23-006 are municipal reference materials, not applicant drawings or applications.",
+    "B23-006 is an advisory and the City says advisories have no legal status; it does not decide a specific design.",
+    "Neither SPV-006 nor B23-006 is a Calgary decision about a particular permit address.",
+    "The SPV-006 operative text omits an edition year, while Figure 1 identifies the 2023 Alberta Edition; preserve that locator distinction."
+  ],
+  "worker": "L04",
+  "prompt_number": 23,
+  "priority_tier": 1,
+  "priority": "Calgary / Edmonton",
+  "attachments": [
+    {
+      "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/firewall-in-a-rowhouse-with-secondary-suites-spv-006.pdf",
+      "sha256": "8df85aa592abc0272806687daf7de01c14fdc9433b97c6641192e438889e9437",
+      "role": "outcome_reference",
+      "bytes": 450927,
+      "filename": "_evaluation/calgary-spv-006-2025-8df85aa592ab.pdf",
+      "included_in_default_input": false,
+      "original_collection_path": "_research/workers/L04/files/calgary-spv-006-2025-8df85aa592ab.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:14.907928+00:00",
+        "http_status": "200",
+        "final_url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/firewall-in-a-rowhouse-with-secondary-suites-spv-006.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-006-triplex-fourplex-buildings-with-secondary-suites-emergency-access.pdf",
+      "sha256": "bab06bca63b9a4f06549901f996dcdc6789a482a698c10d4ffb139dc66a76cd8",
+      "role": "supporting_evidence",
+      "bytes": 510295,
+      "filename": "calgary-advisory-b23-006-fourplex-bab06bca63b9.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L04/files/calgary-advisory-b23-006-fourplex-bab06bca63b9.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:24:15.609339+00:00",
+        "http_status": "200",
+        "final_url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-006-triplex-fourplex-buildings-with-secondary-suites-emergency-access.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-005-building-permit-complete-application.pdf",
+      "sha256": "9b8f05c23ca9dc222221b5bfeb93d20e82542241bbb33cc6c197ed2d532a1198",
+      "role": "supporting_evidence",
+      "bytes": 120260,
+      "filename": "calgary-advisory-b23-005-complete-application-9b8f05c23ca9.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L04/files/calgary-advisory-b23-005-complete-application-9b8f05c23ca9.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:14.924952+00:00",
+        "http_status": "200",
+        "final_url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-005-building-permit-complete-application.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-010-professional-involvement-based-on-complexity.pdf",
+      "sha256": "73110cd7ab5685fb9be345bf135f4e985230f1070686bb65b5b3fa8f2ccf6393",
+      "role": "supporting_evidence",
+      "bytes": 85681,
+      "filename": "calgary-advisory-b23-010-professional-73110cd7ab56.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L04/files/calgary-advisory-b23-010-professional-73110cd7ab56.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:18:56.158719+00:00",
+        "http_status": "200",
+        "final_url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-010-professional-involvement-based-on-complexity.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://www.calgary.ca/content/dam/www/tools-and-resources/guide-to-applying-for-an-alternative-solution.pdf",
+      "sha256": "bbb0628b7b5f13499a4688089bc09484b67865ef283709d40701d823825b1399",
+      "role": "supporting_evidence",
+      "bytes": 172757,
+      "filename": "calgary-alternative-solution-guide-package-link-bbb0628b7b5f.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L04/files/calgary-alternative-solution-guide-package-link-bbb0628b7b5f.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:14.896815+00:00",
+        "http_status": "200",
+        "final_url": "https://www.calgary.ca/content/dam/www/tools-and-resources/guide-to-applying-for-an-alternative-solution.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

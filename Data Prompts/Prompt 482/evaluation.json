@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Secretary of State determined the plans, relating to the use of multi-foil insulation in the proposed roof construction, are not in conformity with Requirement L1(a)(i) of the Building Regulations 2000 (as amended) (p.7 para 38).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Requirement L1(a)(i) U-value compliance with a non-standard insulation product",
+    "product test evidence (European norms/ETA, BR443 methods) and whether it shows the stated U-value",
+    "responsibility of building control bodies for compliance decisions",
+    "Approved Document guidance is not definitive (section 7(1))"
+  ],
+  "case_id": "H15-007",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

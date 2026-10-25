@@ -1,0 +1,50 @@
+{
+  "id": "H02-015",
+  "title": "Determination 2024/027: Compliance of head flashing stop ends extending past the cladding line as an alternative solution to E2",
+  "jurisdiction": "New Zealand: Westland District Council as territorial authority; MBIE determination under the Building Act 2004. Non-Alberta comparative record.",
+  "code_edition": "NZ Building Code (Schedule 1, Building Regulations 1992), clause E2.3.2. The acceptable solution E2/AS1 is the baseline for cladding details. No edition is named in the text read.",
+  "case_type": "appeal_decision",
+  "source_url": "https://codehub.building.govt.nz/resources/2024027",
+  "document_date": "31 May 2024",
+  "facts": [
+    {
+      "text": "Head flashings to horizontal weatherboard cladding on a new dwelling have stop ends that extend past the cladding line. The cover image shows the projecting stop end.",
+      "locator": "p.1 Summary and cover image; p.2"
+    },
+    {
+      "text": "The question is whether the constructed head flashings, with stop ends extending past the cladding, comply with E2.3.2 by way of an alternative solution.",
+      "locator": "p.1 Summary; p.2"
+    }
+  ],
+  "limitations": [
+    "A short determination on a specific detail. The evidence is summarised, and the photographs are embedded in the PDF.",
+    "The decision is positive. It does not generalise to all projecting stop ends.",
+    "Owner and street address are omitted.",
+    "Applies to the New Zealand Building Code only. No Alberta applicability is asserted."
+  ],
+  "worker": "H02",
+  "prompt_number": 391,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2024/2024-027.pdf",
+      "sha256": "df252676adf8d33f0472a4aa380eee7c3933517b0923d973396dc524d2cfb6f8",
+      "role": "input",
+      "bytes": 334799,
+      "filename": "mbie-det-2024-027-df252676adf8.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H02/files/mbie-det-2024-027-df252676adf8.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:49:00.281017+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2024/2024-027.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

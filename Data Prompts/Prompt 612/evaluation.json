@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Council answers (leakage, summary): Question 1 answer treats equivalence as established where the ADAAG-compliant feature allows use with equal or greater ease; Question 2 yes; Question 3 no, the state rule requires white on blue for the symbol; Question 4 yes where screens do not extend beyond the rim and the clear space is at least 29 inches, and extension is not regulated where the clear space is 30 inches or more; Question 5 no, those sinks are not scoped in Section 1105 and are outside Section 1106.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "what 'equivalent accessibility' means in an alternate-methods request",
+    "numerical versus functional comparison",
+    "signage colour requirements in the state rules",
+    "scope of Chapter 11 sections"
+  ],
+  "case_id": "H12-008",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

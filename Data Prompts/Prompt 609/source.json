@@ -1,0 +1,59 @@
+{
+  "id": "H12-005",
+  "title": "Interpretation 07-01 (City of Lacey): whether IRC R703.1 water-resistive barrier and drainage requirements prohibit single-wall construction",
+  "jurisdiction": "Washington State, requested by City of Lacey (comparative test only; not Alberta)",
+  "code_edition": "2006 International Residential Code, R703.1, as cited",
+  "case_type": "regulatory_guidance",
+  "source_url": "https://sbcc.wa.gov/answers-opinions",
+  "document_date": "Not stated in document (interpretation no. 07-01)",
+  "facts": [
+    {
+      "text": "Document type: State Building Code Council interpretation no. 07-01, one page; requester City of Lacey.",
+      "locator": "p1 header"
+    },
+    {
+      "text": "Code and section: 2006 IRC, Section R703.1.",
+      "locator": "p1 SECTION"
+    },
+    {
+      "text": "The question quotes R703.1: a water-resistive barrier behind the exterior veneer and a means of draining water that enters the assembly to the exterior.",
+      "locator": "p1 QUESTIONS"
+    },
+    {
+      "text": "The question asks whether those requirements prohibit single-wall construction.",
+      "locator": "p1 QUESTIONS"
+    }
+  ],
+  "limitations": [
+    "The PDF contains the Council answer on the same page; do not present it as applicant-side input without flagging leakage.",
+    "Interpretation only; no wall assembly details, drawings or test data are in the record.",
+    "2006 IRC edition; an older edition, used for comparison only."
+  ],
+  "original_worker_case_type": "issued_variance",
+  "parent_curation_note": "SBCC published code interpretation/opinion, not a project variance approval or issued individual variance.",
+  "worker": "H12",
+  "prompt_number": 609,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://sbcc.wa.gov/sites/default/files/2019-12/0701irc.pdf",
+      "sha256": "c3f79d72c5960574c4d906e0e4c39a6eed2643419bb5b2724bce70642b395c99",
+      "role": "outcome_reference",
+      "bytes": 41472,
+      "filename": "sbcc-ruling-07-01-0701irc-c3f79d72c596.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H12/files/sbcc-ruling-07-01-0701irc-c3f79d72c596.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:42:44.513933+00:00",
+        "http_status": "200",
+        "final_url": "https://sbcc.wa.gov/sites/default/files/2019-12/0701irc.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

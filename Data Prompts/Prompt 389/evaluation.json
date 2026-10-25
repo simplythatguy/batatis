@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Determination (14 June 2024, s 188, §6.1, p.11): the walkway is not a building to which section 118 applies, and so it is not required to meet the objective of clause D1.1(c) for access for persons with disabilities. The reasoning in §4-5 was not summarised in this pass.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Whether the answer identifies section 118 and clause D1.1(c) as the threshold question, before the technical D1 clauses.",
+    "Whether it explains the building and access-route distinction the record relies on.",
+    "Whether it asks for the walkway's use, users and alternative routes.",
+    "Whether it avoids stating that the walkway complies with clause D1."
+  ],
+  "case_id": "H02-013",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

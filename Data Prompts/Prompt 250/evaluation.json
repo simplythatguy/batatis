@@ -1,0 +1,17 @@
+{
+  "known_outcome": "Board of Appeals voted 4-0 on 2025-09-03 to deny the appeal and uphold the permit 'on the basis that it was properly issued' (minutes p.2, separate attachment).",
+  "outcome_leakage": true,
+  "leakage_detail": "Board minutes are attached as outcome_reference; packet also contains permit-holder and Planning briefs stating positions. Keep both out of any applicant-side prompt.",
+  "review_focus": [
+    "permit description vs NOV scope",
+    "kitchen exhaust (mechanical) shown or not shown in permit documents (appellant's claim)",
+    "structural, electrical and plumbing sheets present or absent in the permit set",
+    "NOV sequence and permit revision history",
+    "code citations as the appellant states them (not verified)"
+  ],
+  "case_id": "H13-001",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

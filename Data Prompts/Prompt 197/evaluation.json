@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The published CCMC opinion is for the evaluated EIFS in its stated NBC 2020 scope; Article 3.1.5.5 is classified Acceptable. The report separately provides bounded fire-performance data. It gives no project-specific outcome.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "EIFS component and substrate schedule",
+    "building classification and exterior-wall conditions",
+    "whether the referenced fire evidence applies to the proposed wall",
+    "local adopted code edition and site-specific design evidence"
+  ],
+  "case_id": "L16-001",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

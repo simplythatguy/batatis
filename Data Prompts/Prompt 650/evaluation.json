@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The supplier case study calls testing incomplete; CHM Fire separately says an approved alternative solution was developed. No full alternative-solution report or decision instrument is attached.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "unknown code edition and occupancy details",
+    "projected vs measured test evidence",
+    "scope of the fire-engineer approval statement",
+    "missing fire/structural plans and authority record"
+  ],
+  "case_id": "L13-009",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

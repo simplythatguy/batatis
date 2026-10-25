@@ -1,0 +1,7 @@
+Review both attached historical 14-BCV-018 STANDATA versions as reference material and identify which clauses belong to the 2018 original versus January 2019 R1. For R1, extract the test/evaluation, sprinkler, glazing, rating, location and system conditions; identify project evidence needed to determine scope and ask targeted questions. Do not merge revision requirements, assume current validity, or certify a wall assembly.
+
+Attachments:
+- catalogue-04-95051c8cd2ec.pdf
+- catalogue-03-998c419c653b.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

@@ -1,0 +1,14 @@
+{
+  "known_outcome": "The report states System 1 sustained 4.3 kPa (90 psf); testing identified membrane tearing around fastener plates.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "compare deck, fastener spacing, membrane, vapour-barrier placement and dynamic test protocol",
+    "check the actual project pressure demand and tested assembly correspondence",
+    "request structural design calculations and professional evidence for the project"
+  ],
+  "case_id": "L18-019",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

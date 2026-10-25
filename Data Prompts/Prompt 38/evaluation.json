@@ -1,0 +1,15 @@
+{
+  "known_outcome": "unknown (design-consideration sheet; no application or decision)",
+  "outcome_leakage": false,
+  "review_focus": [
+    "Edition control: the sheet is marked archived and sourced to NBC(AE) 2019; the tool should flag it and not present its requirements as current 2023 AE text",
+    "The 1 h fire-compartment separation for an attached garage serving the principal house",
+    "The owner letter for garage use intention where no other on-site parking is provided, and what the reviewer may ask for",
+    "Deemed limiting distance coordination between the garden suite and the principal house, and the shared-garage variant"
+  ],
+  "case_id": "A15-003",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Calgary / Edmonton",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

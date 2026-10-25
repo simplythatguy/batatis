@@ -1,0 +1,14 @@
+{
+  "known_outcome": "The appeal board revoked the order.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "measurements and property-line evidence needed to reconstruct limiting-distance analysis",
+    "whether opening/soffit details are attached or merely summarized",
+    "distinguish code interpretation from any proposed alternate design"
+  ],
+  "case_id": "L20-004",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

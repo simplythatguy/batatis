@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The authority was correct to refuse to grant the amendment to the building consent, and the Chief Executive confirmed that decision (decision, p.13).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "window flashing system around retained joinery",
+    "timber remediation method and its evidence",
+    "amendment versus original consent scope",
+    "information a reviewer needs before accepting a revised method"
+  ],
+  "case_id": "H04-016",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

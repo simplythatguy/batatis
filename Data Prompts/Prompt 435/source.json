@@ -1,0 +1,56 @@
+{
+  "id": "H05-011",
+  "title": "Determination 2014/040: building consent and amendments for access to the main pool, Coastlands Aquatic Centre",
+  "jurisdiction": "New Zealand (MBIE determination under the Building Act 2004); comparative test only, not Alberta; NZ code references retained as written",
+  "code_edition": "Building Code Clause D1 to the extent required by section 118 and Schedule 1 of the Building Regulations 1992, as cited",
+  "case_type": "appeal_decision",
+  "source_url": "https://www.building.govt.nz/resolving-problems/resolution-options/determinations",
+  "document_date": "8 September 2014 (header date)",
+  "facts": [
+    {
+      "text": "The applicants are D Shaw (via an agent) and P Curry for the Wellington Paraplegic and Physically Disabled Trust (WPPDT), as persons with a direct interest; Kāpiti Coast District Council is the authority.",
+      "locator": "p.1 §1.2"
+    },
+    {
+      "text": "The matter is the authority's exercise of its powers in issuing the building consent and subsequent amendments for access for people with disabilities to the main pool.",
+      "locator": "p.2 §1.5"
+    },
+    {
+      "text": "The owner's separate determination on the hoist, removable ramp and removable stairs (2014/038) is not considered in this determination.",
+      "locator": "p.2 §1.7"
+    }
+  ],
+  "limitations": [
+    "Decision text on p.10 is partly garbled in extraction; verify on the rendered page before blind use.",
+    "Mask pp.8–10 for blind use.",
+    "One image object; no drawings verified visually."
+  ],
+  "worker": "H05",
+  "prompt_number": 435,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2014/2014-040.pdf",
+      "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2014/2014-040.pdf",
+      "retrieved_at": "2026-10-25T01:44:37.320187+00:00",
+      "sha256": "ec590defb69a769e6191e0b7d11e26a6c4be3db9da8a26504c6e0a651db088cd",
+      "bytes": 190961,
+      "pages": 13,
+      "role": "input",
+      "filename": "mbie-determination-2014-040-ec590defb69a.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H05/files/mbie-determination-2014-040-ec590defb69a.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:44:37.320187+00:00",
+        "http_status": "200",
+        "final_url": "https://www.building.govt.nz/assets/Uploads/resolving-problems/determinations/2014/2014-040.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

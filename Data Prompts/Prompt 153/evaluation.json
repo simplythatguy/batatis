@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Regulator position: NBC(AE) requires lightning protection systems to conform to the CSA installation code; the 2024 CE Code lists that standard as recommended practice; an electrical permit is required for installation, alteration or addition.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the mandatory NBC(AE) requirement from the CE Code recommended practice",
+    "Asks which permit (electrical) and which discipline reviews the work",
+    "Flags the CSA standard as a source to obtain",
+    "Does not state the system is compliant"
+  ],
+  "case_id": "H20-027",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

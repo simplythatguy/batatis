@@ -1,0 +1,61 @@
+{
+  "id": "L01-013",
+  "title": "23-BCV-013/19-EDB-002 — Elevator and passenger-elevating devices",
+  "jurisdiction": "Alberta, Canada (province-wide variance)",
+  "code_edition": "National Building Code – 2023 Alberta Edition; Alberta Elevating Devices Codes Regulation",
+  "case_type": "issued_variance",
+  "source_url": "https://open.alberta.ca/publications/standata-variance-building-national-building-code-2023-alberta-edition",
+  "document_date": "February 2026",
+  "facts": [
+    {
+      "text": "The variance applies where a passenger elevator is installed instead of a lift or LULA to satisfy barrier-free requirements.",
+      "locator": "PDF p.2, Application"
+    },
+    {
+      "text": "It limits vertical travel to 7,620 mm or less and requires elevator-car dimensions at least those in Sentence 3.8.3.7.(2).",
+      "locator": "PDF p.3, Variance item 1"
+    },
+    {
+      "text": "The source states Firefighters’ Emergency Operation elements are not required in the specified substitution circumstances.",
+      "locator": "PDF p.3, Variance items 2–3"
+    },
+    {
+      "text": "Applicants using the variance are directed to provide copies of a Building Permit and an Elevating Devices Permit to the AHJ.",
+      "locator": "PDF p.3, Variance item 4"
+    },
+    {
+      "text": "Catalogue status at capture: the resource title has no [SUPERSEDED] marker; API resource state is active.",
+      "locator": "Official catalogue row and API resource metadata, retrieved 2026-10-24 America/Edmonton"
+    }
+  ],
+  "limitations": [
+    "This is a regulator-issued variance reference, not an applicant submission, approved project file, or evidence that any particular design meets its conditions.",
+    "No applicant facts, site dimensions, drawings, calculations, professional opinions, or permit decision are present in the catalogue record.",
+    "Catalogue labels and API resource state are recorded as published metadata; they are not an independent legal determination of current force."
+  ],
+  "worker": "L01",
+  "prompt_number": 53,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/6b8cc19a-67c5-4f5b-847c-972c638837bc/download/ma-standata-joint-variance-23-bcv-013-19-edb-002.pdf",
+      "sha256": "dc2176d521ae2b2f0eaa57294cc727dc439f6524ad816a8e38f8f3267af4274e",
+      "role": "outcome_reference",
+      "bytes": 72178,
+      "filename": "23-BCV-013-dc2176d521ae.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L01/files/23-BCV-013-dc2176d521ae.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:19.642624+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/6b8cc19a-67c5-4f5b-847c-972c638837bc/download/ma-standata-joint-variance-23-bcv-013-19-edb-002.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

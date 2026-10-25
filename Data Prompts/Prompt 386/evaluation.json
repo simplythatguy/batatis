@@ -1,0 +1,16 @@
+{
+  "known_outcome": "Determination (24 April 2024, s 188, §6.1, p.11): the authority's decision to refuse building consent BCO10312543 is reversed. Reasoning: the existing dormer roof and push-out walls have no meaningful fire resistance (§5.18, p.11); the fibre-cement substrate improves the wall's radiated and received-heat resistance whatever its compliance with the manufacturer's guidelines (§5.19, p.11); so the townhouse will continue to comply with C3.3, C3.6 and C3.7 to at least the same extent as before the work, which meets section 112(1)(b)(ii) and section 17 (§5.20, p.11).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Whether the answer separates the new-work test (section 17) from the alteration test (section 112(1)(b)) and states which applies.",
+    "Whether it identifies C3.3, C3.6, C3.7 and the 1 m boundary threshold as the fire-spread tests.",
+    "Whether it tracks the RFI points (system scope, horizontal flame spread, barge detail, rafter status) as evidence gaps, not as settled findings.",
+    "Whether it separates existing from new elements and asks which are being replaced.",
+    "Whether it does not say the design complies."
+  ],
+  "case_id": "H02-010",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

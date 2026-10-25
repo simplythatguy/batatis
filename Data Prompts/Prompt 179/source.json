@@ -1,0 +1,58 @@
+{
+  "id": "L15-004",
+  "title": "14088-R — CANAROCK Lightweight Pre-Finished Insulated Panel System",
+  "jurisdiction": "Canada (CCMC national product assessment; project AHJ not stated)",
+  "code_edition": "NBC 2015",
+  "case_type": "product_evidence",
+  "source_url": "https://www.nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/document.html?id=14088-R&type=cert",
+  "document_date": "2025-04-14",
+  "facts": [
+    {
+      "text": "CCMC 14088-R is marked Active in the live API snapshot; the report names NBC 2015 as its edition scope.",
+      "locator": "PDF p. 1; live API items"
+    },
+    {
+      "text": "Report limits Part 5 use to specified low-rise buildings, excludes below-grade use, and requires manufacturer-trained/authorized applicators.",
+      "locator": "PDF p. 12"
+    },
+    {
+      "text": "The CCMC report publishes its own code-specific opinion classifications for the printed edition(s); those classifications are bounded by the report conditions.",
+      "locator": "PDF p. 2"
+    }
+  ],
+  "limitations": [
+    "The evaluation is a CCMC product assessment, not an individual Alberta variance or project approval.",
+    "The report editions are NBC editions identified by the source; no equivalence to NBC(AE) 2023, 2nd printing has been established here.",
+    "No project, assembly, jurisdiction/AHJ, loads, site conditions, installation records or professional design package is supplied.",
+    "The CCMC opinion is bound by its stated conditions and limitations; read the full report before judging relevance.",
+    "Insulated exterior wall cladding: Report limits Part 5 use to specified low-rise buildings, excludes below-grade use, and requires manufacturer-trained/authorized applicators."
+  ],
+  "worker": "L15",
+  "prompt_number": 179,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://www.nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?id=617&type=cert",
+      "sha256": "3908231d52cba9d4dac41ba8d25e08a316ed15f94e77e5bcfa8654d4b8d1f228",
+      "role": "input",
+      "bytes": 3437124,
+      "filename": "ccmc-14088-R-canarock-insulated-panel-system-evaluation-18dfc95336c6.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L15/files/ccmc-14088-R-canarock-insulated-panel-system-evaluation-18dfc95336c6.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:19:18.946504+00:00",
+        "http_status": "200",
+        "final_url": "https://www.nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/pdf.html?id=617&type=cert",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded_pdf_entity_extracted",
+        "entity_extraction": "A 433-byte proxy/HTTP response prelude precedes %PDF- in the helper capture. PDF entity bytes from first %PDF- through the final byte were copied unchanged and parsed with pypdf.",
+        "raw_capture_sha256": "18dfc95336c6e2b7f21ef1b5c7126a319e236fc010eca5a16b94b2265d0e9b07",
+        "raw_capture_path": "_research/workers/L15/files/ccmc-14088-R-canarock-insulated-panel-system-evaluation-18dfc95336c6.html"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

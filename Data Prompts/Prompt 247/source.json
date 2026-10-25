@@ -1,0 +1,61 @@
+{
+  "id": "H08-013",
+  "title": "Access // Design // Management - Access Report, Newcastle East End Stage 3 and 4 (Hunter, Morgan, Newcomen and King Streets, Newcastle)",
+  "jurisdiction": "New South Wales, Australia - COMPARATIVE ONLY (not Alberta; NSW code text, not Alberta applicability)",
+  "code_edition": "BCA 2022 Volume 1 (draft and final-draft references, p.3)",
+  "case_type": "actual_application",
+  "source_url": "https://apps.planningportal.nsw.gov.au/prweb/PRRestService/DocMgmt/v1/PublicDocuments/DATA-WORKATTACH-FILE%20PEC-DPE-EP-WORK%20PPSHCC-204!20241128T010125.900%20GMT",
+  "document_date": "Rev1.0, 04 May 2023 (p.1)",
+  "facts": [
+    {
+      "text": "Access report for a development application for Newcastle East End Stage 3 and 4; Rev1.0 dated 04 May 2023.",
+      "locator": "p.1"
+    },
+    {
+      "text": "Consent authority named as Newcastle City Council.",
+      "locator": "p.3"
+    },
+    {
+      "text": "Cites BCA2022 Volume 1 as draft references.",
+      "locator": "p.3"
+    },
+    {
+      "text": "Refers to concept development consent DA2017/00701 and its modification .03, including relevant consent conditions.",
+      "locator": "p.6 and p.15"
+    },
+    {
+      "text": "The PDF has 131 pages; 22 pages carry a 'Page n of 31' footer from PDF page 2, so the 31-page report is compiled with other material.",
+      "locator": "footers from p.2"
+    }
+  ],
+  "limitations": [
+    "Comparative NSW material: it cannot establish Alberta performance or Alberta applicability.",
+    "Only the report's own pages (footers 'Page n of 31') and the header were sampled; the remaining PDF pages were not classified.",
+    "Landing page not located; outcome unknown."
+  ],
+  "worker": "H08",
+  "prompt_number": 247,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://apps.planningportal.nsw.gov.au/prweb/PRRestService/DocMgmt/v1/PublicDocuments/DATA-WORKATTACH-FILE%20PEC-DPE-EP-WORK%20PPSHCC-204!20241128T010125.900%20GMT",
+      "sha256": "dc79c638b2cb2fa7d1e70b6ce69ee9595cbbf88e2a852c2a960d8e9449fcdc1f",
+      "role": "input",
+      "bytes": 2291645,
+      "filename": "pp-workattach-ppshcc-204-dc79c638b2cb.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H08/files/pp-workattach-ppshcc-204/pp-workattach-ppshcc-204-dc79c638b2cb.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:23:26.640409+00:00",
+        "http_status": "200",
+        "final_url": "https://apps.planningportal.nsw.gov.au/prweb/PRRestService/DocMgmt/v1/PublicDocuments/DATA-WORKATTACH-FILE%20PEC-DPE-EP-WORK%20PPSHCC-204%2120241128T010125.900%20GMT",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from New Zealand (Building Act 2004); Dunedin City Council; comparative only, not Alberta. It is not an Alberta application.
+
+This is a New Zealand regulator document about a notice to fix for roof flashings and wall cladding on a new two-storey detached house, where the form and content of the notice are also in question. Using only the attached PDF, identify the weathertightness provisions it treats as uncertain, list the appendix items and submissions it relies on, flag missing or unclear administrative items (such as specified persons, particulars, remedies, and timeframes), and list the next questions a reviewer should ask. Do not say whether the building complies or is weathertight, and do not apply Alberta or NBC(AE) rules.
+
+Attachments:
+- mbie-det-2025-033-73ad68fa8e0e.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

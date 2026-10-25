@@ -1,0 +1,72 @@
+{
+  "id": "L17-007",
+  "title": "NRC FPH test UF-06 — unprotected wood I-joist B floor, open basement doorway",
+  "jurisdiction": "Canada (NRC research facility; no project jurisdiction or AHJ identified)",
+  "code_edition": "unknown; NRC FPH reports describe minimum NBCC requirements without naming the edition",
+  "case_type": "research_evidence",
+  "source_url": "https://publications-cnrc.canada.ca/eng/view/ft/?id=8f07dbef-7b79-4f84-9125-f9acd4fd4b73",
+  "document_date": "2009-03-31",
+  "facts": [
+    {
+      "text": "The report identifies a 302 mm wood I-joist B floor with 15.1 mm OSB and a 0.95 kPa applied load.",
+      "locator": "RR-250, PDF p. 122, Table A1"
+    },
+    {
+      "text": "The report groups UF-06, UF-06R and UF-06RR as repeat tests with the open basement doorway.",
+      "locator": "RR-250, PDF p. 122, Table A1"
+    },
+    {
+      "text": "In Table 4: first alarm 45 s, OD=2 m⁻¹ at 170 s, FED 0.3–1 at 198–211 s (first storey) and 208–241 s (second storey), and structural failure at 382 s.",
+      "locator": "Tenability paper, PDF p. 14, Table 4"
+    }
+  ],
+  "limitations": [
+    "The attachment documents an NRC experiment, not a building permit application or alternative-solution decision.",
+    "The full-scale house/fire scenario and tested assembly are specific; results cannot be transferred to an unidentified project without a documented comparison and professional analysis.",
+    "The report refers to minimum NBCC requirements without identifying an edition; local adoption and project AHJ are unknown."
+  ],
+  "worker": "L17",
+  "prompt_number": 225,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://publications-cnrc.canada.ca/eng/view/ft/?id=8f07dbef-7b79-4f84-9125-f9acd4fd4b73",
+      "sha256": "a9dbf3fa4dd0d2750f4b970c34f1a81d635775d6dbde0e6a13092bf37fe8007c",
+      "role": "input",
+      "bytes": 5990650,
+      "filename": "FPH-RR-250-a9dbf3fa4dd0.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L17/files/FPH-RR-250-a9dbf3fa4dd0.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:20:59.144445+00:00",
+        "http_status": "200",
+        "final_url": "https://publications-cnrc.canada.ca/eng/view/ft/?id=8f07dbef-7b79-4f84-9125-f9acd4fd4b73",
+        "content_type": "application/pdf;charset=UTF-8",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://nrc-publications.canada.ca/eng/view/accepted/?id=0af1ee38-807d-478a-a5e2-c225855664e5",
+      "sha256": "c41f12ff37a96cdc90a363bdaff28a228b9eb442da93c5b415170243cd29cb6a",
+      "role": "supporting_evidence",
+      "bytes": 342829,
+      "filename": "FPH-tenability-analysis-c41f12ff37a9.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L17/files/FPH-tenability-analysis-c41f12ff37a9.pdf",
+      "reuse_status": "rights_review_required",
+      "rights_source": "https://nrc-publications.canada.ca/eng/copyright/",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:48:05.696429+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc-publications.canada.ca/eng/view/accepted/?id=0af1ee38-807d-478a-a5e2-c225855664e5",
+        "content_type": "application/pdf;charset=UTF-8",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "rights_review_required"
+}

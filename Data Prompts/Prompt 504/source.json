@@ -1,0 +1,90 @@
+{
+  "id": "L07-013",
+  "title": "BCAB 1948 – Spatial separation requirements for a detached multi-suite garage",
+  "jurisdiction": "British Columbia",
+  "code_edition": "BCBC 2024",
+  "case_type": "appeal_decision",
+  "source_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1948",
+  "document_date": "2025-01-02",
+  "facts": [
+    {
+      "text": "The project involves the design and construction of three new Part 9 buildings on a single property. Two of the buildings are duplex houses, each containing two dwelling units in a side-by-side configuration. The third building contains four one-car garages, with each garage exclusively serving one of the dwelling units. Individual garages are separated from one another by fire separations having one-hour fire-resistance ratings.",
+      "locator": "Project description, paragraph 1"
+    },
+    {
+      "text": "The general site layout is illustrated below.",
+      "locator": "Project description, paragraph 2"
+    }
+  ],
+  "limitations": [
+    "The decision page is a Board-published appeal record, not the original variance/application package.",
+    "The published decision refers to supporting drawings or evidence in some cases, but these were not attached to the downloaded page.",
+    "Published Board outcome appears in the input attachment; outcome leakage is intentional and flagged.",
+    "Where a figure is attached, the decision page does not consistently identify its author; Board-created figures are distinguished in the research report, and no image is treated as a complete applicant drawing set.",
+    "British Columbia decision retained for comparative attachment format/content only; it does not establish Alberta code applicability, design performance, or acceptance."
+  ],
+  "worker": "L07",
+  "prompt_number": 504,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1948",
+      "sha256": "15d1738f2b096fc2a9a34b96eb54805f182fd6ff59151c704c4d005d520f4ee9",
+      "role": "input",
+      "bytes": 1359292,
+      "filename": "bcab-1948-15d1738f2b09.html",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-1948-15d1738f2b09.html",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:19:03.968808+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/building-code-appeal-board/building-code-appeal-board-decisions/bcab-1948",
+        "content_type": "text/html; charset=utf-8",
+        "kind": "html",
+        "status": "downloaded"
+      },
+      "derived_text": {
+        "filename": "attachment-1-source-text.txt",
+        "sha256": "c92962fafd197c695d2a1b553fda1bec967100b817c16c95d4436a2a70f81d61",
+        "operation": "HTML text extraction; no facts authored"
+      }
+    },
+    {
+      "url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/construction-industry/building-codes-and-standards/building-code-appeal-board/bcab_1948_illustration_1.jpg",
+      "sha256": "2a20a837ef9135ccc6e0f6a9f155497c1035fde3fb7cf530f2face24aed3b4c6",
+      "role": "supporting_evidence",
+      "bytes": 33157,
+      "filename": "bcab-1948-bcab_1948_illustration_1-2a20a837ef91.jpg",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-1948-bcab_1948_illustration_1-2a20a837ef91.jpg",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:23:21.245770+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/construction-industry/building-codes-and-standards/building-code-appeal-board/bcab_1948_illustration_1.jpg",
+        "content_type": "image/jpeg; charset=UTF-8",
+        "kind": "image",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/construction-industry/building-codes-and-standards/building-code-appeal-board/bcab_1948_illustration_2.png",
+      "sha256": "fb92495ac31077324b7ada7313422684ef907b2d0e8750b8ec24508ab1642cab",
+      "role": "supporting_evidence",
+      "bytes": 207213,
+      "filename": "bcab-1948-bcab_1948_illustration_2-fb92495ac310.png",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L07/files/bcab-1948-bcab_1948_illustration_2-fb92495ac310.png",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:23:21.537477+00:00",
+        "http_status": "200",
+        "final_url": "https://www2.gov.bc.ca/assets/gov/farming-natural-resources-and-industry/construction-industry/building-codes-and-standards/building-code-appeal-board/bcab_1948_illustration_2.png",
+        "content_type": "image/png; charset=UTF-8",
+        "kind": "image",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

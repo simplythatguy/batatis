@@ -1,0 +1,52 @@
+{
+  "id": "L20-009",
+  "title": "Fire-damaged single-family dwelling and unsafe-condition order",
+  "jurisdiction": "Saskatchewan; local authority redacted in the published decision",
+  "code_edition": "National Building Code of Canada 2015, Division B, Part 9 (as stated in the decision)",
+  "case_type": "appeal_decision",
+  "source_url": "https://www.saskatchewan.ca/business/housing-development-construction-and-property-management/building-and-technical-standards/saskatchewan-building-and-accessibility-standards-appeal-board",
+  "document_date": "2022-04-11",
+  "facts": [
+    {
+      "text": "The order followed an exterior inspection after a fire; the decision describes charred porch-roof trusses and interior smoke/water damage.",
+      "locator": "PDF pp. 3–5"
+    },
+    {
+      "text": "The decision says no evidence showed an interior inspection had been completed in support of the order; an insurance adjuster had inspected and allowed the owners to remain in the dwelling.",
+      "locator": "PDF p. 6"
+    },
+    {
+      "text": "The decision identifies NBC 2015, Division B, Part 9 as applicable and discusses the order’s statutory basis.",
+      "locator": "PDF pp. 5–6"
+    }
+  ],
+  "limitations": [
+    "Comparative source from outside Alberta; it cannot establish Alberta code performance or approval.",
+    "The attached publication is the appeal decision, not the underlying application file. Exhibits named in the decision are not presumed attached unless visible in this PDF. The decision outcome is visible in the attachment."
+  ],
+  "worker": "L20",
+  "prompt_number": 561,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://publications.saskatchewan.ca/api/v1/products/118841/formats/136649/download",
+      "sha256": "7a1528e995883d05a416079ec370d33b1418948276120cd5baaf900d67374f49",
+      "role": "outcome_reference",
+      "bytes": 178601,
+      "filename": "sk-scsab-appeal-no.-2022-003-7a1528e99588.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L20/files/sk-scsab-appeal-no.-2022-003-7a1528e99588.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:23:03.535289+00:00",
+        "http_status": "200",
+        "final_url": "https://publications.saskatchewan.ca/api/v1/products/118841/formats/136649/download",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

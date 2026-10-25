@@ -1,0 +1,52 @@
+{
+  "id": "L11-015",
+  "title": "561 Toronto Street: sprinkler-protected glazing proposal for exit-path exposure",
+  "jurisdiction": "City of Victoria, British Columbia",
+  "code_edition": "British Columbia Building Code 2018",
+  "case_type": "actual_application",
+  "source_url": "https://tender.victoria.ca/webapps/ourcity/Prospero/FileDownload.aspx?fileId=6ED46171-EC9E-4E01-A596-81D0ACD67921&folderId=58314C180910112405724727",
+  "document_date": "unknown, applicant response to City review",
+  "facts": [
+    {
+      "text": "City comment concerns a main-level west exterior window and exit-path protection under BCBC 3.2.3.13(2).",
+      "locator": "PDF p.8"
+    },
+    {
+      "text": "Applicant says a sprinkler-protected glazing AS will be submitted with the building permit.",
+      "locator": "PDF p.8"
+    },
+    {
+      "text": "Response says BCBC 2018 applies to the future building-permit application.",
+      "locator": "PDF p.8"
+    }
+  ],
+  "limitations": [
+    "British Columbia comparative material only; it cannot establish Alberta code performance or applicability.",
+    "Future AS report is not attached."
+  ],
+  "worker": "L11",
+  "prompt_number": 275,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://tender.victoria.ca/webapps/ourcity/Prospero/FileDownload.aspx?fileId=6ED46171-EC9E-4E01-A596-81D0ACD67921&folderId=58314C180910112405724727",
+      "sha256": "02202d71b3ce475f91735a116e05bee439d1f6266838a68a8093f0c06fc3cd55",
+      "role": "input",
+      "bytes": 107694,
+      "filename": "victoria-561-565-toronto-response-02202d71b3ce.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L11/files/victoria-561-565-toronto-response-02202d71b3ce.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:24:32.762491+00:00",
+        "http_status": "200",
+        "final_url": "https://tender.victoria.ca/webapps/ourcity/Prospero/FileDownload.aspx?fileId=6ED46171-EC9E-4E01-A596-81D0ACD67921&folderId=58314C180910112405724727",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

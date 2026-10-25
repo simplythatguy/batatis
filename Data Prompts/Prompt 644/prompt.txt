@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from United States (ICC-ES evaluation report under IBC/IRC); NON-ALBERTA COMPARATIVE ONLY: cannot establish Alberta performance, acceptance or equivalence; no Canadian or Alberta approval is claimed or implied. It is not an Alberta application.
+
+Comparative test on a US ICC-ES evaluation of insulated structural sheathing that is also rated as a water-resistive barrier. Using only the attached report, identify the codes it is written against, what it says it can replace or serve as, the cladding and in-plane load limits, the fire-rated scope, the special-inspection and permit-submission conditions, and the evidence listed. Then identify what an Alberta reviewer would still need from the manufacturer or an engineer, and what the report does not establish for an Alberta permit.
+
+Attachments:
+- esr-3373-zip-r-sheathing-1ed9ba4e1963.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

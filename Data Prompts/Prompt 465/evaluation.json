@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Granted as proposed (alternate one-hour wall assembly, two layers of 5/8-inch Type X).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "R302.1 table one-hour assembly and STC claim",
+    "whether ceiling finishes substitute for horizontal separation",
+    "which walls are and are not upgraded"
+  ],
+  "case_id": "H11-010",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

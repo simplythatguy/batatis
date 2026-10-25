@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The City listing states the facilities are not deemed safe for occupancy and that pre-application work is ongoing. The public OREOI says detailed City reports are shared with pre-approved applicants. No applicant alternative-solution submission or approval is attached.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "identify and keep separate dated status statements and cost estimates",
+    "notice the YWCA occupancy-status ambiguity across the OREOI and current listing",
+    "request the underlying 2024 BCA, approved drawings, fire/accessibility records and pre-application notes",
+    "do not infer the technical basis for the owner’s occupancy statement"
+  ],
+  "case_id": "A03-005",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Calgary / Edmonton",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

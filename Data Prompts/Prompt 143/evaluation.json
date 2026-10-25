@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Regulator position: new relocatable industrial camp buildings after 1 May 2024 must be certified by an approved organization; CSA-A277 conformance is an acceptable solution; renovations of existing units must be labelled, with the labelling process set out in the interpretation.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates new-unit certification from existing-unit renovation labelling",
+    "Asks which approved organization certified the unit",
+    "Flags the labelling evidence required for renovations",
+    "Does not state that a unit complies"
+  ],
+  "case_id": "H20-017",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

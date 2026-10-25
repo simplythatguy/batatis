@@ -1,0 +1,70 @@
+{
+  "id": "A15-003",
+  "title": "City of Edmonton design sheet: spatial separation considerations for a garden suite house (archived, NBC(AE) 2019)",
+  "jurisdiction": "Edmonton, Alberta (City of Edmonton design-consideration sheet)",
+  "code_edition": "NBC(AE) 2019 Division B (sheet marked archived; 'Refer to NBC-2019AE')",
+  "case_type": "regulatory_guidance",
+  "source_url": "https://www.edmonton.ca/residential_neighbourhoods/application-requirements-house-permits",
+  "document_date": "undated in text (header marks the sheet archived)",
+  "facts": [
+    {
+      "text": "The sheet is marked 'archived' and is sourced to National Building Code-2019 Alberta Edition, Division B, for spatial separation of a garden suite house.",
+      "locator": "p.1 header and source line"
+    },
+    {
+      "text": "A garden suite is an accessory dwelling unit on the same property as the principal house, built to the same standard, citing 9.10.15.",
+      "locator": "p.1 first paragraph"
+    },
+    {
+      "text": "Where an attached garage is intended to serve, wholly or partly, the principal house, the garage parking space is separated from the rest of the building by 1 h fire-resistance rated construction to form a separate fire compartment.",
+      "locator": "p.1"
+    },
+    {
+      "text": "Where no other on-site parking is provided, a letter from the property owner may be required to document the garage use intention. Practice is to rate the parking space in the garden suite for future owner changes.",
+      "locator": "p.1"
+    },
+    {
+      "text": "The sheet says to ensure the garden-suite-facing exposing building face of the principal house is detailed in coordination with the house-facing exposing building face of the garden suite, calculated to a deemed limiting distance between the two structures.",
+      "locator": "p.1"
+    },
+    {
+      "text": "For a mutual or shared detached garage offset from the dwelling, the sheet says to detail the garage-facing exposing face of the house per ABC 9.10.15 and coordinate it with the house-facing face of the garage per ABC 9.10.14, calculated to a deemed limiting distance.",
+      "locator": "p.1 'Mutual or Shared Detached Garage'"
+    },
+    {
+      "text": "The source line directs the reader to 'Refer to NBC-2019AE for exact wording and final determination of compliance'.",
+      "locator": "p.1 final line"
+    }
+  ],
+  "limitations": [
+    "The sheet is archived and cites NBC(AE) 2019; it cannot establish 2023 AE requirements. Every requirement needs a current-edition check.",
+    "One page with no date in the text.",
+    "Commentary only: the sheet says it may not apply to specific circumstances and defers to the code for final compliance.",
+    "No owner, site or dimension is supplied; the prompt describes the sheet's own scenarios."
+  ],
+  "worker": "A15",
+  "prompt_number": 38,
+  "priority_tier": 1,
+  "priority": "Calgary / Edmonton",
+  "attachments": [
+    {
+      "url": "https://www.edmonton.ca/sites/default/files/public-files/assets/Spatial_Separation_Garden_Suite.pdf?cb=1782134782",
+      "sha256": "820ac30e1ddc113ca249301e858b157d54121a4b9f0f588b14cfd5262aa19f45",
+      "role": "input",
+      "bytes": 64271,
+      "filename": "edmonton-spatial-separation-garden-suite-820ac30e1ddc.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/A15/files/edmonton-spatial-separation-garden-suite-820ac30e1ddc.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T02:14:07.309207+00:00",
+        "http_status": "200",
+        "final_url": "https://www.edmonton.ca/sites/default/files/public-files/assets/Spatial_Separation_Garden_Suite.pdf?cb=1782134782",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

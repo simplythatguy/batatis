@@ -1,0 +1,14 @@
+{
+  "known_outcome": "Item 11 (barrier-free south exit door) REVOKED on 2017-10-17 (p.1); para 36 (p.8) gives the reasons.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "barrier-free requirement for exit doors in an existing two-storey building",
+    "distinction between access and egress in the decision's reasoning",
+    "accessibility evidence for magnetic hold-open fire doors"
+  ],
+  "case_id": "A10-003",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

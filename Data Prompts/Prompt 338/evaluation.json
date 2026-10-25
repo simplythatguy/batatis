@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Determination: authority incorrect to decline to decide; purported refusals lacked explicit valid reasons; authority must decide on the information available.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "timeliness and explicitness of written decisions (ss 94–99A)",
+    "conflicting engineers' reports on retaining walls",
+    "sequencing and dependencies of CCCs and certificates of acceptance",
+    "minor variation versus amendment route"
+  ],
+  "case_id": "H03-022",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

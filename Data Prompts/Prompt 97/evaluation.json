@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The reference sets a conditional permit-documentation path for CCMC-evaluated manufactured components in qualifying one/two-family dwellings; it requires stated supplier/manufacturer and project-specific records.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "dwelling scope and Part 9 exemption",
+    "CCMC evaluation and installation instructions",
+    "supplier/manufacturer letters and approved design program",
+    "layout drawings, beam calculations, interfaces and site-specific footings"
+  ],
+  "case_id": "L03-016",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

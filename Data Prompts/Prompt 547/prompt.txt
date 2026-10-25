@@ -1,0 +1,8 @@
+Comparative attachment exercise: this source is from Ontario — City of Hamilton (Dundas). It is not an Alberta application.
+
+Review the attached historical record about roof-truss design for a Dundas addition where the submitted calculation used the SB-1 value of 0.9 kPa and the City policy listed 1.1 kPa. Identify the code/value uncertainty and distinguish the Code citation from municipal policy; list the site elevation, design calculations, policy text, and permit records needed to clarify the issue, and ask follow-up questions. Do not provide structural approval or treat this Ontario ruling as Alberta authority. Use this decision only to compare record format and evidence themes. It cannot establish Alberta performance; identify which Calgary or Edmonton source must be checked first before applying any question locally, then consider other Alberta authorities as needed.
+
+Attachments:
+- attachment-1-source-text.txt
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

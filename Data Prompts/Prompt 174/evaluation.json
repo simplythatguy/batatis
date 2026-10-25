@@ -1,0 +1,14 @@
+{
+  "known_outcome": "The study reports no System 6 failure through its maximum 8.62 kPa (180 psf) test level; this is a bounded test result, not an approval or guarantee for another roof.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "verify exact steel deck gauge, fastener pullout, seam, insulation and membrane match",
+    "identify test protocol limits and demand at the actual project location",
+    "request professional structural design and a clearly detailed load path"
+  ],
+  "case_id": "L18-023",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Canadian supporting evidence",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

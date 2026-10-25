@@ -1,0 +1,15 @@
+{
+  "known_outcome": "unknown: the report contains consultant recommendations; the City's or Council's heritage decision is not in the attachment",
+  "outcome_leakage": false,
+  "review_focus": [
+    "upgrade scope for reuse that the report names but does not define",
+    "heritage 'alternatives' versus Building Code alternative solutions",
+    "separate code analysis that a heritage impact assessment does not provide",
+    "conflict between heritage-attribute conservation and accessibility works"
+  ],
+  "case_id": "H18-006",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

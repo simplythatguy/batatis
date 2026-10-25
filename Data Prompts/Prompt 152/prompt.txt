@@ -1,0 +1,6 @@
+A house with an attached garage has a secondary suite, and the question is whether the sentence the interpretation cites still applies. The attached STANDATA interpretation (23-BCI-035) is my only source. Using only that document, identify the sentence it cites, the dwelling units the garage is said to serve, how professional involvement is connected, and what the file would need next. Do not invent suite size, garage details or fire ratings, and do not state the design complies.
+
+Attachments:
+- ma-standata-interpretation-building-23-bci-035-2025-03-7028fbcba2b7.pdf
+
+This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

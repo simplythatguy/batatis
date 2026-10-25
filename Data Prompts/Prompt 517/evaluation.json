@@ -1,0 +1,14 @@
+{
+  "known_outcome": "The Board said Article 9.19.1.1 permits an unvented roof assembly if venting is shown unnecessary, but left acceptance of a particular design to the building official; it distinguished vapour permeance from air tightness.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Confirm applicable code edition and exact roof assembly layers.",
+    "Request independent air-leakage/moisture evidence and design responsibility.",
+    "Separate interpretation of the exception from approval of this specific design."
+  ],
+  "case_id": "L08-1719",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

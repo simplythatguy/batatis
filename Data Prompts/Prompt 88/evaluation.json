@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The reference permits specified fixed ladders/stairs as alternatives to interior stairways for the cited roof-access requirements, subject to stated height, load, handrail, OHS and landing conditions.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "which code roof-access trigger applies",
+    "access method and vertical height",
+    "OHS/handrail/load-rating documentation",
+    "landings for combined access types"
+  ],
+  "case_id": "L03-007",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

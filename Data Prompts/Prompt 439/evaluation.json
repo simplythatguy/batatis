@@ -1,0 +1,14 @@
+{
+  "known_outcome": "p.18 §8.1: the exterior building envelope does not comply with Clauses E2 and B2 of the Building Code current at consent time; the authority's refusal to issue the code compliance certificate is confirmed.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the closed 2007 items from the open items",
+    "Treats the engineer's cracking concern as an evidence gap to resolve, not a finding",
+    "Flags the deck balustrade and flashing details as item-level questions"
+  ],
+  "case_id": "H05-015",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

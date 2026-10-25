@@ -1,0 +1,78 @@
+{
+  "id": "L01-011",
+  "title": "23-BCV-011 — Polyethylene film for greenhouse enclosures (R1 and superseded issue)",
+  "jurisdiction": "Alberta, Canada (province-wide variance)",
+  "code_edition": "National Building Code – 2023 Alberta Edition",
+  "case_type": "issued_variance",
+  "source_url": "https://open.alberta.ca/publications/standata-variance-building-national-building-code-2023-alberta-edition",
+  "document_date": "February 2025; revised October 2026",
+  "facts": [
+    {
+      "text": "R1 applies to commercial greenhouse facilities governed by NBC(AE), under Article 3.1.18.5.",
+      "locator": "R1 PDF p.1, Application/Code References"
+    },
+    {
+      "text": "R1 has a staff-only option and a public-access option; both require film flame-spread rating not exceeding 25.",
+      "locator": "R1 PDF pp.1–2, Variance options 1 and 2"
+    },
+    {
+      "text": "The public option includes one-storey/Group F Division 3 scope, sales-related access, aisle and exit-width requirements, occupant-load basis, signage/spatial separation and a fire-safety plan.",
+      "locator": "R1 PDF p.2, Option 2 conditions 1–10"
+    },
+    {
+      "text": "The February 2025 issue was limited to greenhouses not intended for the public and is marked superseded; the catalogue lists R1.",
+      "locator": "Historical PDF pp.1–2; catalogue row/API metadata"
+    },
+    {
+      "text": "The October 2026 R1 resource was added/modified in the catalogue API on 2026-10-15; both current and superseded resources have API state active.",
+      "locator": "Official catalogue API resource metadata, retrieved 2026-10-24 America/Edmonton"
+    }
+  ],
+  "limitations": [
+    "This is a regulator-issued variance reference, not an applicant submission, approved project file, or evidence that any particular design meets its conditions.",
+    "No applicant facts, site dimensions, drawings, calculations, professional opinions, or permit decision are present in the catalogue record.",
+    "Catalogue labels and API resource state are recorded as published metadata; they are not an independent legal determination of current force."
+  ],
+  "worker": "L01",
+  "prompt_number": 51,
+  "priority_tier": 2,
+  "priority": "Other Alberta / province-wide",
+  "attachments": [
+    {
+      "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/85d5eedb-04e6-47b3-8922-79de7fb9c5f2/download/ma-standata-variance-building-23-bcv-011r1-2026-10.pdf",
+      "sha256": "223362211845dd6c59d4d25e6b87a2fa7e74f4d3ce4b0227b0ecfb5e5b53caf4",
+      "role": "outcome_reference",
+      "bytes": 85088,
+      "filename": "23-BCV-011-223362211845.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L01/files/23-BCV-011-223362211845.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:18.122854+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/85d5eedb-04e6-47b3-8922-79de7fb9c5f2/download/ma-standata-variance-building-23-bcv-011r1-2026-10.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    },
+    {
+      "url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/fbec1164-a91e-47e3-af8d-4981df6cb758/download/ma-standata-variance-building-23-bcv-011-2025-02.pdf",
+      "sha256": "e2d1f02f6549336dbc6f985204ff3d77141eb0909cb859f0d0388be6a3e98b25",
+      "role": "outcome_reference",
+      "bytes": 670964,
+      "filename": "23-BCV-011-e2d1f02f6549.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L01/files/23-BCV-011-e2d1f02f6549.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:17:18.183345+00:00",
+        "http_status": "200",
+        "final_url": "https://open.alberta.ca/dataset/08ac69ae-5639-46a3-83d2-c52246c78621/resource/fbec1164-a91e-47e3-af8d-4981df6cb758/download/ma-standata-variance-building-23-bcv-011-2025-02.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Regulator position: sets the requirements for fixed suppression and exhaust for commercial cooking, states that whether a ventilation and grease removal system is required in assembly and care, treatment or detention uses was not obvious from the codes; and sends building permit and professional-involvement decisions to the building AHJ; it replaces 19-FCI-002R1.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates fire suppression, exhaust, cleaning and maintenance questions",
+    "Flags the assembly and care-occupancy uncertainty named in the Discussion",
+    "Identifies the building-discipline AHJ and professional-involvement questions",
+    "Notes that the earlier interpretation it replaces (19-FCI-002R1) is not used as current"
+  ],
+  "case_id": "H20-006",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Other Alberta / province-wide",
+  "alberta_evaluation_use": "source extraction and administrative evidence exercise; not technical approval",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,13 @@
+{
+  "known_outcome": "The Board confirmed the request for a complete detailed code analysis identifying all Part 3 non-compliance and proposals to correct issues through prescriptive or alternative-solution paths; it said the analysis was a prerequisite to considering relaxations.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "The original permit, alteration drawings, occupancy records and professional analysis are not attached.",
+    "The specific local authority and exact code edition are not named in the published decision."
+  ],
+  "case_id": "L08-1779",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

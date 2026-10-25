@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Council answer (leakage): the Council cannot make a determination on or approve specific products; the local jurisdiction must decide whether the product's alternate testing procedure is equivalent to the federal test required by R303.1.4 (16 CFR Part 460); the answer says the product's modified ASTM C518 test with an air gap and reflectivity appears not to be allowed for R-value claims under 16 CFR 460.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "product-specific approval is outside the Council's role; the local jurisdiction decides",
+    "equivalence of an alternate test procedure to the required federal test",
+    "test-method modifications that affect a claimed R-value",
+    "what test evidence the local jurisdiction would need to see"
+  ],
+  "case_id": "H12-003",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

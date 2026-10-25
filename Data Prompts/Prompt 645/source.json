@@ -1,0 +1,71 @@
+{
+  "id": "H14-018",
+  "title": "ICC-ES ESR-1233: STO StoGuard air and water-resistive barrier coatings and StoEnergy Guard (coating with continuous insulation)",
+  "jurisdiction": "United States (ICC-ES evaluation report under IBC/IRC); NON-ALBERTA COMPARATIVE ONLY: cannot establish Alberta performance, acceptance or equivalence; no Canadian or Alberta approval is claimed or implied",
+  "code_edition": "2024 and 2021 IBC, IRC and IECC (report §1.1, p1); CALGreen 2022, IgCC, ASHRAE 189.1 and ICC 700 (§1.2, p1)",
+  "case_type": "product_evidence",
+  "source_url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-1233.pdf",
+  "document_date": "Reissued February 2026; subject to renewal February 2027 (p1)",
+  "facts": [
+    {
+      "text": "Report holder STO CORP.; subject is the StoGuard air barrier and water-resistive barrier system and StoEnergy Guard.",
+      "locator": "p1 cover"
+    },
+    {
+      "text": "Installation must comply with the report, the manufacturer's published instructions and the applicable code; the report governs a conflict.",
+      "locator": "§5.1, p7"
+    },
+    {
+      "text": "EIFS applications need special inspection per IBC §1705.15.1; other applications need no jobsite special inspection where a manufacturer-trained installer provides a certificate of installation.",
+      "locator": "§5.2, p7"
+    },
+    {
+      "text": "Systems are limited to walls and must be covered with an exterior wall finish that complies with the code or a current evaluation report.",
+      "locator": "§5.3-5.4, p7"
+    },
+    {
+      "text": "StoEnergy Guard foam must be installed per ICC-ES ESR-2142 or ESR-4755.",
+      "locator": "§5.6, p7"
+    },
+    {
+      "text": "Exterior-wall use in Types I-IV: assemblies in Tables 1 and 2 comply with NFPA 285 and IBC §2603.5 when installed per the report.",
+      "locator": "§4.8, p6"
+    },
+    {
+      "text": "Evidence listed: AC212 (February 2015, editorially revised June 2024) for water-resistive coatings; NFPA 285 test and analysis.",
+      "locator": "§6.1-6.2, p7"
+    }
+  ],
+  "limitations": [
+    "Non-Alberta comparative attachment; the report does not reference NBC(AE) 2023 and is not evidence of Alberta or Canadian acceptance.",
+    "Retrieved 2026-10-25 from the official ICC-ES report URL; current ICC-ES status was not checked live. source_url is the report PDF, not a separate listing page.",
+    "Text from pypdf extraction; figures, tables and signatures not transcribed; locators are PDF page numbers, not printed page numbers.",
+    "ICC-ES copyright; retained locally for comparison only, redistribution not licensed.",
+    "ESR-2142 and ESR-4755 are cited but were not retrieved; the foam-board requirement is taken as stated."
+  ],
+  "worker": "H14",
+  "prompt_number": 645,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.icc-es.org/wp-content/uploads/report-directory/ESR-1233.pdf",
+      "sha256": "51055dbc749cf95f97b0599c7b4d0349ee45471c43a56a1d1f03a15c516a2937",
+      "role": "input",
+      "bytes": 735303,
+      "filename": "esr-1233-stoguard-airwrb-51055dbc749c.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H14/files/esr-1233/esr-1233-stoguard-airwrb-51055dbc749c.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:47:22.432630+00:00",
+        "http_status": "200",
+        "final_url": "https://icc-es.org/wp-content/uploads/report-directory/ESR-1233.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

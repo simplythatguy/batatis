@@ -1,0 +1,15 @@
+{
+  "known_outcome": "The sample argues that its coated-ceiling proposal will meet its stated FSR criterion and describes the maintenance approach. The named product's underlying data and any AHJ decision are not provided.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Treat Product X as unidentified and request the referenced primary product/test documents",
+    "Mark the sample-specific code edition as unstated rather than infer it from guide context",
+    "Separate described maintenance commitments from an attached fire-safety plan",
+    "Do not read a sample analysis as a permit approval"
+  ],
+  "case_id": "L19-004",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

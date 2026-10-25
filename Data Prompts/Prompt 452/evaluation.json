@@ -1,0 +1,15 @@
+{
+  "known_outcome": "Changed and approved with condition: the Committee changed the assessment manager's decision and approved the development subject to an additional condition on gates and doors and on Table 1 and Table 7 documentation (pp. 1-2). Decision dated 13 May 2016 (p. 12).",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Identifies QDC MP 2.3 as the governing residential-care fire-safety provision, with the BCA tables as the paired documentation.",
+    "Flags the acceptable-solution A1 departure as needing explicit documentation.",
+    "Identifies exit and access between building parts as a question, not a finding.",
+    "Makes no compliance statement."
+  ],
+  "case_id": "H09-009",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

@@ -1,0 +1,61 @@
+{
+  "id": "L13-004",
+  "title": "Science Collaboration Centre (formerly Business Hub), Chalk River Laboratories",
+  "jurisdiction": "Chalk River, Ontario; federal site administered by Canadian Nuclear Laboratories",
+  "code_edition": "2015 National Building Code of Canada and 2015 National Fire Code; the report says there was no formal municipal permitting process",
+  "case_type": "documented_design_study",
+  "source_url": "https://cwc.ca/wp-content/uploads/2023/04/CNL-report-for-online.pdf",
+  "document_date": "March 2023",
+  "facts": [
+    {
+      "text": "The CNL case study describes a six-storey Science Collaboration Centre with CLT floors, walls and roof on Levels 2-6 and glulam framing.",
+      "locator": "PDF pp.10, 14"
+    },
+    {
+      "text": "The report says the federal site used national codes and third-party reviews rather than a formal municipal permitting process.",
+      "locator": "PDF pp.27-28, section 4.4"
+    },
+    {
+      "text": "It describes an NBC height issue caused by a sloping site and measuring building height from the lowest ground elevation; the alternative design described used concrete for the first two levels and timber above.",
+      "locator": "PDF p.28, section 4.4.4.1"
+    },
+    {
+      "text": "The report also describes increased sprinkler density by one hazard classification and fire-department access at Level 2 as measures discussed for the building-height issue.",
+      "locator": "PDF p.28, section 4.4.4.1"
+    },
+    {
+      "text": "The report cites a 2019 supplier Code Compliance Report, document B703-20000-REPT-001, but does not include it.",
+      "locator": "PDF p.10, footnote 5"
+    }
+  ],
+  "limitations": [
+    "The case study covers three separate CNL buildings; this candidate isolates the Science Collaboration Centre issue and shares the same original report with the Support Facility candidate.",
+    "The cited Business Hub Code Compliance Report B703-20000-REPT-001 (Morrison Hershfield, 2019) was not located as a public attachment.",
+    "The report is not the full alternative-solution submission or final approval file."
+  ],
+  "worker": "L13",
+  "prompt_number": 296,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://cwc.ca/wp-content/uploads/2023/04/CNL-report-for-online.pdf",
+      "sha256": "59f556a4219c2d20cd7c72609e447351d5c907b191c332138370e0199b93d26d",
+      "role": "input",
+      "bytes": 1461034,
+      "filename": "cnl-science-collaboration-case-study-59f556a4219c.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L13/files/cnl-science-collaboration-case-study-59f556a4219c.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:18:53.621459+00:00",
+        "http_status": "200",
+        "final_url": "https://cwc.ca/wp-content/uploads/2023/04/CNL-report-for-online.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}

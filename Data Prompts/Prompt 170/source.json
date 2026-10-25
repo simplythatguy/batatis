@@ -1,0 +1,53 @@
+{
+  "id": "L18-016",
+  "title": "NRC Task 5 — stucco water entry and drainage/retention measurements for wall drainage assemblies",
+  "jurisdiction": "NRC Construction research, Ottawa, Ontario, Canada (research only; no permit jurisdiction)",
+  "code_edition": "2010 NBC is the study comparator only; a project edition is unknown.",
+  "case_type": "documented_design_study",
+  "source_url": "https://nrc-publications.canada.ca/eng/view/object/?id=84fee7db-882a-4473-9345-8715f8f9bb4b",
+  "document_date": "2014-03-15 (NRC archive record; report cover states 2015-03-15)",
+  "facts": [
+    {
+      "text": "The research project developed one benchmark wall assembly and eleven client wall assemblies to study drainage components and sheathing membranes under climate loads.",
+      "locator": "PDF pp. 10, 14–15; report Summary and §1"
+    },
+    {
+      "text": "Task 5 reports laboratory water-entry measurements through stucco and at deliberate deficiencies, cavity-depth measurements, drainage/retention tests, and drying of a saturated NBC-compliant stucco plate.",
+      "locator": "PDF pp. 14–16; report §1 and contents"
+    },
+    {
+      "text": "Measured component data were used as moisture-load inputs to numerical simulations; the report identifies 2010 NBC capillary-break alternatives as the study context.",
+      "locator": "PDF pp. 10, 14–15; report Summary and §1"
+    }
+  ],
+  "limitations": [
+    "Archive metadata dates the record 2014-03-15 while the embedded report cover states 15 March 2015; both dates are preserved here."
+  ],
+  "worker": "L18",
+  "prompt_number": 170,
+  "priority_tier": 3,
+  "priority": "Canadian supporting evidence",
+  "attachments": [
+    {
+      "url": "https://nrc-publications.canada.ca/eng/view/ft/?id=84fee7db-882a-4473-9345-8715f8f9bb4b",
+      "sha256": "09391ea30e4c5572dab9379b3bfcb3e2c8f58ef3ace1253a26b2118aa5dbd939",
+      "role": "input",
+      "bytes": 10544825,
+      "filename": "water-entry-drainage-components-09391ea30e4c.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/L18/files/water-entry-drainage-components-09391ea30e4c.pdf",
+      "reuse_status": "rights_review_required",
+      "rights_source": "https://nrc-publications.canada.ca/eng/copyright/",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:18:23.603515+00:00",
+        "http_status": "200",
+        "final_url": "https://nrc-publications.canada.ca/eng/view/ft/?id=84fee7db-882a-4473-9345-8715f8f9bb4b",
+        "content_type": "application/pdf;charset=UTF-8",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "rights_review_required"
+}

@@ -1,0 +1,14 @@
+{
+  "known_outcome": "p.12 §7.1: with regard to the proposed method of bracing, the authority correctly exercised its powers in respect of the building consent application, and the authority's decision is confirmed.",
+  "outcome_leakage": true,
+  "review_focus": [
+    "Separates the designer's bracing method from the sufficiency-of-information question",
+    "Treats the sizes and fixings described in the applicant's email as unverified evidence",
+    "Does not assume the Thule Street building's design applies to the shed"
+  ],
+  "case_id": "H05-017",
+  "evaluator_only": true,
+  "jurisdiction_priority": "Outside Alberta - attachment comparison only",
+  "alberta_evaluation_use": "comparative attachment format/content only",
+  "instruction": "Do not upload this file with the test prompt. Published outcome is not a new technical approval or a complete scored ground truth."
+}

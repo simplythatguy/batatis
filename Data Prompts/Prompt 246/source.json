@@ -1,0 +1,57 @@
+{
+  "id": "H08-012",
+  "title": "BCA Assessment Report 110903-BCA-r1, 56 Beane Street, Gosford (Mono Constructions)",
+  "jurisdiction": "New South Wales, Australia - COMPARATIVE ONLY (not Alberta; NSW code text, not Alberta applicability)",
+  "code_edition": "BCA 2019 (stated, p.3-4)",
+  "case_type": "actual_application",
+  "source_url": "https://www.planningportal.nsw.gov.au/sites/default/files/documents/2022/3.12.1%20BCA%20Report.pdf",
+  "document_date": "17 December 2019 (p.1)",
+  "facts": [
+    {
+      "text": "BCA Assessment Report, reference 110903-BCA-r1, dated 17 December 2019, for Mono Constructions; project 56 Beane Street, Gosford.",
+      "locator": "p.1"
+    },
+    {
+      "text": "Site: corner of Beane Street and Gertrude Street.",
+      "locator": "p.4"
+    },
+    {
+      "text": "Contents include '5.3 Performance Based Design - Performance Solutions'.",
+      "locator": "contents p.3; body p.9"
+    },
+    {
+      "text": "Stated code: BCA 2019.",
+      "locator": "p.3-4"
+    }
+  ],
+  "limitations": [
+    "Comparative NSW material: it cannot establish Alberta performance or Alberta applicability.",
+    "Planning Portal file path ('3.12.1 BCA Report.pdf', 2022 folder) is not tied to a DA page in this pass; council and DA number unverified.",
+    "The consultant author is named in PDF metadata; not reproduced here."
+  ],
+  "worker": "H08",
+  "prompt_number": 246,
+  "priority_tier": 4,
+  "priority": "Outside Alberta - attachment comparison only",
+  "attachments": [
+    {
+      "url": "https://www.planningportal.nsw.gov.au/sites/default/files/documents/2022/3.12.1%20BCA%20Report.pdf",
+      "sha256": "ed64c8cad663f4b84a2723e1a74e84632dcae0552ba97e3211b9c2b42170d578",
+      "role": "input",
+      "bytes": 897662,
+      "filename": "planningportal-3-12-1-bca-report-ed64c8cad663.pdf",
+      "included_in_default_input": true,
+      "original_collection_path": "_research/workers/H08/files/planningportal-3-12-1-bca-report/planningportal-3-12-1-bca-report-ed64c8cad663.pdf",
+      "download_receipt": {
+        "retrieved_at": "2026-10-25T01:22:18.958369+00:00",
+        "http_status": "200",
+        "final_url": "https://www.planningportal.nsw.gov.au/sites/default/files/documents/2022/3.12.1%20BCA%20Report.pdf",
+        "content_type": "application/pdf",
+        "kind": "pdf",
+        "status": "downloaded"
+      }
+    }
+  ],
+  "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",
+  "reuse_status": "publisher_terms_apply; no blanket dataset licence asserted"
+}
