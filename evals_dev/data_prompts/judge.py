@@ -15,7 +15,6 @@ import re
 import time
 import unicodedata
 from dataclasses import dataclass
-from pathlib import Path
 
 import httpx
 
