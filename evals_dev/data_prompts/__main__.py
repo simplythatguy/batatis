@@ -135,7 +135,7 @@ def cmd_score(args) -> int:
     folder = RUNS / args.name / 'cases'
     cases = [c for c in corpus.select(args.split) if (folder / f'{c.id}.json').exists()]
     missing = len(corpus.select(args.split)) - len(cases)
-    out_path = RUNS / args.name / f'score-{args.split}-{args.judge_model}-{args.judge_effort}.jsonl'
+    out_path = RUNS / args.name / f'score-{_label(args.split)}-{args.judge_model}-{args.judge_effort}.jsonl'
     rows, failures = [], 0
     with ThreadPoolExecutor(args.workers) as pool:
         futures = {pool.submit(_judge_case, c, json.loads((folder / f'{c.id}.json').read_text()), codes,
@@ -170,8 +170,13 @@ def cmd_show(args) -> int:
     return 0
 
 
+def _label(split: str) -> str:
+    """A file-name-safe name for a split: a named split as is, a list of case ids as a short hash."""
+    return split if len(split) <= 40 else 'ids-' + hashlib.sha256(split.encode()).hexdigest()[:12]
+
+
 def _scored(name: str, split: str, judge_model: str, judge_effort: str) -> dict[str, dict]:
-    path = RUNS / name / f'score-{split}-{judge_model}-{judge_effort}.jsonl'
+    path = RUNS / name / f'score-{_label(split)}-{judge_model}-{judge_effort}.jsonl'
     return {row['case_id']: row for row in score.load_rows(path)}
 
 
