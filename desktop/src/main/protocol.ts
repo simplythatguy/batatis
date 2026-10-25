@@ -30,6 +30,8 @@ export type ApiGate =
   | { kind: "open"; engine: { request(request: EngineRequest, signal?: AbortSignal): Promise<EngineReply> }; jar: SessionJar }
   | { kind: "closed"; detail: string };
 
+type RequestIdentity = Extract<ApiGate, { kind: "open" }> & { epoch: number; cookie: string | null };
+
 export interface AppProtocolOptions {
   distDir: string;
   /** Read per request: the current engine and session, or why /api is closed (starting, switching, stopped). */
@@ -46,30 +48,33 @@ export function createAppProtocol(options: AppProtocolOptions): (request: Reques
       return text(400, "Bad request");
     }
     if (url.protocol !== "batatis:" || url.host !== "app" || url.username || url.password) return text(404, "Not found");
-    if (url.pathname === "/api" || url.pathname.startsWith("/api/")) return forward(request, url, options.gate());
+    if (url.pathname === "/api" || url.pathname.startsWith("/api/")) return forward(request, url, options.gate);
     return serveFile(root, url.pathname);
   };
 }
 
-async function forward(request: Request, url: URL, gate: ApiGate): Promise<Response> {
+async function forward(request: Request, url: URL, readGate: () => ApiGate): Promise<Response> {
   if (!METHODS.has(request.method)) return json(405, { detail: "Method not allowed" });
+  const gate = readGate();
   if (gate.kind === "closed") return json(503, { detail: gate.detail }, { "Retry-After": "2" });
+  const identity: RequestIdentity = { ...gate, epoch: gate.jar.epoch, cookie: gate.jar.cookieHeader() };
   const body = await readBody(request);
   if (body === null) return json(413, { detail: "That upload is too large." });
+  if (!matchesIdentity(readGate(), identity)) return json(503, { detail: "The local workspace or session changed. Nothing was sent." }, { "Retry-After": "2" });
   const headers: [string, string][] = [];
   for (const [name, value] of request.headers) if (FORWARDED_HEADERS.has(name.toLowerCase())) headers.push([name.toLowerCase(), value]);
-  const cookie = gate.jar.cookieHeader();
-  if (cookie) headers.push(["cookie", cookie]);
-  const epoch = gate.jar.epoch;
+  if (identity.cookie) headers.push(["cookie", identity.cookie]);
   let reply: EngineReply;
   try {
-    reply = await gate.engine.request({ method: request.method, path: url.pathname, query: url.search.replace(/^\?/, ""), headers, body }, request.signal);
+    reply = await identity.engine.request({ method: request.method, path: url.pathname, query: url.search.replace(/^\?/, ""), headers, body }, request.signal);
   } catch (error) {
     if (error instanceof EngineLost) return json(503, { detail: "The local service stopped before answering. Nothing was retried." });
     if (error instanceof EngineFailed) return json(502, { detail: "The local service could not answer." });
     throw error;
   }
-  await gate.jar.apply(reply.headers.filter(([name]) => name.toLowerCase() === "set-cookie").map(([, value]) => value), epoch);
+  if (matchesIdentity(readGate(), identity)) {
+    await identity.jar.apply(reply.headers.filter(([name]) => name.toLowerCase() === "set-cookie").map(([, value]) => value), identity.epoch);
+  }
   const out = new Headers();
   for (const [name, value] of reply.headers) if (name.toLowerCase() !== "set-cookie") out.append(name, value);
   if (NO_BODY.has(reply.status) || request.method === "HEAD") {
@@ -77,6 +82,11 @@ async function forward(request: Request, url: URL, gate: ApiGate): Promise<Respo
     return new Response(null, { status: reply.status, headers: out });
   }
   return new Response(reply.body, { status: reply.status, headers: out });
+}
+
+function matchesIdentity(gate: ApiGate, identity: RequestIdentity): boolean {
+  return gate.kind === "open" && gate.engine === identity.engine && gate.jar === identity.jar
+    && gate.jar.epoch === identity.epoch && gate.jar.cookieHeader() === identity.cookie;
 }
 
 async function readBody(request: Request): Promise<Uint8Array | null> {

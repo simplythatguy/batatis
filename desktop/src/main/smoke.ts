@@ -136,7 +136,8 @@ export async function runSmoke(deps: SmokeDeps): Promise<void> {
     await until(async () => deps.current() && !window().webContents.isLoading() && (await text()).length > 20, "loaded canonical UI");
     assert.equal(app.isPackaged, true, "acceptance requires the packaged executable");
     assert.equal(deps.fixture?.adapterConstructed, true, "the bundled adapter factory was constructed without account access");
-    report.codexRuntime = await deps.runtime();
+    const { executable, sha256 } = await deps.runtime();
+    report.codexRuntime = { executable, sha256 };
     assert.match(process.execPath, /Application composée 100% #/, "the packaged executable runs from a URI-sensitive path");
     assert.equal(await page("typeof require"), "undefined", "Node is absent from the renderer");
     assert.equal(await page("typeof process"), "undefined", "Node process is absent from the renderer");

@@ -227,18 +227,18 @@ test("host calls from the engine are parsed before any provider sees them", () =
   }
 });
 
-test("an engine-initiated call is answered on the same pipe", async () => {
+test("a control cannot mint provider authority on the engine pipe", async (t) => {
   let asked: unknown = null;
   const started = await startEngine(fakeCommand("local"), { onCall: async (_op, args) => { asked = args; return { ok: true, value: { json: { a: 1 }, model: "m", effort: "low", usage: null } }; }, log });
   assert.equal(started.kind, "ready");
   const engine = (started as { engine: Engine }).engine;
+  t.after(() => engine.stop());
   await engine.control("call", { task: "intake" });
   let calls: Record<string, unknown>[] = [];
   for (let attempt = 0; attempt < 100 && calls.length === 0; attempt += 1) {
     calls = (await fakeLog(engine)).calls;
     if (!calls.length) await new Promise((done) => setTimeout(done, 10));
   }
-  assert.deepEqual(calls.map(({ t, ok, value }) => ({ t, ok, value })), [{ t: "call.res", ok: true, value: { json: { a: 1 }, model: "m", effort: "low", usage: null } }]);
-  assert.deepEqual(asked, { task: "intake" });
-  await engine.stop();
+  assert.deepEqual(calls.map(({ t, ok, reason }) => ({ t, ok, reason })), [{ t: "call.res", ok: false, reason: "cancelled" }]);
+  assert.equal(asked, null);
 });

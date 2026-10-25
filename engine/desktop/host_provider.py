@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import base64
 import json
+from types import EllipsisType
 
 from ..intake.model import GateClosed, Transport
 from . import bridge
@@ -15,19 +16,19 @@ from . import bridge
 CALL_SECONDS = 180.0
 
 
-def private_call(op: str, args: dict, *, timeout: float = CALL_SECONDS) -> dict:
+def private_call(op: str, args: dict, *, context: bridge.RequestContext | None, timeout: float = CALL_SECONDS) -> dict:
     """Keep document payloads within the frozen bridge framing limit, without changing their content."""
     import time
-    active = bridge.ACTIVE
-    if active is None:
-        raise bridge.HostUnavailable('host absent')
+    if context is None or bridge.ACTIVE is not context.bridge:
+        raise bridge.HostUnavailable('request is not bound to this host')
+    active = context.bridge
     deadline = time.monotonic() + timeout
 
     def send(operation, value):
         remaining = deadline - time.monotonic()
         if remaining <= 0 or bridge.ACTIVE is not active:
             raise bridge.HostUnavailable('host changed or deadline reached')
-        reply = active.call_host(operation, value, timeout=remaining)
+        reply = active.call_host(operation, value, timeout=remaining, request_id=context.request_id)
         if not isinstance(reply, dict):
             raise bridge.HostUnavailable('invalid host reply')
         return reply
@@ -70,22 +71,21 @@ def private_call(op: str, args: dict, *, timeout: float = CALL_SECONDS) -> dict:
 
 
 def host_transport(task: str, *, model: str, effort: str, max_output_tokens: int | None = None,
-                   lease: str | None = None) -> Transport | None:
+                   lease: str | None = None, context: bridge.RequestContext | None | EllipsisType = ...) -> Transport | None:
     """An intake-style Transport, (system, user, schema) -> (payload, usage), answered by the host.
 
     Usage the runtime did not report comes back as None values, never as zero tokens.
     """
     if bridge.ACTIVE is None:
         return None
+    context = bridge.REQUEST_CONTEXT.get() if context is ... else context
 
     def call(system: str, user: str, schema: dict) -> tuple[dict, dict]:
-        active = bridge.ACTIVE
-        if active is None:
-            raise GateClosed('host-provider')
         try:
             reply = private_call('provider.completeJson', {
                 'task': task, 'system': system, 'user': user, 'schema': schema, 'model': model,
-                'effort': effort, 'maxOutputTokens': max_output_tokens, **({'lease': lease} if lease is not None else {})}, timeout=CALL_SECONDS)
+                'effort': effort, 'maxOutputTokens': max_output_tokens, **({'lease': lease} if lease is not None else {})},
+                context=context, timeout=CALL_SECONDS)
         except bridge.HostUnavailable:
             raise GateClosed('host-provider') from None
         value = reply.get('value') if reply.get('ok') else None

@@ -69,6 +69,7 @@ interface Pending {
   reject: (error: Error) => void;
   controller: ReadableStreamDefaultController<Uint8Array> | null;
   detach: () => void;
+  calls: Set<AbortController>;
 }
 
 type Child = ReturnType<typeof spawn>;
@@ -109,7 +110,7 @@ export class Engine {
     return new Promise<EngineReply>((resolve, reject) => {
       const abort = () => this.#cancel(id, new DOMException("The request was cancelled.", "AbortError"));
       signal?.addEventListener("abort", abort, { once: true });
-      this.#pending.set(id, { started: false, resolve, reject, controller: null, detach: () => signal?.removeEventListener("abort", abort) });
+      this.#pending.set(id, { started: false, resolve, reject, controller: null, detach: () => signal?.removeEventListener("abort", abort), calls: new Set() });
       this.#write({ t: "req", id, method: request.method, path: request.path, query: request.query, headers: request.headers.map(([k, v]) => [k, v]) });
       const pieces = chunks(request.body);
       pieces.forEach((piece, n) => this.#write({ t: "body", id, more: n < pieces.length - 1 }, piece));
@@ -198,12 +199,19 @@ export class Engine {
 
   #call(id: string, header: FrameHeader) {
     const op = typeof header.op === "string" ? header.op : "";
+    const request = typeof header.requestId === "string" ? this.#pending.get(header.requestId) : undefined;
+    const cancelled: CallReply = { ok: false, reason: "cancelled", message: "The originating request is no longer active." };
+    if (op.startsWith("provider.") && (!request || this.#gone)) {
+      this.#write({ t: "call.res", id, ...cancelled });
+      return;
+    }
     const abort = new AbortController();
     this.#calls.set(id, abort);
+    request?.calls.add(abort);
     this.#onCall(op, header.args, abort.signal)
       .catch((): CallReply => ({ ok: false, reason: "runtime", message: "The host could not answer." }))
-      .then((reply) => { if (!this.#gone) this.#write({ t: "call.res", id, ...reply }); })
-      .finally(() => this.#calls.delete(id));
+      .then((reply) => { if (!this.#gone) this.#write({ t: "call.res", id, ...(abort.signal.aborted ? cancelled : reply) }); })
+      .finally(() => { this.#calls.delete(id); request?.calls.delete(abort); });
   }
 
   /** A consumer that stops reading (null) or a caller abort before the response started. */
@@ -220,6 +228,8 @@ export class Engine {
     const entry = this.#pending.get(id);
     entry?.detach();
     this.#pending.delete(id);
+    for (const call of entry?.calls ?? []) call.abort();
+    entry?.calls.clear();
     if (this.#pending.size === 0) for (const done of [...this.#idle]) done();
   }
 

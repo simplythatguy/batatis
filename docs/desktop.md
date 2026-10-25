@@ -121,7 +121,8 @@ If Python is not on your path under its normal name, set `BATATIS_BUILD_PYTHON` 
 To build CodeDB on Windows, use the engine's build environment from the repository root. Install the data tools first.
 
 ```powershell
-.\desktop\build\engine-venv\Scripts\python.exe -m pip install -r codedb/requirements.txt fonttools
+.\desktop\build\engine-venv\Scripts\python.exe -m pip install `
+  -r codedb/requirements.txt fonttools
 ```
 
 Fetch the official sources.

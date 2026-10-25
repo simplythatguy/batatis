@@ -29,7 +29,9 @@ protocol.registerSchemesAsPrivileged([
 app.enableSandbox();
 if (process.platform === "win32" && process.env.LOCALAPPDATA) {
   // Workspaces and code data stay on this machine, not in the roaming profile.
-  app.setPath("userData", join(process.env.LOCALAPPDATA, "Batatis"));
+  const userData = join(process.env.LOCALAPPDATA, "Batatis");
+  mkdirSync(userData, { recursive: true });
+  app.setPath("userData", userData);
 }
 const smoke = smokeOptions();
 const smokeMonitor = monitorSmoke(smoke);

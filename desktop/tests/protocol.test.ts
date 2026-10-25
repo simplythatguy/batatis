@@ -70,7 +70,8 @@ test("only the listed headers reach the engine, and the host adds its own sessio
 test("Set-Cookie is kept by the host and never reaches the page", async (t) => {
   const { dist } = site(t);
   const jar = new SessionJar();
-  const handle = createAppProtocol({ distDir: dist, gate: () => ({ kind: "open", engine: engine(() => ok([["set-cookie", `batatis_session=${NEXT}; HttpOnly; Path=/`], ["x-batatis-notice", "notice"]])), jar }) });
+  const fake = engine(() => ok([["set-cookie", `batatis_session=${NEXT}; HttpOnly; Path=/`], ["x-batatis-notice", "notice"]]));
+  const handle = createAppProtocol({ distDir: dist, gate: () => ({ kind: "open", engine: fake, jar }) });
   const response = await handle(new Request("batatis://app/api/auth/login", { method: "POST", body: "{}", headers: { "content-type": "application/json" } }));
   assert.equal(response.headers.get("set-cookie"), null);
   assert.equal(response.headers.get("x-batatis-notice"), "notice");
@@ -113,7 +114,8 @@ test("a closed gate, a lost engine and a failed answer are honest errors, never 
 test("bodies over the engine's limit, unknown methods and empty statuses are handled at the edge", async (t) => {
   const { dist } = site(t);
   const fake = engine(() => ({ status: 204, headers: [], body: body("") }));
-  const handle = createAppProtocol({ distDir: dist, gate: () => ({ kind: "open", engine: fake, jar: new SessionJar() }) });
+  const jar = new SessionJar();
+  const handle = createAppProtocol({ distDir: dist, gate: () => ({ kind: "open", engine: fake, jar }) });
   const tooBig = await handle(new Request("batatis://app/api/cases/c1/files", { method: "POST", body: new Uint8Array(BODY_LIMIT + 1) }));
   assert.equal(tooBig.status, 413);
   assert.equal(fake.seen.length, 0);

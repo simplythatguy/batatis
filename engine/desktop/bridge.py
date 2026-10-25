@@ -7,6 +7,8 @@ from __future__ import annotations
 
 import asyncio
 import concurrent.futures
+from contextvars import ContextVar
+from dataclasses import dataclass
 import itertools
 import json
 import os
@@ -39,6 +41,15 @@ class ControlError(Exception):
 
 class HostUnavailable(Exception):
     """The host did not answer a call: no bridge, a timeout, or the bridge stopped."""
+
+
+@dataclass(frozen=True)
+class RequestContext:
+    bridge: Bridge
+    request_id: str
+
+
+REQUEST_CONTEXT: ContextVar[RequestContext | None] = ContextVar('desktop_request', default=None)
 
 
 def encode(header: dict, body: bytes = b'') -> bytes:
@@ -228,6 +239,7 @@ class Bridge:
                     self.write({'t': 'body', 'id': rid, 'more': more or not last}, data[offset:offset + MAX_BODY])
                 request.finished = not more
 
+        token = REQUEST_CONTEXT.set(RequestContext(self, rid))
         try:
             await self.app(scope, receive, send)
             if not request.finished:
@@ -242,6 +254,7 @@ class Bridge:
             if not request.finished:
                 self.write({'t': 'fail', 'id': rid, 'detail': 'engine error'})
         finally:
+            REQUEST_CONTEXT.reset(token)
             self._requests.pop(rid, None)
 
     async def _control(self, rid: str, header: dict) -> None:
@@ -273,7 +286,7 @@ class Bridge:
             if pending:
                 await asyncio.wait(pending, timeout=1)
 
-    def call_host(self, op: str, args: dict, timeout: float) -> dict:
+    def call_host(self, op: str, args: dict, timeout: float, *, request_id: str | None = None) -> dict:
         """Ask the host and block this worker thread for the answer. Never call it on the event loop."""
         if self._loop is None or self._stopping:
             raise HostUnavailable('bridge not running')
@@ -286,7 +299,7 @@ class Bridge:
         rid = f'c{next(self._call_ids)}'
         future: concurrent.futures.Future = concurrent.futures.Future()
         self._calls[rid] = future
-        self.write({'t': 'call', 'id': rid, 'op': op, 'args': args})
+        self.write({'t': 'call', 'id': rid, 'requestId': request_id, 'op': op, 'args': args})
         try:
             return future.result(timeout=timeout)
         except concurrent.futures.TimeoutError as exc:

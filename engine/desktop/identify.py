@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 import time
 
-from . import composition
+from . import bridge, composition
 from .host_provider import host_transport, private_call
 
 
@@ -20,12 +20,13 @@ def transports(*, scoring, jev_model, anthropic):
         'decisions': 'Not part of the pinned desktop workflow.'})
     if selected.generation == 'off':
         return out
+    context = bridge.REQUEST_CONTEXT.get()
 
     def complete(name, schema, system, user, *, model, max_output_tokens=4096, effort=None, timeout=60):
         if name != 'picks' or (model, effort) != (composition.MODEL, composition.EFFORT):
             raise GateClosed('desktop', 'desktop-profile')
         transport = host_transport('identify-picks', model=model, effort=effort,
-                                   max_output_tokens=max_output_tokens, lease=selected.lease)
+                                   max_output_tokens=max_output_tokens, lease=selected.lease, context=context)
         usage = {'input_tokens': None, 'output_tokens': None}
         try:
             payload, usage = transport(system, user, schema)
@@ -44,6 +45,7 @@ def screening(lease, log):
     from ..identify.jevkit import client
     from ..identify import jev_runtime as runtime
     from ..identify.screen import JEV_MODEL, JEV_PROVIDER
+    context = bridge.REQUEST_CONTEXT.get()
 
     def ask(state, questions, timeout):
         reported = None
@@ -57,7 +59,7 @@ def screening(lease, log):
             # client.ask receives an explicit non-credential sentinel solely to avoid ambient key resolution.
             # Its headers are discarded here. Only main decrypts and adds the actual Authorization header.
             reply = private_call('provider.jev', {'lease': lease, 'body': body.decode('utf-8'), 'timeout': remaining},
-                                 timeout=remaining)
+                                 context=context, timeout=remaining)
             value = reply.get('value') if reply.get('ok') else None
             if not isinstance(value, dict) or type(value.get('status')) is not int or not isinstance(value.get('body'), str):
                 raise runtime.JevResponseError('desktop_unavailable', dispatched=False)

@@ -91,6 +91,7 @@ function connectionValue(row: ProviderRow): ReactNode {
 }
 
 function ConnectionsSection() {
+  const prepare = useSaveBeforeSwitch();
   const [rows, setRows] = useState<ProviderRow[] | null>(null);
   const [configuration, setConfiguration] = useState<AiConfiguration | null>(null);
   const [error, setError] = useState("");
@@ -105,21 +106,34 @@ function ConnectionsSection() {
     const stop = desktop.onChange(load);
     return () => { live = false; stop(); };
   }, []);
-  const act = (id: string) => (action: Parameters<typeof desktop.providers>[0]) => {
-    void desktop.providers(action, id).then(async (next) => {
-      if (action !== "openLogin") setRows(next);
-      setConfiguration(await desktop.configuration());
-    });
-  };
-  const select = async (work: () => ReturnType<typeof desktop.selectGeneration>) => {
+  const change = async (work: () => Promise<void>) => {
     if (busy) return;
     setBusy(true); setError("");
+    try {
+      const reason = await prepare();
+      if (reason) setError(reason);
+      else await work();
+    } finally {
+      setBusy(false);
+    }
+  };
+  const act = (id: string) => (action: Parameters<typeof desktop.providers>[0]) => {
+    const work = async () => {
+      const next = await desktop.providers(action, id);
+      if (action !== "openLogin") setRows(next);
+      setConfiguration(await desktop.configuration());
+    };
+    // Key entry opens the dialog whose Save restarts the engine and replaces this window.
+    if (action === "enterKey" || action === "removeKey" || action === "disconnect") void change(work);
+    else void work();
+  };
+  const select = (work: () => ReturnType<typeof desktop.selectGeneration>) => change(async () => {
     const outcome = await work();
     if (!outcome.ok) setError(outcome.message);
-    setConfiguration(await desktop.configuration()); setBusy(false);
-  };
+    setConfiguration(await desktop.configuration());
+  });
   return (
-    <section className="ac-section" aria-labelledby="dk-s-ai">
+    <section className="ac-section" aria-labelledby="dk-s-ai" aria-busy={busy}>
       <h2 id="dk-s-ai" className="ac-section-title">AI connections</h2>
       {configuration && <>
         <Row label="Generation">
@@ -135,9 +149,10 @@ function ConnectionsSection() {
           </fieldset>
         </Row>
       </>}
+      {busy && <p className="ac-faint-tag is-row" role="status">Updating…</p>}
       {(error || configuration?.note) && <p className="ac-error is-row" role="alert">{error || configuration?.note}</p>}
       {rows === null ? <p className="ac-faint-tag" role="status">Loading…</p> : rows.map((row) => (
-        <Row key={row.id} label={row.label} action={<span className="dk-actions"><ConnectionActions row={row} act={act(row.id)} /></span>}>
+        <Row key={row.id} label={row.label} action={<fieldset className="dk-choice" disabled={busy}><span className="dk-actions"><ConnectionActions row={row} act={act(row.id)} /></span></fieldset>}>
           {connectionValue(row)}
         </Row>
       ))}

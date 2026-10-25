@@ -1,8 +1,15 @@
 """Offline regression checks at the application transport choosers."""
 import json
+from contextvars import ContextVar
 
 from engine.desktop import bridge
 from engine.intake import model, review
+
+
+def bind_host(monkeypatch, host):
+    monkeypatch.setattr(bridge, 'ACTIVE', host)
+    monkeypatch.setattr(bridge, 'REQUEST_CONTEXT', ContextVar('synthetic_request',
+                        default=bridge.RequestContext(host, 'r-synthetic')))
 
 
 class Host:
@@ -11,7 +18,8 @@ class Host:
         self.usage = usage
         self.calls = []
 
-    def call_host(self, op, args, timeout):
+    def call_host(self, op, args, timeout, *, request_id):
+        assert request_id == 'r-synthetic'
         self.calls.append((op, args))
         if op == 'provider.profile':
             return {'ok': True, 'value': {'lease': 'offline-lease', 'generation': self.generation,
@@ -22,7 +30,7 @@ class Host:
 
 def test_desktop_intake_chooser_precedes_ambient_fake(monkeypatch):
     host = Host()
-    monkeypatch.setattr(bridge, 'ACTIVE', host)
+    bind_host(monkeypatch, host)
     monkeypatch.setenv('BATATIS_PROVIDER', 'fake')
     transport, status = model.default_transport()
     result = model.run('A synthetic wall.', 'A synthetic wall.', transport, skip=set(), status=status)
@@ -37,7 +45,7 @@ def test_desktop_intake_chooser_precedes_ambient_fake(monkeypatch):
 
 def test_desktop_off_closes_both_choosers_before_ambient(monkeypatch):
     host = Host(generation='off')
-    monkeypatch.setattr(bridge, 'ACTIVE', host)
+    bind_host(monkeypatch, host)
     monkeypatch.setenv('BATATIS_PROVIDER', 'fake')
     assert model.default_transport() == (None, 'off')
     assert review.default_transport() == (None, 'off')
@@ -60,8 +68,8 @@ def test_wrong_echo_and_invalid_usage_fail_closed(monkeypatch):
     from engine.desktop.host_provider import host_transport
 
     class Broken(Host):
-        def call_host(self, op, args, timeout):
-            reply = super().call_host(op, args, timeout)
+        def call_host(self, op, args, timeout, *, request_id):
+            reply = super().call_host(op, args, timeout, request_id=request_id)
             if op != 'provider.profile':
                 reply['value'].update(self.change)
             return reply
@@ -70,7 +78,7 @@ def test_wrong_echo_and_invalid_usage_fail_closed(monkeypatch):
                    {'usage': {'inputTokens': -1, 'outputTokens': 0}}, {'usage': {}}, {'json': []}):
         host = Broken()
         host.change = change
-        monkeypatch.setattr(bridge, 'ACTIVE', host)
+        bind_host(monkeypatch, host)
         call = host_transport('intake', model=model.MODEL, effort=model.EFFORT, lease='offline-lease')
         with pytest.raises(model.GateClosed):
             call(model.SYSTEM, '{}', model.schema())
@@ -78,7 +86,7 @@ def test_wrong_echo_and_invalid_usage_fail_closed(monkeypatch):
 
 def test_review_ignores_ambient_model_override_and_keeps_unknown_usage(monkeypatch):
     host = Host()
-    monkeypatch.setattr(bridge, 'ACTIVE', host)
+    bind_host(monkeypatch, host)
     monkeypatch.setenv('BATATIS_REVIEW_MODEL', 'gpt-6.1-sol')
     monkeypatch.setenv('BATATIS_REVIEW_EFFORT', 'low')
     transport, status = review.default_transport()
@@ -101,7 +109,7 @@ def test_unknown_tokens_survive_extraction_merge():
 def test_missing_screening_selects_existing_keyword_fallback_without_verifier(monkeypatch):
     from engine.identify import providers
     import pytest
-    monkeypatch.setattr(bridge, 'ACTIVE', Host())
+    bind_host(monkeypatch, Host())
     monkeypatch.setenv('BATATIS_PROVIDER', 'fake')
     tp = providers.transports(scoring={'jev'})
     assert tp.jev is None
@@ -127,14 +135,15 @@ def test_strict_screening_rejects_wrong_model_duplicate_fields_and_bad_probabili
     for raw in cases:
         class ScreenHost:
             calls = 0
-            def call_host(self, op, args, timeout):
+            def call_host(self, op, args, timeout, *, request_id):
+                assert request_id == 'r-synthetic'
                 self.calls += 1
                 assert op == 'provider.jev'
                 assert 'Authorization' not in args and 'api_key' not in args
                 assert set(json.loads(args['body'])) == {'model', 'state', 'questions'}
                 return {'ok': True, 'value': {'status': 200, 'body': raw}}
         host, log = ScreenHost(), SpendLog()
-        monkeypatch.setattr(bridge, 'ACTIVE', host)
+        bind_host(monkeypatch, host)
         with pytest.raises(JevResponseError):
             screening('offline-lease', log)('Synthetic state', {'q': {'type': 'noul', 'instructions': 'A synthetic condition is stated.'}}, 1)
         assert host.calls == 1 and log.usd() is None
@@ -160,7 +169,8 @@ def test_desktop_assistant_keeps_redaction_history_as_data_and_post_dispatch_aut
     class AssistantHost(Host):
         answer = 'This design is safe.'
         after_dispatch = None
-        def call_host(self, op, args, timeout):
+        def call_host(self, op, args, timeout, *, request_id):
+            assert request_id == 'r-synthetic'
             if op == 'provider.completeJson':
                 self.calls.append((op, args))
                 assert args['task'] == 'assistant' and args['system'] == routes_assist.SYSTEM
@@ -168,10 +178,10 @@ def test_desktop_assistant_keeps_redaction_history_as_data_and_post_dispatch_aut
                     self.after_dispatch()
                 return {'ok': True, 'value': {'json': {'answer': self.answer}, 'model': args['model'],
                         'effort': args['effort'], 'usage': None}}
-            return super().call_host(op, args, timeout)
+            return super().call_host(op, args, timeout, request_id=request_id)
 
     host = AssistantHost()
-    monkeypatch.setattr(bridge, 'ACTIVE', host)
+    bind_host(monkeypatch, host)
     with TestClient(create_app(store=workspace.store), base_url='http://localhost') as client:
         client.cookies.set('batatis_session', session['token'])
         body = {'case_id': case.id, 'screen': 'describe', 'question': 'Explain this field for Synthetic Owner.',

@@ -3,19 +3,19 @@ import pytest
 
 from engine import relevance
 from engine.desktop import bridge
-from engine.tests.test_desktop_provider_routing import Host
+from engine.tests.test_desktop_provider_routing import Host, bind_host
 
 
 def test_relevance_uses_selected_desktop_screening_with_web_live_off(monkeypatch):
     class ScreenHost(Host):
-        def call_host(self, op, args, timeout):
-            reply = super().call_host(op, args, timeout)
+        def call_host(self, op, args, timeout, *, request_id):
+            reply = super().call_host(op, args, timeout, request_id=request_id)
             if op == 'provider.profile':
                 reply['value']['screening'] = True
             return reply
 
     host = ScreenHost()
-    monkeypatch.setattr(bridge, 'ACTIVE', host)
+    bind_host(monkeypatch, host)
     monkeypatch.setenv('BATATIS_LIVE', '0')
     monkeypatch.delenv('BATATIS_PROVIDER', raising=False)
     judge = relevance.live_judge()

@@ -18,7 +18,7 @@ class Profile:
 def profile() -> Profile:
     from .host_provider import private_call
     try:
-        reply = private_call('provider.profile', {}, timeout=15)
+        reply = private_call('provider.profile', {}, context=bridge.REQUEST_CONTEXT.get(), timeout=15)
         value = reply.get('value') if reply.get('ok') else None
         if (isinstance(value, dict) and isinstance(value.get('lease'), str) and value['lease']
                 and value.get('generation') in ('off', 'chatgpt', 'openai')
@@ -38,12 +38,12 @@ def review_transport():
     selected = profile()
     if selected.generation == 'off':
         return None, 'off'
+    transport = host_transport('document-review', model=MODEL, effort=EFFORT,
+                               max_output_tokens=MAX_OUTPUT_TOKENS, lease=selected.lease)
 
     def call(system, user, schema, model, effort):
         if (model, effort) != (MODEL, EFFORT):
             raise GateClosed('desktop-profile')
-        transport = host_transport('document-review', model=model, effort=effort,
-                                   max_output_tokens=MAX_OUTPUT_TOKENS, lease=selected.lease)
         try:
             return transport(system, user, schema)
         except IntakeClosed as error:

@@ -262,25 +262,32 @@ def test_frames_reject_oversize_and_truncation():
 def test_a_host_call_carries_the_exact_model_and_keeps_unknown_usage_unknown():
     results = []
 
+    def run_calls():
+        transport = host_provider.host_transport('intake', model='model-exact', effort='low')
+        assert transport is not None
+        for user in ('first', 'unknown usage', 'substituted', 'unverified'):
+            try:
+                results.append(transport('system', user, {'type': 'object'}))
+            except GateClosed:
+                results.append('gate closed')
+
     async def app(scope, receive, send):
-        return
+        if scope['type'] != 'http':
+            return
+        await asyncio.to_thread(run_calls)
+        await send({'type': 'http.response.start', 'status': 200, 'headers': []})
+        await send({'type': 'http.response.body', 'body': b''})
 
     async def script(h):
-        loop = asyncio.get_running_loop()
         bridge.ACTIVE = h.bridge
         try:
-            transport = host_provider.host_transport('intake', model='model-exact', effort='low')
-            assert transport is not None
+            await request(h, 'r1')
 
             async def answer(user, reply):
-                pending = loop.run_in_executor(None, transport, 'system', user, {'type': 'object'})
                 await h.wait_for(lambda head, _: head['t'] == 'call' and head['args']['user'] == user)
                 call = [head for head, _ in h.written if head['t'] == 'call'][-1]
+                assert call['requestId'] == 'r1'
                 await h.send({'t': 'call.res', 'id': call['id'], **reply})
-                try:
-                    results.append(await pending)
-                except GateClosed:
-                    results.append('gate closed')
                 return call
 
             call = await answer('first', {'ok': True, 'value': {
@@ -295,6 +302,7 @@ def test_a_host_call_carries_the_exact_model_and_keeps_unknown_usage_unknown():
             await answer('substituted', {'ok': True, 'value': {
                 'json': {'facts': []}, 'model': 'another-model', 'effort': 'low', 'usage': None}})
             await answer('unverified', {'ok': False, 'reason': 'context_unverified', 'message': 'Not yet'})
+            await h.wait_for(lambda head, _: head.get('id') == 'r1' and head['t'] == 'body')
         finally:
             bridge.ACTIVE = None
 
