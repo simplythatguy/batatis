@@ -61,11 +61,6 @@ jobs:
         run: |
           target="$(node -p "process.platform + '-' + process.arch")"
           node codex/fetch.mjs runtime "$target"
-      - name: Typecheck and test the desktop host
-        working-directory: desktop
-        run: |
-          npm run typecheck
-          npm test
       - name: Prepare official sources for isolated test data only
         shell: bash
         run: |
@@ -75,6 +70,11 @@ jobs:
           "$py" scripts/fetch_sources.py
           "$py" -m codedb build
           echo "BATATIS_DESKTOP_PYTHON=$py" >> "$GITHUB_ENV"
+      - name: Typecheck and test the desktop host
+        working-directory: desktop
+        run: |
+          npm run typecheck
+          npm test
       - name: Exercise the native frozen engine and path regressions
         shell: bash
         run: |

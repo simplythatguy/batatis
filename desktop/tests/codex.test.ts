@@ -10,6 +10,7 @@ import { EFFORT, MODEL, RUNTIME_ARGS, processConfig } from "../src/main/codex/co
 import { bundledRuntime, childEnvironment, prepareHome } from "../src/main/codex/binary.ts";
 import { CATALOG } from "../src/main/codex/release.ts";
 import type { CompleteJsonRequest, HostProvider } from "../src/main/providers.ts";
+import { syntheticCodexEnvironment } from "./codex-fixture.ts";
 
 const REPO = resolve(import.meta.dirname, "../..");
 const RUNTIME_HASH = "f".repeat(64);
@@ -445,4 +446,31 @@ test("catalog pin and binary digest reject altered resources before any executio
 test("environment allow-list drops provider, proxy, agent and inherited path variables", () => {
   const source = { HOME: "/private/person", USER: "person", PATH: "/malicious", OPENAI_API_KEY: "key", HTTP_PROXY: "proxy", T3_TOKEN: "secret", CODEX_AUTH: "token", RUST_LOG: "debug" };
   assert.deepEqual(childEnvironment("/private/app/home", "darwin", source), { CODEX_HOME: "/private/app/home", HOME: "/private/person", USER: "person", PATH: "/usr/bin:/bin:/usr/sbin:/sbin" });
+});
+
+test("Win32 fixture environment reaches a native child without inherited provider or agent values", async (t) => {
+  const systemRoot = process.platform === "win32" ? process.env.SystemRoot : resolve(tmpdir(), "synthetic Windows root");
+  assert.ok(systemRoot, "native Windows fixtures require the runner SystemRoot");
+  const environment = syntheticCodexEnvironment(join(tmpdir(), "synthetic person"), {
+    sYsTeMrOoT: systemRoot, PATH: "malicious", OPENAI_API_KEY: "SYNTHETIC KEY", T3_SECRET: "SYNTHETIC SECRET",
+  });
+  const f = await setup(t, {}, { platform: "win32", environment });
+  assert.deepEqual(await complete(f.provider), { ok: true, json: { answer: "accepted" }, model: MODEL, effort: EFFORT, usage: null });
+  assert.deepEqual(f.commands[0].options.env, {
+    CODEX_HOME: await realpath(f.context.stateDir), SystemRoot: systemRoot,
+    PATH: [join(systemRoot, "System32"), join(systemRoot), join(systemRoot, "System32", "Wbem")].join(";"),
+  });
+  assert.ok((await f.messages()).some((message) => message.method === "turn/start"));
+});
+
+test("Win32 fixtures with missing or relative SystemRoot fail before any child is spawned", async (t) => {
+  for (const source of [{}, { SystemRoot: "relative" }]) {
+    const environment = syntheticCodexEnvironment(join(tmpdir(), "synthetic person"), source);
+    const f = await setup(t, {}, { platform: "win32", environment });
+    const state = await f.provider.status();
+    assert.equal(state.state, "unavailable");
+    if (state.state === "unavailable") assert.equal(state.reason, "runtime-missing");
+    assert.equal(f.commands.length, 0);
+    assert.deepEqual(await f.messages(), []);
+  }
 });

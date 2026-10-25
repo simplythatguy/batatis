@@ -8,6 +8,7 @@ import test, { type TestContext } from "node:test";
 import { codexProviderFactory, CODEX_CONTEXT_FINGERPRINT, type CodexTiming } from "../src/main/codex.ts";
 import { EFFORT, MODEL } from "../src/main/codex/config.ts";
 import type { CompleteJsonRequest, CompleteJsonResult } from "../src/main/providers.ts";
+import { syntheticCodexEnvironment } from "./codex-fixture.ts";
 
 const REPO = resolve(import.meta.dirname, "../..");
 const request: CompleteJsonRequest = {
@@ -96,7 +97,7 @@ async function fixture(t: TestContext, mode: Record<string, unknown> = {}, timin
   const provider = codexProviderFactory({
     runtime: async () => ({ executable: process.execPath, sha256: digest, catalog: await readFile(join(REPO, "desktop/codex/luna-models.json")) }),
     verifiedContext: { evidence: "Synthetic offline lifecycle fixture", runtimeSha256: digest, contextFingerprint: CODEX_CONTEXT_FINGERPRINT },
-    environment: { HOME: dir, USER: "synthetic" },
+    environment: syntheticCodexEnvironment(dir),
     spawn: (_command, _args, options) => {
       const child = spawn(process.execPath, [script, JSON.stringify(mode), capture], options);
       children.push(child);

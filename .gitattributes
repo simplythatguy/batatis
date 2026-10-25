@@ -1,0 +1,3 @@
+# Native evidence pins these bytes across macOS and Windows checkouts.
+desktop/** text=auto eol=lf
+desktop/codex/luna-models.json -text
