@@ -12,6 +12,7 @@ import os
 import threading
 import time
 from contextlib import contextmanager
+from functools import lru_cache
 from typing import TYPE_CHECKING
 
 from engine import llm_gate
@@ -187,7 +188,14 @@ def _invalid_constant(value):
     raise ElephantError('malformed')
 
 
+@lru_cache(maxsize=1)
 def _tls_context():
+    """The trust store is fixed local state: parse it once, not on every request.
+
+    `ssl.create_default_context` reads the whole CA bundle. On Windows that costs
+    about 0.4 s per call, which slowed every scoring call and spent the caller's
+    network deadline before a single byte was sent.
+    """
     import certifi
     import ssl
     return ssl.create_default_context(cafile=certifi.where())
@@ -201,7 +209,6 @@ def _post_once(body: bytes, headers: dict, timeout: float) -> tuple[int, bytes]:
     import httpx
     import ssl
     attempted = False
-    started = time.monotonic()
     if httpcore.__version__ != '1.0.9':
         raise ElephantError('transport_version_unverified', dispatched=False)
     try:
@@ -210,6 +217,16 @@ def _post_once(body: bytes, headers: dict, timeout: float) -> tuple[int, bytes]:
         pass
     else:
         raise ElephantError('synchronous_ask_requires_worker_thread', dispatched=False)
+
+    # Building and checking the trust store is local, fixed work, so it happens
+    # before the clock starts: the deadline covers the request, not the CA parse.
+    try:
+        context = _tls_context()
+    except Exception:
+        raise ElephantError('transport_not_ready', dispatched=False) from None
+    if context.verify_mode != ssl.CERT_REQUIRED or not context.check_hostname or not context.get_ca_certs():
+        raise ElephantError('tls_not_ready', dispatched=False)
+    started = time.monotonic()
 
     async def post():
         nonlocal attempted
@@ -224,9 +241,6 @@ def _post_once(body: bytes, headers: dict, timeout: float) -> tuple[int, bytes]:
 
         try:
             async with asyncio.timeout(timeout):
-                context = _tls_context()
-                if context.verify_mode != ssl.CERT_REQUIRED or not context.check_hostname or not context.get_ca_certs():
-                    raise ElephantError('tls_not_ready', dispatched=False)
                 if time.monotonic() - started >= timeout:
                     raise ElephantError('timeout', dispatched=False)
                 transport = httpx.AsyncHTTPTransport(verify=context, retries=0, trust_env=False)
