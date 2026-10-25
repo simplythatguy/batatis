@@ -139,7 +139,7 @@ export function SectionFooter({ items, index, skipped, onJump, onPrev, onNext, c
                 <span className="cf-qsec-lab">
                   <span className="cf-qsec-name" title={s.label}>{s.short}</span>
                   <span className="cf-qsec-l"><span className="cf-sr">, Section </span>{s.id}</span>
-                  <span className="cf-qsec-count">{s.id === "C" ? `${references} confirmed` : <>{s.done}<span className="cf-qsec-of"> of </span><span className="cf-qsec-slash" aria-hidden="true">/</span>{s.total}</>}</span>
+                  <span className="cf-qsec-count">{s.id === "C" ? <>{references}<span className="cf-qsec-confirmed" aria-hidden="true"> confirmed</span><span className="cf-sr"> confirmed</span></> : <>{s.done}<span className="cf-qsec-of"> of </span><span className="cf-qsec-slash" aria-hidden="true">/</span>{s.total}</>}</span>
                 </span>
                 <span className="cf-sr">. {s.on ? `Current question: ${items[index]?.title}. ` : ""}{s.at.filter((x) => questionProgress(x.it, undefined, skipped) === "skipped").length} skipped. Go to the first open question here.</span>
               </button>

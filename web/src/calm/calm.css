@@ -5079,7 +5079,8 @@ body {
 /* Compact: "C · 0/1" (narrow segment, assistant open, phone). */
 @container qsec (max-width: 124px) {
   .cf-qsec-name,
-  .cf-qsec-of {
+  .cf-qsec-of,
+  .cf-qsec-confirmed {
     display: none;
   }
   .cf-qsec-slash {
@@ -5094,7 +5095,7 @@ body {
   min-width: 64px;
 }
 
-.cf-app[data-assistant="open"] :is(.cf-qsec-name, .cf-qsec-of) {
+.cf-app[data-assistant="open"] :is(.cf-qsec-name, .cf-qsec-of, .cf-qsec-confirmed) {
   display: none;
 }
 
@@ -5389,7 +5390,8 @@ body {
     font-size: 12px;
   }
   .cf-qsec-name,
-  .cf-qsec-of {
+  .cf-qsec-of,
+  .cf-qsec-confirmed {
     display: none;
   }
   .cf-qsec-slash {
