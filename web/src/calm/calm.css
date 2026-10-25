@@ -5660,12 +5660,9 @@ a.cf-save-check {
   color: var(--cf-text-3);
 }
 
-.cf-review-fork .cf-fork {
-  margin-top: 4px;
-}
-
 .cf-preapp {
   margin-top: 6px;
+  padding-bottom: 64px;
   max-width: 620px;
 }
 
