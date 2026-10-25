@@ -14,6 +14,7 @@ from pathlib import Path
 from engine.desktop.bridge import MAX_BODY, encode, read_frame
 
 ROOT = Path(__file__).resolve().parents[2]
+STDERR_LIMIT = 64 * 1024
 
 
 @dataclass
@@ -34,8 +35,12 @@ class Reply:
 
 
 def engine_env(kind: str, root: Path, codedb: Path | None = None, **extra: str) -> dict[str, str]:
-    env = {key: value for key, value in os.environ.items()
-           if key in {'PATH', 'HOME', 'TMPDIR', 'SYSTEMROOT', 'LANG', 'PYTHONPATH'}}
+    home = root / 'engine-home'
+    home.mkdir(parents=True, exist_ok=True)
+    env = {key.upper(): value for key, value in os.environ.items()
+           if key.upper() in {'PATH', 'SYSTEMROOT', 'WINDIR', 'TEMP', 'TMP', 'TMPDIR',
+                              'LANG', 'LC_ALL', 'LC_CTYPE'}}
+    env.update(HOME=str(home), USERPROFILE=str(home), PYTHONNOUSERSITE='1')
     env.update(BATATIS_DESKTOP_WORKSPACE=kind, BATATIS_CASES=str(root / kind / 'cases.sqlite'),
                BATATIS_CODEDB=str(codedb or root / 'no-codedb' / 'codedb.sqlite'), PYTHONDONTWRITEBYTECODE='1')
     env.update(extra)
@@ -58,10 +63,27 @@ class EngineProcess:
         self.frames: queue.Queue = queue.Queue()
         self.ids = itertools.count(1)
         self.lock = threading.Lock()
-        self.stderr: list[bytes] = []
-        threading.Thread(target=self._pump, daemon=True).start()
-        threading.Thread(target=lambda: self.stderr.extend(self.proc.stderr), daemon=True).start()
-        self.hello, _ = self.next_frame(timeout=60)
+        self.stderr = bytearray()
+        self.readers = (threading.Thread(target=self._pump, daemon=True),
+                        threading.Thread(target=self._collect_stderr, daemon=True))
+        for reader in self.readers:
+            reader.start()
+        try:
+            self.hello, _ = self.next_frame(timeout=60)
+        except Exception as error:
+            try:
+                self.close(timeout=5)
+            except Exception as cleanup_error:
+                error.add_note(f'engine startup cleanup raised {cleanup_error!r}')
+            diagnostic = self.stderr.decode('utf-8', errors='replace')
+            error.add_note(f'engine startup failed; exit code {self.proc.poll()}\n'
+                           f'stderr tail ({STDERR_LIMIT} byte limit):\n{diagnostic or "<empty>"}')
+            raise
+
+    def _collect_stderr(self):
+        while chunk := self.proc.stderr.read1(4096):
+            self.stderr.extend(chunk)
+            del self.stderr[:-STDERR_LIMIT]
 
     def _pump(self):
         try:
@@ -131,10 +153,17 @@ class EngineProcess:
                 return header
 
     def close(self, timeout: float = 20) -> int:
-        if self.proc.stdin and not self.proc.stdin.closed:
-            self.proc.stdin.close()
         try:
+            if self.proc.stdin and not self.proc.stdin.closed:
+                self.proc.stdin.close()
             return self.proc.wait(timeout=timeout)
         finally:
             if self.proc.poll() is None:
                 self.proc.kill()
+                self.proc.wait(timeout=5)
+            for reader in self.readers:
+                reader.join(timeout=5)
+            if any(reader.is_alive() for reader in self.readers):
+                raise RuntimeError('engine pipe collectors did not stop')
+            self.proc.stdout.close()
+            self.proc.stderr.close()
