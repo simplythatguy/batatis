@@ -1,4 +1,5 @@
 """Synthetic intake over the production private bridge, without a socket or provider."""
+import atexit
 import io
 import sys
 import threading
@@ -12,6 +13,8 @@ from engine.identify.providers import transports
 from engine.identify.screen import Judge
 from engine.models import Case
 from engine.routes_intake import create_router
+
+atexit.register(lambda: print('request-lifetime: Python atexit', file=sys.stderr, flush=True))
 
 document = io.BytesIO()
 pdf = canvas.Canvas(document)
@@ -118,3 +121,5 @@ async def observed_app(scope, receive, send):
 bridge.run(observed_app, hello={'workspace': {'kind': 'local', 'id': 'synthetic'},
                                'codedb': {'available': False, 'build': None, 'expectedBuild': 'synthetic'}},
            control=None, body_limit=5_000_000)
+print('request-lifetime: bridge stopped; threads=' + ','.join(thread.name for thread in threading.enumerate()),
+      file=sys.stderr, flush=True)

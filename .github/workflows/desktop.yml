@@ -75,6 +75,19 @@ jobs:
         run: |
           npm run typecheck
           npm test
+      - name: Repeat the Windows worker shutdown regression
+        if: runner.os == 'Windows'
+        working-directory: desktop
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in {1..16}; do
+            echo "Worker shutdown attempt $attempt/16"
+            node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON \
+              --import ./scripts/register-ts.mjs --test \
+              --test-name-pattern='^optional Jev screening keeps its origin through real Judge worker threads$' \
+              tests/workflow-request-lifetime.test.ts
+          done
       - name: Exercise the native frozen engine and path regressions
         shell: bash
         run: |

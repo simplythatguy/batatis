@@ -113,14 +113,20 @@ for (const ending of ["abort", "finish", "fail", "reader-cancel"]) {
 
 async function fixtureEngine(t: Parameters<typeof scratch>[0], onCall: HostCall) {
   const markers = new EventEmitter();
+  const diagnostics: string[] = [];
   const command = pythonCommand(scratch(t), "local");
-  const started = await startEngine({ ...command, args: ["-c", fixture] }, { onCall, log: (line) => {
+  const started = await startEngine({ ...command, args: ["-X", "faulthandler", "-c", fixture] }, { onCall, log: (line) => {
+    diagnostics.push(line);
+    if (diagnostics.length > 100) diagnostics.shift();
     const prefix = "engine: request-lifetime: completed ";
     if (line.startsWith(prefix)) markers.emit(line.slice(prefix.length));
   } });
-  assert.equal(started.kind, "ready");
+  assert.equal(started.kind, "ready", diagnostics.join("\n"));
   if (started.kind !== "ready") throw new Error("synthetic fixture failed to start");
-  t.after(async () => { await started.engine.stop(); assert.equal(await started.engine.exited, 0); });
+  t.after(async () => {
+    await started.engine.stop();
+    assert.equal(await started.engine.exited, 0, diagnostics.join("\n"));
+  });
   return { engine: started.engine, markers };
 }
 
@@ -291,6 +297,7 @@ for (const cancelled of [false, true]) {
     assert.equal(gate.kind, "open");
     if (gate.kind !== "open") return;
     const engine = gate.engine;
+    assert.ok(engine instanceof Engine);
     const api = withProviderCancellation(createAppProtocol({ distDir: userData, gate: () => host.gate(host.generation) }),
       (kind) => kind === "identity" ? host.prepareSessionChange() : host.cancelAI());
     const intake = (tag: string, signal?: AbortSignal) => api(new Request(`batatis://app/api/cases/case_synthetic/intake?${tag}`, {
