@@ -2,8 +2,8 @@
 
 One request per case grades all of its items. A covered item must come with an excerpt that occurs in
 the report, or it is scored as not covered (the judge cannot credit text the report does not contain).
-Prohibitions (review points that say what an answer must not do) are classified by their wording, not
-by the judge: they pass unless the judge shows a violating excerpt that occurs in the report.
+Prohibitions (review points that say what an answer must not do) are classified by their wording.
+Missing or malformed verdicts fail closed, including prohibitions.
 Verdicts are cached by (judge version, model, effort, request, report, items).
 """
 from __future__ import annotations
@@ -13,15 +13,15 @@ import json
 import os
 import re
 import time
-import unicodedata
-from dataclasses import dataclass
+from collections import Counter
+from dataclasses import asdict, dataclass
 
 import httpx
 
 from . import ledger
 from .gold import Item
 
-VERSION = 'judge-v5'
+VERSION = 'judge-v7-strict'
 CACHE = ledger.CACHE.parent / 'judge'
 URL = 'https://api.openai.com/v1/chat/completions'
 # A review point that only says what an answer must not do. "no compliance certification" is one;
@@ -80,24 +80,16 @@ def is_prohibition(item: Item) -> bool:
     return item.kind == 'R' and ';' not in item.text and bool(PROHIBITION.search(item.text))
 
 
-def _norm(text: str) -> str:
-    text = unicodedata.normalize('NFKC', text or '').casefold()
-    text = re.sub(r'[‘’“”"\'`]', '', text)
-    text = re.sub(r'[‐-―]', '-', text)
-    return re.sub(r'\s+', ' ', text).strip(' .,;:')
-
-
 def found(evidence: str, report: str) -> bool:
-    excerpt = _norm(evidence)
-    if len(excerpt) < 4:
+    if not isinstance(evidence, str) or not evidence.strip():
         return False
-    if excerpt in _norm(report):
+    if evidence in report:
         return True
     # A long excerpt the judge shortened with an ellipsis: every part must occur, in order.
-    parts = [p for p in re.split(r'\s*(?:\.\.\.|…)\s*', excerpt) if len(p) >= 4]
+    parts = [p for p in re.split(r'\s*(?:\.\.\.|…)\s*', evidence) if p]
     if len(parts) < 2:
         return False
-    body, at = _norm(report), 0
+    body, at = report, 0
     for part in parts:
         at = body.find(part, at)
         if at < 0:
@@ -117,8 +109,13 @@ class Verdict:
 
 def _key(model: str, effort: str, request: str, report: str, items: list[Item]) -> str:
     # DPE_JUDGE_NONCE draws a fresh, separately cached set of verdicts: used to measure judge noise.
+    if model.startswith('deepseek'):
+        from .deepseek_review import MAX_TOKENS, URL as provider_url
+    else:
+        MAX_TOKENS, provider_url = 16000, URL
     blob = json.dumps({'v': VERSION, 'n': os.environ.get('DPE_JUDGE_NONCE', ''), 'm': model, 'e': effort,
-                       'q': request, 'r': report,
+                       'max_output_tokens': MAX_TOKENS, 'provider_url': provider_url,
+                       'system': SYSTEM, 'schema': schema(), 'q': request, 'r': report,
                        'i': [(i.id, i.kind, i.text) for i in items]}, sort_keys=True, ensure_ascii=False)
     return hashlib.sha256(blob.encode()).hexdigest()
 
@@ -138,6 +135,8 @@ def _call(model: str, effort: str, user: str) -> dict:
                 continue
             response.raise_for_status()
             data = response.json()
+            if data['choices'][0].get('finish_reason') not in (None, 'stop'):
+                raise ValueError('judge completion did not finish')
             return json.loads(data['choices'][0]['message']['content'])
         except (httpx.ConnectError, httpx.ConnectTimeout, httpx.ReadError, httpx.ReadTimeout,
                 httpx.RemoteProtocolError, httpx.WriteError, httpx.PoolTimeout):
@@ -151,15 +150,24 @@ def grade(request: str, report: str, items: list[Item], *, model: str, effort: s
           book: ledger.Ledger | None = None) -> list[Verdict]:
     if not items:
         return []
+    if len({i.id for i in items}) != len(items):
+        raise ValueError('duplicate reference item ids')
     key = _key(model, effort, request, report, items)
     path = CACHE / key[:2] / f'{key}.json'
+    active_book = book if book is not None else ledger.Ledger()
     if path.exists():
-        payload = json.loads(path.read_text())
+        cached = json.loads(path.read_text())
+        if cached.get('validator_version') != VERSION:
+            return [Verdict(i.id, i.kind, False, '', 'old-validator') for i in items]
+        payload = cached['payload']
+        ledger.replay(cached['calls'], active_book)
     else:
         user = json.dumps({'request': request, 'report': report,
+                           'experiment_nonce': os.environ.get('DPE_JUDGE_NONCE', ''),
                            'items': [{'id': i.id, 'kind': i.kind, 'prohibition': is_prohibition(i), 'text': i.text}
                                      for i in items]}, ensure_ascii=False)
-        token = ledger.CURRENT.set(book or ledger.Ledger())
+        before = len(active_book.calls)
+        token = ledger.CURRENT.set(active_book)
         try:
             if model.startswith('deepseek'):     # a provisional judge for paired comparisons; Sol is the reference
                 from .deepseek_review import chat_json
@@ -170,24 +178,43 @@ def grade(request: str, report: str, items: list[Item], *, model: str, effort: s
                 payload = _call(model, effort, user)
         finally:
             ledger.CURRENT.reset(token)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        tmp = path.with_suffix(f'.{os.getpid()}.tmp')
-        tmp.write_text(json.dumps(payload))
-        os.replace(tmp, path)
-    by_id = {v.get('id'): v for v in payload.get('items') or [] if isinstance(v, dict)}
+        ledger.write_artifact(path, json.dumps({'validator_version': VERSION, 'request_hash': key,
+                                               'payload': payload,
+                                               'calls': [asdict(c) for c in active_book.calls[before:]]}))
+    # Validate the external boundary before interpreting any verdict. Unknown ids or malformed list
+    # entries make the response ambiguous; missing/duplicate individual ids never receive credit.
+    if not isinstance(payload, dict) or set(payload) != {'items'} or not isinstance(payload['items'], list):
+        return [Verdict(i.id, i.kind, False, '', 'invalid_payload') for i in items]
+    expected = {i.id for i in items}
+    if any(not isinstance(v, dict) or not isinstance(v.get('id'), str) or v['id'] not in expected
+           for v in payload['items']):
+        return [Verdict(i.id, i.kind, False, '', 'invalid_ids') for i in items]
+    counts = Counter(v['id'] for v in payload['items'])
+    by_id = {v['id']: v for v in payload['items']}
     out = []
     for item in items:
         v = by_id.get(item.id)
         if v is None:
-            out.append(Verdict(item.id, item.kind, is_prohibition(item), '', 'missing_verdict'))
+            out.append(Verdict(item.id, item.kind, False, '', 'missing_verdict'))
             continue
-        raw = v.get('evidence') or []
-        excerpts = [str(e) for e in (raw if isinstance(raw, list) else [raw]) if str(e).strip()]
+        if counts[item.id] != 1:
+            out.append(Verdict(item.id, item.kind, False, '', 'duplicate_verdict'))
+            continue
+        if (set(v) != {'id', 'covered', 'evidence'} or type(v['covered']) is not bool
+                or not isinstance(v['evidence'], list)
+                or any(not isinstance(e, str) or not e.strip() for e in v['evidence'])):
+            out.append(Verdict(item.id, item.kind, False, '', 'invalid_verdict'))
+            continue
+        excerpts = v['evidence']
         evidence = ' | '.join(excerpts)
         if is_prohibition(item):
-            violated = (not v.get('covered')) and any(found(e, report) for e in excerpts)
-            out.append(Verdict(item.id, item.kind, not violated, evidence, 'violation' if violated else ''))
-        elif v.get('covered'):
+            if v['covered']:
+                out.append(Verdict(item.id, item.kind, not excerpts, evidence,
+                                   'invalid_verdict' if excerpts else ''))
+            else:
+                verified = bool(excerpts) and all(found(e, report) for e in excerpts)
+                out.append(Verdict(item.id, item.kind, False, evidence, 'violation' if verified else 'unverified'))
+        elif v['covered']:
             ok = bool(excerpts) and all(found(e, report) for e in excerpts)
             out.append(Verdict(item.id, item.kind, ok, evidence, '' if ok else 'unverified'))
         else:

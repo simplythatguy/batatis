@@ -1,0 +1,727 @@
+{
+  "baseline_dev": {
+    "source": ".dpe-cache/runs/baseline/score-dev-gpt-6.1-sol-low.summary.json",
+    "sha256": "9662cab1272a0ed395fa219d2c83fad322a0961b6872da13a11520c680b9152e",
+    "provenance": "historical, pre-integrity-repair; not a new final-source result",
+    "summary": {
+      "cases": 334,
+      "accuracy": 0.2003,
+      "checks": 2981,
+      "by_kind": {
+        "A": {
+          "n": 63,
+          "passed": 56,
+          "rate": 0.8889
+        },
+        "B": {
+          "n": 352,
+          "passed": 5,
+          "rate": 0.0142
+        },
+        "F": {
+          "n": 1255,
+          "passed": 231,
+          "rate": 0.1841
+        },
+        "R": {
+          "n": 1311,
+          "passed": 305,
+          "rate": 0.2326
+        },
+        "all": {
+          "n": 2981,
+          "passed": 597,
+          "rate": 0.2003
+        }
+      },
+      "guardrails": {
+        "citations_resolve": {
+          "n": 334,
+          "passed": 334,
+          "rate": 1.0
+        },
+        "no_alberta_commit_outside_alberta": {
+          "n": 334,
+          "passed": 334,
+          "rate": 1.0
+        },
+        "no_claims": {
+          "n": 334,
+          "passed": 334,
+          "rate": 1.0
+        },
+        "ran": {
+          "n": 334,
+          "passed": 334,
+          "rate": 1.0
+        }
+      },
+      "cost": {
+        "workflow_usd_total": 0.8924,
+        "workflow_usd_per_case": 0.00267,
+        "live_usd_this_run": 0.6986,
+        "provider_calls": 1709,
+        "judge_usd_total": 4.4447
+      }
+    }
+  },
+  "baseline_holdout_aggregate": {
+    "source": ".dpe-cache/runs/baseline/score-holdout-gpt-6.1-sol-low.summary.json",
+    "sha256": "51ae0e1205b7b7c265da2e5a5fb42e29243df3fcebd00e0a7b2c937f0d4f65c1",
+    "provenance": "historical, pre-integrity-repair; not a new final-source result",
+    "summary": {
+      "cases": 319,
+      "accuracy": 0.2066,
+      "checks": 2851,
+      "by_kind": {
+        "A": {
+          "n": 63,
+          "passed": 60,
+          "rate": 0.9524
+        },
+        "B": {
+          "n": 346,
+          "passed": 1,
+          "rate": 0.0029
+        },
+        "F": {
+          "n": 1178,
+          "passed": 216,
+          "rate": 0.1834
+        },
+        "R": {
+          "n": 1264,
+          "passed": 312,
+          "rate": 0.2468
+        },
+        "all": {
+          "n": 2851,
+          "passed": 589,
+          "rate": 0.2066
+        }
+      },
+      "guardrails": {
+        "citations_resolve": {
+          "n": 319,
+          "passed": 319,
+          "rate": 1.0
+        },
+        "no_alberta_commit_outside_alberta": {
+          "n": 319,
+          "passed": 319,
+          "rate": 1.0
+        },
+        "no_claims": {
+          "n": 319,
+          "passed": 319,
+          "rate": 1.0
+        },
+        "ran": {
+          "n": 319,
+          "passed": 319,
+          "rate": 1.0
+        }
+      },
+      "cost": {
+        "workflow_usd_total": 0.7998,
+        "workflow_usd_per_case": 0.00251,
+        "live_usd_this_run": 0.7562,
+        "provider_calls": 1627,
+        "judge_usd_total": 4.2452
+      }
+    }
+  },
+  "luna_review_dev": {
+    "source": ".dpe-cache/runs/it1-review/score-dev-gpt-6.1-sol-low.summary.json",
+    "sha256": "cea74539c65350a8e96664bb481bed3cd68f4a1ab90f4e08abda4076946d9bd2",
+    "provenance": "historical, pre-integrity-repair; not a new final-source result",
+    "summary": {
+      "cases": 334,
+      "accuracy": 0.7742,
+      "checks": 2981,
+      "by_kind": {
+        "A": {
+          "n": 63,
+          "passed": 57,
+          "rate": 0.9048
+        },
+        "B": {
+          "n": 352,
+          "passed": 289,
+          "rate": 0.821
+        },
+        "F": {
+          "n": 1255,
+          "passed": 891,
+          "rate": 0.71
+        },
+        "R": {
+          "n": 1311,
+          "passed": 1071,
+          "rate": 0.8169
+        },
+        "all": {
+          "n": 2981,
+          "passed": 2308,
+          "rate": 0.7742
+        }
+      },
+      "guardrails": {
+        "citations_resolve": {
+          "n": 334,
+          "passed": 334,
+          "rate": 1.0
+        },
+        "no_alberta_commit_outside_alberta": {
+          "n": 334,
+          "passed": 334,
+          "rate": 1.0
+        },
+        "no_claims": {
+          "n": 334,
+          "passed": 305,
+          "rate": 0.9132
+        },
+        "ran": {
+          "n": 334,
+          "passed": 334,
+          "rate": 1.0
+        }
+      },
+      "cost": {
+        "workflow_usd_total": 2.4514,
+        "workflow_usd_per_case": 0.00734,
+        "live_usd_this_run": 1.2909,
+        "provider_calls": 2033,
+        "judge_usd_total": 8.7914
+      }
+    }
+  },
+  "luna_matched_dev99": {
+    "source": ".dpe-cache/runs/it1-review/score-ids-de4ea01a975c-deepseek-flash-max.summary.json",
+    "sha256": "ee3c2375f00493d3766d658e84ea8e4bd300a7fb48ede7446de2c9000bfbcb23",
+    "provenance": "historical, pre-integrity-repair; not a new final-source result",
+    "summary": {
+      "cases": 99,
+      "accuracy": 0.8365,
+      "checks": 850,
+      "by_kind": {
+        "A": {
+          "n": 17,
+          "passed": 15,
+          "rate": 0.8824
+        },
+        "B": {
+          "n": 104,
+          "passed": 99,
+          "rate": 0.9519
+        },
+        "F": {
+          "n": 351,
+          "passed": 263,
+          "rate": 0.7493
+        },
+        "R": {
+          "n": 378,
+          "passed": 334,
+          "rate": 0.8836
+        },
+        "all": {
+          "n": 850,
+          "passed": 711,
+          "rate": 0.8365
+        }
+      },
+      "guardrails": {
+        "citations_resolve": {
+          "n": 99,
+          "passed": 99,
+          "rate": 1.0
+        },
+        "no_alberta_commit_outside_alberta": {
+          "n": 99,
+          "passed": 99,
+          "rate": 1.0
+        },
+        "no_claims": {
+          "n": 99,
+          "passed": 98,
+          "rate": 0.9899
+        },
+        "ran": {
+          "n": 99,
+          "passed": 99,
+          "rate": 1.0
+        }
+      },
+      "cost": {
+        "workflow_usd_total": 0.6958,
+        "workflow_usd_per_case": 0.00703,
+        "live_usd_this_run": 0.3774,
+        "provider_calls": 608,
+        "judge_usd_total": 0.8466
+      }
+    }
+  },
+  "deepseek_matched_dev99": {
+    "source": ".dpe-cache/runs/deepseek-max-dev100/score-ids-de4ea01a975c-deepseek-flash-max.summary.json",
+    "sha256": "bb289bfc6192957d7d9bc1375c59121962d3e4d2bcc17d23932d3cc847e85911",
+    "provenance": "historical, pre-integrity-repair; not a new final-source result",
+    "summary": {
+      "cases": 99,
+      "accuracy": 0.8318,
+      "checks": 850,
+      "by_kind": {
+        "A": {
+          "n": 17,
+          "passed": 15,
+          "rate": 0.8824
+        },
+        "B": {
+          "n": 104,
+          "passed": 95,
+          "rate": 0.9135
+        },
+        "F": {
+          "n": 351,
+          "passed": 267,
+          "rate": 0.7607
+        },
+        "R": {
+          "n": 378,
+          "passed": 330,
+          "rate": 0.873
+        },
+        "all": {
+          "n": 850,
+          "passed": 707,
+          "rate": 0.8318
+        }
+      },
+      "guardrails": {
+        "citations_resolve": {
+          "n": 99,
+          "passed": 99,
+          "rate": 1.0
+        },
+        "no_alberta_commit_outside_alberta": {
+          "n": 99,
+          "passed": 99,
+          "rate": 1.0
+        },
+        "no_claims": {
+          "n": 99,
+          "passed": 99,
+          "rate": 1.0
+        },
+        "ran": {
+          "n": 99,
+          "passed": 99,
+          "rate": 1.0
+        }
+      },
+      "cost": {
+        "workflow_usd_total": 3.0834,
+        "workflow_usd_per_case": 0.03115,
+        "live_usd_this_run": 2.7752,
+        "provider_calls": 621,
+        "judge_usd_total": 0.8883
+      }
+    }
+  },
+  "last_prompt_comparison": {
+    "source": "14 preregistered independent development source components; no holdout",
+    "scope": "review experiment with offline keyword identification, not production/provider parity",
+    "validator_version": "judge-v7-strict",
+    "summary": {
+      "base": {
+        "cases": 14,
+        "cases_expected": 14,
+        "cases_scored": 13,
+        "cases_failed": 1,
+        "accuracy": 0.6846,
+        "checks": 130,
+        "checks_expected": 130,
+        "checks_scored": 121,
+        "checks_failed": 41,
+        "checks_unscored": 9,
+        "by_kind": {
+          "A": {
+            "n": 7,
+            "passed": 5,
+            "rate": 0.7143
+          },
+          "B": {
+            "n": 16,
+            "passed": 15,
+            "rate": 0.9375
+          },
+          "F": {
+            "n": 51,
+            "passed": 27,
+            "rate": 0.5294
+          },
+          "R": {
+            "n": 56,
+            "passed": 42,
+            "rate": 0.75
+          },
+          "all": {
+            "n": 130,
+            "passed": 89,
+            "rate": 0.6846
+          }
+        },
+        "by_tier": {
+          "Calgary / Edmonton": {
+            "n": 26,
+            "passed": 23,
+            "rate": 0.8846
+          },
+          "Canadian supporting evidence": {
+            "n": 34,
+            "passed": 26,
+            "rate": 0.7647
+          },
+          "Other Alberta / province-wide": {
+            "n": 23,
+            "passed": 11,
+            "rate": 0.4783
+          },
+          "Outside Alberta - attachment comparison only": {
+            "n": 47,
+            "passed": 29,
+            "rate": 0.617
+          }
+        },
+        "guardrails": {
+          "citations_resolve": {
+            "n": 14,
+            "passed": 14,
+            "rate": 1.0
+          },
+          "no_alberta_commit_outside_alberta": {
+            "n": 14,
+            "passed": 14,
+            "rate": 1.0
+          },
+          "no_claims": {
+            "n": 14,
+            "passed": 14,
+            "rate": 1.0
+          },
+          "ran": {
+            "n": 14,
+            "passed": 13,
+            "rate": 0.9286
+          }
+        },
+        "judge_notes": {
+          "document_review:failed:InvalidJson": 9
+        },
+        "review_status": {
+          "live": 13,
+          "failed": 1
+        },
+        "failure_reasons": {
+          "document_review:failed:InvalidJson": 1
+        },
+        "cases_with_unread_input": 8,
+        "provenance": {
+          "controlled-experiment:bfe13c882ec774b205914efb679c18dbef4651b1e46ff72db9c8e84e63dd1952": 14
+        },
+        "validator_versions": {
+          "judge-v7-strict": 14
+        },
+        "cost": {
+          "workflow_usd_total": 0.4655,
+          "workflow_usd_per_case": 0.03325,
+          "live_usd_this_run": 0,
+          "provider_calls": 16,
+          "judge_usd_total": 0.1014,
+          "judge_live_usd_total": 0.1014,
+          "unknown_cost_attempts": 0,
+          "judge_unknown_cost_attempts": 2,
+          "cases_with_unverified_cost": 0,
+          "cost_complete": false
+        },
+        "validator_version": "judge-v7-strict",
+        "judge": "deepseek-flash:max",
+        "source_sha256": "3b45b844fa594d6324d0d928db04239f1c6451f5575e5c017787588cdb17d220",
+        "known_judge_usd_exact": 0.101448,
+        "passed_checks_exact": 89
+      },
+      "v3": {
+        "cases": 14,
+        "cases_expected": 14,
+        "cases_scored": 11,
+        "cases_failed": 3,
+        "accuracy": 0.7,
+        "checks": 130,
+        "checks_expected": 130,
+        "checks_scored": 117,
+        "checks_failed": 39,
+        "checks_unscored": 13,
+        "by_kind": {
+          "A": {
+            "n": 7,
+            "passed": 4,
+            "rate": 0.5714
+          },
+          "B": {
+            "n": 16,
+            "passed": 15,
+            "rate": 0.9375
+          },
+          "F": {
+            "n": 51,
+            "passed": 30,
+            "rate": 0.5882
+          },
+          "R": {
+            "n": 56,
+            "passed": 42,
+            "rate": 0.75
+          },
+          "all": {
+            "n": 130,
+            "passed": 91,
+            "rate": 0.7
+          }
+        },
+        "by_tier": {
+          "Calgary / Edmonton": {
+            "n": 26,
+            "passed": 15,
+            "rate": 0.5769
+          },
+          "Canadian supporting evidence": {
+            "n": 34,
+            "passed": 30,
+            "rate": 0.8824
+          },
+          "Other Alberta / province-wide": {
+            "n": 23,
+            "passed": 14,
+            "rate": 0.6087
+          },
+          "Outside Alberta - attachment comparison only": {
+            "n": 47,
+            "passed": 32,
+            "rate": 0.6809
+          }
+        },
+        "guardrails": {
+          "citations_resolve": {
+            "n": 14,
+            "passed": 14,
+            "rate": 1.0
+          },
+          "no_alberta_commit_outside_alberta": {
+            "n": 14,
+            "passed": 14,
+            "rate": 1.0
+          },
+          "no_claims": {
+            "n": 14,
+            "passed": 14,
+            "rate": 1.0
+          },
+          "ran": {
+            "n": 14,
+            "passed": 13,
+            "rate": 0.9286
+          }
+        },
+        "judge_notes": {
+          "document_review:failed:ValidationError": 9,
+          "unverified": 4
+        },
+        "review_status": {
+          "live": 13,
+          "failed": 1
+        },
+        "failure_reasons": {
+          "document_review:failed:ValidationError": 1,
+          "judge_invalid_verdict": 2
+        },
+        "cases_with_unread_input": 7,
+        "provenance": {
+          "controlled-experiment:bfe13c882ec774b205914efb679c18dbef4651b1e46ff72db9c8e84e63dd1952": 14
+        },
+        "validator_versions": {
+          "judge-v7-strict": 14
+        },
+        "cost": {
+          "workflow_usd_total": 0.4969,
+          "workflow_usd_per_case": 0.03549,
+          "live_usd_this_run": 0,
+          "provider_calls": 16,
+          "judge_usd_total": 0.1272,
+          "judge_live_usd_total": 0.1272,
+          "unknown_cost_attempts": 0,
+          "judge_unknown_cost_attempts": 2,
+          "cases_with_unverified_cost": 0,
+          "cost_complete": false
+        },
+        "validator_version": "judge-v7-strict",
+        "judge": "deepseek-flash:max",
+        "source_sha256": "3b45b844fa594d6324d0d928db04239f1c6451f5575e5c017787588cdb17d220",
+        "known_judge_usd_exact": 0.127168,
+        "passed_checks_exact": 91
+      }
+    },
+    "delta": 0.01539999999999997,
+    "exploratory_source_bootstrap_interval": [
+      -0.1333333333333333,
+      0.15172413793103445
+    ],
+    "target_verified": false,
+    "limitation": "Small development-only prompt comparison with offline keyword identification; not full653-case, holdout, production or independent-human accuracy evidence.",
+    "context_audit": {
+      "manifest_sha256": "26f8d2ce95f15b3b8ab3b8b1406f3466b8f7fc38b9ec668652bcebfb22a2f4d9",
+      "registered_cases": 14,
+      "intended_contexts": 28,
+      "equal_case_pairs": 14,
+      "captured_live_requests": 32,
+      "failures": [],
+      "context_verified": true,
+      "accuracy_claim": false
+    },
+    "latency_note": "Host entered low-power sleep at 2026-10-25T12:07:39Z and woke at14:18:01Z; do not use interrupted judging wall time as provider latency evidence."
+  },
+  "locked_profile": {
+    "generation_model": "gpt-6-luna",
+    "generation_effort": "medium",
+    "review_prompt_sha256": "4a29a9bd45488d5d531b9cfaa6c5d37cab285c3576b6fb63a27743611b3054d0",
+    "review_prompt_matches_commit": "437e0f553e8faef6a9b8525a56bbd1d4a7616f4b",
+    "screen": "jev",
+    "rerank": "jev",
+    "scoring_model": "jev-1.13.0",
+    "rerank_n": 60,
+    "verify_model": "gpt-6-luna",
+    "verify_effort": "medium",
+    "verify_n": 15,
+    "config_hash": "5f1c92331550984a",
+    "combined_current_accuracy_verified": false,
+    "automatic_commit_calibration": "not introduced"
+  },
+  "responses_pilot": {
+    "source": "external dpe-work/opus-schema-iteration/runs/responses-schema-dev14/pilot-summary.json",
+    "sha256": "5505b4cd1f5e6eb330707a11167025ff1402e979f45ebb1631bebe50ffb75981",
+    "cases": 4,
+    "passed_checks": 28,
+    "checks": 29,
+    "review_attempts": 5,
+    "review_usd": 0.136322,
+    "judge_usd": 0.028869,
+    "known_total_usd": 0.165191,
+    "unknown_cost_attempts": 0,
+    "decision": "reject; not adopted",
+    "limitations": [
+      "four development cases",
+      "offline keyword identification",
+      "one sample per arm",
+      "no holdout",
+      "not a Luna workflow result"
+    ],
+    "expansion_started": false
+  },
+  "corpus_shape_repairs": {
+    "commit": "8dbf2760",
+    "before_harness_commit": "721ad421",
+    "wording_preserved": true,
+    "scope": "shape/count audit only; no item-level holdout errors read",
+    "files": [
+      {
+        "path": "Data Prompts/Canada/British Columbia/Unspecified locality/Prompts/L07-003-bcab-2005-provision-of-water-supply-for-firefighting/evaluation.json",
+        "before_sha256": "badd718badf20e402ef5033d562c63229faeae6898707fcb3551482224e7470a",
+        "after_sha256": "8592ddb7de1e7ce042cf65d71ee7c266ebe016b97f0582687526823822b6d43c",
+        "old_shape": "list",
+        "old_items": 144,
+        "old_single_character_items": 143,
+        "new_items": 2,
+        "wording_preserved_by_contiguous_character_reassembly": true
+      },
+      {
+        "path": "Data Prompts/Canada/British Columbia/Unspecified locality/Prompts/L07-009-bcab-1964-accessibility-requirements-for-a-fruit-processing-retail-and-s/evaluation.json",
+        "before_sha256": "86396168a7bbf7614c8afb0613f006b4e20615145e620b1fa4c4b3ab29ac51e9",
+        "after_sha256": "c06fb849c23c383c15dc7942a3b060633a3f3a79fc2c3baf30f5ac170a8f4708",
+        "old_shape": "list",
+        "old_items": 140,
+        "old_single_character_items": 139,
+        "new_items": 2,
+        "wording_preserved_by_contiguous_character_reassembly": true
+      },
+      {
+        "path": "Data Prompts/Canada/British Columbia/Unspecified locality/Prompts/L07-011-bcab-1957-construction-of-an-exterior-exit-facility/evaluation.json",
+        "before_sha256": "eebaa40060589dde930849382e27c37f2c8adda68dbba8ad243830cf26b8d601",
+        "after_sha256": "a8dc3ddbdaba9495ec61877aedd49ae1d14450d1fc5175f4726bc5edbf06f5ad",
+        "old_shape": "list",
+        "old_items": 130,
+        "old_single_character_items": 129,
+        "new_items": 2,
+        "wording_preserved_by_contiguous_character_reassembly": true
+      },
+      {
+        "path": "Data Prompts/Canada/British Columbia/Unspecified locality/Prompts/L07-023-bcab-1894-source-of-water-supply-for-nfpa-13-sprinkler-requirements/evaluation.json",
+        "before_sha256": "3d97cd3924944ba988f7388755c57e5f5353d8802a54020afe80dc17e8588908",
+        "after_sha256": "64be15fdd312b12c12d54c3b212b5e993bad3f01b537257aafba268d06bbf262",
+        "old_shape": "list",
+        "old_items": 121,
+        "old_single_character_items": 120,
+        "new_items": 2,
+        "wording_preserved_by_contiguous_character_reassembly": true
+      },
+      {
+        "path": "Data Prompts/Canada/Unspecified region/Unspecified locality/Prompts/L17-012-nrc-mass-timber-room-test-1-fully-encapsulated-baseline/evaluation.json",
+        "before_sha256": "8818257280ee1acf90ca61ea543cd7b5164ec2b2a71caaa3b53c160664dc99ce",
+        "after_sha256": "c03c5e3d4a803489d2d7443933a1eabc0c36b2e1b61c7df1b4fe4d409be5418f",
+        "old_shape": "string",
+        "old_items": 1,
+        "old_single_character_items": null,
+        "new_items": 1,
+        "wording_preserved_by_contiguous_character_reassembly": true
+      }
+    ],
+    "before_commit": "0dfbf027f6b2392fd3ae9fa436d6a3a15bc69aca",
+    "after_commit": "eb3baaf3bd360b2b98b1845906406e4df1c1396f"
+  },
+  "final_verification": {
+    "engine_passed": 3501,
+    "engine_skipped": 607,
+    "web": [
+      "typecheck",
+      "unit checks",
+      "unwrap check",
+      "production build",
+      "no CodeDB in web output"
+    ],
+    "harness_passed": 91,
+    "gate_log_sha256": "513ae97e0faec2780bfd7b03a24e15385267ecd3fcced9e1439675bdab144329",
+    "optional_gitleaks": "not installed; not run",
+    "independent_review_findings": [],
+    "independent_review_focused_passed": 388,
+    "independent_review_synthetic_passed": 16,
+    "reviewed_implementation_hashes": {
+      "engine/intake/review.py": "65442fb19c80d0b00ff9611e562101342153cb59d99a946e573ebff2a8edb026",
+      "evals_dev/data_prompts/checks.py": "1c78d81ea12a1935117b1159b0625c1f25e5167ffe225428bb78b99ebb69eae9",
+      "engine/identify/config.py": "3eaf99a3234f2075805653114cd4f0b6955b507003db06285abede210431c8bd",
+      "engine/identify/pipeline.json": "05ab2fa217e1e8469e23b3c5c3345522c76c503d78a9a38e08f49582d426be1d",
+      "engine/tests/test_r5_review_boundaries.py": "8a830826e80b2465ed5333ec2151c0c2fe1a382552a43b5dea48e884eccca412",
+      "engine/tests/test_normalized_source_numbers.py": "f7fd2de0f4befae1c2e20e0045e74c71d4289297666adfa078c69261b71a4b78",
+      "engine/tests/test_workflow_profile.py": "0b1dcf3f2fe60c758b9882778113c80b604064557a1df458e3983e9134c4ac00",
+      "engine/tests/test_identify_policy.py": "9db413e85e7cc02989f928d31de19d7080e6b0bdfb48fc7aa51f56b394c4dd66",
+      "engine/tests/test_identify_service.py": "3272588c7a3b0c972584b8a03c0994a10addc4ff2886442a1857edac0f8b0069",
+      "engine/tests/test_elephant_routes.py": "23439a5205b948bcdd3bfb9c15290fde6ea161ea7a325db25d79b78db10cca0f",
+      "engine/tests/test_identify_shortlist.py": "22db82a1a53e0dec67e0225a626a9e3d317498ed59358ea9ff35df534866aff6",
+      "engine/intake/service.py": "62d6df202a7a6402ec41420639448b2224bdcec1c14709b9a0664e96f777d263",
+      "engine/identify/screen.py": "980a33e6cd2c52605c4cc91f549dbc946a40a0c6a546d7185030581af7593d89",
+      "evals_dev/data_prompts/ledger.py": "0859c0a77e4674327eed436e95bf3d73ec2ed25d86840ba45c3e1d1a6ad1d064",
+      "evals_dev/data_prompts/sut.py": "5ad7e8f887a72bfb0162c1a4028c0afb1935ccb4e46a17233e985447dbc0807e"
+    },
+    "reviewed_implementation_drift": [],
+    "nonvisual": true,
+    "fresh_accuracy_test": false
+  }
+}

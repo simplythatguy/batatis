@@ -28,6 +28,8 @@ def world(tmp_path, monkeypatch):
             monkeypatch.delenv(name, raising=False)
     monkeypatch.setenv('BATATIS_LIVE', '0')
     monkeypatch.setenv('BATATIS_LIVE_ELEPHANT', '1')
+    monkeypatch.setenv('BATATIS_IDENTIFY_SCREEN', 'elephant')
+    monkeypatch.setenv('BATATIS_IDENTIFY_RERANK', 'elephant')
     monkeypatch.setenv('OPENROUTER_API_KEY', 'synthetic-only-key')
     for name in ('BATATIS_RELEVANCE_RATE_LIMIT', 'BATATIS_IDENTIFY_RATE_LIMIT', 'BATATIS_RELEVANCE_DAILY_RUNS'):
         monkeypatch.setenv(name, '100')

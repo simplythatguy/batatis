@@ -59,6 +59,8 @@ ENUMS = {'applicant_role': ROLES, 'occupancy': OCCUPANCIES, 'sprinklered': SPRIN
 PERSONAL = frozenset({'owner_name', 'owner_rep_name', 'mailing_address', 'municipal_address', 'legal_description',
                       'lot', 'block', 'plan', 'ats_qtr', 'ats_sec', 'ats_twp', 'ats_rge', 'ats_mer',
                       'permit_number'})
+# Parts of a legal description. A short number alone (lot 12, block 3) identifies no one.
+LEGAL_PARTS = frozenset({'lot', 'block', 'ats_qtr', 'ats_sec', 'ats_twp', 'ats_rge', 'ats_mer'})
 
 
 @dataclass(frozen=True)

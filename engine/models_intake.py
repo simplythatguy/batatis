@@ -10,7 +10,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 Method = Literal['rules', 'form', 'model']
 FileStatus = Literal['read', 'partly_read', 'not_read']
@@ -230,7 +230,7 @@ class DocumentReview(BaseModel):
     Facts, conflicts and cited provisions carry excerpts that occur in the named page. Missing items,
     questions and flags are Batatis's own words and never say that a design complies, is safe or is approved."""
     status: ModelStatus
-    model: str | None = None
+    model: str | None = None                # an opaque version (engine/public_names.py), never a provider pin
     effort: str | None = None
     reason: str | None = None
     documents: list[ReviewedDocument] = []
@@ -244,6 +244,12 @@ class DocumentReview(BaseModel):
     dropped: int = 0                        # model items removed because their excerpt or numbers did not check out
     input_tokens: int = 0
     output_tokens: int = 0
+
+    @field_validator('model')
+    @classmethod
+    def _model_is_an_opaque_version(cls, value):
+        from .public_names import public_review_model
+        return public_review_model(value)
 
 
 class IntakeRecord(BaseModel):

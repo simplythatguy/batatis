@@ -53,11 +53,27 @@ def configure(*, live: bool, elephant: bool) -> None:
     os.environ.setdefault('BATATIS_STORE', 'file')
     os.environ['BATATIS_JEV_UNCAPPED'] = '1'          # the engine's own switch: Jev is outside the dollar ledger
     ledger.install(read=os.environ.get('DPE_HTTP_CACHE', 'read') != 'refresh')
+    from engine.identify import screen
+    screen.ThreadPoolExecutor = ledger.CaseThreadPoolExecutor
 
 
 def init_worker(live: bool, elephant: bool) -> None:
     load_env()
     configure(live=live, elephant=elephant)
+
+
+def accounted_calls(raw_calls: list[dict], http_calls: list) -> list[dict]:
+    """Match each HTTP dispatch once; other transports keep their separately metered cost."""
+    available = list(http_calls)
+    out = []
+    for raw in raw_calls:
+        match = next((c for c in available if raw['provider'] in ('openai', 'openai_decisions') and c.request_hash
+                      and (c.model, c.input_tokens, c.output_tokens) ==
+                      (raw['model'], raw['input_tokens'], raw['output_tokens'])), None)
+        if match is not None:
+            available.remove(match)
+        out.append({**raw, 'http_request_hash': match.request_hash if match else None})
+    return out
 
 
 def run_case(case: Case) -> dict:
@@ -66,6 +82,7 @@ def run_case(case: Case) -> dict:
     from engine.completeness import check_completeness
     from engine.identify.config import load_config
     from engine.identify.pipeline import description_hash, run as identify_run
+    from engine.identify.providers import transports as identify_transports
     from engine.intake import model as model_pass
     from engine.intake import review as review_pass
     from engine.intake import service
@@ -106,11 +123,17 @@ def run_case(case: Case) -> dict:
         plan = engine_case.intake.plan if engine_case.intake else None
         redirected = bool(plan and plan.scope.status == 'redirect')    # the web skips identification then
         result['identify_skipped'] = redirected
+        result['identify_stage_events'] = []
+        tp, http_before = None, len(book.calls)
         try:
             if redirected:
                 raise _Skipped()
-            output = identify_run(outbound, codes=codes, config=load_config(), facts=engine_case.facts,
-                                  description_sha256=description_hash(text), client_ip='dpe')
+            config = load_config()
+            tp = identify_transports('dpe', scoring={config.screen, config.rerank},
+                                     anthropic=config.verifier == 'anthropic')
+            output = identify_run(outbound, codes=codes, config=config, transports=tp, facts=engine_case.facts,
+                                  description_sha256=description_hash(text), client_ip='dpe',
+                                  on_stage=lambda stage, event: result['identify_stage_events'].append(dict(event)))
             engine_case.identify = output.result
             trace = output.result.trace
             result['identify_spend'] = {'usd': trace.usd, 'by_provider': trace.spend}
@@ -120,6 +143,10 @@ def run_case(case: Case) -> dict:
             pass
         except Exception as error:                     # the route answers 503; the case keeps its intake
             result['errors'].append(f'identify: {type(error).__name__}: {error}'[:300])
+        finally:
+            if tp is not None:
+                result.setdefault('identify_spend', {})['transport_calls'] = accounted_calls(
+                    tp.log.calls, book.calls[http_before:])
         stages['identify'] = time.monotonic() - t
 
         service.refresh(engine_case)

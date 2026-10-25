@@ -55,7 +55,7 @@ def arts(codes):
 
 
 def calibrated(config=None, threshold=0.05):
-    return CommitPolicy('calibrated', 'test fit', {9: threshold}, 3, (config or IdentifyConfig()).config_hash)
+    return CommitPolicy('calibrated', 'test fit', {9: threshold}, 3, (config or load_config()).config_hash)
 
 
 def displayed_text_ok(result, arts):
@@ -374,15 +374,16 @@ def test_rate_limit_is_per_ip_and_before_any_provider(client, monkeypatch):
     assert limited.status_code == 429 and limited.headers['retry-after']
 
 
-def test_spend_is_settled_per_provider_for_a_run(client):
+def test_spend_is_settled_per_provider_for_a_run(client, monkeypatch):
+    monkeypatch.setenv('BATATIS_JEV_UNCAPPED', '0')
     http, _ = client
     case_id = described(http)
     trace = http.post(f'/cases/{case_id}/identify', json={}).json()['trace']
     assert set(trace['spend']) == {'scoring', 'verification'}
     scoring_stages = [s for s in trace['stages'] if s['stage'] in ('screen', 'rerank')]
     assert trace['spend']['scoring']['requests'] == sum(s['requests'] for s in scoring_stages)
-    assert trace['spend']['scoring']['requests'] > 2  # Elephant's full request budget requires batches.
-    assert trace['spend']['scoring']['usd'] == 0
+    assert trace['spend']['scoring']['requests'] > 2
+    assert trace['spend']['scoring']['usd'] > 0
     assert abs(float(llm_gate._memory.today()) - trace['usd']) < 1e-6
 
 

@@ -13,7 +13,8 @@ from typing import Any
 
 # Facts that hold names, addresses or identifiers of people and sites.
 PERSONAL_FIELDS = {
-    'owner', 'owner_name', 'representative', 'mailingAddress', 'mailing_address', 'municipalAddress',
+    'owner', 'owner_name', 'owner_rep_name', 'representative', 'mailingAddress', 'mailing_address', 'municipalAddress',
+    'municipal_address',
     'civic_address', 'legalDescription', 'legal_description', 'permit', 'permit_number',
     'professional.name', 'professional.registration_number', 'professional.seal', 'applicant.name',
     'applicant.email', 'applicant.phone',
@@ -67,12 +68,12 @@ def people_names(store: Any, case: Any, user: Any = None) -> list[str]:
 
 def known_values(case: Any, extra: Iterable[str] = ()) -> list[str]:
     """Personal values the applicant entered, longest first so the full value wins over a part."""
-    values: set[str] = {value.strip() for value in extra if isinstance(value, str) and len(value.strip()) >= 3}
+    values: set[str] = {value.strip() for value in extra if isinstance(value, str) and value.strip()}
     for fact in getattr(case, 'facts', None) or []:
         field = str(getattr(fact, 'field', ''))
         if field in PERSONAL_FIELDS or field.endswith(PERSONAL_SUFFIXES):
             value = getattr(fact, 'value', None)
-            if isinstance(value, str) and len(value.strip()) >= 3:
+            if isinstance(value, str) and value.strip():
                 values.add(value.strip())
     return sorted(values, key=len, reverse=True)
 
@@ -81,7 +82,12 @@ def scrub(text: str, known: Iterable[str] = ()) -> str:
     if not text:
         return text
     for value in known:
-        text = re.sub(re.escape(value), '[personal detail]', text, flags=re.I)
+        if not value:
+            continue
+        # Whole words and numeric tokens: "202" must not replace part of "2025" or "202.5".
+        before = r'(?<!\w)(?<!\d[.,])' if value[0].isdigit() else r'(?<!\w)'
+        after = r'(?!\w|[.,]\d)' if value[-1].isdigit() else r'(?!\w)'
+        text = re.sub(before + re.escape(value) + after, '[personal detail]', text, flags=re.I)
     text = EMAIL.sub('[email]', text)
     text = NAMED.sub(_name_span, text)
     text = PHONE.sub('[phone]', text)

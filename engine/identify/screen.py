@@ -181,6 +181,9 @@ class Judge:
                     last_error = error
                     with self._lock:
                         self.usage.errors += 1
+                    status = getattr(getattr(error, 'response', None), 'status_code', None)
+                    if isinstance(status, int) and 400 <= status < 500 and status != 429:
+                        raise                       # a refused request fails the same way every time
                     if attempt + 1 < self.attempts:
                         time.sleep(1.5 * (attempt + 1))
             raise RuntimeError('scoring batch failed after retries') from last_error

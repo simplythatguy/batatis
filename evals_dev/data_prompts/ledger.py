@@ -10,16 +10,23 @@ they are free but quota-limited, and their transport is not httpx.Client.post.
 from __future__ import annotations
 
 import contextvars
+import fcntl
 import hashlib
 import json
 import os
+import shutil
 import tempfile
 import threading
 import time
-from dataclasses import asdict, dataclass, field
+import uuid
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import asdict, dataclass, field, replace
+from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import urlsplit
 
 CACHE = Path(os.environ.get('DPE_CACHE') or Path(__file__).resolve().parents[2] / '.dpe-cache') / 'http'
+ATTEMPTS = CACHE.parent / 'attempts.jsonl'
 OPENAI = 'https://api.openai.com/'
 LONG_CONTEXT = 272_000
 # USD per 1M tokens: input, cached input, output (developers.openai.com/api/docs/pricing, read 2026-10-25).
@@ -38,9 +45,11 @@ class Call:
     cached_input_tokens: int
     output_tokens: int
     reasoning_tokens: int
-    usd: float
+    usd: float | None
     from_cache: bool
     seconds: float
+    request_hash: str | None = None
+    status: str = 'succeeded'
 
 
 @dataclass
@@ -51,7 +60,10 @@ class Ledger:
     def summary(self) -> dict:
         live = [c for c in self.calls if not c.from_cache]
         return {'calls': len(self.calls), 'live_calls': len(live),
-                'usd': round(sum(c.usd for c in self.calls), 6), 'live_usd': round(sum(c.usd for c in live), 6),
+                'usd': round(sum(c.usd for c in self.calls if c.usd is not None), 6),
+                'live_usd': round(sum(c.usd for c in live if c.usd is not None), 6),
+                'unknown_cost_attempts': sum(c.usd is None for c in self.calls),
+                'live_unknown_cost_attempts': sum(c.usd is None for c in live),
                 'input_tokens': sum(c.input_tokens for c in self.calls),
                 'output_tokens': sum(c.output_tokens for c in self.calls),
                 'reasoning_tokens': sum(c.reasoning_tokens for c in self.calls),
@@ -62,9 +74,10 @@ class Ledger:
 def _by(calls: list[Call], key: str) -> dict:
     out: dict = {}
     for c in calls:
-        row = out.setdefault(getattr(c, key) or 'none', {'calls': 0, 'usd': 0.0})
+        row = out.setdefault(getattr(c, key) or 'none', {'calls': 0, 'usd': 0.0, 'unknown_cost_attempts': 0})
         row['calls'] += 1
-        row['usd'] = round(row['usd'] + c.usd, 6)
+        row['usd'] = round(row['usd'] + (c.usd if c.usd is not None else 0.0), 6)
+        row['unknown_cost_attempts'] += c.usd is None
     return out
 
 
@@ -73,7 +86,59 @@ CURRENT: contextvars.ContextVar[Ledger | None] = contextvars.ContextVar('dpe_led
 # so spend is never silently dropped. A run reports this total next to the per-case costs.
 UNATTRIBUTED = Ledger()
 _lock = threading.Lock()
+_attempt_lock = threading.Lock()
 _installed = False
+
+
+class CaseThreadPoolExecutor(ThreadPoolExecutor):
+    """Carry the submitting case's ledger into each engine scoring batch."""
+
+    def submit(self, fn, /, *args, **kwargs):
+        context = contextvars.copy_context()
+        return super().submit(context.run, fn, *args, **kwargs)
+
+
+def attempt_event(event: str, *, request_hash: str, stage: str, model: str, effort: str,
+                  attempt_id: str | None = None, **metadata) -> str:
+    """Append counts/status only, locked across processes. A start without a finish has unknown cost.
+
+    Callers must never pass headers, request/response bodies, exception messages, or document text.
+    """
+    attempt_id = attempt_id or uuid.uuid4().hex
+    row = {'event': event, 'attempt_id': attempt_id, 'request_hash': request_hash, 'stage': stage,
+           'model': model, 'effort': effort, 'at': datetime.now(timezone.utc).isoformat(), **metadata}
+    ATTEMPTS.parent.mkdir(parents=True, exist_ok=True)
+    with _attempt_lock, ATTEMPTS.open('a') as handle:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        try:
+            handle.write(json.dumps(row, separators=(',', ':')) + '\n')
+            handle.flush()
+            os.fsync(handle.fileno())
+        finally:
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+    return attempt_id
+
+
+def replay(calls: list[dict], book: Ledger) -> None:
+    """Keep original workflow prices while attributing zero fresh provider spend to a cache hit."""
+    book.calls.extend(replace(Call(**row), from_cache=True) for row in calls)
+
+
+def write_artifact(path: Path, text: str) -> None:
+    """Atomically replace an artifact, retaining the old bytes in history before any replacement."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(dir=path.parent, suffix='.tmp')
+    try:
+        with os.fdopen(fd, 'w') as handle:
+            handle.write(text)
+        if path.exists():
+            history = path.parent / 'history'
+            history.mkdir(exist_ok=True)
+            shutil.copy2(path, history / f'{path.stem}.{uuid.uuid4().hex}{path.suffix}')
+        os.replace(tmp, path)
+    finally:
+        if os.path.exists(tmp):
+            os.unlink(tmp)
 
 
 def price(model: str, input_tokens: int, cached: int, output_tokens: int) -> float:
@@ -93,16 +158,42 @@ def _stage(body: dict) -> str:
     return 'unknown'
 
 
-def _record(body: dict, data: dict, from_cache: bool, seconds: float) -> None:
-    ledger = CURRENT.get() or UNATTRIBUTED
-    usage = data.get('usage') or {}
-    model = body.get('model') or data.get('model') or 'unknown'
-    tokens_in = int(usage.get('prompt_tokens') or 0)
-    cached = int((usage.get('prompt_tokens_details') or {}).get('cached_tokens') or 0)
-    tokens_out = int(usage.get('completion_tokens') or 0)
-    reasoning = int((usage.get('completion_tokens_details') or {}).get('reasoning_tokens') or 0)
-    ledger.calls.append(Call(model, body.get('reasoning_effort'), _stage(body), tokens_in, cached, tokens_out,
-                             reasoning, price(model, tokens_in, cached, tokens_out), from_cache, round(seconds, 3)))
+def _record(body: dict, data: dict, from_cache: bool, seconds: float, request_hash=None,
+            status='succeeded', legacy=False, endpoint=None) -> Call:
+    book = CURRENT.get() or UNATTRIBUTED
+    usage = data.get('usage') if isinstance(data, dict) else None
+    decisions = endpoint == '/v1/decisions'
+    input_key, output_key = ('input_tokens', 'output_tokens') if decisions else ('prompt_tokens', 'completion_tokens')
+    valid = isinstance(usage, dict) and all(type(usage.get(k)) is int and usage[k] >= 0
+                                           for k in (input_key, output_key))
+    valid = valid and endpoint in (None, '/v1/chat/completions', '/v1/decisions')
+    usage = usage if isinstance(usage, dict) else {}
+    count = lambda n: n if type(n) is int and n >= 0 else 0
+    tokens_in, tokens_out = count(usage.get(input_key)), count(usage.get(output_key))
+    if decisions or 'total_tokens' in usage:
+        valid = valid and type(usage.get('total_tokens')) is int and usage['total_tokens'] == tokens_in + tokens_out
+    counts = {}
+    for field, names, total in (
+        (input_key + '_details', ('cached_tokens', 'cache_write_tokens') if decisions else ('cached_tokens',), tokens_in),
+        (output_key + '_details', ('reasoning_tokens',), tokens_out),
+    ):
+        details = usage.get(field)
+        if decisions or field in usage:
+            valid = valid and isinstance(details, dict)
+        details = details if isinstance(details, dict) else {}
+        for name in names:
+            value = details.get(name)
+            if decisions or name in details:
+                valid = valid and type(value) is int and 0 <= value <= total
+            counts[name] = count(value)
+    cached, reasoning = counts['cached_tokens'], counts['reasoning_tokens']
+    valid = valid and cached + counts.get('cache_write_tokens', 0) <= tokens_in
+    model = body.get('model') or 'unknown'
+    usd = price(model, tokens_in, cached, tokens_out) if valid and not legacy else None
+    call = Call(model, body.get('reasoning_effort'), _stage(body), tokens_in, cached, tokens_out,
+                reasoning, usd, from_cache, round(seconds, 3), request_hash, status)
+    book.calls.append(call)
+    return call
 
 
 def _key(url: str, body) -> str:
@@ -118,11 +209,7 @@ def _load(key: str) -> dict | None:
 
 def _store(key: str, value: dict) -> None:
     folder = CACHE / key[:2]
-    folder.mkdir(parents=True, exist_ok=True)
-    fd, tmp = tempfile.mkstemp(dir=folder, suffix='.tmp')
-    with os.fdopen(fd, 'w') as handle:
-        json.dump(value, handle)
-    os.replace(tmp, folder / f'{key}.json')
+    write_artifact(folder / f'{key}.json', json.dumps(value))
 
 
 def install(*, read: bool = True) -> None:
@@ -142,22 +229,53 @@ def install(*, read: bool = True) -> None:
             key = _key(target, body)
             hit = _load(key) if read else None
             if hit is not None:
-                _record(body or {}, hit['response'], True, hit.get('seconds', 0.0))
+                book = CURRENT.get() or UNATTRIBUTED
+                if 'attempt_calls' in hit:
+                    replay(hit['attempt_calls'], book)
+                else:
+                    _record(body or {}, hit['response'], True, hit.get('seconds', 0.0), key,
+                            'legacy_unverified', legacy=True, endpoint=urlsplit(target).path)
+                attempt_event('cache_hit', request_hash=key, stage=_stage(body or {}),
+                              model=(body or {}).get('model', 'unknown'), effort=(body or {}).get('reasoning_effort'),
+                              dispatched=False, status='cache_hit')
                 return httpx.Response(200, json=hit['response'], request=httpx.Request('POST', target))
             if (body or {}).get('service_tier') not in (None, 'default', 'auto'):
                 raise RuntimeError('priority or flex service tiers are not used in these runs')
             started = time.monotonic()
-            response = original(self, url, *args, **kwargs)
-            seconds = time.monotonic() - started
-            if response.status_code == 200:
-                data = response.json()
-                _store(key, {'response': data, 'seconds': round(seconds, 3)})
-                _record(body or {}, data, False, seconds)
-            else:
-                ledger = CURRENT.get()
-                if ledger is not None:
-                    ledger.errors.append(f'openai HTTP {response.status_code}')
-            return response
+            attempt_id = attempt_event('attempt_started', request_hash=key, stage=_stage(body or {}),
+                                       model=(body or {}).get('model', 'unknown'),
+                                       effort=(body or {}).get('reasoning_effort'), dispatched=True,
+                                       status='dispatching', usd=None, cost_status='unknown')
+            response, data, status = None, {}, 'transport_error'
+            try:
+                response = original(self, url, *args, **kwargs)
+                status = 'http_error' if response.status_code != 200 else 'invalid_response_json'
+                try:
+                    data = response.json()
+                except ValueError:
+                    if response.status_code == 200:
+                        raise
+                if response.status_code == 200:
+                    status = 'succeeded'
+                return response
+            finally:
+                seconds = time.monotonic() - started
+                call = _record(body or {}, data, False, seconds, key, status, endpoint=urlsplit(target).path)
+                attempt_event('attempt_finished', attempt_id=attempt_id, request_hash=key, stage=call.stage,
+                              model=call.model, effort=call.effort, dispatched=True, status=status,
+                              http_status=response.status_code if response is not None else None,
+                              seconds=seconds, input_tokens=call.input_tokens, output_tokens=call.output_tokens,
+                              usd=call.usd, cost_status='priced' if call.usd is not None else 'unknown')
+                if status == 'succeeded':
+                    chain = []
+                    for prior in reversed((CURRENT.get() or UNATTRIBUTED).calls):
+                        if prior.request_hash != key:
+                            continue
+                        if chain and (prior.from_cache or prior.status == 'succeeded'):
+                            break
+                        chain.append(asdict(prior))
+                    _store(key, {'response': data, 'seconds': round(seconds, 3),
+                                 'attempt_calls': list(reversed(chain))})
 
         httpx.Client.post = post
         _installed = True
