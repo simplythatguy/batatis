@@ -4,11 +4,11 @@
 import argparse
 import json
 import shutil
+import subprocess
 import tempfile
 import zipfile
 from pathlib import Path
 from urllib.parse import urlsplit
-from urllib.request import Request, urlopen
 from xml.etree import ElementTree
 
 from assemble import html_text
@@ -45,16 +45,17 @@ def download(attachment, destination):
             urlsplit(value).hostname == "nrc-publications.canada.ca"
             for value in (url, attachment["url"])):
         raise ValueError("publisher rights review required; use a permitted local copy")
-    request = Request(url, headers={"User-Agent": "Batatis-corpus-restore/1.0",
-                                    "Accept-Encoding": "identity"})
-    limit = attachment["bytes"]
-    with urlopen(request, timeout=60) as response, destination.open("wb") as output:
-        count = 0
-        while block := response.read(min(1024 * 1024, limit + 1 - count)):
-            count += len(block)
-            if count > limit:
-                raise ValueError("response is larger than the recorded original")
-            output.write(block)
+    # Use the same system trust store and transport as the original collector.
+    result = subprocess.run([
+        "curl", "--location", "--fail", "--silent", "--show-error",
+        "--proto", "=https,http", "--proto-redir", "=https,http",
+        "--connect-timeout", "20", "--max-time", "60",
+        "--max-filesize", str(attachment["bytes"]),
+        "--user-agent", "Batatis-corpus-restore/1.0",
+        "--output", str(destination), "--url", url,
+    ], capture_output=True, text=True)
+    if result.returncode:
+        raise ValueError(f"download failed ({result.returncode}): {result.stderr.strip()}")
 
 
 def restore(base, source_root=None, numbers=None, network=False, include_evaluation=False):

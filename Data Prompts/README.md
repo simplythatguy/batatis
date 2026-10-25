@@ -17,6 +17,8 @@ Git stores the 653 prompt texts, provenance, evaluator notes, source catalogues,
 
 A new checkout has metadata only. Restore the original attachment files from your existing `Data Prompts` collection, then verify their recorded hashes:
 
+The portable tools require Python 3.11 or newer. Network restoration also uses `curl` with certificate verification enabled, matching the original collector.
+
 ```sh
 python3 'Data Prompts/_tools/restore_attachments.py' --from '/path/to/existing/Data Prompts' --include-evaluation
 python3 'Data Prompts/_tools/verify_corpus.py' --attachments
