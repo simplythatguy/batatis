@@ -23,6 +23,10 @@ from .corpus import Case
 UPLOAD_LIMIT = 4 * 1024 * 1024
 
 
+class _Skipped(Exception):
+    pass
+
+
 def load_env(path: str | None = None) -> None:
     """Read provider keys from a private .env into this process only. Values are never printed."""
     path = path or os.environ.get('DPE_ENV_FILE')
@@ -92,10 +96,17 @@ def run_case(case: Case) -> dict:
         t = time.monotonic()
         text = description(engine_case)
         outbound = scrub(text, known_values(engine_case, []))
+        plan = engine_case.intake.plan if engine_case.intake else None
+        redirected = bool(plan and plan.scope.status == 'redirect')    # the web skips identification then
+        result['identify_skipped'] = redirected
         try:
+            if redirected:
+                raise _Skipped()
             output = identify_run(outbound, codes=codes, config=load_config(), facts=engine_case.facts,
                                   description_sha256=description_hash(text), client_ip='dpe')
             engine_case.identify = output.result
+        except _Skipped:
+            pass
         except Exception as error:                     # the route answers 503; the case keeps its intake
             result['errors'].append(f'identify: {type(error).__name__}: {error}'[:300])
         stages['identify'] = time.monotonic() - t

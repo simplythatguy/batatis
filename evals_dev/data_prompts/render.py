@@ -25,6 +25,12 @@ def _origin(case: dict, fact: dict) -> str:
     return 'request text'
 
 
+def _redirected(case: dict) -> bool:
+    """The web skips identification when intake redirects to another regime, so nothing of it is shown."""
+    plan = (case.get('intake') or {}).get('plan') or {}
+    return (plan.get('scope') or {}).get('status') == 'redirect'
+
+
 def _where(case: dict, ref: dict) -> str:
     names = {f['file_id']: f['name'] for f in (case.get('intake') or {}).get('files') or []}
     if ref.get('source_ref') == 'description':
@@ -130,7 +136,7 @@ def report(result: dict) -> str:
         for u in intake['unresolved_citations']:
             lines.append(f'- {u["entered"]}')
 
-    identify = case.get('identify')
+    identify = None if _redirected(case) else case.get('identify')
     if identify:
         lines.append('CODE IDENTIFICATION')
         if identify.get('label'):
@@ -182,7 +188,7 @@ def system_text(result: dict) -> list[str]:
     out += [scope.get('message') or '']
     out += [(plan.get('fork') or {}).get('explanation') or '']
     out += [q.get('text', '') + ' ' + q.get('why', '') for q in plan.get('questions') or []]
-    identify = case.get('identify') or {}
+    identify = {} if _redirected(case) else case.get('identify') or {}
     out += [identify.get('label') or '', identify.get('message') or '']
     out += [s.get('text', '') for s in (plan.get('pre_application') or {}).get('steps') or []]
     out += [g.get('message', '') for g in result.get('gaps') or []]
@@ -193,7 +199,7 @@ def provisions(result: dict) -> set[str]:
     """Article ids (a.b.c.d.) the output presents: identified articles, claimed provisions and any in Batatis's text."""
     case = result.get('case') or {}
     found: set[str] = set()
-    for article in (case.get('identify') or {}).get('articles') or []:
+    for article in ({} if _redirected(case) else case.get('identify') or {}).get('articles') or []:
         m = ARTICLE.match(str(article.get('provision') or ''))
         if m:
             found.add(m.group(1) + '.')
