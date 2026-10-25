@@ -1,13 +1,13 @@
 # Run Batatis locally
 
-This guide starts the current Vite app and FastAPI engine without model API keys. The first block clones the shared `dev` integration source. Run later commands from that repository root unless a step says otherwise.
+This guide starts the current Vite app and FastAPI engine without model API keys. The first block clones `main`, the only permanent branch. Run later commands from that repository root unless a step says otherwise.
 
 ## Start the workspace
 
 Use Python 3.12 and Node.js 22.12 or newer. CI uses Python 3.12 and Node.js 22.
 
 ```bash
-git clone --branch dev https://github.com/simplythatguy/batatis.git
+git clone https://github.com/simplythatguy/batatis.git
 cd batatis
 scripts/install-git-hooks.sh # once per clone; covers all its worktrees
 python3.12 -m venv .venv
@@ -52,7 +52,7 @@ scripts/local-app.sh stop
 scripts/local-app.sh start
 ```
 
-`dev` is the shared integration source. Land only locally verified work on `dev` through `scripts/land.sh`, and finish local testing before release. Only the user merges the single `dev → main` release PR; `main` is the only Vercel deployment branch. Never push directly to `main`. See the [Git workflow](agents/git-workflow.md) for shared ownership and local verification.
+`main` is the only permanent branch and the only Vercel deployment branch. Do each batch of work on a short-lived branch, verify it locally, and open its pull request into `main` with `scripts/land.sh`. Only the user merges pull requests. Never push directly to `main`. See the [Git workflow](agents/git-workflow.md) for shared ownership and local verification.
 
 ## Optional configuration
 

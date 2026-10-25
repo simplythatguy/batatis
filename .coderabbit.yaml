@@ -1,8 +1,7 @@
 # CodeRabbit review configuration.
 # Schema: https://coderabbit.ai/integrations/schema.v2.json
 # base_branches entries are unanchored regular expressions. Anchors match the
-# branch name exactly. `dev` is not the GitHub default branch, so pull requests
-# into `dev` are skipped unless it is listed here.
+# branch name exactly. `main` is the GitHub default branch and the pull request base.
 language: en-US
 
 reviews:
@@ -13,7 +12,6 @@ reviews:
     enabled: true
     drafts: false
     base_branches:
-      - "^dev$"
       - "^main$"
   path_instructions:
     - path: "engine/**"

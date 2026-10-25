@@ -1,13 +1,13 @@
 #!/bin/sh
-# Batatis: GitHub holds exactly two branches, dev and main. Rules: docs/agents/git-workflow.md
-# Allowed: a fast-forward push to refs/heads/dev, and deleting any other remote branch (cleanup).
-# Refused: feature branches, main, tags, rewriting dev, deleting dev or main.
+# Batatis: main changes only through pull requests. Rules: docs/agents/git-workflow.md
+# Allowed: creating, fast-forwarding or deleting work branches, and deleting retired dev.
+# Refused: every push to main, creating or updating dev, rewriting branches, tags and other refs.
 zero=0000000000000000000000000000000000000000
 
 refuse() {
   {
     echo "pre-push: refused. $1"
-    echo "  GitHub has only 'dev' (testing) and 'main' (production). To ship verified work run: scripts/land.sh"
+    echo "  To verify a work branch and open its pull request into main, run: scripts/land.sh"
     echo "  Rules: docs/agents/git-workflow.md"
   } >&2
   exit 1
@@ -15,21 +15,24 @@ refuse() {
 
 while read -r local_ref local_sha remote_ref remote_sha; do
   case "$remote_ref" in
-    refs/heads/dev)
-      [ "$local_sha" = "$zero" ] && refuse "deleting dev is not allowed."
-      if [ "$remote_sha" != "$zero" ] && ! git merge-base --is-ancestor "$remote_sha" "$local_sha" 2>/dev/null; then
-        refuse "this would rewrite dev (not a fast-forward, or origin/dev is stale). Fetch, put your work on top of origin/dev, verify, push again. Never force-push."
-      fi
-      ;;
     refs/heads/main)
-      refuse "main changes only when the user merges the release PR (dev -> main) on GitHub."
+      refuse "main changes only when a pull request is merged on GitHub; run scripts/land.sh to open one."
+      ;;
+    refs/heads/dev)
+      [ "$local_sha" = "$zero" ] && continue
+      refuse "dev was retired; work on a short-lived branch instead."
       ;;
     refs/heads/*)
       [ "$local_sha" = "$zero" ] && continue
-      refuse "'${remote_ref#refs/heads/}' would be a third branch on GitHub."
+      [ "$remote_sha" = "$zero" ] && continue
+      if ! git cat-file -e "$remote_sha^{commit}" 2>/dev/null; then
+        refuse "the remote commit for '${remote_ref#refs/heads/}' is not available locally; fetch first."
+      fi
+      if ! git merge-base --is-ancestor "$remote_sha" "$local_sha" 2>/dev/null; then
+        refuse "this would rewrite '${remote_ref#refs/heads/}'; never force-push; merge origin/main or pull instead."
+      fi
       ;;
     *)
-      [ "$local_sha" = "$zero" ] && continue
       refuse "pushing $remote_ref is not allowed (no tags or other refs)."
       ;;
   esac
