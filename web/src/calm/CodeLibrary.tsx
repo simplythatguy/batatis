@@ -40,7 +40,7 @@ export function ScoreStatus() {
   const elapsed = useElapsed(rel.phase === "running" ? rel.startedAt : null);
   useElapsed(rel.retryAt && rel.retryAt > Date.now() ? rel.retryAt : null);
   const wait = rel.retryAt ? Math.max(0, Math.ceil((rel.retryAt - Date.now()) / 1000)) : 0;
-  const err = rel.error ? errorText(rel.error) : null;
+  const err = rel.error;
   if (rel.phase === "running") {
     return <span className="cf-score is-running" role="status"><span className="cf-dot is-pending cf-pulse" aria-hidden="true" />Scoring your project… {elapsed} s</span>;
   }
@@ -50,8 +50,9 @@ export function ScoreStatus() {
       {label}
     </button>
   );
-  // Why Score is off (no description yet) sits on the button as its title; only a wait is shown.
-  const why = wait > 0 ? `Try again in ${wait} s.` : "";
+  const why = wait > 0 ? `Try again in ${wait} s.`
+    : err && (err.status === 0 || err.status === 409 || err.status === 429) ? err.detail
+    : err && rel.result ? "Scores unavailable." : "";
   return (
     <div className="cf-score-wrap">
       {rel.result ? (
@@ -68,12 +69,6 @@ export function ScoreStatus() {
         <span className="cf-score"><span className="cf-dot is-pending" aria-hidden="true" />Not scored {scoreBtn("Score relevance")}</span>
       )}
       {why && <span className="cf-score-why">{why}</span>}
-      {err && (
-        <details className="cf-tech is-inline">
-          <summary>{err.text}</summary>
-          <p>{err.technical}</p>
-        </details>
-      )}
     </div>
   );
 }
