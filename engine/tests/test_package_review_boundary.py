@@ -6,7 +6,7 @@ import re
 
 import pytest
 
-from engine.models_review import EditedItem, Finding, Pointer
+from engine.models_review import EditedItem, Finding, Pointer, RequestTarget
 from engine.review import information_request as ir
 from engine.review.package import review_uploads
 from engine.tests.package_review_fixtures import CLEAN_FORM, CLEAN_NARRATIVE, package
@@ -91,7 +91,7 @@ def test_edit_keeps_links_marks_officer_text_and_rejects_unknown_ids():
     request = ir.build(findings)
     owner = next(item for item in request.items if item.field == 'owner_name')
     edited = ir.edit(request, [EditedItem(id=owner.id, text=owner.text, included=True),
-                               EditedItem(text='Please send the site plan.')], None)
+                               EditedItem(text='Please send the site plan.', target=RequestTarget(section='B', label='Site plan'))], None)
     assert edited.items[0].authored_by == 'batatis' and edited.items[0].finding_key == owner.finding_key
     assert edited.items[1].authored_by == 'officer' and edited.items[1].finding_key is None
     reworded = ir.edit(request, [EditedItem(id=owner.id, text='Owner, please.')], 'Intro')
