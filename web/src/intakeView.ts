@@ -112,10 +112,10 @@ const pointerFor = (c: Case, id: string) => c.intake?.record.pointers.find((p) =
  * unconfirmed proposal on the case. A computed value takes its input with it; the model's statement
  * of the same words as a rules fact joins that fact.
  */
-export function readGroups(c: Case, detailIds: ReadonlySet<string>): ReadGroup[] {
+export function readGroups(c: Case, detailIds: ReadonlySet<string>, includeConfirmed = false): ReadGroup[] {
   const waiting = new Set(c.facts.filter((f) => f.status === "unconfirmed").map((f) => f.id));
   const own = (f: Fact) => f.field !== "scope.redirect" && f.field !== "project.description" && f.field !== "applicant_role";
-  const fromRun = (c.intake?.facts ?? []).filter((f) => own(f) && f.status === "unconfirmed");
+  const fromRun = (c.intake?.facts ?? []).filter((f) => own(f) && (includeConfirmed || f.status === "unconfirmed"));
   const runIds = new Set(fromRun.map((f) => f.id));
   const all = [...fromRun, ...c.facts.filter((f) => waiting.has(f.id) && !runIds.has(f.id) && own(f))];
   const used = new Set<string>();

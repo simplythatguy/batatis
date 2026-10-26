@@ -202,7 +202,7 @@ export function Start() {
               start();
             }
           }}
-          placeholder="Or say it in a few words"
+          placeholder="Describe it in a few words, or attach plans and photos"
         />
         <div className="cf-composer-foot">
           <div className="cf-attach">

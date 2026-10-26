@@ -275,10 +275,10 @@ test("a confirmed option hides the other options of its choice; 'not yet' means 
 
 test("an authority read from the site is confirmed once on its card; unanswered it is required", () => {
   const set = { ...demo(), authority: "edmonton" as const };
-  const card = buildDeck(set, [], opts()).find((i) => i.key === "authority")!;
+  const card = buildDeck(set, [], opts()).find((i) => i.kind === "paperwork")?.paperworkRows?.find((i) => i.key === "authority")!;
   assert.deepEqual([card.done, card.optional], [false, true]);
-  assert.equal(buildDeck(set, [], opts({ seen: new Set(["authority"]) })).find((i) => i.key === "authority")?.done, true);
-  const open = buildDeck(demo(), [], opts()).find((i) => i.key === "authority")!;
+  assert.equal(buildDeck(set, [], opts({ seen: new Set(["authority"]) })).find((i) => i.kind === "paperwork")?.paperworkRows?.find((i) => i.key === "authority")?.done, true);
+  const open = buildDeck(demo(), [], opts()).find((i) => i.kind === "paperwork")?.paperworkRows?.find((i) => i.key === "authority")!;
   assert.deepEqual([open.done, open.optional], [false, false]);
 });
 

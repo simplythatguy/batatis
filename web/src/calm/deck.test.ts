@@ -9,6 +9,8 @@ import { aliasKey, alternativeChoice, buildDeck, choicesFor, deckProgress, gapKe
 import { journeyAnswerAction, journeyProgress, STAGES } from "./journey.ts";
 import { calmHref, resolveRoute } from "./routes.ts";
 
+const paperworkRows = (items: ReturnType<typeof buildDeck>) => items.find((item) => item.kind === "paperwork")?.paperworkRows ?? [];
+
 /* —— Fixtures: the demo description as the engine's intake and identify routes return it (fake providers). —— */
 
 const DEMO =
@@ -171,7 +173,7 @@ test("Not right is the applicant's answer: recorded as a confirmed empty value, 
   assert.equal(addr.status, "confirmed");
   assert.equal(addr.value, null);
   assert.equal(addr.source.ref, NOT_RIGHT);
-  const card = buildDeck(c, getGaps(c)).find((i) => i.key === "field-municipalAddress")!;
+  const card = paperworkRows(buildDeck(c, getGaps(c))).find((i) => i.key === "field-municipalAddress")!;
   assert.equal(card.kind, "detail", "the form card asks for the right address");
 });
 
@@ -180,7 +182,7 @@ test("confirming the site's municipality answers the reviewing authority (never 
   assert.equal(c.authority, "");
   c = reducer(c, { type: "confirmFacts", ids: ["fact_muni"] });
   assert.equal(c.authority, "edmonton");
-  assert.equal(buildDeck(c, getGaps(c), { includeDone: true }).find((i) => i.key === "authority")?.done, true);
+  assert.equal(paperworkRows(buildDeck(c, getGaps(c), { includeDone: true })).find((i) => i.key === "authority")?.done, true);
 });
 
 test("a value already confirmed is not asked again when the description is read again", () => {
@@ -202,9 +204,9 @@ test("the journey asks deciding facts before paperwork while retaining form sect
   assert.equal(deck[0].kind, "understood");
   const stages = deck.map((i) => STAGES.findIndex((s) => s.stage === i.stage));
   assert.deepEqual(stages, [...stages].sort((a, b) => a - b));
-  assert.ok(deck.findIndex((i) => i.ref === "intake.part4_design") < deck.findIndex((i) => i.ref === "intake.mailing_address"));
-  assert.ok(deck.findIndex((i) => i.kind === "candidate") < deck.findIndex((i) => i.key === "field-representative"));
-  assert.equal(deck.find((i) => i.key === "field-representative")?.section, "A");
+  assert.ok(deck.findIndex((i) => i.ref === "intake.part4_design") < deck.findIndex((i) => i.kind === "paperwork"));
+  assert.ok(deck.findIndex((i) => i.kind === "candidate") < deck.findIndex((i) => i.kind === "paperwork"));
+  assert.equal(paperworkRows(deck).find((i) => i.key === "field-representative")?.section, "A");
   assert.equal(deck.filter((i) => i.kind === "process").length, 6);
 });
 
@@ -212,17 +214,18 @@ test("planner cards follow their form fields, and each field has one editable ca
   const c = demoCase();
   const deck = buildDeck(c, getGaps(c));
   const plan = deck.filter((i) => i.kind === "plan");
-  assert.deepEqual(plan.map((i) => i.ref), ["intake.part4_design", "intake.assembly.description", "intake.sprinklered", "intake.mailing_address", "intake.legal_description"]);
+  assert.deepEqual(plan.map((i) => i.ref), ["intake.part4_design", "intake.assembly.description", "intake.sprinklered"]);
   assert.equal(plan[0].context, "", "the question stands alone");
   assert.equal(plan.find((i) => i.ref === "intake.part4_design")?.why, "Why part4_design.", "Help keeps the contextual reason without boilerplate");
   assert.deepEqual(choicesFor(plan.find((i) => i.ref === "intake.sprinklered")!).map((x) => x.label), ["Yes", "No", "Partly", "Not sure"]);
-  // Legal description and mailing address are planner cards, so their form cards wait.
+  // Paperwork is edited once on the sheet, including fields previously issued by the planner.
   assert.ok(!deck.some((i) => i.key === "field-legalDescription" || i.key === "field-mailingAddress"));
-  assert.equal(plan.find((i) => i.ref === "intake.legal_description")?.section, "B");
-  assert.equal(plan.find((i) => i.ref === "intake.mailing_address")?.section, "A");
+  assert.equal(paperworkRows(deck).find((i) => i.ref === "legalDescription")?.section, "B");
+  assert.equal(paperworkRows(deck).find((i) => i.ref === "mailingAddress")?.section, "A");
   const all = buildDeck(c, getGaps(c), { includeDone: true });
   assert.ok(!all.some((i) => i.key === "field-legalDescription" || i.key === "field-mailingAddress"), "footer navigation has no duplicate form cards either");
-  assert.equal(aliasKey(c, "field-mailingAddress"), "plan-intake.mailing_address");
+  assert.equal(aliasKey(c, "field-mailingAddress"), "paperwork");
+  assert.equal(paperworkRows(all).filter((i) => i.ref === "mailingAddress").length, 1);
 });
 
 test("Not sure on a planner question never blocks and is not asked again on its form card", () => {
@@ -231,8 +234,8 @@ test("Not sure on a planner question never blocks and is not asked again on its 
   c = reducer(c, { type: "noteIntakeRecord", record });
   const gaps = getGaps(c);
   const all = buildDeck(c, gaps, { includeDone: true });
-  assert.equal(all.find((i) => i.ref === "intake.mailing_address")?.done, true);
-  const card = all.find((i) => i.key === "plan-intake.mailing_address")!;
+  const card = paperworkRows(all).find((i) => i.ref === "mailingAddress")!;
+  assert.equal(card.done, true);
   assert.equal(card.settled, true, "a blocking gap stays on the review, but the card is settled");
   assert.equal(questionProgress(card, undefined), "uncertain");
   assert.equal(QUESTION_PROGRESS_LABEL.uncertain, "Left open");
@@ -252,7 +255,7 @@ test("while intake reads, the deck holds one waiting card; a failed read can be 
   const failed = buildDeck(c, getGaps(c), { intake: "error", intakeNote: "Batatis could not be reached." });
   assert.equal(failed[0].stage, "understand");
   assert.equal(failed.find((i) => i.kind === "reading")?.optional, true);
-  assert.ok(failed.some((i) => i.key === "field-owner"), "every A/B detail is still asked");
+  assert.ok(paperworkRows(failed).some((i) => i.key === "field-owner"), "every A/B detail is still reachable in the sheet");
 });
 
 test("another regime shows only the redirect page until the applicant says it is a building-code question", () => {
@@ -339,21 +342,21 @@ test("every local gap that routes to questions has a card", () => {
   const keys = new Set(buildDeck(c, gaps, { includeDone: true }).map((i) => i.key));
   for (const gap of gaps) {
     const key = gapKey(c, gap);
-    if (key) assert.ok(keys.has(key), `no card for gap ${gap.id} -> ${key}`);
+    if (key) assert.ok(keys.has(aliasKey(c, key)), `no card for gap ${gap.id} -> ${key}`);
   }
 });
 
 test("authority offers real choices, while legacy uncertainty leaves its gap open", () => {
   const c = demoCase();
-  const card = buildDeck(c, []).find((i) => i.key === "authority")!;
+  const card = paperworkRows(buildDeck(c, [])).find((i) => i.key === "authority")!;
   assert.equal(c.authority, "");
   assert.equal(card.done, false);
   assert.ok(["calgary", "edmonton", "red-deer"].every((place) => choicesFor(card).some((choice) => choice.value === place)));
   assert.ok(choicesFor(card).some((choice) => choice.value === "later"));
   const gap = { id: "jurisdiction", severity: "blocking" as const, label: "Reviewing authority", href: "#/describe?focus=authority" };
   assert.equal(gapKey(c, gap), "authority");
-  assert.equal(buildDeck(c, [gap], { seen: new Set(["authority"]), includeDone: true }).find((i) => i.key === "authority")?.done, true);
-  assert.equal(buildDeck(c, [gap], { seen: new Set(["authority"]), includeDone: true }).find((i) => i.key === "authority")?.settled, true);
+  assert.equal(paperworkRows(buildDeck(c, [gap], { seen: new Set(["authority"]), includeDone: true })).find((i) => i.key === "authority")?.done, true);
+  assert.equal(paperworkRows(buildDeck(c, [gap], { seen: new Set(["authority"]), includeDone: true })).find((i) => i.key === "authority")?.settled, true);
 });
 
 test("before an application exists the Questions stage has no describe card (Start asks it once)", () => {
@@ -398,9 +401,9 @@ test("progress marks one current item, answers, recorded uncertainty and future 
   let c = demoCase();
   c = reducer(c, { type: "setDetail", field: "date", value: "2026-10-25", section: "A" });
   const deck = buildDeck(c, getGaps(c), { includeDone: true });
-  const current = deck.find((i) => i.key === "authority")!;
-  const deferred = { ...deck.find((i) => i.key === "field-representative")!, done: true, settled: true };
-  const answered = deck.find((i) => i.key === "field-date")!;
+  const current = deck.find((i) => i.kind === "paperwork")!;
+  const deferred = { ...paperworkRows(deck).find((i) => i.key === "field-representative")!, done: true, settled: true };
+  const answered = paperworkRows(deck).find((i) => i.key === "field-date")!;
   const future = deck.find((i) => i.key === "field-risk")!;
   const states = deck.map((i) => questionProgress(i, current.key));
   assert.equal(states.filter((s) => s === "current").length, 1);
@@ -419,12 +422,12 @@ test("issued planner cards stay editable after a later plan replaces them, witho
   const record = intakeResult({ plan: { asked: [scope], questions: [] } }).record;
   c = reducer(c, { type: "noteIntakeRecord", record });
   let all = buildDeck(c, getGaps(c), { includeDone: true });
-  assert.equal(all.find((i) => i.ref === scope.id)?.done, false, "an unanswered issued card survives reranking");
-  assert.equal(aliasKey(c, "field-scope"), `plan-${scope.id}`);
+  assert.equal(paperworkRows(all).find((i) => i.ref === "scope")?.done, false, "an unanswered issued field stays editable");
+  assert.equal(aliasKey(c, "field-scope"), "paperwork");
   assert.ok(!all.some((i) => i.key === "field-scope"));
   c = reducer(c, { type: "adoptFacts", facts: [{ id: "saved-scope", field: "scope", value: "site", kind: "pointed", status: "confirmed", source: { type: "user_text", ref: "intake answer", quote: "site" } }] });
   all = buildDeck(c, getGaps(c), { includeDone: true });
-  const answered = all.find((i) => i.ref === scope.id)!;
+  const answered = paperworkRows(all).find((i) => i.ref === "scope")!;
   assert.equal(answered.done, true);
   assert.deepEqual(choicesFor(answered).map((o) => o.value), ["site", "jurisdiction", "later"], "Back offers both real answers and Later");
   assert.ok(!all.some((i) => i.key === "field-scope"));
@@ -439,20 +442,23 @@ test("question choices offer recorded uncertainty or Later, never Skip", () => {
   }
 });
 
-test("answered read cards stay in the progress as done", () => {
+test("confirmed rows leave the acknowledgement open until Looks right", () => {
   let c = demoCase();
   const before = deckProgress(buildDeck(c, getGaps(c), { includeDone: true }));
   c = reducer(c, { type: "confirmFacts", ids: ["fact_storeys"] });
   const after = deckProgress(buildDeck(c, getGaps(c), { includeDone: true }));
   assert.equal(after.total, before.total);
-  assert.equal(after.done, before.done + 1);
+  assert.equal(after.done, before.done);
+  const understood = buildDeck(c, [], { includeDone: true }).find((i) => i.kind === "understood")!;
+  c = reducer(c, journeyAnswerAction({ ...understood, key: understood.acknowledgementKey! }, "acknowledged"));
+  assert.equal(deckProgress(buildDeck(c, getGaps(c), { includeDone: true })).done, before.done + 1);
 });
 
 test("permit is optional and offered once", () => {
   const c = demoCase();
-  const permit = buildDeck(c, []).find((i) => i.key === "field-permit")!;
+  const permit = paperworkRows(buildDeck(c, [])).find((i) => i.key === "field-permit")!;
   assert.equal(permit.optional, true);
-  assert.equal(buildDeck(c, [], { seen: new Set(["field-permit"]) }).some((i) => i.key === "field-permit"), false);
+  assert.equal(paperworkRows(buildDeck(c, [], { seen: new Set(["field-permit"]) })).find((i) => i.key === "field-permit")?.done, true);
 });
 
 test("Section D joins the deck with a real reference and stays open while its gaps remain", () => {
@@ -490,9 +496,10 @@ test("an asynchronous planner replacement keeps a later Section A field ahead of
   c = reducer(c, { type: "noteIntakeRecord", record: intakeResult().record });
   const after = buildDeck(c, getGaps(c), { includeDone: true }).map((i) => i.key);
   const queue = mergeQueue(before.filter((k) => after.includes(k)), after.filter((k) => !before.includes(k)), after);
-  assert.ok(queue.indexOf("plan-intake.mailing_address") > queue.indexOf("field-representative"));
-  assert.ok(queue.indexOf("plan-intake.mailing_address") < queue.indexOf("field-date"));
-  assert.ok(queue.indexOf("field-date") < queue.indexOf("authority"));
+  assert.equal(queue.filter((key) => key === "paperwork").length, 1);
+  const rows = paperworkRows(buildDeck(c, getGaps(c), { includeDone: true }));
+  assert.ok(rows.findIndex((row) => row.ref === "mailingAddress") > rows.findIndex((row) => row.ref === "representative"));
+  assert.ok(rows.findIndex((row) => row.ref === "date") < rows.findIndex((row) => row.kind === "authority"));
 });
 
 /* —— Review fixes: pending decisions, reopened references, page counts —— */
@@ -543,7 +550,7 @@ test("a rebuilt card keeps a pending answer the engine never stored", () => {
 test("an obvious question is a short label and its control; the reason waits behind Help", () => {
   const c = demoCase();
   const deck = buildDeck(c, getGaps(c), { includeDone: true });
-  const date = deck.find((i) => i.key === "field-date")!;
+  const date = paperworkRows(deck).find((i) => i.key === "field-date")!;
   assert.equal(date.title, "Request date");
   assert.equal(date.context, "", "no subtitle restating the field");
   assert.match(date.why, /Section A/, "the reason is still one click away");

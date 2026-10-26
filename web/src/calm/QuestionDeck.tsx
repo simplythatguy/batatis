@@ -10,7 +10,7 @@ import { openAssistant, setAssistantContext } from "./assistant/assistant";
 import { questionContext } from "./assistant/questionContext";
 import { useCurrentApplication } from "./begin";
 import { CodeDrawer, type DrawerState } from "./CodeDrawer";
-import { aliasKey, alternativeChoice, buildDeck, deferralFor, mergeQueue, rankAhead, choiceKey, choicesFor, preCaseState, sourcePhrase, type DeckItem } from "./deck";
+import { aliasKey, alternativeChoice, buildDeck, deferralFor, mergeQueue, rankAhead, choiceKey, choicesFor, paperworkRowKey, preCaseState, sourcePhrase, type DeckItem } from "./deck";
 import { NOT_SURE, planFactAnswer, planInput } from "../intakeView";
 import { confirmedAnswer, localField } from "../intakeFields";
 import { KeywordTriage } from "./KeywordTriage";
@@ -33,6 +33,7 @@ import { JurisdictionNote } from "./JurisdictionNote";
 import { AuthorityPicker } from "./AuthorityPicker";
 import { DatePicker } from "./DatePicker";
 import { DocumentReview } from "./DocumentReview";
+import { PaperworkSheet } from "./PaperworkSheet";
 import { AUTHORITIES, authorityUnsure, officeChoiceAction, officeSuggestion } from "../config";
 import { PACKAGE_YES, RULE_ADD, RULE_LEAVE } from "./deck";
 import { useAccount } from "./account";
@@ -224,7 +225,7 @@ function PlanBody({ item, onPick, draft, setDraft, note }: { item: Shown; onPick
 }
 
 /** Render the current card’s inputs, saved answer, source details and loading or failure feedback. */
-function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote, extras, note, busy, onReload, position }: { item: Shown; picked?: string; onPick: (value: string) => void; draft: string; setDraft: (v: string) => void; openDrawer: (s: DrawerState) => void; planNote: string; extras: ReturnType<typeof useDeckExtras>["extras"]; note: string; busy: boolean; onReload?: () => void; position: number }) {
+function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote, extras, note, busy, onReload, position, focusRow, onPaperworkDone }: { item: Shown; picked?: string; onPick: (value: string) => void; draft: string; setDraft: (v: string) => void; openDrawer: (s: DrawerState) => void; planNote: string; extras: ReturnType<typeof useDeckExtras>["extras"]; note: string; busy: boolean; onReload?: () => void; position: number; focusRow: string | null; onPaperworkDone: () => void }) {
   const { c, dispatch } = useCase();
   const session = useSession();
   const [tips, setTips] = useState(false);
@@ -288,6 +289,7 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
     return <div className="cf-embed cf-sectiond"><Recommendations /></div>;
   }
   if (item.kind === "understood") return <UnderstoodFacts item={item} />;
+  if (item.kind === "paperwork") return <PaperworkSheet key={engineGeneration()} item={item} focusRow={focusRow} onDone={onPaperworkDone} extras={extras} />;
   if (item.kind === "route") {
     const saved = routeChoice(c);
     const current = saved === "variance" && c.intake?.record.plan?.fork.variance_needed === "not_indicated" ? "different" : saved ?? undefined;
@@ -483,6 +485,8 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
   const seen = useMemo(() => new Set(session.seen), [session.seen]);
   // A keyword lead opened from the grouped triage (or a saved link) stays on the deck while you answer it.
   const [focusedCandidate, setFocusedCandidate] = useState(focus?.startsWith("cand-") ? focus : undefined);
+  const [paperworkFocus, setPaperworkFocus] = useState(() => focus ? paperworkRowKey(c, focus) : null);
+  useEffect(() => { if (focus) setPaperworkFocus(paperworkRowKey(c, focus)); }, [focus]);
   useEffect(() => { if (focus?.startsWith("cand-")) setFocusedCandidate(focus); }, [focus]);
   const today = toIso(todayIn(new Date()));
   const all = buildDeck(c, gaps, { ...deckExtras, seen, today, includeDone: true, identify: reading.identify, intake: reading.intake, intakeNote: reading.intakeNote, focusedCandidate: focus?.startsWith("cand-") ? focus : focusedCandidate });
@@ -646,6 +650,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
 
   // A card that takes typing gets the caret straight away; otherwise the heading (no ring) holds focus.
   useEffect(() => {
+    if (item?.kind === "paperwork") return;
     const w = wrapRef.current;
     const field = w?.querySelector<HTMLElement>(".cf-q-body input.cf-uline, .cf-q-body textarea");
     (field ?? w?.querySelector<HTMLElement>("h2"))?.focus({ preventScroll: true });
@@ -656,7 +661,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
     const key = queue[from];
     const open = (k: string) => {
       const it = itemFor(k);
-      return Boolean(k !== key && it && !it.done && it.answerer !== "office" && !session.seen.includes(k));
+      return Boolean(k !== key && it && !it.done && it.answerer !== "office" && (it.kind === "understood" || !session.seen.includes(k)));
     };
     // New questions can arrive earlier in the journey while the current answer is being saved.
     const first = queue.findIndex(open);
@@ -688,7 +693,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
     if (it.kind === "section-d" || it.kind === "file" || it.kind === "code-run" || it.kind === "code-note" || it.kind === "code-triage") return true;
     if (it.kind === "reading") return reading.intake !== "running";
     if (it.kind === "scope") return false;
-    if (it.kind === "understood") return true;
+    if (it.kind === "understood" || it.kind === "paperwork") return true;
     if (it.kind === "product-notice") return true;
     if (it.kind === "route-detail") return Boolean(draft.trim());
     if (it.kind === "plan" || it.kind === "product-scope") return reading.busy !== it.ref && (it.done || Boolean(draft.trim()));
@@ -712,7 +717,12 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
     if (!canContinue(item)) return;
     if (item.kind === "understood") {
       dispatch({ type: "confirmFacts", ids: item.ids ?? [] });
+      dispatch(journeyAnswerAction({ ...item, key: item.acknowledgementKey ?? item.key }, "acknowledged"));
       setAdvanceAfter({ key: item.key, generation: engineGeneration() });
+      return;
+    }
+    if (item.kind === "paperwork") {
+      wrapRef.current?.querySelector<HTMLFormElement>("form.cf-paperwork")?.requestSubmit();
       return;
     }
     if (item.kind === "route-detail") {
@@ -961,7 +971,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
     if (drawer || e.defaultPrevented || document.querySelector("dialog[open]")) return;
     const t = e.target as HTMLElement | null;
     // Keys typed in the menu, a popover, the assistant or any dialog belong to them.
-    if (t?.closest?.(".cf-pop, dialog, [role='menu'], .cf-palette, .cf-assist, .cf-document-review, .cf-understood")) return;
+    if (t?.closest?.(".cf-pop, dialog, [role='menu'], .cf-palette, .cf-assist, .cf-document-review, .cf-understood, .cf-paperwork")) return;
     const inText = isTextTarget(t);
     const embedded = item?.kind === "section-d" && t && t !== document.body && !t.closest("[data-deck-foot]") && t.tagName !== "H2";
     if (embedded) return;
@@ -1011,7 +1021,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
         </div>
       )}
       <DocumentReview intake={c.intake} files={c.files} description={c.description} intakeStatus={reading.intake} />
-      <div className="cf-q-stage">
+      <div className={`cf-q-stage${item?.kind === "paperwork" ? " is-paperwork" : ""}`}>
         {/* A submission on its way only pauses the mounted card (App's edit lock); a sent one is read-only. */}
         {readOnly ? (
           <div className="cf-q-wrap" aria-labelledby="cf-q" role="group">
@@ -1025,7 +1035,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
         ) : item?.kind === "scope" && !item.gone ? (
           <RedirectPage />
         ) : item ? (
-          <div ref={wrapRef} key={item.key} className={`cf-q-wrap is-from-${dir}${item.kind === "section-d" || item.kind === "code-triage" ? " is-wide" : ""}`} aria-labelledby="cf-q" role="group">
+          <div ref={wrapRef} key={item.key} className={`cf-q-wrap is-from-${dir}${item.kind === "section-d" || item.kind === "code-triage" || item.kind === "paperwork" ? " is-wide" : ""}`} aria-labelledby="cf-q" role="group">
             <p className="cf-eyebrow is-plain">{item.plan?.kind === "conflict" ? "You wrote two things" : STAGES.find((s) => s.stage === item.stage)?.label}<span className="cf-faint"> · Section {item.section}</span></p>
             <h2 id="cf-q" className="cf-q-text" tabIndex={-1}>{item.title}</h2>
             {item.answerer === "designer" && <span className="cf-answerer-tag"><Icon24 name="compose" size={15} />Usually your designer knows</span>}
@@ -1046,6 +1056,8 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
                 openDrawer={setDrawer}
                 planNote={planNotes[item.key] ?? ""}
                 extras={extras}
+                focusRow={paperworkFocus}
+                onPaperworkDone={() => moveFrom(index, true)}
                 note={cardNotes[item.key] ?? ""}
                 busy={busyKey === item.key}
                 onReload={conflicted === item.key ? () => void reloadChecklists().then((e) => { noteFor(item.key, e ?? ""); if (!e) setConflicted(null); }) : undefined}
@@ -1057,7 +1069,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
             {item.section === "C" && (extras.failed.rules || extras.failed.case) && (
               <p className="cf-note" role="status"><span className="cf-dot is-warning" aria-hidden="true" />Rule checks didn’t load, so some rule questions may be missing. <button type="button" className="cf-link-btn" onClick={retryExtras}>Try again</button></p>
             )}
-            <OkRow label={item.kind === "understood" ? "Looks right" : "Continue"} primary={choicesFor(item).length === 0 || item.kind === "authority" || (item.kind === "detail" && (picked[item.key] === "dismiss" || picked[item.key] === "edit-suggested")) || (item.kind === "condition" && (picked[item.key] ?? currentState(item)) === "does_not_apply")} disabled={!canContinue(item)} onOk={next} typed={typed}>
+            <OkRow label={item.kind === "understood" ? "Looks right" : "Continue"} primary={item.kind !== "paperwork" && (choicesFor(item).length === 0 || item.kind === "authority" || (item.kind === "detail" && (picked[item.key] === "dismiss" || picked[item.key] === "edit-suggested")) || (item.kind === "condition" && (picked[item.key] ?? currentState(item)) === "does_not_apply"))} disabled={!canContinue(item)} onOk={next} typed={typed}>
               <span className="cf-ok-more">
                 {deferralFor(item) && (choicesFor(item).length === 0 || item.kind === "authority") && <button type="button" className="cf-link-btn" disabled={locked || reading.busy === item.ref || busyKey === item.key} onClick={() => { const choice = deferralFor(item); if (choice) deferCurrent(choice.value); }}>{deferralFor(item)?.label}</button>}
                 <HelpButton item={item} n={n} open={why} onToggle={() => setWhy((v) => !v)} />

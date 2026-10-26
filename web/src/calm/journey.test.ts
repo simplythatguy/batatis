@@ -6,22 +6,33 @@ import { buildDeck } from "./deck.ts";
 import { journeyAnswerAction, journeyProgress, routeChoice, understandingRows } from "./journey.ts";
 import { DETAIL_IDS } from "../model.ts";
 
+test("paperwork is one sheet with row counts and field focus aliases", () => {
+  const items = buildDeck(emptyCase(), [], { today: "2026-10-26", includeDone: true });
+  const paperwork = items.filter((item) => item.stage === "paperwork");
+  assert.equal(paperwork.length, 1);
+  const sheet = paperwork[0];
+  assert.equal(sheet.title, "Last details for the form");
+  assert.equal(sheet.paperworkRows?.filter((row) => !row.optional && !row.done).length, 8);
+  assert.equal(journeyProgress([sheet]).open.you + journeyProgress([sheet]).open.batatis, 8);
+  assert.equal(sheet.paperworkRows?.find((row) => row.ref === "permit")?.optional, true);
+});
+
 test("project decisions come before owner and mailing paperwork", () => {
   const c = reducer(emptyCase(), { type: "setDescription", text: "A house with larger windows." });
   const deck = buildDeck(c, getGaps(c), { includeDone: true });
-  const owner = deck.findIndex((i) => i.key === "field-owner");
+  const owner = deck.findIndex((i) => i.kind === "paperwork");
   assert.ok(deck.findIndex((i) => i.kind === "storeys") < owner);
-  assert.equal(deck.find((i) => i.key === "authority")?.stage, "paperwork");
+  assert.ok(deck[owner].paperworkRows?.some((i) => i.kind === "authority"));
 });
 
 test("Later is case data, stays open, and is not automatically asked again", () => {
   let c = emptyCase();
-  const item = buildDeck(c, []).find((i) => i.key === "field-owner")!;
+  const item = buildDeck(c, []).find((i) => i.kind === "paperwork")!.paperworkRows!.find((i) => i.key === "field-owner")!;
   c = reducer(c, journeyAnswerAction(item, "later"));
   const reopened = JSON.parse(JSON.stringify(c));
   assert.ok(!buildDeck(reopened, []).some((i) => i.key === item.key));
   const all = buildDeck(reopened, [], { includeDone: true });
-  assert.equal(all.find((i) => i.key === item.key)?.settled, true);
+  assert.equal(all.find((i) => i.kind === "paperwork")?.paperworkRows?.find((i) => i.key === item.key)?.settled, true);
   assert.equal(journeyProgress(all).yourPartDone, false);
 });
 
@@ -51,8 +62,9 @@ test("equal readings retain their sources in one row, while picture proposals st
 test("derived confirmations are explicit suggestions and never silently fill the case", () => {
   const c = reducer(emptyCase("owner"), { type: "setDetail", field: "municipalAddress", value: "Synthetic site address", section: "B" });
   const items = buildDeck(c, [], { today: "2026-10-26", includeDone: true });
-  const date = items.find((i) => i.ref === "date")!;
-  const mailing = items.find((i) => i.ref === "mailingAddress")!;
+  const rows = items.find((i) => i.kind === "paperwork")!.paperworkRows!;
+  const date = rows.find((i) => i.ref === "date")!;
+  const mailing = rows.find((i) => i.ref === "mailingAddress")!;
   assert.equal(date.answerer, "batatis");
   assert.equal(date.suggestedValue, "2026-10-26");
   assert.equal(mailing.suggestedValue, "Synthetic site address");

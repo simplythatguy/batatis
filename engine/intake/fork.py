@@ -28,6 +28,8 @@ _DEPARTS = re.compile(
     r"(?i)\binstead\s+of\b|\binstead\b|\brather\s+than\b|\bin\s+place\s+of\b|\bomit(?:s|ted|ting)?\b|\bleav(?:e|ing)\s+out\b"
     r"|\bskip(?:ping)?\b|\bdrop\s+the\b|\bwithout\s+(?:the|a|any|adding|designing|checking|demonstrating|a\s+separate)\b"
     r"|\bnot\s+(?:meet|meeting|offering|providing|provide|install|use|check)\b|\b(?:doesn'?t|does\s+not|don'?t|do\s+not)\s+meet\b"
+    r"|\b(?:less|fewer|smaller|thinner|shorter|lower|closer|narrower|more|bigger|larger|longer|higher|taller|further|wider)\b"
+    r"[^.!?;\n]{0,100}?\bthan\s+(?:(?:the\s+)?(?:(?:table|code|rules?|bylaw)\s+)?(?:allows?|permits?)|(?:is\s+)?(?:allowed|permitted))\b"
     r"|\b(?:less|fewer|smaller|thinner|shorter|lower|closer|narrower)\s+than\s+(?:the\s+)?(?:code|required|allowed|permitted|prescribed|table)"
     r"|\b(?:more|larger|longer|higher|taller|further|wider)\s+than\s+(?:the\s+)?(?:code|allowed|permitted|maximum|limit)"
     r"|\bexceed(?:s|ing)?\s+the\b|\btoo\s+close\b|\breduc(?:e|ed|ing)\b|\breplace(?:s|d)?\s+(?:the\s+)?(?:required|both)\b"

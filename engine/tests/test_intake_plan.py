@@ -94,6 +94,32 @@ def test_a_house_with_a_bathroom_or_a_gas_fireplace_stays_in_scope():
 
 # ---------------------------------------------------------------- fork
 
+@pytest.mark.parametrize('text', [
+    'We want bigger windows on the side wall than the table allows.',
+    'Our windows cover more than the code allows.',
+    'The windows are larger than allowed.',
+    'The wall is closer than permitted.',
+    'We want wider openings than is allowed.',
+    'We want taller walls than the bylaw permits.',
+    'The openings are larger than the rules allow.',
+    'The opening is larger than the rule permits.',
+])
+def test_fork_reads_everyday_comparisons(text):
+    assert assess(text).variance_needed == 'likely'
+
+
+@pytest.mark.parametrize('text, expected', [
+    ('The bigger windows are within the table limits.', 'not_indicated'),
+    ('Our house follows the code.', 'not_indicated'),
+    ('We use standard construction.', 'not_indicated'),
+    ('Would bigger windows than the table allows be possible?', 'unknown'),
+    ('Are larger windows than allowed possible?', 'unknown'),
+    ('Can we build closer than permitted? Our house follows the code.', 'unknown'),
+    ('Can we build closer than permitted?', 'likely'),
+])
+def test_fork_comparisons_preserve_follows_cues_and_questions(text, expected):
+    assert assess(text).variance_needed == expected
+
 def test_fork_on_labelled_cases(capsys):
     rows = [(p['text'], p['label']) for p in _prompts('blind_fork.json')]
     rows += [(c['description'], 'likely') for c in CASES if c['gold']['intake_action'] == 'proceed_conditionally']

@@ -41,7 +41,7 @@ const ANSWERER: Readonly<Record<string, Answerer>> = {
   fire_response_over_10_min: "office",
   "professional.ahj_requires_professional": "office",
 };
-const PAPERWORK = new Set(["owner", "representative", "mailingAddress", "municipalAddress", "legalDescription", "permit", "date", "scope", "applicant_role"]);
+export const PAPERWORK_FIELDS = new Set(["owner", "representative", "mailingAddress", "municipalAddress", "legalDescription", "permit", "date", "scope", "applicant_role"]);
 const PROJECT = new Set(["storeys", "building_area_m2", "floor_area_m2", "occupancy", "sprinklered", "dwelling_units", "limiting_distance_m", "faces_public_way", "part4_design", "assembly.description"]);
 type Positioned = Pick<DeckItem, "kind" | "ref" | "section"> & Partial<Pick<DeckItem, "plan" | "input" | "read" | "assumed" | "field">>;
 const fieldOf = (item: Positioned) => localField(item.plan?.field ?? item.input?.field ?? item.field ?? item.ref);
@@ -50,7 +50,7 @@ export function stageOf(item: Positioned): Stage {
   const field = fieldOf(item);
   if (item.kind === "understood" || item.kind === "fact" || item.kind === "file" || item.kind === "reading" || item.plan?.kind === "conflict") return "understand";
   if (item.kind === "route" || item.kind === "route-detail" || item.kind === "product-scope" || item.kind === "product-notice" || item.kind === "scope" || field === "product_scope") return "route";
-  if (item.kind === "role" || item.kind === "authority" || PAPERWORK.has(field)) return "paperwork";
+  if (item.kind === "paperwork" || item.kind === "role" || item.kind === "authority" || PAPERWORK_FIELDS.has(field)) return "paperwork";
   if (item.kind === "process" || field === "alternative") return "case";
   if (item.kind === "section-d" || field.startsWith("professional.") || field.startsWith("evidence.")) return "proof";
   if (item.kind === "storeys" || (item.kind === "plan" && item.plan?.priority !== "administrative") || PROJECT.has(field)) return "project";
@@ -77,7 +77,7 @@ export function orderJourney(items: DeckItem[]): DeckItem[] {
   return [...items].sort((a, b) => STAGES.findIndex((s) => s.stage === a.stage) - STAGES.findIndex((s) => s.stage === b.stage) || position(a) - position(b));
 }
 
-export type JourneyAnswerValue = "not_sure" | "designer" | "later";
+export type JourneyAnswerValue = "not_sure" | "designer" | "later" | "acknowledged";
 export interface JourneyAnswer {
   key: string;
   field: string;
@@ -106,7 +106,7 @@ export function journeyAnswers(c: Case): Map<string, JourneyAnswer> {
     try {
       const a: unknown = JSON.parse(fact.value);
       if (!a || typeof a !== "object" || !("key" in a) || typeof a.key !== "string" || !("field" in a) || typeof a.field !== "string" || !("question" in a) || typeof a.question !== "string" || !("required" in a) || typeof a.required !== "boolean") continue;
-      if (!("value" in a) || (a.value !== "not_sure" && a.value !== "designer" && a.value !== "later")) continue;
+      if (!("value" in a) || (a.value !== "not_sure" && a.value !== "designer" && a.value !== "later" && a.value !== "acknowledged")) continue;
       if (!("stage" in a) || !STAGES.some((s) => s.stage === a.stage) || !("answerer" in a) || !ANSWERERS.some((who) => who === a.answerer)) continue;
       const stage = STAGES.find((s) => s.stage === a.stage)!.stage;
       const answerer = ANSWERERS.find((who) => who === a.answerer)!;
@@ -141,6 +141,17 @@ export interface UnderstandingRow {
   deferred?: JourneyAnswerValue;
 }
 
+/** Confirmation changes no part of this key; a fresh reading or changed rows does. */
+export function understandingAnswerKey(c: Case, rows: UnderstandingRow[]): string {
+  const signature = JSON.stringify([c.intake?.record.ran_at ?? null, rows.map((r) => [r.field, [...r.ids].sort()])]);
+  // A bounded reading identity; personal values never become fact-field names.
+  let hash = 0xcbf29ce484222325n;
+  for (let i = 0; i < signature.length; i++) hash = BigInt.asUintN(64, (hash ^ BigInt(signature.charCodeAt(i))) * 0x100000001b3n);
+  return `understood:${hash.toString(16)}`;
+}
+
+export const cleanReadValue = (value: string): string => value.trim().replace(/[.,;:!?]+$/, "").trimEnd();
+
 function pictureFact(c: Case, fact: Fact): boolean {
   if (fact.kind !== "proposed" || fact.source.type !== "file") return false;
   const file = c.files.find((f) => f.engineId === fact.source.ref || f.id === fact.source.ref);
@@ -155,7 +166,7 @@ export function understandingRows(c: Case, detailIds: ReadonlySet<string>): Unde
   const rows: UnderstandingRow[] = [];
   const answers = journeyAnswers(c);
   const latestByField = new Map(latestLocalFacts(c.facts).map((f) => [f.field, f]));
-  for (const group of readGroups(c, detailIds)) {
+  for (const group of readGroups(c, detailIds, true)) {
     if (group.fact.field.startsWith("journey.")) continue;
     const field = localField(group.fact.field);
     const latest = latestByField.get(field);
@@ -164,7 +175,8 @@ export function understandingRows(c: Case, detailIds: ReadonlySet<string>): Unde
     const shown = corrected ? latest : { ...group.fact, field };
     const assumed = shown.kind === "computed" || shown.kind === "proposed" || c.intake?.record.pointers.some((p) => p.fact_id === shown.id && p.verified === false) === true;
     const separate = pictureFact(c, group.fact) || Boolean(c.intake?.record.conflicts.some((conflict) => localField(conflict.field) === field));
-    const copy = readCopy(c, { ...group, fact: shown });
+    const read = readCopy(c, { ...group, fact: shown });
+    const copy = { ...read, value: cleanReadValue(read.value), confirm: cleanReadValue(read.confirm) };
     const sources = corrected ? ["Your answer"] : group.ids.map((id) => c.facts.find((f) => f.id === id) ?? c.intake?.facts.find((f) => f.id === id)).filter((f): f is Fact => Boolean(f)).map((f) => sourceLine(c, f));
     const twin = !separate && rows.find((row) => !row.separate && row.field === field && row.copy.value.trim().toLowerCase() === copy.value.trim().toLowerCase());
     if (twin) {

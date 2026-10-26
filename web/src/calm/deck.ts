@@ -20,7 +20,7 @@ import { calmHref } from "./routes";
 import { caseRuleResults, inputChoices, linkedCandidate, plainResult, RULE_REF, ruleFacts, ruleInPlay, ruleTopic, type RuleData, type ShownRule } from "./rulesView";
 import { preparationGaps } from "./preparation";
 import { professionalCounts } from "../professional";
-import { answererOf, journeyAnswers, journeyProgress, orderJourney, productScope, routeChoice, stageOf, understandingRows, type UnderstandingRow, type Answerer, type JourneyAnswerValue, type Stage } from "./journey";
+import { answererOf, itemOpen, journeyAnswers, journeyProgress, orderJourney, PAPERWORK_FIELDS, productScope, routeChoice, stageOf, understandingAnswerKey, understandingRows, type UnderstandingRow, type Answerer, type JourneyAnswerValue, type Stage } from "./journey";
 
 /** Choice values on rule and package cards. */
 export const RULE_ADD = "add";
@@ -29,7 +29,7 @@ export const PACKAGE_YES = "yes";
 export const PACKAGE_NO = "no";
 
 export type DeckKind =
-  | "understood" | "route" | "route-detail" | "product-scope" | "product-notice" | "role"
+  | "understood" | "route" | "route-detail" | "product-scope" | "product-notice" | "role" | "paperwork"
   | "fact" | "file" | "plan" | "candidate" | "storeys" | "question" | "authority" | "detail" | "process" | "section-d"
   /** Intake reading the description and files, or failed (with Try again). */
   | "reading"
@@ -117,6 +117,9 @@ export interface DeckItem {
   /** Section D: answers changed after the last check; the current requirements need a fresh check. */
   needsCheck?: boolean;
   rows?: UnderstandingRow[];
+  acknowledgementKey?: string;
+  /** The paperwork sheet retains each field's identity, deferral and required status. */
+  paperworkRows?: DeckItem[];
   assumed?: boolean;
   deferred?: JourneyAnswerValue;
   suggestedValue?: string;
@@ -285,6 +288,7 @@ function questionOnOtherCard(c: Case, id: string, cardId?: string): boolean {
 
 /** Map a gap or link key to the card that answers it. */
 export function aliasKey(c: Case, key: string): string {
+  if (paperworkRowKey(c, key)) return "paperwork";
   const row = understandingRows(c, DETAIL_IDS).find((r) => r.key === key || (key.startsWith("fact-") && r.ids.includes(key.slice(5))));
   if (row && !row.separate) return "understood";
   if (key.startsWith("field-")) {
@@ -305,12 +309,22 @@ export function aliasKey(c: Case, key: string): string {
   return key;
 }
 
-/** The deck key a gap's fix link opens, or null when the fix is not a card (Start, references). */
+/** Resolve old field/planner/fact links to the row inside the paperwork sheet. */
+export function paperworkRowKey(c: Case, key: string): string | null {
+  if (key === "authority" || key === "field-authority") return "authority";
+  if (key === "role" || key === "field-applicant_role") return "role";
+  const plan = planQuestions(c).find(({ q }) => `plan-${q.id}` === key)?.q;
+  const fact = key.startsWith("fact-") ? c.facts.find((f) => f.id === key.slice(5)) ?? c.intake?.facts.find((f) => f.id === key.slice(5)) : undefined;
+  const field = localField(plan?.field ?? fact?.field ?? (key.startsWith("field-") ? key.slice(6) : ""));
+  return PAPERWORK_FIELDS.has(field) ? field === "applicant_role" ? "role" : `field-${field}` : null;
+}
+
+/** Keep a paperwork row's focus in fix links; the deck resolves its containing sheet on entry. */
 export function gapKey(c: Case, gap: Gap): string | null {
   const href = calmHref(gap.href);
   if (!href.startsWith("#/questions")) return null;
   const focus = new URLSearchParams(href.split("?")[1] ?? "").get("focus");
-  return focus ? aliasKey(c, focus) : null;
+  return focus ? paperworkRowKey(c, focus) ?? aliasKey(c, focus) : null;
 }
 
 export function sectionDGaps(gaps: Gap[]): Gap[] {
@@ -335,12 +349,12 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
   const push = (group: keyof typeof groups, source: UnpositionedItem) => {
     const item = positioned(source);
     const pending = item.kind === "candidate" && c.candidates.some((a) => a.id === item.ref && a.pending);
-    const answer = pending ? undefined : deferred.get(item.key);
+    const answer = pending ? undefined : deferred.get(item.key) ?? (item.stage === "paperwork" ? [...deferred.values()].find((a) => a.stage === "paperwork" && a.field === localField(item.field ?? item.ref)) : undefined);
     // Legacy uncertainty stays open on Review without asking the same card repeatedly.
     const answeredUnsure = (item.kind === "authority" && seen.has("authority")) || item.settled;
-    const open = !item.done || (!item.optional && gapKeys.has(item.key) && item.kind !== "section-d" && !answeredUnsure);
+    const open = !item.done || (!item.optional && gapKeys.has(item.key) && item.kind !== "section-d" && item.kind !== "understood" && !answeredUnsure);
     const next: DeckItem = { ...item, done: answer ? true : !open, settled: answer ? true : item.settled, deferred: answer?.value, answerer: answer?.value === "designer" ? "designer" : item.answerer };
-    if (opts.includeDone || (!next.done && next.answerer !== "office")) groups[group].push(next);
+    if (item.stage === "paperwork" || opts.includeDone || (!next.done && next.answerer !== "office")) groups[group].push(next);
   };
 
   // While intake reads, nothing else is asked: every card after it may already be answered by what it reads.
@@ -398,12 +412,14 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
   const rows = understandingRows(c, DETAIL_IDS);
   const readFields = new Set(rows.filter((r) => r.value != null && r.value !== "").map((r) => r.field));
   const shared = rows.filter((r) => !r.separate && answererOf({ kind: "question", ref: r.field, section: "B" }) !== "office");
+  const acknowledgementKey = understandingAnswerKey(c, shared);
+  const acknowledged = deferred.get(acknowledgementKey)?.value === "acknowledged";
   if (shared.length) push("read", {
     key: "understood", kind: "understood", section: "B", eyebrow: "Understand · Section B",
     title: "Here’s what I understood", context: "", why: "Check the values and their sources. Looks right confirms every row together; Fix opens an individual fact.",
     ref: "understood", rows: shared, ids: [...new Set(shared.filter((r) => !r.done).flatMap((r) => r.ids))],
-    done: shared.every((r) => r.done), optional: false, settled: shared.some((r) => Boolean(r.deferred)),
-    counts: { batatis: { open: shared.filter((r) => !r.done).length, done: shared.filter((r) => r.done && !r.deferred).length }, you: { open: shared.filter((r) => Boolean(r.deferred)).length, done: 0 } },
+    done: acknowledged, optional: false, acknowledgementKey,
+    counts: { batatis: { open: acknowledged ? 0 : 1, done: acknowledged ? 1 : 0 } },
   });
   // Conflicts and proposals read from pictures require their own confirmation.
   for (const row of rows.filter((r) => !shared.includes(r))) {
@@ -466,6 +482,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
   const plan = planQuestions(c);
   const planFields = new Set(plan.map(({ q }) => localField(q.field)));
   for (const { q, done, notSure } of plan) {
+    if (PAPERWORK_FIELDS.has(localField(q.field)) && q.kind !== "conflict") continue;
     if (readFields.has(localField(q.field)) && q.kind !== "conflict") continue;
     const detail = DETAIL_FIELDS.find((d) => d.id === localField(q.field));
     push("plan", {
@@ -504,22 +521,23 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
     ref: "authority",
     // Read from the site's municipality, it is a quiet confirmation offered once (with the office's
     // pack); unanswered, it is required.
-    done: opts.confirmAuthority ? seen.has("authority") : Boolean(c.authority) || seen.has("authority"),
+    done: Boolean(c.authority && confirmedAnswer(c.facts, "office.choice")?.value === c.authority) || (opts.confirmAuthority ? seen.has("authority") : Boolean(c.authority) || seen.has("authority")),
     optional: Boolean(opts.confirmAuthority && c.authority),
     settled: !c.authority && seen.has("authority"),
     assumed: Boolean(opts.confirmAuthority && c.authority),
   });
   const planned = plannedFields(c);
   for (const d of DETAIL_FIELDS) {
-    if (readFields.has(d.id)) continue;
+    const paperwork = PAPERWORK_FIELDS.has(d.id);
+    if (readFields.has(d.id) && !paperwork) continue;
     const fact = factFor(c, d.id);
-    if (fact?.status === "unconfirmed") continue; // asked on its "check what we read" card
+    if (fact?.status === "unconfirmed" && !paperwork) continue; // asked on its "check what we read" card
     // A choice field counts only with one of its choices (a free-text answer elsewhere can land here).
     const filled = d.options ? valueText(fact) in d.options : Boolean(valueText(fact).trim());
-    if (!d.required && filled && !opts.includeDone) continue;
+    if (!d.required && filled && !opts.includeDone && !paperwork) continue;
     // One editable card per field, including in footer navigation and after a planner answer is saved.
     const cover = planned.get(d.id);
-    if (planFields.has(d.id)) continue;
+    if (planFields.has(d.id) && !paperwork) continue;
     // The proposed alternative is usually what the applicant already described on Start: offer
     // those words instead of asking again. Nothing is filled until they say yes.
     const offer = d.id === "alternative" && Boolean(c.description.trim());
@@ -549,6 +567,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
   // Open questions: project questions, and questions from code matching.
   for (const q of c.questions) {
     if (questionOnOtherCard(c, q.id, q.cardId)) continue;
+    if (PAPERWORK_FIELDS.has(localField(q.field))) continue;
     if (readFields.has(localField(q.field)) || planFields.has(localField(q.field))) continue;
     const fromCode = q.kind === "intake" || q.id.startsWith("q-identify-");
     push(fromCode ? "C" : "questions", {
@@ -784,8 +803,25 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
     });
   }
   const items = [...groups.read, ...groups.plan, ...groups.A, ...groups.B, ...groups.questions, ...groups.C, ...groups.D];
+  const paperworkRows = orderJourney(items.filter((item) => item.stage === "paperwork"));
   const usualRoute = route === "standard" || productScope(c) === "product_acceptance";
-  return orderJourney(items.filter((item) => !usualRoute || (item.stage !== "case" && item.stage !== "proof" && item.kind !== "candidate" && item.kind !== "rule" && item.kind !== "package" && item.kind !== "condition" && item.kind !== "package-end" && item.ref !== "scope")));
+  const rowsForRoute = paperworkRows.filter((row) => !usualRoute || row.ref !== "scope");
+  const counts: DeckItem["counts"] = {};
+  for (const row of rowsForRoute.filter((row) => !row.optional)) {
+    const count = counts[row.answerer] ??= { open: 0, done: 0 };
+    if (itemOpen(row)) count.open++;
+    else count.done++;
+  }
+  const sheet: DeckItem = {
+    key: "paperwork", kind: "paperwork", section: "A", stage: "paperwork", answerer: "you",
+    eyebrow: "Paperwork", title: "Last details for the form", context: "",
+    why: "These details fill the form. Tap a default to accept it, or leave a row for Later. Done saves your answers.",
+    ref: "paperwork", optional: false, done: rowsForRoute.every((row) => row.done || row.optional),
+    paperworkRows: rowsForRoute, counts,
+  };
+  const cards = items.filter((item) => item.stage !== "paperwork" && (!usualRoute || (item.stage !== "case" && item.stage !== "proof" && item.kind !== "candidate" && item.kind !== "rule" && item.kind !== "package" && item.kind !== "condition" && item.kind !== "package-end")));
+  if (opts.includeDone || !sheet.done) cards.push(sheet);
+  return orderJourney(cards);
 }
 
 /** Keys after `index` that match `pick` take the current journey order. */
@@ -893,8 +929,8 @@ function answerChoices(item: DeckItem): { value: string; label: string }[] {
   return [];
 }
 
-export function deferralFor(item: DeckItem): { value: JourneyAnswerValue; label: string } | null {
-  if (["understood", "reading", "file", "code-run", "code-note", "code-triage", "package-end", "product-notice", "route", "scope"].includes(item.kind)) return null;
+export function deferralFor(item: DeckItem): { value: Exclude<JourneyAnswerValue, "acknowledged">; label: string } | null {
+  if (["understood", "paperwork", "reading", "file", "code-run", "code-note", "code-triage", "package-end", "product-notice", "route", "scope"].includes(item.kind)) return null;
   if (item.stage === "paperwork") return { value: "later", label: "Later" };
   return item.answerer === "designer" ? { value: "designer", label: "Ask my designer" } : { value: "not_sure", label: "Not sure" };
 }
