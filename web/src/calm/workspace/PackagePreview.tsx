@@ -77,8 +77,11 @@ export function PackagePreview({ official, versionKey, zoom }: { official: boole
   const first = view.phase === "ready" ? view.preview.pages[0] : undefined;
   const stale = view.phase === "ready" && view.basis !== versionKey;
   return <section className="aw-package-preview" aria-label="Officer view">
-    <div className="aw-preview-bar"><span>{official ? "Officer view" : "Draft package"}{view.phase === "ready" ? ` · ${view.preview.page_count} pages` : ""}</span>{stale && <button type="button" className="cf-btn is-xs" onClick={() => void load()}><CIcon name="retry" size={12} />Update</button>}{pdfUrl && <a className="cf-icon-btn is-plain" href={pdfUrl} target="_blank" rel="noreferrer" title="Open package PDF in a new tab" aria-label="Open package PDF in a new tab"><CIcon name="external" size={14} /></a>}</div>
-    {stale && <p className="aw-notice" role="status">The application changed. Update the package preview.</p>}
+    <div className="aw-preview-bar">
+      <span>{official ? "What the officer receives" : "Draft package"}{view.phase === "ready" ? <span className="aw-meta"> · {view.preview.page_count} pages</span> : null}</span>
+      {stale && <button type="button" className="cf-btn is-xs" onClick={() => void load()}><CIcon name="retry" size={12} />Update</button>}
+      {pdfUrl && <a className="cf-icon-btn is-plain" href={pdfUrl} target="_blank" rel="noreferrer" title="Open the PDF in a new tab" aria-label="Open the PDF in a new tab"><CIcon name="external" size={14} /></a>}
+    </div>
     {view.phase === "ready" ? <div className="aw-package-pages" ref={setRoot} role="region" tabIndex={0} aria-label={official ? "Pages the officer receives" : "Draft PDF pages"}>
       <div className="aw-preview-scale" style={{ width: `${zoom}%`, maxWidth: `${650 * zoom / 100}px` }}>{Array.from({ length: view.preview.page_count }, (_, index) => <Page key={`${view.id}:${view.basis}:${official}:${index}`} id={view.id} index={index} total={view.preview.page_count} official={official} root={root}
         seed={index < view.preview.pages.length ? view.preview.pages[index] : undefined} width={first?.width ?? 612} height={first?.height ?? 792} />)}</div>

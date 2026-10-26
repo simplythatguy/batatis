@@ -51,7 +51,7 @@ export function SubmitPanel({ signingReason, beforeSubmit, sections }: { signing
   const needsCheck = work.checkNeeded.length > 0;
   const routed = gaps.some((g) => g.severity === "blocking" && g.submissionBlocking === false);
   const n = work.applicant.length;
-  const reason = !c.authority ? "Choose a reviewing office." : n ? `${n} required ${n === 1 ? "item" : "items"} missing.` : needsCheck ? "Check your changed application first." : signingReason;
+  const reason = !c.authority ? "Choose a reviewing office." : n ? "Fix the flagged items first." : needsCheck ? "Check your changed application first." : signingReason;
 
   reasonNow.current = reason;
   async function submit() {
@@ -86,7 +86,7 @@ export function SubmitPanel({ signingReason, beforeSubmit, sections }: { signing
         <p className="cf-faint cf-small">
           {reason} {signingReason && !n && !needsCheck && c.authority ? <a className="cf-inline-link" href="#/application?step=sign">Sign</a> : c.authority && needsCheck && !n
             ? <button type="button" className="cf-link-btn" disabled={checkStatus === "running"} onClick={() => void requestCheck(checkStatus === "unavailable")}>{checkStatus === "running" ? "Checking…" : "Check application"}</button>
-            : <a className="cf-inline-link" href={!c.authority ? "#/questions?focus=authority" : "#/review"}>{!c.authority ? "Pick one" : "See them"}</a>}
+            : !c.authority ? <a className="cf-inline-link" href="#/questions?focus=authority">Pick one</a> : null}
         </p>
       )}
       {!reason && routed && <p className="cf-faint cf-small">The professional question goes to the officer with your application.</p>}

@@ -89,9 +89,10 @@ export function buildDocument(c: Case, gaps: readonly Gap[], requests: readonly 
   for (const f of PROCESS_FIELDS) add("case", {
     id: PROCESS_FACT[f.id], label: f.label, text: c.process[f.id], required: true, target: { kind: "process", field: f.id },
   });
-  add("C", { id: "provisions", label: "Code references", text: c.candidates.filter(a => a.answer === "yes").map(a => a.provision).join(" · "), required: true, target: { kind: "card", href: "#/questions?first=code" } });
+  // The chosen references are the rows below; a summary line only appears while none is chosen.
+  if (!c.sectionC.length) add("C", { id: "provisions", label: "Code references", text: c.candidates.filter(a => a.answer === "yes").map(a => a.provision).join(" · "), required: true, target: { kind: "card", href: "#/questions?first=code" } });
   for (const row of c.sectionC) {
-    add("C", { id: `section_c.${row.provision}`, label: row.provision, text: row.citation, required: false,
+    add("C", { id: `section_c.${row.provision}`, label: articleTitle(c, row.provision) || "Code reference", text: row.citation, required: false,
       reference: row, target: { kind: "card", href: "#/references" } });
     const field = `section_c.${row.provision}.explanation`;
     add("C", { id: field, label: `Explanation · ${row.provision}`, text: confirmedText(c, field), draft: row.explanation,
@@ -113,6 +114,13 @@ export function buildDocument(c: Case, gaps: readonly Gap[], requests: readonly 
     if (block && r.note?.trim()) block.requests.push({ id: r.id, note: r.note });
   }
   return sections;
+}
+
+/** The article's own title from code identification, or the plain-language topic the applicant confirmed. */
+function articleTitle(c: Case, provision: string): string {
+  const article = provision.split("(")[0];
+  return c.identify?.articles.find(a => a.provision === article || a.provision === provision)?.title
+    || c.candidates.find(a => a.provision === provision)?.topic || "";
 }
 
 export function listedDocuments(c: Case): { id: string; title: string }[] {

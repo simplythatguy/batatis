@@ -63,6 +63,16 @@ export function useWorkspace(contentKey: string) {
     return () => { journal.edits.flush(); scope.abort(); };
   }, [journal]);
 
+  // The server decides whether a signature still matches the saved application. When saved content no
+  // longer matches what the record was read against, read it again rather than guessing.
+  const saved = store.readSync().saved;
+  const basis = state.phase === "ready" ? state.basis : null;
+  useEffect(() => {
+    if (basis === null || !saved || basis === contentKey) return;
+    const timer = setTimeout(() => void reload(), 600);
+    return () => clearTimeout(timer);
+  }, [basis, saved, contentKey, reload]);
+
   const flushHistory = useCallback(async () => {
     journal.edits.flush();
     if (!journal.queue.size || live.current.locked) return;
