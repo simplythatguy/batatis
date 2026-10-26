@@ -148,7 +148,12 @@
               "enum": [
                 "manufacturer",
                 "contractor",
-                "homebuilder"
+                "homebuilder",
+                "builder",
+                "designer",
+                "owner",
+                "engineer",
+                "other"
               ],
               "type": "string"
             },
@@ -6672,7 +6677,12 @@
               "enum": [
                 "manufacturer",
                 "contractor",
-                "homebuilder"
+                "homebuilder",
+                "builder",
+                "designer",
+                "owner",
+                "engineer",
+                "other"
               ],
               "type": "string"
             },
@@ -10723,7 +10733,12 @@
               "enum": [
                 "manufacturer",
                 "contractor",
-                "homebuilder"
+                "homebuilder",
+                "builder",
+                "designer",
+                "owner",
+                "engineer",
+                "other"
               ],
               "type": "string"
             },

@@ -73,7 +73,7 @@ PROBES = (
           'requirements apply.', ('assembly requirements',),
           ('9.10.3.', '9.25.', '9.23.', '9.27.', '9.36.', '3.1.5.', '3.1.7.'),
           ('wall', 'assembly', 'sheathing', 'insulation', 'cladding', 'siding', 'board', 'panel')),
-    Probe('scope', 'Is this for one building or site, or do you want acceptance for use across Alberta?',
+    Probe('product_scope', 'One building, or across Alberta?',
           'A variance is a decision for one building or site. Acceptance everywhere is a product-evaluation route.',
           ('the application route',), (), ('product', 'manufactur', 'sell', 'market', 'across alberta'), base=0),
     Probe('owner_name', "What is the owner's name?", 'Section A of the variance form names the owner.',
@@ -134,7 +134,7 @@ def plan_questions(*, known: set[str], prose: str, candidates: list[dict], confl
             continue
         if probe.field == 'alternative_description' and departure_known:
             continue
-        if probe.field == 'scope' and role != 'manufacturer':
+        if probe.field == 'product_scope' and role != 'manufacturer' and not any(word in low for word in probe.prose):
             continue
         hits = [c['provision'] for c in candidates if any(str(c.get('provision', '')).startswith(p) for p in probe.prefixes)]
         mentioned = any(word in low for word in probe.prose)
@@ -142,7 +142,7 @@ def plan_questions(*, known: set[str], prose: str, candidates: list[dict], confl
         if probe.priority == 'administrative':
             score = 1
         else:
-            score = split * 10 + len(hits) * 2 + probe.base + (8 if mentioned else 0) + (30 if probe.field == 'scope' else 0)
+            score = split * 10 + len(hits) * 2 + probe.base + (8 if mentioned else 0) + (50 if probe.field == 'product_scope' else 0)
             if score == 0:
                 continue                         # nothing in the words or the candidates makes it matter
         scored.append((score, -order, Question(id=qid, field=probe.field, text=probe.text, why=probe.why,

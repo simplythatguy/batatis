@@ -3,12 +3,12 @@
  * Pure and derived. Every card comes from the case and the shared gap list; nothing is typed by hand.
  * Card keys reuse the legacy focus ids (field-*, cand-*, fact-*, q-*), so gap hrefs land on cards.
  *
- * Order: Section A → B → C → D. Reading and planner cards stay in the section they fill.
+ * Journey order decides what is asked; section letters retain the form mapping.
  */
 import type { Question as PlanQuestion } from "../api/types.gen";
 import { AUTHORITIES } from "../config";
 import { confirmedAnswer, localField } from "../intakeFields";
-import { codeQuestion, fileNotes, type ReadCopy, planInput, planQuestions, plannedFields, readCopy, readGroups, scopeRedirect } from "../intakeView";
+import { codeQuestion, fileNotes, type ReadCopy, planInput, planQuestions, plannedFields, readGroups, scopeRedirect } from "../intakeView";
 import { DETAIL_FIELDS, DETAIL_IDS, PROCESS_FIELDS, answeredByDescription, factFor, questionAnsweredByFact, valueText } from "../model";
 import { isProvision, keywordCandidate, keywordGroups } from "../provisions";
 import { quoteKind } from "../rules";
@@ -19,6 +19,8 @@ import { conditionChoices, coveredByOption, followedInFull, groupOf, matchingChe
 import { calmHref } from "./routes";
 import { caseRuleResults, inputChoices, linkedCandidate, plainResult, RULE_REF, ruleFacts, ruleInPlay, ruleTopic, type RuleData, type ShownRule } from "./rulesView";
 import { preparationGaps } from "./preparation";
+import { professionalCounts } from "../professional";
+import { answererOf, journeyAnswers, journeyProgress, orderJourney, productScope, routeChoice, stageOf, understandingRows, type UnderstandingRow, type Answerer, type JourneyAnswerValue, type Stage } from "./journey";
 
 /** Choice values on rule and package cards. */
 export const RULE_ADD = "add";
@@ -27,6 +29,7 @@ export const PACKAGE_YES = "yes";
 export const PACKAGE_NO = "no";
 
 export type DeckKind =
+  | "understood" | "route" | "route-detail" | "product-scope" | "product-notice" | "role"
   | "fact" | "file" | "plan" | "candidate" | "storeys" | "question" | "authority" | "detail" | "process" | "section-d"
   /** Intake reading the description and files, or failed (with Try again). */
   | "reading"
@@ -71,6 +74,8 @@ export interface DeckItem {
   kind: DeckKind;
   /** Form section this card fills (footer progress, popover). */
   section: SectionId;
+  stage: Stage;
+  answerer: Answerer;
   eyebrow: string;
   title: string;
   /** One muted line under the question. */
@@ -80,8 +85,9 @@ export interface DeckItem {
   why: string;
   /** What the card edits: fact id, candidate id, question id or field id. */
   ref: string;
+  field?: string;
   done: boolean;
-  /** Offered once; Skip does not bring it back and it is not counted. */
+  /** Offered once and excluded from required-answer totals. */
   optional: boolean;
   /** A real code provision for the citation chip. Absent for cards built from the applicant's words. */
   provision?: string;
@@ -110,7 +116,15 @@ export interface DeckItem {
   pendingForOfficer?: boolean;
   /** Section D: answers changed after the last check; the current requirements need a fresh check. */
   needsCheck?: boolean;
+  rows?: UnderstandingRow[];
+  assumed?: boolean;
+  deferred?: JourneyAnswerValue;
+  suggestedValue?: string;
+  /** Inner professional/evidence questions may supply their real counts here. */
+  counts?: Partial<Record<Answerer, { open: number; done: number }>>;
 }
+type UnpositionedItem = Omit<DeckItem, "stage" | "answerer">;
+const positioned = (item: UnpositionedItem): DeckItem => ({ ...item, stage: stageOf(item), answerer: answererOf(item) });
 
 export interface DeckOptions {
   /** Keys the applicant has continued past in this visit (Section D, optional cards). */
@@ -125,8 +139,6 @@ export interface DeckOptions {
   /** Rule definitions (GET /rules) and the case's stored results (GET /cases/{id}/rules). */
   rules?: RuleData | null;
   storedRules?: CaseRules | null;
-  /** Rule inputs answered Not sure in this visit: not asked again. */
-  ruleUnsure?: ReadonlySet<string>;
   /** GET /cases/{id}/checklists, and the applicant's choice on each offered package. */
   checklists?: CaseChecklists | null;
   packages?: Readonly<Record<string, "yes" | "no">>;
@@ -137,6 +149,8 @@ export interface DeckOptions {
   confirmAuthority?: boolean;
   /** An optional keyword lead the applicant explicitly opened from grouped triage or a saved link. */
   focusedCandidate?: string;
+  /** A visible default supplied by the caller, never a silently saved date. */
+  today?: string;
 }
 
 const RULE_WHY = "Batatis compares the numbers you give with one acceptable solution in the code. It flags where your design departs from it; it never decides whether the design is acceptable. The officer decides.";
@@ -190,7 +204,7 @@ function firstSentence(text: string): string {
 }
 
 /** Build a code-check card, keeping answers open until the engine stores them. */
-function candidateItem(c: Case, a: Candidate): DeckItem {
+function candidateItem(c: Case, a: Candidate): UnpositionedItem {
   // An answer the engine has not stored yet keeps the card open, so answering again resends it.
   const done = a.answer !== null && !a.pending;
   if (a.id === "desc-storeys") {
@@ -201,7 +215,7 @@ function candidateItem(c: Case, a: Candidate): DeckItem {
       eyebrow: sectionEyebrow("C"),
       title: "How many storeys is the building?",
       context: "",
-      why: "The count decides which part of the code is the benchmark. Buildings up to 3 storeys usually follow Part 9; larger ones follow Part 3. Skip leaves the question open for review.",
+      why: "The count decides which part of the code is the benchmark. Buildings up to 3 storeys usually follow Part 9; larger ones follow Part 3. Not sure leaves the question open for review.",
       ref: a.id,
       done: done || Boolean(confirmedAnswer(c.facts, "storeys")),
       optional: false,
@@ -219,7 +233,7 @@ function candidateItem(c: Case, a: Candidate): DeckItem {
       title: `Does your design ${a.departure}?`,
       context: "You wrote",
       quote: a.quote.text.trim() || firstSentence(c.description),
-      why: "Your answer decides whether this becomes a departure in your application. Skip leaves the question open for review.",
+      why: "Your answer decides whether this becomes a departure in your application. Not sure leaves the question open for review.",
       ref: a.id,
       done,
       optional: false,
@@ -235,7 +249,7 @@ function candidateItem(c: Case, a: Candidate): DeckItem {
       context: keywordCandidate(c, a)
         ? "A keyword match only. Its relevance has not been assessed."
         : a.rank === "committed" ? "Likely match for your project." : "Close match for your project.",
-      why: "Yes adds this rule to the list of rules your design differs from (Section C of the form). No leaves it out. Skip leaves the question open for review. Batatis never decides whether the design meets the code.",
+      why: "Yes adds this rule to the list of rules your design differs from (Section C of the form). No leaves it out. Not sure leaves the question open for review. Batatis never decides whether the design meets the code.",
       ref: a.id,
       done,
       optional: false,
@@ -255,7 +269,7 @@ function candidateItem(c: Case, a: Candidate): DeckItem {
     eyebrow: sectionEyebrow("C"),
     title: "Is your design different from what this rule asks for?",
     context: origin,
-    why: "Yes adds this rule to the list of rules your design differs from (Section C of the form). No leaves it out. Skip leaves the question open for review.",
+    why: "Yes adds this rule to the list of rules your design differs from (Section C of the form). No leaves it out. Not sure leaves the question open for review.",
     ref: a.id,
     done,
     optional: false,
@@ -271,6 +285,8 @@ function questionOnOtherCard(c: Case, id: string, cardId?: string): boolean {
 
 /** Map a gap or link key to the card that answers it. */
 export function aliasKey(c: Case, key: string): string {
+  const row = understandingRows(c, DETAIL_IDS).find((r) => r.key === key || (key.startsWith("fact-") && r.ids.includes(key.slice(5))));
+  if (row && !row.separate) return "understood";
   if (key.startsWith("field-")) {
     const q = planQuestions(c).find(({ q }) => localField(q.field) === key.slice("field-".length))?.q;
     if (q) return `plan-${q.id}`;
@@ -315,17 +331,21 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
   // Warnings (Not sure, open questions for the officer) never lock an answered card.
   const gapKeys = new Set(gaps.filter((g) => g.severity === "blocking").map((g) => gapKey(c, g)).filter((k): k is string => !!k));
   const groups = { read: [] as DeckItem[], plan: [] as DeckItem[], A: [] as DeckItem[], B: [] as DeckItem[], questions: [] as DeckItem[], C: [] as DeckItem[], D: [] as DeckItem[] };
-  const push = (group: keyof typeof groups, item: DeckItem) => {
+  const deferred = journeyAnswers(c);
+  const push = (group: keyof typeof groups, source: UnpositionedItem) => {
+    const item = positioned(source);
+    const pending = item.kind === "candidate" && c.candidates.some((a) => a.id === item.ref && a.pending);
+    const answer = pending ? undefined : deferred.get(item.key);
     // Legacy uncertainty stays open on Review without asking the same card repeatedly.
     const answeredUnsure = (item.kind === "authority" && seen.has("authority")) || item.settled;
     const open = !item.done || (!item.optional && gapKeys.has(item.key) && item.kind !== "section-d" && !answeredUnsure);
-    const next = { ...item, done: !open };
-    if (opts.includeDone || !next.done) groups[group].push(next);
+    const next: DeckItem = { ...item, done: answer ? true : !open, settled: answer ? true : item.settled, deferred: answer?.value, answerer: answer?.value === "designer" ? "designer" : item.answerer };
+    if (opts.includeDone || (!next.done && next.answerer !== "office")) groups[group].push(next);
   };
 
   // While intake reads, nothing else is asked: every card after it may already be answered by what it reads.
   if (opts.intake === "running") {
-    return [{
+    return [positioned({
       key: "reading",
       kind: "reading",
       section: "B",
@@ -336,13 +356,13 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       ref: "reading",
       done: false,
       optional: true,
-    }];
+    })];
   }
 
   // Another safety-codes regime: one page and nothing else until the applicant says otherwise.
   const redirect = scopeRedirect(c);
   if (redirect && c.facts.some((f) => f.field === "scope.redirect" && f.status === "unconfirmed")) {
-    return [{
+    return [positioned({
       key: SCOPE_ITEM_KEY,
       kind: "scope",
       section: "B",
@@ -353,7 +373,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       ref: SCOPE_ITEM_KEY,
       done: false,
       optional: false,
-    }];
+    })];
   }
 
   const unread = !c.intake && Boolean(c.description.trim()) && opts.intake !== undefined;
@@ -375,28 +395,56 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
     });
   }
 
-  // 1. What we read from the applicant's words and files, one thing to check per card.
-  for (const g of readGroups(c, DETAIL_IDS)) {
-    // Once answered, a Section A or B value lives on its form card (same key), editable there.
-    if (g.done && DETAIL_IDS.has(g.fact.field)) continue;
-    const copy = readCopy(c, g);
-    const detail = DETAIL_FIELDS.find((d) => d.id === g.fact.field);
+  const rows = understandingRows(c, DETAIL_IDS);
+  const readFields = new Set(rows.filter((r) => r.value != null && r.value !== "").map((r) => r.field));
+  const shared = rows.filter((r) => !r.separate && answererOf({ kind: "question", ref: r.field, section: "B" }) !== "office");
+  if (shared.length) push("read", {
+    key: "understood", kind: "understood", section: "B", eyebrow: "Understand · Section B",
+    title: "Here’s what I understood", context: "", why: "Check the values and their sources. Looks right confirms every row together; Fix opens an individual fact.",
+    ref: "understood", rows: shared, ids: [...new Set(shared.filter((r) => !r.done).flatMap((r) => r.ids))],
+    done: shared.every((r) => r.done), optional: false, settled: shared.some((r) => Boolean(r.deferred)),
+    counts: { batatis: { open: shared.filter((r) => !r.done).length, done: shared.filter((r) => r.done && !r.deferred).length }, you: { open: shared.filter((r) => Boolean(r.deferred)).length, done: 0 } },
+  });
+  // Conflicts and proposals read from pictures require their own confirmation.
+  for (const row of rows.filter((r) => !shared.includes(r))) {
+    const copy = row.copy;
+    const detail = DETAIL_FIELDS.find((d) => d.id === row.field);
     push("read", {
-      key: g.key,
+      key: row.key,
       kind: "fact",
       section: detail?.section === "A" ? "A" : "B",
-      eyebrow: "Check what we read",
+      eyebrow: row.separate ? "Check this reading" : "To confirm with the office",
       title: copy.title,
       context: "",
       why: "We read this from what you gave us, but it isn’t clear enough to use without you.",
-      ref: g.fact.id,
-      ids: g.ids,
+      ref: row.ref,
+      field: row.field,
+      ids: row.ids,
       read: copy,
-      done: g.done,
+      done: row.done,
       optional: false,
       confirmLabels: { confirm: copy.confirm, dismiss: copy.dismiss },
     });
   }
+  const route = routeChoice(c);
+  const fork = c.intake?.record.plan?.fork;
+  if (fork && fork.variance_needed !== "unknown") push("B", {
+    key: "route", kind: "route", section: "B", eyebrow: "Route · Section B",
+    title: fork.variance_needed === "likely" ? "You likely need a variance" : "You may not need a variance",
+    context: "", quote: fork.cues.join(" · ") || valueText(factFor(c, "alternative")) || firstSentence(c.description) || undefined,
+    why: fork.explanation, ref: "journey.route", done: route !== null, optional: false,
+    choices: fork.variance_needed === "likely" ? [{ value: "variance", label: "Continue" }] : [{ value: "standard", label: "Use the standard way" }, { value: "different", label: "Something is different" }],
+  });
+  if (route === "different") push("B", {
+    key: "route-detail", kind: "route-detail", section: "B", eyebrow: "Route · Section B",
+    title: "What will be different?", context: "", why: "Describe what you want to do differently from the code’s standard way. This records your words, not a technical conclusion.",
+    ref: "journey.departure", done: false, optional: false,
+  });
+  if (productScope(c) === "product_acceptance") push("B", {
+    key: "product-notice", kind: "product-notice", section: "B", eyebrow: "Product acceptance",
+    title: "A product acceptance route", context: "Across Alberta means product acceptance, for example a CCMC evaluation. A site variance is a separate request for one building or site.",
+    why: "The engine’s sourced product-route notice explains the available routes.", ref: "product_scope", done: seen.has("product-notice"), optional: true,
+  });
   // Files intake could not read in full say so, with the reason, once.
   for (const f of fileNotes(c)) {
     const key = `file-${f.file_id}`;
@@ -407,24 +455,25 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       eyebrow: "Your files",
       title: f.status === "not_read" ? `We couldn’t read ${f.name}.` : `We read part of ${f.name}.`,
       context: f.reason ?? "",
-      why: "Batatis reads the text layer of PDFs and fillable forms. It does not read images, and it never guesses.",
+      why: "Each file report says what was read and what remains unread. Batatis never guesses what an unread page contains.",
       ref: f.file_id,
       done: seen.has(key),
       optional: true,
     });
   }
 
-  // 2. Every issued planner question; the final section sort places each in the form.
+  // Every issued planner question takes its journey position, retaining the form mapping.
   const plan = planQuestions(c);
   const planFields = new Set(plan.map(({ q }) => localField(q.field)));
   for (const { q, done, notSure } of plan) {
+    if (readFields.has(localField(q.field)) && q.kind !== "conflict") continue;
     const detail = DETAIL_FIELDS.find((d) => d.id === localField(q.field));
     push("plan", {
       key: `plan-${q.id}`,
-      kind: "plan",
+      kind: q.field === "product_scope" ? "product-scope" : "plan",
       section: detail?.section ?? "B",
       eyebrow: q.kind === "conflict" ? "You wrote two things" : q.priority === "administrative" ? sectionEyebrow(detail?.section ?? "B") : "A quick question",
-      title: q.text,
+      title: q.field === "product_scope" ? "One building, or across Alberta?" : q.text,
       context: "",
       why: q.why,
       ref: q.id,
@@ -432,10 +481,18 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       optional: false,
       settled: notSure,
       plan: q,
+      choices: q.field === "product_scope" ? [{ value: "site", label: "One building or site" }, { value: "product_acceptance", label: "Across Alberta" }] : undefined,
     });
   }
 
-  // 3. The remaining Section A and B details. Section B opens with the reviewing authority.
+  push("A", {
+    key: "role", kind: "role", section: "A", eyebrow: sectionEyebrow("A"),
+    title: "Your part in this project", context: "", why: "Your part helps direct questions to the person who can answer them.", ref: "applicant_role",
+    done: [...ROLE_CHOICES.map((r) => r.value), "homebuilder", "builder", "architect-engineer"].includes(String(factFor(c, "applicant_role")?.value ?? "")), optional: true,
+    choices: ROLE_CHOICES,
+  });
+
+  // Remaining form details and the office are placed in paperwork.
   push("B", {
     key: "authority",
     kind: "authority",
@@ -450,9 +507,11 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
     done: opts.confirmAuthority ? seen.has("authority") : Boolean(c.authority) || seen.has("authority"),
     optional: Boolean(opts.confirmAuthority && c.authority),
     settled: !c.authority && seen.has("authority"),
+    assumed: Boolean(opts.confirmAuthority && c.authority),
   });
   const planned = plannedFields(c);
   for (const d of DETAIL_FIELDS) {
+    if (readFields.has(d.id)) continue;
     const fact = factFor(c, d.id);
     if (fact?.status === "unconfirmed") continue; // asked on its "check what we read" card
     // A choice field counts only with one of its choices (a free-text answer elsewhere can land here).
@@ -464,6 +523,8 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
     // The proposed alternative is usually what the applicant already described on Start: offer
     // those words instead of asking again. Nothing is filled until they say yes.
     const offer = d.id === "alternative" && Boolean(c.description.trim());
+    const siteAddress = d.id === "mailingAddress" ? confirmedAnswer(c.facts, "municipalAddress") : undefined;
+    const suggestedValue = !filled ? (d.id === "date" ? opts.today : siteAddress ? String(siteAddress.value) : undefined) : undefined;
     push(d.section, {
       key: `field-${d.id}`,
       kind: "detail",
@@ -480,12 +541,15 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       optional: !d.required,
       settled: Boolean(cover?.notSure) && !filled,
       confirmLabels: offer ? { confirm: "Yes, use my description", dismiss: "No, I’ll write it" } : undefined,
+      suggestedValue,
+      assumed: Boolean(suggestedValue),
     });
   }
 
   // Open questions: project questions, and questions from code matching.
   for (const q of c.questions) {
     if (questionOnOtherCard(c, q.id, q.cardId)) continue;
+    if (readFields.has(localField(q.field)) || planFields.has(localField(q.field))) continue;
     const fromCode = q.kind === "intake" || q.id.startsWith("q-identify-");
     push(fromCode ? "C" : "questions", {
       key: `q-${q.id}`,
@@ -496,6 +560,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       context: "",
       why: q.why,
       ref: q.id,
+      field: q.field,
       done: Boolean(q.answer?.trim()) || questionAnsweredByFact(c, q),
       optional: false,
     });
@@ -541,7 +606,8 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
   const inPlay = caseRules(c, opts);
   for (const cl of matchingChecklists(c, opts.checklists ?? null, inPlay)) {
     const answered = cl.conditions.some((x) => x.answer);
-    const choice = opts.packages?.[cl.id];
+    const savedChoice = factFor(c, `journey.package.${cl.id}`)?.value;
+    const choice = savedChoice === "yes" || savedChoice === "no" ? savedChoice : opts.packages?.[cl.id];
     push("C", {
       key: `pkg-${cl.id}`,
       kind: "package",
@@ -552,7 +618,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       why: `${cl.summary} ${cl.notice}`,
       ref: cl.id,
       done: Boolean(choice) || answered,
-      // A real choice: skipped, it comes back once at the end of the pass (even if it joined late).
+      // A real choice; a deferral is recorded on the case.
       optional: false,
       checklist: cl.id,
       choices: [{ value: PACKAGE_YES, label: "Yes, follow its conditions" }, { value: PACKAGE_NO, label: "No, build my own case" }],
@@ -597,19 +663,17 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
   // article that already has a code-check card sits on that card instead of a second one.
   const index = opts.rules?.index;
   const facts = index ? ruleFacts(c, index) : new Map();
-  const unsure = opts.ruleUnsure ?? new Set<string>();
   const missing = new Set(inPlay.flatMap((r) => r.missing.map((m) => m.field)));
   const asked = new Set<string>();
   /** Add each needed rule input once, leaving fields already handled by the planner on its cards. */
   const ruleInputs = (r: ShownRule) => {
     if (!index) return;
     const mine = new Set(r.missing.map((m) => m.field));
-    const fields = r.inputs.map((i) => i.field).filter((f) => mine.has(f) || facts.get(f)?.source.ref?.startsWith(RULE_REF) || (unsure.has(f) && !facts.has(f)));
+    const fields = r.inputs.map((i) => i.field).filter((f) => mine.has(f) || facts.get(f)?.source.ref?.startsWith(RULE_REF));
     for (const f of fields) {
       // A planner question asks this field already (or it was answered Not sure there).
-      if (asked.has(f) || planned.has(f) || !index.inputs[f]) continue;
+      if (asked.has(f) || planned.has(f) || readFields.has(f) || !index.inputs[f]) continue;
       asked.add(f);
-      const settled = unsure.has(f) && missing.has(f);
       push("C", {
         key: `rulein-${f}`,
         kind: "rule-input",
@@ -619,9 +683,8 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
         context: "",
         why: `${index.inputs[f].why} Batatis compares it with the code’s standard way for ${ruleTopic(r).toLowerCase()}.`,
         ref: f,
-        done: !missing.has(f) || settled,
+        done: !missing.has(f),
         optional: false,
-        settled,
         provision: r.provision.id,
         input: { field: f, spec: index.inputs[f], rule: r.rule_id },
         choices: inputChoices(index.inputs[f]),
@@ -629,7 +692,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
     }
   };
   /** Build a follows or departs card; unresolved and inapplicable rules have no result card. */
-  const resultItem = (r: ShownRule): DeckItem | null => {
+  const resultItem = (r: ShownRule): UnpositionedItem | null => {
     if (r.state !== "departs" && r.state !== "follows") return null;
     const plain = plainResult(r);
     const key = `rule-${r.rule_id}`;
@@ -642,7 +705,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       context: plain.line,
       why: RULE_WHY,
       ref: r.rule_id,
-      done: seen.has(key),
+      done: seen.has(key) || factFor(c, `journey.rule.${r.rule_id}`)?.value === RULE_LEAVE,
       // A departure needs an answer (add the rule, or leave it out); a "follows" result is a note.
       optional: r.state === "follows",
       provision: r.provision.id,
@@ -717,19 +780,15 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       optional: pendingForOfficer || needsCheck,
       pendingForOfficer,
       needsCheck,
+      counts: professionalCounts(c),
     });
   }
   const items = [...groups.read, ...groups.plan, ...groups.A, ...groups.B, ...groups.questions, ...groups.C, ...groups.D];
-  const formPosition = (item: DeckItem) => {
-    if (item.kind === "authority") return -1;
-    const field = item.plan ? localField(item.plan.field) : item.key.startsWith("field-") ? item.key.slice("field-".length) : "";
-    const at = DETAIL_FIELDS.findIndex((d) => d.id === field);
-    return at < 0 ? DETAIL_FIELDS.length : at;
-  };
-  return SECTIONS.flatMap((s) => items.filter((item) => item.section === s.id).sort((a, b) => formPosition(a) - formPosition(b)));
+  const usualRoute = route === "standard" || productScope(c) === "product_acceptance";
+  return orderJourney(items.filter((item) => !usualRoute || (item.stage !== "case" && item.stage !== "proof" && item.kind !== "candidate" && item.kind !== "rule" && item.kind !== "package" && item.kind !== "condition" && item.kind !== "package-end" && item.ref !== "scope")));
 }
 
-/** Keys after `index` that match `pick` take the form's order among their own positions. */
+/** Keys after `index` that match `pick` take the current journey order. */
 export function rankAhead(queue: string[], index: number, order: string[], pick: (k: string) => boolean): string[] {
   const at = queue.map((k, i) => (i > index && pick(k) && order.includes(k) ? i : -1)).filter((i) => i >= 0);
   if (at.length < 2) return queue;
@@ -739,7 +798,7 @@ export function rankAhead(queue: string[], index: number, order: string[], pick:
   return out.join("|") === queue.join("|") ? queue : out;
 }
 
-/** Insert each new key after the last queued key that comes before it in the form. */
+/** Insert each new key after the last queued key that comes before it in the journey. */
 export function mergeQueue(queue: string[], fresh: string[], order: string[]): string[] {
   const out = [...queue];
   for (const k of fresh) {
@@ -756,9 +815,12 @@ export function mergeQueue(queue: string[], fresh: string[], order: string[]): s
 }
 
 export const ROLE_CHOICES: { value: ApplicantType; label: string }[] = [
+  { value: "owner", label: "Owner" },
+  { value: "designer", label: "Designer or architect" },
+  { value: "engineer", label: "Engineer" },
+  { value: "contractor", label: "Builder or contractor" },
   { value: "manufacturer", label: "Manufacturer" },
-  { value: "contractor", label: "Contractor" },
-  { value: "homebuilder", label: "Homebuilder" },
+  { value: "other", label: "Someone else" },
 ];
 
 /** Which of the two alternative answers the saved value means (the description, or the applicant's own words). */
@@ -784,31 +846,18 @@ export function preCaseState(draft: string): { items: DeckItem[]; line: string; 
 
 /** Answered out of tracked (non-optional) cards. */
 export function deckProgress(items: DeckItem[]): { done: number; total: number } {
-  const tracked = items.filter((i) => !i.optional);
-  return { done: tracked.filter((i) => i.done && !i.settled).length, total: tracked.length };
+  const stages = journeyProgress(items).stages;
+  return { done: stages.reduce((n, s) => n + s.done, 0), total: stages.reduce((n, s) => n + s.total, 0) };
 }
 
-/** One current question; saved uncertainty is never labelled answered. Skip does not create a fact. */
-export function questionProgress(item: DeckItem, currentKey: string | undefined, skipped: readonly string[]): "current" | "done" | "skipped" | "uncertain" | "open" {
+/** One current question; saved uncertainty is never labelled answered. */
+export function questionProgress(item: DeckItem, currentKey: string | undefined): "current" | "done" | "uncertain" | "open" {
   if (item.key === currentKey) return "current";
-  if (skipped.includes(item.key) && (!item.done || item.optional)) return "skipped";
   if (item.settled) return "uncertain";
   return item.done ? "done" : "open";
 }
 
-export const QUESTION_PROGRESS_LABEL = { current: "Current question", done: "Answered", skipped: "Skipped", uncertain: "Left open", open: "Unanswered" };
-
-/** Only a real Skip click is called skipped; human-pending work is never an applicant omission. */
-export function deckCompletion(items: DeckItem[], skipped: readonly string[]): { open: number; skipped: number; message: string } {
-  const left = items.filter((i) => !i.done && !i.optional);
-  const count = left.filter((i) => skipped.includes(i.key)).length;
-  const message = count ? `You skipped ${count} ${count === 1 ? "question" : "questions"}. They stay on your list and on the review.`
-    : left.length ? `${left.length} ${left.length === 1 ? "question still needs" : "questions still need"} your answer. Review shows what is missing.`
-      : items.some((i) => i.needsCheck) ? "Your answers are in. Check your changed application to see the current requirements."
-        : items.some((i) => i.pendingForOfficer) ? "Your answers are in. The officer’s determination is still pending; Review keeps it visible."
-          : "Batatis checks what you have and shows anything still missing.";
-  return { open: left.length, skipped: count, message };
-}
+export const QUESTION_PROGRESS_LABEL = { current: "Current question", done: "Answered", uncertain: "Left open", open: "Unanswered" };
 
 /** Letter key for a choice (A, B, C…), Typeform style. */
 export const choiceKey = (n: number) => String.fromCharCode(65 + n);
@@ -822,7 +871,7 @@ export function sectionProgress(items: DeckItem[]): { id: SectionId; label: stri
 }
 
 /** Choices for a card, in keyboard order (A, B, C). */
-export function choicesFor(item: DeckItem): { value: string; label: string }[] {
+function answerChoices(item: DeckItem): { value: string; label: string }[] {
   if (item.choices) return item.choices;
   if (item.kind === "plan" && item.plan) {
     const input = planInput(item.plan.field);
@@ -836,9 +885,23 @@ export function choicesFor(item: DeckItem): { value: string; label: string }[] {
       : [{ value: "yes", label: "Yes" }, { value: "no", label: "No" }];
   }
   if (item.kind === "detail") {
+    if (item.suggestedValue) return [{ value: "use-suggested", label: item.ref === "date" ? "Use today" : "Same as the site address" }, { value: "edit-suggested", label: "Use something else" }];
     if (item.confirmLabels) return [{ value: "confirm", label: item.confirmLabels.confirm }, { value: "dismiss", label: item.confirmLabels.dismiss }];
     const def = DETAIL_FIELDS.find((d) => d.id === item.ref);
     if (def?.options) return Object.entries(def.options).map(([value, label]) => ({ value, label }));
   }
   return [];
+}
+
+export function deferralFor(item: DeckItem): { value: JourneyAnswerValue; label: string } | null {
+  if (["understood", "reading", "file", "code-run", "code-note", "code-triage", "package-end", "product-notice", "route", "scope"].includes(item.kind)) return null;
+  if (item.stage === "paperwork") return { value: "later", label: "Later" };
+  return item.answerer === "designer" ? { value: "designer", label: "Ask my designer" } : { value: "not_sure", label: "Not sure" };
+}
+
+/** Picking an offered answer saves it immediately; free text uses the primary action. */
+export function choicesFor(item: DeckItem): { value: string; label: string }[] {
+  const choices = answerChoices(item);
+  const defer = deferralFor(item);
+  return choices.length && defer && !choices.some((c) => /not sure|ask my designer|later/i.test(c.label)) ? [...choices, defer] : choices;
 }

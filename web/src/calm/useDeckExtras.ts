@@ -1,6 +1,7 @@
 /**
  * The deck options every screen that builds the deck passes (deck, Review, header progress): rule
- * data and stored results, checklists, and this visit's package and Not sure choices. One source,
+ * data and stored results, checklists, and this visit's package choices. Recorded uncertainty
+ * lives on the case and is read by buildDeck. One source,
  * so the counts agree everywhere.
  */
 import { useMemo } from "react";
@@ -19,8 +20,7 @@ export function useDeckExtras(): { options: DeckOptions; extras: CaseExtras } {
     storedRules: extras.caseRules,
     checklists: extras.checklists,
     packages: session.packages,
-    ruleUnsure: new Set(session.ruleUnsure),
     confirmAuthority: true,
-  }), [extras.rules, extras.caseRules, extras.checklists, session.packages, session.ruleUnsure]);
+  }), [extras.rules, extras.caseRules, extras.checklists, session.packages]);
   return { options, extras };
 }

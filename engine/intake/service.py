@@ -223,6 +223,10 @@ class AnswerRejected(ValueError):
 
 
 def _value(field: str, raw: str):
+    if field == 'product_scope':
+        if raw.strip() in ('site', 'product_acceptance'):
+            return raw.strip()
+        raise AnswerRejected('choose one building or site, or across Alberta')
     kind = FIELDS.get(field, ('', 'text'))[1]
     text = raw.strip()
     if kind == 'text' or field not in FIELDS:

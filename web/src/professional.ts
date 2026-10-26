@@ -294,3 +294,17 @@ export function professionalWorkBasis(c: Case): string {
 export function professionalWorkCurrent(c: Case): boolean {
   return c.professionalWork?.basis === professionalWorkBasis(c);
 }
+
+/** Open and answered professional and evidence questions by who answers them, for honest progress. */
+export function professionalCounts(c: Case): Partial<Record<"you" | "designer", { open: number; done: number }>> {
+  const missing = professionalWorkCurrent(c) ? c.professionalWork?.professional.missing_facts : undefined;
+  const counts: Partial<Record<"you" | "designer", { open: number; done: number }>> = {};
+  const add = (who: "you" | "designer", open: boolean) => {
+    const row = counts[who] ?? { open: 0, done: 0 };
+    if (open) row.open += 1; else row.done += 1;
+    counts[who] = row;
+  };
+  for (const question of professionalQuestions(c, missing)) add(question.deferred ? "designer" : professionalAnswerer(question.field), !question.known);
+  for (let i = 0; i < professionalEvidenceCount(c); i += 1) add("designer", true);
+  return counts;
+}

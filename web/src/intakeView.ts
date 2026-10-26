@@ -249,6 +249,7 @@ export function planInput(field: string): PlanInput {
   if (field === "faces_public_way") return { kind: "choices", choices: [
     { value: "neighbour", label: "Neighbour’s lot" }, { value: "lane", label: "A lane" }, { value: "street", label: "A street" },
   ] };
+  if (field === "product_scope") return { kind: "choices", choices: [{ value: "site", label: "One building or site" }, { value: "product_acceptance", label: "Across Alberta" }] };
   if (field === "sprinklered") return { kind: "choices", choices: [{ value: "yes", label: "Yes" }, { value: "no", label: "No" }, { value: "partial", label: "Partly" }] };
   if (field === "part4_design") return { kind: "choices", choices: [{ value: "yes", label: "Yes" }, { value: "no", label: "No" }] };
   if (field === "scope") return { kind: "choices", choices: [{ value: "site", label: "One building or site" }, { value: "jurisdiction", label: "Many sites, or across Alberta" }] };

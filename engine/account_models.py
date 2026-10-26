@@ -8,7 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field, StrictBool, model_validator
 from .models_ids import new_id, now
 
 Role = Literal['applicant', 'reviewer']
-ApplicantType = Literal['manufacturer', 'contractor', 'homebuilder']
+ApplicantType = Literal['manufacturer', 'contractor', 'homebuilder', 'builder', 'designer', 'owner', 'engineer', 'other']
 Authority = Literal['calgary', 'edmonton']
 
 

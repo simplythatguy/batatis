@@ -200,7 +200,7 @@ export interface EvidenceDraft {
   fileRef?: string | null;
 }
 
-export type ApplicantType = "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner";
+export type ApplicantType = "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner" | "engineer" | "other";
 
 export interface Case {
   id: string;

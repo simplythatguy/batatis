@@ -75,5 +75,6 @@ def build_plan(case: Case) -> IntakePlan:
     asked = {q.id: q for q in [*issued_questions(case.facts, previous), *questions]}
     return IntakePlan(next=step, scope=scope, fork=fork, questions=questions, asked=list(asked.values()), not_sure=not_sure,
                       pre_application=pre_application(case, value('municipality')),
-                      route_notice=route_notice(value('applicant_role'), value('scope')),
+                      route_notice=route_notice(value('applicant_role'),
+                                                'jurisdiction' if value('product_scope') == 'product_acceptance' else None),
                       candidates_seen=len(candidates))
