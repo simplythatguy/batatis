@@ -98,6 +98,12 @@ def create_router(cases, code):
             if key in built:
                 built[key] = scrub_obj(built[key], known)
         start, end = (0, len(body.text)) if body.start == body.end else (body.start, body.end)
+        _, detected = protect_personal_details(body.text, known)
+        for value in set(detected.values()):
+            if any(match.start() < boundary < match.end() for match in re.finditer(re.escape(value), body.text)
+                   for boundary in (start, end)):
+                raise HTTPException(422, 'Select complete personal details, or a passage outside them.')
+        known = sorted(set([*known, *detected.values()]), key=len, reverse=True)
         selected, personal_details = protect_personal_details(body.text[start:end], known)
         built['rewrite'] = {'field': body.field, 'before_selection': scrub(body.text[:start], known),
                             'selected': selected, 'after_selection': scrub(body.text[end:], known)}
@@ -139,14 +145,15 @@ def create_router(cases, code):
             return '[unknown reference removed]'
 
         limited = assist.ARTICLE.sub(restrict, reply.text)
-        replacement, cited, unknown = assist.check_citations(limited, codes, context=built)
-        removed = list(dict.fromkeys([*removed, *unknown]))
         try:
-            replacement = restore_personal_details(replacement, personal_details)
+            replacement = restore_personal_details(limited, personal_details)
         except ValueError as error:
             raise HTTPException(422, str(error)) from error
         if assist.CLAIM_WORDS.search(replacement) or names_a_provider(replacement):
-            raise HTTPException(422, 'The rewrite included a restricted claim or internal service information. Try another instruction.')
+            raise HTTPException(422, 'The rewrite included a restricted claim or internal service information. '
+                                     'Try another instruction.')
+        replacement, cited, unknown = assist.check_citations(replacement, codes, context=built)
+        removed = list(dict.fromkeys([*removed, *unknown]))
         guard()
         notice = assist.model_notice(route)
         response.headers['X-Batatis-Notice'] = notice

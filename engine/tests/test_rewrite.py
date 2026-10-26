@@ -201,3 +201,27 @@ def test_rewrite_cannot_lose_duplicate_or_invent_protected_details(rewriting, mo
     monkeypatch.setattr(routes_assist, 'call_model', corrupt)
     response = rewrite(client, case, text='Priya Natarajan uses a panel.', start=0, end=0)
     assert response.status_code == 422 and 'replacement' not in response.json()
+
+
+@pytest.mark.parametrize(('text', 'start', 'end'), [
+    ('Priya Natarajan uses a panel.', 0, 5),
+    ('Call 780-555-0142 about the panel.', 5, 8),
+    ('Call Dr. Ada Lin about the panel.', 9, 12),
+])
+def test_partial_selection_cannot_split_a_recognized_personal_detail(rewriting, text, start, end):
+    client, _, case, calls = rewriting
+    response = rewrite(client, case, text=text, start=start, end=end)
+    assert response.status_code == 422 and not calls
+
+
+def test_recognized_contact_name_is_protected_when_its_lead_in_is_outside_selection(rewriting, monkeypatch):
+    client, _, case, calls = rewriting
+    def keep(**kwargs):
+        calls.append(kwargs)
+        selected = json.loads(kwargs['context'])['rewrite']['selected']
+        assert 'Ada Lin' not in selected
+        return routes_assist.ModelAnswer(selected, 10, 10)
+    monkeypatch.setattr(routes_assist, 'call_model', keep)
+    response = rewrite(client, case, text='Call Dr. Ada Lin about the panel.', start=9, end=16)
+    assert response.status_code == 200, response.text
+    assert response.json()['replacement'] == 'Ada Lin'
