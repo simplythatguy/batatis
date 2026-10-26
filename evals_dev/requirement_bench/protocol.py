@@ -60,7 +60,10 @@ def digest_bytes(data: bytes) -> str:
 
 
 def canonical(value) -> bytes:
-    return json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False).encode()
+    try:
+        return json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False).encode()
+    except UnicodeError as error:
+        raise Invalid('invalid Unicode scalar in JSON') from error
 
 
 def fingerprint(value) -> str:
@@ -82,7 +85,7 @@ def is_hash(value) -> bool:
 def _pairs(pairs):
     out = {}
     for key, value in pairs:
-        require(key not in out, f'duplicate JSON key: {key}')
+        require(key not in out, 'duplicate JSON key')
         out[key] = value
     return out
 
@@ -95,7 +98,21 @@ def loads(text: str):
         require(math.isfinite(value), 'non-finite JSON number')
         return value
     try:
-        return json.loads(text, object_pairs_hook=_pairs, parse_constant=bad_constant, parse_float=finite_float)
+        value = json.loads(text, object_pairs_hook=_pairs, parse_constant=bad_constant, parse_float=finite_float)
+        # JSON escapes can decode to lone surrogates despite valid UTF-8 bytes.
+        # Validate strings before any hash or report serialization uses them.
+        def unicode_scalars(item):
+            if isinstance(item, str):
+                item.encode('utf-8')
+            elif isinstance(item, list):
+                for child in item:
+                    unicode_scalars(child)
+            elif isinstance(item, dict):
+                for key, child in item.items():
+                    unicode_scalars(key)
+                    unicode_scalars(child)
+        unicode_scalars(value)
+        return value
     except Invalid:
         raise
     except (ValueError, UnicodeError, RecursionError) as error:
@@ -111,9 +128,13 @@ def read_json(path: Path):
 
 def write_json(path: Path, value) -> None:
     """Refuse accidental overwrite of sealed inputs, keys, and past run artifacts."""
+    try:
+        raw = (json.dumps(value, indent=2, ensure_ascii=False, allow_nan=False) + '\n').encode('utf-8')
+    except UnicodeError as error:
+        raise Invalid('invalid Unicode scalar in JSON') from error
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open('x', encoding='utf-8') as stream:
-        stream.write(json.dumps(value, indent=2, ensure_ascii=False, allow_nan=False) + '\n')
+    with path.open('xb') as stream:
+        stream.write(raw)
 
 
 def child(root: Path, relative: str) -> Path:

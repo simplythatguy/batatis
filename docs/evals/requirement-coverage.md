@@ -7,6 +7,26 @@ the engine, import historical answer keys, tune identification, or call provider
 No expert-verified real requirement sets are supplied. The included examples and
 regressions are synthetic harness evidence, never expert gold or product accuracy.
 
+The separate `evals_dev.requirement_capture` adapter runs the actual deterministic
+engine from an exported predictor-only bundle. It verifies the frozen source,
+config, corpus and inline input hashes and retains observed input and raw result
+artifacts. It supplies retrieval and confirmed-applicability layers separately.
+It leaves application/export and applicant-visible layers `null`, since a local
+engine invocation does not observe those surfaces. The scorer consequently
+reports them as `not_supplied`, rather than inventing visibility or complete-flow
+success.
+
+Freeze its current configuration before sealing a real input plan:
+
+```sh
+python3 -c 'import json; from evals_dev.requirement_capture import frozen_config; print(json.dumps(frozen_config(), indent=2))' > /path/to/bundle/config.json
+python3 -m evals_dev.requirement_capture --bundle /path/to/exported-inputs --out /path/to/new-capture --db /absolute/path/to/codedb/build/codedb.sqlite
+```
+
+The adapter requires the configured `requirements` profile and the exact recorded
+source revision/hash. It makes zero provider calls. A source-verified but
+unreviewed candidate is not silently counted as a confirmed identification.
+
 ## Run it
 
 From the repository root, with Python 3.11 or later:

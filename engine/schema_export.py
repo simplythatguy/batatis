@@ -29,7 +29,7 @@ from .voice import VoiceStart, VoiceCommand
 from .voice_context import VoiceScope
 from .routes_intake import AnswersRequest, IntakeRequest, IntakeResult, PlanRequest, ScopeRequest
 from .identify.http_models import (BenchmarkConfirmRequest, IdentifyConfirmRequest, IdentifyDecisionRequest,
-                                   IdentifyDecisionResponse, IdentifyRequest)
+                                   IdentifyDecisionResponse, IdentifyRequest, RequirementDecisionRequest)
 from .models_review import InformationRequestEdit, PackageReviewIndex, ReviewSession, SentInformationRequests
 from .models_jurisdictions import JurisdictionDetail, JurisdictionsResult
 from .routes_jurisdictions import CaseJurisdictionPack
@@ -51,6 +51,7 @@ REQUESTS = (Fact, NewCase, SectionCRequest, SignupRequest, LoginRequest, Onboard
             SubmitRequest, AssistRequest, InformationRequestEdit,
             IntakeRequest, AnswersRequest, ScopeRequest, PlanRequest,
             IdentifyRequest, IdentifyDecisionRequest, IdentifyConfirmRequest, BenchmarkConfirmRequest,
+            RequirementDecisionRequest,
             ChecklistAnswerRequest, TitleRequest, SelectedArticlesRequest, ApplicationPreferencesPatch,
             VoiceStart, VoiceCommand, VoiceScope)  # defaulted fields optional
 

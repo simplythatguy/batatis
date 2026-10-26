@@ -25,7 +25,7 @@ class AnswerIn(BaseModel):
 class IdentifyRequest(BaseModel):
     """`prose` defaults to the case's latest project.description fact when omitted."""
     model_config = ConfigDict(extra='forbid')
-    prose: str | None = Field(default=None, max_length=20000)
+    prose: str | None = Field(default=None, max_length=2_000_000)
     answers: list[AnswerIn] = Field(default_factory=list, max_length=20)
     expected_version: int | None = ExpectedVersion()
 
@@ -53,3 +53,12 @@ class BenchmarkConfirmRequest(BaseModel):
 class IdentifyDecisionResponse(IdentifyResult):
     """The identify result after a decision, plus the Section C rows a `yes` wrote for that article."""
     section_c: list[SectionCRow] = []
+
+
+class RequirementDecisionRequest(BaseModel):
+    """Applicability is independent from the legacy departure question."""
+    model_config = ConfigDict(extra='forbid')
+    disposition: Literal['include', 'exclude', 'review']
+    role: Literal['varied', 'supporting', 'admin', 'conditional', 'unresolved']
+    reason: str = Field(min_length=1, max_length=2000)
+    expected_version: int = Field(ge=1, strict=True)

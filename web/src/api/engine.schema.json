@@ -4781,6 +4781,37 @@
           "title": "Engineering Required",
           "type": "string"
         },
+        "input_coverage_gaps": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Input Coverage Gaps",
+          "type": "array"
+        },
+        "input_fingerprint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Input Fingerprint"
+        },
+        "input_sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Input Sha256"
+        },
         "label": {
           "title": "Label",
           "type": "string"
@@ -4854,6 +4885,47 @@
           "title": "Questions",
           "type": "array"
         },
+        "requirement_coverage": {
+          "$ref": "#/$defs/RequirementCoverage"
+        },
+        "requirement_evidence": {
+          "items": {
+            "$ref": "#/$defs/RequirementEvidence"
+          },
+          "title": "Requirement Evidence",
+          "type": "array"
+        },
+        "requirement_links": {
+          "items": {
+            "$ref": "#/$defs/RequirementLink"
+          },
+          "title": "Requirement Links",
+          "type": "array"
+        },
+        "requirement_status": {
+          "default": "not_run",
+          "enum": [
+            "not_run",
+            "needs_review",
+            "source_unavailable"
+          ],
+          "title": "Requirement Status",
+          "type": "string"
+        },
+        "requirements": {
+          "items": {
+            "$ref": "#/$defs/RequirementRecord"
+          },
+          "title": "Requirements",
+          "type": "array"
+        },
+        "scope_assessments": {
+          "items": {
+            "$ref": "#/$defs/PartScopeAssessment"
+          },
+          "title": "Scope Assessments",
+          "type": "array"
+        },
         "scored_at": {
           "title": "Scored At",
           "type": "string"
@@ -4892,6 +4964,13 @@
         }
       },
       "required": [
+        "requirements",
+        "requirement_evidence",
+        "requirement_links",
+        "requirement_status",
+        "requirement_coverage",
+        "input_fingerprint",
+        "scope_assessments",
         "mode",
         "source",
         "label",
@@ -4910,6 +4989,8 @@
         "title",
         "scored_at",
         "description_sha256",
+        "input_sha256",
+        "input_coverage_gaps",
         "stale",
         "persisted",
         "case_version",
@@ -4949,7 +5030,7 @@
         "prose": {
           "anyOf": [
             {
-              "maxLength": 20000,
+              "maxLength": 2000000,
               "type": "string"
             },
             {
@@ -5032,6 +5113,37 @@
           "title": "Engineering Required",
           "type": "string"
         },
+        "input_coverage_gaps": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Input Coverage Gaps",
+          "type": "array"
+        },
+        "input_fingerprint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Input Fingerprint"
+        },
+        "input_sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Input Sha256"
+        },
         "label": {
           "title": "Label",
           "type": "string"
@@ -5105,6 +5217,47 @@
           "title": "Questions",
           "type": "array"
         },
+        "requirement_coverage": {
+          "$ref": "#/$defs/RequirementCoverage"
+        },
+        "requirement_evidence": {
+          "items": {
+            "$ref": "#/$defs/RequirementEvidence"
+          },
+          "title": "Requirement Evidence",
+          "type": "array"
+        },
+        "requirement_links": {
+          "items": {
+            "$ref": "#/$defs/RequirementLink"
+          },
+          "title": "Requirement Links",
+          "type": "array"
+        },
+        "requirement_status": {
+          "default": "not_run",
+          "enum": [
+            "not_run",
+            "needs_review",
+            "source_unavailable"
+          ],
+          "title": "Requirement Status",
+          "type": "string"
+        },
+        "requirements": {
+          "items": {
+            "$ref": "#/$defs/RequirementRecord"
+          },
+          "title": "Requirements",
+          "type": "array"
+        },
+        "scope_assessments": {
+          "items": {
+            "$ref": "#/$defs/PartScopeAssessment"
+          },
+          "title": "Scope Assessments",
+          "type": "array"
+        },
         "scored_at": {
           "title": "Scored At",
           "type": "string"
@@ -5135,6 +5288,13 @@
         }
       },
       "required": [
+        "requirements",
+        "requirement_evidence",
+        "requirement_links",
+        "requirement_status",
+        "requirement_coverage",
+        "input_fingerprint",
+        "scope_assessments",
         "mode",
         "source",
         "label",
@@ -5153,6 +5313,8 @@
         "title",
         "scored_at",
         "description_sha256",
+        "input_sha256",
+        "input_coverage_gaps",
         "stale",
         "persisted",
         "case_version",
@@ -6970,6 +7132,54 @@
       "title": "PackageReviewIndex",
       "type": "object"
     },
+    "PartScopeAssessment": {
+      "properties": {
+        "basis": {
+          "items": {
+            "$ref": "#/$defs/ScopeBasis"
+          },
+          "title": "Basis",
+          "type": "array"
+        },
+        "conditions": {
+          "items": {
+            "$ref": "#/$defs/ScopeCondition"
+          },
+          "title": "Conditions",
+          "type": "array"
+        },
+        "limitation": {
+          "default": "This evaluates only supplied scope conditions. It does not establish that Part 9 applies, choose every governing Part, or exclude details invoked by another requirement.",
+          "title": "Limitation",
+          "type": "string"
+        },
+        "part": {
+          "const": 9,
+          "default": 9,
+          "title": "Part",
+          "type": "integer"
+        },
+        "status": {
+          "default": "not_determined",
+          "enum": [
+            "not_determined",
+            "boundary_not_met",
+            "conditions_met_scope_unresolved"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "part",
+        "status",
+        "conditions",
+        "basis",
+        "limitation"
+      ],
+      "title": "PartScopeAssessment",
+      "type": "object"
+    },
     "PlanRequest": {
       "additionalProperties": false,
       "properties": {
@@ -8069,6 +8279,770 @@
       "title": "RelevanceRecord",
       "type": "object"
     },
+    "RequirementCondition": {
+      "properties": {
+        "fact_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Fact Ids",
+          "type": "array"
+        },
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "status": {
+          "default": "unknown",
+          "enum": [
+            "unknown",
+            "provided",
+            "conflict"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "field",
+        "status",
+        "fact_ids"
+      ],
+      "title": "RequirementCondition",
+      "type": "object"
+    },
+    "RequirementCoverage": {
+      "properties": {
+        "applicability_status": {
+          "const": "not_determined",
+          "default": "not_determined",
+          "title": "Applicability Status",
+          "type": "string"
+        },
+        "articles_by_division": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Articles By Division",
+          "type": "object"
+        },
+        "discovered": {
+          "default": 0,
+          "title": "Discovered",
+          "type": "integer"
+        },
+        "exhaustive": {
+          "const": false,
+          "default": false,
+          "title": "Exhaustive",
+          "type": "boolean"
+        },
+        "gaps": {
+          "items": {
+            "$ref": "#/$defs/RequirementGap"
+          },
+          "title": "Gaps",
+          "type": "array"
+        },
+        "graph_status": {
+          "default": "not_run",
+          "enum": [
+            "not_run",
+            "traversed",
+            "traversed_with_gaps"
+          ],
+          "title": "Graph Status",
+          "type": "string"
+        },
+        "human_confirmed": {
+          "default": 0,
+          "title": "Human Confirmed",
+          "type": "integer"
+        },
+        "limits": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Limits",
+          "type": "array"
+        },
+        "notes_scanned": {
+          "default": 0,
+          "title": "Notes Scanned",
+          "type": "integer"
+        },
+        "provider_requests": {
+          "const": 0,
+          "default": 0,
+          "title": "Provider Requests",
+          "type": "integer"
+        },
+        "provisions_scanned": {
+          "default": 0,
+          "title": "Provisions Scanned",
+          "type": "integer"
+        },
+        "query_chunks": {
+          "default": 0,
+          "title": "Query Chunks",
+          "type": "integer"
+        },
+        "scan_status": {
+          "default": "not_run",
+          "enum": [
+            "not_run",
+            "scanned",
+            "unavailable"
+          ],
+          "title": "Scan Status",
+          "type": "string"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RequirementSource"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "source",
+        "scan_status",
+        "graph_status",
+        "applicability_status",
+        "exhaustive",
+        "articles_by_division",
+        "provisions_scanned",
+        "notes_scanned",
+        "query_chunks",
+        "discovered",
+        "human_confirmed",
+        "gaps",
+        "limits",
+        "provider_requests"
+      ],
+      "title": "RequirementCoverage",
+      "type": "object"
+    },
+    "RequirementDecisionRequest": {
+      "additionalProperties": false,
+      "description": "Applicability is independent from the legacy departure question.",
+      "properties": {
+        "disposition": {
+          "enum": [
+            "include",
+            "exclude",
+            "review"
+          ],
+          "title": "Disposition",
+          "type": "string"
+        },
+        "expected_version": {
+          "minimum": 1,
+          "title": "Expected Version",
+          "type": "integer"
+        },
+        "reason": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "varied",
+            "supporting",
+            "admin",
+            "conditional",
+            "unresolved"
+          ],
+          "title": "Role",
+          "type": "string"
+        }
+      },
+      "required": [
+        "disposition",
+        "role",
+        "reason",
+        "expected_version"
+      ],
+      "title": "RequirementDecisionRequest",
+      "type": "object"
+    },
+    "RequirementDiscovery": {
+      "properties": {
+        "detail": {
+          "title": "Detail",
+          "type": "string"
+        },
+        "evidence": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RequirementEvidence"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "evidence_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence Id"
+        },
+        "evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "from_requirement": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "From Requirement"
+        },
+        "kind": {
+          "enum": [
+            "lexical",
+            "explicit",
+            "reference",
+            "reverse_reference",
+            "administrative",
+            "human",
+            "previous"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "path": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Path",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "detail",
+        "from_requirement",
+        "path",
+        "evidence",
+        "evidence_id",
+        "evidence_ids"
+      ],
+      "title": "RequirementDiscovery",
+      "type": "object"
+    },
+    "RequirementEvidence": {
+      "description": "An actual matched passage or reference, never an arbitrary opening sentence.",
+      "properties": {
+        "citation": {
+          "title": "Citation",
+          "type": "string"
+        },
+        "contextual": {
+          "default": false,
+          "title": "Contextual",
+          "type": "boolean"
+        },
+        "division": {
+          "enum": [
+            "A",
+            "B",
+            "C"
+          ],
+          "title": "Division",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "provision",
+            "heading",
+            "note"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "pdf_page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pdf Page"
+        },
+        "pdf_page_end": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pdf Page End"
+        },
+        "provision_id": {
+          "title": "Provision Id",
+          "type": "string"
+        },
+        "quote": {
+          "title": "Quote",
+          "type": "string"
+        },
+        "source_sha256": {
+          "title": "Source Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "division",
+        "provision_id",
+        "kind",
+        "quote",
+        "citation",
+        "pdf_page",
+        "pdf_page_end",
+        "source_sha256",
+        "contextual"
+      ],
+      "title": "RequirementEvidence",
+      "type": "object"
+    },
+    "RequirementGap": {
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "evidence": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RequirementEvidence"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "evidence_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence Id"
+        },
+        "from_requirement": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "From Requirement"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "reference": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reference"
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "reference",
+        "from_requirement",
+        "evidence",
+        "evidence_id"
+      ],
+      "title": "RequirementGap",
+      "type": "object"
+    },
+    "RequirementLink": {
+      "properties": {
+        "evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "source_requirement": {
+          "title": "Source Requirement",
+          "type": "string"
+        },
+        "target_requirement": {
+          "title": "Target Requirement",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_requirement",
+        "target_requirement",
+        "evidence_ids"
+      ],
+      "title": "RequirementLink",
+      "type": "object"
+    },
+    "RequirementRecord": {
+      "description": "A source-qualified candidate, with applicability separate from discovery.\n\nRecords group an article's matched sentences/clauses. Inclusion requires a human\ndecision; a reference edge or keyword match never proves applicability or a departure.",
+      "properties": {
+        "applicability": {
+          "default": "unknown",
+          "enum": [
+            "unknown",
+            "confirmed",
+            "needs_review"
+          ],
+          "title": "Applicability",
+          "type": "string"
+        },
+        "citation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Citation"
+        },
+        "conditions": {
+          "items": {
+            "$ref": "#/$defs/RequirementCondition"
+          },
+          "title": "Conditions",
+          "type": "array"
+        },
+        "confirmation_fingerprint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confirmation Fingerprint"
+        },
+        "confirmation_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confirmation Reason"
+        },
+        "confirmed_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confirmed At"
+        },
+        "discoveries": {
+          "items": {
+            "$ref": "#/$defs/RequirementDiscovery"
+          },
+          "title": "Discoveries",
+          "type": "array"
+        },
+        "disposition": {
+          "default": "review",
+          "enum": [
+            "include",
+            "review",
+            "exclude"
+          ],
+          "title": "Disposition",
+          "type": "string"
+        },
+        "division": {
+          "anyOf": [
+            {
+              "enum": [
+                "A",
+                "B",
+                "C"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Division"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/RequirementEvidence"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "human_confirmed": {
+          "default": false,
+          "title": "Human Confirmed",
+          "type": "boolean"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "needs_review": {
+          "default": true,
+          "title": "Needs Review",
+          "type": "boolean"
+        },
+        "pdf_page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pdf Page"
+        },
+        "pdf_page_end": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pdf Page End"
+        },
+        "provision_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provision Id"
+        },
+        "quote": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Quote"
+        },
+        "quote_provision_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Quote Provision Id"
+        },
+        "review_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Review Reasons",
+          "type": "array"
+        },
+        "role": {
+          "default": "unresolved",
+          "enum": [
+            "varied",
+            "supporting",
+            "admin",
+            "conditional",
+            "unresolved"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "source_sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Sha256"
+        },
+        "source_status": {
+          "default": "verified",
+          "enum": [
+            "verified",
+            "unavailable"
+          ],
+          "title": "Source Status",
+          "type": "string"
+        },
+        "title": {
+          "default": "",
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "provision_id",
+        "division",
+        "title",
+        "role",
+        "disposition",
+        "applicability",
+        "human_confirmed",
+        "confirmation_fingerprint",
+        "confirmation_reason",
+        "confirmed_at",
+        "needs_review",
+        "source_status",
+        "citation",
+        "quote",
+        "quote_provision_id",
+        "pdf_page",
+        "pdf_page_end",
+        "source_sha256",
+        "discoveries",
+        "evidence",
+        "evidence_ids",
+        "conditions",
+        "review_reasons"
+      ],
+      "title": "RequirementRecord",
+      "type": "object"
+    },
+    "RequirementSource": {
+      "description": "Provenance verified against both CodeDB's docs row and build metadata.\n\nHashes identify the registered extraction/PDF; they do not certify the parser.",
+      "properties": {
+        "build_version": {
+          "title": "Build Version",
+          "type": "string"
+        },
+        "corpus_sha256": {
+          "title": "Corpus Sha256",
+          "type": "string"
+        },
+        "doc": {
+          "const": "NBC-AE",
+          "default": "NBC-AE",
+          "title": "Doc",
+          "type": "string"
+        },
+        "label": {
+          "const": "NBC(AE) 2023 p2",
+          "default": "NBC(AE) 2023 p2",
+          "title": "Label",
+          "type": "string"
+        },
+        "pdf_sha256": {
+          "title": "Pdf Sha256",
+          "type": "string"
+        },
+        "text_sha256": {
+          "title": "Text Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "doc",
+        "label",
+        "text_sha256",
+        "pdf_sha256",
+        "build_version",
+        "corpus_sha256"
+      ],
+      "title": "RequirementSource",
+      "type": "object"
+    },
     "ResolvedForm": {
       "additionalProperties": false,
       "properties": {
@@ -9107,6 +10081,36 @@
       "title": "RuleSet",
       "type": "object"
     },
+    "ScopeBasis": {
+      "properties": {
+        "citation": {
+          "title": "Citation",
+          "type": "string"
+        },
+        "division": {
+          "const": "A",
+          "default": "A",
+          "title": "Division",
+          "type": "string"
+        },
+        "provision_id": {
+          "title": "Provision Id",
+          "type": "string"
+        },
+        "quote": {
+          "title": "Quote",
+          "type": "string"
+        }
+      },
+      "required": [
+        "division",
+        "provision_id",
+        "citation",
+        "quote"
+      ],
+      "title": "ScopeBasis",
+      "type": "object"
+    },
     "ScopeCheck": {
       "properties": {
         "cue": {
@@ -9202,6 +10206,67 @@
         "override_allowed"
       ],
       "title": "ScopeCheck",
+      "type": "object"
+    },
+    "ScopeCondition": {
+      "properties": {
+        "explanation": {
+          "title": "Explanation",
+          "type": "string"
+        },
+        "fact_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Fact Ids",
+          "type": "array"
+        },
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "met",
+            "not_met",
+            "unknown",
+            "conflict"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "values": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Values",
+          "type": "array"
+        }
+      },
+      "required": [
+        "field",
+        "status",
+        "values",
+        "fact_ids",
+        "explanation"
+      ],
+      "title": "ScopeCondition",
       "type": "object"
     },
     "ScopeRequest": {

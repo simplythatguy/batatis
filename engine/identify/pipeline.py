@@ -238,6 +238,15 @@ def run(prose: str, *, codes: Codes, config: IdentifyConfig | None = None, trans
         result = discover_requirements(prose, codes=codes, config=config, facts=facts, previous=previous,
                                        confirmed_provisions=confirmed_provisions,
                                        description_sha256=description_sha256, on_stage=on_stage)
+        from .evidence import compact
+        from .prioritize import order
+        from .scope import assess
+        finish = time.monotonic()
+        if result.requirement_coverage.source is not None:
+            result.scope_assessments = assess(codes, facts, result)
+        order(result, prose)
+        compact(result)
+        result.trace.seconds = round(result.trace.seconds + time.monotonic() - finish, 3)
         return RunOutput(result, None, None)
     tp = transports or default_transports(client_ip, scoring={config.screen, config.rerank},
                                           anthropic=config.verifier == 'anthropic')

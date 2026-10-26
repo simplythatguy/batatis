@@ -10,6 +10,7 @@ from __future__ import annotations
 from typing import Literal
 
 from pydantic import BaseModel, Field, ValidationInfo, field_validator, model_validator
+from .models_scope import PartScopeAssessment
 
 from .public_names import (UNAVAILABLE, VERIFIER_UNAVAILABLE, public_config, public_label, public_method,
                            public_model_id, public_ranker, public_spend, public_stage_model, public_text)
@@ -228,6 +229,12 @@ class RequirementCondition(BaseModel):
     # A provided input is not a finding that a source condition is satisfied.
 
 
+class RequirementLink(BaseModel):
+    source_requirement: str
+    target_requirement: str
+    evidence_ids: list[str] = Field(default_factory=list)
+
+
 class RequirementRecord(BaseModel):
     """A source-qualified candidate, with applicability separate from discovery.
 
@@ -290,9 +297,11 @@ class RequirementSet(BaseModel):
     """Additive ledger fields; old stored results load with an explicit not-run state."""
     requirements: list[RequirementRecord] = Field(default_factory=list)
     requirement_evidence: list[RequirementEvidence] = Field(default_factory=list)
+    requirement_links: list[RequirementLink] = Field(default_factory=list)
     requirement_status: Literal['not_run', 'needs_review', 'source_unavailable'] = 'not_run'
     requirement_coverage: RequirementCoverage = Field(default_factory=RequirementCoverage)
     input_fingerprint: str | None = None
+    scope_assessments: list[PartScopeAssessment] = Field(default_factory=list)
 
 
 class IdentifyResult(RequirementSet):

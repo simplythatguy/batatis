@@ -471,6 +471,29 @@ class ScoringTests(unittest.TestCase):
         self.assertEqual(read_json(self.root / 'failed-cli-report.json')['diagnostics_all_planned']['planned_cases'], 3)
 
 
+    def test_lone_surrogate_in_observed_input_retains_planned_denominator(self):
+        artifact = self.preds[0]['observed_inputs']['request']
+        path = self.pred_path.parent / artifact['path']
+        packet = read_json(path)
+        packet['input']['narrative'] += '\ud800'
+        path.write_text(json.dumps(packet, ensure_ascii=True), encoding='utf-8')
+        self.preds[0]['observed_inputs']['request'] = file_ref(self.pred_path.parent, artifact['path'])
+        report = self.score()
+        self.assertEqual(report['diagnostics_all_planned']['planned_cases'], 3)
+        self.assertEqual(report['cases'][0]['prediction_status'], 'invalid')
+
+    def test_lone_surrogate_prediction_error_writes_cli_failure_report(self):
+        self.preds[0].update(status='error', error='invalid provider text: \ud800')
+        self.pred_path.write_text(''.join(json.dumps(p, ensure_ascii=True) + '\n' for p in self.preds))
+        out = self.root / 'unicode-report.json'
+        proc = subprocess.run([sys.executable, '-m', 'evals_dev.requirement_bench', 'score',
+            '--manifest', str(self.manifest), '--predictions', str(self.pred_path), '--split', 'holdout',
+            '--run-id', 'synthetic-demo', '--out', str(out)], capture_output=True, text=True)
+        self.assertEqual(proc.returncode, 1, proc.stderr)
+        self.assertNotIn('Traceback', proc.stderr)
+        self.assertEqual(read_json(out)['diagnostics_all_planned']['planned_cases'], 3)
+
+
 class SplitAndProtocolTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix='requirement-bench-split-')
@@ -640,6 +663,16 @@ class SplitAndProtocolTests(unittest.TestCase):
         self.assertEqual({r['division'] for r in result['references']}, {'A', 'B', 'C'})
         self.assertEqual(result['provenance']['corpus_files']['database'], digest_bytes(db.read_bytes()))
         self.assertIsNone(result['provenance']['corpus_files']['wal'])
+
+    def test_imported_real_catalog_cannot_resolve_wrong_edition_or_other_codes(self):
+        from .manifest import catalog_index
+        reference = {'document': 'NBC-AE', 'edition': '2023', 'printing': '2nd',
+                     'division': 'B', 'provision': '9.10.15.5.'}
+        for change in ({'printing': '1st'}, {'edition': '2020'}, {'document': 'NFC-AE'}, {'document': 'CSA'}):
+            with self.subTest(change=change), self.assertRaisesRegex(Invalid, 'second-printing'):
+                catalog_index({'schema_version': 1, 'kind': 'source_snapshot',
+                    'provenance': {'notice': 'Invalid policy probe, not a source snapshot'},
+                    'references': [{**reference, **change}]})
 
 
 if __name__ == '__main__':

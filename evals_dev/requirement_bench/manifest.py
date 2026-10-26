@@ -43,6 +43,10 @@ def catalog_index(catalog: dict) -> set[tuple]:
     require(len(set(refs)) == len(refs), 'duplicate catalog reference')
     require(all(r['edition'] is not None and r['printing'] is not None for r in catalog['references']),
             'catalog must identify edition and printing')
+    if catalog['kind'] == 'source_snapshot':
+        require(all(r['document'] == 'NBC-AE' and r['edition'] == '2023' and r['printing'] == '2nd'
+                    and r['division'] in ('A', 'B', 'C') for r in catalog['references']),
+                'only NBC-AE 2023 second-printing references may be resolved; other sources stay unsupported')
     return set(refs)
 
 
