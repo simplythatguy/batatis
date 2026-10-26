@@ -1,6 +1,6 @@
 # Batatis design system (Linear-default)
 
-Historical visual reference. The current product look is the [calm system](design-system-calm.md); retain the interaction P0 requirements from this document.
+Historical visual reference only. Current navigation, controls and interaction rules live in the [calm system](design-system-calm.md) and the current UI skills. This document does not define shipped features or button colours.
 
 Formal UI review follows the current model profile in `.cursor/rules/pstack-models.mdc` (GPT-6.1-Sol at max) and requires a fresh independent reviewer.
 

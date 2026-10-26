@@ -110,7 +110,7 @@ export interface AssistFocus {
 }
 
 export interface AssistNavigation {
-  destination: "applications" | "description" | "questions" | "review" | "application" | "code-library" | "code-search" | "references" | "downloads" | "officer-view" | "settings" | "notifications" | "accuracy" | "comments" | "question-authority" | "question-owner" | "question-representative" | "question-mailing-address" | "question-date" | "question-scope" | "question-permit" | "question-site-address" | "question-legal-description" | "question-alternative" | "question-rationale" | "question-risk" | "question-mitigation" | "question-assumptions" | "question-maintenance" | "question-qualifications" | "question-documents" | "review-queue" | "package-review" | "review-overview" | "review-missing" | "review-checks" | "review-decide" | "review-application" | "review-messages" | "review-request" | "review-versions" | "review-close-out";
+  destination: "applications" | "description" | "questions" | "review" | "application" | "code-library" | "code-search" | "references" | "downloads" | "settings" | "notifications" | "comments" | "question-authority" | "question-owner" | "question-representative" | "question-mailing-address" | "question-date" | "question-scope" | "question-permit" | "question-site-address" | "question-legal-description" | "question-alternative" | "question-rationale" | "question-risk" | "question-mitigation" | "question-assumptions" | "question-maintenance" | "question-qualifications" | "question-documents" | "review-queue" | "package-review" | "review-overview" | "review-missing" | "review-checks" | "review-decide" | "review-application" | "review-messages" | "review-request" | "review-versions" | "review-close-out";
 }
 
 export interface AssistRequest {
@@ -118,7 +118,7 @@ export interface AssistRequest {
   case_id?: string | null;
   case_version?: number | null;
   context_id?: string | null;
-  destinations?: ("applications" | "description" | "questions" | "review" | "application" | "code-library" | "code-search" | "references" | "downloads" | "officer-view" | "settings" | "notifications" | "accuracy" | "comments" | "question-authority" | "question-owner" | "question-representative" | "question-mailing-address" | "question-date" | "question-scope" | "question-permit" | "question-site-address" | "question-legal-description" | "question-alternative" | "question-rationale" | "question-risk" | "question-mitigation" | "question-assumptions" | "question-maintenance" | "question-qualifications" | "question-documents" | "review-queue" | "package-review" | "review-overview" | "review-missing" | "review-checks" | "review-decide" | "review-application" | "review-messages" | "review-request" | "review-versions" | "review-close-out")[];
+  destinations?: ("applications" | "description" | "questions" | "review" | "application" | "code-library" | "code-search" | "references" | "downloads" | "settings" | "notifications" | "comments" | "question-authority" | "question-owner" | "question-representative" | "question-mailing-address" | "question-date" | "question-scope" | "question-permit" | "question-site-address" | "question-legal-description" | "question-alternative" | "question-rationale" | "question-risk" | "question-mitigation" | "question-assumptions" | "question-maintenance" | "question-qualifications" | "question-documents" | "review-queue" | "package-review" | "review-overview" | "review-missing" | "review-checks" | "review-decide" | "review-application" | "review-messages" | "review-request" | "review-versions" | "review-close-out")[];
   focus?: AssistFocus | null;
   history?: AssistTurn[];
   question: string;
@@ -1801,40 +1801,6 @@ export interface UserResult {
 /** The officer's statement that they issued the variance (outside Batatis) on this date. */
 export interface VarianceIssued {
   issued_on: string;
-}
-
-export interface VoiceCapability {
-  available: boolean;
-  max_seconds: number;
-  notice: string;
-  protocol: "batatis.voice.v1";
-  reason: string | null;
-  relay_path: "/api/voice/relay/session";
-}
-
-export interface VoiceCommand {
-  audio?: string | null;
-  context_id: string;
-  revision?: number | null;
-  scope?: VoiceScope | null;
-  session_id: string;
-  type: "session.end" | "audio.append" | "audio.commit" | "audio.clear" | "response.cancel" | "context.update";
-}
-
-export interface VoiceScope {
-  attachment_ids?: string[];
-  case_id?: string | null;
-  case_version?: number | null;
-  context_id: string;
-  destinations?: ("applications" | "description" | "questions" | "review" | "application" | "code-library" | "code-search" | "references" | "downloads" | "officer-view" | "settings" | "notifications" | "accuracy" | "comments" | "question-authority" | "question-owner" | "question-representative" | "question-mailing-address" | "question-date" | "question-scope" | "question-permit" | "question-site-address" | "question-legal-description" | "question-alternative" | "question-rationale" | "question-risk" | "question-mitigation" | "question-assumptions" | "question-maintenance" | "question-qualifications" | "question-documents" | "review-queue" | "package-review" | "review-overview" | "review-missing" | "review-checks" | "review-decide" | "review-application" | "review-messages" | "review-request" | "review-versions" | "review-close-out")[];
-  focus?: AssistFocus | null;
-  revision?: number;
-  screen: string;
-}
-
-export interface VoiceStart {
-  scope: VoiceScope;
-  type: "session.start";
 }
 
 /** The officer's working state for the latest version: per-finding states, counts and the accept gate. */

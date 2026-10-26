@@ -30,7 +30,7 @@ function fixture() {
 }
 
 async function picker() {
-  return componentHarness(new URL("./VoiceControls.tsx", import.meta.url), "AttachButton", {
+  return componentHarness(new URL("./Attachments.tsx", import.meta.url), "AttachButton", {
     "./assistant": A, "../icons": { Icon24: "icon" }, "./ToolButton": { ToolButton: "tool-button" },
   });
 }

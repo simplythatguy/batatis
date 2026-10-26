@@ -11,7 +11,7 @@ description: Batatis UI implementation and review with the current model policy,
 
 ## Default look
 
-Follow `../batatis-ui-linear/SKILL.md` for P0 interaction rules, `../batatis-ui-minimalist/SKILL.md` for content density, and `docs/design-system-calm.md` plus `web/src/calm/` for the current design. The historical Linear look does not replace the calm contract. Keep the light, mostly monotone interface, neutral primary actions, and colour only for identifying the active section or distinguishing crowded items.
+Read [the calm design system](../../../docs/design-system-calm.md), the single design authority for product UI, and use `web/src/calm/` for implementation. Follow `../batatis-ui-linear/SKILL.md` for P0 interaction safeguards and `../batatis-ui-minimalist/SKILL.md` for content density. Resolve visual differences in favour of the calm contract.
 
 ## Product UI surfaces (attribute UX rules correctly)
 
@@ -31,7 +31,3 @@ Follow `../batatis-ui-linear/SKILL.md` for P0 interaction rules, `../batatis-ui-
 - Retrieved code text ≠ AI explanation styling.
 - Empty, error, and loading states when data can be missing.
 - Alt-path process fields (risk / mitigations / assumptions) remain present — not dropped for “simplicity.”
-
-## Design note
-
-Application chrome uses the Linear-default system (dark charcoal tool UI). Marketing/landing pages may differ, but product surfaces (intake, ranking, Section C, SCO, export) stay on tokens.

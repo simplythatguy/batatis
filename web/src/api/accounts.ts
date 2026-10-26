@@ -7,7 +7,7 @@
 import { EngineError } from "./client";
 import { credentialsMode, ENGINE_BASE } from "./engineAuth";
 import { accountRequestSignal } from "./requestLifetime";
-import type { AssistFocus, AssistNavigation, Case, ProfessionalRequirementRequest, VoiceCapability } from "./types.gen";
+import type { AssistFocus, AssistNavigation, Case, ProfessionalRequirementRequest } from "./types.gen";
 
 export type Role = "applicant" | "reviewer";
 
@@ -220,9 +220,6 @@ export const accounts = {
   markRead: (caseId: string, messageIds?: string[], signal?: AbortSignal) =>
     call<void>("POST", `/cases/${enc(caseId)}/messages/read`, messageIds ? { message_ids: messageIds } : {}, signal),
   assist: (req: AssistRequest, signal?: AbortSignal) => call<AssistResponse>("POST", "/assist", req, signal, 60000),
-  /** GET /voice/session: configuration only; opens no microphone or provider and reserves nothing. */
-  voiceSession: (caseId: string | null, signal?: AbortSignal) =>
-    call<VoiceCapability>("GET", `/voice/session${caseId ? `?case_id=${enc(caseId)}` : ""}`, undefined, signal),
 };
 
 /** Blocking gaps from a 409 submit body, whatever shape the engine settles on. */
