@@ -34,7 +34,9 @@ application is `locked`: it can't be dismissed, only asked for.
 Dispositions are stored on the session (`ReviewSession.dispositions`) and changed in the same write as the
 request draft: `PUT …/{version}/information-request` with `findings: [{key, state, reason?, note?}]`
 (changes only). The server owns `included` for finding-linked items: it is true exactly when the state is
-`ask`. The PUT answers with the whole `PackageReviewIndex`, so the counts, the gate and the rendered
+`ask`. Omitting a linked item from the item list does not remove it or change its finding state; only
+officer-added items can be removed this way. The PUT answers with the whole `PackageReviewIndex`, so the
+counts, the gate and the rendered
 `information_request.text` on screen always come from the save that just happened.
 
 ## One set of counts
@@ -45,7 +47,9 @@ request draft: `PUT …/{version}/information-request` with `findings: [{key, st
 - `to_check`: warnings not dismissed. `verify`: findings still to look at. `dismissed`. `asked`: items in the
   request text. `rulebook`: the uncovered rulebook gaps (listed in `Workspace.rulebook`).
 
-`SessionSummary.required` is the same number for older versions.
+`SessionSummary.required` uses the same tally for older versions, with their saved canonical blocking-gap
+snapshot. Pre-migration sessions without that internal snapshot use current canonical gaps conservatively.
+The latest summary always agrees with the returned workspace.
 
 ## Deciding on the version on screen
 
@@ -53,12 +57,15 @@ request draft: `PUT …/{version}/information-request` with `findings: [{key, st
 `case_version`, `current` (it read the saved application as it is now), the states, the tally and
 `gate` (`can_accept`, `reason`). The server rechecks the same gate on every decision:
 
-- An acceptance sends `expected_version` (the saved application on screen) and `review_version` (the
+- An acceptance sends `expected_version` (the saved application on screen; 422 if omitted) and
+  `review_version` (the
   package-review version on screen). It is refused (409, with the reason) unless the case is at
   `expected_version`, `review_version` is the latest session, that session read this case version, its
   `tally.required` is 0, and the shared completeness rules report no blocking gap. Without any package
   review the acceptance is refused unless the code database is missing on this server, in which case the
-  completeness rules alone decide (as before).
+  stored canonical `Case.gaps` decide on that legacy path. A session cannot be accepted while CodeDB is
+  unavailable and the canonical rules cannot be rechecked. The case write also pins the exact latest session
+  JSON, so a concurrent draft change forces a fresh gate check.
 - A refusal pins `expected_version` as before.
 
 ## One way to send a request back
@@ -72,6 +79,10 @@ Before writing, the server checks the claim, the case version, that `version` is
 least one item is included, and every limit in `Workspace.limits` (items, intro, item text, whole text). The
 legacy `…/information-request/send` route and a plain `return` decision stay for older callers; the
 workspace uses only this route.
+
+The case CAS commits one decision, message, snapshot and transition. A case-scoped deterministic message id
+binds that return to its package version; reads recover sent metadata from it if session finalization fails.
+No second send can occur on retry. Reservations without a committed message expire and can be retried.
 
 A sent request is frozen and readable as the applicant sees it (`GET /cases/{case_id}/information-request`).
 
@@ -98,8 +109,8 @@ reach its place; never mark an item resolved by itself (the officer confirms on 
 `request_answer.*` facts like other answers, so they appear in the officer's "changed since" view.
 
 An application that was returned can't be sent again unchanged: `POST /cases/{case_id}/submit` answers 409
-`Nothing changed since it was returned` when no stored answer, evidence listing or request answer differs
-from the return.
+`Nothing changed since it was returned. Fix the requested items, then send it again.` when no stored answer,
+evidence listing, request answer or case-owned file inventory differs from the return.
 
 ## Close-out
 
@@ -107,7 +118,10 @@ Accepting as administratively complete is not issuing a variance. After an accep
 "Administratively complete · technical review next" and nothing is due. When the officer issues the
 variance (outside Batatis) they record the date: `POST /review/{case_id}/close-out/issued`
 `{issued_on: "YYYY-MM-DD"}`. Only then is the copy to the Safety Codes Council due, 10 days after
-`issued_on` (IB-2025-11-18), and "Mark as sent" becomes available. A refusal has no Council copy; its
+`issued_on` (IB-2025-11-18), and "Mark as sent" becomes available. Issuance dates are validated against
+America/Edmonton's local decision
+and current dates; overdue day counts use UTC today. Issuance and sending can each be recorded only once
+for a decision, by its reviewer or the current claimant. A refusal has no Council copy; its
 record package lists what to keep on file.
 
 ## Sources
