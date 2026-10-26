@@ -45,8 +45,6 @@ class OnboardingRequest(BaseModel):
 
     @model_validator(mode='after')
     def _role_fields(self):
-        if self.role == 'applicant' and self.applicant_type is None:
-            raise ValueError('applicant_type is required')
         if self.role == 'reviewer' and self.authority is None:
             raise ValueError('authority is required')
         return self

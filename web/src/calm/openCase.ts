@@ -20,10 +20,12 @@ export function latestFacts(facts: EngineCase["facts"]): Fact[] {
   return latestLocalFacts(facts).filter((f) => !answerWithdrawn(f)) as Fact[];
 }
 
-export function caseFromEngine(saved: EngineCase, type: ApplicantType): Case {
+export function caseFromEngine(saved: EngineCase, type: ApplicantType | null): Case {
   const base = emptyCase(type);
   const facts = latestFacts(saved.facts);
   const by = new Map(facts.map((f) => [f.field, f]));
+  const role = by.get("applicant_role");
+  const applicantType = role?.status === "confirmed" && (role.value === "manufacturer" || role.value === "contractor" || role.value === "homebuilder" || role.value === "owner" || role.value === "designer" || role.value === "builder") ? role.value : type;
   const description = by.get("project.description");
   const authority: AuthorityId = saved.authority ?? saved.jurisdiction?.id ?? "";
   const process = { ...base.process };
@@ -64,6 +66,7 @@ export function caseFromEngine(saved: EngineCase, type: ApplicantType): Case {
   }));
   let c: Case = {
     ...base,
+    applicantType,
     id: `case-${saved.id}`,
     title: saved.title || base.title,
     authority,
@@ -163,7 +166,7 @@ export async function reviewedDescription(saved: EngineCase, record: IntakeResul
   }
 }
 
-export function openedCase(saved: EngineCase, type: ApplicantType, stored: { intake: IntakeResult | null; identify: IdentifyResult | null; reviewedText?: string | null }): Case {
+export function openedCase(saved: EngineCase, type: ApplicantType | null, stored: { intake: IntakeResult | null; identify: IdentifyResult | null; reviewedText?: string | null }): Case {
   const restored = caseFromEngine(saved, type);
   let c = restored;
   if (stored.intake) c = reducer(c, { type: "restoreIntake", result: stored.intake, text: stored.reviewedText ?? null });

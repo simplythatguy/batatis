@@ -14,7 +14,7 @@ import { NativePanels } from "./assistant/NativePanels";
 import { AskButton, AskHost } from "./assistant/AskButton";
 import { invalidateAssistantNavigation, setAssistantCase, setAssistantContext, toggleAssistant, useAssistant, type AssistBinding } from "./assistant/assistant";
 import { OPEN_APPLICATIONS } from "./assistant/destinations";
-import { roleOf, useCurrentApplication } from "./begin";
+import { useCurrentApplication } from "./begin";
 import { CodePalette, OPEN_PALETTE, openPalette } from "./CodePalette";
 import { ApplicationSwitchContext, useCodeScope, type ApplicationSwitch } from "./codeScope";
 import { KEEP_OPEN_NOTE, switchApplication } from "./libraryContext";
@@ -156,6 +156,8 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
   const inCase = phase === "case";
   const progress = useStageProgress();
   const signedIn = account.phase === "signed-in";
+  const signedOut = account.phase === "signed-out";
+  const startingDraft = getSession().startRequested;
   const reviewer = account.user?.role === "reviewer";
   const bare = plain || reviewer;
   const onStage = !bare && STAGES.some((s) => s.screen === active);
@@ -223,13 +225,13 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
   useEffect(() => {
     if (restored.current || account.phase === "probing") return;
     restored.current = true;
-    if (reviewer) return;
+    if (reviewer || startingDraft) return;
     const id = remembered(account.user?.id ?? null);
     if (!id) return;
     if (!signedIn || inCase || caseParam) { if (!signedIn) remember(null); return; }
     const session = accountSession(), request = ++openRequest.current, token = engineGeneration();
     setOpening(id);
-    void openCase(id, roleOf(account.user) ?? "homebuilder").then((error) => {
+    void openCase(id, null).then((error) => {
       if (session !== accountSession() || request !== openRequest.current) return;
       setOpening(null);
       if (!error) return;
@@ -276,6 +278,7 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
 
   // Cmd/Ctrl+B sidebar, +J assistant, +K search applications, +Shift+K search the code.
   useEffect(() => {
+    if (signedOut) return;
     const on = (e: KeyboardEvent) => {
       // A page's own shortcut (the queue's ⌘K search) runs first and claims the key.
       if (!(e.metaKey || e.ctrlKey) || e.altKey || e.defaultPrevented) return;
@@ -297,7 +300,7 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
     window.addEventListener(OPEN_PALETTE, open);
     window.addEventListener(OPEN_APPLICATIONS, list);
     return () => { document.removeEventListener("keydown", on); window.removeEventListener(OPEN_PALETTE, open); window.removeEventListener(OPEN_APPLICATIONS, list); };
-  }, []);
+  }, [signedOut]);
 
   const deckDone = Math.round(progress.questions);
   const localRow: ApplicationSummary | null = inCase
@@ -363,7 +366,6 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
     // A newer open or another sign-in owns the list and the open application from then on.
     const stale = () => session !== accountSession() || request !== openRequest.current;
     setOpening(id);
-    const role = roleOf(account.user) ?? (c.applicantType as Parameters<typeof openCase>[1]);
     const mark = freshDraft.current;
     const superseded = () => freshDraft.current !== mark || stale();
     // Keep the open draft before switching; a failed save keeps it open and says so. A new draft started
@@ -371,7 +373,7 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
     // read when the switch starts (an answer derived since the last render is unsaved too).
     const error = await switchApplication(id, {
       inCase, saveStatus: readSync().saved ? saveStatus : "unsaved", saveDraft,
-      openCase: (next) => (superseded() ? Promise.resolve(null) : openCase(next, role)),
+      openCase: (next) => (superseded() ? Promise.resolve(null) : openCase(next, null)),
       settle: () => { if (!superseded()) { resetSession(); resetRelevance(); } },
     });
     if (stale()) return null;
@@ -442,7 +444,7 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
     resetRelevance();
     const left = groupApplications(saved.filter((a) => a.id !== id));
     const next = [...left.pinned, ...left.active][0];
-    if (next && !(await openCase(next.id, roleOf(account.user) ?? "homebuilder"))) {
+    if (next && !(await openCase(next.id, null))) {
       location.hash = "#/questions";
       return null;
     }
@@ -496,7 +498,7 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
   // In the code library the picker names the application; under None nothing of the application shows.
   const library = active === "code";
   const withCase = inCase && scope === "application";
-  const header = (
+  const header = signedOut ? <AppHeader title="Batatis" right={<a className="cf-btn is-ghost is-sm" href="#/signin">Sign in</a>} /> : (
     <AppHeader
       title={library ? undefined : title}
       onRename={inCase ? renameCase : undefined}
@@ -543,11 +545,11 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
       <NativePanels ownedCaseId={!reviewer && !opening && assistRow?.id === engineId ? engineId : null} />
     <ApplicationSwitchContext.Provider value={appSwitch}>
       <AppLayout
-        rail={<Rail destinations={destinations} updateSlot={<UpdateButton />} notificationsSlot={<NotificationsBell />} accountSlot={<AccountButton />} />}
-        list={bare ? undefined : list}
+        rail={signedOut ? null : <Rail destinations={destinations} updateSlot={<UpdateButton />} notificationsSlot={<NotificationsBell />} accountSlot={<AccountButton />} />}
+        list={bare || signedOut ? undefined : list}
         header={bare ? bareHeader : header}
         banner={onStage && (current?.status === "returned" || current?.status === "refused") ? <ReturnedBanner key={`${current.id}:${current.status}`} app={current} /> : onStage && current?.status === "in_review" ? <RequestBanner app={current} /> : null}
-        assistant={assistant.open ? <AssistantPanel /> : null}
+        assistant={!signedOut && assistant.open ? <AssistantPanel /> : null}
         listCollapsed={listCollapsed}
         sheetOpen={sheet}
         onSheetClose={() => setSheet(false)}

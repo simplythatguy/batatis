@@ -1,11 +1,10 @@
 /** Onboarding questions as data: which question comes next and what the server receives. Pure. */
 import type { ApplicantKind, AuthorityKey, OnboardingRequest, Role } from "../../api/accounts";
 
-export type StepId = "use" | "applicantType" | "authority" | "code";
+export type StepId = "use" | "authority" | "code";
 
 export interface Answers {
   use?: Role;
-  applicantType?: ApplicantKind;
   authority?: AuthorityKey;
   code: string;
 }
@@ -17,7 +16,7 @@ export interface Choice<T extends string> {
 }
 
 export const USE_CHOICES: Choice<Role>[] = [
-  { value: "applicant", label: "I’m applying for a variance", sub: "Manufacturer, general contractor or homebuilder" },
+  { value: "applicant", label: "I have a building project", sub: "Owner, designer, builder, engineer or manufacturer" },
   { value: "reviewer", label: "I review applications for an authority", sub: "Safety Codes Officer. Needs your authority’s access code." },
 ];
 
@@ -38,7 +37,6 @@ export const APPLICANT_LABEL: Record<string, string> = { manufacturer: "Manufact
 export const KEYS = "ABCDEFGH";
 
 export function stepsFor(a: Answers): StepId[] {
-  if (a.use === "applicant") return ["use", "applicantType"];
   if (a.use === "reviewer") return ["use", "authority", "code"];
   return ["use"];
 }
@@ -47,8 +45,6 @@ export function answered(step: StepId, a: Answers): boolean {
   switch (step) {
     case "use":
       return Boolean(a.use);
-    case "applicantType":
-      return Boolean(a.applicantType);
     case "authority":
       return Boolean(a.authority);
     case "code":
@@ -71,7 +67,7 @@ export function previousStep(step: StepId, a: Answers): StepId | null {
 
 /** The POST /auth/onboarding body once every question is answered; null before that. */
 export function onboardingPayload(a: Answers): OnboardingRequest | null {
-  if (a.use === "applicant" && a.applicantType) return { role: "applicant", applicant_type: a.applicantType };
+  if (a.use === "applicant") return { role: "applicant" };
   if (a.use === "reviewer" && a.authority && a.code.trim()) return { role: "reviewer", authority: a.authority, access_code: a.code.trim() };
   return null;
 }

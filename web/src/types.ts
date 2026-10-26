@@ -209,7 +209,7 @@ export interface Case {
    * it. Unset on a new draft, whose placeholder title is never sent as a name.
    */
   titleKept?: boolean;
-  applicantType: ApplicantType;
+  applicantType: ApplicantType | null;
   /** Test-fixture provenance only. Product visits never load sample cases. */
   exampleId?: string;
   codeEdition: string;

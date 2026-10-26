@@ -38,6 +38,13 @@ const reviewResult = (hash: string | null): IntakeResult => ({
   },
 });
 
+test("a reopened case keeps an unknown applicant type; only a confirmed case answer supplies one", () => {
+  assert.equal(caseFromEngine(saved(), null).applicantType, null);
+  assert.equal(caseFromEngine(saved({ facts: [fact("role", "applicant_role", "manufacturer")] }), null).applicantType, "manufacturer");
+  const proposed = { ...fact("role", "applicant_role", "manufacturer"), status: "unconfirmed" as const };
+  assert.equal(caseFromEngine(saved({ facts: [proposed] }), null).applicantType, null);
+});
+
 test("a reopened intake keeps a verified description, but never substitutes edited text for the reviewed input", async () => {
   const result = reviewResult(REVIEWED_HASH);
   const original = saved({ facts: [fact("description", "project.description", REVIEWED_TEXT)] });

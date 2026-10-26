@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { auth, type OnboardingRequest, type User } from "../../api/accounts";
 import type { Route } from "../../router";
 import { bootAccount, getAccountState, refreshApplications, setAccountState, useAccount } from "../account";
+import { resetSession, updateSession } from "../session";
 import { gateRedirect, gateStatus, homeFor, returnTarget, type GateStatus } from "./gate";
 
 const RETURN_KEY = "batatis.returnTo";
@@ -28,6 +29,13 @@ function writeReturn(hash: string | null) {
   } catch {
     /* private mode: no return-to, the home route still works */
   }
+}
+
+/** Keep the Start draft in this page and this tab while the existing auth flow runs. */
+export function requestStartSignIn(): void {
+  updateSession({ startRequested: true });
+  writeReturn("#/");
+  location.hash = "#/signin";
 }
 
 /** Status for App: loading, signed-out, needs-onboarding or ready (ready with no user = no accounts on this server). */
@@ -67,6 +75,7 @@ export function afterSignIn(user: User): string {
 }
 
 function signedIn(user: User) {
+  if (user.role === "reviewer") updateSession({ startRequested: false });
   setAccountState({ phase: "signed-in", user, applications: null, listError: "" });
   if (user.onboarded && user.role !== "reviewer") void refreshApplications();
 }
@@ -96,6 +105,7 @@ export async function signOut(): Promise<void> {
     await auth.logout();
   } finally {
     writeReturn(null);
+    resetSession();
     setAccountState({ phase: "signed-out", user: null, applications: null });
     location.hash = "#/signin";
     location.reload();
