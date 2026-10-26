@@ -1,0 +1,15 @@
+# Applicant drafting acceptance protocol
+
+Run `scripts/eval_applicant_drafts.py` with the repository Python environment. The default prepares input manifests and source-derived PDFs in `.data/drafting-eval/` without a model request. `--live` exercises the actual application drafting and decision routes. `--env-file` loads a local provider configuration without placing credentials in commands or output. Existing AI access and daily spend controls still apply.
+
+The cases are the three raw demo input folders and the sparse BTRboard description in `evals_dev/cases/dev-055.json`. Only that JSON file's `description` is used. It represents the continuous-insulation sheathing product example; it supplies no material properties, test results, project location or building scope. This is not evidence that the organizers supplied a complete product application. The manifest records that limitation explicitly.
+
+The harness supplies a small confirmed benchmark selection for each case, checked through the real second-printing code database. That isolates drafting from code finding, which belongs to another workstream. Additional real-world benchmarks may be necessary. Drafting must identify limits rather than claim the chosen list exhausts applicable requirements.
+
+Generation receives the raw project brief and every other Markdown document under the case's `input/` folder, rendered to readable PDFs without adding content. It never receives `keys/`, completed export JSON, expected narratives or the research worked-case analysis. Every input is hash recorded. The comparison reference is read only after the drafting route returns, for a separate quality judge.
+
+For each case the harness checks that the proposed alternative, six narratives, every selected provision's explanation and the evidence plan exist; all claims have sources; generation writes no accepted answers; explicit acceptance saves exactly the server draft; a subsequent read retains provenance; and the deterministic Section C rows remain unchanged.
+
+The separate quality judge assesses completeness, claim entailment, project specificity, the professional-work limit, explicit questions and usefulness compared with the hand-written reference. Citation presence alone is insufficient. The reference is comparison material, not ground truth: it includes applicant commitments and appointments absent from the raw inputs. The generated text must ask about those or label them as proposals. It must never copy them into factual statements.
+
+Every attempt, including failures, is appended to `attempts.jsonl`. Provider failure, malformed output and a failed quality criterion count as failed cases. A prepared manifest or a mocked route test establishes no live-writing quality. Model-checked writing is not human-reviewed, a professional opinion, a code-equivalence assessment or evidence of a permit outcome. Final evaluation results must give the complete attempted denominator, revision, model/configuration, limits and raw artifact location.
