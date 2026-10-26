@@ -20,7 +20,7 @@ from .models import Case, ProfessionalRequirementResolution, now
 from .process_fields import confirmed_value
 from .professional import professional_involvement
 from .professional_resolution import requirement_fingerprint
-from .review_lifecycle import remember_decision, snapshot, submit_round
+from .review_lifecycle import remember_decision, resubmission_changes, snapshot, submit_round
 from .store import ReviewConflict, ReviewRevision, VersionConflict
 
 ACCEPT_TEXT = 'Accepted as administratively complete. Technical review remains the responsibility of the authority.'
@@ -120,7 +120,8 @@ class DecisionRequest(BaseModel):
     @model_validator(mode='after')
     def _reason_required(self):
         if self.outcome in {'accept', 'refuse'} and self.expected_version is None:
-            raise ValueError(f'An {self.outcome} decision requires the displayed application expected_version')
+            decision = 'An acceptance' if self.outcome == 'accept' else 'A refusal'
+            raise ValueError(f'{decision} requires the displayed application expected_version')
         if self.outcome in {'return', 'refuse'} and (self.message is None or len(self.message.strip()) < 10):
             noun = 'return' if self.outcome == 'return' else 'refusal'
             raise ValueError(f'A {noun} requires a message of at least 10 characters')
@@ -366,7 +367,7 @@ def create_router(cases, code):
             if body and body.expected_version is not None and case.version != body.expected_version:
                 raise HTTPException(409, 'The saved application changed. Review it before submitting again.')
             at = now()
-            number = submit_round(case, cases(), at)
+            resubmission_changes(case, cases(), at)
             blocking = [gap for gap in check_completeness(case, code())
                         if gap.severity == 'blocking' and gap.submission_blocking]
             if blocking:
@@ -374,6 +375,7 @@ def create_router(cases, code):
                                           'gaps': [gap.model_dump() for gap in blocking]})
             if not reviewing_authority(case.authority):
                 raise HTTPException(409, f'Choose {reviewing_authority_names()} as the reviewing authority before submitting')
+            number = submit_round(case, cases(), at)
             label = 'Resubmitted' if number > 1 else 'Submitted'
             transition(case, user, 'submitted', f'{label} for administrative review · submission {number}')
             case.submitted_at = at

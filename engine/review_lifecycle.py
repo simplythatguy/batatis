@@ -66,19 +66,27 @@ def remember_decision(case: Case) -> None:
         case.decision_history.append(case.decision.model_copy(deep=True))
 
 
-def submit_round(case: Case, store, at: str) -> int:
-    number = max(case.submission_number, 1 if case.status == 'returned' else 0) + 1
+def resubmission_changes(case: Case, store, at: str) -> list[SubmissionChange] | None:
+    """Compare a return without building a submission or changing its claim/decision."""
     baseline = case.return_snapshot if case.status == 'returned' else None
-    before = comparison_values(baseline.values) if baseline else {}
+    if baseline is None:
+        return None
+    before = comparison_values(baseline.values)
     after = snapshot(case, at, store).values
     changes = [SubmissionChange(field=field, before=before.get(field), after=after.get(field))
-               for field in sorted(before.keys() | after.keys()) if before.get(field) != after.get(field)] if baseline else []
-    if baseline is not None and not changes:
+               for field in sorted(before.keys() | after.keys()) if before.get(field) != after.get(field)]
+    if not changes:
         raise HTTPException(409, 'Nothing changed since it was returned. Fix the requested items, then send it again.')
+    return changes
+
+
+def submit_round(case: Case, store, at: str) -> int:
+    number = max(case.submission_number, 1 if case.status == 'returned' else 0) + 1
+    changes = resubmission_changes(case, store, at)
     remember_decision(case)
     case.submissions.append(Submission(number=number, at=at, by_id=case.owner_id, authority=case.authority,
         returned_at=case.decision.at if case.decision and case.decision.outcome == 'return' else None,
-        comparison_available=baseline is not None, changes=changes))
+        comparison_available=changes is not None, changes=changes or []))
     # Preserve only the current reservation, after checking its present privileges.
     # An earlier decision/reviewer name never gives someone a new exclusive claim.
     claimant = store.get_user(case.claim.reviewer_id) if case.claim else None

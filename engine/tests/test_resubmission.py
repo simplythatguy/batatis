@@ -263,3 +263,16 @@ def test_new_file_is_a_real_resubmission_change(scene):
     assert revised.status_code == 200, revised.text
     changes = revised.json()['submissions'][-1]['changes']
     assert len(changes) == 1 and changes[0]['field'] == 'file.' + kept['id']
+
+
+def test_new_draft_without_authority_keeps_the_administrative_submit_gate(scene):
+    store, clients, _ = scene
+    case = owned(scene)
+    case.authority = None
+    saved = store.put(case)
+    before = saved.model_dump()
+    response = clients['owner'].post(f'/cases/{case.id}/submit', json={})
+    assert response.status_code == 409, response.text
+    assert response.json()['detail']['message'] == 'Resolve blocking administrative gaps before submitting'
+    assert response.json()['detail']['gaps']
+    assert store.get(case.id).model_dump() == before
