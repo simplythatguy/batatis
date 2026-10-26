@@ -256,7 +256,9 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: Batatis-${{ runner.os }}-${{ runner.arch }}
-          path: desktop/build/release/*.zip
+          path: |
+            desktop/build/release/*.zip
+            desktop/build/release/*.dmg
           if-no-files-found: error
 
   release:
@@ -287,10 +289,10 @@ jobs:
         run: |
           set -euo pipefail
           cd release
-          ls Batatis-*.zip
-          sha256sum Batatis-*.zip > SHA256SUMS
+          ls Batatis-*.zip Batatis-*.dmg
+          sha256sum Batatis-*.zip Batatis-*.dmg > SHA256SUMS
           cat SHA256SUMS
           args=(--target "$SHA" --generate-notes)
           if [ -n "$NOTES_START" ]; then args+=(--notes-start-tag "$NOTES_START"); fi
           if [ "$PRERELEASE" = true ]; then args+=(--prerelease --title "Batatis Beta $VERSION (${SHA:0:12})"); else args+=(--latest --title "Batatis $VERSION"); fi
-          gh release create "$TAG" Batatis-*.zip SHA256SUMS "${args[@]}"
+          gh release create "$TAG" Batatis-*.zip Batatis-*.dmg SHA256SUMS "${args[@]}"

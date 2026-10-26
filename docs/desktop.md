@@ -8,9 +8,9 @@ Applications in the desktop package stay on that computer. The package does not 
 
 Build the package on its target operating system, or download the matching portable archive from a verified desktop workflow run. The workflow saves the app and its acceptance reports as separate artifacts.
 
-The package targets Apple Silicon Macs and Windows x64. Extract the archive before opening `Batatis.app` on macOS or `Batatis.exe` on Windows. The Python engine comes with the package. The app downloads the Codex runtime when you install it from **Settings**.
+The package targets Apple Silicon Macs and Windows x64. Extract the archive before opening `Batatis.app` on macOS or `Batatis.exe` on Windows. Mac releases also carry a `.dmg` with the same app for dragging into **Applications**. The app's updates always use the zip archive. The Python engine comes with the package. The app downloads the Codex runtime when you install it from **Settings**.
 
-macOS release builds are signed and notarized once the Apple account in [Sign and notarize the macOS build](#sign-and-notarize-the-macos-build) exists; until then they use ad hoc signing, and macOS blocks a downloaded copy until you allow it in **System Settings > Privacy & Security** with **Open Anyway**. Windows release builds are signed once the signing account in [Sign the Windows build](#sign-the-windows-build) exists; until then they have no publisher signature, and Windows warns before opening them.
+macOS release builds are signed and notarized once the Apple account in [Sign and notarize the macOS build](#sign-and-notarize-the-macos-build) exists; until then they use ad hoc signing, and macOS blocks a copy downloaded in a browser. `scripts/install-mac.sh` installs the latest stable release with `curl`, which leaves no quarantine mark, after it checks the release's `SHA256SUMS`. Windows release builds are signed once the signing account in [Sign the Windows build](#sign-the-windows-build) exists; until then they have no publisher signature, and Windows warns before opening them.
 
 ## Use local development
 
@@ -239,7 +239,7 @@ Build the application and portable archive.
 npm run package --prefix desktop
 ```
 
-The archive appears under `desktop/build/release/`. Packaging audits check for the native engine, PDF tools, fonts and TLS roots, and that no Codex executable is bundled. The audits reject databases, source documents and credentials in the package.
+The archive, and on macOS the `.dmg`, appear under `desktop/build/release/`. Packaging audits check for the native engine, PDF tools, fonts and TLS roots, and that no Codex executable is bundled. The audits reject databases, source documents and credentials in the package.
 
 ## Verify a build
 
