@@ -57,7 +57,7 @@ async function mounted(initial: Case, focus: string | null = null, answerError: 
   }, { location: { hash: "#/questions", replace() {} }, window: {}, document: { addEventListener() {}, removeEventListener() {} } });
   const render = async () => { await h.render({ focus, codeFirst: false }); return h.render({ focus, codeFirst: false }); };
   const shown = (tree) => nodes(tree, (node) => node.type?.name === "CardBody")[0];
-  return { h, render, shown, actions, case: () => c, session: () => session };
+  return { h, render, shown, actions, dispatch, case: () => c, session: () => session };
 }
 
 test("Looks right confirms every reading and advances in one click", async () => {
@@ -74,14 +74,61 @@ test("Looks right confirms every reading and advances in one click", async () =>
   m.h.unmount();
 });
 
-test("a choice saves and advances without a second OK", async () => {
-  const m = await mounted(blank(), "field-scope");
+test("auto-confirmed readings still ask for acknowledgement once, and a new reading asks again", async () => {
+  const read = { ...field("owner", "Dana Whitfield."), status: "confirmed" as const };
+  const initial = plannedCase();
+  const c = { ...initial, facts: [read], intake: { ...initial.intake!, facts: [read], factIds: [read.id] } };
+  const m = await mounted(c);
   let tree = await m.render();
-  assert.equal(m.shown(tree).props.item.key, "field-scope");
-  m.shown(tree).props.onPick("site");
+  const understood = m.shown(tree)?.props.item;
+  assert.equal(understood?.kind, "understood");
+  assert.equal(understood.rows[0].copy.value, "Dana Whitfield");
+  assert.equal(journey.journeyProgress([understood]).open.batatis, 1);
+  nodes(tree, (node) => node.type?.name === "OkRow")[0].props.onOk();
   tree = await m.render();
-  assert.equal(m.case().facts.find((f) => f.field === "scope")?.value, "site");
-  assert.notEqual(m.shown(tree)?.props.item.key, "field-scope");
+  assert.notEqual(m.shown(tree)?.props.item.kind, "understood");
+  const saved = JSON.parse(JSON.stringify(m.case()));
+  assert.ok(!deck.buildDeck(saved, []).some((i) => i.kind === "understood"));
+  const acknowledged = deck.buildDeck(saved, [], { includeDone: true }).find((i) => i.kind === "understood")!;
+  assert.equal(journey.journeyProgress([acknowledged]).open.batatis, 0);
+  assert.ok(!deck.buildDeck(saved, getGaps(saved)).some((i) => i.kind === "understood"));
+  assert.ok(saved.facts.filter((f) => f.field.startsWith("journey.answer.")).every((f) => !f.field.includes("Dana") && f.field.length < 100));
+  const address = { ...field("municipalAddress", "10234 87 Ave NW, Edmonton"), status: "confirmed" as const };
+  const reread = { ...saved, facts: [...saved.facts, address], intake: { ...saved.intake, facts: [read, address], factIds: [read.id, address.id] } };
+  assert.ok(deck.buildDeck(reread, []).some((i) => i.kind === "understood"));
+  m.dispatch({ type: "restoreIntake", result: { facts: [read, address], record: saved.intake.record }, text: saved.description });
+  tree = await m.render();
+  nodes(tree, (node) => node.type?.name === "OkRow")[0].props.onOk();
+  tree = await m.render();
+  assert.equal(m.shown(tree)?.props.item.kind, "understood", "a prior visit to the card cannot suppress a new reading");
+  m.h.unmount();
+});
+
+test("description rows show you, while a derived value retains its dashed assumed chip", async () => {
+  const c = plannedCase();
+  const own = field("owner", "Dana Whitfield.");
+  const derived = { ...field("building_area_m2", 140), kind: "computed" as const, inputs: [] };
+  c.facts = [own, derived];
+  const h = await componentHarness(new URL("./ReadCards.tsx", import.meta.url), "UnderstoodFacts", {
+    "../store": { useCase: () => ({ c, dispatch() {} }) },
+    "../model": await import("../model.ts"), "../intakeView": await import("../intakeView.ts"),
+    "./journey": journey, "./icons": { Icon24: "icon" },
+  });
+  const tree = await h.render({ item: deck.buildDeck(c, []).find((i) => i.kind === "understood") });
+  assert.ok(nodes(tree, (node) => node.type === "span" && node.props.className === "cf-source-chip" && text(node) === "you").length > 0);
+  assert.ok(nodes(tree, (node) => node.type === "span" && node.props.className === "cf-source-chip is-assumed" && text(node) === "assumed").length > 0);
+  assert.doesNotMatch(text(tree), /Dana Whitfield\./);
+  h.unmount();
+});
+
+test("a choice saves and advances without a second OK", async () => {
+  const m = await mounted(plannedCase("likely"));
+  let tree = await m.render();
+  assert.equal(m.shown(tree).props.item.key, "route");
+  m.shown(tree).props.onPick("variance");
+  tree = await m.render();
+  assert.equal(journey.routeChoice(m.case()), "variance");
+  assert.notEqual(m.shown(tree)?.props.item.key, "route");
   assert.equal(nodes(tree, (node) => node.type === "button" && text(node) === "Skip").length, 0);
   m.h.unmount();
 });
@@ -89,7 +136,11 @@ test("a choice saves and advances without a second OK", async () => {
 test("Later is recorded through case actions and survives a fresh visit", async () => {
   const m = await mounted(blank(), "field-owner");
   let tree = await m.render();
-  m.shown(tree).props.onPick("later");
+  const body = m.shown(tree);
+  assert.equal(body.props.focusRow, "field-owner");
+  const row = body.props.item.paperworkRows.find((row) => row.key === "field-owner");
+  m.dispatch(journey.journeyAnswerAction(row, "later"));
+  body.props.onPaperworkDone();
   await m.render();
   const saved = JSON.parse(JSON.stringify(m.case()));
   assert.equal(journey.journeyAnswers(saved).get("field-owner")?.value, "later");
@@ -112,7 +163,7 @@ test("the office's response-time question never becomes an applicant card", asyn
 });
 
 test("the end screen only says done when no required answer waits on the applicant", async () => {
-  const open = deck.buildDeck(blank(), [], { includeDone: true }).find((i) => i.key === "field-owner")!;
+  const open = deck.buildDeck(blank(), [], { includeDone: true }).find((i) => i.kind === "paperwork")!.paperworkRows!.find((i) => i.key === "field-owner")!;
   const h = await componentHarness(new URL("./QuestionDeck.tsx", import.meta.url), "JourneyEnd", { "./journey": journey, "./icons": { Icon24: "icon" } });
   let tree = await h.render({ items: [open], onJump() {}, onReview() {}, standard: false, product: false });
   assert.match(text(tree), /1 still need you/);
@@ -125,7 +176,7 @@ test("the end screen only says done when no required answer waits on the applica
 });
 
 test("the designer list is copyable and office questions are listed without answer controls", async () => {
-  const item = deck.buildDeck(blank(), [], { includeDone: true }).find((i) => i.key === "field-owner")!;
+  const item = deck.buildDeck(blank(), [], { includeDone: true }).find((i) => i.kind === "paperwork")!.paperworkRows!.find((i) => i.key === "field-owner")!;
   let copied = "";
   const h = await componentHarness(new URL("./QuestionDeck.tsx", import.meta.url), "JourneyEnd", { "./journey": journey, "./icons": { Icon24: "icon" } }, { navigator: { clipboard: { writeText: async (value) => { copied = value; } } } });
   let tree = await h.render({ items: [{ ...item, answerer: "designer", title: "Part 4 design?", done: true, settled: true }, { ...item, key: "response", answerer: "office", title: "Fire response time?" }], onJump() {}, onReview() {}, standard: false, product: false });
@@ -179,28 +230,27 @@ test("Something is different opens its text question before project questions", 
   m.h.unmount();
 });
 
-test("Designer on the role card records the role rather than a designer deferral", async () => {
+test("a legacy role link opens the role row in the sheet and Done advances", async () => {
   const m = await mounted(blank(), "role");
   let tree = await m.render();
-  assert.equal(m.shown(tree).props.item.kind, "role");
-  m.shown(tree).props.onPick("designer");
+  const body = m.shown(tree);
+  assert.equal(body.props.item.kind, "paperwork");
+  assert.equal(body.props.focusRow, "role");
+  const row = body.props.item.paperworkRows.find((row) => row.key === "role");
+  assert.ok(row.choices.some((choice) => choice.value === "designer"));
+  body.props.onPaperworkDone();
   tree = await m.render();
-  assert.equal(m.case().facts.find((f) => f.field === "applicant_role")?.value, "designer");
-  assert.equal(journey.journeyAnswers(m.case()).has("role"), false);
-  assert.notEqual(m.shown(tree)?.props.item.kind, "role");
+  assert.notEqual(m.shown(tree)?.props.item.kind, "paperwork");
   m.h.unmount();
 });
 
-test("an office picker Not sure is recorded on the case and advances", async () => {
+test("an office link opens the office row in the sheet", async () => {
   const m = await mounted(blank(), "authority");
-  let tree = await m.render();
-  assert.equal(m.shown(tree).props.item.kind, "authority");
-  m.shown(tree).props.onPick("unsure");
-  tree = await m.render();
-  assert.equal(journey.journeyAnswers(m.case()).get("authority")?.value, "not_sure");
-  assert.notEqual(m.shown(tree)?.props.item.kind, "authority");
-  const saved = JSON.parse(JSON.stringify(m.case()));
-  assert.ok(!deck.buildDeck(saved, getGaps(saved)).some((i) => i.key === "authority"));
+  const tree = await m.render();
+  const body = m.shown(tree);
+  assert.equal(body.props.item.kind, "paperwork");
+  assert.equal(body.props.focusRow, "authority");
+  assert.ok(body.props.item.paperworkRows.some((row) => row.kind === "authority"));
   m.h.unmount();
 });
 
@@ -229,7 +279,8 @@ test("a reading row can be corrected without restoring the old value on confirma
   click(nodes(tree, (node) => node.type === "button" && text(node) === "Not sure")[0]);
   tree = await render();
   assert.ok(!c.facts.some((f) => f.field === "storeys"));
-  assert.equal(journey.journeyProgress(deck.buildDeck(c, [], { includeDone: true })).open.you > 0, true);
+  const open = journey.journeyProgress(deck.buildDeck(c, [], { includeDone: true })).open;
+  assert.equal(open.you + open.batatis > 0, true);
   assert.match(text(tree), /Not sure/);
   h.unmount();
 });

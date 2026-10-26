@@ -45,7 +45,7 @@ test("a signed-out person attaches plans and Start signs in, then starts and rea
   assert.equal(startButton(tree).props.disabled, true);
   assert.match(text(tree), /What are you building\?/);
   assert.doesNotMatch(text(tree), /Who is applying|differently/);
-  assert.equal(nodes(tree, (n: { type: string }) => n.type === "textarea")[0].props.placeholder, "Or say it in a few words");
+  assert.equal(nodes(tree, (n: { type: string }) => n.type === "textarea")[0].props.placeholder, "Describe it in a few words, or attach plans and photos");
   const input = fileInput(tree);
   for (const extension of [".pdf", ".jpg", ".jpeg", ".png", ".webp", ".txt", ".md"]) assert.ok(input.props.accept.includes(extension), extension);
   const file = new File(["drawing"], "house.webp", { type: "image/webp" });

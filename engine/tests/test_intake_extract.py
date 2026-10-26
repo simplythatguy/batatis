@@ -31,6 +31,18 @@ SECTION_AB = {'owner_name', 'owner_rep_name', 'mailing_address', 'municipal_addr
               'block', 'plan', 'ats_qtr', 'ats_sec', 'ats_twp', 'ats_rge', 'ats_mer', 'permit_number', 'request_date'}
 
 
+@pytest.mark.parametrize('text, field, expected', [
+    ('The owner is Dana Whitfield.', 'owner_name', 'Dana Whitfield'),
+    ('We are building at 10234 87 Ave NW, Edmonton.', 'municipal_address', '10234 87 Ave NW, Edmonton'),
+    ('The mailing address is 10234 87 Ave NW, Edmonton.', 'mailing_address', '10234 87 Ave NW, Edmonton'),
+    ('Owner: Dana Whitfield.\nRepresentative: Alex Chen.', 'owner_rep_name', 'Alex Chen'),
+])
+def test_names_and_addresses_leave_sentence_punctuation_out_of_values_and_spans(text, field, expected):
+    hit = next(h for h in read(text).hits if h.field == field)
+    assert hit.value == expected
+    assert text[hit.start:hit.end] == expected
+
+
 def _cases() -> list[dict]:
     return [json.loads(path.read_text()) for path in CASES]
 

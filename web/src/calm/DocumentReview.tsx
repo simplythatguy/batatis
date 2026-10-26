@@ -87,6 +87,8 @@ export function DocumentReview({ intake, files, description, intakeStatus }: Doc
   const unread = flags.some((flag) => flag.kind === "not_read") || reports.some((report) => report.status !== "read");
   const fileIds = [...new Set([...reports.map((report) => report.file_id), ...(findings?.documents.map((doc) => doc.file_id) ?? [])])];
   const hasFindings = findings && [findings.facts, flags, findings.conflicts, findings.provisions, findings.missing, findings.questions, findings.documents].some((items) => items.length);
+  const hasFiles = files.length > 0 || (!intake?.filesChanged && Boolean(record?.files.length));
+  if (!hasFiles || (!pending && !hasFindings && flags.length === 0)) return null;
   const nameFor = (ref: string) => ref === "description" ? "Your description"
     : record?.files.find((file) => file.file_id === ref)?.name
       ?? files.find((file) => file.engineId === ref)?.name

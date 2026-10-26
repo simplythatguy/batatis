@@ -421,10 +421,15 @@ def _inline_admin(sentence: str, at: int) -> list[Hit]:
             continue
         hits.append(Hit('permit_number', match.group(group), at + match.start(group), at + match.end(group), 0.85))
     for match in _OWNER_IS.finditer(sentence):
-        hits.append(Hit('owner_name', match.group('v'), at + match.start('v'), at + match.end('v'), 0.8))
+        end = match.end('v')
+        while end > match.start('v') and sentence[end - 1] in '.,;:!? ':
+            end -= 1
+        hits.append(Hit('owner_name', sentence[match.start('v'):end], at + match.start('v'), at + end, 0.8))
     for match in STREET.finditer(sentence):
         tail = _ADDRESS_TAIL.match(sentence[match.end():])
         end = match.end() + (tail.end() if tail else 0)
+        while end > match.start() and sentence[end - 1] in '.,;:!? ':
+            end -= 1
         if re.search(r'(?i)\bmail(?:ing)?\b[^.]{0,20}$', sentence[:match.start()]):
             hits.append(Hit('mailing_address', sentence[match.start():end], at + match.start(), at + end, 0.8))
         else:

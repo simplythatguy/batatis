@@ -77,8 +77,8 @@ def test_batatis_never_says_a_design_complies_in_its_own_words():
 
 def test_the_model_only_sees_the_scrubbed_text_and_the_user_sees_the_original():
     out, seen = _run({**EMPTY, 'facts': [
-        {'text': 'The letter is for [personal detail]', 'status': 'stated',
-         'evidence': _evidence('Prepared for 74-[personal detail]')}]})
+        {'text': 'The letter is for [personal detail].', 'status': 'stated',
+         'evidence': _evidence('Prepared for 74-[personal detail].')}]})
     sent = json.dumps(seen)
     assert '94 Newton Road' not in sent and '[personal detail]' in sent
     assert out.facts[0].evidence[0].quote == 'Prepared for 74-94 Newton Road, Wetherill Park.'
