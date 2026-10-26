@@ -16,7 +16,7 @@ import type { ApplicantType, Candidate, CandidateAnswer, Case, Fact, Gap } from 
 import { useSectionC } from "./api/sectionC";
 import { readSectionD, SectionDRecoveryError, type SectionDRead } from "./api/sectionD";
 import { isProvision, reconcileSectionC, sameCards } from "./provisions";
-import { caseFromEngine, latestFacts, openedCase, selectedArticles } from "./calm/openCase";
+import { caseFromEngine, latestFacts, openedCase, reviewedDescription, selectedArticles } from "./calm/openCase";
 import { normalizeTitle, saveTitle, TITLE_EMPTY, titleError } from "./calm/rename";
 import { refreshCase, resetExtras, setChecklist } from "./calm/caseExtras";
 import { accounts } from "./api/accounts";
@@ -1118,7 +1118,8 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       case_id: saved.id, case_version: saved.version, record,
       facts: saved.facts.filter(f => pointers.has(f.id)),
     } : null;
-    return { saved, intake, identify: saved.identify };
+    const reviewedText = await reviewedDescription(saved, record ?? null);
+    return { saved, intake, identify: saved.identify, reviewedText };
   }
 
   /** `next` is the opened case built in one step (openedCase): intake, code cards and their saved selection included. */

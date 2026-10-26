@@ -1,0 +1,9 @@
+{
+  "file": ".dpe-cache/codex/local-dev-v5/calls/0aef7d8ce8e3b80ca45df77f29ca93f964a7baa4d8cd1ce726d1b3892a9ea610/response.json",
+  "sha256": "4ac28ca13b41f0459dafe6a0b13a0ee62063ef57f799b947c979bda0be18266a",
+  "bytes": 1289,
+  "error": "Extra data",
+  "line": 24,
+  "column": 2,
+  "action": "Preserved unchanged. Not imported into any Haiku arm. Source preparation now fails visibly instead of omitting this transport failure."
+}

@@ -54,11 +54,9 @@
     {
       "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/firewall-in-a-rowhouse-with-secondary-suites-spv-006.pdf",
       "sha256": "8df85aa592abc0272806687daf7de01c14fdc9433b97c6641192e438889e9437",
-      "role": "outcome_reference",
+      "role": "published_standing_reference",
       "bytes": 450927,
-      "filename": "_evaluation/calgary-spv-006-2025-8df85aa592ab.pdf",
-      "included_in_default_input": false,
-      "original_collection_path": "_research/workers/L04/files/calgary-spv-006-2025-8df85aa592ab.pdf",
+      "included_in_default_input": true,
       "download_receipt": {
         "retrieved_at": "2026-10-25T01:17:14.907928+00:00",
         "http_status": "200",
@@ -66,16 +64,16 @@
         "content_type": "application/pdf",
         "kind": "pdf",
         "status": "downloaded"
-      }
+      },
+      "filename": "calgary-spv-006-2025-8df85aa592ab.pdf",
+      "original_collection_path": "_research/workers/L04/files/calgary-spv-006-2025-8df85aa592ab.pdf"
     },
     {
       "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-006-triplex-fourplex-buildings-with-secondary-suites-emergency-access.pdf",
       "sha256": "bab06bca63b9a4f06549901f996dcdc6789a482a698c10d4ffb139dc66a76cd8",
       "role": "supporting_evidence",
       "bytes": 510295,
-      "filename": "calgary-advisory-b23-006-fourplex-bab06bca63b9.pdf",
       "included_in_default_input": true,
-      "original_collection_path": "_research/workers/L04/files/calgary-advisory-b23-006-fourplex-bab06bca63b9.pdf",
       "download_receipt": {
         "retrieved_at": "2026-10-25T01:24:15.609339+00:00",
         "http_status": "200",
@@ -83,16 +81,16 @@
         "content_type": "application/pdf",
         "kind": "pdf",
         "status": "downloaded"
-      }
+      },
+      "filename": "calgary-advisory-b23-006-fourplex-bab06bca63b9.pdf",
+      "original_collection_path": "_research/workers/L04/files/calgary-advisory-b23-006-fourplex-bab06bca63b9.pdf"
     },
     {
       "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-005-building-permit-complete-application.pdf",
       "sha256": "9b8f05c23ca9dc222221b5bfeb93d20e82542241bbb33cc6c197ed2d532a1198",
       "role": "supporting_evidence",
       "bytes": 120260,
-      "filename": "calgary-advisory-b23-005-complete-application-9b8f05c23ca9.pdf",
       "included_in_default_input": true,
-      "original_collection_path": "_research/workers/L04/files/calgary-advisory-b23-005-complete-application-9b8f05c23ca9.pdf",
       "download_receipt": {
         "retrieved_at": "2026-10-25T01:17:14.924952+00:00",
         "http_status": "200",
@@ -100,16 +98,16 @@
         "content_type": "application/pdf",
         "kind": "pdf",
         "status": "downloaded"
-      }
+      },
+      "filename": "calgary-advisory-b23-005-complete-application-9b8f05c23ca9.pdf",
+      "original_collection_path": "_research/workers/L04/files/calgary-advisory-b23-005-complete-application-9b8f05c23ca9.pdf"
     },
     {
       "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/advisories/b23-010-professional-involvement-based-on-complexity.pdf",
       "sha256": "73110cd7ab5685fb9be345bf135f4e985230f1070686bb65b5b3fa8f2ccf6393",
       "role": "supporting_evidence",
       "bytes": 85681,
-      "filename": "calgary-advisory-b23-010-professional-73110cd7ab56.pdf",
       "included_in_default_input": true,
-      "original_collection_path": "_research/workers/L04/files/calgary-advisory-b23-010-professional-73110cd7ab56.pdf",
       "download_receipt": {
         "retrieved_at": "2026-10-25T01:18:56.158719+00:00",
         "http_status": "200",
@@ -117,16 +115,16 @@
         "content_type": "application/pdf",
         "kind": "pdf",
         "status": "downloaded"
-      }
+      },
+      "filename": "calgary-advisory-b23-010-professional-73110cd7ab56.pdf",
+      "original_collection_path": "_research/workers/L04/files/calgary-advisory-b23-010-professional-73110cd7ab56.pdf"
     },
     {
       "url": "https://www.calgary.ca/content/dam/www/tools-and-resources/guide-to-applying-for-an-alternative-solution.pdf",
       "sha256": "bbb0628b7b5f13499a4688089bc09484b67865ef283709d40701d823825b1399",
       "role": "supporting_evidence",
       "bytes": 172757,
-      "filename": "calgary-alternative-solution-guide-package-link-bbb0628b7b5f.pdf",
       "included_in_default_input": true,
-      "original_collection_path": "_research/workers/L04/files/calgary-alternative-solution-guide-package-link-bbb0628b7b5f.pdf",
       "download_receipt": {
         "retrieved_at": "2026-10-25T01:17:14.896815+00:00",
         "http_status": "200",
@@ -134,7 +132,9 @@
         "content_type": "application/pdf",
         "kind": "pdf",
         "status": "downloaded"
-      }
+      },
+      "filename": "calgary-alternative-solution-guide-package-link-bbb0628b7b5f.pdf",
+      "original_collection_path": "_research/workers/L04/files/calgary-alternative-solution-guide-package-link-bbb0628b7b5f.pdf"
     }
   ],
   "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",

@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
-import type { Case as EngineCase, IdentifyResult } from "../api/types.gen.ts";
+import type { Case as EngineCase, IdentifyResult, IntakeResult } from "../api/types.gen.ts";
 import { toViewRow } from "../api/sectionC.ts";
 import { engineField } from "../intakeFields.ts";
 import { displayValue, factFor, getGaps, reducer } from "../model.ts";
 import { professionalConfirmed } from "../professional.ts";
-import { caseFromEngine, latestFacts, openedCase, selectedArticles } from "./openCase.ts";
+import { caseFromEngine, latestFacts, openedCase, reviewedDescription, selectedArticles } from "./openCase.ts";
 
 const fact = (id: string, field: string, value: string, ref = "Typed in Section A") => ({
   id, field, value, kind: "pointed" as const, status: "confirmed" as const, confidence: null, formula: null, inputs: [],
@@ -26,6 +26,47 @@ const saved = (over: Partial<EngineCase> = {}): EngineCase => ({
     fact("f4", "process.risk_assessment", "Moisture could collect.", "Typed on the alternative path"),
   ] as EngineCase["facts"],
   ...over,
+});
+
+const REVIEWED_TEXT = "SYNTHETIC original review description.";
+const REVIEWED_HASH = "50b5342dae7a3003937d752b1abe92ef2fb8a93aba6ab9e6e06c0df7c3e0904d";
+const reviewResult = (hash: string | null): IntakeResult => ({
+  case_id: "case_abc", case_version: 7, facts: [],
+  record: {
+    text_sha256: hash, ran_at: "", review: null, plan: null, pointers: [], files: [], conflicts: [], unresolved_citations: [],
+    model: { status: "off", model: null, reason: null, pointed: 0, proposed: 0, dropped: 0, input_tokens: 0, output_tokens: 0 },
+  },
+});
+
+test("a reopened intake keeps a verified description, but never substitutes edited text for the reviewed input", async () => {
+  const result = reviewResult(REVIEWED_HASH);
+  const original = saved({ facts: [fact("description", "project.description", REVIEWED_TEXT)] });
+  const text = await reviewedDescription(original, result.record);
+  assert.equal(text, REVIEWED_TEXT);
+  const current = openedCase(original, "manufacturer", { intake: result, identify: null, reviewedText: text });
+  assert.equal(current.intake?.text, current.description.trim());
+  const edited = saved({ facts: [fact("description", "project.description", "SYNTHETIC edited proposal.")] });
+  const reviewedText = await reviewedDescription(edited, result.record);
+  const stale = openedCase(edited, "manufacturer", { intake: result, identify: null, reviewedText });
+  assert.equal(stale.description, "SYNTHETIC edited proposal.");
+  assert.equal(stale.intake?.text, null, "the screen and Start both require rereading an unmatched saved input");
+  assert.notEqual(stale.intake?.text, stale.description.trim());
+  assert.equal(await reviewedDescription(original, reviewResult(null).record), null, "legacy records without a hash stay unverified");
+  assert.equal(openedCase(original, "manufacturer", { intake: result, identify: null }).intake?.text, null);
+});
+
+test("file edits invalidate the review even when every file is removed; a new intake resets that state", () => {
+  const result = reviewResult(REVIEWED_HASH);
+  let current = openedCase(saved(), "manufacturer", { intake: result, identify: null, reviewedText: REVIEWED_TEXT });
+  current = reducer(current, { type: "addFiles", files: [{ id: "attachment", name: "UNIT-FIXTURE.pdf" }] });
+  assert.equal(current.intake?.filesChanged, true);
+  current = reducer(current, { type: "noteIntake", result, text: REVIEWED_TEXT });
+  assert.equal(current.intake?.filesChanged, undefined);
+  current = reducer(current, { type: "removeFile", id: "attachment" });
+  assert.equal(current.files.length, 0);
+  assert.equal(current.intake?.filesChanged, true);
+  current = reducer(current, { type: "noteIntake", result, text: REVIEWED_TEXT });
+  assert.equal(current.intake?.filesChanged, undefined);
 });
 
 test("latest answer per field wins and withdrawn answers are dropped", () => {

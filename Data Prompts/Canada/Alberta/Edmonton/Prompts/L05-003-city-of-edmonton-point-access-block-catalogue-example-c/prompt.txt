@@ -1,8 +1,11 @@
 Review the attached City of Edmonton Point Access Block Design Guide, Example C (PDF p. 18). Treat the catalogue values only as facts about this illustrative guide scenario, not as facts about an applicant or a specific property. Identify what the source states and what remains unknown before a project-specific Alberta building-permit and alternative-solution submission could be prepared. Flag code-edition and acceptable-solution/attribution questions that must be confirmed, list missing site-specific plans and administrative evidence, and ask the next focused questions, including about professional risk analysis, mitigation, and assumptions/limits. Keep the guide's conceptual status clear; do not claim safety, compliance, or approval.
 
+Also review the attached City of Edmonton Point Access Block Technical Report, Revision 4, as a published historical reference. Attribute to that report its Design Study 2 conclusion: its analysis found equivalent resilience for the vestibule-protected single-stair exemplar compared with the code-compliant two-stair design. Keep the report’s scoped analysis and assumptions distinct from any permit decision or real project conclusion. Batatis must not make or adopt a professional technical conclusion.
+
 Attachments:
 - pab-design-guide-fd29e2084bca.pdf
 - edmonton-point-access-guide-1546fef63937.pdf
 - pab-building-code-guide-54fc45bcb200.pdf
+- pab-technical-report-d2d1dcfb9feb.pdf
 
 This test question is reconstructed from published source material. Use the source jurisdiction and code edition. Identify missing administrative information and evidence; professional technical conclusions remain with the responsible reviewer.

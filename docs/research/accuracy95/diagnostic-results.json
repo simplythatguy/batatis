@@ -1,0 +1,248 @@
+{
+  "scope": "development diagnostic only; not hosted-product accuracy",
+  "independent_generated_case_groups": 2,
+  "cities_with_new_generation": [
+    "Calgary"
+  ],
+  "judge": "Codex gpt-6-luna max via T3, same strict validator",
+  "baseline_matched_subset": {
+    "case_ids": [
+      "A03-003",
+      "L04-001"
+    ],
+    "passed": 19,
+    "checks": 24,
+    "whole_cases_correct": 1
+  },
+  "candidate_matched_subset": {
+    "case_ids": [
+      "A03-003",
+      "L04-001"
+    ],
+    "passed": 21,
+    "checks": 24,
+    "whole_cases_correct": 0
+  },
+  "baseline_four_case_regrade": {
+    "cases": 4,
+    "cases_expected": 4,
+    "cases_scored": 4,
+    "cases_failed": 0,
+    "accuracy": 0.8182,
+    "checks": 44,
+    "checks_expected": 44,
+    "checks_scored": 44,
+    "checks_failed": 8,
+    "checks_unscored": 0,
+    "by_kind": {
+      "A": {
+        "n": 2,
+        "passed": 2,
+        "rate": 1.0
+      },
+      "B": {
+        "n": 4,
+        "passed": 4,
+        "rate": 1.0
+      },
+      "F": {
+        "n": 19,
+        "passed": 12,
+        "rate": 0.6316
+      },
+      "R": {
+        "n": 19,
+        "passed": 18,
+        "rate": 0.9474
+      },
+      "all": {
+        "n": 44,
+        "passed": 36,
+        "rate": 0.8182
+      }
+    },
+    "by_tier": {
+      "Calgary / Edmonton": {
+        "n": 44,
+        "passed": 36,
+        "rate": 0.8182
+      }
+    },
+    "guardrails": {
+      "citations_resolve": {
+        "n": 4,
+        "passed": 4,
+        "rate": 1.0
+      },
+      "no_alberta_commit_outside_alberta": {
+        "n": 4,
+        "passed": 4,
+        "rate": 1.0
+      },
+      "no_claims": {
+        "n": 4,
+        "passed": 4,
+        "rate": 1.0
+      },
+      "ran": {
+        "n": 4,
+        "passed": 4,
+        "rate": 1.0
+      }
+    },
+    "judge_notes": {},
+    "review_status": {
+      "live": 4
+    },
+    "failure_reasons": {},
+    "cases_with_unread_input": 0,
+    "provenance": {
+      "frozen-codex-experiment": 4
+    },
+    "validator_versions": {
+      "judge-v7-strict": 4
+    },
+    "cost": null,
+    "cases_judged": 4,
+    "whole_cases_correct": 1,
+    "by_city": {
+      "Calgary": {
+        "cases": 3,
+        "checks": 34,
+        "passed": 27
+      },
+      "Edmonton": {
+        "cases": 1,
+        "checks": 10,
+        "passed": 9
+      }
+    },
+    "target_met": false,
+    "grading": "Codex Luna max; model-graded, not expert validated"
+  },
+  "candidate_four_case_run_including_two_unexecuted": {
+    "cases": 4,
+    "cases_expected": 4,
+    "cases_scored": 2,
+    "cases_failed": 2,
+    "accuracy": 0.4773,
+    "checks": 44,
+    "checks_expected": 44,
+    "checks_scored": 44,
+    "checks_failed": 23,
+    "checks_unscored": 0,
+    "by_kind": {
+      "A": {
+        "n": 2,
+        "passed": 1,
+        "rate": 0.5
+      },
+      "B": {
+        "n": 4,
+        "passed": 3,
+        "rate": 0.75
+      },
+      "F": {
+        "n": 19,
+        "passed": 7,
+        "rate": 0.3684
+      },
+      "R": {
+        "n": 19,
+        "passed": 10,
+        "rate": 0.5263
+      },
+      "all": {
+        "n": 44,
+        "passed": 21,
+        "rate": 0.4773
+      }
+    },
+    "by_tier": {
+      "Calgary / Edmonton": {
+        "n": 44,
+        "passed": 21,
+        "rate": 0.4773
+      }
+    },
+    "guardrails": {
+      "citations_resolve": {
+        "n": 4,
+        "passed": 4,
+        "rate": 1.0
+      },
+      "no_alberta_commit_outside_alberta": {
+        "n": 4,
+        "passed": 4,
+        "rate": 1.0
+      },
+      "no_claims": {
+        "n": 4,
+        "passed": 4,
+        "rate": 1.0
+      },
+      "ran": {
+        "n": 4,
+        "passed": 2,
+        "rate": 0.5
+      }
+    },
+    "judge_notes": {
+      "missing_case": 19
+    },
+    "review_status": {
+      "live": 2,
+      "null": 2
+    },
+    "failure_reasons": {
+      "missing_case": 2
+    },
+    "cases_with_unread_input": 0,
+    "provenance": {
+      "frozen-codex-experiment": 4
+    },
+    "validator_versions": {
+      "judge-v7-strict": 4
+    },
+    "cost": null,
+    "cases_judged": 4,
+    "whole_cases_correct": 0,
+    "by_city": {
+      "Calgary": {
+        "cases": 3,
+        "checks": 34,
+        "passed": 21
+      },
+      "Edmonton": {
+        "cases": 1,
+        "checks": 10,
+        "passed": 0
+      }
+    },
+    "target_met": false,
+    "grading": "Codex Luna max; model-graded, not expert validated"
+  },
+  "source_artifact_hashes": {
+    ".dpe-cache/codex/baseline-smoke-v1/scores.json": "dfeb65c4c4044adfbcc2283478b0acaa77040b0a3f28c4831951f6f8df400da7",
+    ".dpe-cache/codex/dev-smoke-v1/scores.json": "6375bc04a0c5e0b2fc5fa16013c9a54f251d103673849f382b799acccd146d26",
+    ".dpe-cache/codex/baseline-smoke-v1/manifest.json": "a45072033ec3d5e2e468aee692f45becc5212e1ac6971425d02d7d435b745ee4",
+    ".dpe-cache/codex/dev-smoke-v1/manifest.json": "a8f58c42669feefbcd257093779f5f19118fba3df876d7ca4c080c87e868d8bc"
+  },
+  "limits": [
+    "T3 adds workspace/orchestration context; not an isolated hosted inference context.",
+    "Source/reference audit found material problems; these v1 checks were not repaired for scoring.",
+    "Two planned cases were unexecuted and remain failed in the four-case denominator.",
+    "Generation used bounded BM25/full-text verification rather than selected Jev production profile.",
+    "Model-graded source coverage is not professional or whole-application correctness.",
+    "Generation was before the duplicate-file-model removal; these scores do not evaluate that change."
+  ],
+  "accuracy_target_met": false,
+  "openai_api_calls_this_task": 0,
+  "unknown_cost_and_usage": true,
+  "accounting_corrections": {
+    "candidate_cases_judged": 2,
+    "candidate_checks_scored": 24,
+    "candidate_checks_unscored": 20,
+    "note": "Original v1 summary misnamed counted rows as cases_judged and counted missing-output checks as scored. Passed/expected 21/44 was unchanged; v2 fixes these accounting fields."
+  }
+}

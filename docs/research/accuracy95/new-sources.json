@@ -1,0 +1,226 @@
+{
+  "research_id": "accuracy95-local",
+  "retrieved_at_utc": "2026-10-25T18:44:33.307919+00:00",
+  "focused_search_queries": 26,
+  "inventory_snapshot": {
+    "source": "Data Prompts/index.json",
+    "calgary": {
+      "prompts": 17,
+      "source_groups": 12
+    },
+    "edmonton": {
+      "prompts": 21,
+      "source_groups": 9
+    }
+  },
+  "counts": {
+    "eligible_new_local_source_groups": 1,
+    "distinct_new_local_projects": 2,
+    "duplicate_existing_local_source_groups": 8,
+    "existing_alberta_groups_excluded_for_unspecified_locality": 1,
+    "newly_blocked_candidate_sources": 0,
+    "preexisting_escribe_403_unique_urls": {
+      "total": 24,
+      "calgary": 18,
+      "edmonton": 6
+    }
+  },
+  "candidates": [
+    {
+      "candidate_group_id": "EG01",
+      "source_group_count": 1,
+      "projects": [
+        {
+          "name": "Griesbach K-9 School",
+          "locality": "Edmonton, Alberta"
+        },
+        {
+          "name": "Chambery K-6 School",
+          "locality": "Edmonton, Alberta"
+        }
+      ],
+      "source_type": "official_school_division_project_report_consultant_preplanning",
+      "recommended_record_type": "documented_design_study",
+      "classification": "project_specific_preplanning_and_building_code_review",
+      "not_an_application_or_decision": true,
+      "source": {
+        "title": "ECSD Northwest Edmonton Schools – Griesbach K-9 School & Chambery K-6 School Pre-Planning/Pre-Schematic Design Report",
+        "publisher_client": "Edmonton Catholic School Division",
+        "author": "Stantec Architecture Ltd.",
+        "project_file": "144217370",
+        "document_date": "2026-02-25",
+        "requested_url": "https://www.ecsd.net/documents/1e431fd9-371a-415e-b4b2-be80c24558de/ChamberyK6_GriesbachK9_Final_PD_Report.pdf",
+        "final_url": "https://www.ecsd.net/documents/1e431fd9-371a-415e-b4b2-be80c24558de/ChamberyK6_GriesbachK9_Final_PD_Report.pdf?fingerprint=ppb20260416205227",
+        "http_status_sequence": [
+          302,
+          200
+        ],
+        "content_type": "application/pdf",
+        "bytes": 24433793,
+        "pages": 133,
+        "sha256": "64bdad61f8dcd0aa62bfada88f57d8336aba8c10a17722150837d6f851eb5840",
+        "local_path": "Data Prompts/_research/accuracy95-local/originals/ecsd-griesbach-chambery-preplanning-report.pdf",
+        "reuse_or_redistribution_permission_verified": false
+      },
+      "evidence_locators": [
+        {
+          "pdf_page": 1,
+          "supports": "Report title, Edmonton Catholic School Division, Stantec authorship, project/file number, document date, Northwest Edmonton naming."
+        },
+        {
+          "pdf_page": 5,
+          "supports": "Explicitly locates both new schools in Edmonton, Alberta."
+        },
+        {
+          "pdf_page": 47,
+          "printed_page": 32,
+          "supports": "Griesbach section 5.1.1 Building Code Review; NBC 2023 Alberta Edition; building classification, area, storeys, sprinklers, construction, fire separation."
+        },
+        {
+          "pdf_page": 48,
+          "printed_page": 33,
+          "supports": "Continuation of Griesbach code review, including occupant load, exits, and accessibility."
+        },
+        {
+          "pdf_page": 52,
+          "printed_page": 35,
+          "supports": "Chambery section 5.2.1 Building Code Review; NBC 2023 Alberta Edition; building classification, area, storeys, sprinklers, construction, and fire separation."
+        },
+        {
+          "pdf_page": 53,
+          "printed_page": 36,
+          "supports": "Continuation of Chambery code review, including occupant load, exits, washrooms, and accessibility."
+        }
+      ],
+      "limitations": [
+        "Preplanning/pre-schematic conceptual design only.",
+        "Full text keyword scan found no matches for alternative solution, variance, building permit, or permit application.",
+        "No permit decision, variance approval, or AHJ acceptance established.",
+        "No prompt or applicant facts created.",
+        "Publicly accessible bytes do not establish redistribution permission."
+      ],
+      "dedupe_checks": {
+        "project_name_matches_in_index": 0,
+        "source_url_or_sha256_matches_in_source_catalogue": 0
+      }
+    }
+  ],
+  "duplicate_existing_local_source_groups": [
+    {
+      "case_ids": [
+        "L04-001",
+        "L04-005"
+      ],
+      "source_group": "4414740917f24309",
+      "description": "Calgary standing posted variances surfaced through the official variance index."
+    },
+    {
+      "case_ids": [
+        "L04-003"
+      ],
+      "source_group": "3e6d26b01d63b80c",
+      "description": "Calgary SPV-003 exposed building face variance."
+    },
+    {
+      "case_ids": [
+        "L05-001",
+        "L05-002",
+        "L05-003",
+        "L05-004",
+        "L05-005",
+        "L05-006",
+        "L05-007",
+        "L05-008",
+        "L05-009",
+        "L05-010",
+        "L05-011",
+        "L05-012",
+        "L05-013"
+      ],
+      "source_group": "e13a13e04e52d10e",
+      "description": "Edmonton Point Access Block alternative-solution example set and shared technical source."
+    },
+    {
+      "case_ids": [
+        "L05-014"
+      ],
+      "source_group": "a2b004f8f9d89b31",
+      "description": "Edmonton secondary-suites alternative-solution example."
+    },
+    {
+      "case_ids": [
+        "L06-014"
+      ],
+      "source_group": "e201d10df3de235e",
+      "description": "Edmonton Council Order 2021-09."
+    },
+    {
+      "case_ids": [
+        "L06-015"
+      ],
+      "source_group": "bba2a6cbc93e9305",
+      "description": "Calgary Council Order 2023-03."
+    },
+    {
+      "case_ids": [
+        "L06-017"
+      ],
+      "source_group": "b7f1e6c0ea93534e",
+      "description": "Calgary Council Order 2024-06."
+    },
+    {
+      "case_ids": [
+        "L06-019"
+      ],
+      "source_group": "2dd80f5cf46283fd",
+      "description": "Calgary Council Order 2025-02."
+    }
+  ],
+  "existing_alberta_record_excluded_from_local_count": {
+    "case_id": "L06-016",
+    "source_group": "1190e500f97f84b9",
+    "title": "Paint-storage/tinting facility F1 versus F2 occupancy classification (Council Order 2022-06)",
+    "reason": "The index assigns Unspecified locality. The order's signature location in Edmonton does not establish the project's city."
+  },
+  "official_next_access_routes": {
+    "calgary": {
+      "url": "https://www.calgary.ca/info-requests/access-and-privacy/access-request.html",
+      "use": "Formal Access to Information request for narrowly described disclosable City records: project-specific variance request/report, technical report, deficiency correspondence, and decision record."
+    },
+    "edmonton": {
+      "ati_url": "https://www.edmonton.ca/city_government/city_organization/access-to-information-request",
+      "property_records_form_listing_url": "https://www.edmonton.ca/business_economy/form-listing",
+      "use": "Formal ATI for disclosable City technical / variance records. The listed Search of Records request for a property or building file is owner/acting-agent only."
+    },
+    "requests_submitted": false,
+    "fees_paid": false,
+    "people_contacted": false
+  },
+  "methods_used": [
+    {
+      "name": "Matt Pocock research",
+      "path": "/Users/aamia/.agents/skill-libraries/mattpocock/skills/engineering/research/SKILL.md"
+    }
+  ],
+  "verification": {
+    "saved_pdf_opened_with": "macOS PDFKit",
+    "saved_pdf_readable": true,
+    "corpus_index_edited": false,
+    "main_corpus_files_edited": false,
+    "openai_api_calls": 0
+  },
+  "parent_verification": {
+    "sha256_and_size_verified": true,
+    "page_count_verified": 133,
+    "rendered_pages_inspected": [
+      5,
+      47,
+      52
+    ],
+    "locality_explicit": true,
+    "preliminary_status_explicit": true,
+    "original_kept_out_of_git": true,
+    "assigned_split": "quarantined; not used for tuning or retrieval",
+    "model_tested": false
+  }
+}

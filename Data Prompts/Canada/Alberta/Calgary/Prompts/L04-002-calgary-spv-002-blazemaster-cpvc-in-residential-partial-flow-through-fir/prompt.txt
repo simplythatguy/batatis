@@ -1,6 +1,9 @@
 Review the attached Calgary SPV-002 and the supporting City product/variance guidance as historical issued references. State the code edition and clauses actually named, the exact pipe/system/backflow-device scope, and the permit-address condition. Flag what is missing about any particular product, system, and permit before an officer could determine whether this reference is relevant; ask for that information. Do not treat the old SPV as a general product certificate or current authorization, and do not certify the proposed design.
 
+Treat SPV-002 as a historical published standing variance, not a general product certificate, current authorization, or approval for a particular applicant project.
+
 Attachments:
+- calgary-spv-002-blazemaster-2018-dc80a2c63927.pdf
 - calgary-advisory-b23-014-products-eab7e7951728.pdf
 - calgary-alternative-solution-guide-package-link-bbb0628b7b5f.pdf
 

@@ -32,6 +32,7 @@ import { useDeckExtras } from "./useDeckExtras";
 import { JurisdictionNote } from "./JurisdictionNote";
 import { AuthorityPicker } from "./AuthorityPicker";
 import { DatePicker } from "./DatePicker";
+import { DocumentReview } from "./DocumentReview";
 import { AUTHORITIES } from "../config";
 import { PACKAGE_YES, RULE_ADD, RULE_LEAVE } from "./deck";
 import { useAccount } from "./account";
@@ -885,7 +886,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     if (drawer || e.defaultPrevented || document.querySelector("dialog[open]")) return;
     const t = e.target as HTMLElement | null;
     // Keys typed in the menu, a popover, the assistant or any dialog belong to them.
-    if (t?.closest?.(".cf-pop, dialog, [role='menu'], .cf-palette, .cf-assist")) return;
+    if (t?.closest?.(".cf-pop, dialog, [role='menu'], .cf-palette, .cf-assist, .cf-document-review")) return;
     const inText = isTextTarget(t);
     const embedded = item?.kind === "section-d" && t && t !== document.body && !t.closest("[data-deck-foot]") && t.tagName !== "H2";
     if (embedded) return;
@@ -935,6 +936,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
           <span className={`cf-dot is-${status.tone}`} aria-hidden="true" />{status.heading}. {status.note}
         </div>
       )}
+      <DocumentReview intake={c.intake} files={c.files} description={c.description} intakeStatus={reading.intake} />
       <div className="cf-q-stage">
         {/* A submission on its way only pauses the mounted card (App's edit lock); a sent one is read-only. */}
         {readOnly ? (

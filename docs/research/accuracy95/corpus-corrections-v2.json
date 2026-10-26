@@ -1,0 +1,896 @@
+{
+  "version": 2,
+  "title": "Local DEVELOPMENT corpus input/reference corrections",
+  "created_date": "2026-10-25",
+  "workspace": "/Users/aamia/.t3/worktrees/batatis/work-luna-accuracy-95-20261025",
+  "scope": {
+    "case_ids": [
+      "L04-001",
+      "L04-002",
+      "L04-005",
+      "L05-003",
+      "L14-003"
+    ],
+    "case_count": 5,
+    "only_development_cases": true,
+    "source_group_count_before_and_after": 592,
+    "no_holdout_item_answers_or_errors_inspected": true,
+    "aggregate_membership_and_attachment_hash_inventory_used": true,
+    "no_model_outputs": true,
+    "no_openai_api_calls": true,
+    "no_accuracy_claim": true,
+    "no_engine_or_evaluation_code_modified_by_this_correction": true
+  },
+  "version_boundary": {
+    "historical_audit_file": "docs/research/accuracy95/input-reference-audit.json",
+    "historical_audit_sha256": "e204776ddbf287775021f61a67a30d1ad40a212ea20cb99ee52c4801f94c129e",
+    "historical_audit_markdown_sha256": "ed7514149a90f54d2c7c064993caf9e49a6c45091749e18ae69cfcfac20c7282",
+    "historical_checks_total": 259,
+    "historical_checks_by_kind": {
+      "A": 16,
+      "B": 13,
+      "F": 109,
+      "R": 121
+    },
+    "all_original_checks_preserved": true,
+    "historic_check_rows_modified": 0,
+    "semantic_reference_changes_are_v2": true,
+    "benchmark_score_comparability": "v2 is a corrected input/reference version; no model score is computed or claimed, and it is not the same benchmark score as the historic reference set."
+  },
+  "hash_convention": {
+    "input_manifest_sha256": "SHA-256 over canonical UTF-8 JSON with sorted object keys and compact separators; value contains prompt SHA-256 and the ordered default attachment filename, role, SHA-256 and byte count.",
+    "reference_manifest_sha256": "SHA-256 over canonical UTF-8 JSON with sorted object keys and compact separators; value is the ordered list of excluded reference filename, role, SHA-256 and byte count. It excludes prompt text.",
+    "attachment_sha256": "SHA-256 of original attachment bytes, checked before copying and again in the selected corpus verifier."
+  },
+  "cases": {
+    "L04-001": {
+      "case_type": "issued_variance",
+      "outcome_leakage_after": true,
+      "prompt_sha256_before": "fc879818ea738d58b87ead93090f1ea5ae718bff0009e3d7d79b6f87d22e81dd",
+      "prompt_sha256_after": "892f9f446d8447229fd2c1b494d00ae0f9304eda631af898b91eb77ebe2f722f",
+      "source_json_sha256_before": "0cfc56d745c460df9e397940f3f2452be7e093265eeaccd7e1723d1ce47692aa",
+      "source_json_sha256_after": "f1ce19e1974911cb1e8c995ea0df9e2d3111bb719d837500bbef3c058b5b394f",
+      "evaluation_json_sha256_before": "6828344b3fddc523c9c8693e3bcc940c50009d996619c4b41ef5d75622f00e6a",
+      "evaluation_json_sha256_after": "f0c6b5760e27d065d7a6cfead1f8f2c993a795f689afd533fb2d55cd52dfc7eb",
+      "default_attachment_count_before": 3,
+      "default_attachment_count_after": 4,
+      "excluded_reference_count_before": 1,
+      "excluded_reference_count_after": 0,
+      "input_manifest_sha256_before": "fa4b02370113b77b47443a5bd01067b01cecb2ab32a0bdb4f0e264490090bd7c",
+      "input_manifest_sha256_after": "ec20e2a23ba550ec710b07ba81a795b60a62d62968f6e92399f36a775bbd91a2",
+      "reference_manifest_sha256_before": "d85620fbddad2aa4f920c5800a2ae0329a8a498e81023422d78556cbdbf62c7d",
+      "reference_manifest_sha256_after": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "default_inputs_before": [
+        {
+          "filename": "calgary-spv-001-r4-2024-7a528dc00a59.pdf",
+          "role": "supporting_evidence",
+          "included_in_default_input": true,
+          "sha256": "7a528dc00a5979299f7b4b8f5a3027f420df3a0c929490b6c807cab0a4cc1c36",
+          "bytes": 756343
+        },
+        {
+          "filename": "calgary-alternative-solution-guide-package-link-bbb0628b7b5f.pdf",
+          "role": "supporting_evidence",
+          "included_in_default_input": true,
+          "sha256": "bbb0628b7b5f13499a4688089bc09484b67865ef283709d40701d823825b1399",
+          "bytes": 172757
+        },
+        {
+          "filename": "calgary-request-specific-variance-fa8881140654.pdf",
+          "role": "supporting_evidence",
+          "included_in_default_input": true,
+          "sha256": "fa8881140654ac491732471a576206efce38b826b0d8f7fa84c7a47ada53cce5",
+          "bytes": 194424
+        }
+      ],
+      "default_inputs_after": [
+        {
+          "filename": "calgary-spv-001-r5-2026-bbe2767cfbeb.pdf",
+          "role": "published_standing_reference",
+          "sha256": "bbe2767cfbebab533b1afa971afc9393ef56547337bd95f7996aa5d981b649de",
+          "bytes": 810908,
+          "included_in_default_input": true
+        },
+        {
+          "filename": "calgary-spv-001-r4-2024-7a528dc00a59.pdf",
+          "role": "supporting_evidence",
+          "sha256": "7a528dc00a5979299f7b4b8f5a3027f420df3a0c929490b6c807cab0a4cc1c36",
+          "bytes": 756343,
+          "included_in_default_input": true
+        },
+        {
+          "filename": "calgary-alternative-solution-guide-package-link-bbb0628b7b5f.pdf",
+          "role": "supporting_evidence",
+          "sha256": "bbb0628b7b5f13499a4688089bc09484b67865ef283709d40701d823825b1399",
+          "bytes": 172757,
+          "included_in_default_input": true
+        },
+        {
+          "filename": "calgary-request-specific-variance-fa8881140654.pdf",
+          "role": "supporting_evidence",
+          "sha256": "fa8881140654ac491732471a576206efce38b826b0d8f7fa84c7a47ada53cce5",
+          "bytes": 194424,
+          "included_in_default_input": true
+        }
+      ],
+      "excluded_references_before": [
+        {
+          "filename": "_evaluation/calgary-spv-001-r5-2026-bbe2767cfbeb.pdf",
+          "role": "outcome_reference",
+          "included_in_default_input": false,
+          "sha256": "bbe2767cfbebab533b1afa971afc9393ef56547337bd95f7996aa5d981b649de",
+          "bytes": 810908
+        }
+      ],
+      "excluded_references_after": [],
+      "review_focus_count_after": 6,
+      "review_focus_after": [
+        "Do not infer an edition year from the revision date.",
+        "Preserve the exact stated scope and flag missing project geometry/height/openings evidence.",
+        "Flag the 0.3 m footing projection into the easement on p.4 versus 0.6 m across the property line on p.5; ask for clarification rather than harmonizing the wording.",
+        "Recognize that the MARW/title condition is explicit and applies to adjacent parcels.",
+        "Use the current SPV revision and do not treat Revision 4 as a separate case or as current text.",
+        "Ask for permit and supporting evidence; do not certify design performance."
+      ],
+      "copied_file_byte_checks": [
+        {
+          "filename": "calgary-spv-001-r5-2026-bbe2767cfbeb.pdf",
+          "sha256": "bbe2767cfbebab533b1afa971afc9393ef56547337bd95f7996aa5d981b649de",
+          "bytes": 810908
+        },
+        {
+          "filename": "calgary-spv-001-r4-2024-7a528dc00a59.pdf",
+          "sha256": "7a528dc00a5979299f7b4b8f5a3027f420df3a0c929490b6c807cab0a4cc1c36",
+          "bytes": 756343
+        },
+        {
+          "filename": "calgary-alternative-solution-guide-package-link-bbb0628b7b5f.pdf",
+          "sha256": "bbb0628b7b5f13499a4688089bc09484b67865ef283709d40701d823825b1399",
+          "bytes": 172757
+        },
+        {
+          "filename": "calgary-request-specific-variance-fa8881140654.pdf",
+          "sha256": "fa8881140654ac491732471a576206efce38b826b0d8f7fa84c7a47ada53cce5",
+          "bytes": 194424
+        }
+      ]
+    },
+    "L04-002": {
+      "case_type": "issued_variance",
+      "outcome_leakage_after": true,
+      "prompt_sha256_before": "3d4d37edc110e3f47dcc76e86f8fc6debee53640479dbf71f7e26cb5e69eda16",
+      "prompt_sha256_after": "da0e73fef414be7f59f3c1c36bed0843a6c4727f0403350ccb3d4650a265e28b",
+      "source_json_sha256_before": "5e1bbf39cbb30c1783bd8250bba154834a1d43b72fdc72f440de4f44894461ba",
+      "source_json_sha256_after": "13e5e064b27bcddf81a01bae20107fbf8066f5f78c6813cf51e61eca879bf7c8",
+      "evaluation_json_sha256_before": "062da5fb4ac75d647827b7a54f7fb23346762ff55f913c649a70ef1e0c812964",
+      "evaluation_json_sha256_after": "103170640be3d33b5a49cc0a2594dc0127159019cb3ca3f40299b353b2d2f826",
+      "default_attachment_count_before": 2,
+      "default_attachment_count_after": 3,
+      "excluded_reference_count_before": 1,
+      "excluded_reference_count_after": 0,
+      "input_manifest_sha256_before": "090ca4d93107b1f0a9d93e884f514938b8e3df65947016f42f4d903cfe1e78d0",
+      "input_manifest_sha256_after": "5413577ea52fdc8d521db080441057c840a24fe6c765af823c193a5338adf377",
+      "reference_manifest_sha256_before": "3ed63dfd634123f262f305d78397d12c7ef48f5c7c9c9df7deb32c250a73d48d",
+      "reference_manifest_sha256_after": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "default_inputs_before": [
+        {
+          "filename": "calgary-advisory-b23-014-products-eab7e7951728.pdf",
+          "role": "supporting_evidence",
+          "included_in_default_input": true,
+          "sha256": "eab7e795172816bc47744288e5bad17a4867c2b79cf4ba37b87cd9eee9a02017",
+          "bytes": 206601
+        },
+        {
+          "filename": "calgary-alternative-solution-guide-package-link-bbb0628b7b5f.pdf",
+          "role": "supporting_evidence",
+          "included_in_default_input": true,
+          "sha256": "bbb0628b7b5f13499a4688089bc09484b67865ef283709d40701d823825b1399",
+          "bytes": 172757
+        }
+      ],
+      "default_inputs_after": [
+        {
+          "filename": "calgary-spv-002-blazemaster-2018-dc80a2c63927.pdf",
+          "role": "published_standing_reference",
+          "sha256": "dc80a2c63927fba8cb134de950b9a3cc599a2b636c1ce75588b082f82552b95f",
+          "bytes": 104608,
+          "included_in_default_input": true
+        },
+        {
+          "filename": "calgary-advisory-b23-014-products-eab7e7951728.pdf",
+          "role": "supporting_evidence",
+          "sha256": "eab7e795172816bc47744288e5bad17a4867c2b79cf4ba37b87cd9eee9a02017",
+          "bytes": 206601,
+          "included_in_default_input": true
+        },
+        {
+          "filename": "calgary-alternative-solution-guide-package-link-bbb0628b7b5f.pdf",
+          "role": "supporting_evidence",
+          "sha256": "bbb0628b7b5f13499a4688089bc09484b67865ef283709d40701d823825b1399",
+          "bytes": 172757,
+          "included_in_default_input": true
+        }
+      ],
+      "excluded_references_before": [
+        {
+          "filename": "_evaluation/calgary-spv-002-blazemaster-2018-dc80a2c63927.pdf",
+          "role": "outcome_reference",
+          "included_in_default_input": false,
+          "sha256": "dc80a2c63927fba8cb134de950b9a3cc599a2b636c1ce75588b082f82552b95f",
+          "bytes": 104608
+        }
+      ],
+      "excluded_references_after": [],
+      "review_focus_count_after": 5,
+      "review_focus_after": [
+        "Keep NPC 2015 edition and clauses distinct from current NBC(AE) guidance.",
+        "Identify product, residential partial-flow-through system and DuCF scope without generalizing it.",
+        "Capture conditional DCVAF fallback and permit-address requirement.",
+        "Flag that the record is historical and does not establish a current project/product approval.",
+        "Ask for source-supported missing permit and product documentation; do not certify performance."
+      ],
+      "copied_file_byte_checks": [
+        {
+          "filename": "calgary-spv-002-blazemaster-2018-dc80a2c63927.pdf",
+          "sha256": "dc80a2c63927fba8cb134de950b9a3cc599a2b636c1ce75588b082f82552b95f",
+          "bytes": 104608
+        },
+        {
+          "filename": "calgary-advisory-b23-014-products-eab7e7951728.pdf",
+          "sha256": "eab7e795172816bc47744288e5bad17a4867c2b79cf4ba37b87cd9eee9a02017",
+          "bytes": 206601
+        },
+        {
+          "filename": "calgary-alternative-solution-guide-package-link-bbb0628b7b5f.pdf",
+          "sha256": "bbb0628b7b5f13499a4688089bc09484b67865ef283709d40701d823825b1399",
+          "bytes": 172757
+        }
+      ]
+    },
+    "L04-005": {
+      "case_type": "issued_variance",
+      "outcome_leakage_after": true,
+      "prompt_sha256_before": "14b3c9e33e59b7a11173c6f0eb697feb924b1d7eaf9389d26b37517894a637a7",
+      "prompt_sha256_after": "724a20fa813b23e532898326346414545280a1e68229a8b0fe80951e68219173",
+      "source_json_sha256_before": "b5629ce003733d6c8175633998566a43a520fc3b9b36e8dbf6b59aae9ea666e5",
+      "source_json_sha256_after": "1acfbf9695fc69a0576226c8ca74083afc62151d50a2fb88c402ef9e3b828109",
+      "evaluation_json_sha256_before": "6f44af598d25cd63f1ba918a9c91260301a7c03bb5fc69baacfda3329cb63fb3",
+      "evaluation_json_sha256_after": "8e5443bb9cda66fdbd191356cec2a9e7aefcaf23e3cbe19b02e83a962eb8d10f",
+      "default_attachment_count_before": 4,
+      "default_attachment_count_after": 5,
+      "excluded_reference_count_before": 1,
+      "excluded_reference_count_after": 0,
+      "input_manifest_sha256_before": "8b31678c4ec733da6df613eb1c45a210b55079b5ea6d3b982f67703e6b8a76ac",
+      "input_manifest_sha256_after": "05485bf92305d0610224d09e52986d166501e338dafe97a503952be1518b834d",
+      "reference_manifest_sha256_before": "e95e2c8af6a07d7f67263aaa66f55676be1fdeb4a3b44610a5e1e9010258479d",
+      "reference_manifest_sha256_after": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "default_inputs_before": [
+        {
+          "filename": "calgary-advisory-b23-006-fourplex-bab06bca63b9.pdf",
+          "role": "supporting_evidence",
+          "included_in_default_input": true,
+          "sha256": "bab06bca63b9a4f06549901f996dcdc6789a482a698c10d4ffb139dc66a76cd8",
+          "bytes": 510295
+        },
+        {
+          "filename": "calgary-advisory-b23-005-complete-application-9b8f05c23ca9.pdf",
+          "role": "supporting_evidence",
+          "included_in_default_input": true,
+          "sha256": "9b8f05c23ca9dc222221b5bfeb93d20e82542241bbb33cc6c197ed2d532a1198",
+          "bytes": 120260
+        },
+        {
+          "filename": "calgary-advisory-b23-010-professional-73110cd7ab56.pdf",
+          "role": "supporting_evidence",
+          "included_in_default_input": true,
+          "sha256": "73110cd7ab5685fb9be345bf135f4e985230f1070686bb65b5b3fa8f2ccf6393",
+          "bytes": 85681
+        },
+        {
+          "filename": "calgary-alternative-solution-guide-package-link-bbb0628b7b5f.pdf",
+          "role": "supporting_evidence",
+          "included_in_default_input": true,
+          "sha256": "bbb0628b7b5f13499a4688089bc09484b67865ef283709d40701d823825b1399",
+          "bytes": 172757
+        }
+      ],
+      "default_inputs_after": [
+        {
+          "filename": "calgary-spv-006-2025-8df85aa592ab.pdf",
+          "role": "published_standing_reference",
+          "sha256": "8df85aa592abc0272806687daf7de01c14fdc9433b97c6641192e438889e9437",
+          "bytes": 450927,
+          "included_in_default_input": true
+        },
+        {
+          "filename": "calgary-advisory-b23-006-fourplex-bab06bca63b9.pdf",
+          "role": "supporting_evidence",
+          "sha256": "bab06bca63b9a4f06549901f996dcdc6789a482a698c10d4ffb139dc66a76cd8",
+          "bytes": 510295,
+          "included_in_default_input": true
+        },
+        {
+          "filename": "calgary-advisory-b23-005-complete-application-9b8f05c23ca9.pdf",
+          "role": "supporting_evidence",
+          "sha256": "9b8f05c23ca9dc222221b5bfeb93d20e82542241bbb33cc6c197ed2d532a1198",
+          "bytes": 120260,
+          "included_in_default_input": true
+        },
+        {
+          "filename": "calgary-advisory-b23-010-professional-73110cd7ab56.pdf",
+          "role": "supporting_evidence",
+          "sha256": "73110cd7ab5685fb9be345bf135f4e985230f1070686bb65b5b3fa8f2ccf6393",
+          "bytes": 85681,
+          "included_in_default_input": true
+        },
+        {
+          "filename": "calgary-alternative-solution-guide-package-link-bbb0628b7b5f.pdf",
+          "role": "supporting_evidence",
+          "sha256": "bbb0628b7b5f13499a4688089bc09484b67865ef283709d40701d823825b1399",
+          "bytes": 172757,
+          "included_in_default_input": true
+        }
+      ],
+      "excluded_references_before": [
+        {
+          "filename": "_evaluation/calgary-spv-006-2025-8df85aa592ab.pdf",
+          "role": "outcome_reference",
+          "included_in_default_input": false,
+          "sha256": "8df85aa592abc0272806687daf7de01c14fdc9433b97c6641192e438889e9437",
+          "bytes": 450927
+        }
+      ],
+      "excluded_references_after": [],
+      "review_focus_count_after": 5,
+      "review_focus_after": [
+        "Use the figure’s explicit NBC 2023(AE) label while noting that the operative text omits the year; do not infer the edition from the 2025 issue date alone.",
+        "Keep SPV scope and B23-006 emergency-access guidance distinct.",
+        "Preserve all stated fire-separation, egress, sprinkler, HVAC and other-Code conditions.",
+        "Ask for drawings and permit facts; flag professional involvement when the record requires it.",
+        "Do not claim technical equivalence, safe design, or code compliance."
+      ],
+      "copied_file_byte_checks": [
+        {
+          "filename": "calgary-spv-006-2025-8df85aa592ab.pdf",
+          "sha256": "8df85aa592abc0272806687daf7de01c14fdc9433b97c6641192e438889e9437",
+          "bytes": 450927
+        },
+        {
+          "filename": "calgary-advisory-b23-006-fourplex-bab06bca63b9.pdf",
+          "sha256": "bab06bca63b9a4f06549901f996dcdc6789a482a698c10d4ffb139dc66a76cd8",
+          "bytes": 510295
+        },
+        {
+          "filename": "calgary-advisory-b23-005-complete-application-9b8f05c23ca9.pdf",
+          "sha256": "9b8f05c23ca9dc222221b5bfeb93d20e82542241bbb33cc6c197ed2d532a1198",
+          "bytes": 120260
+        },
+        {
+          "filename": "calgary-advisory-b23-010-professional-73110cd7ab56.pdf",
+          "sha256": "73110cd7ab5685fb9be345bf135f4e985230f1070686bb65b5b3fa8f2ccf6393",
+          "bytes": 85681
+        },
+        {
+          "filename": "calgary-alternative-solution-guide-package-link-bbb0628b7b5f.pdf",
+          "sha256": "bbb0628b7b5f13499a4688089bc09484b67865ef283709d40701d823825b1399",
+          "bytes": 172757
+        }
+      ]
+    },
+    "L05-003": {
+      "case_type": "documented_design_study",
+      "outcome_leakage_after": true,
+      "prompt_sha256_before": "c9f1e862533ed7668bc4e053a903b9f4682bcef27bd7cd862e9591a2ef0aa2f8",
+      "prompt_sha256_after": "3018f2d2b2054c847b05fff13ca91cd5cca87360c33601e2feadd152478dfb67",
+      "source_json_sha256_before": "535c84da0d81720e99bdefbdd988098765a852b17e7509b0c72372f3a27f51f6",
+      "source_json_sha256_after": "0be81215c399eab0d71606b2a212771ab8737fbf5bf58c791d29af480ba55838",
+      "evaluation_json_sha256_before": "7cc861bcc4c36684ce895d4215a3d6649ee81a7d234107a8645d40b16ed72c56",
+      "evaluation_json_sha256_after": "e68ea1403f3dd15942395abe7d143055f7481643acef137b146087de2028171a",
+      "default_attachment_count_before": 3,
+      "default_attachment_count_after": 4,
+      "excluded_reference_count_before": 1,
+      "excluded_reference_count_after": 0,
+      "input_manifest_sha256_before": "aa26921418569066d97e957bbde9ada860f04ef2767226c929a1730b531b2acd",
+      "input_manifest_sha256_after": "eb0178ad34a72185022a539fe65f6e1b738ec27c2f8a3a84b2ba214e8a480aea",
+      "reference_manifest_sha256_before": "de9c03ce4184edc08a9afa13ce5851f57c6fdc7577562b542a6e83259d1294dc",
+      "reference_manifest_sha256_after": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "default_inputs_before": [
+        {
+          "filename": "pab-design-guide-fd29e2084bca.pdf",
+          "role": "input",
+          "included_in_default_input": true,
+          "sha256": "fd29e2084bca5467bce576a13ee65e4c2dee84615a0127699b09a6cb9ab0c79a",
+          "bytes": 4235436
+        },
+        {
+          "filename": "edmonton-point-access-guide-1546fef63937.pdf",
+          "role": "supporting_evidence",
+          "included_in_default_input": true,
+          "sha256": "1546fef639376b5b363214f8ea035ef02c94abb8aa001a2d9d68a44813df0983",
+          "bytes": 2241434
+        },
+        {
+          "filename": "pab-building-code-guide-54fc45bcb200.pdf",
+          "role": "supporting_evidence",
+          "included_in_default_input": true,
+          "sha256": "54fc45bcb200c1b27e3f3ed9ebace61b98335729b0b80e191feb881002a68055",
+          "bytes": 541037
+        }
+      ],
+      "default_inputs_after": [
+        {
+          "filename": "pab-design-guide-fd29e2084bca.pdf",
+          "role": "input",
+          "sha256": "fd29e2084bca5467bce576a13ee65e4c2dee84615a0127699b09a6cb9ab0c79a",
+          "bytes": 4235436,
+          "included_in_default_input": true
+        },
+        {
+          "filename": "edmonton-point-access-guide-1546fef63937.pdf",
+          "role": "supporting_evidence",
+          "sha256": "1546fef639376b5b363214f8ea035ef02c94abb8aa001a2d9d68a44813df0983",
+          "bytes": 2241434,
+          "included_in_default_input": true
+        },
+        {
+          "filename": "pab-building-code-guide-54fc45bcb200.pdf",
+          "role": "supporting_evidence",
+          "sha256": "54fc45bcb200c1b27e3f3ed9ebace61b98335729b0b80e191feb881002a68055",
+          "bytes": 541037,
+          "included_in_default_input": true
+        },
+        {
+          "filename": "pab-technical-report-d2d1dcfb9feb.pdf",
+          "role": "published_historical_technical_reference",
+          "sha256": "d2d1dcfb9feb131d537170b256780beac4a155a60d8856486afca72ba514d693",
+          "bytes": 4010121,
+          "included_in_default_input": true
+        }
+      ],
+      "excluded_references_before": [
+        {
+          "filename": "_evaluation/pab-technical-report-d2d1dcfb9feb.pdf",
+          "role": "outcome_reference",
+          "included_in_default_input": false,
+          "sha256": "d2d1dcfb9feb131d537170b256780beac4a155a60d8856486afca72ba514d693",
+          "bytes": 4010121
+        }
+      ],
+      "excluded_references_after": [],
+      "review_focus_count_after": 6,
+      "review_focus_after": [
+        "Attribute the Design Study 2 conclusion to the attached technical report and keep its scope and assumptions distinct from a project-specific permit decision or conclusion by Batatis.",
+        "Keep the guide scenario separate from actual applicant, owner, civic address, survey, or permit facts.",
+        "Ask which current code edition/printing and acceptable-solution departure apply to the real proposal; verify any attributed objectives and functional statements from authoritative code sources.",
+        "Identify missing site-specific zoning, surveyed dimensions, occupancy, complete drawings and application requirements.",
+        "Identify the professional-authored alternative-solution report, risk assessment, mitigation measures, and assumptions/limits that need to be supplied or confirmed; do not write professional evidence.",
+        "Ask focused next questions and make no safety, compliance, or approval determination."
+      ],
+      "copied_file_byte_checks": [
+        {
+          "filename": "pab-design-guide-fd29e2084bca.pdf",
+          "sha256": "fd29e2084bca5467bce576a13ee65e4c2dee84615a0127699b09a6cb9ab0c79a",
+          "bytes": 4235436
+        },
+        {
+          "filename": "edmonton-point-access-guide-1546fef63937.pdf",
+          "sha256": "1546fef639376b5b363214f8ea035ef02c94abb8aa001a2d9d68a44813df0983",
+          "bytes": 2241434
+        },
+        {
+          "filename": "pab-building-code-guide-54fc45bcb200.pdf",
+          "sha256": "54fc45bcb200c1b27e3f3ed9ebace61b98335729b0b80e191feb881002a68055",
+          "bytes": 541037
+        },
+        {
+          "filename": "pab-technical-report-d2d1dcfb9feb.pdf",
+          "sha256": "d2d1dcfb9feb131d537170b256780beac4a155a60d8856486afca72ba514d693",
+          "bytes": 4010121
+        }
+      ]
+    },
+    "L14-003": {
+      "case_type": "documented_design_study",
+      "outcome_leakage_after": false,
+      "prompt_sha256_before": "cb0281b13fa72e8748a7e721c9ad3c894c6bfe9d929af76afe7f4864ff5c6ebf",
+      "prompt_sha256_after": "8ba6a99839e243bd0b882480fa5e19fccb1d9fd7bd57de00732696a4f1e6cbe6",
+      "source_json_sha256_before": "c4bd156d8bdb337c1035b1f7a8064fa23beaf8a8719ae5cf80739925f91d02d3",
+      "source_json_sha256_after": "390ac46297001cc587de8ac4a5b58ab3a4c5fac65b91dd2b481c875b2e8044ee",
+      "evaluation_json_sha256_before": "2729d3af4d2a6c60aacb669b7ccba24f478bdf3e546bbc55feb79ce397b4ddf0",
+      "evaluation_json_sha256_after": "a8b91fddf2fd719f22b1aec053ae36cef81e837a23a4e2e4440efd7c52925de6",
+      "default_attachment_count_before": 3,
+      "default_attachment_count_after": 3,
+      "excluded_reference_count_before": 1,
+      "excluded_reference_count_after": 1,
+      "input_manifest_sha256_before": "3eb26311636bc67ebafec9ec889d33583fc966d35194dd0331a82986559b21d2",
+      "input_manifest_sha256_after": "b9a524e8670bc4705e127ba815780a2c4c60141b8eba96d93b0c0ff6fc5aa4ad",
+      "reference_manifest_sha256_before": "8bd21176438abd62510d364ad55535ebc121e06bd69b068059597693342223b6",
+      "reference_manifest_sha256_after": "8bd21176438abd62510d364ad55535ebc121e06bd69b068059597693342223b6",
+      "default_inputs_before": [
+        {
+          "filename": "KHA-typical-floor-plan-c396d5160f32.jpg",
+          "role": "input",
+          "included_in_default_input": true,
+          "sha256": "c396d5160f32b3833e38af102b865f08d4bc2b3289740dc937248dd41242de6e",
+          "bytes": 1148114
+        },
+        {
+          "filename": "kha-long-section-drawing-75b2b8c6b87a.jpg",
+          "role": "input",
+          "included_in_default_input": true,
+          "sha256": "75b2b8c6b87a2fde20daae3729635e1109110706ab4ca37cb4327226c113f953",
+          "bytes": 2352301
+        },
+        {
+          "filename": "kha-plan-01-ground-floor-8c4eaef8913c.jpg",
+          "role": "input",
+          "included_in_default_input": true,
+          "sha256": "8c4eaef8913cd1fb315d85479aaed620c0c021899584179648c9ab926c80e0ed",
+          "bytes": 1221776
+        }
+      ],
+      "default_inputs_after": [
+        {
+          "filename": "KHA-typical-floor-plan-c396d5160f32.jpg",
+          "role": "input",
+          "sha256": "c396d5160f32b3833e38af102b865f08d4bc2b3289740dc937248dd41242de6e",
+          "bytes": 1148114,
+          "included_in_default_input": true
+        },
+        {
+          "filename": "kha-long-section-drawing-75b2b8c6b87a.jpg",
+          "role": "input",
+          "sha256": "75b2b8c6b87a2fde20daae3729635e1109110706ab4ca37cb4327226c113f953",
+          "bytes": 2352301,
+          "included_in_default_input": true
+        },
+        {
+          "filename": "kha-plan-01-ground-floor-8c4eaef8913c.jpg",
+          "role": "input",
+          "sha256": "8c4eaef8913cd1fb315d85479aaed620c0c021899584179648c9ab926c80e0ed",
+          "bytes": 1221776,
+          "included_in_default_input": true
+        }
+      ],
+      "excluded_references_before": [
+        {
+          "filename": "_evaluation/singlestair-kha-9d648e601877.html",
+          "role": "outcome_reference",
+          "included_in_default_input": false,
+          "sha256": "9d648e601877ce7b38f25cbe1baebb56ee7981ff0cfcec517425830e2f20c79f",
+          "bytes": 169974
+        }
+      ],
+      "excluded_references_after": [
+        {
+          "filename": "_evaluation/singlestair-kha-9d648e601877.html",
+          "role": "outcome_reference",
+          "sha256": "9d648e601877ce7b38f25cbe1baebb56ee7981ff0cfcec517425830e2f20c79f",
+          "bytes": 169974,
+          "included_in_default_input": false
+        }
+      ],
+      "review_focus_count_after": 6,
+      "review_focus_after": [
+        "scope of the single-exit-served levels",
+        "what one typical plan does and does not establish",
+        "administrative evidence for the claimed measures",
+        "If prior permit submission or acceptance is relevant, request the original permit record and an authority-issued decision or acceptance record; do not assume a project claim establishes it.",
+        "Reconcile ambiguous drawing levels through a question rather than inferring the profile storey count.",
+        "Identify which conditions are visibly supported by the drawings and which require project or authority records; do not infer values absent from the supplied images."
+      ],
+      "copied_file_byte_checks": [
+        {
+          "filename": "KHA-typical-floor-plan-c396d5160f32.jpg",
+          "sha256": "c396d5160f32b3833e38af102b865f08d4bc2b3289740dc937248dd41242de6e",
+          "bytes": 1148114
+        },
+        {
+          "filename": "_evaluation/singlestair-kha-9d648e601877.html",
+          "sha256": "9d648e601877ce7b38f25cbe1baebb56ee7981ff0cfcec517425830e2f20c79f",
+          "bytes": 169974
+        },
+        {
+          "filename": "_evaluation/attachment-2-source-text.txt",
+          "sha256": "6d1c87cf0a24ba82aabd9c3de91b578d52d03117cf49e1e87456d986c6b15367",
+          "bytes": 5576,
+          "derived_text": true
+        },
+        {
+          "filename": "kha-long-section-drawing-75b2b8c6b87a.jpg",
+          "sha256": "75b2b8c6b87a2fde20daae3729635e1109110706ab4ca37cb4327226c113f953",
+          "bytes": 2352301
+        },
+        {
+          "filename": "kha-plan-01-ground-floor-8c4eaef8913c.jpg",
+          "sha256": "8c4eaef8913cd1fb315d85479aaed620c0c021899584179648c9ab926c80e0ed",
+          "bytes": 1221776
+        }
+      ]
+    }
+  },
+  "l14_semantic_reference_changes": {
+    "case_id": "L14-003",
+    "drawing_only_intent_preserved": true,
+    "profile_included_in_default_input": false,
+    "review_check_count_before_and_after": 6,
+    "original_historic_R4": {
+      "check_id": "L14-003:R4",
+      "text": "independent confirmation of proponent-reported acceptance",
+      "status": "excluded-source-only"
+    },
+    "v2_R4": "If prior permit submission or acceptance is relevant, request the original permit record and an authority-issued decision or acceptance record; do not assume a project claim establishes it.",
+    "original_historic_R6": {
+      "check_id": "L14-003:R6",
+      "text": "The proponent profile is kept under _evaluation and must not be uploaded as default input.",
+      "status": "disputed label"
+    },
+    "v2_R6": "Identify which conditions are visibly supported by the drawings and which require project or authority records; do not infer values absent from the supplied images.",
+    "R5_unchanged": true
+  },
+  "l05_semantic_reference_change": {
+    "case_id": "L05-003",
+    "original_historic_R1": "Keep the technical report’s stated study conclusion separate from any permit decision; identify its assumptions and whether they are established for a real proposal.",
+    "v2_R1": "Attribute the Design Study 2 conclusion to the attached technical report and keep its scope and assumptions distinct from a project-specific permit decision or conclusion by Batatis.",
+    "authenticated_report_sha256": "d2d1dcfb9feb131d537170b256780beac4a155a60d8856486afca72ba514d693",
+    "report_claim_confirmed_before_copy": true,
+    "professional_conclusion_by_batatis": false
+  },
+  "source_content_verification": {
+    "reader": "macOS PDFKit through Swift; read-only extraction from restored local originals before copy.",
+    "all_source_descriptors_sha_size_matched_before_copy": true,
+    "authenticated_documents": [
+      {
+        "case_id": "L05-003",
+        "filename": "pab-technical-report-d2d1dcfb9feb.pdf",
+        "url": "https://www.edmonton.ca/sites/default/files/public-files/Point-Access-Block-Technical-Report.pdf?cb=1755190412",
+        "sha256": "d2d1dcfb9feb131d537170b256780beac4a155a60d8856486afca72ba514d693",
+        "bytes": 4010121,
+        "content_review": "PDFKit opened the 30-page report; p.6 Executive Summary and p.26 section 5.2 state the Design Study 2 vestibule and equivalent-resilience conclusion.",
+        "source_catalogue_rows": 3
+      },
+      {
+        "case_id": "L04-001",
+        "filename": "calgary-spv-001-r5-2026-bbe2767cfbeb.pdf",
+        "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/zero-lot-line-march-2026.pdf",
+        "sha256": "bbe2767cfbebab533b1afa971afc9393ef56547337bd95f7996aa5d981b649de",
+        "bytes": 810908,
+        "content_review": "PDFKit opened the 6-page PDF and inspected pp.1, 4 and 5: Revision 5/date; 0.3 m projection into the easement; separate 0.6 m footing wording across the property line; CSTIC acceptance.",
+        "source_catalogue_rows": 1
+      },
+      {
+        "case_id": "L04-001",
+        "filename": "calgary-spv-001-r4-2024-7a528dc00a59.pdf",
+        "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/advisory-zero-lot-line-variance.pdf",
+        "sha256": "7a528dc00a5979299f7b4b8f5a3027f420df3a0c929490b6c807cab0a4cc1c36",
+        "bytes": 756343,
+        "content_review": "PDFKit opened the 5-page PDF and inspected pp.1 and 5: Revision 4 date and version history; retained as prior-version context.",
+        "source_catalogue_rows": 0
+      },
+      {
+        "case_id": "L04-002",
+        "filename": "calgary-spv-002-blazemaster-2018-dc80a2c63927.pdf",
+        "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/variance-blazemaster-chlorinated-polyviychloride-pipe-spv-002.pdf",
+        "sha256": "dc80a2c63927fba8cb134de950b9a3cc599a2b636c1ce75588b082f82552b95f",
+        "bytes": 104608,
+        "content_review": "PDFKit opened the 4-page PDF and inspected pp.1-3: NPC 2015 clauses, CPVC/DuCF scope, conditional DCVAF fallback and permit-address condition.",
+        "source_catalogue_rows": 1
+      },
+      {
+        "case_id": "L04-005",
+        "filename": "calgary-spv-006-2025-8df85aa592ab.pdf",
+        "url": "https://www.calgary.ca/content/dam/www/pda/pd/documents/building/variances/firewall-in-a-rowhouse-with-secondary-suites-spv-006.pdf",
+        "sha256": "8df85aa592abc0272806687daf7de01c14fdc9433b97c6641192e438889e9437",
+        "bytes": 450927,
+        "content_review": "PDFKit opened the 5-page PDF and inspected pp.1-5 for the published SPV text, scope and permit conditions.",
+        "source_catalogue_rows": 1
+      }
+    ]
+  },
+  "source_group_and_split_check": {
+    "method": "Existing Data Prompts/_tools/corpus.py source_groups helper over attachment SHA-256s; split recomputed from case id, tier and group summaries only.",
+    "component_membership_changes": 0,
+    "source_group_count_before": 592,
+    "source_group_count_after": 592,
+    "split_assignments_changed": 0,
+    "development_case_count_before": 334,
+    "development_case_count_after": 334,
+    "holdout_case_count_before": 319,
+    "holdout_case_count_after": 319,
+    "promoted_hash_prior_default_owners": {
+      "bbe2767cfbebab533b1afa971afc9393ef56547337bd95f7996aa5d981b649de": [],
+      "dc80a2c63927fba8cb134de950b9a3cc599a2b636c1ce75588b082f82552b95f": [],
+      "8df85aa592abc0272806687daf7de01c14fdc9433b97c6641192e438889e9437": [],
+      "d2d1dcfb9feb131d537170b256780beac4a155a60d8856486afca72ba514d693": []
+    },
+    "promoted_hash_default_owners_after": {
+      "bbe2767cfbebab533b1afa971afc9393ef56547337bd95f7996aa5d981b649de": [
+        "L04-001"
+      ],
+      "dc80a2c63927fba8cb134de950b9a3cc599a2b636c1ce75588b082f82552b95f": [
+        "L04-002"
+      ],
+      "8df85aa592abc0272806687daf7de01c14fdc9433b97c6641192e438889e9437": [
+        "L04-005"
+      ],
+      "d2d1dcfb9feb131d537170b256780beac4a155a60d8856486afca72ba514d693": [
+        "L05-003"
+      ]
+    },
+    "target_component_membership_hashes": [
+      {
+        "case_id": "L04-001",
+        "source_group_before": "4414740917f24309",
+        "source_group_after": "4414740917f24309",
+        "members_before": [
+          "L04-001",
+          "L04-002",
+          "L04-005"
+        ],
+        "members_after": [
+          "L04-001",
+          "L04-002",
+          "L04-005"
+        ],
+        "split_before": "dev",
+        "split_after": "dev"
+      },
+      {
+        "case_id": "L04-002",
+        "source_group_before": "4414740917f24309",
+        "source_group_after": "4414740917f24309",
+        "members_before": [
+          "L04-001",
+          "L04-002",
+          "L04-005"
+        ],
+        "members_after": [
+          "L04-001",
+          "L04-002",
+          "L04-005"
+        ],
+        "split_before": "dev",
+        "split_after": "dev"
+      },
+      {
+        "case_id": "L04-005",
+        "source_group_before": "4414740917f24309",
+        "source_group_after": "4414740917f24309",
+        "members_before": [
+          "L04-001",
+          "L04-002",
+          "L04-005"
+        ],
+        "members_after": [
+          "L04-001",
+          "L04-002",
+          "L04-005"
+        ],
+        "split_before": "dev",
+        "split_after": "dev"
+      },
+      {
+        "case_id": "L05-003",
+        "source_group_before": "e13a13e04e52d10e",
+        "source_group_after": "e13a13e04e52d10e",
+        "members_before": [
+          "L05-001",
+          "L05-002",
+          "L05-003",
+          "L05-004",
+          "L05-005",
+          "L05-006",
+          "L05-007",
+          "L05-008",
+          "L05-009",
+          "L05-010",
+          "L05-011",
+          "L05-012",
+          "L05-013"
+        ],
+        "members_after": [
+          "L05-001",
+          "L05-002",
+          "L05-003",
+          "L05-004",
+          "L05-005",
+          "L05-006",
+          "L05-007",
+          "L05-008",
+          "L05-009",
+          "L05-010",
+          "L05-011",
+          "L05-012",
+          "L05-013"
+        ],
+        "split_before": "dev",
+        "split_after": "dev"
+      },
+      {
+        "case_id": "L14-003",
+        "source_group_before": "19d4395eae6a5d6a",
+        "source_group_after": "19d4395eae6a5d6a",
+        "members_before": [
+          "L14-003"
+        ],
+        "members_after": [
+          "L14-003"
+        ],
+        "split_before": "dev",
+        "split_after": "dev"
+      }
+    ],
+    "cross_dev_holdout_bridge_detected": false
+  },
+  "offline_reference_counts": {
+    "new_default_references": 4,
+    "new_unique_default_hashes": 4,
+    "five_case_default_attachment_records_before": 15,
+    "five_case_default_attachment_records_after": 19,
+    "corpus_default_attachment_records_before": 815,
+    "corpus_default_attachment_records_after": 819,
+    "corpus_unique_default_hashes_before": 714,
+    "corpus_unique_default_hashes_after": 718,
+    "source_catalogue_jsonl_changed": false,
+    "all_promoted_hashes_already_present_in_source_catalogue": true,
+    "promoted_hash_source_catalogue_row_counts": {
+      "bbe2767cfbebab533b1afa971afc9393ef56547337bd95f7996aa5d981b649de": 1,
+      "dc80a2c63927fba8cb134de950b9a3cc599a2b636c1ce75588b082f82552b95f": 1,
+      "8df85aa592abc0272806687daf7de01c14fdc9433b97c6641192e438889e9437": 1,
+      "d2d1dcfb9feb131d537170b256780beac4a155a60d8856486afca72ba514d693": 3
+    }
+  },
+  "local_byte_copies": {
+    "packet_attachment_originals_copied": 20,
+    "worker_collection_originals_copied": 20,
+    "source_receipt_sidecars_copied": 18,
+    "derived_text_copies": 1,
+    "all_copied_bytes_verified": true,
+    "promoted_default_files_outside_evaluation_directories": true
+  },
+  "verification": {
+    "full_metadata_command": "python3 'Data Prompts/_tools/verify_corpus.py'",
+    "full_metadata_result": {
+      "prompts": 653,
+      "attachment_files_checked": 0,
+      "errors": [],
+      "source_groups": 592
+    },
+    "selected_attachment_command": "python3 'Data Prompts/_tools/verify_corpus.py' --case L04-001 --case L04-002 --case L04-005 --case L05-003 --case L14-003 --attachments",
+    "selected_attachment_result": {
+      "prompts": 5,
+      "attachment_files_checked": 21,
+      "errors": [],
+      "source_groups": 592
+    },
+    "prompt_attachment_lists_match_metadata": true,
+    "excluded_evaluation_paths_listed_as_default": false,
+    "non_target_curation_entries_unchanged": true,
+    "target_source_fact_fields_unchanged": true,
+    "index_and_source_catalogue_content_changed": false
+  },
+  "changed_metadata_files": [
+    "Data Prompts/_research/curation_overrides.json",
+    "Data Prompts/Canada/Alberta/Calgary/Prompts/L04-001-calgary-spv-001-zero-lot-line-revision-5-with-revision-4-history/source.json",
+    "Data Prompts/Canada/Alberta/Calgary/Prompts/L04-001-calgary-spv-001-zero-lot-line-revision-5-with-revision-4-history/prompt.txt",
+    "Data Prompts/Canada/Alberta/Calgary/Prompts/L04-001-calgary-spv-001-zero-lot-line-revision-5-with-revision-4-history/evaluation.json",
+    "Data Prompts/Canada/Alberta/Calgary/Prompts/L04-002-calgary-spv-002-blazemaster-cpvc-in-residential-partial-flow-through-fir/source.json",
+    "Data Prompts/Canada/Alberta/Calgary/Prompts/L04-002-calgary-spv-002-blazemaster-cpvc-in-residential-partial-flow-through-fir/prompt.txt",
+    "Data Prompts/Canada/Alberta/Calgary/Prompts/L04-002-calgary-spv-002-blazemaster-cpvc-in-residential-partial-flow-through-fir/evaluation.json",
+    "Data Prompts/Canada/Alberta/Calgary/Prompts/L04-005-calgary-spv-006-firewall-in-a-rowhouse-with-secondary-suites/source.json",
+    "Data Prompts/Canada/Alberta/Calgary/Prompts/L04-005-calgary-spv-006-firewall-in-a-rowhouse-with-secondary-suites/prompt.txt",
+    "Data Prompts/Canada/Alberta/Calgary/Prompts/L04-005-calgary-spv-006-firewall-in-a-rowhouse-with-secondary-suites/evaluation.json",
+    "Data Prompts/Canada/Alberta/Edmonton/Prompts/L05-003-city-of-edmonton-point-access-block-catalogue-example-c/source.json",
+    "Data Prompts/Canada/Alberta/Edmonton/Prompts/L05-003-city-of-edmonton-point-access-block-catalogue-example-c/prompt.txt",
+    "Data Prompts/Canada/Alberta/Edmonton/Prompts/L05-003-city-of-edmonton-point-access-block-catalogue-example-c/evaluation.json",
+    "Data Prompts/Canada/Alberta/Edmonton/Prompts/L14-003-kha-edmonton-three-storey-apartment-proposal/source.json",
+    "Data Prompts/Canada/Alberta/Edmonton/Prompts/L14-003-kha-edmonton-three-storey-apartment-proposal/prompt.txt",
+    "Data Prompts/Canada/Alberta/Edmonton/Prompts/L14-003-kha-edmonton-three-storey-apartment-proposal/evaluation.json"
+  ],
+  "parent_editorial_clarification": {
+    "file": "docs/research/accuracy95/input-reference-audit.md",
+    "sha256_after": "26f7628479a93939a895814081519459d935c9fbd29b6d150b0c875a0e541c3f",
+    "reason": "Clarified that source-support judgments are Codex Luna model judgments, not human/professional review; no check rows or source classifications were changed.",
+    "historical_check_json_unchanged": true
+  }
+}

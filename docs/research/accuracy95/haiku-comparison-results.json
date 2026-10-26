@@ -1,0 +1,46 @@
+{
+  "updated_utc": "2026-10-25T22:52:03.111168+00:00",
+  "status": "partial",
+  "planned_cases": 25,
+  "planned_checks": 268,
+  "paired_case_ids": [
+    "A03-003"
+  ],
+  "judge": "Codex Luna max / priority, strict judge-v7; empty nonce; model-graded, not expert validated",
+  "scope": "Local T3 agent diagnostic; no production or 95% accuracy claim. Partial pairs do not estimate full accuracy.",
+  "arms": {
+    "Luna max": {
+      "cases_judged": 1,
+      "paired_cases": 1,
+      "paired_passed_checks": 9,
+      "paired_checks": 10,
+      "paired_accuracy": 0.9,
+      "paired_whole_cases_correct": 0,
+      "paired_cases_with_unread_input": 1,
+      "manifest_sha256": "91967cb361d352e224006820984ed387103bd42d27642bd343cdadfd15d0bc44",
+      "scores_sha256": "ef146f1ad15d2cb03310a06f6a91f995aec76b277b4359a9958123f0869839d0"
+    },
+    "Haiku 5.5 low": {
+      "cases_judged": 1,
+      "paired_cases": 1,
+      "paired_passed_checks": 9,
+      "paired_checks": 10,
+      "paired_accuracy": 0.9,
+      "paired_whole_cases_correct": 0,
+      "paired_cases_with_unread_input": 1,
+      "manifest_sha256": "1819eca190e8fe379cda3947ec768144f207e86abab35f51f3bedf32437aae5b",
+      "scores_sha256": "1fc7510bbb1421c32dc05825e83237570375a982e35915efd4b1464bd3b65454"
+    },
+    "Haiku 5.5 medium": {
+      "cases_judged": 1,
+      "paired_cases": 1,
+      "paired_passed_checks": 9,
+      "paired_checks": 10,
+      "paired_accuracy": 0.9,
+      "paired_whole_cases_correct": 0,
+      "paired_cases_with_unread_input": 1,
+      "manifest_sha256": "c054ba9e80d022de5978f49a6fc5c7e0a6dd05aec0d07d69424e9d36815321ef",
+      "scores_sha256": "cebcf7b9c368729ae4e27b5800be1ee0a87949362c7f17bd29c5c170d9a67577"
+    }
+  }
+}

@@ -155,7 +155,7 @@ The desktop app gets its AI differently from the website. You can connect a Chat
 
 For applicants:
 
-1. **Describe the project.** Rules read facts, such as the owner and the address, from the description and from the text and fields of any PDFs. If AI is on, GPT-6 Luna, an OpenAI model, points at more facts, and each one must quote the text it came from. When you attach files, Luna also reviews them page by page.
+1. **Describe the project.** Rules read facts, such as the owner and the address, from the description and from the text and fields of any PDFs. If AI is on, GPT-6 Luna, an OpenAI model, points at more facts, and each one must quote the text it came from. When you attach files, Luna also reviews them page by page, and the questions screen lists what it found.
 2. **Answer a few questions.** A rule-based planner picks up to five questions. It starts with conflicts in what you wrote, then facts that narrow down the code articles. The website then shows one card for each item that is still open. No AI writes the questions.
 3. **Confirm the code articles.** Jev 1.13.0, a TypeSafe model that answers with a probability, scores all 2,080 articles in Division B of the code and reranks the top 60. Luna then reads the top 15 in full and quotes the sentences that apply. Batatis shows up to 10 articles, and you confirm each one. With AI off, or if scoring fails, a keyword search over CodeDB suggests articles instead.
 4. **Section C fills itself in.** The objectives, functions, and intent of each confirmed article come from the code's own tables in CodeDB. No AI is involved.
@@ -172,7 +172,7 @@ For Safety Codes Officers:
 
 Batatis checks what Luna writes before it keeps anything. The document review proposes facts, conflicts, the code provisions the files cite, what is still missing, and questions to ask next. Batatis drops a fact, conflict, or provision unless its excerpt appears in the request or the file it names. When a restated fact adds a number that its excerpt lacks, Batatis shows the excerpt instead. A wording filter removes Batatis's own sentences that say a design complies, is safe, or is approved, or that cite an article number CodeDB doesn't have.
 
-The filter catches common phrasings, not every one. The engine saves the document review with the application, but the screens don't show it yet, and step 3 doesn't use it to find articles yet.
+The filter catches common phrasings, not every one. The questions screen shows the document review as advice. Each finding shows whether the files state, propose, or recommend it, and the excerpt and page it came from. The review never confirms a fact for you or changes the list of missing items. If you edit the description or the files, Batatis labels the old review as belonging to the earlier input until it reads them again. Step 3 doesn't use the review to find articles yet.
 
 CodeDB is a SQLite database of the building code. You build it on your computer from the official PDFs of the National Building Code, 2023 Alberta Edition, second printing. Applications and accounts live in SQLite on your computer, or in PostgreSQL on Neon when the app is hosted. The web assistant answers with GPT-4.1 mini by default, or with Claude Sonnet 5.5 when `ANTHROPIC_API_KEY` is set. Web voice uses Grok from xAI.
 
@@ -188,6 +188,8 @@ The team chose this workflow on October 25, 2026, and stopped benchmarking. The 
 - [`engine/identify/pipeline.json`](engine/identify/pipeline.json) holds the settings for step 3. They resolve to configuration `5f1c92331550984a`. Jev reads each article as its heading and the first 700 characters of its text. [`engine/tests/test_workflow_profile.py`](engine/tests/test_workflow_profile.py) fails if a selected model, effort, or limit changes.
 
 No complete, reliable test has measured the accuracy of this combined workflow, and no result shows that it is more than 97% accurate. The record also keeps older scores from earlier code, other judges, and other workloads. None of them is the accuracy of this workflow.
+
+Later on October 25, the team started test 3 on the 25 Calgary and Edmonton development cases. Their older saved score was 181 of 259 checks, about 70%, from earlier code and another judge. First, the team fixed five cases whose attachments left out the documents their questions asked about. Then it ran the cases through Codex, OpenAI's coding agent, instead of the OpenAI API, so the test needed no API key. Luna, and Claude Haiku 5.5 at low and at medium effort, each passed 9 of 10 checks on the one case that finished, graded by the same Luna judge. The other 24 cases didn't finish before the team moved on to other work. One case is far too few to measure accuracy. The [saved results](docs/research/accuracy95/haiku-comparison-results.json) and [their limits](docs/research/accuracy95/verification.md) are in the repository.
 
 When testing resumes, these are the next tests, in order. None is scheduled.
 
@@ -225,7 +227,9 @@ The pictures show the main folders and files, not every one. They leave out thes
 
 - [`engine/intake/review.py`](engine/intake/review.py) runs the document review and checks what it returns.
 - [`engine/identify/pipeline.json`](engine/identify/pipeline.json) holds the settings for finding code articles.
+- [`web/src/calm/DocumentReview.tsx`](web/src/calm/DocumentReview.tsx) shows the document review on the questions screen.
 - [`evals_dev/data_prompts/`](evals_dev/data_prompts/) runs the practice cases through the engine and scores the results.
+- [`evals_dev/luna_accuracy.py`](evals_dev/luna_accuracy.py) prepares the same test for Codex tasks in T3 Code, the app the team codes in, and scores what they return.
 - [`docs/evaluations/workflow-decision-20261025.md`](docs/evaluations/workflow-decision-20261025.md) explains why Batatis uses this workflow, and its limits.
 
 ## Get started

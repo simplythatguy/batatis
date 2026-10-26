@@ -58,9 +58,7 @@
       "sha256": "fd29e2084bca5467bce576a13ee65e4c2dee84615a0127699b09a6cb9ab0c79a",
       "role": "input",
       "bytes": 4235436,
-      "filename": "pab-design-guide-fd29e2084bca.pdf",
       "included_in_default_input": true,
-      "original_collection_path": "_research/workers/L05/files/pab-design-guide-fd29e2084bca.pdf",
       "download_receipt": {
         "retrieved_at": "2026-10-25T01:17:46.029156+00:00",
         "http_status": "200",
@@ -68,16 +66,16 @@
         "content_type": "application/pdf",
         "kind": "pdf",
         "status": "downloaded"
-      }
+      },
+      "filename": "pab-design-guide-fd29e2084bca.pdf",
+      "original_collection_path": "_research/workers/L05/files/pab-design-guide-fd29e2084bca.pdf"
     },
     {
       "url": "https://www.edmonton.ca/sites/default/files/public-files/Point-Access-Block-Alternative-Solution-Guide.pdf",
       "sha256": "1546fef639376b5b363214f8ea035ef02c94abb8aa001a2d9d68a44813df0983",
       "role": "supporting_evidence",
       "bytes": 2241434,
-      "filename": "edmonton-point-access-guide-1546fef63937.pdf",
       "included_in_default_input": true,
-      "original_collection_path": "_research/workers/L05/files/edmonton-point-access-guide-1546fef63937.pdf",
       "download_receipt": {
         "retrieved_at": "2026-10-25T01:16:39.973755+00:00",
         "http_status": "200",
@@ -85,16 +83,16 @@
         "content_type": "application/pdf",
         "kind": "pdf",
         "status": "downloaded"
-      }
+      },
+      "filename": "edmonton-point-access-guide-1546fef63937.pdf",
+      "original_collection_path": "_research/workers/L05/files/edmonton-point-access-guide-1546fef63937.pdf"
     },
     {
       "url": "https://www.edmonton.ca/sites/default/files/public-files/Point-Access-Block-Building-Code-Guide.pdf?cb=1755190407",
       "sha256": "54fc45bcb200c1b27e3f3ed9ebace61b98335729b0b80e191feb881002a68055",
       "role": "supporting_evidence",
       "bytes": 541037,
-      "filename": "pab-building-code-guide-54fc45bcb200.pdf",
       "included_in_default_input": true,
-      "original_collection_path": "_research/workers/L05/files/pab-building-code-guide-54fc45bcb200.pdf",
       "download_receipt": {
         "retrieved_at": "2026-10-25T01:17:46.029148+00:00",
         "http_status": "200",
@@ -102,16 +100,16 @@
         "content_type": "application/pdf",
         "kind": "pdf",
         "status": "downloaded"
-      }
+      },
+      "filename": "pab-building-code-guide-54fc45bcb200.pdf",
+      "original_collection_path": "_research/workers/L05/files/pab-building-code-guide-54fc45bcb200.pdf"
     },
     {
       "url": "https://www.edmonton.ca/sites/default/files/public-files/Point-Access-Block-Technical-Report.pdf?cb=1755190412",
       "sha256": "d2d1dcfb9feb131d537170b256780beac4a155a60d8856486afca72ba514d693",
-      "role": "outcome_reference",
+      "role": "published_historical_technical_reference",
       "bytes": 4010121,
-      "filename": "_evaluation/pab-technical-report-d2d1dcfb9feb.pdf",
-      "included_in_default_input": false,
-      "original_collection_path": "_research/workers/L05/files/pab-technical-report-d2d1dcfb9feb.pdf",
+      "included_in_default_input": true,
       "download_receipt": {
         "retrieved_at": "2026-10-25T01:17:46.029163+00:00",
         "http_status": "200",
@@ -119,7 +117,9 @@
         "content_type": "application/pdf",
         "kind": "pdf",
         "status": "downloaded"
-      }
+      },
+      "filename": "pab-technical-report-d2d1dcfb9feb.pdf",
+      "original_collection_path": "_research/workers/L05/files/pab-technical-report-d2d1dcfb9feb.pdf"
     }
   ],
   "prompt_origin": "reconstructed source-derived evaluation question; not an original applicant message",

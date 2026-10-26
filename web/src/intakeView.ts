@@ -215,7 +215,7 @@ export function readCopy(c: Case, g: ReadGroup): ReadCopy {
   const f = g.fact;
   const value = spokenValue(f.field, f.value);
   const pointer = pointerFor(c, f.id) ?? g.ids.map((id) => pointerFor(c, id)).find(Boolean);
-  const words = pointer?.source_ref === "description" && c.intake ? snippet(c.intake.text, pointer.start, pointer.end) : null;
+  const words = pointer?.source_ref === "description" && c.intake?.text ? snippet(c.intake.text, pointer.start, pointer.end) : null;
   const long = LONG(f.field);
   const title = f.field.startsWith("statement.") ? "Did we read this right?" : READ_QUESTION[f.field] ?? `What is the ${f.field.replace(/[._]/g, " ").replace(/\bm2\b/, "area")}?`;
   return {
