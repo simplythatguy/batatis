@@ -46,6 +46,19 @@ gh pr view "$pr" --repo simplythatguy/batatis --json body --jq .body
 
 Confirm that the saved description covers the whole pull request and has exactly the three sections. Updating a description does not approve or merge anything.
 
+## Screen-recorded demos
+
+Agents opening or updating a pull request must provide a screen-recorded demo **if and only if the PR includes visual changes**. Judge the whole PR, including changes to appearance, visible content, layout, navigation, or interactions in the web app, desktop app, or other rendered output. Backend, tooling, tests, and agent-instruction changes with no visual effect require no recording.
+
+For a visual PR, capture and inspect the demo before opening it or handing off an update, then attach the evidence as soon as the PR exists:
+
+1. Record the running app or rendered output and demonstrate the changed screens or behavior. Use supported T3 recording tools when available.
+2. Play back and inspect the saved recording yourself. Fix visible defects and recapture; screenshots supplement the recording and do not replace it.
+3. Attach the recording or a reviewer-accessible link in a PR comment, alongside verification results. Include the demonstrated commit SHA. A local file path alone is insufficient for GitHub reviewers.
+4. Refresh the demo when later commits change what it shows. If recording or sharing is blocked, report the blocker and keep the PR marked as awaiting required demo evidence; a visual PR is not ready for handoff without it.
+
+Keep the PR description's existing three-section format. For a PR without visual changes, state “No visual changes; demo not required.” in the verification comment.
+
 ## Rules
 
 - **`main` is the only permanent branch.** Never push to `main`; it changes only when a pull request is merged. Never delete `main`. Never recreate `dev`.

@@ -8,6 +8,7 @@ GitHub has one permanent branch, `main` (production). Each batch of work happens
 
 - Flow: **branch from the latest `main`** → **verify locally** (`scripts/verify.sh`) → **open or update the pull request** (`scripts/land.sh`) → the user tests it locally and merges it.
 - Every pull request into `main` uses the [plain-language format and update steps](./docs/agents/git-workflow.md#pull-request-descriptions): **New features added**, **Improvements**, **Bug Fixes**. This format takes precedence over generic PR-writing skills; children return their notes to the parent through task output.
+- Agents opening or updating a PR must include a screen-recorded demo **if and only if the PR includes visual changes**. Follow the [PR demo requirement](./docs/agents/git-workflow.md#screen-recorded-demos) for recording, inspection, and linking the evidence.
 - Never push to `main`, never merge a pull request unless the user asks, never force-push, never delete `main`, never recreate `dev`. Children never push; the parent opens the pull request. Run `scripts/install-git-hooks.sh` in a new clone.
 - Push only verified work. Local verification is required even when GitHub Actions runs. Pull requests into `main` run CI; only a merge into `main` triggers Vercel.
 - To catch a branch up with `main`, merge `origin/main` into it (`scripts/land.sh` does this). Never rebase a branch that is already on GitHub.
