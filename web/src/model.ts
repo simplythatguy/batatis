@@ -472,6 +472,8 @@ export type Action =
   | { type: "noteIntakeRecord"; record: IntakeRecord }
   /** Derived: facts the engine wrote on an intake route (answers, scope), adopted as saved. */
   | { type: "adoptFacts"; facts: Fact[]; drop?: string[] }
+  /** Derived: one server-confirmed applicant draft answer, preserving all other local work. */
+  | { type: "adoptApplicantDraft"; fact: Fact }
   /** Derived: the latest code identification; its committed articles and choices become code cards. */
   | { type: "noteIdentify"; result: IdentifyResult }
   | { type: "markDecisionPending"; id: string; pending: boolean }
@@ -717,6 +719,14 @@ export function reducer(c: Case, a: Action): Case {
     case "adoptFacts": {
       const drop = new Set([...(a.drop ?? []), ...a.facts.map((f) => f.id)]);
       return { ...c, facts: [...c.facts.filter((f) => !drop.has(f.id)), ...a.facts] };
+    }
+    case "adoptApplicantDraft": {
+      const fact = asLocal(a.fact);
+      const process = { ...c.process };
+      for (const p of PROCESS_FIELDS) {
+        if (PROCESS_FACT[p.id] === fact.field && typeof fact.value === "string") process[p.id] = fact.value;
+      }
+      return { ...c, process, facts: [...c.facts.filter(f => f.field !== fact.field), fact] };
     }
     case "noteIdentify": {
       const made = identifyCandidates(a.result, c.candidates);

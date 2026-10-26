@@ -37,6 +37,7 @@ import { AUTHORITIES } from "../config";
 import { PACKAGE_YES, RULE_ADD, RULE_LEAVE } from "./deck";
 import { useAccount } from "./account";
 import { useQuestionDraft } from "./useQuestionDraft";
+import { ApplicantDraftLink, processDraftField } from "./ApplicantDrafts";
 
 type Shown = DeckItem & { gone?: boolean };
 
@@ -277,7 +278,7 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
   if (item.kind === "package-end" && cl) return <PackageEnd cl={cl} />;
 
   if (item.kind === "section-d") {
-    return <div className="cf-embed cf-sectiond"><Recommendations /></div>;
+    return <><ApplicantDraftLink field="evidence_plan" /><div className="cf-embed cf-sectiond"><Recommendations /></div></>;
   }
   if (item.kind === "plan") return <PlanBody item={item} onPick={onPick} draft={draft} setDraft={setDraft} note={planNote} />;
   if (item.kind === "code-run") return <CodeProgress />;
@@ -338,6 +339,7 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
             onChange={(e) => dispatch({ type: "setProcess", field: item.ref as keyof typeof c.process, value: e.target.value })}
             placeholder="In your own words…"
           />
+          <ApplicantDraftLink field={processDraftField(item.ref)} />
           <button type="button" className="cf-link-btn cf-tips-toggle" aria-expanded={tips} onClick={() => setTips((v) => !v)}>What to include</button>
           {tips && (
             <ul className="cf-tips">
@@ -371,6 +373,7 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
             </p>
           )}
           {!offer && picked === "dismiss" && !fact && <p className="cf-note">Removed.</p>}
+          {def.id === "alternative" && <ApplicantDraftLink field="alternative_description" />}
         </>
       ) : item.kind === "authority" ? (
         <>

@@ -14,6 +14,7 @@ import type {
   CaseRules,
   ChecklistAnswerRequest,
   ChecklistAnswerResult,
+  DraftingRecord,
   ExportPreview,
   ExportPreviewTooLarge,
   JurisdictionDetail,
@@ -194,6 +195,12 @@ export function createEngine(base: string) {
     setSelectedArticles: (caseId: string, body: SelectedArticlesRequest, signal?: AbortSignal) =>
       call<Case>("PUT", `/cases/${enc(caseId)}/selected-articles`, body, signal),
     getCase: (id: string, signal?: AbortSignal) => call<Case>("GET", `/cases/${enc(id)}`, undefined, signal),
+    applicantDrafts: (caseId: string, signal?: AbortSignal) =>
+      call<DraftingRecord | null>("GET", `/cases/${enc(caseId)}/drafts`, undefined, signal),
+    generateApplicantDrafts: (caseId: string, expectedVersion: number, signal?: AbortSignal) =>
+      call<Case>("POST", `/cases/${enc(caseId)}/drafts`, { expected_version: expectedVersion }, signal, APPLICANT_DRAFT_WAIT_MS),
+    decideApplicantDraft: (caseId: string, draftId: string, expectedVersion: number, decision: "accept" | "reject", signal?: AbortSignal) =>
+      call<Case>("POST", `/cases/${enc(caseId)}/drafts/${enc(draftId)}/decision`, { expected_version: expectedVersion, decision }, signal),
     /**
      * PATCH /cases/{id}/title `{ title }`: the applicant's own name for the application, returning the
      * full Case. The server trims it to one line; empty or over 500 characters is 422; a sent,
@@ -498,6 +505,9 @@ export class ExportBlockedError extends EngineError {
 
 /** Bound so a slow engine cannot leave the screen on "waiting". */
 const ENGINE_WAIT_MS = 8000;
+
+/** Generation and grounding audit each have 180 seconds, followed by registry and save overhead. */
+export const APPLICANT_DRAFT_WAIT_MS = 420_000;
 
 /**
  * An export, or its preview, fills the whole form and appendix. The review's 500-reference draft took 49.8 s

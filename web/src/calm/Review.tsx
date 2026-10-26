@@ -17,6 +17,7 @@ import { Icon24, type IconName } from "./icons";
 import { CIcon, CompletenessNote, Dot, Eyebrow, Kbd, type DotTone } from "./ui";
 import { confirmedProvisions } from "../provisions";
 import { preparationGaps } from "./preparation";
+import { ApplicantDrafts } from "./ApplicantDrafts";
 
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
@@ -38,7 +39,7 @@ export function EngineerCallout({ c, gaps, readOnly = false }: { c: Case; gaps: 
     <section className="cf-engineer" aria-labelledby="cf-engineer-title">
       <h2 className="cf-engineer-h" id="cf-engineer-title"><CIcon name="warn" />{need.title}</h2>
       <p>{need.line}</p>
-      <p>Batatis can list what that evidence must address, but it can’t write it.</p>
+      <p>Batatis can draft your evidence plan. Professional analysis and evidence come from your engineer or architect.</p>
       {officerPending && <p>Official PDF and administrative acceptance stay on hold until the officer resolves the requirement.</p>}
       {!readOnly && <a className="cf-engineer-link" href={officerPending ? "#/application" : "#/questions?focus=section-d"}>{officerPending ? "Preview and submit" : "Open your case and proof"} <CIcon name="arrow" size={13} /></a>}
     </section>
@@ -109,6 +110,7 @@ export function Review() {
           <h1 className="cf-h1" tabIndex={-1}>{s.heading}</h1>
           <p className="cf-lede is-sm">{s.note} {s.next}</p>
           <div className="cf-row-actions"><a className="cf-btn is-primary" href="#/application">View application</a></div>
+          <ApplicantDrafts />
         </div>
       </div>
     );
@@ -218,6 +220,8 @@ function CaseReview() {
         {checkStatus === "unavailable" && checkDetail && (
           <details className="cf-tech"><summary>Technical detail</summary><p>{checkDetail}</p></details>
         )}
+
+        <ApplicantDrafts />
 
         <div className="cf-metrics">
           <div className="cf-tile cf-metric">

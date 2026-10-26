@@ -43,6 +43,12 @@ export async function componentHarness(url, name, modules, globals = {}) {
         if (!Object.is(value, slots[i].value)) { slots[i].value = value; dirty = true; }
       }];
     },
+    useReducer(reducer, initial) {
+      const [value, setValue] = hooks.useState(initial);
+      return [value, (action) => setValue(current => reducer(current, action))];
+    },
+    createContext: value => ({ Provider: "ContextProvider", value }),
+    useContext: context => context.value,
     useEffect, useLayoutEffect: useEffect, useMemo,
     useCallback: (fn, deps) => useMemo(() => fn, deps),
     useRef: (value) => useMemo(() => ({ current: value }), []),

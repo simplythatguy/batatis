@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState, type Dispatch, type ReactNode } from "react";
 import { engine, EngineError, failureText, isCaseConflict, isCaseGone, type EngineGap, type UploadedFile } from "./api/client";
-import type { Case as EngineCase, IdentifyResult, IntakeResult, Question as PlanQuestion } from "./api/types.gen";
+import type { Case as EngineCase, DraftingRecord, IdentifyResult, IntakeResult, Question as PlanQuestion } from "./api/types.gen";
+import { acceptedApplicantFact, applicantDraftInputKey, unchangedDraftField, type ApplicantDraftActivity, type ApplicantDraftCommand } from "./applicantDrafts";
 import { type CompletenessRecord } from "./humanReview";
 import { acknowledgedVersion, acknowledgeWrite, adoptEngineCase, clearEngineSession, CONFLICT_TEXT, engineCaseId, engineGeneration, evidenceFacts, isEngineGeneration, ensureEngineCase, isReadOnlyCase, needsReconcile, noteConflict, notePosted, noteShownSelection, pushDeletedEvidence, pushFacts, pushListedEvidence, pushSelectedArticles, reconcileEngineCase, refreshGaps, selectionKey, syncJurisdiction, type EvidenceOutcome } from "./api/sync";
 import { engineNotices, factSignature, groupEvidenceGaps, missingFromEngine, uploadMessage } from "./rules";
@@ -60,6 +61,13 @@ function roleFor(type: ApplicantType): string {
 }
 
 interface Store {
+  drafting: DraftingRecord | null;
+  draftingStale: boolean;
+  draftActivity: ApplicantDraftActivity;
+  draftingError: string;
+  generateApplicantDrafts: () => Promise<void>;
+  decideApplicantDraft: (draftId: string, decision: "accept" | "reject") => Promise<void>;
+  retryApplicantDrafts: () => Promise<void>;
   reading: Reading;
   /** Read the description and attached PDFs (intake), then check the code (identify). Explicit: Start and Continue. */
   readDescription: () => Promise<void>;
@@ -258,6 +266,12 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const planRevision = useRef(0);
   const syncQueue = useRef<Promise<unknown>>(Promise.resolve());
   const activeSubmit = useRef<{ generation: number; session: number; revision: number; caseId: string; dispatched: boolean; ctl: AbortController; promise: Promise<void> } | null>(null);
+  const activeDraftWrite = useRef<{ session: number; ctl: AbortController; promise: Promise<void> } | null>(null);
+  const draftAccountSession = useRef(accountSession());
+  const draftRetry = useRef<ApplicantDraftCommand | null>(null);
+  const [draftRecord, setDraftRecord] = useState<{ record: DraftingRecord; basis: string } | null>(null);
+  const [draftActivity, setDraftActivity] = useState<ApplicantDraftActivity>({ kind: "idle" });
+  const [draftingError, setDraftingError] = useState("");
   const caseRead = useRef(0);
   const caseOpening = useRef(false);
   const caseReads = useRef(new Set<{ session: number; ctl: AbortController }>());
@@ -273,8 +287,17 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         setSubmitting(false);
         setSubmissionDispatched(false);
       }
+      if (draftAccountSession.current !== accountSession()) {
+        draftAccountSession.current = accountSession();
+        activeDraftWrite.current?.ctl.abort();
+        activeDraftWrite.current = null;
+        draftRetry.current = null;
+        setDraftRecord(null);
+        setDraftActivity({ kind: "idle" });
+        setDraftingError("");
+      }
     });
-    return () => { stop(); for (const read of caseReads.current) read.ctl.abort(); activeSubmit.current?.ctl.abort(); };
+    return () => { stop(); for (const read of caseReads.current) read.ctl.abort(); activeSubmit.current?.ctl.abort(); activeDraftWrite.current?.ctl.abort(); };
   }, []);
   const sectionDHold = useRef<{ generation: number; id: string; error: SectionDRecoveryError } | null>(null);
   /** The saved case was deleted or expired. Nothing is written again until Reset starts a new case. */
@@ -328,7 +351,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     // after a saved case is opened) is derived data, not an edit: the draft stays saved.
     // On a read-only case the lookup's expansion of an article is display only: never an unsaved edit.
     const readOnlyCase = isReadOnlyCase(engineCaseId());
-    const derived = (action.type === "reconcileSectionC" && (readOnlyCase || sameCards(reducer(latestCase.current, action).candidates, latestCase.current.candidates))) || [ "editEvidenceDraft", "addFiles", "removeFile", "setFileResult", "ackEvidence", "noteUnscopedEvidence", "notePractice", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions", "noteIntake", "restoreIntake", "restoreReviewQuestions", "noteIntakeRecord", "adoptFacts", "noteIdentify", "renameCase"].includes(action.type);
+    const derived = (action.type === "reconcileSectionC" && (readOnlyCase || sameCards(reducer(latestCase.current, action).candidates, latestCase.current.candidates))) || [ "editEvidenceDraft", "addFiles", "removeFile", "setFileResult", "ackEvidence", "noteUnscopedEvidence", "notePractice", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions", "noteIntake", "restoreIntake", "restoreReviewQuestions", "noteIntakeRecord", "adoptFacts", "adoptApplicantDraft", "noteIdentify", "renameCase"].includes(action.type);
     // A read-only application's code cards are not the applicant's to change (the deck and library are locked;
     // the references screen's Remove is not): refused, so the screen keeps showing what is saved.
     if (!derived && readOnlyCase && action.type !== "reset" && selectionKey(selectedArticles(reducer(latestCase.current, action))) !== selectionKey(selectedArticles(latestCase.current))) return;
@@ -340,14 +363,14 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       && isEngineGeneration(transition.generation) && transition.caseId === engineCaseId()) return;
     if (action.type === "answerCandidate" || action.type === "removeCandidate") refreshedSelection.current.delete(action.id);
     if (action.type === "addCandidate") refreshedSelection.current.delete(action.candidate.id);
-    if (!derived) {
+    if (!derived || action.type === "adoptApplicantDraft") {
       revision.current += 1;
       if (action.type !== "saveEvidence" && action.type !== "removeEvidence") planRevision.current += 1;
       activeCheck.current?.ctl.abort();
-      syncState.current = { saved: false, reviewed: false, detail: "" };
+      syncState.current = { saved: derived ? syncState.current.saved : false, reviewed: false, detail: "" };
       setSyncOk(false);
       // A deleted or expired case stays reported as gone while the applicant keeps editing.
-      if (!goneCase.current || goneCase.current !== engineCaseId()) {
+      if (!derived && (!goneCase.current || goneCase.current !== engineCaseId())) {
         setSaveStatus("unsaved");
         setSaveDetail("");
         setSavedNote("");
@@ -569,6 +592,114 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     const pending = syncQueue.current.catch(() => {}).then(work);
     syncQueue.current = pending;
     return pending;
+  }
+
+  /** Draft metadata is server state. Only an accepted canonical fact enters the local answer model. */
+  function writeApplicantDraft(command: ApplicantDraftCommand, retry = false): Promise<void> {
+    if (activeDraftWrite.current) return activeDraftWrite.current.promise;
+    const token = renderGeneration, session = renderSession, version = revision.current, user = account.user;
+    let selectedId = engineCaseId();
+    const ctl = new AbortController();
+    const live = () => !ctl.signal.aborted && isEngineGeneration(token) && accountSession() === session
+      && getAccountState().phase === "signed-in" && Boolean(user) && getAccountState().user === user
+      && (!selectedId || engineCaseId() === selectedId);
+    const current = () => live() && revision.current === version;
+    if (!live()) return Promise.resolve();
+    if (activeSubmit.current || (selectedId && (lockedCase(selectedId) || isReadOnlyCase(selectedId)))) {
+      setDraftingError(activeSubmit.current ? "Wait for submission to finish." : "Drafting is available only for your editable application.");
+      return Promise.resolve();
+    }
+    draftRetry.current = command;
+    setDraftingError("");
+    setDraftActivity(command.kind === "generate" ? { kind: "generating" } : { kind: "deciding", draftId: command.draftId });
+    const promise = enqueue(async () => {
+      try {
+        if (!current()) throw new Error("Your answers changed. Review them, then try drafting again.");
+        if (selectedId && goneCase.current === selectedId) throw new Error(GONE_NOTE);
+        if (retry && selectedId && needsReconcile(selectedId)) {
+          const saved = await reconcileEngineCase(selectedId);
+          if (!current()) return;
+          refreshed(saved, latestCase.current);
+          openedStatus.current = saved.status;
+          setSavedStatus(saved.status);
+          patchApplication(selectedId, { status: saved.status });
+        }
+        if (selectedId && (lockedCase(selectedId) || isReadOnlyCase(selectedId))) throw new Error("This saved application is read-only.");
+        const id = await performSync(latestCase.current, current, ctl.signal);
+        if (!live()) return;
+        if (!current()) throw new Error("Your answers changed while saving. Try again with your latest answers.");
+        if (!id || !syncState.current.saved) throw new Error(syncState.current.detail || "Save your answers before drafting.");
+        selectedId = id;
+        if (lockedCase(id) || isReadOnlyCase(id)) throw new Error("This saved application is read-only.");
+        if (command.kind === "generate") await uploadHeld(id, current);
+        if (!current()) throw new Error("Your input changed while preparing the drafts. Try again with your latest answers.");
+        if (command.kind === "generate" && (getSession().held.length || getSession().uploading.length)) throw new Error("A document is still waiting to upload. Finish uploading, then try drafting again.");
+        const expected = acknowledgedVersion(id);
+        if (expected === null || needsReconcile(id)) throw new EngineError(409, CONFLICT_TEXT);
+        const before = latestCase.current;
+        const basis = applicantDraftInputKey(before);
+        if (command.kind === "decide" && (!draftRecord || draftRecord.record.stale || draftRecord.basis !== basis)) {
+          throw new Error("These drafts use earlier input. Draft your application again before accepting or rejecting.");
+        }
+        if (command.kind === "decide" && command.decision === "accept"
+          && !draftRecord?.record.drafts.find(d => d.id === command.draftId)?.text.trim()) {
+          throw new Error("No wording to accept. Answer the questions, then draft again.");
+        }
+        const saved = command.kind === "generate"
+          ? await engine.generateApplicantDrafts(id, expected, ctl.signal)
+          : await engine.decideApplicantDraft(id, command.draftId, expected, command.decision, ctl.signal);
+        if (!live()) return;
+        // The server committed even if the applicant edited while waiting. Advance CAS before the
+        // next queued autosave; replace only the accepted field if that field still matches.
+        acknowledgeWrite(id, saved.version);
+        const editedWhileWaiting = revision.current !== version || applicantDraftInputKey(latestCase.current) !== basis;
+        if (command.kind === "decide" && command.decision === "accept") {
+          const fact = acceptedApplicantFact(saved, command.draftId);
+          if (!fact) throw new Error("The decision was saved, but its confirmed answer could not be restored. Save your local answers and refresh before continuing.");
+          notePosted(id, [fact]);
+          if (unchangedDraftField(before, latestCase.current, fact.field)) derive({ type: "adoptApplicantDraft", fact });
+          setFactsEpoch(n => n + 1);
+        }
+        const record = saved.drafting;
+        setDraftRecord(record ? { record, basis: editedWhileWaiting ? basis : applicantDraftInputKey(latestCase.current) } : null);
+        if (command.kind === "generate" && !record) throw new Error("No drafts were returned. Try drafting again.");
+        if (editedWhileWaiting) {
+          setDraftingError("Your input changed while drafting. Your edits are kept; generate fresh drafts before deciding.");
+        }
+      } catch (error) {
+        if (!live()) return;
+        if (isCaseGone(error) && selectedId) {
+          goneCase.current = selectedId;
+          markGone("case not found");
+        }
+        if (isCaseConflict(error) && selectedId) {
+          noteConflict(selectedId);
+          setSaveStatus("failed");
+          setSavedNote(CONFLICT_NOTE);
+          setSaveDetail(CONFLICT_TEXT);
+          syncState.current = { ...syncState.current, saved: false, reviewed: false, detail: CONFLICT_TEXT };
+          setSyncOk(false);
+          activeCheck.current?.ctl.abort();
+          setEngineGaps([]);
+          setGapsSource("idle");
+          setCompletenessRecord(null);
+          if (checkRef.current.status !== "not_requested") {
+            publishCheck({ ...checkRef.current, status: "stale", note: "The saved application changed. Check again after saving.", detail: "" });
+          }
+        }
+        setDraftingError(isCaseGone(error) ? GONE_NOTE : isCaseConflict(error)
+          ? "The saved application or draft changed. Try again to reload its version and save your current answers first."
+          : error instanceof Error ? error.message : failureText(error));
+      }
+    });
+    const active = { session, ctl, promise };
+    activeDraftWrite.current = active;
+    void promise.finally(() => {
+      if (activeDraftWrite.current !== active) return;
+      activeDraftWrite.current = null;
+      setDraftActivity({ kind: "idle" });
+    });
+    return promise;
   }
 
   /**
@@ -1079,6 +1210,12 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     activeCheck.current = null;
     activeSubmit.current?.ctl.abort();
     activeSubmit.current = null;
+    activeDraftWrite.current?.ctl.abort();
+    activeDraftWrite.current = null;
+    draftRetry.current = null;
+    setDraftRecord(null);
+    setDraftActivity({ kind: "idle" });
+    setDraftingError("");
     setSubmitting(false);
     setSubmissionDispatched(false);
     clearEngineSession();
@@ -1110,6 +1247,20 @@ export function CaseProvider({ children }: { children: ReactNode }) {
 
   async function readSavedCase(id: string, signal?: AbortSignal) {
     const saved = await engine.getCase(id, signal);
+    let drafting = saved.drafting ?? null;
+    if (drafting) {
+      try {
+        const current = await engine.applicantDrafts(id, signal);
+        // Keep wording and decisions bound to this Case snapshot. A newer record or an unreadable
+        // staleness check stays inspectable, but cannot be accepted against this older snapshot.
+        const sameDecisions = current && JSON.stringify(current.drafts.map(d => [d.id, d.status])) === JSON.stringify(drafting.drafts.map(d => [d.id, d.status]));
+        drafting = { ...drafting, stale: drafting.stale || !current || current.stale
+          || current.input_fingerprint !== drafting.input_fingerprint || !sameDecisions };
+      } catch (error) {
+        if (isCaseGone(error) || signal?.aborted) throw error;
+        drafting = { ...drafting, stale: true };
+      }
+    }
     // Both records are embedded in this exact case revision. Later route reads can observe
     // another writer's newer run and combine its questions with this snapshot's older facts.
     const record = saved.intake;
@@ -1119,7 +1270,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       facts: saved.facts.filter(f => pointers.has(f.id)),
     } : null;
     const reviewedText = await reviewedDescription(saved, record ?? null);
-    return { saved, intake, identify: saved.identify, reviewedText };
+    return { saved, intake, identify: saved.identify, reviewedText, drafting };
   }
 
   /** `next` is the opened case built in one step (openedCase): intake, code cards and their saved selection included. */
@@ -1132,6 +1283,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     setSavedStatus(read.saved.status);
     patchApplication(read.saved.id, { status: read.saved.status, authority: read.saved.authority });
     setEngineId(read.saved.id);
+    setDraftRecord(read.drafting ? { record: read.drafting, basis: applicantDraftInputKey(next) } : null);
     setReadingState({ ...NO_READING, intake: read.intake ? "done" : "idle", identify: read.identify ? "done" : "idle" });
     setSaveStatus("saved");
     setSavedNote("Saved");
@@ -1143,7 +1295,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const keptDraft = "Your local answers stay open. Save them before refreshing this application.";
   function cleanForRefresh() {
     const draft = latestCase.current;
-    return syncState.current.saved && !activeSubmit.current && !caseOpening.current
+    return syncState.current.saved && !activeSubmit.current && !activeDraftWrite.current && !caseOpening.current
       && !draft.listedEvidence?.length && !draft.deletedEvidence?.length
       && !Object.keys(draft.evidenceDrafts ?? {}).length
       && !getSession().held.length && !getSession().uploading.length;
@@ -1202,6 +1354,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
           // The return decision can introduce answer cards without changing any facts.
           // Reconcile only these cards so the active applicant controls stay mounted.
           derive({ type: "restoreReviewQuestions", questions: next.questions });
+          setDraftRecord(read.drafting ? { record: read.drafting, basis: applicantDraftInputKey(latestCase.current) } : null);
         }
         else {
           showSavedCase(read, { ...restored, files: local.files });
@@ -1259,6 +1412,12 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   useEffect(() => { latestGaps.current = gaps; }, [gaps]);
 
   const value: Store = {
+    drafting: draftRecord?.record ?? null,
+    draftingStale: Boolean(draftRecord && (draftRecord.record.stale || draftRecord.basis !== applicantDraftInputKey(c) || (engineId && needsReconcile(engineId)))),
+    draftActivity, draftingError,
+    generateApplicantDrafts: () => writeApplicantDraft({ kind: "generate" }),
+    decideApplicantDraft: (draftId, decision) => writeApplicantDraft({ kind: "decide", draftId, decision }),
+    retryApplicantDrafts: () => draftRetry.current ? writeApplicantDraft(draftRetry.current, true) : Promise.resolve(),
     reading, readDescription, runIdentify,
     uploadFiles: () => {
       const token = engineGeneration();
