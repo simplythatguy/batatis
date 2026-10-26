@@ -34,6 +34,7 @@ def _exercise(store):
     # Standalone packages follow creation-based retention; case packages go with the case.
     standalone = 'pkg_' + uuid.uuid4().hex[:8]
     sessions.add(_session(standalone, 1, None, created_at='2000-01-01T00:00:00+00:00'))
+    sessions.record_issuance(case.id, '2026-10-21T00:00:00+00:00', '2026-10-21', 'Reviewer')
     sessions.record_closeout(case.id, '2026-10-21T00:00:00+00:00', '2026-10-22T00:00:00+00:00', 'Reviewer')
     with pytest.raises(SessionConflict):
         sessions.record_closeout(case.id, '2026-10-21T00:00:00+00:00', '2026-10-23T00:00:00+00:00', 'Reviewer')
@@ -56,6 +57,7 @@ def test_retention_purge_removes_reviews_without_a_review_request(tmp_path):
     sessions = Sessions(store)
     old = store.put(Case(title='expired', created_at='2000-01-01T00:00:00+00:00'))
     sessions.add(_session(old.id, 1, old.id))
+    sessions.record_issuance(old.id, '2000-01-02T00:00:00+00:00', '2000-01-02', 'Reviewer')
     sessions.record_closeout(old.id, '2000-01-02T00:00:00+00:00', '2000-01-03T00:00:00+00:00', 'Reviewer')
     sessions.add(_session('pkg_old', 1, None, created_at='2000-01-01T00:00:00+00:00'))
     assert purge_now(store) == 1
@@ -90,3 +92,47 @@ def test_official_export_reads_back_as_present_fields():
         assert state.status == 'present', placement.field
         assert placement.lines[0].strip()[:20] in state.value, (placement.field, state.value)
     assert read.text_pages, 'the appendix pages are read as text'
+
+def test_legacy_closeout_migration_keeps_sending_without_inventing_issuance(tmp_path):
+    import sqlite3
+    from engine.store import CaseStore
+    store = CaseStore(tmp_path / 'legacy.sqlite')
+    case = store.put(Case())
+    with sqlite3.connect(store.path) as con:
+        con.execute('CREATE TABLE package_review_closeouts (case_id TEXT PRIMARY KEY, decided_at TEXT NOT NULL, '
+                    'sent_at TEXT NOT NULL, sent_by_name TEXT NOT NULL)')
+        con.execute('INSERT INTO package_review_closeouts VALUES (?,?,?,?)',
+                    (case.id, '2026-10-20T12:00:00+00:00', '2026-10-21T12:00:00+00:00', 'Original officer'))
+    record = Sessions(store).closeout(case.id)
+    assert record.sent_by_name == 'Original officer' and record.issued_on is None
+    Sessions(store).record_issuance(case.id, record.decided_at, '2026-10-20', 'Issuing officer')
+    record = Sessions(store).closeout(case.id)
+    assert record.issued_on == '2026-10-20' and record.sent_by_name == 'Original officer'
+
+
+@pytest.mark.parametrize('kind', ['sqlite', 'memory', 'postgres'])
+def test_issuance_store_preserves_fields_and_scopes_them_to_one_decision(tmp_path, kind):
+    import os
+    from engine.store import CaseStore
+    from engine.review.sessions import SessionConflict
+    if kind == 'postgres':
+        if not os.environ.get('TEST_DATABASE_URL'):
+            pytest.skip('TEST_DATABASE_URL is not set')
+        from engine.store_postgres import PostgresCaseStore
+        store = PostgresCaseStore(os.environ['TEST_DATABASE_URL'])
+    elif kind == 'sqlite':
+        store = CaseStore(tmp_path / 'closeout.sqlite')
+    else:
+        store = object()
+    records = Sessions(store)
+    case_id = store.put(Case()).id if kind != 'memory' else 'memory-case'
+    with pytest.raises(SessionConflict):
+        records.record_closeout(case_id, 'first', 'sent', 'Officer')
+    records.record_issuance(case_id, 'first', '2026-10-20', 'Issuer')
+    with pytest.raises(SessionConflict):
+        records.record_issuance(case_id, 'first', '2026-10-21', 'Other')
+    records.record_closeout(case_id, 'first', 'sent', 'Sender')
+    assert tuple(records.closeout(case_id)) == ('first', 'sent', 'Sender', '2026-10-20', 'Issuer')
+    records.record_issuance(case_id, 'second', '2026-10-23', 'New issuer')
+    assert not records.closeout(case_id).sent_at
+

@@ -5,7 +5,7 @@ import threading
 
 import pytest
 
-from engine.tests.case_builder_fixtures import fact
+from engine.tests.case_builder_fixtures import acceptance_request, fact
 from engine.tests.test_review import scene, owned  # noqa: F401 -- shared authenticated API fixture
 
 
@@ -53,13 +53,13 @@ def test_resubmit_keeps_identity_history_valid_reviewer_and_real_changes(scene):
     row = next(a for a in clients['reviewer'].get('/review/queue?mine=true').json()['applications'] if a['id'] == revised['id'])
     assert row['submission_number'] == 2 and row['claim']['reviewer_id'] == users['reviewer']['id']
     assert clients['second'].post(f"/review/{revised['id']}/claim", json={}).status_code == 409
-    assert clients['reviewer'].post(f"/review/{revised['id']}/decision", json={'outcome': 'accept'}).status_code == 409
+    assert clients['reviewer'].post(f"/review/{revised['id']}/decision", json={'outcome': 'accept', 'expected_version': store.get(revised['id']).version}).status_code == 409
     assert clients['reviewer'].post(f"/review/{revised['id']}/claim", json={}).status_code == 200
     assert store.get(revised['id']).status == 'in_review'
     # A past return is history, so it must not prevent releasing this new round.
     assert clients['reviewer'].delete(f"/review/{revised['id']}/claim").status_code == 204
     assert clients['second'].post(f"/review/{revised['id']}/claim", json={}).status_code == 200
-    accepted = clients['second'].post(f"/review/{revised['id']}/decision", json={'outcome': 'accept'})
+    accepted = clients['second'].post(f"/review/{revised['id']}/decision", json=acceptance_request(clients['second'], revised['id']))
     assert accepted.status_code == 200, accepted.text
     assert [d['outcome'] for d in accepted.json()['decision_history']] == ['return', 'accept']
     assert clients['owner'].post(path + '/submit', json={}).status_code == 409
@@ -113,6 +113,7 @@ def test_conflicting_legacy_evidence_representations_remain_visible_in_compariso
 def test_resubmit_does_not_restore_a_stale_claim_or_authority_permission(scene, changes):
     store, clients, users = scene
     returned = sent_back(scene)
+    assert clients['owner'].post(f"/cases/{returned['id']}/facts", json=fact('request_answer.scope', 'Revised scope.').model_dump()).status_code == 200
     # A reviewer that changed role is history, not a current authority permission.
     person = store.get_user(users['reviewer']['id'])
     try:
@@ -147,6 +148,7 @@ def test_legacy_return_has_honest_unavailable_comparison_and_no_claim_resurrecti
 def test_resubmission_notifications_agree_with_actual_submitted_state(scene):
     _, clients, _ = scene
     returned = sent_back(scene)
+    assert clients['owner'].post(f"/cases/{returned['id']}/facts", json=fact('request_answer.scope', 'Clarified scope.').model_dump()).status_code == 200
     response = clients['owner'].post(f"/cases/{returned['id']}/submit", json={})
     assert response.status_code == 200
     notes = clients['reviewer'].get('/me/notifications').json()['notifications']
@@ -211,6 +213,7 @@ def test_repeated_return_rounds_keep_decisions_and_compare_against_the_latest_re
 def test_simultaneous_resubmission_resume_and_takeover_never_create_two_claim_owners(scene):
     store, clients, users = scene
     returned = sent_back(scene)
+    assert clients['owner'].post(f"/cases/{returned['id']}/facts", json=fact('request_answer.scope', 'Changed before resubmission.').model_dump()).status_code == 200
     assert clients['owner'].post(f"/cases/{returned['id']}/submit", json={}).status_code == 200
     barrier, responses = threading.Barrier(2), []
 
@@ -227,5 +230,49 @@ def test_simultaneous_resubmission_resume_and_takeover_never_create_two_claim_ow
     current = store.get(returned['id'])
     assert dict(responses)['second'] == 200
     assert current.status == 'in_review' and current.claim.reviewer_id == users['second']['id']
-    assert clients['reviewer'].post(f"/review/{current.id}/decision", json={'outcome': 'accept'}).status_code == 409
-    assert clients['second'].post(f"/review/{current.id}/decision", json={'outcome': 'accept'}).status_code == 200
+    assert clients['reviewer'].post(f"/review/{current.id}/decision", json={'outcome': 'accept', 'expected_version': current.version}).status_code == 409
+    assert clients['second'].post(f"/review/{current.id}/decision", json=acceptance_request(clients['second'], current.id)).status_code == 200
+
+
+def test_returned_application_cannot_be_resubmitted_unchanged(scene):
+    store, clients, _ = scene
+    returned = sent_back(scene)
+    path = '/cases/' + returned['id']
+    before = store.get(returned['id']).model_dump()
+    response = clients['owner'].post(path + '/submit', json={})
+    assert response.status_code == 409, response.text
+    assert response.json()['detail'] == 'Nothing changed since it was returned. Fix the requested items, then send it again.'
+    assert store.get(returned['id']).model_dump() == before
+    # A changed quote/source alone still does not constitute a changed answer.
+    assert clients['owner'].post(path + '/facts', json=fact('legal_description',
+        'Synthetic lot 1 block 2 plan 3').model_dump()).status_code == 200
+    assert clients['owner'].post(path + '/submit', json={}).status_code == 409
+    assert clients['owner'].post(path + '/facts', json=fact('request_answer.ir_custom',
+        'SYNTHETIC clarified assembly information.').model_dump()).status_code == 200
+    revised = clients['owner'].post(path + '/submit', json={})
+    assert revised.status_code == 200, revised.text
+    assert revised.json()['submissions'][-1]['changes'] == [{
+        'field': 'request_answer.ir_custom', 'before': None, 'after': 'SYNTHETIC clarified assembly information.'}]
+
+
+def test_new_file_is_a_real_resubmission_change(scene):
+    store, clients, _ = scene
+    returned = sent_back(scene)
+    kept = store.put_file(returned['id'], 'revised-source.pdf', b'%PDF-1.4\nSYNTHETIC new file bytes.\n')
+    revised = clients['owner'].post(f"/cases/{returned['id']}/submit", json={})
+    assert revised.status_code == 200, revised.text
+    changes = revised.json()['submissions'][-1]['changes']
+    assert len(changes) == 1 and changes[0]['field'] == 'file.' + kept['id']
+
+
+def test_new_draft_without_authority_keeps_the_administrative_submit_gate(scene):
+    store, clients, _ = scene
+    case = owned(scene)
+    case.authority = None
+    saved = store.put(case)
+    before = saved.model_dump()
+    response = clients['owner'].post(f'/cases/{case.id}/submit', json={})
+    assert response.status_code == 409, response.text
+    assert response.json()['detail']['message'] == 'Resolve blocking administrative gaps before submitting'
+    assert response.json()['detail']['gaps']
+    assert store.get(case.id).model_dump() == before

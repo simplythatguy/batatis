@@ -558,6 +558,7 @@ def test_preferences_preserve_stored_source_hash_review_versions_and_closeout(sc
             created_by_name='SYNTHETIC reviewer', input_kind='case',
             files=[InputFile(name='SYNTHETIC.pdf', sha256=source_hash, size=len(data), role='attachment')],
             information_request=InformationRequest(intro='SYNTHETIC prior review', items=[])))
+    sessions.record_issuance(case.id, case.decision.at, case.created_at[:10], reviewer.name)
     sessions.record_closeout(case.id, case.decision.at, case.created_at, reviewer.name)
     before = sessions.list(case.id)
     raw = sessions.get(case.id, 2)[1]

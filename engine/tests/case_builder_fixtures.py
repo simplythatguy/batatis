@@ -68,3 +68,27 @@ def complete_case(provisions=None):
                    fact('evidence.synthetic.date', '2026-10-20'), fact('evidence.synthetic.title', 'Synthetic test attachment')]
     case.facts += [fact(f'evidence.synthetic.covers.{item.id}', True) for item in section_d_plan(case, codes).items]
     return case
+
+
+def acceptance_request(client, case_id, *, run=True):
+    """A synthetic officer explicitly checks package blockers before an acceptance test."""
+    if run:
+        response = client.post(f'/review/{case_id}/package-review')
+        assert response.status_code == 201, response.text
+    index = client.get(f'/review/{case_id}/package-review').json()
+    session = index['latest']
+    assert not index['workspace']['rulebook'], index['workspace']
+    states = {state['key']: state for state in index['workspace']['states']}
+    dismiss = [dict(key=finding['key'], state='dismissed', reason='checked',
+                    note='Synthetic officer checked this fixture source.')
+               for finding in session['findings'] if finding['severity'] == 'blocking'
+               and finding['key'] in states and states[finding['key']]['state'] != 'dismissed']
+    assert not any(states[entry['key']]['locked'] for entry in dismiss)
+    if dismiss:
+        response = client.put(f'/review/{case_id}/package-review/{session["version"]}/information-request', json={
+            'items': [{'id': item['id'], 'text': item['text'], 'included': item['included']}
+                      for item in session['information_request']['items']], 'findings': dismiss})
+        assert response.status_code == 200, response.text
+        index = response.json()
+    assert index['workspace']['gate']['can_accept'], index['workspace']
+    return dict(outcome='accept', expected_version=session['case_version'], review_version=session['version'])

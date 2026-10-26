@@ -46,8 +46,7 @@ def review(client, files):
     assert stored.status_code == 200, stored.text
     saved = stored.json()
     assert saved['latest'] == {key: value for key, value in result.items() if key != 'meta'}
-    assert saved['sessions'][0]['open_gaps'] == sum(
-        item['included'] for item in result['information_request']['items'])
+    assert saved['sessions'][0]['required'] == saved['workspace']['tally']['required']
     return result
 
 

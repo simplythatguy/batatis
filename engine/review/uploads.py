@@ -1,8 +1,8 @@
 """Read a multipart body carrying the SCC form and attachments (several PDFs, one request).
 
 The whole body is capped at the engine's 4 MB PDF limit plus multipart overhead
-(the hosting body limit is 4.5 MB). Files are kept in memory only for the
-review; their bytes are not stored.
+(the hosting body limit is 4.5 MB). Standalone files are kept in memory only for the
+review. The case-linked route also keeps the uploaded bytes with the case, best effort.
 """
 from __future__ import annotations
 

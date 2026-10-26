@@ -7,8 +7,9 @@ mitigation, assumptions or the officer's decision**. Every response carries `adm
 `not_a_compliance_determination: true` and a notice.
 
 In the officer's process (accept, refuse, or **request more information**), the drafted information request
-below is the **request-more-information** path. Accept and return are #48's decision route
-(`POST /review/{case_id}/decision`); refuse is not part of this backend.
+below is the **request-more-information** path. The officer workspace sends and returns in one operation;
+accept, refuse and legacy plain returns use `POST /review/{case_id}/decision`. See the
+[officer workspace contract](officer-workspace.md) for finding dispositions, one tally and acceptance gating.
 
 Wire types: `ReviewSession`, `PackageReviewIndex`, `CloseOut`, `SentInformationRequests` (responses) and
 `InformationRequestEdit` (request) in `web/src/api/types.gen.ts`. Models: `engine/models_review.py`. Code:
@@ -19,30 +20,34 @@ Wire types: `ReviewSession`, `PackageReviewIndex`, `CloseOut`, `SentInformationR
 | Route | Who | Behaviour |
 | --- | --- | --- |
 | `POST /review/{case_id}/package-review` | Claimer (current claim, status `in_review`) | No body (or `{}`): review the saved case. `multipart/form-data` with one or more PDFs (any field name): review the uploaded package. 201 `ReviewSession`, next version; `diff` against the previous version. 409 without the claim; 503 `code database not found` for a saved-case review without codedb; 409 `case was updated concurrently` if the case changes during the review. |
-| `GET /review/{case_id}/package-review` | Any reviewer of the case's authority | `PackageReviewIndex`: session summaries (version, author, open gaps, diff statement, sent time), the latest session, and `close_out` when decided. |
+| `GET /review/{case_id}/package-review` | Any reviewer of the case's authority | `PackageReviewIndex`: session summaries (version, author, `required`, diff statement, sent time), the latest session, server-owned `workspace`, and `close_out` after a final decision. |
 | `GET /review/{case_id}/package-review/{version}` | Same | One `ReviewSession`. |
-| `PUT /review/{case_id}/package-review/{version}/information-request` | Claimer | `{"intro"?: str, "items": [{"id"?: str, "text": str, "included": bool}]}` replaces the item list in that order. Items with an existing `id` keep their finding link (reworded text becomes `authored_by: "officer"`); items without `id` are officer items. Unknown id 422; after sending 409. |
-| `POST /review/{case_id}/package-review/{version}/information-request/send` | Claimer | Posts the included items to the case thread as a message from the reviewer (each item as a structured `DecisionItem`), so the applicant gets the usual #48 notification. Freezes the request. 409 when already sent or nothing is included. Does not change status or record a decision. |
+| `PUT /review/{case_id}/package-review/{version}/information-request` | Claimer | Saves `intro`, ordered `items` and `findings` changes atomically. Linked inclusion follows the finding state; omitted linked items remain available. Officer items need a `target`. Returns the full `PackageReviewIndex`. 422 for unknown ids/keys, invalid dismissals/targets or limits; 409 for an older, sent or concurrently changed version. |
+| `POST /review/{case_id}/package-review/{version}/return` | Claimer | `{expected_version, text}` validates the saved draft and returns the case with one decision message and targeted items. 200 `Case`; 409 for a stale case/review, changed preview, no items, missing claim or repeat; 422 for request limits/targets. |
+| `POST /review/{case_id}/package-review/{version}/information-request/send` | Claimer | Posts the included items to the case thread as a message from the reviewer (each item as a structured `DecisionItem`), so the applicant gets the usual #48 notification. Freezes the request. 409 when already sent or nothing is included. Does not change status or record a decision. Legacy route; rejects invalid targets or limits with 422 and never truncates text. |
 | `GET /cases/{case_id}/information-request` | Owner, or a reviewer of the authority (central guard, read mode) | `SentInformationRequests`: only requests that were sent. Drafts are never shown. |
 | `GET /review/{case_id}/close-out` | Any reviewer of the authority | `CloseOut` for a decided case (see below); 404 before a final decision. |
-| `POST /review/{case_id}/close-out/sent` | The reviewer who recorded the decision (or the claimer) | Records the officer's statement that they sent the copy to the Council. Batatis sends nothing. 409 when already recorded for that decision. |
+| `POST /review/{case_id}/close-out/issued` | Deciding reviewer or current claimant | `{issued_on: "YYYY-MM-DD"}` records issuance outside Batatis. 200 `CloseOut`; 422 for invalid dates, dates before the decision or future dates (America/Edmonton); 409 for refusal, lack of authority or an already recorded issuance. |
+| `POST /review/{case_id}/close-out/sent` | Deciding reviewer or current claimant | Records that the officer sent the variance copy. 200 `CloseOut`; 409 before issuance, for a refusal, when already recorded or without authority; 404 before a final decision. |
 | `POST /package-review` | Reviewer | Standalone third-party package (no Batatis case): multipart PDFs. 201 `ReviewSession` with a new `package_id` (`pkg_…`), scoped to the reviewer's authority. |
 | `POST /package-review/{package_id}` | Reviewer of that authority | Re-upload: next version with `diff`. |
 | `GET /package-review/{package_id}` and `/{version}` | Reviewer of that authority | Index and one session. |
-| `PUT /package-review/{package_id}/{version}/information-request` | Reviewer of that authority | Edit; the text is copied out by the officer (no applicant account to send to). |
+| `PUT /package-review/{package_id}/{version}/information-request` | Reviewer of that authority | Same draft validation and full `PackageReviewIndex` response; latest version only. The officer copies out the text (no applicant account to send to). |
 | `POST /cases/{case_id}/completeness` | Ported saved-case report (`batatis.completeness.v1`) | See "Saved-case completeness report". |
 
 Access: `/review/{case_id}/…` handlers apply the central `authorize_case(..., mode='review')` first, so
 applicants, other authorities and anonymous callers get **404** (unowned legacy cases have no reviewer
 workflow and also 404), then require a reviewer account. Standalone routes return 401 signed out, 403 for
 non-reviewers, 404 for another authority's package. Uploads: at most 12 files, 4 MB in total
-(`413` above), `415` when the body is not multipart. Uploaded bytes are read in memory and not stored; the
-session keeps the extracted values and quotes.
+(`413` above), `415` when the body is not multipart. Case-linked uploads are also kept with the case,
+best effort: `InputFile.file_id` opens `GET /cases/{case_id}/files/{file_id}`. A failed file write leaves
+`file_id: null` and does not fail the review. Standalone uploaded bytes are not kept; sessions retain their
+readings and quotes. An upload review on a case records the case version it ran against.
 
 ## A session
 
 - `files[]`: name, sha256, size, pages, `role` (`scc_form_fillable`, `scc_form_flattened`, `attachment`,
-  `unreadable`, `case_record`), `form_version` (field map, e.g. `scc_2026-10`), note.
+  `unreadable`, `case_record`), `form_version` (field map, e.g. `scc_2026-10`), note, nullable `file_id`.
 - `fields[]`: one row per form field (the form's own widget names, typos included) and per applicant passage
   read from the appendix or attachments (`alternative_description`, `rationale`, `risk_assessment`, `mitigating_measures`,
   `assumptions_and_limits`, `professional_name`, `professional_qualifications`). `status`:
@@ -67,14 +72,49 @@ session keeps the extracted values and quotes.
   names the form's values and the table's pairs), `no_table_row`, `provision_not_found`, `not_checked`
   (e.g. values continue in an appendix).
 - `information_request`: `intro`, `items[]` (`id`, `finding_key`, `text`, `authored_by`, `included`,
-  `officer_check`), `edited`, `sent_at`, `sent_by_name`, `message_id`, `text` (numbered, ready to copy).
+  `officer_check`, `target`), `edited`, `sent_at`, `sent_by_name`, `message_id`, `text` (numbered, ready to copy).
   Items are generated deterministically from findings; each one asks the applicant ("Please provide …",
   "Please confirm …"). Not-found findings become items with `officer_check: true` and `included: false`: the
   officer looks first. Officer-routed findings (unreadable files, the peer-review signal, the officer's own
   Div C 2.3.1 registration documentation) are never asked of the applicant.
-- `diff` (from version 2): `resolved`, `still_open`, `new` (by finding key) and `statement`, e.g.
+- `dispositions[]`: officer state, dismissal reason/note and author/time. New versions always start fresh;
+  dismissals never carry over.
+- `diff` (from version 2): `resolved`, `still_open`, `new`, `unverified` (by finding key) and `statement`, e.g.
   `"2 of 3 gaps resolved, 1 still open, 1 new"`. Counts applicant gaps only (not-found officer checks and
-  officer-routed findings are excluded).
+  officer-routed findings are excluded from the initial denominator). An earlier open gap that becomes
+  unreadable or cannot be established is `unverified`, never resolved; the statement adds `N can't tell`.
+  This applicant-change comparison does not define the workspace tally: blocking uncertainty still counts
+  in `required`.
+
+## Draft and decision guarantees
+
+`Workspace` contains the effective finding states, uncovered canonical blocking gaps, one `ReviewTally`,
+`AcceptGate` and `RequestLimits`. `check_completeness` remains the only rulebook. Its blocking fields lock
+matching findings against dismissal. A blocking dismissal requires a reason and at least three non-space
+characters in its note. `ask` requires a linked request item; `included` on those items is server-owned.
+
+Limits are 50 items, 2,000 introduction characters, 2,000 characters per item and 12,000 rendered request
+characters. Save, return and legacy send validate the whole draft before writing; they never truncate it.
+New officer items require `{section, field?, label}` targets. Linked targets are derived from findings.
+Decision items carry `section`, `field`, `label`, `request_item_id` and `finding_key`; an item without a field
+uses the applicant fact key `request_answer.<request_item_id>`. See [where the applicant answers](officer-workspace.md#where-the-applicant-answers).
+
+Acceptance requires `expected_version` (422 when missing) and, when any review exists, the latest
+`review_version` (409 when missing/wrong). The session must match the case version, have no required items,
+and have no canonical blocking gaps. Both the case revision and exact latest session JSON are rechecked
+under the case database write lock. With CodeDB present, no session means 409 `Run the package review before
+accepting`. With CodeDB absent and no session, legacy acceptance checks stored canonical `Case.gaps`; a
+session cannot be accepted while canonical rules cannot be rechecked.
+
+A return reserves the draft using session CAS, then the existing case CAS writes the decision, one
+message, snapshot, status and history together. Its deterministic case-scoped message id binds the package
+version. The session's sent metadata is finalized afterward. Reads recover that metadata from the durable
+case message, even when finalization failed, and refuse further edits/sends. A failure before the case
+commit produces no sent request; a retry after commit produces no second message. An expired reservation
+without a committed message can be edited or retried. Concurrent session changes invalidate the case write.
+
+Returned cases with a snapshot cannot resubmit unchanged (409). Request-answer facts, evidence and owned
+file inventory count as real changes; a new fact id or quote/source alone does not.
 
 ## What is checked
 
@@ -126,19 +166,28 @@ session keeps the extracted values and quotes.
 
 ## Close-out
 
-`CloseOut` exists once the case has a final decision (`accept`; a future `refuse` outcome is included
-automatically): `decided_at`, `due_date` (10 days later), `days_remaining`, `overdue`, `sent`, `sent_at`,
-`sent_by_name`, and a deterministic `record_package`: `send_to_council` (the copy of the variance as decided,
-the single location) and `retain_on_file` (Section C references, supporting documents, information requests
-sent, the latest package review, the decision record), with the bulletin `basis` (IB-2025-11-18,
-IB-2026-10-01, the Orders and Variances Portal). The officer sends and registers; Batatis never sends.
+`CloseOut` exists after `accept` or `refuse`. Administrative acceptance does not issue a variance:
+`issued_on`, `issued_by_name`, `due_date` and `days_remaining` remain null until the officer records issuance.
+Only then is the Council copy due, `issued_on + 10 days`, and sending can be recorded. Date validation uses
+Alberta local dates (America/Edmonton); overdue calculations use UTC today. A refusal has no Council copy
+or deadline and lists only records to retain.
+
+`record_package.send_to_council` names **Copy of the variance as issued** and the single location for an
+accepted application. `retain_on_file` lists Section C references, supporting documents, information
+requests and applicant revisions, the latest package review's `required`/`to_check` tally, and decision
+history. Bulletin basis: IB-2025-11-18, IB-2026-10-01 and the Orders and Variances Portal. Batatis sends
+nothing to the Council.
 
 ## Storage and retention
 
 Sessions and close-out records live in `package_review_sessions` and `package_review_closeouts`, created with
-`CREATE TABLE IF NOT EXISTS` in the same SQLite file or PostgreSQL database as the cases. Rows for a case are
+`CREATE TABLE IF NOT EXISTS` in the same SQLite file or PostgreSQL database as the cases. Safe additive
+migrations add nullable `issued_on`/`issued_by_name` to close-outs and internal `rulebook_json` to sessions.
+Historical summaries use the canonical blocking-gap snapshot from creation or the last draft save;
+pre-migration sessions without that snapshot conservatively use current canonical gaps. Existing sending
+records are preserved without inventing issuance dates. Rows for a case are
 removed when the case is deleted or purged (swept on every package-review access); standalone packages follow
-the same seven-day creation-based retention. At most 50 versions per package. The `Case` schema is unchanged.
+the same seven-day creation-based retention. At most 50 versions per package. Retention durations are unchanged. No new Case or package-review wire fields were added beyond the committed officer-workspace contract.
 
 ## Saved-case completeness report (ported)
 

@@ -6,7 +6,7 @@ import re
 
 import pytest
 
-from engine.models_review import EditedItem, Finding, Pointer
+from engine.models_review import EditedItem, Finding, Pointer, RequestTarget
 from engine.review import information_request as ir
 from engine.review.package import review_uploads
 from engine.tests.package_review_fixtures import CLEAN_FORM, CLEAN_NARRATIVE, package
@@ -91,10 +91,11 @@ def test_edit_keeps_links_marks_officer_text_and_rejects_unknown_ids():
     request = ir.build(findings)
     owner = next(item for item in request.items if item.field == 'owner_name')
     edited = ir.edit(request, [EditedItem(id=owner.id, text=owner.text, included=True),
-                               EditedItem(text='Please send the site plan.')], None)
+                               EditedItem(text='Please send the site plan.', target=RequestTarget(section='B', label='Site plan'))], None)
     assert edited.items[0].authored_by == 'batatis' and edited.items[0].finding_key == owner.finding_key
     assert edited.items[1].authored_by == 'officer' and edited.items[1].finding_key is None
-    reworded = ir.edit(request, [EditedItem(id=owner.id, text='Owner, please.')], 'Intro')
+    owner_only = request.model_copy(update={'items': [owner]})
+    reworded = ir.edit(owner_only, [EditedItem(id=owner.id, text='Owner, please.')], 'Intro')
     assert reworded.items[0].authored_by == 'officer' and reworded.intro == 'Intro'
     assert reworded.text == 'Intro\n\n1. Owner, please.'
     with pytest.raises(KeyError):
@@ -118,3 +119,12 @@ def test_diff_counts_resolved_still_open_and_new():
     assert diff.statement == '3 of 4 gaps resolved, 1 still open, 1 new'
     assert ir.diff(2, [], []).statement == '0 of 0 gaps resolved'
     assert ir.diff(3, before, []).statement == '4 of 4 gaps resolved'
+
+
+def test_unavailable_citation_lookup_cannot_resolve_an_earlier_gap():
+    before = [Finding(key='citation:bad', section='C', field='citation.9.10.15.5.(99)', label='Citation',
+                      status='unclear', problem='nonexistent_provision', message='Confirm this provision.')]
+    result = ir.diff(1, before, [], lookup_skipped=True)
+    assert not result.resolved
+    assert [entry.key for entry in result.unverified] == ['citation:bad']
+    assert result.statement == "0 of 1 gaps resolved, 1 can't tell"

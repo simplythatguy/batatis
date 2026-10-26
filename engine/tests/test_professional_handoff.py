@@ -44,7 +44,7 @@ def test_mandatory_duty_cannot_be_waived_even_on_a_legacy_submitted_case(scene, 
     assert store.get(case.id).model_dump() == before
     gaps = clients['reviewer'].get(f'/cases/{case.id}/gaps').json()['items']
     assert any(g['field'] == 'professional_confirmation' and g['submission_blocking'] for g in gaps)
-    assert clients['reviewer'].post(f'/review/{case.id}/decision', json={'outcome': 'accept'}).status_code == 409
+    assert clients['reviewer'].post(f'/review/{case.id}/decision', json={'outcome': 'accept', 'expected_version': store.get(case.id).version}).status_code == 409
 
 
 def test_source_failure_cannot_be_resolved_by_an_officer_record(scene, monkeypatch):
@@ -81,7 +81,7 @@ def test_changed_applicant_content_invalidates_resolution_but_preserves_provenan
     assert store.get(case.id).professional_resolutions[0].model_dump() == record
     assert owner.post(f'/cases/{case.id}/submit', json={}).status_code == 200
     assert officer.post(f'/review/{case.id}/claim', json={}).status_code == 200
-    assert officer.post(f'/review/{case.id}/decision', json={'outcome': 'accept'}).status_code == 409
+    assert officer.post(f'/review/{case.id}/decision', json={'outcome': 'accept', 'expected_version': store.get(case.id).version}).status_code == 409
     case = store.get(case.id)
     again = officer.post(f'/review/{case.id}/professional-requirement', json=determination(case))
     assert again.status_code == 200, again.text
@@ -99,7 +99,7 @@ def test_officer_requirement_records_do_not_fabricate_evidence_and_can_be_revise
     assert response.status_code == 200
     screen = officer.get(f'/cases/{case.id}/professional').json()
     assert screen['required'] == 'yes' and screen['mandatory_required'] is False
-    assert officer.post(f'/review/{case.id}/decision', json={'outcome': 'accept'}).status_code == 409
+    assert officer.post(f'/review/{case.id}/decision', json={'outcome': 'accept', 'expected_version': store.get(case.id).version}).status_code == 409
     case = store.get(case.id)
     changed = determination(case, required=False)
     changed['basis'] = 'SYNTHETIC authority revised the discretionary determination after its scope assessment.'
