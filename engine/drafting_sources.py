@@ -16,6 +16,7 @@ from .models import Case
 from .models_drafting import DraftSource, DraftRegistryQuery, draft_passages
 from .process_fields import PROCESS_ALIASES, process_fields
 from .professional import professional_involvement
+from .professional_resolution import current_resolution
 from .redact import PERSONAL_FIELDS, PERSONAL_SUFFIXES, known_values, scrub, scrub_obj
 from .section_c import section_c_rows
 
@@ -38,23 +39,47 @@ def digest(value) -> str:
 
 
 def generated_fact(fact, case: Case) -> bool:
-    if fact.source.ref.startswith('applicant-draft:'):
+    if fact.source.ref.startswith('applicant-draft:') or edits_accepted_draft(fact, case):
         return True
     # Older/generated wording must not become its own corroboration when copied into another fact.
     originals = {s.ref for s in original_sources(case) if s.kind in {'fact', 'description'}}
-    return (fact.id not in originals and isinstance(fact.value, str)
-            and ' '.join(fact.value.split()) in generated_passages(case))
+    return fact.id not in originals and isinstance(fact.value, str) and contains_generated(fact.value, case)
+
+
+def edits_accepted_draft(fact, case: Case) -> bool:
+    """A later answer to a field whose draft was accepted starts from Batatis's wording."""
+    if not case.drafting:
+        return False
+    order = {f.id: index for index, f in enumerate(case.facts)}
+    return fact.id in order and any(
+        draft.status == 'accepted' and fact.field in aliases(draft.field)
+        and order.get(draft.accepted_fact_id, len(order)) < order[fact.id] for draft in case.drafting.drafts)
 
 
 def original_sources(case: Case) -> list[DraftSource]:
     return [*case.drafting.source_history, *case.drafting.sources] if case.drafting else []
 
 
+_SENTENCE = re.compile(r'(?<=[.!?])\s+|\n+')
+MIN_SENTENCE_WORDS = 8
+
+
 def generated_passages(case: Case) -> set[str]:
+    """Whole generated passages and their longer sentences, minus anything copied from a real source."""
     if not case.drafting:
         return set()
+    originals = '\n'.join(' '.join(s.text.split()) for s in original_sources(case))
     texts = [*case.drafting.generated_texts, *(text for draft in case.drafting.drafts for text in draft_passages(draft))]
-    return {' '.join(text.split()) for text in texts if text.strip()}
+    out = set()
+    for text in texts:
+        pieces = [text, *(s for s in _SENTENCE.split(text) if len(s.split()) >= MIN_SENTENCE_WORDS)]
+        out.update(p for p in (' '.join(piece.split()) for piece in pieces) if p and p not in originals)
+    return out
+
+
+def contains_generated(text: str, case: Case) -> bool:
+    normal = ' '.join(text.split())
+    return any(passage in normal for passage in generated_passages(case))
 
 
 def current_description_source(fact, case: Case) -> bool:
@@ -62,7 +87,7 @@ def current_description_source(fact, case: Case) -> bool:
         return True
     current = next((f for f in reversed(case.facts) if f.field == 'project.description'), None)
     return bool(current and isinstance(current.value, str) and fact.source.quote
-                and fact.source.quote in current.value and not generated_fact(current, case))
+                and fact.source.quote in current.value)
 
 
 def input_facts(case: Case):
@@ -85,8 +110,10 @@ def aliases(field: str) -> tuple[str, ...]:
 
 def has_answer(case: Case, field: str) -> bool:
     fact = next((f for f in reversed(case.facts) if f.field in aliases(field)), None)
-    # Never replace even an unconfirmed applicant revision. Explicitly empty withdrawals allow new writing.
-    return fact is not None and fact.value is not None and str(fact.value).strip() != ''
+    # Never replace an applicant revision. A model's unconfirmed paraphrase is not one, and explicitly
+    # empty withdrawals allow new writing.
+    return (fact is not None and not (fact.kind == 'proposed' and fact.status != 'confirmed')
+            and fact.value is not None and str(fact.value).strip() != '')
 
 
 def rough_alternative(case: Case, store=None):
@@ -164,9 +191,10 @@ def read_inputs(case: Case, store, codes, *, include_bytes: bool = False) -> Inp
                     page=ref.pdf_page, url=ref.url, metadata={'edition': ref.edition, 'structure_only': True})
     # Use the real case for the screen: accepting new wording can invalidate an older officer
     # determination. Excluding the prose as evidence must not resurrect that determination.
+    # A current officer determination is about the case as saved, so it applies as is.
     current_facts = [f for f in case.facts if current_description_source(f, case)]
-    professional_case = (case if len(current_facts) == len(case.facts) else
-                         case.model_copy(update={'facts': current_facts, 'professional_resolutions': []}))
+    professional_case = (case if current_resolution(case) or len(current_facts) == len(case.facts) else
+                         case.model_copy(update={'facts': current_facts}))
     screen = professional_involvement(professional_case, codes)
     add('professional_screen', 'professional_involvement', 'Deterministic professional-involvement screen',
         screen.model_dump_json())
@@ -230,8 +258,10 @@ def collect_sources(case: Case, inputs: Inputs, *, names=(), registry: CCMCRegis
         add(**resource.model_dump(exclude={'id'}), verbatim=resource.kind in {'code', 'section_c'})
     actual_pages = {}
     for fact in input_facts(case):
-        if (fact.field == 'project.description' and fact.kind != 'proposed' and isinstance(fact.value, str)
-                and not generated_fact(fact, case)):
+        if fact.field == 'project.description' and fact.kind != 'proposed' and isinstance(fact.value, str):
+            if generated_fact(fact, case):
+                bundle.notices.append('The saved description repeats prior generated applicant prose; excluded as a source.')
+                continue
             actual_pages[('description', None)] = fact.value
             add('description', fact.id, 'Saved project description', fact.value,
                 metadata={'fact_id': fact.id, 'field': fact.field})
@@ -256,7 +286,7 @@ def collect_sources(case: Case, inputs: Inputs, *, names=(), registry: CCMCRegis
         for page, text in pages:
             original = any(s.kind == 'document' and s.ref == saved['id'] and s.page == page
                 and s.metadata.get('sha256') == saved['sha256'] for s in original_sources(case))
-            if not original and any(passage in ' '.join(text.split()) for passage in generated_passages(case)):
+            if not original and contains_generated(text, case):
                 bundle.notices.append(f'{label}, page {page}: prior generated applicant prose excluded as a source.')
                 continue
             actual_pages[(saved['id'], page)] = text

@@ -306,6 +306,17 @@ def test_chat_routes_authoring_to_the_saved_drafting_flow_without_freeform_model
     assert response.json()['cited'] == [] and calls == []
 
 
+@pytest.mark.parametrize('question', ['Is the risk assessment complete?',
+    'What should I write in the rationale field?', 'Which documents complete Section D?'])
+def test_questions_about_draft_fields_still_reach_the_assistant(assistant, monkeypatch, question):
+    client, _, calls = assistant
+    enable(monkeypatch)
+    response = ask(client, question=question)
+    assert response.status_code == 200
+    assert response.json()['answer'] not in {routes_assist.SAVED_DRAFT_HELP, routes_assist.SAFE_HELP}
+    assert len(calls) == 1
+
+
 def test_personal_information_is_redacted_before_the_provider_sees_it(assistant, monkeypatch):
     client, store, calls = assistant
     enable(monkeypatch)

@@ -206,6 +206,18 @@ def story_text(story: list) -> list[str]:
     return out
 
 
+def _provenance(case: Case, draft_field: str, value: str, source) -> str:
+    from ..drafting_sources import contains_generated
+    if source.ref.startswith('applicant-draft:'):
+        return 'Batatis applicant draft; wording accepted by the applicant; claim sources retained in the drafting record'
+    accepted = case.drafting is not None and any(d.status == 'accepted' and d.field == draft_field
+                                                 for d in case.drafting.drafts)
+    if accepted or contains_generated(value, case):
+        return ('Applicant revision of a Batatis applicant draft; confirmed by the applicant; '
+                'claim sources retained in the drafting record')
+    return f'{_SOURCE_KIND.get(source.type, source.type)}; confirmed by the applicant; not written by Batatis'
+
+
 def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None,
                    package_notes: list[str] | None = None, text: list[str] | None = None) -> bytes | None:
     """Render the appendix PDF, or None when nothing real belongs in it. When ``text`` is a list, the
@@ -257,11 +269,7 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None,
             story.append(KeepTogether([
                 Paragraph(f'P-{n}&nbsp;&nbsp;{escape(field.label)}', H3), _p(field.answer.value),
                 _kv('Applicant source', source.ref + (f', page {source.page}' if source.page else '')),
-                _kv('Provenance', ('Batatis applicant draft; wording accepted by the applicant; '
-                                  'claim sources retained in the application drafting record'
-                                  if source.ref.startswith('applicant-draft:') else
-                                  f'{_SOURCE_KIND.get(source.type, source.type)}; confirmed by the '
-                                  'applicant; not written by Batatis')),
+                _kv('Provenance', _provenance(case, 'process.' + field.id, field.answer.value, source)),
                 _p(field.citation, SMALL)]))
 
     bench = benchmark(case, codes)
@@ -329,6 +337,12 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None,
             Paragraph(escape(item.description), H3),
             _p('listed by applicant, no file attached, not reviewed'),
         ]))
+    plan_fact = next((f for f in reversed(case.facts) if f.field == 'evidence_plan'), None)
+    if (plan_fact is not None and plan_fact.status == 'confirmed' and plan_fact.kind == 'pointed'
+            and isinstance(plan_fact.value, str) and plan_fact.value.strip() and plan_fact.value == plan_fact.source.quote):
+        story += [Paragraph('Supporting evidence plan (applicant wording)', H2), _p(plan_fact.value),
+                  _kv('Provenance', _provenance(case, 'evidence_plan', plan_fact.value, plan_fact.source)),
+                  _p('A plan of the evidence to supply. It is not evidence and does not close any requirement.', SMALL)]
     if not story:
         return None
     printing = ', 2nd printing' if codes is not None and second_printing_proven(codes) else ''

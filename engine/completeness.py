@@ -215,7 +215,8 @@ def check_completeness(case: Case, codes: Codes, *,
         section = ('C' if pending.draft_field.startswith('section_c.') else
                    'D' if pending.draft_field == 'evidence_plan' else
                    'B' if pending.draft_field == 'alternative_description' else 'process')
-        gaps.append(Gap(id=pending.id, section=section, field=pending.field,
+        # A warning until the question flow gives applicants a way to answer these.
+        gaps.append(Gap(id=pending.id, section=section, field=pending.field, severity='warning',
                         message=pending.question.text, routed_to=pending.question.routed_to,
                         fix_hint=pending.question.why + ' Accepting draft wording does not answer this question.'))
     for field in process:

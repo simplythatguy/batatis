@@ -234,3 +234,84 @@ def test_removed_provision_no_longer_has_accepted_c_question_gaps(app):
     assert not open_questions(current, accepted_only=True)
     assert not any(g.id.startswith('draft-question:') for g in check_completeness(current, codes))
     assert next(d for d in current.drafting.drafts if d.id == c_draft['id']).questions
+
+
+def test_editing_accepted_wording_keeps_it_out_of_evidence_and_labels_it_a_revision(app):
+    from engine.export.appendix import _provenance
+    _, store, _, _, _, case = app
+    generated, _ = generation_context(app)
+    risk = next(d for d in generated['drafting']['drafts'] if d['field'] == 'process.risk_assessment')
+    assert decide(app, case, risk).status_code == 200
+    edited = fact('process.risk_assessment', risk['text'].replace('Ask', 'We will ask', 1))
+    store.add_fact(case.id, edited)
+    _, context = generation_context(app)
+    assert not any(s['ref'] == edited.id for s in context['sources'])
+    assert _provenance(store.get(case.id), 'process.risk_assessment', edited.value, edited.source).startswith(
+        'Applicant revision of a Batatis applicant draft')
+
+
+def test_generated_sentences_inside_longer_text_are_not_evidence(app):
+    _, store, _, _, _, case = app
+    generated, _ = generation_context(app)
+    plan = next(d for d in generated['drafting']['drafts'] if d['field'] == 'evidence_plan')['text']
+    wrapped = fact('copied_notes', 'From the draft I was given: ' + plan)
+    store.add_fact(case.id, wrapped)
+    store.add_fact(case.id, fact('project.description', DESCRIPTION + ' ' + plan))
+    current = store.get(case.id)
+    bundle = drafting_sources.collect_sources(current, drafting_sources.read_inputs(current, store, app[2]),
+                                              registry=app[4])
+    assert not any(s.ref == wrapped.id or s.kind == 'description' for s in bundle.sources)
+    assert any('description repeats prior generated' in notice for notice in bundle.notices)
+
+
+def test_a_new_document_sharing_a_sentence_the_draft_quoted_from_a_real_source_stays_readable(app):
+    _, store, _, connection, _, case = app
+
+    def quote_description(raw, context):
+        source = next(s for s in context['sources'] if s['kind'] == 'description')
+        risk = next(d for d in raw['drafts'] if d['field'] == 'process.risk_assessment')
+        risk['claims'][0] = {'kind': 'fact', 'text': source['text'], 'sources': [{'source_id': source['id'], 'quote': source['text']}]}
+    connection.change = quote_description
+    generated, _ = generation_context(app)
+    quoted = next(d for d in generated['drafting']['drafts'] if d['field'] == 'process.risk_assessment')['claims'][0]['text']
+    assert len(quoted.split()) >= drafting_sources.MIN_SENTENCE_WORDS
+    drawing = store.put_file(case.id, 'drawing.pdf', pdf(quoted))
+    current = store.get(case.id)
+    bundle = drafting_sources.collect_sources(
+        current, drafting_sources.read_inputs(current, store, app[2], include_bytes=True), registry=app[4])
+    assert any(s.ref == drawing['id'] for s in bundle.sources)
+
+
+def test_an_unconfirmed_model_paraphrase_does_not_stop_b_drafting(app):
+    _, store, _, _, _, case = app
+    store.add_fact(case.id, Fact(field='alternative_description', value='A timber panel wall.', kind='proposed',
+                                 status='unconfirmed', source=Source(type='user_text', ref='description',
+                                                                     quote='timber wall panel')))
+    _, context = generation_context(app)
+    assert 'alternative_description' in context['fields']
+
+
+def test_a_current_officer_determination_survives_a_changed_description(app):
+    from engine.models import ProfessionalRequirementResolution
+    from engine.professional_resolution import requirement_fingerprint
+    intake(app, DESCRIPTION + ' The building has three storeys.')
+    intake(app, DESCRIPTION + ' The building has two storeys.')
+    _, store, codes, _, _, case = app
+    current = store.get(case.id)
+    current.professional_resolutions.append(ProfessionalRequirementResolution(
+        required=True, scope='wall panel', basis='Structural design is in scope.', reference='AHJ-1',
+        by_id='officer', by_name='Officer', content_fingerprint=requirement_fingerprint(current)))
+    current = store.put(current, expected_version=current.version)
+    assert drafting_sources.read_inputs(current, store, codes).professional_required
+
+
+def test_accepted_evidence_plan_appears_in_the_export_appendix(app):
+    from engine.export.scc import export_case
+    _, store, codes, _, _, case = app
+    generated, _ = generation_context(app)
+    plan = next(d for d in generated['drafting']['drafts'] if d['field'] == 'evidence_plan')
+    assert decide(app, case, plan).status_code == 200
+    result = export_case(store.get(case.id), draft=True, codes=codes)
+    text = ' '.join(' '.join(t.split()) for t in result.appendix_text)
+    assert 'Supporting evidence plan (applicant wording)' in text
+    assert ' '.join(plan['text'].split()) in text

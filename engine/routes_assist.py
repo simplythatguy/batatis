@@ -81,7 +81,10 @@ SAFE_HELP = ('I can explain source text and missing administrative information. 
 SAVED_DRAFT_HELP = ('Use the application’s saved drafting actions to create source-cited applicant wording, '
                     'review its claims and gap questions, then accept it explicitly. Professional work must '
                     'come from its responsible author.')
-_AUTHORING = re.compile(r'\b(?:write|draft|compose|generate|fill|complete|rewrite)\b', re.I)
+# Only a request for the assistant to do the writing, not a question about what a field needs.
+_AUTHORING = re.compile(r'^\W*(?:please\s+)?(?:write|draft|compose|generate|fill|rewrite)\b'
+                        r'|\b(?:can|could|would|will)\s+you\s+(?:please\s+)?(?:write|draft|compose|generate|fill|rewrite)\b'
+                        r'|\b(?:write|draft|compose|generate|fill|rewrite)\b[^.?!]*\bfor\s+(?:me|us)\b', re.I)
 _DRAFT_FIELDS = re.compile(r'\b(?:rationale|risk|mitigat\w*|assumptions?|maintenance|qualifications?'
                            r'|section\s+[bcd]|proposed alternative|evidence plan|engineering report'
                            r'|professional evidence|calculations?|test results?|equivalence opinion|seals?)\b', re.I)

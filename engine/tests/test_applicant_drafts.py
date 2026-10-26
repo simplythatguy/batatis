@@ -417,12 +417,13 @@ def test_accepting_narrative_keeps_real_gap_questions_and_does_not_complete_evid
     key = pending[0].field
     gaps = check_completeness(saved, codes)
     assert not any(g.id == 'D09:risk_assessment' for g in gaps)
-    assert any(g.field == key and g.severity == 'blocking' and g.routed_to == 'professional' for g in gaps)
+    # A visible warning: the applicant has no screen to answer it until the question flow provides one.
+    assert any(g.field == key and g.severity == 'warning' and g.routed_to == 'professional' for g in gaps)
     assert any(g['field'] == key for g in client.get(f'/cases/{case.id}/gaps').json()['items'])
     assert any(g.id.startswith('evidence:') for g in gaps)
     assert saved.evidence == []
     from engine.export.scc import blockers, load_field_map
-    assert any(risk['questions'][0]['text'] in reason for reason in blockers(saved, load_field_map(), codes))
+    assert not any(risk['questions'][0]['text'] in reason for reason in blockers(saved, load_field_map(), codes))
     # The separate question flow can answer the stable key with actual applicant words; accepting prose never does so.
     store.add_fact(case.id, fact(key, 'Not sure'))
     assert open_questions(store.get(case.id), accepted_only=True)
