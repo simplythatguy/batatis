@@ -6,6 +6,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { PassThrough } from "node:stream";
 import test from "node:test";
+import Ajv from "ajv";
 import { DesktopHost } from "../src/main/controller.ts";
 import { KeyVault } from "../src/main/credentials.ts";
 import { Engine, startEngine, type HostCall } from "../src/main/engine.ts";
@@ -15,8 +16,19 @@ import { createAppProtocol } from "../src/main/protocol.ts";
 import { withProviderCancellation } from "../src/main/provider-protocol.ts";
 import { unavailableProvider, type HostProvider } from "../src/main/providers.ts";
 import { DESKTOP, pythonCommand, REPO, scratch, text } from "./helpers.ts";
+import type { IntakeResult } from "../../web/src/api/types.gen.ts";
+import engineSchema from "../../web/src/api/engine.schema.json" with { type: "json" };
 
 const fixture = readFileSync(join(DESKTOP, "tests", "fixtures", "request-lifetime.py"), "utf8");
+const validateIntake = new Ajv({ strict: false, validateFormats: false }).compile<IntakeResult>({
+  ...engineSchema, $ref: "#/$defs/IntakeResult",
+});
+
+function readIntake(text: string): IntakeResult {
+  const value: unknown = JSON.parse(text);
+  if (!validateIntake(value)) assert.fail(`Invalid intake response: ${JSON.stringify(validateIntake.errors)}`);
+  return value;
+}
 
 function deferred() {
   let resolve = () => {};
@@ -249,9 +261,15 @@ test("generation and screening closures retain their origin across worker pools 
   assert.deepEqual((await send("parallel")).results, ["ok", "ok", "ok", "ok"]);
 });
 
-for (const cancelled of [false, true]) {
-  test(cancelled ? "an intake cancelled during profile acquisition cannot dispatch and a fresh request still works"
-    : "the real intake route dispatches intake and synthetic PDF review", { timeout: 15_000 }, async (t) => {
+for (const attachment of [
+  { context: "project", id: "file_synthetic", project: true },
+  { context: "reference", id: "file_reference", project: false },
+  { context: "unknown", id: "file_unknown", project: false },
+  { context: "mixed", id: "file_mixed", project: true },
+]) for (const cancelled of [false, true]) {
+  const title = cancelled ? "an intake cancelled during profile acquisition cannot dispatch and a fresh request still works"
+    : "the real intake route dispatches intake and synthetic PDF review";
+  test(attachment.context === "project" ? title : `${title} (${attachment.context} attachment)`, { timeout: 15_000 }, async (t) => {
     const userData = scratch(t);
     await mkdir(join(userData, "engine-home"));
     await writeFile(join(userData, "settings.json"), JSON.stringify({ version: 1, workspace: "local", devProfile: null,
@@ -263,7 +281,7 @@ for (const cancelled of [false, true]) {
     const abort = new AbortController();
     let statusCount = 0;
     let phase = "origin";
-    const calls: { phase: string; task: string; signal: AbortSignal }[] = [];
+    const calls: { phase: string; task: string; user: string; signal: AbortSignal }[] = [];
     const vault = new KeyVault(join(userData, "providers"), {
       available: async () => false, encrypt: async () => { throw new Error("credential access forbidden"); },
     });
@@ -274,7 +292,7 @@ for (const cancelled of [false, true]) {
     const provider: HostProvider = {
       ...unavailableProvider(), workflowReadiness: async () => ({ ready: true }),
       completeJson: async (request, signal) => {
-        calls.push({ phase, task: request.task, signal });
+        calls.push({ phase, task: request.task, user: request.user, signal });
         const json = request.task === "document-review"
           ? { documents: [], flags: [], facts: [], conflicts: [], provisions: [], missing: [], questions: [] }
           : { facts: [] };
@@ -300,9 +318,30 @@ for (const cancelled of [false, true]) {
     assert.ok(engine instanceof Engine);
     const api = withProviderCancellation(createAppProtocol({ distDir: userData, gate: () => host.gate(host.generation) }),
       (kind) => kind === "identity" ? host.prepareSessionChange() : host.cancelAI());
+    function assertReading(body: IntakeResult) {
+      assert.ok(body.record.review);
+      assert.equal(body.record.review.status, "live");
+      assert.equal(body.record.review.pages_sent, 1);
+      assert.deepEqual(body.record.conflicts, []);
+      assert.equal(body.record.files.length, 1);
+      const fileFacts = body.facts.filter((fact) => fact.source.ref === attachment.id);
+      if (attachment.project) {
+        assert.deepEqual(fileFacts.filter((fact) => fact.field === "storeys").map((fact) => fact.value), [2]);
+        assert.deepEqual(fileFacts.filter((fact) => fact.field === "municipal_address").map((fact) => fact.value), ["42 Project Street"]);
+        assert.deepEqual(fileFacts.filter((fact) => fact.field === "owner_name"), []);
+      } else {
+        assert.deepEqual(fileFacts, []);
+        assert.deepEqual(body.record.files[0].project_pages, []);
+        assert.ok(body.record.files[0].reason);
+      }
+      if (attachment.context !== "project") {
+        assert.deepEqual(body.record.unresolved_citations.map((citation) =>
+          [citation.entered, citation.source_ref, citation.page]), [["9.10.11.2.(2)", attachment.id, 1]]);
+      }
+    }
     const intake = (tag: string, signal?: AbortSignal) => api(new Request(`batatis://app/api/cases/case_synthetic/intake?${tag}`, {
       method: "POST", signal, headers: { "content-type": "application/json" },
-      body: JSON.stringify({ text: "A synthetic novel wall is proposed.", file_ids: ["file_synthetic"] }),
+      body: JSON.stringify({ text: "A synthetic novel wall is proposed.", file_ids: [attachment.id] }),
     }));
     const pending = intake("origin", abort.signal).then(async (response) => ({ status: response.status, body: await response.text() }));
     const rejected = cancelled ? assert.rejects(pending, { name: "AbortError" }) : null;
@@ -310,15 +349,42 @@ for (const cancelled of [false, true]) {
     if (cancelled) abort.abort();
     releaseStatus.resolve();
     if (rejected) await rejected;
-    else assert.equal((await pending).status, 200);
+    else {
+      const origin = await pending;
+      assert.equal(origin.status, 200);
+      assertReading(readIntake(origin.body));
+    }
     await completed.promise;
+    const expectedTasks = attachment.project ? ["intake", "intake", "document-review"] : ["intake", "document-review"];
     assert.deepEqual(calls.filter((call) => call.phase === "origin").map((call) => call.task),
-      cancelled ? [] : ["intake", "intake", "document-review"], "a cancelled worker cannot reacquire provider authority");
+      cancelled ? [] : expectedTasks, cancelled
+        ? "a cancelled worker cannot reacquire provider authority"
+        : attachment.project
+          ? "a project request dispatches description intake, attachment intake, and document review"
+          : "a reference or unknown attachment is reviewed without project field extraction");
     assert.equal(engine.busy, 0);
     phase = "fresh";
-    assert.equal((await intake("fresh")).status, 200);
+    const fresh = await intake("fresh");
+    assert.equal(fresh.status, 200);
+    const body = readIntake(await fresh.text());
+    assertReading(body);
     await freshCompleted.promise;
-    assert.deepEqual(calls.filter((call) => call.phase === "fresh").map((call) => call.task), ["intake", "intake", "document-review"]);
+    const freshCalls = calls.filter((call) => call.phase === "fresh");
+    assert.deepEqual(freshCalls.map((call) => call.task), expectedTasks);
+    assert.equal(freshCalls.some((call) => call.task === "intake" && call.user.includes("two-storey")), attachment.project);
+    for (const call of calls) {
+      for (const personal of ["Reference Owner", "10111 104 Avenue NW", "42 Project Street"]) {
+        assert.equal(call.user.includes(personal), false, "excluded passages still contribute to privacy scrubbing");
+      }
+      if (call.task === "intake") assert.equal(call.user.includes("four-storey"), false);
+    }
+    if (attachment.context !== "project") {
+      assert.ok(freshCalls.some((call) => call.task === "document-review" && call.user.includes("four-storey")));
+    }
+    const saved = await api(new Request("batatis://app/api/cases/case_synthetic/intake"));
+    assert.equal(saved.status, 200);
+    assert.deepEqual(readIntake(await saved.text()).facts, body.facts, "the stored run agrees with the intake response");
+    assert.equal(engine.busy, 0);
     await host.dispose();
     assert.equal(await engine.exited, 0, "the owned synthetic bridge exits cleanly");
   });
