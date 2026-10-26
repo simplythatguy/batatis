@@ -25,7 +25,7 @@ from .code_library import CodeTOC, ProvisionContext, provision_context, table_of
 from .codes import CodeDbMissing, Codes
 from .export import (EXPORT_FAILED_DETAIL, ExportBlocked, ExportError, FORM_NOT_FOUND_DETAIL, FormNotFound,
                      export_case)
-from .export.preview import fits as preview_fits, page_images
+from .export.preview import ENTRY_BYTES, PAYLOAD_BUDGET, encoded, fits as preview_fits, page_images
 from .http_guard import HttpGuard
 from .jurisdictions import export_notice
 from .identify import Judge
@@ -78,7 +78,15 @@ class ExportPreviewTooLarge(BaseModel):
     pdf_bytes: int
 
 
-ExportPreviewResult = Annotated[ExportPreview | ExportPreviewTooLarge, Field(discriminator='kind')]
+class PackagePreview(BaseModel):
+    filename: str
+    page_count: int
+    start: int
+    pages: list[PreviewPage]
+    pdf: str | None = None
+
+
+ExportPreviewResult = ExportPreview | ExportPreviewTooLarge | PackagePreview
 
 
 async def read_capped(request: Request, limit: int = PDF_MAX_BYTES) -> bytes:
@@ -319,21 +327,32 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
             headers['X-Batatis-Jurisdiction-Notice'] = notice
         return Response(res.pdf, media_type='application/pdf', headers=headers)
 
-    @app.get('/cases/{case_id}/export/preview', response_model=ExportPreviewResult)
-    def export_preview(case_id: str):
-        """The draft export drawn as page images, with the bytes they show. A read like the export itself."""
-        res = run_export(get_case(case_id), True)
-        if not preview_fits(len(res.pdf)):
-            # Checked before anything is encoded: the response stays small, and the export route still
-            # delivers the whole draft.
-            return ExportPreviewTooLarge(page_count=res.form_pages + res.appendix_pages, pdf_bytes=len(res.pdf))
-        images, count = page_images(res.pdf)
+    @app.get('/cases/{case_id}/export/preview', response_model=ExportPreviewResult,
+             response_model_exclude_none=True)
+    def export_preview(case_id: str, request: Request, start: int | None = Query(None, ge=0),
+                       count: int | None = Query(None, ge=1, le=60), official: bool = False):
+        """Legacy whole-draft preview, or a bounded window of the exact package pages."""
+        res = run_export(get_case(case_id), not official)
+        windowed = start is not None or count is not None or 'official' in request.query_params
+        filename = f'{case_id}-scc-variance{"" if official else "-DRAFT"}.pdf'
 
         def data_url(kind: str, data: bytes) -> str:
             return f'data:{kind};base64,' + base64.b64encode(data).decode('ascii')
-        return ExportPreview(filename=f'{case_id}-scc-variance-DRAFT.pdf', pdf=data_url('application/pdf', res.pdf),
-                             page_count=count, pages=[PreviewPage(width=i.width, height=i.height,
-                                                                  image=data_url('image/png', i.png)) for i in images])
+
+        if windowed:
+            images, total = page_images(res.pdf, start=start or 0, max_pages=count or 8, reserve_pdf=False)
+            used = ENTRY_BYTES + sum(encoded(len(item.png)) + ENTRY_BYTES for item in images)
+            pdf = data_url('application/pdf', res.pdf) if encoded(len(res.pdf)) + used <= PAYLOAD_BUDGET else None
+            return PackagePreview(filename=filename, page_count=total, start=start or 0,
+                pages=[PreviewPage(width=item.width, height=item.height, image=data_url('image/png', item.png))
+                       for item in images], pdf=pdf)
+        if not preview_fits(len(res.pdf)):
+            return ExportPreviewTooLarge(page_count=res.form_pages + res.appendix_pages + res.attachment_pages,
+                                         pdf_bytes=len(res.pdf))
+        images, total = page_images(res.pdf)
+        return ExportPreview(filename=filename, pdf=data_url('application/pdf', res.pdf), page_count=total,
+            pages=[PreviewPage(width=item.width, height=item.height, image=data_url('image/png', item.png))
+                   for item in images])
 
     @app.get('/code/search')
     def code_search(request: Request, q: str, division: str | None = Query('B', pattern='^[ABC]$'),

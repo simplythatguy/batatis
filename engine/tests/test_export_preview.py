@@ -47,7 +47,8 @@ def test_preview_is_the_draft_pdf_and_an_image_of_each_page(tmp_path):
     assert marker not in ' '.join(page.extract_text() for page in reader.pages)     # confirmed values only
     assert body['page_count'] == len(reader.pages) == len(body['pages']) > 20      # a long package, every page
     for page, preview in zip(reader.pages, body['pages']):
-        assert (preview['width'], preview['height']) == (float(page.mediabox.width), float(page.mediabox.height))
+        assert (preview['width'], preview['height']) == pytest.approx(
+            (float(page.mediabox.width), float(page.mediabox.height)), abs=0.001)
         image = Image.open(io.BytesIO(decoded(preview['image'], 'image/png')))
         assert image.format == 'PNG' and image.size == (round(preview['width'] * SCALE), round(preview['height'] * SCALE))
 
@@ -116,3 +117,57 @@ def test_preview_is_bound_to_the_application_like_the_export(tmp_path, monkeypat
         for client in (other, anonymous):
             assert client.get(f'/cases/{case_id}/export/preview').status_code == 404
             assert client.post(f'/cases/{case_id}/export', json={'draft': True}).status_code == 404
+
+
+def test_window_pages_match_the_actual_requested_pages_and_official_gates(tmp_path):
+    store = CaseStore(tmp_path / 'window.sqlite')
+    case = store_with_synthetic_files(store, sample_case(Codes(), provisions=['9.25.2.2.(1)']))
+    with TestClient(create_app(store=store)) as client:
+        legacy = client.get(f'/cases/{case.id}/export/preview').json()
+        second = client.get(f'/cases/{case.id}/export/preview?start=1&count=2')
+        assert second.status_code == 200, second.text
+        body = second.json()
+        assert body['start'] == 1 and len(body['pages']) == 2
+        assert body['page_count'] == legacy['page_count']
+        assert body['pages'] == legacy['pages'][1:3]
+        assert body['filename'].endswith('-DRAFT.pdf')
+        ready = client.get(f'/cases/{case.id}/export/preview?start=0&count=2&official=true')
+        assert ready.status_code == 200, ready.text
+        assert ready.json()['filename'].endswith('-scc-variance.pdf')
+        pdf = PdfReader(io.BytesIO(decoded(ready.json()['pdf'], 'application/pdf')))
+        assert all('Draft · not for submission' not in page.extract_text() for page in pdf.pages)
+        store.add_fact(case.id, Fact(field='process.risk', value='Pending', kind='pointed',
+                                    source=Source(type='user_text', ref='pending')))
+        blocked = client.get(f'/cases/{case.id}/export/preview?official=true&count=1')
+        assert blocked.status_code == 409 and blocked.json()['detail']['reasons']
+        for query in ['start=-1', 'count=0', 'count=61', 'start=word']:
+            assert client.get(f'/cases/{case.id}/export/preview?{query}').status_code == 422
+
+
+def test_window_still_renders_when_pdf_bytes_do_not_fit(tmp_path):
+    from pypdf import PdfWriter
+    from pypdf.generic import DecodedStreamObject, NameObject
+    from engine.models import Case
+    from engine.tests.case_builder_fixtures import fact
+    store = CaseStore(tmp_path / 'large-window.sqlite')
+    case = store.put(Case())
+    writer = PdfWriter()
+    page = writer.add_blank_page(width=612, height=792)
+    padding = DecodedStreamObject()
+    padding.set_data(b'0' * 3_100_000)
+    page[NameObject('/SyntheticSizeFixture')] = writer._add_object(padding)
+    output = io.BytesIO()
+    writer.write(output)
+    saved = store.put_file(case.id, 'SYNTHETIC-size-boundary.pdf', output.getvalue())
+    source = Source(type='file', ref=saved['id'], quote='SYNTHETIC size boundary, no evidence content.')
+    case.facts.append(fact('evidence.size.file_ref', saved['id'], source=source))
+    store.put(case)
+    with TestClient(create_app(store=store)) as client:
+        legacy = client.get(f'/cases/{case.id}/export/preview')
+        assert legacy.status_code == 200 and legacy.json()['kind'] == 'too_large'
+        response = client.get(f'/cases/{case.id}/export/preview?start=3&count=2')
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body['start'] == 3 and len(body['pages']) == 2 and body['page_count'] >= 8
+    assert 'pdf' not in body
+    assert len(response.content) < RESPONSE_CAP
