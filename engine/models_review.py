@@ -23,6 +23,10 @@ Section = Literal['A', 'B', 'C', 'D', 'process']
 FieldStatus = Literal['present', 'blank', 'not_found']
 FindingStatus = Literal['blank', 'not_found', 'missing', 'unclear']
 FileRole = Literal['scc_form_fillable', 'scc_form_flattened', 'attachment', 'unreadable', 'case_record']
+# The officer's call on one automated finding. `verify` is "not established: look first" and still counts
+# against acceptance when the finding is blocking; only `dismissed` (with a reason) stops it counting.
+OfficerState = Literal['ask', 'verify', 'dismissed']
+DismissReason = Literal['checked', 'not_needed', 'does_not_fit']
 
 
 class Pointer(BaseModel):
@@ -118,6 +122,18 @@ class SectionCCheck(BaseModel):
     pointer: Pointer
 
 
+class RequestTarget(BaseModel):
+    """Where the applicant answers a request item: a form section and, when known, one field.
+
+    `field` is an engine field id the applicant workspace maps to the place to fix it (see
+    docs/api/package-review.md, "Where the applicant answers"). `label` is what both sides show.
+    """
+    model_config = ConfigDict(extra='forbid')
+    section: Section
+    field: str | None = Field(default=None, max_length=200)
+    label: str = Field(min_length=1, max_length=200)
+
+
 class InformationRequestItem(BaseModel):
     model_config = ConfigDict(extra='forbid')
     id: str
@@ -126,8 +142,25 @@ class InformationRequestItem(BaseModel):
     field: str | None = None
     text: str
     authored_by: Literal['batatis', 'officer'] = 'batatis'
+    # Server-owned for finding-linked items: True exactly when the finding's officer state is `ask`.
     included: bool = True
     officer_check: bool = False       # a not-found field: the officer looks before asking
+    target: RequestTarget | None = None   # every item that is sent has one
+
+
+class Disposition(BaseModel):
+    """The officer's call on one automated finding, kept with the session. It never edits the finding.
+
+    Absent means the default: `ask` for an applicant finding the review established, `verify` for a
+    not-found or officer-routed one. `dismissed` needs a reason, and a note when the finding is blocking.
+    """
+    model_config = ConfigDict(extra='forbid')
+    key: str
+    state: OfficerState
+    reason: DismissReason | None = None
+    note: str = Field(default='', max_length=500)
+    by_name: str | None = None
+    at: str | None = None
 
 
 class InformationRequest(BaseModel):
@@ -156,6 +189,8 @@ class ReviewDiff(BaseModel):
     resolved: list[DiffEntry]
     still_open: list[DiffEntry]
     new: list[DiffEntry]
+    # An earlier gap the new version can't establish either way (unreadable, not found). Never "resolved".
+    unverified: list[DiffEntry] = Field(default_factory=list)
     statement: str                    # "x of y gaps resolved"
 
 
@@ -168,6 +203,7 @@ class InputFile(BaseModel):
     role: FileRole
     form_version: str | None = None
     note: str = ''
+    file_id: str | None = None        # a case upload kept with the case: GET /cases/{case_id}/files/{file_id}
 
 
 class ReviewSession(BaseModel):
@@ -193,6 +229,7 @@ class ReviewSession(BaseModel):
     information_request: InformationRequest
     diff: ReviewDiff | None = None
     lookup_skipped: bool = False      # True when the code database was unavailable
+    dispositions: list[Disposition] = Field(default_factory=list)
 
 
 class SessionSummary(BaseModel):
@@ -201,7 +238,7 @@ class SessionSummary(BaseModel):
     created_at: str
     created_by_name: str
     input_kind: Literal['case', 'upload']
-    open_gaps: int
+    required: int                     # ReviewTally.required for that version
     statement: str | None = None
     sent_at: str | None = None
 
@@ -224,20 +261,89 @@ class RecordPackage(BaseModel):
 
 
 class CloseOut(BaseModel):
-    """Close-out after a final decision: the copy goes to the Council within 10 days of the decision."""
+    """Close-out after a final decision.
+
+    An administrative acceptance is not a variance: it only says the file is complete. The copy to the
+    Council is due within 10 days of the variance being issued, which happens outside Batatis and which
+    the officer records (`issued_on`). Before that, and after a refusal, nothing is due.
+    """
     model_config = ConfigDict(extra='forbid')
     case_id: str
     outcome: Literal['accept', 'refuse']
     decided_at: str
-    due_date: str                   # ISO date, 10 days after the decision
-    days_remaining: int             # negative when overdue
-    overdue: bool
+    issued_on: str | None = None    # ISO date the officer says the variance was issued; accept only
+    issued_by_name: str | None = None
+    due_date: str | None = None     # ISO date, 10 days after issued_on; None until issued
+    days_remaining: int | None = None   # negative when overdue
+    overdue: bool = False
     sent: bool                      # the officer recorded that they sent it
     sent_at: str | None = None
     sent_by_name: str | None = None
     record_package: RecordPackage
     notice: str = ('Batatis does not send anything to the Safety Codes Council. The officer sends the copy and '
                    'records it here.')
+
+
+class FindingState(BaseModel):
+    """A finding's effective officer state (stored disposition or default), as the server counts it."""
+    model_config = ConfigDict(extra='forbid')
+    key: str
+    state: OfficerState
+    reason: DismissReason | None = None
+    note: str = ''
+    by_name: str | None = None
+    at: str | None = None
+    # The rulebook still requires this on the saved application, so it can't be dismissed: ask for it.
+    locked: bool = False
+
+
+class ReviewTally(BaseModel):
+    """The one definition of every count the officer sees, for one session. The client never recounts."""
+    model_config = ConfigDict(extra='forbid')
+    required: int       # acceptance blockers: blocking findings not dismissed, plus rulebook blocking gaps no finding covers
+    to_check: int       # warnings not dismissed
+    verify: int         # not established yet, whatever the severity: the officer looks first
+    dismissed: int
+    asked: int          # items in the request text
+    rulebook: int       # rulebook blocking gaps on the saved application with no finding (shown, never dismissible)
+
+
+class RulebookGap(BaseModel):
+    """A blocking gap from the shared completeness rules that no finding covers. Shown as-is."""
+    model_config = ConfigDict(extra='forbid')
+    id: str
+    field: str | None = None
+    section: Section | None = None
+    message: str
+
+
+class AcceptGate(BaseModel):
+    """Whether this version can be accepted now, decided by the server (the decision route rechecks it)."""
+    model_config = ConfigDict(extra='forbid')
+    can_accept: bool
+    reason: str = ''
+
+
+class RequestLimits(BaseModel):
+    """Checked when the draft is saved and again on return; the client shows them, never enforces others."""
+    model_config = ConfigDict(extra='forbid')
+    items: int = 50
+    intro: int = 2000
+    item_text: int = 2000
+    text: int = 12000
+
+
+class Workspace(BaseModel):
+    """The officer's working state for the latest version: per-finding states, counts and the accept gate."""
+    model_config = ConfigDict(extra='forbid')
+    version: int
+    case_version: int | None = None
+    current: bool                       # this version read the saved application as it is now
+    states: list[FindingState]          # one per finding except the peer-review signal, in finding order
+    rulebook: list[RulebookGap] = Field(default_factory=list)
+    tally: ReviewTally
+    gate: AcceptGate
+    limits: RequestLimits = Field(default_factory=RequestLimits)
 
 
 class PackageReviewIndex(BaseModel):
@@ -247,21 +353,47 @@ class PackageReviewIndex(BaseModel):
     authority: str
     sessions: list[SessionSummary]
     latest: ReviewSession | None = None
+    workspace: Workspace | None = None  # for `latest`; None when there is no session
     close_out: CloseOut | None = None
 
 
 class InformationRequestEdit(BaseModel):
-    """Officer edits: replace the item list (text, inclusion, order) and optionally the intro."""
+    """Officer edits, saved as one write: the item list (text, order, officer items), the intro, and the
+    officer's call on findings. `findings` lists changes only; findings left out keep their state."""
     model_config = ConfigDict(extra='forbid')
     intro: str | None = Field(default=None, max_length=2000)
-    items: list[EditedItem]
+    items: list[EditedItem] = Field(max_length=50)
+    findings: list[DispositionEdit] = Field(default_factory=list, max_length=200)
 
 
 class EditedItem(BaseModel):
     model_config = ConfigDict(extra='forbid')
     id: str | None = Field(default=None, max_length=100)   # None adds an officer item
     text: str = Field(min_length=1, max_length=2000)
+    # Officer items only; a finding-linked item follows its finding's state and ignores this.
     included: bool = True
+    target: RequestTarget | None = None   # required for an officer item; finding-linked items keep theirs
+
+
+class DispositionEdit(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    key: str = Field(min_length=1, max_length=300)
+    state: OfficerState
+    reason: DismissReason | None = None
+    note: str = Field(default='', max_length=500)
+
+
+class ReturnWithRequest(BaseModel):
+    """Send the saved request and return the application, as one write. Both or neither."""
+    model_config = ConfigDict(extra='forbid')
+    expected_version: int = Field(ge=1, strict=True)   # the saved application version on screen
+    text: str = Field(min_length=1, max_length=12000)   # the exact request text the officer previewed
+
+
+class VarianceIssued(BaseModel):
+    """The officer's statement that they issued the variance (outside Batatis) on this date."""
+    model_config = ConfigDict(extra='forbid')
+    issued_on: str = Field(pattern=r'^\d{4}-\d{2}-\d{2}$')
 
 
 InformationRequestEdit.model_rebuild()

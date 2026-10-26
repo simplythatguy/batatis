@@ -109,7 +109,10 @@ class DecisionRequest(BaseModel):
     outcome: DecisionOutcome
     # Legacy accept/return callers may omit this. New final refusals pin their displayed revision.
     expected_version: int | None = Field(default=None, ge=1, strict=True,
-                                        description='Required for a refusal; the displayed saved application version.')
+                                        description='Required for an acceptance and a refusal; the displayed saved application version.')
+    # The package-review version on screen. An acceptance needs it whenever the case has a package review:
+    # it must be the latest version, read from the saved application as it is now, with nothing required open.
+    review_version: int | None = Field(default=None, ge=1, strict=True)
     message: str | None = Field(default=None, max_length=4000)
     items: list[DecisionItem] = Field(default_factory=list, max_length=50)
 
