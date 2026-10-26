@@ -508,9 +508,10 @@ const ENGINE_WAIT_MS = 8000;
 export const EXPORT_WAIT_MS = 90_000;
 /**
  * Intake reads the description, then runs the document review inside the same request under the engine's
- * 240 s review deadline (engine/intake/review.py). A local AI connection can take most of that.
+ * 240 s review deadline (engine/intake/review.py), after the description is read. A local AI connection
+ * can take most of both.
  */
-const INTAKE_WAIT_MS = 300_000;
+const INTAKE_WAIT_MS = 420_000;
 
 function withTimeout(parent: AbortSignal | undefined, ms: number) {
   const scope = accountRequestSignal(parent);

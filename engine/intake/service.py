@@ -114,7 +114,8 @@ def settle(case: Case, extraction: Extraction) -> None:
             elif given:
                 chosen, confirm = [f for f in unique if f.value != prior.value][:1], False
             elif field in PROBE_BY_FIELD:
-                if field not in conflicted:
+                # Short values become one "You wrote two things" choice; long passages get the plain question.
+                if field not in conflicted and all(len(str(f.value)) <= 60 for f in unique):
                     extraction.conflicts.append(FieldConflict(
                         field=field, values=[f.value for f in unique][:6], quotes=[f.source.quote or '' for f in unique][:6],
                         source_ref=unique[0].source.ref or '', page=unique[0].source.page))

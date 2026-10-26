@@ -13,7 +13,8 @@ from types import EllipsisType
 from ..intake.model import GateClosed, Transport
 from . import bridge
 
-CALL_SECONDS = 180.0
+# Just under the document review's 240 s deadline (engine/intake/review.py): a local runtime can need most of it.
+CALL_SECONDS = 235.0
 
 
 def private_call(op: str, args: dict, *, context: bridge.RequestContext | None, timeout: float = CALL_SECONDS) -> dict:

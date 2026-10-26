@@ -68,7 +68,7 @@ export class ProviderDispatch {
     const cancel = () => abort.abort();
     signal.addEventListener("abort", cancel, { once: true });
     this.#pending.add(abort);
-    const timeout = setTimeout(cancel, op === "provider.jev" && typeof args.timeout === "number" ? Math.min(180_000, args.timeout * 1000) : 180_000);
+    const timeout = setTimeout(cancel, op === "provider.jev" && typeof args.timeout === "number" ? Math.min(180_000, args.timeout * 1000) : 235_000);
     try {
       let reply: CallReply;
       if (op === "provider.completeJson") {

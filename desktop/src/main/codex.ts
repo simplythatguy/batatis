@@ -68,7 +68,7 @@ class CodexProvider implements HostProvider {
   constructor(context: HostProviderContext, options: CodexProviderOptions) {
     this.context = context;
     this.options = { ...options, environment: { ...(options.environment ?? process.env) }, verifiedContext: options.verifiedContext && { ...options.verifiedContext } };
-    this.timing = { requestMs: 15_000, completionMs: 170_000, interruptMs: 5_000, stopMs: 1000, loginMs: 15 * 60_000, ...options.timing };
+    this.timing = { requestMs: 15_000, completionMs: 225_000, interruptMs: 5_000, stopMs: 1000, loginMs: 15 * 60_000, ...options.timing };
     for (const value of Object.values(this.timing)) if (!Number.isFinite(value) || value < 1 || value > 30 * 60_000) throw new Error("Invalid Codex deadline");
   }
 

@@ -189,6 +189,10 @@ def test_where_sources_disagree_the_description_wins_else_one_question_or_one_ch
     asked = _settled(Case(), [_pointed('occupancy', 'multi_family', page, 'rowhouses'),
                               _pointed('occupancy', 'single_family', page, 'houses')])
     assert asked.facts == [] and [(c.field, c.values) for c in asked.conflicts] == [('occupancy', ['multi_family', 'single_family'])]
+    long = [_pointed('alternative_description', f'{n} ' + 'rated party walls between the rowhouse units ' * 3, page, 'x')
+            for n in (1, 2)]
+    plain = _settled(Case(), long)
+    assert plain.facts == [] and plain.conflicts == []
     check = _settled(Case(), [_pointed('wall.cladding', 'Rated party walls', page, 'Rated party walls'),
                               _pointed('wall.cladding', 'Sprinklers in each suite', page, 'Sprinklers in each suite')])
     assert [(f.value, f.status) for f in check.facts] == [('Rated party walls', 'unconfirmed')]

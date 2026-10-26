@@ -168,7 +168,8 @@ class ClaudeProvider implements HostProvider {
     this.environment = { ...(options.environment ?? process.env) };
     this.platform = options.platform ?? process.platform;
     this.pin = options.pin === undefined ? claudePin(this.platform, options.arch ?? process.arch) : options.pin;
-    this.timing = { completionMs: 170_000, commandMs: 30_000, loginMs: 15 * 60_000, urlMs: 10_000, stopMs: 2000, ...options.timing };
+    // Ends before the host gives up (235 s), so a slow document review fails with this provider's own reason.
+    this.timing = { completionMs: 225_000, commandMs: 30_000, loginMs: 15 * 60_000, urlMs: 10_000, stopMs: 2000, ...options.timing };
     for (const value of Object.values(this.timing)) if (!Number.isFinite(value) || value < 1 || value > 30 * 60_000) throw new Error("Invalid Claude deadline");
   }
 
