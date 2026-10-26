@@ -18,6 +18,7 @@ from codedb.ids import parse
 from .account_models import ApplicationStatus, Claim, Decision, ReviewSnapshot, StatusChange, StoredMessage, Submission
 from .case_retention import expiry_at
 
+from .models_workspace import Workspace
 from .models_intake import IntakeRecord
 from .relevance_models import RelevanceRecord
 from .models_identify import IdentifyResult
@@ -210,6 +211,7 @@ class Case(BaseModel):
     submissions: list[Submission] = Field(default_factory=list)
     return_snapshot: ReviewSnapshot | None = None
     messages: list[StoredMessage] = Field(default_factory=list)
+    workspace: Workspace = Field(default_factory=Workspace)
     professional_resolutions: list[ProfessionalRequirementResolution] = Field(default_factory=list)
     created_at: str = Field(default_factory=now)
     updated_at: str = Field(default_factory=now)
