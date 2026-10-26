@@ -315,6 +315,14 @@ function registerIpc() {
     if (page) await shell.openExternal(page);
     return null;
   }, null);
+  answer("batatis:login-code", async (_e, arg) => {
+    const { id, code } = typeof arg === "object" && arg !== null ? arg as Record<string, unknown> : {};
+    const status = isAccount(id) ? await host.account(id).status() : null;
+    if (isAccount(id) && status?.state === "pending" && status.acceptsCode && typeof code === "string") {
+      await host.account(id).submitLoginCode?.(status.loginId, code.trim());
+    }
+    return host.providerRows();
+  }, []);
   answer("batatis:cancel-login", async (_e, id) => {
     const status = isAccount(id) ? await host.account(id).status() : null;
     if (isAccount(id) && status?.state === "pending") await host.account(id).cancelLogin(status.loginId);

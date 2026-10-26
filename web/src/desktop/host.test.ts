@@ -30,7 +30,7 @@ test("connection rows show a device code only with an https sign-in address, and
     { id: "a3", kind: "account", label: "Account", description: "d", status: { state: "signed-out", last: { loginId: "l1", result: "cancelled" } } },
   ]);
   assert.deepEqual(rows.map((r) => r.id), ["a1", "k1", "a3"]);
-  assert.deepEqual(rows[0].status, { state: "pending", userCode: "ABCD-1234", address: "example.test/device" });
+  assert.deepEqual(rows[0].status, { state: "pending", userCode: "ABCD-1234", address: "example.test/device", acceptsCode: false });
   assert.equal(rows[1].status, "saved");
   assert.deepEqual(rows[2].status, { state: "signed-out", last: "Sign-in cancelled." });
   assert.doesNotMatch(JSON.stringify(rows), /secret|sk-should/);
@@ -94,7 +94,18 @@ test("a browser sign-in is pending without a code, with its page only when it is
       status: { state: "pending", loginId: "l", userCode: "", verificationUrl } }])[0];
     return row?.kind === "account" ? row.status : null;
   };
-  assert.deepEqual(pending(""), { state: "pending", userCode: null, address: null });
-  assert.deepEqual(pending("https://claude.com/cai/oauth/authorize"), { state: "pending", userCode: null, address: "claude.com/cai/oauth/authorize" });
-  assert.deepEqual(pending("http://claude.com/x"), { state: "pending", userCode: null, address: null });
+  assert.deepEqual(pending(""), { state: "pending", userCode: null, address: null, acceptsCode: false });
+  assert.deepEqual(pending("https://claude.com/cai/oauth/authorize"), { state: "pending", userCode: null, address: "claude.com/cai/oauth/authorize", acceptsCode: false });
+  assert.deepEqual(pending("http://claude.com/x"), { state: "pending", userCode: null, address: null, acceptsCode: false });
+});
+
+test("a browser sign-in that offers a pasted code says so; anything but true is no", () => {
+  const accepts = (acceptsCode: unknown) => {
+    const row = parseRows([{ id: "c", kind: "account", label: "Account", description: "", workflow: null,
+      status: { state: "pending", loginId: "l", userCode: "", verificationUrl: "https://claude.com/x", acceptsCode } }])[0];
+    return row?.kind === "account" && row.status.state === "pending" ? row.status.acceptsCode : null;
+  };
+  assert.equal(accepts(true), true);
+  assert.equal(accepts("true"), false);
+  assert.equal(accepts(undefined), false);
 });

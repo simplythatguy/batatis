@@ -32,7 +32,18 @@ if (args[0] === "auth" && args[1] === "status") {
   process.stdin.resume();
   if (login.outcome === "success") setTimeout(() => { save({ loggedIn: true, authMethod: "claude.ai" }); process.exit(0); }, login.delayMs ?? 0);
   else if (login.outcome === "fail") setTimeout(() => process.exit(1), login.delayMs ?? 0);
-  else hang();
+  else if (login.outcome === "code") {
+    let typed = "";
+    process.stdin.setEncoding("utf8");
+    process.stdin.on("data", (chunk) => {
+      typed += chunk;
+      if (!typed.includes("\n")) return;
+      record({ pasted: typed });
+      if (typed === `${login.code}\n`) { save({ loggedIn: true, authMethod: "claude.ai" }); process.exit(0); }
+      process.exit(1);
+    });
+    hang();
+  } else hang();
 } else if (args[0] === "auth" && args[1] === "logout") {
   record({});
   save({ loggedIn: false, authMethod: "none" });

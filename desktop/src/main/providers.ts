@@ -49,8 +49,11 @@ export type LoginOutcome =
 export type ConnectionState =
   | { state: "unavailable"; reason: "adapter-missing" | "runtime-missing" | "unsupported-platform" | "keyring-unavailable"; message: string }
   | { state: "signed-out"; last: LoginOutcome | null }
-  /** Sign-in in progress: the person opens verificationUrl and, for device-code sign-in, enters userCode (empty otherwise). */
-  | { state: "pending"; loginId: string; verificationUrl: string; userCode: string }
+  /**
+   * Sign-in in progress: the person opens verificationUrl and, for device-code sign-in, enters userCode (empty otherwise).
+   * acceptsCode: the sign-in page may end by showing a code for the person to paste back into the app.
+   */
+  | { state: "pending"; loginId: string; verificationUrl: string; userCode: string; acceptsCode?: true }
   | { state: "signed-in"; plan: string | null }
   | { state: "error"; message: string };
 
@@ -104,6 +107,8 @@ export interface HostProvider {
   /** Starts sign-in. Pending state carries the page to open and, for device-code sign-in, the code to enter. */
   startLogin(): Promise<ConnectionState>;
   cancelLogin(loginId: string): Promise<ConnectionState>;
+  /** Hands a pasted sign-in code to the pending login that offered acceptsCode. */
+  submitLoginCode?(loginId: string, code: string): Promise<ConnectionState>;
   logout(): Promise<ConnectionState>;
   models(): Promise<readonly HostModel[]>;
   completeJson(request: CompleteJsonRequest, signal: AbortSignal): Promise<CompleteJsonResult>;

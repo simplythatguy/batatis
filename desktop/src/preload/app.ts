@@ -22,6 +22,7 @@ if (location.origin === "batatis://app") {
       connect: (id: string) => invoke("batatis:connect", id),
       openLogin: (id: string) => invoke("batatis:open-login", id),
       cancelLogin: (id: string) => invoke("batatis:cancel-login", id),
+      submitLoginCode: (id: string, code: string) => invoke("batatis:login-code", { id, code }),
       disconnect: (id: string) => invoke("batatis:disconnect", id),
     },
     codeDb: { choose: () => invoke("batatis:choose-codedb") },
