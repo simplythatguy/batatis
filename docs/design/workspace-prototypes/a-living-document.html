@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Prototype A · Living document</title>
+<style>
+:root{--bg:#f5f6f8;--rail:#eceef2;--s:#fff;--t:#14161b;--t2:#4a505c;--t3:#6b7280;--t4:#a3a8b3;--l:rgba(17,24,39,.08);--l2:rgba(17,24,39,.14);--hov:rgba(17,24,39,.04);--sel:rgba(17,24,39,.07);--accent:#f25a2a;--block:#e5484d;--warn:#f0a20b;--done:#18a058;--pend:#9aa0ab;--pri:#16181d;--violet:#6d28d9;--font:Inter,ui-sans-serif,system-ui,sans-serif;--mono:ui-monospace,"SF Mono",monospace}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:14px/1.55 var(--font)}
+button{font:inherit;color:inherit;cursor:pointer}
+.app{display:grid;grid-template-rows:52px 1fr;height:820px;overflow:hidden}
+.hdr{display:flex;align-items:center;gap:14px;padding:0 18px;border-bottom:1px solid var(--l);background:var(--bg)}
+.brand{width:22px;height:22px;border-radius:7px;background:var(--accent)}
+.ttl{font-weight:600}
+.stages{margin:0 auto;display:flex;gap:18px;color:var(--t3)}
+.stages span{opacity:.6}.stages .cur{opacity:1;color:var(--t);font-weight:500}
+.save{font:12px var(--mono);color:var(--t3);display:flex;gap:6px;align-items:center}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex:none}
+.d-done{background:var(--done)}.d-block{background:var(--block)}.d-warn{background:var(--warn)}.d-pend{background:var(--pend)}
+.main{display:grid;grid-template-columns:200px 1fr 300px;min-height:0}
+.outline{padding:22px 10px 22px 18px;overflow:auto}
+.outline a{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;color:var(--t2);text-decoration:none;font-size:13.5px}
+.outline a:hover{background:var(--hov)}.outline a.on{background:var(--sel);color:var(--t)}
+.outline .n{margin-left:auto;font:11px var(--mono);color:var(--t3)}
+.outline .ico{width:16px;text-align:center;color:var(--t3);font-size:12px}
+.docwrap{overflow:auto;padding:0 8px 80px;position:relative}
+.toolbar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:6px;padding:12px 4px;background:var(--bg)}
+.tb{border:0;background:transparent;border-radius:9px;padding:6px 9px;color:var(--t2);display:flex;gap:6px;align-items:center;font-size:13px}
+.tb:hover{background:var(--hov)}
+.sp{flex:1}
+.status{font-size:12px;color:var(--t3);display:flex;gap:6px;align-items:center;padding:0 6px}
+.pri{background:var(--pri);color:#fff;border:0;border-radius:999px;padding:8px 16px;font-weight:500;font-size:13px}
+.ghost{background:transparent;border:1px solid var(--l2);border-radius:999px;padding:7px 14px;font-size:13px}
+.paper{background:#fff;max-width:720px;margin:6px auto 0;border-radius:6px;box-shadow:0 30px 80px -20px rgba(17,24,39,.16);padding:48px 60px;font-size:13.5px;line-height:1.6;color:#111}
+.paper h1{font-size:18px;margin:0}.paper .sub{font:11px var(--mono);color:#63636b;margin-bottom:26px}
+.paper h2{font-size:14px;margin:30px 0 10px;display:flex;align-items:baseline;gap:10px}
+.paper h2 .k{font:11px var(--mono);color:var(--t3);font-weight:400}
+.row{display:grid;grid-template-columns:170px 1fr;gap:14px;padding:6px 8px;margin:0 -8px;border-radius:8px}
+.row .lab{color:#63636b;font-size:12.5px}
+.val{outline:none;border-radius:6px;padding:1px 4px;margin:-1px -4px}
+.val:hover{background:var(--hov)}.val:focus{background:#fff;box-shadow:0 0 0 1.5px var(--t3)}
+.miss{color:var(--block);font-size:12.5px}
+.narr{padding:4px 8px;margin:0 -8px;border-radius:8px;position:relative}
+.narr h3{font-size:12.5px;color:#63636b;font-weight:500;margin:14px 0 2px}
+.narr p{margin:0}
+.ai-mark{position:absolute;left:-30px;top:20px;color:var(--t3);font-size:12px}
+ins.ai{text-decoration:none;border-bottom:1.5px dashed #8b5cf6;background:#f6f2ff}
+del.ai{color:var(--t4);text-decoration:line-through}
+.code{border-left:2px solid #111;padding:6px 0 6px 12px;margin:6px 0;font-size:12.5px}
+.code .tag{font:10.5px var(--mono);color:var(--t3);display:block}
+.lookup{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.chip{font:11px var(--mono);border:1px solid var(--l2);border-radius:6px;padding:1px 6px;color:var(--t2)}
+.aibox{border:1px dashed var(--l2);border-radius:10px;padding:8px 10px;margin-top:8px;font-size:12.5px;color:var(--t2)}
+.aibox .tag{font:10.5px var(--mono);color:var(--t3);display:block}
+.sig{display:grid;grid-template-columns:1.6fr 1fr;border:1px solid var(--l2);border-radius:10px;margin-top:10px;overflow:hidden}
+.sig>div{padding:10px 12px;min-height:72px}.sig>div+div{border-left:1px solid var(--l2)}
+.sig .lab{font-size:11.5px;color:#63636b}
+.sig .print{grid-column:1/-1;border-top:1px solid var(--l2);min-height:0;font-size:12px}
+.signbtn{margin-top:6px;border:1px dashed var(--l2);background:#fff;border-radius:8px;padding:8px 12px;width:100%;text-align:left;color:var(--t2)}
+.consent{display:flex;gap:10px;align-items:flex-start;font-size:12px;color:#444;margin-top:8px}
+.box{width:15px;height:15px;border:1px solid var(--t3);border-radius:4px;flex:none;margin-top:2px;display:grid;place-items:center;font-size:11px}
+.box.on{background:#111;color:#fff;border-color:#111}
+.margin{padding:66px 18px 0 6px;overflow:auto;position:relative}
+.card{background:#fff;border-radius:14px;box-shadow:0 1px 2px rgba(17,24,39,.05),0 4px 16px -6px rgba(17,24,39,.08);padding:12px 14px;margin-bottom:10px;font-size:13px}
+.card .h{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--t3);margin-bottom:6px}
+.card .acts{display:flex;gap:6px;margin-top:10px}
+.mini{border:1px solid var(--l2);background:#fff;border-radius:999px;padding:4px 11px;font-size:12px}
+.mini.dark{background:var(--pri);color:#fff;border-color:var(--pri)}
+.seltb{position:absolute;display:none;background:#16181d;color:#fff;border-radius:10px;padding:4px;gap:2px;box-shadow:0 8px 24px rgba(0,0,0,.2);z-index:20}
+.seltb button{background:transparent;border:0;color:#fff;padding:6px 10px;border-radius:7px;font-size:12.5px}
+.seltb button:hover{background:rgba(255,255,255,.12)}
+.hilite{background:#fff4c2}
+.modal{position:fixed;inset:0;background:rgba(17,24,39,.25);display:none;place-items:center;z-index:30}
+.dlg{background:#fff;border-radius:18px;width:460px;padding:22px;box-shadow:0 30px 80px rgba(0,0,0,.2)}
+.dlg h3{margin:0 0 4px;font-size:18px}
+.tabs{display:flex;gap:4px;margin:12px 0}
+.tabs button{border:0;background:transparent;border-radius:8px;padding:5px 10px;color:var(--t3)}
+.tabs .on{background:var(--sel);color:var(--t)}
+canvas{border:1px solid var(--l2);border-radius:12px;width:100%;height:140px;touch-action:none;background:#fff}
+.flags .it{display:flex;gap:8px;align-items:flex-start;padding:6px 0;font-size:13px}
+.label{font:11px var(--mono);color:var(--t3)}
+</style></head><body>
+<div class="app">
+ <div class="hdr"><div class="brand"></div><div class="ttl">NailBase siding</div>
+  <div class="stages"><span>✎</span><span>?</span><span>☰</span><span class="cur">▤ Application</span></div>
+  <div class="save"><span class="dot d-done"></span>Saved</div></div>
+ <div class="main">
+  <nav class="outline" aria-label="Sections">
+   <a href="#A" class="on"><span class="ico">A</span>About you<span class="n">✓</span></a>
+   <a href="#B"><span class="ico">B</span>Your project<span class="n">✓</span></a>
+   <a href="#case"><span class="ico">¶</span>Your case<span class="n" style="color:#6d28d9">✦ 1</span></a>
+   <a href="#C"><span class="ico">C</span>Rules<span class="n">2</span></a>
+   <a href="#D"><span class="ico">D</span>Documents<span class="n"><span class="dot d-block"></span></span></a>
+   <a href="#sign"><span class="ico">✍</span>Sign<span class="n">0/1</span></a>
+  </nav>
+  <div class="docwrap" id="docwrap">
+   <div class="toolbar">
+    <button class="tb" title="Find (⌘F)">⌕</button><button class="tb" title="Smaller">−</button><span class="label">100%</span><button class="tb" title="Larger">+</button>
+    <button class="tb" title="History">↺ History</button>
+    <div class="sp"></div>
+    <span class="status"><span class="dot d-pend"></span>Draft · not sent</span>
+    <button class="ghost" id="ov">Officer view</button>
+    <button class="pri">Send…</button>
+   </div>
+   <article class="paper" id="paper">
+    <h1>Request for an alternative solution</h1>
+    <div class="sub">NBC 2023 Alberta Edition, 2nd printing · City of Edmonton</div>
+    <h2 id="A">About you <span class="k">Section A</span></h2>
+    <div class="row"><span class="lab">Owner's name</span><span class="val" contenteditable>Birchfield Homes Ltd.</span></div>
+    <div class="row"><span class="lab">Owner's representative</span><span class="val" contenteditable style="color:#63636b">N/A · owner applies directly</span></div>
+    <div class="row"><span class="lab">Mailing address</span><span class="val" contenteditable>000 Example Road NW, Edmonton AB</span></div>
+    <div class="row"><span class="lab">Date of request</span><span class="val" contenteditable>Oct 21, 2026</span></div>
+    <h2 id="B">Your project <span class="k">Section B</span></h2>
+    <div class="row"><span class="lab">Municipal address</span><span class="val" contenteditable>0000 Example Way NW</span></div>
+    <div class="row"><span class="lab">Lot · Block · Plan</span><span class="val" contenteditable>0 · 0 · 0000000</span></div>
+    <div class="row"><span class="lab">Permit number</span><span class="val" style="color:#63636b">N/A · goes in with the permit</span></div>
+    <div class="row"><span class="lab">Proposed alternative</span><span class="val" contenteditable id="alt">On wall type W1, vertical vinyl siding is fastened with ring-shank nails at 400 mm o.c. directly into the 6 mm fibre-cement facer of a 50 mm insulating sheathing panel, instead of into framing, furring or a listed sheathing.</span></div>
+    <h2 id="case">Your case <span class="k">Appendix</span></h2>
+    <div class="narr"><h3>Why a variance</h3><p class="val" contenteditable>The benchmark is Sentence 9.27.5.1.(2): cladding fastened to sheathing of the kind and thickness it lists. Our panel replaces that sheathing, so the siding is held by the facer alone.</p></div>
+    <div class="narr"><span class="ai-mark" title="Drafted with AI · you accepted Oct 26">✦</span><h3>Risk</h3><p class="val" contenteditable>If the facer cannot hold the nails, siding could loosen in high wind <del class="ai">and fall</del><ins class="ai">and detach from the wall, mainly at corners and upper storeys</ins>.</p></div>
+    <div class="narr"><h3>Mitigating measures</h3><p class="val" contenteditable>Nails at 400 mm o.c., ring-shank only; installer follows the manufacturer's guide; site check before cladding.</p></div>
+    <div class="narr"><h3>Assumptions and limits</h3><p class="miss">● Missing · <u>write it</u> · <u>draft with AI</u></p></div>
+    <h2 id="C">Which rules apply <span class="k">Section C</span></h2>
+    <div><span class="chip">9.27.5.1.(2)</span> <span style="font-size:12.5px">Attachment of cladding</span>
+     <div class="lookup"><span class="chip">OS2.3</span><span class="chip">F20</span><span class="chip">OP2.3</span><span class="label" title="Looked up, not written">🔒 lookup</span></div>
+     <div class="code"><span class="tag">Code text · verbatim</span>Cladding shall be fastened to framing members, furring members, blocking, or to sheathing of a type and thickness listed…</div>
+     <div class="aibox"><span class="tag">✦ AI draft · not code text</span>This sentence lists which sheathing can hold cladding nails; the panel's facer is not on that list, which is why the request exists.<div class="acts" style="margin-top:6px"><button class="mini dark">Accept</button><button class="mini">Edit</button><button class="mini">Reject</button></div></div>
+    </div>
+    <h2 id="D">Supporting documents <span class="k">Section D</span></h2>
+    <div class="row"><span class="lab">Test report summary</span><span>Example Materials Testing · <span class="label">📎 PDF · 6 pages</span></span></div>
+    <div class="row"><span class="lab">Engineer's letter</span><span>J. Example, P.Eng. · <span class="miss">no file attached</span></span></div>
+    <h2 id="sign">Signatures and disclosures <span class="k">Form</span></h2>
+    <div class="consent"><span class="box" id="cbox"></span><span>I agree to the described use of the information provided. <u style="color:#63636b">Read the disclosure</u></span></div>
+    <div class="sig"><div><span class="lab">Owner's signature</span><button class="signbtn" id="signbtn">✍ Sign as Birchfield Homes Ltd.</button></div><div><span class="lab">Date</span><div id="sdate" style="color:#63636b">Filled when signed</div></div><div class="print"><span class="lab">Owner's name (print) </span> Birchfield Homes Ltd.</div></div>
+    <p class="label" style="margin-top:8px">Professionals sign their own documents. Batatis never signs for them.</p>
+   </article>
+   <div class="seltb" id="seltb"><button>✦ Ask</button><button>✦ Rewrite ▾</button><button>Clearer</button><button>Shorter</button></div>
+  </div>
+  <aside class="margin" id="margin">
+   <div class="card" style="margin-top:420px"><div class="h"><span style="color:#6d28d9">✦</span>Suggested · Risk</div>“…and detach from the wall, mainly at corners and upper storeys.”<div class="acts"><button class="mini dark">Accept</button><button class="mini">Reject</button></div></div>
+   <div class="card"><div class="h"><span class="dot d-block"></span>Officer would flag</div>Assumptions and limits are empty.<div class="acts"><button class="mini">Write it</button></div></div>
+  </aside>
+ </div>
+</div>
+<div class="modal" id="modal"><div class="dlg"><h3>Sign as owner</h3><div class="label">Birchfield Homes Ltd. · Oct 26, 2026</div>
+ <div class="tabs"><button class="on">Draw</button><button>Type</button></div><canvas id="cv" width="832" height="280"></canvas>
+ <p style="font-size:12px;color:#63636b">By signing, the owner agrees that the proposed alternative provides equal or better performance to the provisions stated.</p>
+ <div style="display:flex;gap:8px;justify-content:flex-end"><button class="ghost" id="cancel">Cancel</button><button class="pri" id="ok">Sign</button></div></div></div>
+<script>
+const seltb=document.getElementById('seltb'),wrap=document.getElementById('docwrap');
+document.addEventListener('selectionchange',()=>{const s=getSelection();if(!s.rangeCount||s.isCollapsed||!document.getElementById('paper').contains(s.anchorNode)){seltb.style.display='none';return}
+ const r=s.getRangeAt(0).getBoundingClientRect(),w=wrap.getBoundingClientRect();seltb.style.display='flex';seltb.style.left=(r.left-w.left+wrap.scrollLeft)+'px';seltb.style.top=(r.top-w.top+wrap.scrollTop-44)+'px'});
+window.selectDemo=()=>{const el=document.getElementById('alt');const t=el.firstChild;const r=document.createRange();r.setStart(t,0);r.setEnd(t,58);const s=getSelection();s.removeAllRanges();s.addRange(r)};
+const m=document.getElementById('modal');document.getElementById('signbtn').onclick=()=>m.style.display='grid';document.getElementById('cancel').onclick=()=>m.style.display='none';
+const cv=document.getElementById('cv'),cx=cv.getContext('2d');cx.lineWidth=3;cx.lineCap='round';let dn=false;
+cv.onpointerdown=e=>{dn=true;const b=cv.getBoundingClientRect();cx.beginPath();cx.moveTo((e.clientX-b.left)*832/b.width,(e.clientY-b.top)*280/b.height)};
+cv.onpointermove=e=>{if(!dn)return;const b=cv.getBoundingClientRect();cx.lineTo((e.clientX-b.left)*832/b.width,(e.clientY-b.top)*280/b.height);cx.stroke()};onpointerup=()=>dn=false;
+window.scribble=()=>{cx.beginPath();cx.moveTo(60,190);for(let i=0;i<60;i++){cx.lineTo(60+i*11,170+Math.sin(i/2.2)*40-(i%7)*3)}cx.stroke()};
+document.getElementById('ok').onclick=()=>{m.style.display='none';document.getElementById('signbtn').outerHTML='<img alt="Signature" style="height:44px;margin-top:4px" src="'+cv.toDataURL()+'">';document.getElementById('sdate').textContent='Oct 26, 2026';document.getElementById('sdate').style.color='#111';document.getElementById('cbox').classList.add('on');document.getElementById('cbox').textContent='✓'};
+document.getElementById('cbox').onclick=e=>{e.target.classList.toggle('on');e.target.textContent=e.target.classList.contains('on')?'✓':''};
+</script></body></html>
