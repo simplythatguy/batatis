@@ -4,6 +4,12 @@ Batatis helps builders in Alberta prepare a complete building-code variance appl
 
 [Open the app](https://batatis-vert.vercel.app) · [Download for Mac or Windows](https://github.com/simplythatguy/batatis/releases) · [Desktop setup](docs/desktop.md) · [License](LICENSE.md)
 
+## See it work
+
+[![The filled variance form in Batatis, from the demo](docs/readme/demo-poster.png)](docs/readme/demo.mp4)
+
+[Watch the 5-minute demo](docs/readme/demo.mp4). A homebuilder describes a project and attaches two City of Edmonton PDFs. Batatis reads them, asks only what they didn't already say, and fills in the variance form. Then a City of Edmonton officer reviews the application. The demo uses example data and runs in the desktop app with Claude Haiku.
+
 ## The problem
 
 Every new building in Alberta has to follow the building code. The code is a set of safety rules that tell builders how to build, so that buildings don't collapse, catch fire easily, or trap people inside.
