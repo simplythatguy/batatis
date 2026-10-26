@@ -26,3 +26,8 @@ test("the same item asked five times is one row with its count, grouped by what 
     ["answers", [["Owner's name", 1]]], ["rules", [["Does your design differ from this rule?", 3]]], ["signing", [["Consent not given", 1]]],
   ]);
 });
+test("one question asked of several articles reads as one row naming the first", () => {
+  const ask = (n: number) => ({ id: `q${n}`, label: `Answer whether your design differs from rule 9.27.5.1.(${n})`, href: `#/q${n}`, group: "rules" as const });
+  const [rules] = groupFlags([ask(1), ask(2), ask(3)]);
+  assert.deepEqual(rules.rows.map(r => [r.label, r.href, r.all.length]), [["Answer whether your design differs from rule 9.27.5.1.(1) and 2 more", "#/q1", 3]]);
+});

@@ -7,7 +7,7 @@ import type { WorkspaceLoad } from "./useWorkspace";
 
 export type FlagGroup = "answers" | "rules" | "documents" | "signing" | "officer";
 export interface SigningFlag { id: string; label: string; href: string; group?: FlagGroup }
-export interface FlagRow { key: string; label: string; href: string; count: number }
+export interface FlagRow { key: string; label: string; href: string; count: number; /** Every label this row stands for, when they differ only by article. */ all: string[] }
 
 export const GROUP_LABEL: Record<FlagGroup, string> = {
   answers: "Your answers",
@@ -61,16 +61,26 @@ export function officerFlags(c: Case, gaps: Gap[], sections: readonly DocSection
   ];
 }
 
-/** Identical items (one question asked of five articles) read as one row with a count. */
+const ARTICLE = /\b\d+(?:\.\d+)+\.?(?:\(\d+\))*(?:\([a-z]+\))?/g;
+
+/**
+ * Identical items read as one row with a count; items that differ only by article number (one question
+ * asked of five sentences) read as one row naming the first and how many more.
+ */
 export function groupFlags(flags: readonly SigningFlag[]): { group: FlagGroup; rows: FlagRow[] }[] {
   const groups = new Map<FlagGroup, Map<string, FlagRow>>();
   for (const f of flags) {
     const group = f.group ?? "answers";
     const rows = groups.get(group) ?? new Map<string, FlagRow>();
-    const row = rows.get(f.label);
-    if (row) row.count += 1;
-    else rows.set(f.label, { key: f.id, label: f.label, href: f.href, count: 1 });
+    const key = f.label.replace(ARTICLE, "#");
+    const row = rows.get(key);
+    if (!row) rows.set(key, { key: f.id, label: f.label, href: f.href, count: 1, all: [f.label] });
+    else if (row.all.includes(f.label)) row.count += 1;
+    else row.all.push(f.label);
     groups.set(group, rows);
   }
-  return ORDER.filter(g => groups.has(g)).map(group => ({ group, rows: [...groups.get(group)!.values()] }));
+  return ORDER.filter(g => groups.has(g)).map(group => ({
+    group,
+    rows: [...groups.get(group)!.values()].map(r => r.all.length > 1 ? { ...r, label: `${r.all[0]} and ${r.all.length - 1} more` } : r),
+  }));
 }

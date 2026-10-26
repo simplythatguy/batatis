@@ -29,7 +29,7 @@ One sub-bar under the header: three steps, `Edit · Sign · Send`. The current s
 - Verbatim code text keeps the solid-rule quote style and is never editable. Section C objectives and functions are lookups (lock icon), never editable.
 - A returned application shows each officer request on the block it concerns (`DecisionItem.field`), above the block, in the officer's words.
 - History (clock icon in the sub-bar) opens a drawer: every change, newest first, with who (`You`, `AI · accepted`, `Restored`), the block, and `Restore` on each entry. `⌘Z` outside a text field and the toast after accepting an AI change undo the last change.
-- Zoom: `−` `+` in the sub-bar scale the paper (80–140%). Sections are reachable from the step's outline popover (`A B ¶ C D`).
+- Zoom: `−` `+` in the sub-bar scale the paper (80–140%). A slim section index left of the paper (`A B ¶ C D`) jumps to a section; only the section you are reading takes its hue (A blue, B teal, ¶ slate, C violet, D amber), and a red dot marks a section with something missing.
 - Read-only (sent, in review, accepted, refused): no caret, no selection rewrite; `Ask` stays.
 
 ### Sign
@@ -38,12 +38,12 @@ One sub-bar under the header: three steps, `Edit · Sign · Send`. The current s
 - `Sign here` opens a dialog: `Draw` (pointer, touch or pen) or `Type` (the name in a signature face). The printed name comes from the application and stays editable; the date is today's date in Alberta and is filled automatically. The form's attestation sentence sits above the button.
 - A signature is tied to the content it signed. If the application changes after signing, the card says `Changed since signed` and asks to sign again; the export leaves that signature out.
 - Batatis never signs or seals for anyone: each signature needs an explicit act by its signer. Professionals sign their own Section D documents; the Sign step offers no professional signature.
-- A signer who is not at this computer: `Copy signing link` (phase 2, see routes).
+- A signer who is not at this computer: not built yet. Planned: a single-use signing link that expires and is revoked when the content changes.
 
 ### Send
 
 - Officer view: the real package pages as the officer receives them (the exported PDF, drawn a few pages at a time), and beside them:
-  - `Officer would flag n`: the shared completeness results, plus unsigned or out-of-date signatures and missing consent, each with `Fix` that opens the block or the Sign step.
+  - `Officer would flag n`: the shared completeness results, plus unsigned or out-of-date signatures and missing consent, each with `Fix` that opens the block or the Sign step. Identical items show once with `×n`; items that differ only by article number show once as "… and n more".
   - `In the package`: Form Part 1, the appendix, each attached supporting document with its page count; a listed document with no file says `Not attached`.
   - The one primary action: `Submit to <office>` (disabled with the reason while anything blocks), and `Download PDF` (the official package when ready; otherwise a draft marked on every page).
 
