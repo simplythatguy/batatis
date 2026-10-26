@@ -91,12 +91,10 @@ export const DESTINATIONS: Record<DestinationId, Target> = {
   application: route("Application", "#/application", { role: "applicant" }),
   "code-library": route("Code library", "#/code", { prefix: true }),
   "code-search": { kind: "action", label: "Look up code", open: fire(OPEN_PALETTE), shows: "dialog.cf-palette[open]" },
-  references: route("Rules you chose", "#/references", { role: "applicant", case: true }),
+  references: route("Rules you chose", "#/application", { role: "applicant", case: true }),
   downloads: route("Download options", "#/application?download=options", { role: "applicant", case: true }),
-  "officer-view": route("Officer view", "#/officer", { role: "applicant", case: true }),
   settings: route("Settings", "#/settings"),
   notifications: route("Notifications", "#/notifications"),
-  accuracy: route("Accuracy report", "#/accuracy"),
   "question-authority": question("Reviewing jurisdiction", "authority"),
   "question-owner": question("Owner", "field-owner"),
   "question-representative": question("Representative", "field-representative"),
@@ -143,7 +141,6 @@ export const destinationLabel = (id: DestinationId): string => DESTINATIONS[id].
 
 export type PanelOpener = (caseId: string | null) => boolean | Promise<boolean>;
 const panels = new Map<DestinationId, { caseId: string | null; open: PanelOpener }>();
-const panelListeners = new Set<() => void>();
 
 /**
  * Offer `id` while mounted, for one application (`caseId`; null for case-free panels). Returns the
@@ -153,17 +150,10 @@ export function registerPanel(id: DestinationId, caseId: string | null, open: Pa
   if (DESTINATIONS[id].kind !== "panel") throw new Error(`${id} is not a panel`);
   const entry = { caseId, open };
   panels.set(id, entry);
-  for (const l of panelListeners) l();
   return () => {
     if (panels.get(id) !== entry) return;
     panels.delete(id);
-    for (const l of panelListeners) l();
   };
-}
-
-export function subscribePanels(l: () => void): () => void {
-  panelListeners.add(l);
-  return () => { panelListeners.delete(l); };
 }
 
 /** The ids to offer the server: only what this role can open right now, for this application. */

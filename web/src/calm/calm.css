@@ -1,8 +1,4 @@
-/*
-  Batatis calm system. Tokens mirror docs/design/calm-flow-prototype.html.
-  Loaded after styles.css. Classes are prefixed cf- so they never collide with the
-  legacy screens; .cf-legacy and .cf-embed re-theme those screens through their tokens.
-*/
+/* Current calm system; shared.css supplies embedded controls, quotes and notices. */
 
 :root {
   /* Light layer (user decision 2026-10-22): soft grey canvas, white surfaces, dark ink, hairlines.
@@ -2912,8 +2908,7 @@ body {
 
 /* —— Embedded legacy parts (Section D card, drawer search) —— */
 
-.cf-embed,
-.cf-legacy {
+.cf-embed {
   --bg-app: transparent;
   --bg-panel: transparent;
   --bg-elevated: rgba(17, 24, 39, 0.04);
@@ -2946,7 +2941,7 @@ body {
   color: var(--cf-text);
 }
 
-:is(.cf-embed, .cf-legacy) .btn {
+.cf-embed .btn {
   height: 36px;
   padding: 0 16px;
   border-radius: 999px;
@@ -2958,49 +2953,49 @@ body {
   transition-timing-function: ease-out;
 }
 
-:is(.cf-embed, .cf-legacy) .btn:not(:disabled):active {
+.cf-embed .btn:not(:disabled):active {
   scale: 0.96;
 }
 
-:is(.cf-embed, .cf-legacy) .btn:hover {
+.cf-embed .btn:hover {
   background: transparent;
 }
 
 @media (hover: hover) {
-  :is(.cf-embed, .cf-legacy) .btn:not(:disabled):hover {
+  .cf-embed .btn:not(:disabled):hover {
     background: rgba(17, 24, 39, 0.06);
   }
-  :is(.cf-embed, .cf-legacy) .btn-primary:not(:disabled):hover {
+  .cf-embed .btn-primary:not(:disabled):hover {
     background: var(--cf-primary-hover);
   }
 }
 
-:is(.cf-embed, .cf-legacy) .btn-primary {
+.cf-embed .btn-primary {
   background: var(--cf-primary-bg);
   color: var(--cf-primary-text);
   border-color: transparent;
 }
 
-:is(.cf-embed, .cf-legacy) .btn-ghost {
+.cf-embed .btn-ghost {
   border-color: transparent;
   color: var(--cf-text-2);
 }
 
-:is(.cf-embed, .cf-legacy) .btn-xs {
+.cf-embed .btn-xs {
   height: 28px;
   padding: 0 12px;
   font-size: 12px;
 }
 
-:is(.cf-embed, .cf-legacy) .field label,
-:is(.cf-embed, .cf-legacy) .field-label-row label {
+.cf-embed .field label,
+.cf-embed .field-label-row label {
   font-size: 12px;
   color: var(--cf-text-2);
 }
 
-:is(.cf-embed, .cf-legacy) .field input:not([type="checkbox"]),
-:is(.cf-embed, .cf-legacy) .field select,
-:is(.cf-embed, .cf-legacy) .field textarea {
+.cf-embed .field input:not([type="checkbox"]),
+.cf-embed .field select,
+.cf-embed .field textarea {
   border-radius: 12px;
   border-color: var(--cf-line-2);
   background-color: rgba(17, 24, 39, 0.03);
@@ -3008,29 +3003,29 @@ body {
   color: var(--cf-text);
 }
 
-:is(.cf-embed, .cf-legacy) .field select {
+.cf-embed .field select {
   color-scheme: light;
 }
 
-:is(.cf-embed, .cf-legacy) .field select option {
+.cf-embed .field select option {
   background: #fff;
   color: var(--cf-text);
 }
 
-:is(.cf-embed, .cf-legacy) .meta,
-:is(.cf-embed, .cf-legacy) .field-note {
+.cf-embed .meta,
+.cf-embed .field-note {
   color: var(--cf-text-3);
   font-size: 12.5px;
 }
 
-:is(.cf-embed, .cf-legacy) .card {
+.cf-embed .card {
   background: var(--cf-inset);
   border: 1px solid var(--cf-line);
   border-radius: var(--cf-r-tile);
   padding: 18px;
 }
 
-:is(.cf-embed, .cf-legacy) .label-pill {
+.cf-embed .label-pill {
   border-radius: 999px;
   border-color: var(--cf-line-2);
   height: 24px;
@@ -3038,14 +3033,14 @@ body {
   font-size: 11.5px;
 }
 
-:is(.cf-embed, .cf-legacy) .pill {
+.cf-embed .pill {
   border-radius: 999px;
   height: 30px;
   padding: 0 14px;
   font-size: 13px;
 }
 
-:is(.cf-embed, .cf-legacy) .cite-block {
+.cf-embed .cite-block {
   font-family: var(--cf-font);
   font-size: 14px;
   line-height: 1.6;
@@ -3056,41 +3051,41 @@ body {
   padding: 14px 16px;
 }
 
-:is(.cf-embed, .cf-legacy) .ai-explain,
-:is(.cf-embed, .cf-legacy) .ai-block {
+.cf-embed .ai-explain,
+.cf-embed .ai-block {
   border: 1px dashed var(--cf-line-2);
   border-radius: 14px;
   padding: 12px 14px;
 }
 
-:is(.cf-embed, .cf-legacy) details > summary {
+.cf-embed details > summary {
   cursor: pointer;
   border-radius: 6px;
 }
 
-:is(.cf-embed, .cf-legacy) .compact-help > summary,
-:is(.cf-embed, .cf-legacy) .disclosure > summary {
+.cf-embed .compact-help > summary,
+.cf-embed .disclosure > summary {
   color: var(--cf-text-2);
   font-size: 13px;
 }
 
-:is(.cf-embed, .cf-legacy) .nrc-credit {
+.cf-embed .nrc-credit {
   color: var(--cf-text-3);
   font-family: var(--cf-mono);
   font-size: 11px;
 }
 
-:is(.cf-embed, .cf-legacy) .step-heading h2 {
+.cf-embed .step-heading h2 {
   font-size: 18px;
   font-weight: 500;
   letter-spacing: -0.015em;
 }
 
-:is(.cf-embed, .cf-legacy) .step-controls {
+.cf-embed .step-controls {
   flex-wrap: wrap;
 }
 
-:is(.cf-embed, .cf-legacy) .table th {
+.cf-embed .table th {
   font-family: var(--cf-mono);
   letter-spacing: 0.06em;
 }
@@ -3114,60 +3109,6 @@ body {
 
 .cf-sectiond .field-step {
   margin-top: 6px;
-}
-
-/* Legacy screens rendered inside the shell (Officer, Accuracy, references). */
-.cf-legacy {
-  max-width: 1040px;
-  height: calc(100% - 24px);
-  margin: 12px auto 0;
-  display: flex;
-  flex-direction: column;
-  border: 1px solid var(--cf-line);
-  border-radius: var(--cf-r-card);
-  background: var(--cf-glass);
-  backdrop-filter: blur(24px) saturate(140%);
-  box-shadow: inset 0 1px 0 var(--cf-glass-hi), 0 30px 80px -30px rgba(17, 24, 39, 0.16);
-  overflow: hidden;
-}
-
-.cf-main:has(> .cf-legacy),
-.cf-main:has(> .cf-edit-lock > .cf-legacy) {
-  padding: 0 24px 24px;
-}
-
-.cf-legacy .panel-header {
-  height: auto;
-  padding: 24px 28px 16px;
-  border-bottom: 1px solid var(--cf-line);
-}
-
-.cf-legacy .panel-title {
-  font-size: 26px;
-  font-weight: 500;
-  letter-spacing: -0.02em;
-}
-
-.cf-legacy .header-meta {
-  font-family: var(--cf-mono);
-  font-size: 11px;
-  letter-spacing: 0;
-}
-
-.cf-legacy .pane {
-  padding: 20px 28px;
-}
-
-.cf-legacy .footer-bar {
-  flex-wrap: wrap;
-  padding: 14px 28px;
-  border-top: 1px solid var(--cf-line);
-}
-
-.cf-legacy .dialog {
-  border-radius: 24px;
-  background: rgba(16, 18, 22, 0.98);
-  border-color: var(--cf-line-2);
 }
 
 /* —— Responsive —— */
@@ -3295,16 +3236,6 @@ body {
   }
   .cf-drawer-scroll {
     padding: 22px 20px 28px;
-  }
-  .cf-main:has(> .cf-legacy),
-  .cf-main:has(> .cf-edit-lock > .cf-legacy) {
-    padding: 0 10px 12px;
-  }
-  .cf-legacy .panel-header,
-  .cf-legacy .pane,
-  .cf-legacy .footer-bar {
-    padding-left: 18px;
-    padding-right: 18px;
   }
 }
 
@@ -4533,7 +4464,6 @@ body {
    Overlays (menus, dialogs, drawer, palette, tooltips, assistant) use one raised near-black. */
 
 .cf-glass,
-.cf-legacy,
 .cf-sheet-pane {
   background: transparent;
   backdrop-filter: none;
@@ -4646,19 +4576,13 @@ body {
   border-color: var(--cf-text);
 }
 
-.cf-legacy .dialog {
-  background: var(--cf-raise);
-  border-radius: 16px;
-}
-
-.cf-embed,
-.cf-legacy {
+.cf-embed {
   --bg-elevated: transparent;
   --bg-input: transparent;
   --code-bg: transparent;
 }
 
-:is(.cf-embed, .cf-legacy) .card {
+.cf-embed .card {
   background: transparent;
 }
 

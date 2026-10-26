@@ -27,7 +27,7 @@ test("document review in a real DOM (API-typed unit fixtures)", { skip: !playwri
   try { output = (await bundle.generate({ format: "iife" })).output; }
   finally { await bundle.close(); }
   const script = output.filter((file) => file.type === "chunk").map((file) => file.code).join("\n");
-  const styles = (await Promise.all(["../styles.css", "./calm.css", "./DocumentReview.css"].map((file) => readFile(new URL(file, import.meta.url), "utf8")))).join("\n");
+  const styles = (await Promise.all(["../shared.css", "./calm.css", "./DocumentReview.css"].map((file) => readFile(new URL(file, import.meta.url), "utf8")))).join("\n");
   const path = join(directory, "document-review-unit.html");
   await writeFile(path, `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Document review · unit fixture</title><style>body{margin:0}*{box-sizing:border-box}${styles}</style><div id="fixture"></div><script>${script.replaceAll("</script", "<\\/script")}</script></html>`);
   t.diagnostic(`Unit fixture (no application server): ${path}`);

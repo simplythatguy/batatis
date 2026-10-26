@@ -127,7 +127,6 @@ function reviewCaseOf(path: string): string | null {
 function accountPage(path: string): { screen: string; label: string } {
   if (path === "/settings") return { screen: "settings", label: "settings" };
   if (path === "/notifications") return { screen: "notifications", label: "notifications" };
-  if (path === "/accuracy") return { screen: "accuracy", label: "the accuracy report" };
   if (path === "/review") return { screen: "queue", label: "the review queue" };
   if (/^\/review\/package(\/|$)/.test(path)) return { screen: "package", label: "a PDF package" };
   if (path.startsWith("/review/")) return { screen: "review", label: "this file" };
@@ -525,13 +524,10 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
             items={[
               { label: "Look up code", hint: `${MOD_KEY} ⇧ K`, onClick: openPalette },
               { label: "Code library", href: "#/code" },
-              { label: "Accuracy report", href: "#/accuracy" },
               ...(withCase && current && current.status !== "draft" ? [{ label: current.unread_messages > 0 ? `Comments (${current.unread_messages} new)` : "Comments", href: "#/comments" }] : []),
               ...(withCase && current?.status !== "refused" && checkStatus === "unavailable" ? [{ label: "Try the check again", onClick: () => void requestCheck(true), separator: true }] : []),
               ...(withCase
                 ? [
-                    { label: "Rules you chose (Section C)", href: "#/references", separator: checkStatus === "unavailable" },
-                    { label: "Officer view", href: "#/officer" },
                     { label: "Download draft", href: "#/application?download=draft", separator: true },
                     { label: signedIn ? "New application" : "Start over", onClick: () => (signedIn ? startNew() : setConfirm(true)) },
                   ]
