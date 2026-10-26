@@ -1,6 +1,7 @@
 /** Account-scoped queue reads, shared by queue/detail and the existing notification poll. */
 import { useSyncExternalStore } from "react";
 import { QueueSessionChanged, review, type QueueApplication } from "../../api/accounts";
+import { packageReview } from "../../api/packageReview";
 import { engine, EngineError } from "../../api/client";
 import { accountSession, getAccountState, setAccountState, subscribeAccount } from "../account";
 import { getNotificationsState, subscribeNotifications } from "../notifications/notifications";
@@ -9,7 +10,7 @@ export interface QueueState {
   phase: "idle" | "loading" | "ready" | "error";
   rows: QueueApplication[];
   error: string;
-  /** Blocking gap count per case id (from GET /cases/{id}/gaps), filled lazily. */
+  /** Server workspace required count per case; legacy servers use their canonical gaps. */
   blocking: Record<string, number>;
 }
 
@@ -27,7 +28,6 @@ let controller: AbortController | null = null;
 let inflight: Promise<void> | null = null;
 let patches = new Map<string, Partial<QueueApplication>>();
 let seen = new Set<string>();
-const asked = new Map<string, string>();
 const reviewer = () => {
   const { phase, user } = getAccountState();
   return phase === "signed-in" && user?.role === "reviewer" && Boolean(user.authority);
@@ -41,7 +41,6 @@ subscribeAccount(() => {
   controller = null;
   inflight = null;
   patches = new Map();
-  asked.clear();
   seen.clear();
   state = empty();
   for (const l of listeners) l();
@@ -83,8 +82,7 @@ export function loadQueue(refresh = false): Promise<void> {
         return;
       }
       if (e instanceof QueueSessionChanged) {
-        asked.clear();
-        set({ phase: "error", rows: [], blocking: {}, error: e.detail });
+              set({ phase: "error", rows: [], blocking: {}, error: e.detail });
         return;
       }
       set({ phase: state.rows.length ? "ready" : "error", error: e instanceof EngineError ? e.detail : "The queue didn’t load." });
@@ -101,20 +99,31 @@ export function patchRow(id: string, patch: Partial<QueueApplication>, session =
   set({ rows: state.rows.map(r => r.id === id ? { ...r, ...patch } : r) });
 }
 
-export function setBlocking(id: string, n: number) {
-  if (reviewer()) set({ blocking: { ...state.blocking, [id]: n } });
+export function setBlocking(id: string, n: number | null) {
+  if (!reviewer()) return;
+  const blocking = { ...state.blocking };
+  if (n === null) delete blocking[id];
+  else blocking[id] = n;
+  set({ blocking });
 }
 
-/** Re-check changed submissions/content, three reads at a time, within the same session. */
+/** Draft dispositions can change without Case.updated_at changing. Read the server on every refresh. */
 async function fillBlocking(rows: QueueApplication[], signal: AbortSignal, current: () => boolean) {
-  const todo = rows.filter(row => asked.get(row.id) !== row.updated_at);
+  const todo = [...rows];
   const worker = async () => {
     for (let row = todo.shift(); row && current(); row = todo.shift()) {
       try {
-        const gaps = await engine.gaps(row.id, signal);
+        let required: number | null;
+        try {
+          const index = await packageReview.index({ kind: "case", id: row.id }, signal);
+          required = index.workspace?.current ? index.workspace.tally.required : null;
+        } catch (error) {
+          if (!(error instanceof EngineError) || ![404, 405].includes(error.status)) throw error;
+          const gaps = await engine.gaps(row.id, signal);
+          required = gaps.filter(g => g.severity === "blocking").length;
+        }
         if (!current()) return;
-        asked.set(row.id, row.updated_at);
-        setBlocking(row.id, gaps.filter(g => g.severity === "blocking").length);
+        setBlocking(row.id, required);
       } catch { /* A later notification or manual refresh can retry. */ }
     }
   };

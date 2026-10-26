@@ -15,7 +15,7 @@ export function CodeRef({ citation }: { citation: string }) {
     if (!next || !parsed || state.phase === "ready" || state.phase === "loading") return;
     setState({ phase: "loading", text: "" });
     engine.provision(parsed.id, parsed.division).then(
-      (r) => setState({ phase: "ready", text: r.text.replace(/\s+/g, " ").trim() }),
+      (r) => setState({ phase: "ready", text: r.text }),
       () => setState({ phase: "error", text: "" }),
     );
   }

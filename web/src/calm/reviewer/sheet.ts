@@ -11,6 +11,7 @@ import { evidenceBinding } from "../../evidence";
 type Fact = EngineCase["facts"][number];
 
 export interface SheetRow {
+  field?: string;
   label: string;
   value: string | null;
   /** Required for completeness (missing shows "— missing"; optional shows "—"). */
@@ -91,7 +92,7 @@ function text(f: Fact | null): string | null {
 function row(facts: Fact[], label: string, fields: string[], required: boolean): SheetRow {
   const f = latest(facts, fields);
   const value = text(f);
-  return { label, value, required, unconfirmed: Boolean(value && f?.status === "unconfirmed") };
+  return { field: fields[0], label, value, required, unconfirmed: Boolean(value && f?.status === "unconfirmed") };
 }
 
 const authorityLabel = (id: string | null | undefined) => (id ? id.charAt(0).toUpperCase() + id.slice(1) : null);
@@ -118,7 +119,7 @@ export function sheetFromEngine(c: EngineCase, information?: InformationRequest 
     questions: information && information.case_id === c.id && information.case_version === c.version ? information.questions ?? [] : [],
     applicant: A_FIELDS.map(([l, f, r]) => row(facts, l, f, r)),
     project: [
-      { label: "Reviewing authority", value: authorityLabel(c.authority ?? c.jurisdiction?.id), required: true },
+      { field: "authority", label: "Reviewing authority", value: authorityLabel(c.authority ?? c.jurisdiction?.id), required: true },
       ...B_FIELDS.map(([l, f, r]) => row(facts, l, f, r)),
     ],
     alternative: row(facts, "Proposed alternative", ["alternative_description", "alternative"], true),
@@ -127,7 +128,7 @@ export function sheetFromEngine(c: EngineCase, information?: InformationRequest 
     supporting: [
       row(facts, "Registered professional", [professionalField], true),
       row(facts, "Registration or seal", [registrationField], false),
-      { label: "Documents listed", value: docs.size ? `${docs.size} ${docs.size === 1 ? "document" : "documents"}` : null, required: true },
+      { field: "documents", label: "Documents listed", value: docs.size ? `${docs.size} ${docs.size === 1 ? "document" : "documents"}` : null, required: true },
     ],
     documents: [...docs].map(([id, title]) => {
       const binding = evidenceBinding(facts, id);

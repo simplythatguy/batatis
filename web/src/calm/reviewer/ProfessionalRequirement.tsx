@@ -15,6 +15,7 @@ export function ProfessionalRequirement({ c, editable, busy, unresolved, onResol
 }) {
   const id = useId();
   const [screen, setScreen] = useState<ProfessionalResult | null>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [loadError, setLoadError] = useState("");
   const [open, setOpen] = useState(false);
   const [required, setRequired] = useState<boolean | null>(null);
@@ -31,7 +32,7 @@ export function ProfessionalRequirement({ c, editable, busy, unresolved, onResol
       if (active) setLoadError("The professional requirement check didn’t load. Reload to try again.");
     });
     return () => { active = false; };
-  }, [c.id, c.version]);
+  }, [c.id, c.version, loadAttempt]);
   useEffect(() => { if (!editable) setOpen(false); }, [editable]);
   useEffect(() => {
     onEditingChange?.(open);
@@ -75,6 +76,7 @@ export function ProfessionalRequirement({ c, editable, busy, unresolved, onResol
           ? "The earlier determination does not resolve the current application. Review the requirement again."
           : "The applicant has left this question for the officer. Acceptance waits for a requirement determination.")}</p>
       )}
+      {loadError && <button type="button" className="cf-btn is-xs" onClick={() => setLoadAttempt(attempt => attempt + 1)}>Try again</button>}
       {editable && <button type="button" className="cf-btn is-sm" disabled={busy || !screen} onClick={begin}>{resolution ? "Update determination" : "Record determination"}</button>}
       <Modal open={open} onClose={() => { if (!busy) setOpen(false); }} labelledBy={`${id}-title`} className="ac-return">
         <div className="cf-modal-body">

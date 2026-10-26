@@ -187,8 +187,10 @@ export function PackagePage({ packageId, phoneTools }: { packageId: string | nul
             <>
             <button type="button" className="rv-back" onClick={() => setView("review")}><AcIcon name="back" size={15} />Back to the review</button>
             <InfoRequest
-              target={target}
+              key={shown.version}
+              target={{ kind: "package", id: target.id }}
               session={shown}
+              limits={index?.workspace?.limits}
               latest={!index?.latest || shown.version === index.latest.version}
               canEdit
               applicant="the applicant"

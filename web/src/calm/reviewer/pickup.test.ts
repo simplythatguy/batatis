@@ -8,78 +8,16 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { componentHarness, nodes, text } from "../../../scripts/component-harness.mjs";
-import * as packageView from "./packageView.ts";
-import * as queue from "./queue.ts";
-import * as threadMessages from "./threadMessages.ts";
-
-class EngineError extends Error {
-  status: number;
-  detail: string;
-  constructor(status: number, detail = "Synthetic failure") { super(detail); this.status = status; this.detail = detail; }
-}
-class AccountsError extends EngineError {
-  body: unknown;
-  constructor(status: number, detail: string, body: unknown = null) { super(status, detail); this.body = body; }
-}
-
-const me = { id: "officer", name: "Morgan" };
-const session = (version: number) => ({ package_id: "c1", version, case_version: 1, findings: [], information_request: { items: [] } });
-
-type Case = { id: string; title: string; status: string; version: number; claim: null | { reviewer_id: string; reviewer_name: string; claimed_at: string } };
-
-async function harness(start: Partial<Case>, opts: { claim?: () => Promise<unknown>; getCase?: () => Promise<unknown> } = {}) {
-  const current: Case = { id: "c1", title: "Synthetic pick-up", status: "submitted", version: 1, claim: null, ...start };
-  const calls = { claim: 0, release: 0, run: 0 };
-  let reviewed: ReturnType<typeof session> | null = null;
-  const location = { hash: "#/review/c1" };
-  const claimed = async () => {
-    current.status = "in_review";
-    current.claim = { reviewer_id: me.id, reviewer_name: me.name, claimed_at: "2026-10-22T12:00:00Z" };
-    return current.claim;
-  };
-  const h = await componentHarness(new URL("./ReviewDetail.tsx", import.meta.url), "ReviewDetail", {
-    "../../api/client": { EngineError, engine: { getCase: opts.getCase ?? (async () => ({ ...current })), gaps: async () => [] } },
-    "../../api/accounts": {
-      AccountsError,
-      accounts: { messages: async () => [] },
-      claimConflict: (e: unknown) => (e instanceof AccountsError && e.status === 409 ? (e.body as { claim?: Case["claim"] })?.claim ?? null : null),
-      review: {
-        claim: async () => { calls.claim++; return (opts.claim ?? claimed)(); },
-        release: async () => { calls.release++; current.status = "submitted"; current.claim = null; },
-      },
-    },
-    "../../api/packageReview": { packageReview: {
-      index: async () => ({ latest: reviewed, sessions: reviewed ? [reviewed] : [], close_out: null }),
-      run: async () => { calls.run++; reviewed = session(1); return reviewed; },
-    } },
-    "../account": { useAccount: () => ({ user: me }), accountSession: () => "officer-session" },
-    // The page reads the case, its gaps, questions and thread as one snapshot (reviewSnapshot.ts).
-    "./reviewSnapshot": { readReviewSnapshot: async () => ({ c: await (opts.getCase ?? (async () => ({ ...current })))(), gaps: [], information: null, messages: [], gapError: "", questionError: "" }) },
-    "./threadMessages": threadMessages,
-    "./sheet": { sheetFromEngine: () => ({ questions: [] }) },
-    "./reviewData": { useQueue: () => ({ rows: [] }), setBlocking() {}, patchRow() {}, loadQueue: async () => {} },
-    "./queue": queue,
-    "./packageView": packageView,
-    "./PackageReview": { PackageReview: "PackageReview", StepTitle: "StepTitle" },
-    "../shell/MoreMenu": { MoreMenu: "MoreMenu" },
-    "./InfoRequest": { InfoRequest: "InfoRequest" },
-  }, { window: { location } });
-  return { ...h, calls, current, location };
-}
+import { workspaceHarness as harness, EngineError, AccountsError, officer as me, workspaceNode, menuItem } from "./tests/workspaceHarness.mjs";
 
 const button = (tree, label: RegExp) => nodes(tree, (n) => n.type === "button" && label.test(text(n)));
-const menuItem = (tree, label: string) => {
-  const head = nodes(tree, (n) => n.props?.right)[0];
-  return nodes(head.props.right, (n) => n.type === "MoreMenu")[0]?.props.items.find((i) => i.label === label);
-};
-
 test("opening a file nobody has picked up picks it up once and goes straight to the review", async () => {
   const h = await harness({});
   let tree = await h.render({ caseId: "c1" });
   for (let i = 0; i < 3; i++) tree = await h.render();
   assert.equal(h.calls.claim, 1, "claimed exactly once, however often the page renders");
   assert.equal(h.calls.run, 1, "the review then runs by itself");
-  assert.equal(nodes(tree, (n) => n.type === "PackageReview").length, 1, "the review is on screen");
+  assert.equal(Number(Boolean(workspaceNode(tree))), 1, "the review is on screen");
   assert.equal(button(tree, /Pick up/).length, 0, "no second button to start the review");
   h.unmount();
 });
@@ -95,7 +33,7 @@ test("while the pick-up is pending the page says so, with no Pick up button to p
   resolve(h.current.claim);
   tree = await h.render();
   tree = await h.render();
-  assert.equal(nodes(tree, (n) => n.type === "PackageReview").length, 1);
+  assert.equal(Number(Boolean(workspaceNode(tree))), 1);
   assert.equal(h.calls.claim, 1);
   h.unmount();
 });
@@ -176,5 +114,29 @@ test("Stop reviewing releases and goes back to the queue, without picking the fi
   assert.equal(h.calls.release, 1);
   assert.equal(h.location.hash, "#/review", "back to the queue");
   assert.equal(h.calls.claim, 0, "no re-pickup loop");
+  h.unmount();
+});
+
+test("a kept reservation after resubmission waits for Resume review", async () => {
+  const h = await harness({ status: "submitted", submission_number: 2, claim: { reviewer_id: me.id, reviewer_name: me.name, claimed_at: "2026-10-22T12:00:00Z" } });
+  let tree = await h.render({ caseId: "c1" });
+  assert.equal(h.calls.claim, 0); assert.equal(h.calls.run, 0);
+  button(tree, /^Resume review$/)[0].props.onClick(); tree = await h.render();
+  assert.equal(h.calls.claim, 1); assert.equal(h.calls.run, 1);
+  assert.ok(workspaceNode(tree));
+  h.unmount();
+});
+
+test("older review versions are read-only and never expose a decision foot", async () => {
+  const { reviewSession, indexFor } = await import("./tests/workspaceHarness.mjs");
+  const latest = reviewSession(3);
+  const h = await harness({ status: "in_review", claim: { reviewer_id: me.id, reviewer_name: me.name, claimed_at: "2026-10-22T12:00:00Z" } }, {
+    index: async () => indexFor(latest, { sessions: [{ version: 1, required: 2 }, { version: 3, required: 0 }] }),
+  });
+  let tree = await h.render({ caseId: "c1" });
+  const head = nodes(tree, n => n.props?.right)[0];
+  const version = nodes(head.props.right, n => n.type === "button" && text(n) === "Version 1 · 2 required")[0];
+  assert.ok(version); version.props.onClick({ currentTarget: { closest: () => ({ open: true }) } }); tree = await h.render();
+  assert.deepEqual([workspaceNode(tree).props.session.version, workspaceNode(tree).props.editable, workspaceNode(tree).props.historical, workspaceNode(tree).props.showDecision], [1, false, true, false]);
   h.unmount();
 });

@@ -281,11 +281,15 @@ export interface QueueApplication {
 export interface DecisionItemInput {
   gap_id?: string;
   field?: string;
+  section?: "A" | "B" | "C" | "D" | "process";
+  label?: string;
+  request_item_id?: string;
+  finding_key?: string;
   note: string;
 }
 
 export type DecisionRequest =
-  | { outcome: "accept"; expected_version?: number }
+  | { outcome: "accept"; expected_version: number; review_version?: number }
   | { outcome: "return"; message: string; items: DecisionItemInput[]; expected_version?: number }
   | { outcome: "refuse"; message: string; expected_version: number };
 

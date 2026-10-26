@@ -4,15 +4,13 @@
  * the refusal message and the close-out. Pure: everything is derived from a ReviewSession or CloseOut.
  * Administrative completeness only: nothing here judges the design.
  */
-import type { DecisionItemInput, DecisionRequest } from "../../api/accounts";
+import type { DecisionRequest } from "../../api/accounts";
 import type {
   Attribute,
   CitationCheck,
   CloseOut,
   DocumentRow,
   Finding,
-  InformationRequest,
-  InformationRequestEdit,
   Pointer,
   ReviewSession,
   SectionCCheck,
@@ -50,9 +48,9 @@ export function pointerLabel(p: Pointer | null | undefined): string {
 
 /** The quote behind a pointer, when it adds something beyond the value itself. */
 export function pointerQuote(p: Pointer | null | undefined, value?: string | null): string {
-  const q = p?.quote?.trim() ?? "";
+  const q = p?.quote ?? "";
   if (!q || (value && q === value.trim())) return "";
-  return q.length > 220 ? `${q.slice(0, 217).trimEnd()}…` : q;
+  return q;
 }
 
 /** "NBC(AE) 2023 p2, Div C, Sentence 2.3.1.1.(3) [PDF p.739]" → { division: "C", id: "2.3.1.1.(3)" }. */
@@ -87,6 +85,7 @@ export interface FindingView {
   where: string;
   quote: string;
   citations: string[];
+  sources: { where: string; quote: string }[];
 }
 
 /** Findings are often worded to the applicant ("Your application …"); the officer reads them in the third person. */
@@ -104,6 +103,7 @@ export function findingView(f: Finding): FindingView {
     where: pointerLabel(p),
     quote: pointerQuote(p),
     citations: f.citations,
+    sources: f.pointers.map(p => ({ where: pointerLabel(p), quote: p.quote ?? "" })),
   };
 }
 
@@ -113,8 +113,6 @@ export interface MissingView {
   groups: { section: Section; label: string; items: FindingView[] }[];
   /** For the officer to look at first. */
   officer: FindingView[];
-  /** Equals the summary's "to ask" plus "to check", so both screens show the same number. */
-  total: number;
 }
 
 export function missingView(s: ReviewSession): MissingView {
@@ -128,13 +126,7 @@ export function missingView(s: ReviewSession): MissingView {
     items: applicant.filter((f) => f.section === section).map(findingView),
   })).filter((g) => g.items.length);
   const officer = own.filter((f) => isOfficerCheck(f, asked)).map(findingView);
-  return { groups, officer, total: applicant.length + officer.length };
-}
-
-/** Open applicant gaps that block acceptance (not-found items are the officer's checks, not gaps). */
-export function blockingGaps(s: ReviewSession): number {
-  const asked = askable(s);
-  return s.findings.filter((f) => f.severity === "blocking" && !isPeer(f) && !isOfficerCheck(f, asked)).length;
+  return { groups, officer };
 }
 
 /* —— Summary —— */
@@ -159,11 +151,6 @@ export interface SummaryView {
   provisions: string[];
   documents: string[];
   readFrom: string;
-  present: number;
-  blank: number;
-  notFound: number;
-  toAsk: number;
-  toCheck: number;
   peer: boolean;
 }
 
@@ -184,8 +171,6 @@ export function summaryView(s: ReviewSession): SummaryView {
   const readFrom = s.input_kind === "case"
     ? "Read from the saved application."
     : `Read from ${plural(pdfs.length, "PDF")}${form ? `: the SCC form (${form.role === "scc_form_fillable" ? "fillable" : "flattened"}, ${plural(form.pages, "page")})` : ", with no SCC form found"}${pdfs.length > (form ? 1 : 0) ? ` and ${plural(pdfs.length - (form ? 1 : 0), "attachment")}` : ""}.`;
-  const asked = askable(s);
-  const own = s.findings.filter((f) => !isPeer(f));
   return {
     headline,
     proposal: proposalField?.value?.trim() ?? null,
@@ -193,11 +178,6 @@ export function summaryView(s: ReviewSession): SummaryView {
     provisions,
     documents,
     readFrom,
-    present: s.fields.filter((f) => f.status === "present" && f.value?.trim()).length,
-    blank: s.fields.filter((f) => f.status === "blank").length,
-    notFound: s.fields.filter((f) => f.status === "not_found").length,
-    toAsk: own.filter((f) => !isOfficerCheck(f, asked)).length,
-    toCheck: own.filter((f) => isOfficerCheck(f, asked)).length,
     peer: s.findings.some(isPeer),
   };
 }
@@ -287,9 +267,6 @@ export interface CheckRow {
   message: string;
 }
 
-/** Open Division C file items and "demonstrate" prompts, for the step's count. */
-export const fileGaps = (s: ReviewSession) => s.findings.filter((f) => isFileItem(f) || isDemonstrate(f)).length;
-
 export function fileItemsView(s: ReviewSession): { items: CheckRow[]; demonstrate: CheckRow[]; read: boolean } {
   // Nothing readable means nothing was checked; never show "no gap" for an unread package.
   const read = s.fields.some((f) => f.status === "present" && f.value?.trim());
@@ -318,64 +295,6 @@ export function peerView(s: ReviewSession): { signal: boolean; reasons: string[]
   return { signal: true, reasons: body.split(/;\s*/).map((r) => sentence(r.trim().replace(/\.$/, ""))).filter(Boolean) };
 }
 
-/* —— Information request draft —— */
-
-export interface DraftItem {
-  /** Server id; absent for an officer item not yet saved. */
-  id: string | null;
-  /** Stable React key. */
-  key: string;
-  text: string;
-  included: boolean;
-  authored: "batatis" | "officer";
-  officerCheck: boolean;
-  section: Section | null;
-  /** Drafted from a finding (it can be left out, not removed). */
-  linked: boolean;
-}
-
-export function draftFrom(ir: InformationRequest): { intro: string; items: DraftItem[] } {
-  return {
-    intro: ir.intro,
-    items: ir.items.map((i) => ({ id: i.id, key: i.id, text: i.text, included: i.included, authored: i.authored_by, officerCheck: i.officer_check, section: i.section, linked: Boolean(i.finding_key) })),
-  };
-}
-
-/** The PUT body: the full list in order (text trimmed); empty officer items are dropped. */
-export function toEdit(intro: string, items: DraftItem[]): InformationRequestEdit {
-  return {
-    intro: intro.trim(),
-    items: items
-      .filter((i) => i.id || i.text.trim())
-      .map((i) => (i.id ? { id: i.id, text: i.text.trim(), included: i.included } : { text: i.text.trim(), included: i.included })),
-  };
-}
-
-/** The text the applicant receives (mirrors the server's render: intro, blank line, numbered items). */
-export function previewText(intro: string, items: DraftItem[]): string {
-  const lines = [intro.trim(), ""];
-  let n = 0;
-  for (const i of items) if (i.included && i.text.trim()) lines.push(`${++n}. ${i.text.trim()}`);
-  return lines.join("\n").trim();
-}
-
-export function sameDraft(a: InformationRequestEdit, b: InformationRequestEdit): boolean {
-  return JSON.stringify(a) === JSON.stringify(b);
-}
-
-export const includedCount = (items: DraftItem[]) => items.filter((i) => i.included && i.text.trim()).length;
-
-/** The note that returns the application after a request, and the items it carries. Pure. */
-export function returnAfterRequest(count: number): string {
-  return `I sent you an information request with ${count} ${count === 1 ? "item" : "items"}. Please update the application and send it again.`;
-}
-
-export function requestItems(s: ReviewSession): DecisionItemInput[] {
-  return s.information_request.items
-    .filter((i) => i.included && i.text.trim())
-    .map((i) => ({ field: (i.field || "information_request").slice(0, 200), note: i.text.trim().slice(0, 2000) }));
-}
-
 /* —— Re-upload diff —— */
 
 export function diffView(s: ReviewSession): null | {
@@ -391,7 +310,7 @@ export function diffView(s: ReviewSession): null | {
   const byKey = new Map(s.findings.map((f) => [f.key, f]));
   const view = (e: { key: string; label: string; message: string }, tone: Tone): FindingView => {
     const f = byKey.get(e.key);
-    return f ? { ...findingView(f), tone } : { key: e.key, title: sentence(e.label), message: e.message, tone, where: "", quote: "", citations: [] };
+    return f ? { ...findingView(f), tone } : { key: e.key, title: sentence(e.label), message: e.message, tone, where: "", quote: "", citations: [], sources: [] };
   };
   return {
     statement: sentence(d.statement),
@@ -439,6 +358,8 @@ export function dayLabel(iso: string): string {
 }
 
 export function dueView(c: CloseOut): { tone: Tone; text: string } {
+  if (c.outcome === "refuse") return { tone: "pending", text: "Keep the refusal record on file. Nothing to send to the Council." };
+  if (!c.issued_on || c.due_date === null || c.days_remaining === null) return { tone: "pending", text: "Variance not issued yet" };
   if (c.sent) return { tone: "done", text: `You recorded sending it${c.sent_at ? ` on ${dayLabel(c.sent_at)}` : ""}${c.sent_by_name ? ` (${c.sent_by_name})` : ""}.` };
   if (c.overdue) return { tone: "blocking", text: `Due ${dayLabel(c.due_date)} · ${plural(Math.abs(c.days_remaining), "day")} overdue` };
   if (c.days_remaining === 0) return { tone: "warning", text: `Due today, ${dayLabel(c.due_date)}` };
