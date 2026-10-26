@@ -196,3 +196,19 @@ def test_full_saved_summary_never_promotes_unconfirmed_or_unsupported_document_m
         assert fields[key].pointer.quote is None
     document = next(row for row in parts.documents if row.id == 'report')
     assert not document.title.known and not document.responsible.known
+
+
+def test_owner_without_representative_and_lot_block_plan_agree_on_both_paths():
+    from engine.tests.case_builder_fixtures import complete_case, fact as saved_fact
+    codes = Codes()
+    case = complete_case()
+    case.facts = [f for f in case.facts if f.field not in ('legal_description', 'representative')]
+    case.facts += [saved_fact('lot', '12'), saved_fact('block', '3'), saved_fact('plan', '1234567')]
+    applicant = saved_case_response(case, codes).policy
+    officer = review_uploads([('same.pdf', export_case(case, codes=codes, draft=True).pdf)], codes).policy
+    for report in (applicant, officer):
+        items = {item.field: item for item in report.items}
+        assert items['representative'].verdict == 'present'
+        assert items['legal_description'].verdict == 'present'
+        assert items['legal_description'].value == 'Lot 12, Block 3, Plan 1234567'
+        assert report.export_reasons == []
