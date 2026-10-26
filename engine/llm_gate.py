@@ -153,6 +153,9 @@ def reset_for_tests() -> None:
 
 
 def live_enabled(provider: str = 'openai') -> bool:
+    from . import ai_access
+    if not ai_access.allowed():
+        return False
     if provider == 'elephant':
         switch = os.environ.get('BATATIS_LIVE_ELEPHANT') or os.environ.get('BATATIS_LIVE')
         return switch == '1' and bool((os.environ.get('OPENROUTER_API_KEY') or '').strip())
@@ -298,6 +301,9 @@ def provider_enabled(provider: str) -> bool:
         return False
     if fake_providers():
         return True
+    from . import ai_access
+    if not ai_access.allowed():
+        return False
     if provider != 'jev':
         return live_enabled(provider)
     if os.environ.get('BATATIS_LIVE') != '1':

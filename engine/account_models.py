@@ -30,6 +30,8 @@ class User(BaseModel):
     created_at: str = Field(default_factory=now)
     # Notifications created at or before this instant count as read.
     notifications_seen_at: str | None = None
+    # The name of the AI access code this account entered (engine/ai_access.py), never the code.
+    ai_access: str | None = None
 
 
 class UserResult(BaseModel):

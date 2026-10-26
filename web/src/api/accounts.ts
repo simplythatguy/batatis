@@ -345,3 +345,12 @@ export const notifications = {
     })),
   markAllRead: (signal?: AbortSignal) => call<void>("POST", "/me/notifications/read", {}, signal),
 };
+
+/** Whether this server needs an access code for AI, and whether the signed-in account has a current one. */
+export interface AiAccess { required: boolean; granted: boolean }
+
+export const aiAccess = {
+  read: () => call<AiAccess>("GET", "/auth/ai-access"),
+  enter: (code: string) => call<AiAccess>("POST", "/auth/ai-access", { code }),
+  remove: () => call<AiAccess>("DELETE", "/auth/ai-access", {}),
+};

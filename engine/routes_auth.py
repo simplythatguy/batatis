@@ -8,6 +8,7 @@ import secrets
 from fastapi import APIRouter, HTTPException, Request, Response
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from . import ai_access
 from .account_models import ApplicantType, Authority, Role, User, UserResult
 from .accounts import (COOKIE, cookie_secure, digest, email_address, issue_session, limit_auth,
                        password_hash, password_matches, require_user)
@@ -49,6 +50,17 @@ class OnboardingRequest(BaseModel):
         if self.role == 'reviewer' and self.authority is None:
             raise ValueError('authority is required')
         return self
+
+
+class AiAccessRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    code: str = Field(min_length=1, max_length=200)
+
+
+class AiAccess(BaseModel):
+    """Whether this deployment needs a code for AI, and whether this account has a current one."""
+    required: bool
+    granted: bool
 
 
 def reviewer_code(authority: str, supplied: str | None):
@@ -102,6 +114,30 @@ def create_router(cases):
     @router.get('/me', response_model=UserResult)
     def me(request: Request):
         return UserResult(user=require_user(request))
+
+    @router.get('/ai-access', response_model=AiAccess)
+    def ai_access_status(request: Request):
+        user = require_user(request)
+        return AiAccess(required=ai_access.required(), granted=ai_access.granted(user))
+
+    @router.post('/ai-access', response_model=AiAccess)
+    def ai_access_enter(body: AiAccessRequest, request: Request):
+        user = require_user(request).model_copy()
+        store = cases()
+        limit_auth(store, request, 'ai-access')
+        name = ai_access.name_for(body.code)
+        if name is None:
+            raise HTTPException(403, 'That access code isn’t valid')
+        user.ai_access = name
+        store.update_user(user, revoke_sessions=False)
+        return AiAccess(required=ai_access.required(), granted=True)
+
+    @router.delete('/ai-access', response_model=AiAccess)
+    def ai_access_remove(request: Request):
+        user = require_user(request).model_copy()
+        user.ai_access = None
+        cases().update_user(user, revoke_sessions=False)
+        return AiAccess(required=ai_access.required(), granted=ai_access.granted(user))
 
     @router.post('/onboarding', response_model=UserResult)
     def onboarding(body: OnboardingRequest, request: Request, response: Response):

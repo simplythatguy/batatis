@@ -8,6 +8,7 @@ from __future__ import annotations
 import json
 import threading
 import time
+import contextvars
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from typing import Any, Callable, Mapping
@@ -197,6 +198,8 @@ class Judge:
         elif len(batches) == 1:
             run(batches[0])
         elif batches:
+            # Each batch runs in a copy of this request's context, so its AI access check sees the account.
+            contexts = [contextvars.copy_context() for _ in batches]
             with ThreadPoolExecutor(max_workers=self.workers) as pool:
-                list(pool.map(run, batches))
+                list(pool.map(lambda context, batch: context.run(run, batch), contexts, batches))
         return {a: probs[a] for a in ids}
