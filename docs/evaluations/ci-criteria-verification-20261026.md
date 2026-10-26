@@ -73,3 +73,7 @@ scripts/verify.sh --engine
 The expanded engine run additionally selected the intake, schema-export, saved-case completeness, and evidence-file tests. Engine runs used the available CodeDB and official form. Desktop runs used the installed engine interpreter through `BATATIS_DESKTOP_PYTHON`. For the full engine script, a shell function selected that native interpreter instead of the MSYS Python without pytest. Neither selection changes the tests or their criteria.
 
 The SHA256 of the proposed three-file test diff is `68090e38d0c2c79e2711cf0ef4fc592b03e4a67bae716ce0c30f729004d90d90`. This hash identifies the reviewed test-only diff against the assessment base, before merging newer main changes for publication.
+
+## Publication follow-up
+
+The user approved publication on 2026-10-26. Latest main `544b10839b00323050760b88f247bc72b479cc52` was merged without conflicts at `79d0e1b8f5c895cb4930c93d5b3c77a2951e544c`. Post-merge validation passed: **280 engine tests, 16 PostgreSQL-dependent skips**, including the new main branch's case-input and requirement-route integration tests; **17 desktop request-lifetime tests**, no failures or skips; strict standalone test typechecking and diff whitespace checks. The original full native-Windows gate limits above remain unresolved. The desktop test process returned zero; the local receipt printer subsequently encountered a Windows console Unicode encoding error, which did not affect that test result. Hosted CI must still verify the published revision. No merge is authorized.
