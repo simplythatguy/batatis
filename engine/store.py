@@ -369,8 +369,11 @@ class CaseStore(FileAccountsMixin):
             if previous is None:
                 return None
             enforce_stored_mutation(previous[0])
+            stamp = now()
             con.execute('INSERT INTO case_files VALUES (?,?,?,?,?,?,?)',
-                        (file_id, case_id, name, content_type, len(data), data, now()))
+                        (file_id, case_id, name, content_type, len(data), data, stamp))
+            con.execute("UPDATE cases SET json=json_set(json, '$.updated_at', ?), updated_at=? WHERE id=?",
+                        (stamp, stamp, case_id))
         return {'id': file_id, 'case_id': case_id, 'name': name, 'content_type': content_type, 'size': len(data)}
 
     def get_file(self, case_id: str, file_id: str) -> dict | None:

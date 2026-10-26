@@ -222,6 +222,25 @@ def test_retention_follows_inactivity_and_workflow_not_creation(retention_store,
         assert store.get(case.id).updated_at == before
 
 
+def test_uploaded_bytes_reset_inactivity_in_the_same_transaction(retention_store, monkeypatch):
+    store, created = retention_store
+    current = datetime.now(timezone.utc)
+    case = store.put(Case())
+    created.append(case.id)
+    _set_last_activity(store, case.id, (current - timedelta(days=7) + timedelta(hours=1)).isoformat())
+    response = TestClient(create_app(store)).post(f'/cases/{case.id}/files',
+        content=b'%PDF synthetic new applicant upload', headers={'content-type': 'application/pdf'})
+    assert response.status_code == 201
+    uploaded = store.get(case.id)
+    assert datetime.fromisoformat(uploaded.updated_at) >= current
+    assert uploaded.version == case.version  # file inventory does not change the content CAS
+    later_cutoff = (current + timedelta(hours=2) - timedelta(days=7)).isoformat()
+    monkeypatch.setattr('engine.store.retention_cutoff', lambda: later_cutoff)
+    monkeypatch.setattr('engine.store_postgres.retention_cutoff', lambda: later_cutoff)
+    assert store.get(case.id) is not None
+    assert store.get_file(case.id, response.json()['id']) is not None
+
+
 def assert_retention(store, created: list | None = None) -> None:
     old = store.put(Case(title='old', evidence=[EvidenceItem(description='old evidence')]))
     kept = store.put(Case(title='kept', evidence=[EvidenceItem(description='kept evidence')]))

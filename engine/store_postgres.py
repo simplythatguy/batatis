@@ -265,9 +265,12 @@ class PostgresCaseStore(PostgresAccountsMixin):
             if row is None or self._purge_expired(con, case_id):
                 return None
             enforce_stored_mutation(row[0])
+            stamp = now()
             con.execute('INSERT INTO case_files (id, case_id, name, content_type, size, data, created_at) '
                         'VALUES (%s, %s, %s, %s, %s, %s, %s)',
-                        (file_id, case_id, name, content_type, len(data), data, now()))
+                        (file_id, case_id, name, content_type, len(data), data, stamp))
+            con.execute("UPDATE cases SET data=jsonb_set(data, '{updated_at}', to_jsonb(%s::text)), updated_at=%s WHERE id=%s",
+                        (stamp, stamp, case_id))
         return {'id': file_id, 'case_id': case_id, 'name': name, 'content_type': content_type, 'size': len(data)}
 
     def get_file(self, case_id: str, file_id: str) -> dict | None:
