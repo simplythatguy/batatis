@@ -87,6 +87,7 @@ def prepare(name: str, directory: Path):
             pdf_from_markdown(path, target)
             documents.append(target)
     manifest = {'case': name, 'description': description, 'sources': sources,
+                'case_origin': 'synthetic researcher-authored BTRboard surrogate; organizer package says Details coming soon' if folder is None else 'fictional repository demo raw inputs',
                 'provisions': provisions, 'selection_note': 'Confirmed benchmarks supplied by the harness; code finding is outside this evaluation.',
                 'input_limit': 'Generation reads no keys, completed exports, expected narratives or research worked-case prose.'}
     dump(directory / 'input-manifest.json', manifest)
@@ -114,7 +115,7 @@ def judge(record: dict, manifest: dict, comparison: dict):
               'properties': {key: item for key in criteria}}
     payload, usage = metered_openai_json(raw_openai_json)('draft_quality', schema, JUDGE_SYSTEM,
         json.dumps({'raw_input': manifest, 'drafting': record, 'comparison_only': comparison}, ensure_ascii=False),
-        model='gpt-6.1-sol', effort='medium', max_output_tokens=6000, timeout=180)
+        model='gpt-6.1-sol', effort='max', max_output_tokens=16000, timeout=240)
     return {'criteria': payload, 'usage': usage, 'passed': all(payload.get(k, {}).get('pass') is True for k in criteria)}
 
 
@@ -146,8 +147,9 @@ def run_live(name: str, directory: Path, manifest: dict, documents: list[Path], 
         drafts = [d for d in record['drafts'] if d['status'] == 'draft']
         missing = sorted(expected - {d['field'] for d in drafts})
         checks = {'all_targets': not missing, 'missing_targets': missing,
-                  'all_claims_have_sources': all(c['sources'] for d in drafts for c in d['claims']),
-                  'all_text_is_nonempty': all(d['text'].strip() for d in drafts),
+                  'all_claims_have_sources': bool(drafts) and any(d['claims'] for d in drafts)
+                    and all(c['sources'] for d in drafts for c in d['claims']),
+                  'all_pieces_have_writing_or_questions': all(d['text'].strip() or d['questions'] for d in drafts),
                   'generation_writes_no_answers': saved['facts'] == before_facts}
         # Exercise the actual decision and persistence path, without making a professional finding.
         sample = next(d for d in drafts if d['field'] == 'process.rationale')
