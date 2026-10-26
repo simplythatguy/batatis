@@ -20,3 +20,16 @@ targetRules = ["generic-api-key"]
 condition = "AND"
 paths = ['''^Data Prompts/(Prompt 314|Canada/British\ Columbia/Unspecified\ locality/Prompts/L14\-018\-bc\-housing\-study\-scenario\-2\-two\-combined\-33\-foot\-lots)/prompt\.txt$''']
 regexes = ['''^parking/amenity$''']
+
+[[allowlists]]
+description = "Five verified SHA256 checksums in the pinned pstack source manifest, not credentials."
+targetRules = ["generic-api-key", "sentry-access-token"]
+condition = "AND"
+paths = ['''^\.agents/pstack/manifest\.json$''']
+regexes = [
+  '''^d2fa44ce9d400f85708043e398de6503a35386735088af11ac9a649c9a8d5b9e$''',
+  '''^0f77108f0ff05c8d6541e67024cfec3d1ecd9edc37ca79ba1513663514121601$''',
+  '''^1a12e61ed87e7aa19615a63694f0cd715bbd0dbf842ff1cbca044eb7a8812ff6$''',
+  '''^b57c63b557292acea35c1643b033fa6085f355a42bef80134cbf463a6a3ffc7c$''',
+  '''^2d4f83048eac1df530b399e2aed75dd7c9c18577b7665420aaeb96d0ceb0b702$''',
+]

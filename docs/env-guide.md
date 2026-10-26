@@ -12,9 +12,9 @@ Follow [local development](local-development.md) to run the app on localhost:300
 
 ## Engineering workflows
 
-Read [AGENTS.md](../AGENTS.md) first. It routes the domain/variance skills, Matt Pocock engineering methods and UI quality checks. [Open Pstack](pstack.md) is the supported pstack source for Codex and Claude Code; the old Cursor-specific installation is retired on the shared machine. Installation and model setup are described in that guide.
+Read [AGENTS.md](../AGENTS.md) first. It routes the domain/variance skills, Matt Pocock engineering methods and UI quality checks. [Open Pstack](pstack.md) is bundled as `pstack-*` project skills for Codex, Claude Code, and Cursor. Cloning includes the pinned source and project adapter; no global pstack installation is required.
 
-Every agent role, including implementation, research and independent quality/UI review, uses **GPT-6.1-Sol at max**. T3 subagents request Fast mode through **serviceTier=priority**. The portable role map is `.cursor/rules/pstack-models.mdc`; the shared machine's model source is `~/.agents/pstack-models.md`. Respect the user's selected main-thread model and actual supported task options.
+Every delegated agent role, including implementation, research and independent quality/UI review, uses **GPT-6.1-Sol at max**. T3 subagents request Fast mode through **serviceTier=priority**. The portable role map is `.cursor/rules/pstack-models.mdc`. Respect the user's selected main-thread model and actual supported task options.
 
 Children work in isolated checkouts, return results through task output/completion only, and never message another thread or agent. The parent integrates and lands. T3's supported task, browser and PR tools govern transport; upstream CLI examples do not override them.
 

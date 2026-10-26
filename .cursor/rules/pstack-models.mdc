@@ -9,7 +9,7 @@ alwaysApply: true
 # T3 uses provider codex, model gpt-6.1-sol, reasoningEffort max, serviceTier priority (Fast mode user request).
 # Panels are independent Sol lanes when warranted; they have no provider diversity.
 # T3 delegates through its supported task tools, never subprocess agent CLIs.
-# The source is ~/.agents/pstack-models.md; native harness sheets mirror it.
+# Repository defaults for every clone; explicit user model choices take precedence.
 codex writer sandbox: bounded
 
 feature, refactoring: codex:gpt-6.1-sol@max
