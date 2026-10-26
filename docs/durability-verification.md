@@ -49,12 +49,20 @@ uses one saved Case acknowledgement without the former derived-read fanout.
 
 ## Checks and remaining evidence
 
-- Web gate at the final frontend revision: 495 tests passed, none skipped, with
+- Web gate after merging `main` and the independent frontend review fixes: 436 tests
+  passed, none skipped (`main` removed retired surfaces and their tests), with
   `PLAYWRIGHT_MODULE` pointing at an installed playwright-core; typecheck passed.
   Mounted Chromium regressions use mocked HTTP, including newer typing during
   saves, failed flushes, refresh/rejoin, attachment bindings, retries, typing
   while sign out waits, conflicting edits from two devices, edits made during
   job acceptance, jobs started on another device and failed cancellation.
+- Independent frontend review (Claude Opus 5.5; Codex was out of quota) found three
+  issues, each now covered by a regression that fails on the unfixed code: a visit
+  reset was dropped while editing was paused, a job finishing during the pause was
+  never applied, and conflict review compared every saved document revision with
+  only the latest, so it reported untouched documents as changed elsewhere.
+- Full gate on the merge with `main`: engine 3451 passed, desktop 227 passed
+  (one installed-runtime check skipped), web as above.
 - Desktop gate: 227 tests passed; one installed-runtime check skipped because
   the pinned native Codex runtime is not prepared. Typecheck and main/preload
   build passed.

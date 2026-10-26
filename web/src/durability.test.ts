@@ -408,6 +408,42 @@ test("mounted durable saves and jobs (mocked HTTP; no listeners)", { skip: !play
       assert.equal(await page.getByLabel("Unconfirmed owner").inputValue(), "  Local unfinished text  ");
     });
 
+    await t.test("a job that finishes while editing is paused is applied when editing resumes, not dropped", async () => {
+      await begin();
+      await page.evaluate(() => window.caseStore.dispatch({ type: "setDescription", text: "Finish while paused" }));
+      await page.evaluate(() => window.caseStore.readDescription());
+      await page.waitForFunction(() => window.caseStore.reading.intakeJob?.state === "running");
+      const id = await page.evaluate(() => window.caseStore.engineId), remote = cases.get(id);
+      const job = [...jobs.values()].filter(j => j.case_id === id && j.kind === "intake").at(-1);
+      await page.evaluate(() => { window.resumeEdits = window.pauseApplicationEdits(); });
+      try {
+        remote.facts.push({ id: "paused-job-fact", field: "owner_name", value: "Applied after the pause", status: "confirmed", kind: "pointed",
+          source: { type: "user_text", ref: "intake:description", quote: "Applied after the pause" }, confidence: null, formula: null, inputs: [] });
+        remote.version++; job.result_version = remote.version; job.state = "succeeded"; job.stage = "completed";
+        await page.waitForFunction(() => window.caseStore.reading.intakeJob?.state === "succeeded");
+        await page.waitForTimeout(200);
+        assert.equal(await page.evaluate(() => window.caseStore.c.facts.some(f => f.id === "paused-job-fact")), false, "output waits for the pause");
+      } finally { await page.evaluate(() => window.resumeEdits()); }
+      await page.waitForFunction(() => window.caseStore.c.facts.some(f => f.id === "paused-job-fact"));
+    });
+
+    await t.test("an account change while editing is paused still clears the previous applicant's visit", async () => {
+      await fresh();
+      await page.getByLabel("Unconfirmed owner").fill("Private to the first account"); await save();
+      await page.evaluate(() => window.updateSession({ skipped: ["first-account-skip"] }));
+      const user = await page.evaluate(() => window.getAccountState().user);
+      await page.evaluate(() => { window.resumeEdits = window.pauseApplicationEdits(); });
+      try {
+        await page.evaluate(user => window.setAccountState({ user: { ...user, id: "second-account" } }), user);
+        await page.waitForFunction(() => window.caseStore.phase === "who" && window.caseStore.engineId === null);
+        assert.equal(await page.evaluate(() => window.caseStore.c.facts.length), 0);
+        assert.deepEqual(await page.evaluate(() => window.getSession().skipped), []);
+        assert.equal(await page.getByLabel("Unconfirmed owner").inputValue(), "");
+      } finally { await page.evaluate(() => window.resumeEdits()); }
+      await page.evaluate(user => window.setAccountState({ user }), user);
+      await page.waitForFunction(() => window.getAccountState().user?.id === "durability-owner");
+    });
+
     await t.test("logout freezes DOM, dispatch, raw-editor and session callbacks through HTTP failure then restores editing", async () => {
       const id = await fresh();
       await page.getByLabel("Unconfirmed owner").fill("Text accepted before logout");

@@ -4,7 +4,7 @@ import { evidenceSlot } from "../model";
 import { factSignature } from "../rules";
 import type { Case, Fact } from "../types";
 import { DESCRIPTION_DRAFT } from "./applicantDraft";
-import { selectedArticles } from "./openCase";
+import { latestFacts, selectedArticles } from "./openCase";
 
 export type ReconciliationChoices = Record<string, "mine" | "saved">;
 export type ReconciliationConflict = { id: string; label: string; mine: string; saved: string };
@@ -96,7 +96,9 @@ export function reconcileDraft(input: ReconciliationInput, choices: Reconciliati
     evidence_drafts: record("evidence-draft", "Unfinished document", baselineDraft?.evidence_drafts ?? {}, draft.evidence_drafts, savedDraft?.evidence_drafts ?? {}),
   };
   const evidenceKey = (values: Fact[], id: string) => key(values.filter(fact => evidenceSlot(fact.field) === id).map(factSignature));
-  const evidenceChanged = (id: string) => evidenceKey(input.baselineEvidence, id) !== evidenceKey(remote.facts, id);
+  // The ledger keeps every revision; compare it in the same latest, non-withdrawn projection as the read case.
+  const baselineEvidence = latestFacts(input.baselineEvidence as Parameters<typeof latestFacts>[0]);
+  const evidenceChanged = (id: string) => evidenceKey(baselineEvidence, id) !== evidenceKey(remote.facts, id);
   const listedEvidence = (local.listedEvidence ?? []).filter(item => choose(`document:${item.id}`, "Document changes", item, undefined, true, evidenceChanged(item.id), item => item ? show(item.description) : "Keep saved document") !== undefined);
   const deletedEvidence = (local.deletedEvidence ?? []).filter(id => choose(`document:${id}`, "Remove document", id, undefined, true, evidenceChanged(id), item => item ? "Remove document" : "Keep saved document") !== undefined);
   const files = (mergedDraft.intake_file_ids ?? []).flatMap(id => {

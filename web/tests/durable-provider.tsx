@@ -11,13 +11,14 @@ import { signOut } from "../src/calm/auth/useAuthGate";
 import { signOutStatus } from "../src/calm/auth/signOutGuard";
 import { Start } from "../src/calm/Start";
 import { SaveStatus } from "../src/calm/Shell";
+import { pauseApplicationEdits } from "../src/calm/applicationEditing";
 import { ReadingState, CodeProgress } from "../src/calm/ReadCards";
 
 function Probe() {
   const store = useCase();
   const base = String(store.c.facts.find(f => f.field === "owner")?.value ?? "");
   const draft = useQuestionDraft(draftAccount(getAccountState().user), engineGeneration(), store.engineId, "owner-editor", base);
-  Object.assign(window, { caseStore: store, questionDrafts, getSession, updateSession, getAccountState, setAccountState, signOut, signOutStatus });
+  Object.assign(window, { caseStore: store, questionDrafts, getSession, updateSession, getAccountState, setAccountState, signOut, signOutStatus, pauseApplicationEdits });
   return <>
     <SaveStatus />
     <Start />

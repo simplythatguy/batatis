@@ -7,7 +7,7 @@ import { engineNotices, factSignature, groupEvidenceGaps, missingFromEngine, upl
 import { readDecisionBody, wireDecision } from "./identify";
 import { asLocal } from "./intakeFields";
 import { toViewRow } from "./api/sectionC";
-import { getSession, resetSession, subscribeSession, updateSavedSession } from "./calm/session";
+import { getSession, resetSavedSession, subscribeSession, updateSavedSession } from "./calm/session";
 import { applicantDraft, draftAccount, restoreApplicantDraft, sessionDraft } from "./calm/applicantDraft";
 import { questionDrafts } from "./calm/questionDrafts";
 import { checkCurrent, newCheckState, type CheckState, type SaveStatus } from "./checkState";
@@ -28,7 +28,7 @@ import { activeJob, isApplicantJob, latestJob, observeJob, type CaseJob } from "
 import { PROCESS_FACT, PROCESS_FIELDS } from "./model";
 import { acknowledgeJobCase, acknowledgedAuthority, acknowledgedDraft, acknowledgedDraftKey, acknowledgedEvidenceFacts, acknowledgedSelectionKey, draftKey, pendingFactChanges, pushReconciledDraft } from "./api/sync";
 import { registerSignOutGuard, resetSignOutStatus } from "./calm/auth/signOutGuard";
-import { applicationEditsPaused, pauseApplicationEdits, useApplicationEditsPaused } from "./calm/applicationEditing";
+import { applicationEditsPaused, pauseApplicationEdits, useApplicationEditsPaused, whenEditsResume } from "./calm/applicationEditing";
 import { reconcileDraft, type ReconciliationChoices, type ReconciliationInput, type SaveConflictReview } from "./calm/reconcileDraft";
 
 /** Older builds kept the whole case here. It is removed on load and never written again. */
@@ -872,7 +872,8 @@ export function CaseProvider({ children }: { children: ReactNode }) {
 
   /** Apply only the output of this owned job, retaining edits newer than its acknowledged input. */
   async function finishJob(job: CaseJob, live: () => boolean) {
-    if (!live() || applicationEditsPaused() || completedJobs.current.has(job.id)) return;
+    await whenEditsResume();
+    if (!live() || completedJobs.current.has(job.id)) return;
     if (job.state !== "succeeded") { jobProgress(job); return; }
     let continueIdentify = false;
     await enqueue(async () => {
@@ -1025,10 +1026,13 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   }
 
   /** Only save, upload and the short acceptance request hold the queue. Polling never does. */
-  function startJob(kind: CaseJob["kind"], chain?: { jobId: string; createdAt: string }): Promise<void> {
-    if (applicationEditsPaused()) return Promise.resolve();
+  async function startJob(kind: CaseJob["kind"], chain?: { jobId: string; createdAt: string }): Promise<void> {
+    // A click is refused while paused; a chained start from finished work waits for the pause to end.
+    if (applicationEditsPaused() && !chain) return;
     const token = engineGeneration(), session = accountSession();
     const live = () => isEngineGeneration(token) && accountSession() === session;
+    await whenEditsResume();
+    if (!live()) return;
     setReading(kind === "intake" ? { intake: "running", intakeNote: "", intakeJob: undefined }
       : { identify: "running", identifyNote: "", identifyJob: undefined, stages: {} });
     return enqueue(async () => {
@@ -1447,7 +1451,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     setSaveConflictReview({ kind: "closed" });
     evidenceUploads.current.clear();
     restoring.current = true;
-    resetSession();
+    resetSavedSession();
     restoring.current = false;
     activeSave.current = null;
     savedSelection.current = null;
@@ -1468,7 +1472,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     goneCase.current = null;
     sectionDHold.current = null;
     syncQueue.current = Promise.resolve();
-    dispatch({ type: "reset", to: next });
+    dispatch({ type: "reset", to: next }, "save");
     syncState.current = { saved: false, reviewed: false, detail: "" };
     latestGaps.current = getGaps(next);
     setEngineId(null);
@@ -1536,7 +1540,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const keptDraft = "Your local answers stay open. Save them before refreshing this application.";
   function cleanForRefresh() {
     const draft = latestCase.current;
-    return syncState.current.saved && !activeSubmit.current && !caseOpening.current
+    return syncState.current.saved && !applicationEditsPaused() && !activeSubmit.current && !caseOpening.current
       && !draft.listedEvidence?.length && !draft.deletedEvidence?.length
       && !getSession().held.length && !getSession().uploading.length && !evidenceUploads.current.size;
   }

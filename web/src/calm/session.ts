@@ -62,6 +62,11 @@ export function updateSavedSession(patch: Partial<Session> | ((s: Session) => Pa
 
 export function resetSession(keep: Partial<Session> = {}) {
   if (applicationEditsPaused()) return;
+  resetSavedSession(keep);
+}
+
+/** Clearing or replacing the visit (account change, opening a saved case) is never an applicant edit. */
+export function resetSavedSession(keep: Partial<Session> = {}) {
   state = { ...EMPTY, ...keep };
   for (const l of listeners) l();
 }

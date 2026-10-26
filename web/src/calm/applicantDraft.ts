@@ -1,7 +1,7 @@
 import type { Case, EvidenceDraft } from "../types";
 import type { ApplicantDraft, DraftFileBinding, RemoveFileBinding, RetainFileBinding } from "../api/types.gen";
 import { questionDrafts } from "./questionDrafts";
-import { getSession, resetSession, updateSavedSession, type Session } from "./session";
+import { getSession, resetSavedSession, updateSavedSession, type Session } from "./session";
 
 export type { ApplicantDraft } from "../api/types.gen";
 export const DESCRIPTION_DRAFT = "description-editor";
@@ -56,5 +56,5 @@ export function restoreApplicantDraft(saved: ApplicantDraft | null | undefined, 
     packages: saved.packages, ruleUnsure: saved.rule_unsure,
   } : { skipped: [], seen: [], authorityUnsure: false, packages: {}, ruleUnsure: [] };
   if (preserveSession) updateSavedSession(patch);
-  else resetSession(patch);
+  else resetSavedSession(patch);
 }

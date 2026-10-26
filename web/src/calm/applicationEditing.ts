@@ -13,6 +13,15 @@ export function pauseApplicationEdits() {
   return () => { if (pauses.delete(token)) publish(); };
 }
 
+/** Saved work (a finished job's output, its chained start) waits for the pause instead of being dropped. */
+export function whenEditsResume(): Promise<void> {
+  if (!applicationEditsPaused()) return Promise.resolve();
+  return new Promise(resolve => {
+    const check = () => { if (!applicationEditsPaused()) { listeners.delete(check); resolve(); } };
+    listeners.add(check);
+  });
+}
+
 export function useApplicationEditsPaused() {
   return useSyncExternalStore(listener => { listeners.add(listener); return () => { listeners.delete(listener); }; }, applicationEditsPaused, applicationEditsPaused);
 }
