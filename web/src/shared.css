@@ -185,6 +185,7 @@ summary:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 3p
 .doc-row:last-child { border-bottom: 1px solid var(--border-subtle, var(--border-default)); }
 .doc-row-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
 .doc-title { overflow-wrap: anywhere; }
+.doc-row-actions { display: flex; gap: 8px; flex-shrink: 0; }
 .doc-status { display: inline-flex; align-items: center; gap: 6px; }
 
 @media (max-width: 640px) {
