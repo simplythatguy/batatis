@@ -1,0 +1,28 @@
+.cf-journey-foot { flex-wrap: wrap; gap: 14px; }
+.cf-journey-steps { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+.cf-journey-step { display: inline-flex; align-items: center; gap: 7px; border: 0; padding: 8px 0; background: none; color: var(--cf-text-3); font-size: 12px; cursor: pointer; }
+.cf-journey-step.is-on { color: var(--hue-s); }
+.cf-journey-step-mark { width: 8px; height: 8px; border-radius: 50%; background: var(--cf-line-2); }
+.cf-journey-step-mark.is-done { background: var(--cf-text-3); }
+.cf-journey-step.is-on .cf-journey-step-mark { background: var(--hue-s); }
+.cf-journey-counts, .cf-journey-counts > span, .cf-journey-map-toggle { display: inline-flex; align-items: center; gap: 6px; }
+.cf-journey-counts { gap: 14px; font: 12px var(--cf-mono); color: var(--cf-text-2); }
+.cf-journey-pop { position: absolute; bottom: calc(100% + 8px); right: 18px; width: min(400px, calc(100vw - 36px)); padding: 16px; max-height: 65vh; overflow-y: auto; overscroll-behavior: contain; }
+.cf-journey-map { margin: 18px 0; }
+.cf-journey-map-row, .cf-journey-map-head { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 9px 0; }
+.cf-journey-map-head { font-weight: 600; padding-top: 0; }
+.cf-journey-list { margin-top: 24px; }
+.cf-journey-list h3 { display: flex; gap: 8px; align-items: center; font-size: 15px; }
+.cf-journey-list ul { list-style: none; margin: 12px 0; padding: 0; }
+.cf-journey-list li { margin: 8px 0; color: var(--cf-text-2); font-size: 14px; }
+.cf-understood { margin-top: 24px; }
+.cf-understood summary { display: flex; gap: 10px; align-items: baseline; padding: 12px 0; cursor: pointer; list-style: none; }
+.cf-understood summary::-webkit-details-marker { display: none; }
+.cf-understood-value { flex: 1; min-width: 0; overflow-wrap: anywhere; color: var(--cf-text); }
+.cf-understood-label { display: block; font-size: 12px; color: var(--cf-text-3); margin-bottom: 3px; }
+.cf-understood-sources { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 5px; }
+.cf-source-chip { border: 1px solid var(--cf-line-2); border-radius: 5px; padding: 2px 5px; font-size: 11px; color: var(--cf-text-3); }
+.cf-source-chip.is-assumed { border-style: dashed; }
+.cf-understood-fix { color: var(--cf-text-3); font-size: 12px; }
+.cf-answerer-tag { display: inline-flex; align-items: center; gap: 7px; margin-top: 12px; color: var(--cf-text-3); font-size: 12px; }
+@media (max-width: 600px) { .cf-journey-foot { padding: 10px 16px; gap: 10px; } .cf-journey-steps { flex-basis: calc(100% - 84px); gap: 10px; } .cf-journey-map-toggle { order: 3; } .cf-journey-foot .cf-qnav { margin-left: auto; } }

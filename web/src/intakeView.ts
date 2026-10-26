@@ -245,6 +245,7 @@ export interface PlanInput {
 
 /** How a planner question is answered: choices for yes/no and enums, a number, or words. */
 export function planInput(field: string): PlanInput {
+  if (field === "product_scope") return { kind: "choices", choices: [{ value: "site", label: "One building or site" }, { value: "product_acceptance", label: "Across Alberta" }] };
   if (field === "sprinklered") return { kind: "choices", choices: [{ value: "yes", label: "Yes" }, { value: "no", label: "No" }, { value: "partial", label: "Partly" }] };
   if (field === "part4_design") return { kind: "choices", choices: [{ value: "yes", label: "Yes" }, { value: "no", label: "No" }] };
   if (field === "scope") return { kind: "choices", choices: [{ value: "site", label: "One building or site" }, { value: "jurisdiction", label: "Many sites, or across Alberta" }] };

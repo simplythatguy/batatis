@@ -29,7 +29,7 @@ export interface AnswersRequest {
 }
 
 export interface ApplicantSummary {
-  applicant_type: "manufacturer" | "contractor" | "homebuilder" | null;
+  applicant_type: "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner" | "engineer" | "other" | null;
   name: string;
 }
 
@@ -1027,7 +1027,7 @@ export interface NotificationsResult {
 
 export interface OnboardingRequest {
   access_code?: string | null;
-  applicant_type?: "manufacturer" | "contractor" | "homebuilder" | null;
+  applicant_type?: "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner" | "engineer" | "other" | null;
   authority?: "calgary" | "edmonton" | null;
   role: "applicant" | "reviewer";
 }
@@ -1685,7 +1685,7 @@ export interface UnresolvedCitation {
 export interface User {
   ai_access: string | null;
   ai_access_fingerprint: string | null;
-  applicant_type: "manufacturer" | "contractor" | "homebuilder" | null;
+  applicant_type: "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner" | "engineer" | "other" | null;
   authority: "calgary" | "edmonton" | null;
   created_at: string;
   email: string;

@@ -1,20 +1,20 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { DETAIL_FIELDS, NOT_RIGHT, PROCESS_FIELDS, factFor, isTyped, valueText } from "../model";
-import { confirmedProvisions, withinProvision } from "../provisions";
+import { withinProvision } from "../provisions";
 import { exitCountWarning } from "../rules";
 import { useCandidateAnswer } from "../screens/CodeCheck";
 import { Recommendations } from "../screens/Recommendations";
 import { useCase } from "../store";
 import { readOnlyStatus } from "./applications";
-import { openAssistant, setAssistantContext, useAssistant } from "./assistant/assistant";
+import { openAssistant, setAssistantContext } from "./assistant/assistant";
 import { questionContext } from "./assistant/questionContext";
 import { useCurrentApplication } from "./begin";
 import { CodeDrawer, type DrawerState } from "./CodeDrawer";
-import { aliasKey, alternativeChoice, buildDeck, deckCompletion, mergeQueue, rankAhead, choiceKey, choicesFor, preCaseState, questionProgress, QUESTION_PROGRESS_LABEL, SECTIONS, sourcePhrase, type DeckItem, type SectionId } from "./deck";
+import { aliasKey, alternativeChoice, buildDeck, deferralFor, mergeQueue, rankAhead, choiceKey, choicesFor, preCaseState, sourcePhrase, type DeckItem } from "./deck";
 import { NOT_SURE, planInput } from "../intakeView";
 import { confirmedAnswer, localField } from "../intakeFields";
 import { KeywordTriage } from "./KeywordTriage";
-import { CodeProgress, ReadingState, ReadSource, RedirectPage, ShowCode } from "./ReadCards";
+import { CodeProgress, ReadingState, ReadSource, RedirectPage, ShowCode, UnderstoodFacts, ProductRouteNotice, ForkNote } from "./ReadCards";
 import { Icon24 } from "./icons";
 import { RelevanceRing } from "./RelevanceRing";
 import { getSession, updateSession, useSession } from "./session";
@@ -26,7 +26,7 @@ import { provisionCandidate } from "../screens/SectionC";
 import { ConditionBody, PackageEnd, PackageOffer } from "./ChecklistCards";
 import { otherOptions } from "./checklistView";
 import { RuleNumberInput, RuleResultView } from "./RuleCards";
-import { choiceValue, NOT_SURE_RULE, readNumber, RULE_REF, ruleFacts } from "./rulesView";
+import { choiceValue, NOT_SURE_RULE, readNumber, ruleFacts } from "./rulesView";
 import { canonicalProvision } from "../provisions";
 import { useDeckExtras } from "./useDeckExtras";
 import { JurisdictionNote } from "./JurisdictionNote";
@@ -37,6 +37,9 @@ import { AUTHORITIES } from "../config";
 import { PACKAGE_YES, RULE_ADD, RULE_LEAVE } from "./deck";
 import { useAccount } from "./account";
 import { useQuestionDraft } from "./useQuestionDraft";
+import { todayIn, toIso } from "./calendarDate";
+import { clearJourneyAnswerAction, journeyAnswerAction, journeyProgress, itemOpen, productScope, routeChoice, STAGES, type Answerer } from "./journey";
+import "./journey.css";
 
 type Shown = DeckItem & { gone?: boolean };
 
@@ -50,7 +53,7 @@ function isTextTarget(t: EventTarget | null): boolean {
 
 /** Cards answered by typing several lines continue with Cmd/Ctrl+Enter instead of Enter. */
 function multiline(item: DeckItem): boolean {
-  return item.kind === "question" || item.kind === "process" || (item.kind === "detail" && Boolean(DETAIL_FIELDS.find((d) => d.id === item.ref)?.multiline)) || (item.kind === "plan" && planInput(item.plan?.field ?? "").kind === "area");
+  return item.kind === "route-detail" || item.kind === "question" || item.kind === "process" || (item.kind === "detail" && Boolean(DETAIL_FIELDS.find((d) => d.id === item.ref)?.multiline)) || (item.kind === "plan" && planInput(item.plan?.field ?? "").kind === "area");
 }
 
 /* —— Typeform pieces —— */
@@ -70,12 +73,12 @@ export function Choices({ choices, current, onPick }: { choices: { value: string
   );
 }
 
-function OkRow({ label = "OK", disabled, onOk, typed, children }: { label?: string; disabled?: boolean; onOk: () => void; typed: boolean; children?: ReactNode }) {
+function OkRow({ label = "Continue", disabled, onOk, typed, children, primary = true }: { label?: string; disabled?: boolean; onOk: () => void; typed: boolean; children?: ReactNode; primary?: boolean }) {
   return (
     <div className="cf-ok-row" data-deck-foot>
-      <button type="button" className="cf-btn is-primary is-lg" disabled={disabled} onClick={onOk} aria-keyshortcuts={typed ? "Meta+Enter Control+Enter" : "Enter"}>
+      {primary && <button type="button" className="cf-btn is-primary is-lg" disabled={disabled} onClick={onOk} aria-keyshortcuts={typed ? "Meta+Enter Control+Enter" : "Enter"}>
         {label} <Icon24 name="check" size={16} stroke={2} />
-      </button>
+      </button>}
       {children}
     </div>
   );
@@ -92,88 +95,77 @@ function useDirection(index: number): "down" | "up" {
   return dir.current;
 }
 
-/* —— Footer: progress split by form section, popover per section, up/down —— */
+/* —— Journey progress and the map, shared with the end screen —— */
 
-export function SectionFooter({ items, index, skipped, onJump, onPrev, onNext, canPrev, canNext }: { items: Shown[]; index: number; skipped: readonly string[]; onJump: (i: number) => void; onPrev: () => void; onNext: () => void; canPrev: boolean; canNext: boolean }) {
-  const { c } = useCase();
-  const references = confirmedProvisions(c).length;
-  const [open, setOpen] = useState<SectionId | null>(null);
-  const timer = useRef<number | undefined>(undefined);
-  const hold = (id: SectionId | null) => { window.clearTimeout(timer.current); setOpen(id); };
-  const later = () => { window.clearTimeout(timer.current); timer.current = window.setTimeout(() => setOpen(null), 160); };
-  useEffect(() => () => window.clearTimeout(timer.current), []);
-  // The assistant opening (or any resize) moves the sections; a list left open would point at nothing.
-  const assistantOpen = useAssistant().open;
-  useEffect(() => { setOpen(null); }, [assistantOpen]);
-  useEffect(() => {
-    const close = () => setOpen(null);
-    window.addEventListener("resize", close);
-    return () => window.removeEventListener("resize", close);
-  }, []);
-  const sections = SECTIONS.map((s) => {
-    const at = items.map((it, i) => ({ it, i })).filter((x) => x.it.section === s.id);
-    const tracked = at.filter((x) => !x.it.optional);
-    return { ...s, at, done: tracked.filter((x) => x.it.done && !x.it.settled).length, total: tracked.length, on: at.some((x) => x.i === index) };
-  }).filter((s) => s.at.length > 0);
-  const lastHalf = (n: number) => n >= Math.ceil(sections.length / 2);
-  return (
-    <footer className="cf-qfoot" aria-label="Progress">
-      <div className="cf-secs">
-        {sections.map((s, sn) => {
-          const first = s.at.find((x) => !x.it.done) ?? s.at[0];
-          return (
-            <div
-              key={s.id}
-              className={`cf-qsec is-${SECTION_HUE[s.id] ?? "slate"}${s.on ? " is-on" : ""}`}
-              style={{ ["--n" as string]: s.at.length }}
-              onPointerEnter={(e) => { if (e.pointerType === "mouse") hold(s.id); }}
-              onPointerLeave={(e) => { if (e.pointerType === "mouse") later(); }}
-              onFocus={() => hold(s.id)}
-              onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node)) later(); }}
-              onKeyDown={(e) => { if (e.key === "Escape" && open) { e.stopPropagation(); setOpen(null); } }}
-            >
-              <button type="button" className="cf-qsec-btn" aria-expanded={open === s.id} aria-controls={open === s.id ? `cf-qsec-pop-${s.id}` : undefined} onClick={() => { setOpen(null); onJump(first.i); }}>
-                <span className="cf-qsec-bar" aria-hidden="true">
-                  {s.at.map((x) => {
-                    const state = questionProgress(x.it, items[index]?.key, skipped);
-                    return <i key={x.it.key} className={state === "current" ? "is-cur" : `is-${state}`} />;
-                  })}
-                </span>
-                <span className="cf-qsec-lab">
-                  <span className="cf-qsec-name" title={s.label}>{s.short}</span>
-                  <span className="cf-qsec-l"><span className="cf-sr">, Section </span>{s.id}</span>
-                  <span className="cf-qsec-count">{s.id === "C" ? <>{references}<span className="cf-qsec-confirmed" aria-hidden="true"> confirmed</span><span className="cf-sr"> confirmed</span></> : <>{s.done}<span className="cf-qsec-of"> of </span><span className="cf-qsec-slash" aria-hidden="true">/</span>{s.total}</>}</span>
-                </span>
-                <span className="cf-sr">. {s.on ? `Current question: ${items[index]?.title}. ` : ""}{s.at.filter((x) => questionProgress(x.it, undefined, skipped) === "skipped").length} skipped. Go to the first open question here.</span>
-              </button>
-              {open === s.id && (
-                <div id={`cf-qsec-pop-${s.id}`} className={`cf-pop cf-qsec-pop${lastHalf(sn) ? " is-end" : ""}`} role="group" aria-label={`${s.label}, Section ${s.id} questions`}>
-                  <p className="cf-qsec-about">{SECTIONS.find((x) => x.id === s.id)?.about}</p>
-                  {s.at.map((x, k) => {
-                    const state = questionProgress(x.it, items[index]?.key, skipped);
-                    return <button key={x.it.key} type="button" className={`cf-qsec-row${state === "current" ? " is-cur" : ""}`} aria-current={state === "current" ? "step" : undefined} aria-label={`${s.id}${k + 1}: ${x.it.title}. ${QUESTION_PROGRESS_LABEL[state]}.`} onClick={() => { setOpen(null); onJump(x.i); }}>
-                      <span className="cf-qsec-n">{s.id}{k + 1}</span>
-                      <span className="cf-qsec-t">{x.it.title}</span>
-                      {state === "done" && <span className="cf-qsec-done"><Icon24 name="check" size={14} /></span>}
-                      {state === "skipped" && <span className="cf-qsec-skipped"><Icon24 name="x" size={14} /></span>}
-                    </button>;
-                  })}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-      <div className="cf-qnav">
-        <button type="button" className="cf-icon-btn cf-qnav-btn" aria-label="Previous question (↑)" disabled={!canPrev} onClick={onPrev}><Icon24 name="up" size={16} /></button>
-        <button type="button" className="cf-icon-btn cf-qnav-btn" aria-label="Next question (↓)" disabled={!canNext} onClick={onNext}><Icon24 name="down" size={16} /></button>
-      </div>
-    </footer>
-  );
+const ANSWERER_ICON = { you: "user", designer: "compose", office: "landmark", batatis: "spark" } as const;
+const ANSWERER_LABEL = { you: "You", designer: "Your designer", office: "The office", batatis: "To confirm" };
+
+export function AnswererCounts({ counts }: { counts: Record<Answerer, number> }) {
+  const shown = { ...counts, you: counts.you + counts.batatis };
+  return <span className="cf-journey-counts">{(["you", "designer", "office"] as const).map((who) => shown[who] > 0 && <span key={who} role="img" title={`${ANSWERER_LABEL[who]}: ${shown[who]}`} aria-label={`${ANSWERER_LABEL[who]}: ${shown[who]}`}><Icon24 name={ANSWERER_ICON[who]} size={15} />{shown[who]}</span>)}</span>;
 }
 
-/** The form's parts, by colour (the officer's review uses the same). */
-const SECTION_HUE: Record<string, string> = { A: "blue", B: "teal", C: "violet", D: "amber" };
+export function JourneyMap({ items, onJump }: { items: DeckItem[]; onJump: (key: string) => void }) {
+  const progress = journeyProgress(items);
+  return <div className="cf-journey-map" aria-label="Where you stand">{progress.stages.filter((s) => s.total > 0).map((s) => {
+    const first = items.find((i) => i.stage === s.stage && i.answerer !== "office" && itemOpen(i)) ?? items.find((i) => i.stage === s.stage && i.answerer !== "office");
+    return <div key={s.stage} className="cf-journey-map-row">
+      <button type="button" className="cf-link-btn" disabled={!first} onClick={() => first && onJump(first.key)}>{STAGES.find((stage) => stage.stage === s.stage)?.label}</button>
+      {s.open ? <AnswererCounts counts={s.byAnswerer} /> : <span className="cf-faint"><Icon24 name="check" size={14} /><span className="cf-sr">Done</span></span>}
+    </div>;
+  })}</div>;
+}
+
+export function SectionFooter({ items, index, onJump, onPrev, onNext, canPrev, canNext }: { items: Shown[]; index: number; onJump: (i: number) => void; onPrev: () => void; onNext: () => void; canPrev: boolean; canNext: boolean }) {
+  const [map, setMap] = useState(false);
+  const progress = journeyProgress(items);
+  const current = items[index]?.stage;
+  const jump = (key: string) => { setMap(false); onJump(items.findIndex((i) => i.key === key)); };
+  return <footer className="cf-qfoot cf-journey-foot" aria-label="Journey progress" onKeyDown={(e) => { if (e.key === "Escape") setMap(false); }}>
+    <div className="cf-journey-steps">{STAGES.map((s) => {
+      const stage = progress.stages.find((p) => p.stage === s.stage)!;
+      if (!items.some((i) => i.stage === s.stage)) return null;
+      const on = current === s.stage;
+      return <button key={s.stage} type="button" className={`cf-journey-step is-${s.hue}${on ? " is-on" : ""}`} aria-current={on ? "step" : undefined} title={`${s.label}: ${stage.open} open`} aria-label={`${s.label}: ${stage.open} open`} onClick={() => { setMap(true); }}>
+        <span className={`cf-journey-step-mark${stage.total > 0 && stage.open === 0 ? " is-done" : ""}`} aria-hidden="true" />
+        {on && <span>{s.label}</span>}
+      </button>;
+    })}</div>
+    <button type="button" className="cf-link-btn cf-journey-map-toggle" aria-label="Where you stand" aria-expanded={map} onClick={() => setMap((v) => !v)}><AnswererCounts counts={progress.open} /><Icon24 name="table" size={16} /></button>
+    {map && <div className="cf-pop cf-journey-pop" role="group" aria-label="Journey map"><div className="cf-journey-map-head"><span>Where you stand</span><button type="button" className="cf-icon-btn" aria-label="Close journey map" onClick={() => setMap(false)}><Icon24 name="x" size={14} /></button></div><JourneyMap items={items} onJump={jump} /></div>}
+    <div className="cf-qnav">
+      <button type="button" className="cf-icon-btn cf-qnav-btn" aria-label="Previous question (↑)" disabled={!canPrev} onClick={onPrev}><Icon24 name="up" size={16} /></button>
+      <button type="button" className="cf-icon-btn cf-qnav-btn" aria-label="Next question (↓)" disabled={!canNext} onClick={onNext}><Icon24 name="down" size={16} /></button>
+    </div>
+  </footer>;
+}
+
+export function JourneyEnd({ items, standard, product, onJump, onReview }: { items: DeckItem[]; standard: boolean; product: boolean; onJump: (key: string) => void; onReview: () => void }) {
+  const [copyNote, setCopyNote] = useState("");
+  const progress = journeyProgress(items);
+  const yours = items.filter((i) => !i.optional && (i.answerer === "you" || i.answerer === "batatis") && itemOpen(i));
+  const designers = items.filter((i) => i.answerer === "designer" && itemOpen(i));
+  const office = items.filter((i) => i.answerer === "office" && itemOpen(i));
+  const count = progress.open.you + progress.open.batatis;
+  const copyQuestions = async () => {
+    try {
+      await navigator.clipboard.writeText(designers.map((i) => `• ${i.title}`).join("\n"));
+      setCopyNote("Copied");
+    } catch {
+      setCopyNote("Couldn’t copy. Select the questions above to copy them.");
+    }
+  };
+  return <>
+    <h2 id="cf-q" className="cf-q-text" tabIndex={-1}>{progress.yourPartDone ? "Your part is done" : `${count} still need you`}</h2>
+    {standard && <p className="cf-q-help">Prepare the usual permit documents and evidence for your permit office.</p>}
+    {product && <p className="cf-q-help">Your next step is product acceptance, such as a CCMC evaluation. A pilot building can have its own site variance.</p>}
+    <JourneyMap items={items} onJump={onJump} />
+    {yours.length > 0 && <button type="button" className="cf-link-btn" onClick={() => onJump(yours[0].key)}>Go to the first one</button>}
+    {designers.length > 0 && <section className="cf-journey-list" aria-label="For your designer"><h3><Icon24 name="compose" size={17} />For your designer</h3><ul>{designers.map((i) => <li key={i.key}><button type="button" className="cf-link-btn" onClick={() => onJump(i.key)}>{i.title}</button></li>)}</ul><button type="button" className="cf-link-btn" onClick={() => void copyQuestions()}>Copy questions</button>{copyNote && <p className="cf-note" role="status">{copyNote}</p>}</section>}
+    {office.length > 0 && <section className="cf-journey-list" aria-label="To confirm with the office"><h3><Icon24 name="landmark" size={17} />To confirm with the office</h3><ul>{office.map((i) => <li key={i.key}>{i.title}</li>)}</ul></section>}
+    <OkRow label="See my application" onOk={onReview} typed={false} />
+  </>;
+}
 
 /* —— One card's controls —— */
 
@@ -192,11 +184,12 @@ function PlanBody({ item, onPick, draft, setDraft, note }: { item: Shown; onPick
   const q = item.plan!;
   const input = planInput(q.field);
   const current = planValue(item, c);
+  const selected = item.deferred ?? (current === NOT_SURE ? "not_sure" : current);
   const busy = reading.busy === q.id;
   return (
     <>
       {input.kind === "choices" ? (
-        <Choices choices={choicesFor(item)} current={current} onPick={onPick} />
+        <Choices choices={choicesFor(item)} current={selected} onPick={onPick} />
       ) : (
         <div className={`cf-inline-answer${input.kind === "area" ? " is-wide" : ""}`}>
           <label className="cf-sr" htmlFor="cf-plan-answer">{q.text}</label>
@@ -236,11 +229,11 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
   if (item.kind === "rule-input" && item.input) {
     const { field, spec } = item.input;
     const fact = factFor(c, field);
-    const unsure = session.ruleUnsure.includes(field) && (fact?.value === undefined || fact?.value === null);
+    const unsure = Boolean(item.deferred || item.settled) && (fact?.value === undefined || fact?.value === null);
     if (spec.type === "number" || spec.type === "int") {
       return <RuleNumberInput id={`cf-rule-${field}`} label={spec.label} unit={spec.unit} draft={draft} setDraft={setDraft} unsure={unsure} note={note} />;
     }
-    const current = unsure ? NOT_SURE_RULE : fact?.value === undefined || fact?.value === null ? undefined : String(fact.value);
+    const current = item.deferred ?? (unsure ? "not_sure" : fact?.value === undefined || fact?.value === null ? undefined : String(fact.value));
     return <>
       <Choices choices={choices} current={current} onPick={onPick} />
       {unsure && <p className="cf-note"><span className="cf-dot is-pending" aria-hidden="true" />Saved as Not sure. The rule stays open.</p>}
@@ -250,7 +243,7 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
     return (
       <>
         <RuleResultView rule={item.rule} index={index} />
-        {choices.length > 0 && <Choices choices={choices} current={picked ?? (item.done ? RULE_LEAVE : undefined)} onPick={onPick} />}
+        {choices.length > 0 && <Choices choices={choices} current={item.deferred ?? picked ?? (item.done ? RULE_LEAVE : undefined)} onPick={onPick} />}
         {busy && <p className="cf-note" role="status"><span className="cf-dot is-pending" aria-hidden="true" />Adding the rule…</p>}
         {!busy && note && <p className="cf-note" role="alert"><span className="cf-dot is-warning" aria-hidden="true" />{note}</p>}
       </>
@@ -260,14 +253,14 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
     return (
       <>
         <PackageOffer cl={cl} />
-        <Choices choices={choices} current={session.packages[cl.id] ?? (cl.conditions.some((x) => x.answer) ? PACKAGE_YES : undefined)} onPick={onPick} />
+        <Choices choices={choices} current={item.deferred ?? String(factFor(c, `journey.package.${cl.id}`)?.value ?? session.packages[cl.id] ?? (cl.conditions.some((x) => x.answer) ? PACKAGE_YES : ""))} onPick={onPick} />
       </>
     );
   }
   if (item.kind === "condition" && cl) {
     const row = cl.conditions.find((x) => x.id === item.condition);
     if (!row) return null;
-    const current = picked ?? row.answer?.state;
+    const current = item.deferred ?? picked ?? row.answer?.state;
     return (
       <ConditionBody cl={cl} row={row} position={position} reasonOpen={current === "does_not_apply"} reason={draft} setReason={setDraft} note={note} busy={busy} onReload={onReload}>
         <Choices choices={choices} current={current} onPick={onPick} />
@@ -279,7 +272,16 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
   if (item.kind === "section-d") {
     return <div className="cf-embed cf-sectiond"><Recommendations /></div>;
   }
-  if (item.kind === "plan") return <PlanBody item={item} onPick={onPick} draft={draft} setDraft={setDraft} note={planNote} />;
+  if (item.kind === "understood") return <UnderstoodFacts item={item} />;
+  if (item.kind === "route") {
+    const saved = routeChoice(c);
+    const current = saved === "variance" && c.intake?.record.plan?.fork.variance_needed === "not_indicated" ? "different" : saved ?? undefined;
+    return <><Choices choices={choices} current={picked ?? current} onPick={onPick} />{c.intake?.record.plan?.fork && <ForkNote fork={c.intake.record.plan.fork} detailsOnly />}</>;
+  }
+  if (item.kind === "product-notice") return <ProductRouteNotice />;
+  if (item.kind === "role") return <Choices choices={choices} current={String(factFor(c, "applicant_role")?.value ?? "")} onPick={onPick} />;
+  if (item.kind === "route-detail") return <textarea className="cf-uline is-area" rows={2} aria-label={item.title} value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="What you want to do differently…" />;
+  if (item.kind === "plan" || item.kind === "product-scope") return <PlanBody item={item} onPick={onPick} draft={draft} setDraft={setDraft} note={planNote} />;
   if (item.kind === "code-run") return <CodeProgress />;
   if (item.kind === "code-triage") return <KeywordTriage c={c} openDrawer={openDrawer} />;
   if (item.kind === "reading") return <ReadingState />;
@@ -302,12 +304,14 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
     const latest = c.facts.find((f) => item.ids?.includes(f.id)) ? undefined : factFor(c, c.intake?.facts.find((f) => f.id === item.ref)?.field ?? "");
     if (latest) current = latest.source.ref === NOT_RIGHT ? "dismiss" : "confirm";
   }
-  if (item.kind === "candidate" && cand) current = cand.answer ?? undefined;
-  if (item.kind === "authority") current = c.authority || (session.authorityUnsure ? "unsure" : undefined);
+  if (item.kind === "candidate" && cand) current = cand.answer === "not-sure" ? "not_sure" : cand.answer ?? undefined;
+  if (item.kind === "authority") current = c.authority || (item.deferred ? "unsure" : undefined);
   if (item.kind === "detail" && def?.options) current = valueText(fact) || undefined;
   // The proposed alternative offers the description: Yes uses it, No opens the field.
-  const offer = item.kind === "detail" && Boolean(item.confirmLabels);
+  const offer = item.kind === "detail" && Boolean(item.confirmLabels || item.suggestedValue);
   if (offer) current = picked === "dismiss" ? "dismiss" : alternativeChoice(c.description, valueText(fact)) ?? picked;
+  if (item.suggestedValue) current = picked === "edit-suggested" ? picked : valueText(fact) === item.suggestedValue ? "use-suggested" : picked;
+  current = item.deferred ?? current;
 
   return (
     <>
@@ -349,7 +353,8 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
       ) : item.kind === "detail" && def && !def.options ? (
         <>
           {offer && <Choices choices={choices} current={current} onPick={onPick} />}
-          {offer && current !== "dismiss" ? null : def.multiline ? (
+          {item.suggestedValue && current !== "edit-suggested" && <p className="cf-note">{item.suggestedValue} <span className="cf-source-chip is-assumed">{item.ref === "date" ? "default" : "assumed"}</span></p>}
+          {offer && current !== "dismiss" && current !== "edit-suggested" ? null : def.multiline ? (
             <textarea id={`field-${def.id}`} className="cf-uline is-area" rows={2} aria-label={def.label} value={valueText(fact)} onChange={(e) => dispatch({ type: "setDetail", field: def.id, value: e.target.value, section: def.section })} placeholder={offer ? "What you propose instead, in a sentence or two…" : "Type your answer here…"} />
           ) : def.inputType === "date" ? (
             <DatePicker id={`field-${def.id}`} label={def.label} value={valueText(fact)} onChange={(value) => dispatch({ type: "setDetail", field: def.id, value, section: def.section })} />
@@ -454,7 +459,7 @@ function NoQuestionsYet() {
 /* —— The application's deck —— */
 
 /** Coordinate the visit queue, rule and checklist answers, and navigation through the case’s cards. */
-function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boolean }) {
+export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boolean }) {
   const { c, engineId, gaps, dispatch, requestCheck, sectionCLookup, reading, answerPlan, answerChecklist, reloadChecklists, applicationStatus } = useCase();
   const session = useSession();
   const { app, locked, readOnly } = useCurrentApplication();
@@ -464,7 +469,8 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
   // A keyword lead opened from the grouped triage (or a saved link) stays on the deck while you answer it.
   const [focusedCandidate, setFocusedCandidate] = useState(focus?.startsWith("cand-") ? focus : undefined);
   useEffect(() => { if (focus?.startsWith("cand-")) setFocusedCandidate(focus); }, [focus]);
-  const all = buildDeck(c, gaps, { ...deckExtras, seen, includeDone: true, identify: reading.identify, intake: reading.intake, intakeNote: reading.intakeNote, focusedCandidate: focus?.startsWith("cand-") ? focus : focusedCandidate });
+  const today = toIso(todayIn(new Date()));
+  const all = buildDeck(c, gaps, { ...deckExtras, seen, today, includeDone: true, identify: reading.identify, intake: reading.intake, intakeNote: reading.intakeNote, focusedCandidate: focus?.startsWith("cand-") ? focus : focusedCandidate });
   const byKey = new Map(all.map((i) => [i.key, i] as const));
   const snapshots = useRef(new Map<string, DeckItem>());
   for (const i of all) snapshots.current.set(i.key, i);
@@ -477,14 +483,14 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     return snap ? { ...snap, done: true, gone: true } : undefined;
   };
 
-  // New open cards join this visit's queue in form order (code questions arriving after the check
+  // New open cards join this visit's queue in journey order (code questions arriving after the check
   // land in the code section, not at the end); vanished, unseen keys leave it.
   const order = all.map((i) => i.key);
-  const openKeys = all.filter((i) => !i.done).map((i) => i.key);
+  const openKeys = all.filter((i) => !i.done && i.answerer !== "office").map((i) => i.key);
   const fresh = openKeys.filter((k) => !session.queue.includes(k));
   const sessionKey = session.queue[session.index];
-  // Unreached cards keep form order when a replan or another navigation adds a card.
-  const ranked = rankAhead(session.queue, session.index, order, () => true);
+  // Unreached cards keep journey order when a replan or another navigation adds a card.
+  const ranked = rankAhead(session.queue, session.index, order, () => true).filter((k) => byKey.get(k)?.answerer !== "office");
   const queue = fresh.length ? mergeQueue(ranked, fresh, order) : ranked;
   const index = sessionKey !== undefined ? Math.max(queue.indexOf(sessionKey), 0) : fresh.length ? queue.indexOf(fresh[0]) : Math.min(session.index, queue.length);
   const currentKey = queue[index];
@@ -493,7 +499,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
   useEffect(() => {
     updateSession((s) => {
       const cur = s.queue[s.index];
-      const kept = rankAhead(s.queue, s.index, order, () => true).filter((k) => byKey.has(k) || k === cur);
+      const kept = rankAhead(s.queue, s.index, order, () => true).filter((k) => (byKey.has(k) || k === cur) && byKey.get(k)?.answerer !== "office");
       const next = mergeQueue(kept, fresh, order);
       return { queue: next, index: cur ? Math.max(next.indexOf(cur), 0) : fresh.length ? next.indexOf(fresh[0]) : Math.min(s.index, next.length) };
     });
@@ -503,10 +509,11 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
   const account = useAccount();
   const savedDraft = (() => {
     if (!item) return "";
+    if (item.kind === "route-detail") return String(factFor(c, "journey.departure")?.value ?? "");
     if (item.kind === "question") return c.questions.find((q) => q.id === item.ref)?.answer ?? "";
     // A confirmed saved value under any of its names wins over the description question (alias rehydration).
     if (item.kind === "storeys") return String(confirmedAnswer(c.facts, "storeys")?.value ?? c.questions.find((q) => q.id === "q-desc-storeys")?.answer ?? "");
-    if (item.kind === "plan" && item.plan) {
+    if ((item.kind === "plan" || item.kind === "product-scope") && item.plan) {
       const saved = factFor(c, localField(item.plan.field))?.value;
       return saved == null || typeof saved === "boolean" ? "" : String(saved);
     }
@@ -530,6 +537,10 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
   const noteFor = (key: string, text: string) => setCardNotes((n) => ({ ...n, [key]: text }));
   /** A typed planner answer was sent: move on once it is saved. */
   const [advanceAfter, setAdvanceAfter] = useState<{ key: string; generation: number } | null>(null);
+  const candidateNote = item?.kind === "candidate" ? decisionNoteFor(item.ref) : "";
+  useEffect(() => {
+    if (candidateNote && advanceAfter) setAdvanceAfter(null);
+  }, [candidateNote, advanceAfter]);
   const wrapRef = useRef<HTMLDivElement>(null);
   const formPos = currentKey ? all.findIndex((i) => i.key === currentKey) : all.length;
   const dir = useDirection(formPos < 0 ? index : formPos);
@@ -559,7 +570,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
       return;
     }
     const key = focus ? aliasKey(c, focus) : all.find((i) => (i.kind === "candidate" || i.kind === "storeys" || i.kind === "code-triage") && !i.done)?.key;
-    if (key && byKey.has(key)) {
+    if (key && byKey.has(key) && byKey.get(key)?.answerer !== "office") {
       updateSession((s) => {
         const base = s.queue.length >= queue.length ? s.queue : queue;
         const q = mergeQueue(base, [key], order);
@@ -625,35 +636,23 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     (field ?? w?.querySelector<HTMLElement>("h2"))?.focus({ preventScroll: true });
   }, [currentKey]);
 
-  /** Next open card after `from`. At the end, come back once to cards skipped in this pass. */
-  function moveFrom(from: number, markSeen: boolean, skipping = false) {
+  /** Every answer takes one pass. Deferred answers live on the case, never in a return queue. */
+  function moveFrom(from: number, markSeen: boolean) {
     const key = queue[from];
-    const open = (k: string, extraSeen?: string) => {
+    const open = (k: string) => {
       const it = itemFor(k);
-      return Boolean(it && !it.done && !(it.optional && (session.seen.includes(k) || k === extraSeen)));
+      return Boolean(k !== key && it && !it.done && it.answerer !== "office" && !session.seen.includes(k));
     };
-    const seenNow = markSeen ? key : undefined;
-    let j = from + 1;
-    while (j < queue.length && !open(queue[j], seenNow)) j++;
-    let wrapped = session.wrapped;
-    if (j >= queue.length && !wrapped) {
-      const back = queue.findIndex((k, n) => n !== from && open(k, seenNow) && !itemFor(k)?.optional);
-      if (back >= 0) { j = back; wrapped = true; }
-    }
-    updateSession((s) => ({
-      // The render's queue (with any new cards merged in) is the one `j` indexes.
-      queue,
-      index: j,
-      wrapped,
-      seen: markSeen && key && !s.seen.includes(key) ? [...s.seen, key] : s.seen,
-      skipped: skipping && key && !s.skipped.includes(key) ? [...s.skipped, key] : markSeen && key ? s.skipped.filter((k) => k !== key) : s.skipped,
-    }));
+    // New questions can arrive earlier in the journey while the current answer is being saved.
+    const first = queue.findIndex(open);
+    updateSession((s) => ({ queue, index: first >= 0 ? first : queue.length, seen: markSeen && key && !s.seen.includes(key) ? [...s.seen, key] : s.seen }));
   }
 
   /** Up/down and the footer move through the whole form in order, answered cards included. */
   const pos = currentKey ? all.findIndex((i) => i.key === currentKey) : all.length;
   function goToKey(key: string | null) {
     if (!key) return updateSession({ index: queue.length });
+    if (byKey.get(key)?.answerer === "office") return;
     updateSession((s) => {
       const base = s.queue.length >= queue.length ? s.queue : queue;
       const q = mergeQueue(base, [key], order);
@@ -661,22 +660,26 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     });
   }
   const step = (d: -1 | 1) => {
-    const at = pos < 0 ? all.length : pos;
+    const navigable = all.filter((i) => i.answerer !== "office");
+    const at = currentKey ? navigable.findIndex((i) => i.key === currentKey) : navigable.length;
     const to = at + d;
     if (to < 0) return;
-    goToKey(to >= all.length ? null : all[to].key);
+    goToKey(to >= navigable.length ? null : navigable[to].key);
   };
 
   /** Check whether the current answer can advance, including pending writes and required reasons. */
   function canContinue(it: Shown): boolean {
-    if (locked) return false;
+    if (locked || busyKey === it.key || advanceAfter?.key === it.key) return false;
     if (it.kind === "section-d" || it.kind === "file" || it.kind === "code-run" || it.kind === "code-note" || it.kind === "code-triage") return true;
     if (it.kind === "reading") return reading.intake !== "running";
     if (it.kind === "scope") return false;
-    if (it.kind === "plan") return reading.busy !== it.ref && (it.done || Boolean(draft.trim()));
+    if (it.kind === "understood") return true;
+    if (it.kind === "product-notice") return true;
+    if (it.kind === "route-detail") return Boolean(draft.trim());
+    if (it.kind === "plan" || it.kind === "product-scope") return reading.busy !== it.ref && (it.done || Boolean(draft.trim()));
     if (it.kind === "question") return Boolean(draft.trim()) || it.done;
     if (it.kind === "storeys") return (Number.isInteger(Number(draft)) && Number(draft) > 0) || it.done;
-    if (it.kind === "authority") return it.done || Boolean(c.authority) || session.authorityUnsure;
+    if (it.kind === "authority") return it.done || Boolean(c.authority);
     if (it.kind === "rule") return it.rule?.state !== "departs" || it.done || picked[it.key] === RULE_LEAVE;
     if (it.kind === "package-end") return true;
     if (it.kind === "rule-input" && it.input && (it.input.spec.type === "number" || it.input.spec.type === "int")) return it.done || Boolean(draft.trim());
@@ -692,7 +695,19 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
       return;
     }
     if (!canContinue(item)) return;
-    if (item.kind === "plan" && item.plan && draft.trim() && planInput(item.plan.field).kind !== "choices") {
+    if (item.kind === "understood") {
+      dispatch({ type: "confirmFacts", ids: item.ids ?? [] });
+      setAdvanceAfter({ key: item.key, generation: engineGeneration() });
+      return;
+    }
+    if (item.kind === "route-detail") {
+      dispatch({ type: "setDetail", field: "journey.departure", value: draft.trim(), section: "B" });
+      dispatch({ type: "setDetail", field: "alternative", value: draft.trim(), section: "B" });
+      dispatch({ type: "setDetail", field: "journey.route", value: "variance", section: "B" });
+      setAdvanceAfter({ key: item.key, generation: engineGeneration() });
+      return;
+    }
+    if ((item.kind === "plan" || item.kind === "product-scope") && item.plan && draft.trim() && planInput(item.plan.field).kind !== "choices") {
       const typed = draft.trim();
       const saved = factFor(c, localField(item.plan.field))?.value;
       if (!item.done || String(saved ?? "") !== typed) {
@@ -703,11 +718,11 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     if (item.kind === "rule-input" && item.input && draft.trim() && (item.input.spec.type === "number" || item.input.spec.type === "int")) {
       const got = readNumber(item.input.spec, draft);
       if ("error" in got) return noteFor(item.key, got.error);
+      dispatch(clearJourneyAnswerAction(item));
       noteFor(item.key, "");
       const saved = extras.rules ? ruleFacts(c, extras.rules.index).get(item.input.field)?.value : undefined;
       if (!item.done || saved !== got.value) {
         dispatch({ type: "setRuleInput", field: item.input.field, value: got.value, rule: item.input.rule, quote: `${draft.trim()}${item.input.spec.unit ? ` ${item.input.spec.unit}` : ""}` });
-        updateSession((s) => ({ ruleUnsure: s.ruleUnsure.filter((f) => f !== item.input!.field) }));
         // Move on once the new value has rendered, so a question it opens comes next, not at the end.
         if (!item.done) {
           setAdvanceAfter({ key: item.key, generation: engineGeneration() });
@@ -724,18 +739,36 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     }
     if (item.kind === "question" && draft.trim()) dispatch({ type: "answerQuestion", id: item.ref, answer: draft.trim() });
     if (item.kind === "storeys" && Number(draft) > 0) dispatch({ type: "setStoreyCount", value: draft });
+    dispatch(clearJourneyAnswerAction(item));
     moveFrom(index, true);
   }
 
-  /** Defer a required card until the return pass, or mark an optional card as seen. */
-  function skip() {
-    if (!item) return;
-    // Optional cards are offered once; required ones come back at the end of this pass.
-    moveFrom(index, item.optional, true);
+  function deferCurrent(value: "not_sure" | "designer" | "later") {
+    if (!item || locked) return;
+    if (item.plan) { sendPlan(item, NOT_SURE, true, value); return; }
+    if (item.kind === "candidate") {
+      const cand = c.candidates.find((a) => a.id === item.ref);
+      if (cand) onAnswer(cand, "not-sure");
+    } else if (item.kind === "storeys") {
+      dispatch({ type: "setStoreyCount", value: "" });
+    } else if (item.kind === "question") {
+      dispatch({ type: "answerQuestion", id: item.ref, answer: "" });
+    } else if (item.kind === "rule-input" && item.input) {
+      dispatch({ type: "setRuleInput", field: item.input.field, value: null, rule: item.input.rule, quote: "" });
+    } else if (item.kind === "condition") {
+      sendCondition(item, "not_yet", "", true, value);
+      return;
+    } else if (item.kind === "detail") {
+      dispatch({ type: "setDetail", field: item.ref, value: "", section: item.section });
+    } else if (item.kind === "authority" && value === "not_sure") {
+      dispatch({ type: "setAuthority", authority: "" });
+    }
+    dispatch(journeyAnswerAction(item, value));
+    setAdvanceAfter({ key: item.key, generation: engineGeneration() });
   }
 
   /** One planner answer to the intake answers route; a typed answer moves on once saved. */
-  function sendPlan(it: Shown, answer: string, advance: boolean) {
+  function sendPlan(it: Shown, answer: string, advance: boolean, deferred?: "not_sure" | "designer" | "later") {
     if (!it.plan) return;
     const key = it.key;
     setPlanNotes((n) => ({ ...n, [key]: "" }));
@@ -745,7 +778,10 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
       if (error) {
         setAdvanceAfter(null);
         setPlanNotes((n) => ({ ...n, [key]: error }));
-      } else if (advance && getSession().queue[getSession().index] === key) setAdvanceAfter({ key, generation });
+      } else {
+        dispatch(deferred ? journeyAnswerAction(it, deferred) : clearJourneyAnswerAction(it));
+        if (advance && getSession().queue[getSession().index] === key) setAdvanceAfter({ key, generation });
+      }
     });
   }
 
@@ -759,7 +795,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
   }
 
   /** One checklist answer; a confirmed option records "does not apply" for the other options of its choice. */
-  function sendCondition(it: Shown, state: "confirmed" | "not_yet" | "does_not_apply", reason: string, advance: boolean) {
+  function sendCondition(it: Shown, state: "confirmed" | "not_yet" | "does_not_apply", reason: string, advance: boolean, deferred?: "not_sure" | "designer" | "later") {
     const cl = extras.checklists?.checklists.find((x) => x.id === it.checklist);
     const row = conditionOf(it);
     if (!cl || !row) return;
@@ -788,11 +824,12 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
         return;
       }
       setConflicted(null);
+      dispatch(deferred ? journeyAnswerAction(it, deferred) : clearJourneyAnswerAction(it));
       if (!advance) return;
       // Move on only if the applicant is still on this card; a first answer moves once it renders.
       const s = getSession();
       if (s.queue[s.index] !== key) return;
-      if (!row.answer) setAdvanceAfter({ key, generation: engineGeneration() });
+      if (!row.answer || deferred) setAdvanceAfter({ key, generation: engineGeneration() });
       else moveFrom(index, true);
     })();
   }
@@ -825,39 +862,48 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
 
   /** Apply a card’s selected choice through the rule, package, checklist or case answer flow. */
   function pick(value: string) {
-    if (!item || locked) return;
+    if (!item || locked || busyKey === item.key || reading.busy === item.ref || advanceAfter?.key === item.key) return;
+    if (value === "not_sure" || value === "unsure" || (value === "designer" && item.kind !== "role") || value === "later" || value === NOT_SURE_RULE) { deferCurrent(value === "designer" ? "designer" : value === "later" ? "later" : "not_sure"); return; }
+    if (!item.plan && item.kind !== "condition") dispatch(clearJourneyAnswerAction(item));
+    const advance = () => setAdvanceAfter({ key: item.key, generation: engineGeneration() });
+    if (item.kind === "route") {
+      dispatch({ type: "setDetail", field: "journey.route", value, section: "B" });
+      // Something is different opens its one text question immediately.
+      advance();
+      return;
+    }
+    if (item.kind === "role") {
+      dispatch({ type: "setDetail", field: "applicant_role", value, section: "A" });
+      advance(); return;
+    }
     if (item.kind === "rule-input" && item.input) {
       const { field, rule, spec } = item.input;
       setPicked((p) => ({ ...p, [item.key]: value }));
-      if (value === NOT_SURE_RULE) {
-        if (factFor(c, field)?.source.ref?.startsWith(RULE_REF)) dispatch({ type: "setRuleInput", field, value: null, rule, quote: "" });
-        updateSession((s) => ({ ruleUnsure: s.ruleUnsure.includes(field) ? s.ruleUnsure : [...s.ruleUnsure, field] }));
-        setDraft("");
-        return;
-      }
       dispatch({ type: "setRuleInput", field, value: choiceValue(spec, value), rule, quote: choicesFor(item).find((x) => x.value === value)?.label ?? value });
-      updateSession((s) => ({ ruleUnsure: s.ruleUnsure.filter((f) => f !== field) }));
+      advance();
       return;
     }
     if (item.kind === "rule") {
       setPicked((p) => ({ ...p, [item.key]: value }));
       if (value === RULE_ADD) void addRule(item);
-      else if (value === RULE_LEAVE) updateSession((s) => ({ seen: s.seen.includes(item.key) ? s.seen : [...s.seen, item.key] }));
+      else if (value === RULE_LEAVE) { dispatch({ type: "setDetail", field: `journey.rule.${item.ref}`, value, section: "C" }); updateSession((s) => ({ seen: s.seen.includes(item.key) ? s.seen : [...s.seen, item.key] })); advance(); }
       return;
     }
     if (item.kind === "package" && item.checklist) {
       const id = item.checklist;
+      dispatch({ type: "setDetail", field: `journey.package.${id}`, value, section: "C" });
       updateSession((s) => ({ packages: { ...s.packages, [id]: value as "yes" | "no" } }));
+      advance();
       return;
     }
     if (item.kind === "condition") {
       setPicked((p) => ({ ...p, [item.key]: value }));
       if (value === "does_not_apply") return; // the reason comes first; OK sends it
-      sendCondition(item, value as "confirmed" | "not_yet", "", false);
+      sendCondition(item, value as "confirmed" | "not_yet", "", true);
       return;
     }
     setPicked((p) => ({ ...p, [item.key]: value }));
-    if (item.kind === "plan") sendPlan(item, value, value === NOT_SURE && planInput(item.plan?.field ?? "").kind !== "choices");
+    if (item.kind === "plan" || item.kind === "product-scope") { sendPlan(item, value, true); return; }
     else if (item.kind === "fact") {
       // An answered card changes the value it left: Not right marks the confirmed value, Yes restores what was read.
       const field = c.intake?.facts.find((f) => f.id === item.ref)?.field;
@@ -867,10 +913,12 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     }
     else if (item.kind === "authority") {
       dispatch({ type: "setAuthority", authority: value === "unsure" ? "" : (value as typeof c.authority) });
-      updateSession({ authorityUnsure: value === "unsure" });
     } else if (item.kind === "candidate") {
       const cand = c.candidates.find((a) => a.id === item.ref);
       if (cand) onAnswer(cand, value as "yes" | "no" | "not-sure");
+    } else if (item.kind === "detail" && item.suggestedValue) {
+      if (value === "edit-suggested") return;
+      dispatch({ type: "setDetail", field: item.ref, value: item.suggestedValue, section: item.section });
     } else if (item.kind === "detail" && item.confirmLabels) {
       const saved = valueText(factFor(c, item.ref));
       if (value === "confirm") dispatch({ type: "setDetail", field: item.ref, value: c.description.trim(), section: "B" });
@@ -879,6 +927,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
       const def = DETAIL_FIELDS.find((d) => d.id === item.ref);
       if (def) dispatch({ type: "setDetail", field: def.id, value, section: def.section });
     }
+    if (!(item.kind === "detail" && item.confirmLabels && value === "dismiss")) advance();
   }
 
   const keyHandler = useRef<(e: KeyboardEvent) => void>(() => {});
@@ -886,7 +935,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     if (drawer || e.defaultPrevented || document.querySelector("dialog[open]")) return;
     const t = e.target as HTMLElement | null;
     // Keys typed in the menu, a popover, the assistant or any dialog belong to them.
-    if (t?.closest?.(".cf-pop, dialog, [role='menu'], .cf-palette, .cf-assist, .cf-document-review")) return;
+    if (t?.closest?.(".cf-pop, dialog, [role='menu'], .cf-palette, .cf-assist, .cf-document-review, .cf-understood")) return;
     const inText = isTextTarget(t);
     const embedded = item?.kind === "section-d" && t && t !== document.body && !t.closest("[data-deck-foot]") && t.tagName !== "H2";
     if (embedded) return;
@@ -923,8 +972,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
 
   const n = (pos < 0 ? index : pos) + 1;
   // Counted from the derived deck: an answered card waiting on the officer (or on a fresh check) is not "left".
-  const completion = deckCompletion(all, session.skipped);
-  const openLeft = completion.open;
+
   const typed = Boolean(item && (item.kind === "condition" ? (picked[item.key] ?? currentState(item)) === "does_not_apply" : multiline(item)));
   const status = readOnlyStatus(app?.status ?? applicationStatus, app?.authority ?? c.authority);
 
@@ -952,14 +1000,16 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
           <RedirectPage />
         ) : item ? (
           <div ref={wrapRef} key={item.key} className={`cf-q-wrap is-from-${dir}${item.kind === "section-d" || item.kind === "code-triage" ? " is-wide" : ""}`} aria-labelledby="cf-q" role="group">
+            <p className="cf-eyebrow is-plain">{item.plan?.kind === "conflict" ? "You wrote two things" : STAGES.find((s) => s.stage === item.stage)?.label}<span className="cf-faint"> · Section {item.section}</span></p>
             <h2 id="cf-q" className="cf-q-text" tabIndex={-1}>{item.title}</h2>
+            {item.answerer === "designer" && <span className="cf-answerer-tag"><Icon24 name="compose" size={15} />Usually your designer knows</span>}
             {(item.context || item.quote) && (
               <p className="cf-q-help">
                 {item.context}
                 {item.quote && <> <q>{item.quote}</q></>}
               </p>
             )}
-            <fieldset className="cf-q-body" disabled={locked}>
+            <fieldset className="cf-q-body" disabled={locked || busyKey === item.key || reading.busy === item.ref || advanceAfter?.key === item.key}>
               <legend className="cf-sr">Your answer</legend>
               <CardBody
                 item={item}
@@ -976,13 +1026,14 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
                 position={item.kind === "condition" ? (extras.checklists?.checklists.find((x) => x.id === item.checklist)?.conditions.findIndex((x) => x.id === item.condition) ?? 0) + 1 : 0}
               />
             </fieldset>
+            {item.deferred && item.kind !== "plan" && item.kind !== "product-scope" && item.kind !== "rule-input" && <p className="cf-note" role="status">{item.deferred === "later" ? "Saved for later" : item.deferred === "designer" ? "For your designer" : "Not sure"} · open on Review</p>}
             {item.kind === "candidate" && decisionNoteFor(item.ref) && <p className="cf-note">{decisionNoteFor(item.ref)}</p>}
             {item.section === "C" && (extras.failed.rules || extras.failed.case) && (
               <p className="cf-note" role="status"><span className="cf-dot is-warning" aria-hidden="true" />Rule checks didn’t load, so some rule questions may be missing. <button type="button" className="cf-link-btn" onClick={retryExtras}>Try again</button></p>
             )}
-            <OkRow label={item.kind === "section-d" ? "Finish Section D" : item.kind === "code-run" ? "Continue" : "OK"} disabled={!canContinue(item)} onOk={next} typed={typed}>
+            <OkRow label={item.kind === "understood" ? "Looks right" : "Continue"} primary={choicesFor(item).length === 0 || item.kind === "authority" || (item.kind === "detail" && (picked[item.key] === "dismiss" || picked[item.key] === "edit-suggested")) || (item.kind === "condition" && (picked[item.key] ?? currentState(item)) === "does_not_apply")} disabled={!canContinue(item)} onOk={next} typed={typed}>
               <span className="cf-ok-more">
-                <button type="button" className="cf-link-btn" title={item.optional ? undefined : "It stays on your list"} onClick={skip}>Skip</button>
+                {deferralFor(item) && (choicesFor(item).length === 0 || item.kind === "authority") && <button type="button" className="cf-link-btn" disabled={locked || reading.busy === item.ref || busyKey === item.key} onClick={() => { const choice = deferralFor(item); if (choice) deferCurrent(choice.value); }}>{deferralFor(item)?.label}</button>}
                 <HelpButton item={item} n={n} open={why} onToggle={() => setWhy((v) => !v)} />
               </span>
             </OkRow>
@@ -990,30 +1041,11 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
           </div>
         ) : (
           <div ref={wrapRef} key="finish" className={`cf-q-wrap is-from-${dir}`} aria-labelledby="cf-q" role="group">
-            <h2 id="cf-q" className="cf-q-text" tabIndex={-1}>That’s everything for now.</h2>
-            <p className="cf-q-help">
-              {completion.message}
-            </p>
-            <OkRow label="Review my application" onOk={next} typed={false}>
-              {openLeft > 0 && (
-                <span className="cf-ok-more">
-                  <button
-                    type="button"
-                    className="cf-link-btn"
-                    onClick={() => {
-                      const first = queue.findIndex((k) => !itemFor(k)?.done && !itemFor(k)?.optional);
-                      updateSession({ queue, index: Math.max(first, 0), skipped: [], wrapped: true });
-                    }}
-                  >
-                    {completion.skipped ? "Go back to skipped" : "Go to unanswered"}
-                  </button>
-                </span>
-              )}
-            </OkRow>
+            <JourneyEnd items={all} standard={routeChoice(c) === "standard"} product={productScope(c) === "product_acceptance"} onJump={goToKey} onReview={next} />
           </div>
         )}
       </div>
-      <SectionFooter items={all} index={item ? pos : -1} skipped={session.skipped} onJump={(i) => goToKey(all[i]?.key ?? null)} onPrev={() => step(-1)} onNext={() => step(1)} canPrev={(pos < 0 ? all.length : pos) > 0} canNext={Boolean(item)} />
+      <SectionFooter items={all} index={item ? pos : -1} onJump={(i) => goToKey(all[i]?.key ?? null)} onPrev={() => step(-1)} onNext={() => step(1)} canPrev={(pos < 0 ? all.length : pos) > 0} canNext={Boolean(item)} />
       <CodeDrawer state={drawer} onClose={() => setDrawer(null)} onAdded={(id) => { setDrawer(null); setJumpTo(id); }} />
     </div>
   );

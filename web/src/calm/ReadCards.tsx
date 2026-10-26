@@ -8,9 +8,12 @@ import { useId, useState } from "react";
 import { useProvisionText } from "../api/sectionC";
 import type { Fork, PreApplication } from "../api/types.gen";
 import { NrcCredit } from "../components";
-import { forkLine, HALF_PLAIN, scopeRedirect, snippet, stageViews, type ReadCopy, type Snippet } from "../intakeView";
+import { forkLine, HALF_PLAIN, planInput, scopeRedirect, snippet, stageViews, type ReadCopy, type Snippet } from "../intakeView";
 import { useCase } from "../store";
 import type { Candidate } from "../types";
+import { DETAIL_IDS, factLabel } from "../model";
+import type { DeckItem } from "./deck";
+import { clearJourneyAnswerAction, journeyAnswerAction } from "./journey";
 import { Icon24 } from "./icons";
 import { codeHref } from "./routes";
 import { CIcon, Dot } from "./ui";
@@ -41,11 +44,70 @@ export function ReadSource({ copy }: { copy: ReadCopy }) {
   );
 }
 
+/** A single confirmation covers the reading; each row keeps its existing confirm/correct UI. */
+export function UnderstoodFacts({ item }: { item: DeckItem }) {
+  const { c, dispatch } = useCase();
+  const [editing, setEditing] = useState<string | null>(null);
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [note, setNote] = useState("");
+  return <div className="cf-understood">{item.rows?.map((row) => {
+    const section = DETAIL_IDS.has(row.field) && ["owner", "representative", "mailingAddress", "date"].includes(row.field) ? "A" : "B";
+    const fact: DeckItem = { key: row.key, kind: "fact", section, stage: "understand", answerer: "you", eyebrow: "Understand", title: row.copy.title, context: "", why: "", ref: row.ref, field: row.field, ids: row.ids, done: row.done, optional: false };
+    const fix = (value: "confirm" | "dismiss" | "not_sure", details: HTMLDetailsElement | null) => {
+      if (value === "dismiss") { setEditing(row.key); setNote(""); return; }
+      if (value === "not_sure") {
+        dispatch({ type: "rejectFacts", ids: row.ids });
+        dispatch({ type: "setRuleInput", field: row.field, value: null, rule: "intake-correction", quote: "" });
+        dispatch(journeyAnswerAction(fact, "not_sure"));
+      }
+      else {
+        dispatch(clearJourneyAnswerAction(fact));
+        const waiting = row.ids.filter((id) => c.facts.some((f) => f.id === id && f.status === "unconfirmed"));
+        dispatch({ type: "confirmFacts", ids: row.deferred ? row.ids : waiting });
+      }
+      if (details) details.open = false;
+    };
+    const input = typeof row.value === "boolean" ? { kind: "choices", choices: [{ value: "yes", label: "Yes" }, { value: "no", label: "No" }] } : planInput(row.field);
+    const save = (value: string, details: HTMLDetailsElement | null) => {
+      const numeric = input.kind === "number" || typeof row.value === "number";
+      const number = Number(value.trim());
+      if (!value.trim() || (numeric && (!Number.isFinite(number) || number < 0 || ((row.field === "storeys" || row.field === "dwelling_units") && (!Number.isInteger(number) || number < 1))))) { setNote("Enter a value for this question."); return; }
+      dispatch(clearJourneyAnswerAction(fact));
+      dispatch({ type: "rejectFacts", ids: row.ids });
+      if (numeric || typeof row.value === "boolean") dispatch({ type: "setRuleInput", field: row.field, value: numeric ? number : value === "yes", rule: "intake-correction", quote: value });
+      else dispatch({ type: "setDetail", field: row.field, value, section });
+      setEditing(null);
+      setNote("");
+      if (details) details.open = false;
+    };
+    return <details key={row.key}>
+      <summary aria-label={`Fix ${factLabel(row.field)}`}><Icon24 name={row.assumed ? "spark" : "file"} size={16} /><span className="cf-understood-value"><span className="cf-understood-label">{factLabel(row.field)}</span>{row.copy.value}<span className="cf-understood-sources">{row.assumed ? <span className="cf-source-chip is-assumed">assumed</span> : row.sources.map((source) => <span key={source} className="cf-source-chip">{/^Your (description|answer)$/.test(source) ? "you" : source}</span>)}{row.deferred && <span className="cf-source-chip">{row.deferred === "designer" ? "Ask my designer" : "Not sure"}</span>}</span></span><span className="cf-understood-fix">Fix</span></summary>
+      <ReadSource copy={row.copy} />
+      {editing === row.key ? <div>
+        {input.kind === "choices" ? <div className="cf-row-actions">{input.choices?.map((choice) => <button key={choice.value} type="button" className="cf-btn" onClick={(e) => save(choice.value, e.currentTarget.closest("details"))}>{choice.label}</button>)}</div> : <div className="cf-inline-answer"><input className="cf-uline" aria-label={row.copy.title} value={drafts[row.key] ?? String(row.value ?? "")} onChange={(e) => setDrafts((draft) => ({ ...draft, [row.key]: e.target.value }))} /><button type="button" className="cf-btn" onClick={(e) => save(drafts[row.key] ?? String(row.value ?? ""), e.currentTarget.closest("details"))}>Save</button></div>}
+        {note && <p className="cf-note" role="alert">{note}</p>}
+      </div> : null}
+      <div className="cf-row-actions">
+        <button type="button" className="cf-btn" onClick={(e) => fix("confirm", e.currentTarget.closest("details"))}>{row.copy.confirm}</button>
+        <button type="button" className="cf-btn" onClick={(e) => fix("dismiss", e.currentTarget.closest("details"))}>{row.copy.dismiss}</button>
+        <button type="button" className="cf-link-btn" onClick={(e) => fix("not_sure", e.currentTarget.closest("details"))}>Not sure</button>
+      </div>
+    </details>;
+  })}</div>;
+}
+
+export function ProductRouteNotice() {
+  const { c } = useCase();
+  const notice = c.intake?.record.plan?.route_notice;
+  if (!notice) return null;
+  return <details className="cf-fork-more"><summary>Product acceptance and a site variance</summary><p>{notice.summary}</p>{notice.bullets.map((bullet, i) => <p key={i}>{bullet.claim} {bullet.citations.map((source) => source.url ? <a key={source.title} href={source.url} target="_blank" rel="noreferrer">{source.title}</a> : <span key={source.title}>{source.title}</span>)}</p>)}</details>;
+}
+
 /** The acceptable or alternative path, in the API's words, with the two halves kept apart. */
-export function ForkNote({ fork }: { fork: Fork }) {
+export function ForkNote({ fork, detailsOnly = false }: { fork: Fork; detailsOnly?: boolean }) {
   return (
     <div className="cf-fork" role="note">
-      <p className="cf-fork-line"><Dot tone={fork.variance_needed === "likely" ? "warning" : "pending"} />{forkLine(fork)}</p>
+      {!detailsOnly && <p className="cf-fork-line"><Dot tone={fork.variance_needed === "likely" ? "warning" : "pending"} />{forkLine(fork)}</p>}
       <details className="cf-fork-more">
         <summary>Details</summary>
         <p className="cf-fork-text">{fork.explanation}</p>
