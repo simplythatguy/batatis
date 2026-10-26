@@ -16,6 +16,7 @@ from engine.api import create_app
 from engine.models import Case, EvidenceItem, Fact, Source
 from engine.retention import maybe_purge, purge_now, reset_purge_clock
 from engine.store import RETENTION_DAYS, CaseStore, open_store
+from engine.case_retention import DRAFT_RETENTION_DAYS, CLOSED_RETENTION_DAYS
 
 
 @pytest.fixture(params=['sqlite', 'postgres'])
@@ -169,7 +170,7 @@ def test_retention_boundary_uses_elapsed_days_including_timezone_offsets(retenti
         case = store.put(Case())
         created.append(case.id)
         file_id = store.put_file(case.id, 'boundary.pdf', b'%PDF-1.4 boundary')['id']
-        _set_created_at(store, case.id, stamp.isoformat(timespec='seconds'))
+        _set_last_activity(store, case.id, stamp.isoformat(timespec='seconds'))
         cases.append((case.id, file_id))
     assert store.purge_expired() == 2
     for index, (case_id, file_id) in enumerate(cases):
@@ -183,17 +184,42 @@ def _stamp(days: int) -> str:
 
 
 def _age(store, case_id: str, days: int) -> None:
-    _set_created_at(store, case_id, _stamp(days))
+    _set_last_activity(store, case_id, _stamp(days))
 
 
-def _set_created_at(store, case_id: str, stamp: str) -> None:
+def _set_last_activity(store, case_id: str, stamp: str) -> None:
     if isinstance(store, CaseStore):
         with sqlite3.connect(store.path) as con:
-            con.execute("UPDATE cases SET json = json_set(json, '$.created_at', ?) WHERE id=?", (stamp, case_id))
+            con.execute("UPDATE cases SET json = json_set(json, '$.updated_at', ?), updated_at=? WHERE id=?", (stamp, stamp, case_id))
         return
     with store._conn() as con:
-        con.execute("UPDATE cases SET data = jsonb_set(data, '{created_at}', to_jsonb(%s::text)) WHERE id=%s",
-                    (stamp, case_id))
+        con.execute("UPDATE cases SET data = jsonb_set(data, '{updated_at}', to_jsonb(%s::text)), updated_at=%s WHERE id=%s",
+                    (stamp, stamp, case_id))
+
+
+@pytest.mark.parametrize('status,owner,days,expired', [
+    ('draft', None, 8, True), ('draft', 'owner', 8, False),
+    ('draft', 'owner', DRAFT_RETENTION_DAYS - 1, False),
+    ('draft', 'owner', DRAFT_RETENTION_DAYS + 1, True),
+    ('submitted', 'owner', 2000, False), ('in_review', 'owner', 2000, False),
+    ('returned', 'owner', 2000, False),
+    ('accepted', 'owner', CLOSED_RETENTION_DAYS - 1, False),
+    ('refused', 'owner', CLOSED_RETENTION_DAYS + 1, True),
+    ('withdrawn', 'owner', CLOSED_RETENTION_DAYS + 1, True),
+])
+def test_retention_follows_inactivity_and_workflow_not_creation(retention_store, status, owner, days, expired):
+    store, created = retention_store
+    case = store.put(Case(status=status, owner_id=owner, created_at=_stamp(3000)))
+    created.append(case.id)
+    file_id = store.put_file(case.id, 'record.pdf', b'%PDF synthetic retained record')['id']
+    _set_last_activity(store, case.id, _stamp(days))
+    assert (store.get(case.id) is None) is expired
+    assert (store.get_file(case.id, file_id) is None) is expired
+    if not expired:
+        kept = store.get(case.id)
+        before = kept.updated_at
+        assert (kept.expires_at is None) == (status in {'submitted', 'in_review', 'returned'})
+        assert store.get(case.id).updated_at == before
 
 
 def assert_retention(store, created: list | None = None) -> None:

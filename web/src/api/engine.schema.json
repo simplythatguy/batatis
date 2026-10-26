@@ -140,6 +140,233 @@
       "title": "AnswersRequest",
       "type": "object"
     },
+    "ApplicantDraft": {
+      "additionalProperties": false,
+      "properties": {
+        "authority_unsure": {
+          "default": false,
+          "title": "Authority Unsure",
+          "type": "boolean"
+        },
+        "choices": {
+          "additionalProperties": {
+            "maxLength": 20000,
+            "type": "string"
+          },
+          "maxProperties": 1000,
+          "propertyNames": {
+            "maxLength": 300,
+            "minLength": 1
+          },
+          "title": "Choices",
+          "type": "object"
+        },
+        "evidence_drafts": {
+          "additionalProperties": {
+            "$ref": "#/$defs/EvidenceDraft"
+          },
+          "maxProperties": 1000,
+          "propertyNames": {
+            "maxLength": 300,
+            "minLength": 1
+          },
+          "title": "Evidence Drafts",
+          "type": "object"
+        },
+        "packages": {
+          "additionalProperties": {
+            "enum": [
+              "yes",
+              "no"
+            ],
+            "type": "string"
+          },
+          "maxProperties": 1000,
+          "propertyNames": {
+            "maxLength": 300,
+            "minLength": 1
+          },
+          "title": "Packages",
+          "type": "object"
+        },
+        "question_text": {
+          "additionalProperties": {
+            "$ref": "#/$defs/DraftText"
+          },
+          "maxProperties": 1000,
+          "propertyNames": {
+            "maxLength": 300,
+            "minLength": 1
+          },
+          "title": "Question Text",
+          "type": "object"
+        },
+        "role": {
+          "default": "homebuilder",
+          "enum": [
+            "manufacturer",
+            "contractor",
+            "homebuilder",
+            "builder",
+            "designer",
+            "owner"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "rule_unsure": {
+          "items": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 1000,
+          "title": "Rule Unsure",
+          "type": "array"
+        },
+        "seen": {
+          "items": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 1000,
+          "title": "Seen",
+          "type": "array"
+        },
+        "skipped": {
+          "items": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 1000,
+          "title": "Skipped",
+          "type": "array"
+        }
+      },
+      "required": [
+        "role",
+        "question_text",
+        "choices",
+        "skipped",
+        "seen",
+        "authority_unsure",
+        "packages",
+        "rule_unsure",
+        "evidence_drafts"
+      ],
+      "title": "ApplicantDraft",
+      "type": "object"
+    },
+    "ApplicantDraftInput": {
+      "additionalProperties": false,
+      "properties": {
+        "authority_unsure": {
+          "default": false,
+          "title": "Authority Unsure",
+          "type": "boolean"
+        },
+        "choices": {
+          "additionalProperties": {
+            "maxLength": 20000,
+            "type": "string"
+          },
+          "maxProperties": 1000,
+          "propertyNames": {
+            "maxLength": 300,
+            "minLength": 1
+          },
+          "title": "Choices",
+          "type": "object"
+        },
+        "evidence_drafts": {
+          "additionalProperties": {
+            "$ref": "#/$defs/EvidenceDraftInput"
+          },
+          "maxProperties": 1000,
+          "propertyNames": {
+            "maxLength": 300,
+            "minLength": 1
+          },
+          "title": "Evidence Drafts",
+          "type": "object"
+        },
+        "packages": {
+          "additionalProperties": {
+            "enum": [
+              "yes",
+              "no"
+            ],
+            "type": "string"
+          },
+          "maxProperties": 1000,
+          "propertyNames": {
+            "maxLength": 300,
+            "minLength": 1
+          },
+          "title": "Packages",
+          "type": "object"
+        },
+        "question_text": {
+          "additionalProperties": {
+            "$ref": "#/$defs/DraftText"
+          },
+          "maxProperties": 1000,
+          "propertyNames": {
+            "maxLength": 300,
+            "minLength": 1
+          },
+          "title": "Question Text",
+          "type": "object"
+        },
+        "role": {
+          "default": "homebuilder",
+          "enum": [
+            "manufacturer",
+            "contractor",
+            "homebuilder",
+            "builder",
+            "designer",
+            "owner"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "rule_unsure": {
+          "items": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 1000,
+          "title": "Rule Unsure",
+          "type": "array"
+        },
+        "seen": {
+          "items": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 1000,
+          "title": "Seen",
+          "type": "array"
+        },
+        "skipped": {
+          "items": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 1000,
+          "title": "Skipped",
+          "type": "array"
+        }
+      },
+      "title": "ApplicantDraft",
+      "type": "object"
+    },
     "ApplicantSummary": {
       "properties": {
         "applicant_type": {
@@ -1324,6 +1551,17 @@
     },
     "Case": {
       "properties": {
+        "applicant_draft": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ApplicantDraft"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "authority": {
           "anyOf": [
             {
@@ -1615,6 +1853,7 @@
         "version",
         "jurisdiction",
         "facts",
+        "applicant_draft",
         "selected_articles",
         "provisions",
         "section_c",
@@ -3261,6 +3500,87 @@
       "title": "DocumentRow",
       "type": "object"
     },
+    "DraftPatch": {
+      "additionalProperties": false,
+      "properties": {
+        "applicant_draft": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ApplicantDraftInput"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "expected_version": {
+          "minimum": 1,
+          "title": "Expected Version",
+          "type": "integer"
+        },
+        "facts": {
+          "items": {
+            "$ref": "#/$defs/FactInput"
+          },
+          "maxItems": 1000,
+          "title": "Facts",
+          "type": "array"
+        },
+        "jurisdiction": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/JurisdictionInput"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "selected_articles": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/SelectedArticleInput"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Selected Articles"
+        }
+      },
+      "required": [
+        "expected_version"
+      ],
+      "title": "DraftPatch",
+      "type": "object"
+    },
+    "DraftText": {
+      "additionalProperties": false,
+      "properties": {
+        "base": {
+          "maxLength": 20000,
+          "title": "Base",
+          "type": "string"
+        },
+        "value": {
+          "maxLength": 20000,
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "base",
+        "value"
+      ],
+      "title": "DraftText",
+      "type": "object"
+    },
     "DroppedPick": {
       "properties": {
         "article": {
@@ -3311,6 +3631,174 @@
         "text"
       ],
       "title": "EditedItem",
+      "type": "object"
+    },
+    "EvidenceDraft": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "default": "",
+          "maxLength": 20000,
+          "title": "Date",
+          "type": "string"
+        },
+        "document": {
+          "default": "",
+          "maxLength": 20000,
+          "title": "Document",
+          "type": "string"
+        },
+        "editing": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Editing"
+        },
+        "evidenceType": {
+          "default": "",
+          "maxLength": 20000,
+          "title": "Evidencetype",
+          "type": "string"
+        },
+        "fileRef": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fileref"
+        },
+        "note": {
+          "default": "",
+          "maxLength": 20000,
+          "title": "Note",
+          "type": "string"
+        },
+        "responsible": {
+          "default": "",
+          "maxLength": 20000,
+          "title": "Responsible",
+          "type": "string"
+        },
+        "step": {
+          "anyOf": [
+            {
+              "maximum": 10,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Step"
+        }
+      },
+      "required": [
+        "document",
+        "responsible",
+        "date",
+        "evidenceType",
+        "note",
+        "step",
+        "editing",
+        "fileRef"
+      ],
+      "title": "EvidenceDraft",
+      "type": "object"
+    },
+    "EvidenceDraftInput": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "default": "",
+          "maxLength": 20000,
+          "title": "Date",
+          "type": "string"
+        },
+        "document": {
+          "default": "",
+          "maxLength": 20000,
+          "title": "Document",
+          "type": "string"
+        },
+        "editing": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Editing"
+        },
+        "evidenceType": {
+          "default": "",
+          "maxLength": 20000,
+          "title": "Evidencetype",
+          "type": "string"
+        },
+        "fileRef": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fileref"
+        },
+        "note": {
+          "default": "",
+          "maxLength": 20000,
+          "title": "Note",
+          "type": "string"
+        },
+        "responsible": {
+          "default": "",
+          "maxLength": 20000,
+          "title": "Responsible",
+          "type": "string"
+        },
+        "step": {
+          "anyOf": [
+            {
+              "maximum": 10,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Step"
+        }
+      },
+      "title": "EvidenceDraft",
       "type": "object"
     },
     "EvidenceItem": {

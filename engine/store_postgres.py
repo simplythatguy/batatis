@@ -16,7 +16,7 @@ from psycopg.types.json import Jsonb
 
 from .models import Case, Fact, now
 from .store import (FileTooLarge, InvalidAttachment, VersionConflict, attachment_reference,
-                    case_with_stored_files, retention_cutoff)
+                    case_with_stored_files, retention_cutoff, retention_windows)
 from .uploads import PDF_MAX_BYTES
 from .account_store import ACCOUNT_MIGRATIONS, PostgresAccountsMixin, _DB, preserve_messages
 from .access import enforce_mutation, enforce_stored_mutation, enforce_read
@@ -28,6 +28,7 @@ MIGRATIONS = (
          data jsonb NOT NULL,
          version int NOT NULL,
          updated_at timestamptz NOT NULL)""",
+    'CREATE INDEX IF NOT EXISTS cases_activity ON cases(updated_at)',
     """CREATE TABLE IF NOT EXISTS case_files (
          id text PRIMARY KEY,
          case_id text NOT NULL REFERENCES cases(id),
@@ -137,8 +138,11 @@ class PostgresCaseStore(PostgresAccountsMixin):
 
     def _purge_expired(self, con, case_id: str | None = None) -> int:
         self._purge_accounts(_DB(con, postgres=True))
-        where = "(data->>'created_at')::timestamptz < %s::timestamptz"
-        params = [retention_cutoff()]
+        status = "COALESCE(data->>'status', 'draft')"
+        where = (f"(({status} = 'draft' AND data->>'owner_id' IS NULL AND updated_at < %s::timestamptz) "
+                 f"OR ({status} = 'draft' AND data->>'owner_id' IS NOT NULL AND updated_at < %s::timestamptz) "
+                 f"OR ({status} IN ('accepted','refused','withdrawn') AND updated_at < %s::timestamptz))")
+        params = list(retention_windows(retention_cutoff()))
         if case_id is not None:
             where += ' AND id=%s'
             params.append(case_id)

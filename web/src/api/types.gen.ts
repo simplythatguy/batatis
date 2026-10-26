@@ -28,6 +28,30 @@ export interface AnswersRequest {
   expected_version?: number | null;
 }
 
+export interface ApplicantDraft {
+  authority_unsure: boolean;
+  choices: Record<string, string>;
+  evidence_drafts: Record<string, EvidenceDraft>;
+  packages: Record<string, "yes" | "no">;
+  question_text: Record<string, DraftText>;
+  role: "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner";
+  rule_unsure: string[];
+  seen: string[];
+  skipped: string[];
+}
+
+export interface ApplicantDraftInput {
+  authority_unsure?: boolean;
+  choices?: Record<string, string>;
+  evidence_drafts?: Record<string, EvidenceDraftInput>;
+  packages?: Record<string, "yes" | "no">;
+  question_text?: Record<string, DraftText>;
+  role?: "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner";
+  rule_unsure?: string[];
+  seen?: string[];
+  skipped?: string[];
+}
+
 export interface ApplicantSummary {
   applicant_type: "manufacturer" | "contractor" | "homebuilder" | null;
   name: string;
@@ -200,6 +224,7 @@ export interface Bulletin {
 }
 
 export interface Case {
+  applicant_draft: ApplicantDraft | null;
   authority: string | null;
   claim: Claim | null;
   created_at: string;
@@ -501,6 +526,19 @@ export interface DocumentRow {
   type: Attribute;
 }
 
+export interface DraftPatch {
+  applicant_draft?: ApplicantDraftInput | null;
+  expected_version: number;
+  facts?: FactInput[];
+  jurisdiction?: JurisdictionInput | null;
+  selected_articles?: SelectedArticleInput[] | null;
+}
+
+export interface DraftText {
+  base: string;
+  value: string;
+}
+
 export interface DroppedPick {
   article: string;
   reason: string;
@@ -510,6 +548,28 @@ export interface EditedItem {
   id?: string | null;
   included?: boolean;
   text: string;
+}
+
+export interface EvidenceDraft {
+  date: string;
+  document: string;
+  editing: string | null;
+  evidenceType: string;
+  fileRef: string | null;
+  note: string;
+  responsible: string;
+  step: number | null;
+}
+
+export interface EvidenceDraftInput {
+  date?: string;
+  document?: string;
+  editing?: string | null;
+  evidenceType?: string;
+  fileRef?: string | null;
+  note?: string;
+  responsible?: string;
+  step?: number | null;
 }
 
 export interface EvidenceItem {
