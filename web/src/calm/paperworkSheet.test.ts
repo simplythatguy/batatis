@@ -103,3 +103,32 @@ test("an office Not sure and a later correction both persist through ordinary ca
   assert.equal(m.sheet().paperworkRows?.find((row) => row.key === "authority")?.done, true);
   m.h.unmount();
 });
+
+test("a paperwork row asked by the planner shows and saves its form field, not the question id", async () => {
+  let c = emptyCase();
+  const questions = ["owner_name", "municipal_address"].map((field) => ({ id: `intake.${field}`, field, text: `${field}?`, why: "Section A.", unblocks: [], splits: [], priority: "administrative" as const, kind: "missing" as const, provision: null }));
+  c = { ...c, description: "A house.", facts: [
+    { id: "f-owner", field: "owner_name", value: "Dana Whitfield", kind: "pointed", status: "confirmed", confidence: 0.8, source: { type: "user_text", ref: "intake:description", quote: "Dana Whitfield" } },
+    { id: "f-site", field: "municipal_address", value: "10234 87 Ave NW, Edmonton", kind: "pointed", status: "confirmed", confidence: 0.8, source: { type: "user_text", ref: "intake:description", quote: "10234 87 Ave NW, Edmonton" } },
+  ] as never, intake: { text: "A house.", facts: [], factIds: [], record: {
+    ran_at: "2026-10-26", text_sha256: null, pointers: [], files: [], conflicts: [], unresolved_citations: [], model: { status: "off", model: null, reason: null, pointed: 0, proposed: 0, dropped: 0, input_tokens: 0, output_tokens: 0 },
+    plan: { next: "questions", scope: { status: "in_scope", regime: null, message: null, cue: null, start: null, end: null, scores: {}, override_allowed: true }, fork: { variance_needed: "unknown", explanation: "", cues: [], halves: [] }, questions, asked: questions, not_sure: [], pre_application: { jurisdiction_id: null, jurisdiction_name: null, resolved_by: null, steps: [] }, route_notice: null, candidates_seen: 0 },
+  } } as never };
+  const actions: Action[] = [];
+  const h = await componentHarness(new URL("./PaperworkSheet.tsx", import.meta.url), "PaperworkSheet", {
+    "../store": { useCase: () => ({ c, dispatch: (a: Action) => { actions.push(a); c = model.reducer(c, a); } }) },
+    "../model": model, "../config": config, "./journey": journey,
+    "../intakeView": await import("../intakeView.ts"), "../intakeFields": await import("../intakeFields.ts"),
+    "./AuthorityPicker": { AuthorityPicker: "authority-picker" }, "./DatePicker": { DatePicker: "date-picker" },
+    "./icons": { Icon24: "icon" }, "./JurisdictionNote": { JurisdictionNote: "jurisdiction-note" },
+  });
+  const sheet = buildDeck(c, model.getGaps(c), { includeDone: true, today: "2026-10-26" }).find((i) => i.kind === "paperwork")!;
+  const tree = await h.render({ item: sheet, focusRow: null, extras: {}, onDone: () => {} });
+  const values = nodes(tree, (n) => n.type === "input").map((n) => n.props.value);
+  assert.ok(values.includes("Dana Whitfield") && values.includes("10234 87 Ave NW, Edmonton"), JSON.stringify(values));
+  assert.ok(button(tree, "Same as the site address"), "the site address offers itself as the mailing address");
+  button(tree, "Same as the site address").props.onClick();
+  submit(await h.render({ item: sheet, focusRow: null, extras: {}, onDone: () => {} }));
+  assert.ok(actions.every((a) => !("field" in a) || !String(a.field).startsWith("intake.")), "never saved under a question id");
+  h.unmount();
+});

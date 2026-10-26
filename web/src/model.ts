@@ -750,7 +750,8 @@ export function reducer(c: Case, a: Action): Case {
       // A re-run replaces what the last run left unconfirmed (the engine does the same) and keeps every confirmed value.
       let facts = c.facts.filter((f) => !(previous.has(f.id) && f.status === "unconfirmed") && !(f.field === "scope.redirect" && f.kind === "computed"));
       for (const raw of a.result.facts) {
-        if (raw.status !== "unconfirmed" || raw.field === "project.description") continue;
+        // Values the engine confirmed while reading are the case's values too, exactly as a reopened case loads them.
+        if (raw.field === "project.description") continue;
         const f = asLocal(raw) as Fact;
         if (facts.some((x) => x.id === f.id)) continue;
         // The same value already confirmed under the browser's name is not asked twice: it is confirmed again.

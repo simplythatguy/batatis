@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { emptyCase } from "./intake.ts";
-import { reducer } from "./model.ts";
+import { factFor, reducer } from "./model.ts";
 
 const TEXT = "Two-storey infill house in Edmonton, about 210 m².\nOwner: Jordan Lee\nMunicipal address: 10234 84 Avenue NW, Edmonton";
 
@@ -42,4 +42,17 @@ test("an evidence acknowledgement that changes nothing keeps the same case, so a
   const changed = reducer(c, { type: "ackEvidence", acked: [], deleted: [], rejected: [], facts: [{ ...ledger[0], value: "SYNTHETIC revised report" }], error: null });
   assert.notEqual(changed, c);
   assert.equal(changed.facts.find((f) => f.field === "evidence.ev-1.title")?.value, "SYNTHETIC revised report");
+});
+
+test("values the engine confirmed while reading become the case's values, as a reopened case loads them", () => {
+  const c = emptyCase(null);
+  const record = { ran_at: "2026-10-26", text_sha256: null, pointers: [], files: [], conflicts: [], unresolved_citations: [], model: { status: "off" } } as never;
+  const result = { case_id: "c1", case_version: 2, record, facts: [
+    { id: "f1", field: "owner_name", value: "Dana Whitfield", kind: "pointed", status: "confirmed", confidence: 0.8, source: { type: "user_text", ref: "intake:description", quote: "Dana Whitfield" } },
+    { id: "f2", field: "storeys", value: 3, kind: "proposed", status: "unconfirmed", confidence: 0.4, source: { type: "file", ref: "photo", quote: "Three storeys" } },
+  ] } as never;
+  const next = reducer(c, { type: "noteIntake", result, text: "A house for Dana Whitfield." });
+  assert.equal(factFor(next, "owner")?.value, "Dana Whitfield");
+  assert.equal(factFor(next, "owner")?.status, "confirmed");
+  assert.equal(factFor(next, "storeys")?.status, "unconfirmed");
 });
