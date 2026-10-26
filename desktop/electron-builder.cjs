@@ -47,12 +47,14 @@ module.exports = {
     grantFileProtocolExtraPrivileges: false,
   },
   mac: {
+    icon: "assets/icon-mac.png",
     target: ["zip"], category: "public.app-category.productivity", identity: "-", hardenedRuntime: false, notarize: false,
   },
   win: windowsSigning ? {
+    icon: "assets/icon-win.png",
     target: [{ target: "zip", arch: ["x64"] }],
     azureSignOptions: windowsSigning,
     // The engine's libraries are signed too.
     signExts: [".dll", ".pyd"],
-  } : { target: [{ target: "zip", arch: ["x64"] }], signAndEditExecutable: false },
+  } : { icon: "assets/icon-win.png", target: [{ target: "zip", arch: ["x64"] }], signExecutable: false },
 };
