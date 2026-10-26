@@ -8,7 +8,7 @@ import type { RequestLimits, RequestTarget, ReviewSession } from "../../api/type
 import type { ReviewQuestion } from "../../api/client";
 import { AcIcon } from "../auth/bits";
 import { CIcon } from "../ui";
-import { clock, sentLabel } from "./queue";
+import { clock, sentPhrase } from "./queue";
 import { officerItem } from "./requestDraft";
 import { TargetSelect } from "./TargetSelect";
 import type { useRequestDraft } from "./useRequestDraft";
@@ -64,9 +64,9 @@ export function RequestPanel({ session, applicant, draft, limits, asked, targets
   return (
     <div className="rw-req">
       <div className="rw-req-h">
-        <h3>{ir.sent_at ? `Sent ${sentLabel(ir.sent_at)}` : editable ? `What ${applicant} receives` : "Draft · not sent"}</h3>
+        <h3>{ir.sent_at ? `Sent ${sentPhrase(ir.sent_at)}` : editable ? `What ${applicant} receives` : "Draft · not sent"}</h3>
         {editable && draft && (
-          <button type="button" className="cf-btn is-xs" disabled={full || adding} onClick={() => setAdding(true)}>
+          <button type="button" className="cf-btn is-xs" disabled={full || adding} title={full ? `At most ${limits?.items} items` : undefined} onClick={() => setAdding(true)}>
             <CIcon name="plus" size={13} />Add item
           </button>
         )}

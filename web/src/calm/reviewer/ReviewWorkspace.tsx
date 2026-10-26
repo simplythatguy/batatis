@@ -8,7 +8,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, typ
 import { AccountsError, claimConflict, review, type Claim, type Message } from "../../api/accounts";
 import { EngineError } from "../../api/client";
 import { packageReview, type ReviewTarget } from "../../api/packageReview";
-import type { Case, PackageReviewIndex, ProfessionalRequirementRequest, ReviewSession, Workspace } from "../../api/types.gen";
+import type { Case, Finding, PackageReviewIndex, ProfessionalRequirementRequest, ReviewSession, Workspace } from "../../api/types.gen";
 import { accountSession, useAccount } from "../account";
 import { AcIcon, Avatar, PageHead } from "../auth/bits";
 import { ExpiryNotice } from "../ExpiryNotice";
@@ -16,7 +16,8 @@ import { getNotificationsState, subscribeNotifications } from "../notifications/
 import { MoreMenu } from "../shell/MoreMenu";
 import { ConfirmDialog, Modal } from "../ui";
 import { CloseOutPanel } from "./CloseOutPanel";
-import { refusalDecision } from "./packageView";
+import { refusalDecision, sentence } from "./packageView";
+import { officerItem } from "./requestDraft";
 import { ProfessionalRequirement } from "./ProfessionalRequirement";
 import { sentLabel, sinceLabel } from "./queue";
 import { RefuseDialog } from "./RefuseDialog";
@@ -36,6 +37,7 @@ import { allAnchors, findingState, sheetRows, targetOptions, workspaceDecision, 
 import "./review.css";
 
 type Snapshot = Awaited<ReturnType<typeof readReviewSnapshot>>;
+type DraftReport = { pending: boolean; trouble: string; discard: () => void };
 type IndexState = "loading" | "ready" | "failed" | "unavailable";
 type DecisionPreview = { kind: "return"; caseVersion: number; reviewVersion: number; text: string; count: number }
   | { kind: "accept"; caseVersion: number; reviewVersion?: number };
@@ -69,6 +71,8 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
   const [legacyText, setLegacyText] = useState("");
   const [professionalEditing, setProfessionalEditing] = useState(false);
   const [draftPending, setDraftPending] = useState(false);
+  // A save that failed or a draft the server would refuse: shown in the status line with a way out.
+  const [draftTrouble, setDraftTrouble] = useState<{ text: string; discard: () => void } | null>(null);
   const [tab, setTab] = useState<"request" | "messages">("request");
   const [filter, setFilter] = useState<FindingFilter>("all");
   const upload = useRef<HTMLInputElement>(null);
@@ -120,7 +124,13 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
       const previous = indexRef.current;
       setIndex(next); setIndexState("ready");
       setBlocking(target.id, next.workspace?.current ? next.workspace.tally.required : null);
-      setShown(current => !keepShown || !current || (current.version === previous?.latest?.version && next.latest && next.latest.version > current.version) ? next.latest : current);
+      setShown(current => {
+        if (!keepShown || !current || !next.latest) return next.latest;
+        // The same version, refreshed (sent, saved elsewhere), or a newer one while the latest was on screen.
+        if (current.version === next.latest.version) return next.latest;
+        if (current.version === previous?.latest?.version && next.latest.version > current.version) return next.latest;
+        return current;
+      });
       return next;
     } catch (e) {
       if (!live(session) || sequence !== indexReads.current) return null;
@@ -139,7 +149,7 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
   useEffect(() => {
     setIndex(null); setShown(null); setIndexState("loading"); setRunError(""); setActionError(""); setConflict(null);
     setBusy(""); setRunning(false); setPreview(null); setRefusing(false); setTakeover(false); setLegacyReturn(false); setLegacyText("");
-    setMessageDraft(""); setTab("request"); setFilter("all"); setDraftPending(false); draftDirty.current = false; actionPending.current = false;
+    setMessageDraft(""); setTab("request"); setFilter("all"); setDraftPending(false); setDraftTrouble(null); draftDirty.current = false; actionPending.current = false;
     autoClaimed.current = ""; autoRan.current = "";
     void reload("replace"); void loadIndex(); if (!q.rows.length) void loadQueue();
   }, [caseId, user, reload, loadIndex]); // The queue itself never resets an open document.
@@ -181,7 +191,7 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
   const workspace = shown && index?.workspace?.version === shown.version && latest?.version === shown.version ? index.workspace : null;
   const onLatest = Boolean(shown && latest?.version === shown.version);
   const currentReview = Boolean(workspace?.current && workspace.case_version === c?.version);
-  const editable = canReview && onLatest && currentReview && !shown?.information_request.sent_at && indexState === "ready" && !running && !busy && !refreshing && !refreshError;
+  const editable = canReview && onLatest && currentReview && !shown?.information_request.sent_at && indexState === "ready" && !running && !refreshError;
   const applicant = row?.applicant.name || "The applicant";
   const title = c?.title?.trim() || row?.title?.trim() || "Application";
   const closeOut = index?.close_out;
@@ -277,7 +287,7 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
     } catch (e) {
       if (!live(session)) return;
       setDecisionError(errorText(e, "The decision didn’t save. Try again."));
-      if (e instanceof EngineError && (e.status === 409 || e.status === 404)) { await reload(); await loadIndex(true); }
+      if (e instanceof EngineError && [0, 404, 409].includes(e.status)) { await reload(); await loadIndex(true); }
     } finally { if (live(session)) { actionPending.current = false; setBusy(""); } }
   }
   async function sendRefusal(reasons: string) {
@@ -308,7 +318,11 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
     finally { if (live(session)) { actionPending.current = false; setBusy(""); } }
   }
 
-  const pendingChanged = useCallback((pending: boolean) => { draftDirty.current = pending; setDraftPending(pending); }, []);
+  const draftChanged = useCallback((state: DraftReport) => {
+    draftDirty.current = state.pending;
+    setDraftPending(state.pending);
+    setDraftTrouble(state.trouble ? { text: state.trouble, discard: state.discard } : null);
+  }, []);
   const adoptIndex = (next: PackageReviewIndex) => { setBlocking(caseId, next.workspace?.current ? next.workspace.tally.required : null); setIndex(next); if (next.latest) setShown(next.latest); setIndexState("ready"); };
   const versions = index?.sessions ?? [];
   const historical = Boolean(shown && latest && shown.version < latest.version);
@@ -344,6 +358,10 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
         ? { tone: "pending", text: "Opening the review…", role: "status" }
         : { tone: "blocking", text: `Not picked up · ${actionError}`, role: "alert", action: retry("Pick up", () => void doClaim()) };
     }
+    if (draftTrouble) {
+      return { tone: "blocking", text: draftTrouble.text, role: "alert",
+        action: <button type="button" className="cf-btn is-xs" onClick={draftTrouble.discard}>Discard my changes</button> };
+    }
     if (actionError) return { tone: "blocking", text: actionError, role: "alert" };
     if (refreshError) return { tone: "blocking", text: refreshError, role: "alert", action: retry("Try again", () => refresh(true)) };
     if (otherClaim) {
@@ -355,6 +373,7 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
     if (runError) return { tone: "blocking", text: runError, role: "alert", action: retry("Try again", () => void run(), !idle) };
     if (indexState === "failed") return { tone: "blocking", text: "The review didn’t load · decisions wait", role: "alert", action: retry("Try again", () => { setIndexState("loading"); void loadIndex(true); }) };
     if (indexState === "unavailable") return { tone: "pending", text: "No automatic review on this server · the completeness checklist decides" };
+    if (status === "returned" && c?.decision) return { tone: "warning", text: `Returned ${sentLabel(c.decision.at).replace(/^Today, /, "today, ")} · read-only until ${applicant} sends it again` };
     if (historical && latest) return { tone: "pending", text: `v${shown?.version} · an earlier review, read-only`, action: retry(`Back to v${latest.version}`, () => void pickVersion(latest.version)) };
     if (canReview && shown && !currentReview) return { tone: "warning", text: "The application changed after this review", action: retry("Review again", () => void run(), !idle) };
     return null;
@@ -401,7 +420,7 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
               target={target} applicant={applicant} editable={editable} busy={Boolean(busy) || running || refreshing}
               showDecision={canReview && !historical && !closeOut} historical={historical} filter={filter} onFilter={setFilter}
               tab={tab} onTab={setTab} messages={messages} onMessages={setMessages} me={me} messageDraft={messageDraft}
-              onMessageDraft={setMessageDraft} unread={unread} onPending={pendingChanged} onSaved={adoptIndex} onConflict={() => refresh(true)}
+              onMessageDraft={setMessageDraft} unread={unread} onDraft={draftChanged} onSaved={adoptIndex} onConflict={() => refresh(true)}
               onReturn={() => openPreview("return")} onAccept={() => openPreview("accept")} onRefuse={() => setRefusing(true)}
               professional={professional} outcome={outcome} />
           ) : (
@@ -410,7 +429,7 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
                 <ExpiryNotice expiresAt={c.expires_at} officer />
                 <ApplicationSheet c={c} sheet={sheet} rows={sheetRows(sheet, null)} anchors={allAnchors(sheetRows(sheet, null), sheet, null)}
                   session={null} rulebook={[]} states={new Map()} items={[]} limits={READ_ONLY_LIMITS} filter="all" editable={false}
-                  historical={false} focus={null} professional={professional} onDisposition={() => {}} onText={() => {}}
+                  historical={false} focus={null} professional={professional} onDisposition={() => {}} onText={() => {}} onAddItem={() => {}}
                   questions={<OpenQuestions questions={sheet.questions} loading={false} error={snapshot.questionError} />} />
                 <SubmissionHistory c={c} />
               </div>
@@ -430,17 +449,20 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
                 tab={tab} onTab={setTab} asked={null} unread={unread}
                 request={<p className="rw-empty">{indexState === "loading" ? "Loading the review…" : "No request without a review."}</p>}
                 messages={<MessagesPane c={c} me={me} messages={messages} onMessages={setMessages} canWrite={canReview} draft={messageDraft} onDraft={setMessageDraft} reading={tab === "messages"} />}
-                foot={outcome ?? (canReview && indexState === "unavailable" && (() => {
-                  const blocked = snapshot.gaps === null || Boolean(snapshot.gapError) || snapshot.gaps.some((g) => g.severity === "blocking");
-                  return (
+                foot={outcome}
+              />
+              {!outcome && canReview && indexState === "unavailable" && (() => {
+                const blocked = snapshot.gaps === null || Boolean(snapshot.gapError) || snapshot.gaps.some((g) => g.severity === "blocking");
+                return (
+                  <div className="rw-foot">
                     <DecisionBar d={{
                       version: c.version, savedAt: "application", asked: 0, busy: Boolean(busy) || refreshing,
                       canReturn: true, returnWhy: "", canAccept: !blocked, acceptWhy: blocked ? "Required checklist items remain" : "", canRefuse: true,
                       onReturn: () => { setDecisionError(""); setLegacyReturn(true); }, onAccept: () => openPreview("accept"), onRefuse: () => setRefusing(true), returnLabel: "Return with a message",
                     }} />
-                  );
-                })())}
-              />
+                  </div>
+                );
+              })()}
             </div>
           )}
         </div>
@@ -505,18 +527,22 @@ function MessagesPane({ c, me, messages, onMessages, canWrite, draft, onDraft, r
 }
 
 /** The workspace for one review version: the sheet with its findings, and the rail. */
-function SessionWorkspace({ c, snapshot, session, workspace, target, applicant, editable, busy, showDecision, historical, filter, onFilter, tab, onTab, messages, onMessages, me, messageDraft, onMessageDraft, unread, onPending, onSaved, onConflict, onReturn, onAccept, onRefuse, professional, outcome }: {
+function SessionWorkspace({ c, snapshot, session, workspace, target, applicant, editable, busy, showDecision, historical, filter, onFilter, tab, onTab, messages, onMessages, me, messageDraft, onMessageDraft, unread, onDraft, onSaved, onConflict, onReturn, onAccept, onRefuse, professional, outcome }: {
   c: Case; snapshot: Snapshot; session: ReviewSession; workspace: Workspace | null; target: ReviewTarget; applicant: string;
   editable: boolean; busy: boolean; showDecision: boolean; historical: boolean;
   filter: FindingFilter; onFilter: (f: FindingFilter) => void; tab: "request" | "messages"; onTab: (t: "request" | "messages") => void;
   messages: Message[] | null; onMessages: Dispatch<SetStateAction<Message[] | null>>; me: string | null; messageDraft: string; onMessageDraft: (v: string) => void; unread: number;
-  onPending: (pending: boolean) => void; onSaved: (index: PackageReviewIndex) => void; onConflict: () => void;
+  onDraft: (state: DraftReport) => void; onSaved: (index: PackageReviewIndex) => void; onConflict: () => void;
   onReturn: () => void; onAccept: () => void; onRefuse: () => void; professional: ReactNode; outcome: ReactNode;
 }) {
   const limits = workspace?.limits ?? READ_ONLY_LIMITS;
   const draft = useRequestDraft({ target, session, limits, enabled: editable, onSaved, onConflict });
-  useEffect(() => { onPending(draft.pending); }, [draft.pending, onPending]);
-  useEffect(() => () => onPending(false), [onPending]);
+  const save = draft.state.save;
+  const trouble = save.kind === "error" ? save.message : draft.state.save.kind !== "saved" ? draft.problem : "";
+  const { dispatch } = draft;
+  const discard = useCallback(() => dispatch({ type: "reset", session }), [dispatch, session]);
+  useEffect(() => { onDraft({ pending: draft.pending, trouble, discard }); }, [draft.pending, trouble, discard, onDraft]);
+  useEffect(() => () => onDraft({ pending: false, trouble: "", discard: () => {} }), [onDraft]);
   const [focus, setFocus] = useState<string | null>(null);
   const root = useRef<HTMLDivElement>(null);
 
@@ -532,36 +558,48 @@ function SessionWorkspace({ c, snapshot, session, workspace, target, applicant, 
     return [f.key, { ...state, ...draft.state.content.findings.find((e) => e.key === f.key) }];
   }));
 
-  // J and K move between findings; A asks, D dismisses the one in focus. Never while typing.
+  // J and K move between findings; A asks, D dismisses the finding that has focus. Never while typing,
+  // and never on a card the keyboard has left: the target is always where focus actually is.
   useEffect(() => {
+    const cardOf = (el: Element | null) => el?.closest<HTMLElement>("[data-finding]") ?? null;
     const keydown = (e: KeyboardEvent) => {
       if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || !(e.target instanceof Element)) return;
       if (e.target.closest("input, textarea, [contenteditable=true], dialog[open], [role=listbox], [role=menu]")) return;
       const key = e.key.toLowerCase();
       if (!["j", "k", "a", "d"].includes(key)) return;
       const cards = [...(root.current?.querySelectorAll<HTMLElement>("[data-finding]") ?? [])];
-      const at = cards.findIndex((card) => card.dataset.finding === focus);
+      const here = cardOf(document.activeElement);
+      const at = here ? cards.indexOf(here) : -1;
       if (key === "j" || key === "k") {
         const next = cards[at < 0 ? 0 : Math.max(0, Math.min(cards.length - 1, at + (key === "j" ? 1 : -1)))];
         if (!next) return;
         e.preventDefault();
-        setFocus(next.dataset.finding ?? null);
         next.focus({ preventScroll: true });
-        next.scrollIntoView({ block: "center", behavior: "smooth" });
-      } else if (editable && at >= 0) {
-        cards[at].querySelector<HTMLButtonElement>(`[data-action=${key === "a" ? "ask" : "dismiss"}]:not(:disabled)`)?.click();
-        e.preventDefault();
+        next.scrollIntoView({ block: "center", behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+      } else if (editable && here) {
+        const button = here.querySelector<HTMLButtonElement>(`[data-action=${key === "a" ? "ask" : "dismiss"}]:not(:disabled)`);
+        if (button) { e.preventDefault(); button.click(); }
       }
     };
+    const focusin = () => setFocus(cardOf(document.activeElement)?.dataset.finding ?? null);
     document.addEventListener("keydown", keydown);
-    return () => document.removeEventListener("keydown", keydown);
-  }, [editable, focus]);
+    document.addEventListener("focusin", focusin);
+    return () => { document.removeEventListener("keydown", keydown); document.removeEventListener("focusin", focusin); };
+  }, [editable]);
+
+  const targets = targetOptions(session, anchors);
+  function addOwn(f: Finding) {
+    const target = targets.find((t) => t.field === f.field) ?? targets.find((t) => t.section === f.section && !t.field)
+      ?? { section: f.section, field: f.field, label: sentence(f.label) };
+    dispatch({ type: "add", item: officerItem(`Please provide or confirm the ${f.label}.`, target) });
+    onTab("request");
+  }
 
   const gate = workspaceDecision({ workspace, editable, pending: draft.pending, busy });
   const savedAt = draft.state.savedAt ?? session.created_at;
   const decision: Decision = {
     version: session.version, savedAt: `saved ${sentLabel(savedAt).replace(/^Today, /, "")}`, asked: workspace?.tally.asked ?? 0, busy,
-    canReturn: gate.canReturn, returnWhy: gate.returnReason, canAccept: gate.canAccept, acceptWhy: gate.acceptReason, canRefuse: gate.canRefuse,
+    canReturn: gate.canReturn, returnWhy: trouble || gate.returnReason, canAccept: gate.canAccept, acceptWhy: trouble || gate.acceptReason, canRefuse: gate.canRefuse,
     onReturn, onAccept, onRefuse,
   };
 
@@ -574,7 +612,7 @@ function SessionWorkspace({ c, snapshot, session, workspace, target, applicant, 
           focus={focus} professional={historical ? null : professional}
           questions={historical ? null : <OpenQuestions questions={sheet.questions} loading={snapshot.information === null && !snapshot.questionError} error={snapshot.questionError} />}
           onDisposition={(edit) => draft.dispatch({ type: "finding", edit })}
-          onText={(key, text) => draft.dispatch({ type: "item", key, patch: { text } })} />
+          onText={(key, text) => draft.dispatch({ type: "item", key, patch: { text } })} onAddItem={addOwn} />
         {!historical && <SubmissionHistory c={c} />}
       </div>
       <ReviewRail
@@ -586,10 +624,11 @@ function SessionWorkspace({ c, snapshot, session, workspace, target, applicant, 
         )}
         tab={tab} onTab={onTab} asked={workspace?.tally.asked ?? null} unread={unread}
         request={<RequestPanel session={session} applicant={applicant} draft={editable ? draft : null} limits={workspace?.limits ?? null}
-          asked={workspace?.tally.asked ?? 0} targets={targetOptions(session, anchors)} questions={sheet.questions} editable={editable} />}
+          asked={workspace?.tally.asked ?? 0} targets={targets} questions={sheet.questions} editable={editable} />}
         messages={<MessagesPane c={c} me={me} messages={messages} onMessages={onMessages} canWrite={showDecision} draft={messageDraft} onDraft={onMessageDraft} reading={tab === "messages"} />}
-        foot={outcome ?? (showDecision && <DecisionBar d={decision} />)}
+        foot={outcome}
       />
+      {!outcome && showDecision && <div className="rw-foot"><DecisionBar d={decision} /></div>}
     </div>
   );
 }

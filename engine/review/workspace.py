@@ -59,7 +59,7 @@ def build(session: ReviewSession, case=None, gaps=(), *, codes_available: bool =
     elif blocking:
         reason = 'The completeness rules still require information on the saved application'
     elif tally.required:
-        reason = f'{tally.required} required item(s) still need attention'
+        reason = f'{tally.required} required {"item" if tally.required == 1 else "items"} still open'
     else:
         reason = ''
     return Workspace(version=session.version, case_version=session.case_version, current=current, states=states,

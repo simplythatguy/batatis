@@ -17,14 +17,16 @@ export function Tally({ tally, filter, onFilter }: { tally: ReviewTally; filter:
     ["dismissed", tally.dismissed, "Dismissed", "pending"],
   ];
   return (
-    <div className="rw-tally" role="group" aria-label="Counts · choose one to show only those findings">
-      {tiles.map(([key, n, label, tone]) => (
-        <button key={key} type="button" aria-pressed={filter === key} onClick={() => onFilter(filter === key ? "all" : key)}>
-          <b>{n}</b>
-          <span><span className={`cf-dot is-${tone}`} aria-hidden="true" />{label}</span>
-          {key === "required" && tally.verify > 0 && <small>{tally.verify} to look at</small>}
-        </button>
-      ))}
+    <div className="rw-tally-wrap">
+      <div className="rw-tally" role="group" aria-label="Counts · choose one to show only those findings">
+        {tiles.map(([key, n, label, tone]) => (
+          <button key={key} type="button" aria-pressed={filter === key} onClick={() => onFilter(filter === key ? "all" : key)}>
+            <b>{n}</b>
+            <span><span className={`cf-dot is-${tone}`} aria-hidden="true" />{label}</span>
+          </button>
+        ))}
+      </div>
+      {tally.verify > 0 && <p className="rw-verify"><span className="cf-dot is-ring" aria-hidden="true" />{tally.verify} the review couldn’t establish · look first</p>}
     </div>
   );
 }
@@ -76,23 +78,26 @@ export interface Decision {
 
 export function DecisionBar({ d }: { d: Decision }) {
   const id = useId();
-  const why = !d.canReturn && d.returnWhy ? d.returnWhy : !d.canAccept ? d.acceptWhy : "";
+  const returnWhy = !d.canReturn ? d.returnWhy : "";
+  const acceptWhy = !d.canAccept && d.acceptWhy !== returnWhy ? d.acceptWhy : "";
+  const refuseWhy = !d.canRefuse ? "Wait for the current action to finish" : "";
   return (
     <footer className="rw-decide">
       <p className="rw-pin"><AcIcon name="clipboard" size={13} />Deciding on v{d.version} · {d.savedAt}</p>
       <div className="rw-decide-acts">
         <button type="button" className="cf-btn is-sm is-primary is-wide" disabled={!d.canReturn || d.busy}
-          aria-describedby={!d.canReturn ? `${id}-why` : undefined} onClick={d.onReturn}>
+          aria-describedby={returnWhy ? `${id}-r` : undefined} onClick={d.onReturn}>
           <AcIcon name="send" size={14} />{d.returnLabel ?? `Return with ${d.asked} ${d.asked === 1 ? "item" : "items"}`}
         </button>
         <button type="button" className="cf-btn is-sm" disabled={!d.canAccept || d.busy}
           data-requires-no-blocking-gaps={d.canAccept ? undefined : "true"}
-          aria-describedby={!d.canAccept ? `${id}-why` : undefined} onClick={d.onAccept}>
+          aria-describedby={!d.canAccept ? `${id}-${acceptWhy ? "a" : "r"}` : undefined} onClick={d.onAccept}>
           <AcIcon name="check" size={14} />Accept
         </button>
-        <button type="button" className="cf-btn is-sm" disabled={!d.canRefuse || d.busy} onClick={d.onRefuse}>Refuse</button>
+        <button type="button" className="cf-btn is-sm" disabled={!d.canRefuse || d.busy} title={refuseWhy || undefined} onClick={d.onRefuse}>Refuse</button>
       </div>
-      {why && <p id={`${id}-why`} className="rw-why" title={why}><span className="cf-dot is-blocking" aria-hidden="true" />{why}</p>}
+      {returnWhy && <p id={`${id}-r`} className="rw-why"><span className="cf-dot is-blocking" aria-hidden="true" />{returnWhy}</p>}
+      {acceptWhy && <p id={`${id}-a`} className="rw-why"><span className="cf-dot is-blocking" aria-hidden="true" />{acceptWhy}</p>}
       <p className="rw-scope">Completeness only · not a design approval</p>
     </footer>
   );

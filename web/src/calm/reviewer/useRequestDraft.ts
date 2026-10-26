@@ -21,7 +21,10 @@ export function useRequestDraft({ target, session, limits, enabled, onSaved, onC
   useEffect(() => {
     if (session.information_request === acknowledged.current) return;
     acknowledged.current = session.information_request;
-    if (current.current.save.kind === "saved") setState(previous => ({ ...initialDraft(session), savedAt: previous.savedAt }));
+    // A refreshed request replaces the draft when nothing is unsaved, or when the last save was refused
+    // as a conflict (the officer's edits were made against a request that no longer exists).
+    const save = current.current.save;
+    if (save.kind === "saved" || (save.kind === "error" && save.conflict)) setState(previous => ({ ...initialDraft(session), savedAt: previous.savedAt }));
   }, [session.information_request]);
   const dispatch = useCallback((event: DraftEvent) => setState(previous => draftReducer(previous, event)), []);
 

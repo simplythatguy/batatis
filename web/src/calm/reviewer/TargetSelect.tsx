@@ -54,12 +54,20 @@ export function TargetSelect({ options, value, onChange, disabled }: {
             if (e.key === "ArrowDown" || e.key === "ArrowUp") {
               e.preventDefault();
               setActive((a) => Math.max(0, Math.min(options.length - 1, a + (e.key === "ArrowDown" ? 1 : -1))));
+            } else if (e.key === "Home" || e.key === "End") {
+              e.preventDefault();
+              setActive(e.key === "Home" ? 0 : options.length - 1);
             } else if (e.key === "Enter" || e.key === " ") {
               e.preventDefault();
               pick(active);
             } else if (e.key === "Escape" || e.key === "Tab") {
+              // Back to the button before the list goes, so focus never falls to the page.
+              e.preventDefault();
               setOpen(false);
-              if (e.key === "Escape") { e.preventDefault(); button.current?.focus(); }
+              button.current?.focus();
+            } else if (e.key.length === 1) {
+              const at = options.findIndex((o, i) => i > active && o.label.toLowerCase().includes(e.key.toLowerCase()));
+              if (at >= 0) setActive(at);
             }
           }}>
           {options.map((o, i) => (

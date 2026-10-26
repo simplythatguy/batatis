@@ -42,7 +42,7 @@ function Changed({ before }: { before: string | null | undefined }) {
   );
 }
 
-export function ApplicationSheet({ c, sheet, rows, anchors, session, rulebook, states, items, limits, filter, editable, historical, focus, professional, questions, onDisposition, onText }: {
+export function ApplicationSheet({ c, sheet, rows, anchors, session, rulebook, states, items, limits, filter, editable, historical, focus, professional, questions, onDisposition, onText, onAddItem }: {
   c: Case;
   sheet: SheetView;
   rows: WorkspaceRow[];
@@ -62,6 +62,7 @@ export function ApplicationSheet({ c, sheet, rows, anchors, session, rulebook, s
   questions?: ReactNode;
   onDisposition: (edit: DispositionEdit) => void;
   onText: (key: string, text: string) => void;
+  onAddItem: (finding: Finding) => void;
 }) {
   const changes = historical ? new Map() : changedFields(c);
   const findings = anchoredItems((session?.findings ?? []).filter((f) => !isPeer(f)), anchors);
@@ -74,8 +75,9 @@ export function ApplicationSheet({ c, sheet, rows, anchors, session, rulebook, s
         const state = states.get(f.key);
         if (!state || !visibleFinding(f, state, filter)) return null;
         return (
-          <FindingCard key={f.key} finding={f} state={state} item={items.find((i) => i.finding_key === f.key)} caseId={c.id}
-            files={files} limits={limits} editable={editable} focused={focus === f.key} onDisposition={onDisposition} onText={onText} />
+          <FindingCard key={f.key} finding={f} state={state} item={items.find((i) => i.finding_key === f.key)} askable={items.some((i) => i.finding_key === f.key)}
+            caseId={c.id} files={files} limits={limits} editable={editable} focused={focus === f.key}
+            onDisposition={onDisposition} onText={onText} onAddItem={onAddItem} />
         );
       })}
       {(gaps.get(anchor) ?? []).filter((g) => visibleRulebook(g, filter)).map((g) => <RulebookRow key={g.id} message={g.message} />)}

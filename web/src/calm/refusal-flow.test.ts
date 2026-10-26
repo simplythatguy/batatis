@@ -397,6 +397,26 @@ test("return sends the exact saved server text and expected version in one call"
   h.unmount();
 });
 
+test("after a return the same version is read again, so the rail shows the request as sent", async () => {
+  const draft = reviewSession(3, 7);
+  const sent = { ...draft, information_request: { ...draft.information_request, sent_at: "2026-10-26T14:41:00Z", message_id: "m1" } };
+  let returned = false;
+  const h = await workspaceHarness({ status: "in_review", claim: mine, version: 7 }, {
+    index: async () => indexFor(returned ? sent : draft),
+    returnWithRequest: async () => {
+      returned = true; h.current.status = "returned";
+      h.current.decision = { outcome: "return", by_id: mine.reviewer_id, by_name: mine.reviewer_name, at: "2026-10-26T14:41:00Z", message: "", items: [] };
+      return { ...h.current };
+    },
+  });
+  let tree = await h.render({ caseId: "c1" });
+  workspaceNode(tree).props.onReturn(); tree = await h.render();
+  click(tree, "Return"); tree = await h.render(); tree = await h.render(); tree = await h.render();
+  assert.equal(workspaceNode(tree).props.session.information_request.sent_at, sent.information_request.sent_at, "never the stale draft");
+  assert.match(text(tree), /Returned .* read-only until Mira sends it again/, "the status line says it was returned");
+  h.unmount();
+});
+
 test("a return conflict shows the server reason and refreshes without sending a second decision", async () => {
   let reads = 0;
   const h = await workspaceHarness({ status: "in_review", claim: mine }, { latest: reviewSession(1),
@@ -443,12 +463,24 @@ test("a failed first index load offers a retry and never starts a review against
 test("unsaved request changes hold decisions, release and switching to another version", async () => {
   const h = await workspaceHarness({ status: "in_review", claim: mine }, { latest: reviewSession(2) });
   let tree = await h.render({ caseId: "c1" });
-  workspaceNode(tree).props.onPending(true); tree = await h.render();
+  workspaceNode(tree).props.onDraft({ pending: true, trouble: "", discard() {} }); tree = await h.render();
   assert.equal(menuItem(tree, "Stop reviewing").disabled, true);
   workspaceNode(tree).props.onAccept(); tree = await h.render();
   const open = nodes(tree, n => n.props?.labelledBy === "rw-decision-title")[0];
   assert.equal(open.props.open, false);
   assert.equal(h.calls.decisions.length, 0);
+  h.unmount();
+});
+
+test("a draft the server refused shows in the status line with a way out", async () => {
+  const h = await workspaceHarness({ status: "in_review", claim: mine }, { latest: reviewSession(2) });
+  let tree = await h.render({ caseId: "c1" });
+  let discarded = 0;
+  workspaceNode(tree).props.onDraft({ pending: true, trouble: "The request changed. Review it again.", discard() { discarded++; } }); tree = await h.render();
+  const alert = nodes(tree, n => n.props?.role === "alert").find(n => text(n).includes("The request changed"));
+  assert.ok(alert, "the trouble is on screen, not only on the Request tab");
+  nodes(alert, n => n.type === "button" && text(n) === "Discard my changes")[0].props.onClick();
+  assert.equal(discarded, 1);
   h.unmount();
 });
 

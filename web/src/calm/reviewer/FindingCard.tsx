@@ -32,11 +32,13 @@ export function findingStatus(finding: Finding, state: FindingState): string {
   return required ? "Required" : "To check";
 }
 
-export function FindingCard({ finding, state, item, caseId, files, limits, editable, focused, onDisposition, onText }: {
+export function FindingCard({ finding, state, item, askable, caseId, files, limits, editable, focused, onDisposition, onText, onAddItem }: {
   finding: Finding;
   state: FindingState;
   /** Its request item, while it is asked. */
   item: DraftRequestItem | undefined;
+  /** The review drafted a request item for it. Without one (an officer check), the officer writes their own. */
+  askable: boolean;
   caseId: string;
   files: InputFile[];
   limits: RequestLimits;
@@ -44,6 +46,7 @@ export function FindingCard({ finding, state, item, caseId, files, limits, edita
   focused?: boolean;
   onDisposition: (edit: DispositionEdit) => void;
   onText: (key: string, text: string) => void;
+  onAddItem: (finding: Finding) => void;
 }) {
   const id = useId();
   const [open, setOpen] = useState(false);
@@ -54,7 +57,7 @@ export function FindingCard({ finding, state, item, caseId, files, limits, edita
     onDisposition({ key: finding.key, state: state.state, reason: state.reason, note: state.note, ...patch });
 
   return (
-    <section
+    <article
       className={`rw-f${dismissed ? " is-dismissed" : ""}${focused ? " is-focus" : ""}`}
       tabIndex={-1}
       data-finding={finding.key}
@@ -66,10 +69,14 @@ export function FindingCard({ finding, state, item, caseId, files, limits, edita
           <h4 id={`${id}-t`}>{sentence(finding.label)}</h4>
           <p>{findingStatus(finding, state)}</p>
         </div>
+        {editable && !askable && !dismissed && (
+          <button type="button" className="cf-btn is-xs is-ghost rw-f-own" title="Write your own request item for this"
+            onClick={() => onAddItem(finding)}>Add to request</button>
+        )}
         {editable && (
           <div className="rw-seg" role="group" aria-label={`Your call on ${finding.label}`}>
-            <button type="button" data-action="ask" aria-pressed={state.state === "ask"}
-              onClick={() => call({ state: "ask", reason: null, note: "" })}>Ask</button>
+            {askable && <button type="button" data-action="ask" aria-pressed={state.state === "ask"}
+              onClick={() => call({ state: "ask", reason: null, note: "" })}>Ask</button>}
             <button type="button" data-action="dismiss" aria-pressed={dismissed} disabled={state.locked}
               title={state.locked ? "The completeness rules still require this. Ask for it." : undefined}
               onClick={() => { call({ state: "dismissed", reason: state.reason ?? null }); setOpen(true); }}>Dismiss</button>
@@ -131,7 +138,7 @@ export function FindingCard({ finding, state, item, caseId, files, limits, edita
           )}
         </div>
       )}
-    </section>
+    </article>
   );
 }
 

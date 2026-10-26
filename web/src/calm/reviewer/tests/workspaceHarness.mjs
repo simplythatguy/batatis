@@ -23,7 +23,7 @@ export const workspaceFor = (version, caseVersion = 1, over = {}) => ({
   tally: { required: 0, to_check: 0, verify: 0, dismissed: 0, rulebook: 0, asked: 1 }, gate: { can_accept: true, reason: '' }, ...over,
 });
 export const indexFor = (session, over = {}) => ({ latest: session, sessions: session ? [{ ...session, required: 0 }] : [], close_out: null, workspace: session ? workspaceFor(session.version, session.case_version) : null, ...over });
-export const workspaceNode = tree => nodes(tree, n => n.props?.onPending && n.props?.session)[0];
+export const workspaceNode = tree => nodes(tree, n => n.props?.onDraft && n.props?.session)[0];
 export const menuItem = (tree, label) => {
   const head = nodes(tree, n => n.props?.right)[0];
   return nodes(head.props.right, n => n.type === 'MoreMenu')[0]?.props.items.find(item => item.label === label);
