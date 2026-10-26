@@ -25,6 +25,7 @@ from .professional import (
 )
 from .section_c import section_c_rows
 from .section_d import SupportingDocument, section_d_plan, supporting_documents
+from .drafting_questions import open_questions as open_drafting_questions
 
 
 class Gap(CaseGap):
@@ -210,6 +211,13 @@ def check_completeness(case: Case, codes: Codes, *,
         add('admin', 'B', 'jurisdiction', 'the reviewing jurisdiction.', 'Ask which authority will receive the application.')
 
     process = process_fields(case, codes)
+    for pending in open_drafting_questions(case, accepted_only=True):
+        section = ('C' if pending.draft_field.startswith('section_c.') else
+                   'D' if pending.draft_field == 'evidence_plan' else
+                   'B' if pending.draft_field == 'alternative_description' else 'process')
+        gaps.append(Gap(id=pending.id, section=section, field=pending.field,
+                        message=pending.question.text, routed_to=pending.question.routed_to,
+                        fix_hint=pending.question.why + ' Accepting draft wording does not answer this question.'))
     for field in process:
         if field.answer is None or _missing(field.answer.value):
             rule = {'risk_assessment': 'D09', 'mitigating_measures': 'D10', 'assumptions_and_limits': 'D11'}.get(field.id, 'process')

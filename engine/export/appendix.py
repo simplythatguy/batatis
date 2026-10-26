@@ -114,6 +114,15 @@ def _row_story(k: int, row: SectionCRow, codes, in_form: bool, case: Case | None
         quote = identify_quote(case, row.provision_id, codes)
         if quote:
             out.append(_kv('Identification quote (word for word in the code database)', _nrc(quote, row.citation)))
+    if case is not None:
+        explanation = next((f for f in reversed(case.facts)
+                            if f.field == f'section_c.{row.provision_id}.explanation'), None)
+        if (explanation is not None and explanation.status == 'confirmed' and explanation.kind == 'pointed'
+                and explanation.source.type in {'user_click', 'user_text', 'file'}
+                and isinstance(explanation.value, str) and explanation.value.strip()
+                and explanation.value == explanation.source.quote):
+            out.append(_kv('Applicant explanation (confirmed wording)', explanation.value))
+            out.append(_kv('Applicant explanation source', explanation.source.ref))
     status = row.attribution_status
     if row.attributed_via:
         status += f' ({row.attributed_via})'
@@ -240,16 +249,19 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None,
                 if field.answer] if codes is not None else []
     if answered:
         story.append(Paragraph('P. Alternative solution (Div C 2.3.1): applicant-written documentation', H2))
-        story.append(_p('The following passages were supplied and confirmed by the applicant, each with its source. '
-                        'Batatis supplies prompts and checks that each item is present; it does not write, assess or '
-                        'validate the analysis.', SMALL))
+        story.append(_p('The following passages were confirmed as applicant wording, each with its source. '
+                        'Batatis may draft source-cited explanations for the applicant to accept; acceptance '
+                        'does not assess or validate professional analysis.', SMALL))
         for n, field in answered:
             source = field.answer.source
             story.append(KeepTogether([
                 Paragraph(f'P-{n}&nbsp;&nbsp;{escape(field.label)}', H3), _p(field.answer.value),
                 _kv('Applicant source', source.ref + (f', page {source.page}' if source.page else '')),
-                _kv('Provenance', f'{_SOURCE_KIND.get(source.type, source.type)}; confirmed by the '
-                                  'applicant; not written by Batatis'),
+                _kv('Provenance', ('Batatis applicant draft; wording accepted by the applicant; '
+                                  'claim sources retained in the application drafting record'
+                                  if source.ref.startswith('applicant-draft:') else
+                                  f'{_SOURCE_KIND.get(source.type, source.type)}; confirmed by the '
+                                  'applicant; not written by Batatis')),
                 _p(field.citation, SMALL)]))
 
     bench = benchmark(case, codes)

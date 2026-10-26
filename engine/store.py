@@ -5,6 +5,7 @@ plus `VersionConflict`. This module keeps the file backend; `store_postgres.py` 
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import sqlite3
@@ -41,6 +42,11 @@ class FileTooLarge(Exception):
 
 class InvalidAttachment(ValueError):
     """A confirmed attachment must name bytes owned by this case."""
+
+
+def file_fingerprints(rows) -> dict[str, tuple[str, str]]:
+    """Identity, display name and actual bytes; used under the case write lock by drafting CAS."""
+    return {row[0]: (row[1], hashlib.sha256(bytes(row[2])).hexdigest()) for row in rows}
 
 
 def attachment_reference(fact: Fact) -> str | None:
@@ -82,7 +88,8 @@ class CaseBackend(Protocol):
     def get(self, case_id: str) -> Case | None: ...
     def get_snapshot(self, case_id: str) -> tuple[Case, int] | None: ...
     def get_version(self, case_id: str) -> int | None: ...
-    def put(self, case: Case, *, expected_version: int | None = None) -> Case: ...
+    def put(self, case: Case, *, expected_version: int | None = None,
+            expected_files: dict[str, tuple[str, str | None]] | None = None) -> Case: ...
     def mutate_messages(self, case_id: str, user: User, operation: Callable[[Case], object]) -> tuple[Case, object] | None: ...
     def add_fact(self, case_id: str, fact: Fact) -> Case | None: ...
     def rename_title(self, case_id: str, title: str) -> Case | None: ...
@@ -158,7 +165,10 @@ class CaseStore(FileAccountsMixin):
             row = con.execute('SELECT version FROM cases WHERE id=?', (case_id,)).fetchone()
         return int(row[0]) if row else None
 
-    def put(self, case: Case, *, expected_version: int | None = None) -> Case:
+    def put(self, case: Case, *, expected_version: int | None = None,
+            expected_files: dict[str, tuple[str, str | None]] | None = None) -> Case:
+        if expected_files is not None and (expected_version is None or expected_version < 1):
+            raise ValueError('file CAS requires an existing case version')
         case.updated_at = now()
         conflict = None
         with closing(self._connect()) as con, con:
@@ -194,6 +204,11 @@ class CaseStore(FileAccountsMixin):
             if previous:
                 enforce_stored_mutation(previous[0])
                 preserve_messages(case, previous[0])
+                if expected_files is not None:
+                    actual_files = file_fingerprints(con.execute(
+                        'SELECT id, name, data FROM case_files WHERE case_id=?', (case.id,)))
+                    if actual_files != expected_files:
+                        raise VersionConflict(case.id, expected_version, expected_version)
             payload = case.model_dump_json(exclude={'version'})
             row = con.execute('UPDATE cases SET json=?, updated_at=?, version=version+1 '
                               'WHERE id=? AND version=? RETURNING version',

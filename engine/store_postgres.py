@@ -16,7 +16,7 @@ from psycopg.types.json import Jsonb
 
 from .models import Case, Fact, now
 from .store import (FileTooLarge, InvalidAttachment, VersionConflict, attachment_reference,
-                    case_with_stored_files, retention_cutoff)
+                    case_with_stored_files, file_fingerprints, retention_cutoff)
 from .uploads import PDF_MAX_BYTES
 from .account_store import ACCOUNT_MIGRATIONS, PostgresAccountsMixin, _DB, preserve_messages
 from .access import enforce_mutation, enforce_stored_mutation, enforce_read
@@ -149,7 +149,10 @@ class PostgresCaseStore(PostgresAccountsMixin):
         con.execute('DELETE FROM case_files WHERE case_id = ANY(%s)', (ids,))
         return con.execute('DELETE FROM cases WHERE id = ANY(%s)', (ids,)).rowcount
 
-    def put(self, case: Case, *, expected_version: int | None = None) -> Case:
+    def put(self, case: Case, *, expected_version: int | None = None,
+            expected_files: dict[str, tuple[str, str | None]] | None = None) -> Case:
+        if expected_files is not None and (expected_version is None or expected_version < 1):
+            raise ValueError('file CAS requires an existing case version')
         case.updated_at = now()
         conflict = None
         with self._conn() as con:
@@ -191,6 +194,11 @@ class PostgresCaseStore(PostgresAccountsMixin):
                 conflict = VersionConflict(case.id, expected_version, int(row[1]) if row else None)
             else:
                 preserve_messages(case, row[0])
+                if expected_files is not None:
+                    actual_files = file_fingerprints(con.execute(
+                        'SELECT id, name, data FROM case_files WHERE case_id=%s FOR UPDATE', (case.id,)))
+                    if actual_files != expected_files:
+                        raise VersionConflict(case.id, expected_version, int(row[1]))
                 payload = Jsonb(case.model_dump(mode='json', exclude={'version'}))
                 saved = con.execute('UPDATE cases SET data=%s, version=version+1, updated_at=%s '
                                   'WHERE id=%s AND version=%s RETURNING version',

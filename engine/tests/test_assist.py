@@ -296,6 +296,16 @@ def test_prompt_enforces_professional_and_applicant_authorship(assistant, monkey
     assert all(c['model'] != 'claude-haiku-5-5' for c in calls)
 
 
+@pytest.mark.parametrize('question', ['Write my rationale.', 'Draft my proposed alternative.',
+    'Generate the risk assessment.', 'Write the engineering report and test results.'])
+def test_chat_routes_authoring_to_the_saved_drafting_flow_without_freeform_model_prose(assistant, question):
+    client, store, calls = assistant
+    response = ask(client, question=question)
+    assert response.status_code == 200
+    assert response.json()['answer'] == routes_assist.SAVED_DRAFT_HELP
+    assert response.json()['cited'] == [] and calls == []
+
+
 def test_personal_information_is_redacted_before_the_provider_sees_it(assistant, monkeypatch):
     client, store, calls = assistant
     enable(monkeypatch)

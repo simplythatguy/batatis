@@ -155,7 +155,8 @@ def _pdf_from_body(body: bytes, content_type: str, filename: str | None) -> tupl
 
 
 def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
-               relevance_judge_factory: Callable[[], Judge] | None = None) -> FastAPI:
+               relevance_judge_factory: Callable[[], Judge] | None = None,
+               drafting_provider_factory=None, drafting_registry=None) -> FastAPI:
     if store is None:
         assert_durable_when_hosted()
     state = {'store': store, 'codes': codes}
@@ -227,6 +228,9 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
         case = cases().get(case_id)
         if case is None:
             raise HTTPException(404, 'case not found')
+        if case.drafting:
+            from .drafting_sources import refresh_staleness
+            refresh_staleness(case, cases(), code())
         return case
 
     @app.post('/cases/{case_id}/facts', response_model=Case)
@@ -393,6 +397,8 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
         return JSONResponse(status_code=503, content={'detail': 'case store unavailable'})
 
     app.include_router(__import__('engine.routes_case', fromlist=['create_router']).create_router(cases, code))
+    app.include_router(__import__('engine.routes_drafting', fromlist=['create_router']).create_router(
+        cases, code, provider_factory=drafting_provider_factory, registry=drafting_registry))
     app.include_router(__import__('engine.routes_evidence', fromlist=['create_router']).create_router(cases, code))
     app.include_router(__import__('engine.routes_auth', fromlist=['create_router']).create_router(cases))
     app.include_router(__import__('engine.routes_hosted_ai', fromlist=['create_router']).create_router(cases))
