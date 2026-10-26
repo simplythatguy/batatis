@@ -280,7 +280,7 @@ export function RoleNote() {
 export function CodeQuote({ text, source = "code", className = "" }: { text: ReactNode; source?: keyof typeof NRC_SOURCES; className?: string }) {
   return (
     <figure className="code-quote">
-      {/* Long text scrolls inside the quote (styles.css), so it needs a keyboard stop. */}
+      {/* Long text scrolls inside the quote (shared.css), so it needs a keyboard stop. */}
       <blockquote className={`cite-block quote ${className}`.trim()} tabIndex={typeof text === "string" && text.length > 700 ? 0 : undefined}>
         {text}
       </blockquote>
