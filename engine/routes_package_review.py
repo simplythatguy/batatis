@@ -25,6 +25,7 @@ from .access import authorize_case
 from .account_models import Decision, DecisionItem, User
 from .codes import CodeDbMissing, Codes
 from .completeness import check_completeness
+from .data.jurisdictions.time_zones import ALBERTA_TIME_ZONE
 from .models import Case, now
 from .models_review import (CloseOut, Disposition, InformationRequestEdit, PackageReviewIndex, ReturnWithRequest, ReviewSession, SentInformationRequest,
                             SentInformationRequests, SessionSummary, VarianceIssued)
@@ -287,7 +288,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes]) -
             issued = date.fromisoformat(body.issued_on)
         except ValueError:
             raise HTTPException(422, 'Enter a valid issuance date') from None
-        alberta = ZoneInfo('America/Edmonton')
+        alberta = ZoneInfo(ALBERTA_TIME_ZONE)
         decided_on = datetime.fromisoformat(case.decision.at).astimezone(alberta).date()
         if issued < decided_on or issued > datetime.now(alberta).date():
             raise HTTPException(422, 'Issuance must be on or after the decision date and not in the future')
