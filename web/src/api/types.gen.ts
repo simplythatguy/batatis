@@ -597,6 +597,7 @@ export interface FieldConflict {
   page: number | null;
   quotes: string[];
   source_ref: string;
+  source_refs: string[];
   values: (string | number | boolean)[];
 }
 
@@ -877,6 +878,7 @@ export interface IntakeRequest {
   expected_version?: number | null;
   file_ids?: string[];
   model?: boolean;
+  pictures?: boolean;
   role?: string | null;
   text?: string | null;
 }

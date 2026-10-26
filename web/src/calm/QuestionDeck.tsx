@@ -10,6 +10,7 @@ import { openAssistant, setAssistantContext } from "./assistant/assistant";
 import { questionContext } from "./assistant/questionContext";
 import { useCurrentApplication } from "./begin";
 import { CodeDrawer, type DrawerState } from "./CodeDrawer";
+import { PictureConsent } from "./PictureConsent";
 import { aliasKey, alternativeChoice, buildDeck, deferralFor, mergeQueue, rankAhead, choiceKey, choicesFor, paperworkRowKey, preCaseState, sourcePhrase, type DeckItem } from "./deck";
 import { NOT_SURE, planFactAnswer, planInput } from "../intakeView";
 import { confirmedAnswer, localField } from "../intakeFields";
@@ -1021,6 +1022,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
         </div>
       )}
       <DocumentReview intake={c.intake} files={c.files} description={c.description} intakeStatus={reading.intake} />
+      <PictureConsent />
       <div className={`cf-q-stage${item?.kind === "paperwork" ? " is-paperwork" : ""}`}>
         {/* A submission on its way only pauses the mounted card (App's edit lock); a sent one is read-only. */}
         {readOnly ? (

@@ -27,6 +27,8 @@ from .text import find_quote
 DESCRIPTION = 'description'
 DESCRIPTION_REF = 'intake:description'
 IMAGES_PER_FILE = 4
+READER_VERSION = 'reader-1'                       # what a client reads instead of the private model pin
+PICTURES_NOT_ALLOWED = 'waiting for your OK'
 # (text, personal values the rules just read) -> the copy a provider may see.
 Outbound = Callable[[str, list[str]], str]
 
@@ -172,14 +174,14 @@ def read_text(text: str, origin: Origin, *, codes=None, outbound: Outbound = scr
         values = list(dict.fromkeys(json.dumps(h.value) for h in hits if h.value != -1))
         out.conflicts.append(FieldConflict(field=name, values=[json.loads(v) for v in values],
                                            quotes=[text[h.start:h.end] for h in hits], source_ref=origin.ref,
-                                           page=origin.page))
+                                           page=origin.page, source_refs=[origin.ref] * len(values)))
     _citations(out, origin, text, reading.citations, codes)
     found = {hit.field for hit in reading.hits} | set(reading.conflicts)
     if transport is None:
         return out
     personal = [str(hit.value) for hit in reading.hits if hit.field in PERSONAL and len(str(hit.value)) >= 3]
     run = model_pass.run(text, outbound(text, personal), transport, skip=found, status=status, budget=budget)
-    out.model = ModelPass(status=run.status, model=model_pass.MODEL if run.status == 'live' else None,
+    out.model = ModelPass(status=run.status, model=READER_VERSION if run.status == 'live' else None,
                           reason=run.reason, dropped=run.dropped, input_tokens=run.input_tokens,
                           output_tokens=run.output_tokens)
     for item in run.facts:
@@ -218,7 +220,7 @@ def _semantic_pages(out: Extraction, pages: list[Page], report: FileReport, *, t
     if len(report.semantic_pages_read) != len(pages):
         report.semantic_reason = (model_pass.LIMIT if run.reason == model_pass.LIMIT else
                                   'AI is paused' if run.status == 'gate_closed' else 'AI could not finish reading')
-    counts = ModelPass(status=run.status, model=model_pass.MODEL if run.status == 'live' else None,
+    counts = ModelPass(status=run.status, model=READER_VERSION if run.status == 'live' else None,
                        reason=run.reason, dropped=run.dropped, input_tokens=run.input_tokens,
                        output_tokens=run.output_tokens)
     for item in run.facts:
@@ -242,7 +244,8 @@ def _semantic_pages(out: Extraction, pages: list[Page], report: FileReport, *, t
     out.merge_model(counts)
 
 
-def _pictures(out: Extraction, report: FileReport, pages: list[int], url, *, transport, status, budget, outbound):
+def _pictures(out: Extraction, report: FileReport, pages: list[int], url, *, transport, status, budget, outbound,
+              allowed: bool):
     if not pages:
         return
     if transport is None:
@@ -250,6 +253,10 @@ def _pictures(out: Extraction, report: FileReport, pages: list[int], url, *, tra
         return
     if not getattr(transport, 'supports_images', False):
         report.pictures_not_read_reason = 'This AI connection cannot read pictures'
+        return
+    if not allowed:
+        # Pixels cannot be scrubbed like text: a picture leaves the machine only after the applicant allows it.
+        report.pictures_not_read_reason = PICTURES_NOT_ALLOWED
         return
     for page in pages:
         if len(report.image_pages_read) >= IMAGES_PER_FILE or budget.images <= 0 or budget.expired():
@@ -262,7 +269,7 @@ def _pictures(out: Extraction, report: FileReport, pages: list[int], url, *, tra
             report.pictures_not_read_reason = 'This picture could not be opened'
             continue
         run = model_pass.vision(image, transport, status=status, outbound=lambda text: outbound(text, []))
-        counts = ModelPass(status=run.status, model=model_pass.MODEL if run.status == 'live' else None,
+        counts = ModelPass(status=run.status, model=READER_VERSION if run.status == 'live' else None,
                            reason=run.reason, dropped=run.dropped, input_tokens=run.input_tokens,
                            output_tokens=run.output_tokens)
         if run.status in ('failed', 'gate_closed'):
@@ -344,7 +351,7 @@ def _parsed(cache: dict | None, file_id: str, data: bytes):
 def read_file(file_id: str, name: str, data: bytes, *, codes=None, outbound: Outbound = scrubbed,
               transport: model_pass.Transport | None = None, status: str = 'off',
               cache: dict | None = None, budget: model_pass.Budget | None = None,
-              media_type: str | None = None) -> Extraction:
+              media_type: str | None = None, pictures: bool = False) -> Extraction:
     out = Extraction()
     report = FileReport(file_id=file_id, name=name, status='not_read')
     out.files.append(report)
@@ -357,7 +364,7 @@ def read_file(file_id: str, name: str, data: bytes, *, codes=None, outbound: Out
             return out
         report.pages = 1
         _pictures(out, report, [1], lambda page: picture_url(data), transport=transport, status=status,
-                  budget=budget, outbound=outbound)
+                  budget=budget, outbound=outbound, allowed=pictures)
         _report(out, report)
         return out
     try:
@@ -415,7 +422,7 @@ def read_file(file_id: str, name: str, data: bytes, *, codes=None, outbound: Out
         _semantic_pages(out, content.text_pages, report, transport=transport, outbound=outbound,
                         status=status, budget=budget)
         _pictures(out, report, content.blank_pages, lambda page: picture_page(data, page),
-                  transport=transport, status=status, budget=budget, outbound=outbound)
+                  transport=transport, status=status, budget=budget, outbound=outbound, allowed=pictures)
     else:
         report.pages_read = sorted({w.page for w in content.widgets})
     _report(out, report)

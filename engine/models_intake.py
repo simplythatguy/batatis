@@ -72,6 +72,7 @@ class FieldConflict(BaseModel):
     quotes: list[str] = []
     source_ref: str
     page: int | None = None
+    source_refs: list[str] = []               # one per value, so removing a file withdraws only its values
 
 
 class UnresolvedCitation(BaseModel):

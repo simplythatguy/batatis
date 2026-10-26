@@ -24,7 +24,7 @@ from .scope import classify
 from .text import NUMBER, measurement
 
 
-def _run(text, files, codes, outbound, transport, status, cache=None, media_types=None) -> Extraction:
+def _run(text, files, codes, outbound, transport, status, cache=None, media_types=None, pictures=False) -> Extraction:
     out = Extraction()
     budget = model_pass.Budget()
     if text and text.strip():
@@ -32,7 +32,8 @@ def _run(text, files, codes, outbound, transport, status, cache=None, media_type
                             transport=transport, status=status, budget=budget))
     for file_id, name, data in files:
         out.merge(read_file(file_id, name, data, codes=codes, outbound=outbound, transport=transport,
-                            status=status, cache=cache, budget=budget, media_type=(media_types or {}).get(file_id)))
+                            status=status, cache=cache, budget=budget, media_type=(media_types or {}).get(file_id),
+                            pictures=pictures))
     deduplicate(out)
     return out
 
@@ -40,13 +41,13 @@ def _run(text, files, codes, outbound, transport, status, cache=None, media_type
 def run(text: str | None, files: list[tuple[str, str, bytes]], *, codes=None,
         outbound: Outbound = scrubbed, transport: model_pass.Transport | None = None,
         status: str = 'off', review_transport: review_pass.Transport | None = None,
-        review_status: str = 'off', media_types: dict[str, str] | None = None) -> Extraction:
+        review_status: str = 'off', media_types: dict[str, str] | None = None, pictures: bool = False) -> Extraction:
     """Extraction over the description and each (file id, name, bytes). No ledger change.
 
     With a model, the rules and form passes run over every source first, so a name or address read
     from one file is scrubbed from every text the model sees. The document review reads every page."""
     cache: dict = {}                                  # each PDF is parsed once across both passes
-    first = _run(text, files, codes, outbound, None, status, cache, media_types)
+    first = _run(text, files, codes, outbound, None, status, cache, media_types, pictures)
     if transport is None and review_transport is None:
         return first
     sources = ([review_pass.read_source(file_id, name, data, media_type=(media_types or {}).get(file_id))
@@ -60,7 +61,7 @@ def run(text: str | None, files: list[tuple[str, str, bytes]], *, codes=None,
                                                 *(t for s in sources for _, t in s.pages)])
     out = first
     if transport is not None:
-        out = _run(text, files, codes, lambda s, own: outbound(s, personal), transport, status, cache, media_types)
+        out = _run(text, files, codes, lambda s, own: outbound(s, personal), transport, status, cache, media_types, pictures)
         if out.model.status == 'off':
             out.model.status = 'not_needed'
     if review_transport is not None:
@@ -89,6 +90,7 @@ def settle(case: Case, extraction: Extraction) -> None:
     """
     deduplicate(extraction)
     checked = {p.fact_id for p in extraction.pointers if p.verified}
+    pictured = {p.fact_id for p in extraction.pointers if p.method == 'vision'}
     conflicted = {c.field for c in extraction.conflicts}
     key = lambda fact: repr(fact.value)                                  # noqa: E731
     by_field: dict[str, list[Fact]] = {}
@@ -111,7 +113,7 @@ def settle(case: Case, extraction: Extraction) -> None:
             if len(proposed) > 1 and field not in conflicted:
                 extraction.conflicts.append(FieldConflict(field=field, values=[f.value for f in proposed][:6],
                     quotes=[f.source.quote or '' for f in proposed][:6], source_ref=proposed[0].source.ref,
-                    page=proposed[0].source.page))
+                    page=proposed[0].source.page, source_refs=[f.source.ref or '' for f in proposed][:6]))
             chosen, confirm = ([], False) if len(proposed) > 1 and field in PROBE_BY_FIELD else (facts[:1], False)
         else:
             own = list({key(f): f for f in reversed(sure) if f.source.type == 'user_text'}.values())[::-1]
@@ -126,7 +128,8 @@ def settle(case: Case, extraction: Extraction) -> None:
                 if field not in conflicted and all(len(str(f.value)) <= 60 for f in unique):
                     extraction.conflicts.append(FieldConflict(
                         field=field, values=[f.value for f in unique][:6], quotes=[f.source.quote or '' for f in unique][:6],
-                        source_ref=unique[0].source.ref or '', page=unique[0].source.page))
+                        source_ref=unique[0].source.ref or '', page=unique[0].source.page,
+                        source_refs=[f.source.ref or '' for f in unique][:6]))
                 chosen, confirm = [], False
             else:
                 chosen, confirm = unique[:1], False
@@ -134,6 +137,12 @@ def settle(case: Case, extraction: Extraction) -> None:
             if confirm:
                 fact.status = 'confirmed'
             kept[fact.id] = fact
+        # A picture that disagrees with what was chosen stays as its own proposal to check, never dropped.
+        shown = {key(f) for f in chosen}
+        for fact in facts:
+            if fact.id in pictured and fact.id not in kept and key(fact) not in shown:
+                shown.add(key(fact))
+                kept[fact.id] = fact
     for fact in extraction.facts:
         if fact.kind == 'computed' and fact.inputs and all(i in kept for i in fact.inputs):
             if all(kept[i].status == 'confirmed' for i in fact.inputs):
@@ -231,6 +240,20 @@ def refresh(case: Case) -> None:
     case.intake.plan = build_plan(case)
 
 
+def _without_source(conflict: FieldConflict, file_id: str) -> FieldConflict | None:
+    """The conflict left once one file's values are withdrawn; None when fewer than two values remain."""
+    if not conflict.source_refs:
+        return None if conflict.source_ref == file_id else conflict
+    keep = [i for i, ref in enumerate(conflict.source_refs) if ref != file_id]
+    if len(keep) == len(conflict.source_refs):
+        return conflict
+    if len(keep) < 2:
+        return None
+    pick = lambda items: [items[i] for i in keep if i < len(items)]      # noqa: E731
+    return conflict.model_copy(update={'values': pick(conflict.values), 'quotes': pick(conflict.quotes),
+                                       'source_refs': pick(conflict.source_refs), 'source_ref': conflict.source_refs[keep[0]]})
+
+
 def remove_file(case: Case, file_id: str) -> int:
     """Withdraw a source from intake. Confirmed answers keep their audit source and uploaded bytes."""
     if case.intake is None:
@@ -263,7 +286,7 @@ def remove_file(case: Case, file_id: str) -> int:
             fact.kind, fact.formula, fact.inputs = 'pointed', None, []
     record.pointers = [p for p in record.pointers if p.source_ref != file_id and p.fact_id not in gone]
     record.files = [f for f in record.files if f.file_id != file_id]
-    record.conflicts = [c for c in record.conflicts if c.source_ref != file_id]
+    record.conflicts = [c for c in (_without_source(c, file_id) for c in record.conflicts) if c is not None]
     record.unresolved_citations = [c for c in record.unresolved_citations if c.source_ref != file_id]
     record.review = None
     if file_id not in record.removed_file_ids:

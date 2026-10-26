@@ -34,6 +34,7 @@ class IntakeRequest(BaseModel):
     file_ids: list[str] = Field(default_factory=list, max_length=MAX_FILES)
     role: str | None = None
     model: bool = True                           # false: rules and forms only, no provider call
+    pictures: bool = False                       # true only after the applicant allows sending pictures
     expected_version: int | None = Field(default=None, ge=1, strict=True)
 
     @model_validator(mode='after')
@@ -128,7 +129,8 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes], *
         known = known_values(case, people_names(store, case, getattr(request.state, 'user', None)))
         extraction = service.run(body.text, files, codes=codes_or_none(), transport=transport, status=status,
                                  outbound=lambda text, personal: scrubbed(text, [*known, *personal]),
-                                 review_transport=review_transport, review_status=review_status, media_types=media_types)
+                                 review_transport=review_transport, review_status=review_status, media_types=media_types,
+                                 pictures=body.pictures)
         # One compare-and-swap against the version the client saw, else the one read above. No retry.
         if body.expected_version is not None and body.expected_version != case.version:
             raise HTTPException(409, 'case was updated concurrently')

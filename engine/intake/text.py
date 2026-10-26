@@ -100,10 +100,19 @@ _OWN_PLAN = re.compile(
     r'(?:build|add|use|install|replace|remove|omit|make|convert|renovate|have|put|leave|design|keep)\b')
 
 
+# A question about Batatis, a professional or examples is a question to the tool, whatever its opening verb.
+_ABOUT_TOOL = re.compile(r'(?i)\b(?:batatis|this\s+(?:app|tool|site)|you|examples?|explain|hir(?:e|ing)|professionals?)\b')
+
+
 def is_question(sentence: str) -> bool:
     """A question to the tool, not a statement that merely sits beside one."""
     stripped = sentence.strip()
-    return not _OWN_PLAN.match(stripped) and (stripped.endswith('?') or (bool(_WH.match(stripped)) and '?' in stripped))
+    return not (_OWN_PLAN.match(stripped) and not _ABOUT_TOOL.search(stripped)) and (stripped.endswith('?') or (bool(_WH.match(stripped)) and '?' in stripped))
+
+
+def _exact(value: float) -> float:
+    """Float noise removed, precision kept: stored values may sit right at a rule threshold."""
+    return float(f'{value:.12g}')
 
 
 def measurement(text: str, dimension: str) -> int | float:
@@ -120,7 +129,7 @@ def measurement(text: str, dimension: str) -> int | float:
         value = number(feet.group('n'))
         if value is None or not math.isfinite(value):
             raise ValueError('Enter a finite number.')
-        return rounded((value + inches / 12) * FT_TO_M)
+        return _exact((value + inches / 12) * FT_TO_M)
     match = re.fullmatch(rf'{n}\s*(?P<unit>.*?)', raw, re.I)
     if not match:
         raise ValueError('Enter one number with its unit.')
@@ -138,13 +147,13 @@ def measurement(text: str, dimension: str) -> int | float:
                'mm': .001, 'millimetres': .001, 'millimeters': .001,
                'in': .0254, 'inch': .0254, 'inches': .0254, '"': .0254}
     if dimension == 'length' and unit in lengths:
-        return rounded(value * lengths[unit])
+        return _exact(value * lengths[unit])
     if dimension == 'area':
         normalized = re.sub(r'[\s.^]', '', unit).replace('²', '2')
         if normalized in ('m2', 'sqm', 'squaremetres', 'squaremeters'):
             return value
         if normalized in ('ft2', 'sqft', 'squarefeet', 'squarefoot'):
-            return rounded(value * SQFT_TO_M2)
+            return _exact(value * SQFT_TO_M2)
     raise ValueError('Use m² or ft².' if dimension == 'area' else 'Use m, cm, mm, or ft and in.')
 
 

@@ -7,6 +7,7 @@ import { requestStartSignIn } from "./auth/useAuthGate";
 import { useBegin, useCurrentApplication } from "./begin";
 import { getSession, updateSession, useSession } from "./session";
 import { CIcon, Dot, Kbd, MOD_KEY } from "./ui";
+import { PictureConsent } from "./PictureConsent";
 
 let fileSeq = 0;
 const fileId = () => `file-${Date.now().toString(36)}-${(fileSeq++).toString(36)}`;
@@ -220,6 +221,7 @@ export function Start() {
         </div>
       </div>
       <div className="cf-start-notes">
+        {inCase && <PictureConsent />}
         {blocked && <p id="cf-start-blocked" className="cf-faint cf-small" role="status">{blocked}</p>}
         {!inCase && session.draftFilesLost && text.trim() && <button type="button" className="cf-link-btn" onClick={() => updateSession({ draftFilesLost: false })}>Use description only</button>}
         {note && <p className="cf-faint cf-small" role="status">{note}</p>}

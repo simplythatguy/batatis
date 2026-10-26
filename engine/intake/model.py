@@ -60,6 +60,9 @@ Content = str | list[dict]
 Transport = Callable[[str, Content, dict], tuple[dict, dict]]
 
 
+CALL_SECONDS = 60                                # each provider call's own timeout
+
+
 @dataclass
 class Budget:
     """Shared across description and files in one extraction, including failed attempts."""
@@ -69,7 +72,8 @@ class Budget:
     deadline: float = field(default_factory=lambda: time.monotonic() + 180)
 
     def expired(self) -> bool:
-        return time.monotonic() >= self.deadline
+        # A call starts only if it can finish (it times out after CALL_SECONDS) before the deadline.
+        return time.monotonic() + CALL_SECONDS > self.deadline
 
 
 LIMIT = 'Reading limit reached'
@@ -249,7 +253,7 @@ def openai_transport(client_ip: str | None = None) -> Transport:
                 'response_format': {'type': 'json_schema',
                                     'json_schema': {'name': 'intake_facts', 'strict': True, 'schema': body_schema}}}
         # A failed call keeps its reservation: it may still have used tokens.
-        with httpx.Client(timeout=60, follow_redirects=False) as client:
+        with httpx.Client(timeout=CALL_SECONDS, follow_redirects=False) as client:
             response = client.post(OPENAI_URL, json=body,
                                    headers={'Authorization': 'Bearer ' + os.environ['OPENAI_API_KEY']})
             response.raise_for_status()

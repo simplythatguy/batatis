@@ -3868,6 +3868,14 @@
           "title": "Source Ref",
           "type": "string"
         },
+        "source_refs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Refs",
+          "type": "array"
+        },
         "values": {
           "default": [],
           "items": {
@@ -3895,7 +3903,8 @@
         "values",
         "quotes",
         "source_ref",
-        "page"
+        "page",
+        "source_refs"
       ],
       "title": "FieldConflict",
       "type": "object"
@@ -5835,6 +5844,11 @@
         "model": {
           "default": true,
           "title": "Model",
+          "type": "boolean"
+        },
+        "pictures": {
+          "default": false,
+          "title": "Pictures",
           "type": "boolean"
         },
         "role": {

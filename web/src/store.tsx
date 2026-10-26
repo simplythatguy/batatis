@@ -6,6 +6,7 @@ import { acknowledgedVersion, acknowledgeWrite, adoptEngineCase, clearEngineSess
 import { engineNotices, factSignature, groupEvidenceGaps, missingFromEngine, uploadMessage } from "./rules";
 import { readDecisionBody, wireDecision } from "./identify";
 import { asLocal } from "./intakeFields";
+import { picturesAllowed } from "./intakeView";
 import { toViewRow } from "./api/sectionC";
 import { getSession, updateSession } from "./calm/session";
 import { checkCurrent, newCheckState, type CheckState, type SaveStatus } from "./checkState";
@@ -761,7 +762,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     }
     setReading({ intake: "running", intakeNote: "" });
     try {
-      const result = await engine.intake(id, { text: text || undefined, file_ids: fileIds, role: roleFor(snapshot.applicantType), model: true, expected_version: acknowledgedVersion(id) ?? undefined });
+      const result = await engine.intake(id, { text: text || undefined, file_ids: fileIds, role: roleFor(snapshot.applicantType), model: true, pictures: picturesAllowed(snapshot), expected_version: acknowledgedVersion(id) ?? undefined });
       if (!live()) return null;
       acknowledgeWrite(id, result.case_version);
       adoptIntake(id, result, text);

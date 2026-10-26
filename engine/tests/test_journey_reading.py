@@ -34,11 +34,11 @@ def answering(field):
 
 
 @pytest.mark.parametrize('field,raw,want', [
-    ('limiting_distance_m', '4 feet', 1.22), ('span_m', '4 ft', 1.22), ('span_m', "4'", 1.22),
-    ('span_m', '4 ft 6 in', 1.37), ('span_m', '13\'6"', 4.11), ('span_m', '1.2 m', 1.2),
-    ('span_m', '4 ft and 6 in', 1.37), ('limiting_distance_m', '.3 m', .3),
+    ('limiting_distance_m', '4 feet', 1.2192), ('span_m', '4 ft', 1.2192), ('span_m', "4'", 1.2192),
+    ('span_m', '4 ft 6 in', 1.3716), ('span_m', '13\'6"', 4.1148), ('span_m', '1.2 m', 1.2),
+    ('span_m', '4 ft and 6 in', 1.3716), ('limiting_distance_m', '.3 m', .3),
     ('span_m', '120 cm', 1.2), ('span_m', '1500 mm', 1.5),
-    ('building_area_m2', '1500 sq ft', 139.35), ('floor_area_m2', '140 m2', 140),
+    ('building_area_m2', '1500 sq ft', 139.35456), ('floor_area_m2', '140 m2', 140),
     ('building_area_m2', '140 m²', 140), ('span_m', '4', 4), ('storeys', 'two', 2),
 ])
 def test_answers_convert_units_and_keep_what_the_applicant_typed(field, raw, want):
@@ -107,9 +107,18 @@ class VisionReader:
         return {'facts': [{'field': 'statement', 'value': text, 'quote': text}]}, {'input_tokens': 20, 'output_tokens': 10}
 
 
+def test_no_picture_leaves_the_machine_until_the_applicant_allows_it():
+    reader = VisionReader()
+    scan = pdf([[(72, 700, 'A house.')], []], shapes_only={1})
+    out = service.run('', [('photo', 'elevation.png', picture()), ('scan', 'scan.pdf', scan)], transport=reader, status='fake')
+    assert reader.pictures == []
+    assert [f.pictures_not_read_reason for f in out.files] == ['waiting for your OK', 'waiting for your OK']
+    assert out.files[1].text_pages_read == [1] and out.files[1].status == 'partly_read'
+
+
 def test_pictures_are_downscaled_and_always_unconfirmed_proposals_with_sources():
     reader = VisionReader()
-    out = service.run('', [('photo', 'elevation.png', picture(size=(2800, 1800)))], transport=reader, status='fake')
+    out = service.run('', [('photo', 'elevation.png', picture(size=(2800, 1800)))], transport=reader, status='fake', pictures=True)
     assert len(reader.pictures) == 1
     [fact] = out.facts
     assert (fact.field, fact.kind, fact.status, fact.source.ref, fact.source.page) == ('storeys', 'proposed', 'unconfirmed', 'photo', 1)
@@ -128,7 +137,7 @@ def test_pictures_are_downscaled_and_always_unconfirmed_proposals_with_sources()
 def test_scan_pages_go_to_vision_and_a_text_only_connection_reports_it_cannot_read_pictures():
     data = pdf([[(72, 700, 'A house.')], []], shapes_only={1})
     reader = VisionReader()
-    out = service.run('', [('scan', 'scan.pdf', data)], transport=reader, status='fake')
+    out = service.run('', [('scan', 'scan.pdf', data)], transport=reader, status='fake', pictures=True)
     assert out.files[0].text_pages_read == [1] and out.files[0].semantic_pages_read == [1]
     assert out.files[0].image_pages_read == [2] and out.files[0].pages_read == [1, 2]
     def text_only(*args):
@@ -140,7 +149,7 @@ def test_scan_pages_go_to_vision_and_a_text_only_connection_reports_it_cannot_re
 def test_semantic_reading_reaches_every_text_page_and_the_tail_of_a_long_page():
     reader = VisionReader()
     data = pdf([[(72, 700, f'Page {n}: We propose a special wall.')] for n in range(1, 202)])
-    out = service.run('', [('many', 'many.pdf', data)], transport=reader, status='fake')
+    out = service.run('', [('many', 'many.pdf', data)], transport=reader, status='fake', pictures=True)
     report = out.files[0]
     assert report.pages == 201 and report.text_pages_read == list(range(1, 201))
     assert report.semantic_pages_read == list(range(1, 201))
@@ -155,7 +164,7 @@ def test_semantic_reading_reaches_every_text_page_and_the_tail_of_a_long_page():
 def test_the_picture_budget_is_per_file_and_per_request():
     reader = VisionReader()
     data = pdf([[] for _ in range(9)], shapes_only=set(range(9)))
-    out = service.run('', [(str(n), f'{n}.pdf', data) for n in range(3)], transport=reader, status='fake')
+    out = service.run('', [(str(n), f'{n}.pdf', data) for n in range(3)], transport=reader, status='fake', pictures=True)
     assert len(reader.pictures) == 8
     assert [len(r.image_pages_read) for r in out.files] == [4, 4, 0]
     assert all(r.status != 'read' and r.pictures_not_read_reason for r in out.files)
@@ -244,7 +253,7 @@ def test_picture_statements_survive_settling_and_disagreeing_pictures_stay_a_con
             self.count += 1
             return {'facts': [{'field': 'storeys', 'value': str(self.count + 1), 'quote': f'{self.count + 1} storeys'},
                               {'field': 'statement', 'value': 'A green roof', 'quote': 'A green roof'}]}, {}
-    out = service.run('', [('a', 'a.png', picture()), ('b', 'b.png', picture())], transport=Drawings(), status='fake')
+    out = service.run('', [('a', 'a.png', picture()), ('b', 'b.png', picture())], transport=Drawings(), status='fake', pictures=True)
     service.apply(Case(), '', out)
     assert any(c.field == 'storeys' and set(c.values) == {2, 3} for c in out.conflicts)
     [statement] = [f for f in out.facts if f.field.startswith('statement.')]
@@ -271,7 +280,7 @@ def test_hosted_vision_uses_image_content_parts_and_the_existing_meter(monkeypat
     monkeypatch.setattr('httpx.Client.post', post)
     try:
         transport, status = model.default_transport()
-        out = service.run('', [('a', 'a.png', picture())], transport=transport, status=status)
+        out = service.run('', [('a', 'a.png', picture())], transport=transport, status=status, pictures=True)
         assert out.files[0].image_pages_read == [1] and out.model.input_tokens == 100
         [body] = requests
         assert body['model'] == model.MODEL and body['reasoning_effort'] == model.EFFORT
@@ -345,7 +354,7 @@ from engine.tests.test_journey_reading import VisionReader
 from engine.tests.test_intake_pdf import pdf
 data = pdf([[], []], shapes_only={0, 1})
 def read_one(index):
-    out = run('', [(str(index), 'scan.pdf', data)], transport=VisionReader(), status='fake')
+    out = run('', [(str(index), 'scan.pdf', data)], transport=VisionReader(), status='fake', pictures=True)
     assert out.files[0].image_pages_read == [1, 2]
     assert all(f.kind == 'proposed' for f in out.facts)
 with ThreadPoolExecutor(max_workers=4) as pool:
@@ -355,3 +364,60 @@ print('16 concurrent scan reads completed')
     result = subprocess.run([sys.executable, '-X', 'faulthandler', '-c', probe], capture_output=True, text=True, timeout=45)
     assert result.returncode == 0, result.stderr
     assert '16 concurrent scan reads completed' in result.stdout
+
+
+class ThreeStoreys(VisionReader):
+    def __call__(self, system, user, schema):
+        if isinstance(user, list):
+            self.pictures.append(user)
+            return {'facts': [{'field': 'storeys', 'value': '3', 'quote': 'Three storeys'}]}, {'input_tokens': 20, 'output_tokens': 10}
+        return {'facts': []}, {'input_tokens': 20, 'output_tokens': 10}
+
+
+def test_a_picture_that_disagrees_with_the_text_stays_to_check():
+    out = service.run('', [('plans', 'plans.pdf', pdf([[(72, 700, 'A two-storey house.')]])), ('photo', 'elevation.png', picture())],
+                      transport=ThreeStoreys(), status='fake', pictures=True)
+    case = Case()
+    service.apply(case, '', out)
+    storeys = {(f.value, f.status, f.kind) for f in case.facts if f.field == 'storeys'}
+    assert (2, 'confirmed', 'pointed') in storeys and (3, 'unconfirmed', 'proposed') in storeys
+
+
+def test_removing_a_file_withdraws_only_its_values_from_a_conflict():
+    from engine.models_intake import FieldConflict
+    case = Case()
+    case.intake = IntakeRecord(conflicts=[FieldConflict(field='storeys', values=[2, 3], quotes=['two', 'three'],
+                                                        source_ref='a', source_refs=['a', 'b'])])
+    service.remove_file(case, 'b')
+    assert case.intake.conflicts == []
+    case.intake.conflicts = [FieldConflict(field='storeys', values=[2, 3, 4], quotes=['two', 'three', 'four'],
+                                           source_ref='a', source_refs=['a', 'b', 'c'])]
+    service.remove_file(case, 'a')
+    [left] = case.intake.conflicts
+    assert (left.values, left.source_refs, left.source_ref) == ([3, 4], ['b', 'c'], 'b')
+
+
+@pytest.mark.parametrize('text', ['Can I use Batatis instead of hiring a professional?',
+                                  'Can I have examples of a two-storey house in Edmonton?'])
+def test_a_question_about_the_tool_is_not_read_as_the_plan(text):
+    assert not {f.field for f in service.run(text, []).facts} & {'alternative_description', 'storeys', 'municipality'}
+    assert assess(text).variance_needed != 'likely'
+
+
+@pytest.mark.parametrize(('typed', 'metres'), [('1199 mm', 1.199), ('1.199 m', 1.199), ('4 mm', 0.004), ('4 ft', 1.2192)])
+def test_answer_units_keep_their_precision(typed, metres):
+    from engine.intake.text import measurement
+    assert measurement(typed, 'length') == metres
+
+
+def test_no_reading_call_starts_that_could_outrun_the_deadline():
+    import time
+    from engine.intake.model import CALL_SECONDS, Budget
+    assert Budget(deadline=time.monotonic() + CALL_SECONDS - 1).expired()
+    assert not Budget(deadline=time.monotonic() + CALL_SECONDS + 5).expired()
+
+
+def test_the_reading_record_names_no_model():
+    out = service.run('', [('photo', 'elevation.png', picture())], transport=VisionReader(), status='live', pictures=True)
+    assert out.model.model in (None, 'reader-1')
+    assert 'gpt' not in json.dumps(out.model.model_dump()).lower()

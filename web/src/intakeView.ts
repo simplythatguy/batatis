@@ -427,6 +427,21 @@ export function pagesLabel(count: number): string {
 }
 
 /** What intake actually covered. Uploading callers pass no report until the read completes. */
+/** The engine's reason while pictures wait for the applicant's OK (pixels cannot be scrubbed like text). */
+export const PICTURES_WAITING = "waiting for your OK";
+export const PICTURES_FIELD = "privacy.pictures";
+
+/** The applicant allowed this application's pictures to be sent for reading. */
+export function picturesAllowed(c: Case): boolean {
+  const fact = [...c.facts].reverse().find((f) => f.field === PICTURES_FIELD);
+  return fact?.status === "confirmed" && fact.value === true;
+}
+
+/** Files whose pictures are waiting for that OK. */
+export function picturesWaiting(c: Case): boolean {
+  return !picturesAllowed(c) && Boolean(c.intake?.record.files.some((r) => r.pictures_not_read_reason === PICTURES_WAITING));
+}
+
 export function fileReadLabel(report: FileReport | null | undefined): { tone: "done" | "warning" | "blocking" | "pending"; label: string; reason?: string } {
   if (!report) return { tone: "pending", label: "Waiting to read" };
   const images = new Set(report.image_pages_read ?? []).size;
