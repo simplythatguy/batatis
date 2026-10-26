@@ -7,7 +7,7 @@ import { engineNotices, factSignature, groupEvidenceGaps, missingFromEngine, upl
 import { readDecisionBody, wireDecision } from "./identify";
 import { asLocal } from "./intakeFields";
 import { toViewRow } from "./api/sectionC";
-import { getSession, resetSession, subscribeSession, updateSession } from "./calm/session";
+import { getSession, resetSession, subscribeSession, updateSavedSession } from "./calm/session";
 import { applicantDraft, draftAccount, restoreApplicantDraft, sessionDraft } from "./calm/applicantDraft";
 import { questionDrafts } from "./calm/questionDrafts";
 import { checkCurrent, newCheckState, type CheckState, type SaveStatus } from "./checkState";
@@ -26,8 +26,10 @@ import { accountSession, getAccountState, patchApplication, refreshApplications,
 import { readOnly } from "./calm/applications";
 import { activeJob, isApplicantJob, latestJob, observeJob, type CaseJob } from "./api/jobs";
 import { PROCESS_FACT, PROCESS_FIELDS } from "./model";
-import { acknowledgeJobCase, acknowledgedAuthority, acknowledgedDraftKey, draftKey, pendingFactChanges } from "./api/sync";
+import { acknowledgeJobCase, acknowledgedAuthority, acknowledgedDraft, acknowledgedDraftKey, acknowledgedEvidenceFacts, acknowledgedSelectionKey, draftKey, pendingFactChanges, pushReconciledDraft } from "./api/sync";
 import { registerSignOutGuard, resetSignOutStatus } from "./calm/auth/signOutGuard";
+import { applicationEditsPaused, pauseApplicationEdits, useApplicationEditsPaused } from "./calm/applicationEditing";
+import { reconcileDraft, type ReconciliationChoices, type ReconciliationInput, type SaveConflictReview } from "./calm/reconcileDraft";
 
 /** Older builds kept the whole case here. It is removed on load and never written again. */
 const LEGACY_KEYS = ["batatis-web-case-v4", "batatis-web-case-v3"];
@@ -44,15 +46,15 @@ function load() {
 }
 
 /**
- * The reading after Start: intake (what we read and the plan), then code identification over the
- * stream. Visit-local progress only; the results live on the case (`Case.intake`, `Case.identify`).
+ * The reading after Start: intake (what we read and the plan), then code identification.
+ * Progress rejoins durable jobs; results live on the case (`Case.intake`, `Case.identify`).
  */
 export interface Reading {
   intake: "idle" | "running" | "done" | "error";
   intakeNote: string;
   identify: "idle" | "running" | "done" | "error" | "skipped";
   identifyNote: string;
-  /** Stream stages seen in the current identification, with their counts. */
+  /** Legacy synchronous identification stage details, when supplied. */
   stages: Record<string, Record<string, unknown>>;
   /** A planner question, the scope click or a code card being written (its id). */
   busy: string | null;
@@ -112,6 +114,11 @@ interface Store {
   syncOk: boolean;
   saveStatus: SaveStatus;
   saveDetail: string;
+  saveConflict: boolean;
+  saveConflictReview: SaveConflictReview;
+  reviewSaveConflict: () => Promise<string | null>;
+  saveReviewedChanges: (choices: ReconciliationChoices) => Promise<string | null>;
+  closeSaveConflictReview: () => void;
   checkStatus: CheckState["status"];
   checkNote: string;
   checkDetail: string;
@@ -256,6 +263,7 @@ export function hrefFor(field: string): string {
 }
 
 export function CaseProvider({ children }: { children: ReactNode }) {
+  const editsPaused = useApplicationEditsPaused();
   const account = useAccount();
   const loaded = useMemo(load, []);
   const [phase, setPhase] = useState<"who" | "case">(loaded.phase);
@@ -276,6 +284,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const currentJobs = useRef(new Map<CaseJob["kind"], string>());
   const completedJobs = useRef(new Set<string>());
   const jobRequestKeys = useRef(new Map<string, { key: string; replaces?: string }>());
+  const jobActionNotes = useRef(new Map<string, string>());
   const activeSubmit = useRef<{ generation: number; session: number; revision: number; caseId: string; dispatched: boolean; ctl: AbortController; promise: Promise<void> } | null>(null);
   const caseRead = useRef(0);
   const caseOpening = useRef(false);
@@ -345,6 +354,12 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const [editEpoch, setEditEpoch] = useState(0);
   const [saveDetail, setSaveDetail] = useState("");
   const [savedNote, setSavedNote] = useState("");
+  const [saveConflictReview, setSaveConflictReview] = useState<SaveConflictReview>({ kind: "closed" });
+  const conflictRead = useRef<Promise<string | null> | null>(null);
+  const recovery = useRef<{
+    token: number; session: number; id: string; revision: number; input: ReconciliationInput;
+    read: Awaited<ReturnType<typeof readSavedCase>>;
+  } | null>(null);
   const [check, setCheck] = useState<CheckState>(newCheckState);
   const checkRef = useRef(check);
   const activeCheck = useRef<{ promise: Promise<string | null>; ctl: AbortController } | null>(null);
@@ -421,7 +436,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   }), []);
 
   // Stable dispatch keeps deterministic lookups separate from applicant edits and upload acknowledgements.
-  const dispatch = useCallback((action: Action) => {
+  const dispatch = useCallback((action: Action, origin: "applicant" | "save" = "applicant") => {
     // A lookup that only attaches Section C rows (or re-orders the same cards, as it does right
     // after a saved case is opened) is derived data, not an edit: the draft stays saved.
     // On a read-only case the lookup's expansion of an article is display only: never an unsaved edit.
@@ -434,6 +449,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     // input callbacks. Keep derived acknowledgements and explicit case/session resets working.
     const transition = activeSubmit.current;
     const editing = !derived || ["editEvidenceDraft", "addFiles", "removeFile"].includes(action.type);
+    if (editing && origin === "applicant" && applicationEditsPaused()) return;
     if (action.type !== "reset" && editing && transition?.dispatched
       && isEngineGeneration(transition.generation) && transition.caseId === engineCaseId()) return;
     if (action.type === "answerCandidate" || action.type === "removeCandidate") refreshedSelection.current.delete(action.id);
@@ -683,6 +699,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
    * and sent when it is created. Resolves to an error text, or null when saved.
    */
   function renameCase(raw: string): Promise<string | null> {
+    if (applicationEditsPaused()) return Promise.resolve("Editing is paused while your application is saved or you sign out.");
     const title = normalizeTitle(raw);
     if (!title) return Promise.resolve(TITLE_EMPTY);
     const token = engineGeneration();
@@ -789,19 +806,19 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     for (const { id: local, file } of held) {
       if (!live()) break;
       if (!latestCase.current.files.some((f) => f.id === local)) continue;
-      updateSession(s => ({ uploading: [...s.uploading, local] }));
+      updateSavedSession(s => ({ uploading: [...s.uploading, local] }));
       try {
         const saved = await engine.upload(id, file, signal);
         if (!live()) break;
         dispatch({ type: "setFileResult", id: local, error: null, read: true, pages: saved.pages, sha256: saved.sha256, engineId: saved.id });
-        updateSession(s => ({ held: s.held.filter(f => f.id !== local) }));
+        updateSavedSession(s => ({ held: s.held.filter(f => f.id !== local) }));
       } catch (e) {
         if (!live()) break;
         const status = e instanceof EngineError ? e.status : 0;
         const detail = e instanceof EngineError ? e.detail : String(e);
         dispatch({ type: "setFileResult", id: local, error: uploadMessage(status, detail), unreachable: status === 0 });
       } finally {
-        if (live()) updateSession((s) => ({ uploading: s.uploading.filter((x) => x !== local) }));
+        if (live()) updateSavedSession((s) => ({ uploading: s.uploading.filter((x) => x !== local) }));
       }
     }
   }
@@ -815,7 +832,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       if (evidenceUploads.current.get(key) !== entry) continue;
       evidenceUploads.current.delete(key);
       if (entry.itemId) dispatch({ type: "editEvidenceDraft", itemId: entry.itemId,
-        patch: { fileRef: saved.id, note: "PDF uploaded. Save the document to attach it." } });
+        patch: { fileRef: saved.id, note: "PDF uploaded. Save the document to attach it." } }, "save");
     }
   }
 
@@ -844,9 +861,10 @@ export function CaseProvider({ children }: { children: ReactNode }) {
 
   function jobProgress(job: CaseJob) {
     const state = activeJob(job) ? "running" : job.state === "succeeded" ? "done" : "error";
-    const note = job.state === "superseded" ? "Your answers changed. Read the updated description again."
+    if (!activeJob(job)) jobActionNotes.current.delete(job.id);
+    const note = jobActionNotes.current.get(job.id) ?? (job.state === "superseded" ? "Your answers changed. Read the updated description again."
       : job.state === "cancelled" ? "This work was cancelled. You can start it again."
-      : job.state === "failed" ? job.error?.message || "This work did not finish. Try again." : "";
+      : job.state === "failed" ? job.error?.message || "This work did not finish. Try again." : "");
     setReading(job.kind === "intake"
       ? { intake: state, intakeNote: note, intakeJob: job }
       : { identify: state, identifyNote: note, identifyJob: job, stages: {} });
@@ -854,7 +872,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
 
   /** Apply only the output of this owned job, retaining edits newer than its acknowledged input. */
   async function finishJob(job: CaseJob, live: () => boolean) {
-    if (!live() || completedJobs.current.has(job.id)) return;
+    if (!live() || applicationEditsPaused() || completedJobs.current.has(job.id)) return;
     if (job.state !== "succeeded") { jobProgress(job); return; }
     let continueIdentify = false;
     await enqueue(async () => {
@@ -896,7 +914,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       const facts = [...next.facts.filter(f => !changes.has(f.field)), ...[...changes.values()].filter((f): f is Fact => f !== null)];
       const process = { ...next.process };
       for (const { id } of PROCESS_FIELDS) if (changes.has(PROCESS_FACT[id])) process[id] = local.process[id];
-      next = { ...next, facts, process, files: local.files,
+      next = { ...next, facts, process, files: remoteDraftChanged && !localDraftChanged ? next.files : local.files,
         evidenceDrafts: remoteDraftChanged && !localDraftChanged ? next.evidenceDrafts : local.evidenceDrafts,
         listedEvidence: local.listedEvidence, deletedEvidence: local.deletedEvidence,
         evidenceIssues: local.evidenceIssues, evidenceRev: local.evidenceRev,
@@ -943,9 +961,34 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     const ctl = new AbortController();
     const live = () => !ctl.signal.aborted && isEngineGeneration(token) && engineCaseId() === id && accountSession() === session
       && currentJobs.current.get(job.kind) === job.id;
+    let observed = job, availabilityNote = "", checkedAt = -Infinity, checking = false;
+    const activeNote = () => [jobActionNotes.current.get(job.id), availabilityNote].filter(Boolean).join(" ");
+    const showAvailability = () => {
+      if (live() && activeJob(observed) && activeNote()) setReading(job.kind === "intake"
+        ? { intakeNote: activeNote() } : { identifyNote: activeNote() });
+    };
+    const checkAvailability = () => {
+      if (checking || Date.now() - checkedAt < 10000) return;
+      checkedAt = Date.now(); checking = true;
+      // Availability is advisory and independent of both status polling and the save queue.
+      void engine.workerHealth(id, ctl.signal).then(health => {
+        if (!live() || !activeJob(observed)) return;
+        availabilityNote = health.worker_available ? ""
+          : "Background processing is unavailable. Your job is saved and will resume when processing is available.";
+        setReading(job.kind === "intake" ? { intakeNote: activeNote() } : { identifyNote: activeNote() });
+      }).catch(() => {
+        if (!live() || !activeJob(observed)) return;
+        availabilityNote = "Background processing availability could not be checked. Your job is saved.";
+        showAvailability();
+      }).finally(() => { checking = false; });
+    };
     const stop = observeJob({ job, signal: ctl.signal,
       read: (jobId, signal) => engine.job(id, jobId, signal),
-      change: next => { if (live()) jobProgress(next); },
+      change: next => {
+        if (!live()) return;
+        observed = next; jobProgress(next);
+        if (activeJob(next)) { showAvailability(); checkAvailability(); }
+      },
       failure: error => {
         if (!live()) return;
         const unavailable = `Progress unavailable. ${failureText(error)}`;
@@ -983,6 +1026,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
 
   /** Only save, upload and the short acceptance request hold the queue. Polling never does. */
   function startJob(kind: CaseJob["kind"], chain?: { jobId: string; createdAt: string }): Promise<void> {
+    if (applicationEditsPaused()) return Promise.resolve();
     const token = engineGeneration(), session = accountSession();
     const live = () => isEngineGeneration(token) && accountSession() === session;
     setReading(kind === "intake" ? { intake: "running", intakeNote: "", intakeJob: undefined }
@@ -1003,12 +1047,16 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         if (chain && previous) {
           if (previous.created_at >= chain.createdAt) { watchJob(previous); return; }
         }
+        // The list read can outlast a new edit. Acknowledge that revision before capturing
+        // computation input; later awaits use this immutable saved snapshot.
+        if (!(await flushCurrent(live)) || !live() || !syncState.current.saved) throw new Error("Your latest input wasn’t saved. Try again after saving.");
+        const snapshot = latestCase.current;
         const expected = acknowledgedVersion(id);
         if (expected === null || needsReconcile(id)) throw new EngineError(409, CONFLICT_TEXT);
         const slot = `${id}:${kind}:${chain?.jobId ?? expected}`;
         let submission = jobRequestKeys.current.get(slot) ?? { key: `batatis-${kind}-${crypto.randomUUID()}` };
         jobRequestKeys.current.set(slot, submission);
-        const text = latestCase.current.description.trim();
+        const text = snapshot.description.trim();
         if (!chain && previous?.can_retry && submission.replaces !== previous.id) {
           try {
             const retried = await engine.retryJob(id, previous.id);
@@ -1022,7 +1070,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
           }
         }
         const job = kind === "intake"
-          ? await engine.startIntakeJob(id, { text: text || undefined, file_ids: latestCase.current.files.flatMap(f => f.engineId ? [f.engineId] : []), role: roleFor(latestCase.current.applicantType), model: true, expected_version: expected }, submission.key)
+          ? await engine.startIntakeJob(id, { text: text || undefined, file_ids: snapshot.files.flatMap(f => f.engineId ? [f.engineId] : []), role: roleFor(snapshot.applicantType), model: true, expected_version: expected }, submission.key)
           : await engine.startIdentifyJob(id, { prose: text, answers: [], expected_version: expected }, submission.key);
         if (!live()) return;
         if (!isApplicantJob(job) || job.kind !== kind || job.case_id !== id) throw new Error("The progress response belongs to another application.");
@@ -1039,6 +1087,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   function runIdentify(): Promise<void> { return startJob("identify"); }
 
   function answerPlan(q: PlanQuestion, answer: string): Promise<string | null> {
+    if (applicationEditsPaused()) return Promise.resolve("Editing is paused. Try again when it resumes.");
     const token = engineGeneration();
     const live = () => isEngineGeneration(token);
     setReading({ busy: q.id });
@@ -1069,6 +1118,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   }
 
   function overrideScope(buildingCode: boolean): Promise<string | null> {
+    if (applicationEditsPaused()) return Promise.resolve("Editing is paused. Try again when it resumes.");
     const token = engineGeneration();
     const live = () => isEngineGeneration(token);
     setReading({ busy: "scope" });
@@ -1101,6 +1151,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   }
 
   function decide(candidate: Candidate, answer: CandidateAnswer): Promise<string | null> {
+    if (applicationEditsPaused()) return Promise.resolve("Editing is paused. Try again when it resumes.");
     dispatch({ type: "answerCandidate", id: candidate.id, answer });
     if (candidate.suggestion !== "identify" || !/^\d/.test(candidate.provision)) return Promise.resolve(null);
     const token = engineGeneration();
@@ -1142,6 +1193,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
 
   /** Queue a versioned checklist answer and update shared extras, preserving conflict and missing-case feedback. */
   function answerChecklist(checklistId: string, conditionId: string, state: "confirmed" | "not_yet" | "does_not_apply", reason?: string): Promise<string | null> {
+    if (applicationEditsPaused()) return Promise.resolve("Editing is paused. Try again when it resumes.");
     const token = engineGeneration();
     const live = () => isEngineGeneration(token);
     return enqueue(async () => {
@@ -1177,6 +1229,8 @@ export function CaseProvider({ children }: { children: ReactNode }) {
 
   /** Reconcile a stale case and reload its extras, marking a deleted or expired case as gone. */
   function reloadChecklists(): Promise<string | null> {
+    const id = engineCaseId();
+    if (id && needsReconcile(id)) return reviewSaveConflict();
     const token = engineGeneration();
     return enqueue(async () => {
       const id = engineCaseId();
@@ -1196,6 +1250,101 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         }
         return failureText(e);
       }
+    });
+  }
+
+  /** Read-only preparation. Keep the conflict fence and local editors until a reviewed CAS succeeds. */
+  function reviewSaveConflict(): Promise<string | null> {
+    if (applicationEditsPaused()) return Promise.resolve("Editing is paused. Try again when it resumes.");
+    if (conflictRead.current) return conflictRead.current;
+    const id = engineCaseId(), token = engineGeneration(), session = accountSession();
+    if (!id) return Promise.resolve(null);
+    const current = () => mounted.current && isEngineGeneration(token) && engineCaseId() === id && accountSession() === session;
+    setSaveConflictReview({ kind: "loading" });
+    const pending = enqueue(async () => {
+      try {
+        const read = await readSavedCase(id);
+        if (!current()) return null;
+        if (readOnly(read.saved.status)) throw new Error("This application has been sent or closed. Your local draft stays here; the saved application cannot be overwritten.");
+        const local = latestCase.current, remote = openedCase(read.saved, local.applicantType, read);
+        const baselineSelection = acknowledgedSelectionKey(id);
+        const input: ReconciliationInput = {
+          local, remote,
+          draft: applicantDraft(local, draftAccount(getAccountState().user), token, id),
+          savedDraft: read.saved.applicant_draft, baselineDraft: acknowledgedDraft(id),
+          localFacts: pendingFactChanges(id, local.facts), remoteFacts: pendingFactChanges(id, remote.facts),
+          baselineAuthority: acknowledgedAuthority(id), baselineEvidence: acknowledgedEvidenceFacts(id),
+          localSelectionChanged: selectionKey(selectedArticles(local)) !== baselineSelection,
+          remoteSelectionChanged: selectionKey(selectedArticles(remote)) !== baselineSelection,
+        };
+        recovery.current = { token, session, id, revision: revision.current, input, read };
+        setSaveConflictReview({ kind: "review", conflicts: reconcileDraft(input).conflicts, saving: false, note: "" });
+        return null;
+      } catch (error) {
+        if (!current()) return null;
+        const note = failureText(error);
+        if (isCaseGone(error)) { goneCase.current = id; markGone(note); }
+        setSaveDetail(note);
+        setSaveConflictReview({ kind: "closed" });
+        return note;
+      }
+    });
+    conflictRead.current = pending;
+    void pending.finally(() => { if (conflictRead.current === pending) conflictRead.current = null; });
+    return pending;
+  }
+
+  function saveReviewedChanges(choices: ReconciliationChoices): Promise<string | null> {
+    const entry = recovery.current;
+    if (!entry || applicationEditsPaused()) return Promise.resolve("Review the saved changes first.");
+    const merged = reconcileDraft(entry.input, choices);
+    if (merged.conflicts.some(item => choices[item.id] !== "mine" && choices[item.id] !== "saved")) return Promise.resolve("Choose which value to keep for each change.");
+    const current = () => mounted.current && isEngineGeneration(entry.token) && engineCaseId() === entry.id && accountSession() === entry.session;
+    if (!current() || revision.current !== entry.revision) {
+      const note = "Your draft changed during review. Review the latest changes before saving.";
+      setSaveConflictReview({ kind: "review", conflicts: merged.conflicts, saving: false, note });
+      return Promise.resolve(note);
+    }
+    const resume = pauseApplicationEdits();
+    setSaveConflictReview({ kind: "review", conflicts: merged.conflicts, saving: true, note: "" });
+    return enqueue(async () => {
+      try {
+        if (!current()) return null;
+        const saved = await pushReconciledDraft(entry.read.saved, merged.snapshot);
+        if (!current() || !saved) return null;
+        const reviewedText = await reviewedDescription(saved, saved.intake);
+        if (!current()) return null;
+        const next = openedCase(saved, merged.snapshot.draft.role, { ...entry.read, reviewedText, files: merged.files });
+        restoring.current = true;
+        restoreApplicantDraft(saved.applicant_draft, draftAccount(getAccountState().user), entry.token, entry.id, true);
+        restoring.current = false;
+        derive({ type: "adoptCase", to: { ...next, listedEvidence: merged.listedEvidence, deletedEvidence: merged.deletedEvidence,
+          evidenceIssues: entry.input.local.evidenceIssues, evidenceRev: entry.input.local.evidenceRev } });
+        savedSelection.current = selectionKey(saved.selected_articles ?? []);
+        sectionDHold.current = null;
+        openedStatus.current = saved.status;
+        setSavedStatus(saved.status);
+        dirty();
+        planRevision.current++;
+        setFactsEpoch(n => n + 1);
+        setEngineGaps([]); setGapsSource("idle"); setCompletenessRecord(null);
+        const id = await flushCurrent(current);
+        if (!current()) return null;
+        recovery.current = null;
+        setSaveConflictReview({ kind: "closed" });
+        void rejoinJobs(entry.id);
+        return id && syncState.current.saved ? null : syncState.current.detail || "Some changes still need saving. Your draft stays open.";
+      } catch (error) {
+        if (!current()) return null;
+        const note = isCaseConflict(error) ? "The saved application changed again. Review its latest changes before saving." : failureText(error);
+        setSaveStatus("failed"); setSavedNote(CONFLICT_NOTE); setSaveDetail(note);
+        syncState.current = { saved: false, reviewed: false, detail: note };
+        if (isCaseConflict(error)) {
+          noteConflict(entry.id); recovery.current = null;
+          setSaveConflictReview({ kind: "closed" });
+        } else setSaveConflictReview({ kind: "review", conflicts: merged.conflicts, saving: false, note });
+        return note;
+      } finally { resume(); }
     });
   }
 
@@ -1292,6 +1441,10 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     currentJobs.current.clear();
     completedJobs.current.clear();
     jobRequestKeys.current.clear();
+    jobActionNotes.current.clear();
+    recovery.current = null;
+    conflictRead.current = null;
+    setSaveConflictReview({ kind: "closed" });
     evidenceUploads.current.clear();
     restoring.current = true;
     resetSession();
@@ -1348,7 +1501,14 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       facts: saved.facts.filter(f => pointers.has(f.id)),
     } : null;
     const reviewedText = await reviewedDescription(saved, record ?? null);
-    return { saved, intake, identify: saved.identify, reviewedText };
+    const fileIds = saved.applicant_draft?.intake_file_ids ?? record?.files.map(file => file.file_id) ?? [];
+    const inventory = fileIds.length ? await engine.files(id, signal) : [];
+    const files = fileIds.map(fileId => {
+      const stored = inventory.find(file => file.id === fileId);
+      if (!stored) throw new Error("A saved reading attachment could not be loaded. Your current application stays open.");
+      return { id: `saved-${fileId}`, engineId: fileId, name: stored.name, read: true };
+    });
+    return { saved, intake, identify: saved.identify, reviewedText, files };
   }
 
   /** `next` is the opened case built in one step (openedCase): intake, code cards and their saved selection included. */
@@ -1469,6 +1629,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
           setRemoteEpoch(n => n + 1);
           setFactsEpoch(n => n + 1);
         }
+        if (sameContent) await rejoinJobs(id, token, session);
         return null;
       } catch (e) {
         if (!current()) return keptDraft;
@@ -1503,13 +1664,19 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         try {
           const saved = await engine.cancelJob(id, job.id);
           if (!live()) return null;
-          if (!isApplicantJob(saved) || saved.id !== job.id || saved.case_id !== id) return "The progress response belongs to another application.";
+          if (!isApplicantJob(saved) || saved.id !== job.id || saved.case_id !== id) throw new Error("The progress response belongs to another application.");
           jobObservers.current.get(job.id)?.ctl.abort();
           jobObservers.current.get(job.id)?.stop();
           jobObservers.current.delete(job.id);
           watchJob(saved);
           return null;
-        } catch (error) { return live() ? failureText(error) : null; }
+        } catch (error) {
+          if (!live() || currentJobs.current.get(kind) !== job.id) return null;
+          const note = `Could not cancel this work. ${failureText(error)}`;
+          jobActionNotes.current.set(job.id, note);
+          setReading(kind === "intake" ? { intakeNote: note } : { identifyNote: note });
+          return note;
+        }
       });
     },
     uploadFiles: () => {
@@ -1520,6 +1687,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       });
     },
     uploadEvidenceFile: (file, itemId) => {
+      if (applicationEditsPaused()) return Promise.reject(new Error("Editing is paused. Try again when it resumes."));
       const token = engineGeneration();
       const live = () => isEngineGeneration(token);
       const entry: { file: File; itemId?: string; saved?: UploadedFile } = { file, itemId };
@@ -1538,7 +1706,9 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     snapshotKey: `${renderGeneration}:${renderPlanRevision}:${remoteEpoch}:${JSON.stringify(c.candidates)}:${JSON.stringify(c.sectionC)}:${sectionCLookup.source}`,
     loadSectionD,
     c, gaps, notices, engineGaps, gapsSource, gapsNote, reviewDetail, syncOk,
-    saveStatus, saveDetail, savedNote,
+    saveStatus, saveDetail, savedNote, saveConflict: Boolean(engineId && needsReconcile(engineId)), saveConflictReview,
+    reviewSaveConflict, saveReviewedChanges,
+    closeSaveConflictReview: () => { if (!applicationEditsPaused()) { recovery.current = null; setSaveConflictReview({ kind: "closed" }); } },
     checkStatus: check.status, checkNote: check.note, checkDetail: check.detail,
     checkedAt: checkCurrent(check, engineGeneration(), revision.current) ? check.completedAt : undefined,
     requestCheck,
@@ -1555,6 +1725,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     refreshCurrentCase,
     submitDraft, submitting, submissionDispatched,
     beginEmpty: (type) => {
+      if (applicationEditsPaused()) return;
       clearVisit(caseForRole(type, latestCase.current));
       setResetNote("");
       setPhase("case");
@@ -1563,12 +1734,14 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     completenessRecord, setCompletenessRecord,
     readGaps: () => latestGaps.current,
     resetToWho: (note = "Cleared for this visit.") => {
+      if (applicationEditsPaused()) return;
       clearVisit(emptyCase("homebuilder"));
       setPhase("who");
       setResetNote(note);
       location.hash = "#/";
     },
     openCase: async (id, type) => {
+      if (applicationEditsPaused()) return "Editing is paused. Your current application stays open.";
       if (phaseRef.current === "case" && !syncState.current.saved && !(await sync())) return "Your latest answers aren’t saved, so this application stays open.";
       // A newer open, a reset (Start over, New application), an edit of the open draft or another sign-in
       // while this one is still reading wins: the late read is dropped and the draft open now stays as it is.
@@ -1593,7 +1766,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       }
     },
   };
-  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={value}><fieldset className="cf-edit-lock" disabled={editsPaused} aria-label="Application session">{children}</fieldset></Ctx.Provider>;
 }
 
 export function useCase(): Store {

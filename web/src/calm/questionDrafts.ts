@@ -1,5 +1,6 @@
 /** Unconfirmed editors. Their server snapshot never confirms an answer. */
 import type { DraftText } from "../api/types.gen";
+import { applicationEditsPaused } from "./applicationEditing";
 export type { DraftText } from "../api/types.gen";
 
 export class QuestionDrafts {
@@ -51,6 +52,7 @@ export class QuestionDrafts {
   }
 
   write(scope: string, card: string, base: string, value: string) {
+    if (applicationEditsPaused()) return;
     const key = JSON.stringify([scope, card]);
     if (this.read(scope, card, base) === value) return;
     if (value === base) this.text.delete(key);
@@ -60,11 +62,13 @@ export class QuestionDrafts {
 
   readChoices(scope: string) { return this.choices.get(scope) ?? {}; }
   writeChoices(scope: string, value: Record<string, string>) {
+    if (applicationEditsPaused()) return;
     if (JSON.stringify(this.readChoices(scope)) === JSON.stringify(value)) return;
     this.choices.set(scope, value);
     for (const listener of this.listeners) listener(scope);
   }
   confirm(scope: string, card: string, value: string) {
+    if (applicationEditsPaused()) return;
     const key = JSON.stringify([scope, card]), draft = this.text.get(key);
     // An acknowledgement of older typing never consumes a later edit.
     if (!draft || draft.value.trim() !== value.trim()) return;

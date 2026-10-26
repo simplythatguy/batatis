@@ -1,7 +1,7 @@
 import type { Case, EvidenceDraft } from "../types";
 import type { ApplicantDraft, DraftFileBinding, RemoveFileBinding, RetainFileBinding } from "../api/types.gen";
 import { questionDrafts } from "./questionDrafts";
-import { getSession, resetSession, updateSession, type Session } from "./session";
+import { getSession, resetSession, updateSavedSession, type Session } from "./session";
 
 export type { ApplicantDraft } from "../api/types.gen";
 export const DESCRIPTION_DRAFT = "description-editor";
@@ -29,6 +29,7 @@ export function applicantDraft(c: Case, account: string | null, generation: numb
   const editors = questionDrafts.snapshot(questionDrafts.scope(account, generation, id));
   return {
     role: c.applicantType,
+    intake_file_ids: c.files.flatMap(file => file.engineId ? [file.engineId] : []),
     ...editors,
     question_text: { ...editors.question_text, [DESCRIPTION_DRAFT]: { base: c.description.trim(), value: c.description } },
     ...sessionDraft(getSession()),
@@ -54,6 +55,6 @@ export function restoreApplicantDraft(saved: ApplicantDraft | null | undefined, 
     skipped: saved.skipped, seen: saved.seen, authorityUnsure: saved.authority_unsure,
     packages: saved.packages, ruleUnsure: saved.rule_unsure,
   } : { skipped: [], seen: [], authorityUnsure: false, packages: {}, ruleUnsure: [] };
-  if (preserveSession) updateSession(patch);
+  if (preserveSession) updateSavedSession(patch);
   else resetSession(patch);
 }

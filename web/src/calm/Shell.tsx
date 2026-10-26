@@ -37,6 +37,7 @@ import { useRoute } from "../router";
 import { resetRelevance } from "./useRelevance";
 import { CIcon, ConfirmDialog, Dot, MOD_KEY, type DotTone } from "./ui";
 import { activeJob, jobLabel } from "../api/jobs";
+import { SaveConflictDialog } from "./SaveConflictDialog";
 
 /** The check's state, quietly beside the save status (Review holds the detail and the big retry). */
 function CheckStatus() {
@@ -51,7 +52,7 @@ function CheckStatus() {
 }
 
 export function SaveStatus() {
-  const { phase, saveStatus, savedNote, saveDetail, saveDraft } = useCase();
+  const { phase, saveStatus, savedNote, saveDetail, saveDraft, saveConflict, saveConflictReview, reviewSaveConflict } = useCase();
   // A submission on its way keeps the saved state; the page says editing is paused.
   const current = useCurrentApplication();
   if (phase !== "case") return null;
@@ -70,13 +71,14 @@ export function SaveStatus() {
   const s = map[saveStatus] ?? map.idle;
   const problem = saveStatus === "failed" || saveStatus === "gone";
   return (
-    <div className={`cf-save${problem ? " is-problem" : ""}`} role="status" title={[savedNote, saveDetail].filter(Boolean).join(" · ") || undefined}>
+    <><div className={`cf-save${problem || saveConflict ? " is-problem" : ""}`} role="status" title={[savedNote, saveDetail].filter(Boolean).join(" · ") || undefined}>
       <Dot tone={s.tone} />
-      <span className="cf-save-label">{s.label}</span>
-      {saveStatus === "unsaved" && <button type="button" className="cf-btn is-xs is-ghost" onClick={() => void saveDraft()}>Save now</button>}
-      {saveStatus === "failed" && <button type="button" className="cf-btn is-xs" onClick={() => void saveDraft()}><CIcon name="retry" size={13} />Retry</button>}
+      <span className="cf-save-label">{saveConflict ? "Saved changes need review" : s.label}</span>
+      {saveConflict && <button type="button" className="cf-btn is-xs" disabled={saveConflictReview?.kind === "loading"} onClick={() => void reviewSaveConflict()}>{saveConflictReview?.kind === "loading" ? "Loading…" : "Review changes"}</button>}
+      {!saveConflict && saveStatus === "unsaved" && <button type="button" className="cf-btn is-xs is-ghost" onClick={() => void saveDraft()}>Save now</button>}
+      {!saveConflict && saveStatus === "failed" && <button type="button" className="cf-btn is-xs" onClick={() => void saveDraft()}><CIcon name="retry" size={13} />Retry</button>}
       {saveStatus === "gone" && <a className="cf-btn is-xs" href="#/application?download=options">Keep a draft</a>}
-    </div>
+    </div><SaveConflictDialog /></>
   );
 }
 

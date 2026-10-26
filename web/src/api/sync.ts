@@ -1,7 +1,7 @@
 /**
  * Push the browser case to the engine.
- * Facts go to POST /cases/{id}/facts. Jurisdiction goes to PUT /cases/{id}/jurisdiction
- * with the acknowledged version. Never recreate a case when a route is unavailable or the
+ * Changed facts, jurisdiction, selection and unfinished editors share one versioned draft PATCH.
+ * Never recreate a case when a route is unavailable or the
  * case is gone; keep the draft and report the unacknowledged update.
  *
  * Versions: each content/workflow write increments the stored Case version by one. Messages
@@ -45,13 +45,16 @@ const ackedRevs = new Map<string, Map<string, number>>();
 const attempted = new Map<string, Set<string>>();
 const latestLedger = new Map<string, Fact[]>();
 const postedFacts = new Map<string, Record<string, PostedFact>>();
-const drafts = new Map<string, string>();
+const drafts = new Map<string, ApplicantDraft | null>();
 let currentCaseId: string | null = null;
 
 export const draftKey = (value: ApplicantDraft | null | undefined) => JSON.stringify(value, (_key, item: unknown) =>
   item && typeof item === "object" && !Array.isArray(item) ? Object.fromEntries(Object.entries(item).sort(([a], [b]) => a.localeCompare(b))) : item) ?? "null";
-export const acknowledgedDraftKey = (caseId: string) => drafts.get(caseId);
+export const acknowledgedDraft = (caseId: string) => drafts.get(caseId);
+export const acknowledgedDraftKey = (caseId: string) => drafts.has(caseId) ? draftKey(drafts.get(caseId)) : undefined;
 export const acknowledgedAuthority = (caseId: string) => jurisdictions.get(caseId);
+export const acknowledgedSelectionKey = (caseId: string) => selections.get(caseId);
+export const acknowledgedEvidenceFacts = (caseId: string) => latestLedger.get(caseId) ?? [];
 
 /** The version to send as `expected_version`, or null before the case is acknowledged. */
 export function acknowledgedVersion(caseId: string): number | null {
@@ -245,7 +248,7 @@ export function adoptEngineCase(saved: EngineCase, selection?: SelectedArticleIn
   }
   remember(saved.id, posted);
   noteLedger(saved.id, saved);
-  if ("applicant_draft" in saved) drafts.set(saved.id, draftKey(saved.applicant_draft));
+  if ("applicant_draft" in saved) drafts.set(saved.id, saved.applicant_draft ?? null);
 }
 
 /** Local revisions relative to the last acknowledgement, including removals. Used to merge our job's output. */
@@ -272,14 +275,27 @@ export function acknowledgeJobCase(saved: EngineCase, outputVersion: number | nu
 }
 
 /** One atomic acknowledgement for only the changed fields. CAS conflicts retain the local draft. */
-export async function pushDraft(caseId: string, snapshot: {
+export type DraftSnapshot = {
   facts: Fact[]; authority: AuthorityId; selected: SelectedArticleInput[]; draft: ApplicantDraft;
-}, parent?: AbortSignal): Promise<SavedCase | null> {
+};
+
+export function pushDraft(caseId: string, snapshot: DraftSnapshot, parent?: AbortSignal): Promise<SavedCase | null> {
+  return writeDraft(caseId, snapshot, parent);
+}
+
+/** Explicitly reviewed merge only. Do not adopt the read version or discard local bytes before its CAS acknowledgement. */
+export function pushReconciledDraft(against: EngineCase, snapshot: DraftSnapshot): Promise<SavedCase | null> {
+  return writeDraft(against.id, snapshot, undefined, against);
+}
+
+async function writeDraft(caseId: string, snapshot: DraftSnapshot, parent?: AbortSignal, against?: EngineCase): Promise<SavedCase | null> {
   const token = generation, signal = accountRequestSignal(parent);
   assertGeneration(token, signal);
-  const expected = known.get(caseId);
-  if (conflicts.has(caseId) || expected === undefined) throw new EngineError(409, CONFLICT_TEXT);
-  const posted = postedFor(caseId);
+  const expected = against?.version ?? known.get(caseId);
+  if ((!against && conflicts.has(caseId)) || expected === undefined) throw new EngineError(409, CONFLICT_TEXT);
+  const posted: Record<string, PostedFact> = against ? Object.fromEntries(latestLocalFacts(against.facts)
+    .filter(fact => !answerWithdrawn(fact) && !fact.field.startsWith("evidence."))
+    .map(fact => [fact.field, { id: fact.id, signature: factSignature(fact) }])) : postedFor(caseId);
   const latest = new Map(latestLocalFacts(snapshot.facts).map(fact => [fact.field, fact]));
   const facts = [...latest.values()].filter(fact => !fact.field.startsWith("evidence.") && posted[fact.field]?.signature !== factSignature(fact));
   for (const [field, old] of Object.entries(posted)) {
@@ -290,11 +306,14 @@ export async function pushDraft(caseId: string, snapshot: {
   const body: DraftPatch = { expected_version: expected };
   if (facts.length) body.facts = facts;
   const jurisdiction = snapshot.authority || null;
-  if (jurisdictions.get(caseId) !== jurisdiction) body.jurisdiction = jurisdiction ? jurisdictionBody(jurisdiction) : null;
+  const previousAuthority = against ? against.authority ?? against.jurisdiction?.id ?? null : jurisdictions.get(caseId);
+  if (previousAuthority !== jurisdiction) body.jurisdiction = jurisdiction ? jurisdictionBody(jurisdiction) : null;
   const selected = selectionKey(snapshot.selected);
-  if (selections.get(caseId) !== selected && !(selections.get(caseId) === undefined && !snapshot.selected.length)) body.selected_articles = snapshot.selected;
+  const previousSelection = against ? selectionKey(against.selected_articles ?? []) : selections.get(caseId);
+  if (previousSelection !== selected && !(previousSelection === undefined && !snapshot.selected.length)) body.selected_articles = snapshot.selected;
   const draft = draftKey(snapshot.draft);
-  if (drafts.get(caseId) !== draft) body.applicant_draft = snapshot.draft;
+  // A reviewed decision still needs CAS acknowledgement when the user chooses every saved value.
+  if (against || acknowledgedDraftKey(caseId) !== draft) body.applicant_draft = snapshot.draft;
   if (Object.keys(body).length === 1) return null;
   try {
     const saved = await engine.patchDraft(caseId, body, signal);
@@ -317,8 +336,9 @@ export async function pushDraft(caseId: string, snapshot: {
     remember(caseId, acknowledged);
     jurisdictions.set(caseId, saved.authority ?? saved.jurisdiction?.id ?? null);
     if (body.selected_articles) selections.set(caseId, selected);
-    if (body.applicant_draft) drafts.set(caseId, draft);
+    if (body.applicant_draft) drafts.set(caseId, snapshot.draft);
     noteLedger(caseId, saved);
+    if (against) { adoptEngineCase(saved); conflicts.delete(caseId); }
     return saved;
   } catch (error) {
     assertGeneration(token, signal);

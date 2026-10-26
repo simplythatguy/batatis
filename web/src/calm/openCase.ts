@@ -4,15 +4,15 @@
  * What the engine stores: facts (answers, the description, process fields, professional and
  * evidence facts), the jurisdiction, the title, the confirmed provisions and the code-check
  * selection (`selected_articles`, docs/api/selected-articles.md): every code card with its answer,
- * unanswered and pending ones included. What it does not store: attached file names, which are
- * simply absent, never invented.
+ * unanswered and pending ones included. Selected reading-file IDs live in the applicant draft;
+ * their immutable metadata comes from the case-owned upload inventory.
  */
 import type { Case as EngineCase, IdentifyResult, IntakeResult, SelectedArticleInput } from "../api/types.gen";
 import { emptyCase, applyDescription } from "../intake";
 import { answerWithdrawn, latestLocalFacts } from "../intakeFields";
 import { CODECHECK_PREFIX, PROCESS_FACT, reducer } from "../model";
 import { canonicalProvision, isProvision } from "../provisions";
-import type { ApplicantType, AuthorityId, Candidate, Case, Fact, ProcessFieldId } from "../types";
+import type { ApplicantType, AuthorityId, Candidate, Case, CaseFile, Fact, ProcessFieldId } from "../types";
 import { clarificationQuestionId } from "./uncertainty";
 import type { SavedCase } from "../api/client";
 import { DESCRIPTION_DRAFT, evidenceDrafts } from "./applicantDraft";
@@ -169,10 +169,16 @@ export async function reviewedDescription(saved: EngineCase, record: IntakeResul
   }
 }
 
-export function openedCase(saved: EngineCase, type: ApplicantType, stored: { intake: IntakeResult | null; identify: IdentifyResult | null; reviewedText?: string | null }): Case {
+export function openedCase(saved: EngineCase, type: ApplicantType, stored: { intake: IntakeResult | null; identify: IdentifyResult | null; reviewedText?: string | null; files?: CaseFile[] }): Case {
   const restored = caseFromEngine(saved, type);
   let c = restored;
   if (stored.intake) c = reducer(c, { type: "restoreIntake", result: stored.intake, text: stored.reviewedText ?? null });
+  if (stored.files) {
+    const currentIds = stored.files.map(file => file.engineId).sort();
+    const readIds = stored.intake?.record.files.map(file => file.file_id).sort() ?? [];
+    c = { ...c, files: stored.files, ...(c.intake && JSON.stringify(currentIds) !== JSON.stringify(readIds)
+      ? { intake: { ...c.intake, filesChanged: true } } : {}) };
+  }
   if (stored.identify) c = reducer(c, { type: "noteIdentify", result: stored.identify });
   const list = saved.selected_articles;
   if (!list) return c;

@@ -1,10 +1,12 @@
 import { useSyncExternalStore } from "react";
 import { failureText } from "../../api/client";
+import { pauseApplicationEdits } from "../applicationEditing";
 
 let saveBeforeLeaving: (() => Promise<string | null>) | null = null;
 let state = { pending: false, error: "" };
 let active: Promise<boolean> | null = null;
 let lifetime = 0;
+let resumeEditing: (() => void) | null = null;
 const listeners = new Set<() => void>();
 const publish = (next: typeof state) => { state = next; for (const listener of listeners) listener(); };
 
@@ -16,6 +18,8 @@ export function registerSignOutGuard(save: () => Promise<string | null>) {
 export function guardedSignOut(leave: () => Promise<void>): Promise<boolean> {
   if (active) return active;
   const token = lifetime;
+  const resume = pauseApplicationEdits();
+  resumeEditing = resume;
   publish({ pending: true, error: "" });
   const promise = (async () => {
     try {
@@ -28,6 +32,9 @@ export function guardedSignOut(leave: () => Promise<void>): Promise<boolean> {
     } catch (error) {
       if (token === lifetime) publish({ pending: false, error: failureText(error) });
       return false;
+    } finally {
+      resume();
+      if (resumeEditing === resume) resumeEditing = null;
     }
   })();
   active = promise;
@@ -36,7 +43,7 @@ export function guardedSignOut(leave: () => Promise<void>): Promise<boolean> {
 }
 
 export const signOutStatus = () => state;
-export function resetSignOutStatus() { lifetime++; active = null; publish({ pending: false, error: "" }); }
+export function resetSignOutStatus() { lifetime++; active = null; resumeEditing?.(); resumeEditing = null; publish({ pending: false, error: "" }); }
 const subscribe = (listener: () => void) => { listeners.add(listener); return () => { listeners.delete(listener); }; };
 export function useSignOutStatus() {
   return useSyncExternalStore(subscribe, signOutStatus, signOutStatus);

@@ -10,6 +10,8 @@ import { engineGeneration } from "../src/api/sync";
 import { signOut } from "../src/calm/auth/useAuthGate";
 import { signOutStatus } from "../src/calm/auth/signOutGuard";
 import { Start } from "../src/calm/Start";
+import { SaveStatus } from "../src/calm/Shell";
+import { ReadingState, CodeProgress } from "../src/calm/ReadCards";
 
 function Probe() {
   const store = useCase();
@@ -17,7 +19,10 @@ function Probe() {
   const draft = useQuestionDraft(draftAccount(getAccountState().user), engineGeneration(), store.engineId, "owner-editor", base);
   Object.assign(window, { caseStore: store, questionDrafts, getSession, updateSession, getAccountState, setAccountState, signOut, signOutStatus });
   return <>
+    <SaveStatus />
     <Start />
+    <section aria-label="Reading progress"><ReadingState /></section>
+    <section aria-label="Code progress"><CodeProgress /></section>
     <textarea aria-label="Unconfirmed owner" value={draft.value} onChange={e => draft.setValue(e.target.value)} />
     <output aria-label="Editor conflict">{draft.conflict ? "Changed base; text retained" : ""}</output>
     <output aria-label="Save state">{store.saveStatus}</output>
