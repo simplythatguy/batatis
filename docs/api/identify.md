@@ -40,7 +40,7 @@ confirmed value. Unsupported files, image-only pages, and reader limits are
 explicit input coverage gaps.
 
 `input_sha256` covers active facts, jurisdiction, attachment inventory and bytes.
-GET checks it without a provider call or a write. Title changes and generated
+GET checks it and the current corpus identity without a provider call or a write. Title changes and generated
 results do not invalidate it. Raw fact or file changes make the result stale;
 POST recomputes it. Intake and intake-answer updates refresh the local profile
 inside the existing save transaction. The reusable input composer and `refresh`

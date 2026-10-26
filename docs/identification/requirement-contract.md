@@ -19,7 +19,9 @@ Personal fields are excluded from the search context.
 `input_sha256` binds the active fact ledger, jurisdiction, attachment inventory,
 and exact attachment bytes. Generated results and project titles are excluded.
 GET does not call a provider or change storage; it reports a changed input as
-stale. POST identification uses current inputs. Intake and answer updates refresh
+stale, including a changed or unverifiable code corpus. An applicant's benchmark
+and departure survive an unchanged rerun; changed inputs retain the narrative as
+a comparison to reconfirm. POST identification uses current inputs. Intake and answer updates refresh
 the deterministic requirement profile within their existing compare-and-swap.
 Historical provider profiles remain explicit-only. Raw fact writes and file
 inventory changes invalidate the fingerprint and require a fresh identification.

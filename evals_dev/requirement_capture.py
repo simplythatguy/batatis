@@ -23,7 +23,8 @@ def frozen_config():
     from evals_dev.requirement_bench.protocol import hash_file
     repo = Path(__file__).resolve().parents[1]
     paths = sorted([*repo.joinpath('engine').rglob('*.py'), *repo.joinpath('codedb').rglob('*.py'),
-                    repo / 'engine/identify/pipeline.json', Path(__file__).resolve()])
+                    repo / 'engine/identify/pipeline.json', Path(__file__).resolve(),
+                    Path(__file__).parent / 'requirement_bench/protocol.py'])
     source_hash = fingerprint({str(p.relative_to(repo)): hash_file(p) for p in paths})
     return {'predictor': {'name': 'batatis-local-requirement-ledger',
             'git_commit': subprocess.check_output(['git', '-C', str(repo), 'rev-parse', 'HEAD'], text=True).strip(),
@@ -131,7 +132,9 @@ def main(argv=None):
             request = loads(line)
             started = time.perf_counter()
             try:
+                require(frozen == frozen_config(), 'predictor source or profile changed during capture')
                 record = capture(request, args.bundle, args.out, codes, config)
+                require(frozen == frozen_config(), 'predictor source or profile changed during capture')
             except Exception as error:
                 binding = {k: v for k, v in request.items() if k != 'input'}
                 record = {**binding, 'status': 'error', 'error': f'{type(error).__name__}: {error}',

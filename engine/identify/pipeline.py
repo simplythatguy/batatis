@@ -239,9 +239,11 @@ def run(prose: str, *, codes: Codes, config: IdentifyConfig | None = None, trans
                                        confirmed_provisions=confirmed_provisions,
                                        description_sha256=description_sha256, on_stage=on_stage)
         from .evidence import compact
+        from .benchmark_history import preserve
         from .prioritize import order
         from .scope import assess
         finish = time.monotonic()
+        preserve(result, previous, codes)
         if result.requirement_coverage.source is not None:
             result.scope_assessments = assess(codes, facts, result)
         order(result, prose)

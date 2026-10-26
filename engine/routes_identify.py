@@ -62,10 +62,15 @@ def _require_source(codes: Codes):
         raise HTTPException(503, 'NBC(AE) 2023 second-printing source could not be verified') from None
 
 
-def _current(result: IdentifyResult, case: Case, store=None) -> IdentifyResult:
+def _current(result: IdentifyResult, case: Case, store=None, code_reader=None) -> IdentifyResult:
     out = result.model_copy(deep=True)
     out.stale = (out.input_sha256 != fingerprint(case, store) if getattr(out, 'input_sha256', None)
                  else out.description_sha256 != description_hash(description(case)))
+    if is_requirement_run(out) and code_reader is not None:
+        try:
+            out.stale = out.stale or _require_source(code_reader()) != out.requirement_coverage.source
+        except HTTPException:
+            out.stale = True
     out.persisted = True
     out.case_version = case.version
     if case.title_is_manual:
@@ -185,7 +190,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
         logger.info('Identify: case=%s mode=%s scored=%s committed=%s choices=%s dropped=%s usd=%s seconds=%.3f',
                     case_id, result.mode, result.trace.articles_scored, len(result.committed), len(result.choices),
                     len(result.trace.dropped), result.trace.usd, result.trace.seconds)
-        return _current(saved.identify, saved, cases())
+        return _current(saved.identify, saved, cases(), code)
 
     @router.post('/cases/{case_id}/identify', response_model=IdentifyResult,
                  responses={200: {'content': {'text/event-stream': {}}}})
@@ -266,7 +271,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
         case = get_case(case_id)
         if case.identify is None:
             raise HTTPException(404, 'identify result not found')
-        return _current(case.identify, case, cases())
+        return _current(case.identify, case, cases(), code)
 
     @router.post('/cases/{case_id}/identify/confirm', response_model=Case)
     def confirm(case_id: str, body: IdentifyConfirmRequest):
@@ -308,7 +313,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
         except KeyError:
             raise HTTPException(404, 'provision not found in this identification') from None
         # `section_c`: the rows a `yes` wrote for this article (empty for no and not_sure).
-        return IdentifyDecisionResponse(**_current(saved.identify, saved, cases()).model_dump(), section_c=written)
+        return IdentifyDecisionResponse(**_current(saved.identify, saved, cases(), code).model_dump(), section_c=written)
 
     @router.post('/cases/{case_id}/identify/benchmark', response_model=IdentifyResult)
     def confirm_benchmark(case_id: str, body: BenchmarkConfirmRequest):
@@ -340,9 +345,9 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
             bench.objectives, bench.functions, bench.attribution_missing = objectives, functions, missing
             bench.question = None
             from .identify.requirement_decisions import departure
-            departure(case.identify, bench.provision, 'yes')
+            departure(case.identify, bench.provision, 'yes', reason=reason)
         saved, _ = save(case_id, write, expected_version=body.expected_version)
-        return _current(saved.identify, saved, cases())
+        return _current(saved.identify, saved, cases(), code)
 
     @router.post('/cases/{case_id}/identify/requirements/{requirement_id}/decision', response_model=IdentifyResult)
     def decide_requirement(case_id: str, requirement_id: str, body: RequirementDecisionRequest):
@@ -352,7 +357,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
         def write(case: Case):
             if case.identify is None:
                 raise HTTPException(404, 'identify result not found')
-            if _current(case.identify, case, cases()).stale:
+            if _current(case.identify, case, cases(), code).stale:
                 raise HTTPException(409, 'Identification inputs changed; rerun before confirming applicability')
             try:
                 record(case.identify, requirement_id, body, code())
@@ -361,7 +366,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
             except ValueError as error:
                 raise HTTPException(422, str(error)) from None
         saved, _ = save(case_id, write, expected_version=body.expected_version)
-        return _current(saved.identify, saved, cases())
+        return _current(saved.identify, saved, cases(), code)
 
     @router.get('/cases/{case_id}/identify/information-request')
     def officer_information_request(case_id: str):

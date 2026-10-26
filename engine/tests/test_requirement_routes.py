@@ -135,3 +135,19 @@ def test_legacy_confirmation_cannot_bypass_second_printing_provenance(tmp_path):
         response = client.post(f'/cases/{case.id}/identify/confirm', json={'provisions': ['9.10.15.5.']})
     assert response.status_code == 503
     assert store.get(case.id).provisions == [] and store.get(case.id).section_c == []
+
+
+def test_stored_identification_becomes_stale_when_the_code_source_changes(tmp_path):
+    import shutil
+    import sqlite3
+    db = tmp_path / 'source.sqlite'
+    shutil.copyfile(Codes().db_path, db)
+    store = CaseStore(tmp_path / 'cases.sqlite')
+    case = store.put(Case(facts=[input_fact('project.description', '9.10.15.5.')]))
+    with TestClient(create_app(store=store, codes=Codes(db)), base_url='http://localhost') as client:
+        first = client.post(f'/cases/{case.id}/identify', json={})
+        assert first.status_code == 200 and not first.json()['stale']
+        with sqlite3.connect(db) as con:
+            con.execute("UPDATE docs SET label='NBC(AE) 2023 p1' WHERE doc='NBC-AE'")
+        current = client.get(f'/cases/{case.id}/identify')
+        assert current.status_code == 200 and current.json()['stale']

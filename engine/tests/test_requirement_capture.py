@@ -47,3 +47,21 @@ def test_engine_capture_runs_from_input_only_export_and_keeps_unobserved_layers_
     assert report['expert_headline']['eligible_cases'] == 0
     assert report['expert_headline']['metrics'] is None
     assert report['cases'][0]['layers']['applicant_visible']['status'] == 'not_supplied'
+    # A changed predictor after real execution must fail the capture, keeping the
+    # planned attempt rather than publishing it under the earlier source hash.
+    import copy
+    import evals_dev.requirement_capture as adapter
+    frozen = frozen_config()
+    calls = 0
+    def changed_after_execution():
+        nonlocal calls
+        calls += 1
+        value = copy.deepcopy(frozen)
+        if calls >= 3:
+            value['predictor']['source_sha256'] = '0' * 64
+        return value
+    monkeypatch.setattr(adapter, 'frozen_config', changed_after_execution)
+    changed = tmp_path / 'changed-capture'
+    assert main(['--bundle', str(exported), '--out', str(changed), '--db', str(db)]) == 1
+    failed = json.loads((changed / 'predictions.jsonl').read_text())
+    assert failed['status'] == 'error' and 'changed during capture' in failed['error']

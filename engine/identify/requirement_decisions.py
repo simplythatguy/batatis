@@ -45,7 +45,7 @@ def record(result, requirement_id, body, codes):
     return item
 
 
-def departure(result, article, decision):
+def departure(result, article, decision, *, reason=None):
     """A no-departure response never deletes supporting requirements."""
     for item in result.requirements:
         if item.division != 'B' or item.provision_id != article:
@@ -54,7 +54,7 @@ def departure(result, article, decision):
             item.role, item.disposition, item.applicability = 'varied', 'include', 'confirmed'
             item.human_confirmed, item.needs_review = True, False
             item.confirmation_fingerprint = result.input_fingerprint
-            item.confirmation_reason = 'Applicant confirmed that the design departs from this requirement.'
+            item.confirmation_reason = reason or 'Applicant confirmed that the design departs from this requirement.'
             item.confirmed_at = now()
         elif item.role == 'varied':
             item.role = 'supporting'
