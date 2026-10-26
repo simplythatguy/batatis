@@ -6,6 +6,7 @@
 import type { FileReport, Fork, IdentifyResult, Question as PlanQuestion } from "./api/types.gen";
 import { confirmedAnswer, localField } from "./intakeFields";
 import type { Candidate, CandidateAnswer, Case, Fact } from "./types";
+import { metricUnit, parseMeasurement } from "./calm/units";
 
 /* —— Values in words —— */
 
@@ -245,14 +246,31 @@ export interface PlanInput {
 
 /** How a planner question is answered: choices for yes/no and enums, a number, or words. */
 export function planInput(field: string): PlanInput {
+  if (field === "faces_public_way") return { kind: "choices", choices: [
+    { value: "neighbour", label: "Neighbour’s lot" }, { value: "lane", label: "A lane" }, { value: "street", label: "A street" },
+  ] };
   if (field === "sprinklered") return { kind: "choices", choices: [{ value: "yes", label: "Yes" }, { value: "no", label: "No" }, { value: "partial", label: "Partly" }] };
   if (field === "part4_design") return { kind: "choices", choices: [{ value: "yes", label: "Yes" }, { value: "no", label: "No" }] };
   if (field === "scope") return { kind: "choices", choices: [{ value: "site", label: "One building or site" }, { value: "jurisdiction", label: "Many sites, or across Alberta" }] };
   if (field === "storeys" || field === "dwelling_units") return { kind: "number" };
   if (/_m2$/.test(field)) return { kind: "number", unit: "m²" };
   if (/_m$/.test(field)) return { kind: "number", unit: "m" };
+  if (/_mm$/.test(field)) return { kind: "number", unit: "mm" };
   if (field === "assembly.description" || field === "alternative_description") return { kind: "area" };
   return { kind: "text" };
+}
+
+/** Typed controls write a single canonical fact, preserving the complete entry as its quote. */
+export function planFactAnswer(field: string, raw: string): { value: number | boolean; quote: string } | { error: string } | null {
+  if (field === "faces_public_way") {
+    const choice = planInput(field).choices?.find((choice) => choice.value === raw);
+    return choice ? { value: raw !== "neighbour", quote: choice.label } : null;
+  }
+  const unit = metricUnit(planInput(field).unit);
+  if (!unit) return null;
+  const parsed = parseMeasurement(raw, unit);
+  return parsed.kind === "value" ? { value: parsed.value, quote: parsed.quote }
+    : { error: parsed.kind === "error" ? parsed.error : "Enter a measurement." };
 }
 
 export const NOT_SURE = "Not sure";

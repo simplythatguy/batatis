@@ -328,7 +328,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     // after a saved case is opened) is derived data, not an edit: the draft stays saved.
     // On a read-only case the lookup's expansion of an article is display only: never an unsaved edit.
     const readOnlyCase = isReadOnlyCase(engineCaseId());
-    const derived = (action.type === "reconcileSectionC" && (readOnlyCase || sameCards(reducer(latestCase.current, action).candidates, latestCase.current.candidates))) || [ "editEvidenceDraft", "addFiles", "removeFile", "setFileResult", "ackEvidence", "noteUnscopedEvidence", "notePractice", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions", "noteIntake", "restoreIntake", "restoreReviewQuestions", "noteIntakeRecord", "adoptFacts", "noteIdentify", "renameCase"].includes(action.type);
+    const derived = (action.type === "reconcileSectionC" && (readOnlyCase || sameCards(reducer(latestCase.current, action).candidates, latestCase.current.candidates))) || [ "editEvidenceDraft", "addFiles", "removeFile", "setFileResult", "ackEvidence", "noteUnscopedEvidence", "notePractice", "noteProfessionalWork", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions", "noteIntake", "restoreIntake", "restoreReviewQuestions", "noteIntakeRecord", "adoptFacts", "noteIdentify", "renameCase"].includes(action.type);
     // A read-only application's code cards are not the applicant's to change (the deck and library are locked;
     // the references screen's Remove is not): refused, so the screen keeps showing what is saved.
     if (!derived && readOnlyCase && action.type !== "reset" && selectionKey(selectedArticles(reducer(latestCase.current, action))) !== selectionKey(selectedArticles(latestCase.current))) return;

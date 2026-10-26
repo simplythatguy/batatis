@@ -21,6 +21,7 @@ import { FormPlaceholder, FormViewer } from "./FormViewer";
 import { preparationGaps } from "./preparation";
 import { CIcon, CompletenessNote, Dot, Eyebrow } from "./ui";
 import { retryExtras, useCaseExtras } from "./caseExtras";
+import { submissionOfficeReason } from "../config";
 
 const when = (iso: string | null) => {
   if (!iso) return "";
@@ -59,7 +60,8 @@ function SubmitPanel() {
   const needsCheck = work.checkNeeded.length > 0;
   const routed = gaps.some((g) => g.severity === "blocking" && g.submissionBlocking === false);
   const n = work.applicant.length;
-  const reason = !c.authority ? "Choose a reviewing office." : n ? `${n} required ${n === 1 ? "item" : "items"} missing.` : needsCheck ? "Check your changed application first." : "";
+  const officeReason = submissionOfficeReason(c);
+  const reason = officeReason || (n ? `${n} required ${n === 1 ? "item" : "items"} missing.` : needsCheck ? "Check your changed application first." : "");
 
   async function submit() {
     if (reason || busy || !app) return;
@@ -87,7 +89,7 @@ function SubmitPanel() {
       </button>
       {reason && (
         <p className="cf-faint cf-small">
-          {reason} {c.authority && needsCheck && !n
+          {reason} {officeReason && c.authority ? null : c.authority && needsCheck && !n
             ? <button type="button" className="cf-link-btn" disabled={checkStatus === "running"} onClick={() => void requestCheck(checkStatus === "unavailable")}>{checkStatus === "running" ? "Checking…" : "Check application"}</button>
             : <a className="cf-inline-link" href={!c.authority ? "#/questions?focus=authority" : "#/review"}>{!c.authority ? "Pick one" : "See them"}</a>}
         </p>
