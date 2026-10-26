@@ -832,7 +832,8 @@ def _partially_flattened(reader, data: bytes, name: str, version: FormVersion) -
     if set(fields) - (set(prefix) | attachment_names):
         return None
     out = _flattened(data, name, version)
-    out.role = 'scc_form_fillable' if prefix else 'scc_form_flattened'
+    # Applicant answers come from the flattened page; live signature boxes do not make the form fillable.
+    out.role = 'scc_form_flattened'
     for widget_name in signature_widgets(version.fmap):
         widget = prefix.get(widget_name)
         value = fields.get(widget_name, {}).get('/V')
