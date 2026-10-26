@@ -21,6 +21,9 @@ if (windowsSigning && Object.values(windowsSigning).some((value) => !value)) {
  * path), APPLE_API_KEY_ID and APPLE_API_ISSUER the App Store Connect key that notarizes. Ad hoc otherwise,
  * and macOS then blocks a downloaded copy until it is allowed in Privacy & Security.
  */
+// An empty CSC_LINK, as CI sets for an unset secret, would make electron-builder read the working
+// directory as the certificate; drop it so the build stays ad hoc.
+if (process.env.CSC_LINK === "") delete process.env.CSC_LINK;
 const macSigning = Boolean(process.env.CSC_LINK);
 const MAC_NEEDS = ["CSC_KEY_PASSWORD", "APPLE_API_KEY", "APPLE_API_KEY_ID", "APPLE_API_ISSUER"];
 if (macSigning && MAC_NEEDS.some((name) => !process.env[name])) {
