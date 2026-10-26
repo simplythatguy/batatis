@@ -9,7 +9,6 @@ re-reads rows other processes appended since this process loaded the file.
 """
 from __future__ import annotations
 
-import fcntl
 import hashlib
 import json
 import os
@@ -19,6 +18,8 @@ import time
 from contextlib import contextmanager
 from functools import lru_cache
 from pathlib import Path
+
+from evals_dev.file_lock import file_lock
 
 CACHE_DIR = Path(__file__).resolve().parent / 'cache'
 _claim_locks: dict[str, threading.Lock] = {}
@@ -97,18 +98,14 @@ class Store:
         """Read rows appended since the last load (whole lines only)."""
         if not self.path.is_file():
             return
-        with self.path.open('rb') as f:
-            fcntl.flock(f, fcntl.LOCK_SH)
-            try:
-                stat = os.fstat(f.fileno())
-                if self._inode != stat.st_ino or stat.st_size < self._offset:
-                    self._rows.clear()
-                    self._offset = 0
-                self._inode = stat.st_ino
-                f.seek(self._offset)
-                data = f.read()
-            finally:
-                fcntl.flock(f, fcntl.LOCK_UN)
+        with self.path.open('rb') as f, file_lock(f, shared=True):
+            stat = os.fstat(f.fileno())
+            if self._inode != stat.st_ino or stat.st_size < self._offset:
+                self._rows.clear()
+                self._offset = 0
+            self._inode = stat.st_ino
+            f.seek(self._offset)
+            data = f.read()
         end = data.rfind(b'\n') + 1
         try:
             # JSONL records end only at LF bytes. Unicode line separators are valid
@@ -131,34 +128,30 @@ class Store:
         row = {'key': key, 'at': time.strftime('%Y-%m-%dT%H:%M:%S%z'), 'response': response, **meta}
         line = (json.dumps(row, ensure_ascii=False, allow_nan=False) + '\n').encode('utf-8')
         with self._lock:
-            with self.path.open('a+b') as f:
-                fcntl.flock(f, fcntl.LOCK_EX)
-                try:
-                    # A process may have died halfway through its append. Keep all complete rows,
-                    # remove only the unfinished tail before appending another complete record.
-                    f.seek(0, os.SEEK_END)
-                    size = f.tell()
-                    if size:
-                        f.seek(-1, os.SEEK_END)
-                        if f.read(1) != b'\n':
-                            end = size
-                            while end:
-                                start = max(0, end - 8192)
-                                f.seek(start)
-                                block = f.read(end - start)
-                                newline = block.rfind(b'\n')
-                                if newline >= 0:
-                                    f.truncate(start + newline + 1)
-                                    break
-                                end = start
-                            else:
-                                f.truncate(0)
-                    f.seek(0, os.SEEK_END)
-                    f.write(line)
-                    f.flush()
-                    os.fsync(f.fileno())
-                finally:
-                    fcntl.flock(f, fcntl.LOCK_UN)
+            with self.path.open('a+b') as f, file_lock(f):
+                # A process may have died halfway through its append. Keep all complete rows,
+                # remove only the unfinished tail before appending another complete record.
+                f.seek(0, os.SEEK_END)
+                size = f.tell()
+                if size:
+                    f.seek(-1, os.SEEK_END)
+                    if f.read(1) != b'\n':
+                        end = size
+                        while end:
+                            start = max(0, end - 8192)
+                            f.seek(start)
+                            block = f.read(end - start)
+                            newline = block.rfind(b'\n')
+                            if newline >= 0:
+                                f.truncate(start + newline + 1)
+                                break
+                            end = start
+                        else:
+                            f.truncate(0)
+                f.seek(0, os.SEEK_END)
+                f.write(line)
+                f.flush()
+                os.fsync(f.fileno())
             self._rows[key] = row
 
     @contextmanager
@@ -173,12 +166,8 @@ class Store:
         path = directory / (self.path.name + '-' + request_key('claim', key) + '.lock')
         with _claim_guard:
             lock = _claim_locks.setdefault(str(path.resolve()), threading.Lock())
-        with lock, path.open('a+b') as f:
-            fcntl.flock(f, fcntl.LOCK_EX)
-            try:
-                yield
-            finally:
-                fcntl.flock(f, fcntl.LOCK_UN)
+        with lock, path.open('a+b') as f, file_lock(f):
+            yield
 
     def __len__(self) -> int:
         return len(self.rows())
