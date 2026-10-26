@@ -78,6 +78,25 @@ function ConnectionActions({ row, act }: { row: ProviderRow; act: (action: Param
   }
 }
 
+/** For a sign-in page that ends by showing a code: the person pastes it here and the host passes it on. */
+function LoginCode({ id }: { id: string }) {
+  const [code, setCode] = useState("");
+  const [sent, setSent] = useState(false);
+  if (sent) return <span className="ac-faint-tag" role="status">Signing in…</span>;
+  return (
+    <form className="dk-login-code" onSubmit={(event) => {
+      event.preventDefault();
+      if (!code.trim()) return;
+      setSent(true);
+      void desktop.submitLoginCode(id, code.trim());
+    }}>
+      <input className="ac-in" aria-label="Sign-in code" placeholder="Paste code"
+        autoComplete="off" spellCheck={false} value={code} onChange={(event) => setCode(event.target.value)} />
+      <button type="submit" className="cf-btn is-xs" disabled={!code.trim()}>Continue</button>
+    </form>
+  );
+}
+
 function connectionValue(row: ProviderRow): ReactNode {
   if (row.kind === "key") {
     if (row.status === "saved") return <span className="ac-saved">Saved</span>;
@@ -102,7 +121,9 @@ function connectionValue(row: ProviderRow): ReactNode {
     case "signed-out": return <span><span className="ac-faint-tag">{status.last ?? "Signed out"}</span>{version}</span>;
     case "pending": return status.userCode
       ? <span className="dk-code-line">Enter <code className="dk-code">{status.userCode}</code> at {status.address}</span>
-      : <span className="ac-faint-tag" role="status">Finish signing in in your browser</span>;
+      : status.acceptsCode
+        ? <LoginCode id={row.id} />
+        : <span className="ac-faint-tag" role="status">Finish signing in in your browser</span>;
     case "error": return <span className="ac-faint-tag">{status.message}</span>;
     case "unavailable": return <span className="ac-faint-tag">{status.message}</span>;
   }

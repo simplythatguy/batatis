@@ -180,6 +180,14 @@ def test_conflicts_are_asked_first():
     assert '"two storeys"' in plan.questions[0].text
 
 
+def test_an_answered_conflict_is_not_asked_again():
+    case = _case('The house is two storeys. Actually it is three storeys. We want to omit the housewrap.')
+    qid = case.intake.plan.questions[0].id
+    service.answer(case, [{'question_id': qid, 'answer': '3'}])
+    assert 'storeys' not in {q.field for q in case.intake.plan.questions}
+    assert [(f.value, f.status) for f in case.facts if f.field == 'storeys'] == [(3, 'confirmed')]
+
+
 def _identify(case: Case, provisions: list[str], decisions: dict[str, str] | None = None) -> None:
     articles = [IdentifyArticle(rank=i + 1, provision=p, title='t', part=int(p.split('.')[0]), link='x', status='candidate',
                                 commit_reason='r') for i, p in enumerate(provisions)]

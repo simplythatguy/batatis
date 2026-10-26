@@ -82,6 +82,11 @@ function confirmedValue(c: Case, field: string): unknown {
   return fact?.value;
 }
 
+/** As the engine reads it (engine/professional.py): this checklist's own answer, else the project's value. */
+function professionalValue(c: Case, field: string): unknown {
+  return confirmedValue(c, `professional.${field}`) ?? confirmedValue(c, field);
+}
+
 
 
 const EVIDENCE_TYPES = [
@@ -306,11 +311,11 @@ function EvidenceAnswer({ itemId, provisionId, types }: { itemId: string; provis
   );
 }
 
-function ProfessionalAnswers({ onEvidence }: { onEvidence: () => void }) {
+function ProfessionalAnswers({ onEvidence, missing }: { onEvidence: () => void; missing?: string[] }) {
   const { c, dispatch } = useCase();
   const inputs = PROFESSIONAL_FIELDS.map((q) => {
         const id = `prof-${q.field}`;
-        const current = confirmedValue(c, `professional.${q.field}`);
+        const current = professionalValue(c, q.field);
         if (q.kind === "occupancy") {
           const value = typeof current === "string" ? current : "";
           return (
@@ -455,12 +460,18 @@ function ProfessionalAnswers({ onEvidence }: { onEvidence: () => void }) {
         );
       });
   const deferred = deferredChoice(c, "role");
-  const steps = PROFESSIONAL_FIELDS.map((q, i) => ({
+  const all = PROFESSIONAL_FIELDS.map((q, i) => ({
     title: q.label,
     fields: [`prof-${q.field}`],
+    known: q.field !== "role" && professionalValue(c, q.field) !== undefined,
     content: <div className="form-grid">{inputs[i]}{q.field === "role" && deferred && <p className="meta full">Leave these details for later. The official PDF stays on hold.</p>}</div>,
     continueAction: q.field === "role" && deferred ? { label: "Add evidence", onClick: onEvidence, optionalLabel: "Add more details" } : undefined,
   })).filter((_, i) => !deferred || ![1, 2].includes(i));
+  // Only what the professional screen still needs, never what the project already says (storeys, occupancy,
+  // area…). Everything stays editable once nothing is open.
+  const needed = missing && new Set(missing.flatMap((name) => name.split(" or ")).map((name) => name.replace(/^professional\./, "")));
+  const open = all.filter((step, i) => !step.known && (!needed || i === 0 || needed.has(step.fields[0].replace(/^prof-/, ""))));
+  const steps = open.length ? open : all;
   return <FieldSteps previousHref="#/application?tab=alt&step=last" steps={steps} onComplete={onEvidence} />;
 }
 
@@ -518,7 +529,7 @@ export function Recommendations() {
         <button className="pill" aria-pressed={view === "evidence"} data-active={view === "evidence"} onClick={() => setView("evidence")}>Evidence</button>
       </div>
       {view === "professional" && <>
-      <ProfessionalAnswers onEvidence={() => setView("evidence")} />
+      <ProfessionalAnswers onEvidence={() => setView("evidence")} missing={load.professional?.missing_facts} />
       <details className="compact-help"><summary>Professional review notes</summary>
         {flag && <p>{practiceFlagLine(flag)}</p>}
         <p>Batatis recommends evidence. Your professional supplies the analysis. This is not a safety or compliance decision.</p>

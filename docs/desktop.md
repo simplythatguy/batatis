@@ -60,7 +60,7 @@ Signing out cancels pending work and ends the managed connection. Voice is unava
 
 The Claude row works like the ChatGPT row. Select **Install** to download Claude Code `2.1.309` from [Anthropic's release downloads](https://downloads.claude.ai/claude-code-releases/2.1.309/manifest.json). The app checks its size and SHA-256 against the values it was built with and keeps it in the app's data folder. **Update** appears when a newer Batatis pins a newer release.
 
-Select **Sign in** to sign in with your Claude subscription. Claude Code opens the official sign-in page in your browser; **Open page** opens it again. Sign-in uses the app's own Claude Code settings folder, so it does not use or change the login of a Claude Code you installed yourself.
+Select **Sign in** to sign in with your Claude subscription. Claude Code opens the official sign-in page in your browser; **Open page** opens it again. If the page ends by showing a code, paste it into the box beside **Claude** and select **Continue**. Sign-in uses the app's own Claude Code settings folder, so it does not use or change the login of a Claude Code you installed yourself.
 
 Each request runs Claude Code once with the workflow's instructions and output schema, with every tool, plugin, hook, project file and saved session turned off. Signing out cancels pending work.
 

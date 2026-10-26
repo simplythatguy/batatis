@@ -1,4 +1,4 @@
-"""Intake routes: read the description and dropped PDFs into unconfirmed, pointed facts.
+"""Intake routes: read the description and dropped PDFs into pointed facts, used as read unless unclear.
 
 `POST /cases/{id}/intake` runs the rules, then the model pass when this deployment allows it
 (BATATIS_LIVE=1 and the spend gate, or BATATIS_PROVIDER=fake), and writes the facts to the ledger.
@@ -75,7 +75,7 @@ class PlanRequest(BaseModel):
 class IntakeResult(BaseModel):
     case_id: str
     case_version: int
-    facts: list[Fact]                            # this run's facts, in the ledger, all unconfirmed
+    facts: list[Fact]                            # this run's facts, in the ledger
     record: IntakeRecord
 
 

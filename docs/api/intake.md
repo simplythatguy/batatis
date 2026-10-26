@@ -1,6 +1,8 @@
 # Intake API (`/cases/{id}/intake`)
 
-Intake reads the applicant's description and the PDFs they dropped, and writes what it read to the case's fact ledger as **unconfirmed** facts, each pointing at the words it came from. It never confirms a fact, never says a design complies or is safe, and never names an article that is not in NBC(AE) 2023, 2nd printing.
+Intake reads the applicant's description and the PDFs they dropped, and writes what it read to the case's fact ledger, each fact pointing at the words it came from. It never says a design complies or is safe, and never names an article that is not in NBC(AE) 2023, 2nd printing.
+
+What the applicant already gave is used without asking again. A value whose words were found and checked in the source is stored **confirmed**: quoted context sentences and cited articles always, and any other field when everything read agrees and no answer the applicant gave says otherwise. The same value read on many pages is stored once. Where the sources disagree, the applicant's own description wins; failing that, a field the planner can ask about becomes one conflict question (and no value is stored), and any other field keeps its first reading **unconfirmed** for one check. A guess the model could not point to stays an unconfirmed `proposed` fact while the field has nothing better. A computed value is confirmed when its inputs are.
 
 Source: `engine/routes_intake.py`, `engine/intake/` (`rules.py`, `pdf.py`, `model.py`, `extract.py`, `service.py`, `text.py`, `places.json`), `engine/models_intake.py`.
 
@@ -57,7 +59,7 @@ Body (`IntakeRequest`, extra fields are 422):
 - `model`, default true: run the model pass if this deployment allows it. False: rules and forms only.
 - `expected_version`, optional: the `case_version` the client last saw. One compare-and-swap, no retry: a stale version or a write during the run is `409 case was updated concurrently`.
 
-A re-run removes the facts the previous run left unconfirmed and keeps everything confirmed; a fact whose value the applicant already confirmed is not added again.
+A re-run removes the facts the previous run left unconfirmed and keeps everything confirmed; a fact whose value is already confirmed is not added again. A new reading replaces an earlier reading, but never an answer the applicant gave.
 
 Errors: `404 case not found`, `404 file not found`, `409` (above), `422` validation.
 
@@ -179,11 +181,11 @@ Example (`plan.scope` for "Plumbing contractor. We want an air admittance valve 
  "splits": ["9.9.8.1.", "3.4.2.1."], "priority": "critical", "kind": "missing", "provision": null}
 ```
 
-Order: conflicts in the applicant's own words (`kind: conflict`, "You wrote "two storeys", "three storeys". ...") first; then how evenly the fact splits the open code-identification candidates (`splits` lists the candidate articles it separates; these come from the identify result, so they are codedb articles); then facts that decide the route (Part 9 or Part 3, the departure itself); then Section A and B fields (`priority: administrative`). A field that already has a value on the case is not asked (its confirm card is). Run `POST /cases/{id}/intake/plan` after code identification to re-rank against the candidates.
+Order: conflicts in the applicant's own words (`kind: conflict`, "You wrote "two storeys", "three storeys". ...") first; then how evenly the fact splits the open code-identification candidates (`splits` lists the candidate articles it separates; these come from the identify result, so they are codedb articles); then facts that decide the route (Part 9 or Part 3, the departure itself); then Section A and B fields (`priority: administrative`). A field that already has a value on the case is not asked, and a conflict is not asked again once its field has an answer. Run `POST /cases/{id}/intake/plan` after code identification to re-rank against the candidates.
 
 #### `POST /cases/{id}/intake/answers`
 
-`{"answers": [{"question_id": "intake.storeys", "answer": "three"}], "expected_version": 4}` (1 to 5 answers). Each `question_id` must be in the stored `plan.questions`, and `field`, if sent, must be that question's own field; anything else is `422` and nothing is written. An answer is stored as a confirmed `pointed` fact quoting the applicant's words, typed as the field needs ("three" is 3, "an office" is `business`); an answer that cannot be read as that field is `422`. "Not sure" (or empty) writes no fact: the question id goes to `plan.not_sure`, is not asked again and never blocks anything.
+`{"answers": [{"question_id": "intake.storeys", "answer": "three"}], "expected_version": 4}` (1 to 5 answers). Each `question_id` must be in the stored `plan.questions`, and `field`, if sent, must be that question's own field; anything else is `422` and nothing is written. An answer is stored as a confirmed `pointed` fact quoting the applicant's words (readings of that field still waiting for a check are removed), typed as the field needs ("three" is 3, "an office" is `business`); an answer that cannot be read as that field is `422`. "Not sure" (or empty) writes no fact: the question id goes to `plan.not_sure`, is not asked again and never blocks anything.
 
 #### `POST /cases/{id}/intake/plan`
 

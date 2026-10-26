@@ -48,8 +48,9 @@ export type Connection =
   /**
    * Sign-in in progress. Device sign-in: the person enters userCode at the address shown. Browser sign-in:
    * no code, and the address (when known) reopens the page. The host opens the address on request.
+   * acceptsCode: a page opened by hand may end by showing a code to paste back here.
    */
-  | { state: "pending"; userCode: string | null; address: string | null }
+  | { state: "pending"; userCode: string | null; address: string | null; acceptsCode: boolean }
   | { state: "signed-in"; plan: string | null }
   | { state: "error"; message: string };
 
@@ -89,6 +90,7 @@ interface Bridge {
     configuration(): Promise<unknown>;
     selectModel(slot: Slot, pick: Pick): Promise<unknown>;
     selectScreening(value: boolean): Promise<unknown>;
+    submitLoginCode(id: string, code: string): Promise<unknown>;
   };
   codeDb: { choose(): Promise<unknown> };
   updates?: Record<"state" | "check" | "download" | "install", () => Promise<unknown>> & { onChange(listener: () => void): () => void };
@@ -204,7 +206,7 @@ function parseConnection(value: unknown): Connection | null {
     case "unavailable": return { state: "unavailable", message: str(value.message) ?? "Not available." };
     case "pending": {
       const userCode = str(value.userCode) || null, address = displayAddress(value.verificationUrl);
-      return userCode && !address ? null : { state: "pending", userCode, address };
+      return userCode && !address ? null : { state: "pending", userCode, address, acceptsCode: value.acceptsCode === true };
     }
     case "signed-in": return { state: "signed-in", plan: str(value.plan) };
     case "error": return { state: "error", message: str(value.message) ?? "Something went wrong." };
@@ -387,6 +389,7 @@ export const desktop = {
   restart: () => call((h) => h.restart(), parseOutcome, failed),
   chooseCodeDb: () => call((h) => h.codeDb.choose(), parseOutcome, failed),
   providers: (action: "list" | "enterKey" | "removeKey" | "install" | "connect" | "openLogin" | "cancelLogin" | "disconnect", id?: string) => call((h) => h.providers[action](id), parseRows, []),
+  submitLoginCode: (id: string, code: string) => call((h) => h.providers.submitLoginCode(id, code), parseRows, []),
   configuration: () => call((h) => h.providers.configuration(), parseConfiguration, null),
   refreshConfiguration,
   selectModel: async (slot: Slot, pick: Pick) => {

@@ -243,6 +243,22 @@ test("sign-in is pending with the printed page, then signed in with a change eve
   assert.ok(!f.logs.some((line) => line.includes("oauth") || line.includes("evil")));
 });
 
+test("a code pasted from the sign-in page reaches the CLI once, and only for the pending sign-in", async (t) => {
+  const code = "AbC123-xyz_789#State_456-def";
+  const f = setup(t, { login: { url: URL_SHOWN, outcome: "code", code } }, { loggedIn: false, authMethod: "none" });
+  let changes = 0;
+  f.provider.onChange(() => { changes++; });
+  const pending = await f.provider.startLogin();
+  assert.ok(pending.state === "pending" && pending.acceptsCode);
+  assert.deepEqual(await f.provider.submitLoginCode("someone-else", code), pending);
+  assert.deepEqual(await f.provider.submitLoginCode(pending.loginId, "short"), pending);
+  assert.deepEqual(await f.provider.submitLoginCode(pending.loginId, `${code}\nauth logout`), pending);
+  await f.provider.submitLoginCode(pending.loginId, code);
+  await waitFor(() => changes > 0);
+  assert.deepEqual(await f.provider.status(), { state: "signed-in", plan: null });
+  assert.ok(!f.logs.some((line) => line.includes(code)), "the code never reaches the log");
+});
+
 test("a page the CLI prints late still reaches the pending state", async (t) => {
   const f = setup(t, { login: { url: URL_SHOWN, urlDelayMs: 300, outcome: "hang" } }, { loggedIn: false, authMethod: "none" }, { timing: { urlMs: 50, stopMs: 200 } });
   let changes = 0;

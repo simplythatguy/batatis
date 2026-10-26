@@ -85,6 +85,9 @@ function completionArgs(request: { system: string; schema: Record<string, unknow
   ];
 }
 
+/** An authorization code and its state, as the sign-in page shows them; nothing that could carry a command. */
+const LOGIN_CODE = /^[A-Za-z0-9._~-]{8,512}(?:#[A-Za-z0-9._~-]{8,512})?$/;
+
 /** The first sign-in page the CLI prints, once the line holding it is complete. */
 function loginUrl(output: string): string | null {
   const plain = output.replace(/\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)/g, " ").replace(/\x1b\[[0-9;?]*[ -/]*[@-~]/g, "");
@@ -129,7 +132,7 @@ function classify(result: Record<string, unknown> | null, stderr: string): Claud
 
 type End = "exit" | "aborted" | "timeout" | "overflow" | "failed";
 interface Outcome { code: number | null; stdout: string; stderr: string; end: End }
-interface Run { kill(end: End): void; done: Promise<Outcome> }
+interface Run { kill(end: End): void; write(text: string): boolean; done: Promise<Outcome> }
 interface LaunchOptions { input?: string; keepStdinOpen?: boolean; timeoutMs?: number; signal?: AbortSignal; onOutput?: (text: string) => void }
 type PendingLogin = Extract<ConnectionState, { state: "pending" }>;
 interface LoginSlot { pending: PendingLogin; run: Run }
@@ -165,7 +168,8 @@ class ClaudeProvider implements HostProvider {
     this.environment = { ...(options.environment ?? process.env) };
     this.platform = options.platform ?? process.platform;
     this.pin = options.pin === undefined ? claudePin(this.platform, options.arch ?? process.arch) : options.pin;
-    this.timing = { completionMs: 170_000, commandMs: 30_000, loginMs: 15 * 60_000, urlMs: 10_000, stopMs: 2000, ...options.timing };
+    // Ends before the host gives up (235 s), so a slow document review fails with this provider's own reason.
+    this.timing = { completionMs: 225_000, commandMs: 30_000, loginMs: 15 * 60_000, urlMs: 10_000, stopMs: 2000, ...options.timing };
     for (const value of Object.values(this.timing)) if (!Number.isFinite(value) || value < 1 || value > 30 * 60_000) throw new Error("Invalid Claude deadline");
   }
 
@@ -241,6 +245,11 @@ class ClaudeProvider implements HostProvider {
     const onAbort = () => kill("aborted");
     const run: Run = {
       kill,
+      write: (text) => {
+        if (settled || end || !options.keepStdinOpen || !child.stdin.writable) return false;
+        child.stdin.write(text);
+        return true;
+      },
       done: new Promise<Outcome>((resolve) => {
         const finish = (code: number | null) => {
           if (settled) return;
@@ -324,7 +333,7 @@ class ClaudeProvider implements HostProvider {
   private async beginLogin(): Promise<ConnectionState> {
     if (await this.subscribed()) return { state: "signed-in", plan: null };
     this.lastLogin = null;
-    const pending: PendingLogin = { state: "pending", loginId: randomUUID(), verificationUrl: "", userCode: "" };
+    const pending: PendingLogin = { state: "pending", loginId: randomUUID(), verificationUrl: "", userCode: "", acceptsCode: true };
     let output = "", seen!: (url: string) => void;
     const found = new Promise<string>((done) => { seen = done; });
     // stdin stays open: the CLI abandons sign-in when its paste-a-code input closes.
@@ -361,6 +370,16 @@ class ClaudeProvider implements HostProvider {
       this.lastLogin = { loginId, result: "failed", message: out.end === "timeout" ? LOGIN_TIMED_OUT : LOGIN_FAILED };
     }
     this.emit();
+  }
+
+  /**
+   * The page opened by hand ends by showing a code instead of returning to the CLI's localhost callback.
+   * The CLI reads it from its paste-a-code input, then exits once the sign-in is saved.
+   */
+  async submitLoginCode(loginId: string, code: string): Promise<ConnectionState> {
+    const slot = this.login;
+    if (slot?.pending.loginId === loginId && LOGIN_CODE.test(code)) slot.run.write(`${code}\n`);
+    return this.status();
   }
 
   async cancelLogin(loginId: string): Promise<ConnectionState> {

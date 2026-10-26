@@ -269,7 +269,7 @@ export function createEngine(base: string) {
      * unconfirmed facts that point at the words they came from, plus the plan (scope, fork, questions).
      */
     intake: (caseId: string, body: IntakeRequest, signal?: AbortSignal) =>
-      call<IntakeResult>("POST", `/cases/${enc(caseId)}/intake`, body, signal, 30000),
+      call<IntakeResult>("POST", `/cases/${enc(caseId)}/intake`, body, signal, INTAKE_WAIT_MS),
     /** GET /cases/{id}/intake: the stored run. 404 `intake not run` before the first run. */
     storedIntake: (caseId: string, signal?: AbortSignal) =>
       call<IntakeResult>("GET", `/cases/${enc(caseId)}/intake`, undefined, signal),
@@ -391,6 +391,8 @@ export interface ProfessionalResult {
   general_required: "yes" | "no" | "depends";
   reasons: { code: string; required: "yes" | "no" | "depends"; message: string; citation: string }[];
   questions: string[];
+  /** Facts the screen still needs to decide, e.g. "storeys" or "professional.role". */
+  missing_facts?: string[];
   scope_note: string;
   resolution?: import("./types.gen").ProfessionalRequirementResolution | null;
   mandatory_required?: boolean;
@@ -504,6 +506,12 @@ const ENGINE_WAIT_MS = 8000;
  * finish. Still bounded, and still cancelled with the caller or the account.
  */
 export const EXPORT_WAIT_MS = 90_000;
+/**
+ * Intake reads the description, then runs the document review inside the same request under the engine's
+ * 240 s review deadline (engine/intake/review.py), after the description is read. A local AI connection
+ * can take most of both.
+ */
+const INTAKE_WAIT_MS = 420_000;
 
 function withTimeout(parent: AbortSignal | undefined, ms: number) {
   const scope = accountRequestSignal(parent);

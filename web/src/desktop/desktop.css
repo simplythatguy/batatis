@@ -64,6 +64,8 @@
 
 .dk-actions { display: inline-flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
 .dk-code-line { color: var(--cf-text-2); font-size: 13.5px; }
+.dk-login-code { display: flex; gap: 8px; align-items: center; max-width: 420px; }
+.dk-login-code .ac-in { height: 34px; font-size: 13.5px; }
 .dk-code {
   padding: 1px 6px;
   border-radius: 6px;
