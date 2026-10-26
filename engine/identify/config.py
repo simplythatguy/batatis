@@ -7,8 +7,8 @@ so a threshold fitted on one pipeline is never applied to another.
 
 Resolution order: defaults below -> JSON file (`BATATIS_IDENTIFY_CONFIG`, else
 engine/identify/pipeline.json when present) -> `BATATIS_IDENTIFY_<FIELD>` environment overrides.
-The checked-in profile selects Jev for every Division B article and the top-60 rerank, followed by
-Luna's full-text verifier on the top 15. Historical dataclass defaults retain the Elephant profile
+The checked-in profile selects deterministic full-text/reference requirement discovery. It
+does not use provider stages or the historical top-N limits. Historical dataclass defaults retain the Elephant profile
 for compatibility; explicit profiles and environment overrides select other configurations with
 different hashes. The Anthropic
 verifier adapter (ClaudeVerifier, claude-sonnet-5-5) is kept but off unless configured.
@@ -29,7 +29,7 @@ HERE = Path(__file__).resolve().parent
 PIPELINE_FILE = HERE / 'pipeline.json'
 DIVISION_B_ARTICLES = 2080           # NBC(AE) 2023 2nd printing; asserted on every exhaustive model screen
 
-SCREENS = ('elephant', 'decisions', 'jev', 'bm25', 'bm25_v3', 'shortlist')
+SCREENS = ('elephant', 'decisions', 'jev', 'bm25', 'bm25_v3', 'shortlist', 'requirements')
 RERANKS = ('elephant', 'decisions', 'jev', 'openai', 'none')
 VERIFIERS = ('anthropic', 'openai', 'none')
 FALLBACKS = ('bm25', 'bm25_v3')
@@ -110,6 +110,9 @@ class IdentifyConfig:
         return self.screen in ('elephant', 'decisions', 'jev')
 
     def as_dict(self) -> dict:
+        if self.screen == 'requirements':
+            from .requirements import IDENTITY
+            return dict(screen='requirements', strategy=IDENTITY, rerank='none', verifier='none')
         values = asdict(self)
         # Inactive options must not invalidate historical hashes or calibration.
         if self.question_style == 'shared':
@@ -121,12 +124,12 @@ class IdentifyConfig:
 
     @property
     def tentative(self) -> bool:
-        return self.screen == 'shortlist' or self.question_style == 'self'
+        return self.screen in ('shortlist', 'requirements') or self.question_style == 'self'
 
     @property
     def config_hash(self) -> str:
         values = self.as_dict()
-        if 'elephant' in (self.screen, self.rerank):
+        if self.screen != 'requirements' and 'elephant' in (self.screen, self.rerank):
             from .elephant_runtime import IDENTITY
             values['scoring_identity'] = IDENTITY
         if self.question_style == 'self':
@@ -139,6 +142,8 @@ class IdentifyConfig:
         return hashlib.sha256(blob.encode()).hexdigest()[:16]
 
     def model_ids(self) -> dict[str, str | None]:
+        if self.screen == 'requirements':
+            return dict(screen=None, rerank=None, verifier=None)
         return {'screen': self.screen_model if self.exhaustive or self.screen == 'shortlist' else None,
                 'rerank': self.rerank_model if self.rerank != 'none' else None,
                 'verifier': self.verifier_model if self.verifier != 'none' else None}
@@ -172,6 +177,8 @@ def load_config(path: Path | str | None = None, env: dict | None = None) -> Iden
         raw = env.get('BATATIS_IDENTIFY_' + name.upper())
         if raw not in (None, ''):
             values[name] = _coerce(name, raw)
+    # The production profile keeps the historical stage settings dormant so an
+    # explicit historical screen/rerank selection retains its benchmark identity.
     # Infer pins only when omitted, including for the explicit switch back to Jev. Validate
     # explicit pins before constructing transports; a stale key never selects a provider.
     for stage in ('screen', 'rerank'):

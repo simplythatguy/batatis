@@ -734,6 +734,9 @@ export interface IdentifyDecisionResponse {
   decisions: Record<string, ArticleDecision>;
   description_sha256: string;
   engineering_required: "depends";
+  input_coverage_gaps: string[];
+  input_fingerprint: string | null;
+  input_sha256: string | null;
   label: string;
   message: string | null;
   mode: "live" | "fake" | "bm25_fallback";
@@ -743,6 +746,12 @@ export interface IdentifyDecisionResponse {
   persisted: boolean;
   process_refs: ProcessRef[];
   questions: string[];
+  requirement_coverage: RequirementCoverage;
+  requirement_evidence: RequirementEvidence[];
+  requirement_links: RequirementLink[];
+  requirement_status: "not_run" | "needs_review" | "source_unavailable";
+  requirements: RequirementRecord[];
+  scope_assessments: PartScopeAssessment[];
   scored_at: string;
   section_c: SectionCRow[];
   source: string;
@@ -769,6 +778,9 @@ export interface IdentifyResult {
   decisions: Record<string, ArticleDecision>;
   description_sha256: string;
   engineering_required: "depends";
+  input_coverage_gaps: string[];
+  input_fingerprint: string | null;
+  input_sha256: string | null;
   label: string;
   message: string | null;
   mode: "live" | "fake" | "bm25_fallback";
@@ -778,6 +790,12 @@ export interface IdentifyResult {
   persisted: boolean;
   process_refs: ProcessRef[];
   questions: string[];
+  requirement_coverage: RequirementCoverage;
+  requirement_evidence: RequirementEvidence[];
+  requirement_links: RequirementLink[];
+  requirement_status: "not_run" | "needs_review" | "source_unavailable";
+  requirements: RequirementRecord[];
+  scope_assessments: PartScopeAssessment[];
   scored_at: string;
   source: string;
   stale: boolean;
@@ -1071,6 +1089,14 @@ export interface PackageReviewIndex {
   sessions: SessionSummary[];
 }
 
+export interface PartScopeAssessment {
+  basis: ScopeBasis[];
+  conditions: ScopeCondition[];
+  limitation: string;
+  part: 9;
+  status: "not_determined" | "boundary_not_met" | "conditions_met_scope_unresolved";
+}
+
 export interface PlanRequest {
   expected_version?: number | null;
 }
@@ -1255,6 +1281,114 @@ export interface RelevanceRecord {
   status: "scored";
 }
 
+export interface RequirementCondition {
+  fact_ids: string[];
+  field: string;
+  status: "unknown" | "provided" | "conflict";
+}
+
+export interface RequirementCoverage {
+  applicability_status: "not_determined";
+  articles_by_division: Record<string, number>;
+  discovered: number;
+  exhaustive: false;
+  gaps: RequirementGap[];
+  graph_status: "not_run" | "traversed" | "traversed_with_gaps";
+  human_confirmed: number;
+  limits: string[];
+  notes_scanned: number;
+  provider_requests: 0;
+  provisions_scanned: number;
+  query_chunks: number;
+  scan_status: "not_run" | "scanned" | "unavailable";
+  source: RequirementSource | null;
+}
+
+/** Applicability is independent from the legacy departure question. */
+export interface RequirementDecisionRequest {
+  disposition: "include" | "exclude" | "review";
+  expected_version: number;
+  reason: string;
+  role: "varied" | "supporting" | "admin" | "conditional" | "unresolved";
+}
+
+export interface RequirementDiscovery {
+  detail: string;
+  evidence: RequirementEvidence | null;
+  evidence_id: string | null;
+  evidence_ids: string[];
+  from_requirement: string | null;
+  kind: "lexical" | "explicit" | "reference" | "reverse_reference" | "administrative" | "human" | "previous";
+  path: string[];
+}
+
+/** An actual matched passage or reference, never an arbitrary opening sentence. */
+export interface RequirementEvidence {
+  citation: string;
+  contextual: boolean;
+  division: "A" | "B" | "C";
+  id: string;
+  kind: "provision" | "heading" | "note";
+  pdf_page: number | null;
+  pdf_page_end: number | null;
+  provision_id: string;
+  quote: string;
+  source_sha256: string;
+}
+
+export interface RequirementGap {
+  code: string;
+  evidence: RequirementEvidence | null;
+  evidence_id: string | null;
+  from_requirement: string | null;
+  message: string;
+  reference: string | null;
+}
+
+export interface RequirementLink {
+  evidence_ids: string[];
+  source_requirement: string;
+  target_requirement: string;
+}
+
+/** A source-qualified candidate, with applicability separate from discovery. */
+export interface RequirementRecord {
+  applicability: "unknown" | "confirmed" | "needs_review";
+  citation: string | null;
+  conditions: RequirementCondition[];
+  confirmation_fingerprint: string | null;
+  confirmation_reason: string | null;
+  confirmed_at: string | null;
+  discoveries: RequirementDiscovery[];
+  disposition: "include" | "review" | "exclude";
+  division: "A" | "B" | "C" | null;
+  evidence: RequirementEvidence[];
+  evidence_ids: string[];
+  human_confirmed: boolean;
+  id: string;
+  needs_review: boolean;
+  pdf_page: number | null;
+  pdf_page_end: number | null;
+  provision_id: string | null;
+  quote: string | null;
+  quote_provision_id: string | null;
+  review_reasons: string[];
+  role: "varied" | "supporting" | "admin" | "conditional" | "unresolved";
+  source_sha256: string | null;
+  source_status: "verified" | "unavailable";
+  title: string;
+}
+
+/** Provenance verified against both CodeDB's docs row and build metadata. */
+export interface RequirementSource {
+  build_version: string;
+  corpus_sha256: string;
+  doc: "NBC-AE";
+  label: "NBC(AE) 2023 p2";
+  pdf_sha256: string;
+  text_sha256: string;
+}
+
 export interface ResolvedForm {
   /** Whether Batatis fills this form today. */ export: "supported" | "not_yet";
   field_count: number;
@@ -1427,6 +1561,13 @@ export interface RuleSet {
   version: number;
 }
 
+export interface ScopeBasis {
+  citation: string;
+  division: "A";
+  provision_id: string;
+  quote: string;
+}
+
 export interface ScopeCheck {
   cue: string | null;
   end: number | null;
@@ -1436,6 +1577,14 @@ export interface ScopeCheck {
   scores: Record<string, number>;
   start: number | null;
   status: "in_scope" | "redirect" | "overridden";
+}
+
+export interface ScopeCondition {
+  explanation: string;
+  fact_ids: string[];
+  field: string;
+  status: "met" | "not_met" | "unknown" | "conflict";
+  values: (string | number | boolean | null)[];
 }
 
 /** `building_code: true` is the applicant's "this is a building-code question" override. */
