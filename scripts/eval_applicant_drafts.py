@@ -71,7 +71,7 @@ def prepare(name: str, directory: Path):
         # Only the description is read from this development case. Its gold and missing_info
         # never enter generation. The organizers supplied a product example, not product data.
         path = ROOT / 'evals_dev/cases/dev-055.json'
-        description = json.loads(path.read_text())['description']
+        description = json.loads(path.read_text(encoding='utf-8'))['description']
         sources = [{'path': path.relative_to(ROOT).as_posix(), 'selection': 'description only',
                     'sha256': digest(description.encode())}]
         documents = []
@@ -99,11 +99,11 @@ def reference(name: str):
     if folder is None:
         return {'note': 'Sparse organizers product example: no supported composition, rating, testing, location, building scope or appointments. Specific questions must remain.'}
     root = ROOT / 'evals/demo-cases'
-    completed = json.loads((root / 'export' / (folder + '.json')).read_text())
+    completed = json.loads((root / 'export' / (folder + '.json')).read_text(encoding='utf-8'))
     values = completed['facts']
     # Called only AFTER generation returns. These texts are never written into the case.
     return {'B_and_narratives': {key: values.get(key) for key in ('alternative_description', *PROCESS)},
-            'evidence_plan': (root / 'keys' / folder / 'expected/evidence-plan.md').read_text()}
+            'evidence_plan': (root / 'keys' / folder / 'expected/evidence-plan.md').read_text(encoding='utf-8')}
 
 
 def judge(record: dict, manifest: dict, comparison: dict):
@@ -207,7 +207,7 @@ def main():
             result = {'status': 'failed', 'error_type': type(error).__name__}
         result.update(case=name, revision=revision, seconds=round(time.monotonic() - started, 2))
         dump(directory / 'result.json', result)
-        with (args.out / 'attempts.jsonl').open('a') as ledger:
+        with (args.out / 'attempts.jsonl').open('a', encoding='utf-8') as ledger:
             ledger.write(json.dumps(result) + '\n')
         results.append(result)
         print(json.dumps(result), flush=True)
