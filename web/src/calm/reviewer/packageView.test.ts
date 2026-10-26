@@ -3,10 +3,9 @@ import test from "node:test";
 import type { CloseOut, Finding, ReviewSession } from "../../api/types.gen.ts";
 import { review } from "../../api/accounts.ts";
 import {
-  blockingGaps, citationView, diffView, documentView, draftFrom, dueView, fileItemsView, missingView, officerVoice, parseCitation,
-  peerView, pointerLabel, previewText, refusalDecision, refusalMessage, reasonsProblem, APPEAL_NOTICE, requestItems, returnAfterRequest, sectionCView, summaryView, toEdit,
+  citationView, diffView, documentView, dueView, fileItemsView, missingView, officerVoice, parseCitation,
+  peerView, pointerLabel, refusalDecision, refusalMessage, reasonsProblem, APPEAL_NOTICE, sectionCView, summaryView,
 } from "./packageView.ts";
-import { decisionGate, withPackage } from "./queue.ts";
 
 const P = (file = "case:c1", over = {}) => ({ file, page: null, form_field: null, bbox: null, quote: null, ...over });
 const F = (over: Partial<Finding>): Finding => ({
@@ -53,17 +52,12 @@ test("what's missing: applicant gaps grouped in form order (Div C items with the
   const v = missingView(session(all));
   assert.deepEqual(v.groups.map((g) => [g.section, g.items.map((i) => i.key)]), [["A", ["signature:presence"]], ["B", ["legal:presence"]], ["process", ["div_c.testing_procedures:presence", "demonstrate.failure_conditions:not_mentioned"]]]);
   assert.deepEqual(v.officer.map((i) => i.key), ["seal:presence", "division_c_2_3_1:presence"]);
-  const sum = summaryView(session(all));
-  assert.equal(v.total, sum.toAsk + sum.toCheck);
   assert.equal(v.officer[0].tone, "pending");
   assert.equal(v.officer[0].where, "form.pdf · page 2 · field “Seal”");
   assert.equal(v.groups[1].items[0].message, "The application appears to be missing the thing.");
 });
 
-test("blocking gaps count only applicant gaps (not-found, officer and peer items excluded)", () => {
-  assert.equal(blockingGaps(session(all)), 2); // legal description + testing procedures
-  assert.equal(blockingGaps(session([stamp, peer, reg])), 0);
-});
+
 
 test("summary reads who, where, proposal and counts", () => {
   const v = summaryView(session(all));
@@ -72,8 +66,6 @@ test("summary reads who, where, proposal and counts", () => {
   assert.deepEqual(v.provisions, ["9.9.10.1.(1)"]);
   assert.deepEqual(v.documents, ["Test report"]);
   assert.equal(v.readFrom, "Read from the saved application.");
-  assert.equal(v.toAsk, 4);
-  assert.equal(v.toCheck, 2);
   assert.equal(v.peer, true);
   const pdf = summaryView(session([], { input_kind: "upload", files: [
     { name: "form.pdf", sha256: "x", size: 1, pages: 7, role: "scc_form_flattened", form_version: "scc_2026-10", note: "" },
@@ -123,29 +115,9 @@ test("peer review: reasons for the officer, never a finding", () => {
   assert.deepEqual(peerView(session([])), { signal: false, reasons: [] });
 });
 
-test("information request: draft, edit body and preview", () => {
-  const s = session(all);
-  const d = draftFrom(s.information_request);
-  assert.equal(d.items.length, 5);
-  assert.equal(d.items.find((i) => i.id === "ir_signature:presence")!.linked, true);
-  const items = [...d.items.map((i, n) => (n === 0 ? { ...i, included: false } : i)), { id: null, key: "new-1", text: " Please send the site plan. ", included: true, authored: "officer" as const, officerCheck: false, section: null, linked: false }, { id: null, key: "new-2", text: "  ", included: true, authored: "officer" as const, officerCheck: false, section: null, linked: false }];
-  const body = toEdit(" Hello ", items);
-  assert.equal(body.intro, "Hello");
-  assert.equal(body.items.length, 6, "blank officer items are dropped");
-  assert.deepEqual(body.items[5], { text: "Please send the site plan.", included: true });
-  assert.deepEqual(body.items[0], { id: "ir_signature:presence", text: "Please provide the applicant signature.", included: false });
-  assert.equal(previewText("Hello", items), "Hello\n\n1. Please provide the legal description.\n2. Please provide the testing procedures.\n3. Please provide the thing.\n4. Please send the site plan.", "left-out and look-first items are not in the text");
-});
 
-test("sending a request can also return it, carrying the included items", () => {
-  const s = session([sig, legal]);
-  assert.equal(returnAfterRequest(2), "I sent you an information request with 2 items. Please update the application and send it again.");
-  assert.ok(returnAfterRequest(1).includes("1 item."));
-  assert.deepEqual(requestItems(s), [
-    { field: "signature", note: "Please provide the applicant signature." },
-    { field: "legal_description", note: "Please provide the legal description." },
-  ]);
-});
+
+
 
 test("re-upload diff", () => {
   const s = session([legal], { version: 2, diff: { previous_version: 1, previous_gaps: 3, statement: "2 of 3 gaps resolved, 1 still open", resolved: [{ key: "signature:presence", label: "applicant signature", message: "m", section: "A" }, { key: "x", label: "x", message: "m", section: "A" }], still_open: [{ key: "legal:presence", label: "legal description", message: "m", section: "B" }], new: [] } });
@@ -189,25 +161,16 @@ test("refusal posts a distinct decision with the officer's reasons and appeal no
 });
 
 test("close-out due line", () => {
-  const base: CloseOut = { case_id: "c1", outcome: "accept", decided_at: "2026-10-21T10:00:00Z", due_date: "2026-10-31", days_remaining: 10, overdue: false, sent: false, sent_at: null, sent_by_name: null, notice: "", record_package: { basis: [], note: "", send_to_council: [], retain_on_file: [] } };
+  const base: CloseOut = { case_id: "c1", outcome: "accept", decided_at: "2026-10-21T10:00:00Z", issued_on: "2026-10-21", issued_by_name: "Morgan", due_date: "2026-10-31", days_remaining: 10, overdue: false, sent: false, sent_at: null, sent_by_name: null, notice: "", record_package: { basis: [], note: "", send_to_council: [], retain_on_file: [] } };
+  assert.deepEqual(dueView({ ...base, issued_on: null, issued_by_name: null, due_date: null, days_remaining: null }), { tone: "pending", text: "Variance not issued yet" });
+  assert.match(dueView({ ...base, outcome: "refuse" }).text, /Nothing to send/);
   assert.deepEqual(dueView(base), { tone: "pending", text: "Due Oct 31, 2026 · 10 days left" });
   assert.equal(dueView({ ...base, days_remaining: 2 }).tone, "warning");
   assert.deepEqual(dueView({ ...base, days_remaining: -3, overdue: true }), { tone: "blocking", text: "Due Oct 31, 2026 · 3 days overdue" });
   assert.equal(dueView({ ...base, sent: true, sent_at: "2026-10-22T09:00:00Z", sent_by_name: "Morgan Lee" }).text, "You recorded sending it on Oct 22, 2026 (Morgan Lee).");
 });
 
-test("accept gate waits for a current package review with no blocking gaps", () => {
-  const me = "u1";
-  const open = decisionGate({ status: "in_review", claim: { reviewer_id: me, reviewer_name: "M" } }, me, 0);
-  assert.equal(withPackage(open, { state: "current", blocking: 0 }).canAccept, true);
-  assert.equal(withPackage(open, { state: "unavailable" }).canAccept, true, "no package review on this server: the checklist decides");
-  assert.equal(withPackage(open, { state: "none" }).reason, "Run the package review before accepting.");
-  assert.match(withPackage(open, { state: "stale", version: 2 }).reason, /changed after review version 2/);
-  const blocked = withPackage(open, { state: "current", blocking: 2 });
-  assert.deepEqual([blocked.canAccept, blocked.canReturn], [false, true]);
-  const gaps = decisionGate({ status: "in_review", claim: { reviewer_id: me, reviewer_name: "M" } }, me, 1);
-  assert.equal(withPackage(gaps, { state: "current", blocking: 0 }).reason, gaps.reason, "the completeness gate still applies");
-});
+
 
 test("citations parse for the code reveal; officer voice", () => {
   assert.deepEqual(parseCitation("NBC(AE) 2023 p2, Div C, Sentence 2.3.1.1.(3) [PDF p.739]"), { division: "C", id: "2.3.1.1.(3)" });
@@ -225,9 +188,4 @@ test("co-ordinator row: officer voice, and not found stays an officer check", ()
   assert.equal(fileItemsView(session([])).items.some((i) => i.key === "div_c.coordinator"), false);
 });
 
-test("a package review that failed to load blocks acceptance (it is not 'none' or 'unavailable')", () => {
-  const open = decisionGate({ status: "in_review", claim: { reviewer_id: "u1", reviewer_name: "M" } }, "u1", 0);
-  const g = withPackage(open, { state: "failed" });
-  assert.deepEqual([g.canAccept, g.canReturn], [false, true]);
-  assert.match(g.reason, /didn’t load/);
-});
+

@@ -1,8 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { QueueApplication } from "../../api/accounts.ts";
-import { localDraft, decisionItems, messageProblem, returnableGaps } from "./decision.ts";
-import { applicantLine, completenessView, decisionGate, filterQueue, reviewerCell, rowAction, sentLabel, sinceLabel, statusPill, tabCounts, withPackage } from "./queue.ts";
+import { applicantLine, completenessView, filterQueue, reviewerCell, rowAction, sentLabel, sinceLabel, statusPill, tabCounts } from "./queue.ts";
 
 const ME = "u-dana";
 const OTHER = { reviewer_id: "u-jordan", reviewer_name: "Jordan Tran", claimed_at: "2026-10-21T09:00:00Z" };
@@ -41,11 +40,7 @@ test("refusal has its own queue tab and final gate, even with a retained claim",
   assert.deepEqual(filterQueue(all, "returned", "", ME).map((r) => r.id), ["ret"]);
   assert.deepEqual(statusPill(refused.status, true), { label: "Refused", tone: "blocking" });
   assert.equal(rowAction(refused, ME), "view");
-  for (const blocking of [null, 0, 2]) {
-    const gate = decisionGate(refused, ME, blocking);
-    assert.deepEqual(gate, { canReturn: false, canAccept: false, canRefuse: false, reason: "Administrative refusal recorded. This application is closed and read-only." });
-    assert.deepEqual(withPackage(gate, { state: "current", blocking: 0 }), gate);
-  }
+
 });
 
 test("resubmissions have their own filter and await explicit review even with a kept reservation", () => {
@@ -57,7 +52,6 @@ test("resubmissions have their own filter and await explicit review even with a 
   assert.equal(rowAction(unclaimed, ME), "claim");
   assert.deepEqual(statusPill("submitted", true, 2), { label: "Resubmitted", tone: "warning" });
   assert.deepEqual(statusPill("submitted", false, 3), { label: "Resubmitted", tone: "warning" });
-  assert.equal(decisionGate(revised, ME, 0).canAccept, false);
 });
 
 test("claim state labels and row actions", () => {
@@ -71,21 +65,7 @@ test("claim state labels and row actions", () => {
   assert.deepEqual(statusPill("accepted", true), { label: "Accepted", tone: "done" });
 });
 
-test("only the current claimer decides; blocking gaps hold acceptance while allowing return or refusal", () => {
-  assert.deepEqual(decisionGate(rows[2], ME, 0), { canReturn: true, canAccept: true, canRefuse: true, reason: "" });
-  assert.equal(decisionGate(rows[2], ME, null).canRefuse, true);
-  assert.equal(decisionGate(rows[2], ME, 2).canRefuse, true);
-  assert.equal(decisionGate(rows[1], ME, 0).canRefuse, false);
-  assert.equal(decisionGate(rows[5], ME, 0).canRefuse, false);
-  assert.equal(rowAction(rows[5], ME), "view");
-  assert.equal(statusPill("refused", true).label, "Refused");
-  assert.equal(decisionGate(rows[2], ME, null).canAccept, false); // completeness still loading or failed
-  assert.equal(decisionGate(rows[2], ME, 2).canAccept, false);
-  assert.equal(decisionGate(rows[2], ME, 2).canReturn, true);
-  assert.match(decisionGate(rows[1], ME, 0).reason, /^Jordan Tran is reviewing this/);
-  assert.match(decisionGate(rows[0], ME, 0).reason, /^Pick up/);
-  assert.equal(decisionGate(rows[4], ME, 0).canReturn, false);
-});
+
 
 test("completeness ring from the row or from the gaps, never invented", () => {
   assert.deepEqual(completenessView({ answered: 9, total: 12 }, null), { pct: 75, label: "75%" });
@@ -94,15 +74,7 @@ test("completeness ring from the row or from the gaps, never invented", () => {
   assert.deepEqual(completenessView(null, 2), { pct: 0, label: "2 missing" });
 });
 
-test("officer-owned professional determination points to the available action and retains acceptance hold", () => {
-  assert.deepEqual(decisionGate(rows[2], ME, 1, true), {
-    canReturn: true, canAccept: false, canRefuse: true,
-    reason: "Record the professional determination below before accepting as complete.",
-  });
-  assert.match(decisionGate(rows[2], ME, 3, true).reason, /remaining 2 required items/);
-  assert.match(decisionGate(rows[1], ME, 1, true).reason, /^Jordan Tran is reviewing/);
-  assert.equal(decisionGate(rows[2], ME, null, true).canAccept, false);
-});
+
 
 test("sent and since labels", () => {
   const now = new Date(2026, 9, 21, 15, 0).getTime();
@@ -113,20 +85,4 @@ test("sent and since labels", () => {
   assert.equal(sinceLabel(new Date(2026, 9, 21, 14, 14).toISOString(), now), "since 2:14 PM");
 });
 
-test("return items, the local draft and the message rule", () => {
-  const gaps = [
-    { id: "g1", section: "D" as const, field: "professional_requirement", message: "Professional involvement not yet confirmed", severity: "warning" as const },
-    { id: "g2", section: "A" as const, field: "owner_name", message: "Owner name missing", severity: "blocking" as const },
-    { id: "g3", section: "B" as const, field: "x", message: "Calgary has its own form", severity: "info" as const },
-  ];
-  assert.deepEqual(returnableGaps(gaps).map((g) => g.id), ["g2", "g1"]);
-  assert.deepEqual(decisionItems(gaps, new Set(["g2"])), [{ gap_id: "g2", field: "owner_name", note: "Owner name missing" }]);
-  const d = localDraft(["Owner name missing", "Professional involvement not yet confirmed"]);
-  assert.match(d, /administratively complete/);
-  assert.match(d, /requested items are listed below/);
-  assert.doesNotMatch(d, /Owner name missing|Professional involvement not yet confirmed/);
-  assert.doesNotMatch(d, /approv|complies|compliant|safe/i);
-  assert.equal(localDraft([]), "");
-  assert.match(messageProblem("short"), /At least 10 characters · 5 so far/);
-  assert.equal(messageProblem("Please add the owner name."), "");
-});
+

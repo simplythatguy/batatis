@@ -38,8 +38,8 @@ export function allAnchors(rows: WorkspaceRow[], sheet: SheetView, session: Revi
   const docs = new Map(sheet.documents.map(d => [d.id, d.title]));
   for (const d of session?.documents ?? []) if (!docs.has(d.id)) docs.set(d.id, d.title.known ? d.title.value : "Untitled document");
   return [...rows,
-    ...refs.map(provision => ({ id: `C:${provision}`, section: "C" satisfies Section, field: `section_c.${provision}`, label: provision })),
-    ...[...docs].map(([id, title]) => ({ id: `D:document:${id}`, section: "D" satisfies Section, field: `evidence.${id}`, label: title })),
+    ...refs.map<SheetAnchor>(provision => ({ id: `C:${provision}`, section: "C" satisfies Section, field: `section_c.${provision}`, label: provision })),
+    ...[...docs].map<SheetAnchor>(([id, title]) => ({ id: `D:document:${id}`, section: "D" satisfies Section, field: `evidence.${id}`, label: title })),
     { id: "process:file-checklist", section: "process", field: "div_c", label: "File checklist" },
   ];
 }

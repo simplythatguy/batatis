@@ -71,8 +71,7 @@ function FindingItem({ f }: { f: FindingView }) {
       <details className="pr-item-body pr-fold">
         <summary className="pr-item-title">{f.title}<span className="cf-sr"> ({TONE_WORD[f.tone]})</span></summary>
         <p className="pr-item-msg">{f.message}</p>
-        {f.where && <p className="pr-item-meta">{f.where}</p>}
-        {f.quote && <p className="pr-src"><q>{f.quote}</q></p>}
+        {f.sources.map((source, index) => <div key={index}>{source.where && <p className="pr-item-meta">{source.where}</p>}{source.quote && <p className="pr-src"><q>{source.quote}</q></p>}</div>)}
         {f.citations.length > 0 && <div className="pr-cites">{f.citations.map((c) => <CodeRef key={c} citation={c} />)}</div>}
       </details>
     </li>
@@ -128,11 +127,6 @@ function Summary({ s }: { s: ReviewSession }) {
       ) : (
         <p className="pr-item-msg"><Dot tone="blocking" /> No proposal found</p>
       )}
-      <ul className="pr-metrics" aria-label="What the review found">
-        <li><Dot tone={v.toAsk ? "blocking" : "done"} /><b>{v.toAsk}</b><span>to ask for</span></li>
-        <li><Dot tone={v.toCheck ? "warning" : "done"} /><b>{v.toCheck}</b><span>for you to check</span></li>
-        <li title={[v.blank ? `${v.blank} blank` : "", v.notFound ? `${v.notFound} not found` : ""].filter(Boolean).join(" · ") || undefined}><Dot tone="done" /><b>{v.present}</b><span>found</span></li>
-      </ul>
       <dl className="pr-facts">
         <dt><AcIcon name="book" size={14} />Code</dt>
         <dd>{v.provisions.length ? v.provisions.map((p) => <span key={p} className="pr-mono pr-pill">{p}</span>) : <span className="pr-faint">None cited</span>}</dd>
@@ -146,10 +140,10 @@ function Summary({ s }: { s: ReviewSession }) {
 
 function Missing({ s }: { s: ReviewSession }) {
   const v = missingView(s);
-  if (!v.total) return <StepTitle step="missing" icon="check">Nothing is missing</StepTitle>;
+  if (!v.groups.length && !v.officer.length) return <StepTitle step="missing" icon="check">Nothing is missing</StepTitle>;
   return (
     <>
-      <StepTitle step="missing" count={v.total}>What to ask for</StepTitle>
+      <StepTitle step="missing">What to ask for</StepTitle>
       {v.groups.map((g) => (
         <section key={g.section} className="pr-group" aria-label={g.label}>
           <h3 className="pr-group-h pr-sec">
@@ -349,24 +343,22 @@ type Step = StepId | "final";
  * open count as a quiet number. Every name is the accessible name and a label on hover or focus.
  */
 export function StepTabs({ steps, active, label, counts, onPick }: { steps: Step[]; active: Step; label: (s: Step) => string; counts: Partial<Record<Step, number>>; onPick: (s: Step) => void }) {
-  const at = steps.indexOf(active);
   return (
     <nav className="cf-stages rv-steps" aria-label="Review steps">
       {steps.map((s, i) => {
-        const past = i < at;
         const n = counts[s] ?? 0;
         return (
           <StageButton
             key={s}
             id={`rv-${s}`}
             label={label(s)}
-            ariaLabel={`Step ${i + 1} of ${steps.length}: ${label(s)}${past ? ", done" : ""}${n ? `, ${n} to look at` : ""}`}
+            ariaLabel={`Step ${i + 1} of ${steps.length}: ${label(s)}${n ? `, ${n} to look at` : ""}`}
             icon={<AcIcon name={STEP_LOOK[s].icon} size={16} />}
-            pct={past || s === active ? 100 : 0}
+            pct={s === active ? 100 : 0}
             current={s === active}
-            done={past}
-            count={past ? 0 : n}
-            note={n && !past ? `${n} to look at` : undefined}
+            done={false}
+            count={n}
+            note={n ? `${n} to look at` : undefined}
             onClick={() => onPick(s)}
           />
         );
@@ -433,7 +425,7 @@ export function PackageReview({
   const at = steps.indexOf(active);
   const prev = steps[at - 1];
   const next = steps[at + 1];
-  const counts: Partial<Record<Step, number>> = { missing: missingView(session).total };
+  const counts: Partial<Record<Step, number>> = {};
   const tabs = <StepTabs steps={steps} active={active} label={label} counts={counts} onPick={setStep} />;
 
   return (
@@ -443,9 +435,9 @@ export function PackageReview({
       {versions.length > 1 && at === 0 && (
         <div className="pr-versions" role="group" aria-label="Versions">
           {versions.map((v) => (
-            <button key={v.version} type="button" className="ac-tab" aria-pressed={v.version === session.version} onClick={() => onPickVersion(v.version)} title={v.statement ?? `${v.open_gaps} open`}>
+            <button key={v.version} type="button" className="ac-tab" aria-pressed={v.version === session.version} onClick={() => onPickVersion(v.version)} title={v.statement ?? `${v.required} required`}>
               Version {v.version}
-              <span className="ac-tab-n">{v.statement ? v.statement.split(",")[0] : `${v.open_gaps} open`}</span>
+              <span className="ac-tab-n">{v.statement ? v.statement.split(",")[0] : `${v.required} required`}</span>
             </button>
           ))}
         </div>

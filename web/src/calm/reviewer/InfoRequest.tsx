@@ -1,325 +1,66 @@
-/**
- * Request more information: the deterministic information request, edited by the officer.
- * Include or leave out items, reword them, add your own, preview the exact text, then send it to
- * the case thread (the applicant is notified). A third-party package has no applicant account, so
- * its text is copied out instead. Once sent, the request is frozen and shown as the applicant sees it.
- */
-import { useEffect, useId, useMemo, useState } from "react";
-import { AccountsError, review } from "../../api/accounts";
-import { packageReview, type ReviewTarget } from "../../api/packageReview";
-import type { ReviewSession, SentInformationRequests } from "../../api/types.gen";
-import { AcIcon } from "../auth/bits";
-import { CIcon, Modal } from "../ui";
-import { sentLabel } from "./queue";
-import { draftFrom, includedCount, previewText, requestItems, returnAfterRequest, sameDraft, SECTION_LABEL, toEdit, type DraftItem } from "./packageView";
+/** Standalone third-party packages only: edit a draft, save, and copy the server rendering out. */
+import { useEffect, useId, useRef, useState } from "react";
+import { AccountsError } from "../../api/accounts";
+import { packageReview } from "../../api/packageReview";
+import type { RequestLimits, RequestTarget, ReviewSession } from "../../api/types.gen";
+import { TargetPicker } from "./RequestEditor";
+import { draftReducer, editBody, initialDraft, officerItem } from "./requestDraft";
+import { targetOptions } from "./workspaceView";
 import "./review.css";
 
-let officerSeq = 0;
-
-function errorText(e: unknown, fallback: string): string {
-  return e instanceof AccountsError ? e.detail : fallback;
-}
-
-function SentView({ s, applicant, sent, failed, onRetry }: { s: ReviewSession; applicant: string; sent: SentInformationRequests | null; failed?: boolean; onRetry?: () => void }) {
-  const ir = s.information_request;
-  const theirs = sent?.requests ?? [];
-  return (
-    <>
-      <p className="pr-status"><span className="cf-dot is-done" aria-hidden="true" />Sent {sentLabel(ir.sent_at).replace(/^Today/, "today")}{ir.sent_by_name ? ` by ${ir.sent_by_name}` : ""}. It’s frozen; run a new review to ask again.</p>
-      <section className="pr-group" aria-label={`What ${applicant} sees`}>
-        <h3 className="pr-group-h">What {applicant} sees</h3>
-        {failed ? (
-          <p className="ac-error" role="alert">What the applicant sees didn’t load. <button type="button" className="cf-btn is-xs" onClick={onRetry}>Try again</button></p>
-        ) : sent === null ? (
-          <p className="pr-faint">Loading…</p>
-        ) : theirs.length ? (
-          <ol className="pr-sent">
-            {theirs.map((r) => (
-              <li key={`${r.package_id}-${r.version}`} className="pr-letter">
-                <p className="pr-letter-meta">From {r.sent_by_name || "the officer"} · {sentLabel(r.sent_at)} · version {r.version}</p>
-                <p className="pr-letter-intro">{r.intro}</p>
-                <ol className="pr-letter-items">{r.items.map((t, i) => <li key={i}>{t}</li>)}</ol>
-              </li>
-            ))}
-          </ol>
-        ) : (
-          <p className="pr-faint">Nothing has reached the applicant yet.</p>
-        )}
-      </section>
-    </>
-  );
-}
-
-export function InfoRequest({
-  target,
-  session,
-  latest,
-  canEdit,
-  held = false,
-  terminalStatus,
-  applicant,
-  onChange,
-  onReturned,
-}: {
-  target: ReviewTarget;
-  session: ReviewSession;
-  /** Only the latest version is edited and sent. */
-  latest: boolean;
-  /** The current claimer (cases) or any officer of the authority (packages). */
-  canEdit: boolean;
-  /** Editing waits for something the parent explains beside it (the review list refreshing). */
-  held?: boolean;
-  /** A settled case keeps the request as a historical record, without claim recovery. */
-  terminalStatus?: "accepted" | "refused";
-  applicant: string;
-  onChange: (s: ReviewSession) => void;
-  /** The application was also returned so the applicant can update it. */
-  onReturned?: () => Promise<void> | void;
+export function InfoRequest({ target, session, latest, canEdit, onChange, limits }: {
+  target: { kind: "package"; id: string }; session: ReviewSession; latest: boolean; canEdit: boolean; applicant?: string;
+  onChange: (session: ReviewSession) => void; limits?: RequestLimits;
 }) {
   const id = useId();
-  const ir = session.information_request;
-  const isCase = target.kind === "case";
-  const sentAlready = Boolean(ir.sent_at);
-  const editable = canEdit && !terminalStatus && latest && !sentAlready;
-
-  const [intro, setIntro] = useState(ir.intro);
-  const [items, setItems] = useState<DraftItem[]>(() => draftFrom(ir).items);
-  const [editing, setEditing] = useState<string | null>(null);
-  const [introOpen, setIntroOpen] = useState(false);
+  const [draft, setDraft] = useState(() => initialDraft(session));
   const [adding, setAdding] = useState("");
-  const [preview, setPreview] = useState(false);
-  const [busy, setBusy] = useState<"" | "save" | "send">("");
+  const [destination, setDestination] = useState<RequestTarget | null>(null);
   const [error, setError] = useState("");
   const [note, setNote] = useState("");
-  const [confirm, setConfirm] = useState(false);
-  const [sent, setSent] = useState<SentInformationRequests | null>(null);
-  const [sentFailed, setSentFailed] = useState(false);
-  const [sentAttempt, setSentAttempt] = useState(0);
-
-  // A different version (or a server update) resets the draft.
-  useEffect(() => {
-    const d = draftFrom(session.information_request);
-    setIntro(d.intro);
-    setItems(d.items);
-    setEditing(null);
-    setPreview(false);
-    setError("");
-  }, [session.package_id, session.version, session.information_request]);
-
-  useEffect(() => {
-    if (!isCase || !sentAlready) return;
-    const ctl = new AbortController();
-    setSent(null);
-    setSentFailed(false);
-    // A failure is shown as a failure with a retry, never as "nothing has reached the applicant".
-    packageReview.sent(target.id, ctl.signal).then(
-      (r) => { if (!ctl.signal.aborted) setSent(r); },
-      () => { if (!ctl.signal.aborted) setSentFailed(true); },
-    );
-    return () => ctl.abort();
-  }, [isCase, sentAlready, target.id, ir.message_id, sentAttempt]);
-
-  const server = useMemo(() => toEdit(ir.intro, draftFrom(ir).items), [ir]);
-  const local = toEdit(intro, items);
-  const dirty = !sameDraft(local, server);
-  const count = includedCount(items);
-  const text = previewText(intro, items);
-
-  /** Any edit makes earlier save or send feedback stale. */
-  const edited = () => { setError(""); setNote(""); };
-  const patch = (key: string, p: Partial<DraftItem>) => { edited(); setItems((list) => list.map((i) => (i.key === key ? { ...i, ...p } : i))); };
-
+  const pending = useRef(false);
+  const editable = canEdit && latest && !session.information_request.sent_at;
+  const busy = draft.save.kind === "saving";
+  const dirty = draft.save.kind !== "saved";
+  useEffect(() => { setDraft(initialDraft(session)); setError(""); }, [session.package_id, session.version]);
   async function save(): Promise<ReviewSession | null> {
     if (!dirty) return session;
-    setBusy("save");
-    setError("");
+    if (!editable || pending.current) return null;
+    pending.current = true; setDraft(state => draftReducer(state, { type: "start" })); setError("");
     try {
-      const next = await packageReview.edit(target, session.version, local);
-      onChange(next);
-      setNote("Draft saved.");
-      return next;
+      const index = await packageReview.edit(target, session.version, editBody(draft.content));
+      if (!index.latest || index.latest.version !== session.version) throw new Error("The package version changed. Reload the latest review.");
+      const saved = index.latest;
+      setDraft(state => draftReducer(state, { type: "saved", session: saved, at: new Date().toISOString() }));
+      onChange(saved); setNote("Draft saved."); return saved;
     } catch (e) {
-      setError(errorText(e, "The draft didn’t save. Try again."));
-      return null;
-    } finally {
-      setBusy("");
-    }
+      const message = e instanceof AccountsError ? e.detail : e instanceof Error ? e.message : "The draft didn’t save. Try again.";
+      setDraft(state => draftReducer(state, { type: "failed", message, conflict: e instanceof AccountsError && e.status === 409 }));
+      setError(message); return null;
+    } finally { pending.current = false; }
   }
-
-  function addItem() {
-    const t = adding.trim();
-    if (!t) return;
-    const key = `new-${++officerSeq}`;
-    edited();
-    setItems((list) => [...list, { id: null, key, text: t, included: true, authored: "officer", officerCheck: false, section: null, linked: false }]);
-    setAdding("");
-  }
-
-  async function send() {
-    setConfirm(false);
-    const saved = await save();
-    if (!saved || target.kind !== "case") return;
-    setBusy("send");
-    setError("");
-    try {
-      const done = await packageReview.send(target.id, saved.version);
-      onChange(done);
-      // One-way messages: the applicant can't reply, so a request always returns the application
-      // for them to update and send again.
-      {
-        try {
-          await review.decide(target.id, { outcome: "return", message: returnAfterRequest(includedCount(draftFrom(done.information_request).items)), items: requestItems(done) });
-          await onReturned?.();
-          setNote(`Sent to ${applicant} and returned so they can update the application.`);
-        } catch (e) {
-          setNote("");
-          setError(`The request was sent, but the application wasn’t returned: ${errorText(e, "try Return again")}.`);
-        }
-      }
-    } catch (e) {
-      setError(errorText(e, "The request didn’t send. Try again."));
-    } finally {
-      setBusy("");
-    }
-  }
-
   async function copy() {
     const saved = await save();
     if (!saved) return;
-    try {
-      await navigator.clipboard.writeText(saved.information_request.text || text);
-      setNote("Copied. Paste it into your email to the applicant.");
-    } catch {
-      setPreview(true);
-      setNote("Copy didn’t work here. Select the preview text and copy it.");
-    }
+    try { await navigator.clipboard.writeText(saved.information_request.text); setNote("Copied. Paste it into your email to the applicant."); }
+    catch { setNote("Select the saved text below and copy it."); }
   }
-
-  return (
-    <section className="pr" aria-labelledby={`${id}-h`}>
-      <header className="pr-head">
-        <div className="pr-head-txt">
-          <h2 id={`${id}-h`} className="pr-title">{sentAlready ? "Information request" : "Ask for what’s missing"}</h2>
-          <p className="pr-faint">Version {session.version} · {sentAlready ? "sent" : ir.edited ? "edited draft" : "draft from the review"}{!latest ? " · an earlier version" : ""}</p>
-        </div>
-        {!sentAlready && (
-          <div className="pr-head-acts">
-            <button type="button" className="ac-tab" aria-pressed={!preview} onClick={() => setPreview(false)}>Edit</button>
-            <button type="button" className="ac-tab" aria-pressed={preview} onClick={() => setPreview(true)}>Preview</button>
-          </div>
-        )}
-      </header>
-      <div className="pr-body">
-        {sentAlready ? (
-          <>
-            <SentView s={session} applicant={applicant} sent={isCase ? sent : { case_id: "", requests: [] }} failed={isCase && sentFailed} onRetry={() => setSentAttempt((n) => n + 1)} />
-            {!isCase && <pre className="pr-letter pr-pre">{ir.text}</pre>}
-          </>
-        ) : preview ? (
-          <>
-            <p className="pr-lede">Exactly what {isCase ? `${applicant} receives` : "you copy"}{count ? "" : ". Include at least one item"}.</p>
-            <pre className="pr-letter pr-pre" aria-label="Preview">{text}</pre>
-          </>
-        ) : (
-          <>
-            <p className="pr-lede">One item per gap. Tick what to ask, reword anything, or add your own.</p>
-            <div className="pr-intro">
-              {introOpen && editable ? (
-                <>
-                  <label htmlFor={`${id}-intro`} className="pr-group-h">Opening line</label>
-                  <textarea id={`${id}-intro`} className="ac-ta pr-ta" rows={3} maxLength={2000} value={intro} onChange={(e) => { edited(); setIntro(e.target.value); }} />
-                  <button type="button" className="cf-btn is-xs" onClick={() => setIntroOpen(false)}>Done</button>
-                </>
-              ) : (
-                <>
-                  <p className="pr-intro-text">{intro}</p>
-                  {editable && <button type="button" className="cf-btn is-xs is-ghost" onClick={() => setIntroOpen(true)}>Edit the opening</button>}
-                </>
-              )}
-            </div>
-            <fieldset className="pr-req" disabled={!editable}>
-              <legend className="cf-sr">Items</legend>
-              <ul className="pr-list">
-                {items.map((i) => (
-                  <li key={i.key} className={`pr-req-item${i.included ? " is-on" : ""}`}>
-                    <label className="ac-check pr-req-check">
-                      <input type="checkbox" checked={i.included} onChange={() => patch(i.key, { included: !i.included })} aria-label={`Include: ${i.text}`} />
-                      <span className="ac-box" aria-hidden="true"><AcIcon name="check" size={12} stroke={2.4} /></span>
-                    </label>
-                    <div className="pr-item-body">
-                      {editing === i.key ? (
-                        <>
-                          <label htmlFor={`${id}-${i.key}`} className="cf-sr">Item text</label>
-                          <textarea id={`${id}-${i.key}`} className="ac-ta pr-ta" rows={3} maxLength={2000} value={i.text} autoFocus onChange={(e) => patch(i.key, { text: e.target.value })}
-                            onKeyDown={(e) => { if (e.key === "Escape" || (e.key === "Enter" && (e.metaKey || e.ctrlKey))) { e.preventDefault(); setEditing(null); } }} />
-                        </>
-                      ) : (
-                        <p className="pr-req-text">{i.text || <span className="pr-faint">Empty item</span>}</p>
-                      )}
-                      <div className="pr-req-meta">
-                        <p className="pr-item-meta">
-                          {i.section ? SECTION_LABEL[i.section] : "Your item"}
-                          {i.officerCheck && <span className="pr-tag"><span className="cf-dot is-pending" aria-hidden="true" />Look first: the review couldn’t establish this</span>}
-                          {i.authored === "officer" && i.id && <span className="pr-tag">Your wording</span>}
-                        </p>
-                        {editable && (
-                          <div className="pr-req-acts">
-                            <button type="button" className="cf-btn is-xs is-ghost" onClick={() => setEditing(editing === i.key ? null : i.key)}>{editing === i.key ? "Done" : "Edit"}</button>
-                            {!i.linked && (
-                              <button type="button" className="cf-btn is-xs is-ghost" onClick={() => { edited(); setItems((list) => list.filter((x) => x.key !== i.key)); }}>Remove</button>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-              {!items.length && <p className="pr-faint">The review found nothing to ask. Add your own item if you need something.</p>}
-            </fieldset>
-            {editable && (
-              <div className="pr-add">
-                <label htmlFor={`${id}-add`} className="pr-group-h">Add your own item</label>
-                <textarea id={`${id}-add`} className="ac-ta pr-ta" rows={2} maxLength={2000} placeholder="Please provide…" value={adding} onChange={(e) => { edited(); setAdding(e.target.value); }}
-                  onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); addItem(); } }} />
-                <button type="button" className="cf-btn is-xs" disabled={!adding.trim()} onClick={addItem}><CIcon name="plus" size={13} />Add item</button>
-              </div>
-            )}
-          </>
-        )}
-        {error && <p className="ac-error" role="alert">{error}</p>}
-        {note && !error && <p className="ac-done" role="status"><span className="cf-dot is-done" aria-hidden="true" />{note}</p>}
-      </div>
-      {!sentAlready && (
-        <footer className="pr-foot">
-          <span className="pr-faint pr-count">{count} {count === 1 ? "item" : "items"} included{dirty ? " · unsaved changes" : ""}</span>
-          <span className="ac-grow" />
-          {editable && <button type="button" className="cf-btn is-sm is-ghost" disabled={!dirty || Boolean(busy)} onClick={() => void save()}>{busy === "save" ? "Saving…" : "Save draft"}</button>}
-          {isCase ? (
-            <button type="button" className="cf-btn is-sm is-primary" disabled={!editable || !count || Boolean(busy)} onClick={() => setConfirm(true)}>
-              <AcIcon name="send" size={14} />{busy === "send" ? "Sending…" : `Send to ${applicant}`}
-            </button>
-          ) : (
-            <button type="button" className="cf-btn is-sm is-primary" disabled={!count || Boolean(busy)} onClick={() => void copy()}>Copy the text</button>
-          )}
-        </footer>
-      )}
-      {!sentAlready && !editable && !held && isCase && (terminalStatus || latest) && (
-        <p className="pr-fine pr-admin">{terminalStatus
-          ? `This application was ${terminalStatus}. This request is a historical, read-only record and can’t be edited or sent.`
-          : "Pick up this application (or take over) to edit and send this request."}</p>
-      )}
-
-      <Modal open={confirm} onClose={() => setConfirm(false)} labelledBy={`${id}-ct`} className="ac-return">
-        <div className="cf-modal-body">
-          <h2 id={`${id}-ct`} className="cf-modal-title">Send to {applicant}?</h2>
-          <p className="cf-muted">{count} {count === 1 ? "item" : "items"} · the application goes back to {applicant} to fix and resend. They can’t reply.</p>
-        </div>
-        <div className="cf-modal-foot">
-          <button type="button" className="cf-btn" onClick={() => setConfirm(false)}>Not yet</button>
-          <button type="button" className="cf-btn is-primary" onClick={() => void send()}>Send and return</button>
-        </div>
-      </Modal>
-    </section>
-  );
+  const edit = (event: Parameters<typeof draftReducer>[1]) => { setDraft(state => draftReducer(state, event)); setNote(""); setError(""); };
+  return <section className="pr rw-package-request" aria-labelledby={`${id}-h`}>
+    <h2 id={`${id}-h`} className="pr-title">Information request</h2><p className="rw-meta">Version {session.version}{latest ? "" : " · earlier version, read-only"} · copy out</p>
+    <fieldset disabled={!editable || busy} className="rw-package-fields">
+      <div className="rw-field"><label htmlFor={`${id}-intro`}>Opening line</label><textarea id={`${id}-intro`} className="ac-ta" rows={3} maxLength={limits?.intro} value={draft.content.intro} onChange={e => edit({ type: "intro", value: e.target.value })} /></div>
+      {draft.content.items.map(item => <div className="rw-officer-item" key={item.key}>
+        <div className="rw-field"><label htmlFor={`${id}-${item.key}`}>Item text</label><textarea id={`${id}-${item.key}`} className="ac-ta" rows={3} maxLength={limits?.item_text} value={item.text} onChange={e => edit({ type: "item", key: item.key, patch: { text: e.target.value } })} /></div>
+        <button type="button" className="cf-btn is-xs" aria-pressed={item.included} onClick={() => edit({ type: "item", key: item.key, patch: { included: !item.included } })}>{item.included ? "Included" : "Left out"}</button>
+        {!item.finding_key && <button type="button" className="cf-btn is-xs is-ghost" onClick={() => edit({ type: "remove", key: item.key })}>Remove</button>}
+      </div>)}
+      <div className="rw-field"><label htmlFor={`${id}-add`}>Your item</label><textarea id={`${id}-add`} className="ac-ta" rows={2} maxLength={limits?.item_text} value={adding} onChange={e => setAdding(e.target.value)} /></div>
+      <TargetPicker options={targetOptions(session, [])} value={destination} onChange={setDestination} />
+      <button type="button" className="cf-btn is-xs" disabled={!adding.trim() || !destination} onClick={() => { if (destination) { edit({ type: "add", item: officerItem(adding.trim(), destination) }); setAdding(""); setDestination(null); } }}>Add item</button>
+    </fieldset>
+    <p className="rw-meta">{dirty ? "Unsaved changes · the preview is the last save" : "Saved text"}</p><pre className="rw-letter" aria-label="Saved request text">{session.information_request.text}</pre>
+    {error && <p className="rw-hint" role="alert">{error}</p>}{note && <p className="rw-meta" role="status">{note}</p>}
+    <footer className="pr-foot"><button type="button" className="cf-btn is-sm" disabled={!editable || !dirty || busy} onClick={() => void save()}>{busy ? "Saving…" : "Save draft"}</button><button type="button" className="cf-btn is-sm is-primary" disabled={busy || (dirty && !editable)} onClick={() => void copy()}>Copy the text</button></footer>
+  </section>;
 }
