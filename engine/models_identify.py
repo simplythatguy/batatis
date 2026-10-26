@@ -184,7 +184,118 @@ class ArticleDecision(BaseModel):
     decided_at: str
 
 
-class IdentifyResult(BaseModel):
+class RequirementSource(BaseModel):
+    """Provenance verified against both CodeDB's docs row and build metadata.
+
+    Hashes identify the registered extraction/PDF; they do not certify the parser.
+    """
+    doc: Literal['NBC-AE'] = 'NBC-AE'
+    label: Literal['NBC(AE) 2023 p2'] = 'NBC(AE) 2023 p2'
+    text_sha256: str
+    pdf_sha256: str
+    build_version: str
+    corpus_sha256: str
+
+
+class RequirementEvidence(BaseModel):
+    """An actual matched passage or reference, never an arbitrary opening sentence."""
+    id: str
+    division: Literal['A', 'B', 'C']
+    provision_id: str                         # a real provision or note id in the verified source
+    kind: Literal['provision', 'heading', 'note']
+    quote: str
+    citation: str
+    pdf_page: int | None = None
+    pdf_page_end: int | None = None
+    source_sha256: str
+    contextual: bool = False                 # notes explain; they are not normative requirements
+
+
+class RequirementDiscovery(BaseModel):
+    kind: Literal['lexical', 'explicit', 'reference', 'reverse_reference', 'administrative', 'human', 'previous']
+    detail: str
+    from_requirement: str | None = None
+    path: list[str] = Field(default_factory=list)  # one discovery path, not every walk through a cycle
+    evidence: RequirementEvidence | None = None
+    evidence_id: str | None = None             # shared exact passage in requirement_evidence
+    evidence_ids: list[str] = Field(default_factory=list)
+
+
+class RequirementCondition(BaseModel):
+    field: str
+    status: Literal['unknown', 'provided', 'conflict'] = 'unknown'
+    fact_ids: list[str] = Field(default_factory=list)
+    # A provided input is not a finding that a source condition is satisfied.
+
+
+class RequirementRecord(BaseModel):
+    """A source-qualified candidate, with applicability separate from discovery.
+
+    Records group an article's matched sentences/clauses. Inclusion requires a human
+    decision; a reference edge or keyword match never proves applicability or a departure.
+    """
+    id: str
+    provision_id: str | None = None            # article id; absent when current source cannot be verified
+    division: Literal['A', 'B', 'C'] | None = None
+    title: str = ''
+    role: Literal['varied', 'supporting', 'admin', 'conditional', 'unresolved'] = 'unresolved'
+    disposition: Literal['include', 'review', 'exclude'] = 'review'
+    applicability: Literal['unknown', 'confirmed', 'needs_review'] = 'unknown'
+    human_confirmed: bool = False
+    confirmation_fingerprint: str | None = None
+    confirmation_reason: str | None = None
+    confirmed_at: str | None = None
+    needs_review: bool = True
+    source_status: Literal['verified', 'unavailable'] = 'verified'
+    citation: str | None = None
+    quote: str | None = None
+    quote_provision_id: str | None = None
+    pdf_page: int | None = None
+    pdf_page_end: int | None = None
+    source_sha256: str | None = None
+    discoveries: list[RequirementDiscovery] = Field(default_factory=list)
+    evidence: list[RequirementEvidence] = Field(default_factory=list)
+    evidence_ids: list[str] = Field(default_factory=list)  # all passages; shared text is stored once
+    conditions: list[RequirementCondition] = Field(default_factory=list)
+    review_reasons: list[str] = Field(default_factory=list)
+
+
+class RequirementGap(BaseModel):
+    code: str
+    message: str
+    reference: str | None = None              # unresolved input/source text; never a fabricated citation
+    from_requirement: str | None = None
+    evidence: RequirementEvidence | None = None
+    evidence_id: str | None = None
+
+
+class RequirementCoverage(BaseModel):
+    source: RequirementSource | None = None
+    scan_status: Literal['not_run', 'scanned', 'unavailable'] = 'not_run'
+    graph_status: Literal['not_run', 'traversed', 'traversed_with_gaps'] = 'not_run'
+    applicability_status: Literal['not_determined'] = 'not_determined'
+    exhaustive: Literal[False] = False
+    articles_by_division: dict[str, int] = Field(default_factory=dict)
+    provisions_scanned: int = 0
+    notes_scanned: int = 0
+    query_chunks: int = 0
+    discovered: int = 0
+    human_confirmed: int = 0
+    gaps: list[RequirementGap] = Field(default_factory=list)
+    limits: list[str] = Field(default_factory=list)
+    provider_requests: Literal[0] = 0
+
+
+class RequirementSet(BaseModel):
+    """Additive ledger fields; old stored results load with an explicit not-run state."""
+    requirements: list[RequirementRecord] = Field(default_factory=list)
+    requirement_evidence: list[RequirementEvidence] = Field(default_factory=list)
+    requirement_status: Literal['not_run', 'needs_review', 'source_unavailable'] = 'not_run'
+    requirement_coverage: RequirementCoverage = Field(default_factory=RequirementCoverage)
+    input_fingerprint: str | None = None
+
+
+class IdentifyResult(RequirementSet):
     mode: IdentifyMode
     source: str                                 # 'live', 'fake' or 'bm25 fallback'
     label: str
@@ -203,6 +314,8 @@ class IdentifyResult(BaseModel):
     title: str | None = None
     scored_at: str
     description_sha256: str
+    input_sha256: str | None = None           # parent-composed facts/documents/answers fingerprint
+    input_coverage_gaps: list[str] = Field(default_factory=list)
     stale: bool = False
     persisted: bool = False
     case_version: int | None = None             # the case version after this read or write; send it back as expected_version
