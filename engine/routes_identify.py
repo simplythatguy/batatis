@@ -150,7 +150,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
         saved, _ = save(case_id, attach, expected_version=base.version)
         if list(saved.provisions) != list(base.provisions):   # the CAS pinned `base`; `attach` never touches provisions
             raise HTTPException(500, 'identify must not change provisions')
-        logger.info('Identify: case=%s mode=%s scored=%s committed=%s choices=%s dropped=%s usd=%.6f seconds=%.3f',
+        logger.info('Identify: case=%s mode=%s scored=%s committed=%s choices=%s dropped=%s usd=%s seconds=%.3f',
                     case_id, result.mode, result.trace.articles_scored, len(result.committed), len(result.choices),
                     len(result.trace.dropped), result.trace.usd, result.trace.seconds)
         return _current(saved.identify, saved)

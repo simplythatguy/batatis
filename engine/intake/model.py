@@ -78,8 +78,8 @@ class ModelRun:
     status: str                                 # live, fake, gate_closed, failed, not_needed, off
     facts: list[ModelFact] = field(default_factory=list)
     dropped: int = 0
-    input_tokens: int = 0
-    output_tokens: int = 0
+    input_tokens: int | None = 0
+    output_tokens: int | None = 0
     reason: str | None = None
 
 
@@ -150,12 +150,12 @@ def run(source: str, outbound: str, transport: Transport | None, *, skip: set[st
     try:
         payload, usage = transport(SYSTEM, user, schema())
     except GateClosed as closed:
-        return ModelRun(status='gate_closed', reason=closed.source)
+        return ModelRun(status='gate_closed', reason=closed.source, input_tokens=None, output_tokens=None)
     except Exception as exc:                     # provider text may carry request details; keep only the type
-        return ModelRun(status='failed', reason=type(exc).__name__)
+        return ModelRun(status='failed', reason=type(exc).__name__, input_tokens=None, output_tokens=None)
     facts, dropped = verify(payload, source, skip=skip)
     return ModelRun(status=status, facts=facts, dropped=dropped,
-                    input_tokens=int(usage.get('input_tokens') or 0), output_tokens=int(usage.get('output_tokens') or 0))
+                    input_tokens=usage.get('input_tokens'), output_tokens=usage.get('output_tokens'))
 
 
 def openai_transport(client_ip: str | None = None) -> Transport:
@@ -198,6 +198,13 @@ def fake_transport(system: str, user: str, body_schema: dict) -> tuple[dict, dic
 
 def default_transport(client_ip: str | None = None) -> tuple[Transport | None, str]:
     """The transport this deployment allows, and the status label for its results."""
+    from .. import provider_routing
+    if provider_routing.local_active():
+        selected = provider_routing.local_profile()
+        if selected.generation == 'off':
+            return None, 'off'
+        return provider_routing.local_transport('intake', model=MODEL, effort=EFFORT, max_output_tokens=MAX_OUTPUT_TOKENS,
+                                                lease=selected.lease), 'live'
     if (os.environ.get('BATATIS_PROVIDER') or '').strip().lower() == 'fake' and not os.environ.get('VERCEL'):
         return fake_transport, 'fake'
     if llm_gate.live_enabled('openai'):

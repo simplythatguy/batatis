@@ -3,6 +3,7 @@ import { useEffect, useId, useState, type FormEvent } from "react";
 import { AccountsError, auth, type AuthProvider } from "../../api/accounts";
 import { ProviderMark, clockText, useCountdown } from "./bits";
 import { afterSignIn, rememberedReturn, signIn, signUp } from "./useAuthGate";
+import { DesktopEntry } from "../../desktop/Entry";
 
 export const PASSWORD_MIN = 10;
 
@@ -83,6 +84,7 @@ export function AuthPage({ mode }: { mode: "signin" | "signup" }) {
         <span className="cf-mark ac-auth-mark" aria-hidden="true" />
         <h1 id={`${id}-title`} className="ac-auth-title">{signup ? "Create your account" : "Welcome to Batatis"}</h1>
         <p className="ac-auth-sub">Prepare a complete variance application, or review the ones sent to your authority.</p>
+        {!signup && <DesktopEntry />}
 
         {signup && (
           <div className="ac-field">

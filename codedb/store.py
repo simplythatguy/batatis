@@ -82,6 +82,6 @@ def connect(path: Path | None = None) -> sqlite3.Connection:
     p = Path(path) if path else DB_PATH
     if not p.exists():
         raise FileNotFoundError(f"{p} not built. Run: .venv/bin/python -m codedb build")
-    con = sqlite3.connect(f"file:{p}?mode=ro", uri=True)
+    con = sqlite3.connect(f"{p.resolve().as_uri()}?mode=ro", uri=True)
     con.row_factory = sqlite3.Row
     return con

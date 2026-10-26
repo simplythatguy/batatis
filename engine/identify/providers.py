@@ -134,7 +134,9 @@ class SpendLog:
         with self._lock:
             self.calls.append(row)
 
-    def usd(self) -> float:
+    def usd(self) -> float | None:
+        if any(row['usd'] is None for row in self.calls):
+            return None
         return float(sum((Decimal(str(row['usd'])) for row in self.calls), Decimal('0')))
 
     def by_provider(self) -> dict[str, dict]:
@@ -142,9 +144,11 @@ class SpendLog:
         for row in self.calls:
             slot = out.setdefault(row['provider'], {'requests': 0, 'input_tokens': 0, 'output_tokens': 0, 'usd': 0.0})
             slot['requests'] += 1
-            slot['input_tokens'] += row['input_tokens']
-            slot['output_tokens'] += row['output_tokens']
-            slot['usd'] = round(slot['usd'] + row['usd'], 6)
+            for name in ('input_tokens', 'output_tokens', 'usd'):
+                a, b = slot[name], row[name]
+                slot[name] = None if a is None or b is None else round(a + b, 6)
+            if 'billing' in row:
+                slot['billing'] = row['billing']
         return out
 
 
@@ -299,6 +303,10 @@ def transports(client_ip: str | None = None, *, jev_model: str = JEV_MODEL, anth
     The full-text OpenAI verifier is separate from Decisions. An Anthropic client is built only
     when the run's config asks for it (`anthropic=True`), regardless of credential presence.
     """
+    from .. import provider_routing
+    if provider_routing.local_active():
+        return provider_routing.local_identify_transports(scoring=scoring if scoring is not None else {'jev'},
+                                                         jev_model=jev_model, anthropic=anthropic)
     if scoring is None:
         from .config import load_config
         config = load_config()

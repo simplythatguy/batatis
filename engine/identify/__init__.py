@@ -88,8 +88,8 @@ def identify(query: str, db_path: Path | str, judge: Judge | None = None, *, rer
             usage[key] += getattr(reranker.usage, key)
     if tp is not None:
         usage.update(requests=len(tp.log.calls), rerank_requests=len(tp.log.calls) - calls_before,
-                     input_tokens=sum(c['input_tokens'] for c in tp.log.calls),
-                     output_tokens=sum(c['output_tokens'] for c in tp.log.calls))
+                     input_tokens=None if any(c['input_tokens'] is None for c in tp.log.calls) else sum(c['input_tokens'] for c in tp.log.calls),
+                     output_tokens=None if any(c['output_tokens'] is None for c in tp.log.calls) else sum(c['output_tokens'] for c in tp.log.calls))
     return Identification(ranked=sorted(((a, rer[a]) for a in top), key=lambda x: -x[1]), screen=screen,
                           usage=usage, screen_seconds=t1 - t0, rerank_seconds=t2 - t1, model=config.screen_model,
                           config_hash=config.config_hash,

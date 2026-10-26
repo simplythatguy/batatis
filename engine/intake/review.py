@@ -189,8 +189,8 @@ class _Payload(_Input):
 
 
 class _Usage(_Input):
-    input_tokens: int = Field(default=0, ge=0)
-    output_tokens: int = Field(default=0, ge=0)
+    input_tokens: int | None = Field(default=None, ge=0)
+    output_tokens: int | None = Field(default=None, ge=0)
 
 
 class _ReportedUsage(_Input):
@@ -611,6 +611,9 @@ class GateClosed(Exception):
 
 
 def configured() -> tuple[str, str]:
+    from .. import provider_routing
+    if provider_routing.local_active():
+        return provider_routing.LOCAL_MODEL, provider_routing.LOCAL_EFFORT
     model = (os.environ.get('BATATIS_REVIEW_MODEL') or DEFAULT_MODEL).strip()
     effort = (os.environ.get('BATATIS_REVIEW_EFFORT') or ('low' if model == 'gpt-6.1-sol' else DEFAULT_EFFORT)).strip()
     if model not in MODELS or effort not in MODELS[model]:
@@ -687,10 +690,10 @@ def run(request: str, files: list[tuple[str, str, bytes]], *, outbound: Callable
         usage = _Usage.model_validate(usage).model_dump()
     except GateClosed as closed:
         return DocumentReview(status='gate_closed', model=version, effort=effort, reason=closed.source,
-                              flags=_unread_flags(sources, sent))
+                              flags=_unread_flags(sources, sent), input_tokens=None, output_tokens=None)
     except Exception as exc:                     # provider text may carry request details; keep only the type
         return DocumentReview(status='failed', model=version, effort=effort, reason=type(exc).__name__,
-                              flags=_unread_flags(sources, sent))
+                              flags=_unread_flags(sources, sent), input_tokens=None, output_tokens=None)
 
     def resolves(article: str) -> bool:
         if codes is None:
@@ -706,8 +709,8 @@ def run(request: str, files: list[tuple[str, str, bytes]], *, outbound: Callable
     dropped = 0
     review = DocumentReview(status=status, model=version, effort=effort, flags=_unread_flags(sources, sent),
                             pages_sent=sum(len(s.pages) for s in sent),
-                            input_tokens=int(usage.get('input_tokens') or 0),
-                            output_tokens=int(usage.get('output_tokens') or 0))
+                            input_tokens=usage.get('input_tokens'),
+                            output_tokens=usage.get('output_tokens'))
     known = {s.ref for s in sources}
     for d in payload.get('documents') or []:
         if d.get('file') in known:
@@ -855,6 +858,9 @@ def fake_transport(system: str, user: str, body_schema: dict, model: str, effort
 
 
 def default_transport(client_ip: str | None = None) -> tuple[Transport | None, str]:
+    from .. import provider_routing
+    if provider_routing.local_active():
+        return provider_routing.local_review_transport()
     if (os.environ.get('BATATIS_PROVIDER') or '').strip().lower() == 'fake' and not os.environ.get('VERCEL'):
         return fake_transport, 'fake'
     if llm_gate.live_enabled('openai') and os.environ.get('BATATIS_REVIEW', '1') != '0':

@@ -132,15 +132,25 @@ class AssistResult(BaseModel):
 @dataclass
 class ModelAnswer:
     text: str
-    input_tokens: int
-    output_tokens: int
+    input_tokens: int | None
+    output_tokens: int | None
 
 
-def call_model(*, provider: str, model: str, context: str, body: AssistRequest) -> ModelAnswer:
+def call_model(*, provider: str, model: str, context: str, body: AssistRequest, desktop_profile=None) -> ModelAnswer:
     # History is data in the user message, not additional trusted system messages.
     content = json.dumps({'context': json.loads(context), 'history': [turn.model_dump() for turn in body.history],
                           'question': body.question}, ensure_ascii=False)
     system = SYSTEM + DOCUMENT_SYSTEM if body.attachment_ids else SYSTEM
+    if desktop_profile is not None:
+        from . import provider_routing
+        schema = {'type': 'object', 'additionalProperties': False, 'required': ['answer'],
+                  'properties': {'answer': {'type': 'string', 'maxLength': 12000}}}
+        transport = provider_routing.local_transport('assistant', model=provider_routing.LOCAL_MODEL, effort=provider_routing.LOCAL_EFFORT,
+                                                     max_output_tokens=MAX_TOKENS, lease=desktop_profile.lease)
+        payload, usage = transport(system, content, schema)
+        if not isinstance(payload.get('answer'), str) or set(payload) != {'answer'}:
+            raise ValueError('invalid answer object')
+        return ModelAnswer(payload['answer'], usage['input_tokens'], usage['output_tokens'])
     if provider == 'anthropic':
         import anthropic
         with anthropic.Anthropic(max_retries=0, timeout=30) as client:
@@ -276,8 +286,11 @@ def create_router(cases, code):
                 documents.validate_files(store)
                 return AssistResult(answer=NO_READABLE_TEXT, cited=[], removed_citations=[], notice='',
                                     context=bound, attachments=documents.attachments)
-        provider = 'anthropic' if (os.environ.get('ANTHROPIC_API_KEY') or '').strip() else 'openai'
-        if not llm_gate.live_enabled(provider):
+        from . import provider_routing
+        desktop_profile = provider_routing.local_profile('chat') if provider_routing.local_active() else None
+        provider = ('desktop' if desktop_profile is not None else
+                    'anthropic' if (os.environ.get('ANTHROPIC_API_KEY') or '').strip() else 'openai')
+        if (desktop_profile is not None and desktop_profile.generation == 'off') or (desktop_profile is None and not llm_gate.live_enabled(provider)):
             raise HTTPException(503, 'Assistant unavailable')
         codes = code()
         # Personal information never leaves Batatis: scrub the application data and the user's own
@@ -303,7 +316,7 @@ def create_router(cases, code):
             from .voice_context import MAX_CONTEXT_BYTES
             if len(context.encode()) > MAX_CONTEXT_BYTES:
                 raise HTTPException(422, 'Select a smaller assistant context')
-        model = 'claude-sonnet-5-5' if provider == 'anthropic' else llm_gate.DEFAULT_MODEL
+        model = provider_routing.LOCAL_MODEL if desktop_profile is not None else 'claude-sonnet-5-5' if provider == 'anthropic' else llm_gate.DEFAULT_MODEL
         # UTF-8 bytes bound tokenizer input, including JSON escaping and framing.
         prompt = json.dumps({'context': json.loads(context), 'history': [t.model_dump() for t in body.history],
                              'question': body.question}, ensure_ascii=False)
@@ -313,9 +326,10 @@ def create_router(cases, code):
             reauthorize(body, request, response, store, user)
         if documents:
             documents.validate_files(store)
-        decision = llm_gate.authorize_assist(model=model, provider=provider, max_input_tokens=max_input,
-                                           max_output_tokens=MAX_TOKENS, client_ip=llm_gate.client_ip_from(request))
-        if not decision.allowed:
+        decision = (llm_gate.authorize_assist(model=model, provider=provider, max_input_tokens=max_input,
+                                             max_output_tokens=MAX_TOKENS, client_ip=llm_gate.client_ip_from(request))
+                    if desktop_profile is None else None)
+        if decision is not None and not decision.allowed:
             status = 429 if decision.source == 'rate-limited' else 503
             wait = llm_gate.assist_retry_after(llm_gate.client_ip_from(request)) if status == 429 else None
             raise HTTPException(status, 'Assistant unavailable', headers={'Retry-After': str(wait)} if wait else None)
@@ -326,13 +340,15 @@ def create_router(cases, code):
         if documents:
             documents.validate_files(store)
         try:
-            reply = call_model(provider=provider, model=model, context=context, body=body)
+            reply = call_model(provider=provider, model=model, context=context, body=body,
+                               **({'desktop_profile': desktop_profile} if desktop_profile is not None else {}))
         except Exception:
             # Keep the reservation: a timed-out call may still have consumed tokens.
             # Provider errors may contain text/credentials and must not be logged.
             raise HTTPException(503, 'Assistant unavailable') from None
-        llm_gate.record(model=model, input_tokens=reply.input_tokens, output_tokens=reply.output_tokens,
-                        reserved_usd=decision.reserved_usd)
+        if decision is not None:
+            llm_gate.record(model=model, input_tokens=reply.input_tokens, output_tokens=reply.output_tokens,
+                            reserved_usd=decision.reserved_usd)
         if bound is not None or body.case_version is not None:
             reauthorize(body, request, response, store, user)
         if documents:
@@ -345,7 +361,8 @@ def create_router(cases, code):
             reauthorize(body, request, response, store, user)
         if documents:
             documents.validate_files(store)
-        notice = assistant_notice(provider)
+        notice = (assistant_notice(provider) if desktop_profile is None else
+                  'AI help explains administrative information, not technical correctness. Recognized personal details are removed before your question and selected context use the desktop AI connection. Assistant chat is not stored by Batatis.')
         response.headers['X-Batatis-Notice'] = notice
         return AssistResult(answer=answer, cited=cited, removed_citations=removed, notice=notice, context=bound,
             attachments=documents.attachments if documents else [], document_references=references)

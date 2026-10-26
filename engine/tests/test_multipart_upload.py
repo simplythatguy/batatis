@@ -44,6 +44,31 @@ def test_multipart_file_selection_and_exact_binary_roundtrip(upload, boundary, p
     assert store.get_file(cid, response.json()['id'])['data'] == pdf
 
 
+def test_browser_utf8_filename_preserves_the_name_and_binary_payload(upload):
+    client, store, cid = upload
+    pdf = b'%PDF-1.4\r\n\x00\xff\x80 synthetic binary\r\n%%EOF\n'
+    name = 'plan données 中文 100% #.pdf'
+    body = multipart('WebKitBoundary', [('file', name, pdf)])
+    response = client.post(f'/api/cases/{cid}/files', content=body,
+                           headers={'content-type': 'multipart/form-data; boundary=WebKitBoundary'})
+    assert response.status_code == 201, response.text
+    assert response.json()['name'] == name
+    file = store.get_file(cid, response.json()['id'])
+    assert file['data'] == pdf
+    downloaded = client.get(f'/api/cases/{cid}/files/{file["id"]}')
+    assert downloaded.content == pdf
+    assert "filename*=UTF-8''plan%20donn%C3%A9es%20%E4%B8%AD%E6%96%87%20100%25%20%23.pdf" in downloaded.headers['content-disposition']
+
+
+def test_multipart_invalid_utf8_in_a_filename_still_fails_closed(upload):
+    client, store, cid = upload
+    body = multipart('WebKitBoundary', [('file', 'name.pdf', b'%PDF synthetic')]).replace(b'name.pdf', b'name\xff.pdf')
+    response = client.post(f'/api/cases/{cid}/files', content=body,
+                           headers={'content-type': 'multipart/form-data; boundary=WebKitBoundary'})
+    assert response.status_code == 400
+    assert store.list_files(cid) == []
+
+
 @pytest.mark.parametrize('multipart_body', [False, True], ids=['raw', 'multipart'])
 @pytest.mark.parametrize('extra', [0, 1], ids=['at-pdf-cap', 'over-pdf-cap'])
 def test_pdf_payload_limit_excludes_bounded_multipart_framing(upload, multipart_body, extra):

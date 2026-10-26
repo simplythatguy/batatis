@@ -22,7 +22,7 @@ def second_printing_proven(codes) -> bool:
     if path is None or not Path(path).is_file():
         return False
     try:
-        with closing(sqlite3.connect(f'file:{Path(path)}?mode=ro', uri=True)) as con:
+        with closing(sqlite3.connect(f'{Path(path).resolve().as_uri()}?mode=ro', uri=True)) as con:
             row = con.execute("SELECT value FROM meta WHERE key='stats'").fetchone()
     except sqlite3.Error:
         return False

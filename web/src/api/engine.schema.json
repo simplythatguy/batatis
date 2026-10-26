@@ -3085,9 +3085,16 @@
           "type": "array"
         },
         "input_tokens": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
           "default": 0,
-          "title": "Input Tokens",
-          "type": "integer"
+          "title": "Input Tokens"
         },
         "missing": {
           "default": [],
@@ -3110,9 +3117,16 @@
           "title": "Model"
         },
         "output_tokens": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
           "default": 0,
-          "title": "Output Tokens",
-          "type": "integer"
+          "title": "Output Tokens"
         },
         "pages_sent": {
           "default": 0,
@@ -5224,9 +5238,16 @@
           "type": "array"
         },
         "usd": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
           "default": 0,
-          "title": "Usd",
-          "type": "number"
+          "title": "Usd"
         },
         "verifier": {
           "title": "Verifier",
@@ -6363,9 +6384,16 @@
           "type": "integer"
         },
         "input_tokens": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
           "default": 0,
-          "title": "Input Tokens",
-          "type": "integer"
+          "title": "Input Tokens"
         },
         "model": {
           "anyOf": [
@@ -6380,9 +6408,16 @@
           "title": "Model"
         },
         "output_tokens": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
           "default": 0,
-          "title": "Output Tokens",
-          "type": "integer"
+          "title": "Output Tokens"
         },
         "pointed": {
           "default": 0,
@@ -10006,9 +10041,16 @@
           "type": "integer"
         },
         "input_tokens": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
           "default": 0,
-          "title": "Input Tokens",
-          "type": "integer"
+          "title": "Input Tokens"
         },
         "method": {
           "title": "Method",
@@ -10027,9 +10069,16 @@
           "title": "Model"
         },
         "output_tokens": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
           "default": 0,
-          "title": "Output Tokens",
-          "type": "integer"
+          "title": "Output Tokens"
         },
         "requests": {
           "default": 0,

@@ -476,10 +476,10 @@ export interface DocumentReview {
   effort: string | null;
   facts: ReviewFact[];
   flags: ReviewFlag[];
-  input_tokens: number;
+  input_tokens: number | null;
   missing: ReviewItem[];
   model: string | null;
-  output_tokens: number;
+  output_tokens: number | null;
   pages_sent: number;
   provisions: CitedProvision[];
   questions: ReviewItem[];
@@ -798,7 +798,7 @@ export interface IdentifyTrace {
   seconds: number;
   spend: Record<string, unknown>;
   stages: StageRecord[];
-  usd: number;
+  usd: number | null;
   verifier: string;
 }
 
@@ -987,9 +987,9 @@ export interface MessagesResult {
 
 export interface ModelPass {
   dropped: number;
-  input_tokens: number;
+  input_tokens: number | null;
   model: string | null;
-  output_tokens: number;
+  output_tokens: number | null;
   pointed: number;
   proposed: number;
   reason: string | null;
@@ -1564,10 +1564,10 @@ export interface SourcePointer {
 export interface StageRecord {
   detail: string | null;
   errors: number;
-  input_tokens: number;
+  input_tokens: number | null;
   method: string;
   model: string | null;
-  output_tokens: number;
+  output_tokens: number | null;
   requests: number;
   seconds: number;
   stage: string;

@@ -55,11 +55,11 @@ class CaseScorings:
 
 
 def live_judge() -> Judge:
-    from . import llm_gate
+    from . import llm_gate, provider_routing
     from .identify.config import load_config
     from .identify.providers import scoring_ask, transports
     config = load_config()
-    if not llm_gate.fake_providers() and os.environ.get('BATATIS_LIVE') != '1' \
+    if not provider_routing.local_active() and not llm_gate.fake_providers() and os.environ.get('BATATIS_LIVE') != '1' \
             and not (config.screen == 'elephant' and llm_gate.provider_enabled('elephant')):
         raise RelevanceUnavailable('BATATIS_LIVE is disabled')
     if not config.exhaustive:

@@ -1,5 +1,7 @@
 /** #/settings: who you are, your role (change uses the onboarding endpoint), how data is handled, sign out. */
 import { useId, useState, type ReactNode } from "react";
+import { DesktopSettings } from "../../desktop/DesktopSettings";
+import { useDesktop } from "../../desktop/host";
 import { AccountsError, type ApplicantKind, type AuthorityKey, type Role } from "../../api/accounts";
 import { PRIVACY_NOTICE } from "../../privacy";
 import { useAccount } from "../account";
@@ -8,22 +10,13 @@ import { PageHead, clockText, useCountdown } from "../auth/bits";
 import { APPLICANT_CHOICES, APPLICANT_LABEL, AUTHORITY_CHOICES, codeNeeded } from "../auth/onboardingSteps";
 import { saveOnboarding, signOut } from "../auth/useAuthGate";
 import { ArchivedApplications } from "./ArchivedApplications";
+import { Chips, Row } from "./rows";
 
 
 function roleLine(role: Role | null, applicantType: string | null, authority: string | null): string {
   if (role === "reviewer") return `Reviewer${authority ? ` · ${authorityName(authority)}` : ""}`;
   if (role === "applicant") return `Applicant${applicantType ? ` · ${APPLICANT_LABEL[applicantType] ?? applicantType}` : ""}`;
   return "Not set";
-}
-
-function Chips<T extends string>({ options, value, onPick, label }: { options: { value: T; label: string }[]; value: T | undefined; onPick: (v: T) => void; label: string }) {
-  return (
-    <div className="cf-chips" role="group" aria-label={label}>
-      {options.map((o) => (
-        <button key={o.value} type="button" className="cf-chip" aria-pressed={value === o.value} onClick={() => onPick(o.value)}>{o.label}</button>
-      ))}
-    </div>
-  );
 }
 
 function RoleEditor({ onCancel, onSaved }: { onCancel: () => void; onSaved: () => void }) {
@@ -94,18 +87,10 @@ function RoleEditor({ onCancel, onSaved }: { onCancel: () => void; onSaved: () =
   );
 }
 
-function Row({ label, children, action }: { label: string; children: ReactNode; action?: ReactNode }) {
-  return (
-    <div className="ac-row">
-      <span className="ac-row-label">{label}</span>
-      <span className="ac-row-value">{children}</span>
-      {action && <span className="ac-row-action">{action}</span>}
-    </div>
-  );
-}
-
 export function Settings({ phoneTools }: { phoneTools?: ReactNode }) {
   const { user } = useAccount();
+  // Local development's test people keep their role; the person switch replaces sign-in and onboarding.
+  const testPerson = useDesktop()?.workspace === "dev";
   const [editing, setEditing] = useState(false);
   const [saved, setSaved] = useState(false);
   const [leaving, setLeaving] = useState(false);
@@ -123,7 +108,7 @@ export function Settings({ phoneTools }: { phoneTools?: ReactNode }) {
               <Row label="Email">{user.email}<span className="ac-faint-tag">Can’t be changed here</span></Row>
               <Row
                 label="Role"
-                action={!editing && <button type="button" className="cf-btn is-xs" onClick={() => { setEditing(true); setSaved(false); }}>Change</button>}
+                action={!editing && !testPerson && <button type="button" className="cf-btn is-xs" onClick={() => { setEditing(true); setSaved(false); }}>Change</button>}
               >
                 {roleLine(user.role, user.applicant_type, user.authority)}
                 {saved && <span className="ac-saved" role="status">Saved</span>}
@@ -139,6 +124,8 @@ export function Settings({ phoneTools }: { phoneTools?: ReactNode }) {
           </section>
         )}
 
+        <DesktopSettings />
+
         <section className="ac-section" aria-labelledby="ac-s-data">
           <h2 id="ac-s-data" className="ac-section-title">How your data is handled</h2>
           <details className="cf-help">
@@ -152,7 +139,7 @@ export function Settings({ phoneTools }: { phoneTools?: ReactNode }) {
           <p className="ac-prose"><a className="acc-inline-link" href="#/accuracy">Read the accuracy report</a></p>
         </section>
 
-        {user && (
+        {user && !testPerson && (
           <section className="ac-section is-last">
             <button type="button" className="cf-btn is-sm" disabled={leaving} onClick={() => { setLeaving(true); void signOut(); }}>
               {leaving ? "Signing out…" : "Sign out"}

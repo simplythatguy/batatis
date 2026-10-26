@@ -1,5 +1,7 @@
 /** Rail footer avatar: initials that open a small menu (Settings, Sign out). */
 import { useEffect, useRef, useState } from "react";
+import { useDesktop } from "../../desktop/host";
+import { PeopleMenu } from "../../desktop/People";
 import { initials, useAccount } from "../account";
 import { Tip } from "../RelevanceRing";
 import { AcIcon, usePopover } from "./bits";
@@ -7,13 +9,14 @@ import { signOut } from "./useAuthGate";
 
 export function AccountButton() {
   const { user } = useAccount();
+  const testPerson = useDesktop()?.workspace === "dev";
   const pop = usePopover();
   const [tip, setTip] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const wasOpen = useRef(false);
 
   useEffect(() => {
-    if (pop.open) pop.panel.current?.querySelector<HTMLElement>("[role=menuitem]")?.focus();
+    if (pop.open) pop.panel.current?.querySelector<HTMLElement>("[role^=menuitem]")?.focus();
     else if (wasOpen.current && (document.activeElement === document.body || !document.activeElement)) pop.trigger.current?.focus();
     wasOpen.current = pop.open;
   }, [pop.open, pop.panel, pop.trigger]);
@@ -23,7 +26,7 @@ export function AccountButton() {
   const close = () => pop.setOpen(false);
 
   function onMenuKey(e: React.KeyboardEvent) {
-    const list = [...(pop.panel.current?.querySelectorAll<HTMLElement>("[role=menuitem]") ?? [])];
+    const list = [...(pop.panel.current?.querySelectorAll<HTMLElement>("[role^=menuitem]") ?? [])];
     const at = list.indexOf(document.activeElement as HTMLElement);
     const to = (n: number) => { e.preventDefault(); list[(n + list.length) % list.length]?.focus(); };
     if (e.key === "ArrowDown") to(at + 1);
@@ -60,12 +63,15 @@ export function AccountButton() {
             {user.name && <span className="ac-account-email">{user.email}</span>}
           </div>
           <hr role="separator" />
+          {testPerson && <><PeopleMenu /><hr role="separator" /></>}
           <a role="menuitem" tabIndex={-1} href="#/settings" onClick={close}>
             <AcIcon name="cog" size={16} />Settings
           </a>
-          <button role="menuitem" tabIndex={-1} type="button" disabled={leaving} onClick={() => { setLeaving(true); void signOut(); }}>
-            <AcIcon name="out" size={16} />{leaving ? "Signing out…" : "Sign out"}
-          </button>
+          {!testPerson && (
+            <button role="menuitem" tabIndex={-1} type="button" disabled={leaving} onClick={() => { setLeaving(true); void signOut(); }}>
+              <AcIcon name="out" size={16} />{leaving ? "Signing out…" : "Sign out"}
+            </button>
+          )}
         </div>
       )}
     </>

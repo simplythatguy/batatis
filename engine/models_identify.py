@@ -111,8 +111,8 @@ class StageRecord(BaseModel):
     model: str | None = None
     seconds: float = 0
     requests: int = 0
-    input_tokens: int = 0
-    output_tokens: int = 0
+    input_tokens: int | None = 0
+    output_tokens: int | None = 0
     errors: int = 0
     detail: str | None = None
 
@@ -147,7 +147,7 @@ class IdentifyTrace(BaseModel):
     dropped: list[DroppedPick] = []
     stages: list[StageRecord] = []
     spend: dict = {}
-    usd: float = 0
+    usd: float | None = 0
     seconds: float = 0
 
     # What a client reads about how the run went names no provider, model pin or credential (engine/public_names.py).

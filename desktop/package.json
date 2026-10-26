@@ -1,0 +1,27 @@
+{
+  "name": "batatis-desktop",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Batatis for macOS and Windows",
+  "author": "Batatis",
+  "main": "dist/main/main.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/copy-static.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node scripts/test.mjs",
+    "build:engine": "node scripts/build-engine.mjs",
+    "build:web": "npm --prefix ../web run build",
+    "package": "npm run build:web && npm run build && electron-builder --config electron-builder.cjs",
+    "package:dir": "npm run build:web && npm run build && electron-builder --config electron-builder.cjs --dir",
+    "smoke:packaged": "node scripts/smoke-packaged.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "24.9.1",
+    "electron": "44.9.3",
+    "electron-builder": "26.18.0",
+    "typescript": "7.0.2"
+  },
+  "dependencies": {
+    "ajv": "8.20.0"
+  }
+}
