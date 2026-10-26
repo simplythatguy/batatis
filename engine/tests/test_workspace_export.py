@@ -155,3 +155,17 @@ def test_live_signature_widget_geometry_is_still_verified():
     read = read_pdf(buf.getvalue(), 'moved.pdf')
     assert read.form_version is None
     assert all(value.status == 'not_found' for value in read.fields.values())
+
+
+def test_attachment_field_name_cannot_mask_the_same_name_on_the_form():
+    output = io.BytesIO()
+    draw = canvas.Canvas(output)
+    draw.drawString(48, 720, 'SYNTHETIC attachment with its own form field')
+    draw.acroForm.textfield(name='Signature1', x=48, y=650, width=200, height=24,
+                           value='SYNTHETIC attachment value')
+    draw.showPage(); draw.save()
+    case = Case()
+    result = export_case(case, draft=True, file_loader=attach(case, output.getvalue()))
+    read = read_pdf(result.pdf, 'package.pdf')
+    assert read.form_version == result.field_map
+    assert read.fields['Owner'].status == 'blank'

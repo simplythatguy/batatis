@@ -17,7 +17,7 @@ import psycopg
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from codedb import AmbiguousProvisionError
 
@@ -78,7 +78,13 @@ class ExportPreviewTooLarge(BaseModel):
     pdf_bytes: int
 
 
+def _optional_preview_pdf(schema):
+    # Windowed previews omit the PDF when only page images fit the budget.
+    schema['required'] = [key for key in schema.get('required', []) if key != 'pdf']
+
+
 class PackagePreview(BaseModel):
+    model_config = ConfigDict(json_schema_extra=_optional_preview_pdf)
     filename: str
     page_count: int
     start: int

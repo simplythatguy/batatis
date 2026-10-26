@@ -829,7 +829,7 @@ def _partially_flattened(reader, data: bytes, name: str, version: FormVersion) -
                 or page_no != version.pages.get(widget_name) or rect != version.widget_rects.get(widget_name)):
             return None
         prefix[widget_name] = widget
-    if set(fields) - attachment_names != set(prefix):
+    if set(fields) - (set(prefix) | attachment_names):
         return None
     out = _flattened(data, name, version)
     out.role = 'scc_form_fillable' if prefix else 'scc_form_flattened'

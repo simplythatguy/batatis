@@ -171,3 +171,17 @@ def test_window_still_renders_when_pdf_bytes_do_not_fit(tmp_path):
     assert body['start'] == 3 and len(body['pages']) == 2 and body['page_count'] >= 8
     assert 'pdf' not in body
     assert len(response.content) < RESPONSE_CAP
+
+
+def test_large_drawing_window_bounds_raster_size_while_preserving_page_dimensions():
+    from pypdf import PdfWriter
+    writer = PdfWriter()
+    writer.add_blank_page(width=612, height=792)
+    writer.add_blank_page(width=1800, height=1800)
+    output = io.BytesIO(); writer.write(output)
+    pages, total = page_images(output.getvalue(), start=1, max_pages=1, reserve_pdf=False)
+    assert total == 2 and len(pages) == 1
+    assert (pages[0].width, pages[0].height) == (1800, 1800)
+    image = Image.open(io.BytesIO(pages[0].png))
+    assert max(image.size) <= 1921
+    assert encoded(len(pages[0].png)) + ENTRY_BYTES < PAYLOAD_BUDGET

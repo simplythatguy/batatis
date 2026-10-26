@@ -17,6 +17,7 @@ from dataclasses import dataclass
 from ..pdfium_lock import pdfium_locked
 
 SCALE = 2.0                   # image pixels per PDF point
+WINDOW_MAX_EDGE = 1920        # large drawing sheets still yield a bounded, viewable first image
 COLORS = 32
 MAX_PAGES = 60
 RESPONSE_CAP = 4_500_000      # serverless response body limit
@@ -56,7 +57,8 @@ def page_images(pdf: bytes, *, budget: int = PAYLOAD_BUDGET,
         for index in range(start, min(count, start + max_pages)):
             page = doc[index]
             width, height = page.get_size()
-            bitmap = page.render(scale=SCALE, may_draw_forms=False)
+            scale = SCALE if reserve_pdf else min(SCALE, WINDOW_MAX_EDGE / max(width, height))
+            bitmap = page.render(scale=scale, may_draw_forms=False)
             try:
                 image = bitmap.to_pil().convert('RGB').quantize(colors=COLORS, method=Image.Quantize.FASTOCTREE)
             finally:
