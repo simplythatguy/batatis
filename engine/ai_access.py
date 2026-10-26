@@ -8,9 +8,14 @@ a code; a local engine without codes keeps every AI switch as it was.
 from __future__ import annotations
 
 import contextvars
+import hashlib
 import json
 import os
+import re
 import secrets
+
+# Long random codes make guessing hopeless; the same characters work in a header and in the desktop vault.
+CODE = re.compile(r'[A-Za-z0-9_-]{20,128}')
 
 # Set per request by the access guard; worker threads must run in a copy of the request's context.
 GRANTED: contextvars.ContextVar[bool] = contextvars.ContextVar('ai_access_granted', default=False)
@@ -23,7 +28,12 @@ def codes() -> dict[str, str]:
         return {}
     if not isinstance(raw, dict):
         return {}
-    return {name: code for name, code in raw.items() if isinstance(name, str) and name and isinstance(code, str) and len(code) >= 8}
+    return {name: code for name, code in raw.items() if isinstance(name, str) and name and isinstance(code, str) and CODE.fullmatch(code)}
+
+
+def fingerprint(code: str) -> str:
+    """Stored with an account, so changing a code's value, not only removing its name, turns its accounts off."""
+    return hashlib.sha256(code.encode()).hexdigest()
 
 
 def required() -> bool:
@@ -44,7 +54,8 @@ def granted(user) -> bool:
     if not required():
         return True
     name = getattr(user, 'ai_access', None) if user is not None else None
-    return bool(name) and name in codes()
+    current = codes().get(name) if name else None
+    return current is not None and secrets.compare_digest(fingerprint(current), getattr(user, 'ai_access_fingerprint', None) or '')
 
 
 def allowed() -> bool:

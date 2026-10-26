@@ -37,11 +37,11 @@ def transports(*, scoring, jev_model, anthropic):
 
     out.openai = complete
     if selected.screening and 'jev' in scoring and jev_model == 'jev-1.13.0':
-        out.jev = screening(selected.lease, log)
+        out.jev = screening(selected.lease, log, 'included' if selected.billing == 'included' else 'api')
     return out
 
 
-def screening(lease, log):
+def screening(lease, log, billing: str = 'api'):
     from ..identify.jevkit import client
     from ..identify import jev_runtime as runtime
     from ..identify.screen import JEV_MODEL, JEV_PROVIDER
@@ -93,6 +93,6 @@ def screening(lease, log):
             raise runtime.JevResponseError('desktop_screening_failed') from None
         finally:
             log.add(provider='jev', model=JEV_MODEL, input_tokens=reported[0] if reported else None,
-                    output_tokens=reported[1] if reported else None, usd=None, billing='api')
+                    output_tokens=reported[1] if reported else None, usd=None, billing=billing)
     ask.model, ask.method = JEV_MODEL, 'jev'
     return runtime._tracked(ask)

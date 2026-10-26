@@ -128,14 +128,14 @@ def create_router(cases):
         name = ai_access.name_for(body.code)
         if name is None:
             raise HTTPException(403, 'That access code isn’t valid')
-        user.ai_access = name
+        user.ai_access, user.ai_access_fingerprint = name, ai_access.fingerprint(ai_access.codes()[name])
         store.update_user(user, revoke_sessions=False)
         return AiAccess(required=ai_access.required(), granted=True)
 
     @router.delete('/ai-access', response_model=AiAccess)
     def ai_access_remove(request: Request):
         user = require_user(request).model_copy()
-        user.ai_access = None
+        user.ai_access = user.ai_access_fingerprint = None
         cases().update_user(user, revoke_sessions=False)
         return AiAccess(required=ai_access.required(), granted=ai_access.granted(user))
 

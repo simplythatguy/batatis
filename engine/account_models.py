@@ -32,6 +32,7 @@ class User(BaseModel):
     notifications_seen_at: str | None = None
     # The name of the AI access code this account entered (engine/ai_access.py), never the code.
     ai_access: str | None = None
+    ai_access_fingerprint: str | None = None
 
 
 class UserResult(BaseModel):

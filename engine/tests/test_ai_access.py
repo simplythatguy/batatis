@@ -10,7 +10,7 @@ from engine.api import create_app
 from engine.identify.screen import Judge
 from engine.store import CaseStore
 
-CODES = '{"judges": "judges-code-1234", "team": "team-code-5678", "short": "x"}'
+CODES = '{"judges": "judges-code-aaaaaaaaaaaaaaaa", "team": "team-code-bbbbbbbbbbbbbbbbbbbb", "short": "short-code-1", "spaced": "has spaces in this code"}'
 
 
 @pytest.fixture
@@ -49,8 +49,8 @@ def signup(client, email):
 
 def test_named_codes_are_parsed_and_matched_without_revealing_them(monkeypatch):
     monkeypatch.setenv('BATATIS_AI_ACCESS_CODES', CODES)
-    assert ai_access.codes() == {'judges': 'judges-code-1234', 'team': 'team-code-5678'}, 'codes under 8 characters never count'
-    assert ai_access.name_for(' team-code-5678 ') == 'team'
+    assert ai_access.codes() == {'judges': 'judges-code-aaaaaaaaaaaaaaaa', 'team': 'team-code-bbbbbbbbbbbbbbbbbbbb'}, 'short codes and codes a header or the desktop vault can’t carry never count'
+    assert ai_access.name_for(' team-code-bbbbbbbbbbbbbbbbbbbb ') == 'team'
     assert ai_access.name_for('x') is None and ai_access.name_for('') is None and ai_access.name_for(None) is None
     monkeypatch.setenv('BATATIS_AI_ACCESS_CODES', 'not json')
     assert ai_access.codes() == {}
@@ -71,12 +71,12 @@ def test_ai_stays_off_until_an_account_enters_a_current_code(app):
         assert plain(client.get('/auth/ai-access')) == {'required': True, 'granted': False}
         assert probe(client) == {'request': False, 'worker': False}
 
-        refused = client.post('/auth/ai-access', json={'code': 'judges-code-0000'})
+        refused = client.post('/auth/ai-access', json={'code': 'judges-code-zzzzzzzzzzzzzzzz'})
         assert refused.status_code == 403 and 'judges' not in refused.text
-        assert plain(client.post('/auth/ai-access', json={'code': 'judges-code-1234'})) == {'required': True, 'granted': True}
+        assert plain(client.post('/auth/ai-access', json={'code': 'judges-code-aaaaaaaaaaaaaaaa'})) == {'required': True, 'granted': True}
         assert probe(client) == {'request': True, 'worker': True}
         me = client.get('/auth/me').json()['user']
-        assert me['ai_access'] == 'judges' and 'judges-code-1234' not in str(me)
+        assert me['ai_access'] == 'judges' and 'judges-code-aaaaaaaaaaaaaaaa' not in str(me)
 
         with TestClient(app, base_url='http://localhost') as other:
             signup(other, 'other@example.test')
@@ -89,9 +89,9 @@ def test_ai_stays_off_until_an_account_enters_a_current_code(app):
 def test_removing_a_code_name_turns_its_accounts_off(app, monkeypatch):
     with TestClient(app, base_url='http://localhost') as client:
         signup(client, 'applicant@example.test')
-        client.post('/auth/ai-access', json={'code': 'team-code-5678'})
+        client.post('/auth/ai-access', json={'code': 'team-code-bbbbbbbbbbbbbbbbbbbb'})
         assert probe(client)['request'] is True
-        monkeypatch.setenv('BATATIS_AI_ACCESS_CODES', '{"judges": "judges-code-1234"}')
+        monkeypatch.setenv('BATATIS_AI_ACCESS_CODES', '{"judges": "judges-code-aaaaaaaaaaaaaaaa"}')
         assert probe(client) == {'request': False, 'worker': False}
         assert plain(client.get('/auth/ai-access')) == {'required': True, 'granted': False}
 
@@ -123,3 +123,12 @@ def test_scoring_batches_in_worker_threads_keep_the_request_access(monkeypatch):
         finally:
             ai_access.GRANTED.reset(token)
         assert seen and set(seen) == {granted}
+
+
+def test_changing_a_code_value_turns_its_accounts_off_even_under_the_same_name(app, monkeypatch):
+    with TestClient(app, base_url='http://localhost') as client:
+        signup(client, 'applicant@example.test')
+        client.post('/auth/ai-access', json={'code': 'judges-code-aaaaaaaaaaaaaaaa'})
+        assert probe(client)['request'] is True
+        monkeypatch.setenv('BATATIS_AI_ACCESS_CODES', '{"judges": "judges-code-rotated-cccccccccccc"}')
+        assert probe(client) == {'request': False, 'worker': False}

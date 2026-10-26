@@ -10705,6 +10705,18 @@
           "default": null,
           "title": "Ai Access"
         },
+        "ai_access_fingerprint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ai Access Fingerprint"
+        },
         "applicant_type": {
           "anyOf": [
             {
@@ -10798,7 +10810,8 @@
         "onboarded",
         "created_at",
         "notifications_seen_at",
-        "ai_access"
+        "ai_access",
+        "ai_access_fingerprint"
       ],
       "title": "User",
       "type": "object"

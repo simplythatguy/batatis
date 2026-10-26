@@ -480,13 +480,13 @@ Voice needs an xAI key, `XAI_API_KEY`, which is not in the example file. See the
 
 #### AI access codes
 
-On the hosted website, AI features stay off for an account until it enters an access code in **Settings**. Each code has a name, so you can turn one off without touching the others. Set the codes on the server, as JSON from names to codes of at least 8 characters:
+On the hosted website, AI features stay off for an account until it enters an access code in **Settings**. Each code has a name, so you can turn one off without touching the others. Set the codes on the server, as JSON from names to codes. Each code needs at least 20 characters, using only letters, digits, `-` and `_`, so that nobody can guess one:
 
 ```dotenv
-BATATIS_AI_ACCESS_CODES='{"judges":"pick-a-long-code","team":"another-long-code"}'
+BATATIS_AI_ACCESS_CODES='{"judges":"bat-3fK9qLm2Xw7pTz1vRb8Nc","team":"bat-Q7mZ2xK8pL4wR9vT1bN6c"}'
 ```
 
-An account keeps only the name of the code it entered. Removing a name turns AI off for every account that used it. A code also lets the desktop app use the server's keys through **Batatis AI**: the app sends each AI step with the code to the website, which makes the call and never shares a key. Every use counts against the daily spend cap.
+An account keeps only the code's name and a fingerprint of it, never the code. Removing a name, or changing its code, turns AI off for every account that used it. After ten wrong codes in ten minutes, the server stops checking codes from that address for a while. A code also lets the desktop app use the server's keys through **Batatis AI**: the app sends each AI step with the code to the website, which makes the call and never shares a key. Every use counts against the daily spend cap.
 
 On your own computer, leave the setting empty and AI follows `BATATIS_LIVE` as before. The hosted site, where `VERCEL` is set, always needs a code.
 

@@ -104,7 +104,8 @@ export class ProviderDispatch {
           return { ok: false, reason: "refused_or_invalid", message: "The screening request did not match its pinned profile." };
         }
         const response = await abortable((this.#screensHosted() ? this.#hosted : this.#keys).screen(args.body, abort.signal), abort.signal);
-        reply = response ? { ok: true, value: response } : { ok: false, reason: "auth", message: "Add the optional screening key in Settings." };
+        reply = response ? { ok: true, value: response } : { ok: false, reason: "auth",
+          message: this.#screensHosted() ? "Add your Batatis access code in Settings." : "Add the optional screening key in Settings." };
       } else return { ok: false, reason: "unavailable", message: "Unknown host call." };
       return this.valid(lease) && !abort.signal.aborted ? reply : cancelled();
     } catch {
