@@ -1,7 +1,7 @@
 import type { IntakeRecord, IntakeResult, IdentifyResult } from "./api/types.gen";
 import { AUTHORITIES } from "./config";
 import { applyDescription } from "./intake";
-import { asLocal, confirmedAnswer, localField } from "./intakeFields";
+import { asLocal, confirmedAnswer, isWritingField, localField } from "./intakeFields";
 import { codeQuestion, identifyCandidates, readGroups } from "./intakeView";
 import { AUTHORITY_ONLY_FIELDS, professionalConfirmed } from "./professional";
 import type { Candidate, CandidateAnswer, Case, EvidenceDraft, Fact, Gap, ListedEvidence, ProcessFieldId, SectionCRow } from "./types";
@@ -663,6 +663,8 @@ export function reducer(c: Case, a: Action): Case {
     case "confirmFact":
       return reducer(c, { type: "confirmFacts", ids: [a.id] });
     case "dismissFact":
+      // A writing proposal is separate from the applicant's confirmed answer.
+      if (c.facts.some(f => f.id === a.id && f.kind === "proposed" && isWritingField(f.field))) return { ...c, facts: c.facts.filter(f => f.id !== a.id) };
       return reducer(c, { type: "rejectFacts", ids: [a.id] });
     case "confirmFacts": {
       let next = c;

@@ -1,0 +1,175 @@
+/* The application owns its panes; the shell and the browser page never scroll behind them. */
+.cf-main:has(.aw-workspace) { overflow: hidden; display: flex; }
+.aw-workspace { flex: 1; min-width: 0; min-height: 0; height: 100%; display: flex; flex-direction: column; position: relative; color: var(--cf-text); }
+.aw-empty { max-width: 680px; margin: 80px auto; padding: 24px; display: flex; flex-direction: column; align-items: flex-start; gap: 20px; }
+.aw-empty h1 { font-size: 30px; letter-spacing: -.03em; }
+.aw-subbar { display: flex; align-items: center; gap: 8px; flex-shrink: 0; padding: 12px 22px; min-height: 60px; flex-wrap: wrap; }
+.aw-steps { display: flex; align-items: center; gap: 4px; }
+.aw-steps a { display: inline-flex; align-items: center; gap: 6px; color: var(--cf-text-3); text-decoration: none; padding: 7px 9px; white-space: nowrap; border-radius: 8px; font-size: 13px; }
+.aw-steps a[aria-current] { color: var(--cf-text); background: rgba(17,24,39,.05); }
+.aw-count { font-size: 11px; font-variant-numeric: tabular-nums; }
+.aw-tool { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 30px; min-height: 32px; padding: 5px 7px; background: transparent; border: 0; border-radius: 7px; color: var(--cf-text-2); font: inherit; font-size: 13px; cursor: pointer; white-space: nowrap; }
+.aw-tool:disabled { opacity: .4; cursor: default; }
+.aw-zoom { display: flex; align-items: center; gap: 2px; color: var(--cf-text-3); font-size: 11px; font-variant-numeric: tabular-nums; }
+.aw-zoom span { min-width: 34px; text-align: center; }
+.aw-status { display: inline-flex; align-items: center; gap: 7px; margin-left: auto; font-size: 12px; white-space: nowrap; color: var(--cf-text-2); }
+.aw-outline { position: relative; }
+.aw-outline summary { list-style: none; }
+.aw-outline summary::-webkit-details-marker, .aw-block-menu summary::-webkit-details-marker { display: none; }
+.aw-outline nav, .aw-block-popover { position: absolute; z-index: 30; top: calc(100% + 6px); left: 0; padding: 6px; border: 1px solid transparent; border-radius: 12px; background: var(--cf-surface); box-shadow: var(--cf-shadow); min-width: 210px; max-height: 60vh; overflow: auto; overscroll-behavior: contain; }
+.aw-outline button, .aw-block-popover button, .aw-block-popover a { display: flex; align-items: center; gap: 12px; padding: 9px 10px; width: 100%; font: inherit; font-size: 13px; text-align: left; background: transparent; border: 0; border-radius: 6px; color: var(--cf-text); text-decoration: none; cursor: pointer; white-space: nowrap; }
+.aw-outline button > span { color: var(--cf-text-2); }
+.aw-paper-scroll, .aw-step-scroll { min-width: 0; min-height: 0; flex: 1; overflow: auto; overscroll-behavior: contain; padding: 0 28px 70px; }
+.aw-paper { background: var(--cf-surface); width: min(100%, 740px); min-width: 280px; margin: 0 auto; padding: 44px 54px 50px; border-radius: 5px; box-shadow: 0 22px 65px -25px rgba(17,24,39,.18); font-size: 14px; line-height: 1.65; }
+.aw-paper h1 { margin: 0; font-size: 19px; font-weight: 600; letter-spacing: -.025em; line-height: 1.35; }
+.aw-paper-meta { color: var(--cf-text-3); font-size: 11px; margin: 6px 0 28px; }
+.aw-paper section { scroll-margin-top: 18px; outline-offset: 5px; }
+.aw-paper h2 { display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px; font-size: 15px; font-weight: 600; margin: 30px 0 10px; letter-spacing: -.015em; }
+.aw-paper h2 span { font-size: 11px; font-weight: 400; color: var(--cf-text-3); white-space: nowrap; }
+.aw-block { position: relative; display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 12px; padding: 8px 32px 8px 6px; margin: 0 -6px; border-radius: 6px; scroll-margin-top: 60px; }
+.aw-block.is-narrative { grid-template-columns: minmax(0,1fr); row-gap: 0; margin-top: 9px; }
+.aw-block.is-narrative .aw-block-label, .aw-block.is-narrative .aw-block-content { grid-column: 1; }
+.aw-block-label { align-self: start; font-size: 12px; color: var(--cf-text-3); line-height: 24px; }
+.aw-block-content { min-width: 0; }
+.aw-paper-input { display: block; width: 100%; padding: 0 3px; margin: 0 -3px; box-sizing: content-box; font: inherit; line-height: 1.65; letter-spacing: inherit; color: var(--cf-text); border: 0; background: transparent; border-radius: 4px; resize: none; overflow: hidden; min-height: 24px; outline-offset: 3px; }
+.aw-paper-input:focus { outline: 1px solid var(--cf-focus); background: var(--cf-surface); }
+.aw-paper-value { white-space: pre-wrap; margin: 0; overflow-wrap: anywhere; line-height: 24px; }
+.aw-block-menu { position: absolute; right: 0; top: 8px; }
+.aw-block-menu summary { display: flex; align-items: center; justify-content: center; list-style: none; cursor: pointer; width: 26px; height: 26px; border-radius: 6px; color: var(--cf-text-3); }
+.aw-block-popover { right: 0; left: auto; min-width: 150px; }
+.aw-block-menu.opens-up .aw-block-popover { top: auto; bottom: calc(100% + 6px); }
+.aw-ai-mark { position: absolute; left: -21px; top: 11px; display: inline-flex; color: var(--cf-text-3); }
+.aw-request { grid-column: 1 / -1; padding: 9px 12px; border-left: 2px solid var(--cf-text-3); background: rgba(17,24,39,.035); margin: 2px 0 6px; font-size: 13px; }
+.aw-request p { margin: 3px 0 0; white-space: pre-wrap; }
+.aw-missing { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 6px; color: var(--cf-text-2); font-size: 12px; margin-bottom: 3px; }
+.aw-na { color: var(--cf-text-3); font-size: 12px; margin: 4px 0 0; }
+.aw-change { display: inline-block; font-size: 12px; margin-top: 4px; }
+.aw-read-only { color: var(--cf-text-3); font-size: 12px; }
+.aw-suggestion { margin-top: 8px; background: rgba(17,24,39,.025); border: 1px dashed var(--cf-line-2); border-radius: 7px; padding: 10px 12px; color: var(--cf-text-2); }
+.aw-suggestion p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.aw-suggestion del { color: var(--cf-text-3); text-decoration-thickness: 1px; }
+.aw-suggestion ins { text-decoration: none; background: rgba(17,24,39,.07); border-bottom: 1px dashed var(--cf-text-3); }
+.aw-suggestion-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin-top: 8px; }
+.aw-suggestion-label { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; margin-right: auto; color: var(--cf-text-3); }
+.aw-reference { margin: 6px 0; }
+.aw-reference .cf-cite { font-size: 12px; }
+.aw-lookups { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+.aw-lookup { padding: 0 5px; border: 1px solid var(--cf-line-2); border-radius: 5px; font-size: 11px; font-family: var(--cf-mono); }
+.aw-lock { display: inline-flex; align-items: center; gap: 4px; color: var(--cf-text-3); font-size: 11px; margin-right: 3px; }
+.aw-code-label { display: block; color: var(--cf-text-3); font-size: 10px; margin-bottom: 5px; }
+.aw-intent { font-size: 12px; color: var(--cf-text-2); }
+.aw-intent summary { cursor: pointer; color: var(--cf-text-3); }
+.aw-selection-bar { position: fixed; z-index: 70; padding: 4px; border-radius: 10px; background: #16181d; color: #fff; box-shadow: 0 8px 30px rgba(0,0,0,.2); font-size: 12px; }
+.aw-selection-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 1px; }
+.aw-selection-bar button { display: inline-flex; align-items: center; justify-content: center; gap: 4px; border: 0; border-radius: 6px; background: transparent; color: inherit; font: inherit; padding: 7px 9px; white-space: nowrap; cursor: pointer; }
+.aw-selection-bar button:disabled { opacity: .45; cursor: default; }
+.aw-selection-actions button:last-child { margin-left: auto; }
+.aw-rewrite-form { display: flex; gap: 4px; margin-top: 4px; }
+.aw-rewrite-form input { min-width: 0; flex: 1; border: 1px solid #8b909b; border-radius: 6px; background: #fff; color: #14161b; padding: 8px 10px; font: inherit; }
+.aw-notice { margin: 0 22px 8px; flex-shrink: 0; font-size: 12px; color: var(--cf-text-2); }
+.aw-toast { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); z-index: 80; background: #16181d; color: #fff; border: 1px solid transparent; border-radius: 12px; box-shadow: var(--cf-shadow); padding: 10px 14px; display: flex; align-items: center; gap: 14px; width: max-content; max-width: calc(100% - 32px); font-size: 13px; }
+.aw-toast span { overflow-wrap: anywhere; }
+.aw-toast button { background: transparent; border: 0; color: inherit; font: inherit; padding: 4px; cursor: pointer; white-space: nowrap; }
+.aw-history-list { list-style: none; padding: 0; margin: 16px 0; }
+.aw-history-list li { padding: 16px 0; border-bottom: 1px solid var(--cf-line); }
+.aw-history-list h3 { font-size: 14px; margin: 6px 0; }
+.aw-history-list details { color: var(--cf-text-2); font-size: 13px; }
+.aw-history-list summary { cursor: pointer; margin-bottom: 8px; }
+.aw-history-list p { white-space: pre-wrap; overflow-wrap: anywhere; }
+.aw-history-list .cf-btn { margin-top: 10px; }
+.aw-dialog-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.aw-step-title { font-size: 24px; letter-spacing: -.025em; font-weight: 600; margin: 10px 0 18px; }
+.aw-sign { max-width: 720px; margin: 0 auto; }
+.aw-card { background: var(--cf-surface); border-radius: 14px; padding: 20px 24px; margin-bottom: 14px; box-shadow: 0 1px 2px rgba(17,24,39,.025); }
+.aw-consent { font-size: 13px; color: var(--cf-text-2); }
+.aw-check-label { display: flex; align-items: flex-start; gap: 11px; cursor: pointer; }
+.aw-check-label input[type=checkbox] { appearance: none; flex: 0 0 16px; width: 16px; height: 16px; min-width: 16px; margin: 3px 0 0; padding: 0; border: 1px solid var(--cf-text-3); border-radius: 4px; background: transparent; cursor: pointer; }
+.aw-check-label input:checked { background: #16181d; border-color: #16181d; }
+.aw-check-label input:checked::after { content: ""; display: block; width: 4px; height: 8px; border: solid white; border-width: 0 1.5px 1.5px 0; transform: rotate(45deg); margin: 1px auto; }
+.aw-check-label input:disabled { opacity: .55; cursor: default; }
+.aw-consent details { margin: 8px 0 0 27px; }
+.aw-consent summary { color: var(--cf-text-3); cursor: pointer; }
+.aw-consent details p { font-size: 12px; line-height: 1.7; }
+.aw-signer { display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 12px; align-items: start; }
+.aw-signer h2 { margin: 0; font-size: 16px; font-weight: 600; overflow-wrap: anywhere; }
+.aw-signer p { margin: 3px 0 0; }
+.aw-sign-state { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--cf-text-3); }
+.aw-signer-actions { display: flex; flex-wrap: wrap; gap: 8px; grid-column: 1 / -1; margin-top: 6px; }
+.aw-saved-signature { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; font-size: 12px; color: var(--cf-text-3); }
+.aw-saved-signature img { max-width: 100%; max-height: 80px; object-fit: contain; }
+.aw-saved-signature.is-stale img { opacity: .4; }
+.aw-sign-dialog { width: min(94vw, 520px); max-height: calc(100dvh - 32px); overflow: auto; overscroll-behavior: contain; }
+.aw-sign-dialog .cf-modal-body { padding-bottom: 12px; }
+.aw-input-label { display: flex; flex-direction: column; gap: 6px; margin: 16px 0; font-size: 12px; color: var(--cf-text-2); }
+.aw-input-label input { font: inherit; font-size: 14px; padding: 9px 12px; width: 100%; min-width: 0; border: 1px solid var(--cf-line-ctl); border-radius: 8px; background: #fff; color: var(--cf-text); }
+.aw-sign-modes { display: flex; align-items: center; gap: 5px; margin: 12px 0; }
+.aw-sign-modes button { font: inherit; font-size: 13px; background: transparent; color: var(--cf-text-3); border: 0; padding: 6px 10px; border-radius: 7px; cursor: pointer; }
+.aw-sign-modes button[aria-pressed=true] { color: var(--cf-text); background: rgba(17,24,39,.07); }
+.aw-sign-pad { display: block; width: 100%; height: 150px; border: 1px solid var(--cf-line-ctl); border-radius: 10px; touch-action: none; margin-bottom: 6px; }
+.aw-attestation { font-size: 12px; color: var(--cf-text-2); line-height: 1.7; margin: 18px 0 0; }
+.aw-next { margin-top: 24px; }
+.aw-send { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0,1fr) 330px; gap: 22px; padding: 0 22px 24px; overflow: hidden; }
+.aw-send-side.cf-side { max-height: none; overflow: auto; overscroll-behavior: contain; padding: 20px; min-height: 0; align-self: stretch; }
+.aw-send-side .cf-submit { margin-top: 10px; }
+.aw-flags-heading { font-size: 16px; font-weight: 600; letter-spacing: -.015em; margin: 0; }
+.aw-send-side .cf-row-text { font-size: 12px; }
+.aw-send-side .cf-row-go { white-space: nowrap; }
+.aw-download-options { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+.aw-package-preview { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+.aw-preview-bar { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 5px 4px 12px; color: var(--cf-text-3); font-size: 12px; flex-wrap: wrap; }
+.aw-package-pages { overflow: auto; min-height: 0; flex: 1; overscroll-behavior: contain; padding: 0 8px 40px; }
+.aw-preview-scale { margin: 0 auto; min-width: 80%; max-width: none; }
+.aw-preview-page { max-width: none; width: 100%; margin: 0 auto 16px; background: #fff; border-radius: 3px; box-shadow: 0 6px 25px -12px rgba(17,24,39,.18); }
+.aw-preview-page img { width: 100%; height: auto; display: block; outline: 1px solid rgba(0,0,0,.1); outline-offset: -1px; }
+.aw-page-placeholder, .aw-preview-empty { min-height: 160px; height: 100%; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 14px; padding: 20px; text-align: center; font-size: 13px; color: var(--cf-text-3); }
+.aw-preview-empty { flex: 1; }
+.aw-workspace button:focus-visible, .aw-workspace summary:focus-visible, .aw-workspace a:focus-visible { outline: 2px solid var(--cf-focus); outline-offset: 3px; }
+@media (hover: hover) {
+  .aw-steps a:hover, .aw-tool:not(:disabled):hover, .aw-outline button:hover, .aw-block-popover button:hover, .aw-block-popover a:hover, .aw-block-menu summary:hover { background: rgba(17,24,39,.05); color: var(--cf-text); }
+  .aw-paper-input:not(:focus):hover { background: rgba(17,24,39,.025); }
+  .aw-selection-bar button:not(:disabled):hover { background: rgba(255,255,255,.12); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .aw-tool:not(:disabled):active, .aw-block-popover button:active { scale: .96; transition: scale 150ms ease-out; }
+}
+@container (max-width: 900px) {
+  .aw-send { grid-template-columns: minmax(0,1fr) 300px; gap: 14px; padding-inline: 14px; }
+}
+@media (max-width: 900px) {
+  .aw-send { grid-template-columns: minmax(0,1fr) 300px; gap: 14px; padding-inline: 14px; }
+}
+@media (max-width: 740px) {
+  .aw-subbar { padding: 8px 10px; gap: 2px; }
+  .aw-history-button span { display: none; }
+  .aw-status { font-size: 11px; gap: 4px; }
+  .aw-steps a { padding: 7px 6px; gap: 4px; }
+  .aw-paper-scroll, .aw-step-scroll { padding: 0 14px 50px; }
+  .aw-paper { padding: 26px 24px 36px; }
+  .aw-block { grid-template-columns: minmax(0,1fr); row-gap: 0; margin-top: 8px; }
+  .aw-block-label, .aw-block-content { grid-column: 1; }
+  .aw-ai-mark { left: -17px; }
+  .aw-send { display: flex; flex-direction: column-reverse; overflow: auto; overscroll-behavior: contain; gap: 20px; }
+  .aw-send-side.cf-side { flex-shrink: 0; overflow: visible; height: auto; position: static; }
+  .aw-package-preview { min-height: 500px; flex-shrink: 0; height: 70dvh; }
+  .aw-sign-state { grid-column: 1 / -1; }
+  .aw-card { padding: 18px; }
+}
+@media (max-width: 380px) {
+  .aw-subbar .aw-zoom span { display: none; }
+  .aw-subbar { column-gap: 0; }
+  .aw-outline .aw-tool { min-width: 24px; padding: 4px; }
+  .aw-paper { min-width: 240px; padding-inline: 18px; }
+  .aw-status { margin-left: 2px; }
+}
+
+@container main (max-width: 740px) {
+  .aw-send { display: flex; flex-direction: column-reverse; overflow: auto; overscroll-behavior: contain; gap: 20px; }
+  .aw-send-side.cf-side { flex-shrink: 0; overflow: visible; height: auto; position: static; }
+  .aw-package-preview { min-height: 500px; flex-shrink: 0; height: 70dvh; }
+  .aw-paper-scroll, .aw-step-scroll { padding-inline: 14px; }
+  .aw-paper { padding: 26px 24px 36px; }
+  .aw-block { grid-template-columns: minmax(0,1fr); row-gap: 0; margin-top: 8px; }
+  .aw-block-label, .aw-block-content { grid-column: 1; }
+  .aw-subbar { padding-inline: 10px; gap: 2px; }
+  .aw-history-button span { display: none; }
+}
