@@ -663,6 +663,8 @@ export function reducer(c: Case, a: Action): Case {
     case "confirmFact":
       return reducer(c, { type: "confirmFacts", ids: [a.id] });
     case "dismissFact":
+      // A writing proposal is separate from the applicant's confirmed answer.
+      if (c.facts.some(f => f.id === a.id && f.kind === "proposed")) return { ...c, facts: c.facts.filter(f => f.id !== a.id) };
       return reducer(c, { type: "rejectFacts", ids: [a.id] });
     case "confirmFacts": {
       let next = c;
