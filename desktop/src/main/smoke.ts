@@ -229,7 +229,7 @@ export async function runSmoke(deps: SmokeDeps): Promise<void> {
 
       await page("location.hash = '#/settings'");
       await until(async () => /Workspace/.test(await text()) && /AI connections/.test(await text()), "desktop settings");
-      const pick = async (picker: string, item: string) => {
+      const pick = async (picker: string, item: string, shot?: string) => {
         const done = await page(`(() => {
           const button = [...document.querySelectorAll('.dk-picker-btn')].find((el) => el.getAttribute('aria-label').startsWith(${JSON.stringify(`${picker}:`)}));
           if (!button) return false;
@@ -237,8 +237,15 @@ export async function runSmoke(deps: SmokeDeps): Promise<void> {
           return true;
         })()`);
         assert.equal(done, true, `picker exists: ${picker}`);
+        if (shot) {
+          await page("document.querySelector('.dk-picker-menu')?.scrollIntoView({ block: 'center' })");
+          await capture(shot, "The workflow picker lists every connection's models; ChatGPT and Claude rows offer install, sign-in and sign-out.");
+          const menuText = string(await page("document.querySelector('.dk-picker-menu')?.innerText ?? ''"));
+          assert.match(menuText, /ChatGPT[\s\S]*Luna[\s\S]*Claude[\s\S]*Haiku 5\.5[\s\S]*Sonnet 5\.5[\s\S]*Opus 5\.5/);
+        }
         const chosen = await until(async () => page(`(() => {
-          const menu = document.querySelector('.dk-picker-menu');
+          const button = [...document.querySelectorAll('.dk-picker-btn')].find((el) => el.getAttribute('aria-label').startsWith(${JSON.stringify(`${picker}:`)}));
+          const menu = button?.parentElement?.querySelector('.dk-picker-menu');
           const el = menu && [...menu.querySelectorAll('[role=menuitemradio]')].find((el) => (el.getAttribute('aria-label') ?? el.textContent.trim()) === ${JSON.stringify(item)});
           if (!el) return false;
           el.click();
@@ -248,7 +255,7 @@ export async function runSmoke(deps: SmokeDeps): Promise<void> {
       };
       await until(async () => (await page("document.querySelectorAll('.dk-picker-btn').length")) === 2, "workflow and chat pickers");
       const generationBefore = host.generation;
-      await pick("Workflow model", "ChatGPT Luna");
+      await pick("Workflow model", "ChatGPT Luna", "model-picker");
       await until(() => host.configuration().workflow.source === "chatgpt", "the workflow pick saved");
       assert.deepEqual(host.configuration().chat, host.configuration().workflow, "the first pick also sets chat");
       assert.equal(host.generation, generationBefore, "a model pick keeps the window");
@@ -267,8 +274,9 @@ export async function runSmoke(deps: SmokeDeps): Promise<void> {
       assert.ok(deps.fixture.calls.some((call) => call.task === "assistant"));
       const fixtureCount = deps.fixture.calls.length;
       await pick("Workflow model", "Off");
+      await until(() => host.configuration().workflow.source === "off", "the workflow pick off");
       await pick("Chat model", "Off");
-      await until(() => host.configuration().workflow.source === "off" && host.configuration().chat.source === "off", "both picks off");
+      await until(() => host.configuration().chat.source === "off", "the chat pick off");
       const offBefore = await json(`/cases/${caseId}`);
       const off = await json(`/cases/${caseId}/intake`, "POST", { text: "SYNTHETIC offline model-off check.", file_ids: [fileId], model: true, expected_version: offBefore.version });
       assert.equal(record(record(off.record).model).status, "off");
