@@ -13,7 +13,7 @@ Simple, quiet and fast. The applicant describes the project or drops plans, answ
 
 | Stage | Route | Screen | Job |
 | --- | --- | --- | --- |
-| 01 Describe | `#/` | `Start.tsx` | One headline and the composer: description and plans (drag and drop anywhere). No privacy copy, no chips: the role comes from onboarding; without one, Start asks "Who is applying?" as its next step (A B C, then the application starts). The reviewing authority is a Section B question. Start runs the explicit check. Start is the only place the project is described. |
+| 01 Describe | `#/` | `Start.tsx` | Public front door: "What are you building?", a composer and attachments (drop anywhere). A description or a file is enough. Start asks for sign-in when needed, then starts reading automatically. Applicant type stays unanswered until the later paperwork question. |
 | 02 Questions | `#/questions?focus=<key>` | `QuestionDeck.tsx` + `deck.ts` | Typeform questions in form order (A, B, C, D), derived from the case and the shared gaps. Footer progress per section with a popover and up/down. Before a description exists it asks nothing: one quiet line and a link back to Start (no card, no progress count). Once described, no card re-asks it: the starter questions the description answers are skipped and the proposed alternative offers the description (Yes, use my description / No, I'll write it). |
 | 03 Review | `#/review` | `Review.tsx` | What's left, metric tiles, engineer callout, Sections A–D status. |
 | 04 Application | `#/application` | `Application.tsx` | Paper preview of Part 1 A–D, gated draft and official PDF, text record. |
@@ -22,6 +22,16 @@ Simple, quiet and fast. The applicant describes the project or drops plans, answ
 | Code library | `#/code`, `#/code/<article>?filter=attention\|maybe\|all` | `CodeLibrary.tsx` | Optional reading surface, not a stage. |
 
 Legacy hrefs (store gap links, old screens) are translated in `calm/routes.ts`: `#/describe` → Start, `#/code-check` → questions (code cards first), `#/section-c` → references, `#/application?tab=…&focus=field-<id>` → the card for that field, `prof-*` → the Section D card.
+
+### Start and onboarding
+
+Signed-out visitors see Start with a quiet Sign in in the header. They can type and attach before creating an account. The other application routes keep their sign-in gate; the accuracy report remains public. Reviewers still start at their queue.
+
+The composer accepts PDF, JPG, PNG, WebP, TXT and MD. PDF and image files wait for the case before upload; text notes join the description. The helper and drop overlay say "PDF · JPG · PNG · TXT". The text area says "Or say it in a few words". Files alone enable Start. File rows keep their upload/read state, removal and failed-file Retry.
+
+Pressing Start remembers the intent to start through sign-in, sign-up and onboarding. The pre-application text and that intent use tab-scoped `sessionStorage`, never `localStorage`; they clear when the application begins or the person signs out. File objects stay in memory during email sign-in. After a full-page OAuth reload, Start says "Attach your files again" and waits for reattachment, or an explicit choice to use the description alone.
+
+Onboarding asks apply or review. The applicant choice is "I have a building project" with "Owner, designer, builder, engineer or manufacturer" beneath it. There is no applicant-type step. Reviewers still choose their authority and enter its access code. A new application starts with `applicantType: null`; an account's older applicant type is never used to choose one for it. Settings accepts an unanswered applicant type, and changing into or out of the reviewer role keeps the access-code rule.
 
 ### Deck order
 
@@ -42,7 +52,7 @@ Skip moves on; at the end of the pass the deck comes back once to skipped cards,
 
 Assistant entry points: Ask in the applicant header, Ask in every account page header (`PageHead`: queue, review, settings, notifications) and in the reviewer's code library header, `⌘J`, and field Help. The left rail has no assistant entry (user decision 2026-10-22).
 
-Keyboard: `A` `B` `C` (or `1` `2` `3`) pick a choice, `↵` continues (`⌘↵` inside a text area), `↑` `↓` move through the form, `Esc` closes the drawer. Shell: `⌘B` sidebar (toggle at the far left of the header), `⌘J` assistant (full-height black column), `⌘K` search applications, `⌘⇧K` search the code. All four stages and the code library open in every state; Review and Application show an empty state before a description exists.
+Keyboard: `A` `B` `C` (or `1` `2` `3`) pick a choice, `↵` continues (`⌘↵` inside a text area), `↑` `↓` move through the form, `Esc` closes the drawer. Shell: `⌘B` sidebar (toggle at the far left of the header), `⌘J` assistant (full-height black column), `⌘K` search applications, `⌘⇧K` search the code. Once signed in, all four stages and the code library open in every state; Review and Application show an empty state before a description exists.
 
 Stage navigation (header, and the officer's review steps): icons, and one word for where you are (user decision 2026-10-22, "Option A+B"). Each stage is its icon, in order, with no fill, pill or shadow in any state: the current one shows its one-word name beside its icon at full opacity (an officer step's open count follows the name: `Missing 9`); the others are the icon alone, dimmed (0.6), brightening on hover or keyboard focus (0.85), a locked one fainter still (the current one stays at full strength). Compact cues carry the state in one neutral ink: a small green check mark once done, a thin line at the foot while part of the way through, another officer step's open count as a quiet number beside its icon. Officer step icons: Changes history, Request document, Missing alert, Checks list, Decide scales. Under 360px the stage boxes narrow (30px) so the current name stays clear of the save status. The name and progress show on hover or keyboard focus (one label at a time) and are the accessible name (`aria-current="step"` marks the current one). Shared component: `StageButton` in `web/src/calm/shell/AppHeader.tsx`.
 

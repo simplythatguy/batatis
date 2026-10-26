@@ -55,7 +55,7 @@ export interface Reading {
 const NO_READING: Reading = { intake: "idle", intakeNote: "", identify: "idle", identifyNote: "", stages: {}, busy: null };
 
 /** The engine's role name for the applicant type (docs/api/intake.md `applicant_role`). */
-function roleFor(type: ApplicantType): string {
+function roleFor(type: ApplicantType | null): string | null {
   return type === "builder" ? "homebuilder" : type;
 }
 
@@ -130,7 +130,7 @@ interface Store {
   submitting: boolean;
   /** The saved revision is on its way to the authority; local edits pause until the response. */
   submissionDispatched: boolean;
-  beginEmpty: (type: ApplicantType) => void;
+  beginEmpty: (type: ApplicantType | null) => void;
   /** Back to an empty Start. `note` replaces "Cleared for this visit." (signed in, the old one stays in the list). */
   resetToWho: (note?: string) => void;
   /**
@@ -139,7 +139,7 @@ interface Store {
    * nothing and resolves to a note that the current answers stay open (the shell's own guard decides
    * whether to show it).
    */
-  openCase: (id: string, type: ApplicantType) => Promise<string | null>;
+  openCase: (id: string, type: ApplicantType | null) => Promise<string | null>;
   /** Refresh the selected case only while its acknowledged draft and account are still current. */
   refreshCurrentCase: () => Promise<string | null>;
   completenessRecord: CompletenessRecord | null;

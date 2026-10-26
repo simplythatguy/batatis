@@ -17,7 +17,7 @@ export function initialVisit(_stored?: string | null): Visit {
 }
 
 /** The next role is a new case. `previous` is not copied. */
-export function caseForRole(type: ApplicantType, previous?: Case): Case {
+export function caseForRole(type: ApplicantType | null, previous?: Case): Case {
   void previous;
   return emptyCase(type);
 }

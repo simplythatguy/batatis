@@ -4,6 +4,7 @@ import { AccountsError, auth, type AuthProvider } from "../../api/accounts";
 import { ProviderMark, clockText, useCountdown } from "./bits";
 import { afterSignIn, rememberedReturn, signIn, signUp } from "./useAuthGate";
 import { DesktopEntry } from "../../desktop/Entry";
+import { useSession } from "../session";
 
 export const PASSWORD_MIN = 10;
 
@@ -30,6 +31,7 @@ function errorText(e: unknown, mode: "signin" | "signup"): string {
 }
 
 export function AuthPage({ mode }: { mode: "signin" | "signup" }) {
+  const session = useSession();
   const providers = useProviders();
   const id = useId();
   const [name, setName] = useState("");
@@ -83,7 +85,7 @@ export function AuthPage({ mode }: { mode: "signin" | "signup" }) {
       <form className="ac-auth-box" onSubmit={submit} noValidate aria-labelledby={`${id}-title`}>
         <span className="cf-mark ac-auth-mark" aria-hidden="true" />
         <h1 id={`${id}-title`} className="ac-auth-title">{signup ? "Create your account" : "Welcome to Batatis"}</h1>
-        <p className="ac-auth-sub">Prepare a complete variance application, or review the ones sent to your authority.</p>
+        <p className="ac-auth-sub">{session.startRequested ? "Sign in to start your project." : "Start a building project, or review applications."}</p>
         {!signup && <DesktopEntry />}
 
         {signup && (
@@ -145,6 +147,7 @@ export function AuthPage({ mode }: { mode: "signin" | "signup" }) {
         <p className="ac-auth-switch">
           {signup ? <>Already have an account? <a href="#/signin">Sign in</a></> : <>New here? <a href="#/signup">Create an account</a></>}
         </p>
+        <p className="ac-auth-switch"><a href="#/">Back to your project</a></p>
       </form>
     </div>
   );

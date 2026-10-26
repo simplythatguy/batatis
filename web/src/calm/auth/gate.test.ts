@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import type { User } from "../../api/accounts.ts";
 import { gateRedirect, gateStatus, homeFor, returnTarget } from "./gate.ts";
-import { codeNeeded, nextStep, onboardingPayload, previousStep, stepsFor } from "./onboardingSteps.ts";
+import { USE_CHOICES, codeNeeded, nextStep, onboardingPayload, previousStep, stepsFor } from "./onboardingSteps.ts";
 
 const user = (over: Partial<User> = {}): User => ({
   id: "u1", email: "mira@example.test", name: "Mira Kaur", role: "applicant", applicant_type: "homebuilder",
@@ -34,6 +34,14 @@ test("gate redirects: sign-in, onboarding, home, and no accounts", () => {
   assert.equal(homeFor(null), "#/");
 });
 
+test("signed-out visitors can prepare a draft on Start; other application routes stay gated", () => {
+  assert.equal(gateRedirect("signed-out", null, "/"), null);
+  assert.equal(gateRedirect("signed-out", null, ""), null);
+  for (const path of ["/questions", "/review", "/application", "/settings", "/code", "/onboarding", "/review/case_1"]) {
+    assert.equal(gateRedirect("signed-out", null, path), "#/signin", path);
+  }
+});
+
 test("return targets skip the auth pages and home", () => {
   assert.equal(returnTarget("#/review/case_1"), "#/review/case_1");
   assert.equal(returnTarget("#/code/9.10.9.16.?filter=all"), "#/code/9.10.9.16.?filter=all");
@@ -44,18 +52,19 @@ test("return targets skip the auth pages and home", () => {
 
 test("onboarding steps branch on the first answer and build the request", () => {
   assert.deepEqual(stepsFor({ code: "" }), ["use"]);
-  assert.deepEqual(stepsFor({ use: "applicant", code: "" }), ["use", "applicantType"]);
+  assert.deepEqual(stepsFor({ use: "applicant", code: "" }), ["use"]);
   assert.deepEqual(stepsFor({ use: "reviewer", code: "" }), ["use", "authority", "code"]);
   assert.equal(nextStep("use", { use: "reviewer", code: "" }), "authority");
   assert.equal(nextStep("authority", { use: "reviewer", authority: "edmonton", code: "" }), "code");
   assert.equal(nextStep("code", { use: "reviewer", authority: "edmonton", code: "x" }), null);
-  assert.equal(nextStep("applicantType", { use: "applicant", applicantType: "manufacturer", code: "" }), null);
+  assert.equal(nextStep("use", { use: "applicant", code: "" }), null);
   assert.equal(previousStep("code", { use: "reviewer", code: "" }), "authority");
   assert.equal(previousStep("use", { code: "" }), null);
-  assert.deepEqual(onboardingPayload({ use: "applicant", applicantType: "contractor", code: "" }), { role: "applicant", applicant_type: "contractor" });
+  assert.deepEqual(onboardingPayload({ use: "applicant", code: "" }), { role: "applicant" });
   assert.deepEqual(onboardingPayload({ use: "reviewer", authority: "calgary", code: "  abc  " }), { role: "reviewer", authority: "calgary", access_code: "abc" });
   assert.equal(onboardingPayload({ use: "reviewer", authority: "calgary", code: " " }), null);
-  assert.equal(onboardingPayload({ use: "applicant", code: "" }), null);
+  assert.equal(onboardingPayload({ code: "" }), null);
+  assert.deepEqual(USE_CHOICES[0], { value: "applicant", label: "I have a building project", sub: "Owner, designer, builder, engineer or manufacturer" });
 });
 
 test("settings asks for a code when becoming or leaving a reviewer", () => {
