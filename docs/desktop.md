@@ -64,6 +64,12 @@ Select **Sign in** to sign in with your Claude subscription. Claude Code opens t
 
 Each request runs Claude Code once with the workflow's instructions and output schema, with every tool, plugin, hook, project file and saved session turned off. Signing out cancels pending work.
 
+### Batatis AI, with an access code
+
+The Batatis team can give you an access code instead of a key. Under **AI connections** in **Settings**, select **Add key** on the **Batatis access code** row and enter it in the key dialog. Then choose **Batatis AI** in the workflow or chat picker.
+
+Each AI step goes with your code to the Batatis website, which checks the code, makes the call with the team's keys and sends back only the answer. Your computer never receives a key. Batatis AI runs Luna at medium effort, and optional screening uses the same code when the workflow runs on Batatis AI. A code that has been turned off shows **The Batatis access code isn’t valid**.
+
 ### API keys
 
 Enter keys in the desktop key dialog. The host encrypts them using operating-system storage. The application page receives connection status, not the saved key.
@@ -214,7 +220,7 @@ Build the application and portable archive.
 npm run package --prefix desktop
 ```
 
-The archive appears under `desktop/build/release/`. Packaging audits check for the native engine, PDF tools, fonts, TLS roots and unchanged Codex bytes. The audits reject databases, source documents and credentials in the package.
+The archive appears under `desktop/build/release/`. Packaging audits check for the native engine, PDF tools, fonts and TLS roots, and that no Codex executable is bundled. The audits reject databases, source documents and credentials in the package.
 
 ## Verify a build
 
