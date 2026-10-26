@@ -28,6 +28,24 @@ export interface AnswersRequest {
   expected_version?: number | null;
 }
 
+export interface ApplicantDraft {
+  accepted_fact_id: string | null;
+  claims: DraftClaim[];
+  decided_at: string | null;
+  decided_by: string | null;
+  decision_expected_version: number | null;
+  field: string;
+  generated_at: string;
+  generation_id: string;
+  id: string;
+  input_fingerprint: string;
+  questions: DraftQuestion[];
+  replaces_fact_id: string | null;
+  status: "draft" | "accepted" | "rejected";
+  text: string;
+  title: string;
+}
+
 export interface ApplicantSummary {
   applicant_type: "manufacturer" | "contractor" | "homebuilder" | null;
   name: string;
@@ -68,6 +86,18 @@ export interface ArticleDecision {
   decided_at: string;
   decision: "yes" | "no" | "not_sure";
   open_question_id: string | null;
+}
+
+export interface Assessment {
+  assessment_kind: "evaluation" | "listing";
+  date: string | null;
+  date_kind: "modified" | "issued" | null;
+  date_source_url: string | null;
+  manufacturer: string;
+  message: string;
+  number: string;
+  report_url: string;
+  title: string;
 }
 
 export interface AssistAttachment {
@@ -205,6 +235,7 @@ export interface Case {
   created_at: string;
   decision: Decision | null;
   decision_history: Decision[];
+  drafting: DraftingRecord | null;
   evidence: EvidenceItem[];
   expires_at: string | null;
   facts: Fact[];
@@ -427,6 +458,11 @@ export interface CoverageEntry {
   roadmap: string | null;
 }
 
+export interface DecideDraft {
+  decision: "accept" | "reject";
+  expected_version: number;
+}
+
 export interface Decision {
   at: string;
   by_id: string;
@@ -499,6 +535,71 @@ export interface DocumentRow {
   seal: Attribute;
   title: Attribute;
   type: Attribute;
+}
+
+export interface DraftCitation {
+  quote: string;
+  source_id: string;
+}
+
+export interface DraftClaim {
+  kind: "fact" | "assumption" | "plan";
+  sources: DraftCitation[];
+  text: string;
+}
+
+export interface DraftGeneration {
+  audit_input_tokens: number | null;
+  audit_output_tokens: number | null;
+  auditor_model: string;
+  effort: string;
+  generated_at: string;
+  id: string;
+  input_tokens: number | null;
+  model: string;
+  output_tokens: number | null;
+  provider: string;
+  validation: "grounded";
+}
+
+export interface DraftQuestion {
+  routed_to: "applicant" | "professional";
+  sources: DraftCitation[];
+  text: string;
+  why: string;
+}
+
+export interface DraftRegistryQuery {
+  end: number;
+  query: string;
+  quote: string;
+  source_id: string;
+  start: number;
+}
+
+export interface DraftSource {
+  id: string;
+  kind: "description" | "fact" | "document" | "code" | "section_c" | "guidance" | "precedent_structure" | "professional_screen" | "registry";
+  label: string;
+  metadata: Record<string, string | number | boolean | null>;
+  page: number | null;
+  ref: string;
+  text: string;
+  url: string | null;
+}
+
+export interface DraftingRecord {
+  drafts: ApplicantDraft[];
+  generated_at: string;
+  generations: DraftGeneration[];
+  input_fingerprint: string;
+  notices: string[];
+  registry_queries: DraftRegistryQuery[];
+  registry_searches: RegistrySearch[];
+  schema_version: "batatis.applicant_drafts.v1";
+  sources: DraftSource[];
+  stale: boolean;
+  stale_reasons: string[];
 }
 
 export interface DroppedPick {
@@ -654,6 +755,10 @@ export interface Gap {
   section: "A" | "B" | "C" | "D" | "process";
   severity: "blocking" | "warning" | "info";
   submission_blocking: boolean;
+}
+
+export interface GenerateDrafts {
+  expected_version: number;
 }
 
 /** A published guide for a design category or process. Guidance, not a variance or an approval. */
@@ -1233,6 +1338,20 @@ export interface Regime {
   id: string;
   name: string;
   route: string;
+}
+
+export interface RegistrySearch {
+  cached: boolean;
+  message: string;
+  notice: string;
+  query: string;
+  registry_date: string;
+  results: Assessment[];
+  searched_date: string;
+  snapshot_path: string | null;
+  source: "live" | "snapshot";
+  source_url: string;
+  total_matches: number;
 }
 
 export interface RelevanceBands {
