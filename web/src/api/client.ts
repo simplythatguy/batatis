@@ -391,6 +391,8 @@ export interface ProfessionalResult {
   general_required: "yes" | "no" | "depends";
   reasons: { code: string; required: "yes" | "no" | "depends"; message: string; citation: string }[];
   questions: string[];
+  /** Facts the screen still needs to decide, e.g. "storeys" or "professional.role". */
+  missing_facts?: string[];
   scope_note: string;
   resolution?: import("./types.gen").ProfessionalRequirementResolution | null;
   mandatory_required?: boolean;
