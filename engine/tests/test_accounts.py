@@ -77,13 +77,14 @@ def test_account_model_keeps_an_unknown_applicant_type():
     assert User.model_validate(user.model_dump()).applicant_type is None
 
 
-def test_missing_applicant_role_does_not_trigger_the_manufacturer_scope_probe():
+def test_product_scope_follows_the_words_not_the_account_role():
     from engine.intake.questions import plan_questions
 
-    arguments = dict(known=set(), prose='A product for use across Alberta', candidates=[], conflicts=[],
-                     not_sure=set(), departure_known=True)
-    assert 'scope' not in {q.field for q in plan_questions(role=None, **arguments)}
-    assert 'scope' in {q.field for q in plan_questions(role='manufacturer', **arguments)}
+    arguments = dict(known=set(), conflicts=[], candidates=[], not_sure=set(), departure_known=True)
+    asked = lambda prose, role: {q.field for q in plan_questions(prose=prose, role=role, **arguments)}  # noqa: E731
+    assert 'product_scope' in asked('A product for use across Alberta', None)
+    assert 'product_scope' in asked('A product for use across Alberta', 'manufacturer')
+    assert 'product_scope' not in asked('A two-storey house with larger side windows', None)
 
 
 def test_credentials_validation_normalization_and_generic_failure(app):
