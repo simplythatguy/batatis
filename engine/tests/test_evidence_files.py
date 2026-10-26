@@ -64,6 +64,18 @@ def test_upload_bind_scope_and_download_deliver_the_same_pdf_bytes(ledger):
     assert store.get_version(case.id) == response.json()['case_version'], 'reads do not change the content revision'
 
 
+def test_rereading_an_attachment_keeps_the_applicants_evidence_binding(ledger):
+    store, create, client = ledger
+    case = create()
+    file, _ = upload(client, case.id)
+    assert post(client, case.id, payload(file_ref=file['id'])).status_code == 200
+    assert len(supporting_documents(store.get(case.id))) == 1
+    response = client.post(f'/cases/{case.id}/intake', json={'file_ids': [file['id']], 'model': False})
+    assert response.status_code == 200, response.text
+    assert len(supporting_documents(store.get(case.id))) == 1
+    assert store.get(case.id).evidence[0].kind == 'file'
+
+
 def test_title_and_unowned_ids_cannot_close_attachment_gaps(ledger):
     store, create, client = ledger
     case, other = create(), create()
