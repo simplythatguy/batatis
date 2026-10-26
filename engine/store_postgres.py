@@ -15,7 +15,7 @@ from psycopg.conninfo import conninfo_to_dict, make_conninfo
 from psycopg.types.json import Jsonb
 
 from .models import Case, Fact, now
-from .store import (FileTooLarge, InvalidAttachment, VersionConflict, attachment_reference,
+from .store import (ReviewRevision, check_review_revision, FileTooLarge, InvalidAttachment, VersionConflict, attachment_reference,
                     case_with_stored_files, retention_cutoff)
 from .uploads import PDF_MAX_BYTES
 from .account_store import ACCOUNT_MIGRATIONS, PostgresAccountsMixin, _DB, preserve_messages
@@ -149,7 +149,7 @@ class PostgresCaseStore(PostgresAccountsMixin):
         con.execute('DELETE FROM case_files WHERE case_id = ANY(%s)', (ids,))
         return con.execute('DELETE FROM cases WHERE id = ANY(%s)', (ids,)).rowcount
 
-    def put(self, case: Case, *, expected_version: int | None = None) -> Case:
+    def put(self, case: Case, *, expected_version: int | None = None, expected_review: ReviewRevision | None = None) -> Case:
         case.updated_at = now()
         conflict = None
         with self._conn() as con:
@@ -182,6 +182,7 @@ class PostgresCaseStore(PostgresAccountsMixin):
                     raise VersionConflict(case.id, 0, int(actual[0]) if actual else None)
                 case.version = int(row[0])
                 return case
+            check_review_revision(con, case.id, expected_review, postgres=True)
             row = con.execute('SELECT data, version FROM cases WHERE id=%s FOR UPDATE', (case.id,)).fetchone()
             if row is not None and self._purge_expired(con, case.id):
                 row = None
