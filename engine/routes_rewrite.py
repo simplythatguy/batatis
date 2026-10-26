@@ -123,10 +123,10 @@ def create_router(cases, code):
             raise HTTPException(422, 'The rewrite made a compliance or safety claim. Try another instruction.')
         if names_a_provider(reply.text):
             raise HTTPException(422, 'The rewrite included internal service information. Try another instruction.')
-        replacement, cited, removed = assist.check_citations(reply.text, codes)
         code_context = {'code': built['code_context'], 'focused': built.get('focused_provision'),
                         'references': built.get('application', {}).get('provisions', [])}
         allowed = {item.group() for item in assist.ARTICLE.finditer(body.text + json.dumps(code_context))}
+        removed = []
 
         def restrict(match):
             raw = match.group()
@@ -136,8 +136,9 @@ def create_router(cases, code):
                 removed.append(raw)
             return '[unknown reference removed]'
 
-        replacement = assist.ARTICLE.sub(restrict, replacement)
-        cited = [pid for pid in cited if pid not in removed]
+        limited = assist.ARTICLE.sub(restrict, reply.text)
+        replacement, cited, unknown = assist.check_citations(limited, codes, context=built)
+        removed = list(dict.fromkeys([*removed, *unknown]))
         guard()
         notice = assist.model_notice(route)
         response.headers['X-Batatis-Notice'] = notice

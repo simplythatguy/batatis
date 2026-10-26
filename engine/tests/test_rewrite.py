@@ -156,3 +156,15 @@ def test_generated_provider_names_and_failure_details_are_not_exposed(rewriting,
     monkeypatch.setattr(routes_assist, 'call_model', failed)
     response = rewrite(client, case)
     assert response.status_code == 503 and 'synthetic-secret' not in response.text and 'openai' not in response.text
+
+
+def test_removed_new_reference_cannot_authorize_a_code_style_quote(rewriting, monkeypatch):
+    from engine.codes import Codes
+    client, _, case, _ = rewriting
+    passage = ' '.join(Codes().provision('9.25.2.2.(1)', 'B')['text'].split())[:65].rsplit(' ', 1)[0]
+    monkeypatch.setattr(routes_assist, 'call_model', lambda **kw: routes_assist.ModelAnswer(
+        f'New 9.25.2.2.(1).\n> {passage}', 10, 10))
+    response = rewrite(client, case)
+    assert response.status_code == 200, response.text
+    assert '\n> ' not in response.json()['replacement']
+    assert response.json()['removed_citations'] == ['9.25.2.2.(1)']

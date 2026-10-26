@@ -19,6 +19,7 @@ from .assist_documents import (AssistAttachment, AssistContextBinding, AssistDoc
     DOCUMENT_SYSTEM, NO_READABLE_TEXT, binding, checked_excerpts, prepare_documents, reauthorize)
 from .completeness import check_completeness
 from .privacy import assistant_notice
+from .public_names import names_a_provider
 from .process_fields import PROCESS_ALIASES, process_fields
 from .section_c import section_c_rows
 from .redact import known_values, people_names, scrub, scrub_obj
@@ -220,6 +221,8 @@ def model_reply(route: ModelRoute, *, request, body: AssistRequest, context: str
     try:
         reply = call_model(provider=route.provider, model=route.model, context=context, body=body, system=system,
                            **({'desktop_profile': route.desktop_profile} if route.desktop_profile is not None else {}))
+        if not isinstance(reply.text, str):
+            raise ValueError('invalid assistant text')
     except Exception:
         # A failed call can still cost tokens. Keep its reservation and keep
         # provider diagnostics, prompts and credentials out of HTTP responses.
@@ -308,17 +311,32 @@ def build_context(body: AssistRequest, case, codes, review=None) -> dict:
     return context
 
 
-def check_citations(text: str, codes):
-    cited, removed = [], []
+def _quote_matches(quote: str, source: str) -> bool:
+    parts = [' '.join(part.split()) for part in re.split(r'\.\.\.|…', quote)]
+    parts = [part for part in parts if part]
+    if not parts:
+        return False
+    source, position = ' '.join(source.split()), 0
+    for part in parts:
+        found = source.find(part, position)
+        if found < 0:
+            return False
+        position = found + len(part)
+    return True
+
+
+def check_citations(text: str, codes, *, context: dict | None = None):
+    cited, removed, sources = [], [], []
 
     def replace(match):
         raw = match.group()
         found = False
         for division in ('B', 'A', 'C'):
             try:
-                if codes.provision(raw, division) is not None:
+                record = codes.provision(raw, division)
+                if record is not None:
                     found = True
-                    break
+                    sources.append(record.get('text') or '')
             except ValueError:
                 pass
         target = cited if found else removed
@@ -329,8 +347,23 @@ def check_citations(text: str, codes):
     answer = ARTICLE.sub(replace, text)
     # Conservative output stop for categorical safety/compliance language, even if
     # negated. User-authored messages are stored verbatim; generated claims are not.
-    if CLAIM_WORDS.search(answer):
-        answer, cited = SAFE_HELP, []
+    if CLAIM_WORDS.search(answer) or names_a_provider(answer):
+        return SAFE_HELP, [], removed
+    focused = (context or {}).get('focused_provision')
+    if focused and focused.get('id'):
+        for division in [focused['division']] if focused.get('division') in {'A', 'B', 'C'} else ('B', 'A', 'C'):
+            try:
+                record = codes.provision(focused['id'], division)
+            except ValueError:
+                continue
+            if record:
+                sources.append(record.get('text') or '')
+
+    def verify_quote(match):
+        quote = match.group('quote')
+        return match.group() if any(_quote_matches(quote, source) for source in sources) else quote
+
+    answer = re.sub(r'^[ \t]*>+[ \t]?(?P<quote>[^\r\n]*)', verify_quote, answer, flags=re.M)
     return answer, cited, removed
 
 
@@ -410,7 +443,7 @@ def create_router(cases, code):
             documents.validate_files(store)
             answer, cited, removed, references = checked_excerpts(reply.text, documents, codes)
         else:
-            answer, cited, removed = check_citations(reply.text, codes)
+            answer, cited, removed = check_citations(reply.text, codes, context=built)
             references = []
         if bound is not None or body.case_version is not None:
             reauthorize(body, request, response, store, user)
