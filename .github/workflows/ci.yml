@@ -98,6 +98,8 @@ jobs:
             research/precedents/requirements.txt
       - name: Install from requirements files
         run: python -m pip install -r engine/requirements.txt -r codedb/requirements.txt -r research/precedents/requirements.txt
+      - name: Verify bundled agent skills
+        run: python scripts/pstack_skills.py --check
       - name: Build the code database from sha256-checked official sources
         # Same fetch and build as scripts/vercel_build_engine.sh. Without it, every test that
         # needs codedb (incl. the account/review access matrix) silently skips.

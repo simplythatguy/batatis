@@ -23,6 +23,9 @@ if [ $want_web = 0 ] && [ $want_engine = 0 ] && [ $want_desktop = 0 ]; then want
 
 step() { printf '\n== %s ==\n' "$*"; }
 
+step "agent skills: pinned source and portable entrypoints"
+python3 scripts/pstack_skills.py --check
+
 if [ $want_web = 1 ]; then
   [ -d web/node_modules ] || { step "web: install"; (cd web && npm ci); }
   step "web: typecheck"; (cd web && npm run typecheck)

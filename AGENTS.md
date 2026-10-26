@@ -35,10 +35,11 @@ Single-context: root `GLOSSARY.md` + `docs/adr/` + challenge brief. See `docs/ag
 
 ### Stack skills
 
+- **Project workflow:** For substantive work, read `.agents/pstack/ADAPTER.md`, select the relevant method, and use the tracked source. Pstack is included in every clone through the `pstack-*` skills in `.agents/skills/`, `.claude/skills/`, and `.cursor/skills/`; no global plugin installation is required. Simple answers and small edits stay direct.
 - **Batatis challenge:** `.cursor/skills/batatis-*` (hackathon, variance-workflow, ui-opus, **ui-linear**, **ui-minimalist**).
 - **Matt Pocock engineering:** `.agents/skills/` (also symlinked under `.cursor/skills/`). Reinstall with `npx skills@latest add mattpocock/skills -a cursor`.
 - **README and diagrams:** `.agents/skills/prettyme` (also symlinked under `.cursor/skills/` and `.claude/skills/`), from [prettyme.md](https://github.com/simplythatguy/prettyme.md). Use it for any README or diagram work: Claude writes, and GPT-6.1-Sol only draws. Update with `npx skills@latest add simplythatguy/prettyme.md -a cursor -a claude-code -y`.
-- **pstack / poteto-mode:** [Open Pstack](https://github.com/ericlitman/open-pstack) for Codex and Claude Code; shared T3 routing uses the installed source. See `docs/pstack.md`. All delegated roles use **GPT-6.1-Sol at max** under the user decision of 2026-10-23; `.cursor/rules/pstack-models.mdc` carries the portable role map.
+- **pstack / poteto-mode:** [Open Pstack](https://github.com/ericlitman/open-pstack), pinned in `.agents/pstack/upstream/`. Use `pstack-poteto-mode` for the full workflow or select a focused `pstack-*` skill. See `docs/pstack.md`. All delegated roles use **GPT-6.1-Sol at max** under the user decision of 2026-10-23; `.cursor/rules/pstack-models.mdc` carries the portable role map.
 
 ## What we are building
 
