@@ -124,8 +124,11 @@ _AREA = _sub(rf'(?<![\w/(.])(?P<n>\d{{1,3}}(?:,\d{{3}})+(?:\.\d+)?|\d+(?:\.\d+)?
 _PER_FLOOR_AFTER = _sub(r'^\s*(?:per|each|a|on each|for each|of each)\s+(?:floor|storey|level)\b|^\s*floors?\b')
 _PER_FLOOR_BEFORE = _sub(r'\b(?:each|per|every|typical)\s+(?:floor|storey|level)\b[^,;]{0,25}$|\bfloor\s+area\b[^,;]{0,15}$'
                          r'|\bfloor\s+plate\b[^,;]{0,15}$')
-_NOT_BUILDING = _sub(r'\b(?:lot|parcel|site|yard|wall|opening|glazing|window|roof|deck|panel|room)\s+(?:area\s+)?'
-                     r'(?:of|is|was|about|approximately|totals?)?\s*(?:about\s+|approximately\s+)?$')
+_NOT_BUILDING = _sub(r'\b(?:lot|parcel|site|yard|wall|walls|opening|openings|glazing|glazed|window|windows|roof|deck|panel|room'
+                     r'|face|faces|unprotected|skylights?|doors?)\b[^.;\n]{0,25}?(?:area\s+)?'
+                     r'(?:of|is|was|about|approximately|totals?)?[\s:)(=-]*(?:about\s+|approximately\s+)?$')
+# A window or door schedule row (W5 1800 x 1700 mm 3.06 m²): the area is the opening's, not the building's.
+_SIZE_BEFORE = _sub(r'\d+(?:\.\d+)?\s*[x×]\s*\d+(?:\.\d+)?\s*(?:mm|cm|m)?\b[^.;\n]{0,12}$')
 _BUILDING_AREA_CUE = _sub(r'\bbuilding\s+area\b')
 
 
@@ -133,7 +136,9 @@ def _areas(sentence: str, at: int) -> list[Hit]:
     hits = []
     for match in _AREA.finditer(sentence):
         before, after = sentence[:match.start()], sentence[match.end():]
-        if _NOT_BUILDING.search(before[-30:]):
+        if _NOT_BUILDING.search(before[-40:]):
+            continue
+        if _SIZE_BEFORE.search(before[-40:]):
             continue
         per_floor = bool(_PER_FLOOR_AFTER.search(after) or _PER_FLOOR_BEFORE.search(before))
         name = 'floor_area_m2' if per_floor else 'building_area_m2'
@@ -391,8 +396,22 @@ _OWNER_IS = re.compile(r"\b(?:[Tt]he\s+)?(?:property\s+)?owner\s+is\s+(?P<v>[A-Z
 _ADDRESS_TAIL = re.compile(r'^(?:\s*,\s*[A-Z][\w.\' -]{1,30})?(?:\s*,\s*(?:AB|Alberta))?(?:\s*,?\s*[A-Z]\d[A-Z]\s?\d[A-Z]\d)?')
 
 
+# A drawing's title-block row loses its separator ("Owner Dana Whitfield"): read only a whole-line name or a street address.
+_BARE_LINE = re.compile(
+    r"(?m)^[ \t]*(?:(?P<owner>(?:property\s+|registered\s+)?[Oo]wner)[ \t]+(?P<name>[A-Z][\w.'-]+(?:[ \t]+(?:[A-Z][\w.'-]+|&|and)){1,4})"
+    r"|(?P<addr>(?:[Cc]ivic|[Mm]unicipal|[Ss]ite|[Pp]roject|[Ss]treet|[Pp]roperty)[ \t]+address)[ \t]+(?P<street>\d{1,6}[ \t]+[^\n|]*[^\s|*.,]))[ \t]*\r?$")
+_NOT_A_NAME = re.compile(r'(?i)\b(?:approval|approved|required|signature|sign|date|name|information|info|initials|stamp|review'
+                         r'|n/?a|tbd|unknown|details?|contact|address|phone|email)\b')
+
+
 def _label_lines(text: str) -> list[Hit]:
     hits = []
+    for match in _BARE_LINE.finditer(text):
+        group = 'name' if match.group('owner') else 'street'
+        if group == 'name' and _NOT_A_NAME.search(match.group('name')):
+            continue
+        hits.append(Hit('owner_name' if group == 'name' else 'municipal_address', match.group(group),
+                        match.start(group), match.end(group), 0.9))
     for match in _LABEL_LINE.finditer(text):
         label = match.group('label').lower()
         name = next(key for key, pattern in _LABELS if re.fullmatch(pattern, label, re.I))

@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { AUTHORITIES, authorityUnsure, officeChoiceAction, officeSuggestion } from "../config";
 import { localField } from "../intakeFields";
-import { sourceLine } from "../intakeView";
+import { LEGAL_PART_FIELDS, legalFromParts, sourceLine } from "../intakeView";
 import { DETAIL_FIELDS, factFor, valueText } from "../model";
 import { useCase } from "../store";
 import { AuthorityPicker } from "./AuthorityPicker";
@@ -29,6 +29,9 @@ export function PaperworkSheet({ item, focusRow, onDone, extras }: { item: DeckI
     target?.querySelector<HTMLElement>("input, button, summary, textarea")?.focus({ preventScroll: true });
     row?.scrollIntoView({ block: "nearest" });
   }, [focusRow]);
+  // A legal description read as lot, block and plan parts is shown joined, as the form writes it.
+  const savedValue = (id: string) => cleanReadValue(valueText(factFor(c, id)))
+    || (id === "legalDescription" ? legalFromParts(Object.fromEntries(LEGAL_PART_FIELDS.map((k) => [k, factFor(c, k)?.status === "confirmed" ? factFor(c, k)?.value : undefined]))) : "");
   const answer = (key: string, value: string, defaulted = false) => setDrafts((draft) => ({ ...draft, [key]: { kind: "answer", value, defaulted } }));
 
   function save() {
@@ -60,8 +63,8 @@ export function PaperworkSheet({ item, focusRow, onDone, extras }: { item: DeckI
     <div className="cf-paperwork-rows">{rows.map((row) => {
       const draft = drafts[row.key];
       const field = fieldOf(row);
-      const fact = factFor(c, row.kind === "authority" ? "office.choice" : field);
-      const saved = row.kind === "authority" ? c.authority : cleanReadValue(valueText(fact));
+      const fact = factFor(c, row.kind === "authority" ? "office.choice" : field) ?? (field === "legalDescription" ? factFor(c, "lot") ?? factFor(c, "plan") : undefined);
+      const saved = row.kind === "authority" ? c.authority : savedValue(field);
       const value = draft?.kind === "answer" ? draft.value : draft ? "" : saved;
       const deferred = draft && draft.kind !== "answer" ? draft.kind : !draft ? row.deferred ?? (row.settled ? "not_sure" : undefined) : undefined;
       const detail = DETAIL_FIELDS.find((d) => d.id === field);
@@ -76,7 +79,7 @@ export function PaperworkSheet({ item, focusRow, onDone, extras }: { item: DeckI
       const current = (id: string) => {
         const other = rows.find((r) => fieldOf(r) === id);
         const d = other ? drafts[other.key] : undefined;
-        return d?.kind === "answer" ? d.value.trim() : d ? "" : cleanReadValue(valueText(factFor(c, id)));
+        return d?.kind === "answer" ? d.value.trim() : d ? "" : savedValue(id);
       };
       const owner = current("owner");
       const site = current("municipalAddress");

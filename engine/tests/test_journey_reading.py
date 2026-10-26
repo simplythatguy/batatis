@@ -421,3 +421,17 @@ def test_the_reading_record_names_no_model():
     out = service.run('', [('photo', 'elevation.png', picture())], transport=VisionReader(), status='live', pictures=True)
     assert out.model.model in (None, 'reader-1')
     assert 'gpt' not in json.dumps(out.model.model_dump()).lower()
+
+
+@pytest.mark.parametrize('text', ['Exposing building face (east wall): 31.5 m².', 'W5 1800 x 1700 mm 3.06 m²',
+                                  'Total unprotected openings on the east face: 6.12 m² (19.4 % of the exposing building face).'])
+def test_wall_and_window_areas_on_plans_are_not_the_building_area(text):
+    from engine.intake.rules import read
+    assert not [h for h in read(text).hits if h.field == 'building_area_m2']
+
+
+def test_a_title_block_row_without_a_colon_gives_the_owner_and_address_but_not_guesses():
+    from engine.intake.rules import read
+    text = 'Civic address 10234 87 Ave NW, Edmonton, AB\r\nOwner Dana Whitfield\r\nOwner Approval Required\r\nOwner wants a bigger window\r\n'
+    got = [(h.field, h.value) for h in read(text).hits if h.field in ('owner_name', 'municipal_address')]
+    assert got == [('municipal_address', '10234 87 Ave NW, Edmonton, AB'), ('owner_name', 'Dana Whitfield')]

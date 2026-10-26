@@ -281,11 +281,16 @@ export function planQuestions(c: Case): { q: PlanQuestion; done: boolean; notSur
   const plan = c.intake?.record.plan;
   if (!plan || plan.scope.status === "redirect") return [];
   const has = (field: string) => Boolean(confirmedAnswer(c.facts, field));
+  // A conflict between readings is settled only by the applicant's own answer, typed or picked here.
+  const answeredByApplicant = (field: string) => {
+    const f = confirmedAnswer(c.facts, field);
+    return Boolean(f && f.source.type !== "file" && !String(f.source.ref ?? "").startsWith("intake:"));
+  };
   const questions = new Map([...(plan.asked ?? []), ...plan.questions].map((q) => [q.id, q]));
   const conflicts = new Set(plan.questions.filter((q) => q.kind === "conflict").map((q) => q.id));
   return [...questions.values()].map((q) => {
     const notSure = plan.not_sure.includes(q.id);
-    return { q, notSure, done: notSure || (!conflicts.has(q.id) && has(q.field)) };
+    return { q, notSure, done: notSure || (conflicts.has(q.id) ? answeredByApplicant(q.field) : has(q.field)) };
   });
 }
 
@@ -427,6 +432,18 @@ export function pagesLabel(count: number): string {
 }
 
 /** What intake actually covered. Uploading callers pass no report until the read completes. */
+/** Lot, block and plan (or an ATS location) read as parts, joined the way the form writes a legal description. */
+export const LEGAL_PART_FIELDS = ["lot", "block", "plan", "ats_qtr", "ats_sec", "ats_twp", "ats_rge", "ats_mer"] as const;
+
+export function legalFromParts(parts: Readonly<Record<string, unknown>>): string {
+  const v = (k: string) => (parts[k] == null ? "" : String(parts[k]).trim());
+  const lbp = [["Lot", v("lot")], ["Block", v("block")], ["Plan", v("plan")]].filter(([, x]) => x).map(([k, x]) => `${k} ${x}`).join(", ");
+  const ats = v("ats_sec") && v("ats_twp") && v("ats_rge")
+    ? [v("ats_qtr"), v("ats_sec"), v("ats_twp"), v("ats_rge"), v("ats_mer") ? `W${v("ats_mer").replace(/^W/i, "")}` : ""].filter(Boolean).join("-")
+    : "";
+  return [lbp, ats].filter(Boolean).join("; ");
+}
+
 /** The engine's reason while pictures wait for the applicant's OK (pixels cannot be scrubbed like text). */
 export const PICTURES_WAITING = "waiting for your OK";
 export const PICTURES_FIELD = "privacy.pictures";

@@ -3,7 +3,7 @@ import { latestLocalFacts, localField } from "../intakeFields";
 import type { Action } from "../model";
 import type { Case } from "../types";
 import type { DeckItem } from "./deck";
-import { readCopy, readGroups, sourceLine, type ReadCopy } from "../intakeView";
+import { LEGAL_PART_FIELDS, legalFromParts, readCopy, readGroups, sourceLine, type ReadCopy } from "../intakeView";
 import type { Fact } from "../types";
 
 export type Stage = "understand" | "route" | "project" | "rules" | "case" | "proof" | "paperwork";
@@ -185,7 +185,21 @@ export function understandingRows(c: Case, detailIds: ReadonlySet<string>): Unde
       twin.done = twin.done && group.done;
     } else rows.push({ key: group.key, field, value: shown.value, ref: group.fact.id, ids: group.ids, copy, sources: [...new Set(sources)], assumed, separate, done: group.done || answers.has(group.key), deferred: answers.get(group.key)?.value });
   }
-  return rows;
+  return joinLegalRows(rows);
+}
+
+/** Lot, block and plan are one thing to the applicant: one "Legal description" row. */
+function joinLegalRows(rows: UnderstandingRow[]): UnderstandingRow[] {
+  const parts = rows.filter((r) => !r.separate && (LEGAL_PART_FIELDS as readonly string[]).includes(r.field));
+  if (parts.length < 2) return rows;
+  const value = legalFromParts(Object.fromEntries(parts.map((r) => [r.field, r.value])));
+  const first = parts[0];
+  const joined: UnderstandingRow = {
+    ...first, field: "legalDescription", value, ids: [...new Set(parts.flatMap((r) => r.ids))],
+    copy: { ...first.copy, title: "Legal description", value }, sources: [...new Set(parts.flatMap((r) => r.sources))],
+    assumed: parts.some((r) => r.assumed), done: parts.every((r) => r.done), deferred: parts.find((r) => r.deferred)?.deferred,
+  };
+  return rows.flatMap((r) => (r === first ? [joined] : parts.includes(r) ? [] : [r]));
 }
 
 export function itemOpen(item: DeckItem): boolean {
