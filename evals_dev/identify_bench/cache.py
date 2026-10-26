@@ -16,7 +16,6 @@ import tempfile
 import threading
 import time
 from contextlib import contextmanager
-from functools import lru_cache
 from pathlib import Path
 
 from evals_dev.file_lock import file_lock
@@ -53,7 +52,6 @@ def _stamp(paths) -> tuple:
                  if p.exists() else None for p in paths)
 
 
-@lru_cache(maxsize=8)
 def _fingerprint(paths: tuple[Path, ...], stamp: tuple) -> str:
     h = hashlib.sha256()
     for i, path in enumerate(paths):
