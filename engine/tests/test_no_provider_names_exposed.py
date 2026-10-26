@@ -522,7 +522,8 @@ def test_officer_uploads_and_standalone_reviews_name_no_provider(reviewing):
     assert reviewer.get(f'/package-review/{package_id}').status_code == 200
     assert reviewer.get(f'/package-review/{package_id}/2').status_code == 200
     edit = reviewer.put(f'/package-review/{package_id}/2/information-request',
-                        json={'items': [{'text': 'Please confirm the owner name.', 'included': True}]})
+                        json={'items': [{'text': 'Please confirm the owner name.', 'included': True,
+                                            'target': {'section': 'A', 'field': 'owner_name', 'label': 'Section A · Owner'}}]})
     assert edit.status_code == 200, edit.text
     unreadable = reviewer.post('/package-review', files=[('files', ('notes.txt', b'hello', 'text/plain'))])
     assert unreadable.status_code == 201 and unreadable.json()['files'][0]['role'] == 'unreadable'
