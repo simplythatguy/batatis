@@ -17,6 +17,7 @@ from .intake import review as review_pass
 from .intake import service
 from .intake.extract import scrubbed
 from .intake.questions import issued_questions
+from .identify.case_input import refresh as refresh_identification
 from .intake.rules import ROLES
 from .llm_gate import client_ip_from
 from .models import Fact
@@ -117,6 +118,8 @@ def create_job_handler(code: Callable[[], Codes], *, transport_factory=None, rev
                           'case': case.model_dump(mode='json', include=set(read_fields)),
                           'reading_files': case.applicant_draft.intake_file_ids if case.applicant_draft else None,
                       },
+                      # Apply does no I/O, so it cannot refresh identification as the direct route does.
+                      # The client chains an identify job after intake; until then the stored result is stale.
                       write_fields=('facts', 'intake', 'title'), stages=('reading',), compute=compute,
                       apply=lambda case, body, output: service.apply(case, body.text, output, role=body.role),
                       file_ids=lambda body: body.file_ids, result_path='/intake', uses_ai=lambda body: body.model)
@@ -130,6 +133,12 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes], *
     router = APIRouter(tags=['intake'])
     handler = create_job_handler(code, transport_factory=transport_factory, review_factory=review_factory)
     local_runtime = []
+
+    def codes_or_none():
+        try:
+            return code()
+        except (CodeDbMissing, HTTPException):
+            return None
 
     def runtime():
         if jobs is not None:
@@ -163,6 +172,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes], *
         if body.expected_version is not None and body.expected_version != case.version:
             raise HTTPException(409, 'case was updated concurrently')
         handler.apply(case, body, extraction)
+        refresh_identification(case, store, codes_or_none())
         try:
             saved = store.put(case, expected_version=case.version)
         except VersionConflict as error:
@@ -189,6 +199,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes], *
         if expected_version is not None and expected_version != case.version:
             raise HTTPException(409, 'case was updated concurrently')
         change(case)
+        refresh_identification(case, store, codes_or_none())
         try:
             saved = store.put(case, expected_version=case.version)
         except VersionConflict as error:

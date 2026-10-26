@@ -141,7 +141,8 @@ def test_jobs_and_sync_identify_use_identical_algorithms_and_stages(database):
     final = client.get(start.headers['location']).json()
     assert final['state'] == 'succeeded', final
     saved = client.get(final['result_url']).json()
-    assert saved['mode'] == synchronous.json()['mode'] == 'fake'
+    assert saved['mode'] == synchronous.json()['mode']
+    assert saved['input_sha256'] == synchronous.json()['input_sha256']
     assert [(item['provision'], item['status']) for item in saved['articles']] == [
         (item['provision'], item['status']) for item in synchronous.json()['articles']]
     assert {'screen', 'rerank', 'verify', 'questions', 'applying'} <= set(stages)

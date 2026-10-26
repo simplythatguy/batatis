@@ -1,4 +1,8 @@
-"""Identification used by POST /cases/{id}/identify: screen -> rerank -> verify -> commit or quoted choices.
+"""Identification used by POST /cases/{id}/identify.
+
+The production requirements profile uses verified full-text/reference discovery,
+without provider requests or top-N deletion. The stages below remain available
+for explicitly selected historical benchmark configurations.
 
 Ported from PR #12 (engine/identify/pipeline.py) and rebuilt around one IdentifyConfig:
   screen   Elephant (default), Decisions or Jev judges every Division B article (2,080), or a lexical arm
@@ -225,9 +229,27 @@ def _in_article(quote: str | None, art: dict) -> bool:
 
 def run(prose: str, *, codes: Codes, config: IdentifyConfig | None = None, transports: Transports | None = None,
         verifier=None, on_stage: OnStage | None = None, facts=(), policy: CommitPolicy | None = None,
-        description_sha256: str | None = None, client_ip: str | None = None) -> RunOutput:
+        description_sha256: str | None = None, client_ip: str | None = None,
+        previous: IdentifyResult | None = None, confirmed_provisions=()) -> RunOutput:
     """`prose` is the outbound (already redacted) description. `verifier` overrides the configured one (tests)."""
     config = config or load_config()
+    if config.screen == 'requirements':
+        from .requirements import run as discover_requirements
+        result = discover_requirements(prose, codes=codes, config=config, facts=facts, previous=previous,
+                                       confirmed_provisions=confirmed_provisions,
+                                       description_sha256=description_sha256, on_stage=on_stage)
+        from .evidence import compact
+        from .benchmark_history import preserve
+        from .prioritize import order
+        from .scope import assess
+        finish = time.monotonic()
+        preserve(result, previous, codes)
+        if result.requirement_coverage.source is not None:
+            result.scope_assessments = assess(codes, facts, result)
+        order(result, prose)
+        compact(result)
+        result.trace.seconds = round(result.trace.seconds + time.monotonic() - finish, 3)
+        return RunOutput(result, None, None)
     tp = transports or default_transports(client_ip, scoring={config.screen, config.rerank},
                                           anthropic=config.verifier == 'anthropic')
     policy = (CommitPolicy('uncalibrated', 'tentative workflow: automatic commits are disabled', max_commits=0)
