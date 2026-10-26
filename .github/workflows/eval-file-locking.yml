@@ -59,6 +59,20 @@ jobs:
             evals_dev/requirements.txt
       - name: Install local development dependencies
         run: python -m pip install -r requirements.txt
+      - name: Build the same code database for both revisions
+        shell: python
+        run: |
+          import shutil
+          import subprocess
+          import sys
+          from pathlib import Path
+
+          subprocess.run([sys.executable, 'scripts/fetch_sources.py'], check=True)
+          subprocess.run([sys.executable, '-m', 'codedb', 'build'], check=True)
+          source = Path('codedb/build/codedb.sqlite')
+          destination = Path('.baseline/codedb/build/codedb.sqlite')
+          destination.parent.mkdir(parents=True, exist_ok=True)
+          shutil.copy2(source, destination)
       - name: Run affected suites before the change
         shell: python
         run: |
