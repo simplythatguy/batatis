@@ -1085,7 +1085,7 @@ export interface PackagePreview {
   filename: string;
   page_count: number;
   pages: PreviewPage[];
-  pdf: string | null;
+  pdf?: string | null;
   start: number;
 }
 
