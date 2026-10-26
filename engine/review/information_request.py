@@ -173,6 +173,7 @@ def edit(request: InformationRequest, items: list[EditedItem], intro: str | None
             'authored_by': authored, 'target': target,
             'section': target.section if target else current.section,
             'field': target.field if target else current.field}))
+    out.extend(item for item in request.items if item.finding_key and item.id not in seen)
     updated = request.model_copy(update={'items': out, 'edited': True,
                                          'intro': intro if intro is not None else request.intro})
     updated.text = render(updated)
@@ -186,7 +187,7 @@ def open_gaps(findings: list[Finding]) -> dict[str, Finding]:
             if finding.field not in OFFICER_ONLY and finding.routed_to != 'officer' and finding.status != 'not_found'}
 
 
-def diff(previous_version: int, previous: list[Finding], current: list[Finding]) -> ReviewDiff:
+def diff(previous_version: int, previous: list[Finding], current: list[Finding], *, lookup_skipped=False) -> ReviewDiff:
     before, after = open_gaps(previous), open_gaps(current)
 
     def entry(finding: Finding) -> DiffEntry:
@@ -196,6 +197,7 @@ def diff(previous_version: int, previous: list[Finding], current: list[Finding])
     uncertain_fields = {f.field for f in current if f.status == 'not_found' or f.routed_to != 'applicant'}
     unverified_keys = {key for key, finding in before.items() if key not in after and
                        (key in all_current or finding.field in uncertain_fields
+                        or (lookup_skipped and finding.field.startswith(('citation.', 'section_c.')))
                         or any(f.key == 'form:presence' and f.status == 'not_found' for f in current))}
     resolved = [entry(before[key]) for key in before if key not in after and key not in unverified_keys]
     unverified = [entry(all_current.get(key, before[key])) for key in before if key in unverified_keys]

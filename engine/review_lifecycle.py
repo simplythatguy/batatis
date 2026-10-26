@@ -1,6 +1,8 @@
 """Submission history and a factual diff, never a claim that a requested fix is sufficient."""
 import json
 
+from fastapi import HTTPException
+
 from .account_models import ReviewSnapshot, Submission, SubmissionChange
 from .models import Case
 from .process_fields import PROCESS_ALIASES
@@ -40,7 +42,7 @@ def comparison_values(values: dict[str, str]) -> dict[str, str]:
     return result
 
 
-def snapshot(case: Case, returned_at: str) -> ReviewSnapshot:
+def snapshot(case: Case, returned_at: str, store=None) -> ReviewSnapshot:
     values = {'title': case.title or '', 'authority': case.authority or '',
               'jurisdiction': case.jurisdiction.name if case.jurisdiction else '',
               'provisions': ', '.join(case.provisions)}
@@ -51,6 +53,10 @@ def snapshot(case: Case, returned_at: str) -> ReviewSnapshot:
     for item in case.evidence:
         for field, value in item.model_dump(exclude={'id', 'kind'}).items():
             values[f'evidence.{item.id}.listing.{field}'] = str(value) if value is not None else ''
+    if store is not None and callable(getattr(store, 'list_files', None)):
+        for file in store.list_files(case.id) or []:
+            values[f'file.{file["id"]}'] = json.dumps({key: file[key] for key in ('name', 'size', 'content_type')},
+                                                      sort_keys=True, ensure_ascii=False)
     return ReviewSnapshot(returned_at=returned_at, authority=case.authority, values=comparison_values(values))
 
 
@@ -64,9 +70,11 @@ def submit_round(case: Case, store, at: str) -> int:
     number = max(case.submission_number, 1 if case.status == 'returned' else 0) + 1
     baseline = case.return_snapshot if case.status == 'returned' else None
     before = comparison_values(baseline.values) if baseline else {}
-    after = snapshot(case, at).values
+    after = snapshot(case, at, store).values
     changes = [SubmissionChange(field=field, before=before.get(field), after=after.get(field))
                for field in sorted(before.keys() | after.keys()) if before.get(field) != after.get(field)] if baseline else []
+    if baseline is not None and not changes:
+        raise HTTPException(409, 'Nothing changed since it was returned. Fix the requested items, then send it again.')
     remember_decision(case)
     case.submissions.append(Submission(number=number, at=at, by_id=case.owner_id, authority=case.authority,
         returned_at=case.decision.at if case.decision and case.decision.outcome == 'return' else None,

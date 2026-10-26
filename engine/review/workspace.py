@@ -66,10 +66,12 @@ def build(session: ReviewSession, case=None, gaps=(), *, codes_available: bool =
                      rulebook=rulebook, tally=tally, gate=AcceptGate(can_accept=not reason, reason=reason))
 
 
-def sync_request(session: ReviewSession) -> ReviewSession:
+def sync_request(session: ReviewSession, case=None, gaps=()) -> ReviewSession:
     """A linked item's inclusion and target belong to its finding, not to correspondence edits."""
     from .information_request import render
-    states = {state.key: state.state for state in build(session).states}
+    if session.information_request.message_id:
+        return session
+    states = {state.key: state.state for state in build(session, case, gaps).states}
     findings = {finding.key: finding for finding in session.findings}
     items = []
     for item in session.information_request.items:
