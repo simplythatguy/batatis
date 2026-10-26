@@ -62,6 +62,7 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
   const [draftPending, setDraftPending] = useState(false);
   const [tab, setTab] = useState<"request" | "messages">("request");
   const [filter, setFilter] = useState<FindingFilter>("all");
+  const page = useRef<HTMLDivElement>(null);
   const upload = useRef<HTMLInputElement>(null);
   const scope = useRef({ caseId, session: accountSession() });
   const reads = useRef(0), indexReads = useRef(0);
@@ -318,14 +319,14 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
   const fallbackRows = sheet ? sheetRows(sheet, null) : [];
   const fallbackAnchors = sheet ? allAnchors(fallbackRows, sheet, null) : [];
 
-  return <div className="ac-page rw-page">
+  return <div className="ac-page rw-page" ref={page}>
     <PageHead title={<><a className="ac-crumb" href="#/review">Queue</a><span className="ac-crumb-sep" aria-hidden="true">/</span><span className="ac-crumb-leaf" title={title}>{title}</span></>} phoneTools={phoneTools}
       right={<>
         {shown && <details className="rw-version-menu"><summary>v{shown.version}<span className="cf-sr"> · review version on screen</span><AcIcon name="chev" size={12} /></summary>
           <div>{versions.map(version => <button type="button" key={version.version} disabled={draftPending || running || Boolean(busy)} aria-pressed={version.version === shown.version} onClick={event => { void pickVersion(version.version); const details = event.currentTarget.closest("details"); if (details) details.open = false; }}>Version {version.version} · {version.required} required</button>)}</div>
         </details>}
         <button type="button" className="cf-btn is-xs is-ghost" title="Refresh application" aria-label="Refresh application" disabled={Boolean(busy) || running || draftPending} onClick={() => refresh()}><AcIcon name="history" size={15} /></button>
-        <button type="button" className="cf-btn is-xs is-ghost" title="Messages" aria-label={unread ? `Messages, ${unread} unread` : "Messages"} onClick={() => setTab("messages")}><AcIcon name="chat" size={15} />{unread > 0 && <span className="rw-badge">{unread}</span>}</button>
+        <button type="button" className="cf-btn is-xs is-ghost" title="Messages" aria-label={unread ? `Messages, ${unread} unread` : "Messages"} onClick={() => { setTab("messages"); page.current?.querySelector<HTMLElement>("[data-tab=messages]")?.focus({ preventScroll: true }); page.current?.querySelector(".rw-correspondence")?.scrollIntoView({ block: "start" }); }}><AcIcon name="chat" size={15} />{unread > 0 && <span className="rw-badge">{unread}</span>}</button>
         {menu.length > 0 && <MoreMenu items={menu} />}
       </>} />
     {loadError ? <div className="ac-page-body is-narrow"><p role="alert">{loadError}</p><a className="cf-btn is-sm" href="#/review">Back to the queue</a><button type="button" className="cf-btn is-sm" onClick={() => refresh(true)}>Try again</button></div>
@@ -354,11 +355,11 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
             </div>
             <RequestRail caseId={caseId} session={null} workspace={null} filter="all" onFilter={setFilter} tab={tab} onTab={setTab} draft={null} editable={false} busy={Boolean(busy)} targets={[]} questions={sheet.questions} messages={messages} onMessages={setMessages} me={me} messageDraft={messageDraft} onMessageDraft={setMessageDraft}
               onReturn={() => {}} onAccept={() => {}} onRefuse={() => {}} readOnlyReason={indexState === "loading" ? "Loading the review…" : runError ? "Review failed · try again" : "Review not available"} refreshMessages={() => refresh(true)}
-              outcome={outcome || (indexState === "unavailable" && canReview ? <div className="rw-decision"><p className="rw-scope">Completeness only · not a design approval</p><div className="rw-decision-actions">
-                <button type="button" className="cf-btn is-sm is-primary" disabled={Boolean(busy) || refreshing} onClick={() => { setDecisionError(""); setLegacyReturn(true); }}>Return with a message</button>
-                <button type="button" className="cf-btn is-sm" disabled={Boolean(busy) || refreshing || snapshot.gaps === null || Boolean(snapshot.gapError) || snapshot.gaps.some(g => g.severity === "blocking")} onClick={() => openPreview("accept")}>Accept</button>
+              outcome={outcome || (canReview ? <div className="rw-decision"><p className="rw-pin">Application version {c.version}</p><p className="rw-scope">Completeness only · not a design approval</p><div className="rw-decision-actions">
+                <button type="button" className="cf-btn is-sm is-primary" disabled={indexState !== "unavailable" || Boolean(busy) || refreshing} onClick={() => { setDecisionError(""); setLegacyReturn(true); }}>{indexState === "unavailable" ? "Return with a message" : "Return with 0 items"}</button>
+                <button type="button" className="cf-btn is-sm" disabled={indexState !== "unavailable" || Boolean(busy) || refreshing || snapshot.gaps === null || Boolean(snapshot.gapError) || snapshot.gaps.some(g => g.severity === "blocking")} onClick={() => openPreview("accept")}>Accept</button>
                 <button type="button" className="cf-btn is-sm" disabled={Boolean(busy) || refreshing} onClick={() => setRefusing(true)}>Refuse</button>
-              </div>{snapshot.gaps?.some(g => g.severity === "blocking") && <p className="rw-hint">Required checklist items remain.</p>}</div> : null)} />
+              </div>{indexState !== "unavailable" ? <p className="rw-hint">Acceptance and requests wait for the saved review.</p> : snapshot.gaps?.some(g => g.severity === "blocking") ? <p className="rw-hint">Required checklist items remain.</p> : snapshot.gapError ? <p className="rw-hint">{snapshot.gapError}</p> : null}</div> : null)} />
           </div>}
       </div>}
     <input ref={upload} className="pr-file-input" type="file" accept="application/pdf,.pdf" multiple tabIndex={-1} aria-hidden="true" onChange={event => { const files = [...(event.target.files ?? [])]; event.target.value = ""; if (files.length) void run(files); }} />

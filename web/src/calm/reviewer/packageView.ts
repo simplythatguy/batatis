@@ -267,9 +267,6 @@ export interface CheckRow {
   message: string;
 }
 
-/** Open Division C file items and "demonstrate" prompts, for the step's count. */
-export const fileGaps = (s: ReviewSession) => s.findings.filter((f) => isFileItem(f) || isDemonstrate(f)).length;
-
 export function fileItemsView(s: ReviewSession): { items: CheckRow[]; demonstrate: CheckRow[]; read: boolean } {
   // Nothing readable means nothing was checked; never show "no gap" for an unread package.
   const read = s.fields.some((f) => f.status === "present" && f.value?.trim());

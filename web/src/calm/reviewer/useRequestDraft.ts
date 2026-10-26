@@ -42,7 +42,8 @@ export function useRequestDraft({ target, session, limits, enabled, onSaved, onC
     } catch (error) {
       if (!live()) return;
       const conflict = error instanceof AccountsError && error.status === 409;
-      dispatch({ type: "failed", conflict, message: error instanceof AccountsError ? error.detail : "The request didn’t save. Try again." });
+      const detail = error instanceof AccountsError && error.body && typeof error.body === "object" && "detail" in error.body ? error.body.detail : null;
+      dispatch({ type: "failed", conflict, message: typeof detail === "string" ? detail : error instanceof AccountsError ? error.detail : "The request didn’t save. Try again." });
       if (conflict) callbacks.current.onConflict();
     } finally {
       pending.current = false;

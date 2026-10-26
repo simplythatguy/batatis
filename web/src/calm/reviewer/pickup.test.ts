@@ -116,3 +116,27 @@ test("Stop reviewing releases and goes back to the queue, without picking the fi
   assert.equal(h.calls.claim, 0, "no re-pickup loop");
   h.unmount();
 });
+
+test("a kept reservation after resubmission waits for Resume review", async () => {
+  const h = await harness({ status: "submitted", submission_number: 2, claim: { reviewer_id: me.id, reviewer_name: me.name, claimed_at: "2026-10-22T12:00:00Z" } });
+  let tree = await h.render({ caseId: "c1" });
+  assert.equal(h.calls.claim, 0); assert.equal(h.calls.run, 0);
+  button(tree, /^Resume review$/)[0].props.onClick(); tree = await h.render();
+  assert.equal(h.calls.claim, 1); assert.equal(h.calls.run, 1);
+  assert.ok(workspaceNode(tree));
+  h.unmount();
+});
+
+test("older review versions are read-only and never expose a decision foot", async () => {
+  const { reviewSession, indexFor } = await import("./tests/workspaceHarness.mjs");
+  const latest = reviewSession(3);
+  const h = await harness({ status: "in_review", claim: { reviewer_id: me.id, reviewer_name: me.name, claimed_at: "2026-10-22T12:00:00Z" } }, {
+    index: async () => indexFor(latest, { sessions: [{ version: 1, required: 2 }, { version: 3, required: 0 }] }),
+  });
+  let tree = await h.render({ caseId: "c1" });
+  const head = nodes(tree, n => n.props?.right)[0];
+  const version = nodes(head.props.right, n => n.type === "button" && text(n) === "Version 1 · 2 required")[0];
+  assert.ok(version); version.props.onClick({ currentTarget: { closest: () => ({ open: true }) } }); tree = await h.render();
+  assert.deepEqual([workspaceNode(tree).props.session.version, workspaceNode(tree).props.editable, workspaceNode(tree).props.historical, workspaceNode(tree).props.showDecision], [1, false, true, false]);
+  h.unmount();
+});

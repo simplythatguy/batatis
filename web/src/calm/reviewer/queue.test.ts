@@ -84,5 +84,3 @@ test("sent and since labels", () => {
   assert.equal(sentLabel(null, now), "—");
   assert.equal(sinceLabel(new Date(2026, 9, 21, 14, 14).toISOString(), now), "since 2:14 PM");
 });
-
-

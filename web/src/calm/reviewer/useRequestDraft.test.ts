@@ -64,3 +64,13 @@ test("a late save cannot publish after the account changes", async () => {
   assert.equal(h.saved.length, 0); assert.equal(h.conflicts, 0);
   h.unmount();
 });
+
+test("request limit failures retain the server's exact explanation and the unsaved edit", async () => {
+  const h = await harness(async () => { throw new AccountsError(422, "Some of what you entered isn’t valid.", { detail: "The request exceeds 6000 characters. Remove an item." }); });
+  let draft = await h.render(h.props);
+  draft.dispatch({ type: "intro", value: "Keep this wording" }); await h.render(); h.fire(); draft = await h.render();
+  assert.equal(draft.state.save.kind, "error");
+  assert.equal(draft.state.save.message, "The request exceeds 6000 characters. Remove an item.");
+  assert.equal(draft.state.content.intro, "Keep this wording");
+  h.unmount();
+});

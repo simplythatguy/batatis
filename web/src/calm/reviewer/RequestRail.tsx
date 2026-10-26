@@ -1,4 +1,4 @@
-import { useId, type Dispatch, type ReactNode, type SetStateAction } from "react";
+import { useEffect, useId, useRef, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
 import type { Message } from "../../api/accounts";
 import type { RequestTarget, ReviewSession, Workspace } from "../../api/types.gen";
 import type { ReviewQuestion } from "../../api/client";
@@ -17,6 +17,15 @@ export function RequestRail({ caseId, session, workspace, required, filter, onFi
   showDecision?: boolean; composing?: boolean; onComposing?: (open: boolean) => void; outcome?: ReactNode; readOnlyReason: string; refreshMessages: () => void;
 }) {
   const id = useId();
+  const panel = useRef<HTMLElement>(null);
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    setVisible(false);
+    if (tab !== "messages" || !panel.current || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(entries => setVisible(entries.some(entry => entry.isIntersecting)));
+    observer.observe(panel.current);
+    return () => observer.disconnect();
+  }, [tab]);
   const tally = workspace?.tally;
   const pending = Boolean(draft?.pending || composing);
   const availability = workspaceDecision({ workspace, editable, pending, busy });
@@ -44,11 +53,16 @@ export function RequestRail({ caseId, session, workspace, required, filter, onFi
         ["Fixed", diff.resolved], ["Still open", diff.still_open], ["New", diff.new], ["Can’t tell", diff.unverified ?? []],
       ].map(([label, entries]) => <div key={String(label)}>{typeof entries !== "string" && entries.length > 0 && <><h4>{String(label)}</h4><ul>{entries.map(entry => <li key={entry.key}>{entry.label} · {entry.message}</li>)}</ul></>}</div>)}</details>
     </section>}
-    <div className="rw-tabs" role="tablist" aria-label="Correspondence">
-      <button type="button" id={`${id}-request-tab`} role="tab" aria-selected={tab === "request"} aria-controls={`${id}-request`} onClick={() => onTab("request")}><AcIcon name="doc" size={14} />Request{tally && <span className="rw-badge">{tally.asked}</span>}</button>
-      <button type="button" id={`${id}-messages-tab`} role="tab" aria-selected={tab === "messages"} aria-controls={`${id}-messages`} onClick={() => onTab("messages")}><AcIcon name="chat" size={14} />Messages{messages && <span className="rw-badge">{messages.length}</span>}</button>
+    <div className="rw-tabs" role="tablist" aria-label="Correspondence" onKeyDown={event => {
+      if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+      event.preventDefault();
+      const next = event.key === "Home" ? "request" : event.key === "End" ? "messages" : tab === "request" ? "messages" : "request";
+      onTab(next); event.currentTarget.querySelector<HTMLButtonElement>(`[data-tab=${next}]`)?.focus();
+    }}>
+      <button type="button" id={`${id}-request-tab`} role="tab" data-tab="request" tabIndex={tab === "request" ? 0 : -1} aria-selected={tab === "request"} aria-controls={`${id}-request`} onClick={() => onTab("request")}><AcIcon name="doc" size={14} />Request{tally && <span className="rw-badge">{tally.asked}</span>}</button>
+      <button type="button" id={`${id}-messages-tab`} role="tab" data-tab="messages" tabIndex={tab === "messages" ? 0 : -1} aria-selected={tab === "messages"} aria-controls={`${id}-messages`} onClick={() => onTab("messages")}><AcIcon name="chat" size={14} />Messages{messages && <span className="rw-badge">{messages.length}</span>}</button>
     </div>
-    <section className="rw-rail-section rw-correspondence" id={`${id}-${tab}`} role="tabpanel" aria-labelledby={`${id}-${tab}-tab`}>
+    <section ref={panel} className="rw-rail-section rw-correspondence" id={`${id}-${tab}`} role="tabpanel" aria-labelledby={`${id}-${tab}-tab`}>
       {tab === "request" ? <>
         <h3>{session?.information_request.sent_at ? `Sent ${sentLabel(session.information_request.sent_at)}` : "What the applicant receives"}</h3>
         <pre className="rw-letter" aria-label="Saved request text">{text || "No saved request text yet."}</pre>
@@ -65,7 +79,7 @@ export function RequestRail({ caseId, session, workspace, required, filter, onFi
         {!editable && readOnlyReason && <p className="rw-hint">{readOnlyReason}</p>}
       </> : <>
         {messages === null ? <p className="rw-hint">Messages didn’t load. <button type="button" className="cf-btn is-xs" onClick={refreshMessages}>Try again</button></p>
-          : <Messages caseId={caseId} me={me} messages={messages} onChange={onMessages} canWrite={editable} hideTitle draft={messageDraft} onDraft={onMessageDraft} />}
+          : <Messages caseId={caseId} me={me} messages={messages} onChange={onMessages} canWrite={editable} reading={visible} hideTitle draft={messageDraft} onDraft={onMessageDraft} />}
         <p className="rw-meta">One way · they answer by fixing and resending</p>
       </>}
     </section>

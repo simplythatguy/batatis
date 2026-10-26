@@ -28,7 +28,6 @@ let controller: AbortController | null = null;
 let inflight: Promise<void> | null = null;
 let patches = new Map<string, Partial<QueueApplication>>();
 let seen = new Set<string>();
-const asked = new Map<string, string>();
 const reviewer = () => {
   const { phase, user } = getAccountState();
   return phase === "signed-in" && user?.role === "reviewer" && Boolean(user.authority);
@@ -42,7 +41,6 @@ subscribeAccount(() => {
   controller = null;
   inflight = null;
   patches = new Map();
-  asked.clear();
   seen.clear();
   state = empty();
   for (const l of listeners) l();
@@ -84,8 +82,7 @@ export function loadQueue(refresh = false): Promise<void> {
         return;
       }
       if (e instanceof QueueSessionChanged) {
-        asked.clear();
-        set({ phase: "error", rows: [], blocking: {}, error: e.detail });
+              set({ phase: "error", rows: [], blocking: {}, error: e.detail });
         return;
       }
       set({ phase: state.rows.length ? "ready" : "error", error: e instanceof EngineError ? e.detail : "The queue didn’t load." });
@@ -110,9 +107,9 @@ export function setBlocking(id: string, n: number | null) {
   set({ blocking });
 }
 
-/** Re-check changed submissions/content, three reads at a time, within the same session. */
+/** Draft dispositions can change without Case.updated_at changing. Read the server on every refresh. */
 async function fillBlocking(rows: QueueApplication[], signal: AbortSignal, current: () => boolean) {
-  const todo = rows.filter(row => asked.get(row.id) !== row.updated_at);
+  const todo = [...rows];
   const worker = async () => {
     for (let row = todo.shift(); row && current(); row = todo.shift()) {
       try {
@@ -126,7 +123,6 @@ async function fillBlocking(rows: QueueApplication[], signal: AbortSignal, curre
           required = gaps.filter(g => g.severity === "blocking").length;
         }
         if (!current()) return;
-        asked.set(row.id, row.updated_at);
         setBlocking(row.id, required);
       } catch { /* A later notification or manual refresh can retry. */ }
     }

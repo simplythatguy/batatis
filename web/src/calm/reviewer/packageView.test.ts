@@ -187,5 +187,3 @@ test("co-ordinator row: officer voice, and not found stays an officer check", ()
   assert.deepEqual([unsure.status, unsure.tone], ["Not found · check it", "pending"]);
   assert.equal(fileItemsView(session([])).items.some((i) => i.key === "div_c.coordinator"), false);
 });
-
-

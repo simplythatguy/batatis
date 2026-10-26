@@ -189,7 +189,7 @@
 .rv-start-acts { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 24px; }
 .rv-scope { display: inline-flex; align-items: center; gap: 7px; margin: 18px 0 0; padding: 4px 10px; border-radius: 999px; background: var(--cf-hover); color: var(--cf-text-3); font-size: 12.5px; }
 
-/* The decision: three coloured tiles, icon first */
+/* Legacy package decision geometry. */
 .rv-decide .rv-scope { margin: 0 0 18px; }
 .rv-choices { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .rv-choice {
@@ -270,7 +270,7 @@
 .pr-sec { color: var(--cf-text-2); }
 .pr-sec-badge { width: 20px; height: 20px; display: grid; place-items: center; border-radius: 6px; background: var(--cf-hover); color: var(--cf-text-2); font: 700 11.5px var(--cf-font); }
 
-/* Close-out: the due date as one coloured card with its action */
+/* Close-out geometry. */
 .co-due { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 6px 0 4px; padding: 16px 18px; border-radius: var(--cf-r-card); background: var(--cf-hover); }
 .co-due .pr-ico { background: var(--cf-surface); }
 .co-due-txt { flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 2px; }
@@ -375,7 +375,7 @@ ul.pr-metrics span { color: var(--cf-text-3); font-size: 13.5px; }
 .cf-app .pr-body[tabindex="-1"]:focus-visible { outline: none; }
 
 /* Officer workspace: the application and its saved request share the available room. */
-.rw-page { height: 100%; min-height: 0; overflow: hidden; }
+.rw-page { position: relative; height: 100%; min-height: 0; overflow: hidden; }
 .rw-workspace { flex: 1; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
 .rw { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 380px; overflow: hidden; }
 .rw-document { min-width: 0; overflow-y: auto; overscroll-behavior: contain; padding: 24px 28px 64px; scroll-padding-block: 24px; }
@@ -531,7 +531,7 @@ ul.pr-metrics span { color: var(--cf-text-3); font-size: 13.5px; }
   .rw-finding-head { gap: 8px; }
   .rw-seg { margin-left: 18px; }
   .rw-finding-head .rw-details { margin-left: auto; }
-  .rw-decision { position: fixed; left: 0; right: 0; bottom: 0; z-index: 6; padding: 10px 16px calc(12px + env(safe-area-inset-bottom)); box-shadow: 0 -4px 16px rgb(0 0 0 / 0.04); }
+  .rw-decision { position: absolute; left: 0; right: 0; bottom: 0; z-index: 6; padding: 10px 16px calc(12px + env(safe-area-inset-bottom)); box-shadow: 0 -4px 16px rgb(0 0 0 / 0.04); }
   .rw-pin { margin-bottom: 4px; }
   .rw-scope { margin-bottom: 7px; font-size: 11.5px; }
   .rw-decision-actions { gap: 6px; }
@@ -545,3 +545,16 @@ ul.pr-metrics span { color: var(--cf-text-3); font-size: 13.5px; }
 .rw-key { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rw-target-picker > summary > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rw-target-options > button { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* The sidebar and assistant can make a desktop work area as narrow as a phone. */
+@container main (max-width: 900px) {
+  .rw-workspace { overflow-y: auto; overscroll-behavior: contain; }
+  .rw-banners { max-height: none; overflow: visible; }
+  .rw { display: flex; flex-direction: column; flex: none; overflow: visible; }
+  .rw-document { overflow: visible; padding: 12px 10px 20px; }
+  .rw-sheet { padding: 18px 16px; }
+  .rw-row { grid-template-columns: 1fr; }
+  .rw-rail { overflow: visible; border-left: 0; border-top: 1px solid var(--cf-line); padding-bottom: 250px; }
+  .rw-decision { position: absolute; left: 0; right: 0; bottom: 0; z-index: 6; padding: 10px 16px calc(12px + env(safe-area-inset-bottom)); box-shadow: 0 -4px 16px rgb(0 0 0 / 0.04); }
+}
+.rw-correspondence { scroll-margin-block: 16px 250px; }
