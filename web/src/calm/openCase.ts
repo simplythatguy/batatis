@@ -15,7 +15,7 @@ import { canonicalProvision, isProvision } from "../provisions";
 import type { ApplicantType, AuthorityId, Candidate, Case, CaseFile, Fact, ProcessFieldId } from "../types";
 import { clarificationQuestionId } from "./uncertainty";
 import type { SavedCase } from "../api/client";
-import { DESCRIPTION_DRAFT, evidenceDrafts } from "./applicantDraft";
+import { DESCRIPTION_DRAFT, evidenceDrafts } from "./draftWire";
 
 /** The latest saved fact per field, without withdrawn answers. Order is preserved. */
 export function latestFacts(facts: EngineCase["facts"]): Fact[] {

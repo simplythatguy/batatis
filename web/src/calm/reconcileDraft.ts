@@ -3,7 +3,7 @@ import type { ApplicantDraft } from "../api/types.gen";
 import { evidenceSlot } from "../model";
 import { factSignature } from "../rules";
 import type { Case, Fact } from "../types";
-import { DESCRIPTION_DRAFT } from "./applicantDraft";
+import { DESCRIPTION_DRAFT } from "./draftWire";
 import { latestFacts, selectedArticles } from "./openCase";
 
 export type ReconciliationChoices = Record<string, "mine" | "saved">;

@@ -55,12 +55,15 @@ def database(request, tmp_path):
         pytest.skip('TEST_DATABASE_URL is not configured')
     import psycopg
     from psycopg import sql
-    from psycopg.conninfo import make_conninfo
+    from psycopg.conninfo import conninfo_to_dict, make_conninfo
     from engine.store_postgres import PostgresCaseStore
     schema = 'jobs_test_' + uuid.uuid4().hex
     with psycopg.connect(url, autocommit=True) as con:
         con.execute(sql.SQL('CREATE SCHEMA {}').format(sql.Identifier(schema)))
-    scoped_url = make_conninfo(url, options=f'-c search_path={schema}')
+    # Worker subprocesses read DATABASE_URL, which requires TLS unless a mode is named.
+    # Name libpq's default so they connect exactly as this process does.
+    tls = {} if conninfo_to_dict(url).get('sslmode') else {'sslmode': 'prefer'}
+    scoped_url = make_conninfo(url, options=f'-c search_path={schema}', **tls)
     try:
         yield PostgresCaseStore(scoped_url), lambda: PostgresCaseStore(scoped_url)
     finally:

@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { applicantDraft, evidenceDrafts } from "./applicantDraft";
+import { applicantDraft } from "./applicantDraft";
+import { evidenceDrafts } from "./draftWire";
 import { emptyCase } from "../intake";
 import { reducer } from "../model";
 import { questionDrafts } from "./questionDrafts";
