@@ -4,7 +4,7 @@
  * model and effort from that source's menu; Off sends nothing. Only desktop/ names sources and models.
  */
 
-export type Source = "chatgpt" | "claude" | "openai";
+export type Source = "chatgpt" | "claude" | "openai" | "batatis";
 export type Slot = "workflow" | "chat";
 
 export type Pick =
@@ -14,7 +14,8 @@ export type Pick =
 export interface AiSelection { workflow: Pick; chat: Pick; screening: boolean }
 
 export interface MenuModel { id: string; label: string; efforts: readonly string[] }
-export interface SourceMenu { label: string; billing: "subscription" | "api"; models: readonly MenuModel[]; default: { model: string; effort: string } }
+/** `included`: the Batatis team pays, through an access code. */
+export interface SourceMenu { label: string; billing: "subscription" | "api" | "included"; models: readonly MenuModel[]; default: { model: string; effort: string } }
 
 const CLAUDE_EFFORTS = ["low", "medium", "high"] as const;
 
@@ -34,12 +35,13 @@ export const MENU: Readonly<Record<Source, SourceMenu>> = {
     default: { model: "claude-haiku-5-5", effort: "low" },
   },
   openai: { label: "OpenAI API key", billing: "api", models: [{ id: "gpt-6-luna", label: "Luna", efforts: ["medium"] }], default: { model: "gpt-6-luna", effort: "medium" } },
+  batatis: { label: "Batatis AI", billing: "included", models: [{ id: "gpt-6-luna", label: "Luna", efforts: ["medium"] }], default: { model: "gpt-6-luna", effort: "medium" } },
 };
 
 export const OFF: Pick = { source: "off" };
 export const DEFAULT_SELECTION: AiSelection = { workflow: OFF, chat: OFF, screening: false };
 
-export const isSource = (value: unknown): value is Source => value === "chatgpt" || value === "claude" || value === "openai";
+export const isSource = (value: unknown): value is Source => value === "chatgpt" || value === "claude" || value === "openai" || value === "batatis";
 export const isSlot = (value: unknown): value is Slot => value === "workflow" || value === "chat";
 
 export function defaultPick(source: Source): Pick {

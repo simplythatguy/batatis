@@ -1683,6 +1683,8 @@ export interface UnresolvedCitation {
 }
 
 export interface User {
+  ai_access: string | null;
+  ai_access_fingerprint: string | null;
   applicant_type: "manufacturer" | "contractor" | "homebuilder" | null;
   authority: "calgary" | "edmonton" | null;
   created_at: string;

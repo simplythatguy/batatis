@@ -129,7 +129,8 @@ async function fixture(t: TestContext, mode: Record<string, unknown> = {}, timin
   });
   const messages = async (): Promise<Record<string, unknown>[]> => (await readFile(capture, "utf8")).split("\n").filter(Boolean).map((line) => JSON.parse(line));
   const waitFor = async (check: () => Promise<boolean>) => {
-    const deadline = Date.now() + 2000;
+    // Generous for cold process starts on hosted Windows runners; a passing run returns as soon as the state holds.
+    const deadline = Date.now() + 10_000;
     while (!await check()) {
       assert.ok(Date.now() < deadline, "synthetic child reached the requested state");
       await delay(5);
@@ -171,7 +172,7 @@ for (const [name, errorValue] of [
 
 for (const errorMethod of ["account/read", "turn/start"]) {
   test(`RPC error lifecycle settles malformed ${errorMethod} responses after startup`, async (t) => {
-    const f = await fixture(t, { errorMethod, errorValue: null }, { requestMs: 100, completionMs: 200 });
+    const f = await fixture(t, { errorMethod, errorValue: null }, { requestMs: 2000, completionMs: 4000 });
     const completion = f.provider.completeJson(request, new AbortController().signal);
     const status = f.provider.status();
     await f.waitMethod(errorMethod);

@@ -15,7 +15,7 @@ class Profile:
     billing: str
 
 
-BILLING = {'off': 'none', 'chatgpt': 'subscription', 'claude': 'subscription', 'openai': 'api'}
+BILLING = {'off': 'none', 'chatgpt': 'subscription', 'claude': 'subscription', 'openai': 'api', 'batatis': 'included'}
 
 
 def profile(slot: str = 'workflow') -> Profile:
@@ -26,7 +26,7 @@ def profile(slot: str = 'workflow') -> Profile:
         value = reply.get('value') if reply.get('ok') else None
         if (isinstance(value, dict) and isinstance(value.get('lease'), str) and value['lease']
                 and value.get('generation') in BILLING
-                and type(value.get('screening')) is bool and value.get('billing') in ('none', 'subscription', 'api')):
+                and type(value.get('screening')) is bool and value.get('billing') in set(BILLING.values())):
             expected = BILLING[value['generation']]
             if value['billing'] == expected:
                 return Profile(value['lease'], value['generation'], value['screening'], expected)

@@ -395,6 +395,7 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
     app.include_router(__import__('engine.routes_case', fromlist=['create_router']).create_router(cases, code))
     app.include_router(__import__('engine.routes_evidence', fromlist=['create_router']).create_router(cases, code))
     app.include_router(__import__('engine.routes_auth', fromlist=['create_router']).create_router(cases))
+    app.include_router(__import__('engine.routes_hosted_ai', fromlist=['create_router']).create_router(cases))
     app.include_router(__import__('engine.routes_review', fromlist=['create_router']).create_router(cases, code))
     app.include_router(__import__('engine.routes_assist', fromlist=['create_router']).create_router(cases, code))
     app.include_router(__import__('engine.routes_voice', fromlist=['create_router']).create_router(cases))

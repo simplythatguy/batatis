@@ -260,6 +260,7 @@ export class DesktopHost {
     return [
       await account("chatgpt"),
       await account("claude"),
+      { ...row("batatis"), kind: "key", status: { state: await this.#deps.vault.status("batatis") } },
       { ...row("openai"), kind: "key", status: { state: await this.#deps.vault.status("openai") } },
       { ...row("jev"), kind: "key", status: { state: await this.#deps.vault.status("jev") } },
     ];

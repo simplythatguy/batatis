@@ -9,6 +9,7 @@ import { authorityName } from "../applications";
 import { PageHead, clockText, useCountdown } from "../auth/bits";
 import { APPLICANT_CHOICES, APPLICANT_LABEL, AUTHORITY_CHOICES, codeNeeded } from "../auth/onboardingSteps";
 import { saveOnboarding, signOut } from "../auth/useAuthGate";
+import { AiAccessSection } from "./AiAccess";
 import { ArchivedApplications } from "./ArchivedApplications";
 import { Chips, Row } from "./rows";
 
@@ -115,6 +116,7 @@ export function Settings({ phoneTools }: { phoneTools?: ReactNode }) {
               </Row>
               {editing && <RoleEditor onCancel={() => setEditing(false)} onSaved={() => { setEditing(false); setSaved(true); }} />}
             </section>
+            <AiAccessSection />
             <ArchivedApplications />
           </>
         ) : (

@@ -477,11 +477,12 @@ def test_public_deadline_includes_real_accounting_work(monkeypatch, stage):
     name = 'try_reserve' if stage == 'reserve' else 'adjust'
     original = getattr(llm_gate._memory, name)
     def slow(*args, **kwargs):
-        time.sleep(0.15)
+        time.sleep(1.5)
         return original(*args, **kwargs)
     monkeypatch.setattr(llm_gate._memory, name, slow)
+    # A one-second budget leaves a busy CI runner room to reach the request before the slow accounting step.
     with pytest.raises(JevResponseError, match='timeout'):
-        metered_ask(jev_runtime.raw_ask())(STATE, QUESTIONS, 0.1)
+        metered_ask(jev_runtime.raw_ask())(STATE, QUESTIONS, 1.0)
     assert len(requests) == (0 if stage == 'reserve' else 1)
     assert llm_gate._memory.today() == (Decimal('0') if stage == 'reserve' else Decimal('0.000042'))
 

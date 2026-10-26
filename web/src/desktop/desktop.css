@@ -257,55 +257,72 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Model picker (ModelPicker.tsx), after T3 Code's composer picker. */
+/* Model picker (ModelPicker.tsx): a chip that opens the app's row menu, after T3 Code's composer picker. */
 .dk-picker {
   position: relative;
   display: inline-flex;
 }
 
 .dk-picker-btn {
+  height: 34px;
+  padding: 0 12px 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--cf-line-2);
+  background: rgba(17, 24, 39, 0.09);
+  color: var(--cf-text);
+  font: 500 13px/1 var(--cf-font);
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 30px;
-  padding: 0 10px;
-  border: 1px solid var(--cf-line-2);
-  border-radius: 9px;
-  background: var(--cf-surface);
-  color: var(--cf-text);
-  font: 500 13px/1 var(--cf-font);
+  white-space: nowrap;
   cursor: pointer;
-  transition: background-color 150ms ease-out;
+  transition-property: scale, background-color, color;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+
+.dk-picker-btn > svg {
+  color: var(--cf-text-3);
+}
+
+.dk-picker-btn:not(:disabled):active {
+  scale: 0.96;
 }
 
 .dk-picker.is-compact .dk-picker-btn {
   height: 28px;
-  padding: 0 8px;
+  padding: 0 6px 0 8px;
   border-color: transparent;
   background: none;
-  color: var(--cf-text-2);
+  color: var(--cf-text-3);
   font-size: 12px;
 }
 
 @media (hover: hover) {
   .dk-picker-btn:not(:disabled):hover {
+    background: rgba(17, 24, 39, 0.12);
+  }
+
+  .dk-picker.is-compact .dk-picker-btn:not(:disabled):hover {
     background: var(--cf-hover);
+    color: var(--cf-text);
   }
 }
 
 .dk-picker-menu {
   position: absolute;
-  z-index: 1000;
+  z-index: 30;
   top: calc(100% + 6px);
   left: 0;
-  min-width: 220px;
+  width: 224px;
   max-height: min(26rem, 70vh);
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 6px;
-  border-radius: 12px;
-  background: var(--cf-surface);
+  border-radius: 14px;
+  background: var(--cf-raise);
   border: 1px solid var(--cf-line-2);
-  box-shadow: 0 20px 50px -16px rgba(17, 24, 39, 0.18);
+  box-shadow: 0 24px 60px -24px rgba(17, 24, 39, 0.16);
 }
 
 .dk-picker.is-compact .dk-picker-menu {
@@ -316,55 +333,78 @@
 }
 
 .dk-picker-group {
-  margin: 8px 8px 2px;
-  font-size: 11.5px;
-  font-weight: 550;
+  margin: 8px 10px 2px;
+  font: 500 12px var(--cf-font);
   color: var(--cf-text-3);
 }
 
 .dk-picker-item {
+  width: 100%;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 9px;
+  background: none;
+  color: var(--cf-text-2);
+  font: 500 14px var(--cf-font);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  width: 100%;
-  height: 30px;
-  padding: 0 8px;
-  border: 0;
-  border-radius: 7px;
-  background: none;
-  color: var(--cf-text);
-  font: 400 13px/1 var(--cf-font);
+  gap: 10px;
   text-align: left;
   cursor: pointer;
+  white-space: nowrap;
+  transition-property: background-color, color;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
 }
 
-.dk-picker-item:hover,
-.dk-picker-item:focus-visible {
-  background: var(--cf-hover);
+.dk-picker-item[aria-checked="true"] {
+  color: var(--cf-text);
+}
+
+.dk-picker-item > svg {
+  flex: none;
+  color: var(--cf-text-3);
+}
+
+/* Outranks the shell's focus ring: in a menu, the focused item is shaded instead, like the row menu. */
+.cf-app .dk-picker .dk-picker-item:focus-visible,
+.cf-app .dk-picker .dk-picker-item:focus {
   outline: none;
+  box-shadow: none;
+  background: var(--cf-selected);
+}
+
+@media (hover: hover) {
+  .dk-picker-item:hover {
+    background: var(--cf-hover);
+    color: var(--cf-text);
+  }
 }
 
 .dk-picker-effort {
   display: flex;
-  gap: 4px;
+  flex-wrap: wrap;
+  gap: 6px;
   margin-top: 6px;
-  padding: 8px 4px 2px;
+  padding: 10px 4px 4px;
   border-top: 1px solid var(--cf-line);
 }
 
-.dk-picker-chip {
-  flex: 1;
-  height: 26px;
-  border: 1px solid var(--cf-line-2);
-  border-radius: 7px;
-  background: none;
-  color: var(--cf-text-2);
-  font: 500 12px/1 var(--cf-font);
-  cursor: pointer;
+.dk-picker-effort .cf-chip {
+  height: 30px;
+  padding: 0 12px;
 }
 
-.dk-picker-chip[aria-checked="true"] {
-  background: var(--cf-selected);
+.dk-picker-effort .cf-chip[aria-checked="true"] {
+  background: rgba(17, 24, 39, 0.09);
   color: var(--cf-text);
+  border-color: var(--cf-line-2);
+}
+
+.cf-app .dk-picker-effort .cf-chip:focus-visible {
+  outline: none;
   border-color: var(--cf-line-ctl);
 }
+

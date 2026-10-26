@@ -13,6 +13,7 @@ from .access import authorize_case
 from . import llm_gate
 from .voice import MAX_SECONDS, NOTICE, VoiceSession
 from .voice_grok import GrokVoice
+from . import ai_access
 
 PROTOCOL = 'batatis.voice.v1'
 
@@ -89,6 +90,8 @@ def create_relay(cases, code):
             await socket.close(4401)
             return
         await socket.accept(subprotocol=PROTOCOL)
+        # The relay is mounted outside the access guard, so it sets the account's AI access itself.
+        ai_access.GRANTED.set(ai_access.granted(user))
         await VoiceSession(socket, store=cases(), code=code, user=user,
             authenticate=lambda: fresh_user(socket, cases()), provider_factory=GrokVoice).run()
 

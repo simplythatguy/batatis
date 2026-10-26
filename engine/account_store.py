@@ -230,6 +230,12 @@ class AccountsMixin:
                        (provider, subject, user.id))
             return user
 
+    def account_rate_full(self, bucket: str, limit: int) -> bool:
+        """Has this bucket used its limit? Reads without counting a hit."""
+        with self.account_db() as db:
+            row = db.execute('SELECT hits FROM account_rates WHERE bucket=? AND expires_at>?', (bucket, time.time())).fetchone()
+        return row is not None and row[0] >= limit
+
     def account_rate(self, bucket: str, limit: int, seconds: float) -> bool:
         stamp = time.time()
         with self.account_db() as db:

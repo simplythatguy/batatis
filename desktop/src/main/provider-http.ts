@@ -4,20 +4,24 @@ import Ajv from "ajv";
 import type { KeyVault } from "./credentials";
 import type { CompleteJsonRequest, CompleteJsonResult, KeyProviderId } from "./providers";
 
+type ApiKeyId = Exclude<KeyProviderId, "batatis">;
 const ENDPOINTS = {
   openai: "https://api.openai.com/v1/chat/completions",
   jev: "https://api.typesafe.ai/v1/systemone",
-} satisfies Record<KeyProviderId, string>;
+} satisfies Record<ApiKeyId, string>;
 const LIMIT = 1_000_000;
 export interface HttpReply { status: number; body: string }
-export type ProviderPost = (id: KeyProviderId, key: string, body: string, signal: AbortSignal) => Promise<HttpReply>;
+export type ProviderPost = (id: ApiKeyId, key: string, body: string, signal: AbortSignal) => Promise<HttpReply>;
+
+export const fixedProviderPost: ProviderPost = (id, key, body, signal) => httpsPost(ENDPOINTS[id], {
+  Authorization: `Bearer ${key}`, ...(id === "jev" ? { "User-Agent": "hermes-jev-skills/0.1" } : {}),
+}, body, signal);
 
 /** Node HTTPS ignores proxy environment configuration. No redirects, retries or alternate origins. */
-export const fixedProviderPost: ProviderPost = (id, key, body, signal) => new Promise((resolve, reject) => {
-  const request = httpsRequest(ENDPOINTS[id], {
+export const httpsPost = (url: string, headers: Record<string, string>, body: string, signal: AbortSignal): Promise<HttpReply> => new Promise((resolve, reject) => {
+  const request = httpsRequest(url, {
     method: "POST", agent: false, signal, rejectUnauthorized: true, ca: [...rootCertificates],
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json", Accept: "application/json",
-      "Content-Length": Buffer.byteLength(body), ...(id === "jev" ? { "User-Agent": "hermes-jev-skills/0.1" } : {}) },
+    headers: { ...headers, "Content-Type": "application/json", Accept: "application/json", "Content-Length": Buffer.byteLength(body) },
   }, (response) => {
     const pieces: Buffer[] = [];
     let size = 0;

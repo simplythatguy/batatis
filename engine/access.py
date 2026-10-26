@@ -14,6 +14,7 @@ from types import SimpleNamespace
 
 from fastapi import HTTPException, Request, Response
 
+from . import ai_access
 from .account_models import User
 from .accounts import optional_user
 
@@ -101,6 +102,7 @@ def access_dependency(cases):
     async def guard(request: Request, response: Response):
         user = optional_user(request, response, cases)
         request.state.user = user
+        ai_access.GRANTED.set(ai_access.granted(user))
         response.headers['Cache-Control'] = 'no-store'
         mode = request_mode(request)
         case_id = request.path_params.get('case_id')

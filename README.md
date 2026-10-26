@@ -85,6 +85,7 @@ For applicants:
 - Submit to the City of Edmonton or the City of Calgary, and resubmit after a return.
 - Read messages from the officer.
 - Ask the assistant about your application, by text or by voice.
+- Turn on the AI features with an access code from the Batatis team.
 - See which facts AI suggested and which still need your check.
 - Rename, pin, archive, or delete applications.
 
@@ -109,6 +110,7 @@ In the desktop app, for people who want to connect their own AI:
 
 - Run Batatis on your own Mac or Windows computer. Your applications stay on that computer.
 - Use AI through your own ChatGPT or Claude subscription, or your own OpenAI API key. Install, update, sign in, and sign out from Settings.
+- Or use the Batatis team's AI with an access code, without any key of your own.
 - Pick the AI model for the workflow and for chat separately, even in the middle of a chat.
 - Update the app in two clicks when a new version is out, and choose stable releases or early beta releases.
 - Switch between a test applicant and test officers without making accounts.
@@ -480,6 +482,20 @@ Get a key at [openrouter.ai/settings/keys](https://openrouter.ai/settings/keys).
 
 Voice needs an xAI key, `XAI_API_KEY`, which is not in the example file. See the [voice notes](docs/api/voice.md).
 
+#### AI access codes
+
+On the hosted website, AI features stay off for an account until it enters an access code in **Settings**. Each code has a name, so you can turn one off without touching the others. Set the codes on the server, as JSON from names to codes. Each code needs at least 20 characters, using only letters, digits, `-` and `_`, so that nobody can guess one:
+
+```dotenv
+BATATIS_AI_ACCESS_CODES='{"judges":"bat-3fK9qLm2Xw7pTz1vRb8Nc","team":"bat-Q7mZ2xK8pL4wR9vT1bN6c"}'
+```
+
+An account keeps only the code's name and a fingerprint of it, never the code. Removing a name, or changing its code, turns AI off for every account that used it. After ten wrong codes in ten minutes, the server stops checking codes from that address for a while. A code also lets the desktop app use the server's keys through **Batatis AI**: the app sends each AI step with the code to the website, which makes the call and never shares a key. Every use counts against the daily spend cap.
+
+On your own computer, leave the setting empty and AI follows `BATATIS_LIVE` as before. The hosted site, where `VERCEL` is set, always needs a code.
+
+[`engine/ai_access.py`](engine/ai_access.py) checks the codes, and [`engine/routes_hosted_ai.py`](engine/routes_hosted_ai.py) answers the desktop app.
+
 #### Officer access
 
 To sign in as a Safety Codes Officer, add an access code for an authority to `.env`. Pick any code:
@@ -520,11 +536,31 @@ Then start the website in a second terminal:
 npm run dev --prefix web
 ```
 
-### Make a pull request
+### How a change reaches people
 
-`main` is the only permanent branch. Every change reaches it through a pull request from a short-lived branch, and GitHub deletes that branch after the pull request merges.
+A few words first, if you haven't used Git or GitHub before:
 
-Start a branch from the latest `main`, named for your change:
+- **Repository:** this project's folder of files, with the history of every change. GitHub stores the shared copy, and you work on your own copy.
+- **Commit:** a saved snapshot of your changes, with a short message that says what you did.
+- **Branch:** a separate line of commits, so you can work without touching anyone else's. Each change gets its own short-lived branch.
+- **`main`:** the one permanent branch. Whatever is on `main` is what people use. Nobody changes it directly.
+- **Pull request:** a request to add your branch to `main`. GitHub shows your changes, runs the checks, and lets the team comment before anything is merged.
+- **Checks:** tests that GitHub runs on every pull request, on Linux, macOS and Windows. A red check means something broke.
+- **Merge:** adding the pull request's commits to `main`. Only the project owner merges, and GitHub then deletes the branch.
+
+![A change goes from your branch to a pull request, through the checks, into main. Main updates the website and, within about six hours, a beta release. A stable release comes later, when the team promotes a beta](docs/readme/release-flow.png)
+
+Once a pull request is merged into `main`:
+
+1. **The website** updates by itself within a few minutes. Vercel, the service that hosts it, deploys only `main`.
+2. **A beta release of the desktop app** follows within about six hours. Every 30 minutes, GitHub checks `main`. When it has new changes and the last beta is at least six hours old, it builds the app for macOS and Windows, tests it, and publishes it as a beta, such as `v0.1.1-beta.20261026.57`. Anyone using a beta gets it as an update.
+3. **A stable release** comes later, when the team decides a beta is good. Stable releases, such as `v0.1.1`, go to everyone else. A stable is always the exact code of a beta that people already used.
+
+### Make a change and test it on your computer
+
+Do every step on your computer before you open a pull request. Set up the project first, with [Set it up by hand](#set-it-up-by-hand) or the agent prompt.
+
+1. Get the latest `main`:
 
 ```bash
 git switch main
@@ -534,29 +570,69 @@ git switch main
 git pull
 ```
 
+2. Make a branch for your change. Name it for what you are changing:
+
 ```bash
 git switch -c fix-intake-wording
 ```
 
-When your change is ready, run every check:
+3. Start the app, and open http://localhost:3000:
+
+```bash
+scripts/local-app.sh start
+```
+
+4. Make your change. The website reloads by itself when you save a file in `web/`. After you change a file in `engine/`, restart the app so the engine picks it up:
+
+```bash
+scripts/local-app.sh stop
+```
+
+```bash
+scripts/local-app.sh start
+```
+
+5. Try your change in the app the way a user would. For a change you can see, take a screenshot for the pull request.
+
+6. Run every check. It takes about ten minutes, and it must pass before you open the pull request:
 
 ```bash
 scripts/verify.sh
 ```
 
-If you can't push to this repository, make your fork the `origin` remote:
+While you work, you can run only part of it: `scripts/verify.sh --web`, `--engine`, or `--desktop`.
+
+To try a change to the desktop app, build it and open it. On macOS, the app appears at `desktop/build/release/mac-arm64/Batatis.app`. On Windows, it appears at `desktop/build/release/win-unpacked/Batatis.exe`. The [desktop guide](docs/desktop.md#build-from-source) lists what to install first.
+
+```bash
+npm run package:dir --prefix desktop
+```
+
+### Open a pull request
+
+1. Save your work as a commit. `git add` picks the files, and `git commit` saves them with a message:
+
+```bash
+git add .
+```
+
+```bash
+git commit -m "Explain why the intake question is needed"
+```
+
+2. If you can't push to this repository, make your fork the `origin` remote. A fork is your own copy of the repository on GitHub:
 
 ```bash
 gh repo fork simplythatguy/batatis --remote
 ```
 
-Push your branch:
+3. Push your branch to GitHub:
 
 ```bash
 git push -u origin HEAD
 ```
 
-Open the pull request into `main`, then fill in its three sections in everyday words:
+4. Open the pull request into `main`:
 
 ```bash
 gh pr create --repo simplythatguy/batatis --base main
@@ -564,7 +640,13 @@ gh pr create --repo simplythatguy/batatis --base main
 
 On GitHub, you can instead click **Compare & pull request** and check that the base branch is `main`.
 
-### Test a pull request
+5. Fill in the description's three sections, **New features added**, **Improvements**, and **Bug Fixes**, in everyday words. Write "None." under an empty section. Add your screenshot.
+
+6. Wait for the checks. The website and engine checks take about ten minutes, and the desktop app's macOS and Windows checks about twenty. If one turns red, open it, read the error, fix it on your computer, commit, and push again. The pull request updates by itself.
+
+7. The project owner tests the pull request and merges it. Never merge it yourself, and never push to `main`.
+
+### Test someone else's pull request
 
 To test a pull request on your computer, check it out into its own branch. Replace `123` with the pull request number.
 
@@ -582,7 +664,7 @@ git fetch https://github.com/simplythatguy/batatis.git pull/123/head:pr-123
 git switch pr-123
 ```
 
-If the pull request changes `engine/requirements.txt` or `web/package.json`, repeat step 3. Then run the app:
+If the pull request changes `engine/requirements.txt` or `web/package.json`, repeat step 3 of the setup. Then run the app:
 
 ```bash
 scripts/local-app.sh start
@@ -594,14 +676,29 @@ To go back to `main`:
 git switch main
 ```
 
-### Release the desktop app
+### Beta and stable releases
 
-The desktop app has two release channels, after T3 Code's nightly and stable builds.
+The desktop app has two kinds of release, like T3 Code's nightly and stable builds.
 
-- **Beta** gets merged pull requests. Every 30 minutes, the **Desktop native acceptance** workflow in [`.github/workflows/desktop.yml`](.github/workflows/desktop.yml) checks `main`. When `main` has new commits and the last beta is at least six hours old, it builds, checks, and publishes a beta, such as `v0.1.1-beta.20261026.57`.
-- **Stable** gets what beta users already ran. When a beta looks good, open **Actions**, choose **Desktop native acceptance**, and click **Run workflow** on `main` with the **stable** channel. It publishes that beta's exact commit as `v0.1.1`.
+| | Beta | Stable |
+| --- | --- | --- |
+| For | Testers who want changes early | Everyone else |
+| Contains | Everything merged into `main` | A beta that the team has checked |
+| Published | By itself, at most every six hours, after a merge | When the team promotes a beta |
+| Named like | `v0.1.1-beta.20261026.57` | `v0.1.1` |
+| On GitHub | Marked **Pre-release** | Marked **Latest** |
 
-To publish a beta right away, run the same workflow with the **beta** channel. Each install updates within its own channel. [`desktop/scripts/release-plan.mjs`](desktop/scripts/release-plan.mjs) decides what each run publishes, and the [desktop guide](docs/desktop.md#beta-and-stable-releases) has the details.
+An installed app stays on its kind of release. A stable app only updates to stable releases. A beta app updates to newer betas, and to the stable release when it ships.
+
+To try a beta, open the [releases page](https://github.com/simplythatguy/batatis/releases), pick the newest **Pre-release**, and download the file for your computer under **Assets**.
+
+To publish a beta right away instead of waiting, or to promote the latest beta to stable:
+
+1. Open the repository's **Actions** tab on GitHub.
+2. Choose **Desktop native acceptance** on the left.
+3. Click **Run workflow**, keep the branch on `main`, and choose **beta** or **stable**.
+
+A stable release publishes the latest beta's exact code as the version it previewed. Each beta previews the version after the latest stable. To start a bigger version, such as `0.2.0`, raise `version` in [`desktop/package.json`](desktop/package.json) in a pull request. [`desktop/scripts/release-plan.mjs`](desktop/scripts/release-plan.mjs) decides what each run publishes, and the [desktop guide](docs/desktop.md#beta-and-stable-releases) has the details.
 
 ## For AI agents
 
