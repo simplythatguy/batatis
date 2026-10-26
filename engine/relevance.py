@@ -5,6 +5,7 @@ import hashlib
 import os
 import threading
 from contextlib import contextmanager
+from dataclasses import replace
 from pathlib import Path
 
 from .identify import Identification, Judge
@@ -59,6 +60,9 @@ def live_judge() -> Judge:
     from .identify.config import load_config
     from .identify.providers import scoring_ask, transports
     config = load_config()
+    if config.screen == 'requirements':
+        # Requirement discovery is deterministic; the Code Library keeps the historical Jev relevance arm.
+        config = replace(config, screen='jev', screen_model=JEV_MODEL)
     if not provider_routing.local_active() and not llm_gate.fake_providers() and os.environ.get('BATATIS_LIVE') != '1' \
             and not (config.screen == 'elephant' and llm_gate.provider_enabled('elephant')):
         raise RelevanceUnavailable('BATATIS_LIVE is disabled')

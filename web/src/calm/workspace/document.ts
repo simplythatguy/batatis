@@ -93,7 +93,7 @@ export function buildDocument(c: Case, gaps: readonly Gap[], requests: readonly 
   if (!c.sectionC.length) add("C", { id: "provisions", label: "Code references", text: c.candidates.filter(a => a.answer === "yes").map(a => a.provision).join(" · "), required: true, target: { kind: "card", href: "#/questions?first=code" } });
   for (const row of c.sectionC) {
     add("C", { id: `section_c.${row.provision}`, label: articleTitle(c, row.provision) || "Code reference", text: row.citation, required: false,
-      reference: row, target: { kind: "card", href: "#/references" } });
+      reference: row, target: { kind: "card", href: "#/questions?first=code" } });
     // No explanation line yet: the package does not print one, and the paper shows only what the officer receives.
   }
   add("D", { id: "evidence", label: "Documents", text: listedDocuments(c).map(d => d.title).join("\n"), required: true,

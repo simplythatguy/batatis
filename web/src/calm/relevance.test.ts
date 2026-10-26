@@ -156,7 +156,7 @@ test("code library routes parse the article and filter", () => {
   assert.equal(codeHref("9.27.3.4.(1)", "maybe"), "#/code/9.27.3.4.(1)?filter=maybe");
   const back = codeHref("9.27.3.4.(1)").replace(/^#/, "");
   assert.equal(resolveRoute(back, new URLSearchParams()).article, "9.27.3.4.(1)");
-  assert.equal(resolveRoute("/section-c", new URLSearchParams()).screen, "references");
+  assert.equal(resolveRoute("/section-c", new URLSearchParams()).screen, "application");
 });
 
 test("code text reflows PDF line breaks but keeps clause markers on their own lines", () => {

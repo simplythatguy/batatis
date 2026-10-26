@@ -24,12 +24,11 @@ def clean_gate(monkeypatch):
 
 # --- config ---------------------------------------------------------------------------------------
 
-def test_selected_config_is_jev_screen_and_rerank_with_luna_quote_verifier():
+def test_selected_config_is_local_requirements_and_legacy_models_are_inactive():
     config = load_config(env={})
-    assert (config.screen, config.screen_model, config.rerank, config.rerank_n) == (
-        'jev', 'jev-1.13.0', 'jev', 60)
-    assert (config.verifier, config.verifier_model, config.verify_n) == ('openai', 'gpt-6-luna', 15)
-    assert config.exhaustive and config.model_ids()['verifier'] == 'gpt-6-luna'
+    assert config.screen == 'requirements' and not config.exhaustive
+    assert config.as_dict()['rerank'] == config.as_dict()['verifier'] == 'none'
+    assert config.model_ids() == {'screen': None, 'rerank': None, 'verifier': None}
 
 
 def test_anthropic_verifier_is_opt_in_and_haiku_is_refused():

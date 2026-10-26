@@ -17,6 +17,7 @@ from .intake import review as review_pass
 from .intake import service
 from .intake.extract import scrubbed
 from .intake.questions import issued_questions
+from .identify.case_input import refresh as refresh_identification
 from .intake.rules import ROLES
 from .llm_gate import client_ip_from
 from .models import Fact
@@ -126,6 +127,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes], *
         if body.expected_version is not None and body.expected_version != case.version:
             raise HTTPException(409, 'case was updated concurrently')
         service.apply(case, body.text, extraction, role=body.role)
+        refresh_identification(case, store, codes_or_none())
         try:
             saved = store.put(case, expected_version=case.version)
         except VersionConflict as error:
@@ -143,6 +145,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes], *
         if expected_version is not None and expected_version != case.version:
             raise HTTPException(409, 'case was updated concurrently')
         change(case)
+        refresh_identification(case, store, codes_or_none())
         try:
             saved = store.put(case, expected_version=case.version)
         except VersionConflict as error:

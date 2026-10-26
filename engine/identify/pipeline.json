@@ -1,7 +1,7 @@
 {
-  "chosen_by": "User-selected Luna + Jev workflow; retained scored Luna review prompt",
-  "chosen_at": "2026-10-25",
-  "screen": "jev",
+  "chosen_by": "Source-verified deterministic requirement discovery; historical provider arms remain explicit experiments",
+  "chosen_at": "2026-10-26",
+  "screen": "requirements",
   "card_chars": 700,
   "rerank": "jev",
   "rerank_n": 60,

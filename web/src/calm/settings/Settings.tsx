@@ -136,11 +136,6 @@ export function Settings({ phoneTools }: { phoneTools?: ReactNode }) {
           </details>
         </section>
 
-        <section className="ac-section" aria-labelledby="ac-s-accuracy">
-          <h2 id="ac-s-accuracy" className="ac-section-title">Accuracy</h2>
-          <p className="ac-prose"><a className="acc-inline-link" href="#/accuracy">Read the accuracy report</a></p>
-        </section>
-
         {user && !testPerson && (
           <section className="ac-section is-last">
             <button type="button" className="cf-btn is-sm" disabled={leaving} onClick={() => { setLeaving(true); void signOut(); }}>

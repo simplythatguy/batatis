@@ -105,7 +105,10 @@ test("legacy hrefs translate to calm routes", () => {
   assert.equal(calmHref("#/describe"), "#/");
   assert.equal(calmHref("#/code-check"), "#/questions?first=code");
   assert.equal(calmHref("#/code-check?focus=cand-x"), "#/questions?focus=cand-x");
-  assert.equal(calmHref("#/section-c"), "#/references");
+  assert.equal(calmHref("#/section-c"), "#/application?focus=section-C");
+  assert.equal(calmHref("#/references"), "#/application?focus=section-C");
+  assert.equal(calmHref("#/officer"), "#/review");
+  assert.equal(calmHref("#/accuracy"), "#/");
   assert.equal(calmHref("#/application?tab=A&focus=field-owner"), "#/application?focus=field-owner");
   assert.equal(calmHref("#/application?tab=alt&focus=field-risk"), "#/application?focus=field-risk");
   assert.equal(calmHref("#/application?tab=D&focus=prof-role"), "#/application?focus=evidence");

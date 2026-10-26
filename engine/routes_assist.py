@@ -365,6 +365,11 @@ def check_citations(text: str, codes, *, context: dict | None = None):
     return answer, cited, removed
 
 
+def evidence_authoring_request(text: str) -> bool:
+    return bool(re.search(r'\b(?:write|draft|compose|generate|fill|complete)\b', text, re.I)
+                and re.search(r'\b(?:risk|mitigat\w*|assumptions?|section d|engineering|professional evidence)\b', text, re.I))
+
+
 def create_router(cases, code):
     router = APIRouter(tags=['assistant'])
 
@@ -388,7 +393,6 @@ def create_router(cases, code):
             # History has no server-attested case/selection provenance and is
             # never forwarded as evidence for this document selection.
             body = body.model_copy(update={'history': []})
-            from .voice import evidence_authoring_request
             if evidence_authoring_request(body.question):
                 reauthorize(body, request, response, store, user)
                 documents.validate_files(store)

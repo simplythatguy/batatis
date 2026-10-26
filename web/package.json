@@ -15,8 +15,7 @@
     "test:unwrap": "node --experimental-strip-types --import ./scripts/register-ts.mjs scripts/unwrap-items.test.ts",
     "test": "node scripts/test-unit.mjs",
     "preview": "vite preview",
-    "test:journey": "python3 scripts/test-journey.py",
-    "test:accuracy": "node --experimental-strip-types --import ./scripts/register-ts.mjs --test src/accuracy/report.test.ts src/calm/no-provider-names.test.ts"
+    "test:journey": "python3 scripts/test-journey.py"
   },
   "dependencies": {
     "@fontsource-variable/geist-mono": "^5.3.0",

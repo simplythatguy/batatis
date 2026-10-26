@@ -5,10 +5,10 @@ import { Icon24 } from "../icons";
 import { MOD_KEY } from "../ui";
 import { useAccount } from "../account";
 import {
-  answerBlocks, ask, assistantKey, cancelQuestion, closeAssistant, endVoice, goBack, MAX_QUESTION, retry, setDraft, useAssistant,
+  answerBlocks, ask, assistantKey, cancelQuestion, closeAssistant, goBack, MAX_QUESTION, retry, setDraft, useAssistant,
   type Turn,
 } from "./assistant";
-import { AttachButton, Attachments, MicGlyph, VoiceBar, VoiceButton, VoiceNotice } from "./VoiceControls";
+import { AttachButton, Attachments } from "./Attachments";
 import { ChatFollow, savedPosition, savePosition } from "./follow";
 import { ToolButton } from "./ToolButton";
 import "./assistant.css";
@@ -38,8 +38,6 @@ export function AssistantPanel() {
     return () => window.clearInterval(t);
   }, [c.error?.retryAt]);
   useEffect(() => { input.current?.focus(); }, []);
-  // Voice never runs unseen: the panel going away (closed, signed out, unmounted) ends it.
-  useEffect(() => () => endVoice(), []);
   useLayoutEffect(() => {
     const node = body.current;
     if (!node) return;
@@ -114,8 +112,6 @@ export function AssistantPanel() {
       </div>
       {!following && <button type="button" className="cf-btn is-xs cf-av-latest" onClick={() => follow.current?.toEnd(false, true)}>Latest message <Icon24 name="down" size={13} /></button>}
       </div>
-      {a.noticeOpen && <VoiceNotice a={a} />}
-      <VoiceBar a={a} />
       <form className="cf-composer-box" onSubmit={(e) => { e.preventDefault(); send(c.draft); }}>
         <Attachments a={a} />
         <label className="cf-sr" htmlFor="cf-assist-input">Ask the assistant</label>
@@ -139,7 +135,6 @@ export function AssistantPanel() {
           <div className="cf-av-tools">
             {!signedOut && <ModelPicker slot="chat" label="Chat model" compact />}
             {!signedOut && <AttachButton a={a} />}
-            {!signedOut && <VoiceButton a={a} />}
             <ToolButton type="submit" className="cf-icon-btn is-plain" aria-label="Send" disabled={!c.draft.trim() || busy}>
               <Icon24 name="send" size={16} />
             </ToolButton>
@@ -178,7 +173,6 @@ function TurnView({ t }: { t: Turn }) {
   if (t.role === "user") {
     return (
       <div className={`cf-msg-user${t.unanswered ? " is-unanswered" : ""}`}>
-        {t.via === "voice" && <span className="cf-av-said" aria-label="Said aloud"><MicGlyph /></span>}
         {t.text}
         {t.unanswered && <span className="cf-sr"> (not answered)</span>}
       </div>
@@ -197,10 +191,9 @@ function TurnView({ t }: { t: Turn }) {
       {/* The notice is one step away on every answer (never repeated as a paragraph). */}
       <details className="cf-av-about">
         <summary aria-label="About this answer" title="About this answer">
-          {t.via === "voice" && <MicGlyph />}
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><circle cx="8" cy="8" r="6.25" /><path d="M8 7.2v3.8M8 5.1v.1" strokeLinecap="round" /></svg>
         </summary>
-        <p className="cf-fine">{t.notice || DISCLAIMER}{t.withheld ? " The spoken reply was held back; this text replaces it." : ""}</p>
+        <p className="cf-fine">{t.notice || DISCLAIMER}</p>
       </details>
     </div>
   );

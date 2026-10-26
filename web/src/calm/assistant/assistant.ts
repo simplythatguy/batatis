@@ -1,29 +1,25 @@
 /**
  * Assistant state shared by every entry point (Ask, Cmd/Ctrl+J, field Help, officer messages).
- * Answers come only from POST /assist and the voice relay; nothing is invented when they are
+ * Answers come only from POST /assist; nothing is invented when they are
  * unavailable.
  *
  * One conversation per binding: the account (id, role, authority) and what it is about, either a
  * saved application, an unsaved draft (each new draft is its own context) or no application (the
  * code library's None). Turns, the unsent draft and attachments stay with their conversation:
  * closing keeps them, switching A → B → A restores A's, and nothing crosses accounts (signing out
- * or another account clears them all). A request or a voice session belongs to the binding it
+ * or another account clears them all). A request belongs to the binding it
  * started in; a switch cancels it and its late reply or plan is ignored.
  */
 import { useSyncExternalStore } from "react";
 import { AccountsError, accounts, type AssistRequest, type AssistResponse, type AssistContextBinding, type AssistAttachment, type AssistDocumentReference } from "../../api/accounts";
 import { engine, EngineError } from "../../api/client";
-import type { VoiceCapability } from "../../api/types.gen";
 import { getAccountState } from "../account";
 import { getSession } from "../session";
 import { questionDrafts } from "../questionDrafts";
 import { forgetPositions, savedPosition, savePosition } from "./follow";
 import { matchesDocumentReply, sameIds } from "./documents";
-import { createVoiceAudio, openMicrophone } from "../voice/audio";
-import { checkCapability, type Scope } from "../voice/protocol";
-import { VoiceClient, type SocketLike, type VoiceSnapshot, type VoiceTranscript } from "../voice/session";
 import {
-  bumpViewGeneration, capturePlace, checkPlan, destinationLabel, isDestination, offeredDestinations, openDestination, returnTo, subscribePanels, viewGeneration,
+  bumpViewGeneration, capturePlace, checkPlan, destinationLabel, isDestination, offeredDestinations, openDestination, returnTo, viewGeneration,
   type DestinationId, type NavRole, type OpenDeps, type PageProbe, type ReturnPoint,
 } from "./destinations";
 
@@ -47,10 +43,6 @@ export interface Turn {
   cited?: string[];
   removed?: string[];
   notice?: string | null;
-  /** Said aloud: a completed spoken question, or the spoken reply. */
-  via?: "voice";
-  /** A spoken reply whose audio the server withheld (shown as text only). */
-  withheld?: boolean;
   /** A question that got no answer (failed or stopped). Never sent back as history. */
   unanswered?: boolean;
   /** A navigation result: what opened (and the way back), or why it did not. */
@@ -66,8 +58,6 @@ export interface Attachment {
   fileId?: string;
   error?: string;
 }
-
-export type Capability = { state: "unknown" | "loading" | "failed" } | { state: "ready"; value: VoiceCapability };
 
 export interface AssistError {
   status: number;
@@ -114,10 +104,6 @@ export interface AssistantState {
   binding: AssistBinding;
   /** The current binding's conversation. */
   conv: Conversation;
-  voice: VoiceSnapshot;
-  capability: Capability;
-  /** The voice notice is showing, waiting for an explicit Start. */
-  noticeOpen: boolean;
 }
 
 const DEFAULT_CONTEXT: AssistContext = { screen: "app", label: "your application", suggestions: ["What happens after I submit?", "What is an alternative solution?"] };
@@ -128,32 +114,22 @@ export const MAX_ATTACHMENTS = 3;
 export const MAX_QUESTION = 1500;
 const MAX_HISTORY = 8;
 const MAX_CONVERSATIONS = 12;
-const NOTICE_KEY = "batatis-voice-notice";
 
 // —— Dependencies (real by default; tests replace them) ————————————————————————————————
 
 export interface AssistantDeps {
   assist(req: AssistRequest, signal: AbortSignal): Promise<AssistResponse>;
-  voiceCapability(caseId: string | null, signal: AbortSignal): Promise<unknown>;
   caseVersion(caseId: string, signal: AbortSignal): Promise<number>;
   upload(caseId: string, file: File): Promise<{ id: string; name: string }>;
   /** The signed-in account right now (the binding must match it before anything is sent). */
   account(): { signedIn: boolean; userId: string | null; role: NavRole | null; authority: string | null };
   page: OpenDeps & PageProbe & { hash(): string; focusId(): string | null; focus(id: string | null): void };
-  voice(events: ConstructorParameters<typeof VoiceClient>[1]): VoiceClient;
-  noticeSeen(notice: string): boolean;
-  markNoticeSeen(notice: string): void;
-  setTimer(fn: () => void, ms: number): number;
-  clearTimer(id: number): void;
   now(): number;
 }
-
-const noticeKey = (notice: string) => `${NOTICE_KEY}:${notice.length}:${notice.slice(0, 40)}`;
 
 function browserDeps(): AssistantDeps {
   return {
     assist: (req, signal) => accounts.assist(req, signal),
-    voiceCapability: (caseId, signal) => accounts.voiceSession(caseId, signal),
     caseVersion: async (caseId, signal) => (await engine.getCase(caseId, signal)).version,
     upload: (caseId, file) => engine.upload(caseId, file),
     account: () => {
@@ -178,20 +154,6 @@ function browserDeps(): AssistantDeps {
         if (el instanceof HTMLElement) el.focus({ preventScroll: false });
       },
     },
-    voice: (events) => new VoiceClient({
-      // The DOM socket satisfies the small interface the session uses.
-      socket: (url, protocol) => new WebSocket(url, protocol) as unknown as SocketLike,
-      microphone: openMicrophone,
-      audio: createVoiceAudio,
-      now: () => Date.now(),
-      setTimer: (fn, ms) => window.setTimeout(fn, ms),
-      clearTimer: (id) => window.clearTimeout(id),
-      page: () => ({ protocol: location.protocol, host: location.host }),
-    }, events),
-    noticeSeen: (notice) => { try { return sessionStorage.getItem(noticeKey(notice)) === "1"; } catch { return false; } },
-    markNoticeSeen: (notice) => { try { sessionStorage.setItem(noticeKey(notice), "1"); } catch { /* storage unavailable */ } },
-    setTimer: (fn, ms) => window.setTimeout(fn, ms),
-    clearTimer: (id) => window.clearTimeout(id),
     now: () => Date.now(),
   };
 }
@@ -206,7 +168,7 @@ export function setAssistantDeps(next: Partial<AssistantDeps>) {
 
 // —— Store ————————————————————————————————————————————————————————————————————————————
 
-let state: AssistantState = { open: false, context: DEFAULT_CONTEXT, binding: NO_BINDING, conv: EMPTY_CONV, voice: VoiceClient.blank(), capability: { state: "unknown" }, noticeOpen: false };
+let state: AssistantState = { open: false, context: DEFAULT_CONTEXT, binding: NO_BINDING, conv: EMPTY_CONV };
 const listeners = new Set<() => void>();
 function emit() {
   for (const l of listeners) l();
@@ -266,7 +228,7 @@ const conv = () => state.conv;
 
 /**
  * Who is asking and about what. A change of account clears every conversation; a change of
- * application keeps each one with its own binding, cancels what was in flight and ends voice.
+ * application keeps each one with its own binding, cancels what was in flight and retires pending replies.
  */
 export function setAssistantBinding(next: AssistBinding) {
   const prev = state.binding;
@@ -302,7 +264,6 @@ export function setAssistantBinding(next: AssistBinding) {
     return;
   }
   stopRequest(firstSave ? "changed" : "switched");
-  endVoice();
   if (firstSave && conversations.has(key) && !conversations.has(nextKey)) {
     savedKeys.set(key, nextKey);
     if (savedKeys.size > MAX_CONVERSATIONS) savedKeys.delete(savedKeys.keys().next().value!);
@@ -317,7 +278,7 @@ export function setAssistantBinding(next: AssistBinding) {
   contextId = newContextId();
   typedRevision = 0;
   bumpViewGeneration();
-  set({ conv: conversations.get(key) ?? EMPTY_CONV, capability: { state: "unknown" }, noticeOpen: false, voice: VoiceClient.blank() });
+  set({ conv: conversations.get(key) ?? EMPTY_CONV });
 }
 
 /** Kept for existing callers: an application id alone (no account) binds nothing. */
@@ -340,7 +301,6 @@ export function setAssistantContext(context: AssistContext) {
   // A different question can share a provision id; its older plans still expire.
   bumpViewGeneration();
   set({ context });
-  scheduleVoiceUpdate();
 }
 
 export function openAssistant(context?: AssistContext, question?: string) {
@@ -349,10 +309,9 @@ export function openAssistant(context?: AssistContext, question?: string) {
   if (question) void ask(question);
 }
 
-/** Close the panel: the conversation stays; voice ends (it never runs unseen). */
+/** Close the panel: the conversation stays. */
 export function closeAssistant() {
-  endVoice();
-  set({ open: false, noticeOpen: false });
+  set({ open: false });
 }
 
 export function toggleAssistant() {
@@ -491,18 +450,18 @@ function patchTurn(k: string, id: number, patch: (t: Turn) => Partial<Turn>) {
 }
 
 /** Apply a server plan after re-checking it here; the conversation says what happened. */
-async function applyPlan(plan: { destination: unknown }, asked: { key: string; generation: number }, via?: "voice") {
+async function applyPlan(plan: { destination: unknown }, asked: { key: string; generation: number }) {
   const k = asked.key;
   const epoch = accountEpoch;
   const check = checkPlan(plan, asked, { key, generation: viewGeneration(), offered: offered() });
   const label = isDestination(plan.destination) ? destinationLabel(plan.destination) : "That page";
   if (check !== "apply") {
-    if (k === key) patchConv(k, (c) => ({ turns: [...c.turns, turn({ role: "assistant", text: "", via, nav: { label, state: check, back: null, backState: "idle" } })] }));
+    if (k === key) patchConv(k, (c) => ({ turns: [...c.turns, turn({ role: "assistant", text: "", nav: { label, state: check, back: null, backState: "idle" } })] }));
     return;
   }
   const page = d().page;
   const back = capturePlace(page, state.context.label);
-  const t = turn({ role: "assistant", text: "", via, nav: { label, state: "opening", back, backState: "idle" } });
+  const t = turn({ role: "assistant", text: "", nav: { label, state: "opening", back, backState: "idle" } });
   patchConv(k, (c) => ({ turns: [...c.turns, t] }));
   const caseId = state.binding.mode === "case" ? state.binding.caseId : null;
   const ok = await openDestination(plan.destination as DestinationId, caseId, page);
@@ -524,7 +483,7 @@ export async function goBack(turnId: number) {
   patchTurn(k, turnId, (x) => ({ nav: { ...x.nav!, backState: ok ? "returned" : "failed" } }));
 }
 
-// —— Attachments (typed excerpts and voice use the same stored file IDs) ——————————————
+// —— Attachments (authorized stored file IDs) ——————————————
 
 const uploadError = (e: unknown): string => {
   const status = e instanceof EngineError ? e.status : 0;
@@ -584,7 +543,7 @@ export async function attachFiles(files: File[], pick?: AttachPick) {
         attachments: c.attachments.map((x) => (x.key === a.key ? { ...x, status: "ready", fileId: saved.id } : x)),
         uploaded: [...c.uploaded.filter((x) => x.id !== saved.id), { id: saved.id, name: saved.name || file.name }],
       }));
-      if (k === key) { changeTypedContext(); scheduleVoiceUpdate(true); }
+      if (k === key) { changeTypedContext(); }
     } catch (e) {
       if (epoch !== accountEpoch || !conversations.has(k)) return;
       patchConv(k, (c) => ({ attachments: c.attachments.map((x) => (x.key === a.key ? { ...x, status: "failed", error: uploadError(e) } : x)) }));
@@ -606,183 +565,17 @@ export function attachExisting(fileId: string, name: string) {
   if (live(c).length >= MAX_ATTACHMENTS) return;
   changeTypedContext();
   patchConv(key, (x) => ({ attachments: [...x.attachments, { key: `a${++attachSeq}`, name, status: "ready", fileId }] }));
-  scheduleVoiceUpdate(true);
 }
 
 export function removeAttachment(attachmentKey: string) {
   const was = conv().attachments.find((a) => a.key === attachmentKey);
   if (was?.status === "ready") changeTypedContext();
   patchConv(key, (c) => ({ attachments: c.attachments.filter((a) => a.key !== attachmentKey) }));
-  if (was?.status === "ready") scheduleVoiceUpdate(true);
 }
 
-// —— Voice ————————————————————————————————————————————————————————————————————————————
-//
-// Nothing here opens the microphone or the relay until the person presses Start after the notice.
-// GET /voice/session (free) runs only when the panel asks for it.
-
-let voice: VoiceClient | null = null;
-let voiceKey: string | null = null;
-let voiceContext: string | null = null;
-let voiceVersion: number | null = null;
-/** The view generation when the scope the relay holds was sent. */
-let voiceGen = -1;
-let lastSent: string | null = null;
-let updateTimer: number | null = null;
-let startCtl: AbortController | null = null;
-let capabilityCtl: AbortController | null = null;
-
-function voiceClient(): VoiceClient {
-  if (voice) return voice;
-  const v = d().voice({
-    onTranscript: (t) => onVoiceTranscript(t),
-    onResponse: (r) => {
-      if (voiceKey !== key || !voiceKey) return;
-      patchConv(voiceKey, (c) => ({ turns: [...c.turns, turn({ role: "assistant", text: r.text, via: "voice", withheld: r.withheld })] }));
-    },
-  });
-  v.subscribe(() => { if (voice === v) set({ voice: v.snapshot() }); });
-  voice = v;
-  return v;
-}
-
-/** A completed spoken question: shown, and its plan applied only for the exact current identity. */
-function onVoiceTranscript(t: VoiceTranscript) {
-  const k = voiceKey;
-  if (!k || k !== key || !bound() || t.identity.contextId !== contextId || t.identity.contextId !== voiceContext) return;
-  if (t.identity.caseVersion !== voiceVersion || t.identity.caseId !== (state.binding.mode === "case" ? state.binding.caseId : null)) return;
-  patchConv(k, (c) => ({ turns: [...c.turns, turn({ role: "user", text: t.text, via: "voice" })] }));
-  if (!t.navigation) return;
-  const scope = voice?.currentScope();
-  // The plan was made for the scope the relay holds; any navigation since then makes it stale.
-  const fresh = scope !== null && scope !== undefined && scope.revision === t.identity.revision && updateTimer === null && state.voice.status !== "updating" && voiceGen === viewGeneration();
-  void applyPlan({ destination: t.navigation }, { key: k, generation: fresh ? viewGeneration() : -1 }, "voice");
-}
-
-/** The voice level for the orb (read per frame; no React state). */
-export const voiceLevel = () => voice?.level() ?? 0;
-
-/** Read the voice configuration once per binding (free: no microphone, provider or allowance). */
-export async function loadVoiceCapability() {
-  if (!bound() || state.capability.state === "loading" || state.capability.state === "ready") return;
-  const k = key;
-  const b = state.binding;
-  capabilityCtl?.abort();
-  const ctl = new AbortController();
-  capabilityCtl = ctl;
-  set({ capability: { state: "loading" } });
-  try {
-    const raw = await d().voiceCapability(b.mode === "case" ? b.caseId : null, ctl.signal);
-    if (k !== key || ctl.signal.aborted) return;
-    const value = checkCapability(raw);
-    set({ capability: value ? { state: "ready", value } : { state: "failed" } });
-  } catch {
-    if (k === key && !ctl.signal.aborted) set({ capability: { state: "failed" } });
-  }
-}
-
-const voiceIdle = () => state.voice.status === "idle" || state.voice.status === "ended";
-
-/** The microphone button: the notice first (once per tab and notice text), then start. */
-export function requestVoice() {
-  if (!voiceIdle() || state.capability.state !== "ready" || !state.capability.value.available) return;
-  if (!d().noticeSeen(state.capability.value.notice)) return set({ noticeOpen: true });
-  void startVoice();
-}
-
-export function dismissVoiceNotice() {
-  set({ noticeOpen: false });
-}
-
-/** Clear the message a finished voice conversation left (it stays until read or replaced). */
-export function dismissVoiceMessage() {
-  if (voiceIdle()) set({ voice: VoiceClient.blank() });
-}
-
-/** Explicit start: the person pressed Start with the notice in front of them. */
-export async function startVoice() {
-  if (!bound() || !voiceIdle() || state.capability.state !== "ready" || !state.capability.value.available) return;
-  const cap = state.capability.value;
-  d().markNoticeSeen(cap.notice);
-  set({ noticeOpen: false });
-  const k = key;
-  const b = state.binding;
-  const caseId = b.mode === "case" ? b.caseId : null;
-  let version: number | null = null;
-  startCtl?.abort();
-  const ctl = new AbortController();
-  startCtl = ctl;
-  if (caseId) {
-    // The relay needs the application's saved version; read it now rather than guess.
-    try {
-      version = await d().caseVersion(caseId, ctl.signal);
-    } catch {
-      if (k === key && !ctl.signal.aborted) set({ voice: { ...VoiceClient.blank(), status: "ended", reason: "unavailable", problem: "unavailable" } });
-      return;
-    }
-    if (k !== key || ctl.signal.aborted || !Number.isInteger(version) || version! < 1) return;
-  }
-  startCtl = null;
-  voiceKey = k;
-  voiceContext = contextId;
-  voiceVersion = version;
-  const scope = voiceScope();
-  lastSent = JSON.stringify(scope);
-  voiceGen = viewGeneration();
-  await voiceClient().start(cap.relay_path, scope);
-}
-
-/** End voice now (a switch, close, unmount or the person). Never restarts by itself. */
-export function endVoice() {
-  startCtl?.abort();
-  startCtl = null;
-  if (updateTimer !== null) { d().clearTimer(updateTimer); updateTimer = null; }
-  voice?.end();
-}
-
-export const commitVoice = () => voice?.commit() ?? false;
-export const toggleVoiceMute = () => voice?.toggleMute();
-export const stopVoiceSpeaking = () => voice?.stopSpeaking();
-
-function voiceScope(): Omit<Scope, "revision"> {
-  const ctx = state.context;
-  return {
-    context_id: voiceContext ?? contextId,
-    case_id: state.binding.mode === "case" ? state.binding.caseId : null,
-    case_version: state.binding.mode === "case" ? voiceVersion : null,
-    screen: ctx.screen,
-    focus: ctx.focus ?? null,
-    destinations: offered() as Scope["destinations"],
-    attachment_ids: state.binding.mode === "case" ? selectedAttachmentIds() : [],
-  };
-}
-
-/**
- * Tell a running conversation about a new screen, offered places or attachments. Batched: each
- * update is one of the session's few paid control messages, and input waits for its acknowledgement.
- */
-function scheduleVoiceUpdate(now = false) {
-  if (!voice?.active || voiceKey !== key) return;
-  if (updateTimer === null && JSON.stringify(voiceScope()) === lastSent && voiceGen === viewGeneration()) return;
-  // Stop old local input and output immediately; only the upstream control message is batched.
-  voice.invalidateContext();
-  if (updateTimer !== null) d().clearTimer(updateTimer);
-  updateTimer = d().setTimer(() => {
-    updateTimer = null;
-    if (!voice?.active || voiceKey !== key) return;
-    const scope = voiceScope();
-    const text = JSON.stringify(scope);
-    // A locally invalidated turn always needs an acknowledgement, even after going back.
-    voiceGen = viewGeneration();
-    if (voice.update(scope)) lastSent = text;
-    else voice.end(voice.snapshot().spent ? "limit" : "context_changed");
-  }, now ? 0 : 900);
-}
-
-/** A hash can change without changing the screen/focus sent to the relay. */
+/** A hash can change without changing the screen/focus sent to the assistant. */
 export function assistantRouteChanged() {
   bumpViewGeneration();
-  scheduleVoiceUpdate();
 }
 
 /**
@@ -794,21 +587,17 @@ export function invalidateAssistantNavigation() {
 }
 
 if (typeof window !== "undefined") {
-  subscribePanels(() => scheduleVoiceUpdate());
   // Any route change is manual navigation unless the assistant itself is opening something.
   window.addEventListener("hashchange", assistantRouteChanged);
 }
 
-/** Tests: forget everything (conversations, voice, binding). */
+/** Tests: forget everything (conversations and binding). */
 export function resetAssistant() {
   stopRequest("stopped");
-  endVoice();
-  voice = null;
-  voiceKey = null;
   conversations.clear();
   savedKeys.clear();
   key = "none";
-  state = { open: false, context: DEFAULT_CONTEXT, binding: NO_BINDING, conv: EMPTY_CONV, voice: VoiceClient.blank(), capability: { state: "unknown" }, noticeOpen: false };
+  state = { open: false, context: DEFAULT_CONTEXT, binding: NO_BINDING, conv: EMPTY_CONV };
   emit();
 }
 

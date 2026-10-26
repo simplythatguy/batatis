@@ -4,7 +4,7 @@
  * so every "Fix" or "Answer" link lands on the matching question card.
  */
 
-export type Screen = "start" | "questions" | "review" | "application" | "officer" | "accuracy" | "references" | "code" | "comments";
+export type Screen = "start" | "questions" | "review" | "application" | "code" | "comments";
 
 export type WorkspaceStep = "edit" | "sign" | "send";
 
@@ -106,14 +106,14 @@ export function resolveRoute(path: string, params: URLSearchParams): CalmRoute {
       return build("application", applicationFocus, { applicationStep: step === "sign" || step === "send" ? step : "edit" });
     }
     case "/officer":
-      return build("officer");
+      return build("review");
     case "/comments":
       return build("comments");
-    case "/accuracy":
-      return build("accuracy");
+
     case "/section-c":
     case "/references":
-      return build("references");
+      // Section C now lives on the paper.
+      return build("application", "section-C");
     default:
       return build("start");
   }
