@@ -1,4 +1,5 @@
 import json
+import re
 from types import SimpleNamespace
 
 import pytest
@@ -31,6 +32,10 @@ def rewrite(client, case, **changes):
 def test_selected_span_prompt_redaction_notice_and_no_application_write(rewriting, monkeypatch):
     client, store, case, calls = rewriting
     before = store.get(case.id).model_dump()
+    def selected_name(**kwargs):
+        calls.append(kwargs)
+        return routes_assist.ModelAnswer(json.loads(kwargs['context'])['rewrite']['selected'], 20, 20)
+    monkeypatch.setattr(routes_assist, 'call_model', selected_name)
     result = rewrite(client, case, text='Priya Natarajan uses a panel; call 780-555-0142.', start=0, end=15)
     assert result.status_code == 200, result.text
     body = result.json()
@@ -39,7 +44,8 @@ def test_selected_span_prompt_redaction_notice_and_no_application_write(rewritin
     sent = calls[0]
     assert sent['system'] == REWRITE_SYSTEM
     context = json.loads(sent['context'])
-    assert context['rewrite']['selected'] == '[personal detail]'
+    assert re.fullmatch(r'\[~[0-9a-f]{32}~\]', context['rewrite']['selected'])
+    assert body['replacement'] == 'Priya Natarajan'
     assert context['rewrite']['before_selection'] == ''
     payload = sent['context'] + sent['body'].model_dump_json()
     assert 'Priya Natarajan' not in payload and '780-555-0142' not in payload
@@ -168,3 +174,30 @@ def test_removed_new_reference_cannot_authorize_a_code_style_quote(rewriting, mo
     assert response.status_code == 200, response.text
     assert '\n> ' not in response.json()['replacement']
     assert response.json()['removed_citations'] == ['9.25.2.2.(1)']
+
+
+def test_rewrite_keeps_personal_facts_without_sending_them_to_model(rewriting, monkeypatch):
+    client, _, case, calls = rewriting
+    def keep_details(**kwargs):
+        calls.append(kwargs)
+        selected = json.loads(kwargs['context'])['rewrite']['selected']
+        assert 'Priya Natarajan' not in selected and '780-555-0142' not in selected
+        return routes_assist.ModelAnswer(selected.replace('can be contacted at', 'can be reached at'), 50, 30)
+    monkeypatch.setattr(routes_assist, 'call_model', keep_details)
+    response = rewrite(client, case, text='Priya Natarajan can be contacted at 780-555-0142.', start=0, end=0)
+    assert response.status_code == 200, response.text
+    assert response.json()['replacement'] == 'Priya Natarajan can be reached at 780-555-0142.'
+
+
+@pytest.mark.parametrize('mode', ['drop', 'duplicate', 'invent'])
+def test_rewrite_cannot_lose_duplicate_or_invent_protected_details(rewriting, monkeypatch, mode):
+    client, _, case, _ = rewriting
+    def corrupt(**kwargs):
+        selected = json.loads(kwargs['context'])['rewrite']['selected']
+        token = re.search(r'\[~[0-9a-f]{32}~\]', selected).group()
+        changed = (selected.replace(token, '') if mode == 'drop' else selected + token if mode == 'duplicate'
+                   else selected + '[~' + '0' * 32 + '~]')
+        return routes_assist.ModelAnswer(changed, 40, 30)
+    monkeypatch.setattr(routes_assist, 'call_model', corrupt)
+    response = rewrite(client, case, text='Priya Natarajan uses a panel.', start=0, end=0)
+    assert response.status_code == 422 and 'replacement' not in response.json()

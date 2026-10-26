@@ -8,7 +8,8 @@ through here, so article numbers are untouched.
 from __future__ import annotations
 
 import re
-from collections.abc import Iterable
+import secrets
+from collections.abc import Callable, Iterable
 from typing import Any
 
 # Facts that hold names, addresses or identifiers of people and sites.
@@ -78,7 +79,7 @@ def known_values(case: Any, extra: Iterable[str] = ()) -> list[str]:
     return sorted(values, key=len, reverse=True)
 
 
-def scrub(text: str, known: Iterable[str] = ()) -> str:
+def scrub(text: str, known: Iterable[str] = (), *, replacement: Callable[[str], str] | None = None) -> str:
     if not text:
         return text
     for value in known:
@@ -87,12 +88,46 @@ def scrub(text: str, known: Iterable[str] = ()) -> str:
         # Whole words and numeric tokens: "202" must not replace part of "2025" or "202.5".
         before = r'(?<!\w)(?<!\d[.,])' if value[0].isdigit() else r'(?<!\w)'
         after = r'(?!\w|[.,]\d)' if value[-1].isdigit() else r'(?!\w)'
-        text = re.sub(before + re.escape(value) + after, '[personal detail]', text, flags=re.I)
-    text = EMAIL.sub('[email]', text)
-    text = NAMED.sub(_name_span, text)
-    text = PHONE.sub('[phone]', text)
-    text = STREET.sub('[address]', text)
-    return POSTAL.sub('[postal code]', text)
+        text = re.sub(before + re.escape(value) + after,
+                      (lambda match: replacement(match.group())) if replacement else '[personal detail]',
+                      text, flags=re.I)
+    text = EMAIL.sub((lambda match: replacement(match.group())) if replacement else '[email]', text)
+
+    def name_span(match):
+        if replacement is None:
+            return _name_span(match)
+        lead = _KEEP.match(match.group()).group()
+        return lead + replacement(match.group()[len(lead):])
+
+    text = NAMED.sub(name_span, text)
+    text = PHONE.sub((lambda match: replacement(match.group())) if replacement else '[phone]', text)
+    text = STREET.sub((lambda match: replacement(match.group())) if replacement else '[address]', text)
+    return POSTAL.sub((lambda match: replacement(match.group())) if replacement else '[postal code]', text)
+
+
+_PERSONAL_TOKEN = re.compile(r'\[~[0-9a-f]{32}~\]')
+
+
+def protect_personal_details(text: str, known: Iterable[str] = ()) -> tuple[str, dict[str, str]]:
+    """Use the shared recognizers, retaining only local originals for a rewrite round trip."""
+    originals = {}
+
+    def opaque(value):
+        token = '[~' + secrets.token_hex(16) + '~]'
+        while token in text or token in originals:
+            token = '[~' + secrets.token_hex(16) + '~]'
+        originals[token] = value
+        return token
+
+    return scrub(text, known, replacement=opaque), originals
+
+
+def restore_personal_details(text: str, originals: dict[str, str]) -> str:
+    """Never guess which person a placeholder represents or lose/duplicate their facts."""
+    if any(text.count(token) != 1 for token in originals) or any(
+            token not in originals for token in _PERSONAL_TOKEN.findall(text)):
+        raise ValueError('The rewrite changed a protected personal detail. Try selecting a shorter passage.')
+    return _PERSONAL_TOKEN.sub(lambda match: originals[match.group()], text)
 
 
 def scrub_obj(value: Any, known: Iterable[str] = ()) -> Any:

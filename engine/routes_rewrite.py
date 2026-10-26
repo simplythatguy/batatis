@@ -13,12 +13,13 @@ from .accounts import require_user
 from .assist_documents import reauthorize
 from .process_fields import PROCESS_ALIASES
 from .public_names import names_a_provider
-from .redact import known_values, people_names, scrub, scrub_obj
+from .redact import (known_values, people_names, protect_personal_details, restore_personal_details, scrub,
+                     scrub_obj)
 
 REWRITE_SYSTEM = """You edit the applicant's own words in a Batatis alternative-solution application.
 Rewrite only the selected span according to the instruction, or the whole text for an empty selection.
 Return only the replacement text, with no introduction, surrounding text, HTML or code fences.
-Keep the applicant's facts and uncertainties. Never add facts, test results, certificates, measurements,
+Keep the applicant's facts and uncertainties. Preserve every [~...~] personal-detail token exactly once. Never add facts, test results, certificates, measurements,
 professional opinions or conclusions, or article numbers absent from the original text and code context.
 Never author Section D professional evidence, sign or seal for anyone. Do not add compliance or safety
 language. Do not use approve, approved, compliant, complies, comply, conforms, safe or unsafe, even negated.
@@ -97,8 +98,9 @@ def create_router(cases, code):
             if key in built:
                 built[key] = scrub_obj(built[key], known)
         start, end = (0, len(body.text)) if body.start == body.end else (body.start, body.end)
-        built['rewrite'] = scrub_obj({'field': body.field, 'before_selection': body.text[:start],
-                                     'selected': body.text[start:end], 'after_selection': body.text[end:]}, known)
+        selected, personal_details = protect_personal_details(body.text[start:end], known)
+        built['rewrite'] = {'field': body.field, 'before_selection': scrub(body.text[:start], known),
+                            'selected': selected, 'after_selection': scrub(body.text[end:], known)}
         built['code_context'] = []
         for pid in case.provisions[:8]:
             try:
@@ -139,6 +141,12 @@ def create_router(cases, code):
         limited = assist.ARTICLE.sub(restrict, reply.text)
         replacement, cited, unknown = assist.check_citations(limited, codes, context=built)
         removed = list(dict.fromkeys([*removed, *unknown]))
+        try:
+            replacement = restore_personal_details(replacement, personal_details)
+        except ValueError as error:
+            raise HTTPException(422, str(error)) from error
+        if assist.CLAIM_WORDS.search(replacement) or names_a_provider(replacement):
+            raise HTTPException(422, 'The rewrite included a restricted claim or internal service information. Try another instruction.')
         guard()
         notice = assist.model_notice(route)
         response.headers['X-Batatis-Notice'] = notice
