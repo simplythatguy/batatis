@@ -404,7 +404,7 @@ def test_additional_recognized_forms_cannot_hide_a_supplied_rationale(codes):
     before = None
     for ordered in (uploads, list(reversed(uploads))):
         parts = review_uploads(ordered, codes)
-        assert all(file.role == 'scc_form_flattened' for file in parts.files)
+        assert all(file.role == 'scc_form_fillable' for file in parts.files)
         # Whatever the order, the other form's passage is read; the draft has no placeholder to compete with it.
         reading = next(f for f in parts.fields if f.field == 'rationale')
         assert reading.status == 'present' and reading.value == rationale

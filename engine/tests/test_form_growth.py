@@ -164,7 +164,7 @@ def test_a_grown_export_reads_back_and_its_layout_hint_alone_proves_nothing(code
     case = sample_case(codes, provisions=DENSE, facts={**FACTS, 'mailing_address': LONG_ADDRESS})
     result = export_case(case, codes=codes)
     read = read_pdf(result.pdf, 'grown.pdf')
-    assert read.role == 'scc_form_flattened' and read.form_version == 'challenge_2026-09-15' and not read.note
+    assert read.role == 'scc_form_fillable' and read.form_version == 'challenge_2026-09-15' and not read.note
     assert read.fields['Mailing Address'].status == 'present'
     assert read.fields['Mailing Address'].value == norm(pdf_safe(LONG_ADDRESS))
     assert read.fields['Article(s)'].value == DENSE[0]

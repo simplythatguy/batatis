@@ -1,7 +1,9 @@
 """Owner-only workspace mutations, committed against the exact snapshot they read."""
 from __future__ import annotations
 
+import json
 from datetime import datetime
+from pathlib import Path
 from typing import Callable
 from zoneinfo import ZoneInfo
 
@@ -13,6 +15,10 @@ from .models_workspace import (HistoryEntry, SignatureInput, SignerRole, Workspa
                                WorkspaceSignature, WorkspaceView)
 from .store import CaseBackend, VersionConflict
 from .workspace import content_hash, signers, workspace_view
+
+
+SIGNING_SETTINGS = Path(__file__).parent / 'data' / 'jurisdictions' / 'signing.json'
+SIGNING_ZONE = ZoneInfo(json.loads(SIGNING_SETTINGS.read_text(encoding='utf-8'))['timezone'])
 
 
 class ConsentInput(BaseModel):
@@ -60,7 +66,7 @@ def create_router(cases: Callable[[], CaseBackend]) -> APIRouter:
         if role not in {signer.role for signer in signers(case)}:
             raise HTTPException(422, 'This application does not name an owner representative.')
         signature = WorkspaceSignature(**body.model_dump(), role=role, content_hash=content_hash(case),
-                                       signed_on=datetime.now(ZoneInfo('America/Edmonton')).date().isoformat())
+                                       signed_on=datetime.now(SIGNING_ZONE).date().isoformat())
         case.workspace.signatures = [item for item in case.workspace.signatures if item.role != role] + [signature]
         save(store, case, version)
         return signature
