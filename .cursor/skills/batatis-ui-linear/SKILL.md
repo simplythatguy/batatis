@@ -1,84 +1,39 @@
 ---
 name: batatis-ui-linear
-description: Default Batatis product UI/UX system. Always produce Linear-caliber, ruthlessly simplified interfaces (no feature loss) without the user needing to say Linear. Use for any applicant, SCO, intake, ranking, Section C, export, or product chrome work. Pair with batatis-ui-opus for the current model policy and independent review requirements.
+description: Batatis UI interaction safeguards for applicant, SCO, intake, ranking, Section C, export, and product chrome work. Use the calm design document for visual rules and batatis-ui-opus for model policy and independent review.
 ---
 
-# Batatis UI — Linear-default system
+# Batatis UI interaction safeguards
 
-> **Default look changed (user decision 2026-10-20):** product UI now uses the calm system in `docs/design-system-calm.md` (contract: `docs/design/calm-flow-prototype.html`, code: `web/src/calm/`). The Linear visual language below (sidebar, charcoal tool chrome) is superseded. The **UI P0 rules** in this file still apply to every surface; where a rule names a Linear detail (sidebar, active nav, 14px checkbox), apply its intent to the calm components.
+Read [the calm design system](../../../docs/design-system-calm.md) before product UI work. It is the single design authority for tokens, primary buttons, stage navigation, the icon rail and sidebar. This skill keeps interaction and data safeguards; its historical name does not select a separate visual system.
 
-## Mandate (always on for product UI)
+## Scope
 
-Agents **always** ship spectacular, simplified product UI matching this system — **without** the prompt saying “make it Linear.”
-
-- **Simplify ruthlessly; never drop capabilities.**
-- **Bug-free bar:** working controls; focus visible; empty/error states; gates while gaps open.
-- **Formal UI review uses a fresh independent reviewer** on the current model profile in `.cursor/rules/pstack-models.mdc` (GPT-6.1-Sol at max). See `../batatis-ui-opus/SKILL.md`.
-
-References: `../../../docs/design/linear-reference/`  
-Tokens: `../../../docs/design/tokens.css`  
-Doc: `../../../docs/design-system-linear.md`  
-Shared gaps: `../../../evals/ui-artifacts/shared-gaps.js`  
-Smoke: `../../../evals/ui-artifacts/smoke.mjs` · Captures: `../../../evals/ui-artifacts/screenshots.mjs`
+Simplify without losing supported capabilities. Pair with [minimalist content guidance](../batatis-ui-minimalist/SKILL.md) and [model and quality policy](../batatis-ui-opus/SKILL.md). Formal UI review uses a fresh independent reviewer under `.cursor/rules/pstack-models.mdc` (GPT-6.1-Sol at max).
 
 ## UI P0 (must not fail)
 
 | # | Rule |
 | --- | --- |
-| 1 | **Neutral primary CTAs** — `.btn-primary` = light grey fill `#E6E6E6` + dark text (`--btn-primary-*`). **Never** indigo/purple/violet filled buttons (incl. `#5e6ad2`). |
-| 2 | **Active nav** = `--bg-active` faint fill `rgba(255,255,255,0.05–0.07)` + full-strength text. **No** border, ring, glow, coloured outline. |
-| 3 | **One shared gap source** — `shared-gaps.js` (or equivalent). Same blocking list on intake banner, SCO gaps, export gate. |
-| 4 | **Gating** — disable (or confirm-with-gap-list) complete / download / admin-complete while blocking gaps remain (`data-requires-no-blocking-gaps`). |
-| 5 | **No demo/template leakage** — no “demo” rows; no bracket placeholders (`[linked excerpt]`); no status words standing in for values (`present`, `from registry`). Render the real value or `—` + gap. |
-| 6 | **Styled controls** — custom select; checkbox is a true 14px square (exclude it from text-input padding rules), 1px hairline, 4px radius, checked = `#E6E6E6` fill + dark check glyph; `resize: none` on textareas. No browser-default chrome. |
-| 7 | **Labels never wrap, rows never clip** — `.btn` is `white-space: nowrap`; `.btn-row` uses `flex-wrap: wrap` (never `overflow-x` scroll that hides a button). Shorten labels for narrow detail panes. |
-| 8 | **One data model, derived everywhere** — fields, article status, Section C and Section D live in one state object; gaps, counts, summaries and previews are computed from it and recompute on input. Preview text must equal the table values. Gates name the unconfirmed articles. |
-| 9 | **Every control works** — nav items are links; Back/Continue navigate; each action changes visible state (saved note, dialog, status, download). No inert buttons, no `href="#"`, no native `alert()` — use a styled `<dialog>`. Disabled controls show their reason inline. |
-| 10 | **No silent defaults** — unanswered selects start at "Select…" with empty styling; prefilled values carry a marker (inferred, defaulted) and a way to confirm. |
-| 11 | **Panes scroll, the page does not** — fixed-height shell; list, detail and preview panes own their overflow. |
-| 12 | **No status word without a gap** — anything labelled Required/Missing must also be in the shared gap list (warning at minimum) and clear when satisfied; otherwise label it Planned. Status cells are pills with dots; provenance notes ("Not authored by this tool") are muted meta, not status. |
+| 1 | Use the calm primary-button tokens and keep at most one primary action per card or panel. |
+| 2 | Follow the calm stage and shell navigation contract. Every icon has an accessible name, a hover or focus label, and visible keyboard focus. |
+| 3 | Derive the deck, applicant Review, SCO gaps and export gate from one shared gap source. |
+| 4 | Block official export and administrative-complete decisions while blocking gaps remain or checks are stale. Show the reason inline. Draft exports retain explicit missing values. |
+| 5 | Show real values or an explicit missing value with its gap. Demo rows, bracket placeholders and status words such as `present` never stand in for applicant data. |
+| 6 | Use styled, accessible controls from the calm system. Keep checkboxes square and outside text-input padding rules, and use `resize: none` on textareas. |
+| 7 | Keep button labels on one line and let button rows wrap. Every action stays visible in narrow panes. |
+| 8 | Derive fields, article status, Section C, Section D, counts, summaries and previews from the same application state. Preview text equals the stored table values. Gates name unconfirmed articles. |
+| 9 | Every control works. Navigation uses links; actions visibly change state. Use styled dialogs. Disabled controls explain why. No inert controls, `href="#"` or native `alert()`. |
+| 10 | Start unanswered choices empty. Inferred or defaulted values carry provenance and a way to confirm them. |
+| 11 | Keep scrolling inside the shell's list, detail and preview panes. |
+| 12 | A Required or Missing label corresponds to the shared gap list and clears when satisfied. Provenance such as "Not authored by this tool" remains distinct from status. Status also has a text equivalent. |
 
-`--focus-ring` / `--accent` (`#8a8a8e` neutral grey) = **focus rings only**. Never indigo/`#5E6AD2`. Not CTA identity, not active nav.
-
-## Visual language
-
-| Pillar | Rule |
-| --- | --- |
-| Surfaces | Charcoal layers; depth from value shifts |
-| Borders | 1px low-contrast |
-| Type | Inter-like sans; labels ≥11px, secondary ≥ readable contrast |
-| Grid | 8px; form rows ~32px; inputs ≤36px; prefer 2-col property grids |
-| Color | Status dots only for meaning: blocking=red, warning=amber, pending=grey, done=green. Colour on the **dot**, not spam-coloured text |
-| Lookup / source | Neutral `.label-pill` (thin border, muted text) — not green text |
-| Layout | Sidebar + main; list+detail for review |
-| Icons | Thin-stroke nav icons |
-| Code vs AI | `.cite-block` (no leading indent dump) ≠ `.ai-explain` |
-| PDF preview | Light sheet (`--pdf-sheet-bg`) — do not imply the PDF is charcoal |
-
-## Status map (single)
-
-`blocking` → `--status-blocking` · `warning` → `--status-warning` · `pending` → `--status-pending` · `done` → `--status-done`
-
-## Anti-patterns (material fail)
-
-- Indigo/purple **filled** primary buttons or active-nav rings
-- Composer “PASS” treated as formal seal
-- Divergent gap lists across intake / SCO / export
-- Live demo rows; browser-default checkbox/select; wrapping button labels; clipped buttons in narrow panes
-- `[placeholder]` strings or `present` / `from registry` instead of real values in previews
-- Mark admin-complete / Download enabled while blocking gaps open
-- Inert nav/footer controls, `alert()`, selects defaulting silently, gap lists typed by hand instead of derived
-- Green “lookup” text spam; disc bullets; missing status dots on queue rows
+Retrieved code text stays visually distinct from AI explanations. Completeness indicators, including a composer "PASS", never imply design approval, safety or technical correctness. Section C is deterministic lookup after article identification. Section D professional evidence stays human-authored. The alternative-path rationale, risk assessment, mitigating measures, assumptions, maintenance and qualifications remain reachable.
 
 ## Implementation checklist
 
-1. Load `docs/design/tokens.css`.
-2. Neutral `.btn-primary`; ≤1 primary CTA per viewport footer.
-3. Active nav = faint fill only.
-4. Wire `shared-gaps.js` (or one source) on intake + SCO + export; cross-check before ship.
-5. Gate complete/download/admin-complete on blocking gaps.
-6. Styled checkbox/select/textarea; nowrap labels in wrapping rows (nothing clipped); thin-stroke icons.
-7. Status dots from the single map; lookup = neutral pills.
-8. Required empties: `.field.is-empty` + status dot (not placeholder-only).
-9. Run `node evals/ui-artifacts/smoke.mjs` (chrome, clipping, leakage, every control, cross-screen happy path), then `screenshots.mjs`.
-10. Run a fresh independent UI review on the final revision using the current model profile and `evals/battle-prompts/ui-blind/README.md`.
+1. Read the calm contract and use the current `web/src/calm/` components and tokens.
+2. Check that displayed values, gaps and export gates agree with the same application state, including empty, loading, error and unconfirmed states.
+3. Exercise each changed control with keyboard and pointer input. Check narrow panes, labels, focus, disabled reasons and source-versus-AI styling.
+4. Run `node evals/ui-artifacts/smoke.mjs` for product UI work. Capture and inspect screenshots and a working demo through the supported workflow; the capture helper is `evals/ui-artifacts/screenshots.mjs`.
+5. Review the final revision independently using the current model profile and `evals/battle-prompts/ui-blind/README.md`. For skill or rule edits, audit `evals/fixtures/understanding-checklist.md`.

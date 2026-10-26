@@ -158,10 +158,8 @@ def test_the_privacy_notice_names_no_provider():
 
 
 def test_the_accuracy_report_names_no_provider():
-    """The #/accuracy page bundles docs/accuracy/report.json; the report and the page name no provider or model."""
+    """The contributor report names no provider or model."""
     files = [ROOT / 'docs' / 'accuracy' / 'report.json', ROOT / 'docs' / 'accuracy' / 'report.md']
-    files += sorted(p for p in (WEB / 'src' / 'accuracy').rglob('*') if p.is_file())
-    assert len(files) >= 4, 'the report, its markdown and the page'
     hits = [hit for path in files for hit in text_hits(path, IDENTIFY_NAMES)]
     assert not hits, '\n'.join(hits)
 

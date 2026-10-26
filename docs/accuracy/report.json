@@ -326,7 +326,7 @@
     {
       "id": "no-provider-names",
       "claim": "The web app, code identification answers, the exported form and this report name no AI provider.",
-      "detail": "Tests scan the web code that ships to the browser, the code identification responses, the exported PDF, this report and this page for provider names.",
+      "detail": "Tests scan the web code that ships to the browser, the code identification responses, the exported PDF and this report for provider names.",
       "tests": [
         {
           "id": "engine/tests/test_no_provider_names_exposed.py::test_web_source_that_ships_to_the_browser_names_no_provider",
@@ -357,9 +357,9 @@
           "result": "passed"
         },
         {
-          "id": "web/src/calm/no-provider-names.test.ts::the accuracy page and its report name no provider",
+          "id": "web/src/calm/no-provider-names.test.ts::the contributor accuracy report names no provider",
           "file": "web/src/calm/no-provider-names.test.ts",
-          "name": "the accuracy page and its report name no provider",
+          "name": "the contributor accuracy report names no provider",
           "runner": "node",
           "result": "passed"
         }

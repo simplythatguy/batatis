@@ -24,9 +24,6 @@ from .routes_review import (NotificationsResult, ApplicationsResult, QueueResult
                             DecisionRequest, MessageRequest, MessageReadRequest, ProfessionalRequirementRequest,
                             SubmitRequest)
 from .routes_assist import AssistRequest, AssistResult
-from .routes_voice import VoiceCapability
-from .voice import VoiceStart, VoiceCommand
-from .voice_context import VoiceScope
 from .routes_intake import AnswersRequest, IntakeRequest, IntakeResult, PlanRequest, ScopeRequest
 from .identify.http_models import (BenchmarkConfirmRequest, IdentifyConfirmRequest, IdentifyDecisionRequest,
                                    IdentifyDecisionResponse, IdentifyRequest, RequirementDecisionRequest)
@@ -44,7 +41,7 @@ RESPONSES = (Case, SectionCRow, CodeTOC, ProvisionContext, UserResult, MessagesR
              ReviewSession, PackageReviewIndex, SentInformationRequests,
              JurisdictionsResult, JurisdictionDetail, CaseJurisdictionPack, IntakeResult, CaseRules, RuleSet,
              JurisdictionChecklists, CaseChecklists, ChecklistAnswerResult,
-             ApplicationPreferences, VoiceCapability, ExportPreview,
+             ApplicationPreferences, ExportPreview,
              ExportPreviewTooLarge)  # responses carry every field
 REQUESTS = (Fact, NewCase, SectionCRequest, SignupRequest, LoginRequest, OnboardingRequest,
             ClaimRequest, DecisionRequest, MessageRequest, MessageReadRequest, ProfessionalRequirementRequest,
@@ -52,8 +49,7 @@ REQUESTS = (Fact, NewCase, SectionCRequest, SignupRequest, LoginRequest, Onboard
             IntakeRequest, AnswersRequest, ScopeRequest, PlanRequest,
             IdentifyRequest, IdentifyDecisionRequest, IdentifyConfirmRequest, BenchmarkConfirmRequest,
             RequirementDecisionRequest,
-            ChecklistAnswerRequest, TitleRequest, SelectedArticlesRequest, ApplicationPreferencesPatch,
-            VoiceStart, VoiceCommand, VoiceScope)  # defaulted fields optional
+            ChecklistAnswerRequest, TitleRequest, SelectedArticlesRequest, ApplicationPreferencesPatch)  # defaulted fields optional
 
 
 class _ResponsesCarryDefaults(GenerateJsonSchema):

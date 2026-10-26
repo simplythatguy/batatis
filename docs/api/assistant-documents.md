@@ -6,9 +6,11 @@ application. This is extractive help: a model selects literal quotations and the
 server checks them. It is not full explanatory or semantic PDF Q&A, a complete
 document review, or a determination of technical correctness or relevance.
 
-No UI is implemented by this backend change. Generated schema/TypeScript
-synchronization and independent review of the final combined revision are separate
-integration gates. Do not activate a client from this document alone.
+The typed Help panel supports selecting application PDFs and uploading through
+the existing authorized file route where editing is allowed. It displays selected
+files, excerpt pointers and coverage limits. This API contract does not establish
+browser acceptance or hosted behavior; those require verification of the combined
+client and server revision.
 
 ## Request
 
@@ -73,7 +75,7 @@ Unreadable or ambiguous PDFs and image-only files remain `not_read`; a persuasiv
 filename cannot change that state. No OCR, image understanding, PDF bytes, form
 values or external document fetch is sent to a provider.
 
-The immutable voice context projection is reused: at most three PDFs, three
+The immutable document projection supplies at most three PDFs, three
 text-bearing pages and 6,000 extracted source characters per PDF, with at most
 2,000 source characters per page. Recognized personal details are replaced before
 provider input; replacement labels may be longer than their source text. The

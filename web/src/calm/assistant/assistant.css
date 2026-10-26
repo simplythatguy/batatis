@@ -1,4 +1,4 @@
-/* Assistant and voice: the parts the shared calm.css does not have. Light, monotone, ink only. */
+/* Assistant: the parts the shared calm.css does not have. Light, monotone, ink only. */
 .cf-assist { --cf-text-3: #656c78; }
 .cf-av-boundary { flex: none; margin: 0; padding: 7px 18px 0; color: var(--cf-text-3); font-size: 11.5px; line-height: 1.4; }
 .cf-av-tool { position: relative; display: inline-flex; flex: none; }
@@ -41,13 +41,6 @@
   color: var(--cf-text-3);
   background: transparent;
   border-style: dashed;
-}
-
-.cf-av-said {
-  display: inline-flex;
-  margin-right: 6px;
-  vertical-align: -1px;
-  color: var(--cf-text-3);
 }
 
 .cf-av-about {
@@ -123,135 +116,7 @@
   flex: none;
 }
 
-/* —— Voice notice and bar —— */
-
-.cf-av-notice {
-  flex: none;
-  margin: 0 12px;
-  padding: 14px 16px;
-  border: 1px solid var(--cf-line-2);
-  border-radius: 14px;
-  background: var(--cf-surface);
-  box-shadow: var(--cf-shadow);
-}
-
-.cf-av-notice-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0 0 6px;
-  font-size: 14px;
-  font-weight: 550;
-}
-
-.cf-av-notice-text {
-  margin: 0 0 12px;
-  max-height: 160px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  font-size: 13px;
-  line-height: 1.5;
-  color: var(--cf-text-2);
-}
-
-.cf-av-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-}
-
-.cf-av-bar {
-  flex: none;
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 10px;
-  margin: 12px 12px 0;
-  padding: 8px 8px 8px 12px;
-  border: 1px solid var(--cf-line-2);
-  border-radius: 14px;
-  background: var(--cf-surface);
-}
-
-.cf-av-bar.is-ended {
-  border-style: dashed;
-  background: transparent;
-}
-
-.cf-av-bar .cf-av-row {
-  margin-left: auto;
-}
-
-.cf-av-bar-text {
-  min-width: 0;
-  font-size: 13px;
-  color: var(--cf-text);
-}
-
-.cf-av-bar.is-ended .cf-av-bar-text {
-  flex: 1;
-  color: var(--cf-text-2);
-}
-
-.cf-av-hint {
-  color: var(--cf-text-3);
-}
-
-.cf-av-time {
-  font: 500 12px/1 var(--cf-mono);
-  color: var(--cf-text-3);
-  font-variant-numeric: tabular-nums;
-}
-
-/* A quiet ink orb: its ring follows the voice level; listening is calmer than speaking. */
-.cf-av-orb {
-  --level: 0;
-  position: relative;
-  flex: none;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--cf-text);
-  opacity: calc(0.55 + var(--level) * 0.45);
-}
-
-.cf-av-orb::after {
-  content: "";
-  position: absolute;
-  inset: -4px;
-  border-radius: 50%;
-  border: 1.5px solid var(--cf-text);
-  opacity: calc(var(--level) * 0.6);
-}
-
-.cf-av-orb:is([data-status="mic"], [data-status="connecting"], [data-status="updating"], [data-status="stopping"]) {
-  background: var(--cf-text-4);
-}
-
-.cf-av-orb[data-status="sending"] {
-  background: var(--cf-text-3);
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .cf-av-orb {
-    scale: calc(0.9 + var(--level) * 0.25);
-  }
-  .cf-av-orb::after {
-    scale: calc(1 + var(--level) * 0.35);
-  }
-  .cf-av-orb[data-status="sending"] {
-    animation: cf-av-think 1200ms ease-in-out infinite;
-  }
-}
-
-@keyframes cf-av-think {
-  50% {
-    opacity: 0.35;
-  }
-}
-
-/* —— Files for voice —— */
+/* Selected PDFs */
 
 .cf-av-files {
   display: flex;

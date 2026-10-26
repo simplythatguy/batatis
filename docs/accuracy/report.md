@@ -103,7 +103,7 @@ Enforced by:
 
 ### The web app, code identification answers, the exported form and this report name no AI provider.
 
-Tests scan the web code that ships to the browser, the code identification responses, the exported PDF, this report and this page for provider names.
+Tests scan the web code that ships to the browser, the code identification responses, the exported PDF and this report for provider names.
 
 Enforced by:
 
@@ -111,7 +111,7 @@ Enforced by:
 - `engine/tests/test_no_provider_names_exposed.py::test_identify_responses_name_no_provider` (passed)
 - `engine/tests/test_no_provider_names_exposed.py::test_the_export_headers_and_pdf_name_no_provider` (passed)
 - `engine/tests/test_no_provider_names_exposed.py::test_the_accuracy_report_names_no_provider` (passed)
-- `web/src/calm/no-provider-names.test.ts::the accuracy page and its report name no provider` (passed)
+- `web/src/calm/no-provider-names.test.ts::the contributor accuracy report names no provider` (passed)
 
 ### A refused or failed run leaves no partial write.
 
