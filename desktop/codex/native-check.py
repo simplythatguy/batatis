@@ -41,8 +41,8 @@ RUNTIME_SHA = {
 SOURCE_PINS = {
     "desktop/src/main/codex/config.ts": "b43406a24a5c8a8a8efbb9694979728d654b252acb3656e045fdeb8da274e9a4",
     "desktop/src/main/codex/release.ts": "15b246a3847f0c79215a76d5d26dd64d3fdf285254c9179272357de8fe555da5",
-    "desktop/src/main/codex/binary.ts": "0266824a4afbebbcdc33c3b36ea70d2b4e6b4c53f9cd0c9ad6d220860b82285a",
-    "desktop/src/main/codex/protocol.ts": "2c7531da4dd9ab70931a8fbf47f18ec411277280ac4e2daa8693fdd36c3700de",
+    "desktop/src/main/codex/binary.ts": "acdc4a86e0ef719976a747442996d09a679c83149e2d4bbd088c5fed329e6b78",
+    "desktop/src/main/codex/protocol.ts": "dab8986fef67fd4c8e3056248b3d5bf11861e8c7093277066a74c50433fae630",
     "desktop/scripts/register-ts.mjs": "f55ea34b5f9c8376ca69e9e95ceae774989050228ea0fa9c2673aa109b8f91c6",
     "desktop/scripts/ts-ext.mjs": "2ad6a35c6168a4bcce426223f2b4575754cc426a3c5a9adecf799156379e57d6",
 }

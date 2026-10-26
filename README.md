@@ -105,7 +105,7 @@ For both:
 - Get notified when an application changes status or a message arrives.
 - Applications and their files are deleted 7 days after they are created.
 
-In the desktop app:
+In the desktop app, for people who want to connect their own AI:
 
 - Run Batatis on your own Mac or Windows computer. Your applications stay on that computer.
 - Use AI through your own ChatGPT or Claude subscription, or your own OpenAI API key. Install, update, sign in, and sign out from Settings.
@@ -130,6 +130,7 @@ Many published decisions state their outcome, so the cases test reading and pape
 
 ## What's next
 
+- Offer the website as a paid service, with AI included. The desktop app stays free for people who connect their own AI.
 - Export Calgary's own Request for Specific Variance form next to the Council's form.
 - Register decided variances in the Council's Orders and Variances Portal, which becomes mandatory on December 1, 2026.
 - Add authorities beyond Edmonton and Calgary, then other provinces.
