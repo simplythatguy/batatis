@@ -567,7 +567,7 @@ def builder(args, paths, env, directory, expected, deadline):
     request = {"repo": str(REPO), "resources": str(args.resources_dir), "executable": args.executable,
                "catalog": str(paths["codex-home"] / "luna-models.json"), "cwd": str(paths["cwd"]), "expected": expected}
     argv = [args.node, "--experimental-strip-types", "--disable-warning=MODULE_TYPELESS_PACKAGE_JSON",
-            "--import", str(REPO / "desktop/scripts/register-ts.mjs"), "--input-type=module", "--eval", BRIDGE]
+            "--import", (REPO / "desktop/scripts/register-ts.mjs").as_uri(), "--input-type=module", "--eval", BRIDGE]
     value = load_json_bytes(command(argv, paths, env, directory / "builder", deadline, canonical(request)))
     require(value["contextFingerprint"] == CONTEXT_SHA, "Adapter context fingerprint changed")
     require(value["model"] == "gpt-6-luna" and value["effort"] == "medium", "Builder changed model or effort")
