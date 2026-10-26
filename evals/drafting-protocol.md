@@ -6,7 +6,7 @@ The cases are the three raw demo input folders and the sparse BTRboard descripti
 
 The harness supplies a small confirmed benchmark selection for each case, checked through the real second-printing code database. That isolates drafting from code finding, which belongs to another workstream. Additional real-world benchmarks may be necessary. Drafting must identify limits rather than claim the chosen list exhausts applicable requirements.
 
-Generation receives the raw project brief and every other Markdown document under the case's `input/` folder, rendered to readable PDFs without adding content. It never receives `keys/`, completed export JSON, expected narratives or the research worked-case analysis. Every input is hash recorded. The comparison reference is read only after the drafting route returns, for a separate quality judge.
+Generation receives the raw project brief and every other Markdown document under the case's `input/` folder, rendered to readable PDFs without adding content. The actual intake route runs first with its model pass disabled, so existing extracted facts and copied rough Section B wording exercise the same drafting path as the product. It never receives `keys/`, completed export JSON, expected narratives or the research worked-case analysis. Every input is hash recorded. The comparison reference is read only after the drafting route returns, for a separate quality judge.
 
 For each case the harness checks that the proposed alternative, six narratives, every selected provision's explanation and the evidence plan exist; all claims have sources; generation writes no accepted answers; explicit acceptance saves exactly the server draft; a subsequent read retains provenance; and the deterministic Section C rows remain unchanged.
 

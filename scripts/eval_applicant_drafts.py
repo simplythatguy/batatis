@@ -130,11 +130,18 @@ def run_live(name: str, directory: Path, manifest: dict, documents: list[Path], 
     case = store.put(Case(title='Draft evaluation ' + name, provisions=manifest['provisions'], facts=[
         Fact(field='project.description', value=manifest['description'], kind='pointed', status='confirmed',
              source=Source(type='user_text', ref='eval:raw-description', quote=manifest['description']))]))
+    file_ids = []
     for document in documents:
-        store.put_file(case.id, document.name, document.read_bytes())
+        file_ids.append(store.put_file(case.id, document.name, document.read_bytes())['id'])
     case = store.get(case.id)
-    before_facts = [f.model_dump() for f in case.facts]
     with TestClient(create_app(store=store, codes=codes)) as client:
+        intake = client.post(f'/cases/{case.id}/intake', json={'text': manifest['description'],
+            'file_ids': file_ids, 'model': False, 'expected_version': case.version})
+        if intake.status_code != 200:
+            return {'status': 'failed', 'stage': 'intake', 'http_status': intake.status_code,
+                    'detail': intake.json()}
+        case = store.get(case.id)
+        before_facts = [f.model_dump() for f in case.facts]
         response = client.post(f'/cases/{case.id}/drafts', json={'expected_version': case.version})
         if response.status_code != 200:
             return {'status': 'failed', 'http_status': response.status_code, 'detail': response.json()}
