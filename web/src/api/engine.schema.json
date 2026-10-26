@@ -3753,7 +3753,8 @@
           "enum": [
             "rules",
             "form",
-            "model"
+            "model",
+            "vision"
           ],
           "title": "Method",
           "type": "string"
@@ -3769,6 +3770,30 @@
           ],
           "default": null,
           "title": "Page"
+        },
+        "quote": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Quote"
+        },
+        "source_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Name"
         },
         "source_ref": {
           "title": "Source Ref",
@@ -3800,7 +3825,9 @@
         "page",
         "start",
         "end",
-        "verified"
+        "verified",
+        "source_name",
+        "quote"
       ],
       "title": "FactPointer",
       "type": "object"
@@ -3973,6 +4000,19 @@
           "title": "Form Fields Skipped",
           "type": "array"
         },
+        "image_pages_read": {
+          "default": [],
+          "items": {
+            "type": "integer"
+          },
+          "title": "Image Pages Read",
+          "type": "array"
+        },
+        "media_type": {
+          "default": "application/pdf",
+          "title": "Media Type",
+          "type": "string"
+        },
         "name": {
           "title": "Name",
           "type": "string"
@@ -4005,6 +4045,18 @@
           "title": "Pages Read",
           "type": "array"
         },
+        "pictures_not_read_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pictures Not Read Reason"
+        },
         "reason": {
           "anyOf": [
             {
@@ -4017,6 +4069,34 @@
           "default": null,
           "title": "Reason"
         },
+        "semantic_pages_read": {
+          "default": [],
+          "items": {
+            "type": "integer"
+          },
+          "title": "Semantic Pages Read",
+          "type": "array"
+        },
+        "semantic_pages_sent": {
+          "default": [],
+          "items": {
+            "type": "integer"
+          },
+          "title": "Semantic Pages Sent",
+          "type": "array"
+        },
+        "semantic_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Semantic Reason"
+        },
         "status": {
           "enum": [
             "read",
@@ -4025,6 +4105,14 @@
           ],
           "title": "Status",
           "type": "string"
+        },
+        "text_pages_read": {
+          "default": [],
+          "items": {
+            "type": "integer"
+          },
+          "title": "Text Pages Read",
+          "type": "array"
         }
       },
       "required": [
@@ -4035,6 +4123,13 @@
         "pages",
         "pages_read",
         "pages_not_read",
+        "text_pages_read",
+        "semantic_pages_read",
+        "semantic_pages_sent",
+        "image_pages_read",
+        "semantic_reason",
+        "pictures_not_read_reason",
+        "media_type",
         "form",
         "form_fields_read",
         "form_fields_skipped",
@@ -5653,6 +5748,14 @@
           "title": "Ran At",
           "type": "string"
         },
+        "removed_file_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Removed File Ids",
+          "type": "array"
+        },
         "review": {
           "anyOf": [
             {
@@ -5690,6 +5793,7 @@
         "text_sha256",
         "pointers",
         "files",
+        "removed_file_ids",
         "model",
         "conflicts",
         "unresolved_citations",

@@ -4,10 +4,10 @@
  * What the engine stores: facts (answers, the description, process fields, professional and
  * evidence facts), the jurisdiction, the title, the confirmed provisions and the code-check
  * selection (`selected_articles`, docs/api/selected-articles.md): every code card with its answer,
- * unanswered and pending ones included. What it does not store: attached file names, which are
- * simply absent, never invented.
+ * unanswered and pending ones included. Attached files come from the owned server inventory.
  */
 import type { Case as EngineCase, IdentifyResult, IntakeResult, SelectedArticleInput } from "../api/types.gen";
+import type { StoredFile } from "../api/client";
 import { emptyCase, applyDescription } from "../intake";
 import { answerWithdrawn, latestLocalFacts } from "../intakeFields";
 import { CODECHECK_PREFIX, PROCESS_FACT, reducer } from "../model";
@@ -163,10 +163,16 @@ export async function reviewedDescription(saved: EngineCase, record: IntakeResul
   }
 }
 
-export function openedCase(saved: EngineCase, type: ApplicantType, stored: { intake: IntakeResult | null; identify: IdentifyResult | null; reviewedText?: string | null }): Case {
+export function openedCase(saved: EngineCase, type: ApplicantType, stored: { intake: IntakeResult | null; identify: IdentifyResult | null; reviewedText?: string | null; files?: StoredFile[] }): Case {
   const restored = caseFromEngine(saved, type);
-  let c = restored;
+  let c: Case = { ...restored, files: (stored.files ?? []).filter(f => !stored.intake?.record.removed_file_ids?.includes(f.id)).map(f => {
+    const report = stored.intake?.record.files.find(r => r.file_id === f.id) ?? f.read_report;
+    return { id: f.id, engineId: f.id, name: f.name, read: Boolean(report && report.status !== "not_read"), pages: report?.pages ?? undefined };
+  }) };
   if (stored.intake) c = reducer(c, { type: "restoreIntake", result: stored.intake, text: stored.reviewedText ?? null });
+  if (c.intake?.record.files.some(r => r.pages_read.length && !r.text_pages_read?.length && !r.image_pages_read?.length && r.form !== "scc_variance" && !r.semantic_reason)) {
+    c = { ...c, intake: { ...c.intake, filesChanged: true } };
+  }
   if (stored.identify) c = reducer(c, { type: "noteIdentify", result: stored.identify });
   const list = saved.selected_articles;
   if (!list) return c;

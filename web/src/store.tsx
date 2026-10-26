@@ -10,7 +10,7 @@ import { toViewRow } from "./api/sectionC";
 import { getSession, updateSession } from "./calm/session";
 import { checkCurrent, newCheckState, type CheckState, type SaveStatus } from "./checkState";
 import { emptyCase } from "./intake";
-import { gapLabel, getGaps, lookupBasis, reducer, type Action } from "./model";
+import { gapLabel, getGaps, lookupBasis, pendingUploads, reducer, uploadHeldFile, type Action } from "./model";
 import { caseForRole, initialVisit } from "./visit";
 import type { ApplicantType, Candidate, CandidateAnswer, Case, Fact, Gap } from "./types";
 import { useSectionC } from "./api/sectionC";
@@ -61,10 +61,13 @@ function roleFor(type: ApplicantType): string {
 
 interface Store {
   reading: Reading;
-  /** Read the description and attached PDFs (intake), then check the code (identify). Explicit: Start and Continue. */
+  /** Read the description and attached files (intake), then check the code (identify). Explicit: Start and Continue. */
   readDescription: () => Promise<void>;
-  /** Upload PDFs held for this case (in the save queue, so intake can read them by id). */
+  /** Upload held files and read them in the existing save queue. */
   uploadFiles: () => Promise<void>;
+  retryUpload: (fileId: string) => Promise<void>;
+  /** Remove a file and its source-only unconfirmed facts now; persist in the existing save queue. */
+  removeFile: (fileId: string) => number;
   /** Upload supporting bytes inside the save queue; binding is a separate atomic evidence save. */
   uploadEvidenceFile: (file: File) => Promise<UploadedFile>;
   /** Run code identification again (the code-check card's Try again). */
@@ -304,6 +307,8 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     setReadingState((r) => ({ ...r, ...(typeof patch === "function" ? patch(r) : patch) }));
   const latestGaps = useRef<Gap[]>([]);
   const latestCase = useRef(c);
+  const uploadFilesRef = useRef<(only?: string) => Promise<void>>(() => Promise.resolve());
+  const uploadFilesAction = useCallback(() => uploadFilesRef.current(), []);
   const savedSelection = useRef<string | null>(null);
   const refreshedSelection = useRef(new Map<string, string>());
   latestCase.current = c;
@@ -320,15 +325,14 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Stable dispatch prevents deterministic lookup effects from refiring on status updates.
-  // File list changes and upload acknowledgements are not draft edits: files never travel in a save
-  // (they upload on their own route) and do not change the gaps, so they must not mark the draft
-  // unsaved or abort a running check.
+  // Upload acknowledgements travel on their own route. Removal changes source-backed answers,
+  // so it invalidates the draft's checks like an answer edit.
   const dispatch = useCallback((action: Action) => {
     // A lookup that only attaches Section C rows (or re-orders the same cards, as it does right
     // after a saved case is opened) is derived data, not an edit: the draft stays saved.
     // On a read-only case the lookup's expansion of an article is display only: never an unsaved edit.
     const readOnlyCase = isReadOnlyCase(engineCaseId());
-    const derived = (action.type === "reconcileSectionC" && (readOnlyCase || sameCards(reducer(latestCase.current, action).candidates, latestCase.current.candidates))) || [ "editEvidenceDraft", "addFiles", "removeFile", "setFileResult", "ackEvidence", "noteUnscopedEvidence", "notePractice", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions", "noteIntake", "restoreIntake", "restoreReviewQuestions", "noteIntakeRecord", "adoptFacts", "noteIdentify", "renameCase"].includes(action.type);
+    const derived = (action.type === "reconcileSectionC" && (readOnlyCase || sameCards(reducer(latestCase.current, action).candidates, latestCase.current.candidates))) || [ "editEvidenceDraft", "addFiles", "restoreFiles", "setFileResult", "ackEvidence", "noteUnscopedEvidence", "notePractice", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions", "noteIntake", "restoreIntake", "restoreReviewQuestions", "noteIntakeRecord", "adoptFacts", "noteIdentify", "renameCase"].includes(action.type);
     // A read-only application's code cards are not the applicant's to change (the deck and library are locked;
     // the references screen's Remove is not): refused, so the screen keeps showing what is saved.
     if (!derived && readOnlyCase && action.type !== "reset" && selectionKey(selectedArticles(reducer(latestCase.current, action))) !== selectionKey(selectedArticles(latestCase.current))) return;
@@ -676,26 +680,39 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     dispatch(action);
   }
 
-  /** PDFs held until the case exists: uploaded once, in this queue, so intake can read them. */
-  async function uploadHeld(id: string, live: () => boolean): Promise<void> {
-    const held = getSession().held;
-    if (!held.length) return;
-    updateSession((s) => ({ held: [], uploading: [...s.uploading, ...held.map((h) => h.id)] }));
-    for (const { id: local, file } of held) {
+  /** Held bytes survive failed attempts. Acknowledgement releases only that file, never newer additions. */
+  async function uploadHeld(id: string, live: () => boolean, only?: string): Promise<number> {
+    const held = pendingUploads(latestCase.current, getSession().held, only);
+    let uploaded = 0;
+    for (const { id: local } of held) {
       if (!live()) break;
       if (!latestCase.current.files.some((f) => f.id === local)) continue;
+      dispatch({ type: "setFileResult", id: local, error: null, read: false });
+      updateSession(s => ({ uploading: [...new Set([...s.uploading, local])] }));
       try {
-        const saved = await engine.upload(id, file);
+        const attempt = await uploadHeldFile(getSession().held, local, file => engine.upload(id, file));
         if (!live()) break;
-        dispatch({ type: "setFileResult", id: local, error: null, read: true, pages: saved.pages, sha256: saved.sha256, engineId: saved.id });
+        if (attempt.kind === "missing") continue;
+        if (attempt.kind === "failed") throw attempt.error;
+        const saved = attempt.saved;
+        updateSession(s => ({ held: s.held.filter(h => h.id !== local) }));
+        if (!latestCase.current.files.some(f => f.id === local)) {
+          const removed = await engine.removeIntakeFile(id, saved.id, acknowledgedVersion(id) ?? undefined);
+          if (live()) acknowledgeWrite(id, removed.case_version);
+          continue;
+        }
+        dispatch({ type: "setFileResult", id: local, error: null, read: false, pages: saved.pages, sha256: saved.sha256, engineId: saved.id });
+        uploaded += 1;
       } catch (e) {
+        if (!live()) break;
         const status = e instanceof EngineError ? e.status : 0;
         const detail = e instanceof EngineError ? e.detail : String(e);
         dispatch({ type: "setFileResult", id: local, error: uploadMessage(status, detail), unreachable: status === 0 });
       } finally {
-        updateSession((s) => ({ uploading: s.uploading.filter((x) => x !== local) }));
+        if (live()) updateSession((s) => ({ uploading: s.uploading.filter((x) => x !== local) }));
       }
     }
+    return uploaded;
   }
 
   /** Take an intake run's facts into the case, recorded as saved (the engine wrote them). */
@@ -730,6 +747,75 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     }
     if (e instanceof EngineError && e.status === 0) return "Batatis could not be reached. Your description is still here.";
     return failureText(e);
+  }
+
+  /** The same intake write for Start and later uploads; callers already own the save queue. */
+  async function readFilesNow(id: string, live: () => boolean): Promise<IntakeResult | null> {
+    if (!live()) return null;
+    const snapshot = latestCase.current;
+    const text = snapshot.description.trim();
+    const fileIds = snapshot.files.map(f => f.engineId).filter((id): id is string => Boolean(id));
+    if (!text && !fileIds.length) {
+      setReading({ intake: "error", intakeNote: "Add a file or describe the project." });
+      return null;
+    }
+    setReading({ intake: "running", intakeNote: "" });
+    try {
+      const result = await engine.intake(id, { text: text || undefined, file_ids: fileIds, role: roleFor(snapshot.applicantType), model: true, expected_version: acknowledgedVersion(id) ?? undefined });
+      if (!live()) return null;
+      acknowledgeWrite(id, result.case_version);
+      adoptIntake(id, result, text);
+      setReading({ intake: "done" });
+      return result;
+    } catch (error) {
+      if (live()) setReading({ intake: "error", intakeNote: intakeError(error, id) });
+      return null;
+    }
+  }
+
+  function uploadFiles(only?: string): Promise<void> {
+    if (!pendingUploads(latestCase.current, getSession().held, only).length) return Promise.resolve();
+    const token = engineGeneration();
+    const live = () => isEngineGeneration(token);
+    return enqueue(async () => {
+      if (!live() || !engineCaseId()) return;         // Start creates the case, then uploads held files itself
+      const id = await performSync(latestCase.current, live);
+      if (id && live() && await uploadHeld(id, live, only)) await readFilesNow(id, live);
+    });
+  }
+  uploadFilesRef.current = uploadFiles;
+
+  function removeFile(fileId: string): number {
+    const before = latestCase.current;
+    const file = before.files.find(f => f.id === fileId);
+    const engineFileId = file?.engineId;
+    const id = engineCaseId(), token = engineGeneration();
+    if (!file || isReadOnlyCase(id)) return 0;
+    dispatch({ type: "removeFile", id: fileId });
+    if (latestCase.current.files.some(f => f.id === fileId)) return 0;
+    updateSession(s => ({ held: s.held.filter(h => h.id !== fileId) }));
+    const gone = before.facts.filter(f => !latestCase.current.facts.some(after => after.id === f.id));
+    if (id && engineFileId) {
+      const live = () => isEngineGeneration(token) && engineCaseId() === id;
+      void enqueue(async () => {
+        if (!live()) return;
+        try {
+          const result = await engine.removeIntakeFile(id, engineFileId, acknowledgedVersion(id) ?? undefined);
+          if (!live()) return;
+          acknowledgeWrite(id, result.case_version);
+          derive({ type: "noteIntakeRecord", record: result.record });
+          const present = new Set(latestCase.current.facts.map(f => f.id));
+          const facts = result.facts.filter(f => present.has(f.id)).map(f => asLocal(f) as Fact);
+          derive({ type: "adoptFacts", facts });
+          notePosted(id, facts, gone.map(f => f.field));
+        } catch (error) {
+          if (!live()) return;
+          derive({ type: "restoreFiles", files: [...latestCase.current.files, { ...file, error: "Removal not saved. Remove it again." }] });
+          setReading({ intake: "error", intakeNote: intakeError(error, id) });
+        }
+      });
+    }
+    return gone.length;
   }
 
   /** Code identification over the stream, then the planner re-ranked against its candidates. Inside the queue. */
@@ -780,19 +866,8 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       }
       await uploadHeld(id, live);
       if (!live()) return;
-      const fileIds = latestCase.current.files.map((f) => f.engineId).filter((x): x is string => Boolean(x));
-      let result: IntakeResult;
-      try {
-        result = await engine.intake(id, { text: text || undefined, file_ids: fileIds, role: roleFor(snapshot.applicantType), model: true, expected_version: acknowledgedVersion(id) ?? undefined });
-      } catch (e) {
-        if (!live()) return;
-        setReading({ intake: "error", intakeNote: intakeError(e, id) });
-        return;
-      }
-      if (!live()) return;
-      acknowledgeWrite(id, result.case_version);
-      adoptIntake(id, result, text);
-      setReading({ intake: "done" });
+      const result = await readFilesNow(id, live);
+      if (!result || !live()) return;
       if (result.record.plan?.scope.status === "redirect") {
         setReading({ identify: "skipped" });
         return;
@@ -1109,7 +1184,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   }
 
   async function readSavedCase(id: string, signal?: AbortSignal) {
-    const saved = await engine.getCase(id, signal);
+    const [saved, files] = await Promise.all([engine.getCase(id, signal), engine.files(id, signal)]);
     // Both records are embedded in this exact case revision. Later route reads can observe
     // another writer's newer run and combine its questions with this snapshot's older facts.
     const record = saved.intake;
@@ -1119,7 +1194,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       facts: saved.facts.filter(f => pointers.has(f.id)),
     } : null;
     const reviewedText = await reviewedDescription(saved, record ?? null);
-    return { saved, intake, identify: saved.identify, reviewedText };
+    return { saved, files, intake, identify: saved.identify, reviewedText };
   }
 
   /** `next` is the opened case built in one step (openedCase): intake, code cards and their saved selection included. */
@@ -1190,6 +1265,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         const sameContent = local.title === next.title && local.authority === next.authority
           && signatures(latestFacts(local.facts as EngineCase["facts"])) === signatures(next.facts)
           && JSON.stringify(local.intake?.record ?? null) === JSON.stringify(read.saved.intake)
+          && JSON.stringify(local.files.map(f => [f.engineId, f.name])) === JSON.stringify(restored.files.map(f => [f.engineId, f.name]))
           && JSON.stringify(local.identify ?? null) === JSON.stringify(read.saved.identify)
           && JSON.stringify(local.candidates.filter(a => a.answer === "yes" && isProvision(a.provision)).map(a => a.provision).sort())
             === JSON.stringify([...read.saved.provisions].sort())
@@ -1204,7 +1280,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
           derive({ type: "restoreReviewQuestions", questions: next.questions });
         }
         else {
-          showSavedCase(read, { ...restored, files: local.files });
+          showSavedCase(read, restored);
           refreshedSelection.current = new Map(selectedArticles(restored).map(a => [a.id, selectionKey([a])]));
         }
         openedStatus.current = read.saved.status;
@@ -1260,13 +1336,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
 
   const value: Store = {
     reading, readDescription, runIdentify,
-    uploadFiles: () => {
-      const token = engineGeneration();
-      return enqueue(async () => {
-        const id = engineCaseId();
-        if (id) await uploadHeld(id, () => isEngineGeneration(token));
-      });
-    },
+    uploadFiles: uploadFilesAction, retryUpload: fileId => uploadFiles(fileId), removeFile,
     uploadEvidenceFile: (file) => {
       const token = engineGeneration();
       const live = () => isEngineGeneration(token);
@@ -1276,6 +1346,9 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         if (!id || !live()) throw new Error(syncState.current.detail || "Save the application before uploading.");
         const saved = await engine.upload(id, file);
         if (!live()) throw new Error("The application changed while uploading.");
+        derive({ type: "addFiles", files: [{ id: saved.id, name: saved.name }] });
+        derive({ type: "setFileResult", id: saved.id, engineId: saved.id, error: null, read: false });
+        await readFilesNow(id, live);
         return saved;
       });
     }, answerPlan, overrideScope, decide, answerChecklist, reloadChecklists, renameCase,

@@ -167,7 +167,8 @@ def test_the_same_value_read_on_many_pages_is_kept_once_and_used():
     pages = [_pointed('municipality', 'Edmonton', Origin('file_a', page=n), 'Edmonton') for n in range(1, 22)]
     out = _settled(Case(), pages)
     assert [(f.value, f.status) for f in out.facts] == [('Edmonton', 'confirmed')]
-    assert [p.fact_id for p in out.pointers] == [out.facts[0].id]
+    assert {p.fact_id for p in out.pointers} == {out.facts[0].id}
+    assert [p.page for p in out.pointers] == list(range(1, 22))
 
 
 def test_context_sentences_and_cited_articles_are_kept_as_read():
@@ -414,7 +415,7 @@ def test_rerun_reads_the_new_words_and_keeps_what_the_applicant_gave(client):
     facts = store.get(case_id).facts
     assert [(f.value, f.status) for f in facts if f.field == 'building_area_m2'] == [(150, 'confirmed'), (160, 'confirmed')]
     assert [(f.value, f.status) for f in facts if f.field == 'storeys'][-1] == (2, 'confirmed')
-    assert 'storeys' not in {f['field'] for f in body['facts']}
+    assert len([f for f in body['facts'] if f['field'] == 'storeys']) == 1  # same saved fact, new source pointer
 
 
 def test_role_the_applicant_picked_is_confirmed_and_wins(client):

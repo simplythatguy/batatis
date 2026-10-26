@@ -246,13 +246,13 @@ class Source:
     unread: str | None = None                  # why nothing was read
 
 
-def read_source(file_id: str, name: str, data: bytes) -> Source:
+def read_source(file_id: str, name: str, data: bytes, *, media_type: str | None = None) -> Source:
     lower = name.lower()
     source = Source(file_id, name)
     try:
         if lower.endswith(('.html', '.htm')):
             source.pages, source.page_count = [(None, _html(data))], 1
-        elif lower.endswith('.txt'):
+        elif media_type == 'text/plain' or lower.endswith('.txt'):
             source.pages, source.page_count = [(None, data.decode('utf-8', errors='replace'))], 1
         elif lower.endswith('.docx'):
             source.pages, source.page_count = [(None, _docx(data))], 1

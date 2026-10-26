@@ -1,9 +1,6 @@
-"""Read a dropped PDF: form values exactly, the text layer with page and box, and nothing else.
+"""Read PDF form values and text with page/box pointers; render textless pages for separate vision.
 
-PDF validation is ported from PR #21 (`engine/files.py`: magic header and a parse that fails closed).
-A page with no text layer (a scan or a photo) is reported "not read" with its reason; Batatis does
-not run OCR and never guesses what an image says. Boxes are PDF user-space points, origin at the
-bottom-left of the page: (left, bottom, right, top).
+Boxes are PDF user-space points, origin at the bottom-left: (left, bottom, right, top).
 """
 from __future__ import annotations
 
@@ -18,15 +15,14 @@ from pypdf import PdfReader
 from ..pdfium import open_pdf
 from ..pdfium_lock import pdfium_locked
 
-MAX_PAGES = 60
+MAX_PAGES = 200
 SCC_MAP = Path(__file__).resolve().parents[1] / 'export' / 'field_maps' / 'scc_2026-10.json'
 # The SCC form's own heading, used to recognise a flattened copy that has lost its fields.
 SCC_HEADING = ('Variance Form for Proposed Alternative Solution', 'Safety Codes Council')
 
 NOT_A_PDF = 'This file is not a readable PDF.'
 ENCRYPTED = 'The PDF is password-protected, so it was not read.'
-NO_TEXT = ('This page has no text layer (it looks like a scan or a photo). Batatis does not read images, '
-           'so nothing was taken from it. Type the facts, or attach a PDF with selectable text.')
+NO_TEXT = 'Pictures not read: AI is off'
 FLATTENED_SCC = ('This looks like a flattened copy of the SCC variance form: its fill-in fields are gone, so '
                  'the values cannot be told apart from the printed form. Attach the fillable PDF instead.')
 FORM_ONLY = ('The form fields were read. The pages have no text layer, so nothing else was taken from them.')
@@ -171,6 +167,26 @@ def page_texts(data: bytes, limit: int) -> tuple[int, list[tuple[int, str]]]:
     finally:
         pdf.close()
     return count, out
+
+
+@pdfium_locked
+def picture_page(data: bytes, number: int) -> str:
+    from .images import MAX_EDGE, data_url
+    with open_pdf(data) as pdf:
+        page = pdf[number - 1]
+        try:
+            width, height = page.get_size()
+            bitmap = page.render(scale=min(1.5, MAX_EDGE / max(width, height)))
+            try:
+                image = bitmap.to_pil()
+                try:
+                    return data_url(image)
+                finally:
+                    image.close()
+            finally:
+                bitmap.close()
+        finally:
+            page.close()
 
 
 def read_pdf(data: bytes) -> PdfContent:

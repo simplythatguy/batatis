@@ -582,8 +582,10 @@ export interface FactPointer {
   end: number | null;
   fact_id: string;
   field: string;
-  method: "rules" | "form" | "model";
+  method: "rules" | "form" | "model" | "vision";
   page: number | null;
+  quote: string | null;
+  source_name: string | null;
   source_ref: string;
   start: number | null;
   verified: boolean;
@@ -615,12 +617,19 @@ export interface FileReport {
   form: "scc_variance" | "acroform" | null;
   form_fields_read: number;
   form_fields_skipped: string[];
+  image_pages_read: number[];
+  media_type: string;
   name: string;
   pages: number | null;
   pages_not_read: number[];
   pages_read: number[];
+  pictures_not_read_reason: string | null;
   reason: string | null;
+  semantic_pages_read: number[];
+  semantic_pages_sent: number[];
+  semantic_reason: string | null;
   status: "read" | "partly_read" | "not_read";
+  text_pages_read: number[];
 }
 
 export interface Finding {
@@ -858,6 +867,7 @@ export interface IntakeRecord {
   plan: IntakePlan | null;
   pointers: FactPointer[];
   ran_at: string;
+  removed_file_ids: string[];
   review: DocumentReview | null;
   text_sha256: string | null;
   unresolved_citations: UnresolvedCitation[];

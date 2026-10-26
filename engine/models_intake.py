@@ -12,7 +12,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
-Method = Literal['rules', 'form', 'model']
+Method = Literal['rules', 'form', 'model', 'vision']
 FileStatus = Literal['read', 'partly_read', 'not_read']
 FormKind = Literal['scc_variance', 'acroform']
 ModelStatus = Literal['off', 'fake', 'live', 'gate_closed', 'failed', 'not_needed']
@@ -29,6 +29,8 @@ class FactPointer(BaseModel):
     start: int | None = None
     end: int | None = None
     verified: bool = True                   # false for a model value the rules could not re-derive (proposed)
+    source_name: str | None = None
+    quote: str | None = None
 
 
 class FileReport(BaseModel):
@@ -39,6 +41,13 @@ class FileReport(BaseModel):
     pages: int | None = None
     pages_read: list[int] = []
     pages_not_read: list[int] = []
+    text_pages_read: list[int] = []
+    semantic_pages_read: list[int] = []       # whole pages covered successfully; partial pages do not count
+    semantic_pages_sent: list[int] = []       # includes an attempted or partly sent page, even on failure
+    image_pages_read: list[int] = []
+    semantic_reason: str | None = None
+    pictures_not_read_reason: str | None = None
+    media_type: str = 'application/pdf'
     form: FormKind | None = None
     form_fields_read: int = 0
     form_fields_skipped: list[str] = []     # officer, signature and unmapped fields, by name
@@ -258,6 +267,7 @@ class IntakeRecord(BaseModel):
     text_sha256: str | None = None
     pointers: list[FactPointer] = []
     files: list[FileReport] = []
+    removed_file_ids: list[str] = []          # excluded from later reads and the applicant inventory
     model: ModelPass = Field(default_factory=lambda: ModelPass(status='off'))
     conflicts: list[FieldConflict] = []
     unresolved_citations: list[UnresolvedCitation] = []

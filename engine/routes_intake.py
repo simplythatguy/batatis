@@ -1,4 +1,4 @@
-"""Intake routes: read the description and dropped PDFs into pointed facts, used as read unless unclear.
+"""Read the description and attached files; picture findings remain unconfirmed proposals.
 
 `POST /cases/{id}/intake` runs the rules, then the model pass when this deployment allows it
 (BATATIS_LIVE=1 and the spend gate, or BATATIS_PROVIDER=fake), and writes the facts to the ledger.
@@ -79,6 +79,10 @@ class IntakeResult(BaseModel):
     record: IntakeRecord
 
 
+class FileRemovalResult(IntakeResult):
+    removed_facts: int
+
+
 def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes], *,
                   transport_factory: Callable[[str], tuple[model_pass.Transport | None, str]] | None = None,
                   review_factory: Callable[[str], tuple[review_pass.Transport | None, str]] | None = None) -> APIRouter:
@@ -109,19 +113,22 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes], *
             raise HTTPException(404, 'case not found')
         if body.expected_version is not None and body.expected_version != case.version:
             raise HTTPException(409, 'case was updated concurrently')   # before any provider call
-        files = []
+        files, media_types = [], {}
         for file_id in body.file_ids:
+            if case.intake and file_id in case.intake.removed_file_ids:
+                continue
             stored = store.get_file(case_id, file_id)
             if stored is None:
                 raise HTTPException(404, 'file not found')
             files.append((file_id, stored['name'], stored['data']))
+            media_types[file_id] = stored['content_type']
         transport, status = pick_transport(client_ip_from(request)) if body.model else (None, 'off')
         review_transport, review_status = (pick_review(client_ip_from(request)) if body.model and files
                                            else (None, 'off'))
         known = known_values(case, people_names(store, case, getattr(request.state, 'user', None)))
         extraction = service.run(body.text, files, codes=codes_or_none(), transport=transport, status=status,
                                  outbound=lambda text, personal: scrubbed(text, [*known, *personal]),
-                                 review_transport=review_transport, review_status=review_status)
+                                 review_transport=review_transport, review_status=review_status, media_types=media_types)
         # One compare-and-swap against the version the client saw, else the one read above. No retry.
         if body.expected_version is not None and body.expected_version != case.version:
             raise HTTPException(409, 'case was updated concurrently')
@@ -155,6 +162,17 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes], *
     def replan(case_id: str, body: PlanRequest | None = None):
         """Recompute the plan, for example after code identification ran. No provider call."""
         return write(case_id, body.expected_version if body else None, service.refresh)
+
+    @router.delete('/cases/{case_id}/intake/files/{file_id}', response_model=FileRemovalResult)
+    def remove_file(case_id: str, file_id: str, body: PlanRequest | None = None):
+        if cases().get_file(case_id, file_id) is None:
+            raise HTTPException(404, 'file not found')
+        removed = 0
+        def change(case):
+            nonlocal removed
+            removed = service.remove_file(case, file_id)
+        saved = write(case_id, body.expected_version if body else None, change)
+        return FileRemovalResult(**saved.model_dump(), removed_facts=removed)
 
     @router.post('/cases/{case_id}/intake/answers', response_model=IntakeResult)
     def answer(case_id: str, body: AnswersRequest):

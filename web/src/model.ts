@@ -7,6 +7,25 @@ import { AUTHORITY_ONLY_FIELDS, professionalConfirmed } from "./professional";
 import type { Candidate, CandidateAnswer, Case, EvidenceDraft, Fact, Gap, ListedEvidence, ProcessFieldId, SectionCRow } from "./types";
 import { canonicalProvision, isProvision, keywordCandidate, reconcileSectionC } from "./provisions";
 import { evidenceBinding } from "./evidence";
+import type { UploadedFile } from "./api/client";
+import type { HeldFile } from "./calm/session";
+
+/** Automatic upload skips failures; the named Retry action selects one failed file explicitly. */
+export function pendingUploads(c: Pick<Case, "files">, held: readonly HeldFile[], only?: string): HeldFile[] {
+  return held.filter(h => (!only || h.id === only) && c.files.some(f => f.id === h.id && !f.engineId && (only || !f.error)));
+}
+
+/** Failed bytes remain retryable. No queue mutation happens before an upload acknowledgement. */
+export async function uploadHeldFile(held: readonly HeldFile[], id: string, upload: (file: File) => Promise<UploadedFile>) {
+  const pending = held.find(f => f.id === id);
+  if (!pending) return { kind: "missing" as const, held };
+  try {
+    const saved = await upload(pending.file);
+    return { kind: "uploaded" as const, saved, held: held.filter(f => f.id !== id) };
+  } catch (error) {
+    return { kind: "failed" as const, error, held };
+  }
+}
 
 /** Section A and B fields. Values live only in `case.facts`; nothing here holds a default. */
 export interface DetailField {
@@ -457,6 +476,7 @@ export type Action =
   | { type: "addFiles"; files: { id: string; name: string }[] }
   | { type: "setFileResult"; id: string; error: string | null; read?: boolean; pages?: number; sha256?: string; unreachable?: boolean; engineId?: string }
   | { type: "removeFile"; id: string }
+  | { type: "restoreFiles"; files: Case["files"] }
   | { type: "confirmFact"; id: string }
   | { type: "dismissFact"; id: string }
   /** One click on a "what we read" card: every fact of the group, confirmed or marked not right. */
@@ -633,6 +653,36 @@ function applyAck(c: Case, a: Extract<Action, { type: "ackEvidence" }>): Case {
   return next;
 }
 
+function withFileReports(files: Case["files"], record: IntakeRecord): Case["files"] {
+  return files.map(f => {
+    const report = record.files.find(r => r.file_id === f.engineId);
+    return report ? { ...f, read: report.status !== "not_read", pages: report.pages ?? undefined } : f;
+  });
+}
+
+function withoutFileSource(c: Case, fileId: string, changed = true): Case {
+  const intake = c.intake ?? { text: null, factIds: [], facts: [], record: {
+    ran_at: "", text_sha256: null, pointers: [], files: [], removed_file_ids: [], conflicts: [], unresolved_citations: [], plan: null, review: null,
+    model: { status: "off", model: null, reason: null, pointed: 0, proposed: 0, dropped: 0, input_tokens: 0, output_tokens: 0 },
+  } satisfies IntakeRecord };
+  const others = intake.record.pointers.filter(p => p.source_ref !== fileId);
+  const gone = new Set(c.facts.filter(f => f.status === "unconfirmed" && f.source.ref === fileId && !others.some(p => p.fact_id === f.id)).map(f => f.id));
+  const clean = (facts: Fact[]) => facts.filter(f => !gone.has(f.id)).map(f => {
+    const candidates = others.filter(p => p.fact_id === f.id);
+    const other = f.source.ref === fileId ? candidates.find(p => p.verified) ?? candidates[0] : undefined;
+    const unverified = other && (other.method === "vision" || !other.verified);
+    if (unverified && f.status === "confirmed") return f;
+    const source = other ? { type: other.source_ref === "description" ? "user_text" as const : "file" as const,
+      ref: other.source_ref === "description" ? "intake:description" : other.source_ref, page: other.page, bbox: null, quote: other.quote ?? null } : f.source;
+    return { ...f, source, ...(unverified ? { kind: "proposed" as const, formula: null, inputs: [], confidence: .4 }
+      : f.kind === "computed" && f.inputs?.some(id => gone.has(id)) ? { kind: "pointed" as const, formula: null, inputs: [] } : {}) };
+  });
+  return { ...c, facts: clean(c.facts), intake: { ...intake, ...(changed ? { filesChanged: true as const } : {}), facts: clean(intake.facts), factIds: intake.factIds.filter(id => !gone.has(id)),
+    record: { ...intake.record, pointers: others.filter(p => !gone.has(p.fact_id)), files: intake.record.files.filter(r => r.file_id !== fileId),
+      conflicts: intake.record.conflicts.filter(r => r.source_ref !== fileId), unresolved_citations: intake.record.unresolved_citations.filter(r => r.source_ref !== fileId),
+      removed_file_ids: [...new Set([...(intake.record.removed_file_ids ?? []), fileId])], review: null } } };
+}
+
 export function reducer(c: Case, a: Action): Case {
   switch (a.type) {
     case "setDescription":
@@ -657,9 +707,13 @@ export function reducer(c: Case, a: Action): Case {
             : f,
         ),
       };
-    case "removeFile":
-      return { ...c, files: c.files.filter((f) => f.id !== a.id),
-        intake: c.intake && c.files.some((f) => f.id === a.id) ? { ...c.intake, filesChanged: true } : c.intake };
+    case "removeFile": {
+      const file = c.files.find(f => f.id === a.id);
+      const next = file?.engineId ? withoutFileSource(c, file.engineId) : c;
+      return { ...next, files: c.files.filter(f => f.id !== a.id), intake: next.intake && file ? { ...next.intake, filesChanged: true } : next.intake };
+    }
+    case "restoreFiles":
+      return { ...c, files: a.files };
     case "confirmFact":
       return reducer(c, { type: "confirmFacts", ids: [a.id] });
     case "dismissFact":
@@ -703,17 +757,22 @@ export function reducer(c: Case, a: Action): Case {
         const confirmedBefore = previousAnswer && String(previousAnswer.value).trim() === String(f.value ?? "").trim();
         facts = [...facts, confirmedBefore && f.field !== "scope.redirect" ? confirmedCopy(f) : f];
       }
-      return { ...c, facts, intake: { text: a.text, record: a.result.record, factIds: a.result.facts.map((f) => f.id), facts: a.result.facts.map((f) => asLocal(f) as Fact) } };
+      let next: Case = { ...c, files: withFileReports(c.files, a.result.record), facts, intake: { text: a.text, record: a.result.record, factIds: a.result.facts.map((f) => f.id), facts: a.result.facts.map((f) => asLocal(f) as Fact) } };
+      for (const id of new Set([...(c.intake?.record.removed_file_ids ?? []), ...(a.result.record.removed_file_ids ?? [])])) next = withoutFileSource(next, id, !a.result.record.removed_file_ids?.includes(id));
+      return next;
     }
     case "restoreIntake":
-      return { ...c, intake: { text: a.text, record: a.result.record, factIds: a.result.facts.map((f) => f.id), facts: a.result.facts.map((f) => asLocal(f) as Fact) } };
+      return { ...c, files: withFileReports(c.files, a.result.record), intake: { text: a.text, record: a.result.record, factIds: a.result.facts.map((f) => f.id), facts: a.result.facts.map((f) => asLocal(f) as Fact) } };
     case "restoreReviewQuestions": {
       const questions = [...c.questions.filter(q => !q.field.startsWith("clarification.")),
         ...a.questions.filter(q => q.field.startsWith("clarification."))];
       return JSON.stringify(questions) === JSON.stringify(c.questions) ? c : { ...c, questions };
     }
-    case "noteIntakeRecord":
-      return c.intake ? { ...c, intake: { ...c.intake, record: a.record } } : c;
+    case "noteIntakeRecord": {
+      const currentFiles = c.files.every(f => f.engineId && a.record.files.some(r => r.file_id === f.engineId))
+        && (c.intake?.record.removed_file_ids ?? []).every(id => a.record.removed_file_ids?.includes(id));
+      return c.intake ? { ...c, files: withFileReports(c.files, a.record), intake: { ...c.intake, ...(currentFiles ? { filesChanged: undefined } : {}), record: a.record } } : c;
+    }
     case "adoptFacts": {
       const drop = new Set([...(a.drop ?? []), ...a.facts.map((f) => f.id)]);
       return { ...c, facts: [...c.facts.filter((f) => !drop.has(f.id)), ...a.facts] };
