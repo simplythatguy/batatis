@@ -42,6 +42,10 @@ def comparison_values(values: dict[str, str]) -> dict[str, str]:
     return result
 
 
+# Marks a snapshot that lists the case's files, so returns recorded before that compare like for like.
+FILES_CAPTURED = 'files.captured'
+
+
 def snapshot(case: Case, returned_at: str, store=None) -> ReviewSnapshot:
     values = {'title': case.title or '', 'authority': case.authority or '',
               'jurisdiction': case.jurisdiction.name if case.jurisdiction else '',
@@ -54,6 +58,7 @@ def snapshot(case: Case, returned_at: str, store=None) -> ReviewSnapshot:
         for field, value in item.model_dump(exclude={'id', 'kind'}).items():
             values[f'evidence.{item.id}.listing.{field}'] = str(value) if value is not None else ''
     if store is not None and callable(getattr(store, 'list_files', None)):
+        values[FILES_CAPTURED] = 'yes'
         for file in store.list_files(case.id) or []:
             values[f'file.{file["id"]}'] = json.dumps({key: file[key] for key in ('name', 'size', 'content_type')},
                                                       sort_keys=True, ensure_ascii=False)
@@ -73,6 +78,10 @@ def resubmission_changes(case: Case, store, at: str) -> list[SubmissionChange] |
         return None
     before = comparison_values(baseline.values)
     after = snapshot(case, at, store).values
+    if FILES_CAPTURED not in before:
+        # A return recorded before files were part of the snapshot: comparing them would report every
+        # file as new and let an unchanged application through.
+        after = {key: value for key, value in after.items() if not key.startswith('file.') and key != FILES_CAPTURED}
     changes = [SubmissionChange(field=field, before=before.get(field), after=after.get(field))
                for field in sorted(before.keys() | after.keys()) if before.get(field) != after.get(field)]
     if not changes:

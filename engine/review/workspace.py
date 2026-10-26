@@ -21,6 +21,7 @@ def build(session: ReviewSession, case=None, gaps=(), *, codes_available: bool =
     findings = [f for f in session.findings if f.key != PEER_SIGNAL]
     blocking = [gap for gap in gaps if gap.severity == 'blocking'] if case is not None else []
     locked_fields = {gap.field for gap in blocking if gap.field}
+    # Any finding on a rulebook field covers its gap: it is locked and counts as required (below).
     covered = {f.field for f in findings}
     rulebook = [RulebookGap(id=g.id, field=g.field, section=g.section, message=g.message)
                 for g in blocking if not g.field or g.field not in covered]
@@ -43,8 +44,9 @@ def build(session: ReviewSession, case=None, gaps=(), *, codes_available: bool =
         states.append(state)
     active = {s.key: s for s in states if s.state != 'dismissed'}
     tally = ReviewTally(
-        required=sum(f.severity == 'blocking' and f.key in active for f in findings) + len(rulebook),
-        to_check=sum(f.severity == 'warning' and f.key in active for f in findings),
+        required=sum((f.severity == 'blocking' or f.field in locked_fields) and f.key in active for f in findings)
+        + len(rulebook),
+        to_check=sum(f.severity == 'warning' and f.field not in locked_fields and f.key in active for f in findings),
         verify=sum(s.state == 'verify' for s in states), dismissed=len(states) - len(active),
         asked=sum((active[item.finding_key].state == 'ask' if item.finding_key in active else False)
                   if item.finding_key else item.included for item in session.information_request.items),

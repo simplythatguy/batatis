@@ -54,7 +54,8 @@ The latest summary always agrees with the returned workspace.
 ## Deciding on the version on screen
 
 `GET /review/{case_id}/package-review` returns `workspace` for the latest version: `version`,
-`case_version`, `current` (it read the saved application as it is now), the states, the tally and
+`case_version`, `current` (it was run against the saved application as it is now: a saved-case review, or PDFs
+the officer uploaded for it), the states, the tally and
 `gate` (`can_accept`, `reason`). The server rechecks the same gate on every decision:
 
 - An acceptance sends `expected_version` (the saved application on screen; 422 if omitted) and
@@ -128,4 +129,10 @@ record package lists what to keep on file.
 
 Findings carry every pointer they were read from, each with its full quote. A PDF uploaded to a case's
 package review is kept with the case (`InputFile.file_id`), so "Open page N" opens it; it follows the case's
-retention. Standalone third-party uploads are not kept.
+retention and, like any case file, the applicant can see it in the case's file list. Standalone third-party
+uploads are not kept.
+
+A gap read from a file the next version could not read is never "resolved": the diff lists it as can't tell,
+and the new version carries it as a "look first" finding (still required when it was blocking) until the
+officer checks it and dismisses it, or asks for it. A return also needs the review to be current: a request
+drafted from an earlier application is refused (409) until the review runs again.

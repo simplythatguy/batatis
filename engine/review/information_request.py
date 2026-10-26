@@ -195,8 +195,12 @@ def diff(previous_version: int, previous: list[Finding], current: list[Finding],
 
     all_current = {f.key: f for f in current}
     uncertain_fields = {f.field for f in current if f.status == 'not_found' or f.routed_to != 'applicant'}
+    # A gap read from a file this version could not read was not fixed; nobody can tell yet.
+    unreadable = {f.field[len('file.'):] for f in current
+                  if f.key.startswith('file:') and f.key.endswith(':unreadable') and f.field.startswith('file.')}
     unverified_keys = {key for key, finding in before.items() if key not in after and
                        (key in all_current or finding.field in uncertain_fields
+                        or any(p.file in unreadable for p in finding.pointers)
                         or (lookup_skipped and finding.field.startswith(('citation.', 'section_c.')))
                         or any(f.key == 'form:presence' and f.status == 'not_found' for f in current))}
     resolved = [entry(before[key]) for key in before if key not in after and key not in unverified_keys]
@@ -212,3 +216,23 @@ def diff(previous_version: int, previous: list[Finding], current: list[Finding],
         statement += f", {len(unverified)} can't tell"
     return ReviewDiff(previous_version=previous_version, previous_gaps=len(before), resolved=resolved,
                       still_open=still, new=new, unverified=unverified, statement=statement)
+
+
+def carry_unverified(previous: list[Finding], current: list[Finding], diff_: ReviewDiff) -> list[Finding]:
+    """Earlier blocking gaps this version could not check stay on the officer's list as "look first".
+
+    A gap never stops counting because its file became unreadable: the officer checks it and dismisses
+    it ("I checked it"), or asks for it. Gaps the new version still reports under their own key need
+    nothing carried.
+    """
+    present = {f.key for f in current}
+    earlier = {f.key: f for f in previous}
+    carried = []
+    for entry in diff_.unverified:
+        finding = earlier.get(entry.key)
+        if finding is None or finding.key in present or finding.severity != 'blocking':
+            continue
+        carried.append(finding.model_copy(update={
+            'status': 'not_found', 'routed_to': 'officer',
+            'message': f"This version couldn't check it again. Before: {finding.message}"}))
+    return carried

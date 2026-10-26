@@ -515,3 +515,69 @@ def test_return_requires_an_item_latest_session_and_current_claim(scene):
     Sessions(store).add(review.model_copy(update={'version': 2}))
     assert client.post(path, json=body).status_code == 409
     assert store.get(case.id).status == 'in_review' and store.get(case.id).decision is None
+
+
+# —— Review fixes (2026-10-26): found by the independent server review, each pinned here. ——
+
+def test_a_gap_read_from_a_file_that_became_unreadable_is_not_fixed_and_stays_required():
+    from engine.models_review import Pointer
+    prior = finding('section_d.row1:responsible', section='D', field='section_d.row1.responsible',
+                    pointers=[Pointer(file='plans.pdf', page=2, quote='Prepared by')])
+    unreadable = finding('file:plans.pdf:unreadable', section='D', field='file.plans.pdf', status='not_found',
+                         severity='warning', routed_to='officer')
+    diff = ir.diff(1, [prior], [unreadable])
+    assert diff.resolved == [] and [e.key for e in diff.unverified] == [prior.key]
+    carried = ir.carry_unverified([prior], [unreadable], diff)
+    assert [(f.key, f.status, f.routed_to, f.severity) for f in carried] == [(prior.key, 'not_found', 'officer', 'blocking')]
+    result = workspace.build(session([unreadable, *carried]))
+    assert result.tally.required == 1, 'it still counts until the officer checks it'
+    assert {s.key: s.state for s in result.states}[prior.key] == 'verify'
+
+
+def test_a_warning_on_a_rulebook_field_still_counts_as_required_so_the_count_matches_the_gate():
+    case = Case(version=3)
+    gaps = [Gap(id='required:owner', field='owner', section='A', severity='blocking', message='Need owner', fix_hint='x')]
+    result = workspace.build(session([finding(severity='warning')], case_version=3), case, gaps)
+    assert result.tally.required == 1 and result.tally.to_check == 0
+    assert not result.gate.can_accept
+
+
+def test_an_expired_send_reservation_no_longer_blocks_a_new_review(scene):
+    store = scene[0]
+    case, review, _ = install(scene, [finding()])
+    stale = review.information_request.model_copy(update={'sent_at': '2020-01-01T00:00:00+00:00', 'message_id': None})
+    raw = Sessions(store).get(case.id, 1)[1]
+    Sessions(store).replace(review.model_copy(update={'information_request': stale}), raw)
+    Sessions(store).add(session([finding()], package_id=case.id, case_id=case.id, case_version=case.version, version=2))
+    assert [s.version for s in Sessions(store).list(case.id)] == [1, 2]
+
+
+def test_a_return_recorded_before_files_were_compared_cannot_be_resent_unchanged():
+    from fastapi import HTTPException
+    from engine.account_models import ReviewSnapshot
+    from engine.review_lifecycle import FILES_CAPTURED, resubmission_changes, snapshot
+
+    class Files:
+        def list_files(self, _):
+            return [{'id': 'file_1', 'name': 'plans.pdf', 'size': 10, 'content_type': 'application/pdf'}]
+
+    case = Case(status='returned', facts=[fact('owner_name', 'Example Homes')])
+    taken = snapshot(case, '2026-10-20T00:00:00+00:00', Files())
+    assert FILES_CAPTURED in taken.values
+    legacy = {k: v for k, v in taken.values.items() if not k.startswith('file') }
+    case.return_snapshot = ReviewSnapshot(returned_at=taken.returned_at, authority=None, values=legacy)
+    with pytest.raises(HTTPException) as unchanged:
+        resubmission_changes(case, Files(), '2026-10-26T00:00:00+00:00')
+    assert unchanged.value.status_code == 409
+
+
+def test_a_request_drafted_from_an_earlier_application_cannot_be_returned(scene):
+    store = scene[0]
+    case, review, reviewer = install(scene, [finding()])
+    stored = store.get(case.id)
+    stored.facts.append(fact('mailing_address', 'Changed after the review'))
+    current = store.put(stored, expected_version=stored.version)
+    assert current.version != review.case_version
+    text = review.information_request.text
+    response = reviewer.post(f'/review/{case.id}/package-review/1/return', json={'expected_version': current.version, 'text': text})
+    assert response.status_code == 409 and 'changed after this review' in response.json()['detail']

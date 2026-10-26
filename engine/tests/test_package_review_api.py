@@ -4,6 +4,7 @@ from __future__ import annotations
 from contextlib import ExitStack
 import os
 import uuid
+from datetime import timedelta
 
 import pytest
 from fastapi.testclient import TestClient
@@ -11,6 +12,7 @@ from fastapi.testclient import TestClient
 from engine.api import create_app
 from engine.codes import Codes
 from engine.models import Case
+from engine.review import sessions as review_sessions
 from engine.store import CaseStore
 from engine.tests.case_builder_fixtures import acceptance_request, complete_case, fact, store_with_synthetic_files
 from engine.tests.package_review_fixtures import (CLEAN_FORM, CLEAN_NARRATIVE, annotated_rationale_pdf,
@@ -672,7 +674,7 @@ def test_a_stuck_claim_keeps_the_original_error_is_hidden_and_expires(scene, mon
     assert clients['owner'].get(f'/cases/{case.id}/information-request').json()['requests'] == []
     busy = clients['reviewer'].post(f'/review/{case.id}/package-review/1/information-request/send')
     assert busy.status_code == 409 and busy.headers['retry-after']
-    monkeypatch.setattr(routes, 'SEND_CLAIM_TTL', routes.timedelta(0))   # the claim has expired
+    monkeypatch.setattr(review_sessions, 'SEND_CLAIM_TTL', timedelta(0))   # the claim has expired
     monkeypatch.setattr(routes, 'mutate', real_mutate)
     sent = clients['reviewer'].post(f'/review/{case.id}/package-review/1/information-request/send')
     assert sent.status_code == 200, sent.text

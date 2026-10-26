@@ -11,10 +11,27 @@ from __future__ import annotations
 import json
 import sqlite3
 import threading
+from datetime import datetime, timedelta, timezone
 from typing import NamedTuple
 from contextlib import closing
 
 from ..models_review import ReviewSession
+
+# A send reserves the request (sent_at, no message_id yet) before the case write. A reservation older than
+# this never finished: the write failed and so did its release, so it no longer blocks anything.
+SEND_CLAIM_TTL = timedelta(minutes=2)
+
+
+def claim_live(sent_at: str | None) -> bool:
+    if not sent_at:
+        return False
+    try:
+        at = datetime.fromisoformat(sent_at)
+    except ValueError:
+        return False
+    if at.tzinfo is None:
+        at = at.replace(tzinfo=timezone.utc)
+    return datetime.now(timezone.utc) - at < SEND_CLAIM_TTL
 from ..store import retention_cutoff
 
 MAX_SESSIONS = 50
@@ -67,7 +84,7 @@ def _check_new_session(previous, case_data):
         return
     session = ReviewSession.model_validate_json(previous)
     request = session.information_request
-    if request.sent_at and not request.message_id:
+    if request.sent_at and not request.message_id and claim_live(request.sent_at):
         data = json.loads(case_data) if isinstance(case_data, str) else case_data or {}
         if not any(m['id'] == return_message_id(session.version) for m in data.get('messages', [])):
             raise SessionConflict(session.package_id)
