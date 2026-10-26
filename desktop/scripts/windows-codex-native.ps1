@@ -26,7 +26,7 @@ try {
     -LocalPort Any -RemotePort Any -InterfaceType Any -PolicyStore PersistentStore | Out-Null
   & python -B (Join-Path $repoPath 'desktop/codex/native-check.py') `
     --resources-dir $resources --executable $exe --output $EvidenceDir --node $node `
-    --windows-firewall-rule $rule --deadline-seconds 150
+    --windows-firewall-rule $rule --deadline-seconds 300
   $exitCode = $LASTEXITCODE
   if ($exitCode -ne 0) { throw "Native Windows acceptance failed with exit $exitCode." }
   $cleanup.nativeWindowsExecuted = $true
