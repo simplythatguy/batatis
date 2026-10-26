@@ -54,6 +54,14 @@ logger = logging.getLogger(__name__)
 TransportFactory = Callable[[str | None], Transports]
 
 
+def _require_source(codes: Codes):
+    from .identify.requirement_corpus import load, SourceUnavailable
+    try:
+        return load(codes.db_path).source
+    except SourceUnavailable:
+        raise HTTPException(503, 'NBC(AE) 2023 second-printing source could not be verified') from None
+
+
 def _current(result: IdentifyResult, case: Case, store=None) -> IdentifyResult:
     out = result.model_copy(deep=True)
     out.stale = (out.input_sha256 != fingerprint(case, store) if getattr(out, 'input_sha256', None)
@@ -130,6 +138,8 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
             logger.error('identify config invalid: %s', error)
             raise HTTPException(503, 'Code identification is misconfigured') from None
         codes = code()
+        if config.screen != 'requirements':
+            _require_source(codes)
         started = time.monotonic()
         context = compose(base, cases(), prose=naming_prose or None) if config.screen == 'requirements' else None
         if context is not None:
@@ -261,6 +271,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
     @router.post('/cases/{case_id}/identify/confirm', response_model=Case)
     def confirm(case_id: str, body: IdentifyConfirmRequest):
         codes = code()
+        _require_source(codes)
         missing = []
         for provision_id in body.provisions:
             try:
@@ -288,6 +299,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
         if get_case(case_id).identify is None:
             raise HTTPException(404, 'identify result not found')
         codes = code()
+        _require_source(codes)
 
         def write(case: Case):
             return record_decision(case, provision_id, body.decision, codes)
@@ -306,6 +318,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
         if get_case(case_id).identify is None:
             raise HTTPException(404, 'identify result not found')
         codes = code()
+        _require_source(codes)
         try:
             record = codes.provision(body.provision, 'B')
         except ValueError as exc:
@@ -361,7 +374,9 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
     def case_process_refs(case_id: str):
         get_case(case_id)
         try:
-            return process_refs(code())
+            codes = code()
+            _require_source(codes)
+            return process_refs(codes)
         except ProcessRefMissing:
             raise HTTPException(503, 'process references missing from the code database') from None
 

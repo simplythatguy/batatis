@@ -36,6 +36,7 @@ def test_exact_reference_identification_is_local_and_has_no_hidden_top_ten(scene
     assert response.status_code == 200, response.text
     result = response.json()
     assert any(item['provision'] == '9.10.15.5.' for item in result['articles'])
+    assert result['articles'][0]['provision'] == '9.10.15.5.'
     assert result['input_sha256'] and not result['stale']
     assert sum(stage['requests'] for stage in result['trace']['stages']) == 0
     assert result['trace']['usd'] == 0
@@ -119,3 +120,18 @@ def test_stale_applicability_decision_rejected_then_confirmation_retained_for_re
     kept = next(r for r in rerun['requirements'] if r['id'] == requirement['id'])
     assert kept['human_confirmed'] and kept['needs_review'] and kept['disposition'] == 'review'
     assert kept['confirmation_reason'] == 'Exterior wall for the described project.'
+
+
+def test_legacy_confirmation_cannot_bypass_second_printing_provenance(tmp_path):
+    import shutil
+    import sqlite3
+    db = tmp_path / 'wrong-edition.sqlite'
+    shutil.copyfile(Codes().db_path, db)
+    with sqlite3.connect(db) as con:
+        con.execute("UPDATE docs SET label='NBC(AE) 2023 p1' WHERE doc='NBC-AE'")
+    store = CaseStore(tmp_path / 'cases.sqlite')
+    case = store.put(Case())
+    with TestClient(create_app(store=store, codes=Codes(db)), base_url='http://localhost') as client:
+        response = client.post(f'/cases/{case.id}/identify/confirm', json={'provisions': ['9.10.15.5.']})
+    assert response.status_code == 503
+    assert store.get(case.id).provisions == [] and store.get(case.id).section_c == []
