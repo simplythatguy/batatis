@@ -8,6 +8,7 @@ import { PROCESS_FACT } from "../model";
 import { useRoute } from "../router";
 import { useCase } from "../store";
 import type { Case } from "../types";
+import { useAccount } from "./account";
 import { useCurrentApplication } from "./begin";
 import { CIcon } from "./ui";
 import "./ApplicantDrafts.css";
@@ -140,6 +141,7 @@ export function ApplicantDrafts() {
   const { c, engineId, applicationIdentity, drafting, draftingStale, draftActivity, draftingError,
     generateApplicantDrafts, decideApplicantDraft, retryApplicantDrafts, submitting, saveStatus } = useCase();
   const { locked } = useCurrentApplication();
+  const { phase: accountPhase } = useAccount();
   const route = useRoute();
   const focus = route.params.get("focus");
   const field = focus?.startsWith("draft:") ? focus.slice(6) : null;
@@ -164,21 +166,23 @@ export function ApplicantDrafts() {
     if (field) { panel.current?.scrollIntoView({ block: "start" }); panel.current?.focus({ preventScroll: true }); }
   }, [applicationIdentity, field]);
   const busy = draftActivity.kind !== "idle";
-  const disabled = locked || submitting || busy || saveStatus === "gone";
+  const disabled = locked || submitting || busy || saveStatus === "gone" || accountPhase !== "signed-in";
   const reason = locked || submitting ? "This application is read-only while sent or submitting."
     : saveStatus === "gone" ? "This application was deleted or expired."
-      : !c.description.trim() ? "Describe your project before drafting." : "";
+      : !busy && accountPhase === "probing" ? "Checking sign-in…"
+        : !busy && accountPhase !== "signed-in" ? <><a className="cf-inline-link" href="#/signin">Sign in</a> to draft or decide application wording.</>
+          : !c.description.trim() ? "Describe your project before drafting." : "";
   return <section ref={panel} tabIndex={-1} className="cf-applicant-drafts" aria-labelledby="cf-drafts-heading" aria-busy={busy}>
     <h2 id="cf-drafts-heading">Your application wording</h2>
     <p className="cf-draft-meta">Review and own the wording you accept. Professional analysis, calculations and seals come from your engineer or architect.</p>
     <div className="cf-row-actions">
-      <button type="button" className="cf-btn is-sm" disabled={disabled || !c.description.trim()} onClick={() => void generateApplicantDrafts()}>
+      <button type="button" className="cf-btn is-sm" disabled={disabled || !c.description.trim()} onClick={() => { if (!disabled && c.description.trim()) void generateApplicantDrafts(); }}>
         {draftActivity.kind === "generating" ? "Drafting…" : "Draft my application"}
       </button>
       {busy && <span className="cf-draft-meta" role="status">{draftActivity.kind === "generating" ? "Preparing source-linked writing. This can take a few minutes." : "Saving your decision…"}</span>}
     </div>
     {reason && <p className="cf-draft-meta">{reason}</p>}
-    {draftingError && <p className="cf-draft-error" role="alert">{draftingError}{!reason && <button type="button" className="cf-link-btn" disabled={disabled} onClick={() => void retryApplicantDrafts()}>Try again</button>}</p>}
+    {draftingError && <p className="cf-draft-error" role="alert">{draftingError}{!reason && <button type="button" className="cf-link-btn" disabled={disabled} onClick={() => { if (!disabled) void retryApplicantDrafts(); }}>Try again</button>}</p>}
     {draftingStale && <p className="cf-draft-warning" role="status">Previous or unverified input · Generate fresh drafts before accepting or rejecting.</p>}
     {drafting?.notices.map((notice, i) => <p className="cf-draft-meta" key={i}>{notice}</p>)}
     {!drafting && !busy && <p className="cf-draft-meta">Drafts stay separate from your answers until you accept them.</p>}
@@ -197,8 +201,8 @@ export function ApplicantDrafts() {
         {choice.status === "draft" ? <>
           <p className="cf-draft-meta">{choice.text.trim() ? "Accepting saves this wording as your answer. Open questions and professional work stay open." : "No wording to accept. Answer the questions, then draft again."}</p>
           <div className="cf-row-actions">
-            <button type="button" className="cf-btn is-primary is-sm" disabled={disabled || draftingStale || !choice.text.trim()} onClick={() => void decideApplicantDraft(choice.id, "accept")}>Accept draft</button>
-            <button type="button" className="cf-btn is-ghost is-sm" disabled={disabled || draftingStale} onClick={() => void decideApplicantDraft(choice.id, "reject")}>Reject</button>
+            <button type="button" className="cf-btn is-primary is-sm" disabled={disabled || draftingStale || !choice.text.trim()} onClick={() => { if (!disabled && !draftingStale && choice.text.trim()) void decideApplicantDraft(choice.id, "accept"); }}>Accept draft</button>
+            <button type="button" className="cf-btn is-ghost is-sm" disabled={disabled || draftingStale} onClick={() => { if (!disabled && !draftingStale) void decideApplicantDraft(choice.id, "reject"); }}>Reject</button>
           </div>
         </> : <p className="cf-draft-meta" role="status">{choice.status === "accepted" ? "Accepted by you. Original wording and sources are retained." : "Rejected. No answer was added."}</p>}
       </article>

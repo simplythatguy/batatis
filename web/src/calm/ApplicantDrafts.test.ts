@@ -5,10 +5,13 @@ import { draft, drafting } from "../../tests/applicant-drafts.fixture.ts";
 import { draftPassages } from "../applicantDrafts.ts";
 import { emptyCase } from "../intake.ts";
 import { localField } from "../intakeFields.ts";
+import type { AccountPhase } from "./account";
 
 const sourceContext = { sources: drafting.sources, caseId: "case-drafts", c: { files: [], intake: undefined } };
 const harness = (name: string, modules = {}) => componentHarness(new URL("./ApplicantDrafts.tsx", import.meta.url), name, {
-  "../applicantDrafts": { draftPassages }, "../intakeFields": { localField }, "./ui": { CIcon: "CIcon" }, ...modules,
+  "../applicantDrafts": { draftPassages }, "../intakeFields": { localField }, "./ui": { CIcon: "CIcon" },
+  "./account": { useAccount: () => ({ phase: "signed-in" }) },
+  ...modules,
 }, { URL });
 const buttons = (tree: unknown, label: string) => nodes(tree, n => n.type === "button" && text(n) === label);
 
@@ -133,5 +136,74 @@ test("guidance loads only on disclosure and keeps reviewer prompts plus sourced 
   assert.match(text(tree), /Describe what may go wrong.*Identify affected people.*Explain the conditions/s);
   assert.match(text(tree), /scope, status and edition/);
   assert.equal(nodes(tree, n => n.type === "a")[0].props.href, "https://example.test/precedent.pdf");
+  h.unmount();
+});
+
+test("anonymous and signed-out visitors see Sign in with disabled writes, while status reasons and sources stay available", async () => {
+  const writes: unknown[] = [];
+  let phase: AccountPhase = "anonymous", locked = false;
+  const store = {
+    c: { ...emptyCase("homebuilder"), description: "Unit description" }, engineId: "case-drafts", applicationIdentity: "unit-case",
+    drafting: structuredClone(drafting), draftingStale: false, draftActivity: { kind: "idle" },
+    draftingError: "Earlier request failed.", submitting: false, saveStatus: "saved",
+    generateApplicantDrafts: async () => { writes.push("generate"); },
+    decideApplicantDraft: async (id: string, decision: string) => { writes.push([id, decision]); },
+    retryApplicantDrafts: async () => { writes.push("retry"); },
+  };
+  const h = await harness("ApplicantDrafts", {
+    "../store": { useCase: () => store }, "./account": { useAccount: () => ({ phase }) },
+    "./begin": { useCurrentApplication: () => ({ locked }) },
+    "../router": { useRoute: () => ({ params: new URLSearchParams() }) },
+  });
+  const signIn = (tree: unknown) => nodes(tree, n => n.type === "a" && text(n) === "Sign in");
+  for (const next of ["anonymous", "signed-out"] satisfies AccountPhase[]) {
+    phase = next;
+    const tree = await h.render();
+    assert.match(text(tree), /Sign in to draft or decide application wording/);
+    assert.equal(signIn(tree)[0].props.href, "#/signin");
+    assert.equal(buttons(tree, "Try again").length, 0, "the authentication reason replaces retry");
+    for (const label of ["Draft my application", "Accept draft", "Reject"]) {
+      const button = buttons(tree, label)[0];
+      assert.equal(button.props.disabled, true, `${next}: ${label}`);
+      button.props.onClick();
+    }
+    assert.equal(writes.length, 0, `${next}: even a direct handler invocation cannot call the store`);
+    const content = nodes(tree, n => typeof n.type === "function" && n.props.draft)[0];
+    assert.deepEqual(content.props.sources, drafting.sources);
+    assert.equal(content.props.draft.id, draft.id);
+  }
+  phase = "probing";
+  let tree = await h.render();
+  assert.match(text(tree), /Checking sign-in/);
+  assert.equal(signIn(tree).length, 0);
+  assert.equal(buttons(tree, "Draft my application")[0].props.disabled, true);
+
+  phase = "signed-out";
+  for (const state of ["read-only", "submitting", "gone", "busy"]) {
+    locked = state === "read-only";
+    store.submitting = state === "submitting";
+    store.saveStatus = state === "gone" ? "gone" : "saved";
+    store.draftActivity = { kind: state === "busy" ? "generating" : "idle" };
+    tree = await h.render();
+    assert.equal(signIn(tree).length, 0, `${state} keeps priority over the sign-in reason`);
+    assert.match(text(tree), state === "gone" ? /deleted or expired/ : state === "busy" ? /a few minutes/ : /read-only/);
+    for (const label of [state === "busy" ? "Drafting…" : "Draft my application", "Accept draft", "Reject", "Try again"]) {
+      for (const button of buttons(tree, label)) { assert.equal(button.props.disabled, true); button.props.onClick(); }
+    }
+    assert.equal(writes.length, 0);
+  }
+  phase = "signed-in";
+  locked = false;
+  store.submitting = false;
+  store.saveStatus = "saved";
+  store.draftActivity = { kind: "idle" };
+  tree = await h.render();
+  assert.equal(signIn(tree).length, 0);
+  for (const label of ["Draft my application", "Accept draft", "Reject"]) {
+    const button = buttons(tree, label)[0];
+    assert.equal(button.props.disabled, false);
+    button.props.onClick();
+  }
+  assert.deepEqual(writes, ["generate", [draft.id, "accept"], [draft.id, "reject"]]);
   h.unmount();
 });
