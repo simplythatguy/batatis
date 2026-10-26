@@ -176,7 +176,7 @@ async function setup(t: { after(fn: () => Promise<void>): void }, mode: Record<s
   const provider = codexProviderFactory({
     runtime: async () => ({ executable: process.execPath, sha256: RUNTIME_HASH, catalog: await readFile(join(REPO, "desktop/codex/luna-models.json")) }),
     verifiedContext: { evidence: "offline fixture only", runtimeSha256: RUNTIME_HASH, contextFingerprint: CODEX_CONTEXT_FINGERPRINT },
-    spawn: fakeSpawn, timing: { requestMs: 1000, completionMs: 2000, interruptMs: 100, stopMs: 50, loginMs: 5000 },
+    spawn: fakeSpawn, timing: { requestMs: 1000, completionMs: 2000, interruptMs: 100, stopMs: 1000, loginMs: 5000 },
     ...override,
   })(context);
   t.after(async () => {
@@ -297,7 +297,7 @@ test("logout requires RPC success, signed-out notification and account confirmat
   assert.equal((await f.provider.status()).state, "signed-in");
   assert.deepEqual(await f.provider.logout(), { state: "signed-out", last: null });
   assert.ok(f.children.every((child) => child.exitCode !== null || child.signalCode !== null));
-  const missing = await setup(t, { noLogoutNotice: true }, { timing: { requestMs: 100, stopMs: 30 } });
+  const missing = await setup(t, { noLogoutNotice: true }, { timing: { requestMs: 100, stopMs: 1000 } });
   assert.equal((await missing.provider.logout()).state, "error");
 });
 
@@ -373,14 +373,15 @@ test("logout cancels running and queued workflows before confirming local sign-o
 });
 
 test("the pending operation bound refuses excess requests and dispose drains them", async (t) => {
-  const f = await setup(t, { hangInitialize: true }, { timing: { requestMs: 100, stopMs: 30 } });
+  const f = await setup(t, { hangInitialize: true }, { timing: { requestMs: 100, stopMs: 1000 } });
   const pending = Array.from({ length: 16 }, () => f.provider.status());
   assert.ok((await Promise.all(pending)).every((state) => state.state === "error"));
   await f.provider.dispose();
 });
 
 test("deadline stops an uncooperative turn and dispose stops an EOF-resistant child", async (t) => {
-  const f = await setup(t, { hangTurn: true, ignoreInterrupt: true, ignoreEof: true }, { timing: { completionMs: 150, interruptMs: 50, stopMs: 30 } });
+  // Windows can take longer than a few milliseconds to end a killed process; production waits 1 s too.
+  const f = await setup(t, { hangTurn: true, ignoreInterrupt: true, ignoreEof: true }, { timing: { completionMs: 150, interruptMs: 50, stopMs: 1000 } });
   const result = await complete(f.provider);
   assert.equal(result.ok, false);
   if (!result.ok) assert.equal(result.reason, "incomplete");
