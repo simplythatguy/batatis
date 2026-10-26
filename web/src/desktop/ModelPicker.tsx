@@ -58,14 +58,13 @@ export function ModelPicker({ slot, label, compact = false, onError }: { slot: S
     <div ref={root} className={`dk-picker${compact ? " is-compact" : ""}`}>
       <button ref={button} type="button" className="dk-picker-btn" aria-haspopup="menu" aria-expanded={open} aria-controls={open ? id : undefined}
         aria-label={`${label}: ${pickLabel(configuration, current)}`} disabled={busy} onClick={() => setOpen((value) => !value)}>
-        {!compact && <Icon24 name="spark" size={14} />}
         <span>{pickLabel(configuration, current)}</span>
-        <Icon24 name="down" size={12} />
+        <Icon24 name="down" size={14} stroke={2} />
       </button>
       {open && (
         <div id={id} className="dk-picker-menu" role="menu" aria-label={label}>
           <button type="button" role="menuitemradio" aria-checked={current.source === "off"} className="dk-picker-item" onClick={() => void choose({ source: "off" })}>
-            Off{current.source === "off" && <Icon24 name="check" size={13} />}
+            Off{current.source === "off" && <Icon24 name="check" size={15} stroke={2} />}
           </button>
           {configuration.sources.map((source) => (
             <div key={source.value} role="group" aria-label={source.label}>
@@ -77,7 +76,7 @@ export function ModelPicker({ slot, label, compact = false, onError }: { slot: S
                 return (
                   <button key={model.id} type="button" role="menuitemradio" aria-checked={checked} className="dk-picker-item"
                     aria-label={`${source.label} ${model.label}`} onClick={() => void choose({ source: source.value, model: model.id, effort })}>
-                    {model.label}{checked && <Icon24 name="check" size={13} />}
+                    {model.label}{checked && <Icon24 name="check" size={15} stroke={2} />}
                   </button>
                 );
               })}
@@ -86,7 +85,7 @@ export function ModelPicker({ slot, label, compact = false, onError }: { slot: S
           {isOn(current) && currentModel && currentModel.efforts.length > 1 && (
             <div className="dk-picker-effort" role="group" aria-label="Effort">
               {currentModel.efforts.map((effort) => (
-                <button key={effort} type="button" role="menuitemradio" aria-checked={current.effort === effort} className="dk-picker-chip"
+                <button key={effort} type="button" role="menuitemradio" aria-checked={current.effort === effort} className="cf-chip"
                   onClick={() => void choose({ ...current, effort }, false)}>{capital(effort)}</button>
               ))}
             </div>
