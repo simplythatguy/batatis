@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { KeyVault } from "../src/main/credentials.ts";
 import { ProviderDispatch, parseCompleteJson } from "../src/main/provider-dispatch.ts";
 import { KeyProviders, type ProviderPost } from "../src/main/provider-http.ts";
+import { HOSTED_AI, HostedAi, type HostedPost } from "../src/main/provider-hosted.ts";
 import { unavailableProvider, type CompleteJsonResult, type HostProvider } from "../src/main/providers.ts";
 import { DesktopHost } from "../src/main/controller.ts";
 import { both, fakeCommand, scratch, waitFor } from "./helpers.ts";
@@ -227,4 +228,49 @@ test("a model pick keeps the engine and window, sets both kinds the first time, 
   t.after(() => again.dispose());
   await again.boot();
   assert.deepEqual([again.configuration().workflow, again.configuration().chat], [defaultPick("chatgpt"), defaultPick("claude")]);
+});
+
+test("Batatis AI sends the pinned request with the vault's access code to the website, and only there", async (t) => {
+  const vault = new KeyVault(join(scratch(t), "vault"), box);
+  const sent: { path: string; code: string; body: Record<string, unknown> }[] = [];
+  let status = 200;
+  const post: HostedPost = async (path, code, body) => {
+    sent.push({ path, code, body: JSON.parse(body) });
+    if (status !== 200) return { status, body: "{}" };
+    return path === "complete"
+      ? { status: 200, body: JSON.stringify({ json: { answer: "hosted" }, model: "gpt-6-luna", effort: "medium", usage: { inputTokens: 5, outputTokens: 2 } }) }
+      : { status: 200, body: JSON.stringify({ status: 200, body: '{"answers":{}}' }) };
+  };
+  const dispatch = new ProviderDispatch({ account: () => unavailableProvider(), vault, hosted: new HostedAi(vault, post), accepting: () => true });
+  t.after(() => dispatch.invalidate());
+  dispatch.select({ workflow: defaultPick("batatis"), chat: defaultPick("batatis"), screening: true });
+
+  const missing = await dispatch.call("provider.completeJson", { ...request, lease: await lease(dispatch) }, signal());
+  assert.deepEqual(missing, { ok: false, reason: "auth", message: "Add your Batatis access code in Settings." });
+  assert.equal(sent.length, 0);
+
+  await vault.save("batatis", "judges-code-1234");
+  const profile = await dispatch.call("provider.profile", { slot: "workflow" }, signal());
+  assert.ok(profile.ok);
+  assert.deepEqual([(profile.value as Record<string, unknown>).billing, (profile.value as Record<string, unknown>).screening], ["included", true],
+    "screening runs on Batatis AI with the code alone, without a screening key");
+  const answered = await dispatch.call("provider.completeJson", { ...request, lease: await lease(dispatch) }, signal());
+  assert.ok(answered.ok, JSON.stringify(answered));
+  assert.deepEqual((answered.value as Record<string, unknown>).served, { source: "batatis", model: "gpt-6-luna", effort: "medium" });
+  assert.doesNotMatch(JSON.stringify(answered), /judges-code-1234/);
+  assert.deepEqual(sent[0], { path: "complete", code: "judges-code-1234", body: { task: request.task, system: request.system, user: request.user,
+    schema: request.schema, model: "gpt-6-luna", effort: "medium", maxOutputTokens: request.maxOutputTokens } });
+
+  const screened = await dispatch.call("provider.jev", { lease: await lease(dispatch), timeout: 30,
+    body: JSON.stringify({ model: "jev-1.13.0", questions: { q0: "Does A0 govern?" }, state: {} }) }, signal());
+  assert.ok(screened.ok);
+  assert.equal(sent.at(-1)?.path, "screen");
+
+  status = 403;
+  const refused = await dispatch.call("provider.completeJson", { ...request, lease: await lease(dispatch) }, signal());
+  assert.deepEqual(refused, { ok: false, reason: "auth", message: "The Batatis access code isn’t valid. Replace it in Settings." });
+});
+
+test("the hosted address is the Batatis website over https", () => {
+  assert.equal(HOSTED_AI, "https://batatis-vert.vercel.app/api/hosted-ai");
 });

@@ -6,10 +6,10 @@
  * the labels the host sends.
  */
 
-export type ProviderId = "chatgpt" | "claude" | "openai" | "jev";
+export type ProviderId = "chatgpt" | "claude" | "openai" | "jev" | "batatis";
 /** The managed account connections, each with its own downloadable runtime. */
 export type AccountId = Extract<ProviderId, "chatgpt" | "claude">;
-export type KeyProviderId = Extract<ProviderId, "openai" | "jev">;
+export type KeyProviderId = Extract<ProviderId, "openai" | "jev" | "batatis">;
 export type GenerationChoice = "off" | "chatgpt" | "openai";
 
 export function isGenerationChoice(value: unknown): value is GenerationChoice {
@@ -158,6 +158,10 @@ export const PROVIDER_LABELS: Record<ProviderId, { label: string; description: s
   claude: {
     label: "Claude",
     description: "Uses your Claude subscription through the managed Claude Code runtime when selected. Separate from your Batatis identity. Sign-in and workflow readiness are checked separately.",
+  },
+  batatis: {
+    label: "Batatis access code",
+    description: "Uses the Batatis team's AI, unlocked with an access code. Requests go through the Batatis website, which holds the keys; the code stays in this computer's OS-protected vault.",
   },
   jev: { label: "Jev API key", description: "Optional, separately billed screening and reranking with the pinned Jev profile. Without it, code identification shows its keyword fallback. Off disables this too." },
 };

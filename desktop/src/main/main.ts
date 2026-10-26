@@ -274,7 +274,7 @@ function fromApp(event: IpcMainInvokeEvent): boolean {
 }
 
 const refused: Outcome = { ok: false, message: "Not allowed." };
-const isKeyProvider = (value: unknown): value is KeyProviderId => value === "openai" || value === "jev";
+const isKeyProvider = (value: unknown): value is KeyProviderId => value === "openai" || value === "jev" || value === "batatis";
 const isAccount = (value: unknown): value is AccountId => value === "chatgpt" || value === "claude";
 
 function answer<T>(channel: string, work: (event: IpcMainInvokeEvent, arg: unknown) => Promise<T> | T, fallback: T) {
@@ -353,7 +353,7 @@ function registerIpc() {
 }
 
 function labelFor(id: KeyProviderId): string {
-  return id === "openai" ? "OpenAI API key" : "Jev API key";
+  return id === "openai" ? "OpenAI API key" : id === "batatis" ? "Batatis access code" : "Jev API key";
 }
 
 /** A separate, sandboxed window with its own origin; the key never enters the app window. */

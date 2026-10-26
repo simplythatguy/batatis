@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import type { CallReply, HostCall } from "./engine";
 import type { KeyVault } from "./credentials";
 import { checkCompletion, KeyProviders } from "./provider-http";
+import { HostedAi } from "./provider-hosted";
 import { DEFAULT_SELECTION, MENU, isSlot, slotForTask, type AiSelection, type Pick } from "./models";
 import { isModelId, isReasoningEffort, type AccountId, type CompleteJsonRequest, type HostProvider, type ModelId, type ReasoningEffort } from "./providers";
 
@@ -29,10 +30,15 @@ export class ProviderDispatch {
   #account: (id: AccountId) => HostProvider;
   #vault: KeyVault;
   #keys: KeyProviders;
+  #hosted: HostedAi;
   #accepting: () => boolean;
-  constructor(deps: { account: (id: AccountId) => HostProvider; vault: KeyVault; keys?: KeyProviders; accepting: () => boolean }) {
-    this.#account = deps.account; this.#vault = deps.vault; this.#keys = deps.keys ?? new KeyProviders(deps.vault); this.#accepting = deps.accepting;
+  constructor(deps: { account: (id: AccountId) => HostProvider; vault: KeyVault; keys?: KeyProviders; hosted?: HostedAi; accepting: () => boolean }) {
+    this.#account = deps.account; this.#vault = deps.vault; this.#keys = deps.keys ?? new KeyProviders(deps.vault);
+    this.#hosted = deps.hosted ?? new HostedAi(deps.vault); this.#accepting = deps.accepting;
   }
+
+  /** Screening runs on Batatis AI when the workflow does, otherwise on the person's own screening key. */
+  #screensHosted(): boolean { return this.#selection.workflow.source === "batatis"; }
   get selection(): AiSelection { return structuredClone(this.#selection); }
   select(value: AiSelection) { this.invalidate(); this.#selection = structuredClone(value); }
   invalidate() {
@@ -46,7 +52,8 @@ export class ProviderDispatch {
     const lease = this.#lease;
     const slot = record(args) && isSlot(args.slot) ? args.slot : "workflow";
     const pick = this.#selection[slot];
-    const screening = slot === "workflow" && pick.source !== "off" && this.#selection.screening && await this.#vault.status("jev") === "saved";
+    const screening = slot === "workflow" && pick.source !== "off" && this.#selection.screening
+      && await this.#vault.status(this.#screensHosted() ? "batatis" : "jev") === "saved";
     if (lease !== this.#lease || !this.#accepting()) return cancelled();
     return { ok: true, value: { lease, generation: pick.source, screening, billing: billingOf(pick) } };
   }
@@ -76,6 +83,7 @@ export class ProviderDispatch {
         const routed: CompleteJsonRequest = { ...request, model: pick.model as ModelId, effort: pick.effort as ReasoningEffort };
         let completed;
         if (pick.source === "openai") completed = await abortable(this.#keys.complete(routed, abort.signal), abort.signal);
+        else if (pick.source === "batatis") completed = await abortable(this.#hosted.complete(routed, abort.signal), abort.signal);
         else {
           const account = this.#account(pick.source);
           const readiness = await abortable(account.workflowReadiness(), abort.signal);
@@ -95,7 +103,7 @@ export class ProviderDispatch {
           || Object.keys(body.questions).length > 400 || !("state" in body) || Buffer.byteLength(args.body) > MAX_TEXT) {
           return { ok: false, reason: "refused_or_invalid", message: "The screening request did not match its pinned profile." };
         }
-        const response = await abortable(this.#keys.screen(args.body, abort.signal), abort.signal);
+        const response = await abortable((this.#screensHosted() ? this.#hosted : this.#keys).screen(args.body, abort.signal), abort.signal);
         reply = response ? { ok: true, value: response } : { ok: false, reason: "auth", message: "Add the optional screening key in Settings." };
       } else return { ok: false, reason: "unavailable", message: "Unknown host call." };
       return this.valid(lease) && !abort.signal.aborted ? reply : cancelled();
