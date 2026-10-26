@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { emptyCase } from "../../intake.ts";
-import { reducer } from "../../model.ts";
+import { NOT_RIGHT, factFor, reducer } from "../../model.ts";
 import { blockForField, buildDocument } from "./document.ts";
 import { acceptSuggestion, changedWords, draftSuggestions, freshSuggestions, rejectSuggestion, rewriteRange, rewriteSuggestion } from "./suggestions.ts";
 
@@ -48,4 +48,13 @@ test("an older proposed alias never revives after the applicant writes newer wor
   c.facts.push({ id: "old-draft", field: "process.risk", value: "Older AI proposal", kind: "proposed", status: "unconfirmed", source: { type: "user_text", ref: "Writing draft" } });
   c = reducer(c, { type: "setProcess", field: "risk", value: "Newer applicant words" });
   assert.deepEqual(draftSuggestions(c, buildDocument(c, [])), []);
+});
+
+
+test("rejecting a non-writing intake reading keeps the original Not right withdrawal behavior", () => {
+  const c = reducer(emptyCase("homebuilder"), { type: "setDetail", field: "owner", value: "Earlier name", section: "A" });
+  c.facts.push({ id: "read-owner", field: "owner", value: "Intake reading", kind: "proposed", status: "unconfirmed", source: { type: "user_text", ref: "Intake" } });
+  const rejected = reducer(c, { type: "dismissFact", id: "read-owner" });
+  assert.equal(factFor(rejected, "owner")?.value, null);
+  assert.equal(factFor(rejected, "owner")?.source.ref, NOT_RIGHT);
 });
