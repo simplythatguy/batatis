@@ -2,7 +2,7 @@
 
 Batatis helps builders in Alberta prepare a complete building-code variance application. It also shows Safety Codes Officers what an application is missing.
 
-[Open the app](https://batatis-vert.vercel.app) · [Desktop setup](docs/desktop.md) · [License](LICENSE.md)
+[Open the app](https://batatis-vert.vercel.app) · [Download for Mac or Windows](https://github.com/simplythatguy/batatis/releases) · [Desktop setup](docs/desktop.md) · [License](LICENSE.md)
 
 ## The problem
 
@@ -105,6 +105,14 @@ For both:
 - Get notified when an application changes status or a message arrives.
 - Applications and their files are deleted 7 days after they are created.
 
+In the desktop app:
+
+- Run Batatis on your own Mac or Windows computer. Your applications stay on that computer.
+- Use AI through your own ChatGPT or Claude subscription, or your own OpenAI API key. Install, update, sign in, and sign out from Settings.
+- Pick the AI model for the workflow and for chat separately, even in the middle of a chat.
+- Update the app in two clicks when a new version is out, and choose stable releases or early beta releases.
+- Switch between a test applicant and test officers without making accounts.
+
 ## Practice cases
 
 This repository includes 653 practice cases for testing how well Batatis reads real documents. Each case pairs a request, written the way an applicant might ask, with published documents to attach, such as feasibility studies, issued variances, and appeal decisions. No document in them was made up.
@@ -138,7 +146,9 @@ Many published decisions state their outcome, so the cases test reading and pape
 
 This diagram shows the hosted website. It has the same steps as the one in [Our solution](#our-solution), with the technology that runs each step. The colors mark the same four stages in both diagrams. The website is React and TypeScript, built with Vite. It calls the engine, a Python API built with FastAPI. Vercel hosts the website and its engine.
 
-The desktop package uses the same screens and workflow. Electron runs the screens and a private Python engine on your computer. Desktop accounts and applications stay separate from the website. The [desktop guide](docs/desktop.md) explains local development, AI connections and building the package.
+The desktop app uses the same screens and workflow. Electron, a framework for desktop apps built from web code, runs the screens and a private copy of the Python engine on your computer. The two talk through a private pipe, not a network port. Desktop accounts and applications stay separate from the website.
+
+The desktop app gets its AI differently from the website. You can connect a ChatGPT subscription through Codex, OpenAI's command-line agent, or a Claude subscription through Claude Code, Anthropic's. The app downloads one exact version of each the first time you install it, and checks the file against a checksum before running it. Each request runs with every tool, plugin, and saved setting turned off. A picker for the workflow and one for chat choose the model: Luna at medium effort for ChatGPT, or Haiku 5.5 at low effort for Claude, by default. The app also updates itself from this repository's GitHub releases. The [desktop guide](docs/desktop.md) explains all of this, plus local development and building the app.
 
 For applicants:
 
@@ -204,17 +214,20 @@ The frontend, meaning the files that build the screens and their look:
 
 ![The frontend files: the web app's entry, the screens in web/src/calm, and the design rules and tokens in docs](docs/readme/folder-structure-frontend.png)
 
-Both pictures show the main folders and files, not every one. The pictures leave out these parts:
+The desktop app, which lives across four folders:
+
+<img src="docs/readme/folder-structure-desktop.png" width="760" alt="The desktop files: the app in desktop/, its updater and AI installers, its release and icon scripts, the engine's private link, the desktop screens, and the release workflow">
+
+The pictures show the main folders and files, not every one. They leave out these parts:
 
 - [`engine/intake/review.py`](engine/intake/review.py) runs the document review and checks what it returns.
 - [`engine/identify/pipeline.json`](engine/identify/pipeline.json) holds the settings for finding code articles.
 - [`evals_dev/data_prompts/`](evals_dev/data_prompts/) runs the practice cases through the engine and scores the results.
 - [`docs/evaluations/workflow-decision-20261025.md`](docs/evaluations/workflow-decision-20261025.md) explains why Batatis uses this workflow, and its limits.
-- [`desktop/`](desktop/) holds the desktop host and packaging. [`engine/desktop/`](engine/desktop/) runs its private engine connection, and [`web/src/desktop/`](web/src/desktop/) adds local Settings and person switching.
 
 ## Get started
 
-The steps below run the website locally. For the desktop package, follow [Desktop setup](docs/desktop.md). Desktop builds and the complete repository checks need Node.js 24 or newer.
+The steps below run the website locally. To use the desktop app, download it from the [releases page](https://github.com/simplythatguy/batatis/releases). To build it yourself, follow [Desktop setup](docs/desktop.md). Desktop builds and the complete repository checks need Node.js 24 or newer.
 
 ### Set it up with an AI agent
 
@@ -576,6 +589,15 @@ To go back to `main`:
 git switch main
 ```
 
+### Release the desktop app
+
+The desktop app has two release channels, after T3 Code's nightly and stable builds.
+
+- **Beta** gets merged pull requests. Every 30 minutes, the **Desktop native acceptance** workflow in [`.github/workflows/desktop.yml`](.github/workflows/desktop.yml) checks `main`. When `main` has new commits and the last beta is at least six hours old, it builds, checks, and publishes a beta, such as `v0.1.1-beta.20261026.57`.
+- **Stable** gets what beta users already ran. When a beta looks good, open **Actions**, choose **Desktop native acceptance**, and click **Run workflow** on `main` with the **stable** channel. It publishes that beta's exact commit as `v0.1.1`.
+
+To publish a beta right away, run the same workflow with the **beta** channel. Each install updates within its own channel. [`desktop/scripts/release-plan.mjs`](desktop/scripts/release-plan.mjs) decides what each run publishes, and the [desktop guide](docs/desktop.md#beta-and-stable-releases) has the details.
+
 ## For AI agents
 
 Read [`AGENTS.md`](AGENTS.md) and the skills it names before you write any code. Read them again when the task moves to a new area, such as from the engine to the screens.
@@ -585,6 +607,7 @@ Read [`AGENTS.md`](AGENTS.md) and the skills it names before you write any code.
 | Start any task | [`AGENTS.md`](AGENTS.md) and [`batatis-hackathon`](.cursor/skills/batatis-hackathon/SKILL.md) |
 | Change the application flow or the engine | [`batatis-variance-workflow`](.cursor/skills/batatis-variance-workflow/SKILL.md) |
 | Change an AI model or how articles are found | The [workflow decision record](docs/evaluations/workflow-decision-20261025.md) and [`engine/tests/test_workflow_profile.py`](engine/tests/test_workflow_profile.py) |
+| Change the desktop app or its releases | The [desktop guide](docs/desktop.md) |
 | Change anything on screen | [`batatis-ui-linear`](.cursor/skills/batatis-ui-linear/SKILL.md), [`batatis-ui-opus`](.cursor/skills/batatis-ui-opus/SKILL.md), [`batatis-ui-minimalist`](.cursor/skills/batatis-ui-minimalist/SKILL.md), and [`docs/design-system-calm.md`](docs/design-system-calm.md) |
 | Change a skill or a rule | [`evals/fixtures/understanding-checklist.md`](evals/fixtures/understanding-checklist.md) |
 | Plan, build, debug, or review code | The engineering skills in [`.agents/skills/`](.agents/skills/) and [pstack](docs/pstack.md) |
