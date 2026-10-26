@@ -809,6 +809,39 @@ def _flattened(data: bytes, name: str, version: FormVersion) -> ReadFile:
         out.text_pages = _page_texts(data, range(version.fmap['form_pages'], len(doc)))
         return out
 
+def _partially_flattened(reader, data: bytes, name: str, version: FormVersion) -> ReadFile | None:
+    """Applicant content is flat; only signature/date/consent widgets remain on the form.
+
+    Attachments may have their own fields. Their pages cannot establish a widget's
+    identity or geometry on the verified form prefix.
+    """
+    from ..export.signatures import CONSENT_FIELD, OFFICER_FIELDS, SIGNATURE_FIELDS
+    allowed = {CONSENT_FIELD, *OFFICER_FIELDS,
+               *(field for pair in SIGNATURE_FIELDS.values() for field in pair)}
+    fields = reader.get_fields() or {}
+    prefix, attachment_names = {}, set()
+    for page_no, widget_name, widget in scc._widgets(reader.pages):
+        if page_no >= version.fmap['form_pages']:
+            attachment_names.add(widget_name)
+            continue
+        rect = tuple(round(float(value), 1) for value in widget['/Rect'])
+        if (widget_name not in allowed or widget_name in prefix or widget_name not in fields
+                or page_no != version.pages.get(widget_name) or rect != version.widget_rects.get(widget_name)):
+            return None
+        prefix[widget_name] = widget
+    if set(fields) - attachment_names != set(prefix):
+        return None
+    out = _flattened(data, name, version)
+    out.role = 'scc_form_fillable' if prefix else 'scc_form_flattened'
+    for widget_name in signature_widgets(version.fmap):
+        widget = prefix.get(widget_name)
+        value = fields.get(widget_name, {}).get('/V')
+        if widget is not None and value is not None and widget.get('/V', scc._field(widget).get('/V')) == value:
+            out.signatures[widget_name] = FieldValue(widget_name, version.pages[widget_name],
+                version.rects[widget_name], 'present', 'digital signature present (not validated)')
+    return out
+
+
 def _added_marks(page, rect, template: frozenset) -> bool:
     x0, y0, x1, y1 = rect
     for box in _object_boxes(page) - template:
@@ -834,6 +867,9 @@ def _form_read(reader, data: bytes, name: str) -> ReadFile | None:
             if not has_fields:
                 return _flattened(data, name, version)
             found = _fillable(reader, data, name, version)
+            if found is not None:
+                return found
+            found = _partially_flattened(reader, data, name, version)
             if found is not None:
                 return found
         note = ('This looks like the SCC variance form, but its source, layout, widgets or version hints '

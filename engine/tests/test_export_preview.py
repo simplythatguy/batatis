@@ -41,7 +41,9 @@ def test_preview_is_the_draft_pdf_and_an_image_of_each_page(tmp_path):
     body = response.json()
     assert body['kind'] == 'pages' and body['filename'] == f'{case.id}-scc-variance-DRAFT.pdf'
     reader = PdfReader(io.BytesIO(decoded(body['pdf'], 'application/pdf')))
-    assert reader.metadata['/Title'].endswith('(DRAFT)') and not reader.get_fields()
+    assert reader.metadata['/Title'].endswith('(DRAFT)')
+    assert set(reader.get_fields()) == {'Signature1', 'Signature2', 'Signature3', 'Signature4',
+                                        'Date1', 'Date2', 'SCO Date', 'SCO Date1', 'Check Box14'}
     assert marker not in ' '.join(page.extract_text() for page in reader.pages)     # confirmed values only
     assert body['page_count'] == len(reader.pages) == len(body['pages']) > 20      # a long package, every page
     for page, preview in zip(reader.pages, body['pages']):

@@ -294,7 +294,8 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
 
     def run_export(case: Case, draft: bool):
         try:
-            return export_case(case, draft=draft, codes=code())
+            return export_case(case, draft=draft, codes=code(),
+                               file_loader=lambda file_id: cases().get_file(case.id, file_id))
         except ExportBlocked as e:
             raise HTTPException(409, {'message': 'export blocked; resolve these or export a draft', 'reasons': e.reasons})
         except FormNotFound as exc:

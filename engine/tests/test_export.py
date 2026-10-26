@@ -116,12 +116,10 @@ def test_blocks_on_unconfirmed_facts_and_blocking_gaps(case, codes):
     assert 'Lot' not in {p.field for p in draft.placements}  # the older lot value must not silently return
 
 
-def test_final_export_has_no_widgets_or_help_popups(final):
+def test_final_export_retains_only_signing_widgets_and_no_help_popups(final):
     reader = pypdf.PdfReader(io.BytesIO(final.pdf))
-    assert '/AcroForm' not in reader.trailer['/Root']
-    for page in reader.pages:
-        annots = page.get('/Annots')
-        assert all(a.get_object()['/Subtype'] != '/Widget' for a in (annots.get_object() if annots else []))
+    assert set(reader.get_fields()) == {'Signature1', 'Signature2', 'Signature3', 'Signature4',
+                                        'Date1', 'Date2', 'SCO Date', 'SCO Date1', 'Check Box14'}
     text = ' '.join(page_texts(final.pdf))
     assert 'full legal description of the property' not in text      # ATS Popup
     assert 'objective-based format' not in text                       # Section C Popup
