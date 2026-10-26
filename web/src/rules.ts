@@ -2,7 +2,7 @@
  * Pure rules shared by the screens and the engine client.
  * Tests live in rules.test.ts.
  */
-import { AUTHORITIES, EXIT_COUNT } from "./config";
+import { resolveOffice, EXIT_COUNT } from "./config";
 import type { EngineGap } from "./api/client";
 import type { AuthorityId, Candidate } from "./types";
 
@@ -15,7 +15,7 @@ export const CODED_DB_MESSAGE = "code database not found";
 const EXIT_COUNT_TOPIC = /exit count|single exit|one exit|number of exits|only one exit/i;
 
 export function jurisdictionBody(id: Exclude<AuthorityId, "">) {
-  const row = AUTHORITIES.find((a) => a.id === id);
+  const row = resolveOffice(id);
   if (!row) throw new Error(`unknown authority ${id}`);
   return { id: row.id, name: row.name, authority: null as null };
 }

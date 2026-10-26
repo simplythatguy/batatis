@@ -265,7 +265,7 @@
       "field": "faces_public_way",
       "label": "Faces a public way",
       "type": "bool",
-      "question": "Does this wall and its soffit face a public way, such as a street or lane?",
+      "question": "What is on the other side of that wall?",
       "why": "A soffit facing a public way may project to the property line (Sentence 9.10.15.5.(10))."
     },
     "houses_in_building": {

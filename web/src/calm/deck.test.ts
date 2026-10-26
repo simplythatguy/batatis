@@ -346,7 +346,7 @@ test("authority offers real choices, while legacy uncertainty leaves its gap ope
   const card = buildDeck(c, []).find((i) => i.key === "authority")!;
   assert.equal(c.authority, "");
   assert.equal(card.done, false);
-  assert.deepEqual(choicesFor(card).map((x) => x.value), ["calgary", "edmonton"]);
+  assert.ok(["calgary", "edmonton", "red-deer"].every((place) => choicesFor(card).some((choice) => choice.value === place)));
   const gap = { id: "jurisdiction", severity: "blocking" as const, label: "Reviewing authority", href: "#/describe?focus=authority" };
   assert.equal(gapKey(c, gap), "authority");
   assert.equal(buildDeck(c, [gap], { seen: new Set(["authority"]), includeDone: true }).find((i) => i.key === "authority")?.done, true);

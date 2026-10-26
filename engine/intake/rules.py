@@ -49,6 +49,7 @@ FIELDS: dict[str, tuple[str, str]] = {
     'building_height_m': ('Building height (m)', 'number'),
     'top_floor_height_m': ('Top floor above grade (m)', 'number'),
     'limiting_distance_m': ('Distance to the property line (m)', 'number'),
+    'faces_public_way': ('Faces a public way', 'bool'),
     'span_m': ('Structural span (m)', 'number'),
     'part4_design': ('Designed under Part 4', 'bool'),
     'alternative_description': ('Proposed alternative', 'text'),

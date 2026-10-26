@@ -1,4 +1,8 @@
-import type { AuthorityId } from "./types";
+import type { Case } from "./types";
+import places from "../../engine/data/jurisdictions/place_names.json" with { type: "json" };
+import calgaryPack from "../../engine/data/jurisdictions/packs/calgary.json" with { type: "json" };
+import edmontonPack from "../../engine/data/jurisdictions/packs/edmonton.json" with { type: "json" };
+import fallbackPack from "../../engine/data/jurisdictions/packs/alberta-other.json" with { type: "json" };
 
 /** NBC edition this product cites. One string, used by intake, examples, and screen headers. */
 export const CODE_EDITION = "NBC(AE) 2023, 2nd printing";
@@ -7,10 +11,47 @@ export const CODE_EDITION = "NBC(AE) 2023, 2nd printing";
  * Authorities the applicant can pick. The engine case stays without a jurisdiction
  * until one of these is chosen.
  */
-export const AUTHORITIES: { id: Exclude<AuthorityId, "">; name: string }[] = [
-  { id: "calgary", name: "Calgary" },
-  { id: "edmonton", name: "Edmonton" },
-];
+export const AUTHORITIES = places.places.map((name) => ({ id: name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""), name }));
+const LOCAL_PACKS = [calgaryPack, edmontonPack];
+export const OFFICE_CHOICE_FIELD = "office.choice";
+
+/** A place is a jurisdiction, never an invented reviewer account code. Free text stays intact. */
+export function resolveOffice(value: string): { id: string; name: string; packId: string; reviewerCode: string | null } | null {
+  const raw = value.trim().replace(/\s+/g, " ");
+  if (!raw || /^(?:unsure|not[ _]sure)$/i.test(raw)) return null;
+  const key = raw.toLowerCase();
+  const pack = LOCAL_PACKS.find((pack) => [pack.id, pack.name, ...pack.match.ids, ...pack.match.names].some((name) => name.toLowerCase() === key));
+  const place = AUTHORITIES.find((place) => place.id === key || place.name.toLowerCase() === key);
+  return { id: pack?.id ?? place?.id ?? raw, name: place?.name ?? pack?.name ?? raw, packId: pack?.id ?? fallbackPack.id, reviewerCode: pack?.authority.reviewer_code ?? null };
+}
+
+export function authorityUnsure(c: Case): boolean {
+  const choice = [...c.facts].reverse().find((fact) => fact.field === OFFICE_CHOICE_FIELD);
+  return !c.authority && choice?.status === "confirmed" && choice.kind !== "proposed" && choice.value === "not_sure";
+}
+
+/** Persisted alongside the jurisdiction using the existing fact writer. */
+export function officeChoiceAction(value: string) {
+  const office = resolveOffice(value);
+  return { type: "setRuleInput", field: OFFICE_CHOICE_FIELD, value: office?.id ?? "not_sure", rule: "office", quote: office?.name ?? "Not sure" } as const;
+}
+
+export function officeSuggestion(c: Case): { id: string; name: string } | null {
+  const municipality = [...c.facts].reverse().find((fact) => fact.field === "municipality");
+  if (typeof municipality?.value === "string" && municipality.value.trim()) {
+    const office = resolveOffice(municipality.value);
+    if (office) return office;
+  }
+  const address = [...c.facts].reverse().find((fact) => ["municipalAddress", "municipal_address", "civic_address", "address"].includes(fact.field));
+  if (typeof address?.value !== "string") return null;
+  const text = address.value.toLowerCase();
+  return AUTHORITIES.find((place) => new RegExp(`(?:^|[^a-z])${place.name.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?:$|[^a-z])`).test(text)) ?? null;
+}
+
+export function submissionOfficeReason(c: Case): string {
+  if (!c.authority) return "Choose a reviewing office.";
+  return resolveOffice(c.authority)?.reviewerCode ? "" : "This office receives your PDF outside Batatis. Export it below.";
+}
 
 /** Exit-count sentences. 9.9.4.4 is openings near exterior exit stairs, not this. */
 export const EXIT_COUNT = {

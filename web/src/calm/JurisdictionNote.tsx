@@ -7,6 +7,7 @@
 import { useEffect } from "react";
 import type { JurisdictionDetail, PackSource } from "../api/types.gen";
 import { loadDirectory, loadJurisdiction, retryExtras, type CaseExtras } from "./caseExtras";
+import { resolveOffice } from "../config";
 
 /** Loading or failed: say so, with Try again on failure. */
 function Pending({ failed, what }: { failed: boolean; what: string }) {
@@ -45,6 +46,11 @@ function PackDetail({ pack, extras }: { pack: JurisdictionDetail; extras: CaseEx
   const current = pack.standing_packages.filter((p) => p.status === "current");
   return (
     <div className="cf-juris" role="note">
+      {pack.fallback && <>
+        <p>{pack.authority.name}.</p>
+        <Sources sources={pack.authority.sources} />
+        <p className="cf-faint cf-small">Export your PDF and send it to that office.</p>
+      </>}
       {/* The picker above is the answer; the office's contact, process notes and their limits wait here. */}
       <details className="cf-juris-more">
       <summary>Office details</summary>
@@ -117,10 +123,13 @@ function Elsewhere({ extras }: { extras: CaseExtras }) {
 
 /** Load and show the selected office’s notes, or provincial guidance when the office is unknown. */
 export function JurisdictionNote({ authority, unsure, extras }: { authority: string; unsure: boolean; extras: CaseExtras }) {
-  useEffect(() => { if (authority) void loadJurisdiction(authority); }, [authority]);
-  if (authority) {
-    const pack = extras.details[authority];
-    return pack ? <PackDetail pack={pack} extras={extras} /> : <Pending failed={Boolean(extras.failed.details[authority])} what="The office’s notes" />;
+  useEffect(() => { void loadDirectory(); }, []);
+  const named = extras.directory?.jurisdictions.find((pack) => pack.id === authority || pack.name.toLowerCase() === authority.toLowerCase());
+  const packId = named?.id ?? resolveOffice(authority)?.packId;
+  useEffect(() => { if (packId) void loadJurisdiction(packId); }, [packId]);
+  if (packId) {
+    const pack = extras.details[packId];
+    return pack ? <PackDetail pack={pack} extras={extras} /> : <Pending failed={Boolean(extras.failed.details[packId])} what="The office’s notes" />;
   }
   return unsure ? <Elsewhere extras={extras} /> : null;
 }

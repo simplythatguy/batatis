@@ -5,6 +5,7 @@
  */
 
 import type { FactInput, IdentifyResult, IntakeRecord, SourceInput } from "./api/types.gen";
+import type { ProfessionalResult, SectionDPlan } from "./api/client";
 
 /** Fact, Source and their enums are the engine's (engine/models.py via src/api/types.gen.ts).
  *  exact = code database or form; pointed = a span from the user's words or files;
@@ -245,4 +246,6 @@ export interface Case {
   intake?: IntakeState;
   /** The latest code identification (committed articles, quoted choices, labels). */
   identify?: IdentifyResult;
+  /** Derived Section D work at an explicit case snapshot; never sent as applicant facts. */
+  professionalWork?: { basis: string; professional: ProfessionalResult; plan: SectionDPlan };
 }

@@ -511,6 +511,7 @@ export type Action =
   | { type: "setRuleInput"; field: string; value: number | boolean | string | null; rule: string; quote: string }
   | { type: "answerScope"; field: string; answer: "yes" | "no" | "not-sure" | "clear"; text?: string }
   | { type: "notePractice"; value: true | false | "unknown" }
+  | { type: "noteProfessionalWork"; work: NonNullable<Case["professionalWork"]> }
   | { type: "reset"; to: Case };
 
 /** Source ref of a "Not right" click on a fact intake read. */
@@ -1030,6 +1031,8 @@ export function reducer(c: Case, a: Action): Case {
       // An applicant answer, including one the engine reads as "no", must not store false.
       if (a.value === false) return c.practiceOfEngineering === true ? c : { ...c, practiceOfEngineering: "unknown" };
       return { ...c, practiceOfEngineering: a.value };
+    case "noteProfessionalWork":
+      return { ...c, professionalWork: a.work };
     case "setProfessionalFact": {
       const field = `professional.${a.field}`;
       const quote = typeof a.value === "boolean" ? (a.value ? "yes" : "no") : String(a.value);

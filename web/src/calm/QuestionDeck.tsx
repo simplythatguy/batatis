@@ -11,7 +11,7 @@ import { questionContext } from "./assistant/questionContext";
 import { useCurrentApplication } from "./begin";
 import { CodeDrawer, type DrawerState } from "./CodeDrawer";
 import { aliasKey, alternativeChoice, buildDeck, deckCompletion, mergeQueue, rankAhead, choiceKey, choicesFor, preCaseState, questionProgress, QUESTION_PROGRESS_LABEL, SECTIONS, sourcePhrase, type DeckItem, type SectionId } from "./deck";
-import { NOT_SURE, planInput } from "../intakeView";
+import { NOT_SURE, planFactAnswer, planInput } from "../intakeView";
 import { confirmedAnswer, localField } from "../intakeFields";
 import { KeywordTriage } from "./KeywordTriage";
 import { CodeProgress, ReadingState, ReadSource, RedirectPage, ShowCode } from "./ReadCards";
@@ -33,10 +33,12 @@ import { JurisdictionNote } from "./JurisdictionNote";
 import { AuthorityPicker } from "./AuthorityPicker";
 import { DatePicker } from "./DatePicker";
 import { DocumentReview } from "./DocumentReview";
-import { AUTHORITIES } from "../config";
+import { AUTHORITIES, authorityUnsure, officeChoiceAction, officeSuggestion } from "../config";
 import { PACKAGE_YES, RULE_ADD, RULE_LEAVE } from "./deck";
 import { useAccount } from "./account";
 import { useQuestionDraft } from "./useQuestionDraft";
+import { UnitInput } from "./UnitInput";
+import { measurementText, metricUnit, parseMeasurement } from "./units";
 
 type Shown = DeckItem & { gone?: boolean };
 
@@ -184,6 +186,7 @@ function planValue(item: Shown, c: ReturnType<typeof useCase>["c"]): string | un
   if (c.intake?.record.plan?.not_sure.includes(q.id)) return NOT_SURE;
   const f = factFor(c, localField(q.field));
   if (f?.value == null || f.value === "") return undefined;
+  if (q.field === "faces_public_way") return f.value === false ? "neighbour" : f.source.quote === "A street" ? "street" : "lane";
   return typeof f.value === "boolean" ? (f.value ? "yes" : "no") : String(f.value);
 }
 
@@ -193,10 +196,13 @@ function PlanBody({ item, onPick, draft, setDraft, note }: { item: Shown; onPick
   const input = planInput(q.field);
   const current = planValue(item, c);
   const busy = reading.busy === q.id;
+  const unit = metricUnit(input.unit);
   return (
     <>
       {input.kind === "choices" ? (
         <Choices choices={choicesFor(item)} current={current} onPick={onPick} />
+      ) : unit ? (
+        <UnitInput id="cf-plan-answer" label={q.text} unit={unit} value={draft} onChange={setDraft} />
       ) : (
         <div className={`cf-inline-answer${input.kind === "area" ? " is-wide" : ""}`}>
           <label className="cf-sr" htmlFor="cf-plan-answer">{q.text}</label>
@@ -213,7 +219,7 @@ function PlanBody({ item, onPick, draft, setDraft, note }: { item: Shown; onPick
               placeholder={input.kind === "number" ? "e.g. 2" : "Type your answer here…"}
             />
           )}
-          {input.unit && <span className="cf-unit">{input.unit}</span>}
+          {input.unit && !unit && <span className="cf-unit">{input.unit}</span>}
         </div>
       )}
       {busy && <p className="cf-note" role="status"><span className="cf-dot is-pending" aria-hidden="true" />Saving your answer…</p>}
@@ -238,11 +244,19 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
     const fact = factFor(c, field);
     const unsure = session.ruleUnsure.includes(field) && (fact?.value === undefined || fact?.value === null);
     if (spec.type === "number" || spec.type === "int") {
+      const unit = metricUnit(spec.unit);
+      if (unit) return <>
+        <UnitInput id={`cf-rule-${field}`} label={spec.label} unit={unit} value={draft} onChange={setDraft} />
+        {note && <p className="cf-note" role="alert">{note}</p>}
+        {!note && unsure && <p className="cf-note">Saved as Not sure.</p>}
+      </>;
       return <RuleNumberInput id={`cf-rule-${field}`} label={spec.label} unit={spec.unit} draft={draft} setDraft={setDraft} unsure={unsure} note={note} />;
     }
-    const current = unsure ? NOT_SURE_RULE : fact?.value === undefined || fact?.value === null ? undefined : String(fact.value);
+    const publicWay = field === "faces_public_way";
+    const current = unsure ? NOT_SURE_RULE : publicWay && fact?.value != null ? fact.value === false ? "neighbour" : fact.source.quote === "A street" ? "street" : "lane" : fact?.value === undefined || fact?.value === null ? undefined : String(fact.value);
+    const options = publicWay ? [...(planInput(field).choices ?? []), { value: NOT_SURE_RULE, label: "Not sure" }] : choices;
     return <>
-      <Choices choices={choices} current={current} onPick={onPick} />
+      <Choices choices={options} current={current} onPick={onPick} />
       {unsure && <p className="cf-note"><span className="cf-dot is-pending" aria-hidden="true" />Saved as Not sure. The rule stays open.</p>}
     </>;
   }
@@ -303,7 +317,7 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
     if (latest) current = latest.source.ref === NOT_RIGHT ? "dismiss" : "confirm";
   }
   if (item.kind === "candidate" && cand) current = cand.answer ?? undefined;
-  if (item.kind === "authority") current = c.authority || (session.authorityUnsure ? "unsure" : undefined);
+  if (item.kind === "authority") current = c.authority || (authorityUnsure(c) || session.authorityUnsure ? "unsure" : undefined);
   if (item.kind === "detail" && def?.options) current = valueText(fact) || undefined;
   // The proposed alternative offers the description: Yes uses it, No opens the field.
   const offer = item.kind === "detail" && Boolean(item.confirmLabels);
@@ -374,7 +388,7 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
         </>
       ) : item.kind === "authority" ? (
         <>
-          <AuthorityPicker options={AUTHORITIES} value={c.authority} onPick={onPick} label={item.title} />
+          <AuthorityPicker options={AUTHORITIES} value={c.authority} unsure={authorityUnsure(c)} suggested={officeSuggestion(c)} onPick={(value) => { onPick(value); dispatch(officeChoiceAction(value)); }} label={item.title} />
         </>
       ) : (
         choices.length > 0 && <Choices choices={choices} current={current} onPick={onPick} />
@@ -701,12 +715,15 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
       }
     }
     if (item.kind === "rule-input" && item.input && draft.trim() && (item.input.spec.type === "number" || item.input.spec.type === "int")) {
-      const got = readNumber(item.input.spec, draft);
+      const unit = metricUnit(item.input.spec.unit);
+      const measured = unit ? parseMeasurement(draft, unit) : null;
+      if (measured?.kind === "error") return noteFor(item.key, measured.error);
+      const got = readNumber(item.input.spec, measured?.kind === "value" ? String(measured.value) : draft);
       if ("error" in got) return noteFor(item.key, got.error);
       noteFor(item.key, "");
       const saved = extras.rules ? ruleFacts(c, extras.rules.index).get(item.input.field)?.value : undefined;
       if (!item.done || saved !== got.value) {
-        dispatch({ type: "setRuleInput", field: item.input.field, value: got.value, rule: item.input.rule, quote: `${draft.trim()}${item.input.spec.unit ? ` ${item.input.spec.unit}` : ""}` });
+        dispatch({ type: "setRuleInput", field: item.input.field, value: got.value, rule: item.input.rule, quote: unit ? measurementText(draft, unit) : draft.trim() });
         updateSession((s) => ({ ruleUnsure: s.ruleUnsure.filter((f) => f !== item.input!.field) }));
         // Move on once the new value has rendered, so a question it opens comes next, not at the end.
         if (!item.done) {
@@ -739,6 +756,13 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     if (!it.plan) return;
     const key = it.key;
     setPlanNotes((n) => ({ ...n, [key]: "" }));
+    const parsed = answer === NOT_SURE ? null : planFactAnswer(it.plan.field, answer);
+    if (parsed && "error" in parsed) return setPlanNotes((n) => ({ ...n, [key]: parsed.error }));
+    if (parsed) {
+      dispatch({ type: "setRuleInput", field: localField(it.plan.field), value: parsed.value, quote: parsed.quote, rule: "intake" });
+      if (advance) setAdvanceAfter({ key, generation: engineGeneration() });
+      return;
+    }
     const generation = engineGeneration();
     void answerPlan(it.plan, answer).then((error) => {
       if (engineGeneration() !== generation) return;
@@ -835,7 +859,8 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
         setDraft("");
         return;
       }
-      dispatch({ type: "setRuleInput", field, value: choiceValue(spec, value), rule, quote: choicesFor(item).find((x) => x.value === value)?.label ?? value });
+      const publicWay = field === "faces_public_way" ? planFactAnswer(field, value) : null;
+      dispatch({ type: "setRuleInput", field, value: publicWay && "value" in publicWay ? publicWay.value : choiceValue(spec, value), rule, quote: publicWay && "quote" in publicWay ? publicWay.quote : choicesFor(item).find((x) => x.value === value)?.label ?? value });
       updateSession((s) => ({ ruleUnsure: s.ruleUnsure.filter((f) => f !== field) }));
       return;
     }
