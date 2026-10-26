@@ -23,8 +23,9 @@ export function rewriteSuggestion(id: string, passage: Passage, result: RewriteR
 
 export function draftSuggestions(c: Case, sections: readonly DocSection[]): Suggestion[] {
   return sections.flatMap(s => s.blocks).filter(canRewrite).flatMap(block => {
-    const fact = [...c.facts].reverse().find(f => localField(f.field) === localField(blockField(block)) && f.kind === "proposed");
-    const after = typeof fact?.value === "string" ? fact.value : !fact ? block.draft : undefined;
+    const latest = [...c.facts].reverse().find(f => localField(f.field) === localField(blockField(block)));
+    const fact = latest?.kind === "proposed" ? latest : undefined;
+    const after = typeof fact?.value === "string" ? fact.value : !latest && !block.text ? block.draft : undefined;
     if (!after?.trim() || after === block.text) return [];
     return [{ id: fact ? `draft-${fact.id}` : `lookup-draft-${block.id}`, blockId: block.id, origin: "draft", before: block.text,
       after, ...(fact ? { factId: fact.id } : {}) } satisfies Suggestion];
@@ -47,4 +48,9 @@ export function changedWords(before: string, after: string): { prefix: string; r
   while (start < before.length && start < after.length && before[start] === after[start]) start++;
   while (end < before.length - start && end < after.length - start && before[before.length - end - 1] === after[after.length - end - 1]) end++;
   return { prefix: before.slice(0, start), removed: before.slice(start, before.length - end), added: after.slice(start, after.length - end), suffix: end ? before.slice(-end) : "" };
+}
+
+/** Textarea offsets are UTF-16; the engine slices Python strings by Unicode code point. */
+export function rewriteRange(passage: Passage): { start: number; end: number } {
+  return { start: [...passage.text.slice(0, passage.start)].length, end: [...passage.text.slice(0, passage.end)].length };
 }

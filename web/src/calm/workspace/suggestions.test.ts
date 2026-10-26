@@ -3,7 +3,7 @@ import test from "node:test";
 import { emptyCase } from "../../intake.ts";
 import { reducer } from "../../model.ts";
 import { blockForField, buildDocument } from "./document.ts";
-import { acceptSuggestion, changedWords, draftSuggestions, freshSuggestions, rejectSuggestion, rewriteSuggestion } from "./suggestions.ts";
+import { acceptSuggestion, changedWords, draftSuggestions, freshSuggestions, rejectSuggestion, rewriteRange, rewriteSuggestion } from "./suggestions.ts";
 
 const result = { replacement: "detach", cited: [], removed_citations: [], notice: null };
 test("a selected rewrite preserves every word outside its range and is stale after any newer edit", () => {
@@ -33,4 +33,19 @@ test("whole-block rewrites use start=end and draft reject dismisses exactly its 
 test("tracked changes preserve whitespace and the unchanged prefix and suffix", () => {
   assert.deepEqual(changedWords("high wind and fall.", "high wind and detach."), { prefix: "high wind and ", removed: "fall", added: "detach", suffix: "." });
   assert.deepEqual(changedWords("", "New words"), { prefix: "", removed: "", added: "New words", suffix: "" });
+});
+
+
+test("selected rewrites count Unicode code points for the engine and retain UTF-16 for local replacement", () => {
+  const passage = { blockId: "risk", text: "🏠 Panels fall.", start: 10, end: 14 };
+  assert.deepEqual(rewriteRange(passage), { start: 9, end: 13 });
+  assert.equal(rewriteSuggestion("unicode", passage, result).after, "🏠 Panels detach.");
+});
+
+
+test("an older proposed alias never revives after the applicant writes newer words", () => {
+  let c = emptyCase("homebuilder");
+  c.facts.push({ id: "old-draft", field: "process.risk", value: "Older AI proposal", kind: "proposed", status: "unconfirmed", source: { type: "user_text", ref: "Writing draft" } });
+  c = reducer(c, { type: "setProcess", field: "risk", value: "Newer applicant words" });
+  assert.deepEqual(draftSuggestions(c, buildDocument(c, [])), []);
 });

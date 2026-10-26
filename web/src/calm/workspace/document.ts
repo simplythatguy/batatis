@@ -60,7 +60,8 @@ export function blockAction(block: DocBlock, value: string): Action | null {
 /** Stable aliases for legacy links, gap fields, writing drafts and officer instructions. */
 export function blockForField(sections: readonly DocSection[], field: string): DocBlock | undefined {
   const raw = field.replace(/^field-/, "");
-  const canonical = Object.entries(PROCESS_FACT).find(([key]) => key === raw)?.[1] ?? raw;
+  const aliases: Record<string, string> = { jurisdiction: "authority", jurisdiction_wide: "scope" };
+  const canonical = aliases[raw] ?? Object.entries(PROCESS_FACT).find(([key]) => key === raw)?.[1] ?? raw;
   const key = localField(canonical);
   return sections.flatMap(s => s.blocks).find(b => b.id === raw || localField(b.id) === key || localField(blockField(b)) === key);
 }
@@ -83,7 +84,7 @@ export function buildDocument(c: Case, gaps: readonly Gap[], requests: readonly 
     const target: BlockTarget = f.options || f.inputType || na
       ? { kind: "card", href: `#/questions?focus=field-${f.id}` }
       : { kind: "detail", field: f.id, section: f.section };
-    add(f.section, { id, label: f.label, text: confirmedText(c, f.id), target, required: f.required, ...(na ? { notApplicable: na } : {}) });
+    add(f.section, { id, label: f.label, text: f.options?.[confirmedText(c, f.id)] ?? confirmedText(c, f.id), target, required: f.required, ...(na ? { notApplicable: na } : {}) });
   }
   for (const f of PROCESS_FIELDS) add("case", {
     id: PROCESS_FACT[f.id], label: f.label, text: c.process[f.id], required: true, target: { kind: "process", field: f.id },
@@ -101,13 +102,13 @@ export function buildDocument(c: Case, gaps: readonly Gap[], requests: readonly 
   for (const gap of gaps) {
     const key = gapKey(c, gap);
     const block = (gap.field && blockForField(sections, gap.field)) || (key && blockForField(sections, key))
-      || (/^(?:evidence|professional)/.test(gap.field ?? "") ? blockForField(sections, "evidence") : undefined);
+      || (/^(?:evidence|professional|responsible_professional)/.test(gap.field ?? "") ? blockForField(sections, "evidence") : undefined);
     if (block) block.missing = true;
   }
   for (const r of requests) {
     const gap = gaps.find(g => g.id === r.gap_id);
     const block = blockForField(sections, r.field || gap?.field || "")
-      ?? (/^(?:evidence|professional)/.test(r.field ?? gap?.field ?? "") ? blockForField(sections, "evidence") : undefined)
+      ?? (/^(?:evidence|professional|responsible_professional)/.test(r.field ?? gap?.field ?? "") ? blockForField(sections, "evidence") : undefined)
       ?? (/^(?:section_c|provisions)/.test(r.field ?? gap?.field ?? "") ? blockForField(sections, "provisions") : undefined);
     if (block && r.note?.trim()) block.requests.push({ id: r.id, note: r.note });
   }

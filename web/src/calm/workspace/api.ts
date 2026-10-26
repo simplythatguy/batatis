@@ -61,5 +61,6 @@ export const workspaceApi = {
 };
 export function workspaceFailure(error: unknown, feature: "Signing" | "History" | "Rewriting" | "Package preview"): string {
   if (error instanceof EngineError && [404, 405, 501].includes(error.status)) return `${feature} isn’t available on this server.`;
+  if (error instanceof EngineError && (error.status === 0 || error.status >= 500)) return `${feature} couldn’t finish. Try again.`;
   return error instanceof EngineError ? error.detail : `${feature} couldn’t finish. Try again.`;
 }

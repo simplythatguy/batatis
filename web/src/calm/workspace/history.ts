@@ -13,8 +13,10 @@ export function inverseEntry(entry: HistoryEntry, current: string): HistoryEntry
   return current === entry.after ? historyEntry(entry.block, entry.label, current, entry.before, "restore") : null;
 }
 export function acceptedAI(entries: readonly HistoryEntry[], block: string, text: string): string | undefined {
-  const latest = [...entries].reverse().find(e => e.block === block);
-  return latest?.by === "ai" && latest.after === text ? latest.at : undefined;
+  const ai = [...entries].reverse().find(e => e.block === block && e.by === "ai");
+  if (!ai) return undefined;
+  const laterRestore = [...entries].reverse().find(e => e.block === block && e.by === "restore" && e.at >= ai.at);
+  return laterRestore?.after === ai.before && text === ai.before ? undefined : ai.at;
 }
 
 /** The same entry ids survive retries. New entries arriving during a batch are never acknowledged early. */

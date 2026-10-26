@@ -53,3 +53,8 @@ test("an idle block commits at 1.5 seconds after the most recent keystroke", t =
   t.mock.timers.tick(1);
   assert.deepEqual(entries.map(e => [e.before, e.after]), [["old", "ab"]]);
 });
+
+test("accepted AI provenance stays on a block through later applicant edits", () => {
+  const ai = entry("before", "AI accepted", "ai"), edit = entry("AI accepted", "Applicant refined it");
+  assert.equal(acceptedAI([ai, edit], ai.block, edit.after), ai.at);
+});

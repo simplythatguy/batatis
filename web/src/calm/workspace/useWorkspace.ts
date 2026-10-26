@@ -85,7 +85,7 @@ export function useWorkspace(contentKey: string) {
   }, [history.pending, historyNote, attempt, locked, flushHistory]);
 
   return { state, history: history.entries, historyPending: history.pending, historyNote, journal, flushHistory,
-    reload, retry: () => setAttempt(n => n + 1), signal: lifetime.current.signal,
+    reload, retry: () => setAttempt(n => n + 1), getSignal: () => lifetime.current.signal,
     signaturesCurrent: state.phase === "ready" && state.basis === contentKey && store.readSync().saved };
 }
 export type WorkspaceController = ReturnType<typeof useWorkspace>;

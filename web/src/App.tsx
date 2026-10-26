@@ -82,7 +82,7 @@ export function App() {
       body = <Review />;
       break;
     case "application":
-      body = <Application download={calm.download} />;
+      body = <Application download={calm.download} step={calm.applicationStep} focus={calm.focus} />;
       break;
     case "officer":
       body = <div className="cf-legacy"><Officer /></div>;
