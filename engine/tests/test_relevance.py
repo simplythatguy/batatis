@@ -143,6 +143,7 @@ def test_latest_empty_description_wins(setup):
 
 def test_no_key_is_safe_503_and_does_not_start_scoring(tmp_path, codes, monkeypatch, caplog):
     monkeypatch.setenv('BATATIS_LIVE', '1')
+    monkeypatch.setenv('BATATIS_IDENTIFY_SCREEN', 'jev')
     resolved = []
     monkeypatch.setattr(keystore, 'resolve', lambda provider: resolved.append(provider))
     client = TestClient(create_app(store=CaseStore(tmp_path / 'cases.sqlite'), codes=codes))

@@ -337,6 +337,8 @@ def require_identify(client: Recording) -> None:
 def test_identify_responses_name_no_provider(world, monkeypatch):
     _, client, _, _ = world
     require_identify(client)
+    monkeypatch.setenv('BATATIS_IDENTIFY_SCREEN', 'jev')
+    monkeypatch.setenv('BATATIS_IDENTIFY_RERANK', 'jev')
     monkeypatch.setenv('BATATIS_PROVIDER', 'fake')                                # offline stand-ins, never a live call
     monkeypatch.setenv('BATATIS_IDENTIFY_RATE_LIMIT', '1000')
     case_id = described_case(client)
@@ -368,6 +370,8 @@ def test_identify_with_the_gate_closed_names_no_provider(world, monkeypatch):
     """No fake selected and no live switch: the run takes the labelled keyword fallback, whose cause names a provider."""
     _, client, _, _ = world
     require_identify(client)
+    monkeypatch.setenv('BATATIS_IDENTIFY_SCREEN', 'jev')
+    monkeypatch.setenv('BATATIS_IDENTIFY_RERANK', 'jev')
     monkeypatch.setenv('BATATIS_IDENTIFY_RATE_LIMIT', '1000')
     case_id = described_case(client)
     run = client.post(f'/cases/{case_id}/identify')
