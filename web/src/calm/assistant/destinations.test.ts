@@ -47,8 +47,8 @@ test("plans are checked against binding, generation and the current offer", () =
 
 test("a route only counts once it is still showing after the app's redirects", async () => {
   let path = "/";
-  const deps: OpenDeps = { go: () => { path = "/officer"; }, settle: async () => { if (path === "/officer") path = "/"; }, path: () => path, card: () => null, shows: () => false };
-  assert.equal(await openDestination("officer-view", "A", deps), false);
+  const deps: OpenDeps = { go: () => { path = "/application"; }, settle: async () => { if (path === "/application") path = "/"; }, path: () => path, card: () => null, shows: () => false };
+  assert.equal(await openDestination("application", "A", deps), false);
 });
 
 test("opening code from an application restores its native context after an earlier None visit", async () => {

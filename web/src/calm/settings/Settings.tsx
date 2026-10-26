@@ -138,7 +138,6 @@ export function Settings({ phoneTools }: { phoneTools?: ReactNode }) {
 
         <section className="ac-section" aria-labelledby="ac-s-accuracy">
           <h2 id="ac-s-accuracy" className="ac-section-title">Accuracy</h2>
-          <p className="ac-prose"><a className="acc-inline-link" href="#/accuracy">Read the accuracy report</a></p>
         </section>
 
         {user && !testPerson && (

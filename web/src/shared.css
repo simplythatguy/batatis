@@ -1,0 +1,196 @@
+/* Shared primitives still used by the calm app. The retired standalone shell is not loaded. */
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  overflow: hidden;
+}
+
+:root { --text-md: 14px; --text-xs: 12px; }
+summary:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 3px; }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.code-quote {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* A whole article can run to a page. The quote scrolls inside its card; nothing is cut. */
+.code-quote > blockquote {
+  max-height: 18rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.nrc-credit a,
+.notice-row a {
+  /* Contains the .sr-only "(opens in a new tab)" text so it cannot stretch the page. */
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: var(--text-secondary);
+  text-decoration: underline;
+  text-decoration-color: var(--border-strong);
+  text-underline-offset: 2px;
+}
+
+@media (hover: hover) {
+  .nrc-credit a:hover,
+  .notice-row a:hover {
+    color: var(--text-primary);
+  }
+}
+
+/* Engine `info` items: advice, not a missing item. Neutral, no status dot, no count. */
+.notice-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.notice-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+}
+
+.notice-icon {
+  display: inline-flex;
+  flex: none;
+  margin-top: 2px;
+  color: var(--text-secondary);
+}
+
+/* Supporting documents and manual code search remain embedded in the current flow. */
+.toolbar { flex-shrink: 0; flex-wrap: wrap; }
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.section-title {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+}
+
+.sub-title {
+  margin: var(--space-4) 0 0;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--text-secondary);
+}
+
+.empty {
+  margin: 0;
+  padding: var(--space-4) 0;
+  color: var(--text-secondary);
+  font-size: var(--text-md);
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+}
+
+.form-grid .full {
+  grid-column: 1 / -1;
+}
+
+.card { display: flex; flex-direction: column; gap: var(--space-3); }
+.card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.card-topic {
+  margin: 0 auto 0 0;
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+}
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding-top: var(--space-6);
+  max-width: 60ch;
+}
+
+.empty-state p {
+  margin: 0;
+}
+
+.btn { min-height: 40px; line-height: 20px; }
+.btn-xs { min-height: 32px; }
+.field-step { display: flex; flex-direction: column; gap: 24px; }
+.step-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
+.step-heading h2 { margin: 0; line-height: 1.35; }
+.step-heading .meta { flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.step-controls { display: flex; gap: 12px; align-items: center; margin-top: 8px; }
+.step-controls > :last-child { margin-left: auto; }
+.field-step .form-grid { grid-template-columns: 1fr; gap: 24px; }
+.field { gap: 8px; }
+.field label { line-height: 20px; }
+.compact-help, .jump-menu { color: var(--text-secondary); font-size: 12px; }
+.compact-help > summary, .jump-menu > summary { cursor: pointer; min-height: 28px; display: flex; align-items: center; gap: 8px; list-style: none; }
+.compact-help > summary::after, .jump-menu > summary::after { content: "+"; font-size: 16px; }
+.compact-help[open] > summary::after, .jump-menu[open] > summary::after { content: "−"; }
+.compact-help p{ max-width: 62ch; line-height: 1.55; }
+.jump-menu { position: relative; }
+.jump-menu[open] > div { position: absolute; z-index: 2; bottom: 36px; left: 0; display: flex; flex-direction: column; min-width: 210px; max-height: 260px; overflow: auto; overscroll-behavior: contain; padding: 8px; background: var(--bg-elevated); border: 1px solid var(--border-default); border-radius: var(--radius-md); }
+.jump-menu .btn { justify-content: flex-start; }
+.section-switch { padding: 0; border: 0; }
+.recovery { padding: 16px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; }
+.recovery p { margin: 0 0 4px; flex-basis: 100%; }
+.recovery details { flex-basis: 100%; }
+.optional-next { align-self: flex-start; }
+.evidence-context { margin: -8px 0 8px; }
+.field-step { padding-bottom: 16px; }
+.doc-block { gap: 24px; }
+.doc-entry { display: flex; flex-direction: column; gap: 16px; padding: 16px; border: 1px solid var(--border-default); border-radius: var(--radius-lg); background: var(--bg-elevated); }
+.doc-step-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.doc-step-head .meta:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.doc-step-head .meta:last-child { flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.doc-entry .step-controls { margin-top: 0; }
+.doc-note { margin: 0; }
+.doc-list { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.doc-list > .meta { margin: 0; }
+.doc-list .plain-list { width: 100%; margin: 0; }
+.doc-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--border-subtle, var(--border-default)); }
+.doc-row:last-child { border-bottom: 1px solid var(--border-subtle, var(--border-default)); }
+.doc-row-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.doc-title { overflow-wrap: anywhere; }
+.doc-status { display: inline-flex; align-items: center; gap: 6px; }
+
+@media (max-width: 640px) {
+  .btn, .field input:not([type="checkbox"]), .field select { min-height: 44px; }
+  .field-step, .field-step .form-grid { gap: 16px; }
+  .step-controls { gap: 8px; flex-wrap: wrap; }
+  .doc-entry { padding: 12px; }
+  .doc-row { flex-wrap: wrap; }
+}
