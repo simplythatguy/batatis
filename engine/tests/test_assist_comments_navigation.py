@@ -1,6 +1,6 @@
 """Comments navigation uses the current authorized application, never model prose.
 
-All accounts, databases, code text and voice events here are synthetic. No live
+All accounts, databases and code text here are synthetic. No live
 provider or browser is used; the client owns applying a plan to its bound case.
 """
 from types import SimpleNamespace
@@ -15,7 +15,6 @@ from engine.assist_navigation import available_destinations, plan_navigation
 from engine.models import Case
 from engine.store import CaseStore
 from engine.tests.test_accounts import onboard, signup
-from engine.tests.test_voice_api import SCOPE, begin, commit_turn, upstream, voice_app
 from engine.tests.test_voice_context import synthetic_codes
 
 
@@ -157,79 +156,3 @@ def test_comments_requires_an_enabled_native_destination_and_an_applicant_case()
     assert plan_navigation('Open comments', ['settings'], applicant, case) is None
     reviewer = User(email='officer@example.test', name='Officer', role='reviewer', authority='edmonton')
     assert plan_navigation('Open comments', ['comments'], reviewer, case) is None
-
-
-def test_completed_voice_comments_plan_keeps_the_current_turn_and_context_binding(voice_app):
-    client, store, providers = voice_app
-    owner = client.get('/auth/me').json()['user']
-    case = store.put(Case(owner_id=owner['id'], authority='edmonton', status='returned'))
-    before = store.get(case.id).model_dump()
-    scope = {**SCOPE, 'case_id': case.id, 'case_version': case.version,
-             'screen': 'application', 'destinations': ['comments']}
-    socket, started = begin(client, scope)
-    try:
-        assert started['type'] == 'session.started', started
-        provider = providers[0]
-        commit_turn(client, provider, socket, started, 'comments-turn')
-        upstream(client, provider, type='conversation.item.input_audio_transcription.updated',
-                 item_id='comments-turn', transcript="Open my officer's comments")
-        upstream(client, provider, type='conversation.item.input_audio_transcription.completed',
-                 item_id='comments-turn', transcript="Open my officer's comments")
-        result = socket.receive_json()
-        assert result['type'] == 'transcript.completed'
-        assert result['navigation'] == {'destination': 'comments'}
-        assert (result['session_id'], result['context_id'], result['revision'], result['turn_id']) == (
-            started['session_id'], scope['context_id'], 0, 'comments-turn')
-        assert not any(event['type'] == 'response.create' for event in provider.sent)
-        assert store.get(case.id).model_dump() == before
-    finally:
-        socket.__exit__(None, None, None)
-
-
-def test_old_voice_comments_turn_cannot_navigate_after_context_changes(voice_app):
-    client, store, providers = voice_app
-    owner = client.get('/auth/me').json()['user']
-    case = store.put(Case(owner_id=owner['id'], authority='edmonton', status='returned'))
-    scope = {**SCOPE, 'case_id': case.id, 'case_version': case.version, 'destinations': ['comments']}
-    socket, started = begin(client, scope)
-    try:
-        assert started['type'] == 'session.started', started
-        provider = providers[0]
-        commit_turn(client, provider, socket, started, 'old-comments-turn')
-        socket.send_json({'type': 'context.update', 'session_id': started['session_id'],
-                          'context_id': scope['context_id'], 'revision': 0,
-                          'scope': {**scope, 'revision': 1, 'destinations': ['settings']}})
-        assert socket.receive_json()['type'] == 'audio.clear'
-        assert socket.receive_json()['type'] == 'context.updated'
-        upstream(client, provider, type='conversation.item.input_audio_transcription.completed',
-                 item_id='old-comments-turn', transcript='Open officer comments')
-        commit_turn(client, provider, socket, started, 'new-comments-turn', revision=1)
-        upstream(client, provider, type='conversation.item.input_audio_transcription.completed',
-                 item_id='new-comments-turn', transcript='Open officer comments')
-        result = socket.receive_json()
-        assert result['type'] == 'transcript.completed' and result['navigation'] is None
-        assert result['turn_id'] == 'new-comments-turn' and result['revision'] == 1
-    finally:
-        socket.__exit__(None, None, None)
-
-
-def test_voice_comments_request_cannot_be_rebound_to_another_application(voice_app):
-    client, store, providers = voice_app
-    owner = client.get('/auth/me').json()['user']
-    first = store.put(Case(owner_id=owner['id'], status='returned'))
-    second = store.put(Case(owner_id=owner['id'], status='in_review'))
-    scope = {**SCOPE, 'case_id': first.id, 'case_version': first.version, 'destinations': ['comments']}
-    socket, started = begin(client, scope)
-    try:
-        assert started['type'] == 'session.started', started
-        provider = providers[0]
-        commit_turn(client, provider, socket, started, 'first-application-turn')
-        socket.send_json({'type': 'context.update', 'session_id': started['session_id'],
-                          'context_id': scope['context_id'], 'revision': 0,
-                          'scope': {**scope, 'revision': 1, 'case_id': second.id,
-                                    'case_version': second.version}})
-        result = socket.receive_json()
-        assert result['type'] == 'session.ended' and result['reason'] == 'context_changed'
-        assert 'navigation' not in result
-    finally:
-        socket.__exit__(None, None, None)

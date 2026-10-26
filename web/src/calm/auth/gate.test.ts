@@ -21,6 +21,7 @@ test("gate status follows the account phase", () => {
 test("gate redirects: sign-in, onboarding, home, and no accounts", () => {
   assert.equal(gateRedirect("loading", null, "/questions"), null);
   assert.equal(gateRedirect("signed-out", null, "/questions"), "#/signin");
+  assert.equal(gateRedirect("signed-out", null, "/accuracy"), "#/signin");
   assert.equal(gateRedirect("signed-out", null, "/signup"), null);
   assert.equal(gateRedirect("needs-onboarding", user({ onboarded: false }), "/"), "#/onboarding");
   assert.equal(gateRedirect("needs-onboarding", user({ onboarded: false }), "/onboarding"), null);
@@ -63,11 +64,4 @@ test("settings asks for a code when becoming or leaving a reviewer", () => {
   assert.deepEqual(codeNeeded({ role: "reviewer", authority: "calgary" }, "applicant"), { authority: "calgary" });
   assert.equal(codeNeeded({ role: "applicant", authority: null }, "applicant"), null);
   assert.equal(codeNeeded({ role: "applicant", authority: null }, "reviewer", null), null);
-});
-
-test("the accuracy report is readable signed out, before onboarding and signed in", () => {
-  assert.equal(gateRedirect("signed-out", null, "/accuracy"), null);
-  assert.equal(gateRedirect("needs-onboarding", null, "/accuracy"), null);
-  assert.equal(gateRedirect("ready", null, "/accuracy"), null);
-  assert.equal(gateRedirect("signed-out", null, "/accuracy-not-public"), "#/signin");
 });
