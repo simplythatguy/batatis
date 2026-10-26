@@ -284,7 +284,7 @@ def test_latest_unknown_revision_blocks_final_and_does_not_restore_old_values(ca
 
 def test_authentic_process_answers_and_linked_files_are_in_final_appendix(final, case, codes):
     text = appendix_text(final.pdf, final.form_pages)
-    assert 'P. Alternative solution (Div C 2.3.1): applicant-written documentation' in text and 'SYNTHETIC' in text
+    assert 'P. Alternative solution (Div C 2.3.1): the applicant\'s documentation' in text and 'SYNTHETIC' in text
     for field in process_fields(case, codes):
         assert field.answer is not None
         assert norm(field.answer.value) in text and field.answer.source.ref in text

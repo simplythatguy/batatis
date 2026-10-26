@@ -46,16 +46,13 @@ test("non-text values and applicant N/A reasons link to their exact question", (
   assert.equal(blockForField(sections, "request_date")?.target.kind, "card");
 });
 
-test("Section C lookup stays immutable and its explanation is separate applicant/AI text", () => {
+test("Section C lookup is a read-only reference, with no explanation line the package would not print", () => {
   const c = emptyCase("homebuilder");
   c.sectionC = [{ candidateId: "c", provision: "9.1.1.1.(1)", citation: "Source citation", pairs: [], attributionStatus: "no-row", intent: [], differs: false, explanation: "A draft explanation" }];
   const sections = buildDocument(c, []);
-  const reference = blockForField(sections, "section_c.9.1.1.1.(1)")!;
-  const explanation = blockForField(sections, "section_c.9.1.1.1.(1).explanation")!;
-  assert.equal(reference.target.kind, "card");
-  assert.equal(explanation.text, "");
-  assert.equal(explanation.draft, "A draft explanation");
-  assert.deepEqual(blockAction(explanation, "Applicant explanation"), { type: "setDetail", field: explanation.id, section: "C", value: "Applicant explanation" });
+  assert.equal(blockForField(sections, "section_c.9.1.1.1.(1)")?.target.kind, "card");
+  assert.equal(blockForField(sections, "section_c.9.1.1.1.(1).explanation"), undefined);
+  assert.equal(blockForField(sections, "provisions"), undefined, "chosen references are the rows; no summary line");
 });
 
 test("withdrawn document titles and unscoped listings cannot survive as attached-package labels", () => {

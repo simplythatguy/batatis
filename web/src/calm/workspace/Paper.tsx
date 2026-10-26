@@ -71,7 +71,7 @@ export function Paper({ editing, focus, zoom, statusWord }: { editing: Editing; 
       const block = blocks.find(b => b.id === holder.closest<HTMLElement>("[data-aw-block]")?.dataset.awBlock);
       if (!block) return;
       const rect = s.getRangeAt(0).getBoundingClientRect();
-      setSelection({ blockId: block.id, text: block.text, start: 0, end: 0, selected: s.toString(), left: rect.left, top: rect.top, readOnly: true });
+      setSelection({ blockId: block.id, text: block.text, start: 0, end: 0, selected: s.toString(), left: rect.left, top: rect.top, bottom: rect.bottom, readOnly: true });
     }
     document.addEventListener("selectionchange", onSelection);
     return () => document.removeEventListener("selectionchange", onSelection);

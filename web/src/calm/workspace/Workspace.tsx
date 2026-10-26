@@ -44,6 +44,8 @@ export function Workspace({ step, focus, download }: { step: WorkspaceStep; focu
   }, [step]);
 
   useEffect(() => {
+    // Undo belongs to the paper: on Sign or Send it would change words nobody can see.
+    if (step !== "edit") return;
     function onKey(event: KeyboardEvent) {
       if (!(event.metaKey || event.ctrlKey) || event.altKey || event.shiftKey || event.key.toLowerCase() !== "z" || locked) return;
       const el = event.target;

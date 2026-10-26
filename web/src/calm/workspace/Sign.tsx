@@ -52,6 +52,12 @@ export function Sign({ workspace }: { workspace: WorkspaceController }) {
     }
   }
 
+  /** Close the dialog and give focus back to that signer's card, not the page. */
+  function close(who: Signer) {
+    setSigner(null);
+    requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-signer="${who.role}"] button`)?.focus());
+  }
+
   if (state.phase !== "ready") {
     return (
       <div className="aw-scroll"><div className="aw-sign">
@@ -90,7 +96,7 @@ export function Sign({ workspace }: { workspace: WorkspaceController }) {
         const current = isCurrent(sig);
         const state = current ? "Signed" : sig ? "Changed since signed" : "Not signed";
         return (
-          <section key={s.role} className="aw-card aw-signer" aria-label={`${roleLabel(s)} signature`}>
+          <section key={s.role} className="aw-card aw-signer" data-signer={s.role} aria-label={`${roleLabel(s)} signature`}>
             <header>
               <div>
                 <h2>{s.name || roleLabel(s)}</h2>
@@ -124,7 +130,7 @@ export function Sign({ workspace }: { workspace: WorkspaceController }) {
         );
       })}
 
-      {note && <p className="aw-note" role="status">{note}<button type="button" className="cf-link-btn" onClick={() => { setNote(""); workspace.retry(); }}>Try again</button></p>}
+      {note && <p className="aw-note" role="status">{note}<button type="button" className="cf-link-btn" onClick={() => { setNote(""); workspace.retry(); }}>Reload</button></p>}
       <p className="aw-fine">Professionals sign their own documents. Batatis never signs or seals for anyone.</p>
       <div className="aw-sign-foot">
         <a className={`cf-btn${done ? " is-primary" : ""}`} href="#/application?step=send">
@@ -134,8 +140,8 @@ export function Sign({ workspace }: { workspace: WorkspaceController }) {
 
       {signer && (
         <SigningDialog key={signer.role} signer={signer} busy={busy} locked={locked} note={note}
-          onClose={() => { if (!busy) setSigner(null); }}
-          onSign={async body => { if (await write((id, signal) => workspaceApi.sign(id, signer.role, body, signal))) setSigner(null); }} />
+          onClose={() => { if (!busy) close(signer); }}
+          onSign={async body => { if (await write((id, signal) => workspaceApi.sign(id, signer.role, body, signal))) close(signer); }} />
       )}
     </div></div>
   );
@@ -149,31 +155,47 @@ function SigningDialog({ signer, busy, locked, note, onSign, onClose }: {
   const [name, setName] = useState(signer.name);
   const [hasInk, setHasInk] = useState(false);
   const [error, setError] = useState("");
+  // Nobody signs for anyone else: the person at the pad says who they are.
+  const [identity, setIdentity] = useState(false);
   const canvas = useRef<HTMLCanvasElement>(null);
   const pointer = useRef<number | null>(null);
   const day = albertaDate();
 
-  // Size the pad to its box at the device's pixel ratio; Type draws the printed name in a signature face.
+  // Size the pad to its box at the device's pixel ratio. Resizing clears it, so this runs when the method
+  // changes, never while the printed name is typed: a drawn signature survives a corrected name.
   useEffect(() => {
     const el = canvas.current;
     if (!el) return;
     const frame = requestAnimationFrame(() => {
       const rect = el.getBoundingClientRect(), ratio = window.devicePixelRatio || 1;
-      const w = Math.max(rect.width, 280), h = 160;
-      el.width = Math.round(w * ratio);
-      el.height = Math.round(h * ratio);
+      el.width = Math.round(Math.max(rect.width, 280) * ratio);
+      el.height = Math.round(160 * ratio);
       const ctx = el.getContext("2d");
       if (!ctx) { setError("The signing pad isn’t available in this browser."); return; }
       ctx.scale(ratio, ratio);
       Object.assign(ctx, { lineWidth: 2.2, lineCap: "round", lineJoin: "round", strokeStyle: "#14161b", fillStyle: "#14161b" });
-      if (method === "typed" && name.trim()) {
-        ctx.font = 'italic 44px "Snell Roundhand", "Segoe Script", "Brush Script MT", cursive';
-        ctx.fillText(name.trim(), 24, 100, w - 48);
-        setHasInk(true);
-      } else setHasInk(false);
+      setHasInk(false);
+      if (method === "typed") typeName(el);
     });
     return () => cancelAnimationFrame(frame);
-  }, [method, name]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [method]);
+
+  // Type draws the printed name in a signature face, redrawn as the name changes.
+  useEffect(() => {
+    if (method === "typed" && canvas.current) typeName(canvas.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [name]);
+
+  function typeName(el: HTMLCanvasElement) {
+    const ctx = el.getContext("2d");
+    if (!ctx) return;
+    const w = el.width / (window.devicePixelRatio || 1);
+    ctx.save(); ctx.resetTransform(); ctx.clearRect(0, 0, el.width, el.height); ctx.restore();
+    ctx.font = 'italic 44px "Snell Roundhand", "Segoe Script", "Brush Script MT", cursive';
+    if (name.trim()) ctx.fillText(name.trim(), 24, 100, w - 48);
+    setHasInk(Boolean(name.trim()));
+  }
 
   const at = (e: PointerEvent<HTMLCanvasElement>) => {
     const r = e.currentTarget.getBoundingClientRect();
@@ -204,7 +226,7 @@ function SigningDialog({ signer, busy, locked, note, onSign, onClose }: {
     if (method === "typed") setMethod("drawn");
   }
   async function sign() {
-    if (busy || locked || !canvas.current || !name.trim()) return;
+    if (busy || locked || !canvas.current || !name.trim() || !identity) return;
     try {
       setError("");
       await onSign({ name: name.trim(), method, image: signatureImage(canvas.current) });
@@ -242,11 +264,15 @@ function SigningDialog({ signer, busy, locked, note, onSign, onClose }: {
           {hasInk && <button type="button" className="aw-pad-clear" disabled={busy} onClick={clear}>Clear</button>}
         </div>
         <p className="aw-attest">{ATTESTATION}</p>
+        <label className="aw-identity">
+          <input type="checkbox" className="aw-check" checked={identity} disabled={busy || locked} onChange={e => setIdentity(e.target.checked)} />
+          <span>I am {name.trim() || "the person named above"}, or I am authorized to sign for them.</span>
+        </label>
         {(error || note) && <p className="cf-hint" role="alert">{error || note}</p>}
       </div>
       <div className="cf-modal-foot">
         <button type="button" className="cf-btn" disabled={busy} onClick={onClose}>Cancel</button>
-        <button type="button" className="cf-btn is-primary" disabled={busy || locked || !hasInk || !name.trim()} onClick={() => void sign()}>
+        <button type="button" className="cf-btn is-primary" disabled={busy || locked || !hasInk || !name.trim() || !identity} onClick={() => void sign()}>
           {busy ? "Saving…" : "Sign"}
         </button>
       </div>

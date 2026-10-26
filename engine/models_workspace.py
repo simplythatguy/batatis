@@ -47,7 +47,11 @@ class SignatureInput(BaseModel):
         return value
 
 
-class WorkspaceSignature(SignatureInput):
+class WorkspaceSignature(BaseModel):
+    """A saved signature. Its image was checked once on the way in (SignatureInput); loading a case never decodes it."""
+    name: str
+    method: Literal['drawn', 'typed']
+    image: str
     role: SignerRole
     signed_on: str
     content_hash: str
@@ -71,6 +75,22 @@ class HistoryEntry(BaseModel):
     before: str = Field(max_length=60000, strict=True)
     after: str = Field(max_length=60000, strict=True)
     by: Literal['you', 'ai', 'restore']
+
+
+HISTORY_MAX_ENTRIES = 300
+HISTORY_MAX_CHARS = 1_000_000   # every case read carries the history, so it stays small
+
+
+def trim_history(entries: list[HistoryEntry]) -> list[HistoryEntry]:
+    """The newest entries, one per id (a retried batch is not stored twice), within both limits."""
+    unique = list({entry.id: entry for entry in entries}.values())[-HISTORY_MAX_ENTRIES:]
+    kept, size = [], 0
+    for entry in reversed(unique):
+        size += len(entry.before) + len(entry.after)
+        if size > HISTORY_MAX_CHARS and kept:
+            break
+        kept.append(entry)
+    return list(reversed(kept))
 
 
 class Workspace(BaseModel):

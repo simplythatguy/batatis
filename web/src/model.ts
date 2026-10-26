@@ -1,6 +1,6 @@
 import type { IntakeRecord, IntakeResult, IdentifyResult } from "./api/types.gen";
 import { AUTHORITIES } from "./config";
-import { applyDescription } from "./intake";
+import { AI_ACCEPTED_REF, applyDescription } from "./intake";
 import { asLocal, confirmedAnswer, isWritingField, localField } from "./intakeFields";
 import { codeQuestion, identifyCandidates, readGroups } from "./intakeView";
 import { AUTHORITY_ONLY_FIELDS, professionalConfirmed } from "./professional";
@@ -475,11 +475,11 @@ export type Action =
   /** Derived: the latest code identification; its committed articles and choices become code cards. */
   | { type: "noteIdentify"; result: IdentifyResult }
   | { type: "markDecisionPending"; id: string; pending: boolean }
-  | { type: "setDetail"; field: string; value: string; section: string }
+  | { type: "setDetail"; field: string; value: string; section: string; origin?: "ai" }
   | { type: "answerQuestion"; id: string; answer: string }
   | { type: "setStoreyCount"; value: string }
   | { type: "answerCandidate"; id: string; answer: CandidateAnswer | null }
-  | { type: "setProcess"; field: ProcessFieldId; value: string }
+  | { type: "setProcess"; field: ProcessFieldId; value: string; origin?: "ai" }
   | { type: "setAuthority"; authority: Case["authority"] }
   /** The applicant's own name (already saved, or kept for when the case is created). */
   | { type: "renameCase"; title: string }
@@ -739,7 +739,7 @@ export function reducer(c: Case, a: Action): Case {
     case "markDecisionPending":
       return { ...c, candidates: c.candidates.map((x) => (x.id === a.id ? { ...x, pending: a.pending || undefined } : x)) };
     case "setDetail":
-      return { ...c, facts: upsertUserFact(c, a.field, a.value, { type: "user_text", ref: `${TYPED_REF} Section ${a.section}` }) };
+      return { ...c, facts: upsertUserFact(c, a.field, a.value, { type: "user_text", ref: a.origin === "ai" ? AI_ACCEPTED_REF : `${TYPED_REF} Section ${a.section}` }) };
     case "answerQuestion": {
       const q = c.questions.find((x) => x.id === a.id);
       if (!q) return c;
@@ -803,7 +803,7 @@ export function reducer(c: Case, a: Action): Case {
           confidence: null,
           formula: null,
           inputs: [],
-          source: { type: "user_text", ref: "Typed on the alternative path", quote: value },
+          source: { type: "user_text", ref: a.origin === "ai" ? AI_ACCEPTED_REF : "Typed on the alternative path", quote: value },
         });
       }
       return { ...c, process: { ...c.process, [a.field]: value }, facts };

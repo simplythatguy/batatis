@@ -140,3 +140,13 @@ def test_hash_uses_current_confirmed_content_and_documents():
     proposed.status = 'unconfirmed'
     case.facts.append(proposed)
     assert content_hash(case) != original
+
+
+def test_history_keeps_one_copy_of_a_retried_entry_and_stays_within_its_size_limit():
+    from engine.models_workspace import HISTORY_MAX_CHARS, HistoryEntry, trim_history
+    entry = lambda n, size=10: HistoryEntry(id=f'h{n}', at=f'2026-10-26T00:00:{n:02d}Z', block='process.risk',
+                                             label='Risk', before='a' * size, after='b' * size, by='you')
+    assert [e.id for e in trim_history([entry(1), entry(2), entry(1)])] == ['h1', 'h2']
+    kept = trim_history([entry(n, 60000) for n in range(12)])
+    assert [e.id for e in kept] == [f'h{n}' for n in range(4, 12)], 'the newest entries that fit are kept'
+    assert sum(len(e.before) + len(e.after) for e in kept) <= HISTORY_MAX_CHARS

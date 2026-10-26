@@ -172,6 +172,7 @@ export function useApplicationExport(isActive: () => boolean = () => true, signa
       const missingForm = e instanceof EngineError && (e.status === 503 || /missing a file/i.test(detail));
       const note = missingForm
         ? "The application PDF form is unavailable. Download a text record or try again later."
+        : e instanceof EngineError && e.status === 413 ? detail
         : "The PDF could not be prepared.";
       setTech(detail);
       setStage("error");

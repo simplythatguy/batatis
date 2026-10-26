@@ -127,7 +127,7 @@ export function Send({ download, workspace, sections, zoom }: { download: "" | "
                   <span>{doc.title}{who && <span className="aw-meta"> · {who}</span>}</span>
                   {binding && engineId
                     ? <span className="aw-meta"><EvidenceFileLink caseId={engineId} fileId={binding.fileId} name="PDF" /></span>
-                    : <span className="aw-missing-word">Not attached</span>}
+                    : <span className="aw-missing-word"><Dot tone="blocking" />Not attached</span>}
                 </li>
               );
             })}
@@ -151,6 +151,7 @@ export function Send({ download, workspace, sections, zoom }: { download: "" | "
           <div className="aw-export-status" role="status">
             {ex.busy && <span className="cf-dot is-pending cf-pulse" aria-hidden="true" />}
             <p>{ex.statusText}</p>
+            {ex.stage === "blocked" && ex.reasons.length > 0 && <ul className="aw-reasons">{ex.reasons.slice(0, 5).map(r => <li key={r}>{r}</li>)}</ul>}
             {ex.stage === "ready" && ex.file && <button type="button" className="cf-link-btn" onClick={ex.downloadAgain}>Download again</button>}
             {ex.stage === "ready" && ex.file?.notice && <Notices notices={[ex.file.notice]} />}
             {route && ex.stage === "blocked" && route !== ex.statusText && <p className="aw-fine">{route}</p>}

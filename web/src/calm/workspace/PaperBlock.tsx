@@ -3,21 +3,49 @@ import { authorityName } from "../applications";
 import { Icon24 } from "../icons";
 import { CIcon, Dot, MoreIcon } from "../ui";
 import type { DocBlock } from "./document";
-import { canRewrite, changedWords, type Passage, type Suggestion } from "./suggestions";
+import { acceptable, canRewrite, changedWords, type Passage, type Suggestion } from "./suggestions";
 
 export interface PassageSelection extends Passage {
   selected: string;
+  /** The selected words on screen: the first line's left and top, the last line's bottom. */
   left: number;
   top: number;
+  bottom: number;
   /** The whole block, chosen from its menu rather than by selecting words. */
   wholeBlock?: boolean;
   /** Words selected outside an editor: Ask only. */
   readOnly?: boolean;
+  /** Opened from the keyboard: the bar takes focus. */
+  viaKeyboard?: boolean;
 }
 export const textId = (id: string) => `aw-text-${id}`;
 export const blockId = (id: string) => `aw-block-${id}`;
 
 const isLong = (b: DocBlock) => b.target.kind === "process" || b.id === "alternative_description" || (b.target.kind === "detail" && b.target.section === "C");
+
+/** Grow the editor to its words; the pane keeps its scroll position while the height is measured. */
+function fitHeight(el: HTMLTextAreaElement) {
+  const pane = el.closest(".aw-pane"), top = pane?.scrollTop ?? 0;
+  el.style.height = "0px";
+  el.style.height = `${Math.max(el.scrollHeight, 22)}px`;
+  if (pane) pane.scrollTop = top;
+}
+
+/** Where selected words sit inside an editor, measured on a hidden copy laid out the same way. */
+function rangeBox(el: HTMLTextAreaElement, start: number, end: number): { left: number; top: number; bottom: number } {
+  const box = el.getBoundingClientRect();
+  if (!el.parentElement) return { left: box.left, top: box.top, bottom: box.bottom };
+  const css = getComputedStyle(el), copy = document.createElement("div"), from = document.createElement("span"), to = document.createElement("span");
+  Object.assign(copy.style, {
+    position: "absolute", visibility: "hidden", pointerEvents: "none", width: css.width, whiteSpace: "pre-wrap", overflowWrap: "break-word",
+    fontFamily: css.fontFamily, fontSize: css.fontSize, fontWeight: css.fontWeight, lineHeight: css.lineHeight, letterSpacing: css.letterSpacing,
+  });
+  copy.append(el.value.slice(0, start), from, el.value.slice(start, end), to);
+  el.parentElement.append(copy);
+  const origin = copy.getBoundingClientRect(), a = from.getBoundingClientRect(), b = to.getBoundingClientRect();
+  copy.remove();
+  return { left: box.left + a.left - origin.left, top: box.top + a.top - origin.top, bottom: box.top + b.bottom - origin.top };
+}
 
 /**
  * One line of the form. Free text is typed in place; anything else links to the question that sets it.
@@ -40,10 +68,16 @@ export function PaperBlock({ block, locked, aiAccepted, suggestions, code, onEdi
   useEffect(() => {
     if (!composing.current && sent.current !== block.text) { sent.current = block.text; setValue(block.text); }
   }, [block.text]);
-  useLayoutEffect(() => {
+  useLayoutEffect(() => { if (textarea.current) fitHeight(textarea.current); }, [value, editable]);
+  // The paper narrows when the assistant opens, the window resizes or the zoom changes: the words rewrap.
+  useEffect(() => {
     const el = textarea.current;
-    if (el) { el.style.height = "0px"; el.style.height = `${Math.max(el.scrollHeight, 22)}px`; }
-  }, [value, editable]);
+    if (!el || typeof ResizeObserver === "undefined") return;
+    let width = el.clientWidth;
+    const observer = new ResizeObserver(() => { if (el.clientWidth !== width) { width = el.clientWidth; fitHeight(el); } });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [editable]);
   useEffect(() => {
     const close = (event: globalThis.PointerEvent) => {
       if (event.target instanceof Node && !menu.current?.contains(event.target)) menu.current?.removeAttribute("open");
@@ -63,14 +97,12 @@ export function PaperBlock({ block, locked, aiAccepted, suggestions, code, onEdi
     if (composing.current) return;
     const el = event.currentTarget, start = el.selectionStart, end = el.selectionEnd;
     if (start === end) { onSelect(null); return; }
-    // Anchor the bar above the editor's caret line, not its top edge.
-    const rect = el.getBoundingClientRect();
-    onSelect({ blockId: block.id, text: el.value, start, end, selected: el.value.slice(start, end), left: rect.left, top: rect.top });
+    onSelect({ blockId: block.id, text: el.value, start, end, selected: el.value.slice(start, end), ...rangeBox(el, start, end) });
   }
   function wholeBlock() {
     menu.current?.removeAttribute("open");
     const rect = document.getElementById(blockId(block.id))?.getBoundingClientRect();
-    onSelect({ blockId: block.id, text: block.text, start: 0, end: 0, selected: block.text, wholeBlock: true, left: rect?.left ?? 16, top: rect?.top ?? 100 });
+    onSelect({ blockId: block.id, text: block.text, start: 0, end: 0, selected: block.text, wholeBlock: true, left: rect?.left ?? 16, top: rect?.top ?? 100, bottom: rect?.bottom ?? 100 });
   }
 
   const shown = block.id === "authority" ? authorityName(block.text) || block.text : block.text;
@@ -88,6 +120,16 @@ export function PaperBlock({ block, locked, aiAccepted, suggestions, code, onEdi
           event.stopPropagation();
           menu.current.open = false;
           menu.current.querySelector<HTMLElement>("summary")?.focus();
+        }
+        // Arrow keys move through the open menu, as a menu's keyboard users expect.
+        const keys = ["ArrowDown", "ArrowUp", "Home", "End"];
+        if (menu.current?.open && keys.includes(event.key) && event.target instanceof Node && menu.current.contains(event.target)) {
+          event.preventDefault();
+          const items = [...menu.current.querySelectorAll<HTMLElement>("[role=menuitem]")], at = items.indexOf(event.target as HTMLElement);
+          const next = event.key === "Home" ? 0 : event.key === "End" ? items.length - 1
+            : at < 0 ? (event.key === "ArrowDown" ? 0 : items.length - 1)
+            : (at + (event.key === "ArrowDown" ? 1 : items.length - 1)) % items.length;
+          items[next]?.focus();
         }
       }}>
       {aiAccepted && (
@@ -116,12 +158,15 @@ export function PaperBlock({ block, locked, aiAccepted, suggestions, code, onEdi
             onCompositionEnd={e => { composing.current = false; publish(e.currentTarget.value); }}
             onBlur={e => { if (!composing.current) publish(e.currentTarget.value); onCommit(block.id); }}
             onSelect={select}
-            onPaste={e => {
-              if (composing.current) return;
-              e.preventDefault();
-              const el = e.currentTarget, plain = e.clipboardData.getData("text/plain"), start = el.selectionStart;
-              publish(el.value.slice(0, start) + plain + el.value.slice(el.selectionEnd));
-              requestAnimationFrame(() => el.setSelectionRange(start + plain.length, start + plain.length));
+            onKeyDown={e => {
+              // Shift+F10 on selected words opens Ask and Rewrite for just those words.
+              const el = e.currentTarget;
+              if (e.shiftKey && e.key === "F10" && el.selectionStart !== el.selectionEnd) {
+                e.preventDefault();
+                e.stopPropagation();
+                onSelect({ blockId: block.id, text: el.value, start: el.selectionStart, end: el.selectionEnd,
+                  selected: el.value.slice(el.selectionStart, el.selectionEnd), ...rangeBox(el, el.selectionStart, el.selectionEnd), viaKeyboard: true });
+              }
             }} />
         ) : reference ? (
           <div className="aw-ref">
@@ -129,7 +174,7 @@ export function PaperBlock({ block, locked, aiAccepted, suggestions, code, onEdi
               <span>{reference.provision}</span><CIcon name="external" size={12} />
             </button>
             <Terms reference={reference} />
-            {code && <span className="sr-only" data-aw-text>{code.text}</span>}
+            {code && <blockquote className="sr-only" aria-label="Code text, verbatim" data-aw-text>{code.text}</blockquote>}
           </div>
         ) : block.target.kind === "card" && !locked ? (
           <a className={`aw-link${shown ? "" : " is-empty"}`} href={block.target.href} aria-label={`Change ${block.label}`}>
@@ -145,22 +190,34 @@ export function PaperBlock({ block, locked, aiAccepted, suggestions, code, onEdi
           const d = changedWords(s.before, s.after);
           return (
             <div className="aw-sugg" key={s.id} role="group" aria-label={`AI suggestion for ${block.label}`}>
-              <p>{d.prefix.length > 160 ? `…${d.prefix.slice(-160)}` : d.prefix}<del>{d.removed}</del><ins>{d.added}</ins>{d.suffix.length > 160 ? `${d.suffix.slice(0, 160)}…` : d.suffix}</p>
+              <p>
+                {d.prefix.length > 160 ? `…${d.prefix.slice(-160)}` : d.prefix}
+                {d.removed && <del><span className="sr-only">Removed: </span>{d.removed}</del>}
+                {d.added && <ins><span className="sr-only">Added: </span>{d.added}</ins>}
+                {d.suffix.length > 160 ? `${d.suffix.slice(0, 160)}…` : d.suffix}
+              </p>
+              {!acceptable(s) && (
+                <p className="aw-sugg-warn" role="status">
+                  <Dot tone="blocking" />The AI named {s.removed?.length === 1 ? "a code reference" : "code references"} that {s.removed?.length === 1 ? "isn’t" : "aren’t"} in the code{s.removed?.length ? ` (${s.removed.join(", ")})` : ""}. Reject it, or edit the text yourself.
+                </p>
+              )}
               <div className="aw-sugg-bar">
                 <span className="aw-sugg-tag"><Icon24 name="spark" size={13} />AI suggestion</span>
                 {!locked && (
                   <>
                     <button type="button" className="aw-sugg-reject" onClick={() => onReject(s)}>Reject</button>
-                    <button type="button" className="aw-sugg-accept" onClick={() => onAccept(s)}>Accept</button>
+                    <button type="button" className="aw-sugg-accept" disabled={!acceptable(s)} onClick={() => onAccept(s)}>Accept</button>
                   </>
                 )}
               </div>
+              {s.notice && <p className="aw-sugg-notice">{s.notice}</p>}
             </div>
           );
         })}
       </div>
 
-      <details className="aw-more" ref={menu}>
+      <details className="aw-more" ref={menu}
+        onBlur={e => { if (!(e.relatedTarget instanceof Node && e.currentTarget.contains(e.relatedTarget))) e.currentTarget.removeAttribute("open"); }}>
         <summary aria-label={`More for ${block.label}`} title="More"><MoreIcon /></summary>
         <div className="aw-menu" role="menu">
           <button type="button" role="menuitem" onClick={() => { menu.current?.removeAttribute("open"); onAsk(block, code?.text); }}>

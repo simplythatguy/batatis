@@ -25,7 +25,7 @@ from .code_library import CodeTOC, ProvisionContext, provision_context, table_of
 from .codes import CodeDbMissing, Codes
 from .export import (EXPORT_FAILED_DETAIL, ExportBlocked, ExportError, FORM_NOT_FOUND_DETAIL, FormNotFound,
                      export_case)
-from .export.preview import ENTRY_BYTES, PAYLOAD_BUDGET, encoded, fits as preview_fits, page_images
+from .export.preview import ENTRY_BYTES, PAYLOAD_BUDGET, RESPONSE_CAP, encoded, fits as preview_fits, page_images
 from .http_guard import HttpGuard
 from .jurisdictions import export_notice
 from .identify import Judge
@@ -325,6 +325,10 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
         case = get_case(case_id)
         draft = bool(body and body.draft)
         res = run_export(case, draft)
+        if os.environ.get('VERCEL') and len(res.pdf) > RESPONSE_CAP:
+            # The hosted app cannot return a body this large; say so instead of failing without a reason.
+            raise HTTPException(413, f'This package is {len(res.pdf) / 1_000_000:.1f} MB, more than the website can '
+                                     'send. Use the desktop app, or attach smaller supporting documents.')
         name = f'{case_id}-scc-variance{"-DRAFT" if draft else ""}.pdf'
         headers = {'Content-Disposition': f'attachment; filename="{name}"'}
         notice = export_notice(case)   # from the case's jurisdiction pack; never a block

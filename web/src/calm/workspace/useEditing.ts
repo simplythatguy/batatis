@@ -7,7 +7,7 @@ import { useCurrentApplication } from "../begin";
 import { arrange } from "../comments/thread";
 import { workspaceApi, workspaceFailure } from "./api";
 import { blockAction, buildDocument, type DocBlock, type OfficerRequest } from "./document";
-import { entryId, historyEntry, inverseEntry, type HistoryEntry } from "./history";
+import { acceptedAI, entryId, historyEntry, inverseEntry, type HistoryEntry } from "./history";
 import type { PassageSelection } from "./PaperBlock";
 import {
   acceptSuggestion, canRewrite, draftSuggestions, freshSuggestions, rejectSuggestion, rewriteRange, rewriteSuggestion,
@@ -52,6 +52,9 @@ export function useEditing() {
   const [rewriteBusy, setRewriteBusy] = useState(false);
   const rewriting = useRef<AbortController | null>(null);
   const [toast, setToast] = useState<Toast | null>(null);
+  // Undo walks back through this visit's own changes only, never an earlier session's.
+  const visitStart = useRef(new Date().toISOString());
+  const undone = useRef(new Set<string>());
 
   const sections = useMemo(() => buildDocument(c, gaps, requests), [c, gaps, requests]);
   const blocks = useMemo(() => sections.flatMap(s => s.blocks), [sections]);
@@ -96,7 +99,7 @@ export function useEditing() {
 
   useEffect(() => {
     if (!toast) return;
-    const timer = setTimeout(() => setToast(null), 10000);
+    const timer = setTimeout(() => setToast(null), 20000);
     return () => clearTimeout(timer);
   }, [toast]);
 
@@ -105,16 +108,17 @@ export function useEditing() {
   /** Typing: the store updates on every keystroke; the history coalesces a burst into one entry. */
   function type(block: DocBlock, before: string, after: string) {
     if (live.current.locked) return;
-    const action = blockAction(block, after);
+    // Typing into words the AI drafted keeps them marked as AI-drafted, now edited by the applicant.
+    const action = blockAction(block, after, acceptedAI(workspace.history, block.id, block.text) ? "ai" : undefined);
     if (!action) return;
     dispatch(action);
     workspace.journal.edits.change(block.id, block.label, before, after);
   }
 
-  function change(block: DocBlock, after: string, by: HistoryEntry["by"]): HistoryEntry | undefined {
+  function change(block: DocBlock, after: string, by: HistoryEntry["by"], origin?: "ai"): HistoryEntry | undefined {
     if (live.current.locked) return;
     workspace.journal.edits.flush(block.id);
-    const action = blockAction(block, after);
+    const action = blockAction(block, after, origin);
     const entry = historyEntry(block.id, block.label, block.text, after, by);
     if (!action || !entry) return;
     dispatch(action);
@@ -122,21 +126,25 @@ export function useEditing() {
     return entry;
   }
 
-  function undo(entry = workspace.history.at(-1)) {
-    if (!entry || live.current.locked) return;
+  function undo(target?: HistoryEntry) {
+    if (live.current.locked) return;
     workspace.journal.edits.flush();
+    const entry = target ?? [...workspace.journal.getSnapshot().entries].reverse()
+      .find(e => e.at >= visitStart.current && e.by !== "restore" && !undone.current.has(e.id));
+    if (!entry) { setToast({ text: "Nothing to undo. Older versions are in History." }); return; }
     const block = live.current.blocks.find(b => b.id === entry.block);
     if (!block || !inverseEntry(entry, block.text)) {
-      setToast({ text: "Changed again since. Restore it from History." });
+      setToast({ text: `${entry.label} changed again since. Restore it from History.` });
       return;
     }
-    change(block, entry.before, "restore");
-    setToast({ text: "Undone" });
+    if (!change(block, entry.before, "restore")) return;
+    undone.current.add(entry.id);
+    setToast({ text: `Undid ${entry.label}` });
   }
 
   function restore(entry: HistoryEntry) {
     const block = live.current.blocks.find(b => b.id === entry.block);
-    if (block && change(block, entry.after, "restore")) setToast({ text: "Restored" });
+    if (block && change(block, entry.after, "restore", entry.by === "ai" ? "ai" : undefined)) setToast({ text: `Restored ${entry.label}` });
   }
 
   function accept(suggestion: Suggestion) {
@@ -144,7 +152,7 @@ export function useEditing() {
     if (!block || live.current.locked || !acceptSuggestion(suggestion, block)) return;
     // Consume a writing draft too, so it cannot come back after a later edit.
     if (suggestion.factId) dispatch({ type: "dismissFact", id: suggestion.factId });
-    const entry = change(block, suggestion.after, "ai");
+    const entry = change(block, suggestion.after, "ai", "ai");
     setSuggestions(previous => previous.filter(s => s.id !== suggestion.id));
     if (entry) setToast({ text: "AI change accepted", undo: entry });
   }

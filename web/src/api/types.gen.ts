@@ -1803,6 +1803,7 @@ export interface WorkspaceConsent {
   at: string;
 }
 
+/** A saved signature. Its image was checked once on the way in (SignatureInput); loading a case never decodes it. */
 export interface WorkspaceSignature {
   content_hash: string;
   image: string;

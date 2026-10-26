@@ -573,17 +573,24 @@ def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str
             saved = file_loader(document.file.ref)
             if saved is None:
                 raise ExportError('An attached supporting document could not be loaded.')
+            unreadable = ExportBlocked([f'The attached document "{document.title}" could not be opened. '
+                                        'Attach a copy that opens without a password.'])
             try:
                 reader = PdfReader(io.BytesIO(saved['data']))
-                if reader.is_encrypted or not reader.pages:
-                    raise ValueError('unreadable supporting document')
+                # Sealed reports often carry only an owner password: they open without one, so they are kept.
+                if reader.is_encrypted and not reader.decrypt(''):
+                    raise unreadable
+                if not reader.pages:
+                    raise unreadable
                 start = len(out.pages)
                 for page in reader.pages:
                     out.add_page(page)
                 out.add_outline_item(pdf_safe(document.title), start)
                 attachment_pages += len(reader.pages)
+            except ExportBlocked:
+                raise
             except Exception as error:
-                raise ExportError('An attached supporting document could not be read as a PDF.') from error
+                raise unreadable from error
     if draft:
         stamp_draft(out)
     out.add_metadata({'/Title': 'Variance Form for Proposed Alternative Solution' + (' (DRAFT)' if draft else ''),

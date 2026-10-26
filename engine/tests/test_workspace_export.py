@@ -169,3 +169,37 @@ def test_attachment_field_name_cannot_mask_the_same_name_on_the_form():
     read = read_pdf(result.pdf, 'package.pdf')
     assert read.form_version == result.field_map
     assert read.fields['Owner'].status == 'blank'
+
+
+def test_an_owner_password_attachment_is_kept_and_a_locked_one_is_named():
+    from engine.export.scc import ExportBlocked
+    sealed = PdfWriter(clone_from=PdfReader(io.BytesIO(attachment_pdf())))
+    sealed.encrypt(user_password='', owner_password='owner-only')
+    buf = io.BytesIO(); sealed.write(buf)
+    case = Case(facts=[fact('process.rationale', 'Synthetic applicant rationale.')])
+    result = export_case(case, draft=True, file_loader=attach(case, buf.getvalue()))
+    assert result.attachment_pages == 2
+    locked = PdfWriter(clone_from=PdfReader(io.BytesIO(attachment_pdf())))
+    locked.encrypt('needs-a-password')
+    buf = io.BytesIO(); locked.write(buf)
+    case = Case(facts=[fact('process.rationale', 'Synthetic applicant rationale.')])
+    with pytest.raises(ExportBlocked) as blocked:
+        export_case(case, draft=True, file_loader=attach(case, buf.getvalue()))
+    assert 'Synthetic supporting report' in blocked.value.reasons[0]
+
+
+def test_intake_does_not_read_a_batatis_export_as_applicant_words():
+    from engine.intake.extract import read_file
+    from engine.intake.pdf import BATATIS_EXPORT
+    exported = export_case(demo_case(CASES[0], Codes()), draft=True).pdf
+    out = read_file('file_export', 'export.pdf', exported)
+    assert out.files[0].status == 'not_read' and out.files[0].reason == BATATIS_EXPORT and out.facts == []
+
+
+def test_signatures_go_stale_when_the_benchmark_departure_changes_but_not_for_an_ai_proposal():
+    case = demo_case(CASES[0], Codes())
+    before = content_hash(case)
+    case.facts.append(fact('process.rationale', 'An AI draft.', kind='proposed', status='unconfirmed'))
+    assert content_hash(case) == before, 'an unaccepted proposal is not part of the signed application'
+    case.identify.benchmark.departure = 'A different departure the signer never saw.'
+    assert content_hash(case) != before

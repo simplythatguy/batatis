@@ -23,15 +23,29 @@ export function SelectionBar({ selection, block, allowRewrite, busy, onAsk, onRe
     return () => { document.removeEventListener("pointerdown", away); document.removeEventListener("keydown", escape); };
   }, [onClose]);
 
+  // From the keyboard the bar takes focus; when it closes, focus goes back to the words it was about.
+  useEffect(() => {
+    const node = ref.current;
+    if (selection.viaKeyboard) node?.querySelector<HTMLButtonElement>("button")?.focus();
+    return () => {
+      const active = document.activeElement;
+      if (!active || active === document.body || node?.contains(active)) {
+        document.getElementById(`aw-text-${block.id}`)?.focus({ preventScroll: true });
+      }
+    };
+  }, [selection.viaKeyboard, block.id]);
+
   const width = custom ? Math.min(420, window.innerWidth - 24) : undefined;
   const height = custom ? 126 : 44;
   const left = Math.max(12, Math.min(selection.left, window.innerWidth - (width ?? 360) - 12));
-  const top = Math.max(8, selection.top - height - 8);
+  // Above the words; below them when there is no room, and on touch screens, whose own copy menu sits above.
+  const below = selection.top - height - 8 < 8 || window.matchMedia("(pointer: coarse)").matches;
+  const top = below ? Math.max(8, Math.min(selection.bottom + 8, window.innerHeight - height - 8)) : selection.top - height - 8;
 
   return (
     <div ref={ref} className="aw-selbar" role="toolbar" aria-label={`Selected words in ${block.label}`} style={{ left, top, width }}
-      // Keep the text selection alive while a button is pressed.
-      onPointerDown={e => { if (e.target instanceof HTMLButtonElement) e.preventDefault(); }}>
+      // Keep the text selection alive while a button (or its icon) is pressed.
+      onPointerDown={e => { if (e.target instanceof Element && e.target.closest("button")) e.preventDefault(); }}>
       <div className="aw-selbar-row">
         <button type="button" onClick={onAsk}><Icon24 name="spark" size={14} />Ask</button>
         {allowRewrite && (

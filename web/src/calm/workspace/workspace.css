@@ -8,16 +8,17 @@
 
 /* ---------- Step bar ---------- */
 .aw-bar { flex: none; display: flex; align-items: center; gap: 12px; padding: 12px 20px 10px; }
-.aw-steps { display: inline-flex; gap: 2px; padding: 3px; border-radius: 999px; background: rgba(17, 24, 39, 0.045); }
+/* Steps follow the stage navigation rule: no fill, pill or shadow; the current step is named at full strength. */
+.aw-steps { display: inline-flex; gap: 4px; }
 .aw-step {
-  display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 12px; border-radius: 999px;
-  color: var(--cf-text-3); text-decoration: none; font-size: 13px; white-space: nowrap;
-  transition: color 150ms var(--cf-ease), background-color 150ms var(--cf-ease), box-shadow 150ms var(--cf-ease);
+  display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 8px; border-radius: 8px;
+  color: var(--cf-text); opacity: 0.6; text-decoration: none; font-size: 13px; white-space: nowrap;
+  transition: opacity 150ms var(--cf-ease);
 }
-.aw-step[aria-current] { color: var(--cf-text); background: var(--cf-surface); box-shadow: 0 1px 2px rgba(17, 24, 39, 0.08), 0 0 0 1px var(--cf-line); font-weight: 500; }
-.aw-step:focus-visible { outline: 2px solid var(--cf-focus); outline-offset: 1px; }
+.aw-step[aria-current] { opacity: 1; font-weight: 500; }
+.aw-step:focus-visible { outline: 2px solid var(--cf-focus); outline-offset: 1px; opacity: 0.85; }
 .aw-step-count { font: 500 11px var(--cf-mono); color: var(--cf-text-3); font-variant-numeric: tabular-nums; }
-@media (hover: hover) { .aw-step:not([aria-current]):hover { color: var(--cf-text); } }
+@media (hover: hover) { .aw-step:not([aria-current]):hover { opacity: 0.85; } }
 .aw-bar-tools { margin-left: auto; display: flex; align-items: center; gap: 4px; }
 .aw-tool {
   position: relative; display: inline-grid; place-items: center; min-width: 32px; height: 32px; padding: 0 6px;
@@ -89,6 +90,7 @@
 .aw-link {
   display: inline-flex; align-items: center; gap: 4px; max-width: 100%; color: inherit; text-decoration: none; border-radius: 6px;
 }
+.aw-link > span { white-space: pre-line; }
 .aw-link svg { flex: none; color: var(--cf-text-4); opacity: 0; transition: opacity 150ms var(--cf-ease); }
 .aw-link.is-empty { color: var(--cf-text-4); }
 .aw-block.is-missing .aw-link.is-empty { color: var(--cf-blocking-ink); }
@@ -235,7 +237,8 @@ button.aw-slot:focus-visible { outline: 2px solid var(--cf-focus); outline-offse
 .aw-slot.is-signed { flex-direction: column; justify-content: flex-end; gap: 6px; height: auto; min-height: 104px; padding: 14px 16px 10px; border-style: solid; border-color: var(--cf-line); cursor: default; }
 .aw-slot.is-signed img { max-height: 56px; max-width: 70%; object-fit: contain; align-self: flex-start; }
 .aw-slot.is-stale img { opacity: 0.35; }
-.aw-slot-line { display: flex; justify-content: space-between; width: 100%; padding-top: 6px; border-top: 1px solid var(--cf-line-2); font-size: 12.5px; color: var(--cf-text-2); }
+.aw-slot-line { display: flex; justify-content: space-between; gap: 12px; width: 100%; padding-top: 6px; border-top: 1px solid var(--cf-line-2); font-size: 12.5px; color: var(--cf-text-2); }
+.aw-slot-line .aw-mono { flex: none; white-space: nowrap; }
 .aw-signer-actions { display: flex; align-items: center; justify-content: flex-end; gap: 14px; font-size: 12.5px; }
 .aw-hint { margin-right: auto; color: var(--cf-warning-ink); font-size: 12.5px; }
 .aw-sign .aw-fine { margin: 6px 4px 0; }
@@ -346,3 +349,15 @@ button.aw-slot:focus-visible { outline: 2px solid var(--cf-focus); outline-offse
 .aw-terms-more { height: 20px; padding: 0 6px; border: 0; border-radius: 5px; background: transparent; color: var(--cf-text-2); font: 11.5px var(--cf-mono); cursor: pointer; }
 @media (hover: hover) { .aw-terms-more:hover { background: rgba(17, 24, 39, 0.045); } }
 .aw .aw-input, .aw .aw-input:focus, .aw .aw-input:focus-visible { border: 0; outline: none; box-shadow: none; background: transparent; min-height: 0; padding: 0; border-radius: 0; }
+
+/* Review fixes: signer identity, visible focus, status colour on dots only */
+.aw-identity { display: flex; gap: 10px; align-items: flex-start; margin-top: 12px; font-size: 13px; color: var(--cf-text); cursor: pointer; }
+.aw .aw-block:focus-within { box-shadow: inset 0 0 0 1px var(--cf-line-ctl); background: var(--cf-surface); }
+.aw-package-pages:focus-visible { outline: 2px solid var(--cf-focus); outline-offset: -2px; }
+.aw .aw-block.is-missing .aw-input::placeholder { color: var(--cf-text-3); opacity: 1; }
+.aw .aw-block.is-missing .aw-link.is-empty { color: var(--cf-text-3); }
+.aw-missing-word { display: inline-flex; align-items: center; gap: 6px; color: var(--cf-text-3); }
+.aw-sugg-warn { display: flex; gap: 8px; align-items: baseline; margin: 10px 0 0; font-size: 12.5px; color: var(--cf-text-2); }
+.aw-sugg-notice { margin: 8px 0 0; font-size: 11.5px; line-height: 1.45; color: var(--cf-text-3); }
+.aw-sugg-accept:disabled { opacity: 0.35; cursor: default; }
+.aw-reasons { margin: 4px 0 0; padding-left: 18px; font-size: 12.5px; color: var(--cf-text-2); }

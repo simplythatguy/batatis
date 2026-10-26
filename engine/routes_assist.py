@@ -312,17 +312,12 @@ def build_context(body: AssistRequest, case, codes, review=None) -> dict:
 
 
 def _quote_matches(quote: str, source: str) -> bool:
-    parts = [' '.join(part.split()) for part in re.split(r'\.\.\.|…', quote)]
-    parts = [part for part in parts if part]
-    if not parts:
+    """One contiguous run of code text. An ellipsis may mark a cut at either end, never a splice in the middle."""
+    text = ' '.join(quote.split())
+    text = re.sub(r'^(?:\.\.\.|…)\s*|\s*(?:\.\.\.|…)$', '', text).strip()
+    if not text or '...' in text or '…' in text:
         return False
-    source, position = ' '.join(source.split()), 0
-    for part in parts:
-        found = source.find(part, position)
-        if found < 0:
-            return False
-        position = found + len(part)
-    return True
+    return text in ' '.join(source.split())
 
 
 def check_citations(text: str, codes, *, context: dict | None = None):
@@ -361,9 +356,12 @@ def check_citations(text: str, codes, *, context: dict | None = None):
 
     def verify_quote(match):
         quote = match.group('quote')
-        return match.group() if any(_quote_matches(quote, source) for source in sources) else quote
+        # A verified quote is rewritten with a plain "> " so every reader styles it the same way; anything else
+        # loses its quote mark and reads as the AI's own words.
+        return '> ' + quote if any(_quote_matches(quote, source) for source in sources) else quote
 
-    answer = re.sub(r'^[ \t]*>+[ \t]?(?P<quote>[^\r\n]*)', verify_quote, answer, flags=re.M)
+    # Any whitespace, Unicode spaces included, may come before the mark; the web treats such lines as quotes too.
+    answer = re.sub(r'^[^\S\r\n]*>+[^\S\r\n]?(?P<quote>[^\r\n]*)', verify_quote, answer, flags=re.M)
     return answer, cited, removed
 
 

@@ -5,7 +5,14 @@ import { blockAction, blockField, type DocBlock, type DocSection } from "./docum
 
 export interface Suggestion {
   id: string; blockId: string; origin: "rewrite" | "draft"; before: string; after: string; factId?: string;
+  /** Article numbers the AI wrote that the code database does not have; they were taken out. */
+  removed?: string[];
+  /** The data-handling notice for the AI call that wrote this. */
+  notice?: string | null;
 }
+/** The engine's mark where it took out an article number it could not verify. Never accepted into an application. */
+export const REMOVED_MARK = "[unknown reference removed]";
+export const acceptable = (s: Suggestion) => !s.after.includes(REMOVED_MARK);
 export interface RewriteResult { replacement: string; cited: string[]; removed_citations: string[]; notice: string | null }
 export interface Passage { blockId: string; text: string; start: number; end: number }
 
@@ -18,7 +25,8 @@ export function rewriteSuggestion(id: string, passage: Passage, result: RewriteR
   const { text, start, end } = passage;
   if (start < 0 || end < start || end > text.length) throw new Error("The selected passage changed. Select it again.");
   return { id, blockId: passage.blockId, origin: "rewrite", before: text,
-    after: start === end ? result.replacement : text.slice(0, start) + result.replacement + text.slice(end) };
+    after: start === end ? result.replacement : text.slice(0, start) + result.replacement + text.slice(end),
+    removed: result.removed_citations, notice: result.notice };
 }
 
 export function draftSuggestions(c: Case, sections: readonly DocSection[]): Suggestion[] {
@@ -36,7 +44,7 @@ export const freshSuggestions = (suggestions: readonly Suggestion[], blocks: rea
   suggestions.filter(s => blocks.some(b => b.id === s.blockId && b.text === s.before && b.target.kind !== "card") && s.after !== s.before);
 
 export function acceptSuggestion(suggestion: Suggestion, block: DocBlock): Action | null {
-  return suggestion.blockId === block.id && suggestion.before === block.text ? blockAction(block, suggestion.after) : null;
+  return suggestion.blockId === block.id && suggestion.before === block.text && acceptable(suggestion) ? blockAction(block, suggestion.after, "ai") : null;
 }
 export function rejectSuggestion(suggestion: Suggestion): Action | null {
   return suggestion.factId ? { type: "dismissFact", id: suggestion.factId } : null;

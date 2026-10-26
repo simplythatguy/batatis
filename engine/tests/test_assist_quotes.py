@@ -17,8 +17,11 @@ class QuoteCodes:
 @pytest.mark.parametrize(('quote', 'keeps_style'), [
     ('A fire separation shall be provided between the rooms.', True),
     ('A fire separation  shall\tbe provided', True),
-    ('A fire separation ... between the rooms.', True),
-    ('A fire separation … between the rooms.', True),
+    ('A fire separation ... between the rooms.', False),
+    ('A fire separation … between the rooms.', False),
+    ('... shall be provided between the rooms.', True),
+    ('A fire separation shall be …', True),
+    ('N ... o ... t ... r ... e', False),
     ('a fire separation shall be provided', False),
     ('Batatis invented this interpretation.', False),
     ('Thermal insulation shall be installed.', False),
@@ -69,3 +72,12 @@ def test_real_assistant_route_preserves_only_the_focused_code_quote(assistant, m
 
 def test_generated_provider_names_are_not_returned_by_assistant():
     assert routes_assist.check_citations('OpenAI wrote this.', QuoteCodes())[0] == routes_assist.SAFE_HELP
+
+
+@pytest.mark.parametrize('prefix', ['\u00a0', '\u2003', ' \u00a0', '\u3000'])
+def test_unicode_space_before_the_mark_cannot_smuggle_an_unverified_quote(prefix):
+    invented = 'thermal insulation is optional in all buildings'
+    answer = routes_assist.check_citations(f'Read 9.10.9.16.(1).\n{prefix}> {invented}', QuoteCodes())[0]
+    assert answer.splitlines()[1] == invented
+    verified = routes_assist.check_citations(f'Read 9.10.9.16.(1).\n{prefix}> A fire separation shall be provided', QuoteCodes())[0]
+    assert verified.splitlines()[1] == '> A fire separation shall be provided', 'a verified quote is rewritten with a plain mark'

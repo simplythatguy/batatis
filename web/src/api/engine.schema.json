@@ -9955,7 +9955,6 @@
       "type": "object"
     },
     "SignatureView": {
-      "additionalProperties": false,
       "properties": {
         "content_hash": {
           "title": "Content Hash",
@@ -9966,7 +9965,6 @@
           "type": "boolean"
         },
         "image": {
-          "maxLength": 273090,
           "title": "Image",
           "type": "string"
         },
@@ -9979,8 +9977,6 @@
           "type": "string"
         },
         "name": {
-          "maxLength": 500,
-          "minLength": 1,
           "title": "Name",
           "type": "string"
         },
@@ -11451,14 +11447,13 @@
       "type": "object"
     },
     "WorkspaceSignature": {
-      "additionalProperties": false,
+      "description": "A saved signature. Its image was checked once on the way in (SignatureInput); loading a case never decodes it.",
       "properties": {
         "content_hash": {
           "title": "Content Hash",
           "type": "string"
         },
         "image": {
-          "maxLength": 273090,
           "title": "Image",
           "type": "string"
         },
@@ -11471,8 +11466,6 @@
           "type": "string"
         },
         "name": {
-          "maxLength": 500,
-          "minLength": 1,
           "title": "Name",
           "type": "string"
         },

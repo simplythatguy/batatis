@@ -12,7 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from .models import now
 from .models_workspace import (HistoryEntry, SignatureInput, SignerRole, WorkspaceConsent,
-                               WorkspaceSignature, WorkspaceView)
+                               WorkspaceSignature, WorkspaceView, trim_history)
 from .store import CaseBackend, VersionConflict
 from .workspace import content_hash, signers, workspace_view
 
@@ -88,7 +88,7 @@ def create_router(cases: Callable[[], CaseBackend]) -> APIRouter:
     @router.post('/cases/{case_id}/history', response_model=list[HistoryEntry])
     def append_history(case_id: str, body: HistoryInput, request: Request):
         store, case, version = snapshot(case_id, request)
-        case.workspace.history = (case.workspace.history + body.entries)[-300:]
+        case.workspace.history = trim_history(case.workspace.history + body.entries)
         save(store, case, version)
         return list(reversed(case.workspace.history))
 

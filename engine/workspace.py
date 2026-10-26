@@ -15,14 +15,19 @@ _SIGNING_FACTS = frozenset({'date', 'request_date', 'application_date', 'section
 
 
 def content_hash(case: Case) -> str:
-    latest = {fact.field: fact for fact in case.facts}
+    # An AI proposal is not part of the application until accepted, so it neither changes nor hides the answer.
+    latest = {fact.field: fact for fact in case.facts if fact.kind != 'proposed'}
     facts = {key: fact.value for key, fact in latest.items()
              if fact.export()['status'] == 'confirmed' and key not in _SIGNING_FACTS
              and not key.startswith(('signature.', 'signatures.', 'consent.', 'workspace.'))}
+    identify = case.identify
     content = {'facts': facts, 'provisions': case.provisions,
                'section_c': [row.model_dump() for row in case.section_c],
                'documents': [item.model_dump() for item in case.evidence],
-               'jurisdiction': case.jurisdiction.model_dump() if case.jurisdiction else None}
+               'jurisdiction': case.jurisdiction.model_dump() if case.jurisdiction else None,
+               # The appendix prints the benchmark, the confirmed departure and how each reference was decided.
+               'benchmark': identify.benchmark.model_dump() if identify and identify.benchmark else None,
+               'decisions': [[a.provision, a.status, a.decision] for a in identify.articles] if identify else []}
     return hashlib.sha256(json.dumps(content, sort_keys=True, ensure_ascii=False,
                                      separators=(',', ':')).encode('utf-8')).hexdigest()
 

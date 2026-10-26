@@ -49,10 +49,10 @@ function notApplicable(c: Case, id: string): string | undefined {
   return f ? f.value === true ? "Marked not applicable by the applicant (no reason given)." : String(f.value) : undefined;
 }
 
-export function blockAction(block: DocBlock, value: string): Action | null {
+export function blockAction(block: DocBlock, value: string, origin?: "ai"): Action | null {
   switch (block.target.kind) {
-    case "detail": return { type: "setDetail", field: block.target.field, section: block.target.section, value };
-    case "process": return { type: "setProcess", field: block.target.field, value };
+    case "detail": return { type: "setDetail", field: block.target.field, section: block.target.section, value, ...(origin ? { origin } : {}) };
+    case "process": return { type: "setProcess", field: block.target.field, value, ...(origin ? { origin } : {}) };
     case "card": return null;
   }
 }
@@ -94,9 +94,7 @@ export function buildDocument(c: Case, gaps: readonly Gap[], requests: readonly 
   for (const row of c.sectionC) {
     add("C", { id: `section_c.${row.provision}`, label: articleTitle(c, row.provision) || "Code reference", text: row.citation, required: false,
       reference: row, target: { kind: "card", href: "#/references" } });
-    const field = `section_c.${row.provision}.explanation`;
-    add("C", { id: field, label: `Explanation · ${row.provision}`, text: confirmedText(c, field), draft: row.explanation,
-      required: false, target: { kind: "detail", field, section: "C" } });
+    // No explanation line yet: the package does not print one, and the paper shows only what the officer receives.
   }
   add("D", { id: "evidence", label: "Documents", text: listedDocuments(c).map(d => d.title).join("\n"), required: true,
     target: { kind: "card", href: "#/questions?focus=section-d" } });
