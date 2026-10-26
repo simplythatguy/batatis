@@ -387,6 +387,7 @@ def _complete_package(store, codes):
         'process.assumptions_and_limits': 'SYNTHETIC assumptions limit the cladding installation to this project configuration.',
         'process.maintenance_operation': 'SYNTHETIC applicant identifies inspection intervals and the responsible organisation.',
         'process.qualifications': 'SYNTHETIC applicant records the responsible designer and analysis scope.',
+        'testing_procedures': 'SYNTHETIC applicant names the comparison test method used for the analysis.',
     }.items()]
     case = store.put(case)
     pdf = PdfWriter()

@@ -133,8 +133,9 @@ def test_explicit_additional_location_keeps_its_current_state(context, value, co
 @pytest.mark.parametrize('value,confirmed,kind,verdict', [
     ('NBC(AE) 2023, 2nd printing', False, 'pointed', 'unclear'),
     ('NBC(AE) 2023, 2nd printing', False, 'proposed', 'unclear'),
-    ('', True, 'pointed', 'missing'),
-    (None, True, 'exact', 'missing'),
+    # A blank saved label is filled from the deterministic Section C lookup in the outgoing file.
+    ('', True, 'pointed', 'present'),
+    (None, True, 'exact', 'present'),
 ])
 def test_edition_screen_cannot_promote_pending_or_withdrawn_label(context, with_rows, value, confirmed, kind, verdict):
     ids = ['9.8.2.1.(1)'] if with_rows else []
@@ -143,8 +144,9 @@ def test_edition_screen_cannot_promote_pending_or_withdrawn_label(context, with_
         fact('code_or_standard', value, confirmed=confirmed, kind=kind)])
     entry = review(context, case)['section_c.edition']
     assert entry['verdict'] == verdict
-    assert entry['lookup_skipped'] is True
-    assert entry['prompt']['field'] == 'code_or_standard'
+    if verdict != 'present':
+        assert entry['lookup_skipped'] is True
+        assert entry['prompt']['field'] == 'code_or_standard'
 
 
 @pytest.mark.parametrize('old_key,new_key', [('professional_status', 'professional.status'),

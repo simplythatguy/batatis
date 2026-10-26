@@ -141,11 +141,13 @@ def prepare_package(case, codes, *, store=None, draft=False, form=None, version=
         append_gap(gap)
     # The appendix prints answered passages only; record each unanswered one so a reader can call it blank.
     from ..process_fields import PROCESS_ALIASES, latest_fact
-    for key, names in PROCESS_ALIASES.items():
-        fact = latest_fact(case, *names, *(f'process.{name}' for name in names))
-        if fact is None or (_stored(fact, f'process.{key}').confirmed and not str(fact.value or '').strip()):
-            append_gap(Gap(id=f'{key}:unanswered', section='process', field=key, severity='warning',
-                message=f'No {key.replace("_", " ")} was supplied.', fix_hint='Supply this passage.'), 'blank')
+    unanswered = [(key, 'process', f'process.{key}', (*names, *(f'process.{name}' for name in names)))
+                  for key, names in PROCESS_ALIASES.items()] + [('scope', 'B', 'scope', ('scope',))]
+    for key, section, canonical, names in unanswered:
+        fact = latest_fact(case, *names)
+        if fact is None or (_stored(fact, canonical).confirmed and not str(fact.value or '').strip()):
+            append_gap(Gap(id=f'{key}:unanswered', section=section, field=key, severity='warning',
+                message=f'No {key.replace("_", " ")} was supplied.', fix_hint='Supply this answer.'), 'blank')
     # Statements not represented in the template's ordinary A-D/process fields stay visible.
     for key in ('code_analysis', 'testing_procedures', 'coordinator', 'failure_conditions',
                 'lapsed_maintenance', 'emergency_response', 'engineering_required'):

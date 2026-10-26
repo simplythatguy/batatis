@@ -237,6 +237,12 @@ def from_uploads(uploads: list[tuple[str, bytes]]) -> Snapshot:
                 reason=item.reason, input_field=item.field,
                 pointers=[pointer.model_dump() for pointer in item.pointers]
                     + (previous.pointers if previous else []))
+            remaining_context.append(item)   # an unconfirmed latest answer blocks on its own
+        elif item.reason_code == 'blank' and item.field == 'scope':
+            # A flattened check box cannot be read; the record says no scope was answered.
+            if values.get('scope') is None or values['scope'].status == 'not_found':
+                values['scope'] = StoredValue('scope', '', 'exact', None, explicit_blank=True, status='blank',
+                    input_field='scope', pointers=[pointer.model_dump() for pointer in item.pointers])
         elif item.reason_code == 'blank' and item.field in texts:
             # Batatis recorded this passage as unanswered. A heading found anywhere else still controls.
             if not texts[item.field].file:

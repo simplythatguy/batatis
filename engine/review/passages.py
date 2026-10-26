@@ -47,6 +47,10 @@ _RATIONALE_STOP_LINE = re.compile(
     r'maintenance(?:\s+and\s+(?:operation|commissioning))?|operation\s+and\s+maintenance|commissioning)[ \t]*(?::|$)|'
     r'(?P<ambiguous>[A-Z]-\d+[ \t]+|[A-Z]\.[ \t]+[A-Z]|'
     r'NBC\(AE\)[ \t]+\d{4}(?:[ \t]+p\d+)?[ \t]*,[ \t]*Div[ \t]+[ABC][ \t]*,))', re.M | re.I)
+# Section headings the Batatis appendix prints; inside its own appendix they end a passage unambiguously.
+_APPENDIX_SECTION = re.compile(r'(?:X\. Form values continued|N\. Fields marked not applicable|'
+                               r'B\. Request for variance|P\. Alternative solution \(Div C 2\.3\.1\)|'
+                               r'C\. Attributions to acceptable solutions|D\. Supporting documentation)')
 _RUNNING_HEADER = re.compile(r'^Batatis appendix to SCC variance form - case [^\n]+\n')
 _NO_RATIONALE = '(Not provided or not confirmed. No answer has been supplied by Batatis.)'
 _ENGINEERING = re.compile(r'\b(?:engineering|registered professional|professional involvement)\s+(?:is\s+)?required'
@@ -187,7 +191,8 @@ def _rationale_candidate(read: ReadFile, index: int, match: re.Match, stop_patte
             rest_start = header.end() if header else 0
         rest = continuation.text[rest_start:]
         stop = (stop_pattern or _RATIONALE_STOP_LINE).search(rest)
-        ambiguous = bool(stop and stop.groupdict().get('ambiguous'))
+        ambiguous = bool(stop and stop.groupdict().get('ambiguous')
+                         and not (own_appendix and _APPENDIX_SECTION.match(rest[stop.start():].lstrip())))
         # A known multiword label can wrap in extracted text. Stop before that label,
         # but retain uncertainty rather than attributing its words/body to the rationale.
         wrapped = bool(stop and '\n' in stop.group(0).strip())

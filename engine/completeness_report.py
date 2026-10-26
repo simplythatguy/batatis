@@ -1,13 +1,16 @@
 """HTTP shape for POST /cases/{id}/completeness. Grouped by SCC template Part 1 A–D."""
 from __future__ import annotations
 
+import json
+
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from .review.bulletin_gates import applicant_reminder
 from .completeness_elements import NOTICE, SECTION_TITLES
-from .completeness_variants import ElementVerdict, VariantResult, VariantUnavailable, format_export_reason, run_variant
+from .completeness_variants import (ElementVerdict, QuoteSpan, VariantResult, VariantUnavailable, format_export_reason,
+                                   run_variant)
 from .copyright import NRC_PUBLICATION_URL
 from .models import Source
 from .models_completeness import AdministrativeReport
@@ -213,6 +216,9 @@ def _applicant_projection(policy, case, codes, variant):
         if previous is None:
             by_field[element.field] = element
             continue
+        rank = lambda item: (item.verdict != 'present', item.in_export_preflight, item.severity == 'blocking')
+        if rank(element) > rank(previous):
+            by_field[element.field], previous, element = element, element, previous
         if element.reason not in previous.reason:
             previous.reason += ' ' + element.reason
         previous.sources.extend(source for source in element.sources if source not in previous.sources)
@@ -220,4 +226,33 @@ def _applicant_projection(policy, case, codes, variant):
         previous.citations.extend(citation for citation in element.citations if citation not in previous.citations)
         previous.in_export_preflight |= element.in_export_preflight
     result.elements = list(by_field.values())
+    # Decisions come from the outgoing file; the prompt points at the answer the applicant actually saved.
+    from .fact_aliases import LOGICAL_KEYS, latest
+    canonical = {logical: key for key, logical in LOGICAL_KEYS.items()}
+    current = latest(case)
+    related = {'single_location': ('civic_address', 'additional_location', 'second_location', 'extra_location'),
+               'section_c.edition': ('code_or_standard',),
+               'professional_requirement': ('professional_status', 'professional.status')}
+    for element in result.elements:
+        target = element.prompt.get('field') if element.prompt else None
+        fact = current.get(canonical.get(target, target)) if target else None
+        if fact is not None:
+            element.prompt['field'] = fact.field
+        if element.field == 'professional_requirement':
+            from .process_fields import latest_fact
+            facts = [latest_fact(case, *related['professional_requirement'])]
+        else:
+            facts = [current.get(canonical.get(key, key)) for key in related.get(element.field, (element.field,))]
+        saved = [fact.source.model_dump(mode='json') for fact in facts if fact is not None and fact.source]
+        if saved:
+            element.sources = list({json.dumps(source, sort_keys=True): source for source in saved}.values())
+            if len(related.get(element.field, ())) > 1:
+                # A composite answer is quoted from each saved answer it combines.
+                element.quotes = [QuoteSpan(text=str(f.value), kind='pointed', source_ref=f.source.ref,
+                                            source=f.source.model_dump(mode='json'))
+                                  for f in facts if f is not None and f.source and str(f.value or '').strip()]
+            for quote in element.quotes:
+                match = next((f for f in facts if f is not None and f.source and str(f.value) == quote.text), None)
+                if match:
+                    quote.source = match.source.model_dump(mode='json')
     return result

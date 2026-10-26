@@ -141,6 +141,13 @@ def evaluate(snapshot: Snapshot, codes, *, professional=None, documents=None) ->
             element.severity = 'blocking'
         out.append(element)
 
+    scope = doc.values.get('scope')
+    if scope is not None and scope.explicit_blank:
+        out.append(ElementVerdict('scope', 'B', 'B', 'scope', ['Check Box'], 'site or jurisdiction-wide scope', '',
+            'missing', 'Your application appears to be missing the site or jurisdiction-wide scope.',
+            problem='blank', key='scope:presence', severity='blocking', in_export_preflight=True,
+            certainty='blank', fix_hint='Ask whether this variance is for one site or the whole jurisdiction.'))
+
     # Preparation is the shared stage: Batatis produces applicant pages for external signing.
     # Starting a signature makes its date required; a date alone does not establish signing.
     out.extend(_gap_element(gap) for gap in signature_date_gaps(doc))
@@ -197,6 +204,8 @@ def evaluate(snapshot: Snapshot, codes, *, professional=None, documents=None) ->
             citations=item.citations, pointers=[pointer.model_dump() for pointer in item.pointers],
             submission_blocking=item.submission_blocking, finding_status=item.finding_status,
             defect_class=item.key.split(':')[0] if re.match(r'^D\d+:', item.key) else None)
+        if item.key.startswith('export:unconfirmed:'):
+            element.export_reason = item.reason   # 'unconfirmed <kind> fact "<field>" (<id>)'
         out.append(element)
 
     from .completeness_rules import _on_variance
@@ -213,8 +222,12 @@ def evaluate(snapshot: Snapshot, codes, *, professional=None, documents=None) ->
     # Quoted code requirements alone cannot supply the applicant's testing procedures.
     analysis_parts_present = (doc.values.get('rationale') and doc.values['rationale'].status == 'present'
                               and row_checks and all(row.status in ('match', 'no_table_row') for row in row_checks))
-    for finding in div_c.file_findings(readable_corpus, where, codes, responsible=responsible,
-                                     skip={'div_c.code_analysis'} if analysis_parts_present else set(),
+    skip = {'div_c.code_analysis'} if analysis_parts_present else set()
+    # An answered, labelled passage supplies its own Division C item; no keyword is needed inside it.
+    for passage, item in (('qualifications', 'div_c.qualifications'), ('maintenance_operation', 'div_c.maintenance')):
+        if doc.values.get(passage) and doc.values[passage].status == 'present':
+            skip.add(item)
+    for finding in div_c.file_findings(readable_corpus, where, codes, responsible=responsible, skip=skip,
                                      on_alternative_path=on_alternative, uncertain=bool(snapshot.unreadable)):
         if finding.status == 'not_found':
             finding.pointers = snapshot.unreadable
@@ -351,7 +364,9 @@ def _finish(snapshot, elements, citations, rows):
             submission_blocking=element.submission_blocking, fix_hint=element.fix_hint,
             citations=element.citations, sources=element.sources,
             pointers=[PolicyPointer(**pointer) for pointer in element.pointers]))
-    reasons = list(dict.fromkeys(element.export_reason for element in unique.values() if element.export_reason))
+    reasons = list(dict.fromkeys(element.export_reason for element in sorted(
+        unique.values(), key=lambda element: not element.key.startswith('export:unconfirmed:'))
+        if element.export_reason))
     return PolicyResult(list(unique.values()), gaps, AdministrativeReport(items=public, export_reasons=reasons,
                          ready_for_export=not reasons), citations, rows)
 
