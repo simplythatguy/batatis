@@ -15,13 +15,16 @@ _PATTERNS = (
     re.compile(r'\b(?P<name>(?:[A-Z][A-Za-z0-9-]*[ \t]+){1,3}(?:[A-Z]{1,6}-)?\d{1,5}(?:[.-]\d+)?)\b'),
     re.compile(r'\b(?P<name>(?:[A-Z]{2,}[a-z][A-Za-z0-9]*|[A-Z][a-z]+[A-Z][A-Za-z0-9]*))\b'),
 )
-_DISTINCTIVE = re.compile(r'[A-Z]{2,}[a-z]|[A-Z][a-z]+[A-Z]|\d')
+_DISTINCTIVE = re.compile(r'[A-Z]{2,}[a-z]|[A-Z][a-z]+[A-Z]')
 _AUTHORITY = re.compile(r'\b(?:NBC|CCMC|ISO|ASTM|CAN|CSA|ULC|SCC|STANDATA|Division|Section)\b', re.I)
 _QUERY = re.compile(r"[A-Za-z0-9][A-Za-z0-9 '’()./-]{1,79}")
 
 
 def product_queries(sources: list[DraftSource], limit: int = 3) -> list[DraftRegistryQuery]:
-    out, seen = [], set()
+    out = []
+
+    def covers(full, short):
+        return re.search(r'(?<!\w)' + re.escape(short.casefold()) + r'(?!\w)', full.casefold()) is not None
     for source in sources:
         if source.kind not in {'description', 'document', 'fact'}:
             continue
@@ -50,10 +53,14 @@ def product_queries(sources: list[DraftSource], limit: int = 3) -> list[DraftReg
         for start, end, _ in sorted(kept):
             quote = source.text[start:end]
             query = ' '.join(quote.split())
-            if query.casefold() in seen:
+            if any(covers(existing.query, query) for existing in out):
                 continue
-            seen.add(query.casefold())
-            out.append(DraftRegistryQuery(query=query, source_id=source.id, quote=quote, start=start, end=end))
-            if len(out) >= limit:
-                return out
+            candidate = DraftRegistryQuery(query=query, source_id=source.id, quote=quote, start=start, end=end)
+            replaced = [index for index, existing in enumerate(out) if covers(query, existing.query)]
+            if replaced:
+                position = replaced[0]
+                out = [existing for index, existing in enumerate(out) if index not in replaced]
+                out.insert(position, candidate)
+            elif len(out) < limit:
+                out.append(candidate)
     return out

@@ -3860,6 +3860,13 @@
           "title": "Generated At",
           "type": "string"
         },
+        "generated_texts": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Generated Texts",
+          "type": "array"
+        },
         "generations": {
           "items": {
             "$ref": "#/$defs/DraftGeneration"
@@ -3898,6 +3905,13 @@
           "title": "Schema Version",
           "type": "string"
         },
+        "source_history": {
+          "items": {
+            "$ref": "#/$defs/DraftSource"
+          },
+          "title": "Source History",
+          "type": "array"
+        },
         "sources": {
           "items": {
             "$ref": "#/$defs/DraftSource"
@@ -3929,7 +3943,9 @@
         "generations",
         "registry_searches",
         "registry_queries",
-        "notices"
+        "notices",
+        "generated_texts",
+        "source_history"
       ],
       "title": "DraftingRecord",
       "type": "object"

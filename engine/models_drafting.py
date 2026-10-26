@@ -74,6 +74,12 @@ class ApplicantDraft(DraftModel):
         return self
 
 
+def draft_passages(draft: ApplicantDraft) -> list[str]:
+    """Whole writing and atomic paragraphs, including what the UI labels as future work/assumptions."""
+    return [draft.text, *(claim.text for claim in draft.claims),
+            *(assembled_text([claim]) for claim in draft.claims)]
+
+
 class DraftGeneration(DraftModel):
     id: str
     generated_at: str
@@ -108,3 +114,5 @@ class DraftingRecord(DraftModel):
     registry_searches: list[RegistrySearch] = Field(default_factory=list)
     registry_queries: list[DraftRegistryQuery] = Field(default_factory=list)
     notices: list[str] = Field(default_factory=list)
+    generated_texts: list[str] = Field(default_factory=list)  # append-only exclusion history, including replaced pending drafts
+    source_history: list[DraftSource] = Field(default_factory=list)  # authentic origins exempted by fact identity/file hash

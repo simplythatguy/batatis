@@ -591,12 +591,14 @@ export interface DraftSource {
 export interface DraftingRecord {
   drafts: ApplicantDraft[];
   generated_at: string;
+  generated_texts: string[];
   generations: DraftGeneration[];
   input_fingerprint: string;
   notices: string[];
   registry_queries: DraftRegistryQuery[];
   registry_searches: RegistrySearch[];
   schema_version: "batatis.applicant_drafts.v1";
+  source_history: DraftSource[];
   sources: DraftSource[];
   stale: boolean;
   stale_reasons: string[];

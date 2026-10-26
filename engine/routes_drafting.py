@@ -13,7 +13,7 @@ from .drafting_provider import DraftingUnavailable, configured_provider
 from .drafting_sources import collect_sources, has_answer, read_inputs, refresh_staleness, rough_alternative
 from .llm_gate import client_ip_from
 from .models import Case, Fact, Source, now
-from .models_drafting import DraftModel, DraftingRecord
+from .models_drafting import DraftModel, DraftingRecord, draft_passages
 from .redact import people_names
 from .store import VersionConflict
 
@@ -85,6 +85,13 @@ def create_router(cases, code, *, provider_factory=None, registry=None):
         if current_version != version or inputs(current).fingerprint != original.fingerprint:
             raise HTTPException(409, 'Drafting inputs changed during generation; generate again from the current case.')
         if current.drafting:
+            record.generated_texts = list(dict.fromkeys([*current.drafting.generated_texts,
+                *(text for draft in current.drafting.drafts for text in draft_passages(draft) if text.strip()),
+                *record.generated_texts]))
+            origins = [*current.drafting.source_history,
+                       *(s for s in current.drafting.sources if s.kind in {'fact', 'description', 'document'}),
+                       *record.source_history]
+            record.source_history = list({s.id: s for s in origins}.values())
             history = [d for d in current.drafting.drafts if d.status != 'draft']
             source_ids = {c.source_id for d in history for part in [*d.claims, *d.questions] for c in part.sources}
             # A cited registry result also retains the original span that supplied its search query.
@@ -126,7 +133,7 @@ def create_router(cases, code, *, provider_factory=None, registry=None):
         if target == 'accepted':
             if not draft.text.strip():
                 raise HTTPException(422, 'This draft contains only gap questions; answer them before accepting writing.')
-            rough = rough_alternative(case) if draft.field == 'alternative_description' else None
+            rough = rough_alternative(case, cases()) if draft.field == 'alternative_description' else None
             replacing_rough = rough is not None and rough.id == draft.replaces_fact_id
             if has_answer(case, draft.field) and not replacing_rough:
                 raise HTTPException(409, 'This field already has an answer; a draft cannot overwrite it.')

@@ -13,7 +13,7 @@ from .drafting_registry import product_queries
 from .intake.pdf import MAX_PAGES, NotAPdf, page_texts
 from .intake.extract import DESCRIPTION_REF
 from .models import Case
-from .models_drafting import DraftSource, DraftRegistryQuery
+from .models_drafting import DraftSource, DraftRegistryQuery, draft_passages
 from .process_fields import PROCESS_ALIASES, process_fields
 from .professional import professional_involvement
 from .redact import PERSONAL_FIELDS, PERSONAL_SUFFIXES, known_values, scrub, scrub_obj
@@ -41,9 +41,28 @@ def generated_fact(fact, case: Case) -> bool:
     if fact.source.ref.startswith('applicant-draft:'):
         return True
     # Older/generated wording must not become its own corroboration when copied into another fact.
-    originals = {s.ref for s in case.drafting.sources if s.kind in {'fact', 'description'}} if case.drafting else set()
-    return bool(case.drafting and fact.id not in originals and isinstance(fact.value, str) and any(
-        draft.text and fact.value.strip() == draft.text.strip() for draft in case.drafting.drafts))
+    originals = {s.ref for s in original_sources(case) if s.kind in {'fact', 'description'}}
+    return (fact.id not in originals and isinstance(fact.value, str)
+            and ' '.join(fact.value.split()) in generated_passages(case))
+
+
+def original_sources(case: Case) -> list[DraftSource]:
+    return [*case.drafting.source_history, *case.drafting.sources] if case.drafting else []
+
+
+def generated_passages(case: Case) -> set[str]:
+    if not case.drafting:
+        return set()
+    texts = [*case.drafting.generated_texts, *(text for draft in case.drafting.drafts for text in draft_passages(draft))]
+    return {' '.join(text.split()) for text in texts if text.strip()}
+
+
+def current_description_source(fact, case: Case) -> bool:
+    if fact.source.type != 'user_text' or fact.source.ref != DESCRIPTION_REF or fact.field == 'project.description':
+        return True
+    current = next((f for f in reversed(case.facts) if f.field == 'project.description'), None)
+    return bool(current and isinstance(current.value, str) and fact.source.quote
+                and fact.source.quote in current.value and not generated_fact(current, case))
 
 
 def input_facts(case: Case):
@@ -70,7 +89,7 @@ def has_answer(case: Case, field: str) -> bool:
     return fact is not None and fact.value is not None and str(fact.value).strip() != ''
 
 
-def rough_alternative(case: Case):
+def rough_alternative(case: Case, store=None):
     """Only auto-read, verified verbatim prose may be replaced, and only by an explicit draft decision."""
     latest = next((f for f in reversed(case.facts) if f.field in aliases('alternative_description')), None)
     if (latest is None or case.intake is None or latest.kind != 'pointed' or latest.status != 'confirmed'
@@ -79,16 +98,21 @@ def rough_alternative(case: Case):
         return None
     pointer = next((p for p in case.intake.pointers if p.fact_id == latest.id and p.verified
                     and p.method in {'rules', 'model'} and p.start is not None and p.end is not None), None)
-    if pointer is None:
-        return None
-    if latest.source.type == 'user_text' and latest.source.ref == DESCRIPTION_REF and pointer.source_ref == 'description':
-        description = next((f for f in reversed(case.facts) if f.field == 'project.description'), None)
-        if (description is not None and isinstance(description.value, str)
-                and description.value[pointer.start:pointer.end] == latest.value):
-            return latest
-    if (latest.source.type == 'file' and pointer.source_ref == latest.source.ref
-            and pointer.page == latest.source.page):
+    if latest.source.type == 'user_text' and latest.source.ref == DESCRIPTION_REF and current_description_source(latest, case):
+        # The reserved description source identifies an automatic reading, even in older records
+        # whose identical rerun dropped its pointer. Manual answers/clicks have a different source.
         return latest
+    if (latest.source.type == 'file' and pointer and pointer.source_ref == latest.source.ref
+            and pointer.page == latest.source.page and store is not None):
+        saved = store.get_file(case.id, latest.source.ref)
+        if saved is None or latest.source.page is None or latest.source.page > MAX_PAGES:
+            return None
+        try:
+            _, pages = page_texts(saved['data'], latest.source.page)
+        except (NotAPdf, PdfiumError, ValueError, RuntimeError):
+            return None
+        if latest.value in dict(pages).get(latest.source.page, ''):
+            return latest
     # A form's typed answer and any subsequent user answer/click are intentional writing, never rough input.
     return None
 
@@ -140,7 +164,10 @@ def read_inputs(case: Case, store, codes, *, include_bytes: bool = False) -> Inp
                     page=ref.pdf_page, url=ref.url, metadata={'edition': ref.edition, 'structure_only': True})
     # Use the real case for the screen: accepting new wording can invalidate an older officer
     # determination. Excluding the prose as evidence must not resurrect that determination.
-    screen = professional_involvement(case, codes)
+    current_facts = [f for f in case.facts if current_description_source(f, case)]
+    professional_case = (case if len(current_facts) == len(case.facts) else
+                         case.model_copy(update={'facts': current_facts, 'professional_resolutions': []}))
+    screen = professional_involvement(professional_case, codes)
     add('professional_screen', 'professional_involvement', 'Deterministic professional-involvement screen',
         screen.model_dump_json())
     files = []
@@ -158,7 +185,7 @@ def read_inputs(case: Case, store, codes, *, include_bytes: bool = False) -> Inp
         'resources': [s.model_dump() for s in resources],
         'review': case.intake.review.model_dump() if case.intake and case.intake.review else None,
         'files': [{k: v for k, v in f.items() if k != 'data'} for f in files]})
-    rough = rough_alternative(case)
+    rough = rough_alternative(case, store)
     replacements = {'alternative_description': rough.id} if rough else {}
     return Inputs(fingerprint, resources, files,
                   list(dict.fromkeys(f for f in fields if not has_answer(case, f) or f in replacements)),
@@ -227,9 +254,9 @@ def collect_sources(case: Case, inputs: Inputs, *, names=(), registry: CCMCRegis
         if unread:
             bundle.notices.append(f'{label}: pages {", ".join(map(str, unread))} have no readable text; no OCR was run.')
         for page, text in pages:
-            original = case.drafting and any(s.kind == 'document' and s.ref == saved['id'] and s.page == page
-                and s.metadata.get('sha256') == saved['sha256'] for s in case.drafting.sources)
-            if (case.drafting and not original and any(d.text and d.text in text for d in case.drafting.drafts)):
+            original = any(s.kind == 'document' and s.ref == saved['id'] and s.page == page
+                and s.metadata.get('sha256') == saved['sha256'] for s in original_sources(case))
+            if not original and any(passage in ' '.join(text.split()) for passage in generated_passages(case)):
                 bundle.notices.append(f'{label}, page {page}: prior generated applicant prose excluded as a source.')
                 continue
             actual_pages[(saved['id'], page)] = text
@@ -239,6 +266,9 @@ def collect_sources(case: Case, inputs: Inputs, *, names=(), registry: CCMCRegis
     for fact in input_facts(case):
         if generated_fact(fact, case):
             bundle.notices.append(f'Fact {fact.id}: prior generated applicant prose excluded as a source.')
+            continue
+        if not current_description_source(fact, case):
+            bundle.notices.append(f'Fact {fact.id}: original description passage changed or was withdrawn; excluded.')
             continue
         if (fact.field == 'project.description' or fact.status != 'confirmed' or fact.kind == 'proposed'
                 or fact.field in PERSONAL_FIELDS or fact.field.endswith(PERSONAL_SUFFIXES)

@@ -11,6 +11,8 @@ from .identify.answers import is_unknown_answer
 from .models import Case
 from .models_drafting import DraftQuestion
 from .process_fields import ApplicantText, latest_fact
+from .drafting_sources import aliases
+from .reference_selection import _within
 
 
 @dataclass(frozen=True)
@@ -27,8 +29,12 @@ def open_questions(case: Case, *, accepted_only: bool = False) -> list[OpenDraft
     for draft in case.drafting.drafts if case.drafting else []:
         if draft.status == 'rejected' or (accepted_only and draft.status != 'accepted'):
             continue
+        if draft.field.startswith('section_c.') and draft.field.endswith('.explanation'):
+            provision = draft.field.removeprefix('section_c.').removesuffix('.explanation')
+            if not any(_within(provision, selected) for selected in case.provisions):
+                continue
         if draft.status == 'accepted':
-            current = latest_fact(case, draft.field)
+            current = latest_fact(case, *aliases(draft.field))
             if (current is None or current.id != draft.accepted_fact_id or current.status != 'confirmed'
                     or current.value != draft.text or current.source.ref != 'applicant-draft:' + draft.id):
                 continue  # Historical writing retains its questions, but no longer controls this field.
