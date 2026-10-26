@@ -53,12 +53,13 @@ def page_images(pdf: bytes, *, budget: int = PAYLOAD_BUDGET,
     images: list[PageImage] = []
     used = (encoded(len(pdf)) if reserve_pdf else 0) + ENTRY_BYTES
     with pdfium.PdfDocument(pdf) as doc:
+        doc.init_forms()
         count = len(doc)
         for index in range(start, min(count, start + max_pages)):
             page = doc[index]
             width, height = page.get_size()
             scale = SCALE if reserve_pdf else min(SCALE, WINDOW_MAX_EDGE / max(width, height))
-            bitmap = page.render(scale=scale, may_draw_forms=False)
+            bitmap = page.render(scale=scale, may_draw_forms=True)
             try:
                 image = bitmap.to_pil().convert('RGB').quantize(colors=COLORS, method=Image.Quantize.FASTOCTREE)
             finally:

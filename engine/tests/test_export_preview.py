@@ -185,3 +185,18 @@ def test_large_drawing_window_bounds_raster_size_while_preserving_page_dimension
     image = Image.open(io.BytesIO(pages[0].png))
     assert max(image.size) <= 1921
     assert encoded(len(pages[0].png)) + ENTRY_BYTES < PAYLOAD_BUDGET
+
+
+def test_preview_draws_the_normal_appearance_of_retained_live_fields():
+    from pypdf import PdfWriter
+    from engine.models import Case
+    original = export_case(Case(), draft=True).pdf
+    reader = PdfReader(io.BytesIO(original))
+    page_no = next(index for index, page in enumerate(reader.pages) if any(
+        ref.get_object().get('/T') == 'Date1' for ref in page.get('/Annots', [])))
+    blank, _ = page_images(original, start=page_no, max_pages=1, reserve_pdf=False)
+    writer = PdfWriter(clone_from=io.BytesIO(original))
+    writer.update_page_form_field_values(None, {'Date1': '2030-05-10'}, auto_regenerate=False)
+    output = io.BytesIO(); writer.write(output)
+    filled, _ = page_images(output.getvalue(), start=page_no, max_pages=1, reserve_pdf=False)
+    assert filled[0].png != blank[0].png
