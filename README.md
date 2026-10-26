@@ -130,7 +130,7 @@ Many published decisions state their outcome, so the cases test reading and pape
 
 ## What's next
 
-- Offer the website as a paid service, with AI included. The desktop app stays free for people who connect their own AI.
+- Offer the website as a paid service, with AI included. The desktop app stays for people who connect their own AI.
 - Export Calgary's own Request for Specific Variance form next to the Council's form.
 - Register decided variances in the Council's Orders and Variances Portal, which becomes mandatory on December 1, 2026.
 - Add authorities beyond Edmonton and Calgary, then other provinces.
