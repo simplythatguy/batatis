@@ -1,42 +1,40 @@
-/** Applicant statements stay visible beside their source; only people determine what they mean. */
+/** The applicant's saved answers and uncertainties, with their source. People decide what they mean. */
 import type { ReviewQuestion } from "../../api/client";
 
 const STATE: Record<ReviewQuestion["state"], string> = {
-  not_sure: "Open · applicant is not sure",
-  unanswered: "Open · not answered",
-  unconfirmed: "Open · answer not confirmed by applicant",
-  withdrawn: "Open · answer withdrawn",
-  answered: "Applicant answered · officer review remains",
+  not_sure: "Applicant not sure",
+  unanswered: "Not answered",
+  unconfirmed: "Answer not confirmed",
+  withdrawn: "Answer withdrawn",
+  answered: "Answered",
 };
 
 function Question({ q }: { q: ReviewQuestion }) {
-  return <div className="ac-sheet-question">
-    <p className="cf-sheet-p"><strong>{q.text}</strong>{q.provision_id && <><br /><span className="cf-sheet-ref">{q.provision_id}</span></>}</p>
-    <p className="cf-sheet-p">Applicant answer: {q.answer ?? "No answer supplied"}<br /><span className="cf-sheet-flag">{STATE[q.state]}</span></p>
-    {q.clarification && <p className="cf-sheet-p">Applicant clarification: {q.clarification.answer ?? "No answer supplied"}<br /><span className="cf-sheet-flag">{STATE[q.clarification.state]}</span></p>}
-    <details>
-      <summary>Source · {q.source}</summary>
-      {q.source_detail && <p className="cf-sheet-p">{q.source_detail}</p>}
-      {q.clarification && <p className="cf-sheet-p">Clarification source: {q.clarification.source}{q.clarification.source_detail ? ` · ${q.clarification.source_detail}` : ""}</p>}
-    </details>
-  </div>;
+  return (
+    <li className="rw-q">
+      <p className="rw-q-t">{q.text}{q.provision_id && <span className="pr-mono"> · {q.provision_id}</span>}</p>
+      <p>{q.answer ?? "—"} <span className="rw-note">· {STATE[q.state]}</span></p>
+      {q.clarification && <p>Clarified: {q.clarification.answer ?? "—"} <span className="rw-note">· {STATE[q.clarification.state]}</span></p>}
+      <p className="rw-note">{q.source}{q.source_detail ? ` · ${q.source_detail}` : ""}</p>
+    </li>
+  );
 }
 
 export function OpenQuestions({ questions, loading, error }: { questions: ReviewQuestion[]; loading: boolean; error: string }) {
-  // A clarification never conceals the original abstention or acts as an officer determination.
-  const open = questions.filter(q => q.state !== "answered");
-  const answered = questions.filter(q => q.state === "answered");
-  return <section className="ac-sheet-questions" aria-label="Applicant questions and answers">
-    <h4>Questions for the officer</h4>
-    <p className="cf-sheet-note">Saved applicant answers and uncertainties. They do not determine code applicability or equivalent performance. Request clarification from the Decide step (Return with a message).</p>
-    {error ? <p className="cf-sheet-p" role="status">{error}</p>
-      : loading ? <p className="cf-sheet-p" role="status">Loading saved questions…</p>
-      : <>
-        {open.length ? open.map(q => <Question key={q.id} q={q} />) : <p className="cf-sheet-p">No open contextual questions recorded.</p>}
-        {answered.length > 0 && <details>
-          <summary>Applicant answers · {answered.length}</summary>
-          {answered.map(q => <Question key={q.id} q={q} />)}
-        </details>}
-      </>}
-  </section>;
+  if (error) return <p className="rw-empty" role="status">{error}</p>;
+  if (loading || !questions.length) return null;
+  const open = questions.filter((q) => q.state !== "answered");
+  const answered = questions.filter((q) => q.state === "answered");
+  return (
+    <section className="rw-sec" aria-label="Applicant’s questions">
+      <h3><span className="rw-badge" aria-hidden="true">?</span>Questions the applicant answered</h3>
+      {open.length > 0 && <ul className="rw-qs">{open.map((q) => <Question key={q.id} q={q} />)}</ul>}
+      {answered.length > 0 && (
+        <details className="rw-fold">
+          <summary>Answered · {answered.length}</summary>
+          <ul className="rw-qs">{answered.map((q) => <Question key={q.id} q={q} />)}</ul>
+        </details>
+      )}
+    </section>
+  );
 }

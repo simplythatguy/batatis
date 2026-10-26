@@ -1,4 +1,9 @@
-/** One application, its inline findings, and one saved request-and-decision rail. */
+/**
+ * #/review/<caseId>: the officer's workspace. The application is the screen, with each finding under
+ * the row it is about; the rail holds the counts, the request exactly as it will be sent, the
+ * messages, and the decision for the version on screen. One status line says what needs attention.
+ * Data and actions live here; the pieces below only draw what they are given.
+ */
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type Dispatch, type ReactNode, type SetStateAction } from "react";
 import { AccountsError, claimConflict, review, type Claim, type Message } from "../../api/accounts";
 import { EngineError } from "../../api/client";
@@ -10,20 +15,24 @@ import { ExpiryNotice } from "../ExpiryNotice";
 import { getNotificationsState, subscribeNotifications } from "../notifications/notifications";
 import { MoreMenu } from "../shell/MoreMenu";
 import { ConfirmDialog, Modal } from "../ui";
-import { CloseOutDue, CloseOutPanel } from "./CloseOutPanel";
+import { CloseOutPanel } from "./CloseOutPanel";
 import { refusalDecision } from "./packageView";
 import { ProfessionalRequirement } from "./ProfessionalRequirement";
 import { sentLabel, sinceLabel } from "./queue";
 import { RefuseDialog } from "./RefuseDialog";
-import { RequestRail } from "./RequestRail";
 import { loadQueue, patchRow, setBlocking, useQueue } from "./reviewData";
 import { readReviewSnapshot } from "./reviewSnapshot";
 import { sheetFromEngine } from "./sheet";
 import { SubmissionHistory } from "./SubmissionHistory";
 import { mergeThreadMessages } from "./threadMessages";
 import { useRequestDraft } from "./useRequestDraft";
-import { allAnchors, findingState, sheetRows, targetOptions, type FindingFilter } from "./workspaceView";
-import { WorkspaceSheet } from "./WorkspaceSheet";
+import { ApplicationSheet } from "./ApplicationSheet";
+import { Messages } from "./Messages";
+import { OpenQuestions } from "./OpenQuestions";
+import { RequestPanel } from "./RequestPanel";
+import { DecisionBar, ReviewRail, Since, Tally, type Decision } from "./ReviewRail";
+import { StatusPill } from "./ReviewQueue";
+import { allAnchors, findingState, sheetRows, targetOptions, workspaceDecision, type FindingFilter } from "./workspaceView";
 import "./review.css";
 
 type Snapshot = Awaited<ReturnType<typeof readReviewSnapshot>>;
@@ -62,7 +71,6 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
   const [draftPending, setDraftPending] = useState(false);
   const [tab, setTab] = useState<"request" | "messages">("request");
   const [filter, setFilter] = useState<FindingFilter>("all");
-  const page = useRef<HTMLDivElement>(null);
   const upload = useRef<HTMLInputElement>(null);
   const scope = useRef({ caseId, session: accountSession() });
   const reads = useRef(0), indexReads = useRef(0);
@@ -302,134 +310,286 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
 
   const pendingChanged = useCallback((pending: boolean) => { draftDirty.current = pending; setDraftPending(pending); }, []);
   const adoptIndex = (next: PackageReviewIndex) => { setBlocking(caseId, next.workspace?.current ? next.workspace.tally.required : null); setIndex(next); if (next.latest) setShown(next.latest); setIndexState("ready"); };
-  const readOnlyReason = indexState === "loading" || indexState === "failed" ? "The review list is not current · decisions wait" : !onLatest ? latest && shown && shown.version < latest.version ? "Earlier review · read-only" : "The review list is not current · decisions wait" : status === "returned" ? "Sent request · read-only until the applicant fixes and resends"
-    : status === "accepted" ? "Administratively complete · technical review next" : status === "refused" ? "Refused · the record is closed"
-    : otherClaim ? `${otherClaim.reviewer_name} is reviewing this` : !currentReview ? "The application changed · review again" : !canReview ? "Resume this review to edit" : "";
-  const professional = c && <ProfessionalRequirement c={c} editable={canReview && !draftPending && (!shown || onLatest)} busy={Boolean(busy) || running || refreshing} unresolved={professionalPending} onResolve={resolveProfessional} onEditingChange={setProfessionalEditing} />;
-  const outcome = closeOut && <div className="rw-rail-section"><CloseOutPanel c={closeOut} bare><CloseOutDue c={closeOut} inline canMark={Boolean(me && (c?.decision?.by_id === me || claim?.reviewer_id === me))} onChange={co => setIndex(previous => previous ? { ...previous, close_out: co } : previous)} /></CloseOutPanel></div>;
+  const versions = index?.sessions ?? [];
+  const historical = Boolean(shown && latest && shown.version < latest.version);
+  const sheet = c ? sheetFromEngine(c, snapshot?.information) : null;
+  const canRecord = Boolean(me && (c?.decision?.by_id === me || claim?.reviewer_id === me));
+  const outcome = closeOut
+    ? <CloseOutPanel c={closeOut} canRecord={canRecord} onChange={(next) => setIndex((previous) => (previous ? { ...previous, close_out: next } : previous))} />
+    : null;
+  const professional = c && (
+    <ProfessionalRequirement c={c} editable={canReview && !draftPending && !historical} busy={Boolean(busy) || running || refreshing}
+      unresolved={professionalPending} onResolve={resolveProfessional} onEditingChange={setProfessionalEditing} />
+  );
+  const idle = !busy && !running && !draftPending;
   const menu = [
     ...(canReview ? [
-      { label: running ? "Reviewing…" : "Run the review again", onClick: () => void run(), disabled: Boolean(busy) || running || draftPending },
-      { label: "Review uploaded PDFs", onClick: () => upload.current?.click(), disabled: Boolean(busy) || running || draftPending },
-      { label: busy === "release" ? "Releasing…" : "Stop reviewing", onClick: () => void release(), disabled: Boolean(busy) || running || draftPending, separator: true },
+      { label: running ? "Reading…" : "Run the review again", onClick: () => void run(), disabled: !idle },
+      { label: "Review uploaded PDFs", onClick: () => upload.current?.click(), disabled: !idle },
     ] : []),
+    ...versions.filter((v) => v.version !== shown?.version).map((v, i) => ({
+      label: `Open v${v.version}${v.version === latest?.version ? " · latest" : ""}`,
+      onClick: () => void pickVersion(v.version), disabled: !idle, separator: i === 0 && canReview,
+    })),
+    { label: "Refresh", onClick: () => refresh(true), disabled: !idle, separator: true },
+    ...(canReview ? [{ label: busy === "release" ? "Releasing…" : "Stop reviewing", onClick: () => void release(), disabled: !idle }] : []),
   ];
-  const versions = index?.sessions ?? [];
-  const sheet = c ? sheetFromEngine(c, snapshot?.information) : null;
-  const fallbackRows = sheet ? sheetRows(sheet, null) : [];
-  const fallbackAnchors = sheet ? allAnchors(fallbackRows, sheet, null) : [];
 
-  return <div className="ac-page rw-page" ref={page}>
-    <PageHead title={<><a className="ac-crumb" href="#/review">Queue</a><span className="ac-crumb-sep" aria-hidden="true">/</span><span className="ac-crumb-leaf" title={title}>{title}</span></>} phoneTools={phoneTools}
-      right={<>
-        {shown && <details className="rw-version-menu"><summary>v{shown.version}<span className="cf-sr"> · review version on screen</span><AcIcon name="chev" size={12} /></summary>
-          <div>{versions.map(version => <button type="button" key={version.version} disabled={draftPending || running || Boolean(busy)} aria-pressed={version.version === shown.version} onClick={event => { void pickVersion(version.version); const details = event.currentTarget.closest("details"); if (details) details.open = false; }}>Version {version.version} · {version.required} required</button>)}</div>
-        </details>}
-        <button type="button" className="cf-btn is-xs is-ghost" title="Refresh application" aria-label="Refresh application" disabled={Boolean(busy) || running || draftPending} onClick={() => refresh()}><AcIcon name="history" size={15} /></button>
-        <button type="button" className="cf-btn is-xs is-ghost" title="Messages" aria-label={unread ? `Messages, ${unread} unread` : "Messages"} onClick={() => { setTab("messages"); page.current?.querySelector<HTMLElement>("[data-tab=messages]")?.focus({ preventScroll: true }); page.current?.querySelector(".rw-correspondence")?.scrollIntoView({ block: "start" }); }}><AcIcon name="chat" size={15} />{unread > 0 && <span className="rw-badge">{unread}</span>}</button>
-        {menu.length > 0 && <MoreMenu items={menu} />}
-      </>} />
-    {loadError ? <div className="ac-page-body is-narrow"><p role="alert">{loadError}</p><a className="cf-btn is-sm" href="#/review">Back to the queue</a><button type="button" className="cf-btn is-sm" onClick={() => refresh(true)}>Try again</button></div>
-      : !c || !snapshot || !sheet ? <p className="ac-empty" role="status">Loading the application…</p> : <div className="rw-workspace">
-        <div className="rw-banners">
-          {otherClaim && <div className="rw-banner"><Avatar name={otherClaim.reviewer_name} size="sm" /><span>{otherClaim.reviewer_name} is reviewing this · {sinceLabel(otherClaim.claimed_at)}</span><button type="button" className="cf-btn is-xs" disabled={Boolean(busy)} onClick={() => setTakeover(true)}>Take over</button></div>}
-          {unclaimed && <div className="rw-banner" role="status">{busy === "claim" || !actionError ? "Opening the review…" : <>Not picked up yet<button type="button" className="cf-btn is-sm" onClick={() => void doClaim()}>Pick up</button></>}</div>}
-          {resumable && <div className="rw-banner"><span>Resubmitted · waiting for you to resume</span><button type="button" className="cf-btn is-sm" disabled={Boolean(busy)} onClick={() => void doClaim()}>Resume review</button></div>}
-          {status === "returned" && <div className="rw-banner"><span className="cf-dot is-warning" aria-hidden="true" /><span>Returned{c.decision ? ` ${sentLabel(c.decision.at)}` : ""} · read-only until the applicant fixes and resends</span></div>}
-          {status === "accepted" && <div className="rw-banner"><span className="cf-dot is-done" aria-hidden="true" />Administratively complete · technical review next</div>}
-          {status === "refused" && <div className="rw-banner"><span className="cf-dot is-blocking" aria-hidden="true" />Refused · record to keep on file</div>}
-          {actionError && <p className="rw-banner" role="alert">{actionError}</p>}
-          {refreshError && <p className="rw-banner" role="alert">{refreshError}<button type="button" className="cf-btn is-xs" onClick={() => refresh(true)}>Try again</button></p>}
-          {running && <p className="rw-banner" role="status">Reviewing the saved application…</p>}
-          {runError && <p className="rw-banner" role="alert">{runError}<button type="button" className="cf-btn is-xs" disabled={running || Boolean(busy) || draftPending} onClick={() => void run()}>Try again</button></p>}
-          {indexState === "failed" && <p className="rw-banner" role="alert">The review didn’t load · decisions wait<button type="button" className="cf-btn is-xs" onClick={() => { setIndexState("loading"); void loadIndex(true); }}>Try again</button></p>}
-          {indexState === "unavailable" && <p className="rw-banner">Package review unavailable on this server · completeness checklist only</p>}
+  /** The one line under the header: what needs the officer's attention, with its action. */
+  function statusLine(): { tone: string; text: ReactNode; action?: ReactNode; role?: "alert" | "status" } | null {
+    const retry = (label: string, onClick: () => void, disabled = false) =>
+      <button type="button" className="cf-btn is-xs" disabled={disabled} onClick={onClick}>{label}</button>;
+    if (unclaimed) {
+      return busy === "claim" || !actionError
+        ? { tone: "pending", text: "Opening the review…", role: "status" }
+        : { tone: "blocking", text: `Not picked up · ${actionError}`, role: "alert", action: retry("Pick up", () => void doClaim()) };
+    }
+    if (actionError) return { tone: "blocking", text: actionError, role: "alert" };
+    if (refreshError) return { tone: "blocking", text: refreshError, role: "alert", action: retry("Try again", () => refresh(true)) };
+    if (otherClaim) {
+      return { tone: "pending", text: <><Avatar name={otherClaim.reviewer_name} size="sm" />{otherClaim.reviewer_name} is reviewing this · {sinceLabel(otherClaim.claimed_at)}</>,
+        action: retry("Take over", () => setTakeover(true), Boolean(busy)) };
+    }
+    if (resumable) return { tone: "warning", text: "Resubmitted · reserved for you", action: retry("Resume review", () => void doClaim(), Boolean(busy)) };
+    if (running) return { tone: "pending", text: "Reading the application…", role: "status" };
+    if (runError) return { tone: "blocking", text: runError, role: "alert", action: retry("Try again", () => void run(), !idle) };
+    if (indexState === "failed") return { tone: "blocking", text: "The review didn’t load · decisions wait", role: "alert", action: retry("Try again", () => { setIndexState("loading"); void loadIndex(true); }) };
+    if (indexState === "unavailable") return { tone: "pending", text: "No automatic review on this server · the completeness checklist decides" };
+    if (historical && latest) return { tone: "pending", text: `v${shown?.version} · an earlier review, read-only`, action: retry(`Back to v${latest.version}`, () => void pickVersion(latest.version)) };
+    if (canReview && shown && !currentReview) return { tone: "warning", text: "The application changed after this review", action: retry("Review again", () => void run(), !idle) };
+    return null;
+  }
+  const line = c ? statusLine() : null;
+
+  return (
+    <div className="ac-page rw-page">
+      <PageHead
+        title={<><a className="ac-crumb" href="#/review">Queue</a><span className="ac-crumb-sep" aria-hidden="true">/</span><span className="ac-crumb-leaf" title={title}>{title}</span></>}
+        meta={c && <StatusPill a={{ status, claim, submission_number: c.submission_number }} />}
+        phoneTools={phoneTools}
+        right={
+          <>
+            <button type="button" className="cf-btn is-xs is-ghost rw-head-msg" aria-label={unread ? `Messages, ${unread} new` : "Messages"} title="Messages"
+              onClick={() => { setTab("messages"); document.querySelector<HTMLElement>('.rw-tabs [data-tab="messages"]')?.focus({ preventScroll: false }); }}>
+              <AcIcon name="chat" size={16} />{unread > 0 && <span className="rw-n is-new">{unread}</span>}
+            </button>
+            {c && <MoreMenu items={menu} />}
+          </>
+        }
+      />
+      {loadError ? (
+        <div className="ac-page-body is-narrow">
+          <p className="ac-empty" role="alert">{loadError}</p>
+          <div className="cf-row-actions">
+            <a className="cf-btn is-sm is-primary" href="#/review">Back to the queue</a>
+            <button type="button" className="cf-btn is-sm" onClick={() => refresh(true)}>Try again</button>
+          </div>
         </div>
-        {shown && indexState !== "unavailable" ? <SessionWorkspace key={`${shown.package_id}:${shown.version}:${me}`} c={c} snapshot={snapshot} session={shown} workspace={workspace} target={target} editable={editable} busy={Boolean(busy) || running || refreshing}
-          showDecision={canReview && !(shown && latest && shown.version < latest.version)} historical={Boolean(shown && latest && shown.version < latest.version)} required={versions.find(v => v.version === shown.version)?.required} filter={filter} onFilter={setFilter} tab={tab} onTab={setTab} messages={messages} onMessages={setMessages} me={me} messageDraft={messageDraft} onMessageDraft={setMessageDraft}
-          onPending={pendingChanged} onSaved={adoptIndex} onConflict={() => refresh(true)} onReturn={() => openPreview("return")} onAccept={() => openPreview("accept")} onRefuse={() => setRefusing(true)} professional={professional} outcome={outcome} readOnlyReason={readOnlyReason} refreshMessages={() => refresh(true)} />
-          : <div className="rw">
-            <div className="rw-document"><ExpiryNotice expiresAt={c.expires_at} officer /><WorkspaceSheet c={c} sheet={sheet} rows={fallbackRows} anchors={fallbackAnchors} information={snapshot.information} questionError={snapshot.questionError}
-              session={null} workspace={null} states={new Map()} items={[]} limits={READ_ONLY_LIMITS} filter="all" editable={false} historical={false} professional={professional} onDisposition={() => {}} onText={() => {}} />
-              {indexState === "unavailable" && <section className="rw-canonical-gaps" aria-label="Completeness checklist"><h3>Completeness checklist</h3>{snapshot.gapError ? <p>{snapshot.gapError}</p> : snapshot.gaps === null ? <p>Checklist unavailable</p> : snapshot.gaps.filter(g => g.severity !== "info").map(g => <p key={g.id}><span className={`cf-dot is-${g.severity}`} aria-hidden="true" />{g.message}</p>)}</section>}
+      ) : !c || !snapshot || !sheet ? (
+        <p className="ac-empty" role="status">Loading the application…</p>
+      ) : (
+        <div className="rw-body">
+          {line && (
+            <div className={`rw-line is-${line.tone}`} role={line.role}>
+              <span className="cf-dot" aria-hidden="true" />
+              <span className="rw-line-t">{line.text}</span>
+              {line.action}
             </div>
-            <RequestRail caseId={caseId} session={null} workspace={null} filter="all" onFilter={setFilter} tab={tab} onTab={setTab} draft={null} editable={false} busy={Boolean(busy)} targets={[]} questions={sheet.questions} messages={messages} onMessages={setMessages} me={me} messageDraft={messageDraft} onMessageDraft={setMessageDraft}
-              onReturn={() => {}} onAccept={() => {}} onRefuse={() => {}} readOnlyReason={indexState === "loading" ? "Loading the review…" : runError ? "Review failed · try again" : "Review not available"} refreshMessages={() => refresh(true)}
-              outcome={outcome || (canReview ? <div className="rw-decision"><p className="rw-pin">Application version {c.version}</p><p className="rw-scope">Completeness only · not a design approval</p><div className="rw-decision-actions">
-                <button type="button" className="cf-btn is-sm is-primary" disabled={indexState !== "unavailable" || Boolean(busy) || refreshing} onClick={() => { setDecisionError(""); setLegacyReturn(true); }}>{indexState === "unavailable" ? "Return with a message" : "Return with 0 items"}</button>
-                <button type="button" className="cf-btn is-sm" disabled={indexState !== "unavailable" || Boolean(busy) || refreshing || snapshot.gaps === null || Boolean(snapshot.gapError) || snapshot.gaps.some(g => g.severity === "blocking")} onClick={() => openPreview("accept")}>Accept</button>
-                <button type="button" className="cf-btn is-sm" disabled={Boolean(busy) || refreshing} onClick={() => setRefusing(true)}>Refuse</button>
-              </div>{indexState !== "unavailable" ? <p className="rw-hint">Acceptance and requests wait for the saved review.</p> : snapshot.gaps?.some(g => g.severity === "blocking") ? <p className="rw-hint">Required checklist items remain.</p> : snapshot.gapError ? <p className="rw-hint">{snapshot.gapError}</p> : null}</div> : null)} />
-          </div>}
-      </div>}
-    <input ref={upload} className="pr-file-input" type="file" accept="application/pdf,.pdf" multiple tabIndex={-1} aria-hidden="true" onChange={event => { const files = [...(event.target.files ?? [])]; event.target.value = ""; if (files.length) void run(files); }} />
-    <Modal open={Boolean(preview)} onClose={() => { if (!busy) setPreview(null); }} labelledBy="rw-decision-title" className="ac-return">
-      <div className="cf-modal-body"><h2 id="rw-decision-title" className="cf-modal-title">{preview?.kind === "return" ? `Return to ${applicant}?` : "Accept as administratively complete?"}</h2>
-        {preview?.kind === "return" ? <><p className="rw-meta">They fix the application and send it again. They can’t reply.</p><pre className="rw-letter" aria-label="Request to send">{preview.text}</pre><p className="rw-meta">Version {preview.reviewVersion} · {preview.count} {preview.count === 1 ? "item" : "items"}</p></>
-          : <p>{applicant} is told the file is complete. This is not a variance and not a design approval; technical review comes next.</p>}
-        {decisionError && <p className="rw-hint" role="alert">{decisionError} Close this dialog and review the refreshed file.</p>}
-      </div>
-      <div className="cf-modal-foot"><button type="button" className="cf-btn" disabled={Boolean(busy)} onClick={() => setPreview(null)}>Not yet</button><button type="button" className="cf-btn is-primary" disabled={Boolean(busy) || Boolean(decisionError)} onClick={() => void decide()}>{busy ? "Saving…" : preview?.kind === "return" ? "Return" : "Accept as complete"}</button></div>
-    </Modal>
-    <Modal open={legacyReturn} onClose={() => { if (!busy) setLegacyReturn(false); }} labelledBy="rw-legacy-title" className="ac-return">
-      <div className="cf-modal-body"><h2 id="rw-legacy-title" className="cf-modal-title">Return with a message</h2><p className="rw-meta">They fix the application and send it again. They can’t reply.</p><label className="rw-label" htmlFor="rw-legacy-text">Your message</label><textarea className="ac-ta" id="rw-legacy-text" rows={6} maxLength={4000} value={legacyText} onChange={event => setLegacyText(event.target.value)} />
-        {legacyText.trim().length < 10 && <p className="rw-hint">Write at least 10 characters.</p>}{decisionError && <p className="rw-hint" role="alert">{decisionError}</p>}
-      </div><div className="cf-modal-foot"><button type="button" className="cf-btn" disabled={Boolean(busy)} onClick={() => setLegacyReturn(false)}>Cancel</button><button type="button" className="cf-btn is-primary" disabled={Boolean(busy) || legacyText.trim().length < 10} onClick={() => void sendLegacyReturn()}>Return</button></div>
-    </Modal>
-    <RefuseDialog open={refusing && Boolean(c)} applicant={applicant} onClose={() => setRefusing(false)} onSend={sendRefusal} onRefresh={() => refresh(true)} />
-    <ConfirmDialog open={takeover} title="Take over this review?" body={<p>{otherClaim?.reviewer_name} started this review. Taking over records both names in the history.</p>} cancel="Keep theirs" confirm="Take over" onClose={() => setTakeover(false)} onConfirm={() => void doClaim(true)} />
-  </div>;
+          )}
+          {shown && indexState !== "unavailable" ? (
+            <SessionWorkspace key={`${shown.package_id}:${shown.version}:${me}`} c={c} snapshot={snapshot} session={shown} workspace={workspace}
+              target={target} applicant={applicant} editable={editable} busy={Boolean(busy) || running || refreshing}
+              showDecision={canReview && !historical && !closeOut} historical={historical} filter={filter} onFilter={setFilter}
+              tab={tab} onTab={setTab} messages={messages} onMessages={setMessages} me={me} messageDraft={messageDraft}
+              onMessageDraft={setMessageDraft} unread={unread} onPending={pendingChanged} onSaved={adoptIndex} onConflict={() => refresh(true)}
+              onReturn={() => openPreview("return")} onAccept={() => openPreview("accept")} onRefuse={() => setRefusing(true)}
+              professional={professional} outcome={outcome} />
+          ) : (
+            <div className="rw">
+              <div className="rw-doc">
+                <ExpiryNotice expiresAt={c.expires_at} officer />
+                <ApplicationSheet c={c} sheet={sheet} rows={sheetRows(sheet, null)} anchors={allAnchors(sheetRows(sheet, null), sheet, null)}
+                  session={null} rulebook={[]} states={new Map()} items={[]} limits={READ_ONLY_LIMITS} filter="all" editable={false}
+                  historical={false} focus={null} professional={professional} onDisposition={() => {}} onText={() => {}}
+                  questions={<OpenQuestions questions={sheet.questions} loading={false} error={snapshot.questionError} />} />
+                <SubmissionHistory c={c} />
+              </div>
+              <ReviewRail
+                top={indexState === "unavailable" && (
+                  <section className="rw-top" aria-label="Completeness checklist">
+                    <h3 className="rw-top-h">Completeness checklist</h3>
+                    {snapshot.gapError ? <p className="rw-empty">{snapshot.gapError}</p> : (
+                      <ul className="rw-records">
+                        {(snapshot.gaps ?? []).filter((g) => g.severity !== "info").map((g) => (
+                          <li key={g.id}><span className={`cf-dot is-${g.severity}`} aria-hidden="true" /><span>{g.message}</span></li>
+                        ))}
+                      </ul>
+                    )}
+                  </section>
+                )}
+                tab={tab} onTab={setTab} asked={null} unread={unread}
+                request={<p className="rw-empty">{indexState === "loading" ? "Loading the review…" : "No request without a review."}</p>}
+                messages={<MessagesPane c={c} me={me} messages={messages} onMessages={setMessages} canWrite={canReview} draft={messageDraft} onDraft={setMessageDraft} reading={tab === "messages"} />}
+                foot={outcome ?? (canReview && indexState === "unavailable" && (() => {
+                  const blocked = snapshot.gaps === null || Boolean(snapshot.gapError) || snapshot.gaps.some((g) => g.severity === "blocking");
+                  return (
+                    <DecisionBar d={{
+                      version: c.version, savedAt: "application", asked: 0, busy: Boolean(busy) || refreshing,
+                      canReturn: true, returnWhy: "", canAccept: !blocked, acceptWhy: blocked ? "Required checklist items remain" : "", canRefuse: true,
+                      onReturn: () => { setDecisionError(""); setLegacyReturn(true); }, onAccept: () => openPreview("accept"), onRefuse: () => setRefusing(true), returnLabel: "Return with a message",
+                    }} />
+                  );
+                })())}
+              />
+            </div>
+          )}
+        </div>
+      )}
+
+      <input ref={upload} className="pr-file-input" type="file" accept="application/pdf,.pdf" multiple tabIndex={-1} aria-hidden="true"
+        onChange={(e) => { const files = [...(e.target.files ?? [])]; e.target.value = ""; if (files.length) void run(files); }} />
+
+      <Modal open={Boolean(preview)} onClose={() => { if (!busy) setPreview(null); }} labelledBy="rw-decision-title" className="ac-return rw-dialog">
+        <div className="cf-modal-body">
+          <h2 id="rw-decision-title" className="cf-modal-title">{preview?.kind === "return" ? `Return to ${applicant}?` : "Accept as administratively complete?"}</h2>
+          {preview?.kind === "return" ? (
+            <>
+              <p className="cf-muted">They get exactly this, fix the application and send it again. They can’t reply.</p>
+              <pre className="rw-letter is-dialog" aria-label="Request to send">{preview.text}</pre>
+              <p className="rw-note">v{preview.reviewVersion} · {preview.count} {preview.count === 1 ? "item" : "items"} · sent and returned together</p>
+            </>
+          ) : (
+            <p className="cf-muted">{applicant} is told the file is complete. This is not a variance and not a design approval; technical review comes next.</p>
+          )}
+          {decisionError && <p className="rw-why" role="alert"><span className="cf-dot is-blocking" aria-hidden="true" />{decisionError}</p>}
+        </div>
+        <div className="cf-modal-foot">
+          <button type="button" className="cf-btn" disabled={Boolean(busy)} onClick={() => setPreview(null)}>{decisionError ? "Close" : "Not yet"}</button>
+          {!decisionError && (
+            <button type="button" className="cf-btn is-primary" disabled={Boolean(busy)} onClick={() => void decide()}>
+              {busy ? "Saving…" : preview?.kind === "return" ? "Return" : "Accept as complete"}
+            </button>
+          )}
+        </div>
+      </Modal>
+
+      <Modal open={legacyReturn} onClose={() => { if (!busy) setLegacyReturn(false); }} labelledBy="rw-legacy-title" className="ac-return rw-dialog">
+        <div className="cf-modal-body">
+          <h2 id="rw-legacy-title" className="cf-modal-title">Return to {applicant}?</h2>
+          <p className="cf-muted">They fix the application and send it again. They can’t reply.</p>
+          <label className="cf-sr" htmlFor="rw-legacy-text">What they need to fix</label>
+          <textarea className="ac-ta" id="rw-legacy-text" rows={6} maxLength={4000} value={legacyText} placeholder="What they need to fix"
+            onChange={(e) => setLegacyText(e.target.value)} />
+          {decisionError && <p className="rw-why" role="alert"><span className="cf-dot is-blocking" aria-hidden="true" />{decisionError}</p>}
+        </div>
+        <div className="cf-modal-foot">
+          <button type="button" className="cf-btn" disabled={Boolean(busy)} onClick={() => setLegacyReturn(false)}>Not yet</button>
+          <button type="button" className="cf-btn is-primary" disabled={Boolean(busy) || legacyText.trim().length < 10}
+            title={legacyText.trim().length < 10 ? "At least 10 characters" : undefined} onClick={() => void sendLegacyReturn()}>Return</button>
+        </div>
+      </Modal>
+
+      <RefuseDialog open={refusing && Boolean(c)} applicant={applicant} onClose={() => setRefusing(false)} onSend={sendRefusal} onRefresh={() => refresh(true)} />
+      <ConfirmDialog open={takeover} title="Take over this review?"
+        body={<p>{otherClaim?.reviewer_name} started this review. If you take over, the history records both names.</p>}
+        cancel="Keep theirs" confirm="Take over" onClose={() => setTakeover(false)} onConfirm={() => void doClaim(true)} />
+    </div>
+  );
 }
 
-function SessionWorkspace({ c, snapshot, session, workspace, target, editable, busy, showDecision, historical, required, filter, onFilter, tab, onTab, messages, onMessages, me, messageDraft, onMessageDraft, onPending, onSaved, onConflict, onReturn, onAccept, onRefuse, professional, outcome, readOnlyReason, refreshMessages }: {
-  c: Case; snapshot: Snapshot; session: ReviewSession; workspace: Workspace | null; target: ReviewTarget; editable: boolean; busy: boolean; showDecision: boolean; historical: boolean; required?: number;
-  filter: FindingFilter; onFilter: (filter: FindingFilter) => void; tab: "request" | "messages"; onTab: (tab: "request" | "messages") => void;
-  messages: Message[] | null; onMessages: Dispatch<SetStateAction<Message[] | null>>; me: string | null; messageDraft: string; onMessageDraft: (value: string) => void;
-  onPending: (pending: boolean) => void; onSaved: (index: PackageReviewIndex) => void; onConflict: () => void; onReturn: () => void; onAccept: () => void; onRefuse: () => void;
-  professional: ReactNode; outcome: ReactNode; readOnlyReason: string; refreshMessages: () => void;
+function MessagesPane({ c, me, messages, onMessages, canWrite, draft, onDraft, reading }: {
+  c: Case; me: string | null; messages: Message[] | null; onMessages: Dispatch<SetStateAction<Message[] | null>>;
+  canWrite: boolean; draft: string; onDraft: (v: string) => void; reading: boolean;
 }) {
-  const draft = useRequestDraft({ target, session, limits: workspace?.limits ?? READ_ONLY_LIMITS, enabled: editable, onSaved, onConflict });
-  const [composing, setComposing] = useState(false);
-  useEffect(() => { onPending(draft.pending || composing); }, [draft.pending, composing, onPending]);
+  return <Messages caseId={c.id} me={me} messages={messages} onChange={onMessages} canWrite={canWrite} hideTitle draft={draft} onDraft={onDraft} reading={reading} />;
+}
+
+/** The workspace for one review version: the sheet with its findings, and the rail. */
+function SessionWorkspace({ c, snapshot, session, workspace, target, applicant, editable, busy, showDecision, historical, filter, onFilter, tab, onTab, messages, onMessages, me, messageDraft, onMessageDraft, unread, onPending, onSaved, onConflict, onReturn, onAccept, onRefuse, professional, outcome }: {
+  c: Case; snapshot: Snapshot; session: ReviewSession; workspace: Workspace | null; target: ReviewTarget; applicant: string;
+  editable: boolean; busy: boolean; showDecision: boolean; historical: boolean;
+  filter: FindingFilter; onFilter: (f: FindingFilter) => void; tab: "request" | "messages"; onTab: (t: "request" | "messages") => void;
+  messages: Message[] | null; onMessages: Dispatch<SetStateAction<Message[] | null>>; me: string | null; messageDraft: string; onMessageDraft: (v: string) => void; unread: number;
+  onPending: (pending: boolean) => void; onSaved: (index: PackageReviewIndex) => void; onConflict: () => void;
+  onReturn: () => void; onAccept: () => void; onRefuse: () => void; professional: ReactNode; outcome: ReactNode;
+}) {
+  const limits = workspace?.limits ?? READ_ONLY_LIMITS;
+  const draft = useRequestDraft({ target, session, limits, enabled: editable, onSaved, onConflict });
+  useEffect(() => { onPending(draft.pending); }, [draft.pending, onPending]);
   useEffect(() => () => onPending(false), [onPending]);
+  const [focus, setFocus] = useState<string | null>(null);
   const root = useRef<HTMLDivElement>(null);
+
   const sheet = useMemo(() => {
     const current = sheetFromEngine(c, snapshot.information);
     return historical ? { ...current, references: [], documents: [], questions: [] } : current;
   }, [c, snapshot.information, historical]);
   const rows = useMemo(() => sheetRows(sheet, session, historical), [sheet, session, historical]);
   const anchors = useMemo(() => allAnchors(rows, sheet, session), [rows, sheet, session]);
-  const states = new Map(session.findings.map(finding => {
-    const state = findingState(finding, session, workspace);
-    return [finding.key, { ...state, ...draft.state.content.findings.find(edit => edit.key === finding.key) }];
+  // The server's state, with this browser's unsaved calls on top until the save comes back.
+  const states = new Map(session.findings.map((f) => {
+    const state = findingState(f, session, workspace);
+    return [f.key, { ...state, ...draft.state.content.findings.find((e) => e.key === f.key) }];
   }));
+
+  // J and K move between findings; A asks, D dismisses the one in focus. Never while typing.
   useEffect(() => {
-    const keydown = (event: KeyboardEvent) => {
-      if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.altKey || !(event.target instanceof Element)) return;
-      if (event.target.closest("input, textarea, select, [contenteditable=true], dialog[open], .rw-target-picker, .rw-version-menu")) return;
-      const key = event.key.toLowerCase();
+    const keydown = (e: KeyboardEvent) => {
+      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey || !(e.target instanceof Element)) return;
+      if (e.target.closest("input, textarea, [contenteditable=true], dialog[open], [role=listbox], [role=menu]")) return;
+      const key = e.key.toLowerCase();
       if (!["j", "k", "a", "d"].includes(key)) return;
       const cards = [...(root.current?.querySelectorAll<HTMLElement>("[data-finding]") ?? [])];
-      const selected = event.target.closest<HTMLElement>("[data-finding]");
-      const index = cards.findIndex(card => card === selected);
+      const at = cards.findIndex((card) => card.dataset.finding === focus);
       if (key === "j" || key === "k") {
-        const next = cards[Math.max(0, Math.min(cards.length - 1, index + (key === "j" ? 1 : -1)))];
-        if (next) { event.preventDefault(); next.focus({ preventScroll: true }); next.scrollIntoView({ block: "center" }); }
-      } else if (editable && selected) {
-        const button = selected.querySelector<HTMLButtonElement>(`[data-action=${key === "a" ? "ask" : "dismiss"}]`);
-        if (button && !button.disabled) { event.preventDefault(); button.click(); }
+        const next = cards[at < 0 ? 0 : Math.max(0, Math.min(cards.length - 1, at + (key === "j" ? 1 : -1)))];
+        if (!next) return;
+        e.preventDefault();
+        setFocus(next.dataset.finding ?? null);
+        next.focus({ preventScroll: true });
+        next.scrollIntoView({ block: "center", behavior: "smooth" });
+      } else if (editable && at >= 0) {
+        cards[at].querySelector<HTMLButtonElement>(`[data-action=${key === "a" ? "ask" : "dismiss"}]:not(:disabled)`)?.click();
+        e.preventDefault();
       }
     };
     document.addEventListener("keydown", keydown);
     return () => document.removeEventListener("keydown", keydown);
-  }, [editable]);
-  return <div className="rw" ref={root}>
-    <div className="rw-document"><ExpiryNotice expiresAt={c.expires_at} officer />
-      <WorkspaceSheet c={c} sheet={sheet} rows={rows} anchors={anchors} information={snapshot.information} questionError={snapshot.questionError} session={session} workspace={workspace} states={states} items={draft.state.content.items} limits={workspace?.limits ?? READ_ONLY_LIMITS}
-        filter={filter} editable={editable} historical={historical} professional={historical ? null : professional} onDisposition={edit => draft.dispatch({ type: "finding", edit })} onText={(key, text) => draft.dispatch({ type: "item", key, patch: { text } })} />
-      {!historical && <SubmissionHistory c={c} />}
+  }, [editable, focus]);
+
+  const gate = workspaceDecision({ workspace, editable, pending: draft.pending, busy });
+  const savedAt = draft.state.savedAt ?? session.created_at;
+  const decision: Decision = {
+    version: session.version, savedAt: `saved ${sentLabel(savedAt).replace(/^Today, /, "")}`, asked: workspace?.tally.asked ?? 0, busy,
+    canReturn: gate.canReturn, returnWhy: gate.returnReason, canAccept: gate.canAccept, acceptWhy: gate.acceptReason, canRefuse: gate.canRefuse,
+    onReturn, onAccept, onRefuse,
+  };
+
+  return (
+    <div className="rw" ref={root}>
+      <div className="rw-doc">
+        <ExpiryNotice expiresAt={c.expires_at} officer />
+        <ApplicationSheet c={c} sheet={sheet} rows={rows} anchors={anchors} session={session} rulebook={workspace?.rulebook ?? []}
+          states={states} items={draft.state.content.items} limits={limits} filter={filter} editable={editable} historical={historical}
+          focus={focus} professional={historical ? null : professional}
+          questions={historical ? null : <OpenQuestions questions={sheet.questions} loading={snapshot.information === null && !snapshot.questionError} error={snapshot.questionError} />}
+          onDisposition={(edit) => draft.dispatch({ type: "finding", edit })}
+          onText={(key, text) => draft.dispatch({ type: "item", key, patch: { text } })} />
+        {!historical && <SubmissionHistory c={c} />}
+      </div>
+      <ReviewRail
+        top={workspace && (
+          <div className="rw-top">
+            <Tally tally={workspace.tally} filter={filter} onFilter={onFilter} />
+            {session.diff && <Since diff={session.diff} />}
+          </div>
+        )}
+        tab={tab} onTab={onTab} asked={workspace?.tally.asked ?? null} unread={unread}
+        request={<RequestPanel session={session} applicant={applicant} draft={editable ? draft : null} limits={workspace?.limits ?? null}
+          asked={workspace?.tally.asked ?? 0} targets={targetOptions(session, anchors)} questions={sheet.questions} editable={editable} />}
+        messages={<MessagesPane c={c} me={me} messages={messages} onMessages={onMessages} canWrite={showDecision} draft={messageDraft} onDraft={onMessageDraft} reading={tab === "messages"} />}
+        foot={outcome ?? (showDecision && <DecisionBar d={decision} />)}
+      />
     </div>
-    <RequestRail caseId={c.id} session={session} workspace={workspace} required={required} showDecision={showDecision} filter={filter} onFilter={onFilter} tab={tab} onTab={onTab} draft={draft} editable={editable} busy={busy} targets={targetOptions(session, anchors)} questions={sheet.questions}
-      messages={messages} onMessages={onMessages} me={me} messageDraft={messageDraft} onMessageDraft={onMessageDraft} onReturn={onReturn} onAccept={onAccept} onRefuse={onRefuse} outcome={outcome} readOnlyReason={readOnlyReason} refreshMessages={refreshMessages} composing={composing} onComposing={setComposing} />
-  </div>;
+  );
 }

@@ -134,9 +134,9 @@ test("older review versions are read-only and never expose a decision foot", asy
     index: async () => indexFor(latest, { sessions: [{ version: 1, required: 2 }, { version: 3, required: 0 }] }),
   });
   let tree = await h.render({ caseId: "c1" });
-  const head = nodes(tree, n => n.props?.right)[0];
-  const version = nodes(head.props.right, n => n.type === "button" && text(n) === "Version 1 · 2 required")[0];
-  assert.ok(version); version.props.onClick({ currentTarget: { closest: () => ({ open: true }) } }); tree = await h.render();
+  const { menuItem } = await import("./tests/workspaceHarness.mjs");
+  const version = menuItem(tree, "Open v1");
+  assert.ok(version, "earlier versions open from the ⋯ menu"); version.onClick(); tree = await h.render(); tree = await h.render();
   assert.deepEqual([workspaceNode(tree).props.session.version, workspaceNode(tree).props.editable, workspaceNode(tree).props.historical, workspaceNode(tree).props.showDecision], [1, false, true, false]);
   h.unmount();
 });

@@ -3,7 +3,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { AccountsError } from "../../api/accounts";
 import { packageReview } from "../../api/packageReview";
 import type { RequestLimits, RequestTarget, ReviewSession } from "../../api/types.gen";
-import { TargetPicker } from "./RequestEditor";
+import { TargetSelect } from "./TargetSelect";
 import { draftReducer, editBody, initialDraft, officerItem } from "./requestDraft";
 import { targetOptions } from "./workspaceView";
 import "./review.css";
@@ -56,7 +56,7 @@ export function InfoRequest({ target, session, latest, canEdit, onChange, limits
         {!item.finding_key && <button type="button" className="cf-btn is-xs is-ghost" onClick={() => edit({ type: "remove", key: item.key })}>Remove</button>}
       </div>)}
       <div className="rw-field"><label htmlFor={`${id}-add`}>Your item</label><textarea id={`${id}-add`} className="ac-ta" rows={2} maxLength={limits?.item_text} value={adding} onChange={e => setAdding(e.target.value)} /></div>
-      <TargetPicker options={targetOptions(session, [])} value={destination} onChange={setDestination} />
+      <TargetSelect options={targetOptions(session, [])} value={destination} onChange={setDestination} />
       <button type="button" className="cf-btn is-xs" disabled={!adding.trim() || !destination} onClick={() => { if (destination) { edit({ type: "add", item: officerItem(adding.trim(), destination) }); setAdding(""); setDestination(null); } }}>Add item</button>
     </fieldset>
     <p className="rw-meta">{dirty ? "Unsaved changes · the preview is the last save" : "Saved text"}</p><pre className="rw-letter" aria-label="Saved request text">{session.information_request.text}</pre>

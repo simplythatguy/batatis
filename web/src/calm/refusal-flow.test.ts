@@ -269,7 +269,7 @@ test("terminal officer files keep the request in the workspace as a read-only re
     const workspace = workspaceNode(tree);
     assert.ok(workspace, "the saved request remains alongside the sheet");
     assert.equal(workspace.props.editable, false);
-    assert.match(workspace.props.readOnlyReason, /closed|technical review|read-only/);
+    assert.equal(workspace.props.showDecision, false, "a decided or returned file has no decision bar");
     assert.equal(nodes(tree, n => n.type === "InfoRequest" || n.type === "Drawer").length, 0);
     h.unmount();
   }
