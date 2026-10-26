@@ -63,12 +63,12 @@ module.exports = {
   },
   mac: macSigning ? {
     icon: "assets/icon-mac.png",
-    target: ["zip"], category: "public.app-category.productivity",
+    target: ["zip", "dmg"], category: "public.app-category.productivity",
     hardenedRuntime: true, notarize: true,
     entitlements: "assets/entitlements.mac.plist", entitlementsInherit: "assets/entitlements.mac.plist",
   } : {
     icon: "assets/icon-mac.png",
-    target: ["zip"], category: "public.app-category.productivity", identity: "-", hardenedRuntime: false, notarize: false,
+    target: ["zip", "dmg"], category: "public.app-category.productivity", identity: "-", hardenedRuntime: false, notarize: false,
   },
   win: windowsSigning ? {
     icon: "assets/icon-win.png",

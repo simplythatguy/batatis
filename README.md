@@ -240,13 +240,19 @@ The pictures show the main folders and files, not every one. They leave out thes
 
 ## Get started
 
-The steps below run the website locally. To use the desktop app, download it from the [releases page](https://github.com/simplythatguy/batatis/releases). To build it yourself, follow [Desktop setup](docs/desktop.md). Desktop builds and the complete repository checks need Node.js 24 or newer.
+The steps below run the website locally. To use the desktop app, download it from the [releases page](https://github.com/simplythatguy/batatis/releases), or on a Mac run the one-line installer in [Open the desktop app the first time](#open-the-desktop-app-the-first-time). To build it yourself, follow [Desktop setup](docs/desktop.md). Desktop builds and the complete repository checks need Node.js 24 or newer.
 
 ### Open the desktop app the first time
 
-The app isn't signed by Apple or Microsoft yet, so each computer asks once before it opens it.
+The app isn't signed by Apple or Microsoft yet, so a copy downloaded in a browser gets a warning the first time it opens.
 
-- **Mac:** unzip the download and move `Batatis.app` to **Applications**, then open it. If macOS says "Apple could not verify Batatis", click **Done**. Open **System Settings > Privacy & Security**, scroll down to the message about Batatis, click **Open Anyway** and confirm with your password.
+- **Mac:** open **Terminal** and paste this line. It downloads the latest release, checks it, puts `Batatis.app` in **Applications** and opens it, with no warning:
+
+  ```bash
+  curl -fsSL https://raw.githubusercontent.com/simplythatguy/batatis/main/scripts/install-mac.sh | bash
+  ```
+
+  You can also download the `.dmg` from the releases page and drag Batatis to **Applications**. macOS blocks an app downloaded in a browser until Apple has checked it, so the first time it says "Apple could not verify Batatis". Click **Done**, then run `xattr -dr com.apple.quarantine /Applications/Batatis.app` in Terminal to remove the browser's "downloaded" mark, and open it again.
 - **Windows:** unzip the download and open `Batatis.exe`. If Windows says "Windows protected your PC", click **More info**, then **Run anyway**.
 
 The app's own updates don't ask again. [Desktop setup](docs/desktop.md#sign-and-notarize-the-macos-build) explains how to sign both builds so nobody sees these messages.
