@@ -130,7 +130,7 @@
     {
       "id": "no-filled-blanks",
       "claim": "Batatis never fills a blank to make the form look complete.",
-      "detail": "A value needs a source and the applicant’s confirmation before it reaches the form. A field shows N/A only when the applicant said it does not apply and gave a reason. The official form stays locked while a required field is empty.",
+      "detail": "A value reaches the form only with a source in the applicant’s own words or files; a guess, or sources that disagree, wait for the applicant. A field shows N/A only when the applicant said it does not apply and gave a reason. The official form stays locked while a required field is empty.",
       "tests": [
         {
           "id": "engine/tests/test_export_na.py::test_without_the_fact_the_field_stays_blank_and_is_never_shown_as_n_a",
@@ -168,9 +168,16 @@
           "result": "passed"
         },
         {
-          "id": "engine/tests/test_intake_extract.py::test_every_extracted_fact_blocks_export_until_confirmed",
+          "id": "engine/tests/test_intake_extract.py::test_values_read_from_the_applicants_own_words_are_used_without_asking",
           "file": "engine/tests/test_intake_extract.py",
-          "name": "test_every_extracted_fact_blocks_export_until_confirmed",
+          "name": "test_values_read_from_the_applicants_own_words_are_used_without_asking",
+          "runner": "pytest",
+          "result": "passed"
+        },
+        {
+          "id": "engine/tests/test_intake_extract.py::test_a_guess_or_a_reading_against_the_applicants_answer_stays_to_check",
+          "file": "engine/tests/test_intake_extract.py",
+          "name": "test_a_guess_or_a_reading_against_the_applicants_answer_stays_to_check",
           "runner": "pytest",
           "result": "passed"
         },

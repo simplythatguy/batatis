@@ -16,10 +16,11 @@ from engine import llm_gate
 from engine.api import create_app
 from engine.intake import model as model_pass
 from engine.intake import service
-from engine.intake.extract import DESCRIPTION_REF, scrubbed
+from engine.intake.extract import DESCRIPTION, DESCRIPTION_REF, Origin, scrubbed
 from engine.intake.rules import FIELDS, PERSONAL, read, supports
 from engine.intake.text import NUMBER, find_quote, number, sentences
 from engine.models import Case, Fact, Source
+from engine.models_intake import FactPointer
 from engine.store import CaseStore
 from engine.tests._network_guard import block_network
 from evals_dev.intake_facts import score as dev_score
@@ -135,11 +136,73 @@ def test_no_value_without_a_source_on_dev_cases_and_stripped_copies(variant):
                     all(f.field == 'claimed_provision' for f in out.facts)
 
 
-def test_every_extracted_fact_blocks_export_until_confirmed():
+def test_values_read_from_the_applicants_own_words_are_used_without_asking():
     text = json.loads(CASES[0].read_text())['description']
     case = Case()
-    added = service.apply(case, text, service.run(text, []))
-    assert added and set(case.export_blockers()) == {fact.id for fact in added}
+    extraction = service.run(text, [])
+    checked = {p.fact_id for p in extraction.pointers if p.verified}
+    added = service.apply(case, text, extraction)
+    assert added and all(f.status == 'confirmed' for f in added if f.kind == 'pointed')
+    assert all(f.id in checked for f in added if f.kind == 'pointed')
+    assert not set(case.export_blockers()) & {f.id for f in added if f.status == 'confirmed'}
+
+
+def _pointed(field, value, origin, quote, *, verified=True, kind='pointed'):
+    fact = Fact(field=field, value=value, kind=kind, status='unconfirmed', source=origin.source(quote, 0, len(quote)))
+    return fact, FactPointer(fact_id=fact.id, field=field, method='model', source_ref=origin.ref, page=origin.page,
+                             start=0, end=len(quote), verified=verified)
+
+
+def _settled(case, readings):
+    from engine.intake.extract import Extraction
+    out = Extraction()
+    for fact, pointer in readings:
+        out.facts.append(fact)
+        out.pointers.append(pointer)
+    service.settle(case, out)
+    return out
+
+
+def test_the_same_value_read_on_many_pages_is_kept_once_and_used():
+    pages = [_pointed('municipality', 'Edmonton', Origin('file_a', page=n), 'Edmonton') for n in range(1, 22)]
+    out = _settled(Case(), pages)
+    assert [(f.value, f.status) for f in out.facts] == [('Edmonton', 'confirmed')]
+    assert [p.fact_id for p in out.pointers] == [out.facts[0].id]
+
+
+def test_context_sentences_and_cited_articles_are_kept_as_read():
+    origin = Origin('file_a', page=3)
+    out = _settled(Case(), [_pointed('statement.ab12', 'The suites share a party wall.', origin, 'The suites share a party wall.'),
+                            _pointed('claimed_provision', '9.10.11.2.(2)', origin, '9.10.11.2.(2)'),
+                            _pointed('claimed_provision', '9.10.9.14.(3)', origin, '9.10.9.14.(3)'),
+                            _pointed('claimed_provision', '9.10.11.2.(2)', origin, '9.10.11.2.(2)')])
+    assert [(f.field, f.value, f.status) for f in out.facts] == [
+        ('statement.ab12', 'The suites share a party wall.', 'confirmed'),
+        ('claimed_provision', '9.10.11.2.(2)', 'confirmed'), ('claimed_provision', '9.10.9.14.(3)', 'confirmed')]
+
+
+def test_where_sources_disagree_the_description_wins_else_one_question_or_one_check():
+    said, page = Origin(DESCRIPTION), Origin('file_a', page=2)
+    own = _settled(Case(), [_pointed('occupancy', 'multi_family', page, 'rowhouses'),
+                            _pointed('occupancy', 'single_family', said, 'a house')])
+    assert [(f.value, f.status) for f in own.facts] == [('single_family', 'confirmed')]
+    asked = _settled(Case(), [_pointed('occupancy', 'multi_family', page, 'rowhouses'),
+                              _pointed('occupancy', 'single_family', page, 'houses')])
+    assert asked.facts == [] and [(c.field, c.values) for c in asked.conflicts] == [('occupancy', ['multi_family', 'single_family'])]
+    check = _settled(Case(), [_pointed('wall.cladding', 'Rated party walls', page, 'Rated party walls'),
+                              _pointed('wall.cladding', 'Sprinklers in each suite', page, 'Sprinklers in each suite')])
+    assert [(f.value, f.status) for f in check.facts] == [('Rated party walls', 'unconfirmed')]
+
+
+def test_a_guess_or_a_reading_against_the_applicants_answer_stays_to_check():
+    page = Origin('file_a', page=2)
+    guess = _settled(Case(), [_pointed('storeys', 3, page, 'three', verified=False, kind='proposed')])
+    assert [(f.value, f.status) for f in guess.facts] == [(3, 'unconfirmed')]
+    case = Case()
+    case.facts.append(Fact(field='storeys', value=2, kind='pointed', status='confirmed',
+                           source=Source(type='user_text', ref='intake answer', quote='2')))
+    read = _settled(case, [_pointed('storeys', 3, page, 'three storeys')])
+    assert [(f.value, f.status) for f in read.facts] == [(3, 'unconfirmed')]
 
 
 # ---------------------------------------------------------------- adversarial prose
@@ -319,7 +382,7 @@ def client(tmp_path):
     return TestClient(create_app(store)), store
 
 
-def test_intake_route_writes_unconfirmed_pointed_facts(client):
+def test_intake_route_writes_pointed_facts_confirmed_as_read(client):
     http, store = client
     case_id = http.post('/cases', json={}).json()['id']
     text = 'Renovation contractor. A single-storey bungalow with a building area of 140 m2. We want to omit the housewrap.'
@@ -329,7 +392,7 @@ def test_intake_route_writes_unconfirmed_pointed_facts(client):
     assert body['case_version'] == store.get(case_id).version
     fields = {f['field']: f for f in body['facts']}
     assert fields['building_area_m2']['value'] == 140 and fields['building_area_m2']['source']['quote'] == '140 m2'
-    assert all(f['status'] == 'unconfirmed' for f in body['facts'])
+    assert all(f['status'] == 'confirmed' for f in body['facts'])
     pointer = next(p for p in body['record']['pointers'] if p['field'] == 'building_area_m2')
     assert text[pointer['start']:pointer['end']] == '140 m2'
     stored = store.get(case_id)
@@ -337,7 +400,7 @@ def test_intake_route_writes_unconfirmed_pointed_facts(client):
     assert http.get(f'/cases/{case_id}/intake').json()['facts'] == body['facts']
 
 
-def test_rerun_replaces_unconfirmed_facts_and_keeps_confirmed_ones(client):
+def test_rerun_reads_the_new_words_and_keeps_what_the_applicant_gave(client):
     http, store = client
     case_id = http.post('/cases', json={}).json()['id']
     http.post(f'/cases/{case_id}/intake', json={'text': 'A two-storey house of 150 m2.'})
@@ -345,8 +408,8 @@ def test_rerun_replaces_unconfirmed_facts_and_keeps_confirmed_ones(client):
                                                'source': {'type': 'user_click', 'ref': 'confirm', 'quote': '2'}})
     body = http.post(f'/cases/{case_id}/intake', json={'text': 'A two-storey house of 160 m2.'}).json()
     facts = store.get(case_id).facts
-    assert [f.value for f in facts if f.field == 'building_area_m2'] == [160]
-    assert [(f.value, f.status) for f in facts if f.field == 'storeys'] == [(2, 'confirmed')]
+    assert [(f.value, f.status) for f in facts if f.field == 'building_area_m2'] == [(150, 'confirmed'), (160, 'confirmed')]
+    assert [(f.value, f.status) for f in facts if f.field == 'storeys'][-1] == (2, 'confirmed')
     assert 'storeys' not in {f['field'] for f in body['facts']}
 
 

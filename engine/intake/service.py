@@ -1,7 +1,8 @@
 """One intake run on a case: read the description and the dropped files, then update the ledger.
 
-A re-run replaces the facts the previous run left unconfirmed and keeps everything the applicant
-confirmed. A fact whose value the applicant already confirmed is not added again. The description
+What the applicant already gave is used as read (see `settle`), so the deck asks only what is
+missing or unclear. A re-run replaces the facts the previous run left unconfirmed and keeps
+everything confirmed. A fact whose value is already confirmed is not added again. The description
 itself is stored as the applicant's own confirmed words (`project.description`), as the web does.
 """
 from __future__ import annotations
@@ -12,12 +13,12 @@ import re
 from ..identify.answers import is_unknown_answer
 from ..identify.title import short_title, title_should_replace
 from ..models import Case, Fact, Source
-from ..models_intake import FactPointer, IntakeRecord
+from ..models_intake import FactPointer, FieldConflict, IntakeRecord
 from . import model as model_pass
 from . import review as review_pass
 from .extract import DESCRIPTION, DESCRIPTION_REF, Extraction, Origin, Outbound, read_file, read_text, scrubbed
 from .plan import OVERRIDDEN, SCOPE_FIELD, build_plan, description, overridden
-from .questions import issued_questions
+from .questions import PROBE_BY_FIELD, issued_questions
 from .rules import ENUMS, FIELDS, LEGAL_PARTS, PERSONAL, ROLES, read
 from .scope import classify
 from .text import NUMBER, number
@@ -71,6 +72,68 @@ def _latest(case: Case, name: str) -> Fact | None:
                  if fact.field == name or (name == 'storeys' and fact.field == 'building.storeys')), None)
 
 
+CONTEXT = ('statement.', 'claimed_provision')     # quoted sentences and cited articles: context, never a choice
+
+
+def settle(case: Case, extraction: Extraction) -> None:
+    """Use what the applicant gave without asking again; leave at most one thing to check per field.
+
+    A value whose words were found and checked in the source is confirmed as read: quoted context
+    sentences and cited articles always, any other field when everything read agrees and no earlier
+    answer the applicant gave says otherwise. Repeats collapse to the first. Where the sources disagree, the
+    applicant's own description wins; failing that, a field the planner can ask about becomes one
+    conflict question, and any other keeps its first reading to check. A guess the model could not
+    point to stays a proposal only while the field has nothing better. A computed value follows its inputs.
+    """
+    checked = {p.fact_id for p in extraction.pointers if p.verified}
+    conflicted = {c.field for c in extraction.conflicts}
+    key = lambda fact: repr(fact.value)                                  # noqa: E731
+    by_field: dict[str, list[Fact]] = {}
+    for fact in extraction.facts:
+        if fact.kind != 'computed':
+            by_field.setdefault(fact.field, []).append(fact)
+    kept: dict[str, Fact] = {}                                           # id -> fact kept
+    for field, facts in by_field.items():
+        sure = [f for f in facts if f.kind == 'pointed' and f.id in checked]
+        unique = list({key(f): f for f in reversed(sure)}.values())[::-1]   # first reading of each value
+        prior = _latest(case, field)
+        # Only what the applicant answered or clicked outranks a new reading; an earlier reading does not.
+        given = prior is not None and prior.status == 'confirmed' and prior.source.type != 'file' \
+            and prior.source.ref != DESCRIPTION_REF
+        agrees = lambda f: not given or prior.value == f.value          # noqa: E731
+        if field.startswith(CONTEXT):
+            chosen, confirm = unique, True
+        elif not sure:
+            chosen, confirm = facts[:1], False
+        else:
+            own = list({key(f): f for f in reversed(sure) if f.source.type == 'user_text'}.values())[::-1]
+            if len(unique) == 1 and field not in conflicted and agrees(unique[0]):
+                chosen, confirm = unique, True
+            elif len(own) == 1 and agrees(own[0]):
+                chosen, confirm = own, True
+            elif given:
+                chosen, confirm = [f for f in unique if f.value != prior.value][:1], False
+            elif field in PROBE_BY_FIELD:
+                if field not in conflicted:
+                    extraction.conflicts.append(FieldConflict(
+                        field=field, values=[f.value for f in unique][:6], quotes=[f.source.quote or '' for f in unique][:6],
+                        source_ref=unique[0].source.ref or '', page=unique[0].source.page))
+                chosen, confirm = [], False
+            else:
+                chosen, confirm = unique[:1], False
+        for fact in chosen:
+            if confirm:
+                fact.status = 'confirmed'
+            kept[fact.id] = fact
+    for fact in extraction.facts:
+        if fact.kind == 'computed' and fact.inputs and all(i in kept for i in fact.inputs):
+            if all(kept[i].status == 'confirmed' for i in fact.inputs):
+                fact.status = 'confirmed'
+            kept[fact.id] = fact
+    extraction.facts = [fact for fact in extraction.facts if fact.id in kept]
+    extraction.pointers = [pointer for pointer in extraction.pointers if pointer.fact_id in kept]
+
+
 def apply(case: Case, text: str | None, extraction: Extraction, *, role: str | None = None) -> list[Fact]:
     """Write this run to the case. Returns the facts added by the run."""
     previous_text = description(case)
@@ -86,6 +149,7 @@ def apply(case: Case, text: str | None, extraction: Extraction, *, role: str | N
         if current is None or current.value != role or current.status != 'confirmed':
             case.facts.append(Fact(field='applicant_role', value=role, kind='pointed', status='confirmed',
                                    source=Source(type='user_click', ref='intake:role', quote=role)))
+    settle(case, extraction)
     added, kept_ids, same = [], set(), {}
     for fact in extraction.facts:
         if role in ROLES and fact.field == 'applicant_role':
@@ -210,6 +274,8 @@ def answer(case: Case, answers: list[dict]) -> list[Fact]:
             case.intake.plan.not_sure = [q for q in case.intake.plan.not_sure if q != qid]
         fact = Fact(field=field, value=value, kind='pointed', status='confirmed',
                     source=Source(type='user_text', ref='intake answer', quote=raw.strip()))
+        # The answer settles the field: readings still waiting on it are no longer asked.
+        case.facts = [f for f in case.facts if not (f.field == field and f.status == 'unconfirmed')]
         case.facts.append(fact)
         created.append(fact)
     refresh(case)

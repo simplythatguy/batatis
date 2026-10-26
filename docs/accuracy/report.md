@@ -47,7 +47,7 @@ Enforced by:
 
 ### Batatis never fills a blank to make the form look complete.
 
-A value needs a source and the applicant’s confirmation before it reaches the form. A field shows N/A only when the applicant said it does not apply and gave a reason. The official form stays locked while a required field is empty.
+A value reaches the form only with a source in the applicant’s own words or files; a guess, or sources that disagree, wait for the applicant. A field shows N/A only when the applicant said it does not apply and gave a reason. The official form stays locked while a required field is empty.
 
 Enforced by:
 
@@ -56,7 +56,8 @@ Enforced by:
 - `engine/tests/test_export.py::test_blocks_on_unconfirmed_facts_and_blocking_gaps` (passed)
 - `engine/tests/test_export.py::test_direct_export_cannot_bypass_authoritative_completeness` (passed)
 - `engine/tests/test_intake_extract.py::test_no_value_without_a_source_on_dev_cases_and_stripped_copies` (passed)
-- `engine/tests/test_intake_extract.py::test_every_extracted_fact_blocks_export_until_confirmed` (passed)
+- `engine/tests/test_intake_extract.py::test_values_read_from_the_applicants_own_words_are_used_without_asking` (passed)
+- `engine/tests/test_intake_extract.py::test_a_guess_or_a_reading_against_the_applicants_answer_stays_to_check` (passed)
 - `engine/tests/test_package_review_boundary.py::test_never_fills_a_blank_from_elsewhere_in_the_package` (passed)
 
 ### Batatis never writes the applicant’s case or the officer’s decision.

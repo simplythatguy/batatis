@@ -114,6 +114,8 @@ def plan_questions(*, known: set[str], prose: str, candidates: list[dict], confl
         probe = PROBE_BY_FIELD.get(conflict.field)
         if probe is None or question_id(conflict.field) in not_sure:
             continue
+        if any(name in known for name in ALIASES.get(conflict.field, (conflict.field,))):
+            continue                                 # answered since: the applicant's value settles it
         said = ', '.join(f'"{q}"' for q in dict.fromkeys(conflict.quotes))
         scored.append((1000, -order, Question(
             id=question_id(conflict.field), field=conflict.field, kind='conflict', priority=probe.priority,
