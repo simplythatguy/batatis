@@ -67,6 +67,7 @@ FACTS = {
     'supporting_doc.5.responsible': 'SYNTHETIC laboratory role',
     'supporting_doc.6.name': 'SYNTHETIC air-barrier-detail attachment',
     'supporting_doc.6.responsible': 'SYNTHETIC design-author role',
+    'coordinator': 'SYNTHETIC design-author role co-ordinates the design, code analysis and documentation.',
 }
 
 

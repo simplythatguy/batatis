@@ -47,6 +47,9 @@ class StoredValue:
     source_ref: str = ''
     source: dict | None = None
     input_field: str | None = None
+    status: str | None = None
+    reason: str = ''
+    pointers: list[dict] = field(default_factory=list)
 
 
 @dataclass
@@ -71,19 +74,8 @@ class Ingested:
     case: Case | None = None
 
 
-_ALIASES = {
-    'owner_name': ('owner_name', 'owner', 'section_a.owner_name'),
-    'application_date': ('application_date', 'request_date', 'date', 'section_a.date'),
-    'representative': ('representative', 'owner_rep_name', 'applicant_name'),
-    'mailing_address': ('mailing_address', 'mailingAddress'),
-    'civic_address': ('civic_address', 'municipal_address', 'municipalAddress', 'address'),
-    'legal_description': ('legal_description', 'legalDescription', 'section_b.legal_description'),
-    'alternative_description': ('alternative_description', 'alternative'),
-    'professional_name': ('professional_name', 'responsible_professional', 'professional.name'),
-    'division_c_2_3_1': ('division_c_2_3_1', 'division_c_documentation', 'div_c_2_3_1'),
-}
-_ALIASES.update({key: tuple(f'process.{alias}' for alias in aliases) + aliases
-                 for key, aliases in PROCESS_ALIASES.items()})
+from ..fact_aliases import ALIASES, LOGICAL_KEYS
+from ..fact_aliases import FIELD_KEYS
 
 
 def _stored(fact: Fact, logical: str) -> StoredValue:
@@ -92,12 +84,35 @@ def _stored(fact: Fact, logical: str) -> StoredValue:
     confirmed = fact.status == 'confirmed' and fact.kind != 'proposed'
     if not quote and fact.source.type == 'user_text':
         quote = value                    # typed by the applicant, saved before typed answers carried a quote
-    if fact.kind == 'pointed' and value.strip() and not quote_in_text(value, quote):
+    if (fact.kind == 'pointed' and fact.source.type in ('file', 'drawing')
+            and not (fact.field.endswith('.file_ref') and fact.value == fact.source.ref)
+            and value.strip() and not quote_in_text(value, quote)):
         confirmed = False
+    if (fact.kind == 'pointed' and fact.source.type in ('file', 'drawing')
+            and re.fullmatch(r'[+-]?\d+(?:\.\d+)?', value)
+            and not re.search(r'(?<![\w.])' + re.escape(value) + r'(?![\d.])', quote)):
+        confirmed = False
+    if value.strip() and FIELD_KEYS.get(fact.field, fact.field).startswith('process.'):
+        from ..process_fields import ApplicantText
+        try:
+            ApplicantText.from_fact(fact)
+        except ValueError:
+            confirmed = False
     return StoredValue(logical, value, 'exact' if fact.kind == 'exact' else 'pointed',
                        value if fact.kind == 'exact' else quote or None,
                        explicit_blank=not value.strip(), confirmed=confirmed, source_ref=fact.source.ref,
                        source=fact.source.model_dump(), input_field=fact.field)
+
+
+def effective_case(case: Case) -> Case:
+    """Downgrade unsupported current readings before any rule or renderer consumes them."""
+    from ..fact_aliases import latest
+    rejected = {fact.id for key, fact in latest(case).items() if not _stored(fact, key).confirmed}
+    data = case.model_dump()
+    for fact in data['facts']:
+        if fact['id'] in rejected:
+            fact['status'] = 'unconfirmed'
+    return Case.model_validate(data)
 
 
 def ingested_from_case(case: Case) -> Ingested:
@@ -105,7 +120,8 @@ def ingested_from_case(case: Case) -> Ingested:
     doc = Ingested(case.id, b'', '', 'form', submission_id=case.id, ledger=True, case=case)
     for fact in case.facts:
         doc.values[fact.field] = _stored(fact, fact.field)
-    for logical, aliases in _ALIASES.items():
+    for canonical, aliases in ALIASES.items():
+        logical = LOGICAL_KEYS.get(canonical, canonical)
         fact = latest_fact(case, *aliases)
         if fact is not None:
             doc.values[logical] = _stored(fact, logical)

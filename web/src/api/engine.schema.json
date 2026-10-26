@@ -1,5 +1,230 @@
 {
   "$defs": {
+    "AdministrativeItem": {
+      "additionalProperties": false,
+      "properties": {
+        "certainty": {
+          "enum": [
+            "present",
+            "blank",
+            "not_found",
+            "not_applicable"
+          ],
+          "title": "Certainty",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Citations",
+          "type": "array"
+        },
+        "export_blocking": {
+          "title": "Export Blocking",
+          "type": "boolean"
+        },
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "finding_status": {
+          "anyOf": [
+            {
+              "enum": [
+                "blank",
+                "not_found",
+                "missing",
+                "unclear"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Finding Status"
+        },
+        "fix_hint": {
+          "default": "",
+          "title": "Fix Hint",
+          "type": "string"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "pointers": {
+          "items": {
+            "$ref": "#/$defs/PolicyPointer"
+          },
+          "title": "Pointers",
+          "type": "array"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "reason_code": {
+          "title": "Reason Code",
+          "type": "string"
+        },
+        "routed_to": {
+          "enum": [
+            "applicant",
+            "officer",
+            "professional"
+          ],
+          "title": "Routed To",
+          "type": "string"
+        },
+        "section": {
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "process"
+          ],
+          "title": "Section",
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "blocking",
+            "warning",
+            "info"
+          ],
+          "title": "Severity",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/Source"
+          },
+          "title": "Sources",
+          "type": "array"
+        },
+        "submission_blocking": {
+          "default": true,
+          "title": "Submission Blocking",
+          "type": "boolean"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "verdict": {
+          "enum": [
+            "present",
+            "missing",
+            "unclear"
+          ],
+          "title": "Verdict",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "field",
+        "section",
+        "label",
+        "verdict",
+        "reason_code",
+        "reason",
+        "value",
+        "certainty",
+        "finding_status",
+        "severity",
+        "routed_to",
+        "export_blocking",
+        "submission_blocking",
+        "fix_hint",
+        "citations",
+        "sources",
+        "pointers"
+      ],
+      "title": "AdministrativeItem",
+      "type": "object"
+    },
+    "AdministrativeReport": {
+      "additionalProperties": false,
+      "properties": {
+        "administrative_only": {
+          "const": true,
+          "default": true,
+          "title": "Administrative Only",
+          "type": "boolean"
+        },
+        "export_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Export Reasons",
+          "type": "array"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/AdministrativeItem"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "not_a_compliance_determination": {
+          "const": true,
+          "default": true,
+          "title": "Not A Compliance Determination",
+          "type": "boolean"
+        },
+        "policy_version": {
+          "const": "2026-10-26",
+          "default": "2026-10-26",
+          "title": "Policy Version",
+          "type": "string"
+        },
+        "ready_for_export": {
+          "title": "Ready For Export",
+          "type": "boolean"
+        },
+        "schema_version": {
+          "const": "batatis.administrative_completeness.v1",
+          "default": "batatis.administrative_completeness.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "stage": {
+          "const": "preparation",
+          "default": "preparation",
+          "title": "Stage",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "policy_version",
+        "stage",
+        "administrative_only",
+        "not_a_compliance_determination",
+        "items",
+        "export_reasons",
+        "ready_for_export"
+      ],
+      "title": "AdministrativeReport",
+      "type": "object"
+    },
     "AnswerCounts": {
       "additionalProperties": false,
       "properties": {
@@ -2565,6 +2790,127 @@
       "title": "CodeTOC",
       "type": "object"
     },
+    "CompletenessRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "variant": {
+          "anyOf": [
+            {
+              "enum": [
+                "A",
+                "B",
+                "C"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Variant"
+        }
+      },
+      "title": "CompletenessRequest",
+      "type": "object"
+    },
+    "CompletenessResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "administrative_only": {
+          "const": true,
+          "default": true,
+          "title": "Administrative Only",
+          "type": "boolean"
+        },
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "case_updated_at": {
+          "title": "Case Updated At",
+          "type": "string"
+        },
+        "case_version": {
+          "minimum": 1,
+          "title": "Case Version",
+          "type": "integer"
+        },
+        "llm": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LLMUsageModel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "not_a_compliance_determination": {
+          "const": true,
+          "default": true,
+          "title": "Not A Compliance Determination",
+          "type": "boolean"
+        },
+        "notice": {
+          "default": "This review lists administrative gaps only. It is not a finding that the design is safe, that it complies with the code, or that a variance is granted.",
+          "title": "Notice",
+          "type": "string"
+        },
+        "policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AdministrativeReport"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "reminder": {
+          "$ref": "#/$defs/ReminderModel"
+        },
+        "reviews": {
+          "items": {
+            "$ref": "#/$defs/ReviewModel"
+          },
+          "title": "Reviews",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "batatis.completeness.v1",
+          "default": "batatis.completeness.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "variant": {
+          "enum": [
+            "A",
+            "B"
+          ],
+          "title": "Variant",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "variant",
+        "administrative_only",
+        "not_a_compliance_determination",
+        "notice",
+        "reviews",
+        "reminder",
+        "llm",
+        "policy",
+        "case_id",
+        "case_version",
+        "case_updated_at"
+      ],
+      "title": "CompletenessResponse",
+      "type": "object"
+    },
     "CompletenessSummary": {
       "properties": {
         "answered": {
@@ -3311,6 +3657,246 @@
         "text"
       ],
       "title": "EditedItem",
+      "type": "object"
+    },
+    "ElementModel": {
+      "additionalProperties": false,
+      "properties": {
+        "certainty": {
+          "default": "not_found",
+          "enum": [
+            "present",
+            "blank",
+            "not_found",
+            "not_applicable"
+          ],
+          "title": "Certainty",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Citations",
+          "type": "array"
+        },
+        "defect_class": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Defect Class"
+        },
+        "export_field": {
+          "title": "Export Field",
+          "type": "string"
+        },
+        "export_section": {
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "process"
+          ],
+          "title": "Export Section",
+          "type": "string"
+        },
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "form_fields": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Form Fields",
+          "type": "array"
+        },
+        "group": {
+          "default": "",
+          "title": "Group",
+          "type": "string"
+        },
+        "in_export_preflight": {
+          "default": false,
+          "title": "In Export Preflight",
+          "type": "boolean"
+        },
+        "key": {
+          "default": "",
+          "title": "Key",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "lookup_skipped": {
+          "default": false,
+          "title": "Lookup Skipped",
+          "type": "boolean"
+        },
+        "problem": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Problem"
+        },
+        "prompt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/IntakePromptModel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "quotes": {
+          "items": {
+            "$ref": "#/$defs/QuoteModel"
+          },
+          "title": "Quotes",
+          "type": "array"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "related_fields": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Related Fields",
+          "type": "array"
+        },
+        "routed_to": {
+          "anyOf": [
+            {
+              "enum": [
+                "officer",
+                "professional",
+                "applicant"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Routed To"
+        },
+        "severity": {
+          "default": "warning",
+          "enum": [
+            "blocking",
+            "warning",
+            "info"
+          ],
+          "title": "Severity",
+          "type": "string"
+        },
+        "source": {
+          "enum": [
+            "applicant",
+            "registered_professional"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/Source"
+          },
+          "title": "Sources",
+          "type": "array"
+        },
+        "template_section": {
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ],
+          "title": "Template Section",
+          "type": "string"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "verdict": {
+          "enum": [
+            "present",
+            "missing",
+            "unclear"
+          ],
+          "title": "Verdict",
+          "type": "string"
+        }
+      },
+      "required": [
+        "field",
+        "template_section",
+        "export_section",
+        "export_field",
+        "form_fields",
+        "label",
+        "group",
+        "verdict",
+        "reason",
+        "defect_class",
+        "problem",
+        "quotes",
+        "prompt",
+        "lookup_skipped",
+        "in_export_preflight",
+        "source",
+        "severity",
+        "related_fields",
+        "citations",
+        "routed_to",
+        "sources",
+        "url",
+        "key",
+        "value",
+        "certainty"
+      ],
+      "title": "ElementModel",
       "type": "object"
     },
     "EvidenceItem": {
@@ -5609,6 +6195,42 @@
       "title": "IntakePlan",
       "type": "object"
     },
+    "IntakePromptModel": {
+      "additionalProperties": false,
+      "properties": {
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "form_fields": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Form Fields",
+          "type": "array"
+        },
+        "question": {
+          "title": "Question",
+          "type": "string"
+        },
+        "source": {
+          "enum": [
+            "applicant",
+            "registered_professional"
+          ],
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "question",
+        "field",
+        "form_fields",
+        "source"
+      ],
+      "title": "IntakePromptModel",
+      "type": "object"
+    },
     "IntakeRecord": {
       "properties": {
         "conflicts": {
@@ -6252,6 +6874,78 @@
         "disclaimer"
       ],
       "title": "JurisdictionsResult",
+      "type": "object"
+    },
+    "LLMUsageModel": {
+      "additionalProperties": false,
+      "properties": {
+        "estimated_usd": {
+          "default": 0.0,
+          "title": "Estimated Usd",
+          "type": "number"
+        },
+        "input_tokens": {
+          "default": 0,
+          "title": "Input Tokens",
+          "type": "integer"
+        },
+        "latency_s": {
+          "default": 0.0,
+          "title": "Latency S",
+          "type": "number"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model"
+        },
+        "output_tokens": {
+          "default": 0,
+          "title": "Output Tokens",
+          "type": "integer"
+        },
+        "provider": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provider"
+        },
+        "skipped": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Skipped"
+        }
+      },
+      "required": [
+        "provider",
+        "model",
+        "input_tokens",
+        "output_tokens",
+        "latency_s",
+        "estimated_usd",
+        "skipped"
+      ],
+      "title": "LLMUsageModel",
       "type": "object"
     },
     "LoginRequest": {
@@ -7100,6 +7794,88 @@
       "title": "Pointer",
       "type": "object"
     },
+    "PolicyPointer": {
+      "additionalProperties": false,
+      "properties": {
+        "bbox": {
+          "anyOf": [
+            {
+              "maxItems": 4,
+              "minItems": 4,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bbox"
+        },
+        "file": {
+          "title": "File",
+          "type": "string"
+        },
+        "form_field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Form Field"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "quote": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Quote"
+        }
+      },
+      "required": [
+        "file",
+        "page",
+        "form_field",
+        "bbox",
+        "quote"
+      ],
+      "title": "PolicyPointer",
+      "type": "object"
+    },
     "PreApplication": {
       "description": "'Before you submit': meet the authority having jurisdiction and emergency services early.",
       "properties": {
@@ -7748,6 +8524,40 @@
       "title": "QueueResult",
       "type": "object"
     },
+    "QuoteModel": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "exact",
+            "pointed"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "source": {
+          "additionalProperties": true,
+          "title": "Source",
+          "type": "object"
+        },
+        "source_ref": {
+          "title": "Source Ref",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "kind",
+        "source_ref",
+        "source"
+      ],
+      "title": "QuoteModel",
+      "type": "object"
+    },
     "QuotedChoice": {
       "description": "'The code says X. Does your design do something different?' The id sits behind a disclosure.",
       "properties": {
@@ -8067,6 +8877,50 @@
         "bands"
       ],
       "title": "RelevanceRecord",
+      "type": "object"
+    },
+    "ReminderModel": {
+      "additionalProperties": false,
+      "description": "IB-2025-11-18 copy of the issued variance. Not a present/missing/unclear verdict and not an export blocker.",
+      "properties": {
+        "bulletin_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Bulletin Ids",
+          "type": "array"
+        },
+        "links": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Links",
+          "type": "array"
+        },
+        "source": {
+          "additionalProperties": true,
+          "title": "Source",
+          "type": "object"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "verdict": {
+          "const": "reminder",
+          "default": "reminder",
+          "title": "Verdict",
+          "type": "string"
+        }
+      },
+      "required": [
+        "verdict",
+        "bulletin_ids",
+        "text",
+        "links",
+        "source"
+      ],
+      "title": "ReminderModel",
       "type": "object"
     },
     "ResolvedForm": {
@@ -8423,6 +9277,52 @@
       "title": "ReviewItem",
       "type": "object"
     },
+    "ReviewModel": {
+      "additionalProperties": false,
+      "properties": {
+        "document_id": {
+          "title": "Document Id",
+          "type": "string"
+        },
+        "export_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Export Reasons",
+          "type": "array"
+        },
+        "invented_values": {
+          "title": "Invented Values",
+          "type": "integer"
+        },
+        "reasons_by_section": {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Reasons By Section",
+          "type": "object"
+        },
+        "sections": {
+          "items": {
+            "$ref": "#/$defs/SectionModel"
+          },
+          "title": "Sections",
+          "type": "array"
+        }
+      },
+      "required": [
+        "document_id",
+        "sections",
+        "reasons_by_section",
+        "export_reasons",
+        "invented_values"
+      ],
+      "title": "ReviewModel",
+      "type": "object"
+    },
     "ReviewSession": {
       "additionalProperties": false,
       "properties": {
@@ -8545,6 +9445,17 @@
           "title": "Package Id",
           "type": "string"
         },
+        "policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AdministrativeReport"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "schema_version": {
           "const": "batatis.package_review.v1",
           "default": "batatis.package_review.v1",
@@ -8585,7 +9496,8 @@
         "section_c",
         "information_request",
         "diff",
-        "lookup_skipped"
+        "lookup_skipped",
+        "policy"
       ],
       "title": "ReviewSession",
       "type": "object"
@@ -9457,6 +10369,39 @@
         "explainer"
       ],
       "title": "SectionCRow",
+      "type": "object"
+    },
+    "SectionModel": {
+      "additionalProperties": false,
+      "properties": {
+        "elements": {
+          "items": {
+            "$ref": "#/$defs/ElementModel"
+          },
+          "title": "Elements",
+          "type": "array"
+        },
+        "section": {
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ],
+          "title": "Section",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "section",
+        "title",
+        "elements"
+      ],
+      "title": "SectionModel",
       "type": "object"
     },
     "SelectedArticle": {

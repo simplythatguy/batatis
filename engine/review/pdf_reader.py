@@ -66,6 +66,7 @@ class ReadFile:
     note: str = ''
     data: bytes = b''
     field_map: dict | None = None    # verified runtime map for this form layout
+    _unreadable_cache: tuple[int, ...] | None = field(default=None, repr=False)
 
     def locate(self, page: int, quote: str) -> tuple[float, float, float, float] | None:
         return locate(self.data, page, quote)
@@ -112,6 +113,8 @@ class ReadFile:
         Paths on otherwise readable pages can be table borders/backgrounds, including in
         the official export. Paths inside a labelled passage are checked by passage_has_marks.
         """
+        if self._unreadable_cache is not None:
+            return list(self._unreadable_cache)
         import pypdfium2.raw as raw
         try:
             with open_pdf(self.data) as doc:
@@ -122,9 +125,11 @@ class ReadFile:
                             or (not page.text.strip() and _object_boxes(pdf_page)) or any(
                                 obj.type == raw.FPDF_PAGEOBJ_IMAGE for obj in pdf_page.get_objects(max_depth=4))):
                         unreadable.append(page.page)
+                self._unreadable_cache = tuple(unreadable)
                 return unreadable
         except Exception:  # noqa: BLE001 - a failed inspection cannot establish absence
-            return [page.page for page in self.text_pages]
+            self._unreadable_cache = tuple(page.page for page in self.text_pages)
+            return list(self._unreadable_cache)
 
 
 @dataclass(frozen=True)

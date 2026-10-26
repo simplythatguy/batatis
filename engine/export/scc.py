@@ -129,54 +129,29 @@ def load_form(path: Path | str | None, fmap: dict) -> bytes:
 
 # ---------------------------------------------------------------- case values
 
-_ALIASES = {
-    'owner_name': ('owner_name', 'owner', 'section_a.owner_name'),
-    'owner_rep_name': ('owner_rep_name', 'representative', 'applicant_name'),
-    'request_date': ('request_date', 'application_date', 'date', 'section_a.date'),
-    'mailing_address': ('mailing_address', 'mailingAddress'),
-    'municipal_address': ('municipal_address', 'municipalAddress', 'civic_address', 'address'),
-    'legal_description': ('legal_description', 'legalDescription', 'section_b.legal_description'),
-    'permit_number': ('permit_number', 'permit', 'section_b.permit_number'),
-    'alternative_description': ('alternative_description', 'alternative'),
-}
-_FIELD_KEYS = {alias: key for key, aliases in _ALIASES.items() for alias in aliases}
-_FIELD_KEYS.update({alias: 'process.' + key for key, names in PROCESS_ALIASES.items()
-                    for name in names for alias in (name, 'process.' + name)})
-
-
-def _latest(case: Case):
-    out = {}
-    for fact in case.facts:
-        out[_FIELD_KEYS.get(fact.field, fact.field)] = fact
-    return out
+from ..fact_aliases import ALIASES as _ALIASES, FIELD_KEYS as _FIELD_KEYS, latest as _latest
 
 
 def confirmed_values(case: Case) -> dict[str, object]:
     """Latest logical field wins, even when its revision is blank, proposed or unconfirmed."""
-    return {key: f.value for key, f in _latest(case).items() if f.export()['status'] == 'confirmed'
+    from ..review.ingest import _stored
+    return {key: f.value for key, f in _latest(case).items() if _stored(f, key).confirmed
             and f.value is not None and str(f.value).strip() != ''}
 
 
-def package_notes(case: Case, codes: Codes | None = None) -> list[str]:
+def package_notes(case: Case, codes: Codes | None = None, *, policy=None) -> list[str]:
     """Non-blocking items that still belong in an official package."""
     codes = codes or Codes()
-    return [gap.message for gap in check_completeness(case, codes)
+    from ..completeness_policy import evaluate
+    from ..completeness_snapshot import from_case
+    policy = policy or evaluate(from_case(case), codes)
+    return [gap.message for gap in policy.gaps
             if gap.severity == 'warning' and gap.message == NOT_ENGAGED_ITEM]
 
 
-def blockers(case: Case, fmap: dict, codes: Codes | None = None) -> list[str]:
-    codes = codes or Codes()
-    values = confirmed_values(case)
-    reasons = [f'unconfirmed {f.kind} fact "{f.field}" ({f.id})' for f in _latest(case).values()
-               if f.export()['status'] != 'confirmed']
-    reasons += [f'blocking gap in section {g.section}, {g.field}: {g.message} Fix: {g.fix_hint}'
-                for g in check_completeness(case, codes) if g.severity == 'blocking']
-    reasons += [f'blocking gap in section {g.section}, {g.field}: {g.message}' for g in case.gaps
-                if g.severity == 'blocking']
-    reasons += [f'required field "{k}" is empty' for k in fmap['required_facts'] if k not in values]
-    if not case.section_c:
-        reasons.append('Section C has no provisions')
-    return list(dict.fromkeys(reasons))
+def blockers(case: Case, fmap: dict, codes: Codes | None = None, *, store=None) -> list[str]:
+    from .package import prepare_package
+    return prepare_package(case, codes or Codes(), store=store, version=fmap['version']).policy.report.export_reasons
 
 
 def _canonical_case(case: Case, codes: Codes) -> Case:
@@ -330,8 +305,15 @@ def _plan(case: Case, values: dict, fmap: dict, rects: dict, codes=None) -> _Pla
 
 def _documents(case: Case) -> list[tuple[str, str]]:
     """Section D entries in their D-n order: attached files, then typed listings."""
-    docs = [(pdf_safe(d.title), pdf_safe(d.responsible_party)) for d in supporting_documents(case)]
-    return docs + [(pdf_safe(title), pdf_safe(who)) for title, who in text_evidence(case)]
+    attached = supporting_documents(case)
+    docs = [(pdf_safe(d.title), pdf_safe(d.responsible_party)) for d in attached]
+    typed = [(pdf_safe(title), pdf_safe(who)) for title, who in text_evidence(case)]
+    named = {title for title, _who in docs + typed}
+    ids = {document.id for document in attached}
+    standalone = [(pdf_safe(entry.description), '') for entry in case.evidence
+                  if entry.status == 'evidence_listed' and entry.id not in ids
+                  and pdf_safe(entry.description) not in named and entry.description.strip()]
+    return docs + typed + standalone
 
 
 def _plan_supplied(case: Case, values: dict, fmap: dict, codes, widths: dict) -> tuple[_Plan, Layout, dict]:
@@ -505,20 +487,25 @@ def _rects(form: bytes, fmap: dict) -> dict[str, tuple[float, float, float, floa
     return rects
 
 
-def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str | None = None,
-                version: str = CURRENT_MAP) -> ExportResult:
+def _render_case(case: Case, *, draft: bool = False, codes=None, form: Path | str | None = None,
+                version: str = CURRENT_MAP, store=None) -> ExportResult:
     """Authoritatively check, canonicalize, fill, flatten and append; no prior gap request is needed."""
     from .appendix import build_appendix
 
     fmap = load_field_map(version)
     codes = codes or Codes()
-    reasons = blockers(case, fmap, codes)
-    if reasons and not draft:
-        raise ExportBlocked(reasons)
-    notes = package_notes(case, codes)
+    reasons, notes = [], []
     case = _canonical_case(case, codes)
     blank_form = load_form(form, fmap)
     values = confirmed_values(case)
+    # Drafts must retain explicit extra sites in their visible source cell. Otherwise
+    # officer import would see one address after the shared gate had found several.
+    from ..review.bulletin_gates import _missing
+    extra_sites = [str(values[key]).strip() for key in ('additional_location', 'second_location', 'extra_location')
+                   if key in values and not _missing(values[key])]
+    if extra_sites:
+        values['municipal_address'] = '; '.join(dict.fromkeys([
+            str(values.get('municipal_address') or ''), *extra_sites])).strip('; ')
     if fmap.get('dynamic_attributions'):
         # The supplied form makes room: measure every cell at its normal size, then grow the form to fit.
         plan, layout, measured = _plan_supplied(case, values, fmap, codes, text_widths(blank_form))
@@ -566,3 +553,13 @@ def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str
                         appendix_pages=len(appendix_pages), draft=draft, placements=placements,
                         blank_fields=blank, open_items=visible, not_applicable=list(plan.na), form_text=form_text,
                         appendix_text=appendix_text)
+
+
+def export_case(case: Case, *, draft=False, codes=None, form=None, version=CURRENT_MAP, store=None) -> ExportResult:
+    """Gate the exact outgoing, visible package that officer import will read."""
+    from .package import prepare_package
+    prepared = prepare_package(case, codes or Codes(), store=store, draft=draft, form=form, version=version)
+    if prepared.policy.report.export_reasons and not draft:
+        raise ExportBlocked(prepared.policy.report.export_reasons)
+    prepared.export.open_items = prepared.policy.report.export_reasons
+    return prepared.export

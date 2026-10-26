@@ -50,7 +50,10 @@ def complete_case(provisions=None):
         civic_address='123 Synthetic Street', legal_description='Synthetic lot 1 block 2 plan 3',
         representative='Synthetic applicant', mailing_address='123 Synthetic Street', scope='site',
         alternative_description='Synthetic test departure, no technical conclusion.',
-        rationale='Synthetic applicant rationale.', risk_assessment='Synthetic applicant risk assessment.',
+        rationale='Synthetic applicant rationale.',
+        risk_assessment=('Synthetic applicant risk assessment: the departure could let smoke pass between the '
+                         'two suites if the separation is breached, delaying occupants leaving the building.'),
+        testing_procedures='Synthetic applicant testing procedures: the named test author describes the test method.',
         mitigating_measures='Synthetic applicant measures.', assumptions_and_limits='Synthetic applicant limits.',
         maintenance_operation='Synthetic applicant operation and maintenance conditions.',
         qualifications='Synthetic named test author and their stated test qualifications.',
@@ -62,7 +65,7 @@ def complete_case(provisions=None):
     case = Case(title='Synthetic administrative fixture', jurisdiction=Jurisdiction(id='alberta-other', name='Synthetic AHJ'),
         facts=[fact(k, v, source=_OFFICER) if k in _AUTHORITY_SCREEN else fact(k, v) for k, v in values.items()],
         provisions=provisions, section_c=section_c_rows(provisions, codes))
-    file = Source(type='file', ref='synthetic-evidence-fixture.txt', quote='Synthetic evidence metadata; no test was performed.')
+    file = Source(type='file', ref='engine/tests/fixtures/synthetic-evidence-fixture.txt', quote='Synthetic evidence metadata; no test was performed.')
     case.facts += [fact('evidence.synthetic.file_ref', file.ref, source=file),
                    fact('evidence.synthetic.responsible_party', 'Synthetic test author'),
                    fact('evidence.synthetic.date', '2026-10-20'), fact('evidence.synthetic.title', 'Synthetic test attachment')]

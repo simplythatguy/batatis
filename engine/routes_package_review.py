@@ -73,7 +73,7 @@ def _build(package_id: str, case_id: str | None, authority: str, user: User, kin
         files=parts.files, fields=parts.fields, findings=parts.findings, documents=parts.documents,
         citations=parts.citations, section_c=parts.section_c, information_request=ir.build(parts.findings),
         diff=ir.diff(last.version, last.findings, parts.findings) if last else None,
-        lookup_skipped=parts.lookup_skipped)
+        lookup_skipped=parts.lookup_skipped, policy=parts.policy)
 
 
 def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes]) -> APIRouter:
