@@ -10693,6 +10693,18 @@
     },
     "User": {
       "properties": {
+        "ai_access": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ai Access"
+        },
         "applicant_type": {
           "anyOf": [
             {
@@ -10785,7 +10797,8 @@
         "authority",
         "onboarded",
         "created_at",
-        "notifications_seen_at"
+        "notifications_seen_at",
+        "ai_access"
       ],
       "title": "User",
       "type": "object"

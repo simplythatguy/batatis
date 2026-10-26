@@ -79,7 +79,16 @@ def test_client_ip_prefers_vercel_then_forwarded_then_peer():
     assert client_ip_from(bare) == 'unknown'
 
 
-def test_vercel_spend_cap_does_not_use_memory(monkeypatch):
+@pytest.fixture
+def hosted_account_with_ai():
+    """The hosted site runs AI only for an account holding an access code (engine/ai_access.py)."""
+    from engine import ai_access
+    token = ai_access.GRANTED.set(True)
+    yield
+    ai_access.GRANTED.reset(token)
+
+
+def test_vercel_spend_cap_does_not_use_memory(monkeypatch, hosted_account_with_ai):
     monkeypatch.setenv('VERCEL', '1')
     monkeypatch.setenv('BATATIS_LIVE', '1')
     monkeypatch.setenv('OPENAI_API_KEY', 'sk-test-secret')
@@ -97,7 +106,7 @@ def test_vercel_spend_cap_does_not_use_memory(monkeypatch):
         assert llm_gate._memory.today() == 0
 
 
-def test_postgres_spend_connection_is_created_once(monkeypatch):
+def test_postgres_spend_connection_is_created_once(monkeypatch, hosted_account_with_ai):
     monkeypatch.setenv('VERCEL', '1')
     monkeypatch.setenv('BATATIS_STORE', 'postgres')
     monkeypatch.setenv('BATATIS_LIVE', '1')
