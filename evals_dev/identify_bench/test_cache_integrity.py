@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 from concurrent.futures import ThreadPoolExecutor
 
 import pytest
@@ -64,7 +65,9 @@ def test_lexical_cache_changes_with_db_content_and_preserves_old_entry(monkeypat
     recipe = bench.Recipe()
     assert bench._lexical_pool('same proposal', recipe) == ['1']
     assert bench._lexical_pool('same proposal', recipe) == ['1']
+    stamp = db.stat()
     db.write_bytes(b'other corpus')
+    os.utime(db, ns=(stamp.st_atime_ns, stamp.st_mtime_ns + 1_000_000_000))
     assert bench._lexical_pool('same proposal', recipe) == ['2']
     assert len(store.rows()) == 2
 
