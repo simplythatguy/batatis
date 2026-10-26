@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from typing import Literal, Sequence
 
 from .pdf import Page, Widget
-from .rules import PERSONAL, read
+from .rules import PERSONAL, project_labels, read
 
 Context = Literal['project', 'reference', 'unknown']
 
@@ -29,10 +29,6 @@ _CONDITIONAL = re.compile(r'(?i)^(?:if\b|where\b|for\s+example\b|for\s+reference
 _TEMPLATE = re.compile(r'(?i)^request\s+for\s+(?:a\s+)?specific\s+variance\b')
 _ISSUER = re.compile(r'(?i)^(?:(?:consultant|architect|engineer|designer|issuer|company)\b.{0,35}'
                      r'\b(?:office|contact|address)|(?:office|contact)\s*(?:address\s*)?:)')
-_ADMIN = re.compile(r'(?i)^\s*(?:owner(?:\x27s)?(?:\s+name)?|(?:owner\x27s\s+)?representative|applicant(?:\x27s)?\s+name|'
-                    r'(?:mailing|municipal|civic|site|project|property)\s+address|legal\s+description|'
-                    r'(?:building\s+)?permit(?:\s+(?:number|no\.?|#))?|request\s+date|date\s+of\s+request|'
-                    r'lot|block|plan)\s*:')
 
 
 @dataclass(frozen=True)
@@ -66,12 +62,16 @@ def project_pages(pages: Sequence[Page]) -> list[ProjectPage]:
             # Letterhead, office contact details and report dates are not site/applicant fields.
             # Keep only explicitly named project labels; body building facts remain readable.
             project_line = line
-            if admitted and not _ADMIN.search(stripped):
+            if admitted:
                 reading = read(line)
+                labels = project_labels(line)
                 hits = [*reading.hits, *(hit for hits in reading.conflicts.values() for hit in hits)]
                 admin = [h for h in hits if h.field in PERSONAL or h.field == 'request_date']
                 chars = list(line)
                 for hit in admin:
+                    if any(label.field == hit.field and label.start <= hit.start and hit.end <= label.end
+                           for label in labels):
+                        continue
                     chars[hit.start:hit.end] = ' ' * (hit.end - hit.start)
                 project_line = ''.join(chars)
             kept.append(project_line if admitted else ''.join(c if c in '\r\n' else ' ' for c in line))

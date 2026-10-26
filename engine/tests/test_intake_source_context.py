@@ -121,6 +121,19 @@ def test_unlabelled_conflicting_addresses_are_not_project_conflicts():
     assert not case.intake.conflicts
 
 
+@pytest.mark.parametrize('line,field,value', [
+    ('Street address: 42 Example Street', 'municipal_address', '42 Example Street'),
+    ('Registered owner: Actual Owner', 'owner_name', 'Actual Owner'),
+    ('- Site address: 42 Example Street', 'municipal_address', '42 Example Street'),
+    ('| Site address | 42 Example Street |', 'municipal_address', '42 Example Street'),
+])
+def test_supported_project_labels_survive_context_selection(line, field, value):
+    data = pdf([[(72, 740, 'Project brief'), (72, 720, line)]])
+    case = Case()
+    service.apply(case, None, service.run(None, [('brief', 'brief.pdf', data)]))
+    assert [(f.value, f.status) for f in case.facts if f.field == field] == [(value, 'confirmed')]
+
+
 def test_reference_material_does_not_hide_applicant_answers_or_leak_to_model():
     seen = []
     def transport(system, user, schema):
