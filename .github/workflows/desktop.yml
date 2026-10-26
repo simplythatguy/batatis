@@ -1,14 +1,13 @@
 name: Desktop native acceptance
 
-# Pull requests run the acceptance checks. Releases follow T3 Code's nightly and stable channels
-# (desktop/scripts/release-plan.mjs): a beta from main every six hours or more when main has changed,
-# and a stable on request that ships the latest beta's commit.
+# Pull requests run the acceptance checks. Releases follow T3 Code's beta and stable channels
+# (desktop/scripts/release-plan.mjs): every merge into main publishes a beta, and a stable on
+# request ships the latest beta's commit.
 on:
   pull_request:
     branches: [main]
-  schedule:
-    # Avoid minute zero, when GitHub scheduled jobs are busiest.
-    - cron: "8,38 * * * *"
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       channel:
@@ -22,7 +21,7 @@ permissions:
 
 # Pull requests replace their own earlier run; releases queue per channel and are never cancelled.
 concurrency:
-  group: ${{ github.event_name == 'pull_request' && format('desktop-pr-{0}', github.event.pull_request.number) || format('desktop-release-{0}', (github.event_name == 'schedule' || inputs.channel == 'beta') && 'beta' || 'stable') }}
+  group: ${{ github.event_name == 'pull_request' && format('desktop-pr-{0}', github.event.pull_request.number) || format('desktop-release-{0}', (github.event_name == 'push' || inputs.channel == 'beta') && 'beta' || 'stable') }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
