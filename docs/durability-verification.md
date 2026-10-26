@@ -49,10 +49,12 @@ uses one saved Case acknowledgement without the former derived-read fanout.
 
 ## Checks and remaining evidence
 
-- Web gate before the final review fixes: 488 tests passed, none skipped; generated types, typecheck, unwrap
-  checks and production build passed. Mounted Chromium regressions use mocked
-  HTTP, including newer typing during saves, failed flushes, refresh/rejoin,
-  attachment bindings, retries and sign out.
+- Web gate at the final frontend revision: 495 tests passed, none skipped, with
+  `PLAYWRIGHT_MODULE` pointing at an installed playwright-core; typecheck passed.
+  Mounted Chromium regressions use mocked HTTP, including newer typing during
+  saves, failed flushes, refresh/rejoin, attachment bindings, retries, typing
+  while sign out waits, conflicting edits from two devices, edits made during
+  job acceptance, jobs started on another device and failed cancellation.
 - Desktop gate: 227 tests passed; one installed-runtime check skipped because
   the pinned native Codex runtime is not prepared. Typecheck and main/preload
   build passed.
