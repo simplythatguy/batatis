@@ -1,22 +1,67 @@
 name: Desktop native acceptance
 
+# Pull requests run the acceptance checks. Releases follow T3 Code's nightly and stable channels
+# (desktop/scripts/release-plan.mjs): a beta from main every six hours or more when main has changed,
+# and a stable on request that ships the latest beta's commit.
 on:
   pull_request:
     branches: [main]
-  push:
-    tags: ["desktop-v*"]
+  schedule:
+    # Avoid minute zero, when GitHub scheduled jobs are busiest.
+    - cron: "8,38 * * * *"
   workflow_dispatch:
+    inputs:
+      channel:
+        description: "Release channel"
+        type: choice
+        default: beta
+        options: [beta, stable]
 
 permissions:
   contents: read
 
+# Pull requests replace their own earlier run; releases queue per channel and are never cancelled.
 concurrency:
-  group: desktop-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.event_name == 'pull_request' && format('desktop-pr-{0}', github.event.pull_request.number) || format('desktop-release-{0}', (github.event_name == 'schedule' || inputs.channel == 'beta') && 'beta' || 'stable') }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  plan:
+    name: Plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      build: ${{ steps.plan.outputs.build }}
+      release: ${{ steps.plan.outputs.release }}
+      channel: ${{ steps.plan.outputs.channel }}
+      version: ${{ steps.plan.outputs.version }}
+      tag: ${{ steps.plan.outputs.tag }}
+      sha: ${{ steps.plan.outputs.sha }}
+      prerelease: ${{ steps.plan.outputs.prerelease }}
+      notes_start: ${{ steps.plan.outputs.notes_start }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - name: Decide what this run builds
+        id: plan
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          RELEASE_CHANNEL: ${{ inputs.channel }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = pull_request ]; then
+            printf 'build=true\nrelease=false\nsha=%s\n' "$GITHUB_SHA" >> "$GITHUB_OUTPUT"
+          else
+            node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON desktop/scripts/release-plan.mjs
+          fi
+
   packaged:
     name: Packaged desktop (${{ matrix.os }})
+    needs: plan
+    if: needs.plan.outputs.build == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -37,6 +82,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ needs.plan.outputs.sha }}
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -50,12 +96,6 @@ jobs:
           python-version: "3.14"
           cache: pip
           cache-dependency-path: desktop/engine-requirements.txt
-      - name: Check that the release tag names this app version
-        if: startsWith(github.ref, 'refs/tags/desktop-v')
-        shell: bash
-        run: |
-          version="$(node -p "require('./desktop/package.json').version")"
-          test "$GITHUB_REF_NAME" = "desktop-v$version" || { echo "Tag $GITHUB_REF_NAME does not match desktop/package.json $version" >&2; exit 1; }
       - name: Install the web and desktop dependencies
         run: |
           npm ci --prefix web
@@ -105,20 +145,27 @@ jobs:
             engine/tests/test_desktop_bridge.py engine/tests/test_desktop_bridge_pump.py \
             engine/tests/test_desktop_workspace.py codedb/tests/test_store_paths.py \
             engine/tests/test_export_edition_paths.py engine/tests/test_multipart_upload.py
+      - name: Stamp the release version
+        if: needs.plan.outputs.release == 'true'
+        working-directory: desktop
+        shell: bash
+        env:
+          VERSION: ${{ needs.plan.outputs.version }}
+        run: npm pkg set version="$VERSION"
       - name: Package the native app and portable archive
         working-directory: desktop
         env:
           # Windows release builds are signed once the Artifact Signing account exists (docs/desktop.md).
-          BATATIS_SIGN_ENDPOINT: ${{ startsWith(github.ref, 'refs/tags/desktop-v') && runner.os == 'Windows' && vars.BATATIS_SIGN_ENDPOINT || '' }}
+          BATATIS_SIGN_ENDPOINT: ${{ needs.plan.outputs.release == 'true' && runner.os == 'Windows' && vars.BATATIS_SIGN_ENDPOINT || '' }}
           BATATIS_SIGN_ACCOUNT: ${{ vars.BATATIS_SIGN_ACCOUNT }}
           BATATIS_SIGN_PROFILE: ${{ vars.BATATIS_SIGN_PROFILE }}
           BATATIS_SIGN_PUBLISHER: ${{ vars.BATATIS_SIGN_PUBLISHER }}
-          AZURE_TENANT_ID: ${{ startsWith(github.ref, 'refs/tags/desktop-v') && secrets.AZURE_TENANT_ID || '' }}
-          AZURE_CLIENT_ID: ${{ startsWith(github.ref, 'refs/tags/desktop-v') && secrets.AZURE_CLIENT_ID || '' }}
-          AZURE_CLIENT_SECRET: ${{ startsWith(github.ref, 'refs/tags/desktop-v') && secrets.AZURE_CLIENT_SECRET || '' }}
+          AZURE_TENANT_ID: ${{ needs.plan.outputs.release == 'true' && secrets.AZURE_TENANT_ID || '' }}
+          AZURE_CLIENT_ID: ${{ needs.plan.outputs.release == 'true' && secrets.AZURE_CLIENT_ID || '' }}
+          AZURE_CLIENT_SECRET: ${{ needs.plan.outputs.release == 'true' && secrets.AZURE_CLIENT_SECRET || '' }}
         run: npm run package
       - name: Check the Windows signatures
-        if: runner.os == 'Windows' && startsWith(github.ref, 'refs/tags/desktop-v') && vars.BATATIS_SIGN_ENDPOINT != ''
+        if: runner.os == 'Windows' && needs.plan.outputs.release == 'true' && vars.BATATIS_SIGN_ENDPOINT != ''
         shell: pwsh
         run: |
           $app = Join-Path $env:GITHUB_WORKSPACE 'desktop/build/release/win-unpacked'
@@ -184,9 +231,9 @@ jobs:
           if-no-files-found: error
 
   release:
-    name: Publish the desktop release
-    if: startsWith(github.ref, 'refs/tags/desktop-v')
-    needs: packaged
+    name: Publish the ${{ needs.plan.outputs.channel }} release
+    needs: [plan, packaged]
+    if: needs.plan.outputs.release == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -202,11 +249,19 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
+          TAG: ${{ needs.plan.outputs.tag }}
+          SHA: ${{ needs.plan.outputs.sha }}
+          VERSION: ${{ needs.plan.outputs.version }}
+          CHANNEL: ${{ needs.plan.outputs.channel }}
+          PRERELEASE: ${{ needs.plan.outputs.prerelease }}
+          NOTES_START: ${{ needs.plan.outputs.notes_start }}
         run: |
           set -euo pipefail
           cd release
           ls Batatis-*.zip
           sha256sum Batatis-*.zip > SHA256SUMS
           cat SHA256SUMS
-          gh release create "$GITHUB_REF_NAME" Batatis-*.zip SHA256SUMS \
-            --title "Batatis ${GITHUB_REF_NAME#desktop-v}" --generate-notes --verify-tag
+          args=(--target "$SHA" --generate-notes)
+          if [ -n "$NOTES_START" ]; then args+=(--notes-start-tag "$NOTES_START"); fi
+          if [ "$PRERELEASE" = true ]; then args+=(--prerelease --title "Batatis Beta $VERSION (${SHA:0:12})"); else args+=(--latest --title "Batatis $VERSION"); fi
+          gh release create "$TAG" Batatis-*.zip SHA256SUMS "${args[@]}"

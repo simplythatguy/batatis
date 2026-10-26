@@ -17,7 +17,7 @@ import { Readable, Transform } from "node:stream";
 export const REPOSITORY = "simplythatguy/batatis";
 export const RELEASES_PAGE = `https://github.com/${REPOSITORY}/releases`;
 export const RELEASES_FEED = `https://api.github.com/repos/${REPOSITORY}/releases?per_page=30`;
-const TAG = /^desktop-v(\d+)\.(\d+)\.(\d+)$/;
+const TAG = /^v(.+)$/;
 const SUMS = "SHA256SUMS";
 const MAX_NOTE_GROUPS = 5;
 const MAX_NOTE_ITEMS = 8;
@@ -86,16 +86,35 @@ export interface UpdaterDeps {
   log: (line: string) => void;
 }
 
-export function parseVersion(value: string): [number, number, number] | null {
-  const match = /^(\d+)\.(\d+)\.(\d+)$/.exec(value.trim());
-  return match ? [Number(match[1]), Number(match[2]), Number(match[3])] : null;
+/**
+ * Release versions, after T3 Code's stable and nightly builds: stable is X.Y.Z; beta is
+ * X.Y.Z-beta.YYYYMMDD.RUN, a preview of the stable X.Y.Z, built from main.
+ */
+export interface Version { core: [number, number, number]; beta: [number, number] | null }
+export type Channel = "stable" | "beta";
+
+export function parseVersion(value: string): Version | null {
+  const match = /^(\d+)\.(\d+)\.(\d+)(?:-beta\.(\d{8})\.(\d+))?$/.exec(value.trim());
+  if (!match) return null;
+  const core: [number, number, number] = [Number(match[1]), Number(match[2]), Number(match[3])];
+  return { core, beta: match[4] ? [Number(match[4]), Number(match[5])] : null };
+}
+
+/** Semantic-version order: a stable release sorts after every beta of the same X.Y.Z. */
+export function compareVersions(a: Version, b: Version): number {
+  for (let i = 0; i < 3; i++) if (a.core[i] !== b.core[i]) return a.core[i] - b.core[i];
+  if (!a.beta || !b.beta) return (a.beta ? -1 : 0) - (b.beta ? -1 : 0);
+  return a.beta[0] - b.beta[0] || a.beta[1] - b.beta[1];
 }
 
 export function newer(candidate: string, current: string): boolean {
   const a = parseVersion(candidate), b = parseVersion(current);
-  if (!a || !b) return false;
-  for (let i = 0; i < 3; i++) if (a[i] !== b[i]) return a[i] > b[i];
-  return false;
+  return a !== null && b !== null && compareVersions(a, b) > 0;
+}
+
+/** An install follows the channel its own version came from; a beta build also takes stable releases. */
+export function channelOf(version: string): Channel {
+  return parseVersion(version)?.beta ? "beta" : "stable";
 }
 
 export function archiveName(version: string, platform: NodeJS.Platform, arch: string): string | null {
@@ -126,12 +145,14 @@ export function noteItems(body: string): string[] {
 /** Newer desktop releases from the releases API, newest first, with this platform's archive. */
 export function readReleases(value: unknown, current: string, platform: NodeJS.Platform, arch: string): Release | null {
   if (!Array.isArray(value)) throw new Error("The release list could not be read.");
+  const beta = channelOf(current) === "beta";
   const found: { version: string; url: string; body: string; assets: unknown[] }[] = [];
   for (const item of value) {
-    if (!isRecord(item) || item.draft === true || item.prerelease === true || typeof item.tag_name !== "string") continue;
-    const tag = TAG.exec(item.tag_name);
-    if (!tag) continue;
-    const version = `${Number(tag[1])}.${Number(tag[2])}.${Number(tag[3])}`;
+    if (!isRecord(item) || item.draft === true || typeof item.tag_name !== "string") continue;
+    const version = TAG.exec(item.tag_name)?.[1] ?? "";
+    const parsed = parseVersion(version);
+    // A beta is published as a prerelease and a stable as a release; anything else is not ours to install.
+    if (!parsed || Boolean(parsed.beta) !== (item.prerelease === true) || (parsed.beta && !beta)) continue;
     if (!newer(version, current) || typeof item.html_url !== "string") continue;
     found.push({ version, url: item.html_url, body: typeof item.body === "string" ? item.body : "", assets: Array.isArray(item.assets) ? item.assets : [] });
   }
@@ -277,7 +298,7 @@ export class Updater {
     if (!target) return;
     await remove(`${target}.previous`);
     for (const entry of await readdir(dirname(target)).catch(() => [] as string[])) {
-      if (/^\.batatis-update-\d+\.\d+\.\d+$/.test(entry)) await remove(join(dirname(target), entry));
+      if (/^\.batatis-update-\d+\.\d+\.\d+(?:-beta\.\d{8}\.\d+)?$/.test(entry)) await remove(join(dirname(target), entry));
     }
   }
 

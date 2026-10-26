@@ -82,18 +82,16 @@ The app can replace itself only when it can write to the folder that holds it. O
 
 The updater does not need code signing. Electron's built-in updater on macOS (Squirrel.Mac) installs only apps signed with an Apple Developer ID, and this package is ad hoc signed. Builds from before the updater existed must be replaced by hand once.
 
-### Publish a release
+### Beta and stable releases
 
-1. In a pull request, raise `version` in [`desktop/package.json`](../desktop/package.json), for example to `0.2.0`. Merge it.
-2. Tag the merged commit and push the tag:
+Batatis has two release channels, after T3 Code's nightly and stable builds.
 
-   ```bash
-   git fetch origin main
-   git tag desktop-v0.2.0 origin/main
-   git push origin desktop-v0.2.0
-   ```
+- **Beta** gets merged pull requests. Every 30 minutes the **Desktop native acceptance** workflow checks `main`. When `main` has commits the last beta lacks and the last beta is at least six hours old, it builds, checks and publishes a beta: a GitHub prerelease named like `v0.1.1-beta.20261026.57` (the stable version it previews, the date and the run number). To publish one right away, run the workflow from **Actions** with the **beta** channel.
+- **Stable** gets what beta users already ran. When a beta looks good, run the workflow from **Actions** on `main` with the **stable** channel. It builds the latest beta's exact commit and publishes it as `v0.1.1`, the version that beta previewed, with notes since the previous stable.
 
-3. The **Desktop native acceptance** workflow builds and checks both platforms. If they pass, it publishes the release with both archives, `SHA256SUMS` and notes made from the merged pull request titles. A tag that doesn't match `desktop/package.json` fails before anything is built.
+An installed app follows the channel it came from. A stable install only updates to stable releases. A beta install updates to newer betas and to stable releases, so it moves to `0.1.1` when that ships. To try betas, download one from the [releases page](https://github.com/simplythatguy/batatis/releases).
+
+Each beta previews the patch after the latest stable release. To start a new minor or major version, raise `version` in [`desktop/package.json`](../desktop/package.json) in a pull request; betas use it once it is higher. Every release checks both platforms before it is published. The workflow builds for Apple Silicon only, so Intel Macs see each release and its GitHub link but no download.
 
 ### Sign the Windows build
 
@@ -117,7 +115,7 @@ The release workflow signs Windows builds with [Microsoft Artifact Signing](http
 
 Only release tags read these values. When they are set, the workflow checks every signature before it runs the app, and a signing failure stops the release. When they are missing, the Windows build stays unsigned.
 
-Installed apps see the release at their next check. The workflow builds for Apple Silicon only, so Intel Macs see the release and its GitHub link but no download.
+ The workflow builds for Apple Silicon only, so Intel Macs see the release and its GitHub link but no download.
 
 ## How the package runs
 

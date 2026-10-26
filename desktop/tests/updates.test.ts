@@ -6,7 +6,7 @@ import { dirname, join } from "node:path";
 import test from "node:test";
 import { promisify } from "node:util";
 import {
-  archiveName, expectedSum, installedApp, launchCommand, newer, noteItem, onlyApp, readReleases, swapCommand, trustedUpdateUrl, Updater,
+  archiveName, channelOf, expectedSum, installedApp, launchCommand, newer, noteItem, onlyApp, readReleases, swapCommand, trustedUpdateUrl, Updater,
   type UpdaterDeps,
 } from "../src/main/updates.ts";
 import { scratch, waitFor } from "./helpers.ts";
@@ -28,11 +28,21 @@ function release(version: string, extra: Record<string, unknown> = {}, files: Re
   [`Batatis-${version}-mac-arm64.zip`]: "", [`Batatis-${version}-win-x64.zip`]: "", SHA256SUMS: "",
 }) {
   return {
-    tag_name: `desktop-v${version}`, html_url: `${PAGE}/desktop-v${version}`, draft: false, prerelease: false, body: GENERATED,
-    assets: Object.entries(files).map(([name, bytes]) => ({ name, size: size(bytes), browser_download_url: `${DOWNLOAD}/desktop-v${version}/${name}` })),
+    tag_name: `v${version}`, html_url: `${PAGE}/v${version}`, draft: false, prerelease: version.includes("-beta."), body: GENERATED,
+    assets: Object.entries(files).map(([name, bytes]) => ({ name, size: size(bytes), browser_download_url: `${DOWNLOAD}/v${version}/${name}` })),
     ...extra,
   };
 }
+
+test("versions compare numerically; a stable X.Y.Z sorts after its betas, and betas by date then run", () => {
+  assert.equal(newer("0.2.0", "0.2.0-beta.20261026.40"), true);
+  assert.equal(newer("0.2.0-beta.20261027.1", "0.2.0-beta.20261026.40"), true);
+  assert.equal(newer("0.2.0-beta.20261026.41", "0.2.0-beta.20261026.40"), true);
+  assert.equal(newer("0.2.0-beta.20261026.40", "0.1.9"), true);
+  assert.equal(newer("0.1.9", "0.2.0-beta.20261026.40"), false);
+  assert.equal(channelOf("0.2.0-beta.20261026.40"), "beta");
+  assert.equal(channelOf("0.2.0"), "stable");
+});
 
 test("versions compare numerically and only plain x.y.z counts", () => {
   assert.equal(newer("0.10.0", "0.9.9"), true);
@@ -54,7 +64,8 @@ test("the newest desktop release wins; drafts, prereleases, other tags and older
   const found = readReleases([
     release("0.3.0", { draft: true }),
     release("0.2.5", { prerelease: true }),
-    { ...release("9.9.9"), tag_name: "v9.9.9" },
+    { ...release("9.9.9"), tag_name: "desktop-v9.9.9" },
+    { ...release("0.2.6"), prerelease: true },
     release("0.1.0"),
     release("0.2.0"),
     release("0.1.1"),
@@ -64,7 +75,7 @@ test("the newest desktop release wins; drafts, prereleases, other tags and older
   assert.deepEqual(found.notes.map((note) => note.version), ["0.2.0", "0.1.1"]);
   assert.deepEqual(found.notes[0].items, ["Add the update button (#81)", "Fix the export title (#82)"]);
   assert.equal(found.archive?.name, "Batatis-0.2.0-mac-arm64.zip");
-  assert.equal(found.sums, `${DOWNLOAD}/desktop-v0.2.0/SHA256SUMS`);
+  assert.equal(found.sums, `${DOWNLOAD}/v0.2.0/SHA256SUMS`);
   assert.equal(readReleases([release("0.1.0")], "0.1.0", "darwin", "arm64"), null);
   assert.throws(() => readReleases({ message: "rate limited" }, "0.1.0", "darwin", "arm64"));
 });
@@ -88,7 +99,7 @@ test("a release without this platform's archive is shown but not offered as a do
 
 test("only the repository's releases API and release downloads are fetched", () => {
   assert.equal(trustedUpdateUrl(new URL("https://api.github.com/repos/simplythatguy/batatis/releases?per_page=30")), true);
-  assert.equal(trustedUpdateUrl(new URL(`${DOWNLOAD}/desktop-v0.2.0/SHA256SUMS`)), true);
+  assert.equal(trustedUpdateUrl(new URL(`${DOWNLOAD}/v0.2.0/SHA256SUMS`)), true);
   assert.equal(trustedUpdateUrl(new URL("https://github.com/someone/else/releases/download/x/y")), false);
   assert.equal(trustedUpdateUrl(new URL("http://github.com/simplythatguy/batatis/releases/download/x/y")), false);
   assert.equal(trustedUpdateUrl(new URL("https://api.github.com/repos/simplythatguy/batatis/contents")), false);
@@ -305,4 +316,17 @@ test("startup cleanup removes kept downloads, unpacked copies and backups, and n
   assert.equal(existsSync(`${target}.previous`), false);
   assert.equal(existsSync(join(root, "Applications", "Other.app")), true);
   assert.equal(binary(target), "0.1.0");
+});
+
+test("a stable install never sees betas; a beta install sees betas and stables, newest first", () => {
+  const list = [release("0.2.0-beta.20261026.40"), release("0.1.1"), release("0.2.0-beta.20261027.41")];
+  assert.equal(readReleases(list, "0.1.0", "darwin", "arm64")?.version, "0.1.1");
+  assert.equal(readReleases(list, "0.1.1", "darwin", "arm64"), null);
+  const beta = readReleases(list, "0.1.1-beta.20261020.3", "darwin", "arm64");
+  assert.equal(beta?.version, "0.2.0-beta.20261027.41");
+  assert.deepEqual(beta?.notes.map((note) => note.version), ["0.2.0-beta.20261027.41", "0.2.0-beta.20261026.40", "0.1.1"]);
+  assert.equal(beta?.archive?.name, "Batatis-0.2.0-beta.20261027.41-mac-arm64.zip");
+  assert.equal(readReleases([release("0.2.0")], "0.2.0-beta.20261027.41", "darwin", "arm64")?.version, "0.2.0", "a beta moves on to its stable");
+  const mislabeled = { ...release("0.2.0-beta.20261027.42"), prerelease: false };
+  assert.equal(readReleases([mislabeled], "0.1.1-beta.20261020.3", "darwin", "arm64")?.version ?? null, null, "a beta must be published as a prerelease");
 });

@@ -344,14 +344,20 @@ export async function runSmoke(deps: SmokeDeps): Promise<void> {
       const feed = new URL(options.updateFeed);
       mkdirSync(join(options.output, "update feed"), { recursive: true });
       writeFileSync(feed, JSON.stringify([{
-        tag_name: "desktop-v99.0.0", html_url: "https://github.com/simplythatguy/batatis/releases/tag/desktop-v99.0.0", draft: false, prerelease: false,
+        tag_name: "v99.0.0", html_url: "https://github.com/simplythatguy/batatis/releases/tag/v99.0.0", draft: false, prerelease: false,
         body: "## What's Changed\n* Add the update button by @someone in https://github.com/simplythatguy/batatis/pull/81\n* Keep drafts when switching people by @someone in https://github.com/simplythatguy/batatis/pull/80\n",
         assets: [],
       }]));
       const checked = await deps.updater.check();
       assert.equal(checked.status, "available", JSON.stringify(checked));
       await until(async () => (await page("Boolean(document.querySelector('.dk-update-btn'))")) === true, "update control in the rail");
-      await page("document.querySelector('.dk-update-btn').focus()");
+      // Focus events need the window focused; hovering opens the panel either way.
+      window().webContents.focus();
+      await page(`(() => {
+        const button = document.querySelector('.dk-update-btn');
+        button.focus();
+        button.dispatchEvent(new PointerEvent('pointerover', { bubbles: true, pointerType: 'mouse' }));
+      })()`);
       const panel = record(await until(async () => {
         const found = record(await page(`(() => {
           const panel = document.querySelector('.dk-update-panel');
