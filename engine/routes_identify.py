@@ -22,6 +22,7 @@ import json
 import logging
 import queue
 import threading
+import time
 from typing import Callable
 
 from fastapi import APIRouter, HTTPException, Request, Response
@@ -31,9 +32,10 @@ from .codes import Codes
 from .copyright import attach_meta, attribute_code
 from .identify.answers import AnswerRejected, apply_answers, check_answers
 from .identify.config import ConfigError, load_config
+from .identify.case_input import active_facts, compose, fingerprint, is_requirement_run, refresh as refresh_identification
 from .identify.decisions import information_request, overlay_decisions, record_decision
 from .identify.http_models import (BenchmarkConfirmRequest, IdentifyConfirmRequest, IdentifyDecisionRequest,
-                                   IdentifyDecisionResponse, IdentifyRequest)
+                                   IdentifyDecisionResponse, IdentifyRequest, RequirementDecisionRequest)
 from .identify.pipeline import RunOutput, description_hash, run as identify_run
 from .identify.providers import Transports
 from .identify.title import short_title, title_should_replace
@@ -52,9 +54,23 @@ logger = logging.getLogger(__name__)
 TransportFactory = Callable[[str | None], Transports]
 
 
-def _current(result: IdentifyResult, case: Case) -> IdentifyResult:
+def _require_source(codes: Codes):
+    from .identify.requirement_corpus import load, SourceUnavailable
+    try:
+        return load(codes.db_path).source
+    except SourceUnavailable:
+        raise HTTPException(503, 'NBC(AE) 2023 second-printing source could not be verified') from None
+
+
+def _current(result: IdentifyResult, case: Case, store=None, code_reader=None) -> IdentifyResult:
     out = result.model_copy(deep=True)
-    out.stale = out.description_sha256 != description_hash(description(case))
+    out.stale = (out.input_sha256 != fingerprint(case, store) if getattr(out, 'input_sha256', None)
+                 else out.description_sha256 != description_hash(description(case)))
+    if is_requirement_run(out) and code_reader is not None:
+        try:
+            out.stale = out.stale or _require_source(code_reader()) != out.requirement_coverage.source
+        except HTTPException:
+            out.stale = True
     out.persisted = True
     out.case_version = case.version
     if case.title_is_manual:
@@ -63,6 +79,9 @@ def _current(result: IdentifyResult, case: Case) -> IdentifyResult:
     # (POST /cases/{id}/section-d) clears provisions and citation.* facts without touching this record.
     kept = {p.split('(')[0] for p in case.provisions}
     out.decisions = {k: v for k, v in out.decisions.items() if v.decision != 'yes' or k in kept}
+    for item in out.requirements:
+        if item.role == 'varied' and item.provision_id not in kept:
+            item.applicability, item.disposition, item.needs_review = 'needs_review', 'review', True
     return overlay_decisions(out)
 
 
@@ -124,18 +143,36 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
             logger.error('identify config invalid: %s', error)
             raise HTTPException(503, 'Code identification is misconfigured') from None
         codes = code()
-        transports = transport_factory(client_ip) if transport_factory else None
+        if config.screen != 'requirements':
+            _require_source(codes)
+        started = time.monotonic()
+        context = compose(base, cases(), prose=naming_prose or None) if config.screen == 'requirements' else None
+        if context is not None:
+            outbound = scrub(context.text, known_values(base, people_names(cases(), base)))
+        transports = (transport_factory(client_ip) if transport_factory and config.screen != 'requirements' else None)
+        extra = ({'previous': base.identify, 'confirmed_provisions': base.provisions}
+                 if config.screen == 'requirements' else {})
+        input_seconds = time.monotonic() - started
         output = identify_run(outbound, codes=codes, config=config, transports=transports, on_stage=on_stage,
                               description_sha256=description_hash(text), client_ip=client_ip,
-                              facts=base.facts)
+                              facts=active_facts(base) if context is not None else base.facts, **extra)
         result = output.result
+        if context is not None:
+            result.trace.seconds = round(result.trace.seconds + input_seconds, 3)
+            result.input_sha256 = context.sha256
+            result.input_coverage_gaps = list(context.gaps)
         relevance = _relevance(output, text)
 
         def attach(case: Case):
+            if context is not None and fingerprint(base, cases()) != context.sha256:
+                raise HTTPException(409, 'identification source attachments changed')
             if answers:
-                apply_answers(case, answers)
+                # The validated answers were already staged on `base`. Keep the
+                # same fact ids that the run consumed and fingerprinted.
+                case.facts = [fact.model_copy(deep=True) for fact in base.facts]
             previous = case.identify.decisions if case.identify else {}
-            result.decisions = {k: v for k, v in previous.items() if any(a.provision == k for a in result.articles)}
+            result.decisions = (dict(previous) if is_requirement_run(result) else
+                                {k: v for k, v in previous.items() if any(a.provision == k for a in result.articles)})
             generated = case.identify.title if case.identify else None
             if title_should_replace(case.title, text, generated, manual=case.title_is_manual):
                 # `text` may be an unconfirmed saved description. Only explicit sent
@@ -153,7 +190,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
         logger.info('Identify: case=%s mode=%s scored=%s committed=%s choices=%s dropped=%s usd=%s seconds=%.3f',
                     case_id, result.mode, result.trace.articles_scored, len(result.committed), len(result.choices),
                     len(result.trace.dropped), result.trace.usd, result.trace.seconds)
-        return _current(saved.identify, saved)
+        return _current(saved.identify, saved, cases(), code)
 
     @router.post('/cases/{case_id}/identify', response_model=IdentifyResult,
                  responses={200: {'content': {'text/event-stream': {}}}})
@@ -172,8 +209,8 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
             apply_answers(case, body.answers)
         naming_prose = body.prose if body.prose and body.prose.strip() else ''
         text = naming_prose or description(case)
-        if not text.strip():
-            raise HTTPException(409, 'Describe your project first')
+        if not text.strip() and not compose(case, cases()).text.strip():
+            raise HTTPException(409, 'Describe your project or attach readable plans first')
         client_ip = client_ip_from(request)
         wait = identify_retry_after(client_ip)
         if wait is not None:
@@ -234,11 +271,12 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
         case = get_case(case_id)
         if case.identify is None:
             raise HTTPException(404, 'identify result not found')
-        return _current(case.identify, case)
+        return _current(case.identify, case, cases(), code)
 
     @router.post('/cases/{case_id}/identify/confirm', response_model=Case)
     def confirm(case_id: str, body: IdentifyConfirmRequest):
         codes = code()
+        _require_source(codes)
         missing = []
         for provision_id in body.provisions:
             try:
@@ -253,6 +291,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
         def write(case: Case):
             case.provisions = list(dict.fromkeys(body.provisions))
             case.section_c = section_c_rows(case.provisions, codes)
+            refresh_identification(case, cases(), codes, force=True)
         try:
             saved, _ = save(case_id, write, expected_version=body.expected_version)
         except KeyError as error:   # a section or subsection id: pass an article, sentence or clause
@@ -265,6 +304,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
         if get_case(case_id).identify is None:
             raise HTTPException(404, 'identify result not found')
         codes = code()
+        _require_source(codes)
 
         def write(case: Case):
             return record_decision(case, provision_id, body.decision, codes)
@@ -273,7 +313,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
         except KeyError:
             raise HTTPException(404, 'provision not found in this identification') from None
         # `section_c`: the rows a `yes` wrote for this article (empty for no and not_sure).
-        return IdentifyDecisionResponse(**_current(saved.identify, saved).model_dump(), section_c=written)
+        return IdentifyDecisionResponse(**_current(saved.identify, saved, cases(), code).model_dump(), section_c=written)
 
     @router.post('/cases/{case_id}/identify/benchmark', response_model=IdentifyResult)
     def confirm_benchmark(case_id: str, body: BenchmarkConfirmRequest):
@@ -283,6 +323,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
         if get_case(case_id).identify is None:
             raise HTTPException(404, 'identify result not found')
         codes = code()
+        _require_source(codes)
         try:
             record = codes.provision(body.provision, 'B')
         except ValueError as exc:
@@ -303,8 +344,29 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
             bench.departure, bench.departure_status = reason, 'confirmed'
             bench.objectives, bench.functions, bench.attribution_missing = objectives, functions, missing
             bench.question = None
+            from .identify.requirement_decisions import departure
+            departure(case.identify, bench.provision, 'yes', reason=reason)
         saved, _ = save(case_id, write, expected_version=body.expected_version)
-        return _current(saved.identify, saved)
+        return _current(saved.identify, saved, cases(), code)
+
+    @router.post('/cases/{case_id}/identify/requirements/{requirement_id}/decision', response_model=IdentifyResult)
+    def decide_requirement(case_id: str, requirement_id: str, body: RequirementDecisionRequest):
+        """Confirm application scope without treating “no departure” as “irrelevant”."""
+        from .identify.requirement_decisions import record
+
+        def write(case: Case):
+            if case.identify is None:
+                raise HTTPException(404, 'identify result not found')
+            if _current(case.identify, case, cases(), code).stale:
+                raise HTTPException(409, 'Identification inputs changed; rerun before confirming applicability')
+            try:
+                record(case.identify, requirement_id, body, code())
+            except KeyError:
+                raise HTTPException(404, 'requirement not found') from None
+            except ValueError as error:
+                raise HTTPException(422, str(error)) from None
+        saved, _ = save(case_id, write, expected_version=body.expected_version)
+        return _current(saved.identify, saved, cases(), code)
 
     @router.get('/cases/{case_id}/identify/information-request')
     def officer_information_request(case_id: str):
@@ -317,7 +379,9 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
     def case_process_refs(case_id: str):
         get_case(case_id)
         try:
-            return process_refs(code())
+            codes = code()
+            _require_source(codes)
+            return process_refs(codes)
         except ProcessRefMissing:
             raise HTTPException(503, 'process references missing from the code database') from None
 

@@ -1,10 +1,9 @@
 import assert from "node:assert/strict";
 import { test, beforeEach } from "node:test";
 import { AccountsError, type AssistRequest, type AssistResponse } from "../../api/accounts.ts";
-import { VoiceClient, type SocketLike, type VoiceAudio } from "../voice/session.ts";
 import {
-  ask, assistantKey, assistantRouteChanged, attachExisting, attachFiles, cancelQuestion, closeAssistant, goBack, invalidateAssistantNavigation, loadVoiceCapability, openAssistant, removeAttachment, requestVoice, resetAssistant, retry,
-  getAssistantState, selectedAttachmentIds, setAssistantBinding, setAssistantContext, setAssistantDeps, setDraft, startVoice, type AssistBinding, type AssistantDeps,
+  ask, assistantKey, assistantRouteChanged, attachExisting, attachFiles, cancelQuestion, closeAssistant, goBack, invalidateAssistantNavigation, openAssistant, removeAttachment, resetAssistant, retry,
+  getAssistantState, selectedAttachmentIds, setAssistantBinding, setAssistantContext, setAssistantDeps, setDraft, type AssistBinding, type AssistantDeps,
 } from "./assistant.ts";
 import { bumpViewGeneration, checkPlan, offeredDestinations, registerPanel } from "./destinations.ts";
 import { clearEngineSession, engineGeneration } from "../../api/sync.ts";
@@ -30,26 +29,7 @@ interface Fake {
   uploads: { caseId: string; reply: ReturnType<typeof deferred<{ id: string; name: string }>> }[];
   page: { path: string; card: string | null; hash: string; focused: string | null; went: string[]; redirect: ((href: string) => string) | null; shown: Set<string> };
   user: string | null;
-  capabilityReads: (string | null)[];
-  mic: { asked: number; stopped: number };
-  sockets: FakeSocket[];
-  notice: boolean;
 }
-
-class FakeSocket implements SocketLike {
-  readyState = 1;
-  bufferedAmount = 0;
-  sent: Record<string, unknown>[] = [];
-  closed = false;
-  onmessage: ((e: { data: unknown }) => void) | null = null;
-  onclose: ((e: { code: number }) => void) | null = null;
-  onerror: (() => void) | null = null;
-  send(data: string) { this.sent.push(JSON.parse(data)); }
-  close() { this.closed = true; this.readyState = 3; }
-  emit(e: Record<string, unknown>) { this.onmessage?.({ data: JSON.stringify(e) }); }
-}
-
-const silentAudio = (): VoiceAudio => ({ async startCapture() {}, setMuted() {}, play() {}, clearPlayback() {}, clearCapture() {}, level: () => 0, speaking: () => false, close() {} });
 
 let f: Fake;
 
@@ -59,10 +39,9 @@ beforeEach(() => {
     sessionStorage: { getItem: (key: string) => storage.get(key) ?? null, setItem: (key: string, value: string) => storage.set(key, value), removeItem: (key: string) => storage.delete(key) },
   });
   resetAssistant();
-  f = { requests: [], uploads: [], page: { path: "/questions", card: "field-owner", hash: "#/questions", focused: "cf-q", went: [], redirect: null, shown: new Set() }, user: "u1", capabilityReads: [], mic: { asked: 0, stopped: 0 }, sockets: [], notice: false };
+  f = { requests: [], uploads: [], page: { path: "/questions", card: "field-owner", hash: "#/questions", focused: "cf-q", went: [], redirect: null, shown: new Set() }, user: "u1" };
   const deps: Partial<AssistantDeps> = {
     assist: (req, signal) => { const reply = deferred<AssistResponse>(); f.requests.push({ req, signal, reply }); return reply.promise; },
-    voiceCapability: async (caseId) => { f.capabilityReads.push(caseId); return { available: true, reason: null, protocol: "batatis.voice.v1", relay_path: "/api/voice/relay/session", max_seconds: 55, notice: "Voice sends your microphone audio to a third-party AI service." }; },
     caseVersion: async () => 7,
     upload: (caseId) => { const reply = deferred<{ id: string; name: string }>(); f.uploads.push({ caseId, reply }); return reply.promise; },
     account: () => ({ signedIn: f.user !== null, userId: f.user, role: "applicant", authority: null }),
@@ -83,19 +62,6 @@ beforeEach(() => {
       focusId: () => f.page.focused,
       focus: (id) => { f.page.focused = id; },
     },
-    voice: (events) => new VoiceClient({
-      socket: () => { const s = new FakeSocket(); f.sockets.push(s); return s; },
-      microphone: async () => { f.mic.asked += 1; return { stop: () => { f.mic.stopped += 1; } }; },
-      audio: () => silentAudio(),
-      now: () => 1_000_000,
-      setTimer: () => 0,
-      clearTimer: () => {},
-      page: () => ({ protocol: "https:", host: "batatis.example" }),
-    }, events),
-    noticeSeen: () => f.notice,
-    markNoticeSeen: () => { f.notice = true; },
-    setTimer: (fn) => { queueMicrotask(fn); return 1; },
-    clearTimer: () => {},
     now: () => 1_000_000,
   };
   setAssistantDeps(deps);
@@ -444,7 +410,7 @@ test("a plan whose page never shows (redirect, card missing) is reported as not 
   setAssistantBinding(caseBinding("A"));
   f.page.redirect = () => "#/";
   void ask("Open the officer view");
-  f.requests[0].reply.resolve({ answer: "", cited: [], removed_citations: [], notice: "", navigation: { destination: "officer-view" } });
+  f.requests[0].reply.resolve({ answer: "", cited: [], removed_citations: [], notice: "", navigation: { destination: "application" } });
   await flush();
   const nav = state().conv.turns.at(-1)!.nav!;
   assert.equal(nav.state, "failed");
@@ -526,153 +492,4 @@ test("attachments: PDFs only, three at most, never on a read-only or unsaved app
   setAssistantBinding(draftBinding());
   void attachFiles([{ name: "x.pdf", type: "application/pdf" } as File]);
   assert.equal(f.uploads.length, 3);
-});
-
-/** Drive the real VoiceClient up to session.started. */
-async function startedVoice() {
-  await loadVoiceCapability();
-  requestVoice();
-  assert.equal(state().noticeOpen, true, "the notice comes first");
-  assert.equal(f.mic.asked, 0, "no microphone before Start");
-  await startVoice();
-  await flush();
-  const s = f.sockets.at(-1)!;
-  s.emit({ type: "session.ready", session_id: "voice_1", context_id: null, revision: null, case_id: null, case_version: null });
-  const start = s.sent[0] as { scope: { context_id: string; case_id: string; case_version: number; revision: number } };
-  const ids = { session_id: "voice_1", context_id: start.scope.context_id, revision: 0, case_id: start.scope.case_id, case_version: start.scope.case_version };
-  s.emit({ type: "session.started", ...ids, expires_at: 2000, max_seconds: 55 });
-  return { s, ids, start };
-}
-
-test("voice: nothing on boot or capability read; notice, then Start; the exact case version is bound", async () => {
-  setAssistantBinding(caseBinding("A"));
-  assert.equal(f.capabilityReads.length, 0, "no read before the panel asks");
-  const { start } = await startedVoice();
-  assert.deepEqual(f.capabilityReads, ["A"]);
-  assert.equal(f.mic.asked, 1);
-  assert.equal(start.scope.case_id, "A");
-  assert.equal(start.scope.case_version, 7);
-  assert.equal(state().voice.status, "listening");
-});
-
-test("voice: switching applications ends it at once and drops the old session's late events", async () => {
-  setAssistantBinding(caseBinding("A"));
-  const { s, ids } = await startedVoice();
-  setAssistantBinding(caseBinding("B"));
-  assert.equal(f.mic.stopped, 1);
-  assert.equal(state().voice.status, "idle");
-  s.emit({ type: "audio.committed", ...ids, turn_id: "t1" });
-  s.emit({ type: "transcript.completed", ...ids, turn_id: "t1", text: "Open settings", navigation: { destination: "settings" } });
-  await flush();
-  assert.deepEqual(f.page.went, []);
-  assert.deepEqual(state().conv.turns, []);
-});
-
-test("voice: a granted microphone after closing is released, and no relay opens", async () => {
-  setAssistantBinding(caseBinding("A"));
-  let grant: (m: { stop(): void }) => void = () => {};
-  let stopped = 0;
-  setAssistantDeps({
-    voice: (events) => new VoiceClient({
-      socket: () => { const s = new FakeSocket(); f.sockets.push(s); return s; },
-      microphone: () => new Promise((r) => { grant = r; }),
-      audio: () => silentAudio(), now: () => 0, setTimer: () => 0, clearTimer: () => {},
-      page: () => ({ protocol: "https:", host: "batatis.example" }),
-    }, events),
-  });
-  await loadVoiceCapability();
-  f.notice = true;
-  requestVoice();
-  await flush();
-  closeAssistant();
-  grant({ stop: () => { stopped += 1; } });
-  await flush();
-  assert.equal(stopped, 1);
-  assert.equal(f.sockets.length, 0);
-});
-
-/** A microphone whose frames the test speaks. */
-function talkingAudio() {
-  let onFrame: ((pcm: Uint8Array) => void) | null = null;
-  const audio: VoiceAudio = { async startCapture(fn) { onFrame = fn; }, setMuted() {}, play() {}, clearPlayback() {}, clearCapture() {}, level: () => 0, speaking: () => false, close() { onFrame = null; } };
-  const frame = (voiced: boolean) => {
-    const pcm = new Uint8Array(4800);
-    const v = new DataView(pcm.buffer);
-    for (let i = 0; i < 2400; i++) v.setInt16(i * 2, voiced ? (i % 2 ? 6000 : -6000) : 0, true);
-    onFrame?.(pcm);
-  };
-  return { audio, say: () => { for (let i = 0; i < 5; i++) frame(false); for (let i = 0; i < 6; i++) frame(true); for (let i = 0; i < 10; i++) frame(false); } };
-}
-
-async function voiceWithSpeech() {
-  const mic = talkingAudio();
-  let clock = 1_000_000;
-  setAssistantDeps({
-    voice: (events) => new VoiceClient({
-      socket: () => { const s = new FakeSocket(); f.sockets.push(s); return s; },
-      microphone: async () => ({ stop() {} }),
-      audio: () => mic.audio, now: () => (clock += 100), setTimer: () => 0, clearTimer: () => {},
-      page: () => ({ protocol: "https:", host: "batatis.example" }),
-    }, events),
-  });
-  const v = await startedVoice();
-  await flush();
-  const turn = (id: string, text: string, destination: string | null) => {
-    mic.say();
-    v.s.emit({ type: "audio.clear", ...v.ids });
-    v.s.emit({ type: "audio.committed", ...v.ids, turn_id: id });
-    v.s.emit({ type: "transcript.completed", ...v.ids, turn_id: id, text, navigation: destination ? { destination } : null });
-  };
-  return { ...v, turn };
-}
-
-test("voice: a completed spoken request opens a real destination only for the current identity", async () => {
-  setAssistantBinding(caseBinding("A"));
-  const v = await voiceWithSpeech();
-  v.turn("t1", "Open settings", "settings");
-  await flush();
-  assert.deepEqual(f.page.went, ["#/settings"]);
-  const turns = state().conv.turns;
-  assert.equal(turns.at(-2)!.via, "voice");
-  assert.equal(turns.at(-1)!.nav!.state, "opened");
-  assert.equal(turns.at(-1)!.nav!.back!.href, "#/questions?focus=field-owner");
-  // Old revision or another case version: nothing happens.
-  v.s.emit({ type: "transcript.completed", ...v.ids, revision: 5, turn_id: "t1", text: "Open notifications", navigation: { destination: "notifications" } });
-  v.s.emit({ type: "transcript.completed", ...v.ids, case_version: 8, turn_id: "t1", text: "Open notifications", navigation: { destination: "notifications" } });
-  await flush();
-  assert.deepEqual(f.page.went, ["#/settings"]);
-});
-
-test("voice: after the person navigates by hand, a plan for the old screen does not redirect them", async () => {
-  setAssistantBinding(caseBinding("A"));
-  const v = await voiceWithSpeech();
-  bumpViewGeneration(); // a click elsewhere; the relay still holds the old screen
-  v.turn("t1", "Open settings", "settings");
-  await flush();
-  assert.deepEqual(f.page.went, []);
-  assert.equal(state().conv.turns.at(-1)!.nav!.state, "moved-on");
-});
-
-test("voice: going away and back still acknowledges a new revision before fresh spoken navigation", async () => {
-  const timers = new Map<number, () => void>(); let seq = 0;
-  setAssistantDeps({ setTimer: (fn) => { timers.set(++seq, fn); return seq; }, clearTimer: (id) => { timers.delete(id); } });
-  setAssistantBinding(caseBinding("A")); const v = await voiceWithSpeech();
-  setAssistantContext({ screen: "question", focus: { kind: "card", id: "field-date" }, label: "question 2" });
-  setAssistantContext({ screen: "question", focus: { kind: "card", id: "field-owner" }, label: "question 1" });
-  for (const [id, fn] of [...timers]) { timers.delete(id); fn(); }
-  const update = v.s.sent.find((m) => m.type === "context.update"); assert.ok(update, "same text still needs a new revision");
-  v.s.emit({ type: "audio.clear", ...v.ids });
-  v.s.emit({ type: "context.updated", ...v.ids, revision: 1 });
-  v.ids.revision = 1;
-  v.turn("current", "Open settings", "settings"); await flush();
-  assert.deepEqual(f.page.went, ["#/settings"]);
-});
-
-test("voice: a hash-only move invalidates old plans and acknowledges the same scope for new speech", async () => {
-  setAssistantBinding(caseBinding("A")); const v = await voiceWithSpeech();
-  assistantRouteChanged(); v.turn("old", "Open settings", "settings"); await flush();
-  assert.deepEqual(f.page.went, []);
-  assert.ok(v.s.sent.some(m => m.type === "context.update"));
-  v.s.emit({ type: "audio.clear", ...v.ids }); v.s.emit({ type: "context.updated", ...v.ids, revision: 1 }); v.ids.revision = 1;
-  v.turn("fresh", "Open settings", "settings"); await flush(); assert.deepEqual(f.page.went, ["#/settings"]);
 });

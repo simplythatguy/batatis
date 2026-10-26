@@ -10,9 +10,6 @@ export type GateStatus = "loading" | "signed-out" | "needs-onboarding" | "ready"
 /** Pages for visitors who are not signed in. */
 export const AUTH_PATHS: ReadonlySet<string> = new Set(["/signin", "/signup"]);
 
-/** Pages anyone may read, signed in or not: the accuracy report is static and holds no case data. */
-export const PUBLIC_PATHS: ReadonlySet<string> = new Set(["/accuracy"]);
-
 /**
  * `anonymous` means the server has no accounts routes (or the browser cannot send credentials):
  * the single-visit flow keeps working, so the gate is open with no user.
@@ -44,7 +41,6 @@ export function returnTarget(hash: string): string | null {
  */
 export function gateRedirect(status: GateStatus, user: User | null, path: string, returnTo: string | null = null): string | null {
   const p = path || "/";
-  if (PUBLIC_PATHS.has(p) && status !== "loading") return null;
   switch (status) {
     case "loading":
       return null;

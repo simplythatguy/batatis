@@ -2,7 +2,7 @@
 import { StrictMode, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "../../docs/design/tokens.css";
-import "../src/styles.css";
+import "../src/shared.css";
 import "../src/calm/calm.css";
 import "../src/calm/accounts.css";
 import { review } from "../src/api/accounts";
