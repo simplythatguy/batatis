@@ -10,7 +10,7 @@ Build the package on its target operating system, or download the matching porta
 
 The package targets Apple Silicon Macs and Windows x64. Extract the archive before opening `Batatis.app` on macOS or `Batatis.exe` on Windows. The Python engine comes with the package. The app downloads the Codex runtime when you install it from **Settings**.
 
-The macOS package uses ad hoc signing. It is not notarized. Windows release builds are signed once the signing account in [Sign the Windows build](#sign-the-windows-build) exists; until then they have no publisher signature, and Windows warns before opening them.
+macOS release builds are signed and notarized once the Apple account in [Sign and notarize the macOS build](#sign-and-notarize-the-macos-build) exists; until then they use ad hoc signing, and macOS blocks a downloaded copy until you allow it in **System Settings > Privacy & Security** with **Open Anyway**. Windows release builds are signed once the signing account in [Sign the Windows build](#sign-the-windows-build) exists; until then they have no publisher signature, and Windows warns before opening them.
 
 ## Use local development
 
@@ -98,6 +98,25 @@ Batatis has two release channels, after T3 Code's nightly and stable builds, exc
 An installed app follows the channel it came from. A stable install only updates to stable releases. A beta install updates to newer betas and to stable releases, so it moves to `0.1.1` when that ships. To try betas, download one from the [releases page](https://github.com/simplythatguy/batatis/releases).
 
 Each beta previews the patch after the latest stable release. To start a new minor or major version, raise `version` in [`desktop/package.json`](../desktop/package.json) in a pull request; betas use it once it is higher. Every release checks both platforms before it is published. The workflow builds for Apple Silicon only, so Intel Macs see each release and its GitHub link but no download.
+
+### Sign and notarize the macOS build
+
+macOS blocks an app downloaded from the internet unless it is signed with an Apple Developer ID and notarized by Apple ("Apple could not verify Batatis is free of malware"). Notarization means Apple scanned the app and recorded it. The release workflow does both once the Apple account exists, and checks the result with `codesign`, `spctl` and `stapler` before it publishes. Pull request builds stay ad hoc signed.
+
+1. Join the [Apple Developer Program](https://developer.apple.com/programs/) (US$99 a year).
+2. Create a **Developer ID Application** certificate in [Certificates, IDs & Profiles](https://developer.apple.com/account/resources/certificates/list), install it in Keychain Access, and export it with its private key as a `.p12` file with a password.
+3. In [App Store Connect](https://appstoreconnect.apple.com/access/integrations/api) under **Users and Access > Integrations > Team Keys**, create a key with **Developer** access. Download the `.p8` file and note its **Key ID** and the **Issuer ID**.
+4. In the repository's **Settings > Secrets and variables > Actions**, add these.
+
+| Name | Kind | Value |
+| --- | --- | --- |
+| `APPLE_DEVELOPER_ID_P12` | Secret | The `.p12` file in base64: `base64 -i DeveloperID.p12 \| pbcopy` |
+| `APPLE_DEVELOPER_ID_PASSWORD` | Secret | The `.p12` file's password |
+| `APPLE_API_KEY_P8` | Secret | The whole text of the `.p8` file |
+| `APPLE_API_KEY_ID` | Variable | The key's Key ID |
+| `APPLE_API_ISSUER` | Variable | The Issuer ID |
+
+The next release is signed and notarized. The app runs with the hardened runtime and the entitlements in [`desktop/assets/entitlements.mac.plist`](../desktop/assets/entitlements.mac.plist).
 
 ### Sign the Windows build
 

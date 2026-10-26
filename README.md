@@ -242,6 +242,15 @@ The pictures show the main folders and files, not every one. They leave out thes
 
 The steps below run the website locally. To use the desktop app, download it from the [releases page](https://github.com/simplythatguy/batatis/releases). To build it yourself, follow [Desktop setup](docs/desktop.md). Desktop builds and the complete repository checks need Node.js 24 or newer.
 
+### Open the desktop app the first time
+
+The app isn't signed by Apple or Microsoft yet, so each computer asks once before it opens it.
+
+- **Mac:** unzip the download and move `Batatis.app` to **Applications**, then open it. If macOS says "Apple could not verify Batatis", click **Done**. Open **System Settings > Privacy & Security**, scroll down to the message about Batatis, click **Open Anyway** and confirm with your password.
+- **Windows:** unzip the download and open `Batatis.exe`. If Windows says "Windows protected your PC", click **More info**, then **Run anyway**.
+
+The app's own updates don't ask again. [Desktop setup](docs/desktop.md#sign-and-notarize-the-macos-build) explains how to sign both builds so nobody sees these messages.
+
 ### Set it up with an AI agent
 
 Open an AI coding agent, such as Claude Code, Codex, or Cursor, in an empty folder, and paste this prompt:
@@ -698,7 +707,7 @@ An installed app stays on its kind of release. A stable app only updates to stab
 
 To try a beta, open the [releases page](https://github.com/simplythatguy/batatis/releases), pick the newest **Pre-release**, and download the file for your computer under **Assets**.
 
-To publish a beta right away instead of waiting, or to promote the latest beta to stable:
+To publish a beta again without a merge, or to promote the latest beta to stable:
 
 1. Open the repository's **Actions** tab on GitHub.
 2. Choose **Desktop native acceptance** on the left.
