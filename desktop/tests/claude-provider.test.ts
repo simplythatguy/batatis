@@ -333,3 +333,23 @@ test("dispose stops a pending sign-in and a running completion", async (t) => {
   assert.equal(!(await pending).ok && (await pending as { reason: string }).reason, "cancelled");
   for (const child of [...f.children, ...login.children]) assert.ok(!f.running(child));
 });
+
+test("status read again within a few seconds reuses the answer; sign-out reads afresh", async (t) => {
+  const s = setup(t);
+  assert.equal((await s.provider.status()).state, "signed-in");
+  assert.equal((await s.provider.status()).state, "signed-in");
+  assert.equal(s.commands.length, 1, "one CLI status check for two reads");
+  writeFileSync(s.state, JSON.stringify({ loggedIn: false, authMethod: "none" }));
+  assert.equal((await s.provider.logout()).state, "signed-out");
+  assert.equal((await s.provider.status()).state, "signed-out");
+});
+
+test("an executable changed in place after a verified start is hashed again and refused", async (t) => {
+  const s = setup(t);
+  assert.equal((await s.provider.status()).state, "signed-in");
+  appendFileSync(s.executable, "\n// tampered");
+  await s.provider.logout().catch(() => undefined);
+  const state = await s.provider.status();
+  assert.equal(state.state, "unavailable");
+  assert.equal(state.state === "unavailable" && state.reason, "runtime-missing");
+});

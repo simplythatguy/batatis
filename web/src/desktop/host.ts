@@ -45,8 +45,11 @@ export interface AiConfiguration {
 export type Connection =
   | { state: "unavailable"; message: string }
   | { state: "signed-out"; last: string | null }
-  /** Device sign-in: the person enters userCode at the address shown (the host opens it on request). */
-  | { state: "pending"; userCode: string; address: string }
+  /**
+   * Sign-in in progress. Device sign-in: the person enters userCode at the address shown. Browser sign-in:
+   * no code, and the address (when known) reopens the page. The host opens the address on request.
+   */
+  | { state: "pending"; userCode: string | null; address: string | null }
   | { state: "signed-in"; plan: string | null }
   | { state: "error"; message: string };
 
@@ -200,8 +203,8 @@ function parseConnection(value: unknown): Connection | null {
   switch (value.state) {
     case "unavailable": return { state: "unavailable", message: str(value.message) ?? "Not available." };
     case "pending": {
-      const userCode = str(value.userCode), address = displayAddress(value.verificationUrl);
-      return userCode && address ? { state: "pending", userCode, address } : null;
+      const userCode = str(value.userCode) || null, address = displayAddress(value.verificationUrl);
+      return userCode && !address ? null : { state: "pending", userCode, address };
     }
     case "signed-in": return { state: "signed-in", plan: str(value.plan) };
     case "error": return { state: "error", message: str(value.message) ?? "Something went wrong." };

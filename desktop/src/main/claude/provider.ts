@@ -154,6 +154,10 @@ class ClaudeProvider implements HostProvider {
   private loginStarting: Promise<ConnectionState> | null = null;
   private lastLogin: LoginOutcome | null = null;
   private disposed = false;
+  /** The executable last hashed, by path and file identity; any replacement or edit is hashed again. */
+  private verified: { path: string; identity: string; sha256: string } | null = null;
+  /** Settings re-reads status on every change; a sign-in check spawns the CLI, so a fresh answer is reused briefly. */
+  private statusRead: { at: number; value: Promise<ConnectionState> } | null = null;
 
   constructor(context: HostProviderContext, options: ClaudeProviderOptions) {
     this.context = context;
@@ -168,6 +172,7 @@ class ClaudeProvider implements HostProvider {
   onChange(listener: () => void): () => void { this.listeners.add(listener); return () => this.listeners.delete(listener); }
 
   private emit(): void {
+    this.statusRead = null;
     if (this.disposed) return;
     for (const listener of this.listeners) {
       try { listener(); } catch { this.context.log("Claude connection listener failed."); }
@@ -180,11 +185,17 @@ class ClaudeProvider implements HostProvider {
     if (!pin) throw new ClaudeError("unsupported-platform");
     try {
       const path = await realpath(join(this.options.runtimeRoot, "runtime", pin.key, pin.executable));
-      if (!(await stat(path)).isFile()) throw new ClaudeError("runtime-missing");
-      const sha256 = await sha256File(path);
+      const info = await stat(path);
+      if (!info.isFile()) throw new ClaudeError("runtime-missing");
+      const identity = `${info.dev}:${info.ino}:${info.size}:${info.mtimeMs}:${info.ctimeMs}`;
       const manifest = record(JSON.parse(await readFile(join(dirname(path), "codex-runtime.json"), "utf8")));
+      const sha256 = this.verified?.path === path && this.verified.identity === identity ? this.verified.sha256 : await sha256File(path);
       if (!pin.executables.includes(sha256) || manifest?.version !== pin.version || manifest.platform !== pin.key ||
-        manifest.archiveSha256 !== pin.download.sha256 || manifest.executableSha256 !== sha256) throw new ClaudeError("runtime-missing");
+        manifest.archiveSha256 !== pin.download.sha256 || manifest.executableSha256 !== sha256) {
+        this.verified = null;
+        throw new ClaudeError("runtime-missing");
+      }
+      this.verified = { path, identity, sha256 };
       return path;
     } catch (error) {
       if (error instanceof ClaudeError) throw error;
@@ -284,9 +295,13 @@ class ClaudeProvider implements HostProvider {
 
   async status(): Promise<ConnectionState> {
     if (this.login) return { ...this.login.pending };
-    try {
-      return await this.subscribed() ? { state: "signed-in", plan: null } : { state: "signed-out", last: this.lastLogin };
-    } catch (error) { return this.stateError(error); }
+    const fresh = this.statusRead && Date.now() - this.statusRead.at < 3000 ? this.statusRead : null;
+    if (fresh) return fresh.value;
+    const value = this.subscribed().then(
+      (signedIn): ConnectionState => (signedIn ? { state: "signed-in", plan: null } : { state: "signed-out", last: this.lastLogin }),
+      (error) => this.stateError(error));
+    this.statusRead = { at: Date.now(), value };
+    return value;
   }
 
   async workflowReadiness(): Promise<WorkflowReadiness> {
@@ -361,6 +376,7 @@ class ClaudeProvider implements HostProvider {
   }
 
   async logout(): Promise<ConnectionState> {
+    this.statusRead = null;
     for (const controller of this.active) controller.abort();
     const slot = this.login;
     this.login = null;

@@ -69,7 +69,7 @@ function ConnectionActions({ row, act }: { row: ProviderRow; act: (action: Param
     case "error": return <button type="button" className="cf-btn is-xs" onClick={() => act("connect")}>Try again</button>;
     case "pending": return (
       <>
-        <button type="button" className="cf-btn is-xs is-primary" onClick={() => act("openLogin")}>Open page</button>
+        {row.status.address && <button type="button" className="cf-btn is-xs is-primary" onClick={() => act("openLogin")}>Open page</button>}
         <button type="button" className="cf-btn is-xs is-ghost" onClick={() => act("cancelLogin")}>Cancel</button>
       </>
     );
@@ -100,7 +100,9 @@ function connectionValue(row: ProviderRow): ReactNode {
       {row.workflow && <span className="ac-help" role="status">{row.workflow}</span>}
     </span>;
     case "signed-out": return <span><span className="ac-faint-tag">{status.last ?? "Signed out"}</span>{version}</span>;
-    case "pending": return <span className="dk-code-line">Enter <code className="dk-code">{status.userCode}</code> at {status.address}</span>;
+    case "pending": return status.userCode
+      ? <span className="dk-code-line">Enter <code className="dk-code">{status.userCode}</code> at {status.address}</span>
+      : <span className="ac-faint-tag" role="status">Finish signing in in your browser</span>;
     case "error": return <span className="ac-faint-tag">{status.message}</span>;
     case "unavailable": return <span className="ac-faint-tag">{status.message}</span>;
   }

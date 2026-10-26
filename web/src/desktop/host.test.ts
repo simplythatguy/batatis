@@ -87,3 +87,14 @@ test("the account row carries its runtime's install state; malformed progress is
   const none = parseRows([account])[0];
   assert.equal(none?.kind === "account" && none.runtime, null);
 });
+
+test("a browser sign-in is pending without a code, with its page only when it is https", () => {
+  const pending = (verificationUrl: string) => {
+    const row = parseRows([{ id: "c", kind: "account", label: "Account", description: "", workflow: null,
+      status: { state: "pending", loginId: "l", userCode: "", verificationUrl } }])[0];
+    return row?.kind === "account" ? row.status : null;
+  };
+  assert.deepEqual(pending(""), { state: "pending", userCode: null, address: null });
+  assert.deepEqual(pending("https://claude.com/cai/oauth/authorize"), { state: "pending", userCode: null, address: "claude.com/cai/oauth/authorize" });
+  assert.deepEqual(pending("http://claude.com/x"), { state: "pending", userCode: null, address: null });
+});

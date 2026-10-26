@@ -13,7 +13,9 @@ import { createAppProtocol, ORIGIN } from "./protocol";
 import { unavailableProvider, type AccountId, type HostProvider, type KeyProviderId } from "./providers";
 import { isSlot, parsePick } from "./models";
 import { record } from "./provider-dispatch";
-import { RuntimeInstaller } from "./runtime-install";
+import { RuntimeInstaller, type RuntimePin } from "./runtime-install";
+import { claudePin } from "./claude/release";
+import { claudeProviderFactory } from "./claude/provider";
 import { codexPin } from "./codex/install";
 import { codexProviderFactory } from "./codex";
 import { reviewedContextForPlatform } from "./trusted-context";
@@ -68,39 +70,43 @@ function log(line: string) {
 }
 
 const fixture = smoke ? workflowFixture() : null;
-let providerWorkDir: string | null = null;
 const smokeEngines: Engine[] = [];
 
 const runTool = (command: string, args: string[]) => new Promise<string>((done, fail) => {
   execFile(command, args, { windowsHide: true, maxBuffer: 1 << 20 }, (error, stdout) => (error ? fail(error) : done(stdout)));
 });
 
-/** Downloads the pinned Codex runtime into app data on request; the package no longer carries it. */
-const codexInstaller = new RuntimeInstaller({
-  root: codexInstallRoot(paths),
-  pin: codexPin(process.platform, process.arch),
+/** Each managed connection's pinned runtime, downloaded into app data on request; the package carries neither. */
+const installer = (root: string, pin: RuntimePin | null) => new RuntimeInstaller({
+  root, pin,
   fetch: (url, init) => net.fetch(url, init),
   tar: (args) => runTool(process.platform === "win32" ? join(process.env.SystemRoot ?? "C:\\Windows", "System32", "tar.exe") : "/usr/bin/tar", args),
   notify: () => current?.webContents.send("batatis:changed"),
   log: (line) => process.stderr.write(`${line}\n`),
 });
-let makeProvider: (() => HostProvider) | null = null;
+const installers: Record<AccountId, RuntimeInstaller> = {
+  chatgpt: installer(codexInstallRoot(paths), codexPin(process.platform, process.arch)),
+  claude: installer(join(paths.userData, "claude"), claudePin(process.platform, process.arch)),
+};
+const makeProviders: Partial<Record<AccountId, () => HostProvider>> = {};
+const providerWorkDirs: string[] = [];
 
 /** The running runtime stops before the new one moves into place, and a fresh connection starts after. */
-async function installRuntime() {
-  if (!makeProvider) return;
+async function installRuntime(id: AccountId) {
+  const make = makeProviders[id];
+  if (!make) return;
   let stopped = false;
-  await codexInstaller.install(async () => {
+  await installers[id].install(async () => {
     stopped = true;
-    await host.installProvider(unavailableProvider("The local AI runtime is being installed."));
+    await host.installProvider(unavailableProvider("The local AI runtime is being installed.", id));
   });
-  if (stopped) await host.installProvider(makeProvider());
+  if (stopped) await host.installProvider(make());
 }
 
 const host = new DesktopHost({
   paths,
   version: app.getVersion(),
-  runtime: (id) => (id === "chatgpt" ? codexInstaller.status() : null),
+  runtime: (id) => installers[id].status(),
   ...(smoke ? { start: async (...args: Parameters<typeof startEngine>) => {
     const started = await startEngine(...args);
     if (started.kind === "ready") smokeEngines.push(started.engine);
@@ -296,7 +302,7 @@ function registerIpc() {
     return host.providerRows();
   }, []);
   answer("batatis:runtime-install", async (_e, id) => {
-    if (id === "chatgpt") await installRuntime();
+    if (isAccount(id)) await installRuntime(id);
     return host.providerRows();
   }, []);
   answer("batatis:connect", async (_e, id) => {
@@ -407,7 +413,8 @@ if (!app.requestSingleInstanceLock()) {
   void app.whenReady().then(async () => {
     const root = join(paths.userData, "providers");
     await mkdir(join(root, "codex-state"), { recursive: true, mode: 0o700 });
-    providerWorkDir = await realpath(await mkdtemp(join(root, "codex-work-")));
+    const providerWorkDir = await realpath(await mkdtemp(join(root, "codex-work-")));
+    providerWorkDirs.push(providerWorkDir);
     const runtime = codexRuntime(paths);
     const providerContext = {
       stateDir: await realpath(join(root, "codex-state")), workDir: providerWorkDir,
@@ -415,11 +422,19 @@ if (!app.requestSingleInstanceLock()) {
     };
     const factory = codexProviderFactory({ runtime, verifiedContext: reviewedContextForPlatform(process.platform) });
     const installed = factory(providerContext);
-    await codexInstaller.refresh();
+    await Promise.all([installers.chatgpt.refresh(), installers.claude.refresh()]);
     if (fixture) { fixture.adapterConstructed = true; await installed.dispose(); }
     else {
-      makeProvider = () => factory(providerContext);
+      makeProviders.chatgpt = () => factory(providerContext);
       await host.installProvider(installed);
+      // Claude gets its own state and working folders; the Codex adapter requires its working folder to stay empty.
+      await mkdir(join(root, "claude-state"), { recursive: true, mode: 0o700 });
+      const claudeWork = await realpath(await mkdtemp(join(root, "claude-work-")));
+      providerWorkDirs.push(claudeWork);
+      const claudeContext = { ...providerContext, stateDir: await realpath(join(root, "claude-state")), workDir: claudeWork };
+      const claude = claudeProviderFactory({ runtimeRoot: join(paths.userData, "claude") });
+      makeProviders.claude = () => claude(claudeContext);
+      await host.installProvider(makeProviders.claude());
     }
     registerIpc();
     await host.boot();
@@ -442,9 +457,10 @@ if (!app.requestSingleInstanceLock()) {
     quitting = true;
     event.preventDefault();
     updater.cancel();
-    codexInstaller.cancel();
+    installers.chatgpt.cancel();
+    installers.claude.cancel();
     void host.dispose().finally(async () => {
-      if (providerWorkDir) await rm(providerWorkDir, { recursive: true, force: true });
+      await Promise.all(providerWorkDirs.map((dir) => rm(dir, { recursive: true, force: true })));
       app.quit();
     });
   });
