@@ -536,7 +536,8 @@ const newId = (p: string) => `${p}-${Date.now().toString(36)}-${(seq++).toString
 function upsertUserFact(c: Case, field: string, value: string, source: Fact["source"]): Fact[] {
   const rest = c.facts.filter((f) => f.field !== field);
   if (!value.trim()) return rest;
-  return [...rest, { id: newId("f"), field, value, kind: "pointed", source, status: "confirmed" }];
+  // The applicant's own typed words are the quote: the value is grounded in what they wrote.
+  return [...rest, { id: newId("f"), field, value, kind: "pointed", source: { ...source, quote: value }, status: "confirmed" }];
 }
 
 /** The slot a ledger field belongs to, read the same way as the engine (`.covers.` first). */
