@@ -26,3 +26,10 @@ A stale `expected_version` returns `409` and commits nothing. Keep the applicant
 The browser must mark every typed change dirty synchronously, debounce/coalesce writes, and show Saved only when the latest displayed revision and all unfinished editors were acknowledged. Flush before switching applications, New application, submission and exports. Keep the current draft open after a failed flush. Protect unacknowledged text and held files on browser unload. Application content must not be copied to browser storage; account-scoped case identifiers may be stored to reopen through the authorized API.
 
 Slow computation belongs in the [durable job runtime](jobs.md). Save the input first, enqueue quickly, then observe progress outside the save queue. A successful job is not an acknowledgement of newer typed edits.
+
+`applicant_draft.intake_file_ids` preserves the selected reading uploads before
+and after intake. `[]` explicitly removes all reading inputs; null identifies a
+legacy snapshot whose last intake file IDs can be restored. Only uploads owned
+by this application are accepted. Names and other upload metadata come from the
+existing file inventory on reopen, rather than a second browser copy. Failed
+uploads remain unsaved and require the open browser to retry their held bytes.

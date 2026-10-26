@@ -27,6 +27,9 @@ class DraftWritesMixin:
                 conflict = VersionConflict(case_id, expected_version, version)
             else:
                 patch = {key: value for key, value in changes.items() if key != 'facts'}
+                draft = patch.get('applicant_draft')
+                if draft and set(draft.get('intake_file_ids') or []) - file_ids:
+                    raise InvalidAttachment('Use an uploaded file from this application as a reading input.')
                 if 'facts' in changes:
                     incoming = [Fact.model_validate(value) for value in changes['facts']]
                     for fact in incoming:

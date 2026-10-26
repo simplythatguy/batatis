@@ -59,7 +59,9 @@ Every Job field below is present; nullable fields are JSON `null`:
 `state` is `queued | running | succeeded | failed | cancelled | superseded`.
 Timestamps are UTC ISO 8601. `result_version` is the case version committed with
 success. On success `result_url` is `/cases/{case_id}/intake` or
-`/cases/{case_id}/identify`; fetch that endpoint and the latest case. A later case
+`/cases/{case_id}/identify`. The applicant client fetches the canonical
+`GET /cases/{case_id}` once: its embedded intake/identify records use the same
+derived freshness and decision views as those individual endpoints. A later case
 edit can make that saved result stale under the existing result contract.
 `base_version` records acceptance, not a promise to overwrite that version.
 
@@ -256,7 +258,7 @@ The built-in footprints are:
 
 | Kind | Semantic case reads | Case writes |
 | --- | --- | --- |
-| `intake` | facts, intake, identify, title/manual-title flag, jurisdiction | facts, intake, title |
+| `intake` | facts, intake, identify, title/manual-title flag, jurisdiction, selected reading-file IDs | facts, intake, title |
 | `identify` | facts, identify, title/manual-title flag, provisions, relevance | facts, identify, title, relevance |
 
 Input/result validation, fingerprint comparison, durable actor checks, lease

@@ -162,6 +162,29 @@ def test_ambiguous_legacy_editor_binding_retains_bytes_instead_of_implying_remov
     assert selected.file_binding.kind == 'file' and selected.file_binding.file_id == 'file-legacy'
 
 
+def test_reading_input_selection_is_owned_and_survives_reopen_before_intake(store):
+    backend, created = store
+    case, other = backend.put(Case()), backend.put(Case())
+    created.extend([case.id, other.id])
+    file_id = backend.put_file(case.id, 'reading.pdf', b'%PDF synthetic reading input')['id']
+    foreign = backend.put_file(other.id, 'private.pdf', b'%PDF another application')['id']
+    client = TestClient(create_app(backend))
+    path = f'/cases/{case.id}'
+    saved = client.patch(path + '/draft', json={'expected_version': case.version,
+        'applicant_draft': {'intake_file_ids': [file_id]}})
+    assert saved.status_code == 200, saved.text
+    assert client.get(path).json()['applicant_draft']['intake_file_ids'] == [file_id]
+    rejected = client.patch(path + '/draft', json={'expected_version': saved.json()['version'],
+        'applicant_draft': {'intake_file_ids': [foreign]}})
+    assert rejected.status_code == 422
+    assert client.get(path).json()['applicant_draft']['intake_file_ids'] == [file_id]
+    cleared = client.patch(path + '/draft', json={'expected_version': saved.json()['version'],
+        'applicant_draft': {'intake_file_ids': []}})
+    assert cleared.status_code == 200
+    assert client.get(path).json()['applicant_draft']['intake_file_ids'] == []
+    assert backend.get_file(case.id, file_id) is not None
+
+
 def test_one_case_snapshot_has_the_existing_derived_read_freshness_without_writing(store, monkeypatch):
     from engine.codes import Codes
     from engine.models import now

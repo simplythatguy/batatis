@@ -173,6 +173,24 @@
           "title": "Evidence Drafts",
           "type": "object"
         },
+        "intake_file_ids": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 300,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 1000,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Intake File Ids"
+        },
         "packages": {
           "additionalProperties": {
             "enum": [
@@ -247,6 +265,7 @@
       },
       "required": [
         "role",
+        "intake_file_ids",
         "question_text",
         "choices",
         "skipped",
@@ -291,6 +310,24 @@
           },
           "title": "Evidence Drafts",
           "type": "object"
+        },
+        "intake_file_ids": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 300,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 1000,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Intake File Ids"
         },
         "packages": {
           "additionalProperties": {

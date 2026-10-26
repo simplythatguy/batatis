@@ -154,6 +154,13 @@ as `python -m engine.retention`. Local HTTP runs require bearer auth when
 
 Other prerequisites:
 
+- A continuously supervised background worker for the hosted applicant intake and
+  code-identification jobs. Vercel functions only accept and report these jobs;
+  they do not execute them. Run `python -m engine.jobs worker` on a long-lived
+  host with the same PostgreSQL database, code database, provider configuration
+  and AI access policy as the API. Verify the authorized
+  `GET /cases/{id}/jobs/health` response reports an available worker before
+  release. See [the worker deployment and integration contract](api/jobs.md).
 - An OpenAI key, only if live model calls are turned on. Offline works without one.
 - A private Blob or Neon object for the two PDFs, only if the Vercel builder cannot reach `nrc-publications.canada.ca`.
 

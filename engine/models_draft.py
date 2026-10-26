@@ -58,6 +58,8 @@ class EvidenceDraft(BaseModel):
 class ApplicantDraft(BaseModel):
     model_config = ConfigDict(extra='forbid')
     role: Literal['manufacturer', 'contractor', 'homebuilder', 'builder', 'designer', 'owner'] = 'homebuilder'
+    # None is a legacy snapshot; [] explicitly removes all composer inputs.
+    intake_file_ids: Keys | None = None
     question_text: dict[Key, DraftText] = Field(default_factory=dict, max_length=1000)
     choices: dict[Key, Text] = Field(default_factory=dict, max_length=1000)
     skipped: Keys = Field(default_factory=list)

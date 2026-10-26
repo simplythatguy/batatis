@@ -109,9 +109,14 @@ def create_job_handler(code: Callable[[], Codes], *, transport_factory=None, rev
                            outbound=lambda text, personal: scrubbed(text, [*known, *personal]),
                            review_transport=review_transport, review_status=review_status)
 
-    return JobHandler(kind='intake', revision='intake.v1', request_model=IntakeRequest,
+    read_fields = ('facts', 'intake', 'identify', 'title', 'title_is_manual', 'jurisdiction')
+    return JobHandler(kind='intake', revision='intake.v2', request_model=IntakeRequest,
                       result_adapter=TypeAdapter(Extraction),
-                      read_fields=('facts', 'intake', 'identify', 'title', 'title_is_manual', 'jurisdiction'),
+                      read_fields=read_fields,
+                      input_values=lambda case, body: {
+                          'case': case.model_dump(mode='json', include=set(read_fields)),
+                          'reading_files': case.applicant_draft.intake_file_ids if case.applicant_draft else None,
+                      },
                       write_fields=('facts', 'intake', 'title'), stages=('reading',), compute=compute,
                       apply=lambda case, body, output: service.apply(case, body.text, output, role=body.role),
                       file_ids=lambda body: body.file_ids, result_path='/intake', uses_ai=lambda body: body.model)

@@ -81,6 +81,41 @@ def test_jobs_and_sync_intake_use_identical_algorithm(database):
     assert synchronous.json()['record']['plan'] == asynchronous.json()['record']['plan']
 
 
+@pytest.mark.parametrize('when', ['before', 'during'])
+def test_changed_reading_file_selection_supersedes_old_intake(database, monkeypatch, when):
+    from engine.intake import service
+    from engine.models_draft import ApplicantDraft
+    store, _ = database
+    case = store.put(Case(applicant_draft=ApplicantDraft(intake_file_ids=[])))
+    file_id = store.put_file(case.id, 'source.pdf', b'%PDF synthetic input')['id']
+    case = store.patch_draft(case.id, {'applicant_draft': ApplicantDraft(intake_file_ids=[file_id]).model_dump(mode='json')},
+                             expected_version=case.version)
+    app = create_app(store)
+    client = TestClient(app)
+    start = client.post(f'/cases/{case.id}/intake/jobs', json={'text': 'A house', 'model': False, 'file_ids': [file_id]})
+    assert start.status_code == 202
+
+    def remove_selection():
+        saved = store.get(case.id)
+        store.patch_draft(case.id, {'applicant_draft': ApplicantDraft(intake_file_ids=[]).model_dump(mode='json')},
+                          expected_version=saved.version)
+
+    original = service.run
+    if when == 'before':
+        remove_selection()
+    else:
+        def changed(*args, **kwargs):
+            remove_selection()
+            return original(*args, **kwargs)
+        monkeypatch.setattr(service, 'run', changed)
+    assert app.state.jobs().run_once()
+    assert client.get(start.headers['location']).json()['state'] == 'superseded'
+    current = store.get(case.id)
+    assert current.applicant_draft.intake_file_ids == []
+    assert current.intake is None
+    assert store.get_file(case.id, file_id) is not None
+
+
 def test_jobs_and_sync_identify_use_identical_algorithms_and_stages(database):
     codes = Codes()
     store, _ = database

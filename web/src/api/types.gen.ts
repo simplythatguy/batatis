@@ -32,6 +32,7 @@ export interface ApplicantDraft {
   authority_unsure: boolean;
   choices: Record<string, string>;
   evidence_drafts: Record<string, EvidenceDraft>;
+  intake_file_ids: string[] | null;
   packages: Record<string, "yes" | "no">;
   question_text: Record<string, DraftText>;
   role: "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner";
@@ -44,6 +45,7 @@ export interface ApplicantDraftInput {
   authority_unsure?: boolean;
   choices?: Record<string, string>;
   evidence_drafts?: Record<string, EvidenceDraftInput>;
+  intake_file_ids?: string[] | null;
   packages?: Record<string, "yes" | "no">;
   question_text?: Record<string, DraftText>;
   role?: "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner";
