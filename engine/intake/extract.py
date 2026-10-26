@@ -18,12 +18,15 @@ from ..models import Fact, Source
 from ..redact import scrub
 from ..models_intake import DocumentReview, FactPointer, FieldConflict, FileReport, ModelPass, UnresolvedCitation
 from . import model as model_pass
-from .pdf import FORM_ONLY, MAX_PAGES, NO_TEXT, NOT_A_PDF, SCC_MAP, TOO_LONG, NotAPdf, read_pdf
+from .images import InvalidImage, image_format, image_type, picture_url
+from .pdf import (FORM_ONLY, NOT_A_PDF, SCC_MAP, TOO_LONG, NotAPdf, Page, PdfContent,
+                  is_pdf, picture_page, read_pdf)
 from .rules import PERSONAL, Hit, canonical_citation, read
+from .text import find_quote
 
 DESCRIPTION = 'description'
 DESCRIPTION_REF = 'intake:description'
-MODEL_PAGES = 5                                  # text pages per file sent to the model
+IMAGES_PER_FILE = 4
 # (text, personal values the rules just read) -> the copy a provider may see.
 Outbound = Callable[[str, list[str]], str]
 
@@ -48,7 +51,10 @@ class Extraction:
         self.conflicts += other.conflicts
         self.unresolved += other.unresolved
         self.files += other.files
-        mine, theirs = self.model, other.model
+        self.merge_model(other.model)
+
+    def merge_model(self, other: ModelPass) -> None:
+        mine, theirs = self.model, other
         if theirs.status != 'off':
             mine.status = theirs.status if mine.status in ('off', 'not_needed') else mine.status
             mine.model = theirs.model or mine.model
@@ -58,6 +64,44 @@ class Extraction:
         for name in ('input_tokens', 'output_tokens'):
             a, b = getattr(mine, name), getattr(theirs, name)
             setattr(mine, name, None if a is None or b is None else a + b)
+
+
+def deduplicate(out: Extraction) -> None:
+    """One metric field/value, many pointers. Computed inputs keep their stable ledger ids."""
+    kept, ids, same = [], {}, {}
+    for fact in out.facts:
+        value = fact.value
+        if isinstance(value, (int, float)) and not isinstance(value, bool):
+            key = (fact.field, 'number', round(value, 6))
+        else:
+            key = (fact.field, type(value).__name__, ' '.join(value.split()).casefold() if isinstance(value, str) else value)
+        first = same.get(key)
+        if first is None:
+            same[key] = fact
+            kept.append(fact)
+            ids[fact.id] = fact.id
+        elif first.kind == 'proposed' and fact.kind != 'proposed':
+            # A verified text reading outranks a picture proposal of the same value.
+            kept[kept.index(first)] = fact
+            same[key] = fact
+            ids[first.id] = fact.id
+            ids[fact.id] = fact.id
+        else:
+            ids[fact.id] = first.id
+    def canonical(id):
+        while id != ids.get(id, id):
+            id = ids[id]
+        return id
+    for fact in kept:
+        fact.inputs = list(dict.fromkeys(canonical(id) for id in fact.inputs))
+    seen, pointers = set(), []
+    for pointer in out.pointers:
+        pointer.fact_id = canonical(pointer.fact_id)
+        key = (pointer.fact_id, pointer.source_ref, pointer.page, pointer.method, pointer.start, pointer.end)
+        if key not in seen:
+            seen.add(key)
+            pointers.append(pointer)
+    out.facts, out.pointers = kept, pointers
 
 
 @dataclass(frozen=True)
@@ -81,7 +125,8 @@ def _add(out: Extraction, origin: Origin, name: str, value, kind: str, start: in
                 source=source or origin.source(quote, start, end), formula=formula, inputs=inputs or [])
     out.facts.append(fact)
     out.pointers.append(FactPointer(fact_id=fact.id, field=name, method=method, source_ref=origin.ref,
-                                    page=origin.page, start=start, end=end, verified=verified))
+                                    page=origin.page, start=start, end=end, verified=verified,
+                                    quote=fact.source.quote))
     return fact
 
 
@@ -116,7 +161,8 @@ def _citations(out: Extraction, origin: Origin, text: str, citations, codes) -> 
 
 
 def read_text(text: str, origin: Origin, *, codes=None, outbound: Outbound = scrubbed,
-              transport: model_pass.Transport | None = None, status: str = 'off') -> Extraction:
+              transport: model_pass.Transport | None = None, status: str = 'off',
+              budget: model_pass.Budget | None = None) -> Extraction:
     """Rules over `text`, then the model over its scrubbed copy for the fields still empty."""
     out = Extraction()
     reading = read(text)
@@ -132,7 +178,7 @@ def read_text(text: str, origin: Origin, *, codes=None, outbound: Outbound = scr
     if transport is None:
         return out
     personal = [str(hit.value) for hit in reading.hits if hit.field in PERSONAL and len(str(hit.value)) >= 3]
-    run = model_pass.run(text, outbound(text, personal), transport, skip=found, status=status)
+    run = model_pass.run(text, outbound(text, personal), transport, skip=found, status=status, budget=budget)
     out.model = ModelPass(status=run.status, model=model_pass.MODEL if run.status == 'live' else None,
                           reason=run.reason, dropped=run.dropped, input_tokens=run.input_tokens,
                           output_tokens=run.output_tokens)
@@ -148,6 +194,107 @@ def read_text(text: str, origin: Origin, *, codes=None, outbound: Outbound = scr
         else:
             out.model.proposed += 1
     return out
+
+
+def _semantic_pages(out: Extraction, pages: list[Page], report: FileReport, *, transport, outbound, status, budget):
+    if not pages:
+        return
+    if transport is None:
+        report.semantic_reason = 'AI is off'
+        return
+    chunks, ends, length = [], [], 0
+    for page in pages:
+        personal = [str(h.value) for h in read(page.text).hits if h.field in PERSONAL]
+        chunk = outbound(page.text, personal)
+        chunks.append(chunk)
+        begin = length
+        length += len(chunk)
+        ends.append((page.number, begin, length))
+        length += 2                            # page separator in the outbound text
+    source = '\n\n'.join(p.text for p in pages)
+    run = model_pass.run(source, '\n\n'.join(chunks), transport, skip=set(), status=status, budget=budget)
+    report.semantic_pages_read = [number for number, _, end in ends if end <= run.covered_chars]
+    report.semantic_pages_sent = [number for number, begin, _ in ends if begin < run.sent_chars]
+    if len(report.semantic_pages_read) != len(pages):
+        report.semantic_reason = (model_pass.LIMIT if run.reason == model_pass.LIMIT else
+                                  'AI is paused' if run.status == 'gate_closed' else 'AI could not finish reading')
+    counts = ModelPass(status=run.status, model=model_pass.MODEL if run.status == 'live' else None,
+                       reason=run.reason, dropped=run.dropped, input_tokens=run.input_tokens,
+                       output_tokens=run.output_tokens)
+    for item in run.facts:
+        quote = source[item.start:item.end]
+        # Keep each occurrence's real page and box, including an identical fact on several pages.
+        for page in pages:
+            if page.number not in report.semantic_pages_read:
+                continue
+            span = find_quote(page.text, quote)
+            if span is None:
+                continue
+            name = item.field if item.field != model_pass.STATEMENT else \
+                'statement.' + hashlib.sha256(' '.join(quote.split()).encode()).hexdigest()[:10]
+            _add(out, Origin(report.file_id, page.number, page.box), name, item.value,
+                 'pointed' if item.verified else 'proposed', *span, quote, .6 if item.verified else .4,
+                 'model', verified=item.verified)
+            if item.verified:
+                counts.pointed += 1
+            else:
+                counts.proposed += 1
+    out.merge_model(counts)
+
+
+def _pictures(out: Extraction, report: FileReport, pages: list[int], url, *, transport, status, budget, outbound):
+    if not pages:
+        return
+    if transport is None:
+        report.pictures_not_read_reason = 'AI is off'
+        return
+    if not getattr(transport, 'supports_images', False):
+        report.pictures_not_read_reason = 'This AI connection cannot read pictures'
+        return
+    for page in pages:
+        if len(report.image_pages_read) >= IMAGES_PER_FILE or budget.images <= 0 or budget.expired():
+            report.pictures_not_read_reason = model_pass.LIMIT
+            break
+        budget.images -= 1
+        try:
+            image = url(page)
+        except Exception:
+            report.pictures_not_read_reason = 'This picture could not be opened'
+            continue
+        run = model_pass.vision(image, transport, status=status, outbound=lambda text: outbound(text, []))
+        counts = ModelPass(status=run.status, model=model_pass.MODEL if run.status == 'live' else None,
+                           reason=run.reason, dropped=run.dropped, input_tokens=run.input_tokens,
+                           output_tokens=run.output_tokens)
+        if run.status in ('failed', 'gate_closed'):
+            report.pictures_not_read_reason = run.reason
+            out.merge_model(counts)
+            budget.images = 0
+            break
+        report.image_pages_read.append(page)
+        for item in run.facts:
+            name, value, quote = item.field, item.value, item.quote
+            if name == model_pass.STATEMENT:
+                name = 'statement.' + hashlib.sha256(' '.join(quote.split()).encode()).hexdigest()[:10]
+            _add(out, Origin(report.file_id, page), name, value, 'proposed', None, None, quote, .4, 'vision',
+                 verified=False, source=Source(type='file', ref=report.file_id, page=page, quote=quote))
+            out.pointers[-1].source_name = report.name
+            counts.proposed += 1
+        out.merge_model(counts)
+
+
+def _report(out: Extraction, report: FileReport) -> None:
+    deduplicate(out)
+    report.pages_read = sorted(set(report.pages_read + report.text_pages_read + report.image_pages_read))
+    report.pages_not_read = sorted(set(range(1, (report.pages or 0) + 1)) - set(report.pages_read))
+    report.facts = len({p.fact_id for p in out.pointers if p.source_ref == report.file_id})
+    if report.pages_read or report.form_fields_read:
+        report.status = 'partly_read' if report.pages_not_read else 'read'
+    if report.pages_not_read:
+        report.reason = ('Pictures not read: ' + report.pictures_not_read_reason
+                         if report.pictures_not_read_reason else TOO_LONG)
+    if report.semantic_reason and report.semantic_reason != 'AI is off':
+        report.status = 'partly_read'
+        report.reason = report.semantic_reason
 
 
 # ---------------------------------------------------------------- files
@@ -196,13 +343,33 @@ def _parsed(cache: dict | None, file_id: str, data: bytes):
 
 def read_file(file_id: str, name: str, data: bytes, *, codes=None, outbound: Outbound = scrubbed,
               transport: model_pass.Transport | None = None, status: str = 'off',
-              cache: dict | None = None) -> Extraction:
+              cache: dict | None = None, budget: model_pass.Budget | None = None,
+              media_type: str | None = None) -> Extraction:
     out = Extraction()
     report = FileReport(file_id=file_id, name=name, status='not_read')
     out.files.append(report)
+    budget = budget if budget is not None else model_pass.Budget()
+    if image_format(data):
+        try:
+            report.media_type = image_type(data)
+        except InvalidImage as error:
+            report.reason = str(error)
+            return out
+        report.pages = 1
+        _pictures(out, report, [1], lambda page: picture_url(data), transport=transport, status=status,
+                  budget=budget, outbound=outbound)
+        _report(out, report)
+        return out
     try:
-        content = _parsed(cache, file_id, data)
-    except NotAPdf:
+        if is_pdf(data) or (media_type != 'text/plain' and not name.lower().endswith('.txt')):
+            content = _parsed(cache, file_id, data)
+        else:
+            text = data.decode('utf-8-sig')
+            if not text.strip() or any(ord(c) < 32 and c not in '\r\n\t' for c in text):
+                raise NotAPdf()
+            report.media_type = 'text/plain'
+            content = PdfContent(1, [Page(1, text)], [], [], None)
+    except (NotAPdf, UnicodeError):
         report.reason = NOT_A_PDF
         return out
     report.pages = content.pages
@@ -240,27 +407,18 @@ def read_file(file_id: str, name: str, data: bytes, *, codes=None, outbound: Out
             report.form_fields_read += 1
     if content.form != 'scc_variance':
         # The SCC form's printed text is the template, not the applicant's words.
-        for index, page in enumerate(content.text_pages):
+        for page in content.text_pages:
             origin = Origin(file_id, page.number, page.box)
-            part = read_text(page.text, origin, codes=codes, outbound=outbound,
-                             transport=transport if index < MODEL_PAGES else None, status=status)
+            part = read_text(page.text, origin, codes=codes, outbound=outbound)
             out.merge(part)
-            report.pages_read.append(page.number)
+            report.text_pages_read.append(page.number)
+        _semantic_pages(out, content.text_pages, report, transport=transport, outbound=outbound,
+                        status=status, budget=budget)
+        _pictures(out, report, content.blank_pages, lambda page: picture_page(data, page),
+                  transport=transport, status=status, budget=budget, outbound=outbound)
     else:
-        report.pages_read = list(range(1, content.pages + 1))
-    report.pages_not_read = sorted(set(content.blank_pages) - set(report.pages_read))
-    report.facts = sum(1 for p in out.pointers if p.source_ref == file_id)
-    if content.truncated:
-        report.pages_not_read += list(range(MAX_PAGES + 1, content.pages + 1))
-    if report.form_fields_read and not report.pages_read:
-        # A fillable form with no text layer: its fields were read, its printed pages were not.
-        report.status = 'partly_read' if report.pages_not_read else 'read'
-        report.reason = FORM_ONLY if report.pages_not_read else None
-    elif report.pages_read and not report.pages_not_read:
-        report.status = 'read'
-    elif report.pages_read:
-        report.status = 'partly_read'
-        report.reason = TOO_LONG if content.truncated else NO_TEXT
-    else:
-        report.reason = NO_TEXT
+        report.pages_read = sorted({w.page for w in content.widgets})
+    _report(out, report)
+    if report.form_fields_read and not report.pages_read and report.pictures_not_read_reason == 'AI is off':
+        report.reason = FORM_ONLY
     return out

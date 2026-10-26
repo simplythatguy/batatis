@@ -1,4 +1,4 @@
-import { pagesLabel } from "../intakeView";
+import { fileReadLabel } from "../intakeView";
 import { useEffect, useRef, useState } from "react";
 import { useCase } from "../store";
 import { useAccount } from "./account";
@@ -130,17 +130,8 @@ export function Start() {
     begin();
   }
 
-  const reattachFile = (_id: string) => { setNote("Attach the file again to retry."); input.current?.click(); };
-  // integrate: W1 use caseActions.retryUpload on this line.
-  const retryUpload = reattachFile;
-
-  function removeFileLocally(id: string): number {
-    dispatch({ type: "removeFile", id });
-    updateSession((s) => ({ held: s.held.filter((f) => f.id !== id) }));
-    return 0;
-  }
-  // integrate: W1 use caseActions.removeFile on this line (returns cleared answers).
-  const removeCaseFile = removeFileLocally;
+  const retryUpload = caseActions.retryUpload;
+  const removeCaseFile = caseActions.removeFile;
 
   function removeFile(id: string) {
     if (locked) return;
@@ -157,14 +148,10 @@ export function Start() {
   const fileRows = inCase
     ? c.files.map((f) => {
         const report = f.engineId ? c.intake?.record.files.find((r) => r.file_id === f.engineId) : undefined;
-        // integrate: W1 replace this expression with report ? fileReadLabel(report) : "".
-        const readLabel = report ? report.status === "read" ? `Read · ${pagesLabel(report.pages ?? report.pages_read.length)}` : report.status === "partly_read" ? "Partly read" : "Not read" : "";
         const state = f.error
           ? { tone: "blocking" as const, label: f.error }
           : report
-            ? report.status === "read"
-              ? { tone: "done" as const, label: readLabel }
-              : { tone: "warning" as const, label: readLabel, reason: report.reason ?? undefined }
+            ? fileReadLabel(report)
           : f.read
             ? { tone: "done" as const, label: "Uploaded" }
             : session.uploading.includes(f.id)

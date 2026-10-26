@@ -425,3 +425,24 @@ export function stageViews(seen: Record<string, Record<string, unknown>>, runnin
 export function pagesLabel(count: number): string {
   return `${count} ${count === 1 ? "page" : "pages"}`;
 }
+
+/** What intake actually covered. Uploading callers pass no report until the read completes. */
+export function fileReadLabel(report: FileReport | null | undefined): { tone: "done" | "warning" | "blocking" | "pending"; label: string; reason?: string } {
+  if (!report) return { tone: "pending", label: "Waiting to read" };
+  const images = new Set(report.image_pages_read ?? []).size;
+  const text = new Set(report.text_pages_read ?? report.pages_read).size;
+  if (report.pages_read.length && !text && !images && report.form !== "scc_variance" && !report.semantic_reason) {
+    return { tone: "warning", label: "Read again", reason: "Coverage needs checking" };
+  }
+  const pictures = report.pictures_not_read_reason ? `Pictures not read: ${report.pictures_not_read_reason}` : undefined;
+  const semantic = report.semantic_reason;
+  const reason = pictures ?? (semantic === "AI is off" ? "Text read; AI is off" : semantic) ?? report.reason ?? undefined;
+  const warning = report.status !== "read" || Boolean(reason);
+  if (images && !text) return { tone: warning ? "warning" : "done", label: `${images} ${images === 1 ? "drawing" : "drawings"} looked at`, ...(reason ? { reason } : {}) };
+  if (report.status === "not_read" && !text) return { tone: pictures ? "warning" : "blocking", label: pictures ?? "Not read", ...(reason ? { reason } : {}) };
+  const read = semantic && semantic !== "AI is off"
+    ? new Set([...(report.semantic_pages_read ?? []), ...(report.image_pages_read ?? [])]).size
+    : new Set(report.pages_read).size;
+  const detail = reason ?? (images ? `${images} ${images === 1 ? "drawing" : "drawings"} looked at` : undefined);
+  return { tone: warning ? "warning" : "done", label: report.media_type === "text/plain" ? "Read" : `Read · ${read} of ${report.pages ?? read} pages`, ...(detail ? { reason: detail } : {}) };
+}

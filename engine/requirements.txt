@@ -10,6 +10,7 @@ PyJWT[crypto]>=2.10  # OIDC RS256 signature, issuer/audience/expiry validation
 pytest>=8.0
 pypdf>=6.0
 pypdfium2>=4.30
+Pillow>=11,<13  # Validated image uploads and bounded intake vision thumbnails.
 reportlab>=4.0,<5  # BSD licence; appendix pages for the SCC form export
 # Code database: ../codedb (same repo; needs pypdf and pypdfium2 to rebuild)
 # Jev client: vendored in engine/identify/jevkit (stdlib only)

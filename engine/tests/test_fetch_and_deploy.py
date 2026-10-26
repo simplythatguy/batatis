@@ -139,7 +139,7 @@ def test_vercel_config_keeps_sqlite_on_the_engine_only():
     client = (ROOT / 'web' / 'src' / 'api' / 'client.ts').read_text()
     assert 'VITE_API_BASE' in client
     assert 'PDF too large' not in client
-    assert 'PDF too large: the limit is 4 MB' in (ROOT / 'engine' / 'uploads.py').read_text()
+    assert 'File too large: the limit is 4 MB' in (ROOT / 'engine' / 'uploads.py').read_text()
 
 
 def _globs(value: str) -> list[str]:

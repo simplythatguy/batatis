@@ -37,6 +37,8 @@ const review = {
 const report = (file_id: string, name: string, unread = false): FileReport => ({
   file_id, name, status: unread ? "not_read" : "read", reason: unread ? "No text layer" : null,
   pages: unread ? 2 : 3, pages_read: unread ? [] : [1, 2, 3], pages_not_read: unread ? [1, 2] : [],
+  text_pages_read: unread ? [] : [1, 2, 3], semantic_pages_read: [], semantic_pages_sent: [], image_pages_read: [],
+  semantic_reason: null, pictures_not_read_reason: unread ? "AI is off" : null, media_type: "application/pdf",
   form: null, form_fields_read: 0, form_fields_skipped: [], facts: 0,
 });
 
@@ -44,7 +46,7 @@ function propsFor(value: Review | null): DocumentReviewProps {
   const record = {
     review: value, files: [report("plans", "proposal.pdf"), report("reference", "reference.pdf"), report("scan", "scan.pdf", true)],
     model: { status: "off", model: null, reason: null, pointed: 0, proposed: 0, dropped: 0, input_tokens: 0, output_tokens: 0 },
-    pointers: [], conflicts: [], plan: null, ran_at: "2026-01-01T00:00:00Z", text_sha256: null, unresolved_citations: [],
+    pointers: [], removed_file_ids: [], conflicts: [], plan: null, ran_at: "2026-01-01T00:00:00Z", text_sha256: null, unresolved_citations: [],
   } satisfies IntakeRecord;
   const description = "UNIT FIXTURE — Assume a dry location.";
   return {
