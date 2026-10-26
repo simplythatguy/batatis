@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import json
-import os
 from dataclasses import replace
 
 import pytest
@@ -237,9 +236,7 @@ def test_changed_corpus_during_run_cannot_report_success(monkeypatch, tmp_path, 
     monkeypatch.setattr(bench, 'RESULTS', tmp_path / 'results')
 
     def run(*a, **k):
-        stamp = db.stat()
         db.write_bytes(b'other snapshot')
-        os.utime(db, ns=(stamp.st_atime_ns, stamp.st_mtime_ns + 1_000_000_000))
         return record(c)
 
     monkeypatch.setattr(bench, 'run_case', run)
