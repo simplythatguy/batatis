@@ -469,9 +469,13 @@ def review_uploads(uploads: list[tuple[str, bytes]], codes) -> Parts:
             pointers.extend(found.pointers or [Pointer(file=found.file, page=found.page, quote=found.quote)])
         for quote in element.quotes:
             if quote.source:
-                pointer = _pointer_from_source(quote.source, form.name if form else 'upload')
-                if pointer not in pointers:
-                    pointers.append(pointer)
+                pointer = _pointer_from_source({**quote.source, 'quote': quote.text}, form.name if form else 'upload')
+            else:
+                location = pointers[0] if pointers else Pointer(file=form.name if form else (
+                    reads[0].name if reads else 'upload'))
+                pointer = location.model_copy(update={'quote': quote.text})
+            if pointer not in pointers:
+                pointers.append(pointer)
         if element.field in ('responsible_professional', 'professional_qualifications') and engineering_at:
             pointers.append(engineering_at)
         if not pointers:
@@ -713,6 +717,14 @@ def review_case(case, codes, store=None) -> Parts:
             for element in section.elements:
                 pointers = [_pointer_from_source(source.model_dump() if hasattr(source, 'model_dump') else source,
                                                  record) for source in element.sources]
+                for span in element.quotes:
+                    if span.source:
+                        pointer = _pointer_from_source({**span.source, 'quote': span.text}, record)
+                    else:
+                        pointer = Pointer(file=record, form_field=element.form_fields[0] if element.form_fields else None,
+                                          quote=span.text)
+                    if pointer not in pointers:
+                        pointers.append(pointer)
                 quote = element.quotes[0].text if element.quotes else None
                 if not pointers:
                     pointers = [Pointer(file=record, form_field=element.form_fields[0] if element.form_fields else None,
