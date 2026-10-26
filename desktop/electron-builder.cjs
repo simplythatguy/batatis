@@ -15,6 +15,18 @@ if (windowsSigning && Object.values(windowsSigning).some((value) => !value)) {
   throw new Error("Windows signing needs BATATIS_SIGN_PUBLISHER, BATATIS_SIGN_ENDPOINT, BATATIS_SIGN_ACCOUNT and BATATIS_SIGN_PROFILE.");
 }
 
+/**
+ * macOS Developer ID signing and notarization, when the Apple account is configured: CSC_LINK and
+ * CSC_KEY_PASSWORD carry the Developer ID Application certificate, and APPLE_API_KEY (a .p8 file's
+ * path), APPLE_API_KEY_ID and APPLE_API_ISSUER the App Store Connect key that notarizes. Ad hoc otherwise,
+ * and macOS then blocks a downloaded copy until it is allowed in Privacy & Security.
+ */
+const macSigning = Boolean(process.env.CSC_LINK);
+const MAC_NEEDS = ["CSC_KEY_PASSWORD", "APPLE_API_KEY", "APPLE_API_KEY_ID", "APPLE_API_ISSUER"];
+if (macSigning && MAC_NEEDS.some((name) => !process.env[name])) {
+  throw new Error(`macOS signing needs CSC_LINK, ${MAC_NEEDS.join(", ")}.`);
+}
+
 async function auditBundle(context) {
   const { writeFileSync } = require("node:fs");
   const { audit } = require("./scripts/audit-package.cjs");
@@ -46,7 +58,12 @@ module.exports = {
     onlyLoadAppFromAsar: true,
     grantFileProtocolExtraPrivileges: false,
   },
-  mac: {
+  mac: macSigning ? {
+    icon: "assets/icon-mac.png",
+    target: ["zip"], category: "public.app-category.productivity",
+    hardenedRuntime: true, notarize: true,
+    entitlements: "assets/entitlements.mac.plist", entitlementsInherit: "assets/entitlements.mac.plist",
+  } : {
     icon: "assets/icon-mac.png",
     target: ["zip"], category: "public.app-category.productivity", identity: "-", hardenedRuntime: false, notarize: false,
   },
