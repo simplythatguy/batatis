@@ -549,3 +549,10 @@ test("an obvious question is a short label and its control; the reason waits beh
   const alt = deck.find((i) => i.key === "field-alternative");
   if (alt?.quote) assert.equal(alt.context, "You wrote");
 });
+
+test("a typed answer quotes the applicant's own words, so the officer's check treats it as given", () => {
+  const c = reducer(emptyCase(), { type: "setDetail", field: "owner", value: "SYNTHETIC Larkspur Row Homes", section: "A" });
+  const owner = factFor(c, "owner");
+  assert.equal(owner?.status, "confirmed");
+  assert.equal(owner?.source.quote, "SYNTHETIC Larkspur Row Homes");
+});

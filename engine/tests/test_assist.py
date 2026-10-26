@@ -328,3 +328,38 @@ def test_compliance_and_safety_verdicts_are_stopped(claim):
 def test_safety_codes_officer_and_compliance_disclaimers_are_not_verdicts():
     text = 'Ask your Safety Codes Officer. Batatis checks completeness, not code compliance.'
     assert routes_assist.check_citations(text, Codes())[0] == text
+
+
+def test_context_keeps_the_applicants_answers_and_the_officers_open_items():
+    from types import SimpleNamespace
+    from engine.models import Source
+    quoted = [fact(f'statement.{n:04d}', 'A sentence quoted from an attached report. ' * 12) for n in range(60)]
+    owner = fact('owner', 'SYNTHETIC Larkspur Row Homes')
+    case = Case(facts=[owner, *quoted])
+    review = SimpleNamespace(findings=[
+        SimpleNamespace(section='A', label='Signature', status='missing', severity='blocking', routed_to='applicant', message='The field is blank.'),
+        SimpleNamespace(section='A', label='Owner name', status='present', severity='warning', routed_to='applicant', message='Present.')])
+    body = routes_assist.AssistRequest(screen='review-missing', question='What is still missing?')
+    context = routes_assist.build_context(body, case, Codes(), review)['application']
+    assert 'context_truncated' not in context
+    assert [f['field'] for f in context['facts']] == ['owner']
+    assert [item['label'] for item in context['officer_review']] == ['Signature']
+    applicant = routes_assist.build_context(body, case, Codes())['application']
+    assert 'officer_review' not in applicant
+
+
+def test_a_desktop_reply_has_room_for_the_local_runtimes_reasoning(monkeypatch):
+    from types import SimpleNamespace
+    from engine import provider_routing
+    seen = {}
+
+    def transport(task, **options):
+        seen.update(options, task=task)
+        return lambda system, user, schema: ({'answer': 'Ask for the signature.'}, {'input_tokens': 10, 'output_tokens': 3000})
+
+    monkeypatch.setattr(provider_routing, 'local_transport', transport)
+    body = routes_assist.AssistRequest(screen='review-missing', question='What is still missing?')
+    reply = routes_assist.call_model(provider='desktop', model='m', context='{}', body=body,
+                                     desktop_profile=SimpleNamespace(lease='lease'))
+    assert reply.text == 'Ask for the signature.'
+    assert seen['task'] == 'assistant' and seen['max_output_tokens'] > routes_assist.MAX_TOKENS

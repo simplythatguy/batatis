@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { betaTarget, desktopReleases, MINIMUM_BETA_GAP_MS, planRelease } from "../scripts/release-plan.mjs";
+import { betaTarget, desktopReleases, planRelease } from "../scripts/release-plan.mjs";
 
 const NOW = Date.parse("2026-10-26T12:00:00Z");
 const published = (tag: string, hoursAgo: number, prerelease = tag.includes("-beta.")) =>
@@ -9,7 +9,7 @@ const published = (tag: string, hoursAgo: number, prerelease = tag.includes("-be
 function plan(overrides: Partial<Parameters<typeof planRelease>[0]> = {}) {
   const compared: string[][] = [];
   const run = planRelease({
-    event: "schedule", channel: "", ref: "refs/heads/main", sha: "a".repeat(40), now: NOW, date: "20261026", run: 57,
+    event: "push", channel: "", ref: "refs/heads/main", sha: "a".repeat(40), now: NOW, date: "20261026", run: 57,
     packageVersion: "0.1.0", releases: [],
     compare: async (base: string, head: string) => { compared.push([base, head]); return "ahead"; },
     commitOf: async (tag: string) => `sha-of-${tag}`,
@@ -29,17 +29,13 @@ test("the first beta previews the package version; later ones preview the patch 
   assert.throws(() => betaTarget("0.3.0-beta.1", null));
 });
 
-test("a scheduled beta waits six hours after the last one and needs new commits on main", async () => {
-  const recent = await plan({ releases: [published("v0.1.0-beta.20261026.50", 2)] });
-  assert.equal((await recent.run).build, false);
-  assert.deepEqual(recent.compared, [], "nothing is compared inside the gap");
+test("every merge into main is a beta right away, unless the last beta already ships that commit", async () => {
+  const minutesLater = plan({ releases: [published("v0.1.0-beta.20261026.50", 0.1)] });
+  assert.equal((await minutesLater.run).build, true, "no waiting period between betas");
+  assert.deepEqual(minutesLater.compared, [["v0.1.0-beta.20261026.50", "a".repeat(40)]]);
 
-  const stale = plan({ releases: [published("v0.1.0-beta.20261025.50", MINIMUM_BETA_GAP_MS / 3_600_000 + 1)], compare: async () => "identical" });
-  assert.equal((await stale.run).build, false);
-
-  const due = plan({ releases: [published("v0.1.0-beta.20261025.50", 7)] });
-  assert.equal((await due.run).build, true);
-  assert.deepEqual(due.compared, [["v0.1.0-beta.20261025.50", "a".repeat(40)]]);
+  const same = plan({ releases: [published("v0.1.0-beta.20261026.50", 1)], compare: async () => "identical" });
+  assert.equal((await same.run).build, false);
 
   const manual = await plan({ event: "workflow_dispatch", channel: "beta", releases: [published("v0.1.0-beta.20261026.50", 1)], compare: async () => "identical" }).run;
   assert.equal(manual.build, true, "a manual beta builds now");

@@ -94,6 +94,18 @@ def test_latest_unconfirmed_revision_cannot_resurrect_older_answer(context):
     assert all(quote['text'] != 'SYNTHETIC old owner' for quote in found['owner_name']['quotes'])
 
 
+def test_a_typed_answer_counts_as_given_but_a_reading_its_quote_does_not_support_does_not(context):
+    client, store, _ = context
+    typed = Fact(field='owner', value='SYNTHETIC Larkspur Row Homes', kind='pointed', status='confirmed',
+                 source=Source(type='user_text', ref='Typed in Section A'))
+    read = Fact(field='mailing_address', value='SYNTHETIC 100 Example Street', kind='pointed', status='confirmed',
+                source=Source(type='file', ref='file_a', page=2, quote='SYNTHETIC 200 Other Road'))
+    case = store.put(Case(facts=[typed, read]))
+    found = elements(client.post(f'/cases/{case.id}/completeness', json={}))
+    assert found['owner_name']['verdict'] == 'present'
+    assert found['mailing_address']['verdict'] == 'unclear'
+
+
 @pytest.mark.parametrize('body,status', [({'variant': 'C'}, 503), ({'variant': 'Z'}, 422),
                                         ({'documents': []}, 422), ({'anything_else': True}, 422)])
 def test_unsupported_requests_fail_honestly_without_provider_work(context, body, status):

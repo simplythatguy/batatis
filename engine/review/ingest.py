@@ -90,6 +90,8 @@ def _stored(fact: Fact, logical: str) -> StoredValue:
     value = '' if fact.value is None else str(fact.value)
     quote = fact.source.quote or ''
     confirmed = fact.status == 'confirmed' and fact.kind != 'proposed'
+    if not quote and fact.source.type == 'user_text':
+        quote = value                    # typed by the applicant, saved before typed answers carried a quote
     if fact.kind == 'pointed' and value.strip() and not quote_in_text(value, quote):
         confirmed = False
     return StoredValue(logical, value, 'exact' if fact.kind == 'exact' else 'pointed',

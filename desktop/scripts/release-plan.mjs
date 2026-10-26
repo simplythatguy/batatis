@@ -1,7 +1,7 @@
 // Decides what the desktop workflow publishes, after T3 Code's nightly and stable releases.
 //
-// Beta: a check every 30 minutes builds main as a prerelease when main has commits the last beta
-// lacks and at least six hours have passed since it; a manual beta run builds main now. A beta is
+// Beta: every merge into main builds it as a prerelease, unless the last beta already ships that
+// commit; a manual beta run builds main now. A beta is
 // vX.Y.Z-beta.YYYYMMDD.RUN, previewing the stable X.Y.Z: one patch after the latest stable release,
 // or desktop/package.json's version when that is higher.
 // Stable: a manual stable run publishes the latest beta's exact commit as vX.Y.Z, so stable only
@@ -12,8 +12,6 @@
 import { appendFileSync, readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { compareVersions, parseVersion } from "../src/main/updates.ts";
-
-export const MINIMUM_BETA_GAP_MS = 6 * 60 * 60 * 1000;
 
 const tagVersion = (tag) => (/^v(.+)$/.exec(tag)?.[1] ?? null);
 
@@ -36,13 +34,13 @@ export function betaTarget(packageVersion, latestStable) {
 }
 
 /**
- * @param input.event schedule | workflow_dispatch
+ * @param input.event push | workflow_dispatch
  * @param input.channel beta | stable (workflow_dispatch only)
  * @param input.compare (base, head) => Promise<"ahead" | "identical" | "behind" | "diverged">
  * @param input.commitOf (tag) => Promise<sha>
  */
 export async function planRelease({ event, channel, ref, sha, now, date, run, packageVersion, releases, compare, commitOf }) {
-  const chosen = event === "schedule" ? "beta" : channel;
+  const chosen = event === "push" ? "beta" : channel;
   if (chosen !== "beta" && chosen !== "stable") throw new Error(`Unknown release channel: ${channel}`);
   if (ref !== "refs/heads/main") throw new Error(`Releases are built from main; this run is on ${ref}.`);
   const parsed = desktopReleases(releases);
@@ -51,8 +49,7 @@ export async function planRelease({ event, channel, ref, sha, now, date, run, pa
   const latestBeta = latest(parsed.filter((item) => item.parsed.beta));
 
   if (chosen === "beta") {
-    if (event === "schedule" && latestBeta) {
-      if (now - latestBeta.published < MINIMUM_BETA_GAP_MS) return { build: false, reason: `${latestBeta.tag} is less than six hours old.` };
+    if (event === "push" && latestBeta) {
       const status = await compare(latestBeta.tag, sha);
       if (status !== "ahead") return { build: false, reason: `main is ${status} relative to ${latestBeta.tag}.` };
     }

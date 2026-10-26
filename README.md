@@ -6,9 +6,9 @@ Batatis helps builders in Alberta prepare a complete building-code variance appl
 
 ## See it work
 
-[![The filled variance form in Batatis, from the demo](docs/readme/demo-poster.png)](docs/readme/demo.mp4)
+![Batatis from description to an officer's review: a homebuilder's application, then the City of Edmonton officer's review and the request back to the applicant](docs/readme/demo.gif)
 
-[Watch the 5-minute demo](docs/readme/demo.mp4). A homebuilder describes a project and attaches two City of Edmonton PDFs. Batatis reads them, asks only what they didn't already say, and fills in the variance form. Then a City of Edmonton officer reviews the application. The demo uses example data and runs in the desktop app with Claude Haiku.
+A homebuilder describes a project and attaches two City of Edmonton PDFs. Batatis reads them, asks only what they didn't already say, and fills in the variance form. The City of Edmonton officer then reviews it, asks for what is missing, and the applicant opens that request. The animation plays at 2.5 times the speed of the [full 5-minute video](docs/readme/demo.mp4). It uses example data and runs in the desktop app with Claude Haiku.
 
 ## The problem
 
@@ -554,12 +554,12 @@ A few words first, if you haven't used Git or GitHub before:
 - **Checks:** tests that GitHub runs on every pull request, on Linux, macOS and Windows. A red check means something broke.
 - **Merge:** adding the pull request's commits to `main`. Only the project owner merges, and GitHub then deletes the branch.
 
-![A change goes from your branch to a pull request, through the checks, into main. Main updates the website and, within about six hours, a beta release. A stable release comes later, when the team promotes a beta](docs/readme/release-flow.png)
+![A change goes from your branch to a pull request, through the checks, into main. Main updates the website within minutes and the beta app in about 20 minutes. A stable release comes later, when the team promotes a beta](docs/readme/release-flow.png)
 
 Once a pull request is merged into `main`:
 
 1. **The website** updates by itself within a few minutes. Vercel, the service that hosts it, deploys only `main`.
-2. **A beta release of the desktop app** follows within about six hours. Every 30 minutes, GitHub checks `main`. When it has new changes and the last beta is at least six hours old, it builds the app for macOS and Windows, tests it, and publishes it as a beta, such as `v0.1.1-beta.20261026.57`. Anyone using a beta gets it as an update.
+2. **A beta release of the desktop app** follows in about 20 minutes. Every merge into `main` makes GitHub build the app for macOS and Windows, test it, and publish it as a beta, such as `v0.1.1-beta.20261026.57`. Anyone using a beta gets it the next time they select **Check for updates** in Settings, or by itself the next time the app opens.
 3. **A stable release** comes later, when the team decides a beta is good. Stable releases, such as `v0.1.1`, go to everyone else. A stable is always the exact code of a beta that people already used.
 
 ### Make a change and test it on your computer
@@ -690,7 +690,7 @@ The desktop app has two kinds of release, like T3 Code's nightly and stable buil
 | --- | --- | --- |
 | For | Testers who want changes early | Everyone else |
 | Contains | Everything merged into `main` | A beta that the team has checked |
-| Published | By itself, at most every six hours, after a merge | When the team promotes a beta |
+| Published | By itself, about 20 minutes after each merge | When the team promotes a beta |
 | Named like | `v0.1.1-beta.20261026.57` | `v0.1.1` |
 | On GitHub | Marked **Pre-release** | Marked **Latest** |
 
