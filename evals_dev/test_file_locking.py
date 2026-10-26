@@ -1,4 +1,3 @@
-"""Portable cache and ledger checks use temporary files and spawned processes."""
 from __future__ import annotations
 
 import importlib
