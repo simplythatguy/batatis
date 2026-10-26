@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Callable
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Header, HTTPException, Request, Response
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .codes import CodeDbMissing, Codes
@@ -21,6 +21,7 @@ from .intake.rules import ROLES
 from .llm_gate import client_ip_from
 from .models import Fact
 from .models_intake import IntakeRecord
+from .models_jobs import Job
 from .redact import known_values, people_names
 from .store import CaseBackend, VersionConflict
 
@@ -79,18 +80,60 @@ class IntakeResult(BaseModel):
     record: IntakeRecord
 
 
-def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes], *,
-                  transport_factory: Callable[[str], tuple[model_pass.Transport | None, str]] | None = None,
-                  review_factory: Callable[[str], tuple[review_pass.Transport | None, str]] | None = None) -> APIRouter:
-    router = APIRouter(tags=['intake'])
+def create_job_handler(code: Callable[[], Codes], *, transport_factory=None, review_factory=None):
+    """Shared computation/application seam for HTTP compatibility and durable workers."""
+    from pydantic import TypeAdapter
+    from .intake.extract import Extraction
+    from .jobs import JobHandler
+
     pick_transport = transport_factory or model_pass.default_transport
     pick_review = review_factory or review_pass.default_transport
 
-    def codes_or_none():
+    def compute(case, body, context):
+        context.progress('reading')
+        files = []
+        for file_id in body.file_ids:
+            stored = context.store.get_file(case.id, file_id)
+            if stored is None:
+                raise HTTPException(404, 'file not found')
+            files.append((file_id, stored['name'], stored['data']))
+        transport, status = pick_transport(context.client_key) if body.model else (None, 'off')
+        review_transport, review_status = (pick_review(context.client_key) if body.model and files
+                                           else (None, 'off'))
         try:
-            return code()
+            codes = code()
         except (CodeDbMissing, HTTPException):
-            return None
+            codes = None
+        known = known_values(case, people_names(context.store, case, context.user))
+        return service.run(body.text, files, codes=codes, transport=transport, status=status,
+                           outbound=lambda text, personal: scrubbed(text, [*known, *personal]),
+                           review_transport=review_transport, review_status=review_status)
+
+    return JobHandler(kind='intake', revision='intake.v1', request_model=IntakeRequest,
+                      result_adapter=TypeAdapter(Extraction),
+                      read_fields=('facts', 'intake', 'identify', 'title', 'title_is_manual', 'jurisdiction'),
+                      write_fields=('facts', 'intake', 'title'), stages=('reading',), compute=compute,
+                      apply=lambda case, body, output: service.apply(case, body.text, output, role=body.role),
+                      file_ids=lambda body: body.file_ids, result_path='/intake', uses_ai=lambda body: body.model)
+
+
+def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes], *,
+                  transport_factory: Callable[[str], tuple[model_pass.Transport | None, str]] | None = None,
+                  review_factory: Callable[[str], tuple[review_pass.Transport | None, str]] | None = None,
+                  jobs: Callable | None = None) -> APIRouter:
+    from .jobs import ExecutionContext, JobRegistry, JobRuntime
+    router = APIRouter(tags=['intake'])
+    handler = create_job_handler(code, transport_factory=transport_factory, review_factory=review_factory)
+    local_runtime = []
+
+    def runtime():
+        if jobs is not None:
+            return jobs()
+        if not local_runtime:
+            registry = JobRegistry()
+            registry.register(handler)
+            local_runtime.append(JobRuntime(cases(), registry))
+        return local_runtime[0]
 
     def result(case) -> IntakeResult:
         if case.intake is None or case.intake.plan is None:
@@ -109,23 +152,12 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes], *
             raise HTTPException(404, 'case not found')
         if body.expected_version is not None and body.expected_version != case.version:
             raise HTTPException(409, 'case was updated concurrently')   # before any provider call
-        files = []
-        for file_id in body.file_ids:
-            stored = store.get_file(case_id, file_id)
-            if stored is None:
-                raise HTTPException(404, 'file not found')
-            files.append((file_id, stored['name'], stored['data']))
-        transport, status = pick_transport(client_ip_from(request)) if body.model else (None, 'off')
-        review_transport, review_status = (pick_review(client_ip_from(request)) if body.model and files
-                                           else (None, 'off'))
-        known = known_values(case, people_names(store, case, getattr(request.state, 'user', None)))
-        extraction = service.run(body.text, files, codes=codes_or_none(), transport=transport, status=status,
-                                 outbound=lambda text, personal: scrubbed(text, [*known, *personal]),
-                                 review_transport=review_transport, review_status=review_status)
+        extraction = handler.compute(case, body, ExecutionContext(
+            store, getattr(request.state, 'user', None), client_ip_from(request), lambda stage: None))
         # One compare-and-swap against the version the client saw, else the one read above. No retry.
         if body.expected_version is not None and body.expected_version != case.version:
             raise HTTPException(409, 'case was updated concurrently')
-        service.apply(case, body.text, extraction, role=body.role)
+        handler.apply(case, body, extraction)
         try:
             saved = store.put(case, expected_version=case.version)
         except VersionConflict as error:
@@ -133,6 +165,15 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes], *
                 raise HTTPException(404, 'case not found') from error
             raise HTTPException(409, 'case was updated concurrently') from error
         return result(saved)
+
+    @router.post('/cases/{case_id}/intake/jobs', response_model=Job, status_code=202)
+    def start_intake(case_id: str, body: IntakeRequest, request: Request, response: Response,
+                     idempotency_key: str | None = Header(default=None, alias='Idempotency-Key')):
+        job = runtime().enqueue(case_id, 'intake', body, getattr(request.state, 'user', None),
+                                idempotency_key=idempotency_key, client_ip=client_ip_from(request))
+        response.headers['Cache-Control'] = 'no-store'
+        response.headers['Location'] = f'/cases/{case_id}/jobs/{job.id}'
+        return job
 
     def write(case_id: str, expected_version: int | None, change: Callable):
         """Read, change, one compare-and-swap. No retry."""

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 Key = Annotated[str, Field(min_length=1, max_length=300)]
 Text = Annotated[str, Field(max_length=20000)]
@@ -16,6 +16,22 @@ class DraftText(BaseModel):
     value: Text
 
 
+class RetainFileBinding(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    kind: Literal['retain'] = 'retain'
+
+
+class RemoveFileBinding(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    kind: Literal['remove'] = 'remove'
+
+
+class DraftFileBinding(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    kind: Literal['file'] = 'file'
+    file_id: Key
+
+
 class EvidenceDraft(BaseModel):
     model_config = ConfigDict(extra='forbid')
     document: Text = ''
@@ -25,7 +41,18 @@ class EvidenceDraft(BaseModel):
     note: Text = ''
     step: int | None = Field(default=None, ge=0, le=10)
     editing: Key | None = None
-    fileRef: Key | None = None
+    file_binding: Annotated[RetainFileBinding | RemoveFileBinding | DraftFileBinding,
+                            Field(discriminator='kind')] = Field(default_factory=RetainFileBinding)
+
+    @model_validator(mode='before')
+    @classmethod
+    def _legacy_binding(cls, value):
+        if isinstance(value, dict) and 'fileRef' in value:
+            value = dict(value)
+            reference = value.pop('fileRef')
+            # Earlier editor snapshots collapsed absent and null. Preserve bytes on ambiguity.
+            value.setdefault('file_binding', {'kind': 'file', 'file_id': reference} if reference is not None else {'kind': 'retain'})
+        return value
 
 
 class ApplicantDraft(BaseModel):

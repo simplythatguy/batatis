@@ -19,6 +19,7 @@ from .section_d_issues import SectionDIssue, section_d_issues
 from .llm_gate import client_ip_from, search_retry_after
 from .models import Case, Fact, Jurisdiction, SelectedArticle
 from .models_draft import ApplicantDraft
+from .case_view import current_case
 from .store import CaseBackend, InvalidAttachment, VersionConflict
 from .account_models import reviewing_authority
 from .access import enforce_mutation
@@ -124,7 +125,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
             raise HTTPException(409, 'case was updated concurrently') from error
         if saved is None:
             raise HTTPException(404, 'case not found')
-        return saved
+        return current_case(saved)
 
     @router.put('/cases/{case_id}/selected-articles', response_model=Case)
     def save_selected_articles(case_id: str, body: SelectedArticlesRequest):

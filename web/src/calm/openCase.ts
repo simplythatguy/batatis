@@ -14,14 +14,16 @@ import { CODECHECK_PREFIX, PROCESS_FACT, reducer } from "../model";
 import { canonicalProvision, isProvision } from "../provisions";
 import type { ApplicantType, AuthorityId, Candidate, Case, Fact, ProcessFieldId } from "../types";
 import { clarificationQuestionId } from "./uncertainty";
+import type { SavedCase } from "../api/client";
+import { DESCRIPTION_DRAFT, evidenceDrafts } from "./applicantDraft";
 
 /** The latest saved fact per field, without withdrawn answers. Order is preserved. */
 export function latestFacts(facts: EngineCase["facts"]): Fact[] {
   return latestLocalFacts(facts).filter((f) => !answerWithdrawn(f)) as Fact[];
 }
 
-export function caseFromEngine(saved: EngineCase, type: ApplicantType): Case {
-  const base = emptyCase(type);
+export function caseFromEngine(saved: SavedCase, type: ApplicantType): Case {
+  const base = emptyCase(saved.applicant_draft?.role ?? type);
   const facts = latestFacts(saved.facts);
   const by = new Map(facts.map((f) => [f.field, f]));
   const description = by.get("project.description");
@@ -64,6 +66,7 @@ export function caseFromEngine(saved: EngineCase, type: ApplicantType): Case {
   }));
   let c: Case = {
     ...base,
+    applicantType: saved.applicant_draft?.role ?? base.applicantType,
     id: `case-${saved.id}`,
     title: saved.title || base.title,
     authority,
@@ -71,9 +74,12 @@ export function caseFromEngine(saved: EngineCase, type: ApplicantType): Case {
     questions,
     process,
     candidates: confirmed,
+    evidenceDrafts: evidenceDrafts(saved.applicant_draft),
   };
   // Restore the description/title without replacing any saved facts that share its source ref.
   if (description && typeof description.value === "string") c = { ...applyDescription(c, description.value), facts };
+  const composer = saved.applicant_draft?.question_text[DESCRIPTION_DRAFT];
+  if (composer) c = { ...c, description: composer.value };
   if (saved.title) c = { ...c, title: saved.title, titleKept: true };
   if (saved.selected_articles) c = restoreSelection(c, saved.selected_articles, saved.provisions);
   return restoreCardAnswers(c);

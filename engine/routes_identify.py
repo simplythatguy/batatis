@@ -24,8 +24,9 @@ import queue
 import threading
 from typing import Callable
 
-from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi import APIRouter, Header, HTTPException, Request, Response
 from fastapi.responses import StreamingResponse
+from pydantic import BaseModel, TypeAdapter
 
 from .codes import Codes
 from .copyright import attach_meta, attribute_code
@@ -40,6 +41,7 @@ from .identify.title import short_title, title_should_replace
 from .llm_gate import client_ip_from, identify_retry_after
 from .models import Case, now
 from .models_identify import IdentifyResult, ProcessRef
+from .models_jobs import Job
 from .process_refs import ProcessRefMissing, process_refs
 from .public_names import public_event
 from .redact import known_values, people_names, scrub
@@ -84,10 +86,100 @@ def _event(stage: str, payload: dict) -> str:
     return f'event: {stage}\ndata: {json.dumps(payload, default=str)}\n\n'
 
 
+class IdentifyComputation(BaseModel):
+    result: IdentifyResult
+    relevance: RelevanceRecord | None
+    text: str
+    naming_prose: str
+
+
+def _identify_input(case: Case, body: IdentifyRequest):
+    if body.answers:
+        try:
+            check_answers(case, body.answers)
+        except AnswerRejected as error:
+            raise HTTPException(422, str(error)) from None
+        case = case.model_copy(deep=True)
+        apply_answers(case, body.answers)
+    naming_prose = body.prose if body.prose and body.prose.strip() else ''
+    text = naming_prose or description(case)
+    if not text.strip():
+        raise HTTPException(409, 'Describe your project first')
+    return case, text, naming_prose
+
+
+def _compute_identification(base: Case, text: str, outbound: str, client_ip: str, code: Callable,
+                            transport_factory, on_stage=None, *, naming_prose: str = '') -> IdentifyComputation:
+    try:
+        config = load_config()
+    except (ConfigError, ValueError) as error:
+        logger.error('identify config invalid: %s', error)
+        raise HTTPException(503, 'Code identification is misconfigured') from None
+    codes = code()
+    transports = transport_factory(client_ip) if transport_factory else None
+    output = identify_run(outbound, codes=codes, config=config, transports=transports, on_stage=on_stage,
+                          description_sha256=description_hash(text), client_ip=client_ip, facts=base.facts)
+    return IdentifyComputation(result=output.result, relevance=_relevance(output, text), text=text,
+                               naming_prose=naming_prose)
+
+
+def _apply_identification(case: Case, answers, output: IdentifyComputation):
+    if answers:
+        apply_answers(case, answers)
+    result = output.result.model_copy(deep=True)
+    previous = case.identify.decisions if case.identify else {}
+    result.decisions = {k: v for k, v in previous.items() if any(a.provision == k for a in result.articles)}
+    generated = case.identify.title if case.identify else None
+    if title_should_replace(case.title, output.text, generated, manual=case.title_is_manual):
+        # Only explicit sent prose and confirmed applicant facts are naming inputs.
+        case.title = short_title(output.naming_prose, case.facts, result.model_dump())
+        result.title = case.title
+    else:
+        result.title = generated if not case.title_is_manual and case.title == generated else None
+    case.identify = result
+    if output.relevance is not None:
+        case.relevance = output.relevance
+
+
+def create_job_handler(code: Callable[[], Codes], transport_factory: TransportFactory | None = None):
+    from .jobs import JobHandler
+
+    def validate(case, body):
+        _identify_input(case, body)
+
+    def compute(case, body, context):
+        base, text, naming_prose = _identify_input(case, body)
+        outbound = scrub(text, known_values(base, people_names(context.store, base, context.user)))
+        context.progress('screen')
+        next_stage = {'screen': 'rerank', 'rerank': 'verify', 'verify': 'questions', 'questions': 'questions'}
+        return _compute_identification(
+            base, text, outbound, context.client_key, code, transport_factory,
+            on_stage=lambda stage, payload: context.progress(next_stage[stage]), naming_prose=naming_prose)
+
+    return JobHandler(kind='identify', revision='identify.v1', request_model=IdentifyRequest,
+                      result_adapter=TypeAdapter(IdentifyComputation),
+                      read_fields=('facts', 'identify', 'title', 'title_is_manual', 'provisions', 'relevance'),
+                      write_fields=('facts', 'identify', 'title', 'relevance'),
+                      stages=('screen', 'rerank', 'verify', 'questions'), compute=compute,
+                      apply=lambda case, body, output: _apply_identification(case, body.answers, output),
+                      validate_input=validate, result_path='/identify', uses_ai=lambda body: True)
+
+
 def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
-                  transport_factory: TransportFactory | None = None) -> APIRouter:
+                  transport_factory: TransportFactory | None = None, *, jobs: Callable | None = None) -> APIRouter:
+    from .jobs import JobRegistry, JobRuntime
     router = APIRouter(tags=['code identification'])
     runs = CaseScorings()
+    local_runtime = []
+
+    def runtime():
+        if jobs is not None:
+            return jobs()
+        if not local_runtime:
+            registry = JobRegistry()
+            registry.register(create_job_handler(code, transport_factory))
+            local_runtime.append(JobRuntime(cases(), registry))
+        return local_runtime[0]
 
     def get_case(case_id: str) -> Case:
         case = cases().get(case_id)
@@ -118,36 +210,10 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
     def execute(case_id: str, text: str, outbound: str, client_ip: str, base: Case,
                 on_stage=None, answers=(), *, naming_prose: str = '') -> IdentifyResult:
         """Run identification and store it, with the request's answers, in one CAS against `base`."""
-        try:
-            config = load_config()
-        except (ConfigError, ValueError) as error:
-            logger.error('identify config invalid: %s', error)
-            raise HTTPException(503, 'Code identification is misconfigured') from None
-        codes = code()
-        transports = transport_factory(client_ip) if transport_factory else None
-        output = identify_run(outbound, codes=codes, config=config, transports=transports, on_stage=on_stage,
-                              description_sha256=description_hash(text), client_ip=client_ip,
-                              facts=base.facts)
+        output = _compute_identification(base, text, outbound, client_ip, code, transport_factory, on_stage,
+                                         naming_prose=naming_prose)
         result = output.result
-        relevance = _relevance(output, text)
-
-        def attach(case: Case):
-            if answers:
-                apply_answers(case, answers)
-            previous = case.identify.decisions if case.identify else {}
-            result.decisions = {k: v for k, v in previous.items() if any(a.provision == k for a in result.articles)}
-            generated = case.identify.title if case.identify else None
-            if title_should_replace(case.title, text, generated, manual=case.title_is_manual):
-                # `text` may be an unconfirmed saved description. Only explicit sent
-                # prose and the helper's confirmed applicant facts are naming inputs.
-                case.title = short_title(naming_prose, case.facts, result.model_dump())
-                result.title = case.title
-            else:
-                result.title = (generated if not case.title_is_manual and case.title == generated else None)
-            case.identify = result
-            if relevance is not None:
-                case.relevance = relevance
-        saved, _ = save(case_id, attach, expected_version=base.version)
+        saved, _ = save(case_id, lambda case: _apply_identification(case, answers, output), expected_version=base.version)
         if list(saved.provisions) != list(base.provisions):   # the CAS pinned `base`; `attach` never touches provisions
             raise HTTPException(500, 'identify must not change provisions')
         logger.info('Identify: case=%s mode=%s scored=%s committed=%s choices=%s dropped=%s usd=%s seconds=%.3f',
@@ -162,18 +228,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
         case = get_case(case_id)
         if body.expected_version is not None and body.expected_version != case.version:
             raise HTTPException(409, 'case was updated concurrently')
-        if body.answers:
-            try:
-                check_answers(case, body.answers)
-            except AnswerRejected as error:
-                raise HTTPException(422, str(error)) from None
-            # Staged on a copy: they are written with the result, in the same CAS, or not at all.
-            case = case.model_copy(deep=True)
-            apply_answers(case, body.answers)
-        naming_prose = body.prose if body.prose and body.prose.strip() else ''
-        text = naming_prose or description(case)
-        if not text.strip():
-            raise HTTPException(409, 'Describe your project first')
+        case, text, naming_prose = _identify_input(case, body)
         client_ip = client_ip_from(request)
         wait = identify_retry_after(client_ip)
         if wait is not None:
@@ -192,6 +247,23 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
         except ProcessRefMissing:
             raise HTTPException(503, 'process references missing from the code database') from None
         return result
+
+    @router.post('/cases/{case_id}/identify/jobs', response_model=Job, status_code=202)
+    def start_identify(case_id: str, request: Request, response: Response, body: IdentifyRequest | None = None,
+                       idempotency_key: str | None = Header(default=None, alias='Idempotency-Key')):
+        client_ip = client_ip_from(request)
+
+        def admit():
+            wait = identify_retry_after(client_ip)
+            if wait is not None:
+                raise HTTPException(429, f'Identification limit reached; try again in {wait} seconds',
+                                    headers={'Retry-After': str(wait)})
+
+        job = runtime().enqueue(case_id, 'identify', body or IdentifyRequest(), getattr(request.state, 'user', None),
+                                idempotency_key=idempotency_key, client_ip=client_ip, admit=admit)
+        response.headers['Cache-Control'] = 'no-store'
+        response.headers['Location'] = f'/cases/{case_id}/jobs/{job.id}'
+        return job
 
     def stream(case_id: str, text: str, outbound: str, client_ip: str, base: Case, answers=(), *,
                naming_prose: str = '') -> StreamingResponse:

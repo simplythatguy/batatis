@@ -349,8 +349,9 @@ def test_rename_keeps_the_latest_concurrent_record_including_decision_messages_a
     result = rename(client, case.id, 'Latest title')
     assert result.status_code == 200, result.text
     saved = Case.model_validate(result.json())
-    excluded = {'title', 'title_is_manual', 'updated_at', 'version'}
+    excluded = {'title', 'title_is_manual', 'updated_at', 'expires_at', 'version'}
     assert saved.model_dump(exclude=excluded) == committed[0].model_dump(exclude=excluded)
+    assert datetime.fromisoformat(saved.expires_at) > datetime.fromisoformat(committed[0].expires_at)
     assert saved.version == committed[0].version + 1
 
 
@@ -477,9 +478,8 @@ def test_deleted_or_expired_case_is_never_recreated_by_rename(context, monkeypat
         if disappearance == 'deleted':
             assert store.delete(case_id)
         else:
-            current = store.get(case_id)
-            current.created_at = (datetime.now(timezone.utc) - timedelta(days=8)).isoformat()
-            store.put(current, expected_version=current.version)
+            from engine.tests.test_retention import _set_last_activity
+            _set_last_activity(store, case_id, (datetime.now(timezone.utc) - timedelta(days=8)).isoformat())
         return original(case_id, title)
 
     monkeypatch.setattr(store, 'rename_title', disappear_before_lock)

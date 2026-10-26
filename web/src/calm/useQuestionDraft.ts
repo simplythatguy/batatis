@@ -12,5 +12,7 @@ export function useQuestionDraft(account: string | null, generation: number, eng
     questionDrafts.writeChoices(scope, typeof next === "function" ? next(questionDrafts.readChoices(scope)) : next);
     render();
   };
-  return { value, setValue, choices, setChoices };
+  const conflict = Boolean(card && questionDrafts.conflicted(scope, card, base));
+  const confirmValue = (value: string) => { if (card) questionDrafts.confirm(scope, card, value); render(); };
+  return { value, setValue, choices, setChoices, conflict, confirmValue };
 }

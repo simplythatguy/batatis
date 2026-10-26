@@ -58,11 +58,11 @@ export function resetSession(keep: Partial<Session> = {}) {
   for (const l of listeners) l();
 }
 
-function subscribe(l: () => void) {
+export function subscribeSession(l: () => void) {
   listeners.add(l);
   return () => listeners.delete(l);
 }
 
 export function useSession(): Session {
-  return useSyncExternalStore(subscribe, getSession, getSession);
+  return useSyncExternalStore(subscribeSession, getSession, getSession);
 }

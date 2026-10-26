@@ -18,6 +18,7 @@ from pydantic.json_schema import GenerateJsonSchema, models_json_schema
 from .api import ExportPreview, ExportPreviewTooLarge, NewCase, SectionCRequest
 from .code_library import CodeTOC, ProvisionContext
 from .models import Case, Fact, SectionCRow
+from .models_jobs import Job, JobList, WorkerHealth
 from .account_models import ApplicationPreferences, ApplicationPreferencesPatch, UserResult, MessagesResult
 from .routes_auth import SignupRequest, LoginRequest, OnboardingRequest
 from .routes_review import (NotificationsResult, ApplicationsResult, QueueResult, ClaimResult, ClaimRequest,
@@ -45,7 +46,7 @@ RESPONSES = (Case, SectionCRow, CodeTOC, ProvisionContext, UserResult, MessagesR
              JurisdictionsResult, JurisdictionDetail, CaseJurisdictionPack, IntakeResult, CaseRules, RuleSet,
              JurisdictionChecklists, CaseChecklists, ChecklistAnswerResult,
              ApplicationPreferences, VoiceCapability, ExportPreview,
-             ExportPreviewTooLarge)  # responses carry every field
+             ExportPreviewTooLarge, Job, JobList, WorkerHealth)  # responses carry every field
 REQUESTS = (Fact, NewCase, SectionCRequest, SignupRequest, LoginRequest, OnboardingRequest,
             ClaimRequest, DecisionRequest, MessageRequest, MessageReadRequest, ProfessionalRequirementRequest,
             SubmitRequest, AssistRequest, InformationRequestEdit,

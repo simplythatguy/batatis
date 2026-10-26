@@ -134,3 +134,66 @@ def test_unconfirmed_editors_remain_private_from_officers_without_erasing_storag
     assert response.json()['applicant_draft'] is None
     assert 'Unsubmitted private note' not in response.text
     assert backend.get(case.id).applicant_draft.question_text['owner'].value == 'Unsubmitted private note'
+
+
+@pytest.mark.parametrize('kind', ['retain', 'remove', 'file'])
+def test_unfinished_document_preserves_the_exact_binding_intent(store, kind):
+    backend, created = store
+    case = backend.put(Case())
+    created.append(case.id)
+    file_id = backend.put_file(case.id, 'report.pdf', b'%PDF synthetic applicant report')['id']
+    binding = {'kind': kind, **({'file_id': file_id} if kind == 'file' else {})}
+    client = TestClient(create_app(backend))
+    response = client.patch(f'/cases/{case.id}/draft', json={
+        'expected_version': case.version,
+        'applicant_draft': {'evidence_drafts': {'report': {'document': 'Unfinished rename', 'file_binding': binding}}},
+    })
+    assert response.status_code == 200, response.text
+    reopened = client.get(f'/cases/{case.id}').json()
+    assert reopened['applicant_draft']['evidence_drafts']['report']['file_binding'] == binding
+    assert reopened['facts'] == [] and reopened['evidence'] == []
+    assert backend.get_file(case.id, file_id) is not None
+
+
+def test_ambiguous_legacy_editor_binding_retains_bytes_instead_of_implying_removal():
+    from engine.models_draft import EvidenceDraft
+    assert EvidenceDraft.model_validate({'fileRef': None}).file_binding.kind == 'retain'
+    selected = EvidenceDraft.model_validate({'fileRef': 'file-legacy'})
+    assert selected.file_binding.kind == 'file' and selected.file_binding.file_id == 'file-legacy'
+
+
+def test_one_case_snapshot_has_the_existing_derived_read_freshness_without_writing(store, monkeypatch):
+    from engine.codes import Codes
+    from engine.models import now
+    from engine.relevance import description_hash
+    from engine.relevance_models import RelevanceBands, RelevanceRecord
+    monkeypatch.setenv('BATATIS_LIVE', '0')
+    monkeypatch.setenv('BATATIS_JOBS_WORKER', '0')
+    backend, created = store
+    case = backend.put(Case())
+    created.append(case.id)
+    client = TestClient(create_app(backend, Codes()))
+    path = f'/cases/{case.id}'
+    text = 'A two-storey house needs a larger egress window.'
+    intake = client.post(path + '/intake', json={'text': text, 'model': False})
+    assert intake.status_code == 200, intake.text
+    identified = client.post(path + '/identify', json={})
+    assert identified.status_code == 200, identified.text
+    saved = backend.get(case.id)
+    saved.relevance = RelevanceRecord(scored_at=now(), description_sha256=description_hash(text),
+        scores={}, rerank={}, display={}, bands=RelevanceBands(x=0.3, y=0.85, status='uncalibrated'))
+    saved = backend.put(saved, expected_version=saved.version)
+    changed = {**answer(9), 'field': 'project.description', 'value': 'A different applicant proposal.'}
+    receipt = client.patch(path + '/draft', json={'expected_version': saved.version, 'facts': [changed]})
+    assert receipt.status_code == 200, receipt.text
+    assert receipt.json()['identify']['stale'] is True
+    before = backend.get(case.id).model_dump()
+    opened = client.get(path).json()
+    current_id = client.get(path + '/identify').json()
+    current_intake = client.get(path + '/intake').json()
+    current_relevance = client.get(path + '/relevance').json()
+    assert opened['identify'] == {key: value for key, value in current_id.items() if key != 'meta'}
+    assert opened['intake'] == current_intake['record']
+    assert opened['relevance'] == {key: value for key, value in current_relevance.items() if key != 'meta'}
+    assert opened['identify']['case_version'] == opened['version']
+    assert backend.get(case.id).model_dump() == before

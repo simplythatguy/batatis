@@ -143,9 +143,8 @@ def test_removed_case_has_no_inventory_download_or_binding(ledger, ending):
     if ending == 'deleted':
         store.delete(case.id)
     else:
-        saved = store.get(case.id)
-        saved.created_at = (datetime.now(timezone.utc) - timedelta(days=8)).isoformat()
-        store.put(saved, expected_version=saved.version)
+        from engine.tests.test_retention import _set_last_activity
+        _set_last_activity(store, case.id, (datetime.now(timezone.utc) - timedelta(days=8)).isoformat())
     for suffix in ('/files', f'/files/{file["id"]}'):
         assert client.get(f'/cases/{case.id}' + suffix).status_code == 404
     assert post(client, case.id, payload(file_ref=file['id'])).status_code == 404

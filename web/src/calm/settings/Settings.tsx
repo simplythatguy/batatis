@@ -9,6 +9,7 @@ import { authorityName } from "../applications";
 import { PageHead, clockText, useCountdown } from "../auth/bits";
 import { APPLICANT_CHOICES, APPLICANT_LABEL, AUTHORITY_CHOICES, codeNeeded } from "../auth/onboardingSteps";
 import { saveOnboarding, signOut } from "../auth/useAuthGate";
+import { useSignOutStatus } from "../auth/signOutGuard";
 import { AiAccessSection } from "./AiAccess";
 import { ArchivedApplications } from "./ArchivedApplications";
 import { Chips, Row } from "./rows";
@@ -94,7 +95,7 @@ export function Settings({ phoneTools }: { phoneTools?: ReactNode }) {
   const testPerson = useDesktop()?.workspace === "dev";
   const [editing, setEditing] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [leaving, setLeaving] = useState(false);
+  const leaving = useSignOutStatus();
 
   return (
     <div className="ac-page">
@@ -143,9 +144,10 @@ export function Settings({ phoneTools }: { phoneTools?: ReactNode }) {
 
         {user && !testPerson && (
           <section className="ac-section is-last">
-            <button type="button" className="cf-btn is-sm" disabled={leaving} onClick={() => { setLeaving(true); void signOut(); }}>
-              {leaving ? "Signing out…" : "Sign out"}
+            <button type="button" className="cf-btn is-sm" disabled={leaving.pending} onClick={() => void signOut()}>
+              {leaving.pending ? "Signing out…" : "Sign out"}
             </button>
+            {leaving.error && <p className="cf-note" role="status">{leaving.error}</p>}
           </section>
         )}
       </div>

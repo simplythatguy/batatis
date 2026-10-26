@@ -3500,6 +3500,51 @@
       "title": "DocumentRow",
       "type": "object"
     },
+    "DraftFileBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "file_id": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "File Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "file",
+          "default": "file",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "file_id"
+      ],
+      "title": "DraftFileBinding",
+      "type": "object"
+    },
+    "DraftFileBindingInput": {
+      "additionalProperties": false,
+      "properties": {
+        "file_id": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "File Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "file",
+          "default": "file",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "file_id"
+      ],
+      "title": "DraftFileBinding",
+      "type": "object"
+    },
     "DraftPatch": {
       "additionalProperties": false,
       "properties": {
@@ -3668,19 +3713,27 @@
           "title": "Evidencetype",
           "type": "string"
         },
-        "fileRef": {
-          "anyOf": [
+        "file_binding": {
+          "discriminator": {
+            "mapping": {
+              "file": "#/$defs/DraftFileBinding",
+              "remove": "#/$defs/RemoveFileBinding",
+              "retain": "#/$defs/RetainFileBinding"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
             {
-              "maxLength": 300,
-              "minLength": 1,
-              "type": "string"
+              "$ref": "#/$defs/RetainFileBinding"
             },
             {
-              "type": "null"
+              "$ref": "#/$defs/RemoveFileBinding"
+            },
+            {
+              "$ref": "#/$defs/DraftFileBinding"
             }
           ],
-          "default": null,
-          "title": "Fileref"
+          "title": "File Binding"
         },
         "note": {
           "default": "",
@@ -3717,7 +3770,7 @@
         "note",
         "step",
         "editing",
-        "fileRef"
+        "file_binding"
       ],
       "title": "EvidenceDraft",
       "type": "object"
@@ -3757,19 +3810,27 @@
           "title": "Evidencetype",
           "type": "string"
         },
-        "fileRef": {
-          "anyOf": [
+        "file_binding": {
+          "discriminator": {
+            "mapping": {
+              "file": "#/$defs/DraftFileBindingInput",
+              "remove": "#/$defs/RemoveFileBindingInput",
+              "retain": "#/$defs/RetainFileBindingInput"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
             {
-              "maxLength": 300,
-              "minLength": 1,
-              "type": "string"
+              "$ref": "#/$defs/RetainFileBindingInput"
             },
             {
-              "type": "null"
+              "$ref": "#/$defs/RemoveFileBindingInput"
+            },
+            {
+              "$ref": "#/$defs/DraftFileBindingInput"
             }
           ],
-          "default": null,
-          "title": "Fileref"
+          "title": "File Binding"
         },
         "note": {
           "default": "",
@@ -6335,6 +6396,226 @@
       "title": "IntentBlock",
       "type": "object"
     },
+    "Job": {
+      "additionalProperties": false,
+      "properties": {
+        "attempts": {
+          "title": "Attempts",
+          "type": "integer"
+        },
+        "base_version": {
+          "title": "Base Version",
+          "type": "integer"
+        },
+        "can_retry": {
+          "title": "Can Retry",
+          "type": "boolean"
+        },
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/JobError"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "finished_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Finished At"
+        },
+        "heartbeat_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Heartbeat At"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "pattern": "^[a-z][a-z0-9_]{0,63}$",
+          "title": "Kind",
+          "type": "string"
+        },
+        "lease_expires_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Lease Expires At"
+        },
+        "max_attempts": {
+          "title": "Max Attempts",
+          "type": "integer"
+        },
+        "next_attempt_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Attempt At"
+        },
+        "result_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Result Url"
+        },
+        "result_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Result Version"
+        },
+        "stage": {
+          "title": "Stage",
+          "type": "string"
+        },
+        "started_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Started At"
+        },
+        "state": {
+          "enum": [
+            "queued",
+            "running",
+            "succeeded",
+            "failed",
+            "cancelled",
+            "superseded"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "updated_at": {
+          "title": "Updated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "case_id",
+        "kind",
+        "state",
+        "stage",
+        "attempts",
+        "max_attempts",
+        "base_version",
+        "result_version",
+        "created_at",
+        "updated_at",
+        "started_at",
+        "finished_at",
+        "next_attempt_at",
+        "heartbeat_at",
+        "lease_expires_at",
+        "error",
+        "can_retry",
+        "result_url"
+      ],
+      "title": "Job",
+      "type": "object"
+    },
+    "JobError": {
+      "properties": {
+        "code": {
+          "enum": [
+            "processing_failed",
+            "worker_lost",
+            "access_changed",
+            "input_changed",
+            "invalid_input",
+            "handler_unavailable"
+          ],
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "retryable": {
+          "title": "Retryable",
+          "type": "boolean"
+        },
+        "stage": {
+          "title": "Stage",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "stage",
+        "retryable"
+      ],
+      "title": "JobError",
+      "type": "object"
+    },
+    "JobList": {
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/$defs/Job"
+          },
+          "title": "Items",
+          "type": "array"
+        }
+      },
+      "required": [
+        "items"
+      ],
+      "title": "JobList",
+      "type": "object"
+    },
     "Jurisdiction": {
       "properties": {
         "authority": {
@@ -8557,6 +8838,35 @@
       "title": "RelevanceRecord",
       "type": "object"
     },
+    "RemoveFileBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "remove",
+          "default": "remove",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "title": "RemoveFileBinding",
+      "type": "object"
+    },
+    "RemoveFileBindingInput": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "remove",
+          "default": "remove",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "title": "RemoveFileBinding",
+      "type": "object"
+    },
     "ResolvedForm": {
       "additionalProperties": false,
       "properties": {
@@ -8750,6 +9060,35 @@
         "scope"
       ],
       "title": "ResolvedNote",
+      "type": "object"
+    },
+    "RetainFileBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "retain",
+          "default": "retain",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "title": "RetainFileBinding",
+      "type": "object"
+    },
+    "RetainFileBindingInput": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "retain",
+          "default": "retain",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "title": "RetainFileBinding",
       "type": "object"
     },
     "ReviewConflict": {
@@ -11583,6 +11922,51 @@
         "scope"
       ],
       "title": "VoiceStart",
+      "type": "object"
+    },
+    "WorkerHealth": {
+      "properties": {
+        "execution": {
+          "enum": [
+            "external_required",
+            "in_process",
+            "external"
+          ],
+          "title": "Execution",
+          "type": "string"
+        },
+        "last_heartbeat_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Heartbeat At"
+        },
+        "queued": {
+          "title": "Queued",
+          "type": "integer"
+        },
+        "running": {
+          "title": "Running",
+          "type": "integer"
+        },
+        "worker_available": {
+          "title": "Worker Available",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "worker_available",
+        "last_heartbeat_at",
+        "queued",
+        "running",
+        "execution"
+      ],
+      "title": "WorkerHealth",
       "type": "object"
     }
   },
