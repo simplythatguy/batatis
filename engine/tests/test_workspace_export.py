@@ -246,3 +246,14 @@ def test_an_attached_photo_becomes_a_package_page_not_an_unreadable_item():
         case = Case(facts=[fact('process.rationale', 'Synthetic applicant rationale.')])
         return set(export_case(case, draft=True, store=attach(case, data, name='Synthetic site photo')).open_items)
     assert reasons(buf.getvalue()) == reasons(attachment_pdf())
+
+
+def test_a_photo_with_a_very_long_title_still_reads_as_a_photo():
+    from PIL import Image
+    from engine.package_format import PHOTO
+    buf = io.BytesIO(); Image.new('RGB', (900, 1400), (120, 120, 120)).save(buf, 'JPEG')
+    title = 'Synthetic north elevation photo ' * 12
+    case = Case(facts=[fact('process.rationale', 'Synthetic applicant rationale.')])
+    result = export_case(case, draft=True, store=attach(case, buf.getvalue(), name=title))
+    assert PHOTO in PdfReader(io.BytesIO(result.pdf)).pages[-1].extract_text()
+    assert not any('could not be fully read' in item for item in result.open_items)

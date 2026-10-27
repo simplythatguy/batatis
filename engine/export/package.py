@@ -128,8 +128,13 @@ def _image_pdf(data: bytes, title: str) -> bytes | None:
     output = io.BytesIO()
     page = canvas.Canvas(output, pagesize=letter, invariant=1)
     page.drawImage(ImageReader(image), (width - drawn[0]) / 2, margin + caption + (height - 2 * margin - caption - drawn[1]) / 2, *drawn)
+    # The marker has its own short line so no title, however long, can push it off the page.
     page.setFont('Helvetica', 8)
-    page.drawString(margin, margin, pdf_safe(f'{PHOTO} · Photo supplied by the applicant: {title}'))
+    page.drawString(margin, margin, PHOTO)
+    label = pdf_safe(f'Photo supplied by the applicant: {title}')
+    while label and stringWidth(label, 'Helvetica', 8) > width - 2 * margin:
+        label = label[:-2].rstrip() + '…'
+    page.drawString(margin, margin + 11, label)
     page.save()
     return output.getvalue()
 
