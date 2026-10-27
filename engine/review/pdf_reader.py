@@ -214,42 +214,59 @@ def _passage_object_boxes(page) -> frozenset:
     """
     import pypdfium2.raw as raw
     boxes = set()
+    glyphs = None
     for obj in page.get_objects(max_depth=4):
         if obj.type in (raw.FPDF_PAGEOBJ_TEXT, raw.FPDF_PAGEOBJ_FORM):
             continue
         bounds = obj.get_bounds() if hasattr(obj, 'get_bounds') else obj.get_pos()
-        if obj.type == raw.FPDF_PAGEOBJ_PATH and _passage_underline(page, bounds):
-            continue
+        if obj.type == raw.FPDF_PAGEOBJ_PATH:
+            glyphs = _glyph_baselines(page) if glyphs is None else glyphs
+            if _passage_underline(page, bounds, glyphs):
+                continue
         boxes.add(tuple(bounds))
     return frozenset(boxes)
 
 
-def _passage_underline(page, bounds) -> bool:
-    """A thin rule immediately below at least two glyph origins is text decoration."""
+def _glyph_baselines(page) -> list:
+    """Each visible glyph's device baseline origin and doubled font size, read once per page.
+
+    None marks a glyph whose origin could not be read; an underline scan that reaches it fails.
+    """
     import ctypes
     import pypdfium2.raw as raw
-    left, top, right, bottom = _device_box(page, bounds, 2)
-    if right - left < 4 * max(1, bottom - top):
-        return False
     text = page.get_textpage()
-    matched = 0
+    glyphs = []
     try:
         for index in range(min(text.count_chars(), 65536)):
             if not text.get_text_range(index, 1).strip():
                 continue
             x, y = ctypes.c_double(), ctypes.c_double()
             if not raw.FPDFText_GetCharOrigin(text, index, ctypes.byref(x), ctypes.byref(y)):
-                return False
+                glyphs.append(None)
+                continue
             baseline_x, baseline_y, _right, _bottom = _device_box(page, (x.value, y.value, x.value, y.value), 2)
-            size = raw.FPDFText_GetFontSize(text, index) * 2
-            if (left <= baseline_x <= right and baseline_y <= top
-                    and bottom <= baseline_y + .3 * size + 1 and bottom - top <= .15 * size + 1):
-                matched += 1
-                if matched >= 2:
-                    return True
-        return False
+            glyphs.append((baseline_x, baseline_y, raw.FPDFText_GetFontSize(text, index) * 2))
     finally:
         text.close()
+    return glyphs
+
+
+def _passage_underline(page, bounds, glyphs) -> bool:
+    """A thin rule immediately below at least two glyph origins is text decoration."""
+    left, top, right, bottom = _device_box(page, bounds, 2)
+    if right - left < 4 * max(1, bottom - top):
+        return False
+    matched = 0
+    for glyph in glyphs:
+        if glyph is None:
+            return False
+        baseline_x, baseline_y, size = glyph
+        if (left <= baseline_x <= right and baseline_y <= top
+                and bottom <= baseline_y + .3 * size + 1 and bottom - top <= .15 * size + 1):
+            matched += 1
+            if matched >= 2:
+                return True
+    return False
 
 
 def _annotation_boxes(page) -> frozenset:

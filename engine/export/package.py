@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import io
-import textwrap
 import sqlite3
 from dataclasses import dataclass
 from functools import lru_cache
@@ -10,6 +9,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from pypdf import PdfReader, PdfWriter
+from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
 
 from ..completeness import Gap, _case_constraints
@@ -36,7 +36,6 @@ class _CodeSnapshot:
     """One operation reads each code record once; nothing survives the request."""
     def __init__(self, codes):
         self._codes = codes
-        self.db_path = codes.db_path
         self._provision = lru_cache(maxsize=None)(lambda pid, division: codes.provision(pid, division))
 
     def provision(self, provision_id, division='B'):
@@ -50,19 +49,47 @@ class _CodeSnapshot:
         return getattr(self._codes, name)
 
 
+_FONT, _SIZE, _LEFT, _WIDTH = 'Helvetica', 10, 40, 612 - 2 * 40
+
+
+def _wrap(line: str) -> list[str]:
+    """Lines measured to fit the page: break between words, and inside a word only when it alone is too wide."""
+    lines, current, width = [], '', 0.0
+    space = stringWidth(' ', _FONT, _SIZE)
+    for word in line.split(' '):
+        size = stringWidth(word, _FONT, _SIZE)
+        if current and width + space + size <= _WIDTH:
+            current, width = f'{current} {word}', width + space + size
+            continue
+        if current and size <= _WIDTH:
+            lines.append(current)
+            current, width = word, size
+            continue
+        if current:                 # a word wider than the page starts on this line, like textwrap
+            current, width = current + ' ', width + space
+        for char in word:
+            step = stringWidth(char, _FONT, _SIZE)
+            if current.strip() and width + step > _WIDTH:
+                lines.append(current.rstrip())
+                current, width = '', 0.0
+            current, width = current + char, width + step
+    lines.append(current)
+    return lines
+
+
 def _page(lines):
     """Visible records only. No embedded JSON or metadata carries policy authority."""
     output = io.BytesIO()
     c = canvas.Canvas(output, pagesize=(612, 792), invariant=1)
-    c.setFont('Helvetica', 10)
+    c.setFont(_FONT, _SIZE)
     y = 752
     for line in lines:
-        for part in textwrap.wrap(str(line), width=90, replace_whitespace=False) or ['']:
+        for part in _wrap(str(line).expandtabs(4)):
             if y < 44:
                 c.showPage()
-                c.setFont('Helvetica', 10)
+                c.setFont(_FONT, _SIZE)
                 y = 752
-            c.drawString(40, y, part)
+            c.drawString(_LEFT, y, part)
             y -= 13
     c.save()
     return output.getvalue()
@@ -189,7 +216,7 @@ def prepare_package(case, codes, *, store=None, draft=False, form=None, version=
     output = io.BytesIO()
     writer.write(output)
     result.pdf = output.getvalue()
-    result.appendix_pages = len(writer.pages) - result.form_pages
+    result.record_pages = len(writer.pages) - result.form_pages - result.appendix_pages
     snapshot = from_uploads([('application.pdf', result.pdf)])
     policy = evaluate(snapshot, codes)
     result.open_items = policy.report.export_reasons

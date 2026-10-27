@@ -325,7 +325,7 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
         if not preview_fits(len(res.pdf)):
             # Checked before anything is encoded: the response stays small, and the export route still
             # delivers the whole draft.
-            return ExportPreviewTooLarge(page_count=res.form_pages + res.appendix_pages, pdf_bytes=len(res.pdf))
+            return ExportPreviewTooLarge(page_count=res.page_count, pdf_bytes=len(res.pdf))
         images, count = page_images(res.pdf)
 
         def data_url(kind: str, data: bytes) -> str:
