@@ -383,6 +383,15 @@ export function identifyCandidates(result: IdentifyResult, previous: Candidate[]
   if (result.mode === "bm25_fallback") {
     for (const a of result.articles) add("choice", articleOf(a.provision), a.provision_id ?? a.provision, a.title, a.part, a.quote ?? "", a.citation);
   }
+  // The requirement ledger asks applicability first (docs/identification/requirement-contract.md). A
+  // rule the applicant confirmed applies then becomes the departure card it already was, so the
+  // answer, Section C and the saved case keep their one decision each. Excluded and undecided rules
+  // never become a departure card.
+  for (const record of result.requirements ?? []) {
+    if (record.division !== "B" || record.source_status !== "verified") continue;
+    if (!record.human_confirmed || record.disposition !== "include" || !record.provision_id) continue;
+    add("choice", articleOf(record.provision_id), record.provision_id, record.title ?? "", 0, record.quote ?? "", record.citation);
+  }
   return out;
 }
 

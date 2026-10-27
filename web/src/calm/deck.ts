@@ -11,9 +11,10 @@ import { confirmedAnswer, localField } from "../intakeFields";
 import { codeQuestion, fileNotes, type ReadCopy, planInput, planQuestions, plannedFields, readGroups, scopeRedirect, legalFromFacts } from "../intakeView";
 import { DETAIL_FIELDS, DETAIL_IDS, PROCESS_FIELDS, answeredByDescription, factFor, questionAnsweredByFact, valueText } from "../model";
 import { isProvision, keywordCandidate, keywordGroups } from "../provisions";
+import { requirementQueue, requirementTopic } from "./requirements";
 import { quoteKind } from "../rules";
 import type { ApplicantType, Candidate, Case, Gap } from "../types";
-import type { CaseChecklists, CaseRules } from "../api/types.gen";
+import type { CaseChecklists, CaseRules, RequirementRecord } from "../api/types.gen";
 import type { InputSpec } from "../rules/evaluate";
 import { conditionChoices, coveredByOption, followedInFull, groupOf, matchingChecklists, tallyLine } from "./checklistView";
 import { calmHref } from "./routes";
@@ -37,6 +38,10 @@ export type DeckKind =
   | "code-run"
   /** "I could not narrow this down", or the labelled keyword fallback. */
   | "code-note"
+  /** The requirement-ledger counts and the way into the code library. */
+  | "code-ledger"
+  /** One ledger rule: does it apply to this project? Departure is asked on its own card. */
+  | "requirement"
   /** Keyword-only leads grouped by topic; each lead opens on request (never a relevance score). */
   | "code-triage"
   /** A number or answer a coded rule needs (docs/api/rules.md). */
@@ -125,6 +130,8 @@ export interface DeckItem {
   suggestedValue?: string;
   /** Inner professional/evidence questions may supply their real counts here. */
   counts?: Partial<Record<Answerer, { open: number; done: number }>>;
+  /** A ledger rule card: the requirement row this answer decides (applicability only). */
+  requirement?: RequirementRecord;
 }
 type UnpositionedItem = Omit<DeckItem, "stage" | "answerer">;
 const positioned = (item: UnpositionedItem): DeckItem => ({ ...item, stage: stageOf(item), answerer: answererOf(item) });
@@ -610,7 +617,10 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
     });
   }
   const id = c.identify;
-  if (id && (!id.narrowed || id.mode === "bm25_fallback")) {
+  // `screen: "requirements"` returns a ledger, not a short ranking: `committed` and `choices` are
+  // empty and every candidate lives in `requirements`. Review is optional and arrives in batches.
+  const ledger = id ? requirementQueue(id) : null;
+  if (id && (!id.narrowed || id.mode === "bm25_fallback") && !ledger?.found) {
     push("C", {
       key: "code-note",
       kind: "code-note",
@@ -765,6 +775,41 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
     const item = r && (r.state === "departs" || r.state === "follows") ? { ...base, rule: r } : base;
     // An opened keyword lead stays optional: leaving it unanswered does not mean No.
     push("C", keywordCandidate(c, a) && a.answer !== "yes" ? { ...item, optional: true } : item);
+  }
+
+  // 4b. The requirement ledger: its counts stay reachable, and the closest unanswered rules are asked
+  // about one at a time. Applicability is answered here; a departure is asked on its own card after.
+  if (ledger?.found) {
+    push("C", {
+      key: "code-ledger",
+      kind: "code-ledger",
+      section: "C",
+      eyebrow: sectionEyebrow("C"),
+      title: "Rules that may apply",
+      context: ledger.reviewable
+        ? `${ledger.found} rules mention what you described. ${ledger.reviewable} ${ledger.reviewable === 1 ? "is" : "are"} still unanswered; the closest ${ledger.batch.length} come next.`
+        : `You answered all ${ledger.found} rules that mention what you described.`,
+      why: "Batatis finds rules by searching the code’s wording and the sections each one points to. A match means a rule mentions your project, not that your design differs from it. You decide whether each rule applies; the officer reviews that answer.",
+      ref: "code-ledger",
+      done: seen.has("code-ledger"),
+      optional: true,
+    });
+    for (const record of ledger.batch) {
+      push("C", {
+        key: `req-${record.id}`,
+        kind: "requirement",
+        section: "C",
+        eyebrow: sectionEyebrow("C"),
+        title: "Does this rule apply to your project?",
+        context: requirementTopic(record),
+        why: "The rule was found because your description matches its wording or a section it points to. If it applies, the next card asks how your design differs from it. If it does not, say why. Batatis never decides this for you.",
+        ref: record.id,
+        done: false,
+        optional: true,
+        provision: record.provision_id ?? undefined,
+        requirement: record,
+      });
+    }
   }
 
   // 5. The alternative-solution case, written by the applicant.
@@ -922,6 +967,13 @@ function answerChoices(item: DeckItem): { value: string; label: string }[] {
     return item.provision
       ? [{ value: "yes", label: "Yes, it differs" }, { value: "no", label: "No, it follows" }]
       : [{ value: "yes", label: "Yes" }, { value: "no", label: "No" }];
+  }
+  if (item.kind === "requirement") {
+    return [
+      { value: "applies", label: "Yes, it applies" },
+      { value: "does-not-apply", label: "No, it doesn’t apply" },
+      { value: "not-sure", label: "Not sure" },
+    ];
   }
   if (item.kind === "detail") {
     if (item.suggestedValue) return [{ value: "use-suggested", label: item.ref === "date" ? "Use today" : "Same as the site address" }, { value: "edit-suggested", label: "Use something else" }];

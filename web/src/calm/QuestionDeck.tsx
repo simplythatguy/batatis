@@ -45,6 +45,8 @@ import { measurementText, metricUnit, parseMeasurement } from "./units";
 import { todayIn, toIso } from "./calendarDate";
 import { clearJourneyAnswerAction, journeyAnswerAction, journeyProgress, itemOpen, productScope, routeChoice, STAGES, type Answerer } from "./journey";
 import "./journey.css";
+import { codeHref } from "./routes";
+import type { RequirementAnswer } from "./requirements";
 
 type Shown = DeckItem & { gone?: boolean };
 
@@ -312,6 +314,39 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
       </div>
     );
   }
+  if (item.kind === "code-ledger") {
+    return (
+      <div className="cf-row-actions">
+        <a className="cf-btn" href="#/code">Open the code library</a>
+        <button type="button" className="cf-btn is-ghost" onClick={() => openDrawer({ mode: "search" })}><CIcon name="search" size={14} />Find a rule</button>
+      </div>
+    );
+  }
+  if (item.kind === "requirement" && item.requirement) {
+    const chosen = (picked as RequirementAnswer | undefined) ?? null;
+    const needsReason = chosen === "does-not-apply" || chosen === "not-sure";
+    return (
+      <>
+        <a className="cf-cite" href={codeHref(item.provision)}>
+          {item.provision && <RelevanceRing id={item.provision} focusable={false} />}
+          <b>{item.provision}</b> Show the code
+        </a>
+        <Choices choices={choices} current={chosen ?? undefined} onPick={onPick} />
+        {needsReason && (
+          <textarea
+            className="cf-uline is-area"
+            rows={2}
+            aria-label={chosen === "does-not-apply" ? "Why it doesn’t apply" : "What you’re unsure about"}
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder={chosen === "does-not-apply" ? "In a sentence, why this rule doesn’t apply." : "What would decide it? A sentence is enough."}
+          />
+        )}
+        {busy && <p className="cf-note" role="status"><span className="cf-dot is-pending" aria-hidden="true" />Saving your answer…</p>}
+        {!busy && note && <p className="cf-note" role="alert"><span className="cf-dot is-warning" aria-hidden="true" />{note}</p>}
+      </>
+    );
+  }
   if (item.kind === "file") return null;
 
   const cand = item.kind === "candidate" || item.kind === "storeys" ? c.candidates.find((a) => a.id === item.ref) : undefined;
@@ -481,7 +516,7 @@ function NoQuestionsYet() {
 
 /** Coordinate the visit queue, rule and checklist answers, and navigation through the case’s cards. */
 export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boolean }) {
-  const { c, engineId, gaps, dispatch, requestCheck, sectionCLookup, reading, answerPlan, answerChecklist, reloadChecklists, applicationStatus } = useCase();
+  const { c, engineId, gaps, dispatch, requestCheck, sectionCLookup, reading, answerPlan, answerChecklist, reloadChecklists, applicationStatus, decideRequirement } = useCase();
   const session = useSession();
   const { app, locked, readOnly } = useCurrentApplication();
   const { onAnswer, decisionNoteFor } = useCandidateAnswer();
@@ -624,7 +659,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
 
   // A code card the lookup replaced (article split into sentences) has nothing left to answer.
   useEffect(() => {
-    if (item?.gone && (item.kind === "candidate" || item.kind === "storeys" || item.kind === "rule" || item.kind === "rule-input" || item.kind === "condition" || item.kind === "package" || item.kind === "package-end")) moveFrom(index, false);
+    if (item?.gone && (item.kind === "candidate" || item.kind === "storeys" || item.kind === "rule" || item.kind === "rule-input" || item.kind === "condition" || item.kind === "package" || item.kind === "package-end" || item.kind === "requirement")) moveFrom(index, false);
     // The code check finished while its card was open: the code questions take its place.
     if (item?.gone && item.kind === "code-run") {
       const code = queue.findIndex((k) => { const it = itemFor(k); return Boolean(it && !it.done && it.section === "C"); });
@@ -694,7 +729,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
   /** Check whether the current answer can advance, including pending writes and required reasons. */
   function canContinue(it: Shown): boolean {
     if (locked || busyKey === it.key || advanceAfter?.key === it.key) return false;
-    if (it.kind === "section-d" || it.kind === "file" || it.kind === "code-run" || it.kind === "code-note" || it.kind === "code-triage") return true;
+    if (it.kind === "section-d" || it.kind === "file" || it.kind === "code-run" || it.kind === "code-note" || it.kind === "code-triage" || it.kind === "code-ledger") return true;
     if (it.kind === "reading") return reading.intake !== "running";
     if (it.kind === "scope") return false;
     if (it.kind === "understood" || it.kind === "paperwork") return true;
@@ -708,6 +743,8 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
     if (it.kind === "package-end") return true;
     if (it.kind === "rule-input" && it.input && (it.input.spec.type === "number" || it.input.spec.type === "int")) return it.done || Boolean(draft.trim());
     if (it.kind === "condition") return busyKey !== it.key && ((picked[it.key] ?? currentState(it)) === "does_not_apply" ? Boolean(draft.trim()) : it.done);
+    // "It applies" goes on its own; "No" and "Not sure" need the applicant's reason first.
+    if (it.kind === "requirement") return busyKey !== it.key && (picked[it.key] === "applies" || (Boolean(picked[it.key]) && Boolean(draft.trim())));
     return it.done;
   }
 
@@ -769,6 +806,10 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
         sendCondition(item, "does_not_apply", draft.trim(), true);
         return;
       }
+    }
+    if (item.kind === "requirement" && (picked[item.key] === "does-not-apply" || picked[item.key] === "not-sure")) {
+      sendRequirement(item, picked[item.key] as RequirementAnswer, draft.trim(), true);
+      return;
     }
     if (item.kind === "question" && draft.trim()) { dispatch({ type: "answerQuestion", id: item.ref, answer: draft.trim() }); confirmDraft(draft); }
     if (item.kind === "storeys" && Number(draft) > 0) { dispatch({ type: "setStoreyCount", value: draft }); confirmDraft(draft); }
@@ -875,6 +916,40 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
     })();
   }
 
+  /**
+   * One requirement-ledger answer: applicability only. "It applies" sends the acknowledgement itself;
+   * the other two need the applicant's reason, so OK sends those. A departure is asked afterwards on
+   * its own code card, never here.
+   */
+  function sendRequirement(it: Shown, answer: RequirementAnswer, reason: string, advance: boolean) {
+    const record = it.requirement;
+    if (!record) return;
+    const key = it.key;
+    noteFor(key, "");
+    setBusyKey(key);
+    // The case this answer belongs to: a switch to another application stops the UI update.
+    const startCase = getExtras().caseId;
+    const sameCase = () => getExtras().caseId === startCase;
+    void decideRequirement(record, answer, reason).then((error) => {
+      if (!sameCase()) return;
+      setBusyKey((k) => (k === key ? null : k));
+      if (error) {
+        // Nothing was saved: the choice goes back to unanswered so it can be sent again.
+        setPicked((p) => { const { [key]: _drop, ...rest } = p; return rest; });
+        noteFor(key, error);
+        setConflicted(error === CONFLICT_TEXT ? key : null);
+        return;
+      }
+      setConflicted(null);
+      confirmDraft(reason);
+      if (!advance) return;
+      // Move on only if the applicant is still on this card; the saved ledger removes the row.
+      const s = getSession();
+      if (s.queue[s.index] !== key) return;
+      setAdvanceAfter({ key, generation: engineGeneration() });
+    });
+  }
+
   /** "Add this rule to my application": the departure becomes a Code check card, answered Yes. */
   async function addRule(it: Shown) {
     const r = it.rule;
@@ -942,6 +1017,12 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
       setPicked((p) => ({ ...p, [item.key]: value }));
       if (value === "does_not_apply") return; // the reason comes first; OK sends it
       sendCondition(item, value as "confirmed" | "not_yet", "", true);
+      return;
+    }
+    if (item.kind === "requirement") {
+      setPicked((p) => ({ ...p, [item.key]: value }));
+      // "It applies" is its own acknowledgement; the other two need a reason before OK sends them.
+      if (value === "applies") sendRequirement(item, "applies", "", true);
       return;
     }
     setPicked((p) => ({ ...p, [item.key]: value }));
