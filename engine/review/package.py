@@ -48,7 +48,8 @@ def _parts(snapshot, codes, result=None):
         # not_found row (officer_check=True). Preserve that transport convention;
         # policy.items carries the explicit officer route for both workspaces.
         route = ('applicant' if status == 'not_found' and item.field != 'attachment_source'
-                 and item.reason_code != 'requirement_unresolved' else item.routed_to)
+                 and not item.key.startswith('file:') and item.reason_code != 'requirement_unresolved'
+                 else item.routed_to)
         parts.findings.append(Finding(key=item.key, section=item.section, field=item.field, label=item.label,
             status=status, problem=item.reason_code, message=item.reason, severity=item.severity,
             routed_to=route, pointers=pointers, citations=item.citations,

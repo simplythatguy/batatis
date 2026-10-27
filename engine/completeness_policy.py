@@ -15,7 +15,7 @@ from types import SimpleNamespace
 from .completeness import Gap, _case_constraints
 from .completeness_elements import BY_FIELD, ELEMENTS, ElementSpec
 from .completeness_snapshot import Snapshot
-from .completeness_snapshot import _pointer
+from .completeness_snapshot import _label, _pointer
 from .completeness_rules import (ElementVerdict, QuoteSpan, VariantResult, _one, _presence_class,
                                     format_export_reason)
 from .fact_aliases import FIELD_KEYS, LOGICAL_KEYS, latest
@@ -25,6 +25,8 @@ from .models_review import CitationCheck, Finding, Pointer, SectionCCheck
 from .process_fields import _FIELDS, alternative_path
 from .review import citations as cite, div_c
 from .review.ingest import StoredValue
+from .review.passages import located_quote
+from .review.pdf_reader import FieldValue
 
 
 @dataclass
@@ -227,10 +229,15 @@ def evaluate(snapshot: Snapshot, codes, *, professional=None, documents=None) ->
     for passage, item in (('qualifications', 'div_c.qualifications'), ('maintenance_operation', 'div_c.maintenance')):
         if doc.values.get(passage) and doc.values[passage].status == 'present':
             skip.add(item)
+    # An unread Section C or D cell can hold a file item (for example the co-ordinator), so it is a location too.
+    locations = list(snapshot.unreadable)
+    if snapshot.form and snapshot.field_map:
+        locations += [_pointer(snapshot.form, value) for name, value in sorted(snapshot.form.fields.items())
+                      if value.status == 'not_found' and _label(snapshot.field_map, name)[1] in ('C', 'D')]
     for finding in div_c.file_findings(readable_corpus, where, codes, responsible=responsible, skip=skip,
-                                     on_alternative_path=on_alternative, uncertain=bool(snapshot.unreadable)):
+                                     on_alternative_path=on_alternative, uncertain=bool(locations)):
         if finding.status == 'not_found':
-            finding.pointers = snapshot.unreadable
+            finding.pointers = locations
             finding.routed_to = 'officer'
         out.append(_finding_element(finding))
     signal = div_c.peer_review_finding(professional_required=engineering,
@@ -257,8 +264,19 @@ def evaluate(snapshot: Snapshot, codes, *, professional=None, documents=None) ->
                 label=f'responsible person for “{row.title.value}”', status='missing', problem='no_responsible',
                 defect_class='D13', severity='blocking', message='Your application appears to be missing a responsible person or organisation for this supporting document.',
                 pointers=[row.title.source] if row.title.source else [where])))
+    # One upload is identified by its pages; several uploads also need their names, or one would hide another.
+    unreadable_files = [file for file in snapshot.files if file.role == 'unreadable']
+    named = len(snapshot.files) > 1 or len({pointer.file for pointer in snapshot.unreadable}) > 1
+    for file in unreadable_files:
+        out.append(_finding_element(Finding(key=f'file:{file.name}:unreadable', section='D', field=f'file.{file.name}',
+            label=f'file "{file.name}"', status='not_found', problem='unreadable', severity='blocking',
+            routed_to='officer', message=f'{file.note} Check this file by eye.'.strip(),
+            pointers=[Pointer(file=file.name)])))
     for pointer in snapshot.unreadable:
-        out.append(_finding_element(Finding(key=f'source:page:{pointer.page or 0}',
+        if any(pointer.file == file.name for file in unreadable_files):
+            continue
+        out.append(_finding_element(Finding(
+            key=f'source:{pointer.file}:page:{pointer.page or 0}' if named else f'source:page:{pointer.page or 0}',
             section='D', field='attachment_source', label='readable attachment contents', status='not_found',
             problem='source_unresolved', severity='blocking', routed_to='officer',
             message='The supplied source could not be fully read. Check the indicated file or page before treating its contents as supplied or absent.',
@@ -329,7 +347,7 @@ def _finish(snapshot, elements, citations, rows):
             problem = 'presence' if element.problem in (None, 'blank', 'placeholder', 'not_found', 'unconfirmed') else element.problem
             element.key = f'{element.field}:{problem}'
         if element.certainty == 'not_found':
-            element.pointers = [{**pointer, 'quote': None} for pointer in element.pointers]
+            element.pointers = [{**pointer, 'quote': located_quote(pointer.get('quote'))} for pointer in element.pointers]
         if not element.pointers:
             element.pointers = [{'file': doc.ref}]
         if element.prompt is None and element.verdict != 'present':
@@ -442,11 +460,15 @@ def _rows(form, fmap, codes, parts, description) -> None:
     code_std = fields.get('Code or Standard')
     edition = code_std.value if code_std and code_std.status == 'present' else ''
     row_ids: list[str] = []
+    rows = []
     for number, row in enumerate(fmap['section_c_rows'], start=1):
         cells = {key: fields.get(widget) for key, widget in row.items()}
         article = cells['article']
         if article is None or article.status != 'present':
             continue
+        rows.extend(_overflow_rows(form, article) or [(number, cells)])
+    for number, cells in rows:
+        article = cells['article']
         pointer = _pointer(form, article)
         ids = cite.provision_ids(article.value)
         row_ids.extend(ids)
@@ -522,6 +544,35 @@ def _rows(form, fmap, codes, parts, description) -> None:
                     label=f'benchmark {pid}', status='missing', problem='missing_row', defect_class='D16',
                     message=f'Section B names {pid}, but no Section C row cites it.', severity='blocking',
                     pointers=[Pointer(file=description.file, page=description.page, quote=pid)]))
+
+
+_OVERFLOW = re.compile(r'Rows (\d+)-(\d+)')
+
+
+def _overflow_rows(form, article):
+    """Batatis's own marker for rows that continue in its appendix ("Rows 5-24"): check each listed row there.
+
+    A marker whose rows cannot all be found stays a single unresolved row; nothing is assumed to pass.
+    """
+    marker = _OVERFLOW.fullmatch(article.value.strip())
+    if not marker:
+        return None
+    rows = []
+    for number in range(int(marker.group(1)), int(marker.group(2)) + 1):
+        found = [(page.page, hit.group(1), re.split(r'(?m)^(?:C-\d+[ \t]|Batatis appendix)', page.text[hit.end():])[0])
+                 for page in form.text_pages for hit in re.finditer(rf'(?m)^C-{number}[ \t]+(\S+)', page.text)]
+        # The appendix names a row in its table and again in its detail; one provision per row is required.
+        if len({pid for _page, pid, _block in found}) != 1 or not cite.provision_ids(found[0][1]):
+            return None
+        page, pid = found[0][:2]
+        # Its table prints "no table row" where it has no pair; otherwise the pairs are compared in its detail.
+        shown = 'No table row' if any(re.search(r'\bno table row\b', block, re.I) for *_rest, block in found) \
+            else 'See Appendix C'
+        appendix = lambda name, value: FieldValue(name, page, None, 'present', value)
+        rows.append((number, {'article': appendix(article.name, pid),
+                              'objective': appendix(f'C-{number} objective', shown),
+                              'function': appendix(f'C-{number} function', shown), 'intent': None}))
+    return rows
 
 
 def _section_d(form, fmap, parts) -> None:
