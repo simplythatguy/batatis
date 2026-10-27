@@ -455,17 +455,16 @@ def read_file(file_id: str, name: str, data: bytes, *, codes=None, outbound: Out
             out.merge(part)
             report.text_pages_read.append(page.number)
         # Passages with no project or reference marker (a plain set of drawings) may only propose
-        # values for the applicant to confirm; they never confirm an answer on their own.
+        # values for the applicant to confirm, by the rules alone; they never go to the model.
         unmarked: list[Page] = []
         for page in project_pages(content.text_pages, admit='unknown'):
             if page.text.strip():
                 source = next(p for p in content.text_pages if p.number == page.number)
                 unmarked.append(Page(page.number, page.text, source.boxes))
-                out.merge(read_text(page.text, Origin(file_id, page.number, source.box), codes=None, outbound=outbound))
+                out.merge(read_text(page.text, Origin(file_id, page.number, source.box), codes=None, outbound=outbound,
+                                     citation_text=''))
         _semantic_pages(out, project, report, transport=transport, outbound=outbound,
                         status=status, budget=budget)
-        _semantic_pages(out, unmarked, report, transport=transport, outbound=outbound,
-                        status=status, budget=budget, project=False)
         _pictures(out, report, content.blank_pages, lambda page: picture_page(data, page),
                   transport=transport, status=status, budget=budget, outbound=outbound, allowed=pictures)
     else:

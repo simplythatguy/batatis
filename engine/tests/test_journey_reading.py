@@ -135,7 +135,7 @@ def test_pictures_are_downscaled_and_always_unconfirmed_proposals_with_sources()
 
 
 def test_scan_pages_go_to_vision_and_a_text_only_connection_reports_it_cannot_read_pictures():
-    data = pdf([[(72, 700, 'A house.')], []], shapes_only={1})
+    data = pdf([[(72, 760, 'Project brief'), (72, 700, 'A house.')], []], shapes_only={1})
     reader = VisionReader()
     out = service.run('', [('scan', 'scan.pdf', data)], transport=reader, status='fake', pictures=True)
     assert out.files[0].text_pages_read == [1] and out.files[0].semantic_pages_read == [1]
@@ -148,7 +148,7 @@ def test_scan_pages_go_to_vision_and_a_text_only_connection_reports_it_cannot_re
 
 def test_semantic_reading_reaches_every_text_page_and_the_tail_of_a_long_page():
     reader = VisionReader()
-    data = pdf([[(72, 700, f'Page {n}: We propose a special wall.')] for n in range(1, 202)])
+    data = pdf([[(72, 760, 'Project brief'), (72, 700, 'Page 1: We propose a special wall.')]] + [[(72, 700, f'Page {n}: We propose a special wall.')] for n in range(2, 202)])
     out = service.run('', [('many', 'many.pdf', data)], transport=reader, status='fake', pictures=True)
     report = out.files[0]
     assert report.pages == 201 and report.text_pages_read == list(range(1, 201))
@@ -189,14 +189,14 @@ def test_semantic_failures_and_budget_never_claim_full_coverage():
     from engine.intake.model import Budget, GateClosed
     def fail(*args):
         raise RuntimeError('private token')
-    report = read_file('a', 'a.pdf', pdf([[(72, 700, 'A house.')]]), transport=fail, status='fake').files[0]
+    report = read_file('a', 'a.pdf', pdf([[(72, 760, 'Project brief'), (72, 700, 'A house.')]]), transport=fail, status='fake').files[0]
     assert report.text_pages_read == [1] and report.semantic_pages_read == []
     assert report.status == 'partly_read' and 'private' not in report.reason
-    report = read_file('a', 'a.pdf', pdf([[(72, 700, 'A house.')]]), transport=VisionReader(), status='fake', budget=Budget(text_chars=2)).files[0]
+    report = read_file('a', 'a.pdf', pdf([[(72, 760, 'Project brief'), (72, 700, 'A house.')]]), transport=VisionReader(), status='fake', budget=Budget(text_chars=2)).files[0]
     assert report.semantic_pages_read == [] and report.semantic_reason == 'Reading limit reached'
     def closed(*args):
         raise GateClosed('closed')
-    report = read_file('a', 'a.pdf', pdf([[(72, 700, 'A house.')]]), transport=closed, status='fake').files[0]
+    report = read_file('a', 'a.pdf', pdf([[(72, 760, 'Project brief'), (72, 700, 'A house.')]]), transport=closed, status='fake').files[0]
     assert report.semantic_pages_sent == [] and report.semantic_pages_read == []
     assert report.semantic_reason == 'AI is paused'
 
@@ -299,7 +299,7 @@ def test_outbound_chunks_keep_scrubbing_and_invalid_model_payloads_are_reported(
     text = 'Owner: Jane Example\n' + 'We propose timber.\n' * 800 + 'Mailing address: 12 Elm Street\n'
     service.run(text, [], transport=transport, status='fake')
     assert len(seen) > 1 and 'Jane Example' not in ''.join(seen) and '12 Elm Street' not in ''.join(seen)
-    report = read_file('a', 'a.pdf', pdf([[(72, 700, 'A house.')]]), transport=lambda *args: ([], {}), status='fake').files[0]
+    report = read_file('a', 'a.pdf', pdf([[(72, 760, 'Project brief'), (72, 700, 'A house.')]]), transport=lambda *args: ([], {}), status='fake').files[0]
     assert report.status == 'partly_read' and report.semantic_pages_read == []
 
 
