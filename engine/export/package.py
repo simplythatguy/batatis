@@ -109,6 +109,29 @@ def _source(case, document, store):
     return None
 
 
+def _image_pdf(data: bytes) -> bytes | None:
+    """A photo or scan (JPEG, PNG, WebP) as one letter page, so the package carries what was attached."""
+    from PIL import Image, ImageOps, UnidentifiedImageError
+    from reportlab.lib.pagesizes import letter
+    from reportlab.lib.utils import ImageReader
+    try:
+        with Image.open(io.BytesIO(data)) as opened:
+            if opened.format not in ('JPEG', 'PNG', 'WEBP'):
+                return None
+            image = ImageOps.exif_transpose(opened).convert('RGB')
+    except (UnidentifiedImageError, OSError, ValueError):
+        return None
+    width, height = letter
+    margin = 36
+    scale = min((width - 2 * margin) / image.width, (height - 2 * margin) / image.height)
+    drawn = (image.width * scale, image.height * scale)
+    output = io.BytesIO()
+    page = canvas.Canvas(output, pagesize=letter, invariant=1)
+    page.drawImage(ImageReader(image), (width - drawn[0]) / 2, (height - drawn[1]) / 2, *drawn)
+    page.save()
+    return output.getvalue()
+
+
 def prepare_package(case, codes, *, store=None, draft=False, form=None, version=CURRENT_MAP):
     from ..completeness_policy import evaluate, signature_date_gaps
     from ..completeness_snapshot import from_uploads
@@ -212,6 +235,8 @@ def prepare_package(case, codes, *, store=None, draft=False, form=None, version=
                 fix_hint='Supply the readable attachment.', routed_to='officer'), 'source_unresolved')
             continue
         source_name, data = source
+        if not data.startswith(b'%PDF-'):
+            data = _image_pdf(data) or data
         if not data.startswith(b'%PDF-'):
             try:
                 data = _page(data.decode('utf-8').splitlines())

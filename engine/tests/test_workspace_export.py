@@ -231,3 +231,13 @@ def test_a_draft_mark_does_not_change_what_the_officer_reads():
     assert officer.export_reasons == applicant.export_reasons
     assert sorted((item.key, item.verdict) for item in officer.items) == sorted(
         (item.key, item.verdict) for item in applicant.items)
+
+
+def test_an_attached_photo_becomes_a_package_page_not_an_unreadable_item():
+    from PIL import Image
+    buf = io.BytesIO(); Image.new('RGB', (1200, 800), (40, 90, 160)).save(buf, 'PNG')
+    case = Case(facts=[fact('process.rationale', 'Synthetic applicant rationale.')])
+    result = export_case(case, draft=True, store=attach(case, buf.getvalue(), name='Synthetic site photo'))
+    assert not any('Synthetic site photo' in item for item in result.open_items)
+    pages = PdfReader(io.BytesIO(result.pdf)).pages
+    assert pages[-1].images, 'the photo is the last page of the package'
