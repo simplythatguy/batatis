@@ -3766,6 +3766,11 @@
           "default": null,
           "title": "Page"
         },
+        "project_context": {
+          "default": false,
+          "title": "Project Context",
+          "type": "boolean"
+        },
         "source_ref": {
           "title": "Source Ref",
           "type": "string"
@@ -3796,7 +3801,8 @@
         "page",
         "start",
         "end",
-        "verified"
+        "verified",
+        "project_context"
       ],
       "title": "FactPointer",
       "type": "object"
@@ -4001,6 +4007,14 @@
           "title": "Pages Read",
           "type": "array"
         },
+        "project_pages": {
+          "default": [],
+          "items": {
+            "type": "integer"
+          },
+          "title": "Project Pages",
+          "type": "array"
+        },
         "reason": {
           "anyOf": [
             {
@@ -4034,7 +4048,8 @@
         "form",
         "form_fields_read",
         "form_fields_skipped",
-        "facts"
+        "facts",
+        "project_pages"
       ],
       "title": "FileReport",
       "type": "object"

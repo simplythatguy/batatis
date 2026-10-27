@@ -584,6 +584,7 @@ export interface FactPointer {
   field: string;
   method: "rules" | "form" | "model";
   page: number | null;
+  project_context: boolean;
   source_ref: string;
   start: number | null;
   verified: boolean;
@@ -619,6 +620,7 @@ export interface FileReport {
   pages: number | null;
   pages_not_read: number[];
   pages_read: number[];
+  project_pages: number[];
   reason: string | null;
   status: "read" | "partly_read" | "not_read";
 }
