@@ -73,8 +73,11 @@ def test_actual_officer_default_route_returns_located_grouped_b_without_writes(c
     assert found['mitigating_measures']['verdict'] == 'unclear'
     assert found['legal_description']['verdict'] == 'missing'
     assert found['legal_description']['form_fields']
-    assert found['single_location']['verdict'] == 'unclear'
-    assert found['section_c.edition']['verdict'] == 'unclear'
+    # The outgoing form shows a blank municipal address: read, and empty, so missing rather than unclear.
+    assert found['single_location']['verdict'] == 'missing'
+    assert found['single_location']['problem'] == 'blank'
+    # The outgoing form states the edition Batatis cites, so the edition reads as supplied.
+    assert found['section_c.edition']['verdict'] == 'present'
     assert payload['reviews'][0]['export_reasons'] == blockers(store.get(case.id), load_field_map(), codes)
     assert store.get(case.id).model_dump() == before
     assert store.get_file(case.id, uploaded['id'])['data'] == b'%PDF-1.4\nSYNTHETIC presence bytes\n'

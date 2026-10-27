@@ -13,6 +13,7 @@ from .review.ingest import Ingested, StoredValue, ingested_from_case
 from .review.passages import TEXT_FIELDS, _ENGINEERING, passage_value
 from .review.pdf_reader import FieldValue, ReadFile, field_maps, read_pdf
 from .models_completeness import AdministrativeItem, ProfessionalDeclaration
+from .completeness_elements import BY_FIELD
 
 
 @dataclass
@@ -238,6 +239,12 @@ def from_uploads(uploads: list[tuple[str, bytes]]) -> Snapshot:
                 pointers=[pointer.model_dump() for pointer in item.pointers]
                     + (previous.pointers if previous else []))
             remaining_context.append(item)   # an unconfirmed latest answer blocks on its own
+        elif item.reason_code == 'not_found' and item.field in BY_FIELD:
+            # The saved reading was not found: the field's own check reports it as not found, never as blank.
+            previous = values.get(item.field)
+            values[item.field] = StoredValue(item.field, '', 'pointed', None, status='not_found',
+                reason=item.reason, input_field=item.field,
+                pointers=[pointer.model_dump() for pointer in item.pointers] + (previous.pointers if previous else []))
         elif item.reason_code == 'blank' and item.field == 'scope':
             # A flattened check box cannot be read; the record says no scope was answered.
             if values.get('scope') is None or values['scope'].status == 'not_found':

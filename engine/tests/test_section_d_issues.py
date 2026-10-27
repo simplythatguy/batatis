@@ -40,6 +40,8 @@ class FakeCodes:
     def __init__(self):
         self.rows = {}
         self.issued: set[str] = set()
+        # Like Codes: a database path. It does not exist, so text validation never reads the real corpus.
+        self.db_path = Path('unused-synthetic-corpus')
 
     def add(self, division, provision_id, **extra):
         citation = extra.pop('citation', f'fixture:{division}:{provision_id}')
@@ -51,7 +53,14 @@ class FakeCodes:
         return self
 
     def provision(self, provision_id, division='B'):
-        row = self.rows.get((division, provision_id))
+        if division is None:
+            # Like Codes.provision: an unqualified id resolves only when exactly one division has it.
+            found = [row for (div, pid), row in self.rows.items() if pid == provision_id]
+            if len(found) > 1:
+                raise ValueError(f'{provision_id} exists in several divisions')
+            row = found[0] if found else None
+        else:
+            row = self.rows.get((division, provision_id))
         if row:
             self.issued.add(row['citation'])
         return row
@@ -73,6 +82,8 @@ def codes_with_rules():
               attributions=[{'bracket': '[F03-OP3.1]', 'clauses': [], 'application_note': None,
                              'table_id': 'Table 9.38.1.1.', 'pdf_page': 1, 'fs': ['F03'], 'objectives': ['OP3.1']}])
     codes.add('B', NO_ROW)
+    # Every exported appendix cites the alternative-solution clause; the shared policy reads it back.
+    codes.add('A', '1.2.1.1.(1)(b)')
     return codes
 
 
@@ -452,7 +463,8 @@ def test_unsigned_vendor_email_is_not_professional_evidence():
     assert docs and all(not seal_is_professional_evidence(doc, quote=quote) for doc in docs)
     assert any(gap.field == 'professional_authentication' and gap.id.startswith('D12:')
                for gap in check_completeness(case, codes))
-    report = Source(type='file', ref='report.pdf', quote='Laboratory report.')
+    # File-read metadata counts only when the quoted source text contains it.
+    report = Source(type='file', ref='report.pdf', quote='Laboratory report by A. Engineer, stamp image on the pdf.')
     honest = Case(provisions=[BENCHMARK], facts=[
         fact('part4_design', True),
         fact(f'evidence.{bare.id}.file_ref', report.ref, source=report),

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import io
+import re
 import textwrap
 import sqlite3
 from dataclasses import dataclass
@@ -121,6 +122,9 @@ def prepare_package(case, codes, *, store=None, draft=False, form=None, version=
             'End administrative source record']))
 
     involvement = professional.involvement if professional else 'unresolved'
+    # A settled screen states its own basis; an unresolved one names the deciding question.
+    basis = 'Source unresolved' if professional is None else professional.decision or ' '.join(
+        reason.message for reason in professional.reasons if reason.required == professional.required)
     role = confirmed_value(case, 'professional.role', 'professional_role') or ''
     name = confirmed_value(case, 'professional_name', 'responsible_professional', 'professional.name') or ''
     values = confirmed_values(case)
@@ -132,15 +136,26 @@ def prepare_package(case, codes, *, store=None, draft=False, form=None, version=
         'Record type: professional declaration',
         f'Involvement: {involvement}', f'Requirement: {professional.required if professional else "depends"}',
         f'Applicant confirmation: {"yes" if professional_confirmed(case) else "no"}',
-        f'Name: {name}', f'Role: {role}', f'Basis: {professional.decision if professional else "Source unresolved"}',
+        f'Name: {name}', f'Role: {role}', f'Basis: {basis}',
         f'Owner: {values.get("owner_name") or ""}', f'Location: {"; ".join(dict.fromkeys(locations))}',
         f'Pathway: {confirmed_value(case, "pathway", "path") or "alternative"}',
         'End administrative source record']
     append(_page(declaration))
     for gap in constraints:
         append_gap(gap)
-    # The appendix prints answered passages only; record each unanswered one so a reader can call it blank.
+    # A saved reading marked not found travels visibly, so the reader says not found rather than blank.
+    from ..completeness_elements import BY_FIELD
     from ..process_fields import PROCESS_ALIASES, latest_fact
+    unread = dict.fromkeys(match.group(1) or match.group(2) for fact in case.facts
+                           for match in [re.fullmatch(r'presence\.(.+)|review\.(.+)\.presence', fact.field)] if match)
+    for key in unread:
+        presence = latest_fact(case, f'presence.{key}', f'review.{key}.presence')
+        if presence is not None and presence.value in ('not_found', 'unreadable'):
+            spec = BY_FIELD.get(key)
+            append_gap(Gap(id=f'presence:{key}', section=spec.export_section if spec else 'B', field=key,
+                message=f'The {key.replace("_", " ")} was not found or could not be read. Check its source.',
+                fix_hint='Check the indicated source and confirm this answer.', routed_to='officer'), 'not_found')
+    # The appendix prints answered passages only; record each unanswered one so a reader can call it blank.
     unanswered = [(key, 'process', f'process.{key}', (*names, *(f'process.{name}' for name in names)))
                   for key, names in PROCESS_ALIASES.items()] + [('scope', 'B', 'scope', ('scope',))]
     for key, section, canonical, names in unanswered:

@@ -187,14 +187,18 @@ def evaluate(snapshot: Snapshot, codes, *, professional=None, documents=None) ->
                 pointers=[Pointer(**declaration.pointer.model_dump())])))
     resolved = involvement in ('professional_involved', 'not_required')
     known_required = bool(declaration and declaration.bound_to_application and declaration.requirement == 'yes')
-    out.append(ElementVerdict('professional_requirement', 'D', 'D', 'professional_requirement', [],
-        'professional involvement', '', 'present' if resolved else 'unclear',
-        'The visible administrative declaration records ' + involvement.replace('_', ' ') +
-        '. Credentials, authority and technical scope remain for human review.' if resolved else
-        'A registered engineer or architect is recorded as required for this scope. Their responsibility and authentication need human review.' if known_required else
-        'Whether a registered professional is required is unresolved. The officer must determine it from the scope and sources.',
-        problem=None if resolved else 'requirement_unresolved', severity='warning', in_export_preflight=False,
-        routed_to='professional' if engineering or known_required else 'officer'))
+    # A visible record that names the deciding question and who decides already is this open item.
+    recorded = any(item.field == 'professional_requirement' and item.verdict != 'present'
+                   for item in snapshot.context_items)
+    if not (recorded and not resolved):
+        out.append(ElementVerdict('professional_requirement', 'D', 'D', 'professional_requirement', [],
+            'professional involvement', '', 'present' if resolved else 'unclear',
+            'The visible administrative declaration records ' + involvement.replace('_', ' ') +
+            '. Credentials, authority and technical scope remain for human review.' if resolved else
+            'A registered engineer or architect is recorded as required for this scope. Their responsibility and authentication need human review.' if known_required else
+            'Whether a registered professional is required is unresolved. The officer must determine it from the scope and sources.',
+            problem=None if resolved else 'requirement_unresolved', severity='warning', in_export_preflight=False,
+            routed_to='professional' if engineering or known_required else 'officer'))
 
     for item in snapshot.context_items:
         element = ElementVerdict(item.field, 'B' if item.section == 'process' else item.section,
@@ -253,7 +257,8 @@ def evaluate(snapshot: Snapshot, codes, *, professional=None, documents=None) ->
                 pointers=([row.title.source] if row.title.source else [where]) + snapshot.unreadable)))
         if row.listed_in_section_d and not row.responsible.known:
             out.append(_finding_element(Finding(key=f'document:{_title_key(row.title.value)}:responsible',
-                section='D', field=f'evidence.{row.id}.responsible_party' if case else f'document.{row.id}',
+                section='D', field=(f'evidence.{row.id}.responsible_party' if case else
+                       f'document.{_title_key(row.title.value)}.responsible_party'),
                 label=f'responsible person for “{row.title.value}”', status='missing', problem='no_responsible',
                 defect_class='D13', severity='blocking', message='Your application appears to be missing a responsible person or organisation for this supporting document.',
                 pointers=[row.title.source] if row.title.source else [where])))

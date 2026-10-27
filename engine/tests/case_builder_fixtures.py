@@ -1,4 +1,6 @@
 """Synthetic administrative fixtures only; no actual testing, licence or opinion is asserted."""
+from pathlib import Path
+
 from engine.codes import Codes
 from engine.models import Case, Fact, Jurisdiction, Source
 from engine.section_c import section_c_rows
@@ -15,18 +17,18 @@ def fact(field, value, **changes):
 def store_with_synthetic_files(store, case):
     """API fixtures need actual case-owned bytes, not file-presence metadata alone.
 
-    The deliberately synthetic bytes exercise storage binding only; no test result,
-    professional authentication, parsed document or real evidence is asserted.
+    The package check reads these bytes, so they are the readable synthetic fixture text;
+    no test result, professional authentication or real evidence is asserted.
     """
     store.put(case)
     references = {}
+    data = (Path(__file__).parent / 'fixtures/synthetic-evidence-fixture.txt').read_bytes()
     for entry in case.facts:
         if (entry.field.startswith('evidence.') and entry.field.endswith('.file_ref')
                 and entry.status == 'confirmed' and entry.source.type == 'file'
                 and entry.value == entry.source.ref):
             if entry.source.ref not in references:
-                saved = store.put_file(case.id, 'SYNTHETIC-storage-fixture.pdf',
-                                       b'%PDF-1.4\nSYNTHETIC storage-binding bytes, not a document or result.\n')
+                saved = store.put_file(case.id, 'synthetic-evidence-fixture.txt', data, 'text/plain')
                 references[entry.source.ref] = saved['id']
             entry.value = references[entry.source.ref]
             entry.source = entry.source.model_copy(update={'ref': entry.value})

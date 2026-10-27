@@ -458,6 +458,10 @@ def _intent(doc: Ingested, spec: ElementSpec, state: str, stored: StoredValue | 
     if 'explanatory only' in value.casefold() or MODEL_INTENT_LABEL.casefold() in value.casefold():
         return _finish(spec, doc, 'present', 'The intent statement keeps the national explanatory label.',
                        quotes=_quote_for(doc, stored))
+    if re.fullmatch(r'(?:[^.;]*\.\s*)*No NBC 2020 intent statement(?:[;.][^;]*)?', value.strip(), re.I):
+        # The cell says no national intent statement is presented, so there is nothing to label.
+        return _finish(spec, doc, 'present', 'No national intent statement is presented in this row.',
+                       quotes=_quote_for(doc, stored))
     if doc.kind != 'form':
         return _finish(spec, doc, 'present', 'The summary does not present an unlabelled intent statement.',
                        quotes=_quote_for(doc, stored))
