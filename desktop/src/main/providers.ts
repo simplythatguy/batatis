@@ -6,9 +6,9 @@
  * the labels the host sends.
  */
 
-export type ProviderId = "chatgpt" | "claude" | "openai" | "jev" | "batatis";
+export type ProviderId = "chatgpt" | "claude" | "opencode" | "openai" | "jev" | "batatis";
 /** The managed account connections, each with its own downloadable runtime. */
-export type AccountId = Extract<ProviderId, "chatgpt" | "claude">;
+export type AccountId = Extract<ProviderId, "chatgpt" | "claude" | "opencode">;
 export type KeyProviderId = Extract<ProviderId, "openai" | "jev" | "batatis">;
 export type GenerationChoice = "off" | "chatgpt" | "openai";
 
@@ -163,6 +163,10 @@ export const PROVIDER_LABELS: Record<ProviderId, { label: string; description: s
   claude: {
     label: "Claude",
     description: "Uses your Claude subscription through the managed Claude Code runtime when selected. Separate from your Batatis identity. Sign-in and workflow readiness are checked separately.",
+  },
+  opencode: {
+    label: "OpenCode",
+    description: "Free models through the managed OpenCode runtime. No sign-in or key. OpenCode’s free models are for trial use, log what you send and have a usage limit, so don’t use them with personal or confidential details.",
   },
   batatis: {
     label: "Batatis access code",

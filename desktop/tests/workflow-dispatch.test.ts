@@ -304,3 +304,21 @@ test("signing in to an account while AI is off turns it on, and never overrides 
   await signIn(false); await signIn(true);
   assert.deepEqual(picks(), [defaultPick("claude"), chosen], "a later sign-in leaves the person's picks alone");
 });
+
+test("installing a connection that is ready on its own turns AI on with its default model", async (t) => {
+  const userData = scratch(t);
+  const ready = (signedIn: boolean): HostProvider => ({
+    ...unavailableProvider("", "opencode"),
+    status: async () => (signedIn ? { state: "signed-in", plan: "Free models" } : { state: "unavailable", reason: "runtime-missing", message: "" }),
+  });
+  const host = new DesktopHost({ paths: { userData, resources: "/unused", packaged: true, platform: process.platform }, version: "0.1.0", command: fakeCommand,
+    vault: new KeyVault(join(userData, "vault"), box), localSession: { load: async () => null, save: async () => {} }, provider: unavailableProvider(),
+    opencode: ready(false), log: () => {}, remount: () => {}, notify: () => {} });
+  t.after(() => host.dispose());
+  await host.boot();
+  assert.deepEqual([host.configuration().workflow, host.configuration().chat], [{ source: "off" }, { source: "off" }]);
+  await host.installProvider(ready(true));
+  await new Promise((done) => setTimeout(done, 50));
+  assert.deepEqual([host.configuration().workflow, host.configuration().chat], [defaultPick("opencode"), defaultPick("opencode")]);
+  assert.equal(defaultPick("opencode").model, "nemotron-3.5-super-vl-free");
+});

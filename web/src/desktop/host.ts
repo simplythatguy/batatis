@@ -64,7 +64,7 @@ export type Runtime =
   | { state: "failed"; message: string };
 
 export type ProviderRow =
-  | { id: string; kind: "account"; label: string; description: string; status: Connection; workflow: string | null; runtime: Runtime | null }
+  | { id: string; kind: "account"; label: string; description: string; status: Connection; workflow: string | null; runtime: Runtime | null; signOut: boolean }
   | { id: string; kind: "key"; label: string; description: string; status: "missing" | "saved" | "secure-storage-unavailable" };
 
 export interface ReleaseNote { version: string; items: string[]; more: number; url: string }
@@ -255,7 +255,7 @@ export function parseRows(value: unknown): ProviderRow[] {
     if (item.kind === "account") {
       const status = parseConnection(item.status);
       if (status) rows.push({ id, kind: "account", label, description, status,
-        workflow: isRecord(item.workflow) && item.workflow.ready === false ? str(item.workflow.message) : null, runtime: parseRuntime(item.runtime) });
+        workflow: isRecord(item.workflow) && item.workflow.ready === false ? str(item.workflow.message) : null, runtime: parseRuntime(item.runtime), signOut: item.signOut !== false });
     } else if (item.kind === "key" && isRecord(item.status)) {
       const state = item.status.state;
       if (state === "missing" || state === "saved" || state === "secure-storage-unavailable") rows.push({ id, kind: "key", label, description, status: state });

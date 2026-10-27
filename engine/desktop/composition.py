@@ -15,7 +15,7 @@ class Profile:
     billing: str
 
 
-BILLING = {'off': 'none', 'chatgpt': 'subscription', 'claude': 'subscription', 'openai': 'api', 'batatis': 'included'}
+BILLING = {'off': 'none', 'chatgpt': 'subscription', 'claude': 'subscription', 'opencode': 'free', 'openai': 'api', 'batatis': 'included'}
 
 
 def profile(slot: str = 'workflow') -> Profile:

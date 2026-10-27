@@ -111,3 +111,10 @@ test("a browser sign-in that offers a pasted code says so; anything but true is 
   assert.equal(accepts("true"), false);
   assert.equal(accepts(undefined), false);
 });
+
+test("a connection row says whether it can be signed out, and defaults to yes", () => {
+  const base = { kind: "account", label: "Account", description: "", workflow: null, runtime: null, status: { state: "signed-in", plan: null } };
+  const [kept, hidden] = parseRows([{ ...base, id: "a" }, { ...base, id: "b", signOut: false }]);
+  assert.equal(kept.kind === "account" && kept.signOut, true);
+  assert.equal(hidden.kind === "account" && hidden.signOut, false);
+});

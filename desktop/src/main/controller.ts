@@ -52,7 +52,7 @@ export interface DesktopInfo {
 }
 
 export type ProviderRow =
-  | { id: AccountId; kind: "account"; label: string; description: string; status: ConnectionState; workflow: WorkflowReadiness | null; runtime: InstallState | null }
+  | { id: AccountId; kind: "account"; label: string; description: string; status: ConnectionState; workflow: WorkflowReadiness | null; runtime: InstallState | null; signOut: boolean }
   | { id: KeyProviderId; kind: "key"; label: string; description: string; status: { state: KeyStatus } };
 
 export type Outcome = { ok: true } | { ok: false; message: string };
@@ -77,6 +77,8 @@ export interface HostDeps {
   provider: HostProvider;
   /** The managed Claude connection; unavailable when omitted. */
   claude?: HostProvider;
+  /** The managed OpenCode connection; unavailable when omitted. */
+  opencode?: HostProvider;
   keys?: KeyProviders;
   log: (line: string) => void;
   /** Replace the window with a fresh one for `generation`, opening `route` (or the current one when null). */
@@ -107,7 +109,7 @@ export class DesktopHost {
   #engineRun = 0;
   #aiNote = "";
   /** Whether each account was signed in when last read; null until the first read. */
-  #signedIn: Record<AccountId, boolean | null> = { chatgpt: null, claude: null };
+  #signedIn: Record<AccountId, boolean | null> = { chatgpt: null, claude: null, opencode: null };
   #picking: Promise<unknown> = Promise.resolve();
   #authReset = false;
   #disposed = false;
@@ -118,12 +120,13 @@ export class DesktopHost {
 
   constructor(deps: HostDeps) {
     this.#deps = deps;
-    this.#accounts = { chatgpt: deps.provider, claude: deps.claude ?? unavailableProvider("This connection isn’t available in this version.", "claude") };
+    this.#accounts = { chatgpt: deps.provider, claude: deps.claude ?? unavailableProvider("This connection isn’t available in this version.", "claude"),
+      opencode: deps.opencode ?? unavailableProvider("This connection isn’t available in this version.", "opencode") };
     this.#dispatch = new ProviderDispatch({ account: (id) => this.#accounts[id], vault: deps.vault, keys: deps.keys,
       accepting: () => !this.#disposed && !this.#changing && !this.#authReset && this.#state.kind === "ready" && this.#state.jar.token !== null });
     this.#rpc = new ProviderRpc(this.#dispatch.call, (lease) => this.#dispatch.valid(lease));
     const watch = (provider: HostProvider) => provider.onChange(() => { this.#invalidate(); deps.notify(); void this.#turnOnAfterSignIn(provider.id); });
-    this.#accountStops = { chatgpt: watch(this.#accounts.chatgpt), claude: watch(this.#accounts.claude) };
+    this.#accountStops = { chatgpt: watch(this.#accounts.chatgpt), claude: watch(this.#accounts.claude), opencode: watch(this.#accounts.opencode) };
   }
 
   get generation(): number {
@@ -134,7 +137,7 @@ export class DesktopHost {
   async boot(): Promise<void> {
     this.#settings = await readSettings(this.#settingsFile());
     this.#dispatch.select(this.#settings.ai ?? DEFAULT_SELECTION);
-    for (const id of ["chatgpt", "claude"] as const) {
+    for (const id of ["chatgpt", "claude", "opencode"] as const) {
       this.#signedIn[id] = await this.#accounts[id].status().then((status) => status.state === "signed-in", () => null);
     }
     if (this.#deps.paths.packaged) {
@@ -264,11 +267,12 @@ export class DesktopHost {
     const account = async (id: AccountId): Promise<ProviderRow> => {
       const status = await this.#accounts[id].status();
       const workflow = status.state === "signed-in" ? await this.#accounts[id].workflowReadiness() : null;
-      return { ...row(id), kind: "account", status, workflow, runtime: this.#deps.runtime?.(id) ?? null };
+      return { ...row(id), kind: "account", status, workflow, runtime: this.#deps.runtime?.(id) ?? null, signOut: id !== "opencode" };
     };
     return [
       await account("chatgpt"),
       await account("claude"),
+      await account("opencode"),
       { ...row("batatis"), kind: "key", status: { state: await this.#deps.vault.status("batatis") } },
       { ...row("openai"), kind: "key", status: { state: await this.#deps.vault.status("openai") } },
       { ...row("jev"), kind: "key", status: { state: await this.#deps.vault.status("jev") } },
@@ -289,6 +293,7 @@ export class DesktopHost {
     this.#accountStops[next.id] = next.onChange(() => { this.#invalidate(); this.#deps.notify(); void this.#turnOnAfterSignIn(next.id); });
     await previous.dispose();
     this.#deps.notify();
+    void this.#turnOnAfterSignIn(next.id);
   }
 
   configuration() {
@@ -406,6 +411,7 @@ export class DesktopHost {
     this.#invalidate();
     this.#accountStops.chatgpt();
     this.#accountStops.claude();
+    this.#accountStops.opencode();
     if ((state.kind === "ready" || state.kind === "busy") && state.engine) {
       await this.#stopEngine(state.engine);
     }
@@ -414,7 +420,7 @@ export class DesktopHost {
       const started = await starting;
       if (started.kind === "ready") await this.#stopEngine(started.engine);
     }
-    await Promise.all([this.#accounts.chatgpt.dispose(), this.#accounts.claude.dispose()]);
+    await Promise.all([this.#accounts.chatgpt.dispose(), this.#accounts.claude.dispose(), this.#accounts.opencode.dispose()]);
   }
 
   async #stopEngine(engine: Engine): Promise<void> {

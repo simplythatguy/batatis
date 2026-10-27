@@ -16,6 +16,8 @@ import { record } from "./provider-dispatch";
 import { RuntimeInstaller, type RuntimePin } from "./runtime-install";
 import { claudePin } from "./claude/release";
 import { claudeProviderFactory } from "./claude/provider";
+import { opencodePin } from "./opencode/release";
+import { opencodeProviderFactory } from "./opencode/provider";
 import { codexPin } from "./codex/install";
 import { codexProviderFactory } from "./codex";
 import { reviewedContextForPlatform } from "./trusted-context";
@@ -87,6 +89,7 @@ const installer = (root: string, pin: RuntimePin | null) => new RuntimeInstaller
 const installers: Record<AccountId, RuntimeInstaller> = {
   chatgpt: installer(codexInstallRoot(paths), codexPin(process.platform, process.arch)),
   claude: installer(join(paths.userData, "claude"), claudePin(process.platform, process.arch)),
+  opencode: installer(join(paths.userData, "opencode"), opencodePin(process.platform, process.arch)),
 };
 const makeProviders: Partial<Record<AccountId, () => HostProvider>> = {};
 const providerWorkDirs: string[] = [];
@@ -275,7 +278,7 @@ function fromApp(event: IpcMainInvokeEvent): boolean {
 
 const refused: Outcome = { ok: false, message: "Not allowed." };
 const isKeyProvider = (value: unknown): value is KeyProviderId => value === "openai" || value === "jev" || value === "batatis";
-const isAccount = (value: unknown): value is AccountId => value === "chatgpt" || value === "claude";
+const isAccount = (value: unknown): value is AccountId => value === "chatgpt" || value === "claude" || value === "opencode";
 
 function answer<T>(channel: string, work: (event: IpcMainInvokeEvent, arg: unknown) => Promise<T> | T, fallback: T) {
   ipcMain.handle(channel, (event, arg: unknown) => (fromApp(event) ? work(event, arg) : fallback));
@@ -431,7 +434,7 @@ if (!app.requestSingleInstanceLock()) {
     };
     const factory = codexProviderFactory({ runtime, verifiedContext: reviewedContextForPlatform(process.platform) });
     const installed = factory(providerContext);
-    await Promise.all([installers.chatgpt.refresh(), installers.claude.refresh()]);
+    await Promise.all([installers.chatgpt.refresh(), installers.claude.refresh(), installers.opencode.refresh()]);
     if (fixture) { fixture.adapterConstructed = true; await installed.dispose(); }
     else {
       makeProviders.chatgpt = () => factory(providerContext);
@@ -444,6 +447,13 @@ if (!app.requestSingleInstanceLock()) {
       const claude = claudeProviderFactory({ runtimeRoot: join(paths.userData, "claude") });
       makeProviders.claude = () => claude(claudeContext);
       await host.installProvider(makeProviders.claude());
+      await mkdir(join(root, "opencode-state"), { recursive: true, mode: 0o700 });
+      const opencodeWork = await realpath(await mkdtemp(join(root, "opencode-work-")));
+      providerWorkDirs.push(opencodeWork);
+      const opencodeContext = { ...providerContext, stateDir: await realpath(join(root, "opencode-state")), workDir: opencodeWork };
+      const opencode = opencodeProviderFactory({ runtimeRoot: join(paths.userData, "opencode") });
+      makeProviders.opencode = () => opencode(opencodeContext);
+      await host.installProvider(makeProviders.opencode());
     }
     registerIpc();
     // The saved channel is read before the first window, which asks for the update state as it paints.
@@ -470,6 +480,7 @@ if (!app.requestSingleInstanceLock()) {
     updater.cancel();
     installers.chatgpt.cancel();
     installers.claude.cancel();
+    installers.opencode.cancel();
     void host.dispose().finally(async () => {
       await Promise.all(providerWorkDirs.map((dir) => rm(dir, { recursive: true, force: true })));
       app.quit();

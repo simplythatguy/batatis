@@ -73,7 +73,7 @@ function ConnectionActions({ row, act }: { row: ProviderRow; act: (action: Param
         <button type="button" className="cf-btn is-xs is-ghost" onClick={() => act("cancelLogin")}>Cancel</button>
       </>
     );
-    case "signed-in": return <button type="button" className="cf-btn is-xs is-ghost" onClick={() => act("disconnect")}>Sign out</button>;
+    case "signed-in": return row.signOut ? <button type="button" className="cf-btn is-xs is-ghost" onClick={() => act("disconnect")}>Sign out</button> : null;
     case "unavailable": return null;
   }
 }
