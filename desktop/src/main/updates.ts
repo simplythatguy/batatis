@@ -239,7 +239,12 @@ export class Updater {
     } catch (error) {
       this.deps.log(`update channel not saved: ${this.messageOf(error)}`);
     }
+    // An offer, or a download already waiting, from a channel no longer chosen must not survive a failed look.
     if (s.status === "available") this.state = { status: "idle", checked: false };
+    else if (s.status === "ready" && !beta && parseVersion(s.release.version)?.beta) {
+      await this.discard(s.staged);
+      this.state = { status: "idle", checked: false };
+    }
     return this.check();
   }
 

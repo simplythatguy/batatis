@@ -446,11 +446,12 @@ if (!app.requestSingleInstanceLock()) {
       await host.installProvider(makeProviders.claude());
     }
     registerIpc();
+    // The saved channel is read before the first window, which asks for the update state as it paints.
+    await updater.load();
     await host.boot();
     host.openWindow(null);
     if (updateFeed && !smoke) {
       await updater.cleanup();
-      await updater.load();
       setTimeout(() => void updater.check(), 15_000).unref();
       setInterval(() => void updater.check(), UPDATE_CHECK_MS).unref();
     }

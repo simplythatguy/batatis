@@ -381,3 +381,18 @@ test("a development run without a feed cannot change channel", async (t) => {
   assert.equal(view.status, "unavailable");
   assert.equal(existsSync(join(dir, "updates", "channel.json")), false);
 });
+
+test("turning betas off drops a downloaded beta even when the next look fails", async (t) => {
+  const name = archiveName("0.2.0-beta.20261027.41", process.platform, process.arch) ?? "";
+  const zip = new TextEncoder().encode("beta archive");
+  const files = { [name]: zip, SHA256SUMS: `${sha(zip)}  ${name}\n` };
+  let online = true;
+  const { fetch: serve } = feed(files, [release("0.2.0-beta.20261027.41", {}, files)]);
+  const { instance } = updater(t, { fetch: async (url, init) => { if (!online) throw new TypeError("fetch failed"); return serve(url, init); }, platform: "darwin", arch: process.arch });
+  await instance.setBeta(true);
+  assert.equal((await instance.download()).status, "ready");
+  online = false;
+  const view = await instance.setBeta(false);
+  assert.notEqual(view.status, "ready", "a failed look must not keep a beta the person turned off");
+  assert.equal(instance.staged(), null);
+});
