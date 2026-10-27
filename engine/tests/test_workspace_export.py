@@ -238,6 +238,11 @@ def test_an_attached_photo_becomes_a_package_page_not_an_unreadable_item():
     buf = io.BytesIO(); Image.new('RGB', (1200, 800), (40, 90, 160)).save(buf, 'PNG')
     case = Case(facts=[fact('process.rationale', 'Synthetic applicant rationale.')])
     result = export_case(case, draft=True, store=attach(case, buf.getvalue(), name='Synthetic site photo'))
-    assert not any('Synthetic site photo' in item for item in result.open_items)
     pages = PdfReader(io.BytesIO(result.pdf)).pages
     assert pages[-1].images, 'the photo is the last page of the package'
+    assert 'Synthetic site photo' in pages[-1].extract_text()
+    # The photo adds nothing to the open items: it is a picture for the officer, not an unreadable page.
+    def reasons(data):
+        case = Case(facts=[fact('process.rationale', 'Synthetic applicant rationale.')])
+        return set(export_case(case, draft=True, store=attach(case, data, name='Synthetic site photo')).open_items)
+    assert reasons(buf.getvalue()) == reasons(attachment_pdf())

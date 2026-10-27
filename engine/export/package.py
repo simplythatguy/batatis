@@ -18,7 +18,7 @@ from ..fact_aliases import LOGICAL_KEYS, latest
 from ..process_fields import confirmed_value
 from ..professional import professional_confirmed, professional_involvement
 from ..section_d import supporting_documents
-from ..package_format import CONTEXT, ATTACHMENT
+from ..package_format import CONTEXT, ATTACHMENT, PHOTO
 from .scc import CURRENT_MAP, ExportResult, _render_case, confirmed_values
 from .signatures import stamp_draft
 from .text import pdf_safe
@@ -109,8 +109,8 @@ def _source(case, document, store):
     return None
 
 
-def _image_pdf(data: bytes) -> bytes | None:
-    """A photo or scan (JPEG, PNG, WebP) as one letter page, so the package carries what was attached."""
+def _image_pdf(data: bytes, title: str) -> bytes | None:
+    """A photo (JPEG, PNG, WebP) as one captioned letter page, so the package carries what was attached."""
     from PIL import Image, ImageOps, UnidentifiedImageError
     from reportlab.lib.pagesizes import letter
     from reportlab.lib.utils import ImageReader
@@ -122,12 +122,14 @@ def _image_pdf(data: bytes) -> bytes | None:
     except (UnidentifiedImageError, OSError, ValueError):
         return None
     width, height = letter
-    margin = 36
-    scale = min((width - 2 * margin) / image.width, (height - 2 * margin) / image.height)
+    margin, caption = 36, 28
+    scale = min((width - 2 * margin) / image.width, (height - 2 * margin - caption) / image.height)
     drawn = (image.width * scale, image.height * scale)
     output = io.BytesIO()
     page = canvas.Canvas(output, pagesize=letter, invariant=1)
-    page.drawImage(ImageReader(image), (width - drawn[0]) / 2, (height - drawn[1]) / 2, *drawn)
+    page.drawImage(ImageReader(image), (width - drawn[0]) / 2, margin + caption + (height - 2 * margin - caption - drawn[1]) / 2, *drawn)
+    page.setFont('Helvetica', 8)
+    page.drawString(margin, margin, pdf_safe(f'{PHOTO} · Photo supplied by the applicant: {title}'))
     page.save()
     return output.getvalue()
 
@@ -236,7 +238,7 @@ def prepare_package(case, codes, *, store=None, draft=False, form=None, version=
             continue
         source_name, data = source
         if not data.startswith(b'%PDF-'):
-            data = _image_pdf(data) or data
+            data = _image_pdf(data, document.title) or data
         if not data.startswith(b'%PDF-'):
             try:
                 data = _page(data.decode('utf-8').splitlines())

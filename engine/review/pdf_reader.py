@@ -26,6 +26,7 @@ import re
 from dataclasses import dataclass, field
 from functools import lru_cache
 
+from ..package_format import PHOTO
 from ..export import scc
 from ..export.form_growth import Layout
 from ..pdfium import open_pdf
@@ -123,6 +124,9 @@ class ReadFile:
             with open_pdf(self.data) as doc:
                 unreadable = []
                 for page in self.text_pages:
+                    # An attached photo is looked at, not read: its caption marks it as a picture, not a scan of text.
+                    if PHOTO in page.text:
+                        continue
                     pdf_page = doc[page.page]
                     if (page.uncertain_boxes or _annotation_boxes(pdf_page)
                             or (not page.text.strip() and _object_boxes(pdf_page)) or any(
