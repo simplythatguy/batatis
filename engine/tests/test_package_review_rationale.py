@@ -131,12 +131,16 @@ def _assert_blank_applicant_gap(parts):
     assert finding.severity == 'blocking' and finding.routed_to == 'applicant'
 
 
+HEADING_QUOTES = {None, 'Rationale', 'Rationale for variance'}
+
+
 def _assert_officer_check(parts):
     reading = next(f for f in parts.fields if f.field == 'rationale')
     finding = next(f for f in parts.findings if f.field == 'rationale')
     assert reading.status == finding.status == 'not_found'
     assert reading.value is None
-    assert reading.pointer.quote is None and all(pointer.quote is None for pointer in finding.pointers)
+    # An uncertain passage keeps only the heading that locates it, never words of the unestablished answer.
+    assert {reading.pointer.quote, *(pointer.quote for pointer in finding.pointers)} <= HEADING_QUOTES
     request = ir.build(parts.findings)
     item = next(i for i in request.items if i.finding_key == finding.key)
     assert item.officer_check and not item.included and item.text not in request.text
@@ -213,7 +217,8 @@ def test_each_rationale_occurrence_checks_its_own_graphical_body(body, unique_he
     pdf = repeated_rationale_pdf(body, unique_heading=unique_heading, reversed_stop=reversed_stop)
     finding = _assert_officer_check(review_uploads([('repeated.pdf', pdf)], None))
     assert [(p.file, p.page, p.quote) for p in finding.pointers] == [
-        ('repeated.pdf', 1, None), ('repeated.pdf', 1, None)]
+        ('repeated.pdf', 1, 'Rationale'),
+        ('repeated.pdf', 1, 'Rationale for variance' if unique_heading else 'Rationale')]
 
 
 @pytest.mark.parametrize('body', ['blank', 'outside'])
@@ -233,7 +238,7 @@ def test_readable_cover_cannot_make_a_scanned_rationale_certainly_absent(cover, 
     for ordered in (uploads, list(reversed(uploads))):
         finding = _assert_officer_check(review_uploads(ordered, None))
         assert [(p.file, p.page, p.quote) for p in finding.pointers] == [
-            ('blank.pdf', 1, None), ('supplement.pdf', page, None)]
+            ('blank.pdf', 1, 'Rationale'), ('supplement.pdf', page, None)]
 
 
 def test_readable_cover_and_truly_empty_page_do_not_imply_an_unreadable_passage():
@@ -359,7 +364,9 @@ def test_multiple_rationale_candidates_keep_all_sources_and_stable_outcomes(layo
             item = ir.build([finding]).items[0]
             assert item.included and not item.officer_check
         assert len(finding.pointers) == 2, 'Both labelled candidates must retain their actual source pointers.'
-        assert [p.quote for p in finding.pointers] == ([None, None] if any(values) else ['Rationale', 'Rationale'])
+        # A blank candidate is located by its heading; a candidate's unestablished words are never quoted.
+        assert sorted(p.quote or '' for p in finding.pointers) == sorted(
+            'Rationale' if not value else '' for value in values)
         projection = (reading.model_dump(), finding.model_dump(), ir.build([finding]).model_dump())
         if before is not None:
             assert projection == before, 'Multipart order must not choose which rationale controls.'
@@ -374,7 +381,7 @@ def test_uncertain_rationale_sources_are_not_masked_by_other_candidates(other):
     for ordered in (uploads, list(reversed(uploads))):
         finding = _assert_officer_check(review_uploads(ordered, None))
         assert {p.file for p in finding.pointers} == {'a.pdf', 'b.pdf'}
-        assert any(p.file == 'a.pdf' and p.quote is None for p in finding.pointers)
+        assert any(p.file == 'a.pdf' and p.quote == (None if other else 'Rationale') for p in finding.pointers)
         if before is not None:
             assert finding.model_dump() == before
         before = finding.model_dump()

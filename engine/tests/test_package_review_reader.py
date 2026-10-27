@@ -73,7 +73,9 @@ def test_scanned_form_without_text_is_never_reported_blank():
     read = read_pdf(scanned(flattened(dict(CLEAN_FORM, Owner=''))), 'scan.pdf')
     assert read.role == 'unreadable'
     parts = review_uploads([('scan.pdf', scanned(flattened(CLEAN_FORM)))], None)
-    assert {f.status for f in parts.findings} == {'not_found'}
+    # Nothing is reported blank or missing; the only other state is the officer's own professional determination.
+    assert {f.status for f in parts.findings if f.routed_to != 'officer'} == {'not_found'}
+    assert {f.key for f in parts.findings if f.status != 'not_found'} == {'professional_requirement:requirement_unresolved'}
     assert {'form:presence', 'file:scan.pdf:unreadable'} <= {f.key for f in parts.findings}
 
 

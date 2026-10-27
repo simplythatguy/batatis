@@ -12,6 +12,17 @@ def fact(field, value, **changes):
     return Fact(**data)
 
 
+def _synthetic_pdf() -> bytes:
+    """A readable one-page PDF: the package carries and reads actual attachment pages."""
+    import io
+    from reportlab.pdfgen import canvas
+    output = io.BytesIO()
+    page = canvas.Canvas(output, pagesize=(612, 792), invariant=1)
+    page.drawString(50, 740, 'SYNTHETIC storage-binding bytes, not a document or result.')
+    page.save()
+    return output.getvalue()
+
+
 def store_with_synthetic_files(store, case):
     """API fixtures need actual case-owned bytes, not file-presence metadata alone.
 
@@ -25,8 +36,7 @@ def store_with_synthetic_files(store, case):
                 and entry.status == 'confirmed' and entry.source.type == 'file'
                 and entry.value == entry.source.ref):
             if entry.source.ref not in references:
-                saved = store.put_file(case.id, 'SYNTHETIC-storage-fixture.pdf',
-                                       b'%PDF-1.4\nSYNTHETIC storage-binding bytes, not a document or result.\n')
+                saved = store.put_file(case.id, 'SYNTHETIC-storage-fixture.pdf', _synthetic_pdf())
                 references[entry.source.ref] = saved['id']
             entry.value = references[entry.source.ref]
             entry.source = entry.source.model_copy(update={'ref': entry.value})

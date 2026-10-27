@@ -72,6 +72,16 @@ def _norm(text: str) -> str:
     return re.sub(r'\s+', ' ', text or '').strip()
 
 
+def is_heading(quote: str | None) -> bool:
+    """A quote that is only a passage's own heading locates it; it never carries an unread answer."""
+    return bool(quote) and any(pattern.fullmatch(_norm(quote)) for _label, pattern in TEXT_FIELDS.values())
+
+
+def located_quote(quote: str | None) -> str | None:
+    """The quote an uncertain reading may keep: its heading, never a fragment of the unestablished answer."""
+    return quote if is_heading(quote) else None
+
+
 def text_value(pages: list[tuple[str, int, str]], pattern, reads=None) -> TextValue:
     """Passage after a heading, up to the next heading or source line. Absent heading: not_found."""
     for file, page, text in pages:
@@ -164,6 +174,9 @@ def passage_value(reads: list[ReadFile], key: str) -> TextValue:
     pointers = [pointer for candidate in candidates for pointer in candidate.pointers]
     if all(candidate.status == 'blank' for candidate in candidates):
         return TextValue('blank', '', first.file, first.page, None, pointers)
+    if all(candidate.status == 'present' for candidate in candidates) and len({c.value for c in candidates}) == 1:
+        # The same answer in every place (for example one file uploaded twice) is not a conflict.
+        return TextValue('present', first.value, first.file, first.page, first.quote, pointers)
     return TextValue('not_found', '', first.file, first.page, None, pointers,
                      'Multiple possible sources were found for this answer. Check the indicated pages; no controlling passage was chosen.')
 

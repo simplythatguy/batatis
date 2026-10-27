@@ -36,7 +36,6 @@ def _narrative(**changes):
 PLANTED = [
     ('D01', _form(Owner=''), None, None, ('owner_name', 'blank', None)),
     ('D02', _form(**{'Date of Reqeuest': ''}), None, None, ('application_date', 'blank', None)),
-    ('D02', _form(Date1=''), None, None, ('signature_date', 'blank', None)),
     ('D03', _form(**{'Municipal Address': ''}), None, None, ('civic_address', 'blank', None)),
     ('D04', _form(Lot='TBD'), None, None, ('legal_description', 'missing', 'placeholder')),
     ('D04', _form(Lot='', Block='', Plan=''), None, None, ('legal_description', 'blank', None)),
@@ -53,7 +52,7 @@ PLANTED = [
     ('D11', None, _narrative(**{'Assumptions and limits': ''}), None, ('assumptions_and_limits', 'blank', None)),
     ('D12', None, _narrative(**{'Engineering required: yes': 'SYNTHETIC: stated by the applicant.'}), None,
      ('responsible_professional', None, 'professional_unnamed')),
-    ('D13', _form(**{'Name Responsible': ''}), None, None, ('supporting_doc', 'missing', 'no_responsible')),
+    ('D13', _form(**{'Name Responsible': ''}), None, None, ('document.', 'missing', 'no_responsible')),
     ('D14', None, None, [line.replace('0.40 m', '0.90 m') for line in CLEAN_REPORT],
      ('section_b.consistency', 'unclear', 'contradiction')),
     ('D15', _form(**{'Article(s)': '9.8.2.1.(1)', 'Objective': 'OS3.1', 'Function': 'F30'}), None, None,
@@ -69,10 +68,12 @@ IDS = [f'{row[0]}-{i}' for i, row in enumerate(PLANTED)]
 @pytest.mark.parametrize('flat', [False, True], ids=['fillable', 'flattened'])
 def test_clean_control_has_no_applicant_gap(codes, flat):
     parts = review_uploads(package(flat=flat), codes)
-    applicant_gaps = [f for f in parts.findings if f.status != 'not_found']
+    applicant_gaps = [f for f in parts.findings if f.status != 'not_found' and f.routed_to != 'officer']
     assert applicant_gaps == [], [(f.key, f.message) for f in applicant_gaps]
-    # The only officer check left is a signature, which text cannot establish.
-    assert {f.key for f in parts.findings} <= {'signature:presence'}
+    # Officer checks only: a signature and the professional requirement, which text cannot establish, and on a
+    # flattened form the jurisdiction-wide check box, which cannot be read reliably.
+    allowed = {'signature:presence', 'professional_requirement:requirement_unresolved'}
+    assert {f.key for f in parts.findings} <= allowed | ({'single_location:presence'} if flat else set())
     assert [check.status for check in parts.section_c] == ['match']
 
 
@@ -88,9 +89,24 @@ def test_planted_defect_is_caught_and_asked(codes, flat, defect, form, narrative
     assert finding.defect_class == defect or defect in ('D02', 'D04') and finding.defect_class in ('D02', 'D04', None)
     assert finding.pointers, 'every finding points to its source'
     request = build(parts.findings)
+    if defect == 'D15':
+        # A keyword screen cannot decide relevance: the officer reviews the benchmarks, the applicant is not asked.
+        assert finding.routed_to == 'officer' and not any(i.finding_key == finding.key for i in request.items)
+        return
     item = next(i for i in request.items if i.finding_key == finding.key)
     assert item.text.startswith('Please ')
     assert item.included
+
+
+@pytest.mark.parametrize('flat', [False, True], ids=['fillable', 'flattened'])
+def test_blank_signature_date_without_a_readable_signature_is_an_officer_check(codes, flat):
+    # Preparation stage: only a started signature requires its date. An unread signature stays the officer's check.
+    parts = review_uploads(package(_form(Date1=''), flat=flat), codes)
+    assert not any(f.field.endswith('signature_date') for f in parts.findings)
+    signature = next(f for f in parts.findings if f.key == 'signature:presence')
+    assert signature.status == 'not_found'
+    item = next(i for i in build(parts.findings).items if i.finding_key == signature.key)
+    assert item.officer_check and not item.included
 
 
 def test_planted_d07_names_both_values(codes):

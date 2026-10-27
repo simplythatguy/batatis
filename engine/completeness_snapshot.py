@@ -10,7 +10,7 @@ from .models_review import Attribute, DocumentRow, FieldReading, InputFile, Poin
 from .process_fields import latest_fact
 from .review.documents import attachment_row, case_rows, merge_section_d, unreadable_row
 from .review.ingest import Ingested, StoredValue, ingested_from_case
-from .review.passages import TEXT_FIELDS, _ENGINEERING, passage_value
+from .review.passages import TEXT_FIELDS, _ENGINEERING, located_quote, passage_value
 from .review.pdf_reader import FieldValue, ReadFile, field_maps, read_pdf
 from .models_completeness import AdministrativeItem, ProfessionalDeclaration
 
@@ -71,9 +71,11 @@ def _legal(read: ReadFile) -> tuple[StoredValue | None, list[str]]:
     if printed is not None and printed.status == 'present':
         return _stored('legal_description', printed, read), []
     lbp, ats = ('Lot', 'Block', 'Plan'), ('QTR', 'SEC', 'TWP', 'RGE', 'MER')
-    for group in (lbp, ats):
+    placeholders = ('n/a', 'na', 'tbd', 'unknown')
+    # A complete real group wins; otherwise a filled group keeps its placeholder so it is reported as one, not as blank.
+    for group, real in ((lbp, True), (ats, True), (lbp, False), (ats, False)):
         if all(fields.get(name) and fields[name].status == 'present'
-               and fields[name].value.strip().casefold() not in ('n/a', 'na', 'tbd', 'unknown') for name in group):
+               and (not real or fields[name].value.strip().casefold() not in placeholders) for name in group):
             value = ', '.join(f'{name} {fields[name].value}' for name in group)
             return StoredValue('legal_description', value, 'exact', fields[group[0]].value,
                                form_field=group[0], source={'type': 'file', 'ref': read.name,
@@ -153,9 +155,12 @@ def from_uploads(uploads: list[tuple[str, bytes]]) -> Snapshot:
                 values[logical] = _stored(logical, form.fields[widget], form)
         scope = form.fields.get('Check Box')
         if scope:
+            # The box asks for jurisdiction-wide use. A readable unticked box means site-specific use, not a blank
+            # answer; only a visible "unanswered" record (below) can still make the scope blank.
             values['scope'] = _stored('scope', scope, form)
             if scope.status != 'not_found':
                 values['scope'].value = 'jurisdiction' if scope.status == 'present' and scope.value else 'site'
+                values['scope'].explicit_blank, values['scope'].status = False, 'present'
         legal, _blank = _legal(form)
         if legal is None:
             cells = [value for name, value in form.fields.items()
@@ -200,7 +205,8 @@ def from_uploads(uploads: list[tuple[str, bytes]]) -> Snapshot:
                                  pointers=[pointer.model_dump() for pointer in pointers])
         section = 'process' if key not in ('alternative_description', 'professional_name',
                                           'professional_qualifications') else ('B' if key == 'alternative_description' else 'D')
-        pointer = pointers[0].model_copy(update={'quote': None}) if found.status == 'not_found' else pointers[0]
+        pointer = (pointers[0].model_copy(update={'quote': located_quote(pointers[0].quote)})
+                   if found.status == 'not_found' else pointers[0])
         snapshot.fields.append(FieldReading(field=key, label=label, section=section, status=found.status,
                                             value=found.value if found.status == 'present' else None,
                                             reason=found.reason, pointer=pointer))
@@ -239,8 +245,11 @@ def from_uploads(uploads: list[tuple[str, bytes]]) -> Snapshot:
                     + (previous.pointers if previous else []))
             remaining_context.append(item)   # an unconfirmed latest answer blocks on its own
         elif item.reason_code == 'blank' and item.field == 'scope':
-            # A flattened check box cannot be read; the record says no scope was answered.
-            if values.get('scope') is None or values['scope'].status == 'not_found':
+            # The record says no scope was answered. It can add that gap over an unreadable or unticked
+            # box (the box only asks about jurisdiction-wide use), never over a ticked box or a printed scope.
+            current = values.get('scope')
+            if (current is None or current.status == 'not_found'
+                    or (current.form_field == 'Check Box' and current.value == 'site')):
                 values['scope'] = StoredValue('scope', '', 'exact', None, explicit_blank=True, status='blank',
                     input_field='scope', pointers=[pointer.model_dump() for pointer in item.pointers])
         elif item.reason_code == 'blank' and item.field in texts:
@@ -273,6 +282,9 @@ def from_uploads(uploads: list[tuple[str, bytes]]) -> Snapshot:
     snapshot.corpus += pages
     snapshot.applicant_corpus = [(found.file, found.page, found.value) for found in texts.values()
                                  if found.status == 'present']
+    # Values the applicant entered in the form's own cells (for example a co-ordinator named in Section D).
+    snapshot.applicant_corpus += [(form.name, value.page + 1, f'{value.name}: {value.value}')
+                                  for value in form.fields.values() if value.status == 'present'] if form else []
     snapshot.applicant_corpus += [(read.name, page.page + 1, page.text)
         for read in attachments for page in read.text_pages]
     snapshot.applicant_corpus += [(read.name, page.page + 1, page.text) for read in reads for page in read.text_pages
@@ -301,6 +313,8 @@ def from_uploads(uploads: list[tuple[str, bytes]]) -> Snapshot:
                 listed.append((1, combined.value, '', _pointer(form, combined), _pointer(form, combined)))
         for number, row in enumerate(fmap['section_d_rows'], start=1):
             name, who = form.fields.get(row['document']), form.fields.get(row['responsible'])
+            if name and name.status == 'present' and re.fullmatch(r'Documents \d+-\d+: see Appendix D', name.value.strip()):
+                continue   # Batatis's overflow marker, not a title; those documents are listed in its appendix
             if name and name.status == 'present':
                 listed.append((number, name.value, who.value if who and who.status == 'present' else '',
                                _pointer(form, name), _pointer(form, who) if who else _pointer(form, name)))

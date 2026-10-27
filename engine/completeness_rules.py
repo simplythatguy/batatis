@@ -195,6 +195,11 @@ def _stored_state(doc: Ingested, spec: ElementSpec) -> tuple[str, str | None, St
     # Only a whole answer is a placeholder. Real prose can discuss an unknown.
     placeholder = _missing(stored.value) or _PLACEHOLDER.fullmatch(
         normalize_ws(stored.value).strip(" .!?;:'\""))
+    if spec.field == 'legal_description' and not placeholder:
+        # A legal description is a list of parts ("Lot 12, Block 3, Plan TBD"); each part is a whole answer.
+        parts = [re.sub(r'^(?:lot|block|plan|qtr|sec|twp|rge|mer|ats_[a-z]+)\s+', '', part.strip(), flags=re.I)
+                 for part in stored.value.split(',')]
+        placeholder = any(_missing(part) or _PLACEHOLDER.fullmatch(part.strip(" .!?;:'\"")) for part in parts)
     if placeholder:
         return 'missing', 'placeholder', stored
     folded = normalize_ws(stored.value).casefold().strip(" '")
