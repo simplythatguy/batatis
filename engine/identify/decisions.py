@@ -77,6 +77,8 @@ def record_decision(case, provision_id: str, decision: str, codes) -> list:
     result.decisions[article] = ArticleDecision(
         decision=decision, decided_at=now(),
         open_question_id=stable_id(case.id, 'oq', article) if decision == 'not_sure' else None)
+    from .requirement_decisions import departure
+    departure(result, article, decision)
     overlay_decisions(result)
     return written
 
