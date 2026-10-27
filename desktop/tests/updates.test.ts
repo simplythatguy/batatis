@@ -127,12 +127,12 @@ function feed(files: Record<string, Uint8Array | string>, releases: unknown[]) {
 function updater(t: { after(fn: () => void): void }, deps: Partial<UpdaterDeps>) {
   const dir = scratch(t);
   const events: string[] = [];
-  const instance = new Updater({
+  const all: UpdaterDeps = {
     current: "0.1.0", platform: process.platform, arch: process.arch, feed: "https://api.github.com/repos/simplythatguy/batatis/releases?per_page=30",
     trusted: trustedUpdateUrl, fetch: async () => new Response("unused"), dir: join(dir, "updates"), executable: join(dir, "missing"),
     replaceable: false, run, notify: () => events.push("changed"), log: (line) => events.push(`log:${line}`), ...deps,
-  });
-  return { instance, dir, events };
+  };
+  return { instance: new Updater(all), deps: all, dir, events };
 }
 
 const sha = (bytes: Uint8Array | string) => createHash("sha256").update(bytes).digest("hex");
@@ -176,7 +176,7 @@ test("a rate-limited or unreachable feed reports a failure and no release", asyn
   const offline = updater(t, { fetch: async () => { throw new TypeError("fetch failed"); } });
   assert.equal((await offline.instance.check()).status, "failed");
   const latest = updater(t, { fetch: feed({}, [release("0.1.0")]).fetch });
-  assert.deepEqual(await latest.instance.check(), { status: "idle", current: "0.1.0", checked: true });
+  assert.deepEqual(await latest.instance.check(), { status: "idle", current: "0.1.0", checked: true, beta: false });
   const none = updater(t, { feed: null });
   assert.equal((await none.instance.check()).status, "unavailable");
 });
@@ -329,4 +329,55 @@ test("a stable install never sees betas; a beta install sees betas and stables, 
   assert.equal(readReleases([release("0.2.0")], "0.2.0-beta.20261027.41", "darwin", "arm64")?.version, "0.2.0", "a beta moves on to its stable");
   const mislabeled = { ...release("0.2.0-beta.20261027.42"), prerelease: false };
   assert.equal(readReleases([mislabeled], "0.1.1-beta.20261020.3", "darwin", "arm64")?.version ?? null, null, "a beta must be published as a prerelease");
+});
+
+test("the saved choice, not the installed version, decides whether betas are offered", () => {
+  const list = [release("0.2.0-beta.20261027.41"), release("0.1.1")];
+  assert.equal(readReleases(list, "0.1.0", "darwin", "arm64", true)?.version, "0.2.0-beta.20261027.41", "a stable install can opt in");
+  assert.equal(readReleases(list, "0.1.0", "darwin", "arm64", false)?.version, "0.1.1");
+  assert.equal(readReleases([release("0.2.0-beta.20261027.41")], "0.1.1-beta.20261020.3", "darwin", "arm64", false), null, "a beta install can opt out");
+  assert.equal(readReleases(list, "0.1.1-beta.20261020.3", "darwin", "arm64", false)?.version, "0.1.1", "and still takes the stable");
+});
+
+test("choosing betas is saved, survives a restart, and replaces an offer from the other channel", async (t) => {
+  const list = [release("0.2.0-beta.20261027.41"), release("0.1.1")];
+  const { fetch } = feed({}, list);
+  const first = updater(t, { fetch });
+  const { instance } = first;
+  assert.equal(instance.view().beta, false);
+  assert.equal((await instance.check()).status, "available");
+  const offered = instance.view();
+  assert.equal(offered.status === "available" && offered.release.version, "0.1.1");
+
+  const betaView = await instance.setBeta(true);
+  assert.equal(betaView.beta, true);
+  assert.equal(betaView.status === "available" && betaView.release.version, "0.2.0-beta.20261027.41");
+  assert.deepEqual(JSON.parse(readFileSync(join(first.dir, "updates", "channel.json"), "utf8")), { beta: true });
+
+  const restarted = new Updater(first.deps);
+  assert.equal(restarted.view().beta, false, "before it loads, a restart follows the installed version");
+  await restarted.load();
+  assert.equal(restarted.view().beta, true);
+
+  const back = await restarted.setBeta(false);
+  assert.equal(back.beta, false);
+  assert.equal(back.status === "available" && back.release.version, "0.1.1", "turning betas off drops the beta offer");
+});
+
+test("a beta install can turn betas off; choosing what is already chosen changes nothing", async (t) => {
+  const { fetch, requested } = feed({}, [release("0.1.1")]);
+  const { instance, dir } = updater(t, { fetch, current: "0.1.1-beta.20261020.3" });
+  assert.equal(instance.view().beta, true, "a beta install follows beta by default");
+  await instance.setBeta(true);
+  assert.equal(requested.length, 0, "no change, no request");
+  assert.equal(existsSync(join(dir, "updates", "channel.json")), false);
+  assert.equal((await instance.setBeta(false)).beta, false);
+  assert.deepEqual(JSON.parse(readFileSync(join(dir, "updates", "channel.json"), "utf8")), { beta: false });
+});
+
+test("a development run without a feed cannot change channel", async (t) => {
+  const { instance, dir } = updater(t, { feed: null });
+  const view = await instance.setBeta(true);
+  assert.equal(view.status, "unavailable");
+  assert.equal(existsSync(join(dir, "updates", "channel.json")), false);
 });

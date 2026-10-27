@@ -336,6 +336,7 @@ function registerIpc() {
   answer("batatis:update-check", () => updater.check(), null);
   answer("batatis:update-download", () => updater.download(), null);
   answer("batatis:update-install", () => installUpdate(), refused);
+  answer("batatis:update-beta", (_e, beta) => (typeof beta === "boolean" ? updater.setBeta(beta) : updater.view()), null);
   answer("batatis:choose-codedb", async () => {
     if (!current) return refused;
     const picked = await dialog.showOpenDialog(current, {
@@ -449,6 +450,7 @@ if (!app.requestSingleInstanceLock()) {
     host.openWindow(null);
     if (updateFeed && !smoke) {
       await updater.cleanup();
+      await updater.load();
       setTimeout(() => void updater.check(), 15_000).unref();
       setInterval(() => void updater.check(), UPDATE_CHECK_MS).unref();
     }

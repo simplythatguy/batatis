@@ -70,8 +70,9 @@ export type ProviderRow =
 export interface ReleaseNote { version: string; items: string[]; more: number; url: string }
 export interface UpdateRelease { version: string; url: string; notes: ReleaseNote[]; older: number; history: string; downloadable: boolean }
 
-/** The app's own update, as the host reports it. Links are https pages on GitHub. */
-export type UpdateView =
+/** The app's own update, as the host reports it. Links are https pages on GitHub. `beta` is whether betas are offered. */
+export type UpdateView = UpdateState & { beta: boolean };
+type UpdateState =
   | { status: "unavailable"; current: string; message: string }
   | { status: "idle"; current: string; checked: boolean }
   | { status: "checking"; current: string }
@@ -93,7 +94,7 @@ interface Bridge {
     submitLoginCode(id: string, code: string): Promise<unknown>;
   };
   codeDb: { choose(): Promise<unknown> };
-  updates?: Record<"state" | "check" | "download" | "install", () => Promise<unknown>> & { onChange(listener: () => void): () => void };
+  updates?: Record<"state" | "check" | "download" | "install", () => Promise<unknown>> & { setBeta(beta: boolean): Promise<unknown>; onChange(listener: () => void): () => void };
   onChange(listener: () => void): () => void;
 }
 
@@ -289,6 +290,11 @@ function parseRelease(value: unknown): UpdateRelease | null {
 
 export function parseUpdate(value: unknown): UpdateView | null {
   if (!isRecord(value)) return null;
+  const state = parseUpdateState(value);
+  return state && { ...state, beta: value.beta === true };
+}
+
+function parseUpdateState(value: Record<string, unknown>): UpdateState | null {
   const current = str(value.current) ?? "";
   const release = parseRelease(value.release);
   switch (value.status) {
@@ -335,6 +341,13 @@ function subscribeUpdate(listener: () => void) {
 export function useUpdate(): UpdateView | null {
   return useSyncExternalStore(subscribeUpdate, () => update, () => null);
 }
+
+const setBetaUpdates = async (beta: boolean): Promise<void> => {
+  const updates = bridge()?.updates;
+  if (!updates) return;
+  const next = parseUpdate(await updates.setBeta(beta).catch(() => null));
+  if (next) publishUpdate(next);
+};
 
 const updateAction = (action: "check" | "download") => async (): Promise<void> => {
   const updates = bridge()?.updates;
@@ -402,6 +415,7 @@ export const desktop = {
   updates: {
     check: updateAction("check"),
     download: updateAction("download"),
+    setBeta: setBetaUpdates,
     install: () => call((h) => h.updates ? h.updates.install() : Promise.resolve(null), parseOutcome, failed),
   },
 };

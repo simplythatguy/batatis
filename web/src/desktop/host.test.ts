@@ -63,7 +63,7 @@ test("update state keeps GitHub pages only and drops anything the page can't sho
     notes: [{ version: "0.2.0", url: "https://github.com/simplythatguy/batatis/releases/tag/desktop-v0.2.0", items: ["Add the update button (#81)", 3], more: 4 }],
   };
   assert.deepEqual(parseUpdate({ status: "available", current: "0.1.0", release }), {
-    status: "available", current: "0.1.0",
+    status: "available", current: "0.1.0", beta: false,
     release: { ...release, notes: [{ ...release.notes[0], items: ["Add the update button (#81)"] }] },
   });
   assert.equal(parseUpdate({ status: "available", current: "0.1.0", release: { ...release, url: "https://example.com/x" } }), null);
@@ -72,7 +72,9 @@ test("update state keeps GitHub pages only and drops anything the page can't sho
   assert.equal(downloading?.status === "downloading" && downloading.percent, 100);
   assert.equal(parseUpdate({ status: "ready", current: "0.1.0", release, install: "somewhere" }), null);
   assert.deepEqual(parseUpdate({ status: "failed", current: "0.1.0", release: null, message: "Couldn’t check." }),
-    { status: "failed", current: "0.1.0", release: null, message: "Couldn’t check." });
+    { status: "failed", current: "0.1.0", release: null, message: "Couldn’t check.", beta: false });
+  assert.equal(parseUpdate({ status: "idle", current: "0.1.0", checked: true, beta: true })?.beta, true);
+  assert.equal(parseUpdate({ status: "idle", current: "0.1.0", checked: true, beta: "yes" })?.beta, false);
 });
 
 test("the account row carries its runtime's install state; malformed progress is dropped", () => {

@@ -31,6 +31,7 @@ if (location.origin === "batatis://app") {
       check: () => invoke("batatis:update-check"),
       download: () => invoke("batatis:update-download"),
       install: () => invoke("batatis:update-install"),
+      setBeta: (beta: boolean) => invoke("batatis:update-beta", beta),
       onChange: (listener: () => void) => {
         const handler = () => listener();
         ipcRenderer.on("batatis:update-changed", handler);
