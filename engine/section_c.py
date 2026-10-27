@@ -23,11 +23,11 @@ def section_c_rows(provision_ids: list[str], codes: Codes) -> list[SectionCRow]:
     for pid in provision_ids:
         rec = codes.provision(pid, 'B')
         if rec is None:
-            raise KeyError(f'{pid} is not a Division B provision')
+            raise KeyError(f'Section C lookup missed {pid}: {pid} is not a Division B provision')
         if rec['level'] in ('article', 'subsection', 'section'):
             targets = [c for c in rec['children'] if c['level'] == 'sentence'] if rec['level'] == 'article' else []
             if not targets:
-                raise KeyError(f'{pid}: pass an article, sentence or clause')
+                raise KeyError(f'Section C lookup missed {pid}: pass an article, sentence or clause')
             rows.extend(_row(codes.provision(c['id'], 'B'), codes) for c in targets)
         else:
             rows.append(_row(rec, codes))

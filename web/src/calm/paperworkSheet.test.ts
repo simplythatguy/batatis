@@ -11,6 +11,7 @@ import { aliasKey, buildDeck, gapKey, paperworkRowKey } from "./deck.ts";
 async function mounted() {
   let c = model.reducer(emptyCase(), { type: "setDetail", field: "municipalAddress", value: "10234 87 Ave NW, Edmonton", section: "B" });
   c = model.reducer(c, { type: "setDetail", field: "owner", value: "Dana Whitfield", section: "A" });
+  c = model.reducer(c, { type: "setDetail", field: "pathway", value: "alternative", section: "B" });
   const actions: Action[] = [];
   let done = 0;
   const h = await componentHarness(new URL("./PaperworkSheet.tsx", import.meta.url), "PaperworkSheet", {

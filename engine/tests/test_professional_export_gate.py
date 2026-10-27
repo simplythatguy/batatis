@@ -25,7 +25,7 @@ def package(monkeypatch):
         owner_name='SYNTHETIC owner', request_date='2026-10-20',
         mailing_address='SYNTHETIC address', municipal_address='SYNTHETIC site',
         legal_description='SYNTHETIC lot', representative='SYNTHETIC applicant', scope='site',
-        alternative_description='SYNTHETIC departure', rationale='SYNTHETIC rationale',
+        alternative_description='SYNTHETIC departure', pathway='alternative', rationale='SYNTHETIC rationale',
         risk_assessment=('SYNTHETIC risks: the departure could let smoke pass between the two suites '
                          'if the separation is breached.'),
         mitigating_measures='SYNTHETIC measures: inspect the separation between the two suites before closing.',

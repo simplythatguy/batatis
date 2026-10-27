@@ -111,8 +111,13 @@ def confirmed_value(case: Case, *fields: str):
 
 
 def alternative_path(case: Case) -> bool:
-    """Unresolved routing keeps the alternative-path requirements visible."""
-    return confirmed_value(case, 'pathway', 'path') not in ('acceptable', 'acceptable_solution')
+    """The six process fields open only after the path is alternative.
+
+    A firm follows, a wording match to an acceptable solution, an unknown fork, and a
+    not-applicable check all leave the fields closed. An unknown fork is not a variance.
+    """
+    from .path_decision import decide_path
+    return decide_path(case).path == 'alternative'
 
 
 def process_fields(case: Case, codes: Codes) -> list[ProcessField]:

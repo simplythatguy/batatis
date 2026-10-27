@@ -11,7 +11,8 @@ def _ids(issue):
 
 def test_every_issue_names_someone_and_labels_the_source():
     from engine.human_review import MANDATORY_TRIGGERS
-    issue = section_d_issues(Case(provisions=[BENCHMARK]), codes_with_rules())[0]
+    issue = section_d_issues(
+        Case(provisions=[BENCHMARK], facts=[fact('pathway', 'alternative')]), codes_with_rules())[0]
     assert issue.human_review
     assert all(row.who and row.why and row.cite for row in issue.human_review)
     assert all(row.source == 'statute' or row.trigger_id in MANDATORY_TRIGGERS for row in issue.human_review)

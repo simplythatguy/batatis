@@ -377,12 +377,19 @@ def _one(doc: Ingested, spec: ElementSpec, codes, engineering: bool, heuristics:
 
 
 def _on_variance(doc: Ingested) -> bool:
+    """The six process fields apply only on the alternative path.
+
+    A saved case uses that path decision. A form that never records a path is an SCC
+    variance form, so its process fields still apply. A recorded path opens them only
+    when it says alternative or variance. Acceptable, not applicable, redirect, and
+    not decided all leave them closed.
+    """
     if doc.case is not None:
         return alternative_path(doc.case)
     stored = doc.values.get('pathway') or doc.values.get('path')
-    if stored is None or not stored.confirmed or not stored.value.strip():
+    if stored is None or not stored.confirmed or not str(stored.value or '').strip():
         return True
-    return stored.value.strip().casefold() not in {'acceptable', 'acceptable_solution'}
+    return stored.value.strip().casefold() in {'alternative', 'variance'}
 
 
 def _gate(spec: ElementSpec, doc: Ingested, verdict: str, reason: str, *, problem: str | None = None,
@@ -402,7 +409,7 @@ def _single_location(doc: Ingested, spec: ElementSpec) -> ElementVerdict:
     # IB-2026-10-01: one registration for one specific location. A comma is part of one civic address.
     if not _on_variance(doc):
         return _gate(spec, doc, 'present',
-                     'IB-2026-10-01 applies to variance registration. This record is on the acceptable-solution path.')
+                     'IB-2026-10-01 applies to variance registration. This record is not on the alternative path.')
     scope = doc.values.get('scope')
     if scope and scope.status == 'not_found':
         element = _gate(spec, doc, 'unclear',
@@ -478,7 +485,7 @@ def _intent(doc: Ingested, spec: ElementSpec, state: str, stored: StoredValue | 
 
 def _process(doc: Ingested, spec: ElementSpec, heuristics: bool) -> ElementVerdict:
     if not _on_variance(doc):
-        return _finish(spec, doc, 'present', 'Alternative-path process fields do not apply to the saved acceptable-solution path.')
+        return _finish(spec, doc, 'present', 'Alternative-path process fields apply only when the path is alternative.')
     state, problem, stored = _stored_state(doc, spec)
     if state == 'present' and stored is None:
         return _finish(spec, doc, 'present', 'This summary does not mark the field blank.')

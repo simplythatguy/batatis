@@ -12,6 +12,7 @@ from engine.account_models import User
 from engine.codes import Codes
 from engine.models import Case
 from engine.store import CaseStore
+from engine.tests.case_builder_fixtures import fact
 from engine.voice_context import VoiceScope, prepare_context
 
 
@@ -51,7 +52,7 @@ def context_env(tmp_path):
     codes = synthetic_codes(tmp_path / 'voice-codes.sqlite')
     owner = User(email='voice-owner@example.test', name='Specific Owner', role='applicant')
     case = store.put(Case(owner_id=owner.id, authority='edmonton', title='Specific Owner project',
-                          provisions=['9.10.9.16.(1)']))
+                          facts=[fact('pathway', 'alternative')], provisions=['9.10.9.16.(1)']))
     return store, codes, owner, case
 
 

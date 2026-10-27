@@ -5,7 +5,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 import type { CaseChecklist, CaseChecklists, CaseRules } from "../api/types.gen.ts";
 import { emptyCase } from "../intake.ts";
-import { reducer } from "../model.ts";
+import { getGaps, reducer } from "../model.ts";
 import type { RuleDef, RuleIndex } from "../rules/evaluate.ts";
 import type { Candidate, Case, Fact } from "../types.ts";
 import { conditionChoices, coveredByOption, followedInFull, matchingChecklists, otherOptions, tallyLine } from "./checklistView.ts";
@@ -285,4 +285,48 @@ test("an authority read from the site is confirmed once on its card; unanswered 
 test("caseRules lists the rules in play (a not-applicable one asks nothing and shows no result)", () => {
   assert.deepEqual(caseRules(demo(), opts()).map((r) => [r.rule_id, r.state]), [["glazed-openings-houses", "needs_info"], ["unprotected-openings", "not_applicable"], ["soffits-houses", "needs_info"]]);
   assert.deepEqual(caseRules(demo(), {}), []);
+});
+
+function soffitCase(extra: Fact[]): Case {
+  return {
+    ...emptyCase("homebuilder"),
+    description: "Vented aluminum soffit and a roof overhang on the north wall.",
+    facts: [
+      fact("storeys", 2), fact("building_area_m2", 150), fact("occupancy", "single_family"),
+      fact("soffit_projects", true), ...extra,
+    ],
+  };
+}
+
+test("a firm soffit departure opens the six process fields, the ladder, and site scope", () => {
+  const c = soffitCase([fact("soffit_to_property_line_m", 0.1), fact("faces_public_way", false), fact("limiting_distance_m", 0.3)]);
+  const deck = buildDeck(c, getGaps(c), opts());
+  assert.deepEqual(deck.filter((i) => i.kind === "process").map((i) => i.ref), ["rationale", "risk", "mitigation", "assumptions", "maintenance", "qualifications"]);
+  assert.match(deck.find((i) => i.kind === "section-d")?.why ?? "", /Process fields are separate/);
+  assert.equal(deck.find((i) => i.kind === "paperwork")?.paperworkRows?.some((row) => row.ref === "scope"), true);
+  assert.equal(getGaps(c).some((g) => g.id === "process-rationale"), true);
+  assert.equal(deck.some((i) => i.key === "path-stop"), false);
+});
+
+test("a firm soffit follow keeps the shared ladder and drops the variance package", () => {
+  const c = soffitCase([fact("soffit_to_property_line_m", 0.8), fact("faces_public_way", false), fact("limiting_distance_m", 1.2)]);
+  const deck = buildDeck(c, getGaps(c), opts());
+  assert.equal(deck.filter((i) => i.kind === "process").length, 0);
+  assert.equal(deck.find((i) => i.kind === "section-d")?.why, "This lists the shared evidence ladder. It is not a finding that the design complies or is safe.");
+  assert.equal(deck.find((i) => i.kind === "paperwork")?.paperworkRows?.some((row) => row.ref === "scope"), false);
+  assert.equal(getGaps(c).some((g) => g.id.startsWith("process-")), false);
+});
+
+test("an unknown path and a rule that does not apply open no package", () => {
+  const unknown = { ...emptyCase("homebuilder"), description: "SYNTHETIC exterior cladding departure." };
+  const unknownDeck = buildDeck(unknown, getGaps(unknown), opts());
+  assert.equal(unknownDeck.find((i) => i.key === "path-stop")?.title, "Path not decided");
+  assert.equal(unknownDeck.filter((i) => i.kind === "process").length, 0);
+  assert.equal(unknownDeck.some((i) => i.kind === "section-d"), false);
+
+  const missed = soffitCase([fact("storeys", 5), fact("building_area_m2", 100)]);
+  const missedDeck = buildDeck(missed, getGaps(missed), opts());
+  assert.equal(missedDeck.find((i) => i.key === "path-stop")?.title, "This rule doesn’t apply");
+  assert.equal(missedDeck.filter((i) => i.kind === "process").length, 0);
+  assert.equal(missedDeck.some((i) => i.kind === "section-d"), false);
 });

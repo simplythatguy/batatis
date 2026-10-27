@@ -218,7 +218,7 @@ def test_clear_keeps_missing_benchmark_process_and_professional_export_holds(con
     gaps = client.get(f'/cases/{case.id}/gaps').json()['items']
     assert any(row['field'] == 'provisions' and row['section'] == 'C' for row in gaps)
     fields = client.get(f'/cases/{case.id}/process-fields').json()['items']
-    assert {'risk_assessment', 'mitigating_measures', 'assumptions_and_limits'} <= {row['id'] for row in fields}
+    assert fields == []
     assert client.get(f'/cases/{case.id}/professional').json()['required'] != 'no'
     exported = client.post(f'/cases/{case.id}/export')
     assert_private(exported, 409)

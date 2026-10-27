@@ -120,7 +120,7 @@ def _house_facts():
 
 def test_confirmed_provision_recommends_ladder_and_lists_empty_process_fields():
     codes = codes_with_rules()
-    issue = section_d_issues(Case(provisions=[BENCHMARK]), codes)[0]
+    issue = section_d_issues(Case(provisions=[BENCHMARK], facts=[fact('pathway', 'alternative')]), codes)[0]
     assert issue.provision.provision_id == BENCHMARK and issue.provision.citation == codes.rows[('B', BENCHMARK)]['citation']
     assert issue.objective == 'OP3.1' and issue.function == 'F03'
     assert issue.recommended_types == CONFIDENCE_LADDER + ALTERNATIVE_EVIDENCE_TYPES

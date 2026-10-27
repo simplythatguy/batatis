@@ -44,6 +44,7 @@ def test_actual_officer_default_route_returns_located_grouped_b_without_writes(c
     case = store.put(Case(title='SYNTHETIC officer default B', facts=[
         fact('owner_name', 'SYNTHETIC owner'),
         fact('alternative_description', 'SYNTHETIC wall cladding departure'),
+        fact('pathway', 'alternative'),
         fact('process.risk_assessment', 'low risk'),
         fact('process.mitigating_measures', 'standard measures'),
         fact('professional_status', 'not_engaged'),
@@ -140,6 +141,7 @@ def test_legacy_variant_names_consume_the_same_shared_policy(context):
     client, store, _ = context
     case = store.put(Case(facts=[
         fact('alternative_description', 'SYNTHETIC exterior cladding departure'),
+        fact('pathway', 'alternative'),
         fact('process.risk_assessment', 'low risk'),
         fact('process.mitigating_measures', 'The interior stair handrail will be painted blue'),
         fact('process.assumptions_and_limits', 'The insulation capacity is stated as fact without a test'),
