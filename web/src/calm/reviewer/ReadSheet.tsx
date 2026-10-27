@@ -77,7 +77,7 @@ export function ReadSheet({ c, sheet, rows, anchors, session, rulebook, states, 
       <div className="cf-sheet-sub">{CODE_EDITION}{!historical && c.submitted_at ? ` · sent ${sentPhrase(c.submitted_at)}` : ""}</div>
 
       {SECTIONS.map((section) => (
-        <section key={section} aria-label={TITLE[section]}>
+        <section key={section} id={`sheet-${section === "process" ? "P" : section}`} aria-label={TITLE[section]}>
           <h4>{TITLE[section]}</h4>
           {rows.filter((r) => r.section === section).map((r) => row(r.id, r.label, r.reading.value
             ? <span className="rw-text">{r.reading.value}{r.reading.unconfirmed && <span className="rw-quiet"> · not confirmed</span>}</span>

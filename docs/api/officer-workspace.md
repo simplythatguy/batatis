@@ -10,12 +10,14 @@ Wire types: `engine/models_review.py` (`Workspace`, `FindingState`, `ReviewTally
 `DecisionItem` fields in `engine/routes_review.py` and `engine/account_models.py`. The web reads them from
 `web/src/api/types.gen.ts`.
 
-## Three places, one thing at a time
+## One screen
 
-The officer's review has three places in the header: the Application (the paper sheet, each field with a finding
-marked), Findings (one finding at a time in the question-deck layout: the field, a few words, the applicant's
-own words and sources, then Ask for it or Dismiss) and Decide (the exact request text and one primary action).
-Nothing is marked done because it was passed: the Findings count is what still needs a look.
+The officer's review is one screen on the applicant's Review layout: a headline that counts what will be asked,
+the list of items (each opens in place to the applicant's own words and every source file), and a card with the
+four sections and one primary action (Accept when the server's gate allows it, otherwise Return). A section opens
+the full application (the paper sheet, each field with a finding marked). Nothing is marked done because it was
+passed: an item stays in the list until the officer asks for it or dismisses it. The Return confirmation shows the
+exact text the applicant will receive.
 
 ## The officer's call on a finding
 
@@ -25,7 +27,7 @@ Every finding except the peer-review signal has one officer state (`FindingState
 | --- | --- | --- |
 | `ask` | In the request. Its item is `included`. | Yes |
 | `verify` | Not established yet (`not_found`, or routed to the officer): look first, then ask or dismiss. | Yes |
-| `dismissed` | The officer's call, with a `reason` (`checked`, `not_needed`, `does_not_fit`) and, for a blocking finding, a note. Kept in the record; the applicant never sees it. | No |
+| `dismissed` | The officer's call, with a `reason` (`checked`, `not_needed`, `does_not_fit`) and an optional note. Kept in the record; the applicant never sees it. | No |
 
 Defaults when the officer has not chosen: `ask` for an applicant finding the review established, `verify`
 for a `not_found` or officer-routed one. A finding never stops counting by becoming unreadable: only a

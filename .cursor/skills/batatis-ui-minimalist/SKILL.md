@@ -41,16 +41,17 @@ Every icon-only control or icon metadata has an accessible name and a hover labe
 ## Example: stage navigation
 
 - Before: `1 Describe  2 Questions  3 Review  4 Application` with thin underlines.
-- After: four icons, in order, never with a fill, pill or shadow (at rest, current, hover, pressed or focus). Only the current one shows its one-word name beside its icon, at full opacity (`Describe`, `Questions`, `Review`, `Application`); the others are the icon alone, dimmed and brighter on hover or keyboard focus, fainter when locked (user decision 2026-10-22, "Option A+B"; it replaces "never with words beside them"). Compact cues keep the state in one neutral ink: a small green check mark when done, a thin line at the foot while part of the way through. "Questions, 40% done" is the accessible name and the hover/focus label (one label open at a time). The officer's review uses the same control: Application (document), Findings (alert, the count still to look at as a quiet number), Decide (scales).
-- Code: `StageButton` and `StageRings` in `web/src/calm/shell/AppHeader.tsx`; the officer's stages in `web/src/calm/reviewer/ReviewWorkspace.tsx`.
+- After: four icons, in order, never with a fill, pill or shadow (at rest, current, hover, pressed or focus). Only the current one shows its one-word name beside its icon, at full opacity (`Describe`, `Questions`, `Review`, `Application`); the others are the icon alone, dimmed and brighter on hover or keyboard focus, fainter when locked (user decision 2026-10-22, "Option A+B"; it replaces "never with words beside them"). Compact cues keep the state in one neutral ink: a small green check mark when done, a thin line at the foot while part of the way through. "Questions, 40% done" is the accessible name and the hover/focus label (one label open at a time).
+- Code: `StageButton` and `StageRings` in `web/src/calm/shell/AppHeader.tsx`.
 
 ## Example: the officer's review
 
-- Three places in the header, as stage icons: Application (document), Findings (alert, with the count still to look at), Decide (scales). The current one shows its word.
-- Findings is the question deck: one finding at a time. The field as the eyebrow ("B · Legal description"), a few words as the title ("Couldn't read the plan number"), the applicant's own words as the only context, every source as a chip that opens the file, then two choices: 1 Ask for it, 2 Dismiss. A dismissal shows its three reasons and a note; the check's explanation waits behind "Why". One primary: Next (Decide on the last one). The footer shows the findings per section.
-- Decide: one title that says what happens ("Return with 4 items", "Ready to accept"), the reason Accept waits when it does, the exact request text, Add item and Opening line as links, one primary (Return or Accept), and "Completeness only · not a design approval". Messages fold underneath.
+- One screen, the same layout as the applicant's Review (user correction 2026-10-26: the three-place deck was "too much"; a review is a list you scan, not a deck you page through). No header stages, no steps, no Next.
+- A headline that counts ("Ask for 3 things.", "Complete. Ready to accept."), one quiet lede line only when the application was resent ("Since version 2: 1 fixed · 1 new").
+- "To ask": one row per item, a status dot (a ring when it couldn't be read: look first) and a few words. The row opens in place to the applicant's own words in full and a chip per source file. ✕ means don't ask; a required item asks why with three one-tap reasons, no note. A rule-required item says "Required" and has no ✕. "Add your own" is a link. What isn't asked folds under "Not asking · n".
+- The card: the four sections (icon, letter, a short count) open the application at that section; then the one primary (Accept when complete, otherwise "Return · n"), and "Completeness only". Messages and the menu (⋯) hold everything else.
 - Opening an application nobody has picked up picks it up; "Stop reviewing" (⋯) goes back to the queue.
-- Code: `web/src/calm/reviewer/ReviewWorkspace.tsx`, `FindingStep.tsx`, `DecideStage.tsx`, `ReadSheet.tsx`.
+- Code: `web/src/calm/reviewer/ReviewWorkspace.tsx`, `OfficerReview.tsx`, `ReadSheet.tsx`.
 
 ## Example: an application title
 

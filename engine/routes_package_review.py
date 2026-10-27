@@ -186,8 +186,6 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes]) -
                     raise HTTPException(422, 'The completeness rules still require this; ask for it')
                 if change.reason is None:
                     raise HTTPException(422, 'Choose a reason for dismissing the finding')
-                if finding.severity == 'blocking' and len(''.join(change.note.split())) < 3:
-                    raise HTTPException(422, 'A blocking finding needs a dismissal note of at least 3 non-space characters')
             if change.state == 'ask' and change.key not in linked:
                 raise HTTPException(422, 'This finding has no linked request item; add a targeted officer item')
             dispositions[change.key] = Disposition(**change.model_dump(), by_name=user.name, at=now())

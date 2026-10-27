@@ -3,8 +3,6 @@ import test from "node:test";
 import { componentHarness, nodes, text } from "../../../scripts/component-harness.mjs";
 import * as packageView from "./packageView.ts";
 import * as workspaceView from "./workspaceView.ts";
-import * as requestDraft from "./requestDraft.ts";
-import { reviewSession, workspaceFor } from "./tests/workspaceHarness.mjs";
 
 const finding = { key: "legal", section: "B", field: "legal_description", label: "plan number", status: "not_found", severity: "blocking", routed_to: "applicant",
   message: "Your application has an unclear plan number.", problem: null, defect_class: null,
@@ -12,66 +10,65 @@ const finding = { key: "legal", section: "B", field: "legal_description", label:
     { file: "form.pdf", page: 1, quote: "A complete quote. ".repeat(40), form_field: null, bbox: null },
     { file: "plan.pdf", page: 3, quote: "The second pointer", form_field: null, bbox: null },
   ] };
-const state = { key: "legal", state: "verify", locked: false, reason: null, note: "", at: null, by_name: null };
-const limits = { intro: 2000, item_text: 600, items: 50, text: 6000 };
 const files = [{ name: "form.pdf", file_id: "form" }, { name: "plan.pdf", file_id: "plan" }];
-const item = { key: "ir_legal", id: "ir_legal", finding_key: "legal", saved: true, text: "Please confirm the plan number.", included: false, target: { section: "B", field: "legal_description", label: "Section B · Legal description" } };
-const step = { finding, state, item, own: false, where: "B · Legal description", value: "Lot 12", before: undefined };
+const state = (over = {}) => ({ key: "legal", state: "ask", locked: false, reason: null, note: "", at: null, by_name: null, ...over });
 const deps = { "./workspaceView": workspaceView, "./packageView": packageView };
-const choice = (tree: unknown, label: string) => nodes(tree, (n) => n.type === "button" && n.props.className === "cf-choice" && text(n).includes(label))[0];
+const button = (tree: unknown, match: (n: { props: Record<string, unknown> }) => boolean) => nodes(tree, (n) => n.type === "button" && match(n))[0];
+const json = (v: unknown) => JSON.parse(JSON.stringify(v));
 
 test("a finding is named in a few words from its own status and label", () => {
   assert.equal(workspaceView.findingTitle({ ...finding, status: "blank", label: "signature date" } as never), "Signature date is blank");
   assert.equal(workspaceView.findingTitle(finding as never), "Couldn’t read the plan number");
 });
 
-test("one finding shows every source quote in full, a chip per file, and stays unchosen while it needs a look", async () => {
-  const h = await componentHarness(new URL("./FindingStep.tsx", import.meta.url), "FindingStep", deps, { document: { addEventListener() {}, removeEventListener() {} } });
-  const tree = await h.render({ step, caseId: "c1", files, limits, editable: true, last: false, canBack: false, onCall() {}, onText() {}, onAddOwn() {}, onNext() {}, onBack() {} });
-  assert.deepEqual(nodes(tree, (n) => n.type === "q").map(text), finding.pointers.map((p) => p.quote), "every quote, never cut");
-  assert.deepEqual(nodes(tree, (n) => n.props?.fileId).map((n) => [n.props.fileId, n.props.page]), [["form", 1], ["plan", 3]]);
-  assert.equal(choice(tree, "Ask for it").props["aria-pressed"], false);
-  assert.equal(choice(tree, "Dismiss").props["aria-pressed"], false);
-  h.unmount();
-});
-
-test("a locked finding can't be dismissed and says why; Dismiss records the call", async () => {
-  const calls: unknown[] = [];
-  const h = await componentHarness(new URL("./FindingStep.tsx", import.meta.url), "FindingStep", deps, { document: { addEventListener() {}, removeEventListener() {} } });
-  const props = { step: { ...step, state: { ...state, locked: true } }, caseId: "c1", files, limits, editable: true, last: false, canBack: false,
-    onCall: (e: unknown) => calls.push(e), onText() {}, onAddOwn() {}, onNext() {}, onBack() {} };
+test("a row opens in place to every source quote in full, with a chip per file", async () => {
+  const h = await componentHarness(new URL("./OfficerReview.tsx", import.meta.url), "FindingRow", deps);
+  const props = { row: { finding, state: state(), askable: true }, caseId: "c1", files, editable: true, onCall() {}, onAddOwn() {} };
   let tree = await h.render(props);
-  assert.equal(choice(tree, "Dismiss").props.disabled, true);
-  assert.match(text(tree), /Required by the completeness rules/);
-  tree = await h.render({ ...props, step });
-  choice(tree, "Dismiss").props.onClick();
-  assert.equal(JSON.parse(JSON.stringify(calls.at(-1))).state, "dismissed");
+  assert.equal(nodes(tree, (n) => n.type === "q").length, 0, "the evidence waits one tap away");
+  button(tree, (n) => n.props["aria-expanded"] !== undefined).props.onClick(); tree = await h.render();
+  const evidence = nodes(tree, (n) => (n.type as { name?: string })?.name === "Evidence")[0];
+  assert.ok(evidence, "opening the row shows its evidence");
+  const shown = (evidence.type as (p: unknown) => unknown)(evidence.props);
+  assert.deepEqual(nodes(shown, (n) => n.type === "q").map(text), finding.pointers.map((p) => p.quote), "every quote, never cut");
+  assert.deepEqual(nodes(shown, (n) => n.props?.fileId).map((n) => [n.props.fileId, n.props.page]), [["form", 1], ["plan", 3]]);
   h.unmount();
 });
 
-test("a finding with no drafted item offers Add to request instead of a dead Ask", async () => {
-  const added: unknown[] = [];
-  const h = await componentHarness(new URL("./FindingStep.tsx", import.meta.url), "FindingStep", deps, { document: { addEventListener() {}, removeEventListener() {} } });
-  const tree = await h.render({ step: { ...step, item: undefined }, caseId: "c1", files, limits, editable: true, last: true, canBack: true,
-    onCall() {}, onText() {}, onAddOwn: (f: unknown) => added.push(f), onNext() {}, onBack() {} });
-  choice(tree, "Add to request").props.onClick();
-  assert.equal(added.length, 1);
-  assert.ok(nodes(tree, (n) => n.type === "button" && text(n).startsWith("Decide")).length, "the last finding leads to Decide");
+test("✕ on a required item asks why, and the reason is the whole dismissal", async () => {
+  const calls: unknown[] = [];
+  const h = await componentHarness(new URL("./OfficerReview.tsx", import.meta.url), "FindingRow", deps);
+  let tree = await h.render({ row: { finding, state: state(), askable: true }, caseId: "c1", files, editable: true, onCall: (e: unknown) => calls.push(e), onAddOwn() {} });
+  button(tree, (n) => String(n.props["aria-label"] ?? "").startsWith("Don’t ask")).props.onClick(); tree = await h.render();
+  assert.equal(calls.length, 0, "a required item never disappears without a reason");
+  button(tree, (n) => text(n) === "I checked it").props.onClick();
+  assert.deepEqual(json(calls), [{ key: "legal", state: "dismissed", reason: "checked", note: "" }]);
   h.unmount();
 });
 
-test("Decide shows the server's text, never a local rendering, and Accept follows only the server's gate", async () => {
-  const h = await componentHarness(new URL("./DecideStage.tsx", import.meta.url), "DecideStage", { "./workspaceView": workspaceView, "./requestDraft": requestDraft, "./queue": await import("./queue.ts") });
-  const session = reviewSession(3);
-  const draft = { state: { ...requestDraft.initialDraft(session), save: { kind: "dirty" } }, pending: true, problem: "", dispatch() {}, save: async () => {} };
-  const choices = { canReturn: false, canAccept: false, canRefuse: true, why: "Save the request changes first.", busy: false, onReturn() {}, onAccept() {}, onRefuse() {} };
-  const base = { session, applicant: "Mira", status: "in_review", decidedAt: null, editable: true, targets: [], questions: [], outcome: null, messages: null, unread: 0, messagesAsk: 0 };
-  let tree = await h.render({ ...base, workspace: workspaceFor(3, 1, { tally: { required: 9, to_check: 0, verify: 0, dismissed: 0, rulebook: 0, asked: 2 } }), draft, choices });
-  assert.equal(text(nodes(tree, (n) => n.type === "pre")[0]), "Exact server preview");
-  assert.match(text(tree), /Return with 2 items/);
-  assert.match(text(tree), /Save the request changes first\./, "why the decision waits is on screen");
-  tree = await h.render({ ...base, workspace: workspaceFor(3, 1), draft: null, choices: { ...choices, canReturn: true, canAccept: true, why: "" } });
-  assert.match(text(tree), /Ready to accept/);
-  assert.equal(nodes(tree, (n) => n.type === "button" && text(n).includes("Accept"))[0].props.className.includes("is-primary"), true, "the one primary action follows the gate");
+test("a locked item can't be dropped and says so; a look-first item offers Ask", async () => {
+  const calls: unknown[] = [], own: unknown[] = [];
+  const h = await componentHarness(new URL("./OfficerReview.tsx", import.meta.url), "FindingRow", deps);
+  let tree = await h.render({ row: { finding, state: state({ locked: true }), askable: true }, caseId: "c1", files, editable: true, onCall() {}, onAddOwn() {} });
+  assert.equal(button(tree, (n) => String(n.props["aria-label"] ?? "").startsWith("Don’t ask")), undefined);
+  assert.match(text(tree), /Required/);
+  tree = await h.render({ row: { finding, state: state({ state: "verify" }), askable: true }, caseId: "c1", files, editable: true, onCall: (e: unknown) => calls.push(e), onAddOwn: (f: unknown) => own.push(f) });
+  button(tree, (n) => text(n).startsWith("Ask")).props.onClick();
+  assert.equal(json(calls)[0].state, "ask");
+  tree = await h.render({ row: { finding, state: state({ state: "verify" }), askable: false }, caseId: "c1", files, editable: true, onCall: (e: unknown) => calls.push(e), onAddOwn: (f: unknown) => own.push(f) });
+  button(tree, (n) => text(n).startsWith("Ask")).props.onClick();
+  assert.equal(own.length, 1, "with no drafted item, Ask writes the officer's own");
+  h.unmount();
+});
+
+test("the review shows the headline, the list and only the actions it is given", async () => {
+  const h = await componentHarness(new URL("./OfficerReview.tsx", import.meta.url), "OfficerReview", deps);
+  const tree = await h.render({ headline: "Ask for 2 things.", lede: "", rows: [{ finding, state: state(), askable: true }], rulebook: [], dismissed: [], own: [],
+    caseId: "c1", files, editable: true, targets: [], itemLimit: 600,
+    sections: [{ id: "B", title: "Project", icon: "file", summary: "1 to ask", tone: "blocking" }],
+    actions: null, onCall() {}, onAddOwn() {}, onAdd() {}, onOwnText() {}, onOwnTarget() {}, onOwnRemove() {}, onSection() {} });
+  assert.match(text(tree), /Ask for 2 things\./);
+  assert.equal(nodes(tree, (n) => (n.type as { name?: string })?.name === "FindingRow").length, 1);
+  assert.equal(nodes(tree, (n) => n.type === "button" && /Accept|Return|Refuse/.test(text(n))).length, 0, "no decision without the gate's actions");
   h.unmount();
 });

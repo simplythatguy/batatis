@@ -79,13 +79,12 @@ def test_not_found_is_unverified_never_resolved():
 def test_dispositions_targets_and_full_index_response(scene):
     case, review, client = install(scene, [finding()])
     path = f'/review/{case.id}/package-review/1/information-request'
-    for change in [dict(key='unknown', state='verify'), dict(key='owner:presence', state='dismissed'),
-                   dict(key='owner:presence', state='dismissed', reason='checked', note=' a b ')]:
+    for change in [dict(key='unknown', state='verify'), dict(key='owner:presence', state='dismissed')]:
         response = client.put(path, json={'items': edits(review), 'findings': [change]})
         assert response.status_code == 422, response.text
     response = client.put(path, json={'items': edits(review), 'findings': [
-        dict(key='owner:presence', state='dismissed', reason='checked', note='Checked saved record')]})
-    assert response.status_code == 200, response.text
+        dict(key='owner:presence', state='dismissed', reason='checked')]})
+    assert response.status_code == 200, response.text  # the reason alone dismisses; the note is optional
     index = response.json()
     assert index['workspace']['tally']['required'] == 0
     assert index['sessions'][0]['required'] == 0

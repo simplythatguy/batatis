@@ -8,7 +8,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, typ
 import { AccountsError, claimConflict, review, type Claim, type Message } from "../../api/accounts";
 import { EngineError } from "../../api/client";
 import { packageReview, type ReviewTarget } from "../../api/packageReview";
-import type { Case, Finding, PackageReviewIndex, ProfessionalRequirementRequest, ReviewSession, Workspace } from "../../api/types.gen";
+import type { Case, PackageReviewIndex, ProfessionalRequirementRequest, ReviewSession, Workspace } from "../../api/types.gen";
 import { accountSession, useAccount } from "../account";
 import { AcIcon, Avatar, PageHead } from "../auth/bits";
 import { ExpiryNotice } from "../ExpiryNotice";
@@ -29,18 +29,18 @@ import { mergeThreadMessages } from "./threadMessages";
 import { useRequestDraft } from "./useRequestDraft";
 import { Messages } from "./Messages";
 import { OpenQuestions } from "./OpenQuestions";
-import { DecideStage } from "./DecideStage";
-import { FindingFooter, FindingStep } from "./FindingStep";
 import { ReadSheet } from "./ReadSheet";
-import { StageButton } from "../shell/AppHeader";
+import { OfficerReview, plural, type SectionRow } from "./OfficerReview";
+import { CIcon } from "../ui";
+import type { IconName } from "../icons";
 import { Icon24 } from "../icons";
-import { localField } from "../../intakeFields";
 import { StatusPill } from "./ReviewQueue";
-import { allAnchors, anchorFor, changedFields, findingState, SECTIONS, sheetRows, targetOptions, workspaceDecision } from "./workspaceView";
+import { allAnchors, anchorFor, findingState, SECTIONS, sheetRows, targetOptions, workspaceDecision } from "./workspaceView";
 import "./review.css";
 
 type Snapshot = Awaited<ReturnType<typeof readReviewSnapshot>>;
-type Stage = "read" | "findings" | "decide";
+/** The review, or one step away: the full application or the messages. */
+type Stage = "review" | "application" | "messages";
 type DraftReport = { pending: boolean; trouble: string; discard: () => void };
 type IndexState = "loading" | "ready" | "failed" | "unavailable";
 type DecisionPreview = { kind: "return"; caseVersion: number; reviewVersion: number; text: string; count: number }
@@ -79,8 +79,6 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
   const [draftTrouble, setDraftTrouble] = useState<{ text: string; discard: () => void } | null>(null);
   // Where the officer is: the application, the findings one at a time, or the decision. null = not chosen yet.
   const [stage, setStage] = useState<Stage | null>(null);
-  // Bumped by the header's message button: the decision page opens with the messages unfolded.
-  const [messagesAsk, setMessagesAsk] = useState(0);
   const upload = useRef<HTMLInputElement>(null);
   const scope = useRef({ caseId, session: accountSession() });
   const reads = useRef(0), indexReads = useRef(0);
@@ -257,7 +255,7 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
     const session = accountSession(), sequence = ++indexReads.current; setRunError("");
     try {
       const next = latest?.version === version ? latest : await packageReview.version(target, version);
-      if (live(session) && sequence === indexReads.current) { setShown(next); setStage("read"); }
+      if (live(session) && sequence === indexReads.current) { setShown(next); setStage("review"); }
     } catch (e) { if (live(session)) setRunError(errorText(e, "That review version didn’t load. Try again.")); }
   }
   async function afterDecision(next: Case) {
@@ -351,8 +349,12 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
       label: `Open v${v.version}${v.version === latest?.version ? " · latest" : ""}`,
       onClick: () => void pickVersion(v.version), disabled: !idle, separator: i === 0 && canReview,
     })),
-    { label: "Refresh", onClick: () => refresh(true), disabled: !idle, separator: true },
-    ...(canReview ? [{ label: busy === "release" ? "Releasing…" : "Stop reviewing", onClick: () => void release(), disabled: !idle }] : []),
+    { label: "Application", onClick: () => go("application"), separator: true },
+    { label: "Refresh", onClick: () => refresh(true), disabled: !idle },
+    ...(canReview ? [
+      { label: "Refuse…", onClick: () => setRefusing(true), disabled: !idle, separator: true },
+      { label: busy === "release" ? "Releasing…" : "Stop reviewing", onClick: () => void release(), disabled: !idle },
+    ] : []),
   ];
 
   /** The one line under the header: what needs the officer's attention, with its action. */
@@ -385,35 +387,19 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
   }
   const line = c ? statusLine() : null;
 
-  const findingsCount = (shown?.findings ?? []).filter((f) => f.key !== "peer_review:signal").length + (workspace?.rulebook.length ?? 0);
-  const decided = status === "returned" || status === "accepted" || status === "refused";
-  // The first place to land: the decision once there is one, else the findings, else the decision.
-  const at: Stage = stage ?? (decided || !findingsCount ? "decide" : "findings");
-  const toLook = workspace?.tally.verify ?? 0;
+  const at: Stage = stage ?? "review";
   const go = (next: Stage) => setStage(next);
-
-  const stages = shown && indexState !== "unavailable" && (
-    <nav className="cf-stages rw-stages" aria-label="Review">
-      <StageButton id="rw-read" label="Application" ariaLabel="Application" icon={<AcIcon name="doc" size={16} />} pct={100} current={at === "read"} onClick={() => go("read")} />
-      <StageButton id="rw-findings" label="Findings" icon={<AcIcon name="alert" size={16} />} current={at === "findings"}
-        ariaLabel={`Findings, ${findingsCount}${toLook ? `, ${toLook} to look at` : ""}`}
-        pct={findingsCount ? Math.round(100 * (findingsCount - toLook) / findingsCount) : 100}
-        count={at === "findings" ? undefined : toLook || undefined} disabled={findingsCount ? undefined : "No findings"} onClick={() => go("findings")} />
-      <StageButton id="rw-decide" label="Decide" ariaLabel="Decide" icon={<AcIcon name="scale" size={16} />} pct={decided ? 100 : 0} done={decided} current={at === "decide"} onClick={() => go("decide")} />
-    </nav>
-  );
 
   return (
     <div className="ac-page rw-page">
       <PageHead
         title={<><a className="ac-crumb" href="#/review">Queue</a><span className="ac-crumb-sep" aria-hidden="true">/</span><span className="ac-crumb-leaf" title={title}>{title}</span></>}
         meta={c && <StatusPill a={{ status, claim, submission_number: c.submission_number }} />}
-        center={stages ? <div className="rv-head-steps">{stages}</div> : undefined}
         phoneTools={phoneTools}
         right={
           <>
             <button type="button" className="cf-icon-btn rw-head-msg" aria-label={unread ? `Messages, ${unread} new` : "Messages"} title="Messages"
-              onClick={() => { go("decide"); setMessagesAsk((n) => n + 1); }}>
+              aria-pressed={at === "messages"} onClick={() => go(at === "messages" ? "review" : "messages")}>
               <Icon24 name="msg" size={17} />{unread > 0 && <span className="rw-n is-new">{unread}</span>}
             </button>
             {c && <MoreMenu items={menu} />}
@@ -440,13 +426,13 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
             </div>
           )}
           {shown && indexState !== "unavailable" ? (
-            <SessionWorkspace key={`${shown.package_id}:${shown.version}:${me}`} stage={at} onStage={go} messagesAsk={messagesAsk}
+            <SessionWorkspace key={`${shown.package_id}:${shown.version}:${me}`} stage={at} onStage={go}
               c={c} snapshot={snapshot} session={shown} workspace={workspace} target={target} applicant={applicant}
               editable={editable} busy={Boolean(busy) || running || refreshing} showDecision={canReview && !historical && !closeOut}
               historical={historical} status={status} messages={messages} onMessages={setMessages} me={me}
-              messageDraft={messageDraft} onMessageDraft={setMessageDraft} unread={unread} onDraft={draftChanged} onSaved={adoptIndex}
+              messageDraft={messageDraft} onMessageDraft={setMessageDraft} onDraft={draftChanged} onSaved={adoptIndex}
               onConflict={() => refresh(true)} onReturn={() => openPreview("return")} onAccept={() => openPreview("accept")}
-              onRefuse={() => setRefusing(true)} professional={professional} outcome={outcome} />
+              professional={professional} outcome={outcome} />
           ) : (
             <div className="rw-read">
               <ExpiryNotice expiresAt={c.expires_at} officer />
@@ -483,8 +469,9 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
       <Modal open={Boolean(preview)} onClose={() => { if (!busy) setPreview(null); }} labelledBy="rw-decision-title" className="ac-return rw-dialog">
         <div className="cf-modal-body">
           <h2 id="rw-decision-title" className="cf-modal-title">{preview?.kind === "return" ? `Return to ${applicant}?` : "Accept as administratively complete?"}</h2>
+          {preview?.kind === "return" && <pre className="rw-letter is-dialog" aria-label="Request to send">{preview.text}</pre>}
           <p className="cf-muted">{preview?.kind === "return"
-            ? `${plural(preview.count, "item")}. They fix the application and send it again; they can’t reply.`
+            ? "They fix the application and send it again. They can’t reply."
             : `${applicant} is told the file is complete. Not a variance, not a design approval.`}</p>
           {decisionError && <p className="rw-hint is-error" role="alert"><span className="cf-dot is-blocking" aria-hidden="true" />{decisionError}</p>}
         </div>
@@ -521,22 +508,28 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
   );
 }
 
-const plural = (n: number, one: string) => `${n} ${n === 1 ? one : `${one}s`}`;
-const SECTION_NAME: Record<string, string> = { A: "Applicant", B: "Project", C: "Code", process: "Your case", D: "Documents" };
+/** The form's sections as the applicant's Review shows them; the alternative path belongs with D. */
+const SHEET_SECTIONS: { id: string; title: string; icon: IconName; parts: string[] }[] = [
+  { id: "A", title: "Applicant", icon: "user", parts: ["A"] },
+  { id: "B", title: "Project", icon: "file", parts: ["B"] },
+  { id: "C", title: "Code references", icon: "book", parts: ["C"] },
+  { id: "D", title: "Case and proof", icon: "review", parts: ["D", "process"] },
+];
 
-/** The review of one version, in three places: the application, the findings one at a time, the decision. */
-function SessionWorkspace({ stage, onStage, messagesAsk, c, snapshot, session, workspace, target, applicant, editable, busy, showDecision, historical, status, messages, onMessages, me, messageDraft, onMessageDraft, unread, onDraft, onSaved, onConflict, onReturn, onAccept, onRefuse, professional, outcome }: {
-  stage: Stage; onStage: (s: Stage) => void; messagesAsk: number;
+/** The review of one version: one screen, with the application and the messages one step away. */
+function SessionWorkspace({ stage, onStage, c, snapshot, session, workspace, target, applicant, editable, busy, showDecision, historical, status, messages, onMessages, me, messageDraft, onMessageDraft, onDraft, onSaved, onConflict, onReturn, onAccept, professional, outcome }: {
+  stage: Stage; onStage: (s: Stage) => void;
   c: Case; snapshot: Snapshot; session: ReviewSession; workspace: Workspace | null; target: ReviewTarget; applicant: string;
   editable: boolean; busy: boolean; showDecision: boolean; historical: boolean; status: string;
-  messages: Message[] | null; onMessages: Dispatch<SetStateAction<Message[] | null>>; me: string | null; messageDraft: string; onMessageDraft: (v: string) => void; unread: number;
+  messages: Message[] | null; onMessages: Dispatch<SetStateAction<Message[] | null>>; me: string | null; messageDraft: string; onMessageDraft: (v: string) => void;
   onDraft: (state: DraftReport) => void; onSaved: (index: PackageReviewIndex) => void; onConflict: () => void;
-  onReturn: () => void; onAccept: () => void; onRefuse: () => void; professional: ReactNode; outcome: ReactNode;
+  onReturn: () => void; onAccept: () => void; professional: ReactNode; outcome: ReactNode;
 }) {
   const limits = workspace?.limits ?? READ_ONLY_LIMITS;
   const draft = useRequestDraft({ target, session, limits, enabled: editable, onSaved, onConflict });
   const save = draft.state.save;
-  const trouble = save.kind === "error" ? save.message : save.kind !== "saved" ? draft.problem : "";
+  // Only a save the server refused reaches the status line; an unfinished item shows under the list.
+  const trouble = save.kind === "error" ? save.message : "";
   const { dispatch } = draft;
   const discard = useCallback(() => dispatch({ type: "reset", session }), [dispatch, session]);
   useEffect(() => { onDraft({ pending: draft.pending, trouble, discard }); }, [draft.pending, trouble, discard, onDraft]);
@@ -548,92 +541,126 @@ function SessionWorkspace({ stage, onStage, messagesAsk, c, snapshot, session, w
   }, [c, snapshot.information, historical]);
   const rows = useMemo(() => sheetRows(sheet, session, historical), [sheet, session, historical]);
   const anchors = useMemo(() => allAnchors(rows, sheet, session), [rows, sheet, session]);
-  const changes = useMemo(() => (historical ? new Map() : changedFields(c)), [c, historical]);
   const targets = targetOptions(session, anchors);
+  const items = draft.state.content.items;
   // The server's state, with this browser's unsaved calls on top until the save comes back.
   const states = new Map(session.findings.map((f) => {
     const state = findingState(f, session, workspace);
     return [f.key, { ...state, ...draft.state.content.findings.find((e) => e.key === f.key) }];
   }));
+  const order = new Map(anchors.map((a, i) => [a.id, i]));
+  const all = session.findings.filter((f) => f.key !== "peer_review:signal")
+    .map((f) => ({ finding: f, state: states.get(f.key)!, askable: items.some((i) => i.finding_key === f.key) }))
+    .sort((a, b) => SECTIONS.indexOf(a.finding.section) - SECTIONS.indexOf(b.finding.section)
+      || (order.get(anchorFor(a.finding, anchors)) ?? 999) - (order.get(anchorFor(b.finding, anchors)) ?? 999));
+  const own = items.filter((i) => !i.finding_key);
+  // A look-first finding the officer asked for in their own words shows once: as their item.
+  const ownFields = new Set(own.map((i) => i.field).filter(Boolean));
+  const active = all.filter((r) => r.state.state !== "dismissed" && !(r.state.state === "verify" && !r.askable && ownFields.has(r.finding.field)));
+  const dismissed = all.filter((r) => r.state.state === "dismissed");
+  const rulebook = workspace?.rulebook ?? [];
 
-  // One step per finding, in form order, then the completeness rules' gaps no finding covers.
-  const steps = useMemo(() => {
-    const at = new Map(anchors.map((a, i) => [a.id, i]));
-    const own = draft.state.content.items.filter((i) => !i.finding_key).map((i) => i.target?.field);
-    const asStep = (f: Finding, title?: string) => {
-      const anchor = anchorFor(f, anchors);
-      const row = anchors.find((a) => a.id === anchor);
-      const reading = rows.find((r) => r.id === anchor)?.reading;
-      const change = changes.get(localField(f.field));
-      return {
-        order: SECTIONS.indexOf(f.section) * 10_000 + (at.get(anchor) ?? 9_999),
-        data: {
-          finding: f, state: states.get(f.key) ?? { key: f.key, state: "verify" as const, locked: true, reason: null, note: "", by_name: null, at: null },
-          item: draft.state.content.items.find((i) => i.finding_key === f.key), own: own.includes(f.field),
-          where: `${f.section === "process" ? "Your case" : f.section} · ${row?.label ?? sentence(f.label)}`,
-          value: reading?.value ?? null, before: change ? change.before : undefined, title,
-        },
-      };
-    };
-    const findings = session.findings.filter((f) => f.key !== "peer_review:signal").map((f) => asStep(f));
-    const rules = (workspace?.rulebook ?? []).map((g) => asStep({ key: g.id, section: g.section ?? "A", field: g.field ?? "", label: g.message,
-      status: "missing", problem: null, defect_class: null, message: g.message, severity: "blocking", routed_to: "applicant", pointers: [], citations: [] }, g.message));
-    return [...findings, ...rules].sort((a, b) => a.order - b.order).map((x) => x.data);
-  }, [session, workspace, anchors, rows, changes, draft.state.content, states]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const [index, setIndex] = useState(() => Math.max(0, steps.findIndex((s) => s.state.state === "verify")));
-  const current = steps[Math.min(index, steps.length - 1)];
-  const page = useRef<HTMLDivElement>(null);
-  useEffect(() => { page.current?.querySelector<HTMLElement>(".rw-step-t")?.focus({ preventScroll: true }); }, [index, stage]);
-  const open = (key: string) => { const i = steps.findIndex((s) => s.finding.key === key); if (i >= 0) { setIndex(i); onStage("findings"); } };
-  const addOwn = (f: Finding) => {
-    const t = targets.find((x) => x.field === f.field) ?? targets.find((x) => x.section === f.section && !x.field)
-      ?? { section: f.section, field: f.field, label: sentence(f.label) };
-    dispatch({ type: "add", item: officerItem(`Please provide or confirm the ${f.label}.`, t) });
-  };
-
-  const sections = SECTIONS.map((id) => ({
-    id, name: SECTION_NAME[id],
-    steps: steps.map((s, i) => ({ s, i })).filter(({ s }) => s.finding.section === id)
-      .map(({ s, i }) => ({ index: i, decided: s.state.state !== "verify", title: s.title ?? s.finding.label })),
-  })).filter((s) => s.steps.length);
-
+  const asked = workspace?.tally.asked ?? 0;
+  const required = workspace?.tally.required ?? 0;
   const gate = workspaceDecision({ workspace, editable, pending: draft.pending, busy });
-  const why = trouble || (!gate.canReturn ? gate.returnReason : gate.acceptReason);
+  const decided = status === "returned" || status === "accepted" || status === "refused";
+  const day = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleDateString("en-CA", { month: "short", day: "numeric" }) : "");
+  const headline = status === "returned" ? `Returned. Waiting for ${applicant}.`
+    : status === "accepted" ? "Administratively complete."
+    : status === "refused" ? "Refused."
+    : historical ? `Version ${session.version}, read-only.`
+    : gate.canAccept ? "Complete. Ready to accept."
+    : asked ? `Ask for ${plural(asked, "thing")}.`
+    : required ? `${plural(required, "required item")} to look at.`
+    : "Nothing to ask.";
+  const d = session.diff;
+  const since = d && !decided ? [
+    d.resolved.length ? `${d.resolved.length} fixed` : "",
+    d.new.length ? `${d.new.length} new` : "",
+    d.unverified?.length ? `${d.unverified.length} can’t tell` : "",
+  ].filter(Boolean).join(" · ") : "";
+  const lede = status === "accepted" ? `${day(c.decision?.at)} · technical review next · not a variance`
+    : status === "refused" ? `${day(c.decision?.at)} · with the appeal notice`
+    : status === "returned" ? `Sent ${day(c.decision?.at)}`
+    : since ? `Since version ${d!.previous_version}: ${since}` : "";
 
-  return (
-    <div className="rw-stage" ref={page}>
-      {stage === "read" && (
+  const sections: SectionRow[] = SHEET_SECTIONS.map((s) => {
+    const open = active.filter((r) => s.parts.includes(r.finding.section));
+    const rules = rulebook.filter((g) => g.section && s.parts.includes(g.section));
+    const n = open.length + rules.length;
+    const tone = open.some((r) => r.finding.severity === "blocking") || rules.length ? "blocking" : n ? "warning" : "done";
+    // Once decided, the card only opens the application: counts would describe a request already settled.
+    if (decided || historical) return { id: s.id, title: s.title, icon: s.icon, summary: "", tone: null };
+    return { id: s.id, title: s.title, icon: s.icon, summary: n ? `${n} to ask` : "Complete", tone };
+  });
+
+  // A save in progress only holds the button for a moment; it needs no words.
+  const why = !gate.canReturn && !draft.pending ? gate.returnReason : "";
+  const actions = !showDecision || decided || historical ? null : gate.canAccept ? (
+    <>
+      <button type="button" className="cf-btn is-primary is-grow" disabled={busy} onClick={onAccept}>Accept</button>
+      {asked > 0 && <button type="button" className="cf-btn" disabled={busy || !gate.canReturn} onClick={onReturn}>Return</button>}
+    </>
+  ) : (
+    <>
+      <button type="button" className="cf-btn is-primary is-grow" disabled={busy || !gate.canReturn} title={why || undefined} onClick={onReturn}>
+        Return{asked ? ` · ${asked}` : ""}
+      </button>
+      {why && <p className="cf-faint cf-small ow-hint">{why}</p>}
+    </>
+  );
+  const problem = save.kind !== "saved" && draft.problem;
+
+  // Opening a section from the card scrolls the application to it.
+  const [section, setSection] = useState<string | null>(null);
+  useEffect(() => {
+    if (stage === "application" && section) document.getElementById(`sheet-${section}`)?.scrollIntoView({ block: "start" });
+  }, [stage, section]);
+
+  if (stage === "application") {
+    return (
+      <div className="rw-stage">
         <div className="rw-read">
+          <button type="button" className="cf-link-btn ow-back" onClick={() => onStage("review")}><CIcon name="back" size={13} />Review</button>
           <ExpiryNotice expiresAt={c.expires_at} officer />
-          <ReadSheet c={c} sheet={sheet} rows={rows} anchors={anchors} session={session} rulebook={workspace?.rulebook ?? []} states={states}
-            historical={historical} professional={historical ? null : professional} onOpen={open}
+          <ReadSheet c={c} sheet={sheet} rows={rows} anchors={anchors} session={session} rulebook={rulebook} states={states}
+            historical={historical} professional={historical ? null : professional} onOpen={() => onStage("review")}
             questions={historical ? null : <OpenQuestions questions={sheet.questions} loading={snapshot.information === null && !snapshot.questionError} error={snapshot.questionError} />} />
           {!historical && <SubmissionHistory c={c} />}
         </div>
-      )}
-      {stage === "findings" && current && (
-        <div className="cf-deck-page">
-          <div className="cf-q-stage">
-            <FindingStep step={current} caseId={c.id} files={session.files} limits={limits} editable={editable}
-              last={index >= steps.length - 1} canBack={index > 0}
-              onCall={(edit) => dispatch({ type: "finding", edit })} onText={(key, text) => dispatch({ type: "item", key, patch: { text } })}
-              onAddOwn={addOwn} onNext={() => (index >= steps.length - 1 ? onStage("decide") : setIndex(index + 1))} onBack={() => setIndex(Math.max(0, index - 1))} />
-          </div>
-          <FindingFooter sections={sections} at={index} onJump={setIndex} />
+      </div>
+    );
+  }
+  if (stage === "messages") {
+    return (
+      <div className="rw-stage">
+        <div className="rw-read ow-messages">
+          <button type="button" className="cf-link-btn ow-back" onClick={() => onStage("review")}><CIcon name="back" size={13} />Review</button>
+          <Messages caseId={c.id} me={me} messages={messages} onChange={onMessages} canWrite={showDecision} hideTitle draft={messageDraft} onDraft={onMessageDraft} reading />
         </div>
-      )}
-      {(stage === "decide" || (stage === "findings" && !current)) && (
-        <div className="cf-deck-page">
-          <div className="cf-q-stage">
-            <DecideStage session={session} workspace={workspace} applicant={applicant} status={status} decidedAt={c.decision?.at ?? null}
-              draft={editable ? draft : null} editable={editable} targets={targets} questions={sheet.questions}
-              choices={showDecision ? { canReturn: gate.canReturn, canAccept: gate.canAccept, canRefuse: gate.canRefuse, why, busy, onReturn, onAccept, onRefuse } : null}
-              outcome={outcome} unread={unread} messagesAsk={messagesAsk}
-              messages={<Messages caseId={c.id} me={me} messages={messages} onChange={onMessages} canWrite={showDecision} hideTitle draft={messageDraft} onDraft={onMessageDraft} reading />} />
-          </div>
-        </div>
-      )}
+      </div>
+    );
+  }
+  return (
+    <div className="rw-stage">
+      <OfficerReview headline={headline} lede={lede} rows={decided || historical ? [] : active} rulebook={decided || historical ? [] : rulebook}
+        dismissed={decided || historical ? [] : dismissed} own={decided || historical ? [] : own} caseId={c.id} files={session.files} editable={editable}
+        targets={targets} itemLimit={limits.item_text} sections={sections} actions={actions}
+        extra={<>
+          {problem && <p className="cf-faint cf-small ow-hint">{problem}</p>}
+          {status === "returned" && session.information_request.text && <pre className="rw-letter ow-sent">{session.information_request.text}</pre>}
+          {outcome}
+        </>}
+        onCall={(edit) => dispatch({ type: "finding", edit })}
+        onAddOwn={(f) => {
+          const t = targets.find((x) => x.field === f.field) ?? targets.find((x) => x.section === f.section && !x.field) ?? { section: f.section, field: f.field, label: sentence(f.label) };
+          dispatch({ type: "add", item: officerItem(`Please provide or confirm the ${f.label}.`, t) });
+        }}
+        onAdd={() => dispatch({ type: "add", item: officerItem("", targets.find((t) => t.section === "B" && !t.field) ?? targets[0]) })}
+        onOwnText={(key, text) => dispatch({ type: "item", key, patch: { text } })}
+        onOwnTarget={(key, t) => dispatch({ type: "item", key, patch: { target: t } })}
+        onOwnRemove={(key) => dispatch({ type: "remove", key })}
+        onSection={(id) => { setSection(id); onStage("application"); }} />
     </div>
   );
 }

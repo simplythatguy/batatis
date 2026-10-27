@@ -54,12 +54,12 @@ test("failed saves keep the draft and conflicts require an explicit retry", () =
   assert.equal(draftReducer(state, { type: "retry" }).save.kind, "dirty");
 });
 
-test("invalid dismissals and request limits wait for a valid draft", () => {
+test("a dismissal needs only its reason; request limits wait for a valid draft", () => {
   const blocking: ReviewSession = { ...session, findings: [{ key: "k", severity: "blocking" } as never] };
-  let state = draftReducer(initialDraft(blocking), { type: "finding", edit: { key: "k", state: "dismissed", reason: "checked", note: "" } });
-  assert.match(draftProblem(state.content, blocking, limits), /Add a note/);
-  state = draftReducer(state, { type: "finding", edit: { key: "k", state: "dismissed", reason: "checked", note: "I checked the original form." } });
-  assert.equal(draftProblem(state.content, blocking, limits), "");
+  let state = draftReducer(initialDraft(blocking), { type: "finding", edit: { key: "k", state: "dismissed", reason: null, note: "" } });
+  assert.match(draftProblem(state.content, blocking, limits), /Choose why/);
+  state = draftReducer(state, { type: "finding", edit: { key: "k", state: "dismissed", reason: "checked", note: "" } });
+  assert.equal(draftProblem(state.content, blocking, limits), "", "a required item needs no note, only why");
   state = draftReducer(state, { type: "intro", value: "x".repeat(21) });
   assert.match(draftProblem(state.content, blocking, limits), /20 characters/);
 });

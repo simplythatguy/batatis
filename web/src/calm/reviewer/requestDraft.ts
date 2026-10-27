@@ -79,7 +79,7 @@ export function draftReducer(state: DraftState, event: DraftEvent): DraftState {
   return { ...state, content, revision: state.revision + 1, save: state.save.kind === "saving" ? state.save : state.save.kind === "error" && state.save.conflict ? state.save : { kind: "dirty" } };
 }
 
-export function draftProblem(draft: RequestDraft, session: ReviewSession, limits: RequestLimits): string {
+export function draftProblem(draft: RequestDraft, _session: ReviewSession, limits: RequestLimits): string {
   if (draft.intro.length > limits.intro) return `The opening line is limited to ${limits.intro} characters.`;
   if (draft.items.length > limits.items) return `At most ${limits.items} request items.`;
   for (const item of draft.items) {
@@ -90,7 +90,6 @@ export function draftProblem(draft: RequestDraft, session: ReviewSession, limits
   for (const edit of draft.findings) {
     if (edit.state !== "dismissed") continue;
     if (!edit.reason) return "Choose why you dismissed the finding.";
-    if (session.findings.find(f => f.key === edit.key)?.severity === "blocking" && !edit.note?.trim()) return "Add a note for the required finding you dismissed.";
   }
   return "";
 }

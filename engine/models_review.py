@@ -152,7 +152,7 @@ class Disposition(BaseModel):
     """The officer's call on one automated finding, kept with the session. It never edits the finding.
 
     Absent means the default: `ask` for an applicant finding the review established, `verify` for a
-    not-found or officer-routed one. `dismissed` needs a reason, and a note when the finding is blocking.
+    not-found or officer-routed one. `dismissed` needs a reason; the note is optional.
     """
     model_config = ConfigDict(extra='forbid')
     key: str
