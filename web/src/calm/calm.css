@@ -4697,16 +4697,16 @@ body {
 
 @media (prefers-reduced-motion: no-preference) {
   .cf-q-wrap.is-from-down {
-    animation: cf-q-up 340ms var(--cf-ease) 60ms both;
+    animation: cf-q-up 320ms var(--cf-ease) 90ms both;
   }
   .cf-q-wrap.is-from-up {
-    animation: cf-q-down 340ms var(--cf-ease) 60ms both;
+    animation: cf-q-down 320ms var(--cf-ease) 90ms both;
   }
   .cf-q-leave.is-to-up > .cf-q-wrap {
-    animation: cf-q-leave-up 180ms cubic-bezier(0.4, 0, 1, 1) both;
+    animation: cf-q-leave-up 150ms cubic-bezier(0.2, 0, 0, 1) both;
   }
   .cf-q-leave.is-to-down > .cf-q-wrap {
-    animation: cf-q-leave-down 180ms cubic-bezier(0.4, 0, 1, 1) both;
+    animation: cf-q-leave-down 150ms cubic-bezier(0.2, 0, 0, 1) both;
   }
 }
 
@@ -4733,14 +4733,14 @@ body {
 @keyframes cf-q-leave-up {
   to {
     opacity: 0;
-    transform: translateY(-20px);
+    transform: translateY(-16px);
   }
 }
 
 @keyframes cf-q-leave-down {
   to {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(16px);
   }
 }
 
@@ -4853,7 +4853,12 @@ body {
   opacity: 0.55;
 }
 
-/* Saving an answer is not a locked card: the picked answer stays as it is. */
+/* Saving an answer is not a locked card: the picked answer and its button stay as they are. */
+.cf-q-wrap[data-advancing] .cf-ok-row .cf-btn:disabled {
+  cursor: progress;
+  opacity: 1;
+}
+
 .cf-q-body[data-busy] .cf-choice:disabled,
 .cf-q-body[data-busy] .cf-uline:disabled {
   cursor: progress;

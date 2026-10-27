@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { DETAIL_FIELDS, NOT_RIGHT, PROCESS_FIELDS, factFor, isTyped, valueText } from "../model";
 import { withinProvision } from "../provisions";
 import { exitCountWarning } from "../rules";
@@ -115,13 +115,23 @@ function useLeavingCard(dir: "down" | "up") {
     const old = card.current;
     card.current = node;
     const host = stage.current;
-    if (node || !old || !host?.isConnected || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (node) {
+      // The same question remounted (its card was rebuilt): it stays in place, with no exit or entrance.
+      const layer = host?.querySelector(".cf-q-leave");
+      if (layer && layer.querySelector("h2")?.textContent === node.querySelector("h2")?.textContent) {
+        layer.remove();
+        node.style.animation = "none";
+      }
+      return;
+    }
+    if (!old || !host?.isConnected || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     host.querySelectorAll(".cf-q-leave").forEach((layer) => layer.remove());
     const copy = old.cloneNode(true) as HTMLDivElement;
     const fields = old.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input, textarea");
     copy.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input, textarea").forEach((f, i) => { f.value = fields[i]?.value ?? ""; });
     copy.querySelectorAll("[id]").forEach((el) => el.removeAttribute("id"));
     copy.classList.remove("is-from-down", "is-from-up");
+    copy.style.animation = "";
     const layer = document.createElement("div");
     layer.className = `cf-q-leave is-to-${travel.current === "down" ? "up" : "down"}`;
     layer.setAttribute("aria-hidden", "true");
@@ -706,8 +716,8 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [item?.key, item?.gone]);
 
-  // A typed planner answer moves on once the engine has saved it.
-  useEffect(() => {
+  // An answer moves on as soon as it renders as done, before that in-between state is painted.
+  useLayoutEffect(() => {
     if (!advanceAfter) return;
     if (engineGeneration() !== advanceAfter.generation || item?.key !== advanceAfter.key) {
       setAdvanceAfter(null);
@@ -892,6 +902,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
     if (parsed && "error" in parsed) return setPlanNotes((n) => ({ ...n, [key]: parsed.error }));
     if (parsed) {
       dispatch({ type: "setRuleInput", field: localField(it.plan.field), value: parsed.value, quote: parsed.quote, rule: "intake" });
+      confirmDraft(answer);
       if (advance) setAdvanceAfter({ key, generation: engineGeneration() });
       return;
     }
@@ -1164,7 +1175,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
         ) : item?.kind === "scope" && !item.gone ? (
           <RedirectPage />
         ) : item ? (
-          <div ref={setWrap} key={item.key} className={`cf-q-wrap is-from-${dir}${item.kind === "section-d" || item.kind === "code-triage" || item.kind === "paperwork" ? " is-wide" : ""}`} aria-labelledby="cf-q" role="group">
+          <div ref={setWrap} key={item.key} data-advancing={advanceAfter?.key === item.key ? "" : undefined} className={`cf-q-wrap is-from-${dir}${item.kind === "section-d" || item.kind === "code-triage" || item.kind === "paperwork" ? " is-wide" : ""}`} aria-labelledby="cf-q" role="group">
             <p className="cf-eyebrow is-plain">{item.plan?.kind === "conflict" ? "You wrote two things" : STAGES.find((s) => s.stage === item.stage)?.label}<span className="cf-faint"> · Section {item.section}</span></p>
             <h2 id="cf-q" className="cf-q-text" tabIndex={-1}>{item.title}</h2>
             {item.answerer === "designer" && <span className="cf-answerer-tag"><Icon24 name="compose" size={15} />Usually your designer knows</span>}

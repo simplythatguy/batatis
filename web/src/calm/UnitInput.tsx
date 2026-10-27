@@ -43,7 +43,7 @@ export function UnitInput({ id, label, unit, value, onChange }: UnitInputProps) 
     <div className="cf-inline-answer">
       <label className="cf-sr" htmlFor={inputId}>{label}</label>
       <input id={inputId} className="cf-uline is-number" type="text" inputMode="decimal" value={text}
-        aria-invalid={parsed.kind === "error" || undefined} aria-describedby={`${inputId}-conversion`}
+        aria-describedby={`${inputId}-conversion`}
         onChange={(e) => {
           const next = e.target.value;
           const read = parseMeasurement(next, unit, selected);
@@ -53,8 +53,9 @@ export function UnitInput({ id, label, unit, value, onChange }: UnitInputProps) 
         {entryUnits(unit).map((choice) => <button key={choice} type="button" className="cf-chip" aria-pressed={selected === choice} onClick={() => toggle(choice)}>{choice}</button>)}
       </div>
     </div>
-    <p id={`${inputId}-conversion`} className="cf-note cf-small" role={parsed.kind === "error" ? "alert" : "status"}>
-      {parsed.kind === "value" ? metricPreview(parsed.value, unit) : parsed.kind === "error" ? parsed.error : ""}
+    {/* Only the conversion shows while typing; a half-typed "4 f" is not an error until the answer is sent. */}
+    <p id={`${inputId}-conversion`} className="cf-note cf-small" role="status">
+      {parsed.kind === "value" ? metricPreview(parsed.value, unit) : ""}
     </p>
   </div>;
 }
