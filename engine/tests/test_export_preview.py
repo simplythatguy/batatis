@@ -45,11 +45,11 @@ def test_preview_is_the_draft_pdf_and_an_image_of_each_page(tmp_path):
     assert set(reader.get_fields()) == {'Signature1', 'Signature2', 'Signature3', 'Signature4',
                                         'Date1', 'Date2', 'SCO Date', 'SCO Date1', 'Check Box14'}
     assert marker not in ' '.join(page.extract_text() for page in reader.pages)     # confirmed values only
-    # A long package. The pages stop only at the response budget: this fixture's whole form and appendix are
-    # shown, and the trailing source records and supporting documents may be left to the draft download.
+    # A long package, attachments included. Images run in page order until the encoded budget (how many fit
+    # depends on the platform's rendering); the rest are fetched as windows, and the PDF is whole.
     package = export_case(case, codes=codes, store=store, draft=True)
     assert body['page_count'] == len(reader.pages) == package.page_count > 20
-    assert package.form_pages + package.appendix_pages <= len(body['pages']) <= body['page_count']
+    assert package.form_pages <= len(body['pages']) <= body['page_count']
     for page, preview in zip(reader.pages, body['pages']):
         assert (preview['width'], preview['height']) == pytest.approx(
             (float(page.mediabox.width), float(page.mediabox.height)), abs=0.001)
