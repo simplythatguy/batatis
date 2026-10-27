@@ -12,7 +12,8 @@ export function RenameDialog({ target, onSave, onClose }: {
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  useEffect(() => { setName(target?.title ?? ""); setError(""); setBusy(false); }, [target?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  // Reset when a new target opens, not when it closes: the typed name stays while the dialog fades out.
+  useEffect(() => { if (target) { setName(target.title); setError(""); setBusy(false); } }, [target?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const close = () => { if (!busy) onClose(); };
   return (
     <Modal open={Boolean(target)} onClose={close} labelledBy="cf-rename-title" className="cf-confirm cf-rename">

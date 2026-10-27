@@ -1367,6 +1367,43 @@ body {
   display: flex;
 }
 
+/* The phone sheet slides in from the left edge and back out. */
+.cf-modal.cf-nav-sheet {
+  opacity: 1;
+  scale: none;
+  translate: -100% 0;
+  transition-duration: 200ms;
+}
+
+.cf-modal.cf-nav-sheet[open] {
+  translate: 0 0;
+  transition-duration: 260ms;
+}
+
+@starting-style {
+  .cf-modal.cf-nav-sheet[open] {
+    opacity: 1;
+    scale: none;
+    translate: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cf-modal.cf-nav-sheet,
+  .cf-modal.cf-nav-sheet[open] {
+    translate: none;
+  }
+  .cf-modal.cf-nav-sheet:not([open]) {
+    opacity: 0;
+  }
+  @starting-style {
+    .cf-modal.cf-nav-sheet[open] {
+      translate: none;
+      opacity: 0;
+    }
+  }
+}
+
 .cf-nav-sheet-body {
   display: flex;
   flex: 1;
@@ -1904,6 +1941,68 @@ body {
   backdrop-filter: blur(2px);
 }
 
+/* Open and close: a quick fade with a slight scale, ease-out in and ease-in out. The dialog stays in
+   the top layer while it leaves (display and overlay transition discretely); the drawer and the phone
+   sheet slide instead (below). */
+.cf-modal {
+  opacity: 0;
+  scale: 0.97;
+  transition-property: opacity, scale, translate, display, overlay;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
+  transition-behavior: allow-discrete;
+}
+
+.cf-modal:not([open]) {
+  pointer-events: none;
+}
+
+.cf-modal[open] {
+  opacity: 1;
+  scale: 1;
+  transition-duration: 200ms;
+  transition-timing-function: var(--cf-ease);
+}
+
+@starting-style {
+  .cf-modal[open] {
+    opacity: 0;
+    scale: 0.97;
+  }
+}
+
+.cf-modal::backdrop {
+  opacity: 0;
+  transition-property: opacity, display, overlay;
+  transition-duration: 150ms;
+  transition-timing-function: ease-in;
+  transition-behavior: allow-discrete;
+}
+
+.cf-modal[open]::backdrop {
+  opacity: 1;
+  transition-duration: 200ms;
+  transition-timing-function: ease-out;
+}
+
+@starting-style {
+  .cf-modal[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cf-modal,
+  .cf-modal[open] {
+    scale: none;
+  }
+  @starting-style {
+    .cf-modal[open] {
+      scale: none;
+    }
+  }
+}
+
 .cf-confirm {
   width: min(440px, calc(100vw - 32px));
 }
@@ -2210,10 +2309,6 @@ body {
   height: auto;
   max-height: none;
   border-radius: var(--cf-r-card);
-  transition-property: translate, opacity, display, overlay;
-  transition-duration: 350ms;
-  transition-timing-function: var(--cf-ease);
-  transition-behavior: allow-discrete;
 }
 
 .cf-drawer[open] {
@@ -2221,19 +2316,52 @@ body {
   flex-direction: column;
 }
 
+/* Slides in from the right and back out the same way (the base state is where it closes to). */
+.cf-modal.cf-drawer {
+  opacity: 1;
+  scale: none;
+  translate: calc(100% + 24px) 0;
+  transition-duration: 200ms;
+}
+
+.cf-modal.cf-drawer[open] {
+  translate: 0 0;
+  transition-duration: 320ms;
+}
+
 @starting-style {
-  .cf-drawer[open] {
-    translate: 480px 0;
+  .cf-modal.cf-drawer[open] {
+    opacity: 1;
+    scale: none;
+    translate: calc(100% + 24px) 0;
   }
 }
 
+/* The drawer's and the sheet's backdrops fade over the same time as the panel moves. */
+.cf-modal.cf-drawer::backdrop,
+.cf-modal.cf-nav-sheet::backdrop {
+  transition-duration: 200ms;
+}
+
+.cf-modal.cf-drawer[open]::backdrop {
+  transition-duration: 320ms;
+}
+
+.cf-modal.cf-nav-sheet[open]::backdrop {
+  transition-duration: 260ms;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .cf-drawer {
-    transition-property: opacity, display, overlay;
+  .cf-modal.cf-drawer,
+  .cf-modal.cf-drawer[open] {
+    translate: none;
+  }
+  .cf-modal.cf-drawer:not([open]) {
+    opacity: 0;
   }
   @starting-style {
-    .cf-drawer[open] {
-      translate: 0 0;
+    .cf-modal.cf-drawer[open] {
+      translate: none;
       opacity: 0;
     }
   }
@@ -3327,9 +3455,22 @@ body {
     border-radius: 24px 24px 0 0;
     border-bottom: 0;
   }
+  .cf-modal.cf-drawer {
+    translate: 0 100%;
+  }
   @starting-style {
-    .cf-drawer[open] {
+    .cf-modal.cf-drawer[open] {
       translate: 0 100%;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cf-modal.cf-drawer {
+      translate: none;
+    }
+    @starting-style {
+      .cf-modal.cf-drawer[open] {
+        translate: none;
+      }
     }
   }
   .cf-drawer-scroll {

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Modal } from "../ui";
+import { useLast } from "./presence";
 
 /**
  * Confirm a permanent delete by name. Cancel has the focus; a failure keeps the dialog open with the
@@ -13,9 +14,10 @@ export function DeleteDialog({ target, onDelete, onClose }: {
 }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  useEffect(() => { setBusy(false); setError(""); }, [target?.id]);
+  // Reset when a new target opens, not when it closes: the dialog keeps its words while it fades out.
+  useEffect(() => { if (target) { setBusy(false); setError(""); } }, [target?.id]); // eslint-disable-line react-hooks/exhaustive-deps
   const close = () => { if (!busy) onClose(); };
-  const name = target?.title || "Untitled application";
+  const name = useLast(target)?.title || "Untitled application";
   return (
     <Modal open={Boolean(target)} onClose={close} labelledBy="cf-delete-title" className="cf-confirm cf-delete">
       <div className="cf-modal-body" aria-busy={busy}>

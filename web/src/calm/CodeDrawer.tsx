@@ -9,6 +9,7 @@ import { useCase } from "../store";
 import type { SectionCRow } from "../types";
 import { useCurrentApplication } from "./begin";
 import { RelevanceRing } from "./RelevanceRing";
+import { useLast } from "./shell/presence";
 import { codeHref } from "./routes";
 import { articleOf } from "./useRelevance";
 import { CIcon, Eyebrow, Modal } from "./ui";
@@ -39,13 +40,15 @@ function Pairs({ row }: { row: SectionCRow }) {
 }
 
 /** Right-side drawer (bottom sheet on phones) with the rule behind a code card. */
-export function CodeDrawer({ state, onClose, onAdded }: { state: DrawerState | null; onClose: () => void; onAdded: (candidateId: string) => void }) {
+export function CodeDrawer({ state: requested, onClose, onAdded }: { state: DrawerState | null; onClose: () => void; onAdded: (candidateId: string) => void }) {
   const { c, sectionCLookup, retrySectionC } = useCase();
   const { locked, readOnly } = useCurrentApplication();
+  // While it slides out the drawer keeps showing the rule it was opened on.
+  const state = useLast(requested);
   const a = state?.candidateId ? c.candidates.find((x) => x.id === state.candidateId) : undefined;
   const [searching, setSearching] = useState(false);
   const [attempt, setAttempt] = useState(0);
-  useEffect(() => setSearching(state?.mode === "search"), [state]);
+  useEffect(() => { if (requested) setSearching(requested.mode === "search"); }, [requested]);
   const provision = a && isProvision(a.provision) ? a.provision : undefined;
   const live = useProvisionText(state ? provision : undefined, attempt);
   const row = a
@@ -55,7 +58,7 @@ export function CodeDrawer({ state, onClose, onAdded }: { state: DrawerState | n
   const verbatim = live.state === "live" ? { text: live.text, citation: live.citation } : kind === "code" && a ? { text: a.quote.text, citation: a.quote.citation } : null;
 
   return (
-    <Modal open={Boolean(state)} onClose={onClose} labelledBy="cf-drawer-title" className="cf-drawer">
+    <Modal open={Boolean(requested)} onClose={onClose} labelledBy="cf-drawer-title" className="cf-drawer">
       <div className="cf-drawer-scroll">
         <div className="cf-drawer-head">
           <Eyebrow>{a ? (verbatim ? "Code text · verbatim" : QUOTE_LABEL[kind].pill) : "Code search"}</Eyebrow>
