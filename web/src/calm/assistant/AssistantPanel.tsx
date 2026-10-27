@@ -37,7 +37,8 @@ export function AssistantPanel() {
     const t = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(t);
   }, [c.error?.retryAt]);
-  useEffect(() => { input.current?.focus(); }, []);
+  // No scroll on focus: the panel is still sliding in from beyond the edge, and scrolling to it shifts the page.
+  useEffect(() => { input.current?.focus({ preventScroll: true }); }, []);
   useLayoutEffect(() => {
     const node = body.current;
     if (!node) return;

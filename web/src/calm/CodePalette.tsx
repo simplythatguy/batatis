@@ -44,7 +44,9 @@ export function CodePalette({ open, onClose }: { open: boolean; onClose: () => v
   // Debounced search; the route is rate-limited, so a 429 is a calm note, not an error wall.
   useEffect(() => {
     const term = q.trim();
-    if (!open || term.length < 2) { setHits([]); setNote(""); setBusy(false); return; }
+    // Closed, the results stay as they were so the palette does not empty while it fades out; opening resets them.
+    if (!open) return;
+    if (term.length < 2) { setHits([]); setNote(""); setBusy(false); return; }
     const ctl = new AbortController();
     const t = window.setTimeout(() => {
       setBusy(true);
