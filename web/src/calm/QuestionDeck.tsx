@@ -665,7 +665,8 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
   const formPos = currentKey ? all.findIndex((i) => i.key === currentKey) : all.length;
   const dir = useDirection(formPos < 0 ? index : formPos);
   const leaving = useLeavingCard(dir);
-  const setWrap = (node: HTMLDivElement | null) => { wrapRef.current = node; leaving.ref(node); };
+  // Stable, or React would detach and reattach the card on every render and replay its exit.
+  const setWrap = useRef((node: HTMLDivElement | null) => { wrapRef.current = node; leaving.ref(node); }).current;
 
   // Help starts closed on each card; unconfirmed text stays with that application and card.
   useEffect(() => {
