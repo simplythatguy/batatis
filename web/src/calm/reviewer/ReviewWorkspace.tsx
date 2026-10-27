@@ -597,6 +597,7 @@ function SessionWorkspace({ stage, onStage, c, snapshot, session, workspace, tar
     : status === "accepted" ? "Administratively complete."
     : status === "refused" ? "Refused."
     : historical ? `Version ${session.version}, read-only.`
+    : ready && active.length ? `Complete. ${plural(active.length, "thing")} you could still ask.`
     : ready ? "Complete. Ready to accept."
     : asked ? `Ask for ${plural(asked, "thing")}.`
     : required ? `${plural(required, "required item")} to look at.`
@@ -619,7 +620,8 @@ function SessionWorkspace({ stage, onStage, c, snapshot, session, workspace, tar
     const tone = open.some((r) => r.finding.severity === "blocking") || rules.length ? "blocking" : n ? "warning" : "done";
     // Once decided, the card only opens the application: counts would describe a request already settled.
     if (decided || historical) return { id: s.id, title: s.title, icon: s.icon, summary: "", tone: null };
-    return { id: s.id, title: s.title, icon: s.icon, summary: n ? `${n} to ask` : "Complete", tone };
+    // Nothing required is open: what is left is the officer's choice, not a gap.
+    return { id: s.id, title: s.title, icon: s.icon, summary: n ? ready ? `${n} optional` : `${n} to ask` : "Complete", tone };
   });
 
   // A save or a run only holds the button for a moment; it needs no words.
@@ -713,7 +715,7 @@ function SessionWorkspace({ stage, onStage, c, snapshot, session, workspace, tar
         </div>
       )}
       <div {...layer("review")}>
-      <OfficerReview headline={headline} lede={lede} rows={decided || historical ? [] : active} rulebook={decided || historical ? [] : rulebook}
+      <OfficerReview headline={headline} lede={lede} optional={ready} rows={decided || historical ? [] : active} rulebook={decided || historical ? [] : rulebook}
         dismissed={decided || historical ? [] : dismissed} own={decided || historical ? [] : own} caseId={c.id} files={session.files} editable={editable}
         targets={targets} itemLimit={limits.item_text} sections={sections} actions={actions}
         extra={<>

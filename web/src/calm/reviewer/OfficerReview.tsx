@@ -131,10 +131,12 @@ function OwnItem({ item, targets, limits, onText, onTarget, onRemove }: {
 
 export interface SectionRow { id: string; title: string; icon: IconName; summary: string; tone: "blocking" | "warning" | "pending" | "done" | null }
 
-export function OfficerReview({ headline, lede, rows, rulebook, dismissed, own, caseId, files, editable, targets, itemLimit, sections, actions,
+export function OfficerReview({ headline, lede, optional, rows, rulebook, dismissed, own, caseId, files, editable, targets, itemLimit, sections, actions,
   extra, onCall, onAddOwn, onAdd, onOwnText, onOwnTarget, onOwnRemove, onSection }: {
   headline: string;
   lede: ReactNode;
+  /** The file is complete; the list holds only what the officer may choose to ask. */
+  optional?: boolean;
   rows: Row[];
   rulebook: RulebookGap[];
   dismissed: Row[];
@@ -190,9 +192,9 @@ export function OfficerReview({ headline, lede, rows, rulebook, dismissed, own, 
         <h1 className="cf-h1" id={`${id}-h`} tabIndex={-1}>{headline}</h1>
         {lede && <p className="cf-lede is-sm">{lede}</p>}
 
-        {listed > 0 && <div className="cf-list-label">To ask</div>}
+        {listed > 0 && <div className="cf-list-label">{optional ? "You could ask" : "To ask"}</div>}
         {listed > 0 && (
-          <ul className="cf-rows ow-ask" aria-label="To ask">
+          <ul className="cf-rows ow-ask" aria-label={optional ? "You could ask" : "To ask"}>
             {rows.map((r, i) => (
               <FindingRow key={r.finding.key} row={r} caseId={caseId} files={files} editable={editable}
                 onCall={(edit) => { ask(i); onCall(edit); }} onAddOwn={(f) => { setAim({ kind: "own" }); onAddOwn(f); }} />
