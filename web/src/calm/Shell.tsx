@@ -51,8 +51,20 @@ function CheckStatus() {
   return null;
 }
 
+/** True once `on` has held for `ms`; a conflict the store resolves on its own never flashes. */
+function useLasting(on: boolean, ms: number): boolean {
+  const [lasting, setLasting] = useState(false);
+  useEffect(() => {
+    if (!on) { setLasting(false); return; }
+    const timer = window.setTimeout(() => setLasting(true), ms);
+    return () => window.clearTimeout(timer);
+  }, [on, ms]);
+  return on && lasting;
+}
+
 export function SaveStatus() {
-  const { phase, saveStatus, savedNote, saveDetail, saveDraft, saveConflict, saveConflictReview, reviewSaveConflict } = useCase();
+  const { phase, saveStatus, savedNote, saveDetail, saveDraft, saveConflict: conflicted, saveConflictReview, reviewSaveConflict } = useCase();
+  const saveConflict = useLasting(conflicted, 1500) || (saveConflictReview?.kind ?? "closed") !== "closed";
   // A submission on its way keeps the saved state; the page says editing is paused.
   const current = useCurrentApplication();
   if (phase !== "case") return null;
