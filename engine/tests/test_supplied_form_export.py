@@ -264,6 +264,9 @@ def test_draft_pdf_marks_every_page_and_keeps_the_validation_contract(version, c
         text = page.extract_text()
         assert 'Draft · not for submission' in text
     # The draft's open items stay in the result for the questions and Review; the document never lists them.
+    # Each one travels only as a labelled administrative source record after the form and appendix.
     pdf_text = ' '.join(' '.join(p.extract_text().split()) for p in reader.pages)
     assert 'Open items' not in pdf_text and 'Not provided or not confirmed' not in pdf_text
-    assert not any(' '.join(item.split())[:60] in pdf_text for item in result.open_items)
+    document = ' '.join(' '.join(p.extract_text().split())
+                        for p in reader.pages[:result.form_pages + result.appendix_pages])
+    assert not any(' '.join(item.split())[:60] in document for item in result.open_items)

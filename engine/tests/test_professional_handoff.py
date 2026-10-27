@@ -92,7 +92,7 @@ def test_officer_requirement_records_do_not_fabricate_evidence_and_can_be_revise
     store, clients, _ = scene
     case = unresolved(scene)
     officer = clients['reviewer']
-    assert any('professional_requirement' in reason for reason in blockers(case, load_field_map(), Codes()))
+    assert any('professional_requirement' in reason for reason in blockers(case, load_field_map(), Codes(), store=store))
     assert officer.post(f'/review/{case.id}/claim', json={}).status_code == 200
     case = store.get(case.id)
     response = officer.post(f'/review/{case.id}/professional-requirement', json=determination(case, required=True))
@@ -107,7 +107,7 @@ def test_officer_requirement_records_do_not_fabricate_evidence_and_can_be_revise
     assert response.status_code == 200
     assert [record['required'] for record in response.json()['professional_resolutions']] == [True, False]
     # Only the requirement is resolved: the unchanged synthetic attachment remains a presence fixture.
-    assert blockers(store.get(case.id), load_field_map(), Codes()) == []
+    assert blockers(store.get(case.id), load_field_map(), Codes(), store=store) == []
 
 
 def test_applicant_input_cannot_forge_an_officer_resolution(scene):

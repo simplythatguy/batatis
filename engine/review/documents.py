@@ -67,7 +67,8 @@ def _first_line(pattern, pages):
 
 
 def attachment_row(read: ReadFile, index: int) -> DocumentRow:
-    pages = read.text_pages
+    uncertain = set(read.unreadable_pages())
+    pages = [page for page in read.text_pages if page.page not in uncertain]
     row = {}
     for key, pattern in _LABELLED.items():
         match, page, line = _first_line(pattern, pages)
@@ -104,9 +105,12 @@ def unreadable_row(read: ReadFile, index: int) -> DocumentRow:
 
 
 def _matches(listed: str, row: DocumentRow) -> bool:
-    words = {w for w in re.findall(r'[a-z0-9]{4,}', listed.casefold())}
-    target = f'{row.file or ""} {row.title.value}'.casefold()
-    return bool(words) and sum(1 for w in words if w in target) >= max(1, len(words) // 2)
+    def identity(text):
+        text = re.sub(r'\.(?:pdf|txt|md)$', '', text or '', flags=re.I)
+        return ' '.join(word for word in re.findall(r'[a-z0-9]+', text.casefold())
+                        if word not in {'synthetic', 'example', 'data'})
+    name = identity(listed)
+    return bool(name) and name in {identity(row.title.value), identity(row.file)}
 
 
 def merge_section_d(rows: list[DocumentRow], listed: list[tuple[int, str, str, Pointer, Pointer]]) -> list[DocumentRow]:
@@ -143,6 +147,9 @@ def case_rows(case, store=None) -> list[DocumentRow]:
             fact = latest_fact(case, prefix + name)
             if not value or fact is None:
                 return Attribute()
+            from .ingest import _stored
+            if not _stored(fact, fact.field).confirmed:
+                return Attribute()
             source = fact.source
             return Attribute(value=str(value), known=True,
                              source=Pointer(file=source.ref, page=source.page, bbox=source.bbox,
@@ -168,7 +175,9 @@ def case_rows(case, store=None) -> list[DocumentRow]:
                   else (read_row.seal if read_row else Attribute())),
             responsible=cell('responsible_party', doc.responsible_party), listed_in_section_d=True,
             note='Applicant-entered metadata; file text read where the file is stored. Not reviewed for adequacy.')
-        if not row.title.known:
-            row.title = Attribute(value=doc.title, known=True, source=Pointer(file=doc.file.ref))
+        if not row.title.known and latest_fact(case, prefix + 'title') is None:
+            evidence = next((entry for entry in case.evidence if entry.id == doc.id), None)
+            if evidence and evidence.description.strip():
+                row.title = Attribute(value=evidence.description, known=True, source=Pointer(file=doc.file.ref))
         rows.append(row)
     return rows

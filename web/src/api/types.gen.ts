@@ -8,6 +8,38 @@ export interface AcceptGate {
   reason: string;
 }
 
+export interface AdministrativeItem {
+  certainty: "present" | "blank" | "not_found" | "not_applicable";
+  citations: string[];
+  export_blocking: boolean;
+  field: string;
+  finding_status: "blank" | "not_found" | "missing" | "unclear" | null;
+  fix_hint: string;
+  key: string;
+  label: string;
+  pointers: PolicyPointer[];
+  reason: string;
+  reason_code: string;
+  routed_to: "applicant" | "officer" | "professional";
+  section: "A" | "B" | "C" | "D" | "process";
+  severity: "blocking" | "warning" | "info";
+  sources: Source[];
+  submission_blocking: boolean;
+  value: string | null;
+  verdict: "present" | "missing" | "unclear";
+}
+
+export interface AdministrativeReport {
+  administrative_only: true;
+  export_reasons: string[];
+  items: AdministrativeItem[];
+  not_a_compliance_determination: true;
+  policy_version: "2026-10-26";
+  ready_for_export: boolean;
+  schema_version: "batatis.administrative_completeness.v1";
+  stage: "preparation";
+}
+
 export interface AnswerCounts {
   confirmed: number;
   does_not_apply: number;
@@ -434,6 +466,25 @@ export interface CodeTOC {
   parts: TocPart[];
 }
 
+export interface CompletenessRequest {
+  variant?: "A" | "B" | "C" | null;
+}
+
+export interface CompletenessResponse {
+  administrative_only: true;
+  case_id: string;
+  case_updated_at: string;
+  case_version: number;
+  llm: LLMUsageModel | null;
+  not_a_compliance_determination: true;
+  notice: string;
+  policy: AdministrativeReport | null;
+  reminder: ReminderModel;
+  reviews: ReviewModel[];
+  schema_version: "batatis.completeness.v1";
+  variant: "A" | "B";
+}
+
 export interface CompletenessSummary {
   answered: number;
   total: number;
@@ -685,6 +736,34 @@ export interface EditedItem {
   included?: boolean;
   target?: RequestTargetInput | null;
   text: string;
+}
+
+export interface ElementModel {
+  certainty: "present" | "blank" | "not_found" | "not_applicable";
+  citations: string[];
+  defect_class: string | null;
+  export_field: string;
+  export_section: "A" | "B" | "C" | "D" | "process";
+  field: string;
+  form_fields: string[];
+  group: string;
+  in_export_preflight: boolean;
+  key: string;
+  label: string;
+  lookup_skipped: boolean;
+  problem: string | null;
+  prompt: IntakePromptModel | null;
+  quotes: QuoteModel[];
+  reason: string;
+  related_fields: string[];
+  routed_to: "officer" | "professional" | "applicant" | null;
+  severity: "blocking" | "warning" | "info";
+  source: "applicant" | "registered_professional";
+  sources: Source[];
+  template_section: "A" | "B" | "C" | "D";
+  url: string | null;
+  value: string | null;
+  verdict: "present" | "missing" | "unclear";
 }
 
 export interface EvidenceDraft {
@@ -1100,6 +1179,13 @@ export interface IntakePlan {
   scope: ScopeCheck;
 }
 
+export interface IntakePromptModel {
+  field: string;
+  form_fields: string[];
+  question: string;
+  source: "applicant" | "registered_professional";
+}
+
 export interface IntakeRecord {
   conflicts: FieldConflict[];
   files: FileReport[];
@@ -1241,6 +1327,16 @@ export interface JurisdictionsResult {
   disclaimer: string;
   jurisdictions: JurisdictionSummary[];
   levels: Record<string, string>;
+}
+
+export interface LLMUsageModel {
+  estimated_usd: number;
+  input_tokens: number;
+  latency_s: number;
+  model: string | null;
+  output_tokens: number;
+  provider: string | null;
+  skipped: string | null;
 }
 
 export interface LoginRequest {
@@ -1400,6 +1496,14 @@ export interface Pointer {
   quote: string | null;
 }
 
+export interface PolicyPointer {
+  bbox: [number, number, number, number] | null;
+  file: string;
+  form_field: string | null;
+  page: number | null;
+  quote: string | null;
+}
+
 /** 'Before you submit': meet the authority having jurisdiction and emergency services early. */
 export interface PreApplication {
   jurisdiction_id: string | null;
@@ -1509,6 +1613,13 @@ export interface QueueResult {
   reviewer_id: string;
 }
 
+export interface QuoteModel {
+  kind: "exact" | "pointed";
+  source: Record<string, unknown>;
+  source_ref: string;
+  text: string;
+}
+
 /** 'The code says X. Does your design do something different?' The id sits behind a disclosure. */
 export interface QuotedChoice {
   citation: string | null;
@@ -1578,6 +1689,15 @@ export interface RelevanceRecord {
   scores: Record<string, number>;
   stale: boolean;
   status: "scored";
+}
+
+/** IB-2025-11-18 copy of the issued variance. Not a present/missing/unclear verdict and not an export blocker. */
+export interface ReminderModel {
+  bulletin_ids: string[];
+  links: string[];
+  source: Record<string, unknown>;
+  text: string;
+  verdict: "reminder";
 }
 
 export interface RemoveFileBinding {
@@ -1791,6 +1911,14 @@ export interface ReviewItem {
   why: string;
 }
 
+export interface ReviewModel {
+  document_id: string;
+  export_reasons: string[];
+  invented_values: number;
+  reasons_by_section: Record<string, string[]>;
+  sections: SectionModel[];
+}
+
 export interface ReviewSession {
   administrative_only: true;
   authority: string;
@@ -1811,6 +1939,7 @@ export interface ReviewSession {
   not_a_compliance_determination: true;
   notice: string;
   package_id: string;
+  policy: AdministrativeReport | null;
   schema_version: "batatis.package_review.v1";
   section_c: SectionCCheck[];
   version: number;
@@ -2000,6 +2129,12 @@ export interface SectionCRow {
   provision_id: string;
   related_root: string | null;
   related_root_method: string | null;
+}
+
+export interface SectionModel {
+  elements: ElementModel[];
+  section: "A" | "B" | "C" | "D";
+  title: string;
 }
 
 /** An applicant's code-check card, not a confirmed benchmark or code quotation. */

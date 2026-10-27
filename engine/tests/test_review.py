@@ -265,7 +265,7 @@ def test_complete_submit_claim_return_messages_resubmit_and_accept(scene):
     store, clients, users = scene
     owner, first, second = (clients[n] for n in ('owner', 'reviewer', 'second'))
     case = owned(scene, complete=True)
-    assert owner.get(f'/cases/{case.id}/gaps').json()['items'] == []
+    assert not [g for g in owner.get(f'/cases/{case.id}/gaps').json()['items'] if g['severity'] == 'blocking']
     r = owner.post(f'/cases/{case.id}/submit', json={})
     assert r.status_code == 200 and r.json()['status'] == 'submitted', r.text
     assert r.json()['submitted_at']

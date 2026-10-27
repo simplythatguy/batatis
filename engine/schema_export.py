@@ -18,6 +18,8 @@ from pydantic.json_schema import GenerateJsonSchema, models_json_schema
 from .api import ExportPreview, ExportPreviewTooLarge, NewCase, PackagePreview, SectionCRequest
 from .code_library import CodeTOC, ProvisionContext
 from .models import Case, Fact, SectionCRow
+from .completeness_report import CompletenessResponse
+from .review.routes_completeness import CompletenessRequest
 from .models_jobs import Job, JobList, WorkerHealth
 from .account_models import ApplicationPreferences, ApplicationPreferencesPatch, UserResult, MessagesResult
 from .routes_auth import SignupRequest, LoginRequest, OnboardingRequest
@@ -49,7 +51,7 @@ RESPONSES = (Case, SectionCRow, CodeTOC, ProvisionContext, UserResult, MessagesR
              JurisdictionChecklists, CaseChecklists, ChecklistAnswerResult,
              ApplicationPreferences, ExportPreview,
              ExportPreviewTooLarge, PackagePreview, WorkspaceView, WorkspaceSignature, WorkspaceConsent,
-             RewriteResult, Job, JobList, WorkerHealth)  # responses carry every field
+             RewriteResult, Job, JobList, WorkerHealth, CompletenessResponse)  # responses carry every field
 REQUESTS = (Fact, NewCase, SectionCRequest, SignupRequest, LoginRequest, OnboardingRequest,
             ClaimRequest, DecisionRequest, MessageRequest, MessageReadRequest, ProfessionalRequirementRequest,
             SubmitRequest, AssistRequest, InformationRequestEdit, ReturnWithRequest, VarianceIssued,
@@ -58,7 +60,7 @@ REQUESTS = (Fact, NewCase, SectionCRequest, SignupRequest, LoginRequest, Onboard
             RequirementDecisionRequest,
             ChecklistAnswerRequest, DraftPatch, TitleRequest, SelectedArticlesRequest, ApplicationPreferencesPatch,
             SignatureInput, ConsentInput, HistoryInput, RewriteRequest,
-            GenerateDrafts, DecideDraft)  # defaulted fields optional
+            GenerateDrafts, DecideDraft, CompletenessRequest)  # defaulted fields optional
 
 
 class _ResponsesCarryDefaults(GenerateJsonSchema):

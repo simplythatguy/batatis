@@ -263,17 +263,19 @@ def _officer_review(findings) -> list[dict]:
             for f in findings if f.status != 'present'][:40]
 
 
-def build_context(body: AssistRequest, case, codes, review=None) -> dict:
+def build_context(body: AssistRequest, case, codes, review=None, store=None) -> dict:
     context = {'screen': body.screen, 'help': PRODUCT_HELP}
     if case is not None:
-        gaps = check_completeness(case, codes)
+        gaps = check_completeness(case, codes, store=store)
         fields = process_fields(case, codes)
         # Sentences quoted from the attachments are reading context, not answers; leaving them out keeps
         # the applicant's own answers within the context budget.
         facts = [fact for fact in case.facts if not fact.field.startswith('statement.')]
         context['application'] = {'id': case.id, 'title': case.title, 'status': case.status,
             'facts': [_fact_row(fact) for fact in facts[-100:]],
-            'open_gaps': [gap.model_dump() for gap in gaps],
+            'open_gaps': [{'id': gap.id, 'section': gap.section, 'field': gap.field, 'severity': gap.severity,
+                           'routed_to': gap.routed_to, 'message': gap.message[:240]}
+                          for gap in gaps],
             'process_fields': [field.model_dump(exclude={'example'}) for field in fields],   # examples: focused card only
             'provisions': case.provisions}
         if review is not None:
@@ -436,7 +438,7 @@ def create_router(cases, code):
             from .review.sessions import Sessions
             found = Sessions(store).list(case.id)
             review = found[-1] if found else None
-        built = documents.prepared.data if documents else build_context(body, case, codes, review)
+        built = documents.prepared.data if documents else build_context(body, case, codes, review, store)
         if documents is None:
             built['navigation'] = [{'name': item.name} for item in available_destinations(user, case)]
             # Document projections are already scrubbed and checked. Redacting

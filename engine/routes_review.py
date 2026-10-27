@@ -368,7 +368,7 @@ def create_router(cases, code):
                 raise HTTPException(409, 'The saved application changed. Review it before submitting again.')
             at = now()
             resubmission_changes(case, cases(), at)
-            blocking = [gap for gap in check_completeness(case, code())
+            blocking = [gap for gap in check_completeness(case, code(), store=cases())
                         if gap.severity == 'blocking' and gap.submission_blocking]
             if blocking:
                 raise HTTPException(409, {'message': 'Resolve blocking administrative gaps before submitting',
@@ -480,7 +480,7 @@ def create_router(cases, code):
                 if not found and codes is not None:
                     raise HTTPException(409, 'Run the package review before accepting')
                 # When CodeDB is absent, the legacy path still respects previously saved canonical gaps.
-                gaps = check_completeness(case, codes) if codes is not None else case.gaps
+                gaps = check_completeness(case, codes, store=cases()) if codes is not None else case.gaps
                 if found:
                     if body.review_version != found[-1].version:
                         raise HTTPException(409, 'Review the latest package review before accepting')

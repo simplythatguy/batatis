@@ -39,11 +39,20 @@ def attachment_pdf():
     return buf.getvalue()
 
 
+class _Files:
+    """An in-memory stand-in for the case store's saved attachment bytes."""
+    def __init__(self, case_id, pdf):
+        self.case_id, self.pdf = case_id, pdf
+
+    def get_file(self, case_id, ref):
+        return {'name': 'report.pdf', 'data': self.pdf} if (case_id, ref) == (self.case_id, 'file_test') else None
+
+
 def attach(case, pdf, name='Synthetic supporting report'):
     source = Source(type='file', ref='file_test', quote='Synthetic attachment')
     case.evidence.append(EvidenceItem(id='test', description=name, status='evidence_listed'))
     case.facts += [fact('evidence.test.file_ref', source.ref, source=source), fact('evidence.test.title', name)]
-    return lambda ref: {'data': pdf} if ref == 'file_test' else None
+    return _Files(case.id, pdf)
 
 
 def test_unsigned_fields_are_live_and_canonical_appearances_are_preserved():
@@ -90,16 +99,15 @@ def test_current_signature_image_date_printed_name_and_consent_are_drawn():
 def test_draft_marks_all_pages_and_attachments_follow_appendix_with_bookmarks():
     case = Case(facts=[fact('process.rationale', 'Synthetic applicant rationale.')])
     loader = attach(case, attachment_pdf())
-    result = export_case(case, draft=True, file_loader=loader)
+    result = export_case(case, draft=True, store=loader)
     reader = PdfReader(io.BytesIO(result.pdf))
-    assert result.attachment_pages == 2 and result.appendix_pages > 0
-    assert len(reader.pages) == result.form_pages + result.appendix_pages + 2
+    assert result.appendix_pages > 0 and len(reader.pages) == result.page_count
     assert 'SYNTHETIC attached document page 1' in reader.pages[-2].extract_text()
     assert 'SYNTHETIC attached document page 2' in reader.pages[-1].extract_text()
     assert all('Draft · not for submission' in page.extract_text() for page in reader.pages)
     assert [item.title for item in reader.outline] == ['Form Part 1', 'Appendix', 'Synthetic supporting report']
     assert [reader.get_destination_page_number(item) for item in reader.outline] == [
-        0, result.form_pages, result.form_pages + result.appendix_pages]
+        0, result.form_pages, len(reader.pages) - 2]
 
 
 def test_official_pdf_has_no_draft_mark():
@@ -132,7 +140,7 @@ def test_demo_export_with_live_fields_and_attachment_is_read_through_upload_rout
     case.facts = [entry for entry in case.facts if not entry.field.endswith('.file_ref')]
     loader = attach(case, attachment_pdf())
     signed(case)
-    result = export_case(case, draft=True, file_loader=loader)
+    result = export_case(case, draft=True, store=loader)
     with TestClient(create_app(store=CaseStore(tmp_path / 'review.sqlite')), base_url='http://localhost') as client:
         signup(client, 'reader@example.test'); onboard(client, 'reviewer')
         response = client.post('/package-review', files=[('files', ('own-export.pdf', result.pdf, 'application/pdf'))])
@@ -165,7 +173,7 @@ def test_attachment_field_name_cannot_mask_the_same_name_on_the_form():
                            value='SYNTHETIC attachment value')
     draw.showPage(); draw.save()
     case = Case()
-    result = export_case(case, draft=True, file_loader=attach(case, output.getvalue()))
+    result = export_case(case, draft=True, store=attach(case, output.getvalue()))
     read = read_pdf(result.pdf, 'package.pdf')
     assert read.form_version == result.field_map
     assert read.fields['Owner'].status == 'blank'
@@ -177,15 +185,20 @@ def test_an_owner_password_attachment_is_kept_and_a_locked_one_is_named():
     sealed.encrypt(user_password='', owner_password='owner-only')
     buf = io.BytesIO(); sealed.write(buf)
     case = Case(facts=[fact('process.rationale', 'Synthetic applicant rationale.')])
-    result = export_case(case, draft=True, file_loader=attach(case, buf.getvalue()))
-    assert result.attachment_pages == 2
+    result = export_case(case, draft=True, store=attach(case, buf.getvalue()))
+    reader = PdfReader(io.BytesIO(result.pdf))
+    assert 'SYNTHETIC attached document page 2' in reader.pages[-1].extract_text()
+    assert not any('Synthetic supporting report' in item for item in result.open_items)
     locked = PdfWriter(clone_from=PdfReader(io.BytesIO(attachment_pdf())))
     locked.encrypt('needs-a-password')
     buf = io.BytesIO(); locked.write(buf)
     case = Case(facts=[fact('process.rationale', 'Synthetic applicant rationale.')])
+    draft = export_case(case, draft=True, store=attach(case, buf.getvalue()))
+    named = [item for item in draft.open_items if 'Synthetic supporting report' in item]
+    assert named and 'without a password' in named[0]
     with pytest.raises(ExportBlocked) as blocked:
-        export_case(case, draft=True, file_loader=attach(case, buf.getvalue()))
-    assert 'Synthetic supporting report' in blocked.value.reasons[0]
+        export_case(case, store=attach(case, buf.getvalue()))
+    assert any('Synthetic supporting report' in reason for reason in blocked.value.reasons)
 
 
 def test_intake_does_not_read_a_batatis_export_as_applicant_words():
@@ -203,3 +216,4 @@ def test_signatures_go_stale_when_the_benchmark_departure_changes_but_not_for_an
     assert content_hash(case) == before, 'an unaccepted proposal is not part of the signed application'
     case.identify.benchmark.departure = 'A different departure the signer never saw.'
     assert content_hash(case) != before
+

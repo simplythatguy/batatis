@@ -327,8 +327,7 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
 
     def run_export(case: Case, draft: bool):
         try:
-            return export_case(case, draft=draft, codes=code(),
-                               file_loader=lambda file_id: cases().get_file(case.id, file_id))
+            return export_case(case, draft=draft, codes=code(), store=cases())
         except ExportBlocked as e:
             raise HTTPException(409, {'message': 'export blocked; resolve these or export a draft', 'reasons': e.reasons})
         except FormNotFound as exc:
@@ -376,8 +375,7 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
                 pages=[PreviewPage(width=item.width, height=item.height, image=data_url('image/png', item.png))
                        for item in images], pdf=pdf)
         if not preview_fits(len(res.pdf)):
-            return ExportPreviewTooLarge(page_count=res.form_pages + res.appendix_pages + res.attachment_pages,
-                                         pdf_bytes=len(res.pdf))
+            return ExportPreviewTooLarge(page_count=res.page_count, pdf_bytes=len(res.pdf))
         images, total = page_images(res.pdf)
         return ExportPreview(filename=filename, pdf=data_url('application/pdf', res.pdf), page_count=total,
             pages=[PreviewPage(width=item.width, height=item.height, image=data_url('image/png', item.png))

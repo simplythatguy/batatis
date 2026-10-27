@@ -27,11 +27,11 @@ class Item:
 # Present means the documentation names the item (heading or phrase). Adequacy is not assessed.
 FILE_ITEMS = (
     Item('div_c.code_analysis', 'code analysis with the attributed objectives and functions', '2.3.1.1.(3)',
-         re.compile(r'\b(?:code analysis|objectives? and function(?:al statement)?s?|O[SHPAE]\d(?:\.\d+)*)\b', re.I),
+         re.compile(r'\b(?:code analysis|objectives? and function(?:al statement)?s?)\b', re.I),
          'No code analysis identifying the attributed objectives and functional statements was found.'),
     Item('div_c.testing_procedures', 'testing procedures', '2.3.1.1.(3)',
          re.compile(r'\b(?:testing procedures?|test procedures?|test methods?|tested (?:to|in accordance with)|'
-                    r'testing (?:to|in accordance with)|engineering stud(?:y|ies))\b', re.I),
+                    r'testing (?:to|in accordance with)|side[- ]by[- ]side testing|engineering stud(?:y|ies))\b', re.I),
          'No testing procedures, test methods or engineering studies supporting the code analysis were named.'),
     Item('div_c.qualifications', 'qualifications of the people responsible', '2.3.1.1.(4)',
          re.compile(r'\b(?:qualifications?|experience and background|P\.\s?Eng\.?|registered professional|'
@@ -63,12 +63,28 @@ DEMONSTRATE = (
 PEER_REVIEW = 'Peer review may be warranted'
 
 
-def _find(corpus: Corpus, pattern) -> Pointer | None:
+def _find(corpus: Corpus, pattern, *, negated_ok=False) -> Pointer | None:
     for file, page, text in corpus:
-        match = pattern.search(text or '')
-        if match:
-            line = text[text.rfind('\n', 0, match.start()) + 1:].split('\n', 1)[0].strip()[:300]
-            return Pointer(file=file, page=page, quote=line or match.group(0))
+        for match in pattern.finditer(text or ''):
+            start = text.rfind('\n', 0, match.start()) + 1
+            end = text.find('\n', match.end())
+            end = len(text) if end < 0 else end
+            line = text[start:end].strip()
+            # A heading, a search label, or an admission of absent documentation is not evidence.
+            body = (line[:match.start() - start] + line[match.end() - start:]).strip(' :.-')
+            if not body:
+                continue
+            context = line + ' ' + text[end + 1:].split('\n', 1)[0]
+            before = line[:match.start() - start]
+            after = line[match.end() - start:]
+            if not negated_ok and re.search(r'\b(?:no|not|without)\b[^.;:]{0,80}$', before, re.I):
+                continue
+            if re.search(r'\b(?:no|not|without)\b.{0,90}\b(?:provided|supplied|included|available|named|documented)\b|'
+                         r'\b(?:provided|supplied|included|available)\b.{0,20}\b(?:not|none)\b', context, re.I):
+                continue
+            if re.match(r'\s*:?\s*(?:(?:is|are|remain(?:s)?)\s+)?(?:unknown|tbd|to be provided|to follow)\b', after, re.I):
+                continue
+            return Pointer(file=file, page=page, quote=line[:300])
     return None
 
 
@@ -104,7 +120,7 @@ def file_findings(corpus: Corpus, where: Pointer, codes, *, responsible: list[st
         return []
     out = []
     for item in FILE_ITEMS:
-        if item.key not in skip and _find(corpus, item.pattern) is None:
+        if item.key not in skip and _find(corpus, item.pattern, negated_ok=item.key == 'div_c.maintenance') is None:
             out.append(_missing(item, where, codes, demonstrate=False, uncertain=uncertain))
     people = sorted({re.sub(r'\s+', ' ', name).strip().casefold() for name in responsible if name and name.strip()})
     if len(people) > 1 and _find(corpus, COORDINATOR) is None:
@@ -119,7 +135,7 @@ def file_findings(corpus: Corpus, where: Pointer, codes, *, responsible: list[st
             severity='blocking', pointers=[where], citations=_citation(codes, '2.3.1.1.(6)')))
     if any(text.strip() for _f, _p, text in corpus):
         for item in DEMONSTRATE:
-            if _find(corpus, item.pattern) is None:
+            if _find(corpus, item.pattern, negated_ok=True) is None:
                 out.append(_missing(item, where, codes, demonstrate=True, uncertain=uncertain))
     return out
 

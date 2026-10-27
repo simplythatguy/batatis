@@ -67,6 +67,7 @@ FACTS = {
     'supporting_doc.5.responsible': 'SYNTHETIC laboratory role',
     'supporting_doc.6.name': 'SYNTHETIC air-barrier-detail attachment',
     'supporting_doc.6.responsible': 'SYNTHETIC design-author role',
+    'coordinator': 'SYNTHETIC design-author role co-ordinates the design, code analysis and documentation.',
 }
 
 
@@ -122,7 +123,7 @@ def main(out_dir: str = '/tmp/batatis-export') -> None:
                 finally:
                     bitmap.close()
                 print(png)
-        print(out / name, f'{res.form_pages} form pages + {res.appendix_pages} appendix pages;',
+        print(out / name, f'{res.form_pages} form pages + {res.appendix_pages} appendix pages + {res.record_pages} record pages;',
               'blank:', ', '.join(res.blank_fields) or 'none')
 
 

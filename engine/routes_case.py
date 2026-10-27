@@ -245,7 +245,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
 
     @router.get('/cases/{case_id}/gaps', response_model=list[Gap])
     def gaps(case_id: str):
-        return check_completeness(get_case(case_id), code())
+        return check_completeness(get_case(case_id), code(), store=cases())
 
     @router.delete('/cases/{case_id}/evidence/{evidence_id}', response_model=Case)
     def delete_evidence(case_id: str, evidence_id: str, body: EvidenceDelete):

@@ -12,6 +12,7 @@ from __future__ import annotations
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
+from .models_completeness import AdministrativeReport
 
 REVIEW_SCHEMA = 'batatis.package_review.v1'
 REVIEW_NOTICE = (
@@ -230,6 +231,7 @@ class ReviewSession(BaseModel):
     diff: ReviewDiff | None = None
     lookup_skipped: bool = False      # True when the code database was unavailable
     dispositions: list[Disposition] = Field(default_factory=list)
+    policy: AdministrativeReport | None = None
 
 
 class SessionSummary(BaseModel):

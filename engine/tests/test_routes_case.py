@@ -42,12 +42,16 @@ def test_professional_process_and_gaps_use_latest_persisted_facts(context):
     professional = client.get(f'/cases/{case.id}/professional').json()
     assert professional['involvement'] == 'professional_involved'
     assert professional['required'] != 'no'
-    assert client.get(f'/cases/{case.id}/gaps').json()['items'] == []
+    # The shared report keeps officer-side warnings (signature reading, "demonstrate, don't assert" prompts);
+    # a complete case has no blocking gap.
+    assert not [g for g in client.get(f'/cases/{case.id}/gaps').json()['items'] if g['severity'] == 'blocking']
     fields = client.get(f'/cases/{case.id}/process-fields').json()['items']
     assert len(fields) == 6 and all(f['answer']['author'] == 'applicant' for f in fields)
     store.add_fact(case.id, fact('process.risk_assessment', 'Proposed generated text', kind='proposed', status='unconfirmed'))
     gaps = client.get(f'/cases/{case.id}/gaps').json()['items']
-    assert any(g['id'].startswith('D09:') and g['fix_hint'] and g['citation'] for g in gaps)
+    # The newest answer is unconfirmed: a blocking risk-assessment gap, never the older confirmed answer.
+    assert any(g['field'] == 'risk_assessment' and g['severity'] == 'blocking' and g['fix_hint'] and g['citation']
+               for g in gaps)
     assert next(f for f in client.get(f'/cases/{case.id}/process-fields').json()['items'] if f['id'] == 'risk_assessment')['answer'] is None
 
 

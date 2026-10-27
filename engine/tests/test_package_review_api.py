@@ -210,13 +210,14 @@ def test_upload_on_queue_case_and_reupload_diff(scene):
     first = clients['reviewer'].post(f'/review/{case.id}/package-review', files=multipart(package(planted)))
     assert first.status_code == 201, first.text
     keys = {f['key'] for f in first.json()['findings'] if f['status'] != 'not_found'}
-    assert {'owner_name:presence', 'application_date:presence', 'supporting_doc:no_responsible'} <= keys
+    responsible = 'document:synthetic-soffit-fire-test-report:responsible'
+    assert {'owner_name:presence', 'application_date:presence', responsible} <= keys
     fixed = dict(CLEAN_FORM, **{'Date of Reqeuest': '', 'Lot': 'TBD'})
     second = clients['reviewer'].post(f'/review/{case.id}/package-review', files=multipart(package(fixed, flat=True)))
     assert second.status_code == 201, second.text
     diff = second.json()['diff']
     assert diff['previous_gaps'] == 3
-    assert {e['key'] for e in diff['resolved']} == {'owner_name:presence', 'supporting_doc:no_responsible'}
+    assert {e['key'] for e in diff['resolved']} == {'owner_name:presence', responsible}
     assert {e['key'] for e in diff['still_open']} == {'application_date:presence'}
     assert {e['key'] for e in diff['new']} == {'legal_description:presence'}
     assert diff['statement'] == '2 of 3 gaps resolved, 1 still open, 1 new'
@@ -343,18 +344,18 @@ def test_official_blank_draft_cannot_mask_supplied_rationale(multi_source_scene,
     assert clients['reviewer'].post(f'/review/{case.id}/claim', json={}).status_code == 200
     before = store.get(case.id).model_dump(mode='json')
     route = f'/review/{case.id}/package-review' if linked else '/package-review'
-    # The draft prints no rationale placeholder. On its own the rationale is absent: an officer check,
-    # never a certain blank and never an automatic request.
+    # The draft prints no rationale passage, but its visible administrative record marks the rationale
+    # unanswered. On its own the draft reads as the same certain applicant gap the applicant sees.
     alone = clients['reviewer'].post(route, files=multipart([('official-blank-draft.pdf', exported.content)]))
     assert alone.status_code == 201, alone.text
     session = alone.json()
     reading = next(f for f in session['fields'] if f['field'] == 'rationale')
-    assert reading['status'] == 'not_found' and reading['value'] is None, reading
+    assert reading['status'] == 'blank' and reading['value'] is None, reading
     finding = next(f for f in session['findings'] if f['field'] == 'rationale')
-    assert finding['status'] == 'not_found'
+    assert finding['status'] == 'blank' and finding['routed_to'] == 'applicant'
     item = next(i for i in session['information_request']['items'] if i['field'] == 'rationale')
-    assert item['officer_check'] and not item['included']
-    assert item['text'] not in session['information_request']['text']
+    assert item['included'] and not item['officer_check']
+    assert item['text'] in session['information_request']['text']
     # Beside the applicant's supplied passage, in either order, the draft cannot mask it: the passage is read.
     rationale = 'NBC(AE) defines the benchmark; our proposed departure is described here.'
     uploads = [('official-blank-draft.pdf', exported.content), ('supplied-rationale.pdf', text_pdf([

@@ -66,16 +66,16 @@ def _build(package_id: str, case_id: str | None, authority: str, user: User, kin
         created_at=now(), created_by_name=user.name, input_kind=kind, case_version=parts.case_version,
         files=parts.files, fields=parts.fields, findings=findings, documents=parts.documents,
         citations=parts.citations, section_c=parts.section_c, information_request=ir.build(findings),
-        diff=diff, lookup_skipped=parts.lookup_skipped))
+        diff=diff, lookup_skipped=parts.lookup_skipped, policy=parts.policy))
 
 
-
-def rulebook_gaps(case, codes):
-    """The shared completeness rules' gaps for a saved case: computed, or the case's own when the code
-    database is missing. Every route uses this, so the index, the edit and the decision agree."""
+def rulebook_gaps(case, codes, store=None):
+    """The one shared completeness result's gaps for a saved case: computed from its exported package, or
+    the case's own when the code database is missing. Every route uses this, so the index, the edit and the
+    decision agree."""
     if case is None:
         return []
-    return check_completeness(case, codes) if codes is not None else case.gaps
+    return check_completeness(case, codes, store=store) if codes is not None else case.gaps
 
 
 def decision_items(items):
@@ -135,7 +135,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes]) -
 
     def index(package_id: str, found: list[ReviewSession], case=None) -> PackageReviewIndex:
         codes = optional_codes() if case else None
-        gaps = rulebook_gaps(case, codes)
+        gaps = rulebook_gaps(case, codes, cases())
         if found:
             found = [*found[:-1], workspace.sync_request(found[-1], case, gaps)]
         summaries = []
@@ -171,7 +171,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes]) -
     def edit_request(package_id: str, version: int, body: InformationRequestEdit, user: User, case=None):
         session, raw = editable(package_id, version)
         codes = optional_codes() if case else None
-        gaps = rulebook_gaps(case, codes)
+        gaps = rulebook_gaps(case, codes, cases())
         state = workspace.build(session, case, gaps)
         states = {s.key: s for s in state.states}
         findings = {f.key: f for f in session.findings}
@@ -246,7 +246,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes]) -
                 raise HTTPException(409, 'case was updated concurrently')
             kind = 'case'
         session = _build(case_id, case_id, case.authority, user, kind, parts, previous)
-        gaps = await run_in_threadpool(check_completeness, source_case, codes) if codes is not None else source_case.gaps
+        gaps = await run_in_threadpool(rulebook_gaps, source_case, codes, cases())
         return await run_in_threadpool(save, session, gaps)
 
     def close_out_for(case, found: list[ReviewSession]) -> CloseOut | None:
@@ -255,7 +255,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes]) -
         from .review.documents import case_rows
         documents = found[-1].documents if found else case_rows(case, cases())
         codes = optional_codes()
-        gaps = rulebook_gaps(case, codes)
+        gaps = rulebook_gaps(case, codes, cases())
         return closeout.build(case, found, sessions().closeout(case.id), documents, gaps=gaps)
 
     @router.get('/review/{case_id}/package-review', response_model=PackageReviewIndex)
@@ -331,7 +331,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes]) -
             # A request drafted from an earlier application must not reach the applicant as current.
             raise HTTPException(409, 'The application changed after this review. Run the review again first.')
         codes = optional_codes()
-        gaps = rulebook_gaps(case, codes)
+        gaps = rulebook_gaps(case, codes, cases())
         session = workspace.sync_request(session, case, gaps)
         request_ = session.information_request
         text = validate_request(request_)
@@ -399,7 +399,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes]) -
             raise HTTPException(404, NOT_FOUND)
         session, raw = current
         codes = optional_codes()
-        gaps = rulebook_gaps(case, codes)
+        gaps = rulebook_gaps(case, codes, cases())
         session = workspace.sync_request(session, case, gaps)
         request_ = session.information_request
         if request_.message_id:

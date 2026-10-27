@@ -73,8 +73,11 @@ def test_actual_officer_default_route_returns_located_grouped_b_without_writes(c
     assert found['mitigating_measures']['verdict'] == 'unclear'
     assert found['legal_description']['verdict'] == 'missing'
     assert found['legal_description']['form_fields']
-    assert found['single_location']['verdict'] == 'unclear'
-    assert found['section_c.edition']['verdict'] == 'unclear'
+    # The outgoing form shows a blank municipal address: read, and empty, so missing rather than unclear.
+    assert found['single_location']['verdict'] == 'missing'
+    assert found['single_location']['problem'] == 'blank'
+    # The outgoing form states the edition Batatis cites, so the edition reads as supplied.
+    assert found['section_c.edition']['verdict'] == 'present'
     assert payload['reviews'][0]['export_reasons'] == blockers(store.get(case.id), load_field_map(), codes)
     assert store.get(case.id).model_dump() == before
     assert store.get_file(case.id, uploaded['id'])['data'] == b'%PDF-1.4\nSYNTHETIC presence bytes\n'
@@ -133,7 +136,7 @@ def test_missing_case_checks_storage_before_corpus_or_variant_dependency(tmp_pat
         assert con.execute('SELECT count(*) FROM cases').fetchone()[0] == 0
 
 
-def test_real_b_screens_remain_distinct_from_presence_only_a(context):
+def test_legacy_variant_names_consume_the_same_shared_policy(context):
     client, store, _ = context
     case = store.put(Case(facts=[
         fact('alternative_description', 'SYNTHETIC exterior cladding departure'),
@@ -144,7 +147,8 @@ def test_real_b_screens_remain_distinct_from_presence_only_a(context):
     ]))
     a = elements(client.post(f'/cases/{case.id}/completeness', json={'variant': 'A'}))
     b = elements(client.post(f'/cases/{case.id}/completeness', json={'variant': 'B'}))
-    assert a['risk_assessment']['verdict'] == 'present'
+    assert a == b
+    assert a['risk_assessment']['verdict'] == 'unclear'
     assert b['risk_assessment']['problem'] == 'generic'
     assert b['mitigating_measures']['problem'] == 'unrelated'
     assert b['assumptions_and_limits']['problem'] == 'stated_as_fact'
@@ -386,6 +390,7 @@ def _complete_package(store, codes):
         'process.assumptions_and_limits': 'SYNTHETIC assumptions limit the cladding installation to this project configuration.',
         'process.maintenance_operation': 'SYNTHETIC applicant identifies inspection intervals and the responsible organisation.',
         'process.qualifications': 'SYNTHETIC applicant records the responsible designer and analysis scope.',
+        'testing_procedures': 'SYNTHETIC applicant names the comparison test method used for the analysis.',
     }.items()]
     case = store.put(case)
     pdf = PdfWriter()
