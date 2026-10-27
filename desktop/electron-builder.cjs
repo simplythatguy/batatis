@@ -72,9 +72,11 @@ module.exports = {
   },
   win: windowsSigning ? {
     icon: "assets/icon-win.png",
-    target: [{ target: "zip", arch: ["x64"] }],
+    // The zip feeds the in-app updater; the installer is what people download and run.
+    target: [{ target: "zip", arch: ["x64"] }, { target: "nsis", arch: ["x64"] }],
     azureSignOptions: windowsSigning,
     // The engine's libraries are signed too.
     signExts: [".dll", ".pyd"],
-  } : { icon: "assets/icon-win.png", target: [{ target: "zip", arch: ["x64"] }], signExecutable: false },
+  } : { icon: "assets/icon-win.png", target: [{ target: "zip", arch: ["x64"] }, { target: "nsis", arch: ["x64"] }], signExecutable: false },
+  nsis: { oneClick: true, perMachine: false, deleteAppDataOnUninstall: false, createDesktopShortcut: true },
 };

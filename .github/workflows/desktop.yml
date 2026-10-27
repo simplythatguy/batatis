@@ -259,6 +259,7 @@ jobs:
           path: |
             desktop/build/release/*.zip
             desktop/build/release/*.dmg
+            desktop/build/release/*.exe
           if-no-files-found: error
 
   release:
@@ -289,10 +290,10 @@ jobs:
         run: |
           set -euo pipefail
           cd release
-          ls Batatis-*.zip Batatis-*.dmg
-          sha256sum Batatis-*.zip Batatis-*.dmg > SHA256SUMS
+          ls Batatis-*.zip Batatis-*.dmg Batatis-*.exe
+          sha256sum Batatis-*.zip Batatis-*.dmg Batatis-*.exe > SHA256SUMS
           cat SHA256SUMS
           args=(--target "$SHA" --generate-notes)
           if [ -n "$NOTES_START" ]; then args+=(--notes-start-tag "$NOTES_START"); fi
           if [ "$PRERELEASE" = true ]; then args+=(--prerelease --title "Batatis Beta $VERSION (${SHA:0:12})"); else args+=(--latest --title "Batatis $VERSION"); fi
-          gh release create "$TAG" Batatis-*.zip Batatis-*.dmg SHA256SUMS "${args[@]}"
+          gh release create "$TAG" Batatis-*.zip Batatis-*.dmg Batatis-*.exe SHA256SUMS "${args[@]}"
