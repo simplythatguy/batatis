@@ -74,9 +74,11 @@ export function StageButton({ id, label, ariaLabel, icon, pct, current, done, di
       {disabled ? (
         <span {...common} role="link" aria-disabled="true" tabIndex={0}>{body}</span>
       ) : href ? (
-        <a {...common} href={href}>{body}</a>
+        // Choosing a stage dismisses its label, as a tooltip does on click: the stage now shows its own name
+        // and slides into place, which a label pinned to the old position would trail behind.
+        <a {...common} href={href} onClick={() => setTip(false)}>{body}</a>
       ) : (
-        <button {...common} type="button" onClick={onClick}>{body}</button>
+        <button {...common} type="button" onClick={() => { setTip(false); onClick?.(); }}>{body}</button>
       )}
       <Tip anchor={ref.current} open={tip} id={`stage-tip-${id}`} side="bottom">
         <span>{label}</span>{done ? " ✓" : p > 0 && p < 100 ? <span className="cf-faint cf-mono"> {p}%</span> : null}
