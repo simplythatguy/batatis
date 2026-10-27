@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
 import { execFile, spawn } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import test from "node:test";
 import { promisify } from "node:util";
 import {
-  archiveName, channelOf, expectedSum, installedApp, launchCommand, newer, noteItem, onlyApp, readReleases, swapCommand, trustedUpdateUrl, Updater,
+  archiveName, channelOf, expectedSum, installedApp, keepUninstaller, launchCommand, newer, noteItem, onlyApp, readReleases, swapCommand, trustedUpdateUrl, Updater,
   type UpdaterDeps,
 } from "../src/main/updates.ts";
 import { scratch, waitFor } from "./helpers.ts";
@@ -264,6 +264,28 @@ test("a Windows folder holding anything besides the app is never swapped", async
   assert.equal(await onlyApp(target, staged), true);
   writeFileSync(join(target, "tax return.pdf"), "the person's own file");
   assert.equal(await onlyApp(target, staged), false);
+});
+
+test("an installer's uninstaller travels with the update, but a person's own files still stop the swap", async (t) => {
+  const root = scratch(t);
+  const target = join(root, "Programs", "Batatis");
+  const staged = join(root, "stage", "Batatis");
+  for (const dir of [target, staged]) {
+    mkdirSync(join(dir, "resources"), { recursive: true });
+    writeFileSync(join(dir, "Batatis.exe"), "app");
+  }
+  writeFileSync(join(target, "Uninstall Batatis.exe"), "uninstaller");
+  assert.equal(await onlyApp(target, staged), false, "without the carry-over the uninstaller would block the swap");
+  await keepUninstaller(target, staged);
+  assert.equal(await onlyApp(target, staged), true);
+  assert.equal(readFileSync(join(staged, "Uninstall Batatis.exe"), "utf8"), "uninstaller", "and the swap keeps it");
+  writeFileSync(join(target, "tax return.pdf"), "the person's own file");
+  await keepUninstaller(target, staged);
+  assert.equal(await onlyApp(target, staged), false);
+  const plain = join(root, "Plain");
+  mkdirSync(plain);
+  await keepUninstaller(plain, staged);
+  assert.equal(readdirSync(plain).length, 0, "a zip install has no uninstaller to carry");
 });
 
 test("a failed background check keeps the known update; a manual check after nothing known reports the failure", async (t) => {
