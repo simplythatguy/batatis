@@ -14,6 +14,7 @@ import type {
   CaseRules,
   ChecklistAnswerRequest,
   ChecklistAnswerResult,
+  DraftingRecord,
   ExportPreview,
   ExportPreviewTooLarge,
   JurisdictionDetail,
@@ -201,6 +202,12 @@ export function createEngine(base: string) {
     setSelectedArticles: (caseId: string, body: SelectedArticlesRequest, signal?: AbortSignal) =>
       call<Case>("PUT", `/cases/${enc(caseId)}/selected-articles`, body, signal),
     getCase: (id: string, signal?: AbortSignal) => call<SavedCase>("GET", `/cases/${enc(id)}`, undefined, signal),
+    applicantDrafts: (caseId: string, signal?: AbortSignal) =>
+      call<DraftingRecord | null>("GET", `/cases/${enc(caseId)}/drafts`, undefined, signal),
+    generateApplicantDrafts: (caseId: string, expectedVersion: number, signal?: AbortSignal) =>
+      call<Case>("POST", `/cases/${enc(caseId)}/drafts`, { expected_version: expectedVersion }, signal, APPLICANT_DRAFT_WAIT_MS),
+    decideApplicantDraft: (caseId: string, draftId: string, expectedVersion: number, decision: "accept" | "reject", signal?: AbortSignal) =>
+      call<Case>("POST", `/cases/${enc(caseId)}/drafts/${enc(draftId)}/decision`, { expected_version: expectedVersion, decision }, signal),
     jobs: (caseId: string, signal?: AbortSignal) => call<ItemEnvelope<Job>>("GET", `/cases/${enc(caseId)}/jobs`, undefined, signal).then(unwrapItems),
     workerHealth: (caseId: string, signal?: AbortSignal) => call<WorkerHealth>("GET", `/cases/${enc(caseId)}/jobs/health`, undefined, signal),
     job: (caseId: string, id: string, signal?: AbortSignal) => call<Job>("GET", `/cases/${enc(caseId)}/jobs/${enc(id)}`, undefined, signal),
@@ -514,6 +521,9 @@ export class ExportBlockedError extends EngineError {
 
 /** Bound so a slow engine cannot leave the screen on "waiting". */
 const ENGINE_WAIT_MS = 8000;
+
+/** Generation and grounding audit each have 180 seconds, followed by registry and save overhead. */
+export const APPLICANT_DRAFT_WAIT_MS = 420_000;
 
 /**
  * An export, or its preview, fills the whole form and appendix. The review's 500-reference draft took 49.8 s

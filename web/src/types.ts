@@ -221,7 +221,7 @@ export interface Case {
   questions: Question[];
   candidates: Candidate[];
   sectionC: SectionCRow[];
-  /** Written by the applicant only; the tool supplies prompts, never content. */
+  /** Applicant-owned answers: typed directly or adopted after explicit draft acceptance. */
   process: Record<ProcessFieldId, string>;
   /**
    * True when the Division C screen or a Section D issue says practice of engineering applies.

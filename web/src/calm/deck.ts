@@ -169,7 +169,7 @@ const PROCESS_QUESTION: Record<string, string> = {
   qualifications: "Who takes responsibility for this, and for which parts?",
 };
 
-export const WRITTEN_BY_YOU = "You write this in your own words. Batatis never writes it for you.";
+export const WRITTEN_BY_YOU = "Write your answer or review a sourced draft. You own the wording you accept.";
 
 /** Whitespace folded, cut at `n` characters with an ellipsis. */
 const clip = (t: string, n: number) => {
@@ -710,7 +710,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       section: "D",
       eyebrow: sectionEyebrow("D"),
       title: "Who is responsible, and which documents back this up?",
-      context: "Batatis lists what the evidence must address. Your engineer or architect writes it.",
+      context: "Review a draft evidence plan. Your engineer or architect supplies the professional evidence.",
       why: "This part of the form (Section D) names the engineer or architect responsible and lists the proof for each rule your design differs from. Batatis does not write that proof.",
       ref: "section-d",
       done: (seen.has("section-d") && dGaps.length === 0) || pendingForOfficer || needsCheck,

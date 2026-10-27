@@ -96,6 +96,18 @@ export interface ArticleDecision {
   open_question_id: string | null;
 }
 
+export interface Assessment {
+  assessment_kind: "evaluation" | "listing";
+  date: string | null;
+  date_kind: "modified" | "issued" | null;
+  date_source_url: string | null;
+  manufacturer: string;
+  message: string;
+  number: string;
+  report_url: string;
+  title: string;
+}
+
 export interface AssistAttachment {
   case_id: string;
   content_state: "not_read" | "text_excerpt";
@@ -232,6 +244,7 @@ export interface Case {
   created_at: string;
   decision: Decision | null;
   decision_history: Decision[];
+  drafting: DraftingRecord | null;
   evidence: EvidenceItem[];
   expires_at: string | null;
   facts: Fact[];
@@ -459,6 +472,11 @@ export interface CoverageEntry {
   roadmap: string | null;
 }
 
+export interface DecideDraft {
+  decision: "accept" | "reject";
+  expected_version: number;
+}
+
 export interface Decision {
   at: string;
   by_id: string;
@@ -533,6 +551,17 @@ export interface DocumentRow {
   type: Attribute;
 }
 
+export interface DraftCitation {
+  quote: string;
+  source_id: string;
+}
+
+export interface DraftClaim {
+  kind: "fact" | "assumption" | "plan";
+  sources: DraftCitation[];
+  text: string;
+}
+
 export interface DraftFileBinding {
   file_id: string;
   kind: "file";
@@ -543,6 +572,20 @@ export interface DraftFileBindingInput {
   kind?: "file";
 }
 
+export interface DraftGeneration {
+  audit_input_tokens: number | null;
+  audit_output_tokens: number | null;
+  auditor_model: string;
+  effort: string;
+  generated_at: string;
+  id: string;
+  input_tokens: number | null;
+  model: string;
+  output_tokens: number | null;
+  provider: string;
+  validation: "grounded";
+}
+
 export interface DraftPatch {
   applicant_draft?: ApplicantDraftInput | null;
   expected_version: number;
@@ -551,9 +594,51 @@ export interface DraftPatch {
   selected_articles?: SelectedArticleInput[] | null;
 }
 
+export interface DraftQuestion {
+  routed_to: "applicant" | "professional";
+  sources: DraftCitation[];
+  text: string;
+  why: string;
+}
+
+export interface DraftRegistryQuery {
+  end: number;
+  query: string;
+  quote: string;
+  source_id: string;
+  start: number;
+}
+
+export interface DraftSource {
+  id: string;
+  kind: "description" | "fact" | "document" | "code" | "section_c" | "guidance" | "precedent_structure" | "professional_screen" | "registry";
+  label: string;
+  metadata: Record<string, string | number | boolean | null>;
+  page: number | null;
+  ref: string;
+  text: string;
+  url: string | null;
+}
+
 export interface DraftText {
   base: string;
   value: string;
+}
+
+export interface DraftingRecord {
+  drafts: WordingDraft[];
+  generated_at: string;
+  generated_texts: string[];
+  generations: DraftGeneration[];
+  input_fingerprint: string;
+  notices: string[];
+  registry_queries: DraftRegistryQuery[];
+  registry_searches: RegistrySearch[];
+  schema_version: "batatis.applicant_drafts.v1";
+  source_history: DraftSource[];
+  sources: DraftSource[];
+  stale: boolean;
+  stale_reasons: string[];
 }
 
 export interface DroppedPick {
@@ -733,6 +818,10 @@ export interface Gap {
   section: "A" | "B" | "C" | "D" | "process";
   severity: "blocking" | "warning" | "info";
   submission_blocking: boolean;
+}
+
+export interface GenerateDrafts {
+  expected_version: number;
 }
 
 /** A published guide for a design category or process. Guidance, not a variance or an approval. */
@@ -1395,6 +1484,20 @@ export interface Regime {
   route: string;
 }
 
+export interface RegistrySearch {
+  cached: boolean;
+  message: string;
+  notice: string;
+  query: string;
+  registry_date: string;
+  results: Assessment[];
+  searched_date: string;
+  snapshot_path: string | null;
+  source: "live" | "snapshot";
+  source_url: string;
+  total_matches: number;
+}
+
 export interface RelevanceBands {
   status: string;
   x: number;
@@ -2028,6 +2131,24 @@ export interface User {
 
 export interface UserResult {
   user: User;
+}
+
+export interface WordingDraft {
+  accepted_fact_id: string | null;
+  claims: DraftClaim[];
+  decided_at: string | null;
+  decided_by: string | null;
+  decision_expected_version: number | null;
+  field: string;
+  generated_at: string;
+  generation_id: string;
+  id: string;
+  input_fingerprint: string;
+  questions: DraftQuestion[];
+  replaces_fact_id: string | null;
+  status: "draft" | "accepted" | "rejected";
+  text: string;
+  title: string;
 }
 
 export interface WorkerHealth {

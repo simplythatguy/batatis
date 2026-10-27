@@ -650,6 +650,92 @@
       "title": "ArticleDecision",
       "type": "object"
     },
+    "Assessment": {
+      "properties": {
+        "assessment_kind": {
+          "enum": [
+            "evaluation",
+            "listing"
+          ],
+          "title": "Assessment Kind",
+          "type": "string"
+        },
+        "date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date"
+        },
+        "date_kind": {
+          "anyOf": [
+            {
+              "enum": [
+                "modified",
+                "issued"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date Kind"
+        },
+        "date_source_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date Source Url"
+        },
+        "manufacturer": {
+          "title": "Manufacturer",
+          "type": "string"
+        },
+        "message": {
+          "default": "",
+          "title": "Message",
+          "type": "string"
+        },
+        "number": {
+          "title": "Number",
+          "type": "string"
+        },
+        "report_url": {
+          "title": "Report Url",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "number",
+        "title",
+        "manufacturer",
+        "assessment_kind",
+        "date",
+        "date_kind",
+        "date_source_url",
+        "report_url",
+        "message"
+      ],
+      "title": "Assessment",
+      "type": "object"
+    },
     "AssistAttachment": {
       "additionalProperties": false,
       "properties": {
@@ -1640,6 +1726,17 @@
           "title": "Decision History",
           "type": "array"
         },
+        "drafting": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DraftingRecord"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "evidence": {
           "default": [],
           "items": {
@@ -1899,6 +1996,7 @@
         "relevance",
         "identify",
         "intake",
+        "drafting",
         "expires_at",
         "submission_number"
       ],
@@ -3068,6 +3166,30 @@
       "title": "CoverageEntry",
       "type": "object"
     },
+    "DecideDraft": {
+      "additionalProperties": false,
+      "properties": {
+        "decision": {
+          "enum": [
+            "accept",
+            "reject"
+          ],
+          "title": "Decision",
+          "type": "string"
+        },
+        "expected_version": {
+          "minimum": 1,
+          "title": "Expected Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "expected_version",
+        "decision"
+      ],
+      "title": "DecideDraft",
+      "type": "object"
+    },
     "Decision": {
       "properties": {
         "at": {
@@ -3551,6 +3673,65 @@
       "title": "DocumentRow",
       "type": "object"
     },
+    "DraftCitation": {
+      "additionalProperties": false,
+      "properties": {
+        "quote": {
+          "maxLength": 8000,
+          "minLength": 1,
+          "title": "Quote",
+          "type": "string"
+        },
+        "source_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Source Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_id",
+        "quote"
+      ],
+      "title": "DraftCitation",
+      "type": "object"
+    },
+    "DraftClaim": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "fact",
+            "assumption",
+            "plan"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/DraftCitation"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        },
+        "text": {
+          "maxLength": 3000,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "kind",
+        "sources"
+      ],
+      "title": "DraftClaim",
+      "type": "object"
+    },
     "DraftFileBinding": {
       "additionalProperties": false,
       "properties": {
@@ -3594,6 +3775,104 @@
         "file_id"
       ],
       "title": "DraftFileBinding",
+      "type": "object"
+    },
+    "DraftGeneration": {
+      "additionalProperties": false,
+      "properties": {
+        "audit_input_tokens": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Audit Input Tokens"
+        },
+        "audit_output_tokens": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Audit Output Tokens"
+        },
+        "auditor_model": {
+          "title": "Auditor Model",
+          "type": "string"
+        },
+        "effort": {
+          "title": "Effort",
+          "type": "string"
+        },
+        "generated_at": {
+          "title": "Generated At",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "input_tokens": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Input Tokens"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "output_tokens": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Output Tokens"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "validation": {
+          "const": "grounded",
+          "default": "grounded",
+          "title": "Validation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "generated_at",
+        "provider",
+        "model",
+        "effort",
+        "auditor_model",
+        "validation",
+        "input_tokens",
+        "output_tokens",
+        "audit_input_tokens",
+        "audit_output_tokens"
+      ],
+      "title": "DraftGeneration",
       "type": "object"
     },
     "DraftPatch": {
@@ -3656,6 +3935,174 @@
       "title": "DraftPatch",
       "type": "object"
     },
+    "DraftQuestion": {
+      "additionalProperties": false,
+      "properties": {
+        "routed_to": {
+          "enum": [
+            "applicant",
+            "professional"
+          ],
+          "title": "Routed To",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/DraftCitation"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        },
+        "text": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "why": {
+          "maxLength": 1500,
+          "minLength": 1,
+          "title": "Why",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "why",
+        "routed_to",
+        "sources"
+      ],
+      "title": "DraftQuestion",
+      "type": "object"
+    },
+    "DraftRegistryQuery": {
+      "additionalProperties": false,
+      "properties": {
+        "end": {
+          "title": "End",
+          "type": "integer"
+        },
+        "query": {
+          "title": "Query",
+          "type": "string"
+        },
+        "quote": {
+          "title": "Quote",
+          "type": "string"
+        },
+        "source_id": {
+          "title": "Source Id",
+          "type": "string"
+        },
+        "start": {
+          "title": "Start",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "query",
+        "source_id",
+        "quote",
+        "start",
+        "end"
+      ],
+      "title": "DraftRegistryQuery",
+      "type": "object"
+    },
+    "DraftSource": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "description",
+            "fact",
+            "document",
+            "code",
+            "section_c",
+            "guidance",
+            "precedent_structure",
+            "professional_screen",
+            "registry"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "metadata": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Metadata",
+          "type": "object"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "ref": {
+          "title": "Ref",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "ref",
+        "page",
+        "label",
+        "text",
+        "url",
+        "metadata"
+      ],
+      "title": "DraftSource",
+      "type": "object"
+    },
     "DraftText": {
       "additionalProperties": false,
       "properties": {
@@ -3675,6 +4122,110 @@
         "value"
       ],
       "title": "DraftText",
+      "type": "object"
+    },
+    "DraftingRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "drafts": {
+          "items": {
+            "$ref": "#/$defs/WordingDraft"
+          },
+          "title": "Drafts",
+          "type": "array"
+        },
+        "generated_at": {
+          "title": "Generated At",
+          "type": "string"
+        },
+        "generated_texts": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Generated Texts",
+          "type": "array"
+        },
+        "generations": {
+          "items": {
+            "$ref": "#/$defs/DraftGeneration"
+          },
+          "title": "Generations",
+          "type": "array"
+        },
+        "input_fingerprint": {
+          "title": "Input Fingerprint",
+          "type": "string"
+        },
+        "notices": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Notices",
+          "type": "array"
+        },
+        "registry_queries": {
+          "items": {
+            "$ref": "#/$defs/DraftRegistryQuery"
+          },
+          "title": "Registry Queries",
+          "type": "array"
+        },
+        "registry_searches": {
+          "items": {
+            "$ref": "#/$defs/RegistrySearch"
+          },
+          "title": "Registry Searches",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "batatis.applicant_drafts.v1",
+          "default": "batatis.applicant_drafts.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "source_history": {
+          "items": {
+            "$ref": "#/$defs/DraftSource"
+          },
+          "title": "Source History",
+          "type": "array"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/DraftSource"
+          },
+          "title": "Sources",
+          "type": "array"
+        },
+        "stale": {
+          "default": false,
+          "title": "Stale",
+          "type": "boolean"
+        },
+        "stale_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Stale Reasons",
+          "type": "array"
+        }
+      },
+      "required": [
+        "schema_version",
+        "input_fingerprint",
+        "generated_at",
+        "stale",
+        "stale_reasons",
+        "sources",
+        "drafts",
+        "generations",
+        "registry_searches",
+        "registry_queries",
+        "notices",
+        "generated_texts",
+        "source_history"
+      ],
+      "title": "DraftingRecord",
       "type": "object"
     },
     "DroppedPick": {
@@ -4883,6 +5434,21 @@
         "submission_blocking"
       ],
       "title": "Gap",
+      "type": "object"
+    },
+    "GenerateDrafts": {
+      "additionalProperties": false,
+      "properties": {
+        "expected_version": {
+          "minimum": 1,
+          "title": "Expected Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "expected_version"
+      ],
+      "title": "GenerateDrafts",
       "type": "object"
     },
     "Guide": {
@@ -9101,6 +9667,85 @@
       "title": "Regime",
       "type": "object"
     },
+    "RegistrySearch": {
+      "properties": {
+        "cached": {
+          "title": "Cached",
+          "type": "boolean"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "notice": {
+          "title": "Notice",
+          "type": "string"
+        },
+        "query": {
+          "title": "Query",
+          "type": "string"
+        },
+        "registry_date": {
+          "title": "Registry Date",
+          "type": "string"
+        },
+        "results": {
+          "items": {
+            "$ref": "#/$defs/Assessment"
+          },
+          "title": "Results",
+          "type": "array"
+        },
+        "searched_date": {
+          "title": "Searched Date",
+          "type": "string"
+        },
+        "snapshot_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Snapshot Path"
+        },
+        "source": {
+          "enum": [
+            "live",
+            "snapshot"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "source_url": {
+          "default": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/published_evaluations.html",
+          "title": "Source Url",
+          "type": "string"
+        },
+        "total_matches": {
+          "title": "Total Matches",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "query",
+        "searched_date",
+        "registry_date",
+        "source",
+        "source_url",
+        "snapshot_path",
+        "cached",
+        "total_matches",
+        "results",
+        "message",
+        "notice"
+      ],
+      "title": "RegistrySearch",
+      "type": "object"
+    },
     "RelevanceBands": {
       "properties": {
         "status": {
@@ -13061,6 +13706,144 @@
         "user"
       ],
       "title": "UserResult",
+      "type": "object"
+    },
+    "WordingDraft": {
+      "additionalProperties": false,
+      "properties": {
+        "accepted_fact_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accepted Fact Id"
+        },
+        "claims": {
+          "items": {
+            "$ref": "#/$defs/DraftClaim"
+          },
+          "maxItems": 16,
+          "title": "Claims",
+          "type": "array"
+        },
+        "decided_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decided At"
+        },
+        "decided_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decided By"
+        },
+        "decision_expected_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decision Expected Version"
+        },
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "generated_at": {
+          "title": "Generated At",
+          "type": "string"
+        },
+        "generation_id": {
+          "title": "Generation Id",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "input_fingerprint": {
+          "title": "Input Fingerprint",
+          "type": "string"
+        },
+        "questions": {
+          "items": {
+            "$ref": "#/$defs/DraftQuestion"
+          },
+          "maxItems": 12,
+          "title": "Questions",
+          "type": "array"
+        },
+        "replaces_fact_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Replaces Fact Id"
+        },
+        "status": {
+          "default": "draft",
+          "enum": [
+            "draft",
+            "accepted",
+            "rejected"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "generation_id",
+        "input_fingerprint",
+        "field",
+        "title",
+        "text",
+        "claims",
+        "questions",
+        "status",
+        "generated_at",
+        "decided_at",
+        "decided_by",
+        "decision_expected_version",
+        "accepted_fact_id",
+        "replaces_fact_id"
+      ],
+      "title": "WordingDraft",
       "type": "object"
     },
     "WorkerHealth": {

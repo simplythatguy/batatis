@@ -92,7 +92,7 @@ export function resolveRoute(path: string, params: URLSearchParams): CalmRoute {
     case "/code-check":
       return focus ? build("questions", focus) : build("questions", null, { codeFirst: true });
     case "/review":
-      return build("review");
+      return build("review", focus?.startsWith("draft:") ? focus : null);
     case "/application": {
       const tab = params.get("tab");
       const rawFocus = params.get("focus");

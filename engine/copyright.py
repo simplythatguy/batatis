@@ -75,6 +75,13 @@ def attribute_code(node, key=None, parent=None):
     A citation already on the object stays. Applicant text is left alone and gets no link.
     """
     if isinstance(node, dict):
+        if node.get('schema_version') == 'batatis.applicant_drafts.v1':
+            # This typed record mixes applicant writing, owned pages and canonical code. Generic
+            # `text` detection would attribute the applicant's own claims/questions to NRC.
+            return {**node, 'sources': [
+                {**source, 'url': source.get('url') or NRC_PUBLICATION_URL}
+                if source.get('kind') in {'code', 'section_c'} else source
+                for source in node.get('sources', [])]}
         out = {}
         for name, value in node.items():
             if name in ('clipped', 'clipped_fields'):

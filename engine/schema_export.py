@@ -35,6 +35,7 @@ from .models_review import InformationRequestEdit, PackageReviewIndex, ReviewSes
 from .models_jurisdictions import JurisdictionDetail, JurisdictionsResult
 from .routes_jurisdictions import CaseJurisdictionPack
 from .routes_case import DraftPatch, SelectedArticlesRequest, TitleRequest
+from .routes_drafting import GenerateDrafts, DecideDraft
 from .rules.models import CaseRules, RuleSet
 from .models_checklists import (CaseChecklists, ChecklistAnswerRequest, ChecklistAnswerResult,
                                 JurisdictionChecklists)
@@ -55,7 +56,8 @@ REQUESTS = (Fact, NewCase, SectionCRequest, SignupRequest, LoginRequest, Onboard
             IdentifyRequest, IdentifyDecisionRequest, IdentifyConfirmRequest, BenchmarkConfirmRequest,
             RequirementDecisionRequest,
             ChecklistAnswerRequest, DraftPatch, TitleRequest, SelectedArticlesRequest, ApplicationPreferencesPatch,
-            SignatureInput, ConsentInput, HistoryInput, RewriteRequest)  # defaulted fields optional
+            SignatureInput, ConsentInput, HistoryInput, RewriteRequest,
+            GenerateDrafts, DecideDraft)  # defaulted fields optional
 
 
 class _ResponsesCarryDefaults(GenerateJsonSchema):

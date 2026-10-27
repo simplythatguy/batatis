@@ -187,6 +187,10 @@ def apply(case: Case, text: str | None, extraction: Extraction, *, role: str | N
             added.remove(fact)
             kept_ids.discard(fact.id)
     pointers = [pointer for pointer in extraction.pointers if pointer.fact_id in kept_ids]
+    # An identical rough-B reading reuses the fact, and must also keep its known automatic provenance.
+    pointers += [pointer.model_copy(update={'fact_id': same[pointer.fact_id]}) for pointer in extraction.pointers
+                 if pointer.field == 'alternative_description' and pointer.fact_id in same
+                 and same[pointer.fact_id] in previous]
     redirect = _scope_fact(case)
     if redirect is not None:
         fact, start, end = redirect
