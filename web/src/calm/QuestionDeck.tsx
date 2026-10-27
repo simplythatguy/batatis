@@ -11,8 +11,8 @@ import { questionContext } from "./assistant/questionContext";
 import { useCurrentApplication } from "./begin";
 import { CodeDrawer, type DrawerState } from "./CodeDrawer";
 import { PictureConsent } from "./PictureConsent";
-import { aliasKey, alternativeChoice, buildDeck, deferralFor, mergeQueue, rankAhead, choiceKey, choicesFor, paperworkRowKey, preCaseState, sourcePhrase, type DeckItem } from "./deck";
-import { NOT_SURE, planFactAnswer, planInput } from "../intakeView";
+import { aliasKey, alternativeChoice, buildDeck, deferralFor, mergeQueue, rankAhead, choiceKey, choicesFor, paperworkRowKey, preCaseState, type DeckItem } from "./deck";
+import { NOT_SURE, planFactAnswer, planInput, sourceLine } from "../intakeView";
 import { confirmedAnswer, localField } from "../intakeFields";
 import { KeywordTriage } from "./KeywordTriage";
 import { CodeProgress, ReadingState, ReadSource, RedirectPage, ShowCode, UnderstoodFacts, ProductRouteNotice, ForkNote } from "./ReadCards";
@@ -390,7 +390,7 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
           {!offer && fact && !isTyped(fact) && (
             <p className="cf-note">
               <span className={`cf-dot ${fact.status === "confirmed" ? "is-done" : "is-warning"}`} aria-hidden="true" />
-              {picked === "confirm" ? "Confirmed" : `From ${sourcePhrase(fact.source.ref)}`}
+              {picked === "confirm" ? "Confirmed" : `From ${sourceLine(c, fact)}`}
             </p>
           )}
           {!offer && picked === "dismiss" && !fact && <p className="cf-note">Removed.</p>}

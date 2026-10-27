@@ -865,7 +865,8 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   }
 
   function jobProgress(job: CaseJob) {
-    const state = activeJob(job) ? "running" : job.state === "succeeded" ? "done" : "error";
+    // A finished job is still reading until its result is applied, so no card is asked from the unread case.
+    const state = activeJob(job) || (job.state === "succeeded" && !completedJobs.current.has(job.id)) ? "running" : job.state === "succeeded" ? "done" : "error";
     if (!activeJob(job)) jobActionNotes.current.delete(job.id);
     const note = jobActionNotes.current.get(job.id) ?? (job.state === "superseded" ? "Your answers changed. Read the updated description again."
       : job.state === "cancelled" ? "This work was cancelled. You can start it again."
