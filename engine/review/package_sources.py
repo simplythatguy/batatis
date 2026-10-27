@@ -61,7 +61,7 @@ def visible_sources(read):
                               field_map=None, form_version=None, note=values.get('Source name', ''), _unreadable_cache=None)
             sources.append((segment, values, pointer))
             continue
-        values = _fields(body, ('Record type', 'Requirement key', 'Section', 'Field', 'Reason code', 'Severity',
+        values = _fields(body, ('Record type', 'Requirement key', 'Section', 'Field', 'Label', 'Reason code', 'Severity',
                                'Route', 'Submission blocking', 'Message', 'Fix', 'Citation', 'Involvement',
                                'Requirement', 'Applicant confirmation', 'Name', 'Role', 'Basis', 'Owner', 'Location', 'Pathway'))
         if values.get('Record type') == 'professional declaration':
@@ -88,7 +88,7 @@ def visible_sources(read):
             severity = values['Severity']
             route = values['Route']
             records.append(AdministrativeItem(key=values['Requirement key'], field=values['Field'], section=values['Section'],
-                label=values['Field'].replace('_', ' '), verdict='unclear' if route == 'officer' or
+                label=values.get('Label') or values['Field'].replace('_', ' '), verdict='unclear' if route == 'officer' or
                 values['Reason code'] == 'unconfirmed' else 'missing', reason_code=values['Reason code'],
                 reason=values['Message'], certainty='not_found' if route == 'officer' or values['Reason code'] == 'unconfirmed' else 'blank',
                 severity=severity, routed_to=route, export_blocking=severity == 'blocking',

@@ -140,8 +140,11 @@ def prepare_package(case, codes, *, store=None, draft=False, form=None, version=
             writer.add_page(page)
 
     def append_gap(gap, reason_code=None):
+        missing = 'Your application appears to be missing '
+        label = (gap.message[len(missing):].rstrip('.') if gap.message.startswith(missing)
+                 else gap.field.replace('_', ' '))
         append(_page([CONTEXT, 'Record type: unresolved input', f'Requirement key: {gap.id}',
-            f'Section: {gap.section}', f'Field: {gap.field}',
+            f'Section: {gap.section}', f'Field: {gap.field}', f'Label: {label}',
             f'Reason code: {reason_code or ("unconfirmed" if gap.id.startswith("export:unconfirmed:") else "saved_constraint")}',
             f'Severity: {gap.severity}', f'Route: {gap.routed_to or "applicant"}',
             f'Submission blocking: {"yes" if gap.submission_blocking else "no"}',
