@@ -8,6 +8,7 @@ import { useBegin, useCurrentApplication } from "./begin";
 import { getSession, resetSession, updateSession, useSession } from "./session";
 import { CIcon, Dot, Kbd, MOD_KEY } from "./ui";
 import { PictureConsent } from "./PictureConsent";
+import { DesktopEntry } from "../desktop/Entry";
 
 let fileSeq = 0;
 const fileId = () => `file-${Date.now().toString(36)}-${(fileSeq++).toString(36)}`;
@@ -247,6 +248,8 @@ export function Start() {
         {note && <p className="cf-faint cf-small" role="status">{note}</p>}
         {!inCase && resetNote && <p className="cf-faint cf-small" role="status">{resetNote}</p>}
       </div>
+      {/* A fresh desktop install can enter the shared test workspace from the front door, not only from Sign in. */}
+      {account.phase === "signed-out" && <DesktopEntry />}
     </div>
   );
 }
