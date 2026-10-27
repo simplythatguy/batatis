@@ -105,7 +105,7 @@ def create_job_handler(code: Callable[[], Codes], *, transport_factory=None, rev
             if stored is None:
                 raise HTTPException(404, 'file not found')
             files.append((file_id, stored['name'], stored['data']))
-            media_types[file_id] = stored['content_type']
+            media_types[file_id] = stored.get('content_type')
         transport, status = pick_transport(context.client_key) if body.model else (None, 'off')
         review_transport, review_status = (pick_review(context.client_key) if body.model and files
                                            else (None, 'off'))
