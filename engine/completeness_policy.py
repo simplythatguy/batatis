@@ -364,6 +364,14 @@ def _finish(snapshot, elements, citations, rows):
                 element.routed_to = 'officer' if stored.status == 'not_found' else 'applicant'
                 if stored.reason:
                     element.reason = stored.reason
+        # Every quote reaches the officer in full: at its own source, or at the field when it has none.
+        # Content that could not be read keeps only its located pointers.
+        for quote in element.quotes if element.certainty != 'not_found' else ():
+            if any(pointer.get('quote') == quote.text for pointer in element.pointers):
+                continue
+            located = (_source_pointer(quote.source, doc.ref) if quote.source
+                       else dict(element.pointers[0]) if element.pointers else {'file': doc.ref})
+            element.pointers.append({**located, 'quote': quote.text})
         if not element.key:
             problem = 'presence' if element.problem in (None, 'blank', 'placeholder', 'not_found', 'unconfirmed') else element.problem
             element.key = f'{element.field}:{problem}'
