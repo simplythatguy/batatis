@@ -14,6 +14,7 @@ from .text import fit, pdf_safe
 SIGNATURE_FIELDS = {'owner': ('Signature1', 'Date1'), 'owner_rep': ('Signature2', 'Date2')}
 OFFICER_FIELDS = {'Signature3', 'SCO Date', 'Signature4', 'SCO Date1'}
 CONSENT_FIELD = 'Check Box14'
+DRAFT_MARK = 'Draft · not for submission'   # pdf_reader skips this exact margin line
 
 
 def current_signatures(case):
@@ -75,6 +76,6 @@ def stamp_draft(writer) -> None:
         draw = canvas.Canvas(buf, pagesize=(width, height))
         draw.setFillGray(0.58)
         draw.setFont('Helvetica', 8)
-        draw.drawRightString(width - 24, height - 13, 'Draft · not for submission')
+        draw.drawRightString(width - 24, height - 13, DRAFT_MARK)
         draw.save()
         page.merge_page(PdfReader(buf).pages[0])

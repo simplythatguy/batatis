@@ -30,6 +30,9 @@ from ..export import scc
 from ..export.form_growth import Layout
 from ..pdfium import open_pdf
 from ..pdfium_lock import pdfium_locked
+from ..export.signatures import DRAFT_MARK
+
+_DRAFT_MARK = ''.join(DRAFT_MARK.split())   # line values below hold visible glyphs only
 
 FORM_TITLE = 'Variance Form for Proposed Alternative Solution'
 MAX_ATTRIBUTION_ROWS = 256  # bound untrusted reconstruction hints independently of upload byte limits
@@ -772,6 +775,11 @@ def _page_texts(data: bytes, pages) -> list[PageText]:
                     # Validate the whole source line, including any clipped suffix;
                     # validating only get_text_bounded(rect) would attest unseen text.
                     value = ''.join(units[i] for i, _box in chars)
+                    if value == _DRAFT_MARK:
+                        # A Batatis draft's page mark is not package content; it is blanked, not unsafe.
+                        for i, _box in chars:
+                            units[i] = ' ' * len(units[i])
+                        continue
                     if not valid or not _text_is_visible(page, rect, value, glyphs):
                         unsafe_boxes.append(bounds)
                         for i, _box in chars:

@@ -217,3 +217,17 @@ def test_signatures_go_stale_when_the_benchmark_departure_changes_but_not_for_an
     case.identify.benchmark.departure = 'A different departure the signer never saw.'
     assert content_hash(case) != before
 
+
+def test_a_draft_mark_does_not_change_what_the_officer_reads():
+    from engine.export.package import prepare_package
+    from engine.review.package import review_uploads
+    codes = Codes()
+    case = demo_case(CASES[0], codes)
+    case.facts.append(fact('risk_assessment', 'Low risk.'))
+    applicant = prepare_package(case, codes).policy.report
+    draft = prepare_package(case, codes, draft=True).export.pdf
+    assert all('Draft · not for submission' in page.extract_text() for page in PdfReader(io.BytesIO(draft)).pages)
+    officer = review_uploads([('draft.pdf', draft)], codes).policy
+    assert officer.export_reasons == applicant.export_reasons
+    assert sorted((item.key, item.verdict) for item in officer.items) == sorted(
+        (item.key, item.verdict) for item in applicant.items)
