@@ -418,3 +418,23 @@ test("turning betas off drops a downloaded beta even when the next look fails", 
   assert.notEqual(view.status, "ready", "a failed look must not keep a beta the person turned off");
   assert.equal(instance.staged(), null);
 });
+
+test("the chosen channel is announced even when a waiting download keeps the look that follows quiet", async (t) => {
+  const name = archiveName("0.2.0", process.platform, process.arch) ?? "";
+  const zip = new TextEncoder().encode("stable archive");
+  const files = { [name]: zip, SHA256SUMS: `${sha(zip)}  ${name}\n` };
+  let gate: Promise<void> | null = null;
+  const { fetch: serve } = feed(files, [release("0.2.0", {}, files)]);
+  const { instance, events } = updater(t, { fetch: async (url, init) => { if (gate) await gate; return serve(url, init); }, platform: process.platform === "win32" ? "win32" : "darwin" });
+  await instance.check();
+  assert.equal((await instance.download()).status, "ready");
+  let open: () => void = () => undefined;
+  gate = new Promise<void>((resolve) => { open = resolve; });
+  const before = events.length;
+  const pending = instance.setBeta(true);
+  await waitFor(() => events.length > before);
+  assert.equal(instance.view().beta, true, "the page can already see the new channel");
+  assert.equal(instance.view().status, "ready", "while the quiet look is still waiting");
+  open();
+  await pending;
+});

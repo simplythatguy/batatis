@@ -245,6 +245,8 @@ export class Updater {
       await this.discard(s.staged);
       this.state = { status: "idle", checked: false };
     }
+    // The chosen channel shows at once; the look that follows may take a while, and stays quiet with a download waiting.
+    this.deps.notify();
     return this.check();
   }
 
