@@ -75,7 +75,7 @@ test("field links and gap links resolve to the sheet and focus its requested inl
   const c = m.case();
   assert.equal(aliasKey(c, "field-legalDescription"), "paperwork");
   assert.equal(paperworkRowKey(c, "field-legalDescription"), "field-legalDescription");
-  assert.equal(gapKey(c, { id: "legal", field: "legalDescription", label: "Legal description", severity: "blocking", href: "#/application?tab=B&focus=field-legalDescription" }), "field-legalDescription");
+  assert.equal(gapKey(c, { id: "legal", field: "legalDescription", label: "Legal description", severity: "blocking", href: "#/questions?focus=field-legalDescription" }), "field-legalDescription");
   const tree = await m.render();
   let focused = false, scrolled = false;
   tree.props.ref.current = { querySelectorAll: () => [{ dataset: { paperworkRow: "field-legalDescription" }, querySelector: () => ({ focus: () => { focused = true; } }), scrollIntoView: () => { scrolled = true; } }] };

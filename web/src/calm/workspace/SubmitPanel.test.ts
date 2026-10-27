@@ -15,7 +15,7 @@ async function panel(signingReason = "", fail = false) {
     "../../api/accounts": { submitBlockers }, "../../api/client": { EngineError },
     "../../store": { useCase: () => ({ c, gaps: [], engineId: "c1", saveStatus: "saved", submitting: false, checkStatus: "ready", submitDraft: async (id: string) => { calls.push(`submit:${id}`); if (fail) throw new AccountsError(409, "Missing", "409 Missing", { detail: { gaps: [{ id: "new-risk", field: "process.risk", message: "Risk still missing" }] } }); } }) },
     "../account": { useAccount: () => ({ phase: "signed-in" }) }, "../applications": { authorityName: () => "Edmonton" }, "../begin": { useCurrentApplication: () => ({ app: { id: "c1", status: "returned", authority: "edmonton" } }) },
-    "../preparation": { preparationGaps }, "../ui": { CIcon: "CIcon", Dot: "Dot" }, "./readiness": { workspaceFixHref },
+    "../preparation": { preparationGaps }, "../ui": { CIcon: "CIcon", Dot: "Dot" }, "./readiness": { workspaceFixHref }, "../../config": { submissionOfficeReason: () => "" },
   });
   const props = { signingReason, beforeSubmit: async () => { calls.push("flush history"); }, sections: buildDocument(c, []) };
   let tree = await h.render(props);
