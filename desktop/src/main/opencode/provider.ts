@@ -30,6 +30,8 @@ export interface OpencodeProviderOptions {
   platform?: NodeJS.Platform;
   arch?: string;
   completionMs?: number;
+  /** Runs `work` with the person's OpenCode API key, or null when they have none. */
+  withKey?: <T>(work: (key: string | null) => Promise<T>) => Promise<T>;
 }
 
 type Failure = CompletionFailure | "runtime-missing" | "unsupported-platform";
@@ -224,7 +226,14 @@ class OpencodeProvider implements HostProvider {
         const executable = await this.executable();
         const env = await this.childEnvironment(configFor(request));
         await mkdir(this.context.workDir, { recursive: true, mode: 0o700 });
-        const out = await this.run(executable, ["run", "--standalone", "--agent", "batatis", "--format", "json", "-m", `opencode/${request.model}`, request.user], env, abort.signal);
+        const args = ["run", "--standalone", "--agent", "batatis", "--format", "json", "-m", `opencode/${request.model}`, request.user];
+        const withKey = this.options.withKey ?? ((work) => work(null));
+        const out = await withKey(async (key) => {
+          if (key !== null) env.OPENCODE_API_KEY = key;
+          const printed = await this.run(executable, args, env, abort.signal);
+          if (key !== null && printed.includes(key)) throw new OpencodeError("runtime");
+          return printed;
+        });
         const events = readEvents(out);
         if (events.error) {
           const failure = classify(events.error);

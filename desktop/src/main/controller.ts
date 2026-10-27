@@ -274,6 +274,7 @@ export class DesktopHost {
       await account("claude"),
       await account("opencode"),
       { ...row("batatis"), kind: "key", status: { state: await this.#deps.vault.status("batatis") } },
+      { ...row("opencode-key"), kind: "key", status: { state: await this.#deps.vault.status("opencode-key") } },
       { ...row("openai"), kind: "key", status: { state: await this.#deps.vault.status("openai") } },
       { ...row("jev"), kind: "key", status: { state: await this.#deps.vault.status("jev") } },
     ];

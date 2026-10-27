@@ -4,7 +4,7 @@ import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import test from "node:test";
-import { opencodeProviderFactory, type OpencodeSpawn } from "../src/main/opencode/provider.ts";
+import { opencodeProviderFactory, type OpencodeProviderOptions, type OpencodeSpawn } from "../src/main/opencode/provider.ts";
 import { opencodePin } from "../src/main/opencode/release.ts";
 import type { CompleteJsonRequest, ModelId, ReasoningEffort } from "../src/main/providers.ts";
 import type { RuntimePin } from "../src/main/runtime-install.ts";
@@ -28,7 +28,7 @@ const text = (value: string) => ({ type: "text", part: { type: "text", text: val
 const finish = (input: number, output: number) => ({ type: "step_finish", part: { type: "step-finish", tokens: { input, output } } });
 const failure = (type: string, message: string, status: number) => ({ type: "error", error: { type, message, status } });
 
-function setup(t: { after(fn: () => Promise<void>): void }, events: unknown[] = [], extra: { kind?: "hang"; exitCode?: number } = {}, tamper = false) {
+function setup(t: { after(fn: () => Promise<void>): void }, events: unknown[] = [], extra: { kind?: "hang"; exitCode?: number } = {}, tamper = false, withKey?: OpencodeProviderOptions["withKey"]) {
   const dir = scratch(t);
   const root = join(dir, "install root");
   const folder = join(root, "runtime", "test-platform");
@@ -52,7 +52,7 @@ function setup(t: { after(fn: () => Promise<void>): void }, events: unknown[] = 
   const environment: NodeJS.ProcessEnv = { HOME: dir, PATH: "/opt/evil/bin", LANG: "en_CA.UTF-8", OPENAI_API_KEY: "sk-secret", OPENCODE_API_KEY: "oc-secret", NODE_OPTIONS: "--require=/tmp/x.js" };
   const systemRoot = Object.entries(process.env).find(([name]) => name.toLowerCase() === "systemroot")?.[1];
   if (systemRoot) environment.SystemRoot = systemRoot;
-  const provider = opencodeProviderFactory({ runtimeRoot: root, pin, spawn: fakeSpawn, environment, completionMs: 5000 })(context);
+  const provider = opencodeProviderFactory({ runtimeRoot: root, pin, spawn: fakeSpawn, environment, completionMs: 5000, withKey })(context);
   t.after(async () => {
     await provider.dispose();
     for (const child of children) assert.ok(child.exitCode !== null || child.signalCode !== null, "every fake child exited");
@@ -142,4 +142,20 @@ test("cancelling stops the running child", async (t) => {
   abort.abort();
   const result = await pending;
   assert.deepEqual([result.ok, !result.ok && result.reason], [false, "cancelled"]);
+});
+
+test("the person's OpenCode key is handed to the runtime only for the request, and an answer that echoes it is discarded", async (t) => {
+  const key = "oc-test";
+  const withKey: OpencodeProviderOptions["withKey"] = (work) => work(key);
+  const f = setup(t, [text('{"answer":"yes"}')], {}, false, withKey);
+  assert.equal((await f.provider.completeJson(request, new AbortController().signal)).ok, true);
+  const [run] = f.captured();
+  assert.equal(run.env.OPENCODE_API_KEY, key);
+  assert.ok(!run.config.includes(key) && !run.args.join(" ").includes(key), "the key is in the environment only");
+  const leaky = setup(t, [text(`{"answer":"${key}"}`)], {}, false, withKey);
+  const result = await leaky.provider.completeJson(request, new AbortController().signal);
+  assert.deepEqual([result.ok, !result.ok && result.reason], [false, "runtime"]);
+  const none = setup(t, [text('{"answer":"yes"}')], {}, false, (work) => work(null));
+  await none.provider.completeJson(request, new AbortController().signal);
+  assert.equal(none.captured()[0].env.OPENCODE_API_KEY, undefined, "no key, no variable");
 });

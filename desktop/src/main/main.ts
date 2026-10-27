@@ -277,7 +277,7 @@ function fromApp(event: IpcMainInvokeEvent): boolean {
 }
 
 const refused: Outcome = { ok: false, message: "Not allowed." };
-const isKeyProvider = (value: unknown): value is KeyProviderId => value === "openai" || value === "jev" || value === "batatis";
+const isKeyProvider = (value: unknown): value is KeyProviderId => value === "openai" || value === "jev" || value === "batatis" || value === "opencode-key";
 const isAccount = (value: unknown): value is AccountId => value === "chatgpt" || value === "claude" || value === "opencode";
 
 function answer<T>(channel: string, work: (event: IpcMainInvokeEvent, arg: unknown) => Promise<T> | T, fallback: T) {
@@ -365,7 +365,7 @@ function registerIpc() {
 }
 
 function labelFor(id: KeyProviderId): string {
-  return id === "openai" ? "OpenAI API key" : id === "batatis" ? "Batatis access code" : "Jev API key";
+  return id === "openai" ? "OpenAI API key" : id === "batatis" ? "Batatis access code" : id === "opencode-key" ? "OpenCode API key" : "Jev API key";
 }
 
 /** A separate, sandboxed window with its own origin; the key never enters the app window. */
@@ -451,7 +451,7 @@ if (!app.requestSingleInstanceLock()) {
       const opencodeWork = await realpath(await mkdtemp(join(root, "opencode-work-")));
       providerWorkDirs.push(opencodeWork);
       const opencodeContext = { ...providerContext, stateDir: await realpath(join(root, "opencode-state")), workDir: opencodeWork };
-      const opencode = opencodeProviderFactory({ runtimeRoot: join(paths.userData, "opencode") });
+      const opencode = opencodeProviderFactory({ runtimeRoot: join(paths.userData, "opencode"), withKey: (work) => vault.use("opencode-key", work).then((used) => used ?? work(null)) });
       makeProviders.opencode = () => opencode(opencodeContext);
       await host.installProvider(makeProviders.opencode());
     }

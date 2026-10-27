@@ -4,7 +4,7 @@ import Ajv from "ajv";
 import type { KeyVault } from "./credentials";
 import type { CompleteJsonRequest, CompleteJsonResult, KeyProviderId } from "./providers";
 
-type ApiKeyId = Exclude<KeyProviderId, "batatis">;
+type ApiKeyId = Exclude<KeyProviderId, "batatis" | "opencode-key">;
 const ENDPOINTS = {
   openai: "https://api.openai.com/v1/chat/completions",
   jev: "https://api.typesafe.ai/v1/systemone",

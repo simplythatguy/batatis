@@ -6,10 +6,10 @@
  * the labels the host sends.
  */
 
-export type ProviderId = "chatgpt" | "claude" | "opencode" | "openai" | "jev" | "batatis";
+export type ProviderId = "chatgpt" | "claude" | "opencode" | "opencode-key" | "openai" | "jev" | "batatis";
 /** The managed account connections, each with its own downloadable runtime. */
 export type AccountId = Extract<ProviderId, "chatgpt" | "claude" | "opencode">;
-export type KeyProviderId = Extract<ProviderId, "openai" | "jev" | "batatis">;
+export type KeyProviderId = Extract<ProviderId, "openai" | "jev" | "batatis" | "opencode-key">;
 export type GenerationChoice = "off" | "chatgpt" | "openai";
 
 export function isGenerationChoice(value: unknown): value is GenerationChoice {
@@ -167,6 +167,10 @@ export const PROVIDER_LABELS: Record<ProviderId, { label: string; description: s
   opencode: {
     label: "OpenCode",
     description: "Free models through the managed OpenCode runtime. No sign-in or key. OpenCode’s free models are for trial use, log what you send and have a usage limit, so don’t use them with personal or confidential details.",
+  },
+  "opencode-key": {
+    label: "OpenCode API key",
+    description: "Optional. Adds your OpenCode account to the OpenCode connection, for a higher usage limit than the anonymous free one. Kept in this computer’s OS-protected vault.",
   },
   batatis: {
     label: "Batatis access code",
