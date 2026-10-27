@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useRef, useState } from "react";
 import { engine, failureText, type EngineProcessField } from "../api/client";
-import type { ApplicantDraft, DraftingRecord } from "../api/types.gen";
+import type { WordingDraft, DraftingRecord } from "../api/types.gen";
 import { applicantDraftHref, draftPassages } from "../applicantDrafts";
 import { EvidenceFileLink } from "../EvidenceFileLink";
 import { localField } from "../intakeFields";
@@ -13,8 +13,8 @@ import { useCurrentApplication } from "./begin";
 import { CIcon } from "./ui";
 import "./ApplicantDrafts.css";
 
-const STATUS = { draft: "Draft", accepted: "Accepted", rejected: "Rejected" } satisfies Record<ApplicantDraft["status"], string>;
-const CLAIM_KIND = { fact: "", assumption: "Assumption", plan: "Planned work" } satisfies Record<ApplicantDraft["claims"][number]["kind"], string>;
+const STATUS = { draft: "Draft", accepted: "Accepted", rejected: "Rejected" } satisfies Record<WordingDraft["status"], string>;
+const CLAIM_KIND = { fact: "", assumption: "Assumption", plan: "Planned work" } satisfies Record<WordingDraft["claims"][number]["kind"], string>;
 
 function publicUrl(value: string | null | undefined): string | null {
   if (!value) return null;
@@ -24,7 +24,7 @@ function publicUrl(value: string | null | undefined): string | null {
 
 type SourceContext = { sources: DraftingRecord["sources"]; caseId: string | null; c: Pick<Case, "files" | "intake"> };
 
-export function DraftSources({ claim, sources, caseId, c }: SourceContext & { claim: ApplicantDraft["claims"][number] }) {
+export function DraftSources({ claim, sources, caseId, c }: SourceContext & { claim: WordingDraft["claims"][number] }) {
   if (!claim.sources.length) return <p className="cf-draft-meta">No source excerpt supplied.</p>;
   return <details className="cf-draft-sources">
     <summary><CIcon name="doc" size={14} />Sources <span>{claim.sources.length}</span></summary>
@@ -46,7 +46,7 @@ export function DraftSources({ claim, sources, caseId, c }: SourceContext & { cl
   </details>;
 }
 
-export function DraftClaim({ claim, prefix = "", ...context }: SourceContext & { claim: ApplicantDraft["claims"][number]; prefix?: string }) {
+export function DraftClaim({ claim, prefix = "", ...context }: SourceContext & { claim: WordingDraft["claims"][number]; prefix?: string }) {
   const marker = claim.kind === "assumption" ? "Assumption:" : claim.kind === "plan" ? "Plan:" : "";
   const label = marker && claim.text.trimStart().startsWith(marker) ? "" : prefix.trim() || CLAIM_KIND[claim.kind];
   return <div className="cf-draft-claim">
@@ -56,7 +56,7 @@ export function DraftClaim({ claim, prefix = "", ...context }: SourceContext & {
   </div>;
 }
 
-export function DraftContent({ draft, ...context }: SourceContext & { draft: ApplicantDraft }) {
+export function DraftContent({ draft, ...context }: SourceContext & { draft: WordingDraft }) {
   const wording = draftPassages(draft);
   return <>
     <div className="cf-draft-wording">

@@ -48,7 +48,7 @@ def assembled_text(claims: list[DraftClaim]) -> str:
     return '\n\n'.join(prefixes[claim.kind] + claim.text for claim in claims)
 
 
-class ApplicantDraft(DraftModel):
+class WordingDraft(DraftModel):
     id: str
     generation_id: str
     input_fingerprint: str
@@ -74,7 +74,7 @@ class ApplicantDraft(DraftModel):
         return self
 
 
-def draft_passages(draft: ApplicantDraft) -> list[str]:
+def draft_passages(draft: WordingDraft) -> list[str]:
     """Whole writing and atomic paragraphs, including what the UI labels as future work/assumptions."""
     return [draft.text, *(claim.text for claim in draft.claims),
             *(assembled_text([claim]) for claim in draft.claims)]
@@ -109,7 +109,7 @@ class DraftingRecord(DraftModel):
     stale: bool = False
     stale_reasons: list[str] = Field(default_factory=list)
     sources: list[DraftSource]
-    drafts: list[ApplicantDraft]
+    drafts: list[WordingDraft]
     generations: list[DraftGeneration]
     registry_searches: list[RegistrySearch] = Field(default_factory=list)
     registry_queries: list[DraftRegistryQuery] = Field(default_factory=list)

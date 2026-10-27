@@ -12,6 +12,11 @@ import * as visit from "./visit.ts";
 import * as intake from "./intake.ts";
 import { asLocal, latestLocalFacts } from "./intakeFields.ts";
 import { readOnly } from "./calm/applications.ts";
+import * as applicationEditing from "./calm/applicationEditing.ts";
+import * as savedDraft from "./calm/applicantDraft.ts";
+import * as questionDrafts from "./calm/questionDrafts.ts";
+import * as reconcileDraft from "./calm/reconcileDraft.ts";
+import * as jobs from "./api/jobs.ts";
 import type { Fact } from "./types.ts";
 
 class EngineError extends Error {
@@ -44,6 +49,7 @@ async function provider() {
   const wait = async () => { const pending = gate; gate = null; if (pending) { pending.entered.resolve(); await pending.release.promise; } };
   const engine = {
     getCase: async () => structuredClone(remote),
+    jobs: async () => [], files: async () => [],
     applicantDrafts: async () => { if (draftReadFailure) throw draftReadFailure; return structuredClone(remote.drafting); },
     generateApplicantDrafts: async (_id: string, expected: number) => {
       writes.push({ kind: "generate", expected });
@@ -74,25 +80,31 @@ async function provider() {
     clearEngineSession: () => { generation++; id = null; known = null; posted.clear(); conflicted = false; },
     adoptEngineCase: (saved: typeof remote) => { id = saved.id; known = saved.version; notePosted(id, latestLocalFacts(saved.facts)); },
     isReadOnlyCase: () => readOnly(remote.status), needsReconcile: () => conflicted,
-    noteConflict: () => { conflicted = true; }, CONFLICT_TEXT: "The saved case changed somewhere else. Your answers are still here.",
-    reconcileEngineCase: async () => { known = remote.version; conflicted = false; return structuredClone(remote); },
+    noteConflict: () => { conflicted = true; },
+    // Stands in for the applicant finishing the save-conflict review.
+    resolveConflict: () => { known = remote.version; conflicted = false; }, CONFLICT_TEXT: "The saved case changed somewhere else. Your answers are still here.",
     evidenceFacts: () => [], selectionKey: (values: unknown[]) => JSON.stringify(values),
     ensureEngineCase: async () => id, syncJurisdiction: async (selected: string) => selected,
-    pushFacts: async (_id: string, facts: Fact[]) => {
+    draftKey: (draft: unknown) => JSON.stringify(draft ?? null), acknowledgedDraftKey: () => "null", acknowledgedDraft: () => null,
+    acknowledgedAuthority: () => "edmonton", acknowledgedSelectionKey: () => "[]", acknowledgedEvidenceFacts: () => [],
+    pendingFactChanges: () => new Map(), acknowledgeJobCase: () => true, noteShownSelection() {},
+    // One atomic acknowledgement of only the changed facts, like the real draft save.
+    pushDraft: async (_id: string, snapshot: { facts: Fact[] }) => {
       const pending = saveGate; saveGate = null;
       if (pending) { pending.entered.resolve(); await pending.release.promise; }
-      for (const fact of facts) {
-        if (posted.get(fact.field) === rules.factSignature(fact)) continue;
+      const changed = latestLocalFacts(snapshot.facts).filter(fact => posted.get(fact.field) !== rules.factSignature(fact));
+      if (!changed.length) return null;
+      checkVersion(known ?? -1);
+      for (const fact of changed) {
         writes.push({ kind: "fact", expected: known, field: fact.field });
-        checkVersion(known ?? -1);
         remote.facts.push(structuredClone(fact));
-        remote.version++;
-        acknowledgeWrite(remote.id, remote.version);
-        notePosted(remote.id, [fact]);
       }
-      return null;
+      remote.version++;
+      acknowledgeWrite(remote.id, remote.version);
+      notePosted(remote.id, changed);
+      return structuredClone(remote);
     },
-    pushSelectedArticles: async () => null,
+    pushSelectedArticles: async () => null, pushReconciledDraft: async () => null,
     pushListedEvidence: async () => ({ acked: [], deleted: [], rejected: [] }),
     pushDeletedEvidence: async () => ({ acked: [], deleted: [], rejected: [] }),
     refreshGaps: async () => ({ gaps: [], error: null }),
@@ -108,13 +120,16 @@ async function provider() {
     "./calm/account": { useAccount: () => account, getAccountState: () => account, accountSession: () => session,
       subscribeAccount: (listener: () => void) => { listeners.add(listener); return () => listeners.delete(listener); },
       patchApplication: (_id: string, patch: object) => Object.assign(account.applications[0], patch), refreshApplications: async () => {} },
-    "./calm/session": { getSession: () => ({ held: [], uploading: [] }) },
+    "./calm/session": { getSession: () => ({ held: [], uploading: [] }), resetSavedSession() {}, updateSavedSession() {}, subscribeSession: () => () => {} },
+    "./calm/applicationEditing": { ...applicationEditing, useApplicationEditsPaused: applicationEditing.applicationEditsPaused }, "./calm/applicantDraft": savedDraft, "./calm/questionDrafts": questionDrafts,
+    "./calm/reconcileDraft": reconcileDraft, "./api/jobs": jobs,
+    "./calm/auth/signOutGuard": { registerSignOutGuard: () => () => {}, resetSignOutStatus() {} },
     "./calm/caseExtras": { resetExtras() {} }, "./calm/applications": { readOnly },
     "./api/sectionC": { useSectionC: () => ({ source: "idle", rows: [] }) },
     "./api/accounts": { accounts: { submit: async (_id: string, expected: number) => {
       writes.push({ kind: "submit", expected }); checkVersion(expected); remote.version++; remote.status = "submitted"; return structuredClone(remote);
     } } },
-  }, { sessionStorage: { removeItem() {} }, window: { setTimeout: () => 0, clearTimeout() {} }, location: { hash: "#/review" } });
+  }, { sessionStorage: { removeItem() {} }, window: { setTimeout: () => 0, clearTimeout() {}, addEventListener() {}, removeEventListener() {} }, location: { hash: "#/review" } });
   const store = async () => (await h.render({ children: null })).props.value;
   await (await store()).openCase(remote.id, "homebuilder");
   await store();
@@ -125,6 +140,7 @@ async function provider() {
     fail(error: EngineError | null) { generateFailure = error; },
     failRead(error: EngineError | null) { draftReadFailure = error; },
     changeAccount() { session++; for (const listener of listeners) listener(); },
+    resolveConflict() { sync.resolveConflict(); },
   };
 }
 
@@ -154,6 +170,7 @@ test("acceptance adopts process values without clearing unrelated local work or 
   const p = await provider();
   let s = await p.store();
   s.dispatch({ type: "editEvidenceDraft", itemId: "unfinished", patch: { document: "Unfinished document", step: 1 } });
+  s = await p.store();  // An evidence draft edit is an unsaved edit: check from the current render.
   await s.requestCheck();
   s = await p.store();
   const files = s.c.files, cards = s.c.candidates;
@@ -270,12 +287,17 @@ test("case/account replacement drops late output and a changed revision during p
   p.h.unmount();
 });
 
-test("conflict retry reconciles explicitly, gone cases stay gone, and submitted cases refuse generation", async () => {
+test("a conflict waits for the save-conflict review, gone cases stay gone, and submitted cases refuse generation", async () => {
   const p = await provider();
   p.fail(new EngineError(409, "updated concurrently"));
   await (await p.store()).generateApplicantDrafts();
-  assert.match((await p.store()).draftingError, /saved application or draft changed/);
+  assert.match((await p.store()).draftingError, /Review the save conflict/);
   p.fail(null);
+  const before = p.writes.length;
+  await (await p.store()).retryApplicantDrafts();
+  assert.equal(p.writes.length, before, "drafting never reconciles a conflict by itself");
+  assert.match((await p.store()).draftingError, /Review the save conflict/);
+  p.resolveConflict();
   await (await p.store()).retryApplicantDrafts();
   assert.equal((await p.store()).draftingError, "");
   p.fail(new EngineError(404, "case not found"));

@@ -21,7 +21,7 @@ from engine.completeness import check_completeness
 from engine.export import ExportBlocked, export_case, form_path
 from engine.export.scc import confirmed_values
 from engine.models import Case, Fact, Source
-from engine.models_drafting import ApplicantDraft, assembled_text
+from engine.models_drafting import WordingDraft, assembled_text
 from engine.models_intake import DocumentReview, EvidenceRef, IntakeRecord, ReviewFact
 from engine.process_fields import process_fields
 from engine.section_c import section_c_rows
@@ -156,7 +156,7 @@ def test_generation_is_saved_draft_only_and_no_lookup_or_evidence_mutates(app):
     assert 'url' not in record
     assert all('url' not in d and all('url' not in c for c in d['claims']) for d in record['drafts'])
     assert len(record['drafts']) == 9 and all(d['status'] == 'draft' for d in record['drafts'])
-    assert all(d['text'] == assembled_text(ApplicantDraft.model_validate(d).claims) for d in record['drafts'])
+    assert all(d['text'] == assembled_text(WordingDraft.model_validate(d).claims) for d in record['drafts'])
     assert record['generations'][0]['audit_input_tokens'] is None
     assert any(s['kind'] == 'precedent_structure' and s['metadata']['structure_only'] for s in record['sources'])
     assert any(s['kind'] == 'guidance' and 'comparison' in s['text'].lower() for s in record['sources'])

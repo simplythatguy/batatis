@@ -3,7 +3,8 @@
 A rule hit becomes a `pointed` fact quoting the words that state it (a unit conversion adds a
 `computed` fact over the value as written). A fillable-form value becomes an `exact` fact. A model
 fact is `pointed` only when the rules re-derive it from the quoted sentence, otherwise `proposed`.
-Every fact is unconfirmed; the applicant confirms. Article numbers the applicant typed are kept
+Extraction returns unconfirmed facts; settlement requires verified project context to confirm them.
+Article numbers the applicant typed are kept
 only when they resolve in NBC(AE) 2023, 2nd printing; the rest are listed as unresolved text.
 """
 from __future__ import annotations
@@ -12,14 +13,17 @@ import hashlib
 import json
 import re
 from dataclasses import dataclass, field
+from functools import lru_cache
 from typing import Callable
 
 from ..models import Fact, Source
 from ..redact import scrub
 from ..models_intake import DocumentReview, FactPointer, FieldConflict, FileReport, ModelPass, UnresolvedCitation
 from . import model as model_pass
+from .context import project_pages, reference_widget
 from .pdf import FORM_ONLY, MAX_PAGES, NO_TEXT, NOT_A_PDF, SCC_MAP, TOO_LONG, NotAPdf, read_pdf
-from .rules import PERSONAL, Hit, canonical_citation, read
+from .rules import FIELDS, LEGAL_PARTS, PERSONAL, Hit, canonical_citation, read
+from .review import personal_values
 
 DESCRIPTION = 'description'
 DESCRIPTION_REF = 'intake:description'
@@ -41,6 +45,7 @@ class Extraction:
     model: ModelPass = field(default_factory=lambda: ModelPass(status='off'))
     files: list[FileReport] = field(default_factory=list)
     review: DocumentReview | None = None
+    personal: list[str] = field(default_factory=list)  # scrub candidates even when not project answers
 
     def merge(self, other: Extraction) -> None:
         self.facts += other.facts
@@ -48,6 +53,7 @@ class Extraction:
         self.conflicts += other.conflicts
         self.unresolved += other.unresolved
         self.files += other.files
+        self.personal += other.personal
         mine, theirs = self.model, other.model
         if theirs.status != 'off':
             mine.status = theirs.status if mine.status in ('off', 'not_needed') else mine.status
@@ -66,6 +72,7 @@ class Origin:
     ref: str                                     # 'description' or the file id
     page: int | None = None
     box: Callable[[int, int], tuple[float, float, float, float] | None] | None = None
+    project_context: bool = False
 
     def source(self, quote: str, start: int, end: int) -> Source:
         if self.ref == DESCRIPTION:
@@ -81,7 +88,8 @@ def _add(out: Extraction, origin: Origin, name: str, value, kind: str, start: in
                 source=source or origin.source(quote, start, end), formula=formula, inputs=inputs or [])
     out.facts.append(fact)
     out.pointers.append(FactPointer(fact_id=fact.id, field=name, method=method, source_ref=origin.ref,
-                                    page=origin.page, start=start, end=end, verified=verified))
+                                    page=origin.page, start=start, end=end, verified=verified,
+                                    project_context=origin.ref == DESCRIPTION or origin.project_context))
     return fact
 
 
@@ -116,7 +124,8 @@ def _citations(out: Extraction, origin: Origin, text: str, citations, codes) -> 
 
 
 def read_text(text: str, origin: Origin, *, codes=None, outbound: Outbound = scrubbed,
-              transport: model_pass.Transport | None = None, status: str = 'off') -> Extraction:
+              transport: model_pass.Transport | None = None, status: str = 'off',
+              citation_text: str | None = None) -> Extraction:
     """Rules over `text`, then the model over its scrubbed copy for the fields still empty."""
     out = Extraction()
     reading = read(text)
@@ -127,7 +136,8 @@ def read_text(text: str, origin: Origin, *, codes=None, outbound: Outbound = scr
         out.conflicts.append(FieldConflict(field=name, values=[json.loads(v) for v in values],
                                            quotes=[text[h.start:h.end] for h in hits], source_ref=origin.ref,
                                            page=origin.page))
-    _citations(out, origin, text, reading.citations, codes)
+    citation_text = text if citation_text is None else citation_text
+    _citations(out, origin, citation_text, read(citation_text).citations, codes)
     found = {hit.field for hit in reading.hits} | set(reading.conflicts)
     if transport is None:
         return out
@@ -152,6 +162,7 @@ def read_text(text: str, origin: Origin, *, codes=None, outbound: Outbound = scr
 
 # ---------------------------------------------------------------- files
 
+@lru_cache(maxsize=1)
 def _scc_map() -> dict[str, str]:
     data = json.loads(SCC_MAP.read_text(encoding='utf-8'))
     mapped = {name: spec['fact'] for name, spec in data['text_fields'].items() if spec['section'] != 'C'}
@@ -159,6 +170,15 @@ def _scc_map() -> dict[str, str]:
     for index, row in enumerate(data['section_c_rows']):
         mapped[row['article']] = 'claimed_provision'
     return mapped
+
+
+def reading_field(name: str) -> bool:
+    """Fields intake can write, including legacy readings whose pointers were not retained.
+
+    A file source alone is insufficient: evidence bindings are explicit applicant actions.
+    """
+    metric = re.sub(r'_ft2$', '_m2', re.sub(r'_ft$', '_m', name))
+    return name.startswith('statement.') or metric in FIELDS or name in _scc_map().values()
 
 
 # Generic fillable forms: a field whose name reads like one of these labels.
@@ -210,6 +230,7 @@ def read_file(file_id: str, name: str, data: bytes, *, codes=None, outbound: Out
         report.reason = content.reason
         report.pages_not_read = list(range(1, content.pages + 1))
         return out
+    out.personal = personal_values([page.text for page in content.text_pages])
     if content.form:
         report.form = content.form
         mapped = _scc_map() if content.form == 'scc_variance' else {}
@@ -219,6 +240,12 @@ def read_file(file_id: str, name: str, data: bytes, *, codes=None, outbound: Out
                 report.form_fields_skipped.append(widget.name)
                 continue
             if widget.value is None:
+                continue
+            if target in PERSONAL and not (target in LEGAL_PARTS and str(widget.value).isdigit()
+                                           and len(str(widget.value)) < 5):
+                out.personal.append(str(widget.value))
+            if reference_widget(content.text_pages, widget):
+                report.form_fields_skipped.append(widget.name)
                 continue
             value = widget.value
             if target == 'claimed_provision':
@@ -235,15 +262,20 @@ def read_file(file_id: str, name: str, data: bytes, *, codes=None, outbound: Out
                 value = canonical
             source = Source(type='file', ref=file_id, page=widget.page, bbox=widget.rect,
                             quote=str(widget.value) if widget.kind == 'text' else widget.name)
-            origin = Origin(file_id, widget.page)
+            origin = Origin(file_id, widget.page, project_context=True)
             _add(out, origin, target, value, 'exact', None, None, None, 1.0, 'form', source=source)
             report.form_fields_read += 1
     if content.form != 'scc_variance':
         # The SCC form's printed text is the template, not the applicant's words.
+        scoped = {page.number: page.text for page in project_pages(content.text_pages)}
         for index, page in enumerate(content.text_pages):
-            origin = Origin(file_id, page.number, page.box)
-            part = read_text(page.text, origin, codes=codes, outbound=outbound,
-                             transport=transport if index < MODEL_PAGES else None, status=status)
+            text = scoped[page.number]
+            if text.strip():
+                report.project_pages.append(page.number)
+            origin = Origin(file_id, page.number, page.box, project_context=True)
+            part = read_text(text, origin, codes=codes, outbound=outbound,
+                             transport=transport if index < MODEL_PAGES and text.strip() else None,
+                             status=status, citation_text=page.text)
             out.merge(part)
             report.pages_read.append(page.number)
     else:
@@ -263,4 +295,8 @@ def read_file(file_id: str, name: str, data: bytes, *, codes=None, outbound: Out
         report.reason = TOO_LONG if content.truncated else NO_TEXT
     else:
         report.reason = NO_TEXT
+    if report.pages_read and not report.project_pages and not report.form_fields_read:
+        note = ('No current-project passages were identified. This document remains reference context; '
+                'type project facts in the description or attach a project brief with explicit project labels.')
+        report.reason = f'{report.reason} {note}' if report.reason else note
     return out

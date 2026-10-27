@@ -21,7 +21,7 @@ from .account_store import FileAccountsMixin, _DB, preserve_messages
 from .account_models import ApplicationPreferences, User
 from .access import enforce_mutation, enforce_stored_mutation, enforce_read
 from .identify.title import normalize_title
-from .case_retention import RETENTION_DAYS
+from .case_retention import RETENTION_DAYS, DRAFT_RETENTION_DAYS, CLOSED_RETENTION_DAYS
 
 DEFAULT_PATH = Path.home() / '.batatis' / 'cases.sqlite'
 
@@ -92,6 +92,7 @@ class CaseBackend(Protocol):
             expected_files: dict[str, tuple[str, str | None]] | None = None) -> Case: ...
     def mutate_messages(self, case_id: str, user: User, operation: Callable[[Case], object]) -> tuple[Case, object] | None: ...
     def add_fact(self, case_id: str, fact: Fact) -> Case | None: ...
+    def patch_draft(self, case_id: str, changes: dict, *, expected_version: int) -> Case | None: ...
     def rename_title(self, case_id: str, title: str) -> Case | None: ...
     def list_application_preferences(self, user_id: str) -> dict[str, ApplicationPreferences]: ...
     def patch_application_preferences(self, application_id: str, user: User,
@@ -105,8 +106,14 @@ class CaseBackend(Protocol):
 
 
 def retention_cutoff() -> str:
-    """Cases created before this instant are older than the 7-day retention window."""
+    """Anonymous inactivity cutoff; longer purpose-based windows derive from the same clock."""
     return (datetime.now(timezone.utc) - timedelta(days=RETENTION_DAYS)).isoformat(timespec='seconds')
+
+
+def retention_windows(cutoff: str) -> tuple[str, str, str]:
+    base = datetime.fromisoformat(cutoff)
+    return (cutoff, (base - timedelta(days=DRAFT_RETENTION_DAYS - RETENTION_DAYS)).isoformat(),
+            (base - timedelta(days=CLOSED_RETENTION_DAYS - RETENTION_DAYS)).isoformat())
 
 
 def default_path() -> Path:
@@ -149,6 +156,7 @@ class CaseStore(FileAccountsMixin):
             cols = {row[1] for row in con.execute('PRAGMA table_info(cases)')}
             if 'version' not in cols:
                 con.execute('ALTER TABLE cases ADD COLUMN version INTEGER NOT NULL DEFAULT 1')
+            con.execute('CREATE INDEX IF NOT EXISTS cases_activity ON cases(updated_at)')
             con.execute('CREATE TABLE IF NOT EXISTS case_files (id TEXT PRIMARY KEY, case_id TEXT NOT NULL, '
                         'name TEXT NOT NULL, content_type TEXT NOT NULL, size INTEGER NOT NULL, '
                         'data BLOB NOT NULL, created_at TEXT NOT NULL)')
@@ -282,8 +290,11 @@ class CaseStore(FileAccountsMixin):
             con.execute('BEGIN IMMEDIATE')
         self._purge_accounts(_DB(con))
         # Targeted access uses the case primary key; only periodic sweeps scan all cases.
-        where = "julianday(json_extract(json, '$.created_at')) < julianday(?)"
-        params = [retention_cutoff()]
+        status = "COALESCE(json_extract(json, '$.status'), 'draft')"
+        where = (f"(({status} = 'draft' AND json_extract(json, '$.owner_id') IS NULL AND julianday(updated_at) < julianday(?)) "
+                 f"OR ({status} = 'draft' AND json_extract(json, '$.owner_id') IS NOT NULL AND julianday(updated_at) < julianday(?)) "
+                 f"OR ({status} IN ('accepted','refused','withdrawn') AND julianday(updated_at) < julianday(?)))")
+        params = list(retention_windows(retention_cutoff()))
         if case_id is not None:
             where += ' AND id=?'
             params.append(case_id)
@@ -373,8 +384,11 @@ class CaseStore(FileAccountsMixin):
             if previous is None:
                 return None
             enforce_stored_mutation(previous[0])
+            stamp = now()
             con.execute('INSERT INTO case_files VALUES (?,?,?,?,?,?,?)',
-                        (file_id, case_id, name, content_type, len(data), data, now()))
+                        (file_id, case_id, name, content_type, len(data), data, stamp))
+            con.execute("UPDATE cases SET json=json_set(json, '$.updated_at', ?), updated_at=? WHERE id=?",
+                        (stamp, stamp, case_id))
         return {'id': file_id, 'case_id': case_id, 'name': name, 'content_type': content_type, 'size': len(data)}
 
     def get_file(self, case_id: str, file_id: str) -> dict | None:

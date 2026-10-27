@@ -143,138 +143,264 @@
     "ApplicantDraft": {
       "additionalProperties": false,
       "properties": {
-        "accepted_fact_id": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Accepted Fact Id"
+        "authority_unsure": {
+          "default": false,
+          "title": "Authority Unsure",
+          "type": "boolean"
         },
-        "claims": {
-          "items": {
-            "$ref": "#/$defs/DraftClaim"
+        "choices": {
+          "additionalProperties": {
+            "maxLength": 20000,
+            "type": "string"
           },
-          "maxItems": 16,
-          "title": "Claims",
-          "type": "array"
-        },
-        "decided_at": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Decided At"
-        },
-        "decided_by": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Decided By"
-        },
-        "decision_expected_version": {
-          "anyOf": [
-            {
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Decision Expected Version"
-        },
-        "field": {
-          "title": "Field",
-          "type": "string"
-        },
-        "generated_at": {
-          "title": "Generated At",
-          "type": "string"
-        },
-        "generation_id": {
-          "title": "Generation Id",
-          "type": "string"
-        },
-        "id": {
-          "title": "Id",
-          "type": "string"
-        },
-        "input_fingerprint": {
-          "title": "Input Fingerprint",
-          "type": "string"
-        },
-        "questions": {
-          "items": {
-            "$ref": "#/$defs/DraftQuestion"
+          "maxProperties": 1000,
+          "propertyNames": {
+            "maxLength": 300,
+            "minLength": 1
           },
-          "maxItems": 12,
-          "title": "Questions",
-          "type": "array"
+          "title": "Choices",
+          "type": "object"
         },
-        "replaces_fact_id": {
+        "evidence_drafts": {
+          "additionalProperties": {
+            "$ref": "#/$defs/EvidenceDraft"
+          },
+          "maxProperties": 1000,
+          "propertyNames": {
+            "maxLength": 300,
+            "minLength": 1
+          },
+          "title": "Evidence Drafts",
+          "type": "object"
+        },
+        "intake_file_ids": {
           "anyOf": [
             {
-              "type": "string"
+              "items": {
+                "maxLength": 300,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 1000,
+              "type": "array"
             },
             {
               "type": "null"
             }
           ],
           "default": null,
-          "title": "Replaces Fact Id"
+          "title": "Intake File Ids"
         },
-        "status": {
-          "default": "draft",
+        "packages": {
+          "additionalProperties": {
+            "enum": [
+              "yes",
+              "no"
+            ],
+            "type": "string"
+          },
+          "maxProperties": 1000,
+          "propertyNames": {
+            "maxLength": 300,
+            "minLength": 1
+          },
+          "title": "Packages",
+          "type": "object"
+        },
+        "question_text": {
+          "additionalProperties": {
+            "$ref": "#/$defs/DraftText"
+          },
+          "maxProperties": 1000,
+          "propertyNames": {
+            "maxLength": 300,
+            "minLength": 1
+          },
+          "title": "Question Text",
+          "type": "object"
+        },
+        "role": {
+          "default": "homebuilder",
           "enum": [
-            "draft",
-            "accepted",
-            "rejected"
+            "manufacturer",
+            "contractor",
+            "homebuilder",
+            "builder",
+            "designer",
+            "owner"
           ],
-          "title": "Status",
+          "title": "Role",
           "type": "string"
         },
-        "text": {
-          "title": "Text",
-          "type": "string"
+        "rule_unsure": {
+          "items": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 1000,
+          "title": "Rule Unsure",
+          "type": "array"
         },
-        "title": {
-          "title": "Title",
-          "type": "string"
+        "seen": {
+          "items": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 1000,
+          "title": "Seen",
+          "type": "array"
+        },
+        "skipped": {
+          "items": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 1000,
+          "title": "Skipped",
+          "type": "array"
         }
       },
       "required": [
-        "id",
-        "generation_id",
-        "input_fingerprint",
-        "field",
-        "title",
-        "text",
-        "claims",
-        "questions",
-        "status",
-        "generated_at",
-        "decided_at",
-        "decided_by",
-        "decision_expected_version",
-        "accepted_fact_id",
-        "replaces_fact_id"
+        "role",
+        "intake_file_ids",
+        "question_text",
+        "choices",
+        "skipped",
+        "seen",
+        "authority_unsure",
+        "packages",
+        "rule_unsure",
+        "evidence_drafts"
       ],
+      "title": "ApplicantDraft",
+      "type": "object"
+    },
+    "ApplicantDraftInput": {
+      "additionalProperties": false,
+      "properties": {
+        "authority_unsure": {
+          "default": false,
+          "title": "Authority Unsure",
+          "type": "boolean"
+        },
+        "choices": {
+          "additionalProperties": {
+            "maxLength": 20000,
+            "type": "string"
+          },
+          "maxProperties": 1000,
+          "propertyNames": {
+            "maxLength": 300,
+            "minLength": 1
+          },
+          "title": "Choices",
+          "type": "object"
+        },
+        "evidence_drafts": {
+          "additionalProperties": {
+            "$ref": "#/$defs/EvidenceDraftInput"
+          },
+          "maxProperties": 1000,
+          "propertyNames": {
+            "maxLength": 300,
+            "minLength": 1
+          },
+          "title": "Evidence Drafts",
+          "type": "object"
+        },
+        "intake_file_ids": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 300,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 1000,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Intake File Ids"
+        },
+        "packages": {
+          "additionalProperties": {
+            "enum": [
+              "yes",
+              "no"
+            ],
+            "type": "string"
+          },
+          "maxProperties": 1000,
+          "propertyNames": {
+            "maxLength": 300,
+            "minLength": 1
+          },
+          "title": "Packages",
+          "type": "object"
+        },
+        "question_text": {
+          "additionalProperties": {
+            "$ref": "#/$defs/DraftText"
+          },
+          "maxProperties": 1000,
+          "propertyNames": {
+            "maxLength": 300,
+            "minLength": 1
+          },
+          "title": "Question Text",
+          "type": "object"
+        },
+        "role": {
+          "default": "homebuilder",
+          "enum": [
+            "manufacturer",
+            "contractor",
+            "homebuilder",
+            "builder",
+            "designer",
+            "owner"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "rule_unsure": {
+          "items": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 1000,
+          "title": "Rule Unsure",
+          "type": "array"
+        },
+        "seen": {
+          "items": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 1000,
+          "title": "Seen",
+          "type": "array"
+        },
+        "skipped": {
+          "items": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 1000,
+          "title": "Skipped",
+          "type": "array"
+        }
+      },
       "title": "ApplicantDraft",
       "type": "object"
     },
@@ -1544,6 +1670,17 @@
     },
     "Case": {
       "properties": {
+        "applicant_draft": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ApplicantDraft"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "authority": {
           "anyOf": [
             {
@@ -1846,6 +1983,7 @@
         "version",
         "jurisdiction",
         "facts",
+        "applicant_draft",
         "selected_articles",
         "provisions",
         "section_c",
@@ -3576,6 +3714,51 @@
       "title": "DraftClaim",
       "type": "object"
     },
+    "DraftFileBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "file_id": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "File Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "file",
+          "default": "file",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "file_id"
+      ],
+      "title": "DraftFileBinding",
+      "type": "object"
+    },
+    "DraftFileBindingInput": {
+      "additionalProperties": false,
+      "properties": {
+        "file_id": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "File Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "file",
+          "default": "file",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "file_id"
+      ],
+      "title": "DraftFileBinding",
+      "type": "object"
+    },
     "DraftGeneration": {
       "additionalProperties": false,
       "properties": {
@@ -3672,6 +3855,66 @@
         "audit_output_tokens"
       ],
       "title": "DraftGeneration",
+      "type": "object"
+    },
+    "DraftPatch": {
+      "additionalProperties": false,
+      "properties": {
+        "applicant_draft": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ApplicantDraftInput"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "expected_version": {
+          "minimum": 1,
+          "title": "Expected Version",
+          "type": "integer"
+        },
+        "facts": {
+          "items": {
+            "$ref": "#/$defs/FactInput"
+          },
+          "maxItems": 1000,
+          "title": "Facts",
+          "type": "array"
+        },
+        "jurisdiction": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/JurisdictionInput"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "selected_articles": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/SelectedArticleInput"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Selected Articles"
+        }
+      },
+      "required": [
+        "expected_version"
+      ],
+      "title": "DraftPatch",
       "type": "object"
     },
     "DraftQuestion": {
@@ -3842,12 +4085,33 @@
       "title": "DraftSource",
       "type": "object"
     },
+    "DraftText": {
+      "additionalProperties": false,
+      "properties": {
+        "base": {
+          "maxLength": 20000,
+          "title": "Base",
+          "type": "string"
+        },
+        "value": {
+          "maxLength": 20000,
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "base",
+        "value"
+      ],
+      "title": "DraftText",
+      "type": "object"
+    },
     "DraftingRecord": {
       "additionalProperties": false,
       "properties": {
         "drafts": {
           "items": {
-            "$ref": "#/$defs/ApplicantDraft"
+            "$ref": "#/$defs/WordingDraft"
           },
           "title": "Drafts",
           "type": "array"
@@ -3996,6 +4260,190 @@
         "text"
       ],
       "title": "EditedItem",
+      "type": "object"
+    },
+    "EvidenceDraft": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "default": "",
+          "maxLength": 20000,
+          "title": "Date",
+          "type": "string"
+        },
+        "document": {
+          "default": "",
+          "maxLength": 20000,
+          "title": "Document",
+          "type": "string"
+        },
+        "editing": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Editing"
+        },
+        "evidenceType": {
+          "default": "",
+          "maxLength": 20000,
+          "title": "Evidencetype",
+          "type": "string"
+        },
+        "file_binding": {
+          "discriminator": {
+            "mapping": {
+              "file": "#/$defs/DraftFileBinding",
+              "remove": "#/$defs/RemoveFileBinding",
+              "retain": "#/$defs/RetainFileBinding"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/RetainFileBinding"
+            },
+            {
+              "$ref": "#/$defs/RemoveFileBinding"
+            },
+            {
+              "$ref": "#/$defs/DraftFileBinding"
+            }
+          ],
+          "title": "File Binding"
+        },
+        "note": {
+          "default": "",
+          "maxLength": 20000,
+          "title": "Note",
+          "type": "string"
+        },
+        "responsible": {
+          "default": "",
+          "maxLength": 20000,
+          "title": "Responsible",
+          "type": "string"
+        },
+        "step": {
+          "anyOf": [
+            {
+              "maximum": 10,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Step"
+        }
+      },
+      "required": [
+        "document",
+        "responsible",
+        "date",
+        "evidenceType",
+        "note",
+        "step",
+        "editing",
+        "file_binding"
+      ],
+      "title": "EvidenceDraft",
+      "type": "object"
+    },
+    "EvidenceDraftInput": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "default": "",
+          "maxLength": 20000,
+          "title": "Date",
+          "type": "string"
+        },
+        "document": {
+          "default": "",
+          "maxLength": 20000,
+          "title": "Document",
+          "type": "string"
+        },
+        "editing": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Editing"
+        },
+        "evidenceType": {
+          "default": "",
+          "maxLength": 20000,
+          "title": "Evidencetype",
+          "type": "string"
+        },
+        "file_binding": {
+          "discriminator": {
+            "mapping": {
+              "file": "#/$defs/DraftFileBindingInput",
+              "remove": "#/$defs/RemoveFileBindingInput",
+              "retain": "#/$defs/RetainFileBindingInput"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/RetainFileBindingInput"
+            },
+            {
+              "$ref": "#/$defs/RemoveFileBindingInput"
+            },
+            {
+              "$ref": "#/$defs/DraftFileBindingInput"
+            }
+          ],
+          "title": "File Binding"
+        },
+        "note": {
+          "default": "",
+          "maxLength": 20000,
+          "title": "Note",
+          "type": "string"
+        },
+        "responsible": {
+          "default": "",
+          "maxLength": 20000,
+          "title": "Responsible",
+          "type": "string"
+        },
+        "step": {
+          "anyOf": [
+            {
+              "maximum": 10,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Step"
+        }
+      },
+      "title": "EvidenceDraft",
       "type": "object"
     },
     "EvidenceItem": {
@@ -4455,6 +4903,11 @@
           "default": null,
           "title": "Page"
         },
+        "project_context": {
+          "default": false,
+          "title": "Project Context",
+          "type": "boolean"
+        },
         "source_ref": {
           "title": "Source Ref",
           "type": "string"
@@ -4485,7 +4938,8 @@
         "page",
         "start",
         "end",
-        "verified"
+        "verified",
+        "project_context"
       ],
       "title": "FactPointer",
       "type": "object"
@@ -4690,6 +5144,14 @@
           "title": "Pages Read",
           "type": "array"
         },
+        "project_pages": {
+          "default": [],
+          "items": {
+            "type": "integer"
+          },
+          "title": "Project Pages",
+          "type": "array"
+        },
         "reason": {
           "anyOf": [
             {
@@ -4723,7 +5185,8 @@
         "form",
         "form_fields_read",
         "form_fields_skipped",
-        "facts"
+        "facts",
+        "project_pages"
       ],
       "title": "FileReport",
       "type": "object"
@@ -6707,6 +7170,226 @@
         "pdf_page"
       ],
       "title": "IntentBlock",
+      "type": "object"
+    },
+    "Job": {
+      "additionalProperties": false,
+      "properties": {
+        "attempts": {
+          "title": "Attempts",
+          "type": "integer"
+        },
+        "base_version": {
+          "title": "Base Version",
+          "type": "integer"
+        },
+        "can_retry": {
+          "title": "Can Retry",
+          "type": "boolean"
+        },
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/JobError"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "finished_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Finished At"
+        },
+        "heartbeat_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Heartbeat At"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "pattern": "^[a-z][a-z0-9_]{0,63}$",
+          "title": "Kind",
+          "type": "string"
+        },
+        "lease_expires_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Lease Expires At"
+        },
+        "max_attempts": {
+          "title": "Max Attempts",
+          "type": "integer"
+        },
+        "next_attempt_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Attempt At"
+        },
+        "result_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Result Url"
+        },
+        "result_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Result Version"
+        },
+        "stage": {
+          "title": "Stage",
+          "type": "string"
+        },
+        "started_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Started At"
+        },
+        "state": {
+          "enum": [
+            "queued",
+            "running",
+            "succeeded",
+            "failed",
+            "cancelled",
+            "superseded"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "updated_at": {
+          "title": "Updated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "case_id",
+        "kind",
+        "state",
+        "stage",
+        "attempts",
+        "max_attempts",
+        "base_version",
+        "result_version",
+        "created_at",
+        "updated_at",
+        "started_at",
+        "finished_at",
+        "next_attempt_at",
+        "heartbeat_at",
+        "lease_expires_at",
+        "error",
+        "can_retry",
+        "result_url"
+      ],
+      "title": "Job",
+      "type": "object"
+    },
+    "JobError": {
+      "properties": {
+        "code": {
+          "enum": [
+            "processing_failed",
+            "worker_lost",
+            "access_changed",
+            "input_changed",
+            "invalid_input",
+            "handler_unavailable"
+          ],
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "retryable": {
+          "title": "Retryable",
+          "type": "boolean"
+        },
+        "stage": {
+          "title": "Stage",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "stage",
+        "retryable"
+      ],
+      "title": "JobError",
+      "type": "object"
+    },
+    "JobList": {
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/$defs/Job"
+          },
+          "title": "Items",
+          "type": "array"
+        }
+      },
+      "required": [
+        "items"
+      ],
+      "title": "JobList",
       "type": "object"
     },
     "Jurisdiction": {
@@ -9058,6 +9741,35 @@
       "title": "RelevanceRecord",
       "type": "object"
     },
+    "RemoveFileBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "remove",
+          "default": "remove",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "title": "RemoveFileBinding",
+      "type": "object"
+    },
+    "RemoveFileBindingInput": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "remove",
+          "default": "remove",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "title": "RemoveFileBinding",
+      "type": "object"
+    },
     "RequirementCondition": {
       "properties": {
         "fact_ids": {
@@ -10015,6 +10727,35 @@
         "scope"
       ],
       "title": "ResolvedNote",
+      "type": "object"
+    },
+    "RetainFileBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "retain",
+          "default": "retain",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "title": "RetainFileBinding",
+      "type": "object"
+    },
+    "RetainFileBindingInput": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "retain",
+          "default": "retain",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "title": "RetainFileBinding",
       "type": "object"
     },
     "ReviewConflict": {
@@ -12670,6 +13411,189 @@
         "user"
       ],
       "title": "UserResult",
+      "type": "object"
+    },
+    "WordingDraft": {
+      "additionalProperties": false,
+      "properties": {
+        "accepted_fact_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accepted Fact Id"
+        },
+        "claims": {
+          "items": {
+            "$ref": "#/$defs/DraftClaim"
+          },
+          "maxItems": 16,
+          "title": "Claims",
+          "type": "array"
+        },
+        "decided_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decided At"
+        },
+        "decided_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decided By"
+        },
+        "decision_expected_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decision Expected Version"
+        },
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "generated_at": {
+          "title": "Generated At",
+          "type": "string"
+        },
+        "generation_id": {
+          "title": "Generation Id",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "input_fingerprint": {
+          "title": "Input Fingerprint",
+          "type": "string"
+        },
+        "questions": {
+          "items": {
+            "$ref": "#/$defs/DraftQuestion"
+          },
+          "maxItems": 12,
+          "title": "Questions",
+          "type": "array"
+        },
+        "replaces_fact_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Replaces Fact Id"
+        },
+        "status": {
+          "default": "draft",
+          "enum": [
+            "draft",
+            "accepted",
+            "rejected"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "generation_id",
+        "input_fingerprint",
+        "field",
+        "title",
+        "text",
+        "claims",
+        "questions",
+        "status",
+        "generated_at",
+        "decided_at",
+        "decided_by",
+        "decision_expected_version",
+        "accepted_fact_id",
+        "replaces_fact_id"
+      ],
+      "title": "WordingDraft",
+      "type": "object"
+    },
+    "WorkerHealth": {
+      "properties": {
+        "execution": {
+          "enum": [
+            "external_required",
+            "in_process",
+            "external"
+          ],
+          "title": "Execution",
+          "type": "string"
+        },
+        "last_heartbeat_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Last Heartbeat At"
+        },
+        "queued": {
+          "title": "Queued",
+          "type": "integer"
+        },
+        "running": {
+          "title": "Running",
+          "type": "integer"
+        },
+        "worker_available": {
+          "title": "Worker Available",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "worker_available",
+        "last_heartbeat_at",
+        "queued",
+        "running",
+        "execution"
+      ],
+      "title": "WorkerHealth",
       "type": "object"
     }
   },

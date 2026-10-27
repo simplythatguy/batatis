@@ -95,8 +95,8 @@ def test_officer_notice_send_access_matrix(scene, status):
         assert after['messages'][:-1] == before['messages']
         assert after['messages'][-1]['id'] == notice['id']
         assert after['version'] == before['version']
-        assert {key: value for key, value in after.items() if key not in {'messages', 'version', 'updated_at'}} == {
-            key: value for key, value in before.items() if key not in {'messages', 'version', 'updated_at'}}
+        assert {key: value for key, value in after.items() if key not in {'messages', 'version', 'updated_at', 'expires_at'}} == {
+            key: value for key, value in before.items() if key not in {'messages', 'version', 'updated_at', 'expires_at'}}
         notes = owner.get('/me/notifications').json()['notifications']
         assert any(note['id'] == f'{case.id}:message:{notice["id"]}' and not note['read'] for note in notes)
     store.delete(case.id)
@@ -133,8 +133,8 @@ def test_historic_correspondence_and_read_receipts_remain_available(scene, statu
         assert client.post(f'/cases/{case.id}/messages/read', json={}).status_code == 204
         assert owner.get(f'/cases/{case.id}').json() == after  # repeated receipts do not write
     final = owner.get(f'/cases/{case.id}').json()
-    assert {key: value for key, value in final.items() if key not in {'messages', 'version', 'updated_at'}} == {
-        key: value for key, value in original.items() if key not in {'messages', 'version', 'updated_at'}}
+    assert {key: value for key, value in final.items() if key not in {'messages', 'version', 'updated_at', 'expires_at'}} == {
+        key: value for key, value in original.items() if key not in {'messages', 'version', 'updated_at', 'expires_at'}}
     notices = owner.get('/me/notifications').json()['notifications']
     assert any(note['id'] == f'{case.id}:message:{case.messages[1].id}' and note['read'] for note in notices)
     store.delete(case.id)
@@ -177,8 +177,8 @@ def test_notices_are_one_way_and_preserve_historical_applicant_messages(scene, s
         after = store.get(case.id).model_dump()
         if allowed:
             assert after['version'] == before['version']
-            assert {k: v for k, v in after.items() if k not in {'messages', 'updated_at'}} == {
-                k: v for k, v in before.items() if k not in {'messages', 'updated_at'}}
+            assert {k: v for k, v in after.items() if k not in {'messages', 'updated_at', 'expires_at'}} == {
+                k: v for k, v in before.items() if k not in {'messages', 'updated_at', 'expires_at'}}
         else:
             assert after == before
     thread = clients['owner'].get(f'/cases/{case.id}/messages').json()['messages']
@@ -361,8 +361,8 @@ def test_simultaneous_officer_notices_preserve_both_messages(scene, monkeypatch)
     after = clients['owner'].get(f'/cases/{case.id}').json()
     assert after['version'] == before['version']
     assert {message['id'] for message in after['messages']} == {response.json()['id'] for response in responses}
-    assert {key: value for key, value in after.items() if key not in {'messages', 'version', 'updated_at'}} == {
-        key: value for key, value in before.items() if key not in {'messages', 'version', 'updated_at'}}
+    assert {key: value for key, value in after.items() if key not in {'messages', 'version', 'updated_at', 'expires_at'}} == {
+        key: value for key, value in before.items() if key not in {'messages', 'version', 'updated_at', 'expires_at'}}
     store.delete(case.id)
 
 
@@ -414,8 +414,10 @@ def test_messages_and_review_history_are_purged_with_case(scene):
     clients['reviewer'].post(f'/review/{case.id}/claim', json={})
     clients['reviewer'].post(f'/cases/{case.id}/messages', json={'body': 'A private thread passage.'})
     expired = store.get(case.id)
-    expired.created_at = (datetime.now(timezone.utc) - timedelta(days=8)).isoformat()
+    expired.status = 'refused'
     store.put(expired)
+    from engine.tests.test_retention import _set_last_activity
+    _set_last_activity(store, case.id, (datetime.now(timezone.utc) - timedelta(days=731)).isoformat())
     assert store.purge_expired() >= 1
     assert store.get(case.id) is None
     assert clients['owner'].get(f'/cases/{case.id}/messages').status_code == 404

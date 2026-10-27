@@ -7,7 +7,7 @@ import { useBegin, useCurrentApplication } from "./begin";
 import { ROLE_CHOICES } from "./deck";
 import { Icon24 } from "./icons";
 import { Choices } from "./QuestionDeck";
-import { updateSession, useSession } from "./session";
+import { getSession, resetSession, updateSession, useSession } from "./session";
 import { CIcon, Dot, Kbd, MOD_KEY } from "./ui";
 
 let fileSeq = 0;
@@ -21,12 +21,14 @@ const isText = (f: File) => /^text\/(plain|markdown)$/.test(f.type) || /\.(txt|m
  * the reviewing authority is a Section B question in the deck.
  */
 export function Start() {
-  const { c, phase, dispatch, resetNote, readDescription, submissionDispatched } = useCase();
+  const { c, phase, dispatch, beginEmpty, resetNote, readDescription, submissionDispatched } = useCase();
   const session = useSession();
   const { begin, userRole } = useBegin();
   const [askRole, setAskRole] = useState(false);
   const { app, locked } = useCurrentApplication();
   const inCase = phase === "case";
+  const prepared = useRef(inCase);
+  prepared.current = inCase;
   const [dragging, setDragging] = useState(false);
   const [note, setNote] = useState("");
   const input = useRef<HTMLInputElement>(null);
@@ -36,8 +38,22 @@ export function Start() {
 
   useEffect(() => { if (!locked && !askRole) area.current?.focus({ preventScroll: true }); }, [locked, askRole]);
 
+  /** An onboarded applicant's composer is a durable draft before the explicit AI start. */
+  function prepare() {
+    if (prepared.current) return true;
+    const session = getSession(), chosen = userRole ?? session.role;
+    if (!chosen) return false;
+    prepared.current = true;
+    const files = session.draftFiles;
+    beginEmpty(chosen);
+    if (session.draft) dispatch({ type: "setDescription", text: session.draft });
+    if (files.length) dispatch({ type: "addFiles", files: files.map(f => ({ id: f.id, name: f.file.name })) });
+    resetSession({ held: files });
+    return true;
+  }
+
   function setText(t: string) {
-    if (inCase) dispatch({ type: "setDescription", text: t });
+    if (prepare()) dispatch({ type: "setDescription", text: t });
     else updateSession({ draft: t });
   }
 
@@ -49,7 +65,7 @@ export function Start() {
     const other = files.length - pdfs.length - texts.length;
     if (pdfs.length) {
       const made = pdfs.map((file) => ({ id: fileId(), file }));
-      if (inCase) {
+      if (prepare()) {
         dispatch({ type: "addFiles", files: made.map((m) => ({ id: m.id, name: m.file.name })) });
         updateSession((s) => ({ held: [...s.held, ...made] }));
       } else updateSession((s) => ({ draftFiles: [...s.draftFiles, ...made] }));

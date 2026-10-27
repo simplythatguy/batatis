@@ -10,7 +10,7 @@ from pydantic import Field
 from .drafting_provider import DraftingProvider, DraftingUnavailable
 from .drafting_sources import ARTICLE, TITLES, SourceBundle
 from .models import new_id, now
-from .models_drafting import (ApplicantDraft, DraftClaim, DraftGeneration, DraftModel, DraftQuestion,
+from .models_drafting import (WordingDraft, DraftClaim, DraftGeneration, DraftModel, DraftQuestion,
                               DraftingRecord, assembled_text, draft_passages)
 
 SYSTEM = """Write source-traceable APPLICANT DRAFTS for an Alberta alternative-solution application.
@@ -188,7 +188,7 @@ def generate(bundle: SourceBundle, provider: DraftingProvider) -> DraftingRecord
         raise DraftingUnavailable('Drafting unavailable: generation or grounding validation failed; no writing was saved.') from error
     timestamp, generation_id = now(), new_id('draft_generation')
     by_field = {d.field: d for d in batch.drafts}
-    drafts = [ApplicantDraft(id=new_id('draft'), generation_id=generation_id,
+    drafts = [WordingDraft(id=new_id('draft'), generation_id=generation_id,
         input_fingerprint=bundle.inputs.fingerprint, field=d.field,
         title=TITLES.get(d.field, 'Provision ' + d.field.removeprefix('section_c.').removesuffix('.explanation')),
         text=assembled_text(d.claims), claims=d.claims, questions=d.questions, generated_at=timestamp,

@@ -18,6 +18,7 @@ from typing import Callable, TypeVar
 from .account_models import ApplicationPreferences, ApplicationPreferencesPatch, StoredMessage, User
 from .access import authorize_case, enforce_stored_mutation
 from .models import Case, now
+from .draft_store import DraftWritesMixin
 
 T = TypeVar('T')
 
@@ -73,7 +74,7 @@ class _DB:
         return self.con.execute(sql.replace('?', '%s') if self.postgres else sql, params)
 
 
-class AccountsMixin:
+class AccountsMixin(DraftWritesMixin):
     def mutate_messages(self, case_id: str, user: User, operation: Callable[[Case], T]) -> tuple[Case, T] | None:
         """Authorize and mutate only the thread under the case write lock.
 
@@ -93,7 +94,11 @@ class AccountsMixin:
             result = operation(case)
             messages = [message.model_dump(mode='json') for message in case.messages]
             if messages != data.get('messages', []):
-                case.updated_at = now()
+                previous_ids = {message.get('id') for message in data.get('messages', [])}
+                if any(message.id not in previous_ids for message in case.messages):
+                    case.updated_at = now()
+                else:
+                    case.updated_at = data.get('updated_at', case.updated_at)
                 data = {**data, 'messages': messages, 'updated_at': case.updated_at}
                 if db.postgres:
                     from psycopg.types.json import Jsonb

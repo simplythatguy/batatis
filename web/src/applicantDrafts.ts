@@ -1,4 +1,4 @@
-import type { ApplicantDraft, Case as EngineCase } from "./api/types.gen";
+import type { WordingDraft, Case as EngineCase } from "./api/types.gen";
 import { latestLocalFacts, localField } from "./intakeFields";
 import { factSignature } from "./rules";
 import type { Case, Fact } from "./types";
@@ -17,9 +17,9 @@ export function applicantDraftHref(field: string): string {
 }
 
 /** Place a disclosure beside each literal claim without changing the accepted wording. */
-export function draftPassages(draft: Pick<ApplicantDraft, "text" | "claims">) {
+export function draftPassages(draft: Pick<WordingDraft, "text" | "claims">) {
   let cursor = 0;
-  const passages: { before: string; prefix: string; claim: ApplicantDraft["claims"][number] }[] = [];
+  const passages: { before: string; prefix: string; claim: WordingDraft["claims"][number] }[] = [];
   for (const claim of draft.claims) {
     if (!claim.text) return null;
     const at = draft.text.indexOf(claim.text, cursor);

@@ -453,6 +453,7 @@ export function getGaps(c: Case): Gap[] {
 }
 
 export type Action =
+  | { type: "adoptCase"; to: Case }
   | { type: "setDescription"; text: string }
   | { type: "addFiles"; files: { id: string; name: string }[] }
   | { type: "setFileResult"; id: string; error: string | null; read?: boolean; pages?: number; sha256?: string; unreachable?: boolean; engineId?: string }
@@ -1057,6 +1058,7 @@ export function reducer(c: Case, a: Action): Case {
       const type = typeof a.value === "number" ? "user_text" : "user_click";
       return { ...c, facts: [...rest, { id: newId("f"), field: a.field, value: a.value, kind: "pointed", status: "confirmed", source: { type, ref: `rules:${a.rule}`, quote: a.quote } }] };
     }
+    case "adoptCase":
     case "reset":
       return a.to;
   }

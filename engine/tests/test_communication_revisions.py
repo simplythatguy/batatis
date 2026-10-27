@@ -67,6 +67,7 @@ def test_open_return_read_correct_and_versioned_save(communication_scene):
     messages = owner.get(f'/cases/{case_id}/messages').json()['messages']
     assert not messages[-1]['read_by_me']
     assert owner.post(f'/cases/{case_id}/messages/read', json={}).status_code == 204
+    assert store.get(case_id).updated_at == opened['updated_at']  # reading is not retention-extending activity
     corrected = owner.post(f'/cases/{case_id}/facts', json=fact('legal_description', 'Lot 2, Block 3').model_dump())
     assert corrected.status_code == 200, corrected.text
     # This is the browser's conservative consecutive-write acknowledgement rule.
@@ -361,10 +362,11 @@ def test_communication_rechecks_expiry_and_commits_purge(communication_scene, mo
             column = 'data' if db.postgres else 'json'
             raw = db.execute(f'SELECT {column} FROM cases WHERE id=?', (case_id,)).fetchone()[0]
             raw = raw if db.postgres else json.loads(raw)
-            raw['created_at'] = (datetime.now(timezone.utc) - timedelta(days=8)).isoformat()
+            raw['status'] = 'refused'
+            raw['updated_at'] = (datetime.now(timezone.utc) - timedelta(days=731)).isoformat()
             from psycopg.types.json import Jsonb
-            db.execute(f'UPDATE cases SET {column}=? WHERE id=?',
-                       (Jsonb(raw) if db.postgres else json.dumps(raw), case_id))
+            db.execute(f'UPDATE cases SET {column}=?, updated_at=? WHERE id=?',
+                       (Jsonb(raw) if db.postgres else json.dumps(raw), raw['updated_at'], case_id))
         return original_mutation(*args, **kwargs)
 
     monkeypatch.setattr(store, 'mutate_messages', expired_mutation)
