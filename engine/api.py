@@ -38,6 +38,8 @@ from .uploads import (MULTIPART_MAX_OVERHEAD_BYTES, MULTIPART_MAX_PARTS,
                       PDF_MAX_BYTES, PDF_TOO_LARGE_DETAIL)
 from .access import access_dependency
 from .account_models import Authority, reviewing_authority
+from .case_view import current_case
+from .jobs import JobRuntime, default_registry, in_process_enabled, worker_lifespan
 
 logger = logging.getLogger(__name__)
 
@@ -173,13 +175,23 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
     if store is None:
         assert_durable_when_hosted()
     state = {'store': store, 'codes': codes}
+    job_state = {}
 
     def cases() -> CaseStore:
         if state['store'] is None:
             state['store'] = open_store()
         return state['store']
 
-    app = FastAPI(title='Batatis engine', dependencies=[Depends(access_dependency(cases))])
+    def jobs() -> JobRuntime:
+        if not job_state:
+            execution = ('external_required' if os.environ.get('VERCEL') else
+                         'in_process' if in_process_enabled() else 'external')
+            job_state['runtime'] = JobRuntime(cases(), default_registry(code), execution=execution)
+        return job_state['runtime']
+
+    app = FastAPI(title='Batatis engine', dependencies=[Depends(access_dependency(cases))],
+                  lifespan=worker_lifespan(jobs))
+    app.state.jobs = jobs
 
     def sweep():
         current = state['store']
@@ -236,12 +248,15 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
         response.headers['Cache-Control'] = 'no-store'
         return {'deleted': purge_cases(force=True)}
 
-    @app.get('/cases/{case_id}', response_model=Case)
-    def get_case(case_id: str):
+    def read_case(case_id: str):
         case = cases().get(case_id)
         if case is None:
             raise HTTPException(404, 'case not found')
         return case
+
+    @app.get('/cases/{case_id}', response_model=Case)
+    def get_case(case_id: str):
+        return current_case(read_case(case_id))
 
     @app.post('/cases/{case_id}/facts', response_model=Case)
     def add_fact(case_id: str, fact: Fact):
@@ -322,7 +337,7 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
     @app.post('/cases/{case_id}/export', response_class=Response,
               responses={200: {'content': {'application/pdf': {}}}, 409: {'description': 'export blocked'}})
     def export(case_id: str, body: ExportRequest | None = None):
-        case = get_case(case_id)
+        case = read_case(case_id)
         draft = bool(body and body.draft)
         res = run_export(case, draft)
         if os.environ.get('VERCEL') and len(res.pdf) > RESPONSE_CAP:
@@ -342,7 +357,7 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
     def export_preview(case_id: str, request: Request, start: int | None = Query(None, ge=0),
                        count: int | None = Query(None, ge=1, le=60), official: bool = False):
         """Legacy whole-draft preview, or a bounded window of the exact package pages."""
-        res = run_export(get_case(case_id), not official)
+        res = run_export(read_case(case_id), not official)
         windowed = start is not None or count is not None or 'official' in request.query_params
         filename = f'{case_id}-scc-variance{"" if official else "-DRAFT"}.pdf'
 
@@ -430,10 +445,11 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
     app.include_router(__import__('engine.routes_review', fromlist=['create_router']).create_router(cases, code))
     app.include_router(__import__('engine.routes_rewrite', fromlist=['create_router']).create_router(cases, code))
     app.include_router(__import__('engine.routes_assist', fromlist=['create_router']).create_router(cases, code))
-    app.include_router(__import__('engine.routes_intake', fromlist=['create_router']).create_router(cases, code))
+    app.include_router(__import__('engine.routes_jobs', fromlist=['create_router']).create_router(jobs))
+    app.include_router(__import__('engine.routes_intake', fromlist=['create_router']).create_router(cases, code, jobs=jobs))
     app.include_router(__import__('engine.routes_relevance', fromlist=['create_router']).create_router(
         cases, code, relevance_judge_factory))
-    app.include_router(__import__('engine.routes_identify', fromlist=['create_router']).create_router(cases, code))
+    app.include_router(__import__('engine.routes_identify', fromlist=['create_router']).create_router(cases, code, jobs=jobs))
     app.include_router(__import__('engine.routes_package_review', fromlist=['create_router']).create_router(cases, code))
     app.include_router(__import__('engine.routes_jurisdictions', fromlist=['create_router']).create_router(cases))
     app.include_router(__import__('engine.routes_rules', fromlist=['create_router']).create_router(cases))

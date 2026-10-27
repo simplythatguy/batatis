@@ -37,7 +37,7 @@ const review = {
 const report = (file_id: string, name: string, unread = false): FileReport => ({
   file_id, name, status: unread ? "not_read" : "read", reason: unread ? "No text layer" : null,
   pages: unread ? 2 : 3, pages_read: unread ? [] : [1, 2, 3], pages_not_read: unread ? [1, 2] : [],
-  form: null, form_fields_read: 0, form_fields_skipped: [], facts: 0,
+  form: null, form_fields_read: 0, form_fields_skipped: [], facts: 0, project_pages: [],
 });
 
 function propsFor(value: Review | null): DocumentReviewProps {

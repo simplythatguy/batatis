@@ -133,8 +133,8 @@ def test_preserves_all_unrelated_case_fields_document_metadata_and_file_bytes(co
     # Establish that canonical snapshot in storage before comparing physical retention.
     snapshot, snapshot_version = store.get_snapshot(case.id)
     before = store.put(snapshot, expected_version=snapshot_version)
-    assert before.model_dump(exclude={'version', 'updated_at'}) == Case.model_validate(
-        acknowledged.json()).model_dump(exclude={'version', 'updated_at'})
+    assert before.model_dump(exclude={'version', 'updated_at', 'expires_at'}) == Case.model_validate(
+        acknowledged.json()).model_dump(exclude={'version', 'updated_at', 'expires_at'})
     assert before.evidence[0].kind == 'file'
     before_raw, version, before_files = raw_state(store, case.id)
     ids_before = case_ids(store)
@@ -144,12 +144,12 @@ def test_preserves_all_unrelated_case_fields_document_metadata_and_file_bytes(co
     after = Case.model_validate(response.json())
     assert (after.jurisdiction.model_dump() if after.jurisdiction else None) == jurisdiction
     assert after.version == version + 1
-    assert after.model_dump(exclude={'jurisdiction', 'version', 'updated_at'}) == before.model_dump(
-        exclude={'jurisdiction', 'version', 'updated_at'})
+    assert after.model_dump(exclude={'jurisdiction', 'version', 'updated_at', 'expires_at'}) == before.model_dump(
+        exclude={'jurisdiction', 'version', 'updated_at', 'expires_at'})
     after_raw, actual_version, after_files = raw_state(store, case.id)
     assert actual_version == after.version
-    assert {key: value for key, value in after_raw.items() if key not in ('jurisdiction', 'updated_at')} == {
-        key: value for key, value in before_raw.items() if key not in ('jurisdiction', 'updated_at')}
+    assert {key: value for key, value in after_raw.items() if key not in ('jurisdiction', 'updated_at', 'expires_at')} == {
+        key: value for key, value in before_raw.items() if key not in ('jurisdiction', 'updated_at', 'expires_at')}
     assert after_files == before_files
     assert store.get_file(case.id, file_id)['data'] == payload
     assert case_ids(store) == ids_before
@@ -331,6 +331,8 @@ def test_expiry_after_waiting_for_actual_write_lock_commits_physical_cleanup(con
     case = store.put(Case(title='TEST expiry during lock wait', jurisdiction=FIRST,
                           created_at=(cutoff[0] + timedelta(seconds=1)).isoformat()))
     store.put_file(case.id, 'TEST expiring.pdf', b'%PDF-1.4 TEST expiring bytes')
+    from engine.tests.test_retention import _set_last_activity
+    _set_last_activity(store, case.id, (cutoff[0] + timedelta(seconds=1)).isoformat())
     ready, resume, attempted, done = (threading.Event() for _ in range(4))
     put = store.put
     responses, errors = [], []

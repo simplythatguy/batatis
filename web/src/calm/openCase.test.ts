@@ -326,3 +326,10 @@ test("reopening writing drafts keeps the confirmed narrative beside the proposal
   assert.equal(rejected.process.risk, "Applicant’s original risk.");
   assert.deepEqual(rejected.facts.map(f => f.id), [before.id]);
 });
+
+test("legacy Section A aliases used by shared gaps reopen on their canonical editor", () => {
+  const c = caseFromEngine(saved({ facts: [fact("rep", "section_a.representative", "Legacy representative"), fact("mail", "section_a.mailing_address", "Legacy mailing address")] }), "homebuilder");
+  assert.equal(factFor(c, "representative")?.value, "Legacy representative");
+  assert.equal(factFor(c, "mailingAddress")?.value, "Legacy mailing address");
+  assert.equal(c.facts.length, 2);
+});

@@ -29,6 +29,7 @@ class FactPointer(BaseModel):
     start: int | None = None
     end: int | None = None
     verified: bool = True                   # false for a model value the rules could not re-derive (proposed)
+    project_context: bool = False           # quote identity alone does not establish a project answer
 
 
 class FileReport(BaseModel):
@@ -43,6 +44,7 @@ class FileReport(BaseModel):
     form_fields_read: int = 0
     form_fields_skipped: list[str] = []     # officer, signature and unmapped fields, by name
     facts: int = 0
+    project_pages: list[int] = []           # pages with positively identified project passages
 
 
 class ModelPass(BaseModel):

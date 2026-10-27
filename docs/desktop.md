@@ -18,7 +18,7 @@ Local development has one test applicant and separate reviewers for Calgary and 
 
 Open local development from the desktop sign-in screen. In **Settings**, choose the person you want to use. The account menu also lets you switch people.
 
-When you submit an application as the applicant, the reviewer for its authority sees it in the queue. The normal claim, return, message, submission history and seven-day retention rules still apply. Switching people does not claim an application for review.
+When you submit an application as the applicant, the reviewer for its authority sees it in the queue. The normal claim, return, message, submission history and [inactivity retention policy](application-retention.md) still apply. Switching people does not claim an application for review.
 
 The app saves pending work before switching. A failed save keeps you with the current person and shows the reason.
 

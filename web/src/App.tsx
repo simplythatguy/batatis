@@ -14,7 +14,7 @@ import { useCase } from "./store";
 
 /** Store effects the calm screens ask for: the reading Start requested, and held PDF uploads. */
 function CalmEffects() {
-  const { phase, engineId, readDescription, uploadFiles } = useCase();
+  const { c, phase, engineId, readDescription, uploadFiles } = useCase();
   const session = useSession();
 
   useEffect(() => {
@@ -26,9 +26,9 @@ function CalmEffects() {
 
   // PDFs attached after the case exists upload in the save queue (intake reads them by id).
   useEffect(() => {
-    if (!engineId || !session.held.length) return;
+    if (!engineId || !session.held.some(held => !c.files.find(file => file.id === held.id)?.error && !session.uploading.includes(held.id))) return;
     void uploadFiles();
-  }, [engineId, session.held, uploadFiles]);
+  }, [engineId, session.held, session.uploading, c.files, uploadFiles]);
   return null;
 }
 

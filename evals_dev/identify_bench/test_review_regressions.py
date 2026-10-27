@@ -411,16 +411,16 @@ def quota():
 live.elephant_quota = quota
 def post(*args):
     active = directory / 'active'
-    with active.open('x'):
-        try:
-            with path.open('ab') as f:
-                f.write(b'attempt\n')
-            time.sleep(0.005)
-            if crash:
-                raise SystemExit(17)
-            return fake_elephant_post(*args)
-        finally:
-            active.unlink()
+    active.touch(exist_ok=False)
+    try:
+        with path.open('ab') as f:
+            f.write(b'attempt\n')
+        time.sleep(0.005)
+        if crash:
+            raise SystemExit(17)
+        return fake_elephant_post(*args)
+    finally:
+        active.unlink()
 er._post_once = post
 budget = live.ElephantBudget(reserve=4, max_calls=12)
 budget.remaining = 12

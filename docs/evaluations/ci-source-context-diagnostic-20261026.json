@@ -1,0 +1,29 @@
+{
+  "source_commit": "857a4d2b91b0d31fd1c0239881af8fb1c8212a6b",
+  "description": "Offline diagnostic input variation only; no tracked source edits",
+  "cases": [
+    {
+      "project_heading": false,
+      "calls": [
+        "intake",
+        "document-review"
+      ],
+      "project_pages": [],
+      "receipt": "No current-project passages were identified. This document remains reference context; type project facts in the description or attach a project brief with explicit project labels."
+    },
+    {
+      "project_heading": true,
+      "calls": [
+        "intake",
+        "intake",
+        "document-review"
+      ],
+      "project_pages": [
+        1
+      ],
+      "receipt": null
+    }
+  ],
+  "engine_original_test": "fails at existing assertion",
+  "engine_with_project_heading": "all existing test assertions pass, including timeout reason and completion marker"
+}
