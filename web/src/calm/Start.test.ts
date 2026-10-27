@@ -23,9 +23,10 @@ async function startPage(signedIn = false) {
     "../store": { useCase: store },
     "./account": { useAccount: () => account },
     "./begin": { useBegin: begin.exports.useBegin, useCurrentApplication: () => ({ app: null, locked: false }) },
-    "./session": { getSession, useSession: getSession, updateSession },
+    "./session": { getSession, useSession: getSession, updateSession, resetSession: () => {} },
+    "./PictureConsent": { PictureConsent: "picture-consent" },
     "./auth/useAuthGate": { requestStartSignIn: auth.exports.requestStartSignIn },
-    "./applications": {}, "../intakeView": { pagesLabel: (n: number) => `${n} pages` },
+    "./applications": {}, "../intakeView": { pagesLabel: (n: number) => `${n} pages`, fileReadLabel: () => ({ tone: "done", label: "Read" }) },
     "./ui": { Dot: "Dot", CIcon: "CIcon", Kbd: "Kbd", MOD_KEY: "⌘" },
   }, {
     location,

@@ -82,16 +82,16 @@ test("removal drops only unconfirmed facts with no other source, and late reads 
   assert.equal(c.intake?.filesChanged, undefined, "a server-acknowledged removal does not require endless rereading");
 });
 
-test("reopening restores uploaded names, ids and actual reports from inventory", () => {
+test("reopening keeps the attached files and their reports, leaves removed files out, and rereads unknown coverage", () => {
   const read = result([report()]);
   const saved = { id: "case", facts: [], title: "Plans", provisions: [], selected_articles: null, authority: null, jurisdiction: null,
-    decision: null, intake: read.record, identify: null } as EngineCase;
-  const c = openedCase(saved, "homebuilder", { intake: read, identify: null, files: [
-    { id: "a", name: "plan.pdf", size: 10, content_type: "application/pdf", read_report: read.record.files[0] },
-    { id: "b", name: "photo.webp", size: 20, content_type: "image/webp", read_report: null },
+    decision: null, intake: { ...read.record, removed_file_ids: ["c"] }, identify: null } as EngineCase;
+  const c = openedCase(saved, null, { intake: { ...read, record: { ...read.record, removed_file_ids: ["c"] } }, identify: null, files: [
+    { id: "saved-a", engineId: "a", name: "plan.pdf", read: true },
+    { id: "saved-c", engineId: "c", name: "removed.pdf", read: true },
   ] });
-  assert.deepEqual(c.files.map(f => [f.name, f.engineId, f.read]), [["plan.pdf", "a", true], ["photo.webp", "b", false]]);
+  assert.deepEqual(c.files.map(f => [f.name, f.engineId]), [["plan.pdf", "a"]]);
   assert.equal(fileReadLabel(c.intake?.record.files[0]).label, "Read · 12 of 12 pages");
   const older = result([report({ text_pages_read: [] })]);
-  assert.equal(openedCase(saved, "homebuilder", { intake: older, identify: null }).intake?.filesChanged, true);
+  assert.equal(openedCase(saved, null, { intake: older, identify: null }).intake?.filesChanged, true);
 });

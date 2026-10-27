@@ -48,7 +48,7 @@ async function mounted(initial: Case, focus: string | null = null, answerError: 
     "./begin": { useCurrentApplication: () => ({ app: { status: "draft" }, locked: false, readOnly: false }) },
     "./useDeckExtras": { useDeckExtras: () => ({ options: {}, extras: { failed: {}, checklists: null } }) },
     "./account": { useAccount: () => ({ user: { id: "test", role: "applicant" } }) },
-    "./useQuestionDraft": { useQuestionDraft: (_a, _g, _e, _k, saved) => ({ value: saved, setValue() {}, choices: {}, setChoices() {} }) },
+    "./useQuestionDraft": { useQuestionDraft: (_a, _g, _e, _k, saved) => ({ value: saved, setValue() {}, choices: {}, setChoices() {}, conflict: null, confirmValue() {} }) },
     "./assistant/assistant": { setAssistantContext() {} },
     "./assistant/questionContext": { questionContext: () => ({}) },
     "./applications": { readOnlyStatus: () => ({}) },

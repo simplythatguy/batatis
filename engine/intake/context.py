@@ -45,8 +45,11 @@ def _advance(state: Context, line: str) -> Context:
     return state
 
 
-def project_pages(pages: Sequence[Page]) -> list[ProjectPage]:
+def project_pages(pages: Sequence[Page], *, admit: Context = 'project') -> list[ProjectPage]:
     """Only positive project context is admitted. Reference sections end inherited context.
+
+    `admit='unknown'` returns the passages with no marker either way (a plain set of drawings): they
+    may only propose values the applicant confirms; reference sections are never admitted.
 
     A document that starts as reference material cannot promote its example 'Project brief'
     headings or first-person declarations. Completed widgets are handled separately.
@@ -58,7 +61,7 @@ def project_pages(pages: Sequence[Page]) -> list[ProjectPage]:
         for line in page.text.splitlines(keepends=True):
             stripped = line.strip()
             state = 'reference' if _TEMPLATE.search(stripped) else _advance(state, stripped)
-            admitted = state == 'project' and not _ISSUER.search(stripped)
+            admitted = state == admit and not _ISSUER.search(stripped)
             # Letterhead, office contact details and report dates are not site/applicant fields.
             # Keep only explicitly named project labels; body building facts remain readable.
             project_line = line

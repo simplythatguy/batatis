@@ -207,7 +207,8 @@ def read_text(text: str, origin: Origin, *, codes=None, outbound: Outbound = scr
     return out
 
 
-def _semantic_pages(out: Extraction, pages: list[Page], report: FileReport, *, transport, outbound, status, budget):
+def _semantic_pages(out: Extraction, pages: list[Page], report: FileReport, *, transport, outbound, status, budget,
+                    project: bool = True):
     if not pages:
         return
     if transport is None:
@@ -224,10 +225,11 @@ def _semantic_pages(out: Extraction, pages: list[Page], report: FileReport, *, t
         length += 2                            # page separator in the outbound text
     source = '\n\n'.join(p.text for p in pages)
     run = model_pass.run(source, '\n\n'.join(chunks), transport, skip=set(), status=status, budget=budget)
-    report.semantic_pages_read = [number for number, _, end in ends if end <= run.covered_chars]
-    report.semantic_pages_sent = [number for number, begin, _ in ends if begin < run.sent_chars]
-    if len(report.semantic_pages_read) != len(pages):
-        report.semantic_reason = (model_pass.LIMIT if run.reason == model_pass.LIMIT else
+    read_now = [number for number, _, end in ends if end <= run.covered_chars]
+    report.semantic_pages_read = sorted(set(report.semantic_pages_read) | set(read_now))
+    report.semantic_pages_sent = sorted(set(report.semantic_pages_sent) | {number for number, begin, _ in ends if begin < run.sent_chars})
+    if len(read_now) != len(pages):
+        report.semantic_reason = report.semantic_reason or (model_pass.LIMIT if run.reason == model_pass.LIMIT else
                                   'AI is paused' if run.status == 'gate_closed' else 'AI could not finish reading')
     counts = ModelPass(status=run.status, model=READER_VERSION if run.status == 'live' else None,
                        reason=run.reason, dropped=run.dropped, input_tokens=run.input_tokens,
@@ -243,7 +245,7 @@ def _semantic_pages(out: Extraction, pages: list[Page], report: FileReport, *, t
                 continue
             name = item.field if item.field != model_pass.STATEMENT else \
                 'statement.' + hashlib.sha256(' '.join(quote.split()).encode()).hexdigest()[:10]
-            _add(out, Origin(report.file_id, page.number, page.box, project_context=True), name, item.value,
+            _add(out, Origin(report.file_id, page.number, page.box, project_context=project), name, item.value,
                  'pointed' if item.verified else 'proposed', *span, quote, .6 if item.verified else .4,
                  'model', verified=item.verified)
             if item.verified:
@@ -452,8 +454,18 @@ def read_file(file_id: str, name: str, data: bytes, *, codes=None, outbound: Out
             part = read_text(text, origin, codes=codes, outbound=outbound, citation_text=page.text)
             out.merge(part)
             report.text_pages_read.append(page.number)
+        # Passages with no project or reference marker (a plain set of drawings) may only propose
+        # values for the applicant to confirm; they never confirm an answer on their own.
+        unmarked: list[Page] = []
+        for page in project_pages(content.text_pages, admit='unknown'):
+            if page.text.strip():
+                source = next(p for p in content.text_pages if p.number == page.number)
+                unmarked.append(Page(page.number, page.text, source.boxes))
+                out.merge(read_text(page.text, Origin(file_id, page.number, source.box), codes=None, outbound=outbound))
         _semantic_pages(out, project, report, transport=transport, outbound=outbound,
                         status=status, budget=budget)
+        _semantic_pages(out, unmarked, report, transport=transport, outbound=outbound,
+                        status=status, budget=budget, project=False)
         _pictures(out, report, content.blank_pages, lambda page: picture_page(data, page),
                   transport=transport, status=status, budget=budget, outbound=outbound, allowed=pictures)
     else:
@@ -461,7 +473,7 @@ def read_file(file_id: str, name: str, data: bytes, *, codes=None, outbound: Out
     _report(out, report)
     if report.form_fields_read and not report.pages_read and report.pictures_not_read_reason == 'AI is off':
         report.reason = FORM_ONLY
-    if report.pages_read and not report.project_pages and not report.form_fields_read:
+    if report.pages_read and not report.project_pages and not report.form_fields_read and not report.facts:
         note = ('No current-project passages were identified. This document remains reference context; '
                 'type project facts in the description or attach a project brief with explicit project labels.')
         report.reason = f'{report.reason} {note}' if report.reason else note

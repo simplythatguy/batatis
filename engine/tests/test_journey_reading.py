@@ -375,7 +375,7 @@ class ThreeStoreys(VisionReader):
 
 
 def test_a_picture_that_disagrees_with_the_text_stays_to_check():
-    out = service.run('', [('plans', 'plans.pdf', pdf([[(72, 700, 'A two-storey house.')]])), ('photo', 'elevation.png', picture())],
+    out = service.run('', [('plans', 'plans.pdf', pdf([[(72, 720, 'Project brief'), (72, 700, 'A two-storey house.')]])), ('photo', 'elevation.png', picture())],
                       transport=ThreeStoreys(), status='fake', pictures=True)
     case = Case()
     service.apply(case, '', out)

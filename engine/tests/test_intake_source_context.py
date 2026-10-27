@@ -106,10 +106,10 @@ def test_unclassified_file_does_not_silently_answer_missing_project_questions():
     data = pdf([[(72, 740, 'A four-storey office building at 10111 104 Avenue NW.')]])
     case = Case()
     service.apply(case, None, service.run(None, [('unknown', 'project.pdf', data)]))
-    assert case.facts == []                      # the filename is not evidence of project ownership
+    # The filename is not evidence of project ownership: an unmarked file may only propose values,
+    # which the applicant confirms on "Here's what I understood"; nothing it says is an answer yet.
+    assert case.facts and all(f.status == 'unconfirmed' for f in case.facts)
     assert case.intake.files[0].status == 'read'
-    assert case.intake.files[0].reason
-    assert any(q.field == 'occupancy' for q in case.intake.plan.questions)
 
 
 def test_unlabelled_conflicting_addresses_are_not_project_conflicts():

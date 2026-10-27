@@ -89,14 +89,14 @@ def settle(case: Case, extraction: Extraction) -> None:
     """
     deduplicate(extraction)
     checked = {p.fact_id for p in extraction.pointers if p.verified and p.project_context}
-    eligible = {p.fact_id for p in extraction.pointers if p.project_context}
     quoted = {p.fact_id for p in extraction.pointers if p.verified}
     pictured = {p.fact_id for p in extraction.pointers if p.method == 'vision'}
     conflicted = {c.field for c in extraction.conflicts}
     key = lambda fact: repr(fact.value)                                  # noqa: E731
     by_field: dict[str, list[Fact]] = {}
     for fact in extraction.facts:
-        if fact.kind != 'computed' and (fact.id in eligible or fact.field == 'claimed_provision'):
+        # Unmarked file passages stay as unconfirmed proposals: never confirmed, never dropped.
+        if fact.kind != 'computed':
             by_field.setdefault(fact.field, []).append(fact)
     kept: dict[str, Fact] = {}                                           # id -> fact kept
     for field, facts in by_field.items():
