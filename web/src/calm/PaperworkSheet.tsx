@@ -9,16 +9,23 @@ import { DatePicker } from "./DatePicker";
 import type { DeckItem } from "./deck";
 import { cleanReadValue, clearJourneyAnswerAction, itemOpen, journeyAnswerAction, journeyAnswers } from "./journey";
 import { Icon24 } from "./icons";
-import { JurisdictionNote } from "./JurisdictionNote";
 import type { useDeckExtras } from "./useDeckExtras";
 
 /** The form field a row edits: a planner question carries its own id, the field lives on the question. */
 const fieldOf = (row: DeckItem): string => (row.plan ? localField(row.plan.field) : row.ref);
 
+/** Three small groups instead of one long list; anything unlisted joins the last group. */
+const GROUPS = [
+  { name: "People", fields: ["owner", "applicant_role", "representative", "mailingAddress"] },
+  { name: "Site", fields: ["municipalAddress", "legalDescription", "authority", "scope"] },
+  { name: "Request", fields: ["date", "permit"] },
+];
+const SHORT_LABEL: Record<string, string> = { applicant_role: "Your part", scope: "Sites covered", date: "Request date", permit: "Permit number" };
+
 type RowDraft = { kind: "answer"; value: string; defaulted?: boolean } | { kind: "later" | "not_sure" };
 
 /** Edits and defaults belong to this sheet until the applicant presses Done. */
-export function PaperworkSheet({ item, focusRow, onDone, extras }: { item: DeckItem; focusRow: string | null; onDone: () => void; extras: ReturnType<typeof useDeckExtras>["extras"] }) {
+export function PaperworkSheet({ item, focusRow, onDone }: { item: DeckItem; focusRow: string | null; onDone: () => void; extras?: ReturnType<typeof useDeckExtras>["extras"] }) {
   const { c, dispatch } = useCase();
   const [drafts, setDrafts] = useState<Record<string, RowDraft>>({});
   const root = useRef<HTMLFormElement>(null);
@@ -59,53 +66,65 @@ export function PaperworkSheet({ item, focusRow, onDone, extras }: { item: DeckI
     onDone();
   }
 
-  return <form ref={root} className="cf-paperwork" aria-label="Last details for the form" onSubmit={(e) => { e.preventDefault(); save(); }}>
-    <div className="cf-paperwork-rows">{rows.map((row) => {
-      const draft = drafts[row.key];
-      const field = fieldOf(row);
-      const fact = factFor(c, row.kind === "authority" ? "office.choice" : field) ?? (field === "legalDescription" ? factFor(c, "lot") ?? factFor(c, "plan") : undefined);
-      const saved = row.kind === "authority" ? c.authority : savedValue(field);
-      const value = draft?.kind === "answer" ? draft.value : draft ? "" : saved;
-      const deferred = draft && draft.kind !== "answer" ? draft.kind : !draft ? row.deferred ?? (row.settled ? "not_sure" : undefined) : undefined;
-      const detail = DETAIL_FIELDS.find((d) => d.id === field);
-      const choices = row.choices ?? Object.entries(detail?.options ?? {}).map(([value, label]) => ({ value, label }));
-      const legacyRoles: Record<string, string> = { homebuilder: "Builder or contractor", builder: "Builder or contractor", "architect-engineer": "Architect or engineer" };
-      const choiceLabel = choices.find((choice) => choice.value === value)?.label ?? (field === "applicant_role" ? legacyRoles[value] : undefined) ?? value.trim();
-      const label = row.kind === "authority" ? "Office" : row.title;
-      const source = fact ? sourceLine(c, fact) : "";
-      const assumed = fact?.kind === "computed" || fact?.kind === "proposed" || (!fact && row.assumed);
-      const sourceChip = !draft && saved && (fact || row.kind === "authority") ? <span className={`cf-source-chip${assumed ? " is-assumed" : ""}`}>{assumed ? "assumed" : fact?.source.type === "file" ? source : "you"}</span> : draft?.kind === "answer" && value ? <span className={`cf-source-chip${draft.defaulted ? " is-assumed" : ""}`}>{draft.defaulted ? "default" : "you"}</span> : null;
-      const choose = (picked: string, defaulted = false) => answer(row.key, picked, defaulted);
-      const current = (id: string) => {
-        const other = rows.find((r) => fieldOf(r) === id);
-        const d = other ? drafts[other.key] : undefined;
-        return d?.kind === "answer" ? d.value.trim() : d ? "" : savedValue(id);
-      };
-      const owner = current("owner");
-      const site = current("municipalAddress");
-      const suggestions = field === "representative" ? [{ label: "No representative", value: "No representative" }, ...(owner ? [{ label: "Same as the owner", value: owner }] : [])]
-        : field === "mailingAddress" && site ? [{ label: "Same as the site address", value: site }]
-          : field === "date" && row.suggestedValue ? [{ label: "Today", value: row.suggestedValue }]
-            : field === "scope" && site ? [{ label: "One building site", value: "site" }] : [];
-      return <div key={row.key} className="cf-paperwork-row" data-paperwork-row={row.key} data-open={!row.optional && itemOpen(row) ? "" : undefined} role="group" aria-label={label}>
-        <div className="cf-paperwork-label"><span>{label}</span>{row.optional && <span className="cf-faint">Optional</span>}</div>
-        <div className="cf-paperwork-control">
-          {row.kind === "authority" ? <>
-            <AuthorityPicker options={AUTHORITIES} value={value} unsure={Boolean(deferred || (!draft && authorityUnsure(c)))} suggested={officeSuggestion(c)} label="Office" onPick={(picked) => picked === "unsure" ? setDrafts((draft) => ({ ...draft, [row.key]: { kind: "not_sure" } })) : choose(picked)} />
-            {value && <JurisdictionNote authority={value} unsure={Boolean(deferred)} extras={extras} />}
-          </> : choices.length > 0 ? <details className="cf-paperwork-choice">
-            <summary aria-label={`${label}: ${choiceLabel || "Choose…"}`}>
-              <span>{choiceLabel || "Choose…"}</span><Icon24 name="down" size={14} />
+  const groupOf = (row: DeckItem) => GROUPS.findIndex((g) => g.fields.includes(row.kind === "authority" ? "authority" : fieldOf(row)));
+  const grouped = GROUPS.map((g, n) => ({ ...g, rows: rows.filter((row) => (groupOf(row) < 0 ? GROUPS.length - 1 : groupOf(row)) === n) })).filter((g) => g.rows.length);
+
+  function renderRow(row: DeckItem) {
+    const draft = drafts[row.key];
+    const field = fieldOf(row);
+    const fact = factFor(c, row.kind === "authority" ? "office.choice" : field) ?? (field === "legalDescription" ? factFor(c, "lot") ?? factFor(c, "plan") : undefined);
+    const saved = row.kind === "authority" ? c.authority : savedValue(field);
+    const value = draft?.kind === "answer" ? draft.value : draft ? "" : saved;
+    const deferred = draft && draft.kind !== "answer" ? draft.kind : !draft ? row.deferred ?? (row.settled ? "not_sure" : undefined) : undefined;
+    const detail = DETAIL_FIELDS.find((d) => d.id === field);
+    const choices = row.choices ?? Object.entries(detail?.options ?? {}).map(([value, label]) => ({ value, label }));
+    const legacyRoles: Record<string, string> = { homebuilder: "Builder or contractor", builder: "Builder or contractor", "architect-engineer": "Architect or engineer" };
+    const choiceLabel = choices.find((choice) => choice.value === value)?.label ?? (field === "applicant_role" ? legacyRoles[value] : undefined) ?? value.trim();
+    const label = row.kind === "authority" ? "Office" : SHORT_LABEL[field] ?? row.title;
+    const choose = (picked: string, defaulted = false) => answer(row.key, picked, defaulted);
+    const current = (id: string) => {
+      const other = rows.find((r) => fieldOf(r) === id);
+      const d = other ? drafts[other.key] : undefined;
+      return d?.kind === "answer" ? d.value.trim() : d ? "" : savedValue(id);
+    };
+    const owner = current("owner");
+    const site = current("municipalAddress");
+    const office = row.kind === "authority" ? officeSuggestion(c) : null;
+    const suggestions = field === "representative" ? [{ label: "No representative", value: "No representative" }, ...(owner ? [{ label: "Same as the owner", value: owner }] : [])]
+      : field === "mailingAddress" && site ? [{ label: "Same as the site address", value: site }]
+        : field === "date" && row.suggestedValue ? [{ label: "Today", value: row.suggestedValue }]
+          : field === "scope" && site ? [{ label: "One building site", value: "site" }]
+            : office ? [{ label: office.name, value: office.id }] : [];
+    // Only a value read from a file says where it came from; the applicant's own answers need no badge.
+    const fromFile = !draft && saved && fact?.source.type === "file" ? sourceLine(c, fact) : "";
+    const placeholder = deferred === "later" ? "Later" : deferred ? "Not sure" : row.optional ? "Optional" : "Add";
+    return <div key={row.key} className={`cf-pw-row${value ? "" : " is-empty"}`} data-paperwork-row={row.key} data-open={!row.optional && itemOpen(row) ? "" : undefined} role="group" aria-label={label}>
+      <span className="cf-pw-label">{label}</span>
+      <div className="cf-pw-value">
+        {row.kind === "authority"
+          ? <AuthorityPicker compact options={AUTHORITIES} value={value} unsure={Boolean(deferred || (!draft && authorityUnsure(c)))} label="Office" onPick={(picked) => picked === "unsure" ? setDrafts((d) => ({ ...d, [row.key]: { kind: "not_sure" } })) : choose(picked)} />
+          : choices.length > 0 ? <details className="cf-pw-choice">
+            <summary aria-label={`${label}: ${choiceLabel || placeholder}`}>
+              <span className={choiceLabel ? "" : "cf-pw-placeholder"}>{choiceLabel || placeholder}</span><Icon24 name="down" size={14} />
             </summary>
-            <div className="cf-paperwork-options">{choices.map((choice) => <button type="button" key={choice.value} className="cf-link-btn" aria-pressed={value === choice.value} onClick={(e) => { choose(choice.value); e.currentTarget.closest("details")?.removeAttribute("open"); }}>{choice.label}</button>)}</div>
-          </details> : field === "date" ? <DatePicker id={row.key} label={label} value={value} onChange={choose} />
-            : <input id={row.key} type="text" className="cf-paperwork-input" aria-label={label} value={value} onChange={(e) => choose(e.target.value)} />}
-          {(sourceChip || deferred) && <div className="cf-paperwork-source">{sourceChip}{deferred && <span className="cf-source-chip">{deferred === "later" ? "Later" : "Not sure"}</span>}</div>}
-          {!value && !deferred && suggestions.length > 0 && <div className="cf-paperwork-defaults">{suggestions.map((suggestion) => <button key={suggestion.label} type="button" className="cf-link-btn" onClick={() => choose(suggestion.value, true)}>{suggestion.label} <span className="cf-source-chip is-assumed">default</span></button>)}</div>}
-        </div>
-        <button type="button" className="cf-link-btn cf-paperwork-later" aria-label={`Later: ${label}`} aria-pressed={deferred === "later"} onClick={() => setDrafts((draft) => ({ ...draft, [row.key]: { kind: "later" } }))}>Later</button>
-      </div>;
-    })}</div>
+            <div className="cf-pw-options">{choices.map((choice) => <button type="button" key={choice.value} className="cf-link-btn" aria-pressed={value === choice.value} onClick={(e) => { choose(choice.value); e.currentTarget.closest("details")?.removeAttribute("open"); }}>{choice.label}</button>)}</div>
+          </details>
+          : field === "date" ? <DatePicker id={row.key} label={label} value={value} onChange={choose} />
+            : <input id={row.key} type="text" className="cf-pw-input" aria-label={label} placeholder={placeholder} value={value} onChange={(e) => choose(e.target.value)} />}
+        {!value && !deferred && suggestions.length > 0 && <div className="cf-pw-suggest">{suggestions.map((s) => <button key={s.label} type="button" className="cf-link-btn" onClick={() => choose(s.value, true)}>{s.label}</button>)}</div>}
+      </div>
+      <span className="cf-pw-end">
+        {fromFile ? <span className="cf-pw-source" title={fromFile}><Icon24 name="file" size={14} /><span className="cf-sr">From {fromFile}</span></span>
+          : !value && !deferred ? <button type="button" className="cf-link-btn cf-pw-later" aria-label={`Later: ${label}`} aria-pressed={deferred === "later"} onClick={() => setDrafts((d) => ({ ...d, [row.key]: { kind: "later" } }))}>Later</button> : null}
+      </span>
+    </div>;
+  }
+
+  return <form ref={root} className="cf-paperwork" aria-label="Last details for the form" onSubmit={(e) => { e.preventDefault(); save(); }}>
+    {grouped.map((g) => <section key={g.name} className="cf-pw-group" aria-label={g.name}>
+      <h3 className="cf-pw-group-h">{g.name}</h3>
+      {g.rows.map(renderRow)}
+    </section>)}
     <div className="cf-ok-row" data-deck-foot><button type="submit" className="cf-btn is-primary is-lg">Done <Icon24 name="check" size={16} /></button></div>
   </form>;
 }

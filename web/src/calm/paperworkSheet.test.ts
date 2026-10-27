@@ -47,9 +47,7 @@ test("Done saves chosen defaults, role and office together; Later remains one ho
   button(tree, "Designer or architect").props.onClick({ currentTarget: { closest: () => null } });
   button(tree, "One building site").props.onClick({ currentTarget: { closest: () => null } });
   nodes(tree, (n) => n.type === "button" && n.props["aria-label"] === "Later: Legal description")[0].props.onClick();
-  const office = nodes(tree, (n) => n.type === "authority-picker")[0];
-  assert.equal(office.props.suggested.id, "edmonton");
-  office.props.onPick("edmonton");
+  button(tree, "Edmonton").props.onClick();
   assert.equal(m.actions.length, 0, "all edits remain buffered until Done");
   tree = await m.render();
   assert.match(text(tree), /Later/);

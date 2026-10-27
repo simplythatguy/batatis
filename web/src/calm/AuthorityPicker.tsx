@@ -9,7 +9,7 @@ import "./AuthorityPicker.css";
  * two offices and four hundred read the same. Typing only filters; nothing is answered until an
  * option is chosen, and leaving the field puts the saved choice back.
  */
-export function AuthorityPicker({ options, value, onPick, label, suggested, unsure = false }: { options: readonly AuthorityOption[]; value: string; onPick: (id: string) => void; label: string; suggested?: AuthorityOption | null; unsure?: boolean }) {
+export function AuthorityPicker({ options, value, onPick, label, suggested, unsure = false, compact = false }: { options: readonly AuthorityOption[]; value: string; onPick: (id: string) => void; label: string; suggested?: AuthorityOption | null; unsure?: boolean; compact?: boolean }) {
   const listId = useId();
   const root = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
@@ -67,8 +67,8 @@ export function AuthorityPicker({ options, value, onPick, label, suggested, unsu
   };
 
   return <>
-    {suggested && !unsure && (!value || value === suggested.id) && <button type="button" className="cf-btn" onClick={() => choose(suggested)}>Yes, {suggested.name}</button>}
-    <div className="cf-ap" ref={root} onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) close(); }}>
+    {!compact && suggested && !unsure && (!value || value === suggested.id) && <button type="button" className="cf-btn" onClick={() => choose(suggested)}>Yes, {suggested.name}</button>}
+    <div className={`cf-ap${compact ? " is-compact" : ""}`} ref={root} onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) close(); }}>
       <span className="cf-ap-lead" aria-hidden="true"><Icon24 name="search" size={18} /></span>
       <input
         ref={input}
@@ -123,6 +123,7 @@ export function AuthorityPicker({ options, value, onPick, label, suggested, unsu
       )}
       <span className="cf-sr" role="status" aria-live="polite">{open && query !== null ? (total === 0 ? "No match" : `${total} ${total === 1 ? "office" : "offices"}`) : ""}</span>
     </div>
-    <button type="button" className="cf-link-btn cf-ap-unsure" aria-pressed={unsure} onClick={() => choose({ id: "unsure", name: "Not sure" })}>Not sure</button>
+    {/* Compact (the paperwork sheet): Not sure stays in the list; the row's own Later handles deferral. */}
+    {!compact && <button type="button" className="cf-link-btn cf-ap-unsure" aria-pressed={unsure} onClick={() => choose({ id: "unsure", name: "Not sure" })}>Not sure</button>}
   </>;
 }
