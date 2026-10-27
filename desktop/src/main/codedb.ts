@@ -1,9 +1,10 @@
 /**
- * The code database is chosen deliberately on this computer, never shipped in the installer. A chosen
- * file must be the NBC(AE) 2023 2nd printing build the engine expects; the app keeps its own copy.
+ * The installer carries the code database and the app copies it into its own data on launch; a file the
+ * person chooses instead must be the NBC(AE) 2023 2nd printing build the engine expects. The app keeps
+ * its own copy either way.
  */
 import { createHash } from "node:crypto";
-import { copyFile, mkdir, readFile, rename, rm } from "node:fs/promises";
+import { copyFile, mkdir, readFile, rename, rm, stat } from "node:fs/promises";
 import { dirname } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 
@@ -51,4 +52,29 @@ export async function importCodeDb(source: string, target: string, expectedBuild
   const sha256 = createHash("sha256").update(await readFile(partial)).digest("hex");
   await rename(partial, target);
   return { ...checked, sha256 };
+}
+
+function buildOf(file: string): string | null {
+  try {
+    const db = new DatabaseSync(file, { readOnly: true });
+    try {
+      const build = db.prepare("SELECT value FROM meta WHERE key = 'build_version'").get()?.value;
+      return typeof build === "string" ? build : null;
+    } finally {
+      db.close();
+    }
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Puts the installer's code database in place when the app has none, or has one from another build,
+ * which the engine would refuse. A same-build database the person chose is left alone.
+ */
+export async function installBundledCodeDb(bundled: string, target: string): Promise<boolean> {
+  if (!(await stat(bundled).then((info) => info.isFile(), () => false))) return false;
+  const build = buildOf(bundled);
+  if (build === null || buildOf(target) === build) return false;
+  return (await importCodeDb(bundled, target, build)).ok;
 }
