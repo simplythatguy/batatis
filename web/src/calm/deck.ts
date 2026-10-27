@@ -447,7 +447,8 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
   if (fork && fork.variance_needed !== "unknown") push("B", {
     key: "route", kind: "route", section: "B", eyebrow: "Route · Section B",
     title: fork.variance_needed === "likely" ? "You likely need a variance" : "You may not need a variance",
-    context: "", quote: fork.cues.join(" · ") || valueText(factFor(c, "alternative")) || firstSentence(c.description) || undefined,
+    // The applicant's own sentence explains the route; the bare cue ("instead of") does not.
+    context: "", quote: clip(valueText(factFor(c, "alternative")), 200) || fork.cues.join(" · ") || firstSentence(c.description) || undefined,
     why: fork.explanation, ref: "journey.route", done: route !== null, optional: false,
     choices: fork.variance_needed === "likely" ? [{ value: "variance", label: "Continue" }] : [{ value: "standard", label: "Use the standard way" }, { value: "different", label: "Something is different" }],
   });
