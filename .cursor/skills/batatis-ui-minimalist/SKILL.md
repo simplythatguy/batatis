@@ -5,7 +5,9 @@ description: "Minimalist Batatis UI, the user's standing direction: icons before
 
 # Batatis minimalist UI
 
-The user has asked for pure minimalism again and again: light mode, a monotone UI, visuals over text, one thing on screen at a time. This skill decides **how much** goes on screen. `batatis-ui-linear` (P0 rules) and `docs/design-system-calm.md` (tokens, section colours) still decide how it looks.
+Read `../minimal-ui/SKILL.md` first for the user's portable rules (one major thing, capability on demand, colour only to find what matters, unified components). Run its **Verify a screen** pass on real screenshots before handing off. Where this skill adds Batatis-specific detail, both apply; where they conflict on density or colour jobs, minimal-ui wins unless the user said otherwise for that screen.
+
+The user has asked for pure minimalism again and again: light mode, a monotone UI, visuals over text, one thing on screen at a time. This skill decides **how much** goes on screen for Batatis. `batatis-ui-linear` (P0 rules) and `docs/design-system-calm.md` (tokens, section colours) still decide how it looks.
 
 ## The test for every element
 

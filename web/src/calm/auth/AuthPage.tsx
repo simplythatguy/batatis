@@ -82,8 +82,7 @@ export function AuthPage({ mode }: { mode: "signin" | "signup" }) {
     <div className="ac-auth">
       <form className="ac-auth-box" onSubmit={submit} noValidate aria-labelledby={`${id}-title`}>
         <span className="cf-mark ac-auth-mark" aria-hidden="true" />
-        <h1 id={`${id}-title`} className="ac-auth-title">{signup ? "Create your account" : "Welcome to Batatis"}</h1>
-        <p className="ac-auth-sub">Prepare a complete variance application, or review the ones sent to your authority.</p>
+        <h1 id={`${id}-title`} className="ac-auth-title">{signup ? "Create account" : "Sign in"}</h1>
         {!signup && <DesktopEntry />}
 
         {signup && (
@@ -127,7 +126,7 @@ export function AuthPage({ mode }: { mode: "signin" | "signup" }) {
         )}
 
         <button type="submit" className="cf-btn is-primary is-center ac-auth-go" disabled={busy || wait > 0}>
-          {busy ? (signup ? "Creating account…" : "Signing in…") : "Continue"}
+          {busy ? (signup ? "Creating account…" : "Signing in…") : signup ? "Create account" : "Sign in"}
         </button>
 
         {providers.length > 0 && (
@@ -143,7 +142,7 @@ export function AuthPage({ mode }: { mode: "signin" | "signup" }) {
         )}
 
         <p className="ac-auth-switch">
-          {signup ? <>Already have an account? <a href="#/signin">Sign in</a></> : <>New here? <a href="#/signup">Create an account</a></>}
+          {signup ? <a href="#/signin">Sign in</a> : <a href="#/signup">Create an account</a>}
         </p>
       </form>
     </div>
