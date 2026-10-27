@@ -1,0 +1,64 @@
+import { localField } from "../../intakeFields";
+import type { Action } from "../../model";
+import type { Case } from "../../types";
+import { blockAction, blockField, type DocBlock, type DocSection } from "./document";
+
+export interface Suggestion {
+  id: string; blockId: string; origin: "rewrite" | "draft"; before: string; after: string; factId?: string;
+  /** Article numbers the AI wrote that the code database does not have; they were taken out. */
+  removed?: string[];
+  /** The data-handling notice for the AI call that wrote this. */
+  notice?: string | null;
+}
+/** The engine's mark where it took out an article number it could not verify. Never accepted into an application. */
+export const REMOVED_MARK = "[unknown reference removed]";
+export const acceptable = (s: Suggestion) => !s.after.includes(REMOVED_MARK);
+export interface RewriteResult { replacement: string; cited: string[]; removed_citations: string[]; notice: string | null }
+export interface Passage { blockId: string; text: string; start: number; end: number }
+
+export function canRewrite(block: DocBlock): boolean {
+  return block.target.kind === "process" || block.target.kind === "detail" && (block.target.field === "alternative" || block.target.section === "C");
+}
+
+/** The server replaces only the selected range. The staleness basis is always the entire block. */
+export function rewriteSuggestion(id: string, passage: Passage, result: RewriteResult): Suggestion {
+  const { text, start, end } = passage;
+  if (start < 0 || end < start || end > text.length) throw new Error("The selected passage changed. Select it again.");
+  return { id, blockId: passage.blockId, origin: "rewrite", before: text,
+    after: start === end ? result.replacement : text.slice(0, start) + result.replacement + text.slice(end),
+    removed: result.removed_citations, notice: result.notice };
+}
+
+export function draftSuggestions(c: Case, sections: readonly DocSection[]): Suggestion[] {
+  return sections.flatMap(s => s.blocks).filter(canRewrite).flatMap(block => {
+    const latest = [...c.facts].reverse().find(f => localField(f.field) === localField(blockField(block)));
+    const fact = latest?.kind === "proposed" ? latest : undefined;
+    const after = typeof fact?.value === "string" ? fact.value : !latest && !block.text ? block.draft : undefined;
+    if (!after?.trim() || after === block.text) return [];
+    return [{ id: fact ? `draft-${fact.id}` : `lookup-draft-${block.id}`, blockId: block.id, origin: "draft", before: block.text,
+      after, ...(fact ? { factId: fact.id } : {}) } satisfies Suggestion];
+  });
+}
+
+export const freshSuggestions = (suggestions: readonly Suggestion[], blocks: readonly DocBlock[]): Suggestion[] =>
+  suggestions.filter(s => blocks.some(b => b.id === s.blockId && b.text === s.before && b.target.kind !== "card") && s.after !== s.before);
+
+export function acceptSuggestion(suggestion: Suggestion, block: DocBlock): Action | null {
+  return suggestion.blockId === block.id && suggestion.before === block.text && acceptable(suggestion) ? blockAction(block, suggestion.after, "ai") : null;
+}
+export function rejectSuggestion(suggestion: Suggestion): Action | null {
+  return suggestion.factId ? { type: "dismissFact", id: suggestion.factId } : null;
+}
+
+/** Common prefix/suffix keep a small rewrite legible without altering whitespace. */
+export function changedWords(before: string, after: string): { prefix: string; removed: string; added: string; suffix: string } {
+  let start = 0, end = 0;
+  while (start < before.length && start < after.length && before[start] === after[start]) start++;
+  while (end < before.length - start && end < after.length - start && before[before.length - end - 1] === after[after.length - end - 1]) end++;
+  return { prefix: before.slice(0, start), removed: before.slice(start, before.length - end), added: after.slice(start, after.length - end), suffix: end ? before.slice(-end) : "" };
+}
+
+/** Textarea offsets are UTF-16; the engine slices Python strings by Unicode code point. */
+export function rewriteRange(passage: Passage): { start: number; end: number } {
+  return { start: [...passage.text.slice(0, passage.start)].length, end: [...passage.text.slice(0, passage.end)].length };
+}

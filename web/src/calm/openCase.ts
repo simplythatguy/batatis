@@ -9,7 +9,7 @@
  */
 import type { Case as EngineCase, IdentifyResult, IntakeResult, SelectedArticleInput } from "../api/types.gen";
 import { emptyCase, applyDescription } from "../intake";
-import { answerWithdrawn, latestLocalFacts } from "../intakeFields";
+import { answerWithdrawn, latestFactsWithWritingDrafts } from "../intakeFields";
 import { CODECHECK_PREFIX, PROCESS_FACT, reducer } from "../model";
 import { canonicalProvision, isProvision } from "../provisions";
 import type { ApplicantType, AuthorityId, Candidate, Case, CaseFile, Fact, ProcessFieldId } from "../types";
@@ -19,7 +19,7 @@ import { DESCRIPTION_DRAFT, evidenceDrafts } from "./draftWire";
 
 /** The latest saved fact per field, without withdrawn answers. Order is preserved. */
 export function latestFacts(facts: EngineCase["facts"]): Fact[] {
-  return latestLocalFacts(facts).filter((f) => !answerWithdrawn(f)) as Fact[];
+  return latestFactsWithWritingDrafts(facts).filter((f) => !answerWithdrawn(f)) as Fact[];
 }
 
 export function caseFromEngine(saved: SavedCase, type: ApplicantType): Case {
@@ -32,7 +32,7 @@ export function caseFromEngine(saved: SavedCase, type: ApplicantType): Case {
   // As engine/process_fields.py: the newest answer across the field's names counts only when the
   // applicant confirmed it as their own words. Anything else stays a gap; its saved fact is kept.
   for (const [id, field] of Object.entries(PROCESS_FACT) as [ProcessFieldId, string][]) {
-    const f = by.get(field);
+    const f = [...facts].reverse().find(fact => fact.field === field && fact.kind !== "proposed");
     if (f && f.status === "confirmed" && f.kind === "pointed" && typeof f.value === "string" && f.value.trim() && f.value === f.source?.quote) process[id] = f.value;
   }
   // Starter and intake questions read as answered when their field has a saved answer.

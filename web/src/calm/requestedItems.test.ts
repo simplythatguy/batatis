@@ -27,7 +27,7 @@ test("current gaps route by canonical field when the stored gap id changed", () 
   const row = requestedItemRow(c, [gap], item, true);
   assert.equal(row.state, "open");
   assert.equal(row.tone, "blocking");
-  assert.equal(row.href, "#/questions?focus=field-legalDescription");
+  assert.equal(row.href, "#/application?focus=field-legalDescription");
   assert.equal(row.label, item.note);
 });
 

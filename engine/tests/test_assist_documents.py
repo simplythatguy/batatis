@@ -78,7 +78,8 @@ def test_typed_question_returns_only_current_authorized_pdf_quotes(document_app)
     result = response.json()
     assert result['document_references'] == [
         {'case_id': case['id'], 'file_id': file_id, 'page': 1, 'quote': 'The specimen thickness is 42 mm.'}]
-    assert '> The specimen thickness is 42 mm.' in result['answer']
+    assert 'The specimen thickness is 42 mm.' in result['answer']
+    assert '> The specimen thickness is 42 mm.' not in result['answer']
     assert result['context'] == {'user_id': user['id'], 'context_id': 'synthetic-document-context',
         'revision': 2, 'case_id': case['id'], 'case_version': case['version'], 'attachment_ids': [file_id]}
     assert result['attachments'][0]['content_state'] == 'text_excerpt'

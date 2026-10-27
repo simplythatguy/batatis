@@ -116,12 +116,10 @@ def test_blocks_on_unconfirmed_facts_and_blocking_gaps(case, codes):
     assert 'Lot' not in {p.field for p in draft.placements}  # the older lot value must not silently return
 
 
-def test_final_export_has_no_widgets_or_help_popups(final):
+def test_final_export_retains_only_signing_widgets_and_no_help_popups(final):
     reader = pypdf.PdfReader(io.BytesIO(final.pdf))
-    assert '/AcroForm' not in reader.trailer['/Root']
-    for page in reader.pages:
-        annots = page.get('/Annots')
-        assert all(a.get_object()['/Subtype'] != '/Widget' for a in (annots.get_object() if annots else []))
+    assert set(reader.get_fields()) == {'Signature1', 'Signature2', 'Signature3', 'Signature4',
+                                        'Date1', 'Date2', 'SCO Date', 'SCO Date1', 'Check Box14'}
     text = ' '.join(page_texts(final.pdf))
     assert 'full legal description of the property' not in text      # ATS Popup
     assert 'objective-based format' not in text                       # Section C Popup
@@ -286,7 +284,7 @@ def test_latest_unknown_revision_blocks_final_and_does_not_restore_old_values(ca
 
 def test_authentic_process_answers_and_linked_files_are_in_final_appendix(final, case, codes):
     text = appendix_text(final.pdf, final.form_pages)
-    assert 'P. Alternative solution (Div C 2.3.1): applicant-written documentation' in text and 'SYNTHETIC' in text
+    assert 'P. Alternative solution (Div C 2.3.1): the applicant\'s documentation' in text and 'SYNTHETIC' in text
     for field in process_fields(case, codes):
         assert field.answer is not None
         assert norm(field.answer.value) in text and field.answer.source.ref in text

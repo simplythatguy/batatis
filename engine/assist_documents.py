@@ -170,9 +170,9 @@ def checked_excerpts(text: str, documents: DocumentContext, codes):
     # attach an unrelated valid quote to an invented explanation or field draft.
     answer = 'Selected PDF text excerpts:\n\n' + '\n\n'.join(
         '> ' + ref.quote.replace('\n', '\n> ') for ref in references) + '\n\n' + EXCERPT_LIMIT
-    checked, cited, removed = check_citations(answer, codes)
-    if checked != answer:
+    checked, cited, removed = check_citations(answer, codes, context=documents.prepared.data)
+    if checked == SAFE_HELP or removed:
         return (SAFE_HELP if checked == SAFE_HELP else NO_GROUNDED_EXCERPT), [], removed, []
     if any(match.group().rstrip('.') not in documents.prepared.citation_ids for match in ARTICLE.finditer(answer)):
         return NO_GROUNDED_EXCERPT, [], removed, []
-    return answer, cited, removed, references
+    return checked, cited, removed, references

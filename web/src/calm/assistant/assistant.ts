@@ -625,11 +625,12 @@ export function answerBlocks(text: string): { kind: "p" | "quote"; text: string 
     cur = null;
   };
   for (const line of text.split("\n")) {
-    const quote = /^\s*>/.test(line);
+    // The engine verifies quote lines that start with spaces or tabs and ">"; anything else is plain text.
+    const quote = /^[ \t]*>/.test(line);
     if (!line.trim()) { flush(); continue; }
     const kind = quote ? "quote" : "p";
     if (!cur || cur.kind !== kind) { flush(); cur = { kind, lines: [] }; }
-    cur.lines.push(quote ? line.replace(/^\s*>\s?/, "") : line);
+    cur.lines.push(quote ? line.replace(/^[ \t]*>[ \t]?/, "") : line);
   }
   flush();
   return out;
