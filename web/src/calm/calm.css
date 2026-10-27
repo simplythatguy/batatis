@@ -93,6 +93,8 @@ body {
   height: 100dvh;
   display: flex;
   overflow: hidden;
+  /* Clip, never scroll: focusing into a panel that is still sliding in must not shift the whole shell. */
+  overflow: clip;
   background: var(--cf-bg);
   color: var(--cf-text);
   font-family: var(--cf-font);
@@ -109,6 +111,9 @@ body {
 }
 
 .cf-rail {
+  /* Above the application list, which slides in and out from behind it. */
+  position: relative;
+  z-index: 1;
   width: 60px;
   flex: none;
   display: flex;
@@ -204,7 +209,8 @@ body {
 /* Application list */
 
 .cf-list {
-  width: 300px;
+  --cf-list-w: 300px;
+  width: var(--cf-list-w);
   flex: none;
   display: flex;
   flex-direction: column;
@@ -1133,7 +1139,8 @@ body {
 /* Assistant: a column beside main (pushes it), raised surface. */
 
 .cf-assist {
-  width: 400px;
+  --cf-assist-w: 400px;
+  width: var(--cf-assist-w);
   flex: none;
   display: flex;
   flex-direction: column;
@@ -1143,16 +1150,49 @@ body {
   border-left: 1px solid var(--cf-line);
 }
 
+/* The list and the assistant slide in from their edge and out again (shell/AppLayout.tsx keeps them
+   mounted for the exit). A negative margin, not a transform, so the work area resizes with them
+   every frame instead of jumping; the list passes behind the rail. Exit times match EXIT_MS (200ms). */
+.cf-slot {
+  display: contents;
+}
+
 @media (prefers-reduced-motion: no-preference) {
-  .cf-assist {
-    animation: cf-assist-in 300ms ease-out both;
+  .cf-slot[data-state="entering"] > .cf-list {
+    animation: cf-list-in 240ms var(--cf-ease) backwards;
+  }
+  .cf-slot[data-state="closing"] > .cf-list {
+    animation: cf-list-out 200ms cubic-bezier(0.4, 0, 1, 1) forwards;
+  }
+  .cf-slot[data-state="entering"] > .cf-assist {
+    animation: cf-assist-in 240ms var(--cf-ease) backwards;
+  }
+  .cf-slot[data-state="closing"] > .cf-assist {
+    animation: cf-assist-out 200ms cubic-bezier(0.4, 0, 1, 1) forwards;
+  }
+}
+
+@keyframes cf-list-in {
+  from {
+    margin-left: calc(-1 * var(--cf-list-w));
+  }
+}
+
+@keyframes cf-list-out {
+  to {
+    margin-left: calc(-1 * var(--cf-list-w));
   }
 }
 
 @keyframes cf-assist-in {
   from {
-    opacity: 0;
-    transform: translateX(12px);
+    margin-right: calc(-1 * var(--cf-assist-w));
+  }
+}
+
+@keyframes cf-assist-out {
+  to {
+    margin-right: calc(-1 * var(--cf-assist-w));
   }
 }
 
@@ -3153,10 +3193,10 @@ body {
 
 @media (max-width: 1180px) {
   .cf-list {
-    width: 260px;
+    --cf-list-w: 260px;
   }
   .cf-assist {
-    width: 340px;
+    --cf-assist-w: 340px;
   }
 }
 
@@ -3206,6 +3246,26 @@ body {
     height: auto;
     z-index: 40;
     border-left: 0;
+  }
+  .cf-slot[data-state="entering"] > .cf-assist {
+    animation-name: cf-assist-sheet-in;
+  }
+  .cf-slot[data-state="closing"] > .cf-assist {
+    animation-name: cf-assist-sheet-out;
+  }
+}
+
+@keyframes cf-assist-sheet-in {
+  from {
+    opacity: 0;
+    translate: 0 16px;
+  }
+}
+
+@keyframes cf-assist-sheet-out {
+  to {
+    opacity: 0;
+    translate: 0 16px;
   }
 }
 
