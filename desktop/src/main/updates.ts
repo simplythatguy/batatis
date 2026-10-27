@@ -9,7 +9,7 @@
  */
 import { createHash } from "node:crypto";
 import { createWriteStream } from "node:fs";
-import { access, constants, mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { access, constants, copyFile, mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
 import { pipeline } from "node:stream/promises";
 import { Readable, Transform } from "node:stream";
@@ -427,6 +427,7 @@ export class Updater {
       if (this.deps.platform === "darwin") await this.deps.run("/usr/bin/ditto", ["-x", "-k", archive, stage]);
       else await this.deps.run(join(process.env.SystemRoot ?? "C:\\Windows", "System32", "tar.exe"), ["-xf", archive, "-C", stage]);
       const staged = await this.unpacked(stage, version);
+      if (this.deps.platform === "win32") await keepUninstaller(target, staged);
       if (this.deps.platform === "win32" && !(await onlyApp(target, staged))) {
         await rm(stage, { recursive: true, force: true });
         return { kind: "manual", archive };
@@ -474,6 +475,20 @@ async function exists(path: string): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+/** The installer's own uninstaller, which the zip does not ship. Settings and Add/Remove Programs point at it. */
+const UNINSTALLER = "Uninstall Batatis.exe";
+
+/**
+ * An app put there by the installer has its uninstaller beside it. The swap replaces the whole folder,
+ * so the uninstaller is carried into the update instead of blocking it or being deleted by it.
+ */
+export async function keepUninstaller(target: string, staged: string): Promise<void> {
+  const present = (await readdir(target)).find((name) => name.toLowerCase() === UNINSTALLER.toLowerCase());
+  if (!present) return;
+  if ((await readdir(staged)).some((name) => name.toLowerCase() === UNINSTALLER.toLowerCase())) return;
+  await copyFile(join(target, present), join(staged, present));
 }
 
 /**
