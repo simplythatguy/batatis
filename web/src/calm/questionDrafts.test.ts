@@ -13,11 +13,16 @@ test("unconfirmed text and choices stay on the exact application and card withou
   assert.equal(d.readChoices("case A").condition, "does_not_apply");
 });
 
-test("a newer saved answer replaces an older draft", () => {
+test("a changed saved answer preserves unfinished text and exposes a conflict across restore", () => {
   const d = new QuestionDrafts(); d.selectAccount("A");
   d.write("case", "card", "", "typed");
-  assert.equal(d.read("case", "card", "confirmed elsewhere"), "confirmed elsewhere");
-  assert.equal(d.read("case", "card", ""), "");
+  assert.equal(d.read("case", "card", "confirmed elsewhere"), "typed");
+  assert.equal(d.conflicted("case", "card", "confirmed elsewhere"), true);
+  const next = new QuestionDrafts(); next.restore("case", d.snapshot("case"));
+  assert.equal(next.read("case", "card", "confirmed elsewhere"), "typed");
+  assert.equal(next.conflicted("case", "card", "confirmed elsewhere"), true);
+  next.write("case", "card", "confirmed elsewhere", "revised typed text");
+  assert.equal(next.conflicted("case", "card", "confirmed elsewhere"), false, "an explicit edit uses the reviewed new base");
 });
 
 test("signout, another account or role change clears private drafts and choices", () => {
@@ -27,6 +32,17 @@ test("signout, another account or role change clears private drafts and choices"
   assert.equal(d.read("case", "card", ""), ""); assert.deepEqual(d.readChoices("case"), {});
   d.write("case", "card", "", "private"); d.selectAccount("A/reviewer");
   assert.equal(d.read("case", "card", ""), "");
+});
+
+test("only the exact confirmed editor revision is consumed; a later edit survives an older answer acknowledgement", () => {
+  const d = new QuestionDrafts();
+  d.write("case", "card", "old base", "first text");
+  d.write("case", "card", "old base", "newer text");
+  d.confirm("case", "card", "first text");
+  assert.equal(d.read("case", "card", "first text"), "newer text");
+  d.confirm("case", "card", "newer text");
+  assert.deepEqual(d.snapshot("case").question_text, {});
+  assert.equal(d.read("case", "card", "another device's newer confirmed answer"), "another device's newer confirmed answer");
 });
 
 test("new cases with identical local IDs stay separate and saved IDs restore across reopening", () => {

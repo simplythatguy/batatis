@@ -17,6 +17,7 @@ from engine.privacy import PII_NOTICE
 from engine.retention import reset_purge_clock
 from engine.routes_case import create_router
 from engine.store import RETENTION_DAYS, CaseBackend, CaseStore, VersionConflict
+from engine.tests.test_retention import _set_last_activity
 
 
 def _fact(field, value):
@@ -39,7 +40,10 @@ def evidence_store(request, tmp_path):
     def create(**kwargs):
         case = Case(**kwargs)
         created.append(case.id)
-        return store.put(case, expected_version=0)
+        saved = store.put(case, expected_version=0)
+        if 'created_at' in kwargs:
+            _set_last_activity(store, case.id, kwargs['created_at'])
+        return saved
 
     reset_purge_clock()
     try:
@@ -308,7 +312,7 @@ def _terminal_write(store, case_id, terminal):
                 con.execute('DELETE FROM case_files WHERE case_id=?', (case_id,))
                 con.execute('DELETE FROM cases WHERE id=?', (case_id,))
             else:
-                con.execute("UPDATE cases SET json=json_set(json, '$.created_at', ?) WHERE id=?", (stamp, case_id))
+                con.execute("UPDATE cases SET json=json_set(json, '$.updated_at', ?), updated_at=? WHERE id=?", (stamp, stamp, case_id))
             yield
             con.execute('COMMIT')
         finally:
@@ -320,8 +324,8 @@ def _terminal_write(store, case_id, terminal):
                 con.execute('DELETE FROM case_files WHERE case_id=%s', (case_id,))
                 con.execute('DELETE FROM cases WHERE id=%s', (case_id,))
             else:
-                con.execute("UPDATE cases SET data=jsonb_set(data, '{created_at}', to_jsonb(%s::text)) WHERE id=%s",
-                            (stamp, case_id))
+                con.execute("UPDATE cases SET data=jsonb_set(data, '{updated_at}', to_jsonb(%s::text)), updated_at=%s WHERE id=%s",
+                            (stamp, stamp, case_id))
             yield
 
 

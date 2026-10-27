@@ -9,8 +9,8 @@ import type { Fact } from "./types";
 const FIELD_ALIASES: Readonly<Record<string, readonly string[]>> = {
   storeys: ["building.storeys"],
   owner: ["owner_name", "section_a.owner_name"],
-  representative: ["owner_rep_name", "applicant_name"],
-  mailingAddress: ["mailing_address"],
+  representative: ["owner_rep_name", "applicant_name", "section_a.representative"],
+  mailingAddress: ["mailing_address", "section_a.mailing_address"],
   municipalAddress: ["municipal_address", "civic_address", "address"],
   legalDescription: ["legal_description", "section_b.legal_description"],
   permit: ["permit_number", "section_b.permit_number"],

@@ -36,19 +36,23 @@ import { useNotifications } from "./notifications/notifications";
 import { useRoute } from "../router";
 import { resetRelevance } from "./useRelevance";
 import { CIcon, ConfirmDialog, Dot, MOD_KEY, type DotTone } from "./ui";
+import { activeJob, jobLabel } from "../api/jobs";
+import { SaveConflictDialog } from "./SaveConflictDialog";
 
 /** The check's state, quietly beside the save status (Review holds the detail and the big retry). */
 function CheckStatus() {
-  const { phase, checkStatus } = useCase();
+  const { phase, checkStatus, reading } = useCase();
   const { app } = useCurrentApplication();
   if (phase !== "case" || app?.status === "refused") return null;
+  const job = [reading?.intakeJob, reading?.identifyJob].find(job => job && activeJob(job));
+  if (job) return <span className="cf-save-check" role="status"><span className="cf-dot is-pending cf-pulse" aria-hidden="true" />{jobLabel(job)}</span>;
   if (checkStatus === "running") return <span className="cf-save-check" role="status"><span className="cf-dot is-pending cf-pulse" aria-hidden="true" />Checking…</span>;
   if (checkStatus === "unavailable") return <a className="cf-save-check" href="#/review" role="status" title="The last check couldn’t finish. Retry from the ⋯ menu or open Review.">Check unavailable</a>;
   return null;
 }
 
 export function SaveStatus() {
-  const { phase, saveStatus, savedNote, saveDetail, saveDraft } = useCase();
+  const { phase, saveStatus, savedNote, saveDetail, saveDraft, saveConflict, saveConflictReview, reviewSaveConflict } = useCase();
   // A submission on its way keeps the saved state; the page says editing is paused.
   const current = useCurrentApplication();
   if (phase !== "case") return null;
@@ -67,13 +71,14 @@ export function SaveStatus() {
   const s = map[saveStatus] ?? map.idle;
   const problem = saveStatus === "failed" || saveStatus === "gone";
   return (
-    <div className={`cf-save${problem ? " is-problem" : ""}`} role="status" title={[savedNote, saveDetail].filter(Boolean).join(" · ") || undefined}>
+    <><div className={`cf-save${problem || saveConflict ? " is-problem" : ""}`} role="status" title={[savedNote, saveDetail].filter(Boolean).join(" · ") || undefined}>
       <Dot tone={s.tone} />
-      <span className="cf-save-label">{s.label}</span>
-      {saveStatus === "unsaved" && <button type="button" className="cf-btn is-xs is-ghost" onClick={() => void saveDraft()}>Save now</button>}
-      {saveStatus === "failed" && <button type="button" className="cf-btn is-xs" onClick={() => void saveDraft()}><CIcon name="retry" size={13} />Retry</button>}
+      <span className="cf-save-label">{saveConflict ? "Saved changes need review" : s.label}</span>
+      {saveConflict && <button type="button" className="cf-btn is-xs" disabled={saveConflictReview?.kind === "loading"} onClick={() => void reviewSaveConflict()}>{saveConflictReview?.kind === "loading" ? "Loading…" : "Review changes"}</button>}
+      {!saveConflict && saveStatus === "unsaved" && <button type="button" className="cf-btn is-xs is-ghost" onClick={() => void saveDraft()}>Save now</button>}
+      {!saveConflict && saveStatus === "failed" && <button type="button" className="cf-btn is-xs" onClick={() => void saveDraft()}><CIcon name="retry" size={13} />Retry</button>}
       {saveStatus === "gone" && <a className="cf-btn is-xs" href="#/application?download=options">Keep a draft</a>}
-    </div>
+    </div><SaveConflictDialog /></>
   );
 }
 
@@ -341,11 +346,17 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
     { id: "code", label: "Code library", icon: "book", href: "#/code", current: active === "code", shortcut: `${MOD_KEY} ⇧ K` },
   ];
 
-  function startNew() {
+  async function startNew() {
     freshDraft.current += 1;
     openRequest.current++;
+    const request = openRequest.current, session = accountSession();
     setOpening(null);
     setListNote("");
+    if (inCase && !readSync().saved && !(await saveDraft())) {
+      if (request === openRequest.current && session === accountSession()) setListNote(KEEP_OPEN_NOTE);
+      return;
+    }
+    if (request !== openRequest.current || session !== accountSession()) return;
     remember(null);
     resetSession();
     resetRelevance();
@@ -371,7 +382,7 @@ export function Shell({ active, children, plain = false }: { active: Screen; chi
     const error = await switchApplication(id, {
       inCase, saveStatus: readSync().saved ? saveStatus : "unsaved", saveDraft,
       openCase: (next) => (superseded() ? Promise.resolve(null) : openCase(next, role)),
-      settle: () => { if (!superseded()) { resetSession(); resetRelevance(); } },
+      settle: () => { if (!superseded()) resetRelevance(); },
     });
     if (stale()) return null;
     setOpening(null);

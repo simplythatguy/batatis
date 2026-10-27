@@ -44,7 +44,8 @@ def _header_values(response, name: bytes) -> list[str]:
 def test_web_and_engine_notices_match_and_no_other_notice_remains():
     web = _web_notice()
     assert HEADER_NOTICE is BODY_NOTICE is PII_NOTICE is PRIVACY_NOTICE == web
-    assert web.endswith(f'after {RETENTION_DAYS} days or on request.')
+    assert 'account drafts after 180 inactive days' in web
+    assert 'awaiting review or changes are kept until completed or deleted' in web
     needle = PRIVACY_NOTICE.split('.', 1)[0]
     for path in ENGINE.rglob('*.py'):
         if '__pycache__' in path.parts:
@@ -81,7 +82,9 @@ def test_the_notice_names_no_provider_and_still_makes_its_disclosures():
                      'before any text is sent to an AI provider')
     assert 'In live mode' in second and 'United States' in second
     assert 'third-party AI service providers' in second and 'API data-use terms' in second
-    assert second.endswith(f'Batatis deletes its own stored case data and files after {RETENTION_DAYS} days or on request.')
+    assert f'unsigned drafts expire after {RETENTION_DAYS} inactive days' in second
+    assert 'completed applications after 730 inactive days' in second
+    assert second.endswith('Deleting an application removes its stored data, files and background work.')
 
 
 def test_each_response_has_one_notice_header_and_noindex():

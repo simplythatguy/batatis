@@ -315,3 +315,10 @@ test("a saved reviewing authority is preserved beyond the current picker choices
   const c = caseFromEngine(saved({ authority: null, jurisdiction: { id: "red-deer", name: "Red Deer", authority: "City of Red Deer" } }), "homebuilder");
   assert.equal(c.authority, "red-deer");
 });
+
+test("legacy Section A aliases used by shared gaps reopen on their canonical editor", () => {
+  const c = caseFromEngine(saved({ facts: [fact("rep", "section_a.representative", "Legacy representative"), fact("mail", "section_a.mailing_address", "Legacy mailing address")] }), "homebuilder");
+  assert.equal(factFor(c, "representative")?.value, "Legacy representative");
+  assert.equal(factFor(c, "mailingAddress")?.value, "Legacy mailing address");
+  assert.equal(c.facts.length, 2);
+});

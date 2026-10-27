@@ -28,6 +28,32 @@ export interface AnswersRequest {
   expected_version?: number | null;
 }
 
+export interface ApplicantDraft {
+  authority_unsure: boolean;
+  choices: Record<string, string>;
+  evidence_drafts: Record<string, EvidenceDraft>;
+  intake_file_ids: string[] | null;
+  packages: Record<string, "yes" | "no">;
+  question_text: Record<string, DraftText>;
+  role: "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner";
+  rule_unsure: string[];
+  seen: string[];
+  skipped: string[];
+}
+
+export interface ApplicantDraftInput {
+  authority_unsure?: boolean;
+  choices?: Record<string, string>;
+  evidence_drafts?: Record<string, EvidenceDraftInput>;
+  intake_file_ids?: string[] | null;
+  packages?: Record<string, "yes" | "no">;
+  question_text?: Record<string, DraftText>;
+  role?: "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner";
+  rule_unsure?: string[];
+  seen?: string[];
+  skipped?: string[];
+}
+
 export interface ApplicantSummary {
   applicant_type: "manufacturer" | "contractor" | "homebuilder" | null;
   name: string;
@@ -200,6 +226,7 @@ export interface Bulletin {
 }
 
 export interface Case {
+  applicant_draft: ApplicantDraft | null;
   authority: string | null;
   claim: Claim | null;
   created_at: string;
@@ -501,6 +528,29 @@ export interface DocumentRow {
   type: Attribute;
 }
 
+export interface DraftFileBinding {
+  file_id: string;
+  kind: "file";
+}
+
+export interface DraftFileBindingInput {
+  file_id: string;
+  kind?: "file";
+}
+
+export interface DraftPatch {
+  applicant_draft?: ApplicantDraftInput | null;
+  expected_version: number;
+  facts?: FactInput[];
+  jurisdiction?: JurisdictionInput | null;
+  selected_articles?: SelectedArticleInput[] | null;
+}
+
+export interface DraftText {
+  base: string;
+  value: string;
+}
+
 export interface DroppedPick {
   article: string;
   reason: string;
@@ -510,6 +560,28 @@ export interface EditedItem {
   id?: string | null;
   included?: boolean;
   text: string;
+}
+
+export interface EvidenceDraft {
+  date: string;
+  document: string;
+  editing: string | null;
+  evidenceType: string;
+  file_binding: unknown;
+  note: string;
+  responsible: string;
+  step: number | null;
+}
+
+export interface EvidenceDraftInput {
+  date?: string;
+  document?: string;
+  editing?: string | null;
+  evidenceType?: string;
+  file_binding?: unknown;
+  note?: string;
+  responsible?: string;
+  step?: number | null;
 }
 
 export interface EvidenceItem {
@@ -908,6 +980,39 @@ export interface IntentBlock {
   provision_id: string;
 }
 
+export interface Job {
+  attempts: number;
+  base_version: number;
+  can_retry: boolean;
+  case_id: string;
+  created_at: string;
+  error: JobError | null;
+  finished_at: string | null;
+  heartbeat_at: string | null;
+  id: string;
+  kind: string;
+  lease_expires_at: string | null;
+  max_attempts: number;
+  next_attempt_at: string | null;
+  result_url: string | null;
+  result_version: number | null;
+  stage: string;
+  started_at: string | null;
+  state: "queued" | "running" | "succeeded" | "failed" | "cancelled" | "superseded";
+  updated_at: string;
+}
+
+export interface JobError {
+  code: "processing_failed" | "worker_lost" | "access_changed" | "input_changed" | "invalid_input" | "handler_unavailable";
+  message: string;
+  retryable: boolean;
+  stage: string;
+}
+
+export interface JobList {
+  items: Job[];
+}
+
 export interface Jurisdiction {
   authority: string | null;
   id: string;
@@ -1283,6 +1388,14 @@ export interface RelevanceRecord {
   status: "scored";
 }
 
+export interface RemoveFileBinding {
+  kind: "remove";
+}
+
+export interface RemoveFileBindingInput {
+  kind?: "remove";
+}
+
 export interface RequirementCondition {
   fact_ids: string[];
   field: string;
@@ -1416,6 +1529,14 @@ export interface ResolvedNote {
   sources: PackSource[];
   text: string;
   topic: "entry_point" | "submission" | "permit_link" | "scope" | "documents" | "professional" | "review" | "decision" | "appeal" | "registration" | "authority";
+}
+
+export interface RetainFileBinding {
+  kind: "retain";
+}
+
+export interface RetainFileBindingInput {
+  kind?: "retain";
 }
 
 export interface ReviewConflict {
@@ -1849,4 +1970,12 @@ export interface User {
 
 export interface UserResult {
   user: User;
+}
+
+export interface WorkerHealth {
+  execution: "external_required" | "in_process" | "external";
+  last_heartbeat_at: string | null;
+  queued: number;
+  running: number;
+  worker_available: boolean;
 }

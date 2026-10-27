@@ -1,7 +1,7 @@
 /**
  * Push the browser case to the engine.
- * Facts go to POST /cases/{id}/facts. Jurisdiction goes to PUT /cases/{id}/jurisdiction
- * with the acknowledged version. Never recreate a case when a route is unavailable or the
+ * Changed facts, jurisdiction, selection and unfinished editors share one versioned draft PATCH.
+ * Never recreate a case when a route is unavailable or the
  * case is gone; keep the draft and report the unacknowledged update.
  *
  * Versions: each content/workflow write increments the stored Case version by one. Messages
@@ -11,7 +11,7 @@
  * write (plan or jurisdiction) is rejected by the engine with 409. Only an explicit reconcile
  * adopts a version the visit did not write itself.
  */
-import { engine, EngineError, isCaseConflict, isCaseGone } from "./client";
+import { engine, EngineError, isCaseConflict, isCaseGone, type DraftPatch, type SavedCase } from "./client";
 import type { EngineGap, EvidenceWrite } from "./client";
 import type { Case as EngineCase, SelectedArticleInput } from "./types.gen";
 import { factSignature, jurisdictionBody, jurisdictionForCreate } from "../rules";
@@ -19,6 +19,7 @@ import type { AuthorityId, Fact, ListedEvidence } from "../types";
 import { evidenceSlot } from "../model";
 import { answerWithdrawn, latestLocalFacts } from "../intakeFields";
 import { accountRequestSignal } from "./requestLifetime";
+import type { ApplicantDraft } from "../calm/applicantDraft";
 
 const ID_KEY = "batatis-engine-case-id";
 const POSTED_KEY = "batatis-engine-posted";
@@ -43,6 +44,17 @@ const ackedRevs = new Map<string, Map<string, number>>();
 /** Slots this visit tried to create; a removal of one never tried needs no request. */
 const attempted = new Map<string, Set<string>>();
 const latestLedger = new Map<string, Fact[]>();
+const postedFacts = new Map<string, Record<string, PostedFact>>();
+const drafts = new Map<string, ApplicantDraft | null>();
+let currentCaseId: string | null = null;
+
+export const draftKey = (value: ApplicantDraft | null | undefined) => JSON.stringify(value, (_key, item: unknown) =>
+  item && typeof item === "object" && !Array.isArray(item) ? Object.fromEntries(Object.entries(item).sort(([a], [b]) => a.localeCompare(b))) : item) ?? "null";
+export const acknowledgedDraft = (caseId: string) => drafts.get(caseId);
+export const acknowledgedDraftKey = (caseId: string) => drafts.has(caseId) ? draftKey(drafts.get(caseId)) : undefined;
+export const acknowledgedAuthority = (caseId: string) => jurisdictions.get(caseId);
+export const acknowledgedSelectionKey = (caseId: string) => selections.get(caseId);
+export const acknowledgedEvidenceFacts = (caseId: string) => latestLedger.get(caseId) ?? [];
 
 /** The version to send as `expected_version`, or null before the case is acknowledged. */
 export function acknowledgedVersion(caseId: string): number | null {
@@ -84,7 +96,7 @@ function assertGeneration(value: number, signal?: AbortSignal) {
 }
 
 export function engineCaseId(): string | null {
-  return sessionStorage.getItem(ID_KEY);
+  return currentCaseId;
 }
 
 export function clearEngineSession() {
@@ -99,6 +111,9 @@ export function clearEngineSession() {
   ackedRevs.clear();
   attempted.clear();
   latestLedger.clear();
+  postedFacts.clear();
+  drafts.clear();
+  currentCaseId = null;
   sessionStorage.removeItem(ID_KEY);
   sessionStorage.removeItem(POSTED_KEY);
   sessionStorage.removeItem(LEGACY_EVIDENCE_KEY);
@@ -108,19 +123,11 @@ export function clearEngineSession() {
 type PostedFact = { id: string; signature: string };
 
 function postedFor(caseId: string): Record<string, PostedFact> {
-  try {
-    const map = JSON.parse(sessionStorage.getItem(POSTED_KEY) || "{}");
-    const fields = map?.[caseId];
-    return fields && typeof fields === "object" && !Array.isArray(fields) ? fields : {};
-  } catch {
-    return {};
-  }
+  return postedFacts.get(caseId) ?? {};
 }
 
 function remember(caseId: string, fields: Record<string, PostedFact>) {
-  let map: Record<string, unknown> = {};
-  try { map = JSON.parse(sessionStorage.getItem(POSTED_KEY) || "{}"); } catch { /* empty */ }
-  sessionStorage.setItem(POSTED_KEY, JSON.stringify({ ...map, [caseId]: fields }));
+  postedFacts.set(caseId, fields);
 }
 
 /**
@@ -139,6 +146,7 @@ export function ensureEngineCase(title: string | null, authority: AuthorityId, p
     .then((created) => {
       assertGeneration(token, signal);
       sessionStorage.setItem(ID_KEY, created.id);
+      currentCaseId = created.id;
       acknowledgeWrite(created.id, created.version);
       jurisdictions.set(created.id, created.jurisdiction?.id ?? null);
       return created.id;
@@ -225,6 +233,7 @@ export async function reconcileEngineCase(caseId: string): Promise<EngineCase> {
  */
 export function adoptEngineCase(saved: EngineCase, selection?: SelectedArticleInput[]) {
   sessionStorage.setItem(ID_KEY, saved.id);
+  currentCaseId = saved.id;
   known.set(saved.id, saved.version);
   jurisdictions.set(saved.id, saved.authority ?? saved.jurisdiction?.id ?? null);
   // The cards the opened case shows count as saved: a legacy case (no saved selection) is not rewritten
@@ -239,6 +248,103 @@ export function adoptEngineCase(saved: EngineCase, selection?: SelectedArticleIn
   }
   remember(saved.id, posted);
   noteLedger(saved.id, saved);
+  if ("applicant_draft" in saved) drafts.set(saved.id, saved.applicant_draft ?? null);
+}
+
+/** Local revisions relative to the last acknowledgement, including removals. Used to merge our job's output. */
+export function pendingFactChanges(caseId: string, values: Fact[]): Map<string, Fact | null> {
+  const posted = postedFor(caseId);
+  const latest = new Map(latestLocalFacts(values).map(fact => [fact.field, fact]));
+  const changes = new Map<string, Fact | null>();
+  for (const fact of latest.values()) {
+    if (!fact.field.startsWith("evidence.") && posted[fact.field]?.signature !== factSignature(fact)) changes.set(fact.field, fact);
+  }
+  for (const field of Object.keys(posted)) if (!field.startsWith("evidence.") && !latest.has(field)) changes.set(field, null);
+  return changes;
+}
+
+/** Only our persisted job's exact output (or our already acknowledged newer version) may advance this baseline. */
+export function acknowledgeJobCase(saved: EngineCase, outputVersion: number | null | undefined): boolean {
+  const knownVersion = known.get(saved.id);
+  if (knownVersion === undefined || saved.version < knownVersion || saved.version !== knownVersion && saved.version !== outputVersion) return false;
+  const ownOutput = saved.version === outputVersion;
+  if (needsReconcile(saved.id) && !ownOutput) return false;
+  adoptEngineCase(saved);
+  if (ownOutput) conflicts.delete(saved.id);
+  return true;
+}
+
+/** One atomic acknowledgement for only the changed fields. CAS conflicts retain the local draft. */
+export type DraftSnapshot = {
+  facts: Fact[]; authority: AuthorityId; selected: SelectedArticleInput[]; draft: ApplicantDraft;
+};
+
+export function pushDraft(caseId: string, snapshot: DraftSnapshot, parent?: AbortSignal): Promise<SavedCase | null> {
+  return writeDraft(caseId, snapshot, parent);
+}
+
+/** Explicitly reviewed merge only. Do not adopt the read version or discard local bytes before its CAS acknowledgement. */
+export function pushReconciledDraft(against: EngineCase, snapshot: DraftSnapshot): Promise<SavedCase | null> {
+  return writeDraft(against.id, snapshot, undefined, against);
+}
+
+async function writeDraft(caseId: string, snapshot: DraftSnapshot, parent?: AbortSignal, against?: EngineCase): Promise<SavedCase | null> {
+  const token = generation, signal = accountRequestSignal(parent);
+  assertGeneration(token, signal);
+  const expected = against?.version ?? known.get(caseId);
+  if ((!against && conflicts.has(caseId)) || expected === undefined) throw new EngineError(409, CONFLICT_TEXT);
+  const posted: Record<string, PostedFact> = against ? Object.fromEntries(latestLocalFacts(against.facts)
+    .filter(fact => !answerWithdrawn(fact) && !fact.field.startsWith("evidence."))
+    .map(fact => [fact.field, { id: fact.id, signature: factSignature(fact) }])) : postedFor(caseId);
+  const latest = new Map(latestLocalFacts(snapshot.facts).map(fact => [fact.field, fact]));
+  const facts = [...latest.values()].filter(fact => !fact.field.startsWith("evidence.") && posted[fact.field]?.signature !== factSignature(fact));
+  for (const [field, old] of Object.entries(posted)) {
+    if (latest.has(field) || field.startsWith("evidence.")) continue;
+    facts.push({ id: `${old.id}-withdrawn`, field, value: "", kind: "pointed", status: "unconfirmed",
+      source: { type: "user_click", ref: "Answer withdrawn by applicant", quote: "" } });
+  }
+  const body: DraftPatch = { expected_version: expected };
+  if (facts.length) body.facts = facts;
+  const jurisdiction = snapshot.authority || null;
+  const previousAuthority = against ? against.authority ?? against.jurisdiction?.id ?? null : jurisdictions.get(caseId);
+  if (previousAuthority !== jurisdiction) body.jurisdiction = jurisdiction ? jurisdictionBody(jurisdiction) : null;
+  const selected = selectionKey(snapshot.selected);
+  const previousSelection = against ? selectionKey(against.selected_articles ?? []) : selections.get(caseId);
+  if (previousSelection !== selected && !(previousSelection === undefined && !snapshot.selected.length)) body.selected_articles = snapshot.selected;
+  const draft = draftKey(snapshot.draft);
+  // A reviewed decision still needs CAS acknowledgement when the user chooses every saved value.
+  if (against || acknowledgedDraftKey(caseId) !== draft) body.applicant_draft = snapshot.draft;
+  if (Object.keys(body).length === 1) return null;
+  try {
+    const saved = await engine.patchDraft(caseId, body, signal);
+    assertGeneration(token, signal);
+    if (saved.id !== caseId || !Number.isInteger(saved.version) || saved.version < expected) throw new EngineError(0, "The save acknowledgement could not be verified. Your work is still here.");
+    const returnedFacts = new Map(latestLocalFacts(saved.facts).map(fact => [fact.field, fact]));
+    const returnedAuthority = saved.authority ?? saved.jurisdiction?.id ?? null;
+    if (facts.some(fact => { const returned = returnedFacts.get(fact.field); return !returned || factSignature(returned) !== factSignature(fact); })
+      || body.applicant_draft && draftKey(saved.applicant_draft) !== draft
+      || body.selected_articles && selectionKey(saved.selected_articles ?? []) !== selected
+      || "jurisdiction" in body && returnedAuthority !== jurisdiction) {
+      throw new EngineError(0, "The server did not acknowledge all of your latest changes. Your work is still here.");
+    }
+    known.set(caseId, saved.version);
+    const acknowledged: Record<string, PostedFact> = {};
+    for (const fact of latestLocalFacts(saved.facts)) {
+      if (fact.field.startsWith("evidence.") || answerWithdrawn(fact)) continue;
+      acknowledged[fact.field] = { id: fact.id, signature: factSignature(fact) };
+    }
+    remember(caseId, acknowledged);
+    jurisdictions.set(caseId, saved.authority ?? saved.jurisdiction?.id ?? null);
+    if (body.selected_articles) selections.set(caseId, selected);
+    if (body.applicant_draft) drafts.set(caseId, snapshot.draft);
+    noteLedger(caseId, saved);
+    if (against) { adoptEngineCase(saved); conflicts.delete(caseId); }
+    return saved;
+  } catch (error) {
+    assertGeneration(token, signal);
+    if (isCaseConflict(error)) noteConflict(caseId);
+    throw error;
+  }
 }
 
 /**

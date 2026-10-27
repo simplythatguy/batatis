@@ -416,12 +416,12 @@ def test_waiting_store_patch_rechecks_current_existence_owner_and_retention(scen
                 if change == 'owner':
                     data['owner_id'] = scene.users['other'].id
                 else:
-                    data['created_at'] = (datetime.now(timezone.utc) - timedelta(days=8)).isoformat()
+                    data['updated_at'] = (datetime.now(timezone.utc) - timedelta(days=181)).isoformat()
                 if db.postgres:
                     from psycopg.types.json import Jsonb
-                    db.execute('UPDATE cases SET data=? WHERE id=?', (Jsonb(data), case.id))
+                    db.execute('UPDATE cases SET data=?, updated_at=? WHERE id=?', (Jsonb(data), data['updated_at'], case.id))
                 else:
-                    db.execute('UPDATE cases SET json=? WHERE id=?', (json.dumps(data), case.id))
+                    db.execute('UPDATE cases SET json=?, updated_at=? WHERE id=?', (json.dumps(data), data['updated_at'], case.id))
         if change == 'owner':
             with pytest.raises(HTTPException) as error:
                 future.result(timeout=10)
@@ -478,9 +478,9 @@ def test_existing_store_delete_rechecks_latest_owner_under_lock(scene):
             data['owner_id'] = scene.users['other'].id
             if db.postgres:
                 from psycopg.types.json import Jsonb
-                db.execute('UPDATE cases SET data=? WHERE id=?', (Jsonb(data), case.id))
+                db.execute('UPDATE cases SET data=?, updated_at=? WHERE id=?', (Jsonb(data), data['updated_at'], case.id))
             else:
-                db.execute('UPDATE cases SET json=? WHERE id=?', (json.dumps(data), case.id))
+                db.execute('UPDATE cases SET json=?, updated_at=? WHERE id=?', (json.dumps(data), data['updated_at'], case.id))
         with pytest.raises(HTTPException) as error:
             future.result(timeout=10)
         assert error.value.status_code == 404
@@ -495,8 +495,8 @@ def test_retention_deletes_preferences_and_files_between_sweeps(scene, access):
     store, client = scene.store, scene.clients['owner']
     file = store.put_file(case.id, 'SYNTHETIC.pdf', b'%PDF-1.4 SYNTHETIC')
     assert patch(client, case.id, {'archived': True}).status_code == 200  # consume the HTTP sweep window
-    case.created_at = (datetime.now(timezone.utc) - timedelta(days=8)).isoformat()
-    store.put(case, expected_version=case.version)
+    from engine.tests.test_retention import _set_last_activity
+    _set_last_activity(store, case.id, (datetime.now(timezone.utc) - timedelta(days=181)).isoformat())
     if access == 'purge':
         assert store.purge_expired() >= 1
     elif access == 'preferences':

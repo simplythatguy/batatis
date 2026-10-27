@@ -4,7 +4,7 @@
  */
 import { AUTHORITIES, EXIT_COUNT } from "./config";
 import type { EngineGap } from "./api/client";
-import type { AuthorityId, Candidate } from "./types";
+import type { AuthorityId, Candidate, Fact } from "./types";
 
 export const EXAMPLE_BANNER = "EXAMPLE CASE. Not a real application.";
 export const EXAMPLE_EXPORT_BLOCK = "Example cases are not exported. An example is not a real application.";
@@ -25,11 +25,12 @@ export function jurisdictionForCreate(authority: AuthorityId) {
   return authority ? jurisdictionBody(authority) : null;
 }
 
-export function factSignature(fact: { id: string; field: string; value: unknown; status: string; kind: string }): string {
-  const payload = JSON.stringify([fact.field, fact.value, fact.status, fact.kind]);
-  let hash = 0;
-  for (let i = 0; i < payload.length; i++) hash = (Math.imul(31, hash) + payload.charCodeAt(i)) | 0;
-  return `${fact.id}:${(hash >>> 0).toString(36)}`;
+export function factSignature(fact: { id: string; field: string; value: unknown; status: string; kind: string }
+  & Partial<Pick<Fact, "source" | "confidence" | "formula" | "inputs">>): string {
+  const source = fact.source;
+  return JSON.stringify([fact.id, fact.field, fact.value, fact.status, fact.kind,
+    source ? [source.type, source.ref, source.quote ?? null, source.page ?? null, source.bbox ?? null] : null,
+    fact.confidence ?? null, fact.formula ?? null, fact.inputs ?? []]);
 }
 
 /** The user's own case is replaced only after they confirm. */

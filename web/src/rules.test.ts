@@ -71,6 +71,11 @@ test("jurisdiction stays empty until the applicant picks, and an edit re-posts",
   assert.equal(first, factSignature({ id: "desc-description", field: "project.description", value: "hemp", status: "confirmed", kind: "pointed" }));
 });
 
+test("different applicant answers never share an acknowledgement signature", () => {
+  const value = { id: "answer", field: "owner", value: "Aa", status: "confirmed", kind: "pointed" };
+  assert.notEqual(factSignature(value), factSignature({ ...value, value: "BB" }), "the old 32-bit hash collision lost this changed answer");
+});
+
 test("exit count is not cited as 9.9.4.4", () => {
   const warning = exitCountWarning("9.9.4.4.(1)", "Single exit from the second storey");
   assert.ok(warning);

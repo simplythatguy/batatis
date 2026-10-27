@@ -18,6 +18,7 @@ from pydantic.json_schema import GenerateJsonSchema, models_json_schema
 from .api import ExportPreview, ExportPreviewTooLarge, NewCase, SectionCRequest
 from .code_library import CodeTOC, ProvisionContext
 from .models import Case, Fact, SectionCRow
+from .models_jobs import Job, JobList, WorkerHealth
 from .account_models import ApplicationPreferences, ApplicationPreferencesPatch, UserResult, MessagesResult
 from .routes_auth import SignupRequest, LoginRequest, OnboardingRequest
 from .routes_review import (NotificationsResult, ApplicationsResult, QueueResult, ClaimResult, ClaimRequest,
@@ -30,7 +31,7 @@ from .identify.http_models import (BenchmarkConfirmRequest, IdentifyConfirmReque
 from .models_review import InformationRequestEdit, PackageReviewIndex, ReviewSession, SentInformationRequests
 from .models_jurisdictions import JurisdictionDetail, JurisdictionsResult
 from .routes_jurisdictions import CaseJurisdictionPack
-from .routes_case import SelectedArticlesRequest, TitleRequest
+from .routes_case import DraftPatch, SelectedArticlesRequest, TitleRequest
 from .rules.models import CaseRules, RuleSet
 from .models_checklists import (CaseChecklists, ChecklistAnswerRequest, ChecklistAnswerResult,
                                 JurisdictionChecklists)
@@ -42,14 +43,14 @@ RESPONSES = (Case, SectionCRow, CodeTOC, ProvisionContext, UserResult, MessagesR
              JurisdictionsResult, JurisdictionDetail, CaseJurisdictionPack, IntakeResult, CaseRules, RuleSet,
              JurisdictionChecklists, CaseChecklists, ChecklistAnswerResult,
              ApplicationPreferences, ExportPreview,
-             ExportPreviewTooLarge)  # responses carry every field
+             ExportPreviewTooLarge, Job, JobList, WorkerHealth)  # responses carry every field
 REQUESTS = (Fact, NewCase, SectionCRequest, SignupRequest, LoginRequest, OnboardingRequest,
             ClaimRequest, DecisionRequest, MessageRequest, MessageReadRequest, ProfessionalRequirementRequest,
             SubmitRequest, AssistRequest, InformationRequestEdit,
             IntakeRequest, AnswersRequest, ScopeRequest, PlanRequest,
             IdentifyRequest, IdentifyDecisionRequest, IdentifyConfirmRequest, BenchmarkConfirmRequest,
             RequirementDecisionRequest,
-            ChecklistAnswerRequest, TitleRequest, SelectedArticlesRequest, ApplicationPreferencesPatch)  # defaulted fields optional
+            ChecklistAnswerRequest, DraftPatch, TitleRequest, SelectedArticlesRequest, ApplicationPreferencesPatch)  # defaulted fields optional
 
 
 class _ResponsesCarryDefaults(GenerateJsonSchema):
