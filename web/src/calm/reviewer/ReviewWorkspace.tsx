@@ -14,6 +14,7 @@ import { AcIcon, Avatar, PageHead } from "../auth/bits";
 import { ExpiryNotice } from "../ExpiryNotice";
 import { getNotificationsState, subscribeNotifications } from "../notifications/notifications";
 import { MoreMenu } from "../shell/MoreMenu";
+import { usePresence } from "../usePresence";
 import { ConfirmDialog, Modal } from "../ui";
 import { CloseOutPanel } from "./CloseOutPanel";
 import { refusalDecision, sentence } from "./packageView";
@@ -120,7 +121,7 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
     } finally { if (current()) setRefreshing(false); }
   }, [caseId, live]);
 
-  const loadIndex = useCallback(async (keepShown = false) => {
+  const loadIndex = useCallback(async (keepShown = false, adopt?: number) => {
     const session = accountSession(), sequence = ++indexReads.current;
     try {
       const next = await packageReview.index(target);
@@ -129,7 +130,7 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
       setIndex(next); setIndexState("ready");
       setBlocking(target.id, next.workspace?.current ? next.workspace.tally.required : null);
       setShown(current => {
-        if (!keepShown || !current || !next.latest) return next.latest;
+        if (!keepShown || !current || !next.latest || next.latest.version === adopt) return next.latest;
         // The same version, refreshed (sent, saved elsewhere), or a newer one while the latest was on screen.
         if (current.version === next.latest.version) return next.latest;
         if (current.version === previous?.latest?.version && next.latest.version > current.version) return next.latest;
@@ -229,7 +230,12 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
     try {
       const next = await packageReview.run(target, files);
       if (!live(session)) return;
-      setShown(next); await loadIndex(true); await reload();
+      // The new review goes on screen together with its workspace: shown first, it would draw a moment
+      // of "Nothing to ask." before the counts arrive.
+      const fresh = await loadIndex(true, next.version);
+      if (!live(session)) return;
+      if (fresh?.latest?.version !== next.version) setShown(next);
+      await reload();
     } catch (e) {
       if (!live(session)) return;
       if (e instanceof AccountsError && e.status === 503 && /code database/i.test(e.detail)) setIndexState("unavailable");
@@ -358,12 +364,12 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
   ];
 
   /** The one line under the header: what needs the officer's attention, with its action. */
-  function statusLine(): { tone: string; text: ReactNode; action?: ReactNode; role?: "alert" | "status" } | null {
+  function statusLine(): { tone: string; text: ReactNode; action?: ReactNode; role?: "alert" | "status"; float?: boolean } | null {
     const retry = (label: string, onClick: () => void, disabled = false) =>
       <button type="button" className="cf-btn is-xs" disabled={disabled} onClick={onClick}>{label}</button>;
     if (unclaimed) {
       return busy === "claim" || !actionError
-        ? { tone: "pending", text: "Opening the review…", role: "status" }
+        ? { tone: "pending", text: "Opening the review…", role: "status", float: true }
         : { tone: "blocking", text: `Not picked up · ${actionError}`, role: "alert", action: retry("Pick up", () => void doClaim()) };
     }
     if (draftTrouble) {
@@ -377,7 +383,7 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
         action: retry("Take over", () => setTakeover(true), Boolean(busy)) };
     }
     if (resumable) return { tone: "warning", text: "Resubmitted · reserved for you", action: retry("Resume review", () => void doClaim(), Boolean(busy)) };
-    if (running) return { tone: "pending", text: "Reading the application…", role: "status" };
+    if (running) return { tone: "pending", text: "Reading the application…", role: "status", float: true };
     if (runError) return { tone: "blocking", text: runError, role: "alert", action: retry("Try again", () => void run(), !idle) };
     if (indexState === "failed") return { tone: "blocking", text: "The review didn’t load · decisions wait", role: "alert", action: retry("Try again", () => { setIndexState("loading"); void loadIndex(true); }) };
     if (indexState === "unavailable") return { tone: "pending", text: "No automatic review on this server · the completeness checklist decides" };
@@ -386,6 +392,19 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
     return null;
   }
   const line = c ? statusLine() : null;
+  // A moment of work floats over the page instead of pushing it down and back up.
+  const working = line?.float ? String(line.text) : "";
+  const lastWorking = useRef(working);
+  if (working) lastWorking.current = working;
+  const pill = useRef<HTMLDivElement>(null);
+  const workingPill = usePresence(Boolean(working), pill);
+
+  // A closing dialog fades out with the words it opened with, not a blank or a different title.
+  const lastPreview = useRef(preview);
+  if (preview) lastPreview.current = preview;
+  const dialog = preview ?? lastPreview.current;
+  const lastOther = useRef(otherClaim?.reviewer_name ?? "");
+  if (otherClaim) lastOther.current = otherClaim.reviewer_name;
 
   const at: Stage = stage ?? "review";
   const go = (next: Stage) => setStage(next);
@@ -418,7 +437,14 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
         <p className="ac-empty" role="status">Loading the application…</p>
       ) : (
         <div className="rw-body">
-          {line && (
+          <div className="rw-float" role="status" aria-live="polite">
+            {workingPill.mounted && (
+              <div ref={pill} className="rw-pill" data-leaving={workingPill.leaving || undefined}>
+                <span className="cf-dot" aria-hidden="true" />{working || lastWorking.current}
+              </div>
+            )}
+          </div>
+          {line && !line.float && (
             <div className={`rw-line is-${line.tone}`} role={line.role}>
               <span className="cf-dot" aria-hidden="true" />
               <span className="rw-line-t">{line.text}</span>
@@ -468,9 +494,9 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
 
       <Modal open={Boolean(preview)} onClose={() => { if (!busy) setPreview(null); }} labelledBy="rw-decision-title" className="ac-return rw-dialog">
         <div className="cf-modal-body">
-          <h2 id="rw-decision-title" className="cf-modal-title">{preview?.kind === "return" ? `Return to ${applicant}?` : "Accept as administratively complete?"}</h2>
-          {preview?.kind === "return" && <pre className="rw-letter is-dialog" aria-label="Request to send">{preview.text}</pre>}
-          <p className="cf-muted">{preview?.kind === "return"
+          <h2 id="rw-decision-title" className="cf-modal-title">{dialog?.kind === "return" ? `Return to ${applicant}?` : "Accept as administratively complete?"}</h2>
+          {dialog?.kind === "return" && <pre className="rw-letter is-dialog" aria-label="Request to send">{dialog.text}</pre>}
+          <p className="cf-muted">{dialog?.kind === "return"
             ? "They fix the application and send it again. They can’t reply."
             : `${applicant} is told the file is complete. Not a variance, not a design approval.`}</p>
           {decisionError && <p className="rw-hint is-error" role="alert"><span className="cf-dot is-blocking" aria-hidden="true" />{decisionError}</p>}
@@ -479,7 +505,7 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
           <button type="button" className="cf-btn" disabled={Boolean(busy)} onClick={() => setPreview(null)}>{decisionError ? "Close" : "Not yet"}</button>
           {!decisionError && (
             <button type="button" className="cf-btn is-primary" disabled={Boolean(busy)} onClick={() => void decide()}>
-              {busy ? "Saving…" : preview?.kind === "return" ? "Return" : "Accept"}
+              {busy ? "Saving…" : dialog?.kind === "return" ? "Return" : "Accept"}
             </button>
           )}
         </div>
@@ -502,7 +528,7 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
 
       <RefuseDialog open={refusing && Boolean(c)} applicant={applicant} onClose={() => setRefusing(false)} onSend={sendRefusal} onRefresh={() => refresh(true)} />
       <ConfirmDialog open={takeover} title="Take over this review?"
-        body={<p>{otherClaim?.reviewer_name} started this review. The history keeps both names.</p>}
+        body={<p>{lastOther.current} started this review. The history keeps both names.</p>}
         cancel="Keep theirs" confirm="Take over" onClose={() => setTakeover(false)} onConfirm={() => void doClaim(true)} />
     </div>
   );
@@ -563,13 +589,15 @@ function SessionWorkspace({ stage, onStage, c, snapshot, session, workspace, tar
   const asked = workspace?.tally.asked ?? 0;
   const required = workspace?.tally.required ?? 0;
   const gate = workspaceDecision({ workspace, editable, pending: draft.pending, busy });
+  // What the saved review says, steady through a save or a run; the gate only holds the buttons meanwhile.
+  const ready = Boolean(workspace?.gate.can_accept);
   const decided = status === "returned" || status === "accepted" || status === "refused";
   const day = (iso: string | null | undefined) => (iso ? new Date(iso).toLocaleDateString("en-CA", { month: "short", day: "numeric" }) : "");
   const headline = status === "returned" ? `Returned. Waiting for ${applicant}.`
     : status === "accepted" ? "Administratively complete."
     : status === "refused" ? "Refused."
     : historical ? `Version ${session.version}, read-only.`
-    : gate.canAccept ? "Complete. Ready to accept."
+    : ready ? "Complete. Ready to accept."
     : asked ? `Ask for ${plural(asked, "thing")}.`
     : required ? `${plural(required, "required item")} to look at.`
     : "Nothing to ask.";
@@ -594,11 +622,11 @@ function SessionWorkspace({ stage, onStage, c, snapshot, session, workspace, tar
     return { id: s.id, title: s.title, icon: s.icon, summary: n ? `${n} to ask` : "Complete", tone };
   });
 
-  // A save in progress only holds the button for a moment; it needs no words.
-  const why = !gate.canReturn && !draft.pending ? gate.returnReason : "";
-  const actions = !showDecision || decided || historical ? null : gate.canAccept ? (
+  // A save or a run only holds the button for a moment; it needs no words.
+  const why = !gate.canReturn && !draft.pending && !busy ? gate.returnReason : "";
+  const actions = !showDecision || decided || historical ? null : ready ? (
     <>
-      <button type="button" className="cf-btn is-primary is-grow" disabled={busy} onClick={onAccept}>Accept</button>
+      <button type="button" className="cf-btn is-primary is-grow" disabled={busy || !gate.canAccept} onClick={onAccept}>Accept</button>
       {asked > 0 && <button type="button" className="cf-btn" disabled={busy || !gate.canReturn} onClick={onReturn}>Return</button>}
     </>
   ) : (
@@ -611,38 +639,80 @@ function SessionWorkspace({ stage, onStage, c, snapshot, session, workspace, tar
   );
   const problem = save.kind !== "saved" && draft.problem;
 
-  // Opening a section from the card scrolls the application to it.
-  const [section, setSection] = useState<string | null>(null);
+  // Opening a section from the card scrolls the application to it; the ⋯ menu opens it where it was.
+  const section = useRef<string | null>(null);
+  const views = useRef<HTMLDivElement>(null);
+  const opener = useRef<HTMLElement | null>(null);
+  // Every view stays mounted and they cross-fade in place: the review keeps its scroll, its open rows
+  // and its unsaved text while the application or the messages are on top.
+  const [seen, setSeen] = useState<Set<Stage>>(() => new Set([stage]));
+  if (!seen.has(stage)) setSeen(new Set([...seen, stage]));
+  const shownStage = useRef(stage);
+  useLayoutEffect(() => {
+    const from = shownStage.current;
+    shownStage.current = stage;
+    const root = views.current;
+    if (!root || from === stage) return;
+    const layer = root.querySelector<HTMLElement>(`[data-view="${stage}"]`);
+    const sectionId = section.current;
+    section.current = null;
+    if (stage === "application" && sectionId) {
+      const target = document.getElementById(`sheet-${sectionId}`);
+      if (layer && target) layer.scrollTop += target.getBoundingClientRect().top - layer.getBoundingClientRect().top - 16;
+    }
+    if (stage === "review") {
+      const back = opener.current;
+      opener.current = null;
+      if (back?.isConnected && !back.closest("[inert]")) back.focus({ preventScroll: true });
+      else layer?.querySelector<HTMLElement>("h1")?.focus({ preventScroll: true });
+    } else {
+      const at = document.activeElement;
+      // From the ⋯ menu, come back to the ⋯ button: the menu item itself is gone by then.
+      if (from === "review" && at instanceof HTMLElement && at !== document.body) opener.current = at.closest(".cf-more")?.querySelector<HTMLElement>("button") ?? at;
+      // The header's Messages button stays where the officer is; otherwise the view's back link.
+      if (!document.activeElement?.closest(".rw-head-msg")) layer?.querySelector<HTMLElement>(".ow-back")?.focus({ preventScroll: true });
+    }
+  }, [stage]);
+  // Escape goes back to the review, unless a dialog, menu or list is open and took it.
   useEffect(() => {
-    if (stage === "application" && section) document.getElementById(`sheet-${section}`)?.scrollIntoView({ block: "start" });
-  }, [stage, section]);
+    if (stage === "review") return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.defaultPrevented || document.querySelector("dialog[open]")) return;
+      const t = e.target instanceof Node ? e.target : null;
+      const page = views.current?.closest(".rw-page");
+      if (t && t !== document.body && !page?.contains(t)) return;
+      e.preventDefault();
+      onStage("review");
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [stage, onStage]);
+  const layer = (name: Stage) => ({ "data-view": name, className: `rw-stage rw-view${stage === name ? " is-on" : ""}`, inert: stage !== name || undefined });
+  const back = <button type="button" className="cf-link-btn ow-back" onClick={() => onStage("review")}><CIcon name="back" size={13} />Review</button>;
 
-  if (stage === "application") {
-    return (
-      <div className="rw-stage">
-        <div className="rw-read">
-          <button type="button" className="cf-link-btn ow-back" onClick={() => onStage("review")}><CIcon name="back" size={13} />Review</button>
-          <ExpiryNotice expiresAt={c.expires_at} officer />
-          <ReadSheet c={c} sheet={sheet} rows={rows} anchors={anchors} session={session} rulebook={rulebook} states={states}
-            historical={historical} professional={historical ? null : professional} onOpen={() => onStage("review")}
-            questions={historical ? null : <OpenQuestions questions={sheet.questions} loading={snapshot.information === null && !snapshot.questionError} error={snapshot.questionError} />} />
-          {!historical && <SubmissionHistory c={c} />}
-        </div>
-      </div>
-    );
-  }
-  if (stage === "messages") {
-    return (
-      <div className="rw-stage">
-        <div className="rw-read ow-messages">
-          <button type="button" className="cf-link-btn ow-back" onClick={() => onStage("review")}><CIcon name="back" size={13} />Review</button>
-          <Messages caseId={c.id} me={me} messages={messages} onChange={onMessages} canWrite={showDecision} hideTitle draft={messageDraft} onDraft={onMessageDraft} reading />
-        </div>
-      </div>
-    );
-  }
   return (
-    <div className="rw-stage">
+    <div className="rw-views" ref={views}>
+      {seen.has("application") && (
+        <div {...layer("application")}>
+          <div className="rw-read">
+            {back}
+            <ExpiryNotice expiresAt={c.expires_at} officer />
+            <ReadSheet c={c} sheet={sheet} rows={rows} anchors={anchors} session={session} rulebook={rulebook} states={states}
+              historical={historical} professional={historical ? null : professional} onOpen={() => onStage("review")}
+              questions={historical ? null : <OpenQuestions questions={sheet.questions} loading={snapshot.information === null && !snapshot.questionError} error={snapshot.questionError} />} />
+            {!historical && <SubmissionHistory c={c} />}
+          </div>
+        </div>
+      )}
+      {seen.has("messages") && (
+        <div {...layer("messages")}>
+          <div className="rw-read ow-messages">
+            {back}
+            <Messages caseId={c.id} me={me} messages={messages} onChange={onMessages} canWrite={showDecision} hideTitle draft={messageDraft} onDraft={onMessageDraft} reading={stage === "messages"} />
+          </div>
+        </div>
+      )}
+      <div {...layer("review")}>
       <OfficerReview headline={headline} lede={lede} rows={decided || historical ? [] : active} rulebook={decided || historical ? [] : rulebook}
         dismissed={decided || historical ? [] : dismissed} own={decided || historical ? [] : own} caseId={c.id} files={session.files} editable={editable}
         targets={targets} itemLimit={limits.item_text} sections={sections} actions={actions}
@@ -660,7 +730,8 @@ function SessionWorkspace({ stage, onStage, c, snapshot, session, workspace, tar
         onOwnText={(key, text) => dispatch({ type: "item", key, patch: { text } })}
         onOwnTarget={(key, t) => dispatch({ type: "item", key, patch: { target: t } })}
         onOwnRemove={(key) => dispatch({ type: "remove", key })}
-        onSection={(id) => { setSection(id); onStage("application"); }} />
+        onSection={(id) => { section.current = id; onStage("application"); }} />
+      </div>
     </div>
   );
 }
