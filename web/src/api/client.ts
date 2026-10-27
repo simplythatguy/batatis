@@ -28,6 +28,7 @@ import type {
   IdentifyResult,
   IntakeRequest,
   IntakeResult,
+  FileReport,
   Jurisdiction,
   NewCase,
   SectionCRow,
@@ -266,10 +267,12 @@ export function createEngine(base: string) {
      */
     exportPreview: (caseId: string, signal?: AbortSignal) =>
       call<ExportPreview | ExportPreviewTooLarge>("GET", `/cases/${enc(caseId)}/export/preview`, undefined, signal, EXPORT_WAIT_MS),
-    /** Multipart PDF upload (FormData field `file`), returning its stored id and metadata. */
+    /** Multipart PDF, JPG, PNG, WebP or UTF-8 text note (4 MiB per file). Upload is not reading. */
     upload: (caseId: string, file: File, signal?: AbortSignal) => uploadPdf(base, caseId, file, signal),
     files: (caseId: string, signal?: AbortSignal) =>
       call<ItemEnvelope<StoredFile>>("GET", `/cases/${enc(caseId)}/files`, undefined, signal).then(unwrapItems),
+    removeIntakeFile: (caseId: string, fileId: string, expectedVersion?: number, signal?: AbortSignal) =>
+      call<IntakeResult & { removed_facts: number }>("DELETE", `/cases/${enc(caseId)}/intake/files/${enc(fileId)}`, withVersion({}, expectedVersion), signal),
     fileUrl: (caseId: string, fileId: string) => `${base}/cases/${enc(caseId)}/files/${enc(fileId)}`,
     downloadFile: (caseId: string, fileId: string, signal?: AbortSignal) => downloadFile(base, caseId, fileId, signal),
     /**
@@ -477,6 +480,7 @@ export interface StoredFile {
   name: string;
   size: number;
   content_type: string;
+  read_report?: FileReport | null;
 }
 
 async function downloadFile(base: string, caseId: string, fileId: string, signal?: AbortSignal): Promise<Blob> {

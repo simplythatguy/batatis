@@ -175,8 +175,8 @@ const SHAPE_HINT: Partial<Record<string, Partial<Record<string, string>>>> = {
   },
 };
 
-function shapeHint(type: string, field: string): string | undefined {
-  return SHAPE_HINT[type]?.[field];
+function shapeHint(type: string | null, field: string): string | undefined {
+  return type ? SHAPE_HINT[type]?.[field] : undefined;
 }
 
 function DetailInput({ def }: { def: DetailField }) {

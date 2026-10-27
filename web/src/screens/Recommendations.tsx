@@ -9,14 +9,17 @@ import {
   type SectionDPlan,
   type StoredFile,
 } from "../api/client";
-import { ServiceUnavailable, FieldSteps } from "../components";
+import { ServiceUnavailable } from "../components";
 import { practiceFlagLine, practicePrompt } from "../humanReview";
 import { evidenceDocuments, factFor, keptDocuments, orphanedEvidence, shownProcessAnswer } from "../model";
-import { AUTHORITY_DECISION_FIELDS, evidenceLinked, evidenceRecorded, isScopeField, practiceFromReview, SCOPE_HELP, sectionDIssueStatus } from "../professional";
+import { evidenceLinked, evidenceRecorded, isScopeField, practiceFromReview, professionalAnswerer, professionalOfficeQuestions, professionalQuestions, professionalWorkBasis, SCOPE_HELP, sectionDIssueStatus } from "../professional";
 import { useCase } from "../store";
 import { evidenceBinding, evidenceTask } from "../evidence";
 import { EvidenceFileLink } from "../EvidenceFileLink";
 import type { Case, EvidenceDraft } from "../types";
+import { UnitInput } from "../calm/UnitInput";
+import { parseMeasurement } from "../calm/units";
+import { spokenValue } from "../intakeView";
 
 type Load = {
   recovery?: SectionDRecoveryError;
@@ -48,46 +51,6 @@ const OCCUPANCY = [
   ["mixed", "Mixed use"],
   ["other", "Other"],
 ] as const;
-
-type ProfKind = "bool" | "authority" | "number" | "occupancy" | "role" | "text";
-
-const PROFESSIONAL_FIELDS: { field: string; label: string; kind: ProfKind }[] = [
-  { field: "role", label: "Who is the registered professional for this scope?", kind: "role" },
-  { field: "registration_number", label: "APEGA or AAA registration number", kind: "text" },
-  { field: "seal", label: "Seal that professional confirmed", kind: "text" },
-  { field: "occupancy", label: "What is the occupancy or building type?", kind: "occupancy" },
-  { field: "principal_dwelling_units", label: "How many principal dwelling units, excluding confirmed qualifying secondary suites?", kind: "number" },
-  { field: "storeys", label: "How many storeys is the building?", kind: "number" },
-  { field: "building_area_m2", label: "What is the building area in square metres (not the total of every floor)?", kind: "number" },
-  { field: "part4_design", label: "Is any design carried out under Part 4, including beams, connections, or foundations?", kind: "bool" },
-  { field: "ahj_requires_professional", label: "Has the authority required a registered professional for this project?", kind: "authority" },
-  { field: "special_safety_concerns", label: "Has the authority found that size or complexity requires a professional?", kind: "authority" },
-  { field: "roof_trusses", label: "Are wood roof trusses or truss assembly connections included?", kind: "bool" },
-  { field: "preserved_wood_foundation_part4", label: "Does the project include a preserved wood foundation designed under Part 4?", kind: "bool" },
-  { field: "prescriptive_route_confirmed", label: "Is the design following the prescriptive route, with no reserved professional judgement?", kind: "bool" },
-  { field: "professional_judgement_required", label: "Does any proposed analysis require reserved professional judgement?", kind: "bool" },
-  { field: "professional_scope_resolved", label: "Have the professional-law, discipline, and local submission requirements been resolved?", kind: "authority" },
-  { field: "fire_suppression", label: "Is a fire suppression system being installed?", kind: "bool" },
-  { field: "fire_alarm", label: "Is a fire alarm system being installed?", kind: "bool" },
-  { field: "farm_public_use", label: "Is the farm building for public use?", kind: "bool" },
-];
-
-function deferredChoice(c: Case, field: string): "" | "not_sure" | "not_engaged_yet" {
-  const fact = [...c.facts].reverse().find((item) => item.field === `professional.${field}`);
-  return fact?.value === "not_sure" || fact?.value === "not_engaged_yet" ? fact.value : "";
-}
-
-function confirmedValue(c: Case, field: string): unknown {
-  const fact = [...c.facts].reverse().find((f) => f.field === field && f.status === "confirmed" && f.kind !== "proposed");
-  return fact?.value;
-}
-
-/** As the engine reads it (engine/professional.py): this checklist's own answer, else the project's value. */
-function professionalValue(c: Case, field: string): unknown {
-  return confirmedValue(c, `professional.${field}`) ?? confirmedValue(c, field);
-}
-
-
 
 const EVIDENCE_TYPES = [
   "manufacturer's literature",
@@ -311,168 +274,95 @@ function EvidenceAnswer({ itemId, provisionId, types }: { itemId: string; provis
   );
 }
 
-function ProfessionalAnswers({ onEvidence, missing }: { onEvidence: () => void; missing?: string[] }) {
-  const { c, dispatch } = useCase();
-  const inputs = PROFESSIONAL_FIELDS.map((q) => {
-        const id = `prof-${q.field}`;
-        const current = professionalValue(c, q.field);
-        if (q.kind === "occupancy") {
-          const value = typeof current === "string" ? current : "";
-          return (
-            <div key={q.field} className={`field full ${value ? "" : "is-empty"}`}>
-              <label className="sr-only" htmlFor={id}>{q.label}</label>
-              <select
-                id={id}
-                value={value}
-                onChange={(e) => {
-                  if (e.target.value) dispatch({ type: "setProfessionalFact", field: q.field, value: e.target.value });
-                  else dispatch({ type: "answerScope", field: q.field, answer: "clear" });
-                }}
-              >
-                {OCCUPANCY.map(([value, label]) => (
-                  <option key={value || "empty"} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          );
-        }
-        if (q.kind === "role") {
-          const held = deferredChoice(c, q.field);
-          const value = held || (current === "engineer" || current === "architect" ? current : "");
-          return (
-            <div key={q.field} className={`field full ${value ? "" : "is-empty"}`}>
-              <label className="sr-only" htmlFor="prof-role">{q.label}</label>
-              <details className="compact-help"><summary>Why we ask</summary><p>If a professional is required, provide their identity and authenticated work. Not sure or Not engaged yet leaves the requirement for the officer to determine. A draft remains available; mandatory duties still apply.</p></details>
-              <select
-                id="prof-role"
-                value={value}
-                onChange={(e) => {
-                  const next = e.target.value;
-                  if (next === "") {
-                    dispatch({ type: "answerScope", field: q.field, answer: "clear" });
-                  } else if (next === "not_sure" || next === "not_engaged_yet") {
-                    dispatch({ type: "deferProfessional", field: q.field, choice: next, label: q.label });
-                  } else if (next === "engineer" || next === "architect") {
-                    dispatch({ type: "setProfessionalFact", field: q.field, value: next });
-                  }
-                }}
-              >
-                <option value="">Not answered</option>
-                <option value="engineer">Engineer</option>
-                <option value="architect">Architect</option>
-                <option value="not_sure">Not sure</option>
-                <option value="not_engaged_yet">Not engaged yet</option>
-              </select>
-            </div>
-          );
-        }
-        if (q.kind === "text") {
-          const held = deferredChoice(c, q.field);
-          const value = held ? "" : typeof current === "string" ? current : "";
-          return (
-            <div key={q.field} className={`field full ${held || value ? "" : "is-empty"}`}>
-              <label className="sr-only" htmlFor={id}>{q.label}</label>
-              <select
-                aria-label={`${q.label} choice`}
-                value={held}
-                onChange={(e) => {
-                  const next = e.target.value;
-                  if (next === "not_sure" || next === "not_engaged_yet") {
-                    dispatch({ type: "deferProfessional", field: q.field, choice: next, label: q.label });
-                  } else {
-                    dispatch({ type: "answerScope", field: q.field, answer: "clear" });
-                  }
-                }}
-              >
-                <option value="">Enter it here</option>
-                <option value="not_sure">Not sure</option>
-                <option value="not_engaged_yet">Not engaged yet</option>
-              </select>
-              {held === "" && (
-                <input id={id} value={value} onChange={(e) => dispatch({ type: "setProfessionalFact", field: q.field, value: e.target.value })} />
-              )}
-            </div>
-          );
-        }
-        if (q.kind === "number") {
-          const value = typeof current === "number" ? String(current) : "";
-          return (
-            <div key={q.field} className={`field full ${value ? "" : "is-empty"}`}>
-              <label className="sr-only" htmlFor={id}>{q.label}</label>
-              <input
-                id={id}
-                type="number"
-                min={1}
-                value={value}
-                onChange={(e) => {
-                  if (e.target.value === "") {
-                    dispatch({ type: "answerScope", field: q.field, answer: "clear" });
-                    return;
-                  }
-                  const n = Number(e.target.value);
-                  if (Number.isFinite(n) && n > 0) {
-                    dispatch({ type: "setProfessionalFact", field: q.field, value: q.field === "building_area_m2" ? n : Math.trunc(n) });
-                  }
-                }}
-              />
-            </div>
-          );
-        }
-        if (q.kind !== "bool" && q.kind !== "authority") return null;
-        const scopeField = isScopeField(q.field) ? q.field : null;
-        const authorityField = (AUTHORITY_DECISION_FIELDS as readonly string[]).includes(q.field);
-        const notSure = c.questions.some((question) => question.id === `q-scope-${q.field}` && !question.answer);
-        const recorded = [...c.facts].reverse().find((fact) => fact.field === `professional.${q.field}` && fact.kind !== "proposed");
-        const chosen = recorded?.value;
-        const value = notSure ? "not-sure" : chosen === true ? "yes" : chosen === false ? "no" : "";
-        return (
-          <div key={q.field} className={`field full ${value ? "" : "is-empty"}`}>
-            <label className="sr-only" htmlFor={id}>{q.label}</label>
-            {scopeField && <details className="compact-help"><summary>Help</summary><p>{SCOPE_HELP[scopeField]}</p></details>}
-            {authorityField && (
-              <p className="field-note">
-                Report the authority’s decision, or choose Not sure.
-              </p>
-            )}
-            <select
-              id={id}
-              value={value}
-              onChange={(e) => {
-                const next = e.target.value;
-                if (next === "" || next === "yes" || next === "no" || next === "not-sure") {
-                  dispatch({
-                    type: "answerScope",
-                    field: q.field,
-                    answer: next === "" ? "clear" : next,
-                    text: q.label,
-                  });
-                }
-              }}
-            >
-              <option value="">Not answered</option>
-              <option value="yes">Yes</option>
-              <option value="no">No</option>
-              <option value="not-sure">Not sure</option>
-            </select>
-          </div>
-        );
-      });
-  const deferred = deferredChoice(c, "role");
-  const all = PROFESSIONAL_FIELDS.map((q, i) => ({
-    title: q.label,
-    fields: [`prof-${q.field}`],
-    known: q.field !== "role" && professionalValue(c, q.field) !== undefined,
-    content: <div className="form-grid">{inputs[i]}{q.field === "role" && deferred && <p className="meta full">Leave these details for later. The official PDF stays on hold.</p>}</div>,
-    continueAction: q.field === "role" && deferred ? { label: "Add evidence", onClick: onEvidence, optionalLabel: "Add more details" } : undefined,
-  })).filter((_, i) => !deferred || ![1, 2].includes(i));
-  // Only what the professional screen still needs, never what the project already says (storeys, occupancy,
-  // area…). Everything stays editable once nothing is open.
-  const needed = missing && new Set(missing.flatMap((name) => name.split(" or ")).map((name) => name.replace(/^professional\./, "")));
-  const open = all.filter((step, i) => !step.known && (!needed || i === 0 || needed.has(step.fields[0].replace(/^prof-/, ""))));
-  const steps = open.length ? open : all;
-  return <FieldSteps previousHref="#/application?tab=alt&step=last" steps={steps} onComplete={onEvidence} />;
+export function ProfessionalAnswers({ onEvidence, missing }: { onEvidence: () => void; missing?: string[] }) {
+  const { c, dispatch, applicationIdentity } = useCase();
+  const questions = professionalQuestions(c, missing);
+  const open = questions.filter((question) => !question.known && !question.deferred);
+  const known = questions.filter((question) => question.known);
+  const deferred = questions.filter((question) => question.deferred);
+  const office = professionalOfficeQuestions(c);
+  const [active, setActive] = useState("");
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [note, setNote] = useState("");
+  const [credential, setCredential] = useState<"registration_number" | "seal">("registration_number");
+  useEffect(() => { setActive(""); setDrafts({}); setNote(""); setCredential("registration_number"); }, [applicationIdentity, c.id]);
+  const question = questions.find((question) => question.field === active && !question.deferred) ?? open[0];
+  const field = question?.field ?? "";
+  const draft = drafts[field] ?? "";
+  const setDraft = (text: string) => { setDrafts((drafts) => ({ ...drafts, [field]: text })); setNote(""); };
+  const move = () => { setActive(open.find((item) => item.field !== field)?.field ?? ""); setNote(""); };
+  const save = (value: string | number | boolean, quote?: string) => {
+    const target = field === "registration_number" ? credential : field;
+    dispatch({ type: "setProfessionalFact", field: target, value });
+    if (quote) dispatch({ type: "setRuleInput", field: `professional.${target}`, value, rule: "professional", quote });
+    move();
+  };
+  const defer = (choice: "not_sure" | "not_engaged_yet" = "not_sure") => {
+    if (!question) return;
+    dispatch({ type: "deferProfessional", field, choice, label: question.label });
+    move();
+  };
+  const submit = () => {
+    if (!question || !draft.trim()) return setNote("Enter an answer, or choose Not sure.");
+    if (question.kind === "number") {
+      if (field.endsWith("_m2")) {
+        const parsed = parseMeasurement(draft, "m²");
+        if (parsed.kind !== "value" || parsed.value <= 0) return setNote(parsed.kind === "error" ? parsed.error : "Enter an area above zero.");
+        save(parsed.value, parsed.quote);
+      } else {
+        const value = Number(draft);
+        if (!Number.isSafeInteger(value) || value < 1) return setNote("Enter a whole number above zero.");
+        save(value);
+      }
+    } else save(draft.trim());
+  };
+  return <div className="stack">
+    {question ? <section className="field-step" aria-labelledby="professional-question">
+      <h3 id="professional-question">{field === "registration_number" && credential === "seal" ? "Seal confirmed by your professional" : question.label}</h3>
+      {professionalAnswerer(field) === "designer" && <p className="field-note">Usually your designer knows.</p>}
+      {isScopeField(field) && <details className="compact-help"><summary>Help</summary><p>{SCOPE_HELP[field]}</p></details>}
+      {question.kind === "bool" ? <div className="btn-row">
+        <button type="button" className="btn" aria-pressed={question.value === true} onClick={() => save(true)}>Yes</button>
+        <button type="button" className="btn" aria-pressed={question.value === false} onClick={() => save(false)}>No</button>
+      </div> : question.kind === "role" ? <div className="btn-row">
+        <button type="button" className="btn" onClick={() => save("engineer")}>Engineer</button>
+        <button type="button" className="btn" onClick={() => save("architect")}>Architect</button>
+        <button type="button" className="btn btn-ghost" onClick={() => defer("not_engaged_yet")}>Not engaged yet</button>
+      </div> : question.kind === "occupancy" ? <div className="field">
+        <label className="sr-only" htmlFor="prof-occupancy">{question.label}</label>
+        <select id="prof-occupancy" value="" onChange={(event) => { if (event.target.value) save(event.target.value); }}>
+          {OCCUPANCY.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+        </select>
+      </div> : <form onSubmit={(event) => { event.preventDefault(); submit(); }}>
+        {field.endsWith("_m2") ? <UnitInput id={`prof-${field}`} label={question.label} unit="m²" value={draft} onChange={setDraft} /> : <div className="field">
+          <label className="sr-only" htmlFor={`prof-${field}`}>{question.label}</label>
+          <input id={`prof-${field}`} type="text" inputMode={question.kind === "number" ? "numeric" : undefined} value={draft} onChange={(event) => setDraft(event.target.value)} />
+        </div>}
+        {field === "registration_number" && <div className="btn-row">
+          <button type="button" className="btn btn-xs" aria-pressed={credential === "registration_number"} onClick={() => setCredential("registration_number")}>Registration number</button>
+          <button type="button" className="btn btn-xs" aria-pressed={credential === "seal"} onClick={() => setCredential("seal")}>Confirmed seal</button>
+        </div>}
+        <button type="submit" className="btn btn-primary">Save and continue</button>
+      </form>}
+      {note && <p className="field-note" role="alert">{note}</p>}
+      <button type="button" className="btn btn-ghost" onClick={() => defer()}>{professionalAnswerer(field) === "designer" ? "Ask my designer" : "Not sure"}</button>
+    </section> : <div className="empty-state">
+      <p>No more professional questions for you.</p>
+      <button type="button" className="btn btn-primary" onClick={onEvidence}>Continue to evidence</button>
+    </div>}
+    {known.length > 0 && <details className="compact-help"><summary>Known from your project ({known.length})</summary>
+      <ul className="plain-list">{known.map((question) => <li key={question.field}>{question.label} {spokenValue(question.field, question.value ?? null)} <button type="button" className="btn btn-xs" aria-label={`Change ${question.label}`} onClick={() => {
+        setDrafts((drafts) => ({ ...drafts, [question.field]: `${question.value ?? ""}${question.field.endsWith("_m2") ? " m²" : ""}` }));
+        setActive(question.field); setNote("");
+      }}>Change</button></li>)}</ul>
+    </details>}
+    {deferred.length > 0 && <details className="compact-help"><summary>Waiting for an answer ({deferred.length})</summary>
+      <ul className="plain-list">{deferred.map((question) => <li key={question.field}>{question.label} <span className="meta">{professionalAnswerer(question.field) === "designer" ? "Your designer" : "Not sure"}</span> <button type="button" className="btn btn-xs" onClick={() => { dispatch({ type: "answerScope", field: question.field, answer: "clear" }); setActive(question.field); }}>Answer</button></li>)}</ul>
+    </details>}
+    {office.length > 0 && <details className="compact-help"><summary>To confirm with the office ({office.length})</summary>
+      <ul className="plain-list">{office.map((question) => <li key={question.field}>{question.label}</li>)}</ul>
+    </details>}
+  </div>;
 }
 
 /** One coherent deterministic plan, after the current case has been saved. */
@@ -498,6 +388,8 @@ export function Recommendations() {
       // and choosing that reference again does not relink them.
       const orphaned = orphanedEvidence(c, [...result.plan.items.map(item => item.id), ...(result.issues ?? []).map(issue => issue.id)]);
       if (orphaned.some(id => !c.unscopedEvidence?.includes(id))) dispatch({ type: "noteUnscopedEvidence", ids: orphaned });
+      const unscopedEvidence = [...new Set([...(c.unscopedEvidence ?? []), ...orphaned])];
+      dispatch({ type: "noteProfessionalWork", work: { basis: professionalWorkBasis({ ...c, unscopedEvidence }), professional: result.professional, plan: result.plan } });
       setLoad({ ...result, phase: "live", note: "" });
     }).catch(error => {
       if (active) setLoad({ ...IDLE, phase: "error", note: failureText(error), recovery: error instanceof SectionDRecoveryError ? error : undefined });

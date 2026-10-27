@@ -73,7 +73,7 @@ export interface ApplicantDraft {
   intake_file_ids: string[] | null;
   packages: Record<string, "yes" | "no">;
   question_text: Record<string, DraftText>;
-  role: "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner";
+  role: "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner" | "engineer" | "other" | null;
   rule_unsure: string[];
   seen: string[];
   skipped: string[];
@@ -86,14 +86,14 @@ export interface ApplicantDraftInput {
   intake_file_ids?: string[] | null;
   packages?: Record<string, "yes" | "no">;
   question_text?: Record<string, DraftText>;
-  role?: "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner";
+  role?: "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner" | "engineer" | "other" | null;
   rule_unsure?: string[];
   seen?: string[];
   skipped?: string[];
 }
 
 export interface ApplicantSummary {
-  applicant_type: "manufacturer" | "contractor" | "homebuilder" | null;
+  applicant_type: "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner" | "engineer" | "other" | null;
   name: string;
 }
 
@@ -858,9 +858,11 @@ export interface FactPointer {
   end: number | null;
   fact_id: string;
   field: string;
-  method: "rules" | "form" | "model";
+  method: "rules" | "form" | "model" | "vision";
   page: number | null;
   project_context: boolean;
+  quote: string | null;
+  source_name: string | null;
   source_ref: string;
   start: number | null;
   verified: boolean;
@@ -872,6 +874,7 @@ export interface FieldConflict {
   page: number | null;
   quotes: string[];
   source_ref: string;
+  source_refs: string[];
   values: (string | number | boolean)[];
 }
 
@@ -892,13 +895,20 @@ export interface FileReport {
   form: "scc_variance" | "acroform" | null;
   form_fields_read: number;
   form_fields_skipped: string[];
+  image_pages_read: number[];
+  media_type: string;
   name: string;
   pages: number | null;
   pages_not_read: number[];
   pages_read: number[];
+  pictures_not_read_reason: string | null;
   project_pages: number[];
   reason: string | null;
+  semantic_pages_read: number[];
+  semantic_pages_sent: number[];
+  semantic_reason: string | null;
   status: "read" | "partly_read" | "not_read";
+  text_pages_read: number[];
 }
 
 export interface Finding {
@@ -1193,6 +1203,7 @@ export interface IntakeRecord {
   plan: IntakePlan | null;
   pointers: FactPointer[];
   ran_at: string;
+  removed_file_ids: string[];
   review: DocumentReview | null;
   text_sha256: string | null;
   unresolved_citations: UnresolvedCitation[];
@@ -1202,6 +1213,7 @@ export interface IntakeRequest {
   expected_version?: number | null;
   file_ids?: string[];
   model?: boolean;
+  pictures?: boolean;
   role?: string | null;
   text?: string | null;
 }
@@ -1417,7 +1429,7 @@ export interface OfficerWorkspace {
 
 export interface OnboardingRequest {
   access_code?: string | null;
-  applicant_type?: "manufacturer" | "contractor" | "homebuilder" | null;
+  applicant_type?: "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner" | "engineer" | "other" | null;
   authority?: "calgary" | "edmonton" | null;
   role: "applicant" | "reviewer";
 }
@@ -2363,7 +2375,7 @@ export interface UnresolvedCitation {
 export interface User {
   ai_access: string | null;
   ai_access_fingerprint: string | null;
-  applicant_type: "manufacturer" | "contractor" | "homebuilder" | null;
+  applicant_type: "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner" | "engineer" | "other" | null;
   authority: "calgary" | "edmonton" | null;
   created_at: string;
   email: string;

@@ -33,7 +33,7 @@ function RoleEditor({ onCancel, onSaved }: { onCancel: () => void; onSaved: () =
   const [wait, startWait] = useCountdown();
   if (!user) return null;
   const need = role ? codeNeeded({ role: user.role, authority: user.authority }, role, authority) : null;
-  const complete = role === "applicant" ? Boolean(type) : role === "reviewer" ? Boolean(authority) : false;
+  const complete = role === "applicant" || (role === "reviewer" && Boolean(authority));
   const canSave = complete && (!need || code.trim().length > 0) && !busy && wait === 0;
 
   async function save() {
@@ -56,10 +56,10 @@ function RoleEditor({ onCancel, onSaved }: { onCancel: () => void; onSaved: () =
   return (
     <div className="ac-editor">
       <p className="ac-editor-label">How you use Batatis</p>
-      <Chips label="Role" value={role} onPick={(r) => { setRole(r); setError(""); }} options={[{ value: "applicant", label: "Applying for a variance" }, { value: "reviewer", label: "Reviewing for an authority" }]} />
+      <Chips label="Role" value={role} onPick={(r) => { setRole(r); setError(""); }} options={[{ value: "applicant", label: "Building project" }, { value: "reviewer", label: "Reviewing for an authority" }]} />
       {role === "applicant" && (
         <>
-          <p className="ac-editor-label">Which describes you best</p>
+          <p className="ac-editor-label">Applicant type · optional</p>
           <Chips label="Applicant type" value={type} onPick={setType} options={APPLICANT_CHOICES} />
         </>
       )}
@@ -84,7 +84,7 @@ function RoleEditor({ onCancel, onSaved }: { onCancel: () => void; onSaved: () =
         <button type="button" className="cf-btn is-sm" onClick={onCancel}>Cancel</button>
         <button type="button" className="cf-btn is-sm is-primary" disabled={!canSave} onClick={() => void save()}>{busy ? "Saving…" : "Save"}</button>
       </div>
-      {!complete && role && <p className="ac-help">{role === "applicant" ? "Choose what describes you best." : "Choose an authority."}</p>}
+      {!complete && role && <p className="ac-help">Choose an authority.</p>}
     </div>
   );
 }

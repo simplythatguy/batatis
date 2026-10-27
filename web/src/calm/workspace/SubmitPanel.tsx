@@ -9,6 +9,7 @@ import { preparationGaps } from "../preparation";
 import { CIcon, Dot } from "../ui";
 import type { DocSection } from "./document";
 import { workspaceFixHref } from "./readiness";
+import { submissionOfficeReason } from "../../config";
 
 const when = (iso: string | null) => {
   if (!iso) return "";
@@ -51,7 +52,9 @@ export function SubmitPanel({ signingReason, beforeSubmit, sections }: { signing
   const needsCheck = work.checkNeeded.length > 0;
   const routed = gaps.some((g) => g.severity === "blocking" && g.submissionBlocking === false);
   const n = work.applicant.length;
-  const reason = !c.authority ? "Choose a reviewing office." : n ? "Fix the flagged items first." : needsCheck ? "Check your changed application first." : signingReason;
+  // An office without reviewers in Batatis (anywhere but Calgary and Edmonton) receives the exported PDF instead.
+  const office = c.authority ? submissionOfficeReason(c) : "";
+  const reason = !c.authority ? "Choose a reviewing office." : office || (n ? "Fix the flagged items first." : needsCheck ? "Check your changed application first." : signingReason);
 
   reasonNow.current = reason;
   async function submit() {
@@ -84,7 +87,7 @@ export function SubmitPanel({ signingReason, beforeSubmit, sections }: { signing
       </button>
       {reason && (
         <p className="cf-faint cf-small">
-          {reason} {signingReason && !n && !needsCheck && c.authority ? <a className="cf-inline-link" href="#/application?step=sign">Sign</a> : c.authority && needsCheck && !n
+          {reason} {office ? null : signingReason && !n && !needsCheck && c.authority ? <a className="cf-inline-link" href="#/application?step=sign">Sign</a> : c.authority && needsCheck && !n
             ? <button type="button" className="cf-link-btn" disabled={checkStatus === "running"} onClick={() => void requestCheck(checkStatus === "unavailable")}>{checkStatus === "running" ? "Checking…" : "Check application"}</button>
             : !c.authority ? <a className="cf-inline-link" href="#/questions?focus=authority">Pick one</a> : null}
         </p>

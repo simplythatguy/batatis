@@ -94,6 +94,32 @@ def test_a_house_with_a_bathroom_or_a_gas_fireplace_stays_in_scope():
 
 # ---------------------------------------------------------------- fork
 
+@pytest.mark.parametrize('text', [
+    'We want bigger windows on the side wall than the table allows.',
+    'Our windows cover more than the code allows.',
+    'The windows are larger than allowed.',
+    'The wall is closer than permitted.',
+    'We want wider openings than is allowed.',
+    'We want taller walls than the bylaw permits.',
+    'The openings are larger than the rules allow.',
+    'The opening is larger than the rule permits.',
+])
+def test_fork_reads_everyday_comparisons(text):
+    assert assess(text).variance_needed == 'likely'
+
+
+@pytest.mark.parametrize('text, expected', [
+    ('The bigger windows are within the table limits.', 'not_indicated'),
+    ('Our house follows the code.', 'not_indicated'),
+    ('We use standard construction.', 'not_indicated'),
+    ('Would bigger windows than the table allows be possible?', 'unknown'),
+    ('Are larger windows than allowed possible?', 'unknown'),
+    ('Can we build closer than permitted? Our house follows the code.', 'unknown'),
+    ('Can we build closer than permitted?', 'likely'),
+])
+def test_fork_comparisons_preserve_follows_cues_and_questions(text, expected):
+    assert assess(text).variance_needed == expected
+
 def test_fork_on_labelled_cases(capsys):
     rows = [(p['text'], p['label']) for p in _prompts('blind_fork.json')]
     rows += [(c['description'], 'likely') for c in CASES if c['gold']['intake_action'] == 'proceed_conditionally']
@@ -236,7 +262,7 @@ def test_an_answered_choice_can_be_changed_after_the_plan_moves_on(http):
     intake = http.post(f'/cases/{case_id}/intake', json={
         'text': 'We manufacture an insulated panel for house walls.', 'role': 'manufacturer', 'model': False,
     }).json()
-    scope = next(q for q in intake['record']['plan']['questions'] if q['field'] == 'scope')
+    scope = next(q for q in intake['record']['plan']['questions'] if q['field'] == 'product_scope')
     first = http.post(f'/cases/{case_id}/intake/answers', json={
         'answers': [{'question_id': scope['id'], 'answer': 'site'}], 'expected_version': intake['case_version'],
     })
@@ -247,12 +273,12 @@ def test_an_answered_choice_can_be_changed_after_the_plan_moves_on(http):
     # Read the persisted record before going Back and changing the saved choice.
     reloaded = http.get(f'/cases/{case_id}/intake').json()
     edited = http.post(f'/cases/{case_id}/intake/answers', json={
-        'answers': [{'question_id': scope['id'], 'answer': 'jurisdiction'}],
+        'answers': [{'question_id': scope['id'], 'answer': 'product_acceptance'}],
         'expected_version': reloaded['case_version'],
     })
     assert edited.status_code == 200, edited.text
     latest = http.get(f'/cases/{case_id}').json()
-    assert [f for f in latest['facts'] if f['field'] == 'scope'][-1]['value'] == 'jurisdiction'
+    assert [f for f in latest['facts'] if f['field'] == 'product_scope'][-1]['value'] == 'product_acceptance'
     assert edited.json()['case_version'] == saved['case_version'] + 1
 
     # An issued question remains bound to its field and to the acknowledged case version.
@@ -271,6 +297,52 @@ def test_an_answered_choice_can_be_changed_after_the_plan_moves_on(http):
     })
     assert unasked.status_code == 422
     assert http.get(f'/cases/{case_id}').json() == latest
+
+
+def test_product_prose_asks_the_route_without_a_role_and_keeps_municipal_scope_separate():
+    from engine.models import Fact, Source
+    case = _case('We want to market this insulated wall panel product for buildings across Alberta.')
+    case.facts.append(Fact(field='scope', value='jurisdiction', kind='pointed', status='confirmed',
+                           source=Source(type='user_text', ref='Your answer', quote='municipality-wide variance')))
+    service.refresh(case)
+    question = next(q for q in case.intake.plan.questions if q.field == 'product_scope')
+    assert question.text == 'One building, or across Alberta?'
+    assert not [f for f in case.facts if f.field == 'applicant_role']
+    service.answer(case, [{'question_id': question.id, 'answer': 'product_acceptance'}])
+    assert [f for f in case.facts if f.field == 'scope'][-1].value == 'jurisdiction'
+    assert [f for f in case.facts if f.field == 'product_scope'][-1].value == 'product_acceptance'
+    assert case.intake.plan.route_notice is not None
+    assert 'CCMC' in case.intake.plan.route_notice.summary
+    reloaded = Case.model_validate(case.model_dump())
+    service.refresh(reloaded)
+    assert question.id not in [q.id for q in reloaded.intake.plan.questions]
+    service.answer(reloaded, [{'question_id': question.id, 'answer': 'not sure'}])
+    assert question.id in reloaded.intake.plan.not_sure
+    assert [f for f in reloaded.facts if f.field == 'product_scope'][-1].value is None
+    assert [f for f in reloaded.facts if f.field == 'scope'][-1].value == 'jurisdiction'
+
+
+def test_journey_deferral_and_route_use_the_existing_case_fact_route(http):
+    case_id = http.post('/cases', json={}).json()['id']
+    answer = dict(key='field-owner', field='owner', question='Owner', stage='paperwork', answerer='you',
+                  value='later', required=True)
+    for field, value in [('journey.answer.field-owner', json.dumps(answer)), ('journey.route', 'standard')]:
+        result = http.post(f'/cases/{case_id}/facts', json={
+            'field': field, 'value': value, 'kind': 'pointed', 'status': 'confirmed',
+            'source': {'type': 'user_text', 'ref': 'Typed in Section A', 'quote': value},
+        })
+        assert result.status_code == 200, result.text
+    saved = http.get(f'/cases/{case_id}').json()
+    values = {f['field']: f['value'] for f in saved['facts']}
+    assert json.loads(values['journey.answer.field-owner']) == answer
+    assert values['journey.route'] == 'standard'
+    assert 'owner' not in values, 'Later must never satisfy the underlying required field'
+
+
+def test_applicant_roles_keep_the_existing_none_value():
+    from engine.account_models import User
+    for role in (None, 'owner', 'designer', 'engineer', 'contractor', 'manufacturer', 'other', 'homebuilder', 'builder'):
+        assert User(email='journey@example.test', name='Synthetic applicant', applicant_type=role).applicant_type == role
 
 
 def test_a_saved_not_sure_can_be_replaced_with_a_real_answer():
@@ -371,7 +443,7 @@ const c = openedCase(payload.saved, 'homebuilder', { intake: payload.intake, ide
 const cards = buildDeck(c, [], { includeDone: true }).filter(c => c.ref === 'intake.sprinklered');
 assert.equal(cards.length, 1, 'the older saved choice must have one editable card');
 assert.equal(cards[0].done, true);
-assert.deepEqual(choicesFor(cards[0]).map(c => c.value), ['yes', 'no', 'partial']);
+assert.deepEqual(choicesFor(cards[0]).map(c => c.value), ['yes', 'no', 'partial', 'not_sure']);
 console.log('legacy reopened choice: one editable card, all three real choices');
 '''
     result = subprocess.run([node, '--experimental-strip-types', '--no-warnings', '--import',

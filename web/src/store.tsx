@@ -7,6 +7,7 @@ import { acknowledgedVersion, acknowledgeWrite, adoptEngineCase, clearEngineSess
 import { engineNotices, factSignature, groupEvidenceGaps, missingFromEngine, uploadMessage } from "./rules";
 import { readDecisionBody, wireDecision } from "./identify";
 import { asLocal } from "./intakeFields";
+import { picturesAllowed } from "./intakeView";
 import { toViewRow } from "./api/sectionC";
 import { getSession, resetSavedSession, subscribeSession, updateSavedSession } from "./calm/session";
 import { applicantDraft, draftAccount, restoreApplicantDraft, sessionDraft } from "./calm/applicantDraft";
@@ -66,7 +67,7 @@ export interface Reading {
 const NO_READING: Reading = { intake: "idle", intakeNote: "", identify: "idle", identifyNote: "", stages: {}, busy: null };
 
 /** The engine's role name for the applicant type (docs/api/intake.md `applicant_role`). */
-function roleFor(type: ApplicantType): string {
+function roleFor(type: ApplicantType | null): string | null {
   return type === "builder" ? "homebuilder" : type;
 }
 
@@ -83,6 +84,10 @@ interface Store {
   readDescription: () => Promise<void>;
   /** Upload PDFs held for this case (in the save queue, so intake can read them by id). */
   uploadFiles: () => Promise<void>;
+  /** Upload a file whose upload failed again; a later file is read as soon as it is uploaded. */
+  retryUpload: (fileId: string) => Promise<void>;
+  /** Remove a file and the unconfirmed answers that came only from it; returns how many were removed. */
+  removeFile: (fileId: string) => number;
   /** Upload supporting bytes inside the save queue; binding is a separate atomic evidence save. */
   uploadEvidenceFile: (file: File, itemId?: string) => Promise<UploadedFile>;
   /** Run code identification again (the code-check card's Try again). */
@@ -154,7 +159,7 @@ interface Store {
   submitting: boolean;
   /** The saved revision is on its way to the authority; local edits pause until the response. */
   submissionDispatched: boolean;
-  beginEmpty: (type: ApplicantType) => void;
+  beginEmpty: (type: ApplicantType | null) => void;
   /** Back to an empty Start. `note` replaces "Cleared for this visit." (signed in, the old one stays in the list). */
   resetToWho: (note?: string) => void;
   /**
@@ -163,7 +168,7 @@ interface Store {
    * nothing and resolves to a note that the current answers stay open (the shell's own guard decides
    * whether to show it).
    */
-  openCase: (id: string, type: ApplicantType) => Promise<string | null>;
+  openCase: (id: string, type: ApplicantType | null) => Promise<string | null>;
   /** Refresh the selected case only while its acknowledged draft and account are still current. */
   refreshCurrentCase: () => Promise<string | null>;
   completenessRecord: CompletenessRecord | null;
@@ -464,7 +469,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     // after a saved case is opened) is derived data, not an edit: the draft stays saved.
     // On a read-only case the lookup's expansion of an article is display only: never an unsaved edit.
     const readOnlyCase = isReadOnlyCase(engineCaseId());
-    const derived = (action.type === "reconcileSectionC" && (readOnlyCase || sameCards(reducer(latestCase.current, action).candidates, latestCase.current.candidates))) || [ "adoptCase", "setFileResult", "ackEvidence", "noteUnscopedEvidence", "notePractice", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions", "noteIntake", "restoreIntake", "restoreReviewQuestions", "noteIntakeRecord", "adoptFacts", "adoptApplicantDraft", "noteIdentify", "renameCase"].includes(action.type);
+    const derived = (action.type === "reconcileSectionC" && (readOnlyCase || sameCards(reducer(latestCase.current, action).candidates, latestCase.current.candidates))) || [ "adoptCase", "setFileResult", "ackEvidence", "noteUnscopedEvidence", "notePractice", "noteProfessionalWork", "noteSectionC", "bindOpenQuestion", "noteIdentifyQuestions", "noteIntake", "restoreIntake", "restoreReviewQuestions", "noteIntakeRecord", "adoptFacts", "adoptApplicantDraft", "noteIdentify", "renameCase"].includes(action.type);
     // A read-only application's code cards are not the applicant's to change (the deck and library are locked;
     // the references screen's Remove is not): refused, so the screen keeps showing what is saved.
     if (!derived && readOnlyCase && action.type !== "reset" && selectionKey(selectedArticles(reducer(latestCase.current, action))) !== selectionKey(selectedArticles(latestCase.current))) return;
@@ -987,7 +992,8 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   }
 
   function jobProgress(job: CaseJob) {
-    const state = activeJob(job) ? "running" : job.state === "succeeded" ? "done" : "error";
+    // A finished job is still reading until its result is applied, so no card is asked from the unread case.
+    const state = activeJob(job) || (job.state === "succeeded" && !completedJobs.current.has(job.id)) ? "running" : job.state === "succeeded" ? "done" : "error";
     if (!activeJob(job)) jobActionNotes.current.delete(job.id);
     const note = jobActionNotes.current.get(job.id) ?? (job.state === "superseded" ? "Your answers changed. Read the updated description again."
       : job.state === "cancelled" ? "This work was cancelled. You can start it again."
@@ -1201,7 +1207,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
           }
         }
         const job = kind === "intake"
-          ? await engine.startIntakeJob(id, { text: text || undefined, file_ids: snapshot.files.flatMap(f => f.engineId ? [f.engineId] : []), role: roleFor(snapshot.applicantType), model: true, expected_version: expected }, submission.key)
+          ? await engine.startIntakeJob(id, { text: text || undefined, file_ids: snapshot.files.flatMap(f => f.engineId ? [f.engineId] : []), role: roleFor(snapshot.applicantType), model: true, pictures: picturesAllowed(snapshot), expected_version: expected }, submission.key)
           : await engine.startIdentifyJob(id, { prose: text, answers: [], expected_version: expected }, submission.key);
         if (!live()) return;
         if (!isApplicantJob(job) || job.kind !== kind || job.case_id !== id) throw new Error("The progress response belongs to another application.");
@@ -1806,6 +1812,40 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const notices = useMemo(() => (gapsSource === "engine" ? engineNotices(engineGaps) : []), [engineGaps, gapsSource]);
   useEffect(() => { latestGaps.current = gaps; }, [gaps]);
 
+  /** Remove a file and its source-only unconfirmed answers now; the engine records it in the save queue. */
+  function removeFileNow(fileId: string): number {
+    const before = latestCase.current;
+    const file = before.files.find(f => f.id === fileId);
+    const engineFileId = file?.engineId;
+    const id = engineCaseId(), token = engineGeneration();
+    if (!file || isReadOnlyCase(id)) return 0;
+    dispatch({ type: "removeFile", id: fileId });
+    if (latestCase.current.files.some(f => f.id === fileId)) return 0;
+    updateSavedSession(s => ({ held: s.held.filter(h => h.id !== fileId) }));
+    const gone = before.facts.filter(f => !latestCase.current.facts.some(after => after.id === f.id));
+    if (id && engineFileId) {
+      const live = () => isEngineGeneration(token) && engineCaseId() === id;
+      void enqueue(async () => {
+        if (!live()) return;
+        try {
+          const result = await engine.removeIntakeFile(id, engineFileId, acknowledgedVersion(id) ?? undefined);
+          if (!live()) return;
+          acknowledgeWrite(id, result.case_version);
+          derive({ type: "noteIntakeRecord", record: result.record });
+          const present = new Set(latestCase.current.facts.map(f => f.id));
+          const facts = result.facts.filter(f => present.has(f.id)).map(f => asLocal(f) as Fact);
+          derive({ type: "adoptFacts", facts });
+          notePosted(id, facts, gone.map(f => f.field));
+        } catch (error) {
+          if (!live()) return;
+          derive({ type: "restoreFiles", files: [...latestCase.current.files, { ...file, error: "Removal not saved. Remove it again." }] });
+          setReading({ intake: "error", intakeNote: failureText(error) });
+        }
+      });
+    }
+    return gone.length;
+  }
+
   const value: Store = {
     drafting: draftRecord?.record ?? null,
     draftingStale: Boolean(draftRecord && (draftRecord.record.stale || draftRecord.basis !== applicantDraftInputKey(c) || (engineId && needsReconcile(engineId)))),
@@ -1843,8 +1883,18 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       return enqueue(async () => {
         const id = engineCaseId();
         if (id) await flushCurrent(() => isEngineGeneration(token));
+      }).then(() => {
+        // A file added after the first reading is read as soon as it is uploaded; no Continue needed.
+        const c = latestCase.current;
+        const unread = c.files.some(f => f.engineId && !f.error && !c.intake?.record.files.some(r => r.file_id === f.engineId));
+        if (isEngineGeneration(token) && c.intake && unread && !getSession().held.length) void startJob("intake").catch(() => {});
       });
     },
+    retryUpload: (fileId) => {
+      dispatch({ type: "setFileResult", id: fileId, error: null, read: false });
+      return value.uploadFiles();
+    },
+    removeFile: removeFileNow,
     uploadEvidenceFile: (file, itemId) => {
       if (applicationEditsPaused()) return Promise.reject(new Error("Editing is paused. Try again when it resumes."));
       const token = engineGeneration();

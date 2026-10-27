@@ -6,6 +6,7 @@
 import type { FileReport, Fork, IdentifyResult, Question as PlanQuestion } from "./api/types.gen";
 import { confirmedAnswer, localField } from "./intakeFields";
 import type { Candidate, CandidateAnswer, Case, Fact } from "./types";
+import { metricUnit, parseMeasurement } from "./calm/units";
 
 /* —— Values in words —— */
 
@@ -111,10 +112,10 @@ const pointerFor = (c: Case, id: string) => c.intake?.record.pointers.find((p) =
  * unconfirmed proposal on the case. A computed value takes its input with it; the model's statement
  * of the same words as a rules fact joins that fact.
  */
-export function readGroups(c: Case, detailIds: ReadonlySet<string>): ReadGroup[] {
+export function readGroups(c: Case, detailIds: ReadonlySet<string>, includeConfirmed = false): ReadGroup[] {
   const waiting = new Set(c.facts.filter((f) => f.status === "unconfirmed").map((f) => f.id));
   const own = (f: Fact) => f.field !== "scope.redirect" && f.field !== "project.description" && f.field !== "applicant_role";
-  const fromRun = (c.intake?.facts ?? []).filter((f) => own(f) && f.status === "unconfirmed");
+  const fromRun = (c.intake?.facts ?? []).filter((f) => own(f) && (includeConfirmed || f.status === "unconfirmed"));
   const runIds = new Set(fromRun.map((f) => f.id));
   const all = [...fromRun, ...c.facts.filter((f) => waiting.has(f.id) && !runIds.has(f.id) && own(f))];
   const used = new Set<string>();
@@ -245,14 +246,32 @@ export interface PlanInput {
 
 /** How a planner question is answered: choices for yes/no and enums, a number, or words. */
 export function planInput(field: string): PlanInput {
+  if (field === "faces_public_way") return { kind: "choices", choices: [
+    { value: "neighbour", label: "Neighbour’s lot" }, { value: "lane", label: "A lane" }, { value: "street", label: "A street" },
+  ] };
+  if (field === "product_scope") return { kind: "choices", choices: [{ value: "site", label: "One building or site" }, { value: "product_acceptance", label: "Across Alberta" }] };
   if (field === "sprinklered") return { kind: "choices", choices: [{ value: "yes", label: "Yes" }, { value: "no", label: "No" }, { value: "partial", label: "Partly" }] };
   if (field === "part4_design") return { kind: "choices", choices: [{ value: "yes", label: "Yes" }, { value: "no", label: "No" }] };
   if (field === "scope") return { kind: "choices", choices: [{ value: "site", label: "One building or site" }, { value: "jurisdiction", label: "Many sites, or across Alberta" }] };
   if (field === "storeys" || field === "dwelling_units") return { kind: "number" };
   if (/_m2$/.test(field)) return { kind: "number", unit: "m²" };
   if (/_m$/.test(field)) return { kind: "number", unit: "m" };
+  if (/_mm$/.test(field)) return { kind: "number", unit: "mm" };
   if (field === "assembly.description" || field === "alternative_description") return { kind: "area" };
   return { kind: "text" };
+}
+
+/** Typed controls write a single canonical fact, preserving the complete entry as its quote. */
+export function planFactAnswer(field: string, raw: string): { value: number | boolean; quote: string } | { error: string } | null {
+  if (field === "faces_public_way") {
+    const choice = planInput(field).choices?.find((choice) => choice.value === raw);
+    return choice ? { value: raw !== "neighbour", quote: choice.label } : null;
+  }
+  const unit = metricUnit(planInput(field).unit);
+  if (!unit) return null;
+  const parsed = parseMeasurement(raw, unit);
+  return parsed.kind === "value" ? { value: parsed.value, quote: parsed.quote }
+    : { error: parsed.kind === "error" ? parsed.error : "Enter a measurement." };
 }
 
 export const NOT_SURE = "Not sure";
@@ -262,11 +281,16 @@ export function planQuestions(c: Case): { q: PlanQuestion; done: boolean; notSur
   const plan = c.intake?.record.plan;
   if (!plan || plan.scope.status === "redirect") return [];
   const has = (field: string) => Boolean(confirmedAnswer(c.facts, field));
+  // A conflict between readings is settled only by the applicant's own answer, typed or picked here.
+  const answeredByApplicant = (field: string) => {
+    const f = confirmedAnswer(c.facts, field);
+    return Boolean(f && f.source.type !== "file" && !String(f.source.ref ?? "").startsWith("intake:"));
+  };
   const questions = new Map([...(plan.asked ?? []), ...plan.questions].map((q) => [q.id, q]));
   const conflicts = new Set(plan.questions.filter((q) => q.kind === "conflict").map((q) => q.id));
   return [...questions.values()].map((q) => {
     const notSure = plan.not_sure.includes(q.id);
-    return { q, notSure, done: notSure || (!conflicts.has(q.id) && has(q.field)) };
+    return { q, notSure, done: notSure || (conflicts.has(q.id) ? answeredByApplicant(q.field) : has(q.field)) };
   });
 }
 
@@ -405,4 +429,61 @@ export function stageViews(seen: Record<string, Record<string, unknown>>, runnin
 /** "1 page", "3 pages": one count for both the number and the plural. */
 export function pagesLabel(count: number): string {
   return `${count} ${count === 1 ? "page" : "pages"}`;
+}
+
+/** What intake actually covered. Uploading callers pass no report until the read completes. */
+/** Lot, block and plan (or an ATS location) read as parts, joined the way the form writes a legal description. */
+export const LEGAL_PART_FIELDS = ["lot", "block", "plan", "ats_qtr", "ats_sec", "ats_twp", "ats_rge", "ats_mer"] as const;
+
+export function legalFromParts(parts: Readonly<Record<string, unknown>>): string {
+  const v = (k: string) => (parts[k] == null ? "" : String(parts[k]).trim());
+  const lbp = [["Lot", v("lot")], ["Block", v("block")], ["Plan", v("plan")]].filter(([, x]) => x).map(([k, x]) => `${k} ${x}`).join(", ");
+  const ats = v("ats_sec") && v("ats_twp") && v("ats_rge")
+    ? [v("ats_qtr"), v("ats_sec"), v("ats_twp"), v("ats_rge"), v("ats_mer") ? `W${v("ats_mer").replace(/^W/i, "")}` : ""].filter(Boolean).join("-")
+    : "";
+  return [lbp, ats].filter(Boolean).join("; ");
+}
+
+/** The legal description a case already has as confirmed parts, as engine/completeness.py accepts it: all of lot, block and plan, or a full ATS location. */
+export function legalFromFacts(facts: readonly Fact[]): string {
+  const value = (k: string) => confirmedAnswer(facts, k)?.value;
+  for (const set of [["lot", "block", "plan"], ["ats_qtr", "ats_sec", "ats_twp", "ats_rge", "ats_mer"]]) {
+    if (set.every((k) => value(k) != null && String(value(k)).trim())) return legalFromParts(Object.fromEntries(set.map((k) => [k, value(k)])));
+  }
+  return "";
+}
+
+/** The engine's reason while pictures wait for the applicant's OK (pixels cannot be scrubbed like text). */
+export const PICTURES_WAITING = "waiting for your OK";
+export const PICTURES_FIELD = "privacy.pictures";
+
+/** The applicant allowed this application's pictures to be sent for reading. */
+export function picturesAllowed(c: Case): boolean {
+  const fact = [...c.facts].reverse().find((f) => f.field === PICTURES_FIELD);
+  return fact?.status === "confirmed" && fact.value === true;
+}
+
+/** Files whose pictures are waiting for that OK. */
+export function picturesWaiting(c: Case): boolean {
+  return !picturesAllowed(c) && Boolean(c.intake?.record.files.some((r) => r.pictures_not_read_reason === PICTURES_WAITING));
+}
+
+export function fileReadLabel(report: FileReport | null | undefined): { tone: "done" | "warning" | "blocking" | "pending"; label: string; reason?: string } {
+  if (!report) return { tone: "pending", label: "Waiting to read" };
+  const images = new Set(report.image_pages_read ?? []).size;
+  const text = new Set(report.text_pages_read ?? report.pages_read).size;
+  if (report.pages_read.length && !text && !images && report.form !== "scc_variance" && !report.semantic_reason) {
+    return { tone: "warning", label: "Read again", reason: "Coverage needs checking" };
+  }
+  const pictures = report.pictures_not_read_reason ? `Pictures not read: ${report.pictures_not_read_reason}` : undefined;
+  const semantic = report.semantic_reason;
+  const reason = pictures ?? (semantic === "AI is off" ? "Text read; AI is off" : semantic) ?? report.reason ?? undefined;
+  const warning = report.status !== "read" || Boolean(reason);
+  if (images && !text) return { tone: warning ? "warning" : "done", label: `${images} ${images === 1 ? "drawing" : "drawings"} looked at`, ...(reason ? { reason } : {}) };
+  if (report.status === "not_read" && !text) return { tone: pictures ? "warning" : "blocking", label: pictures ?? "Not read", ...(reason ? { reason } : {}) };
+  const read = semantic && semantic !== "AI is off"
+    ? new Set([...(report.semantic_pages_read ?? []), ...(report.image_pages_read ?? [])]).size
+    : new Set(report.pages_read).size;
+  const detail = reason ?? (images ? `${images} ${images === 1 ? "drawing" : "drawings"} looked at` : undefined);
+  return { tone: warning ? "warning" : "done", label: report.media_type === "text/plain" ? "Read" : `Read · ${read} of ${report.pages ?? read} pages`, ...(detail ? { reason: detail } : {}) };
 }

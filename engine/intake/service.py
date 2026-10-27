@@ -17,40 +17,43 @@ from ..models import Case, Fact, Source
 from ..models_intake import FactPointer, FieldConflict, IntakeRecord
 from . import model as model_pass
 from . import review as review_pass
-from .extract import (DESCRIPTION, DESCRIPTION_REF, Extraction, Origin, Outbound, read_file, read_text,
+from .extract import (DESCRIPTION, DESCRIPTION_REF, Extraction, Origin, Outbound, deduplicate, read_file, read_text,
                       reading_field, scrubbed)
 from .plan import OVERRIDDEN, SCOPE_FIELD, build_plan, description, overridden
 from .questions import PROBE_BY_FIELD, issued_questions
 from .rules import ENUMS, FIELDS, LEGAL_PARTS, PERSONAL, ROLES, read
 from .scope import classify
-from .text import NUMBER, number
+from .text import NUMBER, measurement
 
 
-def _run(text, files, codes, outbound, transport, status, cache=None) -> Extraction:
+def _run(text, files, codes, outbound, transport, status, cache=None, media_types=None, pictures=False) -> Extraction:
     out = Extraction()
+    budget = model_pass.Budget()
     if text and text.strip():
         out.merge(read_text(text, Origin(DESCRIPTION), codes=codes, outbound=outbound,
-                            transport=transport, status=status))
+                            transport=transport, status=status, budget=budget))
     for file_id, name, data in files:
         out.merge(read_file(file_id, name, data, codes=codes, outbound=outbound, transport=transport,
-                            status=status, cache=cache))
+                            status=status, cache=cache, budget=budget, media_type=(media_types or {}).get(file_id),
+                            pictures=pictures))
+    deduplicate(out)
     return out
 
 
 def run(text: str | None, files: list[tuple[str, str, bytes]], *, codes=None,
         outbound: Outbound = scrubbed, transport: model_pass.Transport | None = None,
         status: str = 'off', review_transport: review_pass.Transport | None = None,
-        review_status: str = 'off') -> Extraction:
+        review_status: str = 'off', media_types: dict[str, str] | None = None, pictures: bool = False) -> Extraction:
     """Extraction over the description and each (file id, name, bytes). No ledger change.
 
     With a model, the rules and form passes run over every source first, so a name or address read
     from one file is scrubbed from every text the model sees. The document review reads every page."""
     cache: dict = {}                                  # each PDF is parsed once across both passes
-    first = _run(text, files, codes, outbound, None, status, cache)
+    first = _run(text, files, codes, outbound, None, status, cache, media_types, pictures)
     if transport is None and review_transport is None:
         return first
-    sources = ([review_pass.read_source(file_id, name, data) for file_id, name, data in files]
-               if transport is not None else None)
+    sources = ([review_pass.read_source(file_id, name, data, media_type=(media_types or {}).get(file_id))
+                for file_id, name, data in files] if transport is not None or review_transport is not None else None)
     candidates = [(f.field, f.value) for f in first.facts]
     candidates += [(c.field, value) for c in first.conflicts for value in c.values]
     personal = first.personal + [str(value) for field, value in candidates if field in PERSONAL and str(value).strip()
@@ -60,7 +63,7 @@ def run(text: str | None, files: list[tuple[str, str, bytes]], *, codes=None,
                                                 *(t for s in sources for _, t in s.pages)])
     out = first
     if transport is not None:
-        out = _run(text, files, codes, lambda s, own: outbound(s, personal), transport, status, cache)
+        out = _run(text, files, codes, lambda s, own: outbound(s, personal), transport, status, cache, media_types, pictures)
         if out.model.status == 'off':
             out.model.status = 'not_needed'
     if review_transport is not None:
@@ -84,14 +87,16 @@ def settle(case: Case, extraction: Extraction) -> None:
     conflict question, and any other keeps its first reading to check. A guess the model could not
     point to stays a proposal only while the field has nothing better. A computed value follows its inputs.
     """
+    deduplicate(extraction)
     checked = {p.fact_id for p in extraction.pointers if p.verified and p.project_context}
-    eligible = {p.fact_id for p in extraction.pointers if p.project_context}
     quoted = {p.fact_id for p in extraction.pointers if p.verified}
+    pictured = {p.fact_id for p in extraction.pointers if p.method == 'vision'}
     conflicted = {c.field for c in extraction.conflicts}
     key = lambda fact: repr(fact.value)                                  # noqa: E731
     by_field: dict[str, list[Fact]] = {}
     for fact in extraction.facts:
-        if fact.kind != 'computed' and (fact.id in eligible or fact.field == 'claimed_provision'):
+        # Unmarked file passages stay as unconfirmed proposals: never confirmed, never dropped.
+        if fact.kind != 'computed':
             by_field.setdefault(fact.field, []).append(fact)
     kept: dict[str, Fact] = {}                                           # id -> fact kept
     for field, facts in by_field.items():
@@ -106,9 +111,14 @@ def settle(case: Case, extraction: Extraction) -> None:
             chosen, confirm = list({key(f): f for f in reversed(facts)
                                     if f.id in quoted}.values())[::-1], True
         elif field.startswith('statement.'):
-            chosen, confirm = unique, True
+            chosen, confirm = (unique, True) if sure else (facts, False)
         elif not sure:
-            chosen, confirm = facts[:1], False
+            proposed = list({key(f): f for f in reversed(facts)}.values())[::-1]
+            if len(proposed) > 1 and field not in conflicted:
+                extraction.conflicts.append(FieldConflict(field=field, values=[f.value for f in proposed][:6],
+                    quotes=[f.source.quote or '' for f in proposed][:6], source_ref=proposed[0].source.ref,
+                    page=proposed[0].source.page, source_refs=[f.source.ref or '' for f in proposed][:6]))
+            chosen, confirm = ([], False) if len(proposed) > 1 and field in PROBE_BY_FIELD else (facts[:1], False)
         else:
             own = list({key(f): f for f in reversed(sure) if f.source.type == 'user_text'}.values())[::-1]
             if len(unique) == 1 and field not in conflicted and agrees(unique[0]):
@@ -122,7 +132,8 @@ def settle(case: Case, extraction: Extraction) -> None:
                 if field not in conflicted and all(len(str(f.value)) <= 60 for f in unique):
                     extraction.conflicts.append(FieldConflict(
                         field=field, values=[f.value for f in unique][:6], quotes=[f.source.quote or '' for f in unique][:6],
-                        source_ref=unique[0].source.ref or '', page=unique[0].source.page))
+                        source_ref=unique[0].source.ref or '', page=unique[0].source.page,
+                        source_refs=[f.source.ref or '' for f in unique][:6]))
                 chosen, confirm = [], False
             else:
                 chosen, confirm = unique[:1], False
@@ -130,6 +141,12 @@ def settle(case: Case, extraction: Extraction) -> None:
             if confirm:
                 fact.status = 'confirmed'
             kept[fact.id] = fact
+        # A picture that disagrees with what was chosen stays as its own proposal to check, never dropped.
+        shown = {key(f) for f in chosen}
+        for fact in facts:
+            if fact.id in pictured and fact.id not in kept and key(fact) not in shown:
+                shown.add(key(fact))
+                kept[fact.id] = fact
     for fact in extraction.facts:
         if fact.kind == 'computed' and fact.inputs and all(i in kept for i in fact.inputs):
             if all(kept[i].status == 'confirmed' for i in fact.inputs):
@@ -186,11 +203,15 @@ def apply(case: Case, text: str | None, extraction: Extraction, *, role: str | N
             case.facts.remove(fact)
             added.remove(fact)
             kept_ids.discard(fact.id)
-    pointers = [pointer for pointer in extraction.pointers if pointer.fact_id in kept_ids]
-    # An identical rough-B reading reuses the fact, and must also keep its known automatic provenance.
-    pointers += [pointer.model_copy(update={'fact_id': same[pointer.fact_id]}) for pointer in extraction.pointers
-                 if pointer.field == 'alternative_description' and pointer.fact_id in same
-                 and same[pointer.fact_id] in previous]
+    pointers = []
+    for pointer in extraction.pointers:
+        if pointer.fact_id in kept_ids:
+            pointers.append(pointer)
+        # A reading identical to a saved fact reuses that fact. A rough-B reading keeps automatic
+        # provenance only when the saved fact already had it, so an applicant's own words stay theirs.
+        elif pointer.fact_id in same and (pointer.field != 'alternative_description'
+                                          or same[pointer.fact_id] in previous):
+            pointers.append(pointer.model_copy(update={'fact_id': same[pointer.fact_id]}))
     redirect = _scope_fact(case)
     if redirect is not None:
         fact, start, end = redirect
@@ -198,10 +219,12 @@ def apply(case: Case, text: str | None, extraction: Extraction, *, role: str | N
         pointers.append(FactPointer(fact_id=fact.id, field=SCOPE_FIELD, method='rules', source_ref=DESCRIPTION,
                                     start=start, end=end))
     previous_plan = case.intake.plan if case.intake else None
+    removed_file_ids = case.intake.removed_file_ids if case.intake else []
     case.intake = IntakeRecord(
         text_sha256=hashlib.sha256(text.encode()).hexdigest() if text else None,
         pointers=pointers, files=extraction.files, model=extraction.model, conflicts=extraction.conflicts,
-        unresolved_citations=extraction.unresolved, plan=previous_plan, review=extraction.review)
+        unresolved_citations=extraction.unresolved, plan=previous_plan, review=extraction.review,
+        removed_file_ids=removed_file_ids)
     # Only sent/saved applicant context can name an untitled or legacy sentence-seeded
     # record. Keep an existing subject name, and always honor an explicit rename.
     generated = case.identify.title if case.identify else None
@@ -237,11 +260,70 @@ def refresh(case: Case) -> None:
     case.intake.plan = build_plan(case)
 
 
+def _without_source(conflict: FieldConflict, file_id: str) -> FieldConflict | None:
+    """The conflict left once one file's values are withdrawn; None when fewer than two values remain."""
+    if not conflict.source_refs:
+        return None if conflict.source_ref == file_id else conflict
+    keep = [i for i, ref in enumerate(conflict.source_refs) if ref != file_id]
+    if len(keep) == len(conflict.source_refs):
+        return conflict
+    if len(keep) < 2:
+        return None
+    pick = lambda items: [items[i] for i in keep if i < len(items)]      # noqa: E731
+    return conflict.model_copy(update={'values': pick(conflict.values), 'quotes': pick(conflict.quotes),
+                                       'source_refs': pick(conflict.source_refs), 'source_ref': conflict.source_refs[keep[0]]})
+
+
+def remove_file(case: Case, file_id: str) -> int:
+    """Withdraw a source from intake. Confirmed answers keep their audit source and uploaded bytes."""
+    if case.intake is None:
+        case.intake = IntakeRecord()
+    record = case.intake
+    other = {}
+    for pointer in record.pointers:
+        if pointer.source_ref != file_id:
+            other.setdefault(pointer.fact_id, []).append(pointer)
+    gone = set()
+    for fact in case.facts:
+        pointers = other.get(fact.id, [])
+        from_file = fact.source.ref == file_id or any(p.fact_id == fact.id and p.source_ref == file_id for p in record.pointers)
+        if not from_file:
+            continue
+        if fact.status == 'unconfirmed' and not pointers and fact.source.ref == file_id:
+            gone.add(fact.id)
+        elif fact.source.ref == file_id and pointers:
+            p = next((p for p in pointers if p.verified), pointers[0])
+            if p.method == 'vision' or not p.verified:
+                if fact.status == 'confirmed':
+                    continue                    # the confirmed text reading keeps its original audit source
+                fact.kind, fact.formula, fact.inputs, fact.confidence = 'proposed', None, [], .4
+            fact.source = Source(type='user_text' if p.source_ref == DESCRIPTION else 'file',
+                                 ref=DESCRIPTION_REF if p.source_ref == DESCRIPTION else p.source_ref,
+                                 page=p.page, quote=p.quote)
+    case.facts = [f for f in case.facts if f.id not in gone]
+    for fact in case.facts:
+        if fact.kind == 'computed' and any(id in gone for id in fact.inputs):
+            fact.kind, fact.formula, fact.inputs = 'pointed', None, []
+    record.pointers = [p for p in record.pointers if p.source_ref != file_id and p.fact_id not in gone]
+    record.files = [f for f in record.files if f.file_id != file_id]
+    record.conflicts = [c for c in (_without_source(c, file_id) for c in record.conflicts) if c is not None]
+    record.unresolved_citations = [c for c in record.unresolved_citations if c.source_ref != file_id]
+    record.review = None
+    if file_id not in record.removed_file_ids:
+        record.removed_file_ids.append(file_id)
+    refresh(case)
+    return len(gone)
+
+
 class AnswerRejected(ValueError):
     """The answer is not for a question this case's plan asked, or cannot be read as that field."""
 
 
 def _value(field: str, raw: str):
+    if field == 'product_scope':
+        if raw.strip() in ('site', 'product_acceptance'):
+            return raw.strip()
+        raise AnswerRejected('choose one building or site, or across Alberta')
     kind = FIELDS.get(field, ('', 'text'))[1]
     text = raw.strip()
     if kind == 'text' or field not in FIELDS:
@@ -253,12 +335,15 @@ def _value(field: str, raw: str):
         return found
     if kind == 'enum' and text in ENUMS[field]:
         return text
+    if kind in ('int', 'number') and re.match(rf'^(?:{NUMBER}|[-+.\d])', text, re.I):
+        try:
+            value = measurement(text, 'count' if kind == 'int' else ('area' if field.endswith('_m2') else 'length'))
+        except ValueError as error:
+            raise AnswerRejected(str(error)) from error
+        if kind == 'int' and not isinstance(value, int):
+            raise AnswerRejected('Enter a whole count.')
+        return value
     hits = [hit for hit in read(text).hits if hit.field == field]
-    if kind in ('int', 'number') and not hits:
-        match = re.search(NUMBER, text, re.I)
-        value = number(match.group(0)) if match else None
-        if value is not None and (kind == 'number' or isinstance(value, int)):
-            return value
     if hits:
         return hits[0].value
     if field == 'sprinklered' and text.lower().rstrip('.') in ('yes', 'no'):

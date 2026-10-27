@@ -3,9 +3,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { AccountsError } from "../../api/accounts";
 import { useAccount } from "../account";
 import { AcIcon, clockText, useCountdown } from "./bits";
-import { homeFor } from "./gate";
 import {
-  APPLICANT_CHOICES,
   AUTHORITY_CHOICES,
   KEYS,
   USE_CHOICES,
@@ -18,11 +16,10 @@ import {
   type Choice,
   type StepId,
 } from "./onboardingSteps";
-import { saveOnboarding, signOut } from "./useAuthGate";
+import { afterSignIn, saveOnboarding, signOut } from "./useAuthGate";
 
 const QUESTION: Record<StepId, { text: string; help?: string }> = {
   use: { text: "How will you use Batatis?", help: "You can change this later in settings." },
-  applicantType: { text: "Which describes you best?", help: "This helps us ask the right questions about your project." },
   authority: { text: "Which authority do you review for?", help: "You’ll see the applications sent there." },
   code: { text: "Enter your authority’s access code.", help: "Your authority gives this to its Safety Codes Officers." },
 };
@@ -63,14 +60,14 @@ export function Onboarding() {
   const n = steps.indexOf(step) + 1;
   const ready = answered(step, answers);
 
-  const choices: Choice<string>[] = step === "use" ? USE_CHOICES : step === "applicantType" ? APPLICANT_CHOICES : step === "authority" ? AUTHORITY_CHOICES : [];
+  const choices: Choice<string>[] = step === "use" ? USE_CHOICES : step === "authority" ? AUTHORITY_CHOICES : [];
 
   function pick(value: string) {
     setError("");
     setAnswers((a) => {
-      if (step === "use") return { ...a, use: value as Answers["use"] };
-      if (step === "applicantType") return { ...a, applicantType: value as Answers["applicantType"] };
-      if (step === "authority") return { ...a, authority: value as Answers["authority"], code: a.authority === value ? a.code : "" };
+      if (step === "use" && (value === "applicant" || value === "reviewer")) return { ...a, use: value };
+      const authority = AUTHORITY_CHOICES.find((c) => c.value === value)?.value;
+      if (step === "authority" && authority) return { ...a, authority, code: a.authority === authority ? a.code : "" };
       return a;
     });
   }
@@ -89,7 +86,7 @@ export function Onboarding() {
     setError("");
     try {
       const user = await saveOnboarding(body);
-      location.hash = homeFor(user);
+      location.hash = afterSignIn(user);
     } catch (e) {
       if (e instanceof AccountsError && e.status === 429) startWait(e.retryAfter);
       else if (e instanceof AccountsError && e.status === 403) setError(e.detail || "That access code didn’t work.");
@@ -137,9 +134,9 @@ export function Onboarding() {
     if (step === "code") codeRef.current?.focus();
   }, [step]);
 
-  const value = step === "use" ? answers.use : step === "applicantType" ? answers.applicantType : step === "authority" ? answers.authority : undefined;
+  const value = step === "use" ? answers.use : step === "authority" ? answers.authority : undefined;
   const q = QUESTION[step];
-  const last = !nextStep(step, answers) && step !== "use";
+  const last = ready && !nextStep(step, answers);
 
   return (
     <div className="ac-onb">

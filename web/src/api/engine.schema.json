@@ -466,17 +466,26 @@
           "type": "object"
         },
         "role": {
-          "default": "homebuilder",
-          "enum": [
-            "manufacturer",
-            "contractor",
-            "homebuilder",
-            "builder",
-            "designer",
-            "owner"
+          "anyOf": [
+            {
+              "enum": [
+                "manufacturer",
+                "contractor",
+                "homebuilder",
+                "builder",
+                "designer",
+                "owner",
+                "engineer",
+                "other"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
           ],
-          "title": "Role",
-          "type": "string"
+          "default": null,
+          "title": "Role"
         },
         "rule_unsure": {
           "items": {
@@ -604,17 +613,26 @@
           "type": "object"
         },
         "role": {
-          "default": "homebuilder",
-          "enum": [
-            "manufacturer",
-            "contractor",
-            "homebuilder",
-            "builder",
-            "designer",
-            "owner"
+          "anyOf": [
+            {
+              "enum": [
+                "manufacturer",
+                "contractor",
+                "homebuilder",
+                "builder",
+                "designer",
+                "owner",
+                "engineer",
+                "other"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
           ],
-          "title": "Role",
-          "type": "string"
+          "default": null,
+          "title": "Role"
         },
         "rule_unsure": {
           "items": {
@@ -658,7 +676,12 @@
               "enum": [
                 "manufacturer",
                 "contractor",
-                "homebuilder"
+                "homebuilder",
+                "builder",
+                "designer",
+                "owner",
+                "engineer",
+                "other"
               ],
               "type": "string"
             },
@@ -5823,7 +5846,8 @@
           "enum": [
             "rules",
             "form",
-            "model"
+            "model",
+            "vision"
           ],
           "title": "Method",
           "type": "string"
@@ -5844,6 +5868,30 @@
           "default": false,
           "title": "Project Context",
           "type": "boolean"
+        },
+        "quote": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Quote"
+        },
+        "source_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Name"
         },
         "source_ref": {
           "title": "Source Ref",
@@ -5876,6 +5924,8 @@
         "start",
         "end",
         "verified",
+        "source_name",
+        "quote",
         "project_context"
       ],
       "title": "FactPointer",
@@ -5912,6 +5962,14 @@
           "title": "Source Ref",
           "type": "string"
         },
+        "source_refs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Refs",
+          "type": "array"
+        },
         "values": {
           "default": [],
           "items": {
@@ -5939,7 +5997,8 @@
         "values",
         "quotes",
         "source_ref",
-        "page"
+        "page",
+        "source_refs"
       ],
       "title": "FieldConflict",
       "type": "object"
@@ -6049,6 +6108,19 @@
           "title": "Form Fields Skipped",
           "type": "array"
         },
+        "image_pages_read": {
+          "default": [],
+          "items": {
+            "type": "integer"
+          },
+          "title": "Image Pages Read",
+          "type": "array"
+        },
+        "media_type": {
+          "default": "application/pdf",
+          "title": "Media Type",
+          "type": "string"
+        },
         "name": {
           "title": "Name",
           "type": "string"
@@ -6081,6 +6153,18 @@
           "title": "Pages Read",
           "type": "array"
         },
+        "pictures_not_read_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pictures Not Read Reason"
+        },
         "project_pages": {
           "default": [],
           "items": {
@@ -6101,6 +6185,34 @@
           "default": null,
           "title": "Reason"
         },
+        "semantic_pages_read": {
+          "default": [],
+          "items": {
+            "type": "integer"
+          },
+          "title": "Semantic Pages Read",
+          "type": "array"
+        },
+        "semantic_pages_sent": {
+          "default": [],
+          "items": {
+            "type": "integer"
+          },
+          "title": "Semantic Pages Sent",
+          "type": "array"
+        },
+        "semantic_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Semantic Reason"
+        },
         "status": {
           "enum": [
             "read",
@@ -6109,6 +6221,14 @@
           ],
           "title": "Status",
           "type": "string"
+        },
+        "text_pages_read": {
+          "default": [],
+          "items": {
+            "type": "integer"
+          },
+          "title": "Text Pages Read",
+          "type": "array"
         }
       },
       "required": [
@@ -6119,6 +6239,13 @@
         "pages",
         "pages_read",
         "pages_not_read",
+        "text_pages_read",
+        "semantic_pages_read",
+        "semantic_pages_sent",
+        "image_pages_read",
+        "semantic_reason",
+        "pictures_not_read_reason",
+        "media_type",
         "form",
         "form_fields_read",
         "form_fields_skipped",
@@ -8142,6 +8269,14 @@
           "title": "Ran At",
           "type": "string"
         },
+        "removed_file_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Removed File Ids",
+          "type": "array"
+        },
         "review": {
           "anyOf": [
             {
@@ -8179,6 +8314,7 @@
         "text_sha256",
         "pointers",
         "files",
+        "removed_file_ids",
         "model",
         "conflicts",
         "unresolved_citations",
@@ -8215,6 +8351,11 @@
         "model": {
           "default": true,
           "title": "Model",
+          "type": "boolean"
+        },
+        "pictures": {
+          "default": false,
+          "title": "Pictures",
           "type": "boolean"
         },
         "role": {
@@ -9514,7 +9655,12 @@
               "enum": [
                 "manufacturer",
                 "contractor",
-                "homebuilder"
+                "homebuilder",
+                "builder",
+                "designer",
+                "owner",
+                "engineer",
+                "other"
               ],
               "type": "string"
             },
@@ -15320,7 +15466,12 @@
               "enum": [
                 "manufacturer",
                 "contractor",
-                "homebuilder"
+                "homebuilder",
+                "builder",
+                "designer",
+                "owner",
+                "engineer",
+                "other"
               ],
               "type": "string"
             },

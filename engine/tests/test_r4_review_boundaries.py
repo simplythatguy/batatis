@@ -196,6 +196,9 @@ def test_service_excluded_passages_remain_review_context_without_project_answers
         assert [(fact.value, fact.status) for fact in file_facts if fact.field == 'storeys'] == [(2, 'confirmed')]
         assert [fact.value for fact in file_facts if fact.field == 'municipal_address'] == ['42 Project Street']
         assert not [fact for fact in file_facts if fact.field == 'owner_name']
+    elif context == 'unknown':
+        # An unmarked document may only propose values; nothing it says becomes an answer by itself.
+        assert all(fact.status == 'unconfirmed' for fact in file_facts)
     else:
         assert file_facts == []
         assert case.intake.files[0].reason

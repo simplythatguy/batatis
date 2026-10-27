@@ -1,4 +1,4 @@
-"""Intake routes: read the description and dropped PDFs into pointed facts, used as read unless unclear.
+"""Read the description and attached files; picture findings remain unconfirmed proposals.
 
 `POST /cases/{id}/intake` runs the rules, then the model pass when this deployment allows it
 (BATATIS_LIVE=1 and the spend gate, or BATATIS_PROVIDER=fake), and writes the facts to the ledger.
@@ -36,6 +36,7 @@ class IntakeRequest(BaseModel):
     file_ids: list[str] = Field(default_factory=list, max_length=MAX_FILES)
     role: str | None = None
     model: bool = True                           # false: rules and forms only, no provider call
+    pictures: bool = False                       # true only after the applicant allows sending pictures
     expected_version: int | None = Field(default=None, ge=1, strict=True)
 
     @model_validator(mode='after')
@@ -81,6 +82,10 @@ class IntakeResult(BaseModel):
     record: IntakeRecord
 
 
+class FileRemovalResult(IntakeResult):
+    removed_facts: int
+
+
 def create_job_handler(code: Callable[[], Codes], *, transport_factory=None, review_factory=None):
     """Shared computation/application seam for HTTP compatibility and durable workers."""
     from pydantic import TypeAdapter
@@ -92,12 +97,15 @@ def create_job_handler(code: Callable[[], Codes], *, transport_factory=None, rev
 
     def compute(case, body, context):
         context.progress('reading')
-        files = []
+        files, media_types = [], {}
         for file_id in body.file_ids:
+            if case.intake and file_id in case.intake.removed_file_ids:
+                continue                                 # withdrawn by the applicant: never read again
             stored = context.store.get_file(case.id, file_id)
             if stored is None:
                 raise HTTPException(404, 'file not found')
             files.append((file_id, stored['name'], stored['data']))
+            media_types[file_id] = stored.get('content_type')
         transport, status = pick_transport(context.client_key) if body.model else (None, 'off')
         review_transport, review_status = (pick_review(context.client_key) if body.model and files
                                            else (None, 'off'))
@@ -108,10 +116,11 @@ def create_job_handler(code: Callable[[], Codes], *, transport_factory=None, rev
         known = known_values(case, people_names(context.store, case, context.user))
         return service.run(body.text, files, codes=codes, transport=transport, status=status,
                            outbound=lambda text, personal: scrubbed(text, [*known, *personal]),
-                           review_transport=review_transport, review_status=review_status)
+                           review_transport=review_transport, review_status=review_status,
+                           media_types=media_types, pictures=body.pictures)
 
     read_fields = ('facts', 'intake', 'identify', 'title', 'title_is_manual', 'jurisdiction')
-    return JobHandler(kind='intake', revision='intake.v2', request_model=IntakeRequest,
+    return JobHandler(kind='intake', revision='intake.v3', request_model=IntakeRequest,
                       result_adapter=TypeAdapter(Extraction),
                       read_fields=read_fields,
                       input_values=lambda case, body: {
@@ -212,6 +221,17 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes], *
     def replan(case_id: str, body: PlanRequest | None = None):
         """Recompute the plan, for example after code identification ran. No provider call."""
         return write(case_id, body.expected_version if body else None, service.refresh)
+
+    @router.delete('/cases/{case_id}/intake/files/{file_id}', response_model=FileRemovalResult)
+    def remove_file(case_id: str, file_id: str, body: PlanRequest | None = None):
+        if cases().get_file(case_id, file_id) is None:
+            raise HTTPException(404, 'file not found')
+        removed = 0
+        def change(case):
+            nonlocal removed
+            removed = service.remove_file(case, file_id)
+        saved = write(case_id, body.expected_version if body else None, change)
+        return FileRemovalResult(**saved.model_dump(), removed_facts=removed)
 
     @router.post('/cases/{case_id}/intake/answers', response_model=IntakeResult)
     def answer(case_id: str, body: AnswersRequest):

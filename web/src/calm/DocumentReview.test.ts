@@ -113,25 +113,21 @@ test("document review in a real DOM (API-typed unit fixtures)", { skip: !playwri
       }
     });
 
-    await t.test("off, absent, unknown and test states never claim a live model check; empty output never claims completeness", async () => {
-      for (const [name, label] of [["off", "Off"], ["not_needed", "Not run"], ["unknown", "Unknown"], ["no_review", "Not available"], ["no_intake", "Not available"], ["fake", "Test output"]]) {
-        await openFixture(name);
-        assert.match(await heading.innerText(), new RegExp(label));
-        assert.doesNotMatch(await heading.innerText(), /Model checked/);
-        if (name !== "fake") assert.equal(await panel.getByText("The source proposes a 450 mm projection.").count(), 0);
-        if (name !== "fake") assert.equal(await group("Flags").count(), 0);
+    await t.test("unavailable and empty reviews stay hidden; test output retains its label", async () => {
+      for (const name of ["off", "not_needed", "unknown", "no_review", "no_intake", "empty", "intake_error", "removed_all_files"]) {
+        await page.getByLabel("Unit fixture", { exact: true }).selectOption(name);
+        assert.equal(await panel.count(), 0, name);
       }
-      await openFixture("empty");
-      assert.match(await panel.innerText(), /No findings were returned.*does not establish.*complete/s);
+      await openFixture("fake");
+      assert.match(await heading.innerText(), /Test output/);
+      assert.doesNotMatch(await heading.innerText(), /Model checked/);
     });
 
     await t.test("a pending or failed intake hides old results; edited descriptions and changed file lists are labelled previous input", async () => {
-      for (const name of ["reading", "intake_error"]) {
-        await openFixture(name);
-        assert.equal(await panel.getByText("The source proposes a 450 mm projection.").count(), 0);
-        assert.doesNotMatch(await heading.innerText(), /Model checked|Unread content/);
-      }
-      for (const name of ["changed_description", "added_file", "removed_file", "removed_all_files"]) {
+      await openFixture("reading");
+      assert.equal(await panel.getByText("The source proposes a 450 mm projection.").count(), 0);
+      assert.doesNotMatch(await heading.innerText(), /Model checked|Unread content/);
+      for (const name of ["changed_description", "added_file", "removed_file"]) {
         await openFixture(name);
         assert.match(await heading.innerText(), /Previous input/);
         assert.match(await panel.getByRole("status").innerText(), /earlier description or file list/);

@@ -11,6 +11,7 @@ import type { Candidate, Case, Fact } from "../types.ts";
 import { conditionChoices, coveredByOption, followedInFull, matchingChecklists, otherOptions, tallyLine } from "./checklistView.ts";
 import { buildDeck, caseRules, choicesFor, PACKAGE_YES, RULE_ADD, type DeckOptions } from "./deck.ts";
 import { BUILDING_WIDE, caseRuleResults, numbersUsed, plainResult, readNumber, ruleFacts, ruleInPlay, type RuleData } from "./rulesView.ts";
+import { journeyAnswerAction } from "./journey.ts";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 /** Load a checked-in JSON fixture relative to the repository root. */
@@ -70,8 +71,8 @@ test("missing inputs become Section C deck questions, one card per field, in rul
   assert.deepEqual(inputs.map((i) => i.key), ["rulein-ebf_area_m2", "rulein-glazed_area_m2", "rulein-soffit_projects"]);
   assert.ok(inputs.every((i) => i.section === "C" && !i.done && !i.optional));
   assert.equal(inputs[0].title, index.inputs.ebf_area_m2.question);
-  // Skip leaves a rule open; only confirmed choices belong in the answer controls.
-  assert.deepEqual(choicesFor(inputs[2]).map((x) => x.label), ["Yes", "No"]);
+  // Not sure records uncertainty without supplying a boolean answer.
+  assert.deepEqual(choicesFor(inputs[2]).map((x) => x.label), ["Yes", "No", "Not sure"]);
   assert.deepEqual(choicesFor(inputs[0]), []);
   // No result card while the rule still needs answers.
   assert.ok(!items.some((i) => i.kind === "rule"));
@@ -183,9 +184,12 @@ test("a rule input answer is a confirmed applicant fact; Not sure is settled and
   const f = c.facts.find((x) => x.field === "soffit_projects")!;
   assert.deepEqual([f.value, f.status, f.source.ref, f.source.type], [false, "confirmed", "rules:soffits-houses", "user_click"]);
   assert.equal(buildDeck(c, [], opts()).find((i) => i.key === "rulein-soffit_projects")?.done, true);
-  const unsure = buildDeck(demo(), [], opts({ ruleUnsure: new Set(["soffit_projects"]) })).find((i) => i.key === "rulein-soffit_projects")!;
-  assert.equal(unsure.done, true);
-  assert.equal(unsure.settled, true);
+  const unanswered = demo();
+  const question = buildDeck(unanswered, [], opts()).find((i) => i.key === "rulein-soffit_projects")!;
+  const deferred = JSON.parse(JSON.stringify(reducer(unanswered, journeyAnswerAction(question, "not_sure"))));
+  assert.ok(!deferred.facts.some((f) => f.field === "soffit_projects"), "Not sure never becomes a boolean answer");
+  assert.ok(!buildDeck(deferred, [], opts({ includeDone: false })).some((i) => i.key === question.key), "a new visit never asks it again");
+  assert.equal(buildDeck(deferred, [], opts()).find((i) => i.key === question.key)?.settled, true, "it remains open for Review");
   // Clearing the answer removes the fact.
   assert.ok(!reducer(c, { type: "setRuleInput", field: "soffit_projects", value: null, rule: "soffits-houses", quote: "" }).facts.some((x) => x.field === "soffit_projects"));
 });
@@ -271,10 +275,10 @@ test("a confirmed option hides the other options of its choice; 'not yet' means 
 
 test("an authority read from the site is confirmed once on its card; unanswered it is required", () => {
   const set = { ...demo(), authority: "edmonton" as const };
-  const card = buildDeck(set, [], opts()).find((i) => i.key === "authority")!;
+  const card = buildDeck(set, [], opts()).find((i) => i.kind === "paperwork")?.paperworkRows?.find((i) => i.key === "authority")!;
   assert.deepEqual([card.done, card.optional], [false, true]);
-  assert.equal(buildDeck(set, [], opts({ seen: new Set(["authority"]) })).find((i) => i.key === "authority")?.done, true);
-  const open = buildDeck(demo(), [], opts()).find((i) => i.key === "authority")!;
+  assert.equal(buildDeck(set, [], opts({ seen: new Set(["authority"]) })).find((i) => i.kind === "paperwork")?.paperworkRows?.find((i) => i.key === "authority")?.done, true);
+  const open = buildDeck(demo(), [], opts()).find((i) => i.kind === "paperwork")?.paperworkRows?.find((i) => i.key === "authority")!;
   assert.deepEqual([open.done, open.optional], [false, false]);
 });
 

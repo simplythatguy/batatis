@@ -5,6 +5,7 @@
  */
 
 import type { FactInput, IdentifyResult, IntakeRecord, SourceInput } from "./api/types.gen";
+import type { ProfessionalResult, SectionDPlan } from "./api/client";
 
 /** Fact, Source and their enums are the engine's (engine/models.py via src/api/types.gen.ts).
  *  exact = code database or form; pointed = a span from the user's words or files;
@@ -199,7 +200,7 @@ export interface EvidenceDraft {
   fileRef?: string | null;
 }
 
-export type ApplicantType = "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner";
+export type ApplicantType = "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner" | "engineer" | "other";
 
 export interface Case {
   id: string;
@@ -209,7 +210,7 @@ export interface Case {
    * it. Unset on a new draft, whose placeholder title is never sent as a name.
    */
   titleKept?: boolean;
-  applicantType: ApplicantType;
+  applicantType: ApplicantType | null;
   /** Test-fixture provenance only. Product visits never load sample cases. */
   exampleId?: string;
   codeEdition: string;
@@ -245,4 +246,6 @@ export interface Case {
   intake?: IntakeState;
   /** The latest code identification (committed articles, quoted choices, labels). */
   identify?: IdentifyResult;
+  /** Derived Section D work at an explicit case snapshot; never sent as applicant facts. */
+  professionalWork?: { basis: string; professional: ProfessionalResult; plan: SectionDPlan };
 }
