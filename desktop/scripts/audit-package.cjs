@@ -17,10 +17,11 @@ function audit(resources, platform) {
     ...listPackage(archive, { isPack: false }).map((name) => `app.asar${name.replaceAll("\\", "/")}`),
     ...files(resources).filter((name) => name !== archive).map((name) => relative(resources, name).replaceAll("\\", "/")),
   ];
-  const forbidden = packaged.filter((name) => /(?:^|\/)(?:\.env(?:\..*)?|Data Prompts|reference|evals|evals_dev|research|cases\.sqlite|codedb\.sqlite|auth\.json|config\.toml|providers)(?:\/|$)/i.test(name)
+  // The built NBC(AE) code database is the one database that ships; the app copies it into its own data on launch.
+  const forbidden = packaged.filter((name) => name !== "codedb/codedb.sqlite").filter((name) => /(?:^|\/)(?:\.env(?:\..*)?|Data Prompts|reference|evals|evals_dev|research|cases\.sqlite|codedb\.sqlite|auth\.json|config\.toml|providers)(?:\/|$)/i.test(name)
     || /\.(?:sqlite(?:3)?|sqlite-wal|sqlite-shm|key)$/i.test(name)
     || /NBC-AE-2023-2nd-printing-FULL|NBC-2020-Intent-Statements/i.test(name));
-  assert.deepEqual(forbidden, [], "no workspaces, CodeDB, copyrighted source documents, corpus, credentials or environment files ship");
+  assert.deepEqual(forbidden, [], "no workspaces, other databases, copyrighted source documents, corpus, credentials or environment files ship");
   const engine = join(resources, "engine", platform === "win32" ? "batatis-engine.exe" : "batatis-engine");
   assert.ok(existsSync(engine), "native frozen engine is bundled");
   assert.ok(existsSync(join(resources, "web", "index.html")), "the canonical web build is bundled");

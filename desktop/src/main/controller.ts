@@ -8,7 +8,7 @@
  */
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { importCodeDb, inspectCodeDb } from "./codedb";
+import { importCodeDb, inspectCodeDb, installBundledCodeDb } from "./codedb";
 import type { KeyVault, KeyStatus, SaveOutcome } from "./credentials";
 import { isDevProfileId, startEngine, type CallReply, type DevProfile, type DevProfileId, type Engine, type EngineCommand, type EngineStart, type HostCall, type WorkspaceKind } from "./engine";
 import type { ApiGate } from "./protocol";
@@ -136,6 +136,10 @@ export class DesktopHost {
     this.#dispatch.select(this.#settings.ai ?? DEFAULT_SELECTION);
     for (const id of ["chatgpt", "claude"] as const) {
       this.#signedIn[id] = await this.#accounts[id].status().then((status) => status.state === "signed-in", () => null);
+    }
+    if (this.#deps.paths.packaged) {
+      await installBundledCodeDb(join(this.#deps.paths.resources, "codedb", "codedb.sqlite"), codeDbPath(this.#deps.paths))
+        .catch(() => this.#deps.log("The bundled code database couldn’t be installed."));
     }
     await this.#run(this.#settings.workspace);
   }
