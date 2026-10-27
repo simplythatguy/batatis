@@ -14,6 +14,7 @@ import type { Candidate } from "../types";
 import { Icon24 } from "./icons";
 import { codeHref } from "./routes";
 import { CIcon, Dot } from "./ui";
+import { jobLabel } from "../api/jobs";
 
 export function Words({ words, quote }: { words: Snippet | null; quote?: string }) {
   if (words) {
@@ -91,42 +92,54 @@ export function BeforeYouSubmit({ pre }: { pre: PreApplication }) {
 
 /** Intake at work, or its failure with Try again. */
 export function ReadingState() {
-  const { reading, readDescription } = useCase();
+  const { reading, readDescription, cancelReadingJob } = useCase();
   if (reading.intake === "error") {
-    return <button type="button" className="cf-btn cf-step-start" onClick={() => void readDescription()}><CIcon name="retry" size={14} />Try again</button>;
+    const exhausted = reading.intakeJob && ["failed", "cancelled"].includes(reading.intakeJob.state) && !reading.intakeJob.can_retry;
+    return <><button type="button" className="cf-btn cf-step-start" disabled={exhausted} onClick={() => void readDescription()}><CIcon name="retry" size={14} />Try again</button>{exhausted && <p className="cf-note">This saved job cannot be retried.</p>}</>;
   }
   if (reading.intake !== "running") {
     return <button type="button" className="cf-btn cf-step-start" onClick={() => void readDescription()}>Read my description</button>;
   }
-  return (
+  return <>
     <ol className="cf-steps" aria-live="polite">
       <li className="cf-step is-running">
         <span className="cf-step-mark" aria-hidden="true" />
         <span className="cf-step-label">Reading your description and files</span>
-        <span className="cf-step-detail">Working…</span>
+        <span className="cf-step-detail">{reading.intakeJob ? jobLabel(reading.intakeJob) : "Starting…"}</span>
       </li>
     </ol>
-  );
+    {reading.intakeNote && <p className="cf-note" role="status">{reading.intakeNote}</p>}
+    {reading.intakeJob && <button type="button" className="cf-link-btn" onClick={() => void cancelReadingJob("intake")}>Cancel</button>}
+  </>;
 }
 
 /** Stage progress for the code check: screen, rerank, verify, questions. Counts only. */
 export function CodeProgress() {
-  const { reading, runIdentify } = useCase();
+  const { reading, runIdentify, cancelReadingJob } = useCase();
   const running = reading.identify === "running";
   if (reading.identify === "error") {
+    const exhausted = reading.identifyJob && ["failed", "cancelled"].includes(reading.identifyJob.state) && !reading.identifyJob.can_retry;
     return (
       <div className="cf-step-error">
         <p className="cf-note"><Dot tone="warning" />{reading.identifyNote || "The code check didn’t finish."}</p>
         <div className="cf-row-actions">
-          <button type="button" className="cf-btn" onClick={() => void runIdentify()}><CIcon name="retry" size={14} />Try again</button>
+          <button type="button" className="cf-btn" disabled={exhausted} onClick={() => void runIdentify()}><CIcon name="retry" size={14} />Try again</button>
           <a className="cf-btn is-ghost" href="#/code">Find the rule yourself</a>
         </div>
+        {exhausted && <p className="cf-note">This saved job cannot be retried.</p>}
       </div>
     );
   }
   if (!running && reading.identify !== "done") {
     return <button type="button" className="cf-btn cf-step-start" onClick={() => void runIdentify()}>Check the code now</button>;
   }
+  if (reading.identifyJob) return <><ol className="cf-steps" aria-live="polite"><li className={`cf-step is-${running ? "running" : "done"}`}>
+    <span className="cf-step-mark" aria-hidden="true" />
+    <span className="cf-step-label">Code check</span>
+    <span className="cf-step-detail">{jobLabel(reading.identifyJob)}</span>
+  </li></ol>{reading.identifyNote && <p className="cf-note" role="status">{reading.identifyNote}</p>}
+    {running && <button type="button" className="cf-link-btn" onClick={() => void cancelReadingJob("identify")}>Cancel</button>}
+  </>;
   return (
     <ol className="cf-steps" aria-live="polite">
       {stageViews(reading.stages, running).map((s) => (

@@ -6,13 +6,14 @@ import { initials, useAccount } from "../account";
 import { Tip } from "../RelevanceRing";
 import { AcIcon, usePopover } from "./bits";
 import { signOut } from "./useAuthGate";
+import { useSignOutStatus } from "./signOutGuard";
 
 export function AccountButton() {
   const { user } = useAccount();
   const testPerson = useDesktop()?.workspace === "dev";
   const pop = usePopover();
   const [tip, setTip] = useState(false);
-  const [leaving, setLeaving] = useState(false);
+  const leaving = useSignOutStatus();
   const wasOpen = useRef(false);
 
   useEffect(() => {
@@ -68,10 +69,11 @@ export function AccountButton() {
             <AcIcon name="cog" size={16} />Settings
           </a>
           {!testPerson && (
-            <button role="menuitem" tabIndex={-1} type="button" disabled={leaving} onClick={() => { setLeaving(true); void signOut(); }}>
-              <AcIcon name="out" size={16} />{leaving ? "Signing out…" : "Sign out"}
+            <button role="menuitem" tabIndex={-1} type="button" disabled={leaving.pending} onClick={() => void signOut()}>
+              <AcIcon name="out" size={16} />{leaving.pending ? "Signing out…" : "Sign out"}
             </button>
           )}
+          {leaving.error && <p className="cf-note" role="status">{leaving.error}</p>}
         </div>
       )}
     </>

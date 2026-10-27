@@ -31,17 +31,25 @@ The browser must recheck its current enabled registry, application identity and 
 generation before applying the result. A newer user navigation or case switch
 invalidates an older plan. It acknowledges success only after the actual route or
 panel has opened, retaining unsaved input and ordinary permission/confirmation
-gates. Sending a request is not proof that navigation succeeded. Typed chat and a
-completed spoken utterance use the same seam; partial speech must never navigate.
+gates. Sending a request is not proof that navigation succeeded. This contract
+serves typed chat and contextual Help.
 
 The registry includes the applicant stages, sidebar, code library/search, selected
-references, download options, settings, notifications, accuracy and named form
+references, download options, settings, notifications and named form
 questions. Reviewer destinations include the queue, PDF-package review, current
 review steps and panels. Current-file reviewer destinations also require an
 authorized, reviewable case from the reviewer's authority, owned by someone else.
 The server supplies human destination names as product-help context, replacing
 internal screen-name guesses. Older clients that omit `destinations` receive normal
 help with `navigation: null`.
+
+The `references` destination opens the current Application stage. Historical
+`#/references` and `#/section-c` links also resolve to Application; the Code
+library's existing references link remains a backward alias. Historical
+`#/officer` resolves to the current Review stage. These aliases do not expose
+standalone legacy screens. Accuracy evidence remains offline in
+`docs/accuracy/report.md` and `docs/accuracy/report.json`; there is no accuracy
+destination, product UI or public authentication exemption.
 
 `comments` opens the existing officer-comments page for the applicant's captured
 current application. The browser offers it only while that native destination is
@@ -53,4 +61,4 @@ Reading and read receipts remain the comments page's responsibility. Requests
 about another named application are not inferred or retargeted.
 
 This backend contract is not evidence that the browser has implemented every
-destination, that voice is connected, or that a hosted deployment supports it.
+destination or that a hosted deployment supports it.

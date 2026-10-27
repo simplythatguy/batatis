@@ -197,11 +197,11 @@ def test_selection_does_not_rewrite_confirmed_references_or_other_application_ma
     case = store.put(Case(title='SYNTHETIC manual title', title_is_manual=True, facts=[fact()],
                           provisions=['9.27.3.4.(1)'], section_c=section_c_rows(['9.27.3.4.(1)'], codes),
                           gaps=[Gap(section='D', field='risk', message='SYNTHETIC pending risk')]))
-    before = case.model_dump(exclude={'version', 'updated_at', 'selected_articles'})
+    before = case.model_dump(exclude={'version', 'updated_at', 'expires_at', 'selected_articles'})
     response = save(client, case, [selection('9.27.3.4.(1)', 'no'), selection('9.25.2.2.(1)', 'yes')])
     assert response.status_code == 200, response.text
     after = store.get(case.id)
-    assert after.model_dump(exclude={'version', 'updated_at', 'selected_articles'}) == before
+    assert after.model_dump(exclude={'version', 'updated_at', 'expires_at', 'selected_articles'}) == before
     # A later legacy writer must keep the added field, including a fact or title save.
     added = store.add_fact(case.id, fact())
     assert added.selected_articles == after.selected_articles
@@ -390,6 +390,8 @@ def test_late_write_or_revocation_cannot_be_overwritten_or_resurrected(context, 
 def test_expired_case_cannot_be_recreated_by_a_selection_save(context):
     client, store = context
     case = store.put(Case(created_at=(datetime.now(timezone.utc) - timedelta(days=8)).isoformat()))
+    from engine.tests.test_retention import _set_last_activity
+    _set_last_activity(store, case.id, (datetime.now(timezone.utc) - timedelta(days=8)).isoformat())
     response = save(client, case, [selection()])
     assert response.status_code == 404, response.text
     assert store.get(case.id) is None

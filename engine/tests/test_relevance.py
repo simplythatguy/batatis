@@ -143,6 +143,7 @@ def test_latest_empty_description_wins(setup):
 
 def test_no_key_is_safe_503_and_does_not_start_scoring(tmp_path, codes, monkeypatch, caplog):
     monkeypatch.setenv('BATATIS_LIVE', '1')
+    monkeypatch.setenv('BATATIS_IDENTIFY_SCREEN', 'jev')
     resolved = []
     monkeypatch.setattr(keystore, 'resolve', lambda provider: resolved.append(provider))
     client = TestClient(create_app(store=CaseStore(tmp_path / 'cases.sqlite'), codes=codes))
@@ -262,9 +263,8 @@ def test_finishing_scoring_preserves_concurrent_edits_or_deletion(setup, action)
             elif action == 'delete':
                 assert client.delete(f'/cases/{case_id}').status_code == 204
             else:
-                case = store.get(case_id)
-                case.created_at = '2000-01-01T00:00:00+00:00'
-                store.put(case, expected_version=case.version)
+                from engine.tests.test_retention import _set_last_activity
+                _set_last_activity(store, case_id, '2000-01-01T00:00:00+00:00')
         finally:
             ask.release.set()
         response = pending.result(timeout=10)

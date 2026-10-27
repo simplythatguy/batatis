@@ -19,6 +19,21 @@ def _header(headers, name: bytes) -> bytes:
     return b''
 
 
+def private_editors(payload, user_id: str | None):
+    """Unsubmitted editors stay owner-only, including nested cases in workflow responses.
+
+    Filter the HTTP representation, never the stored model used by officer writes.
+    """
+    if isinstance(payload, list):
+        return [private_editors(item, user_id) for item in payload]
+    if isinstance(payload, dict):
+        result = {key: private_editors(value, user_id) for key, value in payload.items()}
+        if result.get('owner_id') and result['owner_id'] != user_id and 'applicant_draft' in result:
+            result['applicant_draft'] = None
+        return result
+    return payload
+
+
 class HttpGuard:
     def __init__(self, app, sweep=None):
         self.app = app
@@ -83,7 +98,8 @@ class HttpGuard:
             headers = list(started.get('headers') or [])
             if raw and b'application/json' in _header(headers, b'content-type'):
                 try:
-                    payload = attach_meta(attribute_code(json.loads(raw)))
+                    user = scope.get('state', {}).get('user')
+                    payload = attach_meta(attribute_code(private_editors(json.loads(raw), getattr(user, 'id', None))))
                     raw = json.dumps(payload).encode()
                 except (ValueError, UnicodeError):
                     pass

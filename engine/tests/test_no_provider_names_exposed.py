@@ -158,10 +158,8 @@ def test_the_privacy_notice_names_no_provider():
 
 
 def test_the_accuracy_report_names_no_provider():
-    """The #/accuracy page bundles docs/accuracy/report.json; the report and the page name no provider or model."""
+    """The contributor report names no provider or model."""
     files = [ROOT / 'docs' / 'accuracy' / 'report.json', ROOT / 'docs' / 'accuracy' / 'report.md']
-    files += sorted(p for p in (WEB / 'src' / 'accuracy').rglob('*') if p.is_file())
-    assert len(files) >= 4, 'the report, its markdown and the page'
     hits = [hit for path in files for hit in text_hits(path, IDENTIFY_NAMES)]
     assert not hits, '\n'.join(hits)
 
@@ -337,6 +335,8 @@ def require_identify(client: Recording) -> None:
 def test_identify_responses_name_no_provider(world, monkeypatch):
     _, client, _, _ = world
     require_identify(client)
+    monkeypatch.setenv('BATATIS_IDENTIFY_SCREEN', 'jev')
+    monkeypatch.setenv('BATATIS_IDENTIFY_RERANK', 'jev')
     monkeypatch.setenv('BATATIS_PROVIDER', 'fake')                                # offline stand-ins, never a live call
     monkeypatch.setenv('BATATIS_IDENTIFY_RATE_LIMIT', '1000')
     case_id = described_case(client)
@@ -368,6 +368,8 @@ def test_identify_with_the_gate_closed_names_no_provider(world, monkeypatch):
     """No fake selected and no live switch: the run takes the labelled keyword fallback, whose cause names a provider."""
     _, client, _, _ = world
     require_identify(client)
+    monkeypatch.setenv('BATATIS_IDENTIFY_SCREEN', 'jev')
+    monkeypatch.setenv('BATATIS_IDENTIFY_RERANK', 'jev')
     monkeypatch.setenv('BATATIS_IDENTIFY_RATE_LIMIT', '1000')
     case_id = described_case(client)
     run = client.post(f'/cases/{case_id}/identify')

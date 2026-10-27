@@ -35,7 +35,6 @@ jobs:
           npm test
           npm run test:unwrap
           npm run test:rules
-          npm run test:accuracy
           npm run build
       - name: Fail if a sqlite file is in the web output
         run: |
@@ -59,7 +58,7 @@ jobs:
   engine:
     name: engine
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     services:
       postgres:
         image: postgres:16
@@ -109,7 +108,7 @@ jobs:
           python -m codedb build
           test -s codedb/build/codedb.sqlite
       - name: Engine tests and key-free evals
-        run: python -m pytest -q engine/tests codedb/tests evals_dev -rs
+        run: python -m pytest -q engine/tests codedb/tests evals_dev -rs --durations=25
 
   gitleaks:
     name: gitleaks

@@ -390,10 +390,12 @@ _OWNER_IS = re.compile(r"\b(?:[Tt]he\s+)?(?:property\s+)?owner\s+is\s+(?P<v>[A-Z
 _ADDRESS_TAIL = re.compile(r'^(?:\s*,\s*[A-Z][\w.\' -]{1,30})?(?:\s*,\s*(?:AB|Alberta))?(?:\s*,?\s*[A-Z]\d[A-Z]\s?\d[A-Z]\d)?')
 
 
-def _label_lines(text: str) -> list[Hit]:
+def _label_lines(text: str, *, project: bool = False) -> list[Hit]:
     hits = []
     for match in _LABEL_LINE.finditer(text):
         label = match.group('label').lower()
+        if project and label in {'address', 'date'}:
+            continue                              # a report/issuer label does not identify the project
         name = next(key for key, pattern in _LABELS if re.fullmatch(pattern, label, re.I))
         value = match.group('value').strip()
         if not value or _NEGATED_VALUE.match(value):
@@ -404,6 +406,11 @@ def _label_lines(text: str) -> list[Hit]:
             end -= 1
         hits.append(Hit(name, text[start:end], start, end, 0.95))
     return hits
+
+
+def project_labels(text: str) -> list[Hit]:
+    """The shared label grammar, restricted to labels that name a project/applicant field."""
+    return _label_lines(text, project=True)
 
 
 def _inline_admin(sentence: str, at: int) -> list[Hit]:

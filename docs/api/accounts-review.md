@@ -127,10 +127,10 @@ Ownership, authority, status, submission timestamp, claim, decision, status hist
 and messages/read receipts live in the case JSON. Historic applicant replies,
 officer reasons and status history are retained without rewriting them for the
 one-way policy. All workflow/thread mutations
-use the existing case version CAS, retrying against fresh state. Thus deletion
-and the existing seven-day **creation-based** case retention remove messages,
-history, decisions and files with the case, on both backends. Submitting or
-messaging does not extend that seven-day window. User accounts remain durable.
+use the existing case version CAS, retrying against fresh state. Deletion and the [inactivity and workflow retention policy](../application-retention.md)
+remove messages, history, decisions, files and background work with the case on
+both backends. Saved changes and new correspondence extend inactivity deadlines;
+submitted, under-review and returned applications have no automatic expiry. User accounts remain durable.
 Sessions expire after 30 days of inactivity, refreshed on successful authenticated
 requests; OAuth exchanges expire after ten minutes. Account expiry cleanup runs
 with normal case purge transactions and when creating sessions/OAuth exchanges.

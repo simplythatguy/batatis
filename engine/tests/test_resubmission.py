@@ -160,27 +160,25 @@ def test_resubmission_notifications_agree_with_actual_submitted_state(scene):
     assert [n for n in later if n['case_id'] == returned['id'] and n['kind'] == 'status'] == [note]
 
 
-def test_actual_creation_based_expiry_does_not_move_on_submit_or_messages(scene):
+def test_active_review_is_retained_regardless_of_creation_or_inactivity(scene):
     store, clients, _ = scene
     case = owned(scene, complete=True)
     case.created_at = (datetime.now(timezone.utc) - timedelta(days=6)).isoformat()
     store.put(case)
     path = '/cases/' + case.id
     read = clients['owner'].get(path).json()
-    expected = (datetime.fromisoformat(case.created_at) + timedelta(days=7)).isoformat()
+    expected = (datetime.fromisoformat(read['updated_at']) + timedelta(days=180)).isoformat()
     assert read['expires_at'] == expected
-    assert clients['owner'].post(path + '/submit', json={}).json()['expires_at'] == expected
+    assert clients['owner'].post(path + '/submit', json={}).json()['expires_at'] is None
     assert clients['reviewer'].post(path + '/messages', json={'body': 'Keep a synthetic local record.'}).status_code == 201
     app = next(a for a in clients['owner'].get('/me/applications').json()['applications'] if a['id'] == case.id)
-    assert app['expires_at'] == expected
+    assert app['expires_at'] is None
     row = next(a for a in clients['reviewer'].get('/review/queue').json()['applications'] if a['id'] == case.id)
-    assert row['expires_at'] == expected
-    # Expiry is still enforced from creation despite a recent submit/message.
-    case = store.get(case.id)
-    case.created_at = (datetime.now(timezone.utc) - timedelta(days=8)).isoformat()
-    store.put(case)
-    assert clients['owner'].get(path).status_code == 404
-    assert not any(a['id'] == case.id for a in clients['reviewer'].get('/review/queue').json()['applications'])
+    assert row['expires_at'] is None
+    from engine.tests.test_retention import _set_last_activity
+    _set_last_activity(store, case.id, (datetime.now(timezone.utc) - timedelta(days=2000)).isoformat())
+    assert clients['owner'].get(path).status_code == 200
+    assert any(a['id'] == case.id for a in clients['reviewer'].get('/review/queue').json()['applications'])
 
 
 def test_repeated_return_rounds_keep_decisions_and_compare_against_the_latest_return(scene):

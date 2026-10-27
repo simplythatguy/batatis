@@ -84,10 +84,10 @@ def _focus(value, case_id: str) -> tuple[str, ...]:
 def load(root: Path | None = None) -> tuple[Case, ...]:
     root = Path(root or METADATA_ROOT)
     out = []
-    for row in json.loads((root / 'index.json').read_text()):
+    for row in json.loads((root / 'index.json').read_text(encoding='utf-8')):
         folder = root / row['folder']
-        source = json.loads((folder / 'source.json').read_text())
-        evaluation = json.loads((folder / 'evaluation.json').read_text())
+        source = json.loads((folder / 'source.json').read_text(encoding='utf-8'))
+        evaluation = json.loads((folder / 'evaluation.json').read_text(encoding='utf-8'))
         attachments = tuple(Attachment(a['filename'], a.get('role') or 'input', a['sha256'], int(a.get('bytes') or 0))
                             for a in source['attachments'] if a.get('included_in_default_input', True))
         out.append(Case(
@@ -95,7 +95,7 @@ def load(root: Path | None = None) -> tuple[Case, ...]:
             tier=row['priority'], case_type=row['case_type'], jurisdiction=row['jurisdiction'],
             code_edition=row['code_edition'], country=row['country'], province=row['province_or_state'],
             city=row['city_or_town'], source_group=row['source_group'], outcome_leakage=bool(row['outcome_leakage']),
-            prompt=(folder / 'prompt.txt').read_text().strip(), attachments=attachments,
+            prompt=(folder / 'prompt.txt').read_text(encoding='utf-8').strip(), attachments=attachments,
             facts=tuple(SourceFact(f['text'].strip(), (f.get('locator') or '').strip()) for f in source['facts']),
             focus=_focus(evaluation.get('review_focus'), row['case_id']),
             known_outcome=(evaluation.get('known_outcome') or '').strip(),

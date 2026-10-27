@@ -285,6 +285,7 @@ def test_actual_attachments_cannot_be_erased_or_converted_by_text_edits(ledger):
     orphan = store.put_file(case.id, 'unlinked.pdf', b'%PDF-1.4 Synthetic unlinked bytes\n')
     other = create()
     foreign = store.put_file(other.id, 'other-case.pdf', b'%PDF-1.4 Synthetic other case\n')
+    other = store.get(other.id)  # a successful upload updates inactivity, without a content revision
     inventory = {entry['id']: store.get_file(case.id, entry['id']) for entry in (file, orphan)}
     foreign_before = store.get_file(other.id, foreign['id'])
     store.add_fact(case.id, fact('evidence.doc_wall.file_ref', file['id'], 'file', file['id']))
@@ -370,11 +371,12 @@ def test_racing_mutation_cannot_lose_new_data_or_resurrect_absence(ledger, monke
             else:
                 current, version = store.get_snapshot(case.id)
                 if mutation == 'expire':
-                    current.created_at = (datetime.now(timezone.utc) - timedelta(days=8)).isoformat()
+                    from engine.tests.test_retention import _set_last_activity
+                    _set_last_activity(store, case.id, (datetime.now(timezone.utc) - timedelta(days=8)).isoformat())
                 else:
                     from engine.reference_selection import replace_references
                     replace_references(current, [], [])
-                put(current, expected_version=version)
+                    put(current, expected_version=version)
         return put(stale, expected_version=expected_version)
 
     monkeypatch.setattr(store, 'put', race)
@@ -410,6 +412,9 @@ def test_terminal_case_never_created_by_evidence(ledger, method, state):
         case_id = case.id
         if state == 'deleted':
             store.delete(case.id)
+        elif state == 'expired':
+            from engine.tests.test_retention import _set_last_activity
+            _set_last_activity(store, case.id, (datetime.now(timezone.utc) - timedelta(days=8)).isoformat())
     response = post(client, case_id, payload()) if method == 'post' else delete(client, case_id, 'doc_wall', 1)
     private(response, 404)
     assert store.get(case_id) is None and store.get_version(case_id) is None

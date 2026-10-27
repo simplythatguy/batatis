@@ -60,6 +60,32 @@ export interface AnswersRequest {
   expected_version?: number | null;
 }
 
+export interface ApplicantDraft {
+  authority_unsure: boolean;
+  choices: Record<string, string>;
+  evidence_drafts: Record<string, EvidenceDraft>;
+  intake_file_ids: string[] | null;
+  packages: Record<string, "yes" | "no">;
+  question_text: Record<string, DraftText>;
+  role: "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner";
+  rule_unsure: string[];
+  seen: string[];
+  skipped: string[];
+}
+
+export interface ApplicantDraftInput {
+  authority_unsure?: boolean;
+  choices?: Record<string, string>;
+  evidence_drafts?: Record<string, EvidenceDraftInput>;
+  intake_file_ids?: string[] | null;
+  packages?: Record<string, "yes" | "no">;
+  question_text?: Record<string, DraftText>;
+  role?: "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner";
+  rule_unsure?: string[];
+  seen?: string[];
+  skipped?: string[];
+}
+
 export interface ApplicantSummary {
   applicant_type: "manufacturer" | "contractor" | "homebuilder" | null;
   name: string;
@@ -136,7 +162,7 @@ export interface AssistFocus {
 }
 
 export interface AssistNavigation {
-  destination: "applications" | "description" | "questions" | "review" | "application" | "code-library" | "code-search" | "references" | "downloads" | "officer-view" | "settings" | "notifications" | "accuracy" | "comments" | "question-authority" | "question-owner" | "question-representative" | "question-mailing-address" | "question-date" | "question-scope" | "question-permit" | "question-site-address" | "question-legal-description" | "question-alternative" | "question-rationale" | "question-risk" | "question-mitigation" | "question-assumptions" | "question-maintenance" | "question-qualifications" | "question-documents" | "review-queue" | "package-review" | "review-overview" | "review-missing" | "review-checks" | "review-decide" | "review-application" | "review-messages" | "review-request" | "review-versions" | "review-close-out";
+  destination: "applications" | "description" | "questions" | "review" | "application" | "code-library" | "code-search" | "references" | "downloads" | "settings" | "notifications" | "comments" | "question-authority" | "question-owner" | "question-representative" | "question-mailing-address" | "question-date" | "question-scope" | "question-permit" | "question-site-address" | "question-legal-description" | "question-alternative" | "question-rationale" | "question-risk" | "question-mitigation" | "question-assumptions" | "question-maintenance" | "question-qualifications" | "question-documents" | "review-queue" | "package-review" | "review-overview" | "review-missing" | "review-checks" | "review-decide" | "review-application" | "review-messages" | "review-request" | "review-versions" | "review-close-out";
 }
 
 export interface AssistRequest {
@@ -144,7 +170,7 @@ export interface AssistRequest {
   case_id?: string | null;
   case_version?: number | null;
   context_id?: string | null;
-  destinations?: ("applications" | "description" | "questions" | "review" | "application" | "code-library" | "code-search" | "references" | "downloads" | "officer-view" | "settings" | "notifications" | "accuracy" | "comments" | "question-authority" | "question-owner" | "question-representative" | "question-mailing-address" | "question-date" | "question-scope" | "question-permit" | "question-site-address" | "question-legal-description" | "question-alternative" | "question-rationale" | "question-risk" | "question-mitigation" | "question-assumptions" | "question-maintenance" | "question-qualifications" | "question-documents" | "review-queue" | "package-review" | "review-overview" | "review-missing" | "review-checks" | "review-decide" | "review-application" | "review-messages" | "review-request" | "review-versions" | "review-close-out")[];
+  destinations?: ("applications" | "description" | "questions" | "review" | "application" | "code-library" | "code-search" | "references" | "downloads" | "settings" | "notifications" | "comments" | "question-authority" | "question-owner" | "question-representative" | "question-mailing-address" | "question-date" | "question-scope" | "question-permit" | "question-site-address" | "question-legal-description" | "question-alternative" | "question-rationale" | "question-risk" | "question-mitigation" | "question-assumptions" | "question-maintenance" | "question-qualifications" | "question-documents" | "review-queue" | "package-review" | "review-overview" | "review-missing" | "review-checks" | "review-decide" | "review-application" | "review-messages" | "review-request" | "review-versions" | "review-close-out")[];
   focus?: AssistFocus | null;
   history?: AssistTurn[];
   question: string;
@@ -232,6 +258,7 @@ export interface Bulletin {
 }
 
 export interface Case {
+  applicant_draft: ApplicantDraft | null;
   authority: string | null;
   claim: Claim | null;
   created_at: string;
@@ -552,6 +579,29 @@ export interface DocumentRow {
   type: Attribute;
 }
 
+export interface DraftFileBinding {
+  file_id: string;
+  kind: "file";
+}
+
+export interface DraftFileBindingInput {
+  file_id: string;
+  kind?: "file";
+}
+
+export interface DraftPatch {
+  applicant_draft?: ApplicantDraftInput | null;
+  expected_version: number;
+  facts?: FactInput[];
+  jurisdiction?: JurisdictionInput | null;
+  selected_articles?: SelectedArticleInput[] | null;
+}
+
+export interface DraftText {
+  base: string;
+  value: string;
+}
+
 export interface DroppedPick {
   article: string;
   reason: string;
@@ -589,6 +639,28 @@ export interface ElementModel {
   url: string | null;
   value: string | null;
   verdict: "present" | "missing" | "unclear";
+}
+
+export interface EvidenceDraft {
+  date: string;
+  document: string;
+  editing: string | null;
+  evidenceType: string;
+  file_binding: unknown;
+  note: string;
+  responsible: string;
+  step: number | null;
+}
+
+export interface EvidenceDraftInput {
+  date?: string;
+  document?: string;
+  editing?: string | null;
+  evidenceType?: string;
+  file_binding?: unknown;
+  note?: string;
+  responsible?: string;
+  step?: number | null;
 }
 
 export interface EvidenceItem {
@@ -663,6 +735,7 @@ export interface FactPointer {
   field: string;
   method: "rules" | "form" | "model";
   page: number | null;
+  project_context: boolean;
   source_ref: string;
   start: number | null;
   verified: boolean;
@@ -698,6 +771,7 @@ export interface FileReport {
   pages: number | null;
   pages_not_read: number[];
   pages_read: number[];
+  project_pages: number[];
   reason: string | null;
   status: "read" | "partly_read" | "not_read";
 }
@@ -813,6 +887,9 @@ export interface IdentifyDecisionResponse {
   decisions: Record<string, ArticleDecision>;
   description_sha256: string;
   engineering_required: "depends";
+  input_coverage_gaps: string[];
+  input_fingerprint: string | null;
+  input_sha256: string | null;
   label: string;
   message: string | null;
   mode: "live" | "fake" | "bm25_fallback";
@@ -822,6 +899,12 @@ export interface IdentifyDecisionResponse {
   persisted: boolean;
   process_refs: ProcessRef[];
   questions: string[];
+  requirement_coverage: RequirementCoverage;
+  requirement_evidence: RequirementEvidence[];
+  requirement_links: RequirementLink[];
+  requirement_status: "not_run" | "needs_review" | "source_unavailable";
+  requirements: RequirementRecord[];
+  scope_assessments: PartScopeAssessment[];
   scored_at: string;
   section_c: SectionCRow[];
   source: string;
@@ -848,6 +931,9 @@ export interface IdentifyResult {
   decisions: Record<string, ArticleDecision>;
   description_sha256: string;
   engineering_required: "depends";
+  input_coverage_gaps: string[];
+  input_fingerprint: string | null;
+  input_sha256: string | null;
   label: string;
   message: string | null;
   mode: "live" | "fake" | "bm25_fallback";
@@ -857,6 +943,12 @@ export interface IdentifyResult {
   persisted: boolean;
   process_refs: ProcessRef[];
   questions: string[];
+  requirement_coverage: RequirementCoverage;
+  requirement_evidence: RequirementEvidence[];
+  requirement_links: RequirementLink[];
+  requirement_status: "not_run" | "needs_review" | "source_unavailable";
+  requirements: RequirementRecord[];
+  scope_assessments: PartScopeAssessment[];
   scored_at: string;
   source: string;
   stale: boolean;
@@ -972,6 +1064,39 @@ export interface IntentBlock {
   objective: string | null;
   pdf_page: number;
   provision_id: string;
+}
+
+export interface Job {
+  attempts: number;
+  base_version: number;
+  can_retry: boolean;
+  case_id: string;
+  created_at: string;
+  error: JobError | null;
+  finished_at: string | null;
+  heartbeat_at: string | null;
+  id: string;
+  kind: string;
+  lease_expires_at: string | null;
+  max_attempts: number;
+  next_attempt_at: string | null;
+  result_url: string | null;
+  result_version: number | null;
+  stage: string;
+  started_at: string | null;
+  state: "queued" | "running" | "succeeded" | "failed" | "cancelled" | "superseded";
+  updated_at: string;
+}
+
+export interface JobError {
+  code: "processing_failed" | "worker_lost" | "access_changed" | "input_changed" | "invalid_input" | "handler_unavailable";
+  message: string;
+  retryable: boolean;
+  stage: string;
+}
+
+export interface JobList {
+  items: Job[];
 }
 
 export interface Jurisdiction {
@@ -1165,6 +1290,14 @@ export interface PackageReviewIndex {
   latest: ReviewSession | null;
   package_id: string;
   sessions: SessionSummary[];
+}
+
+export interface PartScopeAssessment {
+  basis: ScopeBasis[];
+  conditions: ScopeCondition[];
+  limitation: string;
+  part: 9;
+  status: "not_determined" | "boundary_not_met" | "conditions_met_scope_unresolved";
 }
 
 export interface PlanRequest {
@@ -1375,6 +1508,122 @@ export interface ReminderModel {
   verdict: "reminder";
 }
 
+export interface RemoveFileBinding {
+  kind: "remove";
+}
+
+export interface RemoveFileBindingInput {
+  kind?: "remove";
+}
+
+export interface RequirementCondition {
+  fact_ids: string[];
+  field: string;
+  status: "unknown" | "provided" | "conflict";
+}
+
+export interface RequirementCoverage {
+  applicability_status: "not_determined";
+  articles_by_division: Record<string, number>;
+  discovered: number;
+  exhaustive: false;
+  gaps: RequirementGap[];
+  graph_status: "not_run" | "traversed" | "traversed_with_gaps";
+  human_confirmed: number;
+  limits: string[];
+  notes_scanned: number;
+  provider_requests: 0;
+  provisions_scanned: number;
+  query_chunks: number;
+  scan_status: "not_run" | "scanned" | "unavailable";
+  source: RequirementSource | null;
+}
+
+/** Applicability is independent from the legacy departure question. */
+export interface RequirementDecisionRequest {
+  disposition: "include" | "exclude" | "review";
+  expected_version: number;
+  reason: string;
+  role: "varied" | "supporting" | "admin" | "conditional" | "unresolved";
+}
+
+export interface RequirementDiscovery {
+  detail: string;
+  evidence: RequirementEvidence | null;
+  evidence_id: string | null;
+  evidence_ids: string[];
+  from_requirement: string | null;
+  kind: "lexical" | "explicit" | "reference" | "reverse_reference" | "administrative" | "human" | "previous";
+  path: string[];
+}
+
+/** An actual matched passage or reference, never an arbitrary opening sentence. */
+export interface RequirementEvidence {
+  citation: string;
+  contextual: boolean;
+  division: "A" | "B" | "C";
+  id: string;
+  kind: "provision" | "heading" | "note";
+  pdf_page: number | null;
+  pdf_page_end: number | null;
+  provision_id: string;
+  quote: string;
+  source_sha256: string;
+}
+
+export interface RequirementGap {
+  code: string;
+  evidence: RequirementEvidence | null;
+  evidence_id: string | null;
+  from_requirement: string | null;
+  message: string;
+  reference: string | null;
+}
+
+export interface RequirementLink {
+  evidence_ids: string[];
+  source_requirement: string;
+  target_requirement: string;
+}
+
+/** A source-qualified candidate, with applicability separate from discovery. */
+export interface RequirementRecord {
+  applicability: "unknown" | "confirmed" | "needs_review";
+  citation: string | null;
+  conditions: RequirementCondition[];
+  confirmation_fingerprint: string | null;
+  confirmation_reason: string | null;
+  confirmed_at: string | null;
+  discoveries: RequirementDiscovery[];
+  disposition: "include" | "review" | "exclude";
+  division: "A" | "B" | "C" | null;
+  evidence: RequirementEvidence[];
+  evidence_ids: string[];
+  human_confirmed: boolean;
+  id: string;
+  needs_review: boolean;
+  pdf_page: number | null;
+  pdf_page_end: number | null;
+  provision_id: string | null;
+  quote: string | null;
+  quote_provision_id: string | null;
+  review_reasons: string[];
+  role: "varied" | "supporting" | "admin" | "conditional" | "unresolved";
+  source_sha256: string | null;
+  source_status: "verified" | "unavailable";
+  title: string;
+}
+
+/** Provenance verified against both CodeDB's docs row and build metadata. */
+export interface RequirementSource {
+  build_version: string;
+  corpus_sha256: string;
+  doc: "NBC-AE";
+  label: "NBC(AE) 2023 p2";
+  pdf_sha256: string;
+  text_sha256: string;
+}
+
 export interface ResolvedForm {
   /** Whether Batatis fills this form today. */ export: "supported" | "not_yet";
   field_count: number;
@@ -1400,6 +1649,14 @@ export interface ResolvedNote {
   sources: PackSource[];
   text: string;
   topic: "entry_point" | "submission" | "permit_link" | "scope" | "documents" | "professional" | "review" | "decision" | "appeal" | "registration" | "authority";
+}
+
+export interface RetainFileBinding {
+  kind: "retain";
+}
+
+export interface RetainFileBindingInput {
+  kind?: "retain";
 }
 
 export interface ReviewConflict {
@@ -1556,6 +1813,13 @@ export interface RuleSet {
   version: number;
 }
 
+export interface ScopeBasis {
+  citation: string;
+  division: "A";
+  provision_id: string;
+  quote: string;
+}
+
 export interface ScopeCheck {
   cue: string | null;
   end: number | null;
@@ -1565,6 +1829,14 @@ export interface ScopeCheck {
   scores: Record<string, number>;
   start: number | null;
   status: "in_scope" | "redirect" | "overridden";
+}
+
+export interface ScopeCondition {
+  explanation: string;
+  fact_ids: string[];
+  field: string;
+  status: "met" | "not_met" | "unknown" | "conflict";
+  values: (string | number | boolean | null)[];
 }
 
 /** `building_code: true` is the applicant's "this is a building-code question" override. */
@@ -1835,36 +2107,10 @@ export interface UserResult {
   user: User;
 }
 
-export interface VoiceCapability {
-  available: boolean;
-  max_seconds: number;
-  notice: string;
-  protocol: "batatis.voice.v1";
-  reason: string | null;
-  relay_path: "/api/voice/relay/session";
-}
-
-export interface VoiceCommand {
-  audio?: string | null;
-  context_id: string;
-  revision?: number | null;
-  scope?: VoiceScope | null;
-  session_id: string;
-  type: "session.end" | "audio.append" | "audio.commit" | "audio.clear" | "response.cancel" | "context.update";
-}
-
-export interface VoiceScope {
-  attachment_ids?: string[];
-  case_id?: string | null;
-  case_version?: number | null;
-  context_id: string;
-  destinations?: ("applications" | "description" | "questions" | "review" | "application" | "code-library" | "code-search" | "references" | "downloads" | "officer-view" | "settings" | "notifications" | "accuracy" | "comments" | "question-authority" | "question-owner" | "question-representative" | "question-mailing-address" | "question-date" | "question-scope" | "question-permit" | "question-site-address" | "question-legal-description" | "question-alternative" | "question-rationale" | "question-risk" | "question-mitigation" | "question-assumptions" | "question-maintenance" | "question-qualifications" | "question-documents" | "review-queue" | "package-review" | "review-overview" | "review-missing" | "review-checks" | "review-decide" | "review-application" | "review-messages" | "review-request" | "review-versions" | "review-close-out")[];
-  focus?: AssistFocus | null;
-  revision?: number;
-  screen: string;
-}
-
-export interface VoiceStart {
-  scope: VoiceScope;
-  type: "session.start";
+export interface WorkerHealth {
+  execution: "external_required" | "in_process" | "external";
+  last_heartbeat_at: string | null;
+  queued: number;
+  running: number;
+  worker_available: boolean;
 }

@@ -518,7 +518,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
     return "";
   })();
   const draftAccount = account.user ? JSON.stringify([account.user.id, account.user.role, account.user.authority]) : null;
-  const { value: draft, setValue: setDraft, choices: picked, setChoices: setPicked } = useQuestionDraft(draftAccount, engineGeneration(), engineId, currentKey, savedDraft);
+  const { value: draft, setValue: setDraft, choices: picked, setChoices: setPicked, conflict: draftConflict, confirmValue: confirmDraft } = useQuestionDraft(draftAccount, engineGeneration(), engineId, currentKey, savedDraft);
   const [why, setWhy] = useState(false);
   const [drawer, setDrawer] = useState<DrawerState | null>(null);
   const [jumpTo, setJumpTo] = useState<string | null>(null);
@@ -707,6 +707,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
       const saved = extras.rules ? ruleFacts(c, extras.rules.index).get(item.input.field)?.value : undefined;
       if (!item.done || saved !== got.value) {
         dispatch({ type: "setRuleInput", field: item.input.field, value: got.value, rule: item.input.rule, quote: `${draft.trim()}${item.input.spec.unit ? ` ${item.input.spec.unit}` : ""}` });
+        confirmDraft(draft);
         updateSession((s) => ({ ruleUnsure: s.ruleUnsure.filter((f) => f !== item.input!.field) }));
         // Move on once the new value has rendered, so a question it opens comes next, not at the end.
         if (!item.done) {
@@ -722,8 +723,8 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
         return;
       }
     }
-    if (item.kind === "question" && draft.trim()) dispatch({ type: "answerQuestion", id: item.ref, answer: draft.trim() });
-    if (item.kind === "storeys" && Number(draft) > 0) dispatch({ type: "setStoreyCount", value: draft });
+    if (item.kind === "question" && draft.trim()) { dispatch({ type: "answerQuestion", id: item.ref, answer: draft.trim() }); confirmDraft(draft); }
+    if (item.kind === "storeys" && Number(draft) > 0) { dispatch({ type: "setStoreyCount", value: draft }); confirmDraft(draft); }
     moveFrom(index, true);
   }
 
@@ -745,7 +746,10 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
       if (error) {
         setAdvanceAfter(null);
         setPlanNotes((n) => ({ ...n, [key]: error }));
-      } else if (advance && getSession().queue[getSession().index] === key) setAdvanceAfter({ key, generation });
+      } else {
+        confirmDraft(answer);
+        if (advance && getSession().queue[getSession().index] === key) setAdvanceAfter({ key, generation });
+      }
     });
   }
 
@@ -976,6 +980,7 @@ function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boole
                 position={item.kind === "condition" ? (extras.checklists?.checklists.find((x) => x.id === item.checklist)?.conditions.findIndex((x) => x.id === item.condition) ?? 0) + 1 : 0}
               />
             </fieldset>
+            {draftConflict && <p className="cf-note" role="status">The saved answer changed. Your unfinished text is kept here; review it before confirming.</p>}
             {item.kind === "candidate" && decisionNoteFor(item.ref) && <p className="cf-note">{decisionNoteFor(item.ref)}</p>}
             {item.section === "C" && (extras.failed.rules || extras.failed.case) && (
               <p className="cf-note" role="status"><span className="cf-dot is-warning" aria-hidden="true" />Rule checks didn’t load, so some rule questions may be missing. <button type="button" className="cf-link-btn" onClick={retryExtras}>Try again</button></p>
