@@ -8,7 +8,7 @@
 import type { Question as PlanQuestion } from "../api/types.gen";
 import { AUTHORITIES } from "../config";
 import { confirmedAnswer, localField } from "../intakeFields";
-import { codeQuestion, fileNotes, type ReadCopy, planInput, planQuestions, plannedFields, readGroups, scopeRedirect } from "../intakeView";
+import { codeQuestion, fileNotes, type ReadCopy, planInput, planQuestions, plannedFields, readGroups, scopeRedirect, LEGAL_PART_FIELDS, legalFromParts } from "../intakeView";
 import { DETAIL_FIELDS, DETAIL_IDS, PROCESS_FIELDS, answeredByDescription, factFor, questionAnsweredByFact, valueText } from "../model";
 import { isProvision, keywordCandidate, keywordGroups } from "../provisions";
 import { quoteKind } from "../rules";
@@ -533,7 +533,9 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
     const fact = factFor(c, d.id);
     if (fact?.status === "unconfirmed" && !paperwork) continue; // asked on its "check what we read" card
     // A choice field counts only with one of its choices (a free-text answer elsewhere can land here).
-    const filled = d.options ? valueText(fact) in d.options : Boolean(valueText(fact).trim());
+    // A legal description read as lot, block and plan is filled, as the sheet shows it.
+    const fromParts = d.id === "legalDescription" && Boolean(legalFromParts(Object.fromEntries(LEGAL_PART_FIELDS.map((k) => [k, confirmedAnswer(c.facts, k)?.value]))));
+    const filled = d.options ? valueText(fact) in d.options : Boolean(valueText(fact).trim()) || fromParts;
     if (!d.required && filled && !opts.includeDone && !paperwork) continue;
     // One editable card per field, including in footer navigation and after a planner answer is saved.
     const cover = planned.get(d.id);

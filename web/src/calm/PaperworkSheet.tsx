@@ -85,7 +85,8 @@ export function PaperworkSheet({ item, focusRow, onDone, extras }: { item: DeckI
       const site = current("municipalAddress");
       const suggestions = field === "representative" ? [{ label: "No representative", value: "No representative" }, ...(owner ? [{ label: "Same as the owner", value: owner }] : [])]
         : field === "mailingAddress" && site ? [{ label: "Same as the site address", value: site }]
-          : field === "date" && row.suggestedValue ? [{ label: "Today", value: row.suggestedValue }] : [];
+          : field === "date" && row.suggestedValue ? [{ label: "Today", value: row.suggestedValue }]
+            : field === "scope" && site ? [{ label: "One building site", value: "site" }] : [];
       return <div key={row.key} className="cf-paperwork-row" data-paperwork-row={row.key} role="group" aria-label={label}>
         <div className="cf-paperwork-label"><span>{label}</span>{row.optional && <span className="cf-faint">Optional</span>}</div>
         <div className="cf-paperwork-control">
