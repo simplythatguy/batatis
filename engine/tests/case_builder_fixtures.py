@@ -25,8 +25,13 @@ def store_with_synthetic_files(store, case):
                 and entry.status == 'confirmed' and entry.source.type == 'file'
                 and entry.value == entry.source.ref):
             if entry.source.ref not in references:
-                saved = store.put_file(case.id, 'SYNTHETIC-storage-fixture.pdf',
-                                       b'%PDF-1.4\nSYNTHETIC storage-binding bytes, not a document or result.\n')
+                import io
+                from reportlab.pdfgen import canvas
+                output = io.BytesIO()
+                draw = canvas.Canvas(output, invariant=1)
+                draw.drawString(48, 700, 'SYNTHETIC storage-binding fixture; no test result or professional evidence.')
+                draw.save()
+                saved = store.put_file(case.id, 'SYNTHETIC-storage-fixture.pdf', output.getvalue())
                 references[entry.source.ref] = saved['id']
             entry.value = references[entry.source.ref]
             entry.source = entry.source.model_copy(update={'ref': entry.value})

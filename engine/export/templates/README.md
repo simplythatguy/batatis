@@ -48,17 +48,27 @@ D box grows or continues to carry every listed document and responsible party.
 The new source has one combined supporting-document box. It has no separate
 owner-print fields, and its jurisdiction checkbox is driven by confirmed
 `scope=jurisdiction`, rather than the older form's `submitted_to_scc` fact.
-Consent, signatures and their dates are not automatically filled.
+Current applicant signatures are tied to a hash of the content they attest to.
+Export fits their PNG images inside Signature1/Signature2, fills Date1/Date2
+with the server's Alberta date, and draws their printed names beside the
+source's printed-name labels. It checks Check Box14 only for explicit consent.
+Stale signatures are omitted. Officer signatures are never filled by Batatis.
 
-`export_case` preserves the flattened public response: zero widgets and no
-AcroForm tree. Drafts still bypass official completeness blocking, exclude
-unconfirmed values and retain open items (`ExportResult.open_items`), result/API
-metadata and the draft filename. They have no added visible draft stamp or
-label on any PDF page, and no printed to-do list: the open items, their fix
-hints and placeholders for unanswered passages belong to the questions and
-Review. The appendix prints only real content (notices, continued values,
-N/A reasons, confirmed answers and passages, Section C, listed documents), and
-a draft with none of it has no appendix pages.
+`export_case` flattens applicant content and removes helper widgets. Unfilled
+signature fields and their dates remain live (including the officer signature
+and date boxes); an unchecked consent box also remains live. The canonical
+AcroForm tree and normal appearance streams are preserved for those fields,
+so another PDF tool can sign. A signature or date painted by Batatis is static.
+
+Drafts bypass official completeness blocking, exclude unconfirmed values and
+retain open items in `ExportResult.open_items`. Every page also has a small,
+light-grey `Draft · not for submission` mark in its top margin. No open-item
+list or unanswered placeholders are printed. The appendix prints only real
+content (notices, continued values, N/A reasons, confirmed answers and passages,
+Section C, listed documents). Attached supporting-document PDFs follow the
+appendix in Section D order. Form Part 1, the appendix and each attached
+document have their own bookmark. The API resolves files from this case's
+saved bytes; an offline caller supplies `file_loader` to append those bytes.
 
 The legacy `scc_2026-10` map remains available explicitly, with its original
 five-page bytes and SHA-256
@@ -77,7 +87,10 @@ metadata includes `/BatatisFormVersion`, `/BatatisAttributionRows`, and
 `/BatatisFormPages`. Grown cells also carry a canonical `/BatatisLayout` value.
 These are reconstruction hints, never proof of uploaded content.
 Source hashes, page boxes, source glyph geometry, vector borders and editable
-widget identities/rectangles must match before fields are read. New layouts
+widget identities/rectangles must match before fields are read. Partially
+flattened exports are supported: applicant values are read from verified visible
+page content, while any remaining signature/date/consent widgets must match the
+source identity and geometry. Attachment widgets cannot establish form fields. New layouts
 require consistent version, row, page and source hints. Row reconstruction is
 bounded to 256 rows. Grown-layout hints allow at most 2,000 lines per applicant
 cell or attribution row, 5,000 Section D lines and 60,000 total lines. Their

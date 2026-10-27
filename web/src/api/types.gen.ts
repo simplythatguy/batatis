@@ -257,6 +257,7 @@ export interface Case {
   title_is_manual: boolean;
   updated_at: string;
   version: number;
+  workspace: Workspace;
 }
 
 export interface CaseChecklist {
@@ -422,6 +423,10 @@ export interface ConditionAnswer {
   fact_id: string;
   reason: string | null;
   state: "confirmed" | "not_yet" | "does_not_apply";
+}
+
+export interface ConsentInput {
+  agreed: boolean;
 }
 
 export interface ContextDefinition {
@@ -770,6 +775,20 @@ export interface HistoricalPackage {
   source: PackSource;
   status: "historical";
   title: string;
+}
+
+export interface HistoryEntry {
+  after: string;
+  at: string;
+  before: string;
+  block: string;
+  by: "you" | "ai" | "restore";
+  id: string;
+  label: string;
+}
+
+export interface HistoryInput {
+  entries: HistoryEntry[];
 }
 
 export interface IdentifyArticle {
@@ -1199,6 +1218,14 @@ export interface PackSource {
   url: string;
 }
 
+export interface PackagePreview {
+  filename: string;
+  page_count: number;
+  pages: PreviewPage[];
+  pdf?: string | null;
+  start: number;
+}
+
 export interface PackageReviewIndex {
   authority: string;
   case_id: string | null;
@@ -1626,6 +1653,21 @@ export interface ReviewerName {
   name: string;
 }
 
+export interface RewriteRequest {
+  end: number;
+  field: string;
+  instruction: string;
+  start: number;
+  text: string;
+}
+
+export interface RewriteResult {
+  cited: string[];
+  notice: string;
+  removed_citations: string[];
+  replacement: string;
+}
+
 export interface RouteBullet {
   citations: PlanSource[];
   claim: string;
@@ -1803,6 +1845,22 @@ export interface SessionSummary {
   sent_at: string | null;
   statement: string | null;
   version: number;
+}
+
+export interface SignatureInput {
+  image: string;
+  method: "drawn" | "typed";
+  name: string;
+}
+
+export interface SignatureView {
+  content_hash: string;
+  current: boolean;
+  image: string;
+  method: "drawn" | "typed";
+  name: string;
+  role: "owner" | "owner_rep";
+  signed_on: string;
 }
 
 export interface SignupRequest {
@@ -1990,4 +2048,39 @@ export interface WorkerHealth {
   queued: number;
   running: number;
   worker_available: boolean;
+}
+
+export interface Workspace {
+  consent: WorkspaceConsent | null;
+  history: HistoryEntry[];
+  signatures: WorkspaceSignature[];
+}
+
+export interface WorkspaceConsent {
+  agreed: boolean;
+  at: string;
+}
+
+/** A saved signature. Its image was checked once on the way in (SignatureInput); loading a case never decodes it. */
+export interface WorkspaceSignature {
+  content_hash: string;
+  image: string;
+  method: "drawn" | "typed";
+  name: string;
+  role: "owner" | "owner_rep";
+  signed_on: string;
+}
+
+export interface WorkspaceSigner {
+  name: string;
+  required: boolean;
+  role: "owner" | "owner_rep";
+}
+
+export interface WorkspaceView {
+  consent: WorkspaceConsent | null;
+  content_hash: string;
+  history: HistoryEntry[];
+  signatures: SignatureView[];
+  signers: WorkspaceSigner[];
 }

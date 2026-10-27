@@ -51,12 +51,16 @@ export function emptyCase(type: ApplicantType | null): Case {
   };
 }
 
+/** Words an AI drafted and the applicant accepted, possibly edited since. The export says so. */
+export const AI_ACCEPTED_REF = "AI-drafted, accepted by the applicant";
+
 function isUserKept(f: Fact): boolean {
   return (
     f.source.ref.startsWith("Typed in") ||
     f.source.ref === "Your answer" ||
     f.source.ref === "Confirmed by applicant" ||
-    f.source.ref === "Typed on the alternative path"
+    f.source.ref === "Typed on the alternative path" ||
+    f.source.ref === AI_ACCEPTED_REF
   );
 }
 

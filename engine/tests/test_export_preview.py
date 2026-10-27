@@ -41,11 +41,16 @@ def test_preview_is_the_draft_pdf_and_an_image_of_each_page(tmp_path):
     body = response.json()
     assert body['kind'] == 'pages' and body['filename'] == f'{case.id}-scc-variance-DRAFT.pdf'
     reader = PdfReader(io.BytesIO(decoded(body['pdf'], 'application/pdf')))
-    assert reader.metadata['/Title'].endswith('(DRAFT)') and not reader.get_fields()
+    assert reader.metadata['/Title'].endswith('(DRAFT)')
+    assert set(reader.get_fields()) == {'Signature1', 'Signature2', 'Signature3', 'Signature4',
+                                        'Date1', 'Date2', 'SCO Date', 'SCO Date1', 'Check Box14'}
     assert marker not in ' '.join(page.extract_text() for page in reader.pages)     # confirmed values only
-    assert body['page_count'] == len(reader.pages) == len(body['pages']) > 20      # a long package, every page
+    # A long package, attachments included. Images run in page order until the encoded budget; the PDF is whole.
+    assert body['page_count'] == len(reader.pages) > 20
+    assert 0 < len(body['pages']) <= body['page_count']
     for page, preview in zip(reader.pages, body['pages']):
-        assert (preview['width'], preview['height']) == (float(page.mediabox.width), float(page.mediabox.height))
+        assert (preview['width'], preview['height']) == pytest.approx(
+            (float(page.mediabox.width), float(page.mediabox.height)), abs=0.001)
         image = Image.open(io.BytesIO(decoded(preview['image'], 'image/png')))
         assert image.format == 'PNG' and image.size == (round(preview['width'] * SCALE), round(preview['height'] * SCALE))
 
@@ -114,3 +119,86 @@ def test_preview_is_bound_to_the_application_like_the_export(tmp_path, monkeypat
         for client in (other, anonymous):
             assert client.get(f'/cases/{case_id}/export/preview').status_code == 404
             assert client.post(f'/cases/{case_id}/export', json={'draft': True}).status_code == 404
+
+
+def test_window_pages_match_the_actual_requested_pages_and_official_gates(tmp_path):
+    store = CaseStore(tmp_path / 'window.sqlite')
+    case = store_with_synthetic_files(store, sample_case(Codes(), provisions=['9.25.2.2.(1)']))
+    with TestClient(create_app(store=store)) as client:
+        legacy = client.get(f'/cases/{case.id}/export/preview').json()
+        second = client.get(f'/cases/{case.id}/export/preview?start=1&count=2')
+        assert second.status_code == 200, second.text
+        body = second.json()
+        assert body['start'] == 1 and len(body['pages']) == 2
+        assert body['page_count'] == legacy['page_count']
+        assert body['pages'] == legacy['pages'][1:3]
+        assert body['filename'].endswith('-DRAFT.pdf')
+        ready = client.get(f'/cases/{case.id}/export/preview?start=0&count=2&official=true')
+        assert ready.status_code == 200, ready.text
+        assert ready.json()['filename'].endswith('-scc-variance.pdf')
+        pdf = PdfReader(io.BytesIO(decoded(ready.json()['pdf'], 'application/pdf')))
+        assert all('Draft · not for submission' not in page.extract_text() for page in pdf.pages)
+        store.add_fact(case.id, Fact(field='process.risk', value='Pending', kind='pointed',
+                                    source=Source(type='user_text', ref='pending')))
+        blocked = client.get(f'/cases/{case.id}/export/preview?official=true&count=1')
+        assert blocked.status_code == 409 and blocked.json()['detail']['reasons']
+        for query in ['start=-1', 'count=0', 'count=61', 'start=word']:
+            assert client.get(f'/cases/{case.id}/export/preview?{query}').status_code == 422
+
+
+def test_window_still_renders_when_pdf_bytes_do_not_fit(tmp_path):
+    from pypdf import PdfWriter
+    from pypdf.generic import DecodedStreamObject, NameObject
+    from engine.models import Case
+    from engine.tests.case_builder_fixtures import fact
+    store = CaseStore(tmp_path / 'large-window.sqlite')
+    case = store.put(Case())
+    writer = PdfWriter()
+    page = writer.add_blank_page(width=612, height=792)
+    padding = DecodedStreamObject()
+    padding.set_data(b'0' * 3_100_000)
+    page[NameObject('/SyntheticSizeFixture')] = writer._add_object(padding)
+    output = io.BytesIO()
+    writer.write(output)
+    saved = store.put_file(case.id, 'SYNTHETIC-size-boundary.pdf', output.getvalue())
+    source = Source(type='file', ref=saved['id'], quote='SYNTHETIC size boundary, no evidence content.')
+    case.facts.append(fact('evidence.size.file_ref', saved['id'], source=source))
+    store.put(case)
+    with TestClient(create_app(store=store)) as client:
+        legacy = client.get(f'/cases/{case.id}/export/preview')
+        assert legacy.status_code == 200 and legacy.json()['kind'] == 'too_large'
+        response = client.get(f'/cases/{case.id}/export/preview?start=3&count=2')
+    assert response.status_code == 200, response.text
+    body = response.json()
+    assert body['start'] == 3 and len(body['pages']) == 2 and body['page_count'] >= 8
+    assert 'pdf' not in body
+    assert len(response.content) < RESPONSE_CAP
+
+
+def test_large_drawing_window_bounds_raster_size_while_preserving_page_dimensions():
+    from pypdf import PdfWriter
+    writer = PdfWriter()
+    writer.add_blank_page(width=612, height=792)
+    writer.add_blank_page(width=1800, height=1800)
+    output = io.BytesIO(); writer.write(output)
+    pages, total = page_images(output.getvalue(), start=1, max_pages=1, reserve_pdf=False)
+    assert total == 2 and len(pages) == 1
+    assert (pages[0].width, pages[0].height) == (1800, 1800)
+    image = Image.open(io.BytesIO(pages[0].png))
+    assert max(image.size) <= 1921
+    assert encoded(len(pages[0].png)) + ENTRY_BYTES < PAYLOAD_BUDGET
+
+
+def test_preview_draws_the_normal_appearance_of_retained_live_fields():
+    from pypdf import PdfWriter
+    from engine.models import Case
+    original = export_case(Case(), draft=True).pdf
+    reader = PdfReader(io.BytesIO(original))
+    page_no = next(index for index, page in enumerate(reader.pages) if any(
+        ref.get_object().get('/T') == 'Date1' for ref in page.get('/Annots', [])))
+    blank, _ = page_images(original, start=page_no, max_pages=1, reserve_pdf=False)
+    writer = PdfWriter(clone_from=io.BytesIO(original))
+    writer.update_page_form_field_values(None, {'Date1': '2030-05-10'}, auto_regenerate=False)
+    output = io.BytesIO(); writer.write(output)
+    filled, _ = page_images(output.getvalue(), start=page_no, max_pages=1, reserve_pdf=False)
+    assert filled[0].png != blank[0].png

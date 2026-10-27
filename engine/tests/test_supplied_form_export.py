@@ -54,9 +54,8 @@ def test_default_public_export_uses_the_exact_seven_page_challenge_form():
     assert 'Professional Design' in reader.pages[6].extract_text()
     # This wording distinguishes the supplied source from the old web form.
     assert 'site-specific' in reader.pages[0].extract_text()
-    assert not reader.get_fields()
-    assert not any(a.get_object().get('/Subtype') == '/Widget'
-                   for page in reader.pages for a in page.get('/Annots', []))
+    assert set(reader.get_fields()) == {'Signature1', 'Signature2', 'Signature3', 'Signature4',
+                                        'Date1', 'Date2', 'SCO Date', 'SCO Date1', 'Check Box14'}
 
 
 def test_default_template_is_portable_and_hash_checked():
@@ -223,7 +222,8 @@ def test_saved_answers_change_the_real_http_pdf_bytes(tmp_path):
         assert count > 8 and count < len(reader.pages)
         assert 'Part 4' in reader.pages[count - 2].extract_text()
         assert 'Professional Design' in reader.pages[count - 1].extract_text()
-        assert not reader.get_fields()
+        assert set(reader.get_fields()) == {'Signature1', 'Signature2', 'Signature3', 'Signature4',
+                                            'Date1', 'Date2', 'SCO Date', 'SCO Date1', 'Check Box14'}
 
 
 def test_existing_validator_passes_for_the_new_native_intent_projection():
@@ -244,7 +244,7 @@ def test_coverage_detects_a_missing_last_native_article_instead_of_shrinking_the
 
 @pytest.mark.parametrize('version,count', [(VERSION, 0), (VERSION, 1), (VERSION, 6), (VERSION, 12),
                                           ('scc_2026-10', 0), ('scc_2026-10', 12)])
-def test_draft_pdf_has_no_added_visible_draft_marks_but_keeps_the_validation_contract(version, count, request):
+def test_draft_pdf_marks_every_page_and_keeps_the_validation_contract(version, count, request):
     if version == 'scc_2026-10':
         request.getfixturevalue('legacy_form')
     codes = Codes()
@@ -262,7 +262,7 @@ def test_draft_pdf_has_no_added_visible_draft_marks_but_keeps_the_validation_con
     assert 'Owner' not in {p.field for p in result.placements}
     for page in reader.pages:
         text = page.extract_text()
-        assert 'DRAFT' not in text and 'not for submission; see appendix' not in text
+        assert 'Draft · not for submission' in text
     # The draft's open items stay in the result for the questions and Review; the document never lists them.
     pdf_text = ' '.join(' '.join(p.extract_text().split()) for p in reader.pages)
     assert 'Open items' not in pdf_text and 'Not provided or not confirmed' not in pdf_text

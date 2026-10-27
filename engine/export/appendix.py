@@ -93,6 +93,8 @@ def _nrc(text, citation: str) -> str:
     return ' '.join(parts)
 
 
+# The browser's source for words an AI drafted and the applicant accepted (web/src/intake.ts AI_ACCEPTED_REF).
+AI_ACCEPTED_REF = 'AI-drafted, accepted by the applicant'
 _SOURCE_KIND = {'user_text': 'typed by the applicant', 'user_click': 'chosen by the applicant',
                 'file': "a passage from the applicant's file"}
 
@@ -239,17 +241,17 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None,
     answered = [(n, field) for n, field in enumerate(process_fields(case, codes), start=1)
                 if field.answer] if codes is not None else []
     if answered:
-        story.append(Paragraph('P. Alternative solution (Div C 2.3.1): applicant-written documentation', H2))
-        story.append(_p('The following passages were supplied and confirmed by the applicant, each with its source. '
-                        'Batatis supplies prompts and checks that each item is present; it does not write, assess or '
-                        'validate the analysis.', SMALL))
+        story.append(Paragraph('P. Alternative solution (Div C 2.3.1): the applicant\'s documentation', H2))
+        story.append(_p('The following passages were confirmed by the applicant, each with its source. A passage '
+                        'marked as drafted with AI was proposed by Batatis and accepted by the applicant. Batatis checks '
+                        'that each item is present; it does not assess or validate the analysis.', SMALL))
         for n, field in answered:
             source = field.answer.source
             story.append(KeepTogether([
                 Paragraph(f'P-{n}&nbsp;&nbsp;{escape(field.label)}', H3), _p(field.answer.value),
                 _kv('Applicant source', source.ref + (f', page {source.page}' if source.page else '')),
-                _kv('Provenance', f'{_SOURCE_KIND.get(source.type, source.type)}; confirmed by the '
-                                  'applicant; not written by Batatis'),
+                _kv('Provenance', 'Drafted with AI; accepted and confirmed by the applicant' if source.ref == AI_ACCEPTED_REF
+                    else f'{_SOURCE_KIND.get(source.type, source.type)}; confirmed by the applicant'),
                 _p(field.citation, SMALL)]))
 
     bench = benchmark(case, codes)

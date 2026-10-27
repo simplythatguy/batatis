@@ -102,3 +102,18 @@ export function confirmedAnswer(facts: readonly Fact[], field: string): Fact | u
   if (localField(field) === "storeys" && (!Number.isInteger(Number(text)) || Number(text) <= 0)) return undefined;
   return f;
 }
+
+/** A writing proposal sits beside the applicant's previous text, rather than replacing it on reopen. */
+export function isWritingField(field: string): boolean {
+  const key = localField(field);
+  return key === "alternative" || key.startsWith("process.") && FIELD_ALIASES[key] !== undefined || /^section_c\..+\.explanation$/.test(key);
+}
+export function latestFactsWithWritingDrafts<T extends { field: string; kind: string }>(facts: readonly T[]): T[] {
+  const all = facts.map(asLocal);
+  const latest = new Map(latestLocalFacts(all).map(f => [f.field, f]));
+  const bases = new Map([...latest.values()].filter(f => f.kind === "proposed" && isWritingField(f.field)).flatMap(f => {
+    const before = [...all].reverse().find(basis => basis.field === f.field && basis.kind !== "proposed");
+    return before ? [[before.field, before] as const] : [];
+  }));
+  return all.filter(f => latest.get(f.field) === f || bases.get(f.field) === f);
+}

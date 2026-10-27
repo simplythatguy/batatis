@@ -28,7 +28,7 @@ type Stage = "idle" | "checking" | "preparing" | "blocked" | "error" | "ready";
  * Check, export and text-record logic shared by this screen and the calm Application.
  * `isActive` tells a finished check whether anyone is still waiting for its result.
  */
-export function useApplicationExport(isActive: () => boolean = () => true) {
+export function useApplicationExport(isActive: () => boolean = () => true, signatureNote = UNSIGNED_LINE) {
   const { gaps, saveDraft, engineId, c, gapsSource, syncOk, reviewDetail, readSync, readGaps, setCompletenessRecord, requestCheck, checkStatus, checkedAt } = useCase();
   const { locked } = useCurrentApplication();
   const generation = engineGeneration();
@@ -147,7 +147,7 @@ export function useApplicationExport(isActive: () => boolean = () => true) {
         setCompletenessRecord({
           label: "Application PDF",
           reasons: [],
-          note: `${UNSIGNED_LINE} This does not decide whether the design complies or is safe.`,
+          note: `${signatureNote} This does not decide whether the design complies or is safe.`,
         });
       }
       const a = Object.assign(document.createElement("a"), { href: url, download: got.filename });
@@ -172,6 +172,7 @@ export function useApplicationExport(isActive: () => boolean = () => true) {
       const missingForm = e instanceof EngineError && (e.status === 503 || /missing a file/i.test(detail));
       const note = missingForm
         ? "The application PDF form is unavailable. Download a text record or try again later."
+        : e instanceof EngineError && e.status === 413 ? detail
         : "The PDF could not be prepared.";
       setTech(detail);
       setStage("error");

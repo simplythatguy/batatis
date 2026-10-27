@@ -1,11 +1,10 @@
 """Export a case to the Safety Codes Council variance form (Part 1, applicant fields only).
 
 Steps: check the blank form's SHA-256 against the version-keyed field map, measure applicant values at normal
-size and grow or continue their supplied-form cells (legacy forms use appendix references), fill with pypdf, flatten
-(appearance streams merged into the page, every widget removed, so the help pop-ups and buttons disappear and
-every viewer shows the same thing), and append the generated appendix when it has real content. Draft
-status and the draft's open items stay in metadata and the result; the website shows them, and nothing
-adds visible markings, a to-do list or unanswered placeholders to the supplied form or the appendix.
+size and grow or continue their supplied-form cells (legacy forms use appendix references), fill with pypdf,
+and flatten applicant content while retaining unfilled signature/date and consent fields. Current explicit
+signatures are painted into their source boxes. The generated appendix and attached PDFs follow the form.
+Drafts carry a quiet mark on every page; unresolved items stay in metadata and the result.
 
 Export refuses while a fact is unconfirmed, a blocking gap is open or a required field is empty, unless
 draft=True. Only confirmed facts are ever written to the form, draft or not.
@@ -18,7 +17,7 @@ import json
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import NamedTuple
+from typing import Callable, NamedTuple
 
 from pypdf import PdfReader, PdfWriter
 from pypdf.generic import ArrayObject, DictionaryObject, NameObject, NumberObject, RectangleObject, TextStringObject
@@ -35,6 +34,7 @@ from .edition import code_or_standard_value
 from .challenge_form import LEGAL_ROW, ROW_KEYS, prepare_form, row_fields
 from .form_growth import CAPACITY, CELL_SIZE, CELLS, DOC_LINES, TABLE_SIZE, Layout, lines_in, text_widths
 from .text import fit, lines_at, pdf_safe
+from .signatures import CONSENT_FIELD, live_fields, paint_signatures, stamp_draft
 
 DEFAULT_FORM = Path(__file__).resolve().parents[2] / 'reference' / 'guides' / 'SCC-Variance-Form.pdf'
 BUNDLE_FORM = Path(__file__).resolve().parents[2] / 'codedb' / 'build' / 'SCC-Variance-Form.pdf'
@@ -85,6 +85,7 @@ class ExportResult:
     form_pages: int
     appendix_pages: int
     draft: bool
+    attachment_pages: int = 0
     placements: list[Placement] = field(default_factory=list)
     blank_fields: list[str] = field(default_factory=list)
     open_items: list[str] = field(default_factory=list)
@@ -451,7 +452,7 @@ def _printed_cell(writer: PdfWriter, page_no: int, name: str, rect: tuple[float,
     writer.root_object['/AcroForm']['/Fields'].append(ref)
 
 
-def _fill_and_flatten(form: bytes, plan: _Plan) -> tuple[bytes, list[Placement]]:
+def _fill_and_flatten(form: bytes, plan: _Plan, case: Case) -> tuple[bytes, list[Placement]]:
     """Fill each planned field at its fitted size, merge appearances into the page, then drop every widget."""
     writer = PdfWriter(clone_from=io.BytesIO(form))
     for name, page_no in plan.printed.items():
@@ -477,15 +478,29 @@ def _fill_and_flatten(form: bytes, plan: _Plan) -> tuple[bytes, list[Placement]]
             d[NameObject('/DA')] = TextStringObject(f'/Helv {size:g} Tf 0 g')
         values[name] = '\n'.join(lines)
         placements.append(Placement(owner, page_no, rect, lines, size, full, ref))
+    keep_fields = live_fields(case)
+    if case.workspace.consent and case.workspace.consent.agreed:
+        plan.checks[CONSENT_FIELD] = '/Yes'
     writer.update_page_form_field_values(None, {**values, **plan.checks}, auto_regenerate=False, flatten=True)
+    widgets = list(_widgets(writer.pages))
+    try:
+        paint_signatures(writer, case, widgets)
+    except ValueError as error:
+        raise ExportError(str(error)) from error
+    retained = {_field(widget).indirect_reference.idnum: _field(widget).indirect_reference
+                for _page, name, widget in widgets if name in keep_fields}
     for page in writer.pages:                       # flattened: drop every widget, keep links
         if '/Annots' in page:
-            keep = [a for a in _annots(page) if a.get_object().get('/Subtype') != '/Widget']
+            keep = [a for a in _annots(page) if a.get_object().get('/Subtype') != '/Widget'
+                    or str(_field(a.get_object()).get('/T')) in keep_fields]
             if keep:
                 page[NameObject('/Annots')] = ArrayObject(keep)
             else:
                 del page['/Annots']
-    del writer._root_object['/AcroForm']
+    if retained:
+        writer.root_object['/AcroForm'][NameObject('/Fields')] = ArrayObject(retained.values())
+    else:
+        writer.root_object.pop(NameObject('/AcroForm'), None)
     buf = io.BytesIO()
     writer.write(buf)
     return buf.getvalue(), placements
@@ -506,7 +521,7 @@ def _rects(form: bytes, fmap: dict) -> dict[str, tuple[float, float, float, floa
 
 
 def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str | None = None,
-                version: str = CURRENT_MAP) -> ExportResult:
+                version: str = CURRENT_MAP, file_loader: Callable[[str], dict | None] | None = None) -> ExportResult:
     """Authoritatively check, canonicalize, fill, flatten and append; no prior gap request is needed."""
     from .appendix import build_appendix
 
@@ -516,6 +531,7 @@ def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str
     if reasons and not draft:
         raise ExportBlocked(reasons)
     notes = package_notes(case, codes)
+    signing_case = case
     case = _canonical_case(case, codes)
     blank_form = load_form(form, fmap)
     values = confirmed_values(case)
@@ -527,7 +543,7 @@ def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str
     else:
         blank_form, fmap = prepare_form(blank_form, fmap, len(case.section_c))
         plan = _plan(case, values, fmap, _rects(blank_form, fmap), codes)
-    filled, placements = _fill_and_flatten(blank_form, plan)
+    filled, placements = _fill_and_flatten(blank_form, plan, signing_case)
     # Keep a source passage separate from its field label. "Intent statement"
     # is a PDF /T name, not a claim that every cross-reference inside the quoted
     # passage identifies a national intent-table entry.
@@ -546,8 +562,37 @@ def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str
     out = PdfWriter(clone_from=io.BytesIO(filled))
     form_pages = len(out.pages)
     appendix_pages = PdfReader(io.BytesIO(appendix)).pages if appendix else []
+    out.add_outline_item('Form Part 1', 0)
     for page in appendix_pages:
         out.add_page(page)
+    if appendix_pages:
+        out.add_outline_item('Appendix', form_pages)
+    attachment_pages = 0
+    if file_loader is not None:
+        for document in supporting_documents(case):
+            saved = file_loader(document.file.ref)
+            if saved is None:
+                raise ExportError('An attached supporting document could not be loaded.')
+            unreadable = ExportBlocked([f'The attached document "{document.title}" could not be opened. '
+                                        'Attach a copy that opens without a password.'])
+            try:
+                reader = PdfReader(io.BytesIO(saved['data']))
+                # Sealed reports often carry only an owner password: they open without one, so they are kept.
+                if reader.is_encrypted and not reader.decrypt(''):
+                    raise unreadable
+                if not reader.pages:
+                    raise unreadable
+                start = len(out.pages)
+                for page in reader.pages:
+                    out.add_page(page)
+                out.add_outline_item(pdf_safe(document.title), start)
+                attachment_pages += len(reader.pages)
+            except ExportBlocked:
+                raise
+            except Exception as error:
+                raise unreadable from error
+    if draft:
+        stamp_draft(out)
     out.add_metadata({'/Title': 'Variance Form for Proposed Alternative Solution' + (' (DRAFT)' if draft else ''),
                       '/Producer': f'Batatis export, field map {fmap["version"]}',
                       '/BatatisFormVersion': fmap['version'],
@@ -563,6 +608,6 @@ def export_case(case: Case, *, draft: bool = False, codes=None, form: Path | str
              if n not in filled_names]
     visible = list(dict.fromkeys((reasons if draft else []) + notes))
     return ExportResult(pdf=buf.getvalue(), field_map=fmap['version'], form_pages=form_pages,
-                        appendix_pages=len(appendix_pages), draft=draft, placements=placements,
+                        appendix_pages=len(appendix_pages), attachment_pages=attachment_pages, draft=draft, placements=placements,
                         blank_fields=blank, open_items=visible, not_applicable=list(plan.na), form_text=form_text,
                         appendix_text=appendix_text)

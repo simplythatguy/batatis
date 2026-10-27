@@ -101,7 +101,7 @@ def test_appendix_names_the_variance_and_the_alternative_solution_with_the_equiv
     assert 'request for variance' in text and 'section 38 of the Safety Codes Act' in text
     assert 'alternative solution (NBC(AE) 2023 Division C 2.3.1)' in text
     assert 'at least the level of performance of the acceptable solution' in text
-    assert 'P. Alternative solution (Div C 2.3.1): applicant-written documentation' in text
+    assert 'P. Alternative solution (Div C 2.3.1): the applicant\'s documentation' in text
     assert 'B. Request for variance: proposed alternative and scope' in text
 
 

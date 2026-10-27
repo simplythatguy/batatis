@@ -1,0 +1,60 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { emptyCase } from "../../intake.ts";
+import { NOT_RIGHT, factFor, reducer } from "../../model.ts";
+import { blockForField, buildDocument } from "./document.ts";
+import { acceptSuggestion, changedWords, draftSuggestions, freshSuggestions, rejectSuggestion, rewriteRange, rewriteSuggestion } from "./suggestions.ts";
+
+const result = { replacement: "detach", cited: [], removed_citations: [], notice: null };
+test("a selected rewrite preserves every word outside its range and is stale after any newer edit", () => {
+  let c = reducer(emptyCase("homebuilder"), { type: "setProcess", field: "risk", value: "Panels fall in wind." });
+  const block = blockForField(buildDocument(c, []), "risk")!;
+  const s = rewriteSuggestion("r", { blockId: block.id, text: block.text, start: 7, end: 11 }, result);
+  assert.equal(s.after, "Panels detach in wind.");
+  const action = acceptSuggestion(s, block);
+  assert.ok(action);
+  c = reducer(c, action);
+  assert.equal(c.process.risk, "Panels detach in wind.");
+  assert.deepEqual(freshSuggestions([s], buildDocument(c, []).flatMap(s => s.blocks)), []);
+  assert.equal(acceptSuggestion(s, blockForField(buildDocument(c, []), "risk")!), null);
+  assert.throws(() => rewriteSuggestion("bad", { blockId: block.id, text: "x", start: 0, end: 2 }, result));
+});
+test("whole-block rewrites use start=end and draft reject dismisses exactly its proposed fact", () => {
+  const c = reducer(emptyCase("homebuilder"), { type: "setProcess", field: "risk", value: "Known risk" });
+  c.facts.push({ id: "writing-1", field: "process.risk", value: "Draft risk", kind: "proposed", status: "unconfirmed", source: { type: "user_text", ref: "Writing draft" } });
+  const sections = buildDocument(c, []), [s] = draftSuggestions(c, sections);
+  assert.deepEqual([s.before, s.after, s.factId], ["Known risk", "Draft risk", "writing-1"]);
+  const reject = rejectSuggestion(s);
+  assert.deepEqual(reject, { type: "dismissFact", id: "writing-1" });
+  assert.equal(draftSuggestions(reducer(c, reject!), sections).length, 0);
+  assert.equal(rewriteSuggestion("whole", { blockId: s.blockId, text: "Known risk", start: 0, end: 0 }, result).after, "detach");
+  assert.equal(rejectSuggestion({ ...s, origin: "rewrite", factId: undefined }), null);
+});
+test("tracked changes preserve whitespace and the unchanged prefix and suffix", () => {
+  assert.deepEqual(changedWords("high wind and fall.", "high wind and detach."), { prefix: "high wind and ", removed: "fall", added: "detach", suffix: "." });
+  assert.deepEqual(changedWords("", "New words"), { prefix: "", removed: "", added: "New words", suffix: "" });
+});
+
+
+test("selected rewrites count Unicode code points for the engine and retain UTF-16 for local replacement", () => {
+  const passage = { blockId: "risk", text: "🏠 Panels fall.", start: 10, end: 14 };
+  assert.deepEqual(rewriteRange(passage), { start: 9, end: 13 });
+  assert.equal(rewriteSuggestion("unicode", passage, result).after, "🏠 Panels detach.");
+});
+
+
+test("an older proposed alias never revives after the applicant writes newer words", () => {
+  let c = emptyCase("homebuilder");
+  c.facts.push({ id: "old-draft", field: "process.risk", value: "Older AI proposal", kind: "proposed", status: "unconfirmed", source: { type: "user_text", ref: "Writing draft" } });
+  c = reducer(c, { type: "setProcess", field: "risk", value: "Newer applicant words" });
+  assert.deepEqual(draftSuggestions(c, buildDocument(c, [])), []);
+});
+
+
+test("rejecting a non-writing intake reading keeps the original Not right withdrawal behavior", () => {
+  const c = reducer(emptyCase("homebuilder"), { type: "setDetail", field: "owner", value: "Earlier name", section: "A" });
+  c.facts.push({ id: "read-owner", field: "owner", value: "Intake reading", kind: "proposed", status: "unconfirmed", source: { type: "user_text", ref: "Intake" } });
+  const rejected = reducer(c, { type: "dismissFact", id: "read-owner" });
+  assert.equal(factFor(rejected, "owner")?.value, null);
+  assert.equal(factFor(rejected, "owner")?.source.ref, NOT_RIGHT);
+});
