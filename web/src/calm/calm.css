@@ -3366,6 +3366,10 @@ body {
     display: inline;
     max-width: 90px;
   }
+  /* A problem with its own button: the button names it, so the label would only crowd the stages. */
+  .cf-save.is-problem:has(.cf-btn) .cf-save-label {
+    display: none;
+  }
   /* No room to push: the assistant covers the screen as a full sheet with its own close. */
   .cf-assist {
     position: fixed;
