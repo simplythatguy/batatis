@@ -5,9 +5,10 @@
 import { useEffect } from "react";
 import { auth, type OnboardingRequest, type User } from "../../api/accounts";
 import type { Route } from "../../router";
-import { bootAccount, getAccountState, refreshApplications, setAccountState, useAccount } from "../account";
+import { accountSession, bootAccount, getAccountState, refreshApplications, setAccountState, useAccount } from "../account";
 import { resetSession, updateSession } from "../session";
 import { gateRedirect, gateStatus, homeFor, returnTarget, type GateStatus } from "./gate";
+import { guardedSignOut } from "./signOutGuard";
 
 const RETURN_KEY = "batatis.returnTo";
 
@@ -100,16 +101,18 @@ export async function saveOnboarding(body: OnboardingRequest): Promise<User> {
 }
 
 /** Ends the server session, then reloads on the sign-in page so no previous case stays in memory. */
-export async function signOut(): Promise<void> {
-  try {
+export function signOut(): Promise<boolean> {
+  const session = accountSession();
+  return guardedSignOut(async () => {
+    if (session !== accountSession()) throw new Error("The sign-in changed. Try signing out again.");
     await auth.logout();
-  } finally {
+    if (session !== accountSession()) return;
     writeReturn(null);
     resetSession();
     setAccountState({ phase: "signed-out", user: null, applications: null });
     location.hash = "#/signin";
     location.reload();
-  }
+  });
 }
 
 export function currentUser(): User | null {

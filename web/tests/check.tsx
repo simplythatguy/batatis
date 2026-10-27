@@ -2,7 +2,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "../../docs/design/tokens.css";
-import "../src/styles.css";
+import "../src/shared.css";
 import { App } from "../src/App";
 import { CaseProvider, useCase } from "../src/store";
 function Probe() {

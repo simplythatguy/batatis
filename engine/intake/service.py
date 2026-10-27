@@ -2,7 +2,8 @@
 
 What the applicant already gave is used as read (see `settle`), so the deck asks only what is
 missing or unclear. A re-run replaces the facts the previous run left unconfirmed and keeps
-everything confirmed. A fact whose value is already confirmed is not added again. The description
+explicit applicant confirmations. Re-read file facts replace earlier machine confirmations.
+A fact whose value is already confirmed is not added again. The description
 itself is stored as the applicant's own confirmed words (`project.description`), as the web does.
 """
 from __future__ import annotations
@@ -16,7 +17,8 @@ from ..models import Case, Fact, Source
 from ..models_intake import FactPointer, FieldConflict, IntakeRecord
 from . import model as model_pass
 from . import review as review_pass
-from .extract import DESCRIPTION, DESCRIPTION_REF, Extraction, Origin, Outbound, deduplicate, read_file, read_text, scrubbed
+from .extract import (DESCRIPTION, DESCRIPTION_REF, Extraction, Origin, Outbound, deduplicate, read_file, read_text,
+                      reading_field, scrubbed)
 from .plan import OVERRIDDEN, SCOPE_FIELD, build_plan, description, overridden
 from .questions import PROBE_BY_FIELD, issued_questions
 from .rules import ENUMS, FIELDS, LEGAL_PARTS, PERSONAL, ROLES, read
@@ -54,7 +56,7 @@ def run(text: str | None, files: list[tuple[str, str, bytes]], *, codes=None,
                 for file_id, name, data in files] if transport is not None or review_transport is not None else None)
     candidates = [(f.field, f.value) for f in first.facts]
     candidates += [(c.field, value) for c in first.conflicts for value in c.values]
-    personal = [str(value) for field, value in candidates if field in PERSONAL and str(value).strip()
+    personal = first.personal + [str(value) for field, value in candidates if field in PERSONAL and str(value).strip()
                 and not (field in LEGAL_PARTS and str(value).isdigit() and len(str(value)) < 5)]
     if sources is not None:
         personal += review_pass.personal_values([text or '', *(s.name for s in sources),
@@ -75,38 +77,40 @@ def _latest(case: Case, name: str) -> Fact | None:
                  if fact.field == name or (name == 'storeys' and fact.field == 'building.storeys')), None)
 
 
-CONTEXT = ('statement.', 'claimed_provision')     # quoted sentences and cited articles: context, never a choice
-
-
 def settle(case: Case, extraction: Extraction) -> None:
     """Use what the applicant gave without asking again; leave at most one thing to check per field.
 
-    A value whose words were found and checked in the source is confirmed as read: quoted context
-    sentences and cited articles always, any other field when everything read agrees and no earlier
-    answer the applicant gave says otherwise. Repeats collapse to the first. Where the sources disagree, the
+    A value needs both checked wording and project context before it can be confirmed. Cited articles
+    remain document context, without asserting applicability. Other fields are confirmed when everything
+    read agrees and no earlier answer the applicant gave says otherwise. Repeats collapse to the first. Where the sources disagree, the
     applicant's own description wins; failing that, a field the planner can ask about becomes one
     conflict question, and any other keeps its first reading to check. A guess the model could not
     point to stays a proposal only while the field has nothing better. A computed value follows its inputs.
     """
     deduplicate(extraction)
-    checked = {p.fact_id for p in extraction.pointers if p.verified}
+    checked = {p.fact_id for p in extraction.pointers if p.verified and p.project_context}
+    eligible = {p.fact_id for p in extraction.pointers if p.project_context}
+    quoted = {p.fact_id for p in extraction.pointers if p.verified}
     pictured = {p.fact_id for p in extraction.pointers if p.method == 'vision'}
     conflicted = {c.field for c in extraction.conflicts}
     key = lambda fact: repr(fact.value)                                  # noqa: E731
     by_field: dict[str, list[Fact]] = {}
     for fact in extraction.facts:
-        if fact.kind != 'computed':
+        if fact.kind != 'computed' and (fact.id in eligible or fact.field == 'claimed_provision'):
             by_field.setdefault(fact.field, []).append(fact)
     kept: dict[str, Fact] = {}                                           # id -> fact kept
     for field, facts in by_field.items():
-        sure = [f for f in facts if f.kind == 'pointed' and f.id in checked]
+        sure = [f for f in facts if f.kind in ('pointed', 'exact') and f.id in checked]
         unique = list({key(f): f for f in reversed(sure)}.values())[::-1]   # first reading of each value
         prior = _latest(case, field)
         # Only what the applicant answered or clicked outranks a new reading; an earlier reading does not.
         given = prior is not None and prior.status == 'confirmed' and prior.source.type != 'file' \
             and prior.source.ref != DESCRIPTION_REF
         agrees = lambda f: not given or prior.value == f.value          # noqa: E731
-        if field.startswith(CONTEXT):
+        if field == 'claimed_provision':
+            chosen, confirm = list({key(f): f for f in reversed(facts)
+                                    if f.id in quoted}.values())[::-1], True
+        elif field.startswith('statement.'):
             chosen, confirm = (unique, True) if sure else (facts, False)
         elif not sure:
             proposed = list({key(f): f for f in reversed(facts)}.values())[::-1]
@@ -156,7 +160,18 @@ def apply(case: Case, text: str | None, extraction: Extraction, *, role: str | N
     """Write this run to the case. Returns the facts added by the run."""
     previous_text = description(case)
     previous = {pointer.fact_id for pointer in (case.intake.pointers if case.intake else [])}
-    case.facts = [fact for fact in case.facts if not (fact.id in previous and fact.status == 'unconfirmed')]
+    reread = {file.file_id for file in extraction.files if file.status != 'not_read'}
+    replaced = {fact.id for fact in case.facts if fact.source.type == 'file' and fact.source.ref in reread
+                and (fact.id in previous or reading_field(fact.field))}
+    while True:
+        derived = {fact.id for fact in case.facts if fact.kind == 'computed' and set(fact.inputs) & replaced}
+        if derived <= replaced:
+            break
+        replaced |= derived
+    # Re-readings supersede machine confirmations from older intake versions. Explicit
+    # applicant confirmations are new user_click facts, so they survive this correction.
+    case.facts = [fact for fact in case.facts if fact.id not in replaced
+                  and not (fact.id in previous and fact.status == 'unconfirmed')]
     if text and text.strip():
         current = _latest(case, 'project.description')
         if current is None or current.value != text:

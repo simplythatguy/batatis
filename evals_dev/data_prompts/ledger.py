@@ -10,7 +10,6 @@ they are free but quota-limited, and their transport is not httpx.Client.post.
 from __future__ import annotations
 
 import contextvars
-import fcntl
 import hashlib
 import json
 import os
@@ -24,6 +23,8 @@ from dataclasses import asdict, dataclass, field, replace
 from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlsplit
+
+from evals_dev.file_lock import file_lock
 
 CACHE = Path(os.environ.get('DPE_CACHE') or Path(__file__).resolve().parents[2] / '.dpe-cache') / 'http'
 ATTEMPTS = CACHE.parent / 'attempts.jsonl'
@@ -108,14 +109,10 @@ def attempt_event(event: str, *, request_hash: str, stage: str, model: str, effo
     row = {'event': event, 'attempt_id': attempt_id, 'request_hash': request_hash, 'stage': stage,
            'model': model, 'effort': effort, 'at': datetime.now(timezone.utc).isoformat(), **metadata}
     ATTEMPTS.parent.mkdir(parents=True, exist_ok=True)
-    with _attempt_lock, ATTEMPTS.open('a') as handle:
-        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
-        try:
-            handle.write(json.dumps(row, separators=(',', ':')) + '\n')
-            handle.flush()
-            os.fsync(handle.fileno())
-        finally:
-            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+    with _attempt_lock, ATTEMPTS.open('a') as handle, file_lock(handle):
+        handle.write(json.dumps(row, separators=(',', ':')) + '\n')
+        handle.flush()
+        os.fsync(handle.fileno())
     return attempt_id
 
 

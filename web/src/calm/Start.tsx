@@ -5,7 +5,7 @@ import { useAccount } from "./account";
 import { readOnlyStatus } from "./applications";
 import { requestStartSignIn } from "./auth/useAuthGate";
 import { useBegin, useCurrentApplication } from "./begin";
-import { getSession, updateSession, useSession } from "./session";
+import { getSession, resetSession, updateSession, useSession } from "./session";
 import { CIcon, Dot, Kbd, MOD_KEY } from "./ui";
 import { PictureConsent } from "./PictureConsent";
 
@@ -21,12 +21,14 @@ const isText = (f: File) => /^text\/(plain|markdown)$/.test(f.type) || /\.(txt|m
  */
 export function Start() {
   const caseActions = useCase();
-  const { c, phase, dispatch, resetNote, readDescription, submissionDispatched } = caseActions;
+  const { c, phase, dispatch, beginEmpty, resetNote, readDescription, submissionDispatched } = caseActions;
   const account = useAccount();
   const session = useSession();
   const { begin } = useBegin();
   const { app, locked } = useCurrentApplication();
   const inCase = phase === "case";
+  const prepared = useRef(inCase);
+  prepared.current = inCase;
   const [dragging, setDragging] = useState(false);
   const [note, setNote] = useState("");
   const [attaching, setAttaching] = useState(false);
@@ -42,8 +44,23 @@ export function Start() {
     if (!inCase && session.startRequested && !session.draftFilesLost && !attaching) begin();
   }, [inCase, session.startRequested, session.draftFilesLost, session.draftFiles, attaching, account.phase, account.user, begin]);
 
+  /** A signed-in applicant's composer is a durable draft before the explicit AI start; their part is asked later. */
+  function prepare() {
+    if (prepared.current) return true;
+    const ready = account.phase === "anonymous" || (account.phase === "signed-in" && account.user?.onboarded === true && account.user.role !== "reviewer");
+    if (!ready) return false;
+    prepared.current = true;
+    const session = getSession();
+    const files = session.draftFiles;
+    beginEmpty(null);
+    if (session.draft) dispatch({ type: "setDescription", text: session.draft });
+    if (files.length) dispatch({ type: "addFiles", files: files.map(f => ({ id: f.id, name: f.file.name })) });
+    resetSession({ held: files });
+    return true;
+  }
+
   function setText(t: string) {
-    if (inCase) dispatch({ type: "setDescription", text: t });
+    if (prepare()) dispatch({ type: "setDescription", text: t });
     else updateSession({ draft: t });
   }
 
@@ -56,7 +73,7 @@ export function Start() {
     if (texts.length) setAttaching(true);
     if (attachments.length) {
       const made = attachments.map((file) => ({ id: fileId(), file }));
-      if (inCase) {
+      if (prepare()) {
         dispatch({ type: "addFiles", files: made.map((m) => ({ id: m.id, name: m.file.name })) });
         updateSession((s) => ({ held: [...s.held, ...made] }));
       } else updateSession((s) => ({ draftFiles: [...s.draftFiles, ...made], draftFilesLost: false }));

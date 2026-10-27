@@ -4,28 +4,32 @@
  * What the engine stores: facts (answers, the description, process fields, professional and
  * evidence facts), the jurisdiction, the title, the confirmed provisions and the code-check
  * selection (`selected_articles`, docs/api/selected-articles.md): every code card with its answer,
- * unanswered and pending ones included. Attached files come from the owned server inventory.
+ * unanswered and pending ones included. Selected reading-file IDs live in the applicant draft;
+ * their immutable metadata comes from the case-owned upload inventory.
  */
 import type { Case as EngineCase, IdentifyResult, IntakeResult, SelectedArticleInput } from "../api/types.gen";
-import type { StoredFile } from "../api/client";
 import { emptyCase, applyDescription } from "../intake";
 import { answerWithdrawn, latestLocalFacts } from "../intakeFields";
 import { CODECHECK_PREFIX, PROCESS_FACT, reducer } from "../model";
 import { canonicalProvision, isProvision } from "../provisions";
-import type { ApplicantType, AuthorityId, Candidate, Case, Fact, ProcessFieldId } from "../types";
+import type { ApplicantType, AuthorityId, Candidate, Case, CaseFile, Fact, ProcessFieldId } from "../types";
 import { clarificationQuestionId } from "./uncertainty";
+import type { SavedCase } from "../api/client";
+import { DESCRIPTION_DRAFT, evidenceDrafts } from "./draftWire";
 
 /** The latest saved fact per field, without withdrawn answers. Order is preserved. */
 export function latestFacts(facts: EngineCase["facts"]): Fact[] {
   return latestLocalFacts(facts).filter((f) => !answerWithdrawn(f)) as Fact[];
 }
 
-export function caseFromEngine(saved: EngineCase, type: ApplicantType | null): Case {
-  const base = emptyCase(type);
+export function caseFromEngine(saved: SavedCase, type: ApplicantType | null): Case {
+  const base = emptyCase(saved.applicant_draft?.role ?? type);
   const facts = latestFacts(saved.facts);
   const by = new Map(facts.map((f) => [f.field, f]));
   const role = by.get("applicant_role");
-  const applicantType = role?.status === "confirmed" && (role.value === "manufacturer" || role.value === "contractor" || role.value === "homebuilder" || role.value === "owner" || role.value === "designer" || role.value === "builder") ? role.value : type;
+  const ROLES = ["manufacturer", "contractor", "homebuilder", "owner", "designer", "builder", "engineer", "other"];
+  // The applicant's confirmed answer to "Your part in this project" wins over a draft's stored role.
+  const answered = role?.status === "confirmed" && ROLES.includes(String(role.value)) ? role.value as ApplicantType : null;
   const description = by.get("project.description");
   const authority: AuthorityId = saved.authority ?? saved.jurisdiction?.id ?? "";
   const process = { ...base.process };
@@ -66,7 +70,7 @@ export function caseFromEngine(saved: EngineCase, type: ApplicantType | null): C
   }));
   let c: Case = {
     ...base,
-    applicantType,
+    applicantType: answered ?? saved.applicant_draft?.role ?? base.applicantType,
     id: `case-${saved.id}`,
     title: saved.title || base.title,
     authority,
@@ -74,9 +78,12 @@ export function caseFromEngine(saved: EngineCase, type: ApplicantType | null): C
     questions,
     process,
     candidates: confirmed,
+    evidenceDrafts: evidenceDrafts(saved.applicant_draft),
   };
   // Restore the description/title without replacing any saved facts that share its source ref.
   if (description && typeof description.value === "string") c = { ...applyDescription(c, description.value), facts };
+  const composer = saved.applicant_draft?.question_text[DESCRIPTION_DRAFT];
+  if (composer) c = { ...c, description: composer.value };
   if (saved.title) c = { ...c, title: saved.title, titleKept: true };
   if (saved.selected_articles) c = restoreSelection(c, saved.selected_articles, saved.provisions);
   return restoreCardAnswers(c);
@@ -166,13 +173,20 @@ export async function reviewedDescription(saved: EngineCase, record: IntakeResul
   }
 }
 
-export function openedCase(saved: EngineCase, type: ApplicantType | null, stored: { intake: IntakeResult | null; identify: IdentifyResult | null; reviewedText?: string | null; files?: StoredFile[] }): Case {
+export function openedCase(saved: EngineCase, type: ApplicantType | null, stored: { intake: IntakeResult | null; identify: IdentifyResult | null; reviewedText?: string | null; files?: CaseFile[] }): Case {
   const restored = caseFromEngine(saved, type);
-  let c: Case = { ...restored, files: (stored.files ?? []).filter(f => !stored.intake?.record.removed_file_ids?.includes(f.id)).map(f => {
-    const report = stored.intake?.record.files.find(r => r.file_id === f.id) ?? f.read_report;
-    return { id: f.id, engineId: f.id, name: f.name, read: Boolean(report && report.status !== "not_read"), pages: report?.pages ?? undefined };
-  }) };
+  let c = restored;
   if (stored.intake) c = reducer(c, { type: "restoreIntake", result: stored.intake, text: stored.reviewedText ?? null });
+  if (stored.files) {
+    // A file the applicant removed stays out, even if the draft still lists it.
+    const removed = new Set(stored.intake?.record.removed_file_ids ?? []);
+    const files = stored.files.filter(file => !removed.has(file.engineId ?? file.id));
+    const currentIds = files.map(file => file.engineId).sort();
+    const readIds = stored.intake?.record.files.map(file => file.file_id).sort() ?? [];
+    c = { ...c, files, ...(c.intake && JSON.stringify(currentIds) !== JSON.stringify(readIds)
+      ? { intake: { ...c.intake, filesChanged: true } } : {}) };
+  }
+  // A report saved before reading coverage was recorded is read again, so its status is honest.
   if (c.intake?.record.files.some(r => r.pages_read.length && !r.text_pages_read?.length && !r.image_pages_read?.length && r.form !== "scc_variance" && !r.semantic_reason)) {
     c = { ...c, intake: { ...c.intake, filesChanged: true } };
   }

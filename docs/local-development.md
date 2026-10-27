@@ -18,7 +18,7 @@ BATATIS_LIVE=0 BATATIS_LIVE_ELEPHANT=0 scripts/local-app.sh start
 
 Open http://localhost:3000. The engine's route documentation is at http://127.0.0.1:8000/docs. Create a local applicant account to explore saved applications. Officer access requires a reviewer account; see the [account setup guide](api/accounts-review.md#configuration-and-security-receipt).
 
-The launcher keeps this checkout's cases in `.data/cases.sqlite`. Cases and their files expire seven days after creation. Stop both servers with `scripts/local-app.sh stop`.
+The launcher keeps this checkout's cases in `.data/cases.sqlite`. Cases and their files follow the [inactivity and workflow retention policy](application-retention.md). Stop both servers with `scripts/local-app.sh stop`.
 
 The workspace can start before the code database exists. Code lookup and export then report that their source data is unavailable.
 

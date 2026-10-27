@@ -2,7 +2,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "../../docs/design/tokens.css";
-import "../src/styles.css";
+import "../src/shared.css";
 import { CaseProvider, useCase } from "../src/store";
 import { Recommendations } from "../src/screens/Recommendations";
 import { Application } from "../src/calm/Application";

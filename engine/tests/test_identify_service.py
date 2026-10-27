@@ -40,6 +40,10 @@ def offline(monkeypatch):
                  'BATATIS_IDENTIFY_CONFIG'):
         monkeypatch.delenv(name, raising=False)
     monkeypatch.setenv('BATATIS_PROVIDER', 'fake')
+    # These tests exercise the retained provider pipeline. The new production
+    # requirement profile has its own source/HTTP regressions.
+    monkeypatch.setenv('BATATIS_IDENTIFY_SCREEN', 'jev')
+    monkeypatch.setenv('BATATIS_IDENTIFY_RERANK', 'jev')
     monkeypatch.setenv('BATATIS_IDENTIFY_RATE_LIMIT', '1000')
     yield
     llm_gate.reset_for_tests()

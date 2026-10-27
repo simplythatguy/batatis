@@ -140,6 +140,288 @@
       "title": "AnswersRequest",
       "type": "object"
     },
+    "ApplicantDraft": {
+      "additionalProperties": false,
+      "properties": {
+        "authority_unsure": {
+          "default": false,
+          "title": "Authority Unsure",
+          "type": "boolean"
+        },
+        "choices": {
+          "additionalProperties": {
+            "maxLength": 20000,
+            "type": "string"
+          },
+          "maxProperties": 1000,
+          "propertyNames": {
+            "maxLength": 300,
+            "minLength": 1
+          },
+          "title": "Choices",
+          "type": "object"
+        },
+        "evidence_drafts": {
+          "additionalProperties": {
+            "$ref": "#/$defs/EvidenceDraft"
+          },
+          "maxProperties": 1000,
+          "propertyNames": {
+            "maxLength": 300,
+            "minLength": 1
+          },
+          "title": "Evidence Drafts",
+          "type": "object"
+        },
+        "intake_file_ids": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 300,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 1000,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Intake File Ids"
+        },
+        "packages": {
+          "additionalProperties": {
+            "enum": [
+              "yes",
+              "no"
+            ],
+            "type": "string"
+          },
+          "maxProperties": 1000,
+          "propertyNames": {
+            "maxLength": 300,
+            "minLength": 1
+          },
+          "title": "Packages",
+          "type": "object"
+        },
+        "question_text": {
+          "additionalProperties": {
+            "$ref": "#/$defs/DraftText"
+          },
+          "maxProperties": 1000,
+          "propertyNames": {
+            "maxLength": 300,
+            "minLength": 1
+          },
+          "title": "Question Text",
+          "type": "object"
+        },
+        "role": {
+          "anyOf": [
+            {
+              "enum": [
+                "manufacturer",
+                "contractor",
+                "homebuilder",
+                "builder",
+                "designer",
+                "owner",
+                "engineer",
+                "other"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Role"
+        },
+        "rule_unsure": {
+          "items": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 1000,
+          "title": "Rule Unsure",
+          "type": "array"
+        },
+        "seen": {
+          "items": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 1000,
+          "title": "Seen",
+          "type": "array"
+        },
+        "skipped": {
+          "items": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 1000,
+          "title": "Skipped",
+          "type": "array"
+        }
+      },
+      "required": [
+        "role",
+        "intake_file_ids",
+        "question_text",
+        "choices",
+        "skipped",
+        "seen",
+        "authority_unsure",
+        "packages",
+        "rule_unsure",
+        "evidence_drafts"
+      ],
+      "title": "ApplicantDraft",
+      "type": "object"
+    },
+    "ApplicantDraftInput": {
+      "additionalProperties": false,
+      "properties": {
+        "authority_unsure": {
+          "default": false,
+          "title": "Authority Unsure",
+          "type": "boolean"
+        },
+        "choices": {
+          "additionalProperties": {
+            "maxLength": 20000,
+            "type": "string"
+          },
+          "maxProperties": 1000,
+          "propertyNames": {
+            "maxLength": 300,
+            "minLength": 1
+          },
+          "title": "Choices",
+          "type": "object"
+        },
+        "evidence_drafts": {
+          "additionalProperties": {
+            "$ref": "#/$defs/EvidenceDraftInput"
+          },
+          "maxProperties": 1000,
+          "propertyNames": {
+            "maxLength": 300,
+            "minLength": 1
+          },
+          "title": "Evidence Drafts",
+          "type": "object"
+        },
+        "intake_file_ids": {
+          "anyOf": [
+            {
+              "items": {
+                "maxLength": 300,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 1000,
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Intake File Ids"
+        },
+        "packages": {
+          "additionalProperties": {
+            "enum": [
+              "yes",
+              "no"
+            ],
+            "type": "string"
+          },
+          "maxProperties": 1000,
+          "propertyNames": {
+            "maxLength": 300,
+            "minLength": 1
+          },
+          "title": "Packages",
+          "type": "object"
+        },
+        "question_text": {
+          "additionalProperties": {
+            "$ref": "#/$defs/DraftText"
+          },
+          "maxProperties": 1000,
+          "propertyNames": {
+            "maxLength": 300,
+            "minLength": 1
+          },
+          "title": "Question Text",
+          "type": "object"
+        },
+        "role": {
+          "anyOf": [
+            {
+              "enum": [
+                "manufacturer",
+                "contractor",
+                "homebuilder",
+                "builder",
+                "designer",
+                "owner",
+                "engineer",
+                "other"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Role"
+        },
+        "rule_unsure": {
+          "items": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 1000,
+          "title": "Rule Unsure",
+          "type": "array"
+        },
+        "seen": {
+          "items": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 1000,
+          "title": "Seen",
+          "type": "array"
+        },
+        "skipped": {
+          "items": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 1000,
+          "title": "Skipped",
+          "type": "array"
+        }
+      },
+      "title": "ApplicantDraft",
+      "type": "object"
+    },
     "ApplicantSummary": {
       "properties": {
         "applicant_type": {
@@ -600,10 +882,8 @@
             "code-search",
             "references",
             "downloads",
-            "officer-view",
             "settings",
             "notifications",
-            "accuracy",
             "comments",
             "question-authority",
             "question-owner",
@@ -711,10 +991,8 @@
               "code-search",
               "references",
               "downloads",
-              "officer-view",
               "settings",
               "notifications",
-              "accuracy",
               "comments",
               "question-authority",
               "question-owner",
@@ -1329,6 +1607,17 @@
     },
     "Case": {
       "properties": {
+        "applicant_draft": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ApplicantDraft"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "authority": {
           "anyOf": [
             {
@@ -1620,6 +1909,7 @@
         "version",
         "jurisdiction",
         "facts",
+        "applicant_draft",
         "selected_articles",
         "provisions",
         "section_c",
@@ -3266,6 +3556,132 @@
       "title": "DocumentRow",
       "type": "object"
     },
+    "DraftFileBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "file_id": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "File Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "file",
+          "default": "file",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "file_id"
+      ],
+      "title": "DraftFileBinding",
+      "type": "object"
+    },
+    "DraftFileBindingInput": {
+      "additionalProperties": false,
+      "properties": {
+        "file_id": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "File Id",
+          "type": "string"
+        },
+        "kind": {
+          "const": "file",
+          "default": "file",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "file_id"
+      ],
+      "title": "DraftFileBinding",
+      "type": "object"
+    },
+    "DraftPatch": {
+      "additionalProperties": false,
+      "properties": {
+        "applicant_draft": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ApplicantDraftInput"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "expected_version": {
+          "minimum": 1,
+          "title": "Expected Version",
+          "type": "integer"
+        },
+        "facts": {
+          "items": {
+            "$ref": "#/$defs/FactInput"
+          },
+          "maxItems": 1000,
+          "title": "Facts",
+          "type": "array"
+        },
+        "jurisdiction": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/JurisdictionInput"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "selected_articles": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/SelectedArticleInput"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Selected Articles"
+        }
+      },
+      "required": [
+        "expected_version"
+      ],
+      "title": "DraftPatch",
+      "type": "object"
+    },
+    "DraftText": {
+      "additionalProperties": false,
+      "properties": {
+        "base": {
+          "maxLength": 20000,
+          "title": "Base",
+          "type": "string"
+        },
+        "value": {
+          "maxLength": 20000,
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "base",
+        "value"
+      ],
+      "title": "DraftText",
+      "type": "object"
+    },
     "DroppedPick": {
       "properties": {
         "article": {
@@ -3316,6 +3732,190 @@
         "text"
       ],
       "title": "EditedItem",
+      "type": "object"
+    },
+    "EvidenceDraft": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "default": "",
+          "maxLength": 20000,
+          "title": "Date",
+          "type": "string"
+        },
+        "document": {
+          "default": "",
+          "maxLength": 20000,
+          "title": "Document",
+          "type": "string"
+        },
+        "editing": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Editing"
+        },
+        "evidenceType": {
+          "default": "",
+          "maxLength": 20000,
+          "title": "Evidencetype",
+          "type": "string"
+        },
+        "file_binding": {
+          "discriminator": {
+            "mapping": {
+              "file": "#/$defs/DraftFileBinding",
+              "remove": "#/$defs/RemoveFileBinding",
+              "retain": "#/$defs/RetainFileBinding"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/RetainFileBinding"
+            },
+            {
+              "$ref": "#/$defs/RemoveFileBinding"
+            },
+            {
+              "$ref": "#/$defs/DraftFileBinding"
+            }
+          ],
+          "title": "File Binding"
+        },
+        "note": {
+          "default": "",
+          "maxLength": 20000,
+          "title": "Note",
+          "type": "string"
+        },
+        "responsible": {
+          "default": "",
+          "maxLength": 20000,
+          "title": "Responsible",
+          "type": "string"
+        },
+        "step": {
+          "anyOf": [
+            {
+              "maximum": 10,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Step"
+        }
+      },
+      "required": [
+        "document",
+        "responsible",
+        "date",
+        "evidenceType",
+        "note",
+        "step",
+        "editing",
+        "file_binding"
+      ],
+      "title": "EvidenceDraft",
+      "type": "object"
+    },
+    "EvidenceDraftInput": {
+      "additionalProperties": false,
+      "properties": {
+        "date": {
+          "default": "",
+          "maxLength": 20000,
+          "title": "Date",
+          "type": "string"
+        },
+        "document": {
+          "default": "",
+          "maxLength": 20000,
+          "title": "Document",
+          "type": "string"
+        },
+        "editing": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Editing"
+        },
+        "evidenceType": {
+          "default": "",
+          "maxLength": 20000,
+          "title": "Evidencetype",
+          "type": "string"
+        },
+        "file_binding": {
+          "discriminator": {
+            "mapping": {
+              "file": "#/$defs/DraftFileBindingInput",
+              "remove": "#/$defs/RemoveFileBindingInput",
+              "retain": "#/$defs/RetainFileBindingInput"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/RetainFileBindingInput"
+            },
+            {
+              "$ref": "#/$defs/RemoveFileBindingInput"
+            },
+            {
+              "$ref": "#/$defs/DraftFileBindingInput"
+            }
+          ],
+          "title": "File Binding"
+        },
+        "note": {
+          "default": "",
+          "maxLength": 20000,
+          "title": "Note",
+          "type": "string"
+        },
+        "responsible": {
+          "default": "",
+          "maxLength": 20000,
+          "title": "Responsible",
+          "type": "string"
+        },
+        "step": {
+          "anyOf": [
+            {
+              "maximum": 10,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Step"
+        }
+      },
+      "title": "EvidenceDraft",
       "type": "object"
     },
     "EvidenceItem": {
@@ -3776,6 +4376,11 @@
           "default": null,
           "title": "Page"
         },
+        "project_context": {
+          "default": false,
+          "title": "Project Context",
+          "type": "boolean"
+        },
         "quote": {
           "anyOf": [
             {
@@ -3832,7 +4437,8 @@
         "end",
         "verified",
         "source_name",
-        "quote"
+        "quote",
+        "project_context"
       ],
       "title": "FactPointer",
       "type": "object"
@@ -4071,6 +4677,14 @@
           "default": null,
           "title": "Pictures Not Read Reason"
         },
+        "project_pages": {
+          "default": [],
+          "items": {
+            "type": "integer"
+          },
+          "title": "Project Pages",
+          "type": "array"
+        },
         "reason": {
           "anyOf": [
             {
@@ -4147,7 +4761,8 @@
         "form",
         "form_fields_read",
         "form_fields_skipped",
-        "facts"
+        "facts",
+        "project_pages"
       ],
       "title": "FileReport",
       "type": "object"
@@ -4890,6 +5505,37 @@
           "title": "Engineering Required",
           "type": "string"
         },
+        "input_coverage_gaps": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Input Coverage Gaps",
+          "type": "array"
+        },
+        "input_fingerprint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Input Fingerprint"
+        },
+        "input_sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Input Sha256"
+        },
         "label": {
           "title": "Label",
           "type": "string"
@@ -4963,6 +5609,47 @@
           "title": "Questions",
           "type": "array"
         },
+        "requirement_coverage": {
+          "$ref": "#/$defs/RequirementCoverage"
+        },
+        "requirement_evidence": {
+          "items": {
+            "$ref": "#/$defs/RequirementEvidence"
+          },
+          "title": "Requirement Evidence",
+          "type": "array"
+        },
+        "requirement_links": {
+          "items": {
+            "$ref": "#/$defs/RequirementLink"
+          },
+          "title": "Requirement Links",
+          "type": "array"
+        },
+        "requirement_status": {
+          "default": "not_run",
+          "enum": [
+            "not_run",
+            "needs_review",
+            "source_unavailable"
+          ],
+          "title": "Requirement Status",
+          "type": "string"
+        },
+        "requirements": {
+          "items": {
+            "$ref": "#/$defs/RequirementRecord"
+          },
+          "title": "Requirements",
+          "type": "array"
+        },
+        "scope_assessments": {
+          "items": {
+            "$ref": "#/$defs/PartScopeAssessment"
+          },
+          "title": "Scope Assessments",
+          "type": "array"
+        },
         "scored_at": {
           "title": "Scored At",
           "type": "string"
@@ -5001,6 +5688,13 @@
         }
       },
       "required": [
+        "requirements",
+        "requirement_evidence",
+        "requirement_links",
+        "requirement_status",
+        "requirement_coverage",
+        "input_fingerprint",
+        "scope_assessments",
         "mode",
         "source",
         "label",
@@ -5019,6 +5713,8 @@
         "title",
         "scored_at",
         "description_sha256",
+        "input_sha256",
+        "input_coverage_gaps",
         "stale",
         "persisted",
         "case_version",
@@ -5058,7 +5754,7 @@
         "prose": {
           "anyOf": [
             {
-              "maxLength": 20000,
+              "maxLength": 2000000,
               "type": "string"
             },
             {
@@ -5141,6 +5837,37 @@
           "title": "Engineering Required",
           "type": "string"
         },
+        "input_coverage_gaps": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Input Coverage Gaps",
+          "type": "array"
+        },
+        "input_fingerprint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Input Fingerprint"
+        },
+        "input_sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Input Sha256"
+        },
         "label": {
           "title": "Label",
           "type": "string"
@@ -5214,6 +5941,47 @@
           "title": "Questions",
           "type": "array"
         },
+        "requirement_coverage": {
+          "$ref": "#/$defs/RequirementCoverage"
+        },
+        "requirement_evidence": {
+          "items": {
+            "$ref": "#/$defs/RequirementEvidence"
+          },
+          "title": "Requirement Evidence",
+          "type": "array"
+        },
+        "requirement_links": {
+          "items": {
+            "$ref": "#/$defs/RequirementLink"
+          },
+          "title": "Requirement Links",
+          "type": "array"
+        },
+        "requirement_status": {
+          "default": "not_run",
+          "enum": [
+            "not_run",
+            "needs_review",
+            "source_unavailable"
+          ],
+          "title": "Requirement Status",
+          "type": "string"
+        },
+        "requirements": {
+          "items": {
+            "$ref": "#/$defs/RequirementRecord"
+          },
+          "title": "Requirements",
+          "type": "array"
+        },
+        "scope_assessments": {
+          "items": {
+            "$ref": "#/$defs/PartScopeAssessment"
+          },
+          "title": "Scope Assessments",
+          "type": "array"
+        },
         "scored_at": {
           "title": "Scored At",
           "type": "string"
@@ -5244,6 +6012,13 @@
         }
       },
       "required": [
+        "requirements",
+        "requirement_evidence",
+        "requirement_links",
+        "requirement_status",
+        "requirement_coverage",
+        "input_fingerprint",
+        "scope_assessments",
         "mode",
         "source",
         "label",
@@ -5262,6 +6037,8 @@
         "title",
         "scored_at",
         "description_sha256",
+        "input_sha256",
+        "input_coverage_gaps",
         "stale",
         "persisted",
         "case_version",
@@ -5968,6 +6745,226 @@
         "pdf_page"
       ],
       "title": "IntentBlock",
+      "type": "object"
+    },
+    "Job": {
+      "additionalProperties": false,
+      "properties": {
+        "attempts": {
+          "title": "Attempts",
+          "type": "integer"
+        },
+        "base_version": {
+          "title": "Base Version",
+          "type": "integer"
+        },
+        "can_retry": {
+          "title": "Can Retry",
+          "type": "boolean"
+        },
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "created_at": {
+          "title": "Created At",
+          "type": "string"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/JobError"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "finished_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Finished At"
+        },
+        "heartbeat_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Heartbeat At"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "pattern": "^[a-z][a-z0-9_]{0,63}$",
+          "title": "Kind",
+          "type": "string"
+        },
+        "lease_expires_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Lease Expires At"
+        },
+        "max_attempts": {
+          "title": "Max Attempts",
+          "type": "integer"
+        },
+        "next_attempt_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Next Attempt At"
+        },
+        "result_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Result Url"
+        },
+        "result_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Result Version"
+        },
+        "stage": {
+          "title": "Stage",
+          "type": "string"
+        },
+        "started_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Started At"
+        },
+        "state": {
+          "enum": [
+            "queued",
+            "running",
+            "succeeded",
+            "failed",
+            "cancelled",
+            "superseded"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "updated_at": {
+          "title": "Updated At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "case_id",
+        "kind",
+        "state",
+        "stage",
+        "attempts",
+        "max_attempts",
+        "base_version",
+        "result_version",
+        "created_at",
+        "updated_at",
+        "started_at",
+        "finished_at",
+        "next_attempt_at",
+        "heartbeat_at",
+        "lease_expires_at",
+        "error",
+        "can_retry",
+        "result_url"
+      ],
+      "title": "Job",
+      "type": "object"
+    },
+    "JobError": {
+      "properties": {
+        "code": {
+          "enum": [
+            "processing_failed",
+            "worker_lost",
+            "access_changed",
+            "input_changed",
+            "invalid_input",
+            "handler_unavailable"
+          ],
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "retryable": {
+          "title": "Retryable",
+          "type": "boolean"
+        },
+        "stage": {
+          "title": "Stage",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "stage",
+        "retryable"
+      ],
+      "title": "JobError",
+      "type": "object"
+    },
+    "JobList": {
+      "properties": {
+        "items": {
+          "items": {
+            "$ref": "#/$defs/Job"
+          },
+          "title": "Items",
+          "type": "array"
+        }
+      },
+      "required": [
+        "items"
+      ],
+      "title": "JobList",
       "type": "object"
     },
     "Jurisdiction": {
@@ -7098,6 +8095,54 @@
       "title": "PackageReviewIndex",
       "type": "object"
     },
+    "PartScopeAssessment": {
+      "properties": {
+        "basis": {
+          "items": {
+            "$ref": "#/$defs/ScopeBasis"
+          },
+          "title": "Basis",
+          "type": "array"
+        },
+        "conditions": {
+          "items": {
+            "$ref": "#/$defs/ScopeCondition"
+          },
+          "title": "Conditions",
+          "type": "array"
+        },
+        "limitation": {
+          "default": "This evaluates only supplied scope conditions. It does not establish that Part 9 applies, choose every governing Part, or exclude details invoked by another requirement.",
+          "title": "Limitation",
+          "type": "string"
+        },
+        "part": {
+          "const": 9,
+          "default": 9,
+          "title": "Part",
+          "type": "integer"
+        },
+        "status": {
+          "default": "not_determined",
+          "enum": [
+            "not_determined",
+            "boundary_not_met",
+            "conditions_met_scope_unresolved"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "part",
+        "status",
+        "conditions",
+        "basis",
+        "limitation"
+      ],
+      "title": "PartScopeAssessment",
+      "type": "object"
+    },
     "PlanRequest": {
       "additionalProperties": false,
       "properties": {
@@ -8197,6 +9242,799 @@
       "title": "RelevanceRecord",
       "type": "object"
     },
+    "RemoveFileBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "remove",
+          "default": "remove",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "title": "RemoveFileBinding",
+      "type": "object"
+    },
+    "RemoveFileBindingInput": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "remove",
+          "default": "remove",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "title": "RemoveFileBinding",
+      "type": "object"
+    },
+    "RequirementCondition": {
+      "properties": {
+        "fact_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Fact Ids",
+          "type": "array"
+        },
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "status": {
+          "default": "unknown",
+          "enum": [
+            "unknown",
+            "provided",
+            "conflict"
+          ],
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "field",
+        "status",
+        "fact_ids"
+      ],
+      "title": "RequirementCondition",
+      "type": "object"
+    },
+    "RequirementCoverage": {
+      "properties": {
+        "applicability_status": {
+          "const": "not_determined",
+          "default": "not_determined",
+          "title": "Applicability Status",
+          "type": "string"
+        },
+        "articles_by_division": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Articles By Division",
+          "type": "object"
+        },
+        "discovered": {
+          "default": 0,
+          "title": "Discovered",
+          "type": "integer"
+        },
+        "exhaustive": {
+          "const": false,
+          "default": false,
+          "title": "Exhaustive",
+          "type": "boolean"
+        },
+        "gaps": {
+          "items": {
+            "$ref": "#/$defs/RequirementGap"
+          },
+          "title": "Gaps",
+          "type": "array"
+        },
+        "graph_status": {
+          "default": "not_run",
+          "enum": [
+            "not_run",
+            "traversed",
+            "traversed_with_gaps"
+          ],
+          "title": "Graph Status",
+          "type": "string"
+        },
+        "human_confirmed": {
+          "default": 0,
+          "title": "Human Confirmed",
+          "type": "integer"
+        },
+        "limits": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Limits",
+          "type": "array"
+        },
+        "notes_scanned": {
+          "default": 0,
+          "title": "Notes Scanned",
+          "type": "integer"
+        },
+        "provider_requests": {
+          "const": 0,
+          "default": 0,
+          "title": "Provider Requests",
+          "type": "integer"
+        },
+        "provisions_scanned": {
+          "default": 0,
+          "title": "Provisions Scanned",
+          "type": "integer"
+        },
+        "query_chunks": {
+          "default": 0,
+          "title": "Query Chunks",
+          "type": "integer"
+        },
+        "scan_status": {
+          "default": "not_run",
+          "enum": [
+            "not_run",
+            "scanned",
+            "unavailable"
+          ],
+          "title": "Scan Status",
+          "type": "string"
+        },
+        "source": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RequirementSource"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "source",
+        "scan_status",
+        "graph_status",
+        "applicability_status",
+        "exhaustive",
+        "articles_by_division",
+        "provisions_scanned",
+        "notes_scanned",
+        "query_chunks",
+        "discovered",
+        "human_confirmed",
+        "gaps",
+        "limits",
+        "provider_requests"
+      ],
+      "title": "RequirementCoverage",
+      "type": "object"
+    },
+    "RequirementDecisionRequest": {
+      "additionalProperties": false,
+      "description": "Applicability is independent from the legacy departure question.",
+      "properties": {
+        "disposition": {
+          "enum": [
+            "include",
+            "exclude",
+            "review"
+          ],
+          "title": "Disposition",
+          "type": "string"
+        },
+        "expected_version": {
+          "minimum": 1,
+          "title": "Expected Version",
+          "type": "integer"
+        },
+        "reason": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "varied",
+            "supporting",
+            "admin",
+            "conditional",
+            "unresolved"
+          ],
+          "title": "Role",
+          "type": "string"
+        }
+      },
+      "required": [
+        "disposition",
+        "role",
+        "reason",
+        "expected_version"
+      ],
+      "title": "RequirementDecisionRequest",
+      "type": "object"
+    },
+    "RequirementDiscovery": {
+      "properties": {
+        "detail": {
+          "title": "Detail",
+          "type": "string"
+        },
+        "evidence": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RequirementEvidence"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "evidence_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence Id"
+        },
+        "evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "from_requirement": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "From Requirement"
+        },
+        "kind": {
+          "enum": [
+            "lexical",
+            "explicit",
+            "reference",
+            "reverse_reference",
+            "administrative",
+            "human",
+            "previous"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "path": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Path",
+          "type": "array"
+        }
+      },
+      "required": [
+        "kind",
+        "detail",
+        "from_requirement",
+        "path",
+        "evidence",
+        "evidence_id",
+        "evidence_ids"
+      ],
+      "title": "RequirementDiscovery",
+      "type": "object"
+    },
+    "RequirementEvidence": {
+      "description": "An actual matched passage or reference, never an arbitrary opening sentence.",
+      "properties": {
+        "citation": {
+          "title": "Citation",
+          "type": "string"
+        },
+        "contextual": {
+          "default": false,
+          "title": "Contextual",
+          "type": "boolean"
+        },
+        "division": {
+          "enum": [
+            "A",
+            "B",
+            "C"
+          ],
+          "title": "Division",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "provision",
+            "heading",
+            "note"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "pdf_page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pdf Page"
+        },
+        "pdf_page_end": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pdf Page End"
+        },
+        "provision_id": {
+          "title": "Provision Id",
+          "type": "string"
+        },
+        "quote": {
+          "title": "Quote",
+          "type": "string"
+        },
+        "source_sha256": {
+          "title": "Source Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "division",
+        "provision_id",
+        "kind",
+        "quote",
+        "citation",
+        "pdf_page",
+        "pdf_page_end",
+        "source_sha256",
+        "contextual"
+      ],
+      "title": "RequirementEvidence",
+      "type": "object"
+    },
+    "RequirementGap": {
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "evidence": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RequirementEvidence"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "evidence_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Evidence Id"
+        },
+        "from_requirement": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "From Requirement"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "reference": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reference"
+        }
+      },
+      "required": [
+        "code",
+        "message",
+        "reference",
+        "from_requirement",
+        "evidence",
+        "evidence_id"
+      ],
+      "title": "RequirementGap",
+      "type": "object"
+    },
+    "RequirementLink": {
+      "properties": {
+        "evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "source_requirement": {
+          "title": "Source Requirement",
+          "type": "string"
+        },
+        "target_requirement": {
+          "title": "Target Requirement",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_requirement",
+        "target_requirement",
+        "evidence_ids"
+      ],
+      "title": "RequirementLink",
+      "type": "object"
+    },
+    "RequirementRecord": {
+      "description": "A source-qualified candidate, with applicability separate from discovery.\n\nRecords group an article's matched sentences/clauses. Inclusion requires a human\ndecision; a reference edge or keyword match never proves applicability or a departure.",
+      "properties": {
+        "applicability": {
+          "default": "unknown",
+          "enum": [
+            "unknown",
+            "confirmed",
+            "needs_review"
+          ],
+          "title": "Applicability",
+          "type": "string"
+        },
+        "citation": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Citation"
+        },
+        "conditions": {
+          "items": {
+            "$ref": "#/$defs/RequirementCondition"
+          },
+          "title": "Conditions",
+          "type": "array"
+        },
+        "confirmation_fingerprint": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confirmation Fingerprint"
+        },
+        "confirmation_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confirmation Reason"
+        },
+        "confirmed_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Confirmed At"
+        },
+        "discoveries": {
+          "items": {
+            "$ref": "#/$defs/RequirementDiscovery"
+          },
+          "title": "Discoveries",
+          "type": "array"
+        },
+        "disposition": {
+          "default": "review",
+          "enum": [
+            "include",
+            "review",
+            "exclude"
+          ],
+          "title": "Disposition",
+          "type": "string"
+        },
+        "division": {
+          "anyOf": [
+            {
+              "enum": [
+                "A",
+                "B",
+                "C"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Division"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/RequirementEvidence"
+          },
+          "title": "Evidence",
+          "type": "array"
+        },
+        "evidence_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "human_confirmed": {
+          "default": false,
+          "title": "Human Confirmed",
+          "type": "boolean"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "needs_review": {
+          "default": true,
+          "title": "Needs Review",
+          "type": "boolean"
+        },
+        "pdf_page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pdf Page"
+        },
+        "pdf_page_end": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pdf Page End"
+        },
+        "provision_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provision Id"
+        },
+        "quote": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Quote"
+        },
+        "quote_provision_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Quote Provision Id"
+        },
+        "review_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Review Reasons",
+          "type": "array"
+        },
+        "role": {
+          "default": "unresolved",
+          "enum": [
+            "varied",
+            "supporting",
+            "admin",
+            "conditional",
+            "unresolved"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "source_sha256": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Sha256"
+        },
+        "source_status": {
+          "default": "verified",
+          "enum": [
+            "verified",
+            "unavailable"
+          ],
+          "title": "Source Status",
+          "type": "string"
+        },
+        "title": {
+          "default": "",
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "provision_id",
+        "division",
+        "title",
+        "role",
+        "disposition",
+        "applicability",
+        "human_confirmed",
+        "confirmation_fingerprint",
+        "confirmation_reason",
+        "confirmed_at",
+        "needs_review",
+        "source_status",
+        "citation",
+        "quote",
+        "quote_provision_id",
+        "pdf_page",
+        "pdf_page_end",
+        "source_sha256",
+        "discoveries",
+        "evidence",
+        "evidence_ids",
+        "conditions",
+        "review_reasons"
+      ],
+      "title": "RequirementRecord",
+      "type": "object"
+    },
+    "RequirementSource": {
+      "description": "Provenance verified against both CodeDB's docs row and build metadata.\n\nHashes identify the registered extraction/PDF; they do not certify the parser.",
+      "properties": {
+        "build_version": {
+          "title": "Build Version",
+          "type": "string"
+        },
+        "corpus_sha256": {
+          "title": "Corpus Sha256",
+          "type": "string"
+        },
+        "doc": {
+          "const": "NBC-AE",
+          "default": "NBC-AE",
+          "title": "Doc",
+          "type": "string"
+        },
+        "label": {
+          "const": "NBC(AE) 2023 p2",
+          "default": "NBC(AE) 2023 p2",
+          "title": "Label",
+          "type": "string"
+        },
+        "pdf_sha256": {
+          "title": "Pdf Sha256",
+          "type": "string"
+        },
+        "text_sha256": {
+          "title": "Text Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "doc",
+        "label",
+        "text_sha256",
+        "pdf_sha256",
+        "build_version",
+        "corpus_sha256"
+      ],
+      "title": "RequirementSource",
+      "type": "object"
+    },
     "ResolvedForm": {
       "additionalProperties": false,
       "properties": {
@@ -8390,6 +10228,35 @@
         "scope"
       ],
       "title": "ResolvedNote",
+      "type": "object"
+    },
+    "RetainFileBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "retain",
+          "default": "retain",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind"
+      ],
+      "title": "RetainFileBinding",
+      "type": "object"
+    },
+    "RetainFileBindingInput": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "retain",
+          "default": "retain",
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "title": "RetainFileBinding",
       "type": "object"
     },
     "ReviewConflict": {
@@ -9235,6 +11102,36 @@
       "title": "RuleSet",
       "type": "object"
     },
+    "ScopeBasis": {
+      "properties": {
+        "citation": {
+          "title": "Citation",
+          "type": "string"
+        },
+        "division": {
+          "const": "A",
+          "default": "A",
+          "title": "Division",
+          "type": "string"
+        },
+        "provision_id": {
+          "title": "Provision Id",
+          "type": "string"
+        },
+        "quote": {
+          "title": "Quote",
+          "type": "string"
+        }
+      },
+      "required": [
+        "division",
+        "provision_id",
+        "citation",
+        "quote"
+      ],
+      "title": "ScopeBasis",
+      "type": "object"
+    },
     "ScopeCheck": {
       "properties": {
         "cue": {
@@ -9330,6 +11227,67 @@
         "override_allowed"
       ],
       "title": "ScopeCheck",
+      "type": "object"
+    },
+    "ScopeCondition": {
+      "properties": {
+        "explanation": {
+          "title": "Explanation",
+          "type": "string"
+        },
+        "fact_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Fact Ids",
+          "type": "array"
+        },
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "met",
+            "not_met",
+            "unknown",
+            "conflict"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "values": {
+          "items": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Values",
+          "type": "array"
+        }
+      },
+      "required": [
+        "field",
+        "status",
+        "values",
+        "fact_ids",
+        "explanation"
+      ],
+      "title": "ScopeCondition",
       "type": "object"
     },
     "ScopeRequest": {
@@ -10961,273 +12919,49 @@
       "title": "UserResult",
       "type": "object"
     },
-    "VoiceCapability": {
+    "WorkerHealth": {
       "properties": {
-        "available": {
-          "title": "Available",
-          "type": "boolean"
-        },
-        "max_seconds": {
-          "title": "Max Seconds",
-          "type": "integer"
-        },
-        "notice": {
-          "title": "Notice",
-          "type": "string"
-        },
-        "protocol": {
-          "const": "batatis.voice.v1",
-          "title": "Protocol",
-          "type": "string"
-        },
-        "reason": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "title": "Reason"
-        },
-        "relay_path": {
-          "const": "/api/voice/relay/session",
-          "title": "Relay Path",
-          "type": "string"
-        }
-      },
-      "required": [
-        "available",
-        "reason",
-        "protocol",
-        "relay_path",
-        "max_seconds",
-        "notice"
-      ],
-      "title": "VoiceCapability",
-      "type": "object"
-    },
-    "VoiceCommand": {
-      "additionalProperties": false,
-      "properties": {
-        "audio": {
-          "anyOf": [
-            {
-              "maxLength": 64000,
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Audio"
-        },
-        "context_id": {
-          "maxLength": 80,
-          "minLength": 16,
-          "title": "Context Id",
-          "type": "string"
-        },
-        "revision": {
-          "anyOf": [
-            {
-              "maximum": 1000000,
-              "minimum": 0,
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Revision"
-        },
-        "scope": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/VoiceScope"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null
-        },
-        "session_id": {
-          "maxLength": 80,
-          "minLength": 1,
-          "title": "Session Id",
-          "type": "string"
-        },
-        "type": {
+        "execution": {
           "enum": [
-            "session.end",
-            "audio.append",
-            "audio.commit",
-            "audio.clear",
-            "response.cancel",
-            "context.update"
+            "external_required",
+            "in_process",
+            "external"
           ],
-          "title": "Type",
+          "title": "Execution",
           "type": "string"
-        }
-      },
-      "required": [
-        "type",
-        "session_id",
-        "context_id"
-      ],
-      "title": "VoiceCommand",
-      "type": "object"
-    },
-    "VoiceScope": {
-      "additionalProperties": false,
-      "properties": {
-        "attachment_ids": {
-          "items": {
-            "type": "string"
-          },
-          "maxItems": 3,
-          "title": "Attachment Ids",
-          "type": "array"
         },
-        "case_id": {
+        "last_heartbeat_at": {
           "anyOf": [
             {
-              "maxLength": 100,
-              "minLength": 1,
               "type": "string"
             },
             {
               "type": "null"
             }
           ],
-          "default": null,
-          "title": "Case Id"
+          "title": "Last Heartbeat At"
         },
-        "case_version": {
-          "anyOf": [
-            {
-              "minimum": 1,
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Case Version"
-        },
-        "context_id": {
-          "maxLength": 80,
-          "minLength": 16,
-          "pattern": "^[A-Za-z0-9_-]+$",
-          "title": "Context Id",
-          "type": "string"
-        },
-        "destinations": {
-          "items": {
-            "enum": [
-              "applications",
-              "description",
-              "questions",
-              "review",
-              "application",
-              "code-library",
-              "code-search",
-              "references",
-              "downloads",
-              "officer-view",
-              "settings",
-              "notifications",
-              "accuracy",
-              "comments",
-              "question-authority",
-              "question-owner",
-              "question-representative",
-              "question-mailing-address",
-              "question-date",
-              "question-scope",
-              "question-permit",
-              "question-site-address",
-              "question-legal-description",
-              "question-alternative",
-              "question-rationale",
-              "question-risk",
-              "question-mitigation",
-              "question-assumptions",
-              "question-maintenance",
-              "question-qualifications",
-              "question-documents",
-              "review-queue",
-              "package-review",
-              "review-overview",
-              "review-missing",
-              "review-checks",
-              "review-decide",
-              "review-application",
-              "review-messages",
-              "review-request",
-              "review-versions",
-              "review-close-out"
-            ],
-            "type": "string"
-          },
-          "maxItems": 64,
-          "title": "Destinations",
-          "type": "array"
-        },
-        "focus": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/AssistFocus"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null
-        },
-        "revision": {
-          "default": 0,
-          "maximum": 1000000,
-          "minimum": 0,
-          "title": "Revision",
+        "queued": {
+          "title": "Queued",
           "type": "integer"
         },
-        "screen": {
-          "maxLength": 100,
-          "minLength": 1,
-          "title": "Screen",
-          "type": "string"
-        }
-      },
-      "required": [
-        "context_id",
-        "screen"
-      ],
-      "title": "VoiceScope",
-      "type": "object"
-    },
-    "VoiceStart": {
-      "additionalProperties": false,
-      "properties": {
-        "scope": {
-          "$ref": "#/$defs/VoiceScope"
+        "running": {
+          "title": "Running",
+          "type": "integer"
         },
-        "type": {
-          "const": "session.start",
-          "title": "Type",
-          "type": "string"
+        "worker_available": {
+          "title": "Worker Available",
+          "type": "boolean"
         }
       },
       "required": [
-        "type",
-        "scope"
+        "worker_available",
+        "last_heartbeat_at",
+        "queued",
+        "running",
+        "execution"
       ],
-      "title": "VoiceStart",
+      "title": "WorkerHealth",
       "type": "object"
     }
   },

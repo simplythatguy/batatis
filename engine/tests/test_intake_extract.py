@@ -162,7 +162,7 @@ def test_values_read_from_the_applicants_own_words_are_used_without_asking():
 def _pointed(field, value, origin, quote, *, verified=True, kind='pointed'):
     fact = Fact(field=field, value=value, kind=kind, status='unconfirmed', source=origin.source(quote, 0, len(quote)))
     return fact, FactPointer(fact_id=fact.id, field=field, method='model', source_ref=origin.ref, page=origin.page,
-                             start=0, end=len(quote), verified=verified)
+                             start=0, end=len(quote), verified=verified, project_context=True)
 
 
 def _settled(case, readings):

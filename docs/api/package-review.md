@@ -137,8 +137,8 @@ IB-2026-10-01, the Orders and Variances Portal). The officer sends and registers
 
 Sessions and close-out records live in `package_review_sessions` and `package_review_closeouts`, created with
 `CREATE TABLE IF NOT EXISTS` in the same SQLite file or PostgreSQL database as the cases. Rows for a case are
-removed when the case is deleted or purged (swept on every package-review access); standalone packages follow
-the same seven-day creation-based retention. At most 50 versions per package. The `Case` schema is unchanged.
+removed when the case is deleted or purged (swept on every package-review access); linked records follow [case retention](../application-retention.md). Standalone
+packages expire seven days after creation. At most 50 versions per package. The `Case` schema is unchanged.
 
 ## Saved-case completeness report (ported)
 

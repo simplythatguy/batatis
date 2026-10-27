@@ -90,18 +90,20 @@ test("New application while another application is opening keeps the new draft a
   } finally { s.h.unmount(); }
 });
 
-test("New application while the open draft is still saving leaves no stale switch note", async () => {
+test("New application waits for an in-flight flush and keeps the current draft if it fails", async () => {
   const saved = deferred<boolean>();
   const s = await shell({ saveStatus: "unsaved", saveDraft: () => saved.promise });
   try {
     s.list(await s.render()).props.onSelect("c2");
     await flush();
     s.list(await s.render()).props.onNew();
+    assert.deepEqual(s.calls, [], "no session state is discarded before the acknowledgement");
     saved.resolve(false); // the old draft's save fails after Start over
     await flush();
     const note = s.list(await s.render()).props.note;
-    assert.notEqual(note, library.KEEP_OPEN_NOTE);
-    assert.equal(s.location.hash, "#/");
+    assert.equal(note, library.KEEP_OPEN_NOTE);
+    assert.deepEqual(s.calls, [], "failure retains the active application and its session choices");
+    assert.equal(s.location.hash, "#/questions");
   } finally { s.h.unmount(); }
 });
 
@@ -112,7 +114,19 @@ test("without Start over the switch settles and opens the questions as before", 
     s.list(await s.render()).props.onSelect("c2");
     await flush();
     await s.render();
-    assert.deepEqual(s.calls, ["resetSession", "resetRelevance"]);
+    assert.deepEqual(s.calls, ["resetRelevance"], "the store restored the new application's durable choices; the shell does not clear them");
     assert.equal(s.location.hash, "#/questions");
+  } finally { s.h.unmount(); }
+});
+
+test("New application starts only after its latest draft flush succeeds", async () => {
+  const saved = deferred<boolean>();
+  const s = await shell({ saveStatus: "unsaved", saveDraft: () => saved.promise });
+  try {
+    const started = s.list(await s.render()).props.onNew();
+    await flush(); assert.deepEqual(s.calls, []);
+    saved.resolve(true); await started; await s.render();
+    assert.deepEqual(s.calls, ["resetSession", "resetRelevance", "resetToWho"]);
+    assert.equal(s.location.hash, "#/");
   } finally { s.h.unmount(); }
 });

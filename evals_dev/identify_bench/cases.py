@@ -63,7 +63,7 @@ def dev_cases() -> list[Case]:
     if {p.stem for p in paths} != DEV_IDS:
         raise ValueError('development case files do not match the canonical set')
     for path in paths:
-        c = json.loads(path.read_text())
+        c = json.loads(path.read_text(encoding='utf-8'))
         if c['id'] != path.stem:
             raise ValueError('development case file/id mismatch')
         g = c['gold']
@@ -86,7 +86,7 @@ def dev_cases() -> list[Case]:
 
 def precedent_cases() -> list[Case]:
     out = []
-    for c in json.loads(PRECEDENTS.read_text()):
+    for c in json.loads(PRECEDENTS.read_text(encoding='utf-8')):
         out.append(Case(c['id'], 'precedent', c['query'], _unique(c['gold']), (), 'benchmark',
                         {'type': c['type'], 'edition': c['edition'], 'rewrite_of': c.get('rewrite_of'),
                          'source_url': c.get('url') or ((c.get('source') or {}).get('url')
@@ -100,7 +100,7 @@ def web_cases(source: str) -> list[Case]:
     if not path.is_file():
         return []
     out = []
-    for c in json.loads(path.read_text()):
+    for c in json.loads(path.read_text(encoding='utf-8')):
         gold = _unique(c.get('gold') or [])
         if not gold:
             continue

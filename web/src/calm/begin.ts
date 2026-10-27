@@ -9,6 +9,7 @@ import type { ApplicantType } from "../types";
 import { useAccount } from "./account";
 import { readOnly } from "./applications";
 import { getSession, resetSession } from "./session";
+import { useApplicationEditsPaused } from "./applicationEditing";
 
 /** The applicant type from onboarding, or null when the user has none (or nobody is signed in). */
 export function roleOf(user: User | null | undefined): ApplicantType | null {
@@ -44,8 +45,9 @@ export function useBegin() {
  */
 export function useCurrentApplication(): { app: ApplicationSummary | null; locked: boolean; readOnly: boolean } {
   const { engineId, applicationStatus, submissionDispatched } = useCase();
+  const paused = useApplicationEditsPaused();
   const account = useAccount();
   const app = (engineId && account.applications?.find((a) => a.id === engineId)) || null;
   const saved = readOnly(app?.status ?? applicationStatus);
-  return { app, locked: submissionDispatched || saved, readOnly: saved };
+  return { app, locked: paused || submissionDispatched || saved, readOnly: saved };
 }

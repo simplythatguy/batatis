@@ -34,6 +34,11 @@ import type {
   SelectedArticlesRequest,
 } from "./types.gen";
 import { PRIVACY_NOTICE } from "../privacy";
+import type { Job, WorkerHealth } from "./types.gen";
+import type { DraftPatch } from "./types.gen";
+export type { DraftPatch } from "./types.gen";
+
+export type SavedCase = Case;
 
 /** A provision returned by GET /code/search (engine/codes.py `Codes.search`). */
 export interface CodeHit {
@@ -149,7 +154,7 @@ export function isCaseConflict(e: unknown): boolean {
 const enc = encodeURIComponent;
 
 export function createEngine(base: string) {
-  async function call<T>(method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE", path: string, body?: unknown, signal?: AbortSignal, ms = ENGINE_WAIT_MS): Promise<T> {
+  async function call<T>(method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE", path: string, body?: unknown, signal?: AbortSignal, ms = ENGINE_WAIT_MS, headers: Record<string, string> = {}): Promise<T> {
     const timed = withTimeout(signal, ms);
     let res: Response;
     try {
@@ -157,7 +162,7 @@ export function createEngine(base: string) {
         method,
         credentials: credentialsMode(),
         signal: timed.signal,
-        headers: body === undefined ? undefined : { "Content-Type": "application/json" },
+        headers: { ...(body === undefined ? {} : { "Content-Type": "application/json" }), ...headers },
         body: body === undefined ? undefined : JSON.stringify(body),
       });
     } catch (e) {
@@ -182,6 +187,8 @@ export function createEngine(base: string) {
 
   return {
     createCase: (body: NewCase = {}, signal?: AbortSignal) => call<Case>("POST", "/cases", body, signal),
+    patchDraft: (caseId: string, body: DraftPatch, signal?: AbortSignal) =>
+      call<SavedCase>("PATCH", `/cases/${enc(caseId)}/draft`, body, signal),
     /**
      * PUT /cases/{id}/jurisdiction: `{ jurisdiction, expected_version }`, returning the full Case.
      * Engines without this route answer 404/405; the caller never treats that as saved.
@@ -194,7 +201,16 @@ export function createEngine(base: string) {
      */
     setSelectedArticles: (caseId: string, body: SelectedArticlesRequest, signal?: AbortSignal) =>
       call<Case>("PUT", `/cases/${enc(caseId)}/selected-articles`, body, signal),
-    getCase: (id: string, signal?: AbortSignal) => call<Case>("GET", `/cases/${enc(id)}`, undefined, signal),
+    getCase: (id: string, signal?: AbortSignal) => call<SavedCase>("GET", `/cases/${enc(id)}`, undefined, signal),
+    jobs: (caseId: string, signal?: AbortSignal) => call<ItemEnvelope<Job>>("GET", `/cases/${enc(caseId)}/jobs`, undefined, signal).then(unwrapItems),
+    workerHealth: (caseId: string, signal?: AbortSignal) => call<WorkerHealth>("GET", `/cases/${enc(caseId)}/jobs/health`, undefined, signal),
+    job: (caseId: string, id: string, signal?: AbortSignal) => call<Job>("GET", `/cases/${enc(caseId)}/jobs/${enc(id)}`, undefined, signal),
+    startIntakeJob: (caseId: string, body: IntakeRequest, key: string, signal?: AbortSignal) =>
+      call<Job>("POST", `/cases/${enc(caseId)}/intake/jobs`, body, signal, ENGINE_WAIT_MS, { "Idempotency-Key": key }),
+    startIdentifyJob: (caseId: string, body: { prose: string; answers?: { field?: string; question_id?: string; answer: string }[]; expected_version: number }, key: string, signal?: AbortSignal) =>
+      call<Job>("POST", `/cases/${enc(caseId)}/identify/jobs`, body, signal, ENGINE_WAIT_MS, { "Idempotency-Key": key }),
+    retryJob: (caseId: string, id: string, signal?: AbortSignal) => call<Job>("POST", `/cases/${enc(caseId)}/jobs/${enc(id)}/retry`, {}, signal),
+    cancelJob: (caseId: string, id: string, signal?: AbortSignal) => call<Job>("POST", `/cases/${enc(caseId)}/jobs/${enc(id)}/cancel`, {}, signal),
     /**
      * PATCH /cases/{id}/title `{ title }`: the applicant's own name for the application, returning the
      * full Case. The server trims it to one line; empty or over 500 characters is 422; a sent,

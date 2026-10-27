@@ -17,8 +17,10 @@ from .section_c import section_c_rows
 from .section_d import SectionDPlan, section_d_plan
 from .section_d_issues import SectionDIssue, section_d_issues
 from .llm_gate import client_ip_from, search_retry_after
-from .models import Case, Jurisdiction, SelectedArticle
-from .store import CaseBackend, VersionConflict
+from .models import Case, Fact, Jurisdiction, SelectedArticle
+from .models_draft import ApplicantDraft
+from .case_view import current_case
+from .store import CaseBackend, InvalidAttachment, VersionConflict
 from .account_models import reviewing_authority
 from .access import enforce_mutation
 from .identify.title import normalize_title
@@ -71,6 +73,27 @@ class SelectedArticlesRequest(BaseModel):
         return value
 
 
+class DraftPatch(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    expected_version: int = Field(ge=1, strict=True)
+    facts: list[Fact] = Field(default_factory=list, max_length=1000)
+    applicant_draft: ApplicantDraft | None = None
+    jurisdiction: Jurisdiction | None = None
+    selected_articles: list[SelectedArticle] | None = None
+
+    @model_validator(mode='after')
+    def _safe_changes(self):
+        if len({fact.id for fact in self.facts}) != len(self.facts):
+            raise ValueError('fact ids must be unique')
+        if any(fact.source.type not in {'user_text', 'user_click', 'file', 'drawing'} for fact in self.facts):
+            raise ValueError('public fact input cannot assert officer, professional, or code authority')
+        if 'selected_articles' in self.model_fields_set:
+            if self.selected_articles is None:
+                raise ValueError('selected_articles must be a list; omit to retain')
+            SelectedArticlesRequest(selected_articles=self.selected_articles, expected_version=self.expected_version)
+        return self
+
+
 def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
                   registry: CCMCRegistry | None = None) -> APIRouter:
     router = APIRouter(tags=['case building'])
@@ -81,6 +104,28 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
         if case is None:
             raise HTTPException(404, 'case not found')
         return case
+
+    @router.patch('/cases/{case_id}/draft', response_model=Case)
+    def patch_draft(case_id: str, body: DraftPatch):
+        changes = body.model_dump(mode='json', exclude_unset=True, exclude={'expected_version'})
+        if body.selected_articles:
+            codes = code()
+            for article in body.selected_articles:
+                if codes.provision(article.provision, 'B') is None:
+                    raise HTTPException(404, 'provision not found')
+        if 'jurisdiction' in changes:
+            current = get_case(case_id)
+            if current.owner_id:
+                changes['authority'] = reviewing_authority(body.jurisdiction.id if body.jurisdiction else None)
+        try:
+            saved = cases().patch_draft(case_id, changes, expected_version=body.expected_version)
+        except InvalidAttachment as error:
+            raise HTTPException(422, str(error)) from error
+        except VersionConflict as error:
+            raise HTTPException(409, 'case was updated concurrently') from error
+        if saved is None:
+            raise HTTPException(404, 'case not found')
+        return current_case(saved)
 
     @router.put('/cases/{case_id}/selected-articles', response_model=Case)
     def save_selected_articles(case_id: str, body: SelectedArticlesRequest):

@@ -30,17 +30,14 @@ test("the privacy notice names no provider, carries no link, and keeps its three
   assert.doesNotMatch(PRIVACY_NOTICE, /https?:\/\/|\(|\)/, "no URL, so Settings has no link to build");
   assert.match(PRIVACY_NOTICE, /removes the names, contact details and addresses it recognizes before any text is sent to an AI provider/);
   assert.match(PRIVACY_NOTICE, /In live mode, the remaining text is processed in the United States by third-party AI service providers under their API data-use terms/);
-  assert.match(PRIVACY_NOTICE, /deletes its own stored case data and files after 7 days or on request\.$/);
+  assert.match(PRIVACY_NOTICE, /account drafts after 180 inactive days/);
+  assert.match(PRIVACY_NOTICE, /Deleting an application removes its stored data, files and background work\.$/);
 });
 
-/** The accuracy page also names no model: model family names count. */
-const MODEL_NAMES = /jev|typesafe|openai|anthropic|claude|\bgpt|\bluna\b|sonnet|opus|haiku|gemini/i;
-
-test("the accuracy page and its report name no provider", () => {
-  const files = ["../../../docs/accuracy/report.json", "../../../docs/accuracy/report.md", "../accuracy/report.ts", "../accuracy/AccuracyPage.tsx", "../accuracy/accuracy.css"];
-  for (const file of files) {
-    const text = readFileSync(new URL(file, import.meta.url), "utf8");
-    const hit = MODEL_NAMES.exec(text);
-    assert.equal(hit, null, `${file}: ${hit ? text.slice(Math.max(0, hit.index - 40), hit.index + 40) : ""}`);
+/** Evaluation evidence stays in contributor docs after its applicant page is removed. */
+test("the contributor accuracy report names no provider", () => {
+  const names = /jev|typesafe|openai|anthropic|claude|\bgpt|\bluna\b|sonnet|opus|haiku|gemini/i;
+  for (const file of ["../../../docs/accuracy/report.json", "../../../docs/accuracy/report.md"]) {
+    assert.doesNotMatch(readFileSync(new URL(file, import.meta.url), "utf8"), names, file);
   }
 });

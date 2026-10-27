@@ -141,7 +141,7 @@ function EvidenceAnswer({ itemId, provisionId, types }: { itemId: string; provis
     setFileBusy(true);
     setFilesNote("");
     try {
-      const saved = await uploadEvidenceFile(file);
+      const saved = await uploadEvidenceFile(file, itemId);
       if (!active.current) return;
       edit({ fileRef: saved.id, note: "PDF uploaded. Save the document to attach it." });
       setInventoryRevision((n) => n + 1);

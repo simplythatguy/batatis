@@ -19,6 +19,7 @@ from .account_models import ApplicationStatus, Claim, Decision, ReviewSnapshot, 
 from .case_retention import expiry_at
 
 from .models_intake import IntakeRecord
+from .models_draft import ApplicantDraft
 from .relevance_models import RelevanceRecord
 from .models_identify import IdentifyResult
 
@@ -216,6 +217,7 @@ class Case(BaseModel):
     version: int = Field(default=1, ge=1)      # acknowledgment of the store's row version, never input authority
     jurisdiction: Jurisdiction | None = None
     facts: list[Fact] = []
+    applicant_draft: ApplicantDraft | None = None
     # None: legacy case with no saved card list. []: applicant explicitly cleared it.
     # Only applicant card state lives here; provisions remains the confirmed selection.
     selected_articles: list[SelectedArticle] | None = None
@@ -230,7 +232,7 @@ class Case(BaseModel):
     @computed_field
     @property
     def expires_at(self) -> str | None:
-        return expiry_at(self.created_at)
+        return expiry_at(self.updated_at, status=self.status, owner_id=self.owner_id)
 
     @computed_field
     @property

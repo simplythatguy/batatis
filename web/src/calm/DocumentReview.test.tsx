@@ -39,7 +39,7 @@ const report = (file_id: string, name: string, unread = false): FileReport => ({
   pages: unread ? 2 : 3, pages_read: unread ? [] : [1, 2, 3], pages_not_read: unread ? [1, 2] : [],
   text_pages_read: unread ? [] : [1, 2, 3], semantic_pages_read: [], semantic_pages_sent: [], image_pages_read: [],
   semantic_reason: null, pictures_not_read_reason: unread ? "AI is off" : null, media_type: "application/pdf",
-  form: null, form_fields_read: 0, form_fields_skipped: [], facts: 0,
+  form: null, form_fields_read: 0, form_fields_skipped: [], facts: 0, project_pages: [],
 });
 
 function propsFor(value: Review | null): DocumentReviewProps {

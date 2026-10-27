@@ -20,18 +20,3 @@ export function useRoute(): Route {
   }, []);
   return route;
 }
-
-/** After navigation, move focus to `?focus=<element id>` so gap links land on the fix. */
-export function useFocusParam(route: Route) {
-  const target = route.params.get("focus");
-  useEffect(() => {
-    if (!target) return;
-    const t = window.setTimeout(() => {
-      const el = document.getElementById(target);
-      if (!el) return;
-      el.scrollIntoView({ block: "center" });
-      el.focus({ preventScroll: true });
-    }, 0);
-    return () => window.clearTimeout(t);
-  }, [target, route.path]);
-}

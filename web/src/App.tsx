@@ -4,20 +4,17 @@ import { CodeLibrary } from "./calm/CodeLibrary";
 import { Comments } from "./calm/comments/Comments";
 import { Deck } from "./calm/QuestionDeck";
 import { Review } from "./calm/Review";
-import { resolveRoute, type Screen } from "./calm/routes";
+import { resolveRoute } from "./calm/routes";
 import { extraRoutes, isStandaloneRoute, useAuthRedirect } from "./calm/routes.extra";
 import { updateSession, useSession } from "./calm/session";
 import { Shell } from "./calm/Shell";
 import { Start } from "./calm/Start";
-import { useFocusParam, useRoute } from "./router";
-import { Accuracy } from "./screens/Accuracy";
-import { Officer } from "./screens/Officer";
-import { SectionC } from "./screens/SectionC";
+import { useRoute } from "./router";
 import { useCase } from "./store";
 
 /** Store effects the calm screens ask for: the reading Start requested, and held PDF uploads. */
 function CalmEffects() {
-  const { phase, engineId, readDescription, uploadFiles } = useCase();
+  const { c, phase, engineId, readDescription, uploadFiles } = useCase();
   const session = useSession();
 
   useEffect(() => {
@@ -29,9 +26,9 @@ function CalmEffects() {
 
   // PDFs attached after the case exists upload in the save queue (intake reads them by id).
   useEffect(() => {
-    if (!engineId || !session.held.length) return;
+    if (!engineId || !session.held.some(held => !c.files.find(file => file.id === held.id)?.error && !session.uploading.includes(held.id))) return;
     void uploadFiles();
-  }, [engineId, session.held, uploadFiles]);
+  }, [engineId, session.held, session.uploading, c.files, uploadFiles]);
   return null;
 }
 
@@ -42,26 +39,21 @@ function normalHash(hash: string): string {
   return `#${path || "/"}${q ? `?${q}` : ""}`;
 }
 
-/** The four stages and the code library open in every state; the old screens need an application. */
-const OPEN_WITHOUT_CASE: ReadonlySet<Screen> = new Set(["start", "questions", "review", "application", "code", "comments"]);
-
 export function App() {
   const route = useRoute();
   // Signed-out visitors go to #/signin and new accounts to onboarding before any screen renders.
   const redirecting = useAuthRedirect(route);
-  const { phase, submissionDispatched } = useCase();
+  const { submissionDispatched } = useCase();
   // Accounts, reviewer, settings and notification pages (routes.extra.tsx) come before the stages.
   const extra = extraRoutes(route);
   const calm = resolveRoute(route.path, route.params);
-  const screen: Screen = phase === "case" || OPEN_WITHOUT_CASE.has(calm.screen) ? calm.screen : "start";
-  const legacy = screen === "officer" || screen === "accuracy" || screen === "references";
-  useFocusParam(legacy ? route : { path: route.path, params: new URLSearchParams() });
+  const screen = calm.screen;
 
   // Legacy links (gap hrefs, old screens) are rewritten to the calm route they mean.
   // Rewrite only while the address bar still shows the route this render parsed:
   // a handler may already have navigated on (Start sets #/questions right after the role).
   const parsed = normalHash(`#${route.path}?${route.params.toString()}`);
-  const target = screen === calm.screen ? calm.canonical : "#/";
+  const target = calm.canonical;
   // Not for account pages, nor while the gate is moving the visitor, nor a `?case=` link the shell opens first.
   const keep = Boolean(extra) || redirecting || route.params.has("case");
   useEffect(() => {
@@ -83,15 +75,6 @@ export function App() {
       break;
     case "application":
       body = <Application download={calm.download} />;
-      break;
-    case "officer":
-      body = <div className="cf-legacy"><Officer /></div>;
-      break;
-    case "accuracy":
-      body = <div className="cf-legacy"><Accuracy /></div>;
-      break;
-    case "references":
-      body = <div className="cf-legacy"><SectionC /></div>;
       break;
     case "code":
       body = <CodeLibrary route={calm} />;

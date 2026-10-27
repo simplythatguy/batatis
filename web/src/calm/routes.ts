@@ -4,7 +4,7 @@
  * so every "Fix" or "Answer" link lands on the matching question card.
  */
 
-export type Screen = "start" | "questions" | "review" | "application" | "officer" | "accuracy" | "references" | "code" | "comments";
+export type Screen = "start" | "questions" | "review" | "application" | "code" | "comments";
 
 export interface CalmRoute {
   screen: Screen;
@@ -100,14 +100,13 @@ export function resolveRoute(path: string, params: URLSearchParams): CalmRoute {
       return build("application");
     }
     case "/officer":
-      return build("officer");
+      return build("review");
     case "/comments":
       return build("comments");
-    case "/accuracy":
-      return build("accuracy");
+
     case "/section-c":
     case "/references":
-      return build("references");
+      return build("application");
     default:
       return build("start");
   }

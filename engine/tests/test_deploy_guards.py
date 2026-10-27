@@ -145,8 +145,8 @@ def test_a_failed_purge_is_logged_and_the_request_continues(tmp_path, caplog):
 def test_cases_older_than_seven_days_are_deleted(tmp_path):
     store = CaseStore(tmp_path / 'cases.sqlite')
     old = store.put(Case())
-    old.created_at = (datetime.now(timezone.utc) - timedelta(days=7, seconds=1)).isoformat(timespec='seconds')
-    store.put(old)
+    from engine.tests.test_retention import _set_last_activity
+    _set_last_activity(store, old.id, (datetime.now(timezone.utc) - timedelta(days=7, seconds=1)).isoformat(timespec='seconds'))
     fresh = store.put(Case())
     assert store.purge_expired() == 1
     assert store.get(old.id) is None
