@@ -172,23 +172,25 @@ export function ApplicantDrafts() {
       : !busy && accountPhase === "probing" ? "Checking sign-in…"
         : !busy && accountPhase !== "signed-in" ? <><a className="cf-inline-link" href="#/signin">Sign in</a> to draft or decide application wording.</>
           : !c.description.trim() ? "Describe your project before drafting." : "";
+  // A sent application with nothing drafted has nothing to do here.
+  if ((locked || submitting) && !drafts.length) return null;
+  // A clicked button disables or disappears; focus stays in the panel so Enter can't leave the page.
+  const act = (run: () => unknown) => { panel.current?.focus({ preventScroll: true }); void run(); };
   return <section ref={panel} tabIndex={-1} className="cf-applicant-drafts" aria-labelledby="cf-drafts-heading" aria-busy={busy}>
-    <h2 id="cf-drafts-heading">Your application wording</h2>
-    <p className="cf-draft-meta">Review and own the wording you accept. Professional analysis, calculations and seals come from your engineer or architect.</p>
-    <div className="cf-row-actions">
-      <button type="button" className="cf-btn is-sm" disabled={disabled || !c.description.trim()} onClick={() => { if (!disabled && c.description.trim()) void generateApplicantDrafts(); }}>
-        {draftActivity.kind === "generating" ? "Drafting…" : "Draft my application"}
+    <div className="cf-draft-head">
+      <h2 id="cf-drafts-heading">Your application wording</h2>
+      <button type="button" className="cf-btn is-sm" disabled={disabled || !c.description.trim()} onClick={() => { if (!disabled && c.description.trim()) act(generateApplicantDrafts); }}>
+        <CIcon name="spark" size={14} />{draftActivity.kind === "generating" ? "Drafting…" : "Draft my application"}
       </button>
-      {busy && <span className="cf-draft-meta" role="status">{draftActivity.kind === "generating" ? "Preparing source-linked writing. This can take a few minutes." : "Saving your decision…"}</span>}
     </div>
+    {busy && <p className="cf-draft-meta" role="status">{draftActivity.kind === "generating" ? "Writing your drafts. This can take a few minutes." : "Saving your decision…"}</p>}
     {reason && <p className="cf-draft-meta">{reason}</p>}
     {draftingError && <p className="cf-draft-error" role="alert">{draftingError}{!reason && <button type="button" className="cf-link-btn" disabled={disabled} onClick={() => { if (!disabled) void retryApplicantDrafts(); }}>Try again</button>}</p>}
     {draftingStale && <p className="cf-draft-warning" role="status">Previous or unverified input · Generate fresh drafts before accepting or rejecting.</p>}
     {drafting?.notices.map((notice, i) => <p className="cf-draft-meta" key={i}>{notice}</p>)}
-    {!drafting && !busy && <p className="cf-draft-meta">Drafts stay separate from your answers until you accept them.</p>}
     {drafting && !drafts.length && <p role="status">No writing was returned. Review the generation notes, then try again.</p>}
     {choice && drafting && <>
-      <details className="cf-draft-picker" ref={picker}>
+      <details className="cf-draft-picker" ref={picker} onKeyDown={(e) => { if (e.key === "Escape" && picker.current?.open) { e.preventDefault(); picker.current.open = false; picker.current.querySelector("summary")?.focus(); } }}>
         <summary>{choice.title}<span className="cf-draft-status">{STATUS[choice.status]}</span><CIcon name="chev" size={14} /></summary>
         <div role="group" aria-label="Choose application wording">
           {drafts.map(draft => <button type="button" key={draft.id} aria-pressed={draft.id === choice.id} onClick={() => { setSelected(draft.id); if (picker.current) picker.current.open = false; }}>
@@ -199,10 +201,10 @@ export function ApplicantDrafts() {
       <article key={choice.id} aria-label={choice.title}>
         <DraftContent draft={choice} sources={drafting.sources} caseId={engineId} c={c} />
         {choice.status === "draft" ? <>
-          <p className="cf-draft-meta">{choice.text.trim() ? "Accepting saves this wording as your answer. Open questions and professional work stay open." : "No wording to accept. Answer the questions, then draft again."}</p>
+          <p className="cf-draft-meta">{choice.text.trim() ? "Engineering work and seals still come from your professional." : "No wording to accept. Answer the questions, then draft again."}</p>
           <div className="cf-row-actions">
-            <button type="button" className="cf-btn is-primary is-sm" disabled={disabled || draftingStale || !choice.text.trim()} onClick={() => { if (!disabled && !draftingStale && choice.text.trim()) void decideApplicantDraft(choice.id, "accept"); }}>Accept draft</button>
-            <button type="button" className="cf-btn is-ghost is-sm" disabled={disabled || draftingStale} onClick={() => { if (!disabled && !draftingStale) void decideApplicantDraft(choice.id, "reject"); }}>Reject</button>
+            <button type="button" className="cf-btn is-sm" disabled={disabled || draftingStale || !choice.text.trim()} onClick={() => { if (!disabled && !draftingStale && choice.text.trim()) act(() => decideApplicantDraft(choice.id, "accept")); }}><CIcon name="check" size={14} />Accept</button>
+            <button type="button" className="cf-btn is-ghost is-sm" disabled={disabled || draftingStale} onClick={() => { if (!disabled && !draftingStale) act(() => decideApplicantDraft(choice.id, "reject")); }}>Reject</button>
           </div>
         </> : <p className="cf-draft-meta" role="status">{choice.status === "accepted" ? "Accepted by you. Original wording and sources are retained." : "Rejected. No answer was added."}</p>}
       </article>

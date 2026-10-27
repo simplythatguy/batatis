@@ -7,7 +7,9 @@
   font-size: 14px;
   line-height: 1.55;
 }
-.cf-applicant-drafts h2 { font-size: 20px; font-weight: 550; margin: 0 0 8px; }
+.cf-applicant-drafts h2 { font-size: 17px; font-weight: 550; margin: 0; }
+.cf-draft-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.cf-applicant-drafts:focus { outline: none; }
 .cf-applicant-drafts h4 { font-size: 14px; font-weight: 550; margin: 18px 0 6px; }
 .cf-applicant-drafts p { margin: 8px 0; }
 .cf-draft-meta, .cf-draft-status { color: var(--cf-text-2); font-size: 12px; }

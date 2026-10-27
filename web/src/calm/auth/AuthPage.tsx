@@ -85,7 +85,7 @@ export function AuthPage({ mode }: { mode: "signin" | "signup" }) {
       <form className="ac-auth-box" onSubmit={submit} noValidate aria-labelledby={`${id}-title`}>
         <span className="cf-mark ac-auth-mark" aria-hidden="true" />
         <h1 id={`${id}-title`} className="ac-auth-title">{signup ? "Create your account" : "Welcome to Batatis"}</h1>
-        <p className="ac-auth-sub">{session.startRequested ? "Sign in to start your project." : "Start a building project, or review applications."}</p>
+        <p className="ac-auth-sub">{session.startRequested ? (signup ? "Create an account to start your project." : "Sign in to start your project.") : "Start a building project, or review applications."}</p>
         {!signup && <DesktopEntry />}
 
         {signup && (

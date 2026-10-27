@@ -167,21 +167,43 @@ export function JourneyMap({ items, onJump }: { items: DeckItem[]; onJump: (key:
 
 export function SectionFooter({ items, index, onJump, onPrev, onNext, canPrev, canNext }: { items: Shown[]; index: number; onJump: (i: number) => void; onPrev: () => void; onNext: () => void; canPrev: boolean; canNext: boolean }) {
   const [map, setMap] = useState(false);
+  const pop = useRef<HTMLDivElement>(null);
+  const toggle = useRef<HTMLButtonElement>(null);
   const progress = journeyProgress(items);
   const current = items[index]?.stage;
   const jump = (key: string) => { setMap(false); onJump(items.findIndex((i) => i.key === key)); };
-  return <footer className="cf-qfoot cf-journey-foot" aria-label="Journey progress" onKeyDown={(e) => { if (e.key === "Escape") setMap(false); }}>
+  const firstOf = (stage: string) => items.find((i) => i.stage === stage && i.answerer !== "office" && itemOpen(i)) ?? items.find((i) => i.stage === stage && i.answerer !== "office");
+  const yours = progress.open.you + progress.open.batatis;
+  const designer = progress.open.designer;
+  // The map is a popover: focus moves in, Escape or a click elsewhere closes it and returns focus.
+  useEffect(() => {
+    if (!map) return;
+    pop.current?.querySelector<HTMLElement>("button:not(:disabled)")?.focus({ preventScroll: true });
+    const away = (e: PointerEvent) => { if (!pop.current?.contains(e.target as Node) && !toggle.current?.contains(e.target as Node)) setMap(false); };
+    const esc = (e: KeyboardEvent) => { if (e.key !== "Escape") return; e.preventDefault(); setMap(false); toggle.current?.focus({ preventScroll: true }); };
+    document.addEventListener("pointerdown", away);
+    document.addEventListener("keydown", esc, true);
+    return () => { document.removeEventListener("pointerdown", away); document.removeEventListener("keydown", esc, true); };
+  }, [map]);
+  return <footer className="cf-qfoot cf-journey-foot" aria-label="Journey progress">
     <div className="cf-journey-steps">{STAGES.map((s) => {
       const stage = progress.stages.find((p) => p.stage === s.stage)!;
       if (!items.some((i) => i.stage === s.stage)) return null;
       const on = current === s.stage;
-      return <button key={s.stage} type="button" className={`cf-journey-step is-${s.hue}${on ? " is-on" : ""}`} aria-current={on ? "step" : undefined} title={`${s.label}: ${stage.open} open`} aria-label={`${s.label}: ${stage.open} open`} onClick={() => { setMap(true); }}>
+      const first = firstOf(s.stage);
+      return <button key={s.stage} type="button" className={`cf-journey-step${on ? " is-on" : ""}`} aria-current={on ? "step" : undefined} title={`${s.label}: ${stage.open} open`} aria-label={`${s.label}: ${stage.open} open`} disabled={!first} onClick={() => first && jump(first.key)}>
         <span className={`cf-journey-step-mark${stage.total > 0 && stage.open === 0 ? " is-done" : ""}`} aria-hidden="true" />
-        {on && <span>{s.label}</span>}
+        <span className="cf-journey-step-word" aria-hidden="true"><span>{s.label}</span></span>
       </button>;
     })}</div>
-    <button type="button" className="cf-link-btn cf-journey-map-toggle" aria-label="Where you stand" aria-expanded={map} onClick={() => setMap((v) => !v)}><AnswererCounts counts={progress.open} /><Icon24 name="table" size={16} /></button>
-    {map && <div className="cf-pop cf-journey-pop" role="group" aria-label="Journey map"><div className="cf-journey-map-head"><span>Where you stand</span><button type="button" className="cf-icon-btn" aria-label="Close journey map" onClick={() => setMap(false)}><Icon24 name="x" size={14} /></button></div><JourneyMap items={items} onJump={jump} /></div>}
+    <button ref={toggle} type="button" className="cf-link-btn cf-journey-map-toggle" aria-expanded={map} aria-haspopup="dialog" onClick={() => setMap((v) => !v)}>
+      {yours > 0 ? `${yours} left` : "Your part is done"}{designer > 0 && <span className="cf-faint"> · {designer} for your designer</span>}
+      <Icon24 name="up" size={14} />
+    </button>
+    <div ref={pop} className="cf-pop cf-journey-pop" role="dialog" aria-label="Where you stand" data-open={map ? "" : undefined} inert={!map}>
+      <div className="cf-journey-map-head"><span>Where you stand</span><button type="button" className="cf-icon-btn" aria-label="Close" onClick={() => { setMap(false); toggle.current?.focus({ preventScroll: true }); }}><Icon24 name="x" size={14} /></button></div>
+      <JourneyMap items={items} onJump={jump} />
+    </div>
     <div className="cf-qnav">
       <button type="button" className="cf-icon-btn cf-qnav-btn" aria-label="Previous question (↑)" disabled={!canPrev} onClick={onPrev}><Icon24 name="up" size={16} /></button>
       <button type="button" className="cf-icon-btn cf-qnav-btn" aria-label="Next question (↓)" disabled={!canNext} onClick={onNext}><Icon24 name="down" size={16} /></button>
@@ -337,7 +359,7 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
   if (item.kind === "route") {
     const saved = routeChoice(c);
     const current = saved === "variance" && c.intake?.record.plan?.fork.variance_needed === "not_indicated" ? "different" : saved ?? undefined;
-    return <><Choices choices={choices} current={picked ?? current} onPick={onPick} />{c.intake?.record.plan?.fork && <ForkNote fork={c.intake.record.plan.fork} detailsOnly />}</>;
+    return <>{choices.length > 0 && <Choices choices={choices} current={picked ?? current} onPick={onPick} />}{c.intake?.record.plan?.fork && <ForkNote fork={c.intake.record.plan.fork} detailsOnly />}</>;
   }
   if (item.kind === "product-notice") return <ProductRouteNotice />;
   if (item.kind === "role") return <Choices choices={choices} current={String(factFor(c, "applicant_role")?.value ?? "")} onPick={onPick} />;
@@ -797,6 +819,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
     if (it.kind === "condition") return busyKey !== it.key && ((picked[it.key] ?? currentState(it)) === "does_not_apply" ? Boolean(draft.trim()) : it.done);
     // "It applies" goes on its own; "No" and "Not sure" need the applicant's reason first.
     if (it.kind === "requirement") return busyKey !== it.key && (picked[it.key] === "applies" || (Boolean(picked[it.key]) && Boolean(draft.trim())));
+    if (it.kind === "route" && choicesFor(it).length === 0) return true;
     return it.done;
   }
 
@@ -816,6 +839,12 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
     }
     if (item.kind === "paperwork") {
       wrapRef.current?.querySelector<HTMLFormElement>("form.cf-paperwork")?.requestSubmit();
+      return;
+    }
+    if (item.kind === "route" && choicesFor(item).length === 0) {
+      if (routeChoice(c) !== "variance") dispatch({ type: "setDetail", field: "journey.route", value: "variance", section: "B" });
+      if (item.done) moveFrom(index, true);
+      else setAdvanceAfter({ key: item.key, generation: engineGeneration() });
       return;
     }
     if (item.kind === "route-detail") {
@@ -1210,7 +1239,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
             {item.section === "C" && (extras.failed.rules || extras.failed.case) && (
               <p className="cf-note" role="status"><span className="cf-dot is-warning" aria-hidden="true" />Rule checks didn’t load, so some rule questions may be missing. <button type="button" className="cf-link-btn" onClick={retryExtras}>Try again</button></p>
             )}
-            <OkRow label={item.kind === "understood" ? "Looks right" : "Continue"} primary={item.kind !== "paperwork" && (choicesFor(item).length === 0 || item.kind === "authority" || (item.kind === "detail" && (picked[item.key] === "dismiss" || picked[item.key] === "edit-suggested")) || (item.kind === "condition" && (picked[item.key] ?? currentState(item)) === "does_not_apply"))} disabled={!canContinue(item)} onOk={next} typed={typed}>
+            <OkRow label={item.kind === "understood" ? "Looks right" : "Continue"} primary={item.kind !== "paperwork" && (choicesFor(item).length === 0 || (item.done && !item.deferred) || item.kind === "authority" || (item.kind === "detail" && (picked[item.key] === "dismiss" || picked[item.key] === "edit-suggested")) || (item.kind === "condition" && (picked[item.key] ?? currentState(item)) === "does_not_apply"))} disabled={!canContinue(item)} onOk={next} typed={typed}>
               <span className="cf-ok-more">
                 {deferralFor(item) && choicesFor(item).length === 0 && item.kind !== "authority" && <button type="button" className="cf-link-btn" disabled={locked || reading.busy === item.ref || busyKey === item.key} onClick={() => { const choice = deferralFor(item); if (choice) deferCurrent(choice.value); }}>{deferralFor(item)?.label}</button>}
                 <HelpButton item={item} n={n} open={why} onToggle={() => setWhy((v) => !v)} />

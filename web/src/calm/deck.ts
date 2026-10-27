@@ -456,7 +456,8 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
     // The applicant's own sentence explains the route; the bare cue ("instead of") does not.
     context: "", quote: clip(valueText(factFor(c, "alternative")), 200) || fork.cues.join(" · ") || firstSentence(c.description) || undefined,
     why: fork.explanation, ref: "journey.route", done: route !== null, optional: false,
-    choices: fork.variance_needed === "likely" ? [{ value: "variance", label: "Continue" }] : [{ value: "standard", label: "Use the standard way" }, { value: "different", label: "Something is different" }],
+    // A likely variance has nothing to choose: the card's own Continue records the route.
+    choices: fork.variance_needed === "likely" ? undefined : [{ value: "standard", label: "Use the standard way" }, { value: "different", label: "Something is different" }],
   });
   if (route === "different") push("B", {
     key: "route-detail", kind: "route-detail", section: "B", eyebrow: "Route · Section B",

@@ -68,13 +68,13 @@ test("the panel generates once per click, selects one draft, accepts/rejects thr
   assert.match(text(tree), /Draft/);
   assert.equal(nodes(tree, n => n.type === "article").length, 1);
   buttons(tree, "Draft my application")[0].props.onClick();
-  buttons(tree, "Accept draft")[0].props.onClick();
+  buttons(tree, "Accept")[0].props.onClick();
   buttons(tree, "Reject")[0].props.onClick();
   assert.deepEqual(writes, ["generate", [draft.id, "accept"], [draft.id, "reject"]]);
   store.drafting = { ...store.drafting, drafts: [{ ...draft, status: "accepted" }] };
   tree = await h.render();
   assert.match(text(tree), /Accepted by you.*sources are retained/);
-  assert.equal(buttons(tree, "Accept draft").length, 0);
+  assert.equal(buttons(tree, "Accept").length, 0);
   const content = nodes(tree, n => typeof n.type === "function" && n.props.draft)[0];
   assert.deepEqual(content.props.sources, drafting.sources);
 
@@ -85,7 +85,7 @@ test("the panel generates once per click, selects one draft, accepts/rejects thr
 
   store.drafting = { ...store.drafting, drafts: [{ ...draft, id: "questions-only", title: "Qualifications", field: "process.qualifications", text: "", claims: [] }] };
   tree = await h.render();
-  assert.equal(buttons(tree, "Accept draft")[0].props.disabled, true);
+  assert.equal(buttons(tree, "Accept")[0].props.disabled, true);
   assert.equal(buttons(tree, "Reject")[0].props.disabled, false);
   assert.match(text(tree), /No wording to accept/);
   buttons(tree, "Reject")[0].props.onClick();
@@ -94,20 +94,20 @@ test("the panel generates once per click, selects one draft, accepts/rejects thr
   store.drafting = structuredClone(drafting);
   store.draftingStale = true;
   tree = await h.render();
-  assert.equal(buttons(tree, "Accept draft")[0].props.disabled, true);
+  assert.equal(buttons(tree, "Accept")[0].props.disabled, true);
   assert.equal(buttons(tree, "Reject")[0].props.disabled, true);
   assert.equal(buttons(tree, "Draft my application")[0].props.disabled, false);
   assert.match(text(tree), /Previous or unverified input/);
   store.draftingStale = false;
   locked = true;
   tree = await h.render();
-  for (const name of ["Draft my application", "Accept draft", "Reject"]) assert.equal(buttons(tree, name)[0].props.disabled, true);
+  for (const name of ["Draft my application", "Accept", "Reject"]) assert.equal(buttons(tree, name)[0].props.disabled, true);
   assert.match(text(tree), /read-only/);
   locked = false;
   store.draftActivity = { kind: "generating" };
   tree = await h.render();
   assert.match(text(tree), /a few minutes/);
-  assert.equal(buttons(tree, "Accept draft")[0].props.disabled, true);
+  assert.equal(buttons(tree, "Accept")[0].props.disabled, true);
   store.draftActivity = { kind: "idle" };
   store.draftingError = "Drafting service unavailable.";
   tree = await h.render();
@@ -162,7 +162,7 @@ test("anonymous and signed-out visitors see Sign in with disabled writes, while 
     assert.match(text(tree), /Sign in to draft or decide application wording/);
     assert.equal(signIn(tree)[0].props.href, "#/signin");
     assert.equal(buttons(tree, "Try again").length, 0, "the authentication reason replaces retry");
-    for (const label of ["Draft my application", "Accept draft", "Reject"]) {
+    for (const label of ["Draft my application", "Accept", "Reject"]) {
       const button = buttons(tree, label)[0];
       assert.equal(button.props.disabled, true, `${next}: ${label}`);
       button.props.onClick();
@@ -187,7 +187,7 @@ test("anonymous and signed-out visitors see Sign in with disabled writes, while 
     tree = await h.render();
     assert.equal(signIn(tree).length, 0, `${state} keeps priority over the sign-in reason`);
     assert.match(text(tree), state === "gone" ? /deleted or expired/ : state === "busy" ? /a few minutes/ : /read-only/);
-    for (const label of [state === "busy" ? "Drafting…" : "Draft my application", "Accept draft", "Reject", "Try again"]) {
+    for (const label of [state === "busy" ? "Drafting…" : "Draft my application", "Accept", "Reject", "Try again"]) {
       for (const button of buttons(tree, label)) { assert.equal(button.props.disabled, true); button.props.onClick(); }
     }
     assert.equal(writes.length, 0);
@@ -199,7 +199,7 @@ test("anonymous and signed-out visitors see Sign in with disabled writes, while 
   store.draftActivity = { kind: "idle" };
   tree = await h.render();
   assert.equal(signIn(tree).length, 0);
-  for (const label of ["Draft my application", "Accept draft", "Reject"]) {
+  for (const label of ["Draft my application", "Accept", "Reject"]) {
     const button = buttons(tree, label)[0];
     assert.equal(button.props.disabled, false);
     button.props.onClick();

@@ -1,13 +1,29 @@
 .cf-journey-foot { flex-wrap: wrap; gap: 14px; }
 .cf-journey-steps { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
-.cf-journey-step { display: inline-flex; align-items: center; gap: 7px; border: 0; padding: 8px 0; background: none; color: var(--cf-text-3); font-size: 12px; cursor: pointer; }
-.cf-journey-step.is-on { color: var(--hue-s); }
-.cf-journey-step-mark { width: 8px; height: 8px; border-radius: 50%; background: var(--cf-line-2); }
+.cf-journey-step { display: inline-flex; align-items: center; border: 0; padding: 8px 0; background: none; color: var(--cf-text-3); font-size: 12px; cursor: pointer; transition: color 150ms var(--cf-ease); }
+.cf-journey-step:disabled { cursor: default; }
+.cf-journey-step.is-on { color: var(--cf-text); font-weight: 550; }
+.cf-journey-step-mark { width: 8px; height: 8px; border-radius: 50%; background: var(--cf-line-2); transition: background-color 150ms var(--cf-ease); }
 .cf-journey-step-mark.is-done { background: var(--cf-text-3); }
-.cf-journey-step.is-on .cf-journey-step-mark { background: var(--hue-s); }
+.cf-journey-step.is-on .cf-journey-step-mark { background: var(--cf-text); }
+@media (hover: hover) { .cf-journey-step:not(:disabled):not(.is-on):hover { color: var(--cf-text-2); } }
+/* The current stage's name slides out beside its dot; the others collapse to the dot. */
+.cf-journey-step-word { display: grid; grid-template-columns: 0fr; opacity: 0; transition: grid-template-columns 280ms var(--cf-ease), opacity 200ms var(--cf-ease); }
+.cf-journey-step-word > span { min-width: 0; overflow: hidden; white-space: nowrap; padding-left: 7px; }
+.cf-journey-step.is-on .cf-journey-step-word { grid-template-columns: 1fr; opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .cf-journey-step-word { transition: none; } }
 .cf-journey-counts, .cf-journey-counts > span, .cf-journey-map-toggle { display: inline-flex; align-items: center; gap: 6px; }
 .cf-journey-counts { gap: 14px; font: 12px var(--cf-mono); color: var(--cf-text-2); }
-.cf-journey-pop { position: absolute; bottom: calc(100% + 8px); right: 18px; width: min(400px, calc(100vw - 36px)); padding: 16px; max-height: 65vh; overflow-y: auto; overscroll-behavior: contain; }
+.cf-journey-map-toggle { font-size: 13px; color: var(--cf-text-2); }
+.cf-journey-map-toggle svg { transition: transform 200ms var(--cf-ease); }
+.cf-journey-map-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
+.cf-journey-pop {
+  position: absolute; bottom: calc(100% + 8px); right: 18px; width: min(400px, calc(100vw - 36px)); padding: 16px; max-height: 65vh; overflow-y: auto; overscroll-behavior: contain;
+  opacity: 0; visibility: hidden; transform: translateY(6px) scale(0.985); transform-origin: bottom right;
+  transition: opacity 140ms ease-in, transform 140ms ease-in, visibility 0s linear 140ms;
+}
+.cf-journey-pop[data-open] { opacity: 1; visibility: visible; transform: none; transition: opacity 180ms var(--cf-ease), transform 180ms var(--cf-ease), visibility 0s; }
+@media (prefers-reduced-motion: reduce) { .cf-journey-pop, .cf-journey-pop[data-open] { transition: none; transform: none; } }
 .cf-journey-map { margin: 18px 0; }
 .cf-journey-map-row, .cf-journey-map-head { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 9px 0; }
 .cf-journey-map-head { font-weight: 600; padding-top: 0; }
@@ -106,10 +122,15 @@
   font-size: 13px;
   color: var(--cf-text-3);
 }
+/* Above the deck it overlays the stage's top padding, so the card doesn't move when it comes or goes. */
 .cf-deck-page > .cf-picture-consent {
-  max-width: 680px;
-  margin: 14px auto 0;
-  padding: 0 4px;
+  position: absolute;
+  z-index: 1;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(680px, calc(100% - 32px));
+  justify-content: center;
 }
 .cf-picture-consent .cf-link-btn {
   color: var(--cf-text);

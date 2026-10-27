@@ -19,6 +19,8 @@ const isText = (f: File) => /^text\/(plain|markdown)$/.test(f.type) || /\.(txt|m
  * The public front door: prepare text or files, then sign in and start reading. The person's
  * part in the project is a later paperwork question.
  */
+const EMPTY_START = "Add a description or file to start.";
+
 export function Start() {
   const caseActions = useCase();
   const { c, phase, dispatch, beginEmpty, resetNote, readDescription, submissionDispatched } = caseActions;
@@ -130,7 +132,7 @@ export function Start() {
     : locked ? readOnlyStatus(app?.status, app?.authority).note
     : attaching ? "Reading notes…"
     : !inCase && session.draftFilesLost ? "Attach your files again."
-    : !text.trim() && !(inCase ? c.files.length : session.draftFiles.length) ? "Add a description or file to start." : "";
+    : !text.trim() && !(inCase ? c.files.length : session.draftFiles.length) ? EMPTY_START : "";
 
   function start() {
     if (blocked) return;
@@ -232,14 +234,15 @@ export function Start() {
             </button>
             <span className="cf-faint cf-small cf-drop-hint">PDF · JPG · PNG · TXT</span>
           </div>
-          <button type="button" className="cf-btn is-primary" disabled={Boolean(blocked)} title={blocked || undefined} aria-describedby={blocked ? "cf-start-blocked" : undefined} onClick={start}>
+          <button type="button" className="cf-btn is-primary" disabled={Boolean(blocked)} title={blocked || undefined} aria-describedby={blocked && blocked !== EMPTY_START ? "cf-start-blocked" : undefined} onClick={start}>
             {inCase ? "Continue" : "Start"} <Kbd>{MOD_KEY} ↵</Kbd>
           </button>
         </div>
       </div>
       <div className="cf-start-notes">
         {inCase && <PictureConsent />}
-        {blocked && <p id="cf-start-blocked" className="cf-faint cf-small" role="status">{blocked}</p>}
+        {/* An empty composer needs no sentence: its placeholder already says what to do. */}
+        {blocked && blocked !== EMPTY_START && <p id="cf-start-blocked" className="cf-faint cf-small" role="status">{blocked}</p>}
         {!inCase && session.draftFilesLost && text.trim() && <button type="button" className="cf-link-btn" onClick={() => updateSession({ draftFilesLost: false })}>Use description only</button>}
         {note && <p className="cf-faint cf-small" role="status">{note}</p>}
         {!inCase && resetNote && <p className="cf-faint cf-small" role="status">{resetNote}</p>}
