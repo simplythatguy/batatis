@@ -106,6 +106,8 @@ export class DesktopHost {
   #accountStops: Record<AccountId, () => void>;
   #engineRun = 0;
   #aiNote = "";
+  /** Whether each account was signed in when last read; null until the first read. */
+  #signedIn: Record<AccountId, boolean | null> = { chatgpt: null, claude: null };
   #picking: Promise<unknown> = Promise.resolve();
   #authReset = false;
   #disposed = false;
@@ -120,7 +122,7 @@ export class DesktopHost {
     this.#dispatch = new ProviderDispatch({ account: (id) => this.#accounts[id], vault: deps.vault, keys: deps.keys,
       accepting: () => !this.#disposed && !this.#changing && !this.#authReset && this.#state.kind === "ready" && this.#state.jar.token !== null });
     this.#rpc = new ProviderRpc(this.#dispatch.call, (lease) => this.#dispatch.valid(lease));
-    const watch = (provider: HostProvider) => provider.onChange(() => { this.#invalidate(); deps.notify(); });
+    const watch = (provider: HostProvider) => provider.onChange(() => { this.#invalidate(); deps.notify(); void this.#turnOnAfterSignIn(provider.id); });
     this.#accountStops = { chatgpt: watch(this.#accounts.chatgpt), claude: watch(this.#accounts.claude) };
   }
 
@@ -132,6 +134,9 @@ export class DesktopHost {
   async boot(): Promise<void> {
     this.#settings = await readSettings(this.#settingsFile());
     this.#dispatch.select(this.#settings.ai ?? DEFAULT_SELECTION);
+    for (const id of ["chatgpt", "claude"] as const) {
+      this.#signedIn[id] = await this.#accounts[id].status().then((status) => status.state === "signed-in", () => null);
+    }
     await this.#run(this.#settings.workspace);
   }
 
@@ -277,7 +282,7 @@ export class DesktopHost {
     this.#invalidate();
     this.#accountStops[next.id]();
     this.#accounts[next.id] = next;
-    this.#accountStops[next.id] = next.onChange(() => { this.#invalidate(); this.#deps.notify(); });
+    this.#accountStops[next.id] = next.onChange(() => { this.#invalidate(); this.#deps.notify(); void this.#turnOnAfterSignIn(next.id); });
     await previous.dispose();
     this.#deps.notify();
   }
@@ -349,6 +354,21 @@ export class DesktopHost {
     const state = this.#state;
     if (state.kind === "ready" && state.jar.token !== null) this.#authReset = true;
     this.#invalidate();
+  }
+
+  /**
+   * Signing in is the person's request to use that account, so a first sign-in while both kinds of work
+   * are Off turns them on with that account's default model. A later sign-in never overrides a pick.
+   */
+  async #turnOnAfterSignIn(id: AccountId): Promise<void> {
+    const before = this.#signedIn[id];
+    try {
+      const signedIn = (await this.#accounts[id].status()).state === "signed-in";
+      this.#signedIn[id] = signedIn;
+      if (!signedIn || before !== false || this.#disposed) return;
+      const { workflow, chat } = this.#dispatch.selection;
+      if (workflow.source === "off" && chat.source === "off") await this.selectModel("workflow", defaultPick(id));
+    } catch { /* the sign-in itself already reported; the pickers stay as they were */ }
   }
 
   #invalidate() { this.#dispatch.invalidate(); this.#rpc.clear(); }
