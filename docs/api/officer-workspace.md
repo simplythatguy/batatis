@@ -15,7 +15,8 @@ Wire types: `engine/models_review.py` (`OfficerWorkspace`, `FindingState`, `Revi
 The officer's review is one screen on the applicant's Review layout: a headline that counts what will be asked,
 the list of items (each opens in place to the applicant's own words and every source file), and a card with the
 four sections and one primary action (Accept when the server's gate allows it, otherwise Return). A section opens
-the full application (the paper sheet, each field with a finding marked). Nothing is marked done because it was
+the full application: one group per section, a label and the applicant's value on each line, in one neutral
+ink. A line with an open item is shaded and says Asking, Look first or Not asking. Nothing is marked done because it was
 passed: an item stays in the list until the officer asks for it or dismisses it. The Return confirmation shows the
 exact text the applicant will receive.
 

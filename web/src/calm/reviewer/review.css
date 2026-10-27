@@ -432,20 +432,29 @@ ul.pr-metrics span { color: var(--cf-text-3); font-size: 13.5px; }
 .ow-sec-btn .cf-sec-t > span:last-child { font-size: 13px; margin-top: 3px; }
 
 /* One step away: the application, the messages. */
-.rw-read { max-width: 808px; margin: 0 auto; padding: 24px 24px 64px; }
+.rw-read { max-width: 760px; margin: 0 auto; padding: 24px 24px 64px; }
 .ow-back { margin-bottom: 14px; }
-.rw-sheet { width: 100%; }
-.rw-sheet h4 { margin: 26px 0 6px; }
-.rw-kv { display: grid; grid-template-columns: 168px minmax(0, 1fr); gap: 4px 16px; padding: 9px 0; border-top: 1px solid var(--cf-line); font-size: 14px; line-height: 1.5; }
-.rw-k { color: var(--cf-text-3); }
-.rw-v { min-width: 0; overflow-wrap: anywhere; }
-.rw-text { white-space: pre-wrap; }
-.rw-quiet { color: var(--cf-text-3); }
-.rw-mark { display: inline-flex; align-items: center; gap: 6px; margin-left: 12px; padding: 0; border: 0; background: none; color: var(--cf-text-2); font: 500 13px var(--cf-font); white-space: nowrap; cursor: pointer; vertical-align: 1px; }
-.rw-mark.is-static { cursor: default; }
-.rw-chg { margin-left: 10px; color: var(--cf-text-3); font-size: 13px; text-decoration: underline dotted var(--cf-line-2); text-underline-offset: 3px; cursor: help; }
-.rw-v .cf-cite { margin-right: 8px; }
-.rw-peer { display: flex; align-items: center; gap: 8px; margin-top: 26px; font-size: 13.5px; }
+/* The application, one step from the review: sections headed like the review's card, a label and the
+   applicant's value on each line. Monotone: a line with an open item is shaded and says what is happening. */
+.ap { width: 100%; }
+.ap-sec { margin-top: 40px; scroll-margin-top: 16px; }
+.ap-sec-h { display: flex; align-items: center; gap: 12px; margin: 0 0 10px; color: var(--cf-text); font: 600 15px/1.3 var(--cf-font); }
+.ap-sec-h .cf-faint { font-weight: 400; }
+.ap-line { display: grid; grid-template-columns: 184px minmax(0, 1fr) auto; gap: 4px 20px; align-items: baseline; margin: 0 -12px; padding: 12px; border-top: 1px solid var(--cf-line); font-size: 15px; line-height: 1.5; }
+.ap-line:first-child, .ap-line.is-open, .ap-line.is-open + .ap-line { border-top-color: transparent; }
+.ap-line.is-open { border-radius: 10px; background: rgba(17, 24, 39, 0.04); }
+.ap-line.is-open + .ap-line.is-open { margin-top: 3px; }
+.ap .cf-sheet-sources { margin-top: 18px; }
+.ap-k { color: var(--cf-text-3); font-size: 14px; }
+.ap-v { min-width: 0; overflow-wrap: anywhere; color: var(--cf-text); }
+.ap-text { white-space: pre-wrap; }
+.ap-none { color: var(--cf-text-3); }
+.ap-chg { margin-left: 10px; color: var(--cf-text-3); font-size: 13px; text-decoration: underline dotted var(--cf-line-2); text-underline-offset: 3px; cursor: help; }
+.ap-ref { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.ap-tags { display: inline-flex; gap: 14px; justify-self: end; }
+.ap-tag { padding: 0; border: 0; background: none; color: var(--cf-text-2); font: 500 13px var(--cf-font); white-space: nowrap; cursor: pointer; }
+.ap-tag.is-static { color: var(--cf-text-3); cursor: default; }
+.ap-empty { margin: 10px 0 0; color: var(--cf-text-3); font-size: 14px; }
 .rw-legacy { margin: 28px 0 0; }
 .rw-acts { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 20px; margin-top: 22px; }
 .rw-scope { margin: 14px 0 0; color: var(--cf-text-3); font-size: 13px; }
@@ -453,14 +462,12 @@ ul.pr-metrics span { color: var(--cf-text-3); font-size: 13.5px; }
 .rw-hint.is-error { color: var(--cf-blocking-ink); }
 .ow-messages > .ac-side-sec { margin: 0; padding: 0; border: 0; }
 .rw-qs { display: grid; gap: 10px; margin: 6px 0 0; padding: 0; list-style: none; }
-.rw-q { padding: 10px 0; border-top: 1px solid var(--cf-line); font-size: 13.5px; }
+.rw-q { padding: 12px 0; border-top: 1px solid var(--cf-line); font-size: 15px; line-height: 1.5; }
 .rw-q p { margin: 2px 0 0; }
 .rw-q-t { color: var(--cf-text); font-weight: 500; }
 .rw-fold > summary { list-style: none; cursor: pointer; }
 .rw-fold > summary::-webkit-details-marker { display: none; }
 .rw-empty { margin: 8px 0; color: var(--cf-text-3); font-size: 13px; }
-.rw-sec > h3 { display: flex; align-items: center; gap: 10px; margin: 26px 0 4px; color: var(--cf-text-2); font: 600 13px var(--cf-font); }
-.rw-badge { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 7px; background: var(--cf-selected); color: var(--cf-text); font: 600 12px var(--cf-mono); }
 .rw-file-link { display: inline-flex; flex-direction: column; gap: 4px; }
 .rw-file-link .cf-cite { gap: 8px; text-decoration: none; }
 .cf-cite.is-static { cursor: default; }
@@ -507,7 +514,7 @@ ul.pr-metrics span { color: var(--cf-text-3); font-size: 13.5px; }
 .pr-code-q { white-space: pre-wrap; }
 
 @media (hover: hover) {
-  .rw-mark:not(.is-static):hover, .ow-row-t:hover { color: var(--cf-text); }
+  .ap-tag:not(.is-static):hover, .ow-row-t:hover { color: var(--cf-text); }
   .ow-sec-btn:hover .cf-sec-icon { background: rgba(17, 24, 39, 0.09); }
 }
 .rw-stage :is(button, summary, a, input, [role=listbox]):focus-visible { outline: 2px solid var(--cf-focus); outline-offset: 2px; }
@@ -515,6 +522,6 @@ ul.pr-metrics span { color: var(--cf-text-3); font-size: 13.5px; }
 @container main (max-width: 900px) {
   .rw-line { padding: 8px 16px; }
   .rw-read { padding: 16px 12px 48px; }
-  .rw-kv { grid-template-columns: 1fr; }
-  .rw-mark { margin-left: 0; margin-right: 12px; }
+  .ap-line { grid-template-columns: minmax(0, 1fr) auto; margin: 0 -6px; padding: 12px 6px; }
+  .ap-k { grid-column: 1 / -1; }
 }

@@ -50,6 +50,7 @@ Every icon-only control or icon metadata has an accessible name and a hover labe
 - A headline that counts ("Ask for 3 things.", "Complete. Ready to accept."), one quiet lede line only when the application was resent ("Since version 2: 1 fixed · 1 new").
 - "To ask": one row per item, a status dot (a ring when it couldn't be read: look first) and a few words. The row opens in place to the applicant's own words in full and a chip per source file. ✕ means don't ask; a required item asks why with three one-tap reasons, no note. A rule-required item says "Required" and has no ✕. "Add your own" is a link. What isn't asked folds under "Not asking · n".
 - The card: the four sections (icon, letter, a short count) open the application at that section; then the one primary (Accept when complete, otherwise "Return · n"), and "Completeness only". Messages and the menu (⋯) hold everything else.
+- The application one step away is not a paper form with coloured dots (user correction 2026-10-26: "a child playing around with colors and circles on a document"). It is sections headed like the card (icon tile, title, faint letter), then label and value lines in one ink. "Not given" in grey, never red. A line with an open item gets a light shade and one word (Asking, Look first, Not asking, with a count when several share a line).
 - Opening an application nobody has picked up picks it up; "Stop reviewing" (⋯) goes back to the queue.
 - Code: `web/src/calm/reviewer/ReviewWorkspace.tsx`, `OfficerReview.tsx`, `ReadSheet.tsx`.
 

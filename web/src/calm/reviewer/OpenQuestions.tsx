@@ -1,5 +1,6 @@
 /** The applicant's saved answers and uncertainties, with their source. People decide what they mean. */
 import type { ReviewQuestion } from "../../api/client";
+import { Icon24 } from "../icons";
 
 const STATE: Record<ReviewQuestion["state"], string> = {
   not_sure: "Applicant not sure",
@@ -26,8 +27,11 @@ export function OpenQuestions({ questions, loading, error }: { questions: Review
   const open = questions.filter((q) => q.state !== "answered");
   const answered = questions.filter((q) => q.state === "answered");
   return (
-    <section className="rw-sec" aria-label="Applicant’s questions">
-      <h3><span className="rw-badge" aria-hidden="true">?</span>Questions the applicant answered</h3>
+    <section className="ap-sec" aria-label="Applicant’s questions">
+      <h2 className="ap-sec-h">
+        <span className="cf-sec-icon" aria-hidden="true"><Icon24 name="questions" size={18} /></span>
+        <span>Questions<span className="cf-faint"> · Their answers</span></span>
+      </h2>
       {open.length > 0 && <ul className="rw-qs">{open.map((q) => <Question key={q.id} q={q} />)}</ul>}
       {answered.length > 0 && (
         <details className="rw-fold">
