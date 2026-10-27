@@ -388,7 +388,7 @@ test("turning betas off drops a downloaded beta even when the next look fails", 
   const files = { [name]: zip, SHA256SUMS: `${sha(zip)}  ${name}\n` };
   let online = true;
   const { fetch: serve } = feed(files, [release("0.2.0-beta.20261027.41", {}, files)]);
-  const { instance } = updater(t, { fetch: async (url, init) => { if (!online) throw new TypeError("fetch failed"); return serve(url, init); }, platform: "darwin", arch: process.arch });
+  const { instance } = updater(t, { fetch: async (url, init) => { if (!online) throw new TypeError("fetch failed"); return serve(url, init); }, platform: process.platform === "win32" ? "win32" : "darwin" });
   await instance.setBeta(true);
   assert.equal((await instance.download()).status, "ready");
   online = false;
