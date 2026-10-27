@@ -61,8 +61,12 @@ uses one saved Case acknowledgement without the former derived-read fanout.
   reset was dropped while editing was paused, a job finishing during the pause was
   never applied, and conflict review compared every saved document revision with
   only the latest, so it reported untouched documents as changed elsewhere.
-- Full gate on the merge with `main`: engine 3451 passed, desktop 227 passed
-  (one installed-runtime check skipped), web as above.
+- Full gate after merging `main` at 544b1083 (requirement identification): web 436
+  passed, none skipped; engine with a private PostgreSQL 17 (`TEST_DATABASE_URL`
+  without `sslmode`, as in CI) 4140 passed, 305 skipped for other environment
+  gates; desktop 227 passed, one installed-runtime check skipped.
+- CI's engine job has no web packages: `openCase` now loads without React, and the
+  job worker tests name libpq's TLS mode for their subprocesses.
 - Desktop gate: 227 tests passed; one installed-runtime check skipped because
   the pinned native Codex runtime is not prepared. Typecheck and main/preload
   build passed.
