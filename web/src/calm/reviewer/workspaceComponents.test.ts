@@ -12,7 +12,7 @@ const finding = { key: "legal", section: "B", field: "legal_description", label:
   ] };
 const files = [{ name: "form.pdf", file_id: "form" }, { name: "plan.pdf", file_id: "plan" }];
 const state = (over = {}) => ({ key: "legal", state: "ask", locked: false, reason: null, note: "", at: null, by_name: null, ...over });
-const deps = { "./workspaceView": workspaceView, "./packageView": packageView };
+const deps = { "./workspaceView": workspaceView, "./packageView": packageView, "../usePresence": { usePresence: (open: boolean) => ({ mounted: open, leaving: false }) } };
 const button = (tree: unknown, match: (n: { props: Record<string, unknown> }) => boolean) => nodes(tree, (n) => n.type === "button" && match(n))[0];
 const json = (v: unknown) => JSON.parse(JSON.stringify(v));
 

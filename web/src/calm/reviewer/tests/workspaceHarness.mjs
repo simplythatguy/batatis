@@ -56,6 +56,8 @@ export async function workspaceHarness(start = {}, opts = {}) {
     './reviewData': { useQueue: () => ({ rows: [{ ...current, applicant: { name: 'Mira', applicant_type: 'homebuilder' } }] }), patchRow() {}, setBlocking() {}, loadQueue: async () => {} },
     './queue': queue, './packageView': packageView,
     '../shell/MoreMenu': { MoreMenu: 'MoreMenu' },
+    // No browser here: a popup is on screen exactly while it is open.
+    '../usePresence': { usePresence: open => ({ mounted: open, leaving: false }) },
     '../notifications/notifications': { getNotificationsState: () => ({ items: [], phase: 'ready' }), subscribeNotifications: () => () => {} },
     './RequestRail': { RequestRail: 'RequestRail' },
   }, { window: { location }, document: { addEventListener() {}, removeEventListener() {} } });

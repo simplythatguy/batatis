@@ -51,7 +51,6 @@ export function RefuseDialog({ open, applicant, onClose, onSend, onRefresh }: {
     <Modal open={open} onClose={sending ? () => {} : onClose} labelledBy={`${id}-t`} className="ac-return pr-refuse">
       <div className="cf-modal-body">
         <h2 id={`${id}-t`} className="cf-modal-title">Refuse the variance</h2>
-        <p className="ac-faint ac-return-sub">Write your reasons in your own words. Batatis doesn’t draft refusal reasons.</p>
         <label htmlFor={`${id}-r`} className="pr-group-h pr-label">Your reasons</label>
         <textarea
           id={`${id}-r`}
@@ -74,12 +73,12 @@ export function RefuseDialog({ open, applicant, onClose, onSend, onRefresh }: {
           <p>{APPEAL_NOTICE}</p>
           <a className="ac-link pr-small" href={APPEAL_SOURCE} target="_blank" rel="noopener noreferrer">Safety Codes Council, Variances</a>
         </div>
-        <p className="pr-note pr-small"><span className="cf-dot is-pending" aria-hidden="true" />{applicant} gets your reasons and the appeal notice in the application’s messages. The application is closed and read-only. Issue the written notice of refusal through your authority’s usual process.</p>
-        {error && <p className="ac-error" role="alert">{error} <button type="button" className="cf-btn is-xs" disabled={sending} onClick={onRefresh}>Refresh application</button></p>}
+        <p className="pr-note pr-small"><span className="cf-dot is-pending" aria-hidden="true" />Goes to {applicant} and closes the application. Send the written notice through your authority’s usual process.</p>
+        {error && <p className="ac-error" role="alert">{error} <button type="button" className="cf-btn is-xs" disabled={sending} onClick={onRefresh}>Refresh</button></p>}
       </div>
       <div className="cf-modal-foot">
         <button type="button" className="cf-btn is-sm" disabled={sending} onClick={onClose}>Cancel</button>
-        <button type="button" className="cf-btn is-sm is-primary" disabled={sending} onClick={() => void send()}>{sending ? "Sending…" : "Send the refusal"}</button>
+        <button type="button" className="cf-btn is-sm is-primary" disabled={sending} onClick={() => void send()}>{sending ? "Sending…" : "Refuse"}</button>
       </div>
     </Modal>
   );

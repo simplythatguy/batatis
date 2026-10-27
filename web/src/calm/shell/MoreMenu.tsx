@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Icon24 } from "../icons";
+import { usePresence } from "../usePresence";
 
 function useOutsideClose(open: boolean, close: () => void, ...refs: React.RefObject<HTMLElement | null>[]) {
   useEffect(() => {
@@ -20,10 +21,13 @@ export function MoreMenu({ items, label = "More" }: { items: { label: string; hr
   const btn = useRef<HTMLButtonElement>(null);
   const pop = useRef<HTMLDivElement>(null);
   useOutsideClose(open, () => setOpen(false), btn, pop);
+  // Stays on screen while it fades out (when the stylesheet gives it an exit transition).
+  const { mounted, leaving } = usePresence(open, pop);
   const wasOpen = useRef(false);
   useEffect(() => {
+    const at = document.activeElement;
     if (open) pop.current?.querySelector<HTMLElement>("[role=menuitem]:not(:disabled)")?.focus();
-    else if (wasOpen.current && (document.activeElement === document.body || !document.activeElement)) btn.current?.focus();
+    else if (wasOpen.current && (!at || at === document.body || pop.current?.contains(at))) btn.current?.focus();
     wasOpen.current = open;
   }, [open]);
   const close = () => setOpen(false);
@@ -43,8 +47,8 @@ export function MoreMenu({ items, label = "More" }: { items: { label: string; hr
       <button ref={btn} type="button" className="cf-icon-btn is-plain" aria-label={label} aria-expanded={open} aria-haspopup="menu" onClick={() => setOpen((v) => !v)}>
         <Icon24 name="more" size={18} />
       </button>
-      {open && (
-        <div ref={pop} className="cf-pop cf-menu" role="menu" aria-label={label} onKeyDown={onMenuKey}>
+      {mounted && (
+        <div ref={pop} className="cf-pop cf-menu" role="menu" aria-label={label} onKeyDown={onMenuKey} data-leaving={leaving || undefined}>
           {items.map((it) => (
             <div key={it.label} role="none">
               {it.separator && <hr role="separator" />}

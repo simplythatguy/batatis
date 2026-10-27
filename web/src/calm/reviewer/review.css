@@ -380,8 +380,20 @@ ul.pr-metrics span { color: var(--cf-text-3); font-size: 13.5px; }
    action. The application and the messages are one step away, full page, never in a drawer. */
 
 .rw-page { height: 100%; min-height: 0; overflow: hidden; }
-.rw-body { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.rw-body { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .rw-stage { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-bottom: 64px; }
+/* The review, the application and the messages are stacked layers that cross-fade in place, so the
+   review keeps its scroll and its open rows while another view is on top. */
+.rw-views { position: relative; flex: 1; min-height: 0; }
+.rw-view { position: absolute; inset: 0; }
+.rw-view:not(.is-on) { visibility: hidden; opacity: 0; pointer-events: none; }
+.cf-app .rw-view h1[tabindex="-1"]:focus-visible { outline: none; }
+
+/* A moment of work (opening, reading) floats over the page instead of pushing it. */
+.rw-float { position: absolute; z-index: 6; top: 14px; left: 0; right: 0; height: 0; display: flex; justify-content: center; pointer-events: none; }
+.rw-pill { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 14px; border: 1px solid var(--cf-line-2); border-radius: 999px;
+  background: var(--cf-raise, var(--cf-surface)); box-shadow: 0 12px 32px -14px rgba(17, 24, 39, 0.22); color: var(--cf-text-2); font-size: 13px; white-space: nowrap; }
+.rw-pill > .cf-dot { flex: none; background: var(--cf-pending); }
 
 /* One status line, only when something needs attention. */
 .rw-line { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 8px 28px; border-bottom: 1px solid var(--cf-line); color: var(--cf-text-2); font-size: 14px; }
@@ -395,18 +407,23 @@ ul.pr-metrics span { color: var(--cf-text-3); font-size: 13.5px; }
 .cf-dot.is-warning.is-ring { box-shadow: inset 0 0 0 2px var(--cf-warning); }
 
 /* A row: tap the name to see the applicant's words and the sources in place. */
-.ow-row { flex-wrap: wrap; align-items: center; }
+.ow-row { flex-wrap: wrap; align-items: center; row-gap: 0; }
 .ow-row .cf-dot { translate: 0 0; }
 .ow-row-t { padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
 .ow-row.is-quiet .cf-row-text { color: var(--cf-text-3); }
 /* The 28px target overhangs the row so a row with ✕ is as tall as one without. */
 .ow-x { flex: none; width: 28px; height: 28px; margin-block: -6px; color: var(--cf-text-3); }
-.ow-ev, .ow-why { flex-basis: 100%; padding-left: 20px; }
-.ow-ev { display: grid; gap: 8px; padding-top: 4px; padding-bottom: 4px; }
+.ow-ev, .ow-why { padding-left: 20px; }
+.ow-ev { display: grid; gap: 8px; padding-top: 16px; padding-bottom: 4px; }
 .ow-ev q { display: block; color: var(--cf-text); font-size: 15px; line-height: 1.5; quotes: "“" "”"; overflow-wrap: anywhere; }
 .ow-ev-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.ow-ev-chips .cf-cite { margin-top: 0; }
 .ow-ev .cf-small { margin: 0; }
-.ow-why { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.ow-why { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding-top: 12px; }
+/* What opens under a row (the evidence, the reasons) grows from nothing and folds back. */
+.ow-reveal { flex-basis: 100%; display: grid; grid-template-rows: 1fr; min-width: 0; }
+.ow-reveal > * { min-height: 0; overflow: clip; overflow-clip-margin: 6px; }
+.pr-code > .ow-reveal { flex-basis: auto; }
 .ow-own-body { flex: 1; min-width: 0; display: grid; gap: 8px; }
 .ow-own-input { width: 100%; padding: 2px 0 6px; border: 0; border-bottom: 1px solid var(--cf-line-ctl); background: none; color: var(--cf-text); font: 15px/1.45 var(--cf-font); outline: none; }
 .ow-own-input:focus { border-bottom-color: var(--cf-text); box-shadow: 0 1px 0 var(--cf-text); }
@@ -524,4 +541,48 @@ ul.pr-metrics span { color: var(--cf-text-3); font-size: 13.5px; }
   .rw-read { padding: 16px 12px 48px; }
   .ap-line { grid-template-columns: minmax(0, 1fr) auto; margin: 0 -6px; padding: 12px 6px; }
   .ap-k { grid-column: 1 / -1; }
+}
+
+/* —— Motion ——————————————————————————————————————————————————————————————
+   Quick and quiet: 120–180ms, opacity first, movement only without reduced motion. Exits are a
+   little faster than entrances. usePresence and Modal keep an element until its exit ends. The
+   code drawer and the palette keep their own motion. */
+.rw-page .cf-menu, .rw-select-list, .rw-page .cf-modal:not(.cf-drawer, .cf-palette), .rw-pill { transition-property: opacity, scale, translate; transition-duration: 150ms; transition-timing-function: var(--cf-ease); }
+.rw-page .cf-menu[data-leaving], .rw-select-list[data-leaving], .rw-pill[data-leaving],
+.rw-page .cf-modal:not(.cf-drawer, .cf-palette)[data-closing] { opacity: 0; pointer-events: none; transition-duration: 110ms; }
+.rw-page .cf-modal:not(.cf-drawer, .cf-palette)::backdrop { transition: opacity 150ms var(--cf-ease); }
+.rw-page .cf-modal:not(.cf-drawer, .cf-palette)[data-closing]::backdrop { opacity: 0; transition-duration: 110ms; }
+@starting-style {
+  .rw-page .cf-menu, .rw-select-list, .rw-pill, .rw-page .cf-modal:not(.cf-drawer, .cf-palette)[open], .rw-page .cf-modal:not(.cf-drawer, .cf-palette)[open]::backdrop { opacity: 0; }
+}
+.rw-page .cf-menu { transform-origin: top right; }
+.rw-select-list { transform-origin: top center; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .rw-view { transition: opacity 170ms var(--cf-ease) 50ms, translate 170ms var(--cf-ease) 50ms, visibility 0s; }
+  .rw-view:not(.is-on) { transition: opacity 100ms ease-out, translate 100ms ease-out, visibility 0s linear 100ms; }
+  .rw-view:not([data-view="review"]):not(.is-on) { translate: 0 8px; }
+  @starting-style {
+    .rw-view.is-on { opacity: 0; }
+    .rw-view.is-on:not([data-view="review"]) { translate: 0 8px; }
+  }
+
+  .rw-page .cf-menu[data-leaving], .rw-select-list[data-leaving] { scale: 0.98; translate: 0 -2px; }
+  .rw-page .cf-modal:not(.cf-drawer, .cf-palette)[data-closing] { scale: 0.98; }
+  .rw-pill[data-leaving] { translate: 0 -4px; }
+  @starting-style {
+    .rw-page .cf-menu, .rw-select-list { scale: 0.96; translate: 0 -4px; }
+    .rw-page .cf-modal:not(.cf-drawer, .cf-palette)[open] { scale: 0.97; translate: 0 6px; }
+    .rw-pill { translate: 0 -4px; }
+  }
+
+  .ow-reveal { transition: grid-template-rows 180ms var(--cf-ease), opacity 160ms var(--cf-ease); }
+  .ow-reveal[data-leaving] { grid-template-rows: 0fr; opacity: 0; transition-duration: 140ms, 110ms; }
+  @starting-style { .ow-reveal { grid-template-rows: 0fr; opacity: 0; } }
+
+  /* Folds (Not asking, Completeness only) open and close the same way, where the browser can. */
+  .rw-page :is(.ow-fold, .cf-complete) { interpolate-size: allow-keywords; }
+  .rw-page :is(.ow-fold, .cf-complete)::details-content { display: flow-root; block-size: 0; opacity: 0; overflow-y: clip;
+    transition: block-size 180ms var(--cf-ease), opacity 160ms var(--cf-ease), content-visibility 180ms allow-discrete; }
+  .rw-page :is(.ow-fold, .cf-complete)[open]::details-content { block-size: auto; opacity: 1; }
 }

@@ -552,7 +552,7 @@ try {
       await page.getByText('The application changed while its review was loading. Refresh to read the current version.', { exact: false }).waitFor();
       assert.equal(await page.getByRole('button', { name: 'Accept', exact: true }).isDisabled(), true);
       assert.equal(await drafted(), 'Unsent officer draft must survive background updates.');
-      await page.getByRole('button', { name: 'Refresh application', exact: true }).click();
+      await page.getByRole('button', { name: 'Refresh', exact: true }).click();
       await page.locator('.rv-who').filter({ hasText: 'Synthetic colleague is reviewing this' }).waitFor();
       assert.equal(await drafted(), 'Unsent officer draft must survive background updates.');
     } finally { await owner.close(); await colleague.close(); }

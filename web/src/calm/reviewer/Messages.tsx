@@ -118,7 +118,7 @@ export function Messages({ caseId, me, messages, onChange, canWrite, hideTitle =
             maxLength={4000}
           />
           <div className="ac-composer-foot">
-            {error ? <span className="ac-error is-row" role="alert">{error}</span> : <span className="ac-faint ac-small">One way · they can’t reply · {MOD_KEY} ↵</span>}
+            {error ? <span className="ac-error is-row" role="alert">{error}</span> : <span className="ac-faint ac-small">They can’t reply · {MOD_KEY} ↵</span>}
             <button type="button" className="cf-btn is-xs" disabled={!draft.trim() || busy} onClick={() => void send()}>{busy ? "Sending…" : "Send"}</button>
           </div>
         </div>

@@ -4,10 +4,11 @@
  * applicant's own words and the source files. ✕ means "don't ask for this"; a required item asks why
  * (one tap). Everything else is one step away: the full application, the messages.
  */
-import { useId, useState, type ReactNode } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import type { DispositionEdit, Finding, FindingState, InputFile, RequestTarget, RulebookGap } from "../../api/types.gen";
 import { CIcon, CompletenessNote, Dot, Eyebrow } from "../ui";
 import { Icon24, type IconName } from "../icons";
+import { usePresence } from "../usePresence";
 import { CodeRef } from "./CodeRef";
 import { OpenFileLink } from "./OpenFileLink";
 import { officerVoice, sentence } from "./packageView";
@@ -53,12 +54,21 @@ export function FindingRow({ row, caseId, files, editable, onCall, onAddOwn }: {
   const { finding: f, state } = row;
   const [open, setOpen] = useState(false);
   const [why, setWhy] = useState(false);
+  const ev = useRef<HTMLDivElement>(null);
+  const evidence = usePresence(open, ev);
+  const x = useRef<HTMLButtonElement>(null);
+  const reasons = useRef<HTMLDivElement>(null);
+  const whyBox = useRef<HTMLDivElement>(null);
+  const reasonsShown = usePresence(why, whyBox);
   const verify = state.state === "verify";
   const tone = f.severity === "blocking" ? "blocking" : "warning";
   const dismiss = (reason: DismissReason) => { setWhy(false); onCall({ key: f.key, state: "dismissed", reason, note: "" }); };
   const drop = () => (f.severity === "blocking" ? setWhy(true) : dismiss("not_needed"));
+  const cancel = () => { setWhy(false); x.current?.focus(); };
+  // The reasons take the focus from ✕, so the keyboard picks one straight away.
+  useEffect(() => { if (why) reasons.current?.querySelector<HTMLElement>("button")?.focus(); }, [why]);
   return (
-    <li className={`cf-row ow-row${open ? " is-open" : ""}`}>
+    <li className={`cf-row ow-row${open ? " is-open" : ""}`} data-key={f.key}>
       <span className={`cf-dot is-${tone}${verify ? " is-ring" : ""}`} aria-hidden="true" />
       <button type="button" className="cf-row-text ow-row-t" aria-expanded={open} onClick={() => setOpen(!open)}
         title={verify ? "Couldn’t be read · look first" : undefined}>
@@ -73,22 +83,34 @@ export function FindingRow({ row, caseId, files, editable, onCall, onAddOwn }: {
       {editable && (state.locked ? (
         <span className="cf-faint cf-small" title="The completeness rules require it">Required</span>
       ) : (
-        <button type="button" className="cf-icon-btn is-plain ow-x" aria-label={`Don’t ask for ${f.label}`} title="Don’t ask" onClick={drop}>
+        <button ref={x} type="button" className="cf-icon-btn is-plain ow-x" aria-label={`Don’t ask for ${f.label}`} title="Don’t ask"
+          aria-expanded={f.severity === "blocking" ? why : undefined} onClick={() => (why ? cancel() : drop())}>
           <CIcon name="close" size={14} />
         </button>
       ))}
-      {why && (
-        <div className="ow-why" role="group" aria-label="Why not ask">
-          {DISMISS_REASONS.map((r) => <button key={r.id} type="button" className="cf-chip" onClick={() => dismiss(r.id)}>{r.label}</button>)}
-          <button type="button" className="cf-link-btn" onClick={() => setWhy(false)}>Cancel</button>
+      {reasonsShown.mounted && (
+        <div ref={whyBox} className="ow-reveal" data-leaving={reasonsShown.leaving || undefined} inert={reasonsShown.leaving || undefined}>
+          <div>
+            <div ref={reasons} className="ow-why" role="group" aria-label="Why not ask"
+              onKeyDown={(e) => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); cancel(); } }}>
+              {DISMISS_REASONS.map((r) => <button key={r.id} type="button" className="cf-chip" onClick={() => dismiss(r.id)}>{r.label}</button>)}
+              <button type="button" className="cf-link-btn" onClick={cancel}>Cancel</button>
+            </div>
+          </div>
         </div>
       )}
-      {open && <Evidence f={f} caseId={caseId} files={files} />}
+      {evidence.mounted && (
+        <div ref={ev} className="ow-reveal" data-leaving={evidence.leaving || undefined} inert={evidence.leaving || undefined}>
+          <div><Evidence f={f} caseId={caseId} files={files} /></div>
+        </div>
+      )}
     </li>
   );
 }
 
 type DismissReason = NonNullable<FindingState["reason"]>;
+/** Where the focus goes after a row action: a place in the list or the fold, or the newest own item. */
+type Aim = { kind: "ask"; index: number } | { kind: "fold"; index: number; key: string } | { kind: "own" };
 
 function OwnItem({ item, targets, limits, onText, onTarget, onRemove }: {
   item: DraftRequestItem; targets: RequestTarget[]; limits: number;
@@ -137,16 +159,44 @@ export function OfficerReview({ headline, lede, rows, rulebook, dismissed, own, 
 }) {
   const id = useId();
   const listed = rows.length + rulebook.length + own.length;
+  const main = useRef<HTMLDivElement>(null);
+  // Acting on a row can move it out of the list (✕, Remove, Ask again) or add one (Add your own). The
+  // focus goes to the row that took its place, or the new item's text, never back to the page.
+  const [aim, setAim] = useState<Aim | null>(null);
+  useLayoutEffect(() => {
+    if (!aim || !main.current) return;
+    setAim(null);
+    const at = document.activeElement;
+    if (at && at !== document.body && main.current.contains(at) && at.isConnected && aim.kind !== "own") return;
+    const focus = (el: Element | null | undefined) => (el instanceof HTMLElement ? (el.focus(), true) : false);
+    const first = (li: Element | undefined) => li?.querySelector("input, button, summary, [tabindex='0']");
+    if (aim.kind === "own") {
+      const inputs = main.current.querySelectorAll<HTMLInputElement>(".ow-own-input");
+      if (focus(inputs[inputs.length - 1])) return;
+    } else {
+      const items = [...(main.current.querySelector(aim.kind === "ask" ? ".ow-ask" : ".ow-fold .cf-rows")?.children ?? [])];
+      const near = [...items.slice(aim.index), ...items.slice(0, aim.index).reverse()];
+      for (const li of near) if (focus(first(li))) return;
+      // The last one asked again: follow it back into the list.
+      if (aim.kind === "fold" && focus(first(main.current.querySelector(`.ow-ask > [data-key="${CSS.escape(aim.key)}"]`) ?? undefined))) return;
+    }
+    if (focus(main.current.querySelector(".ow-add"))) return;
+    focus(main.current.querySelector("h1"));
+  }, [aim]);
+  const ask = (index: number) => setAim({ kind: "ask", index });
   return (
     <div className="cf-review ow">
-      <div className="cf-review-main">
+      <div className="cf-review-main" ref={main}>
         <h1 className="cf-h1" id={`${id}-h`} tabIndex={-1}>{headline}</h1>
         {lede && <p className="cf-lede is-sm">{lede}</p>}
 
         {listed > 0 && <div className="cf-list-label">To ask</div>}
         {listed > 0 && (
-          <ul className="cf-rows" aria-label="To ask">
-            {rows.map((r) => <FindingRow key={r.finding.key} row={r} caseId={caseId} files={files} editable={editable} onCall={onCall} onAddOwn={onAddOwn} />)}
+          <ul className="cf-rows ow-ask" aria-label="To ask">
+            {rows.map((r, i) => (
+              <FindingRow key={r.finding.key} row={r} caseId={caseId} files={files} editable={editable}
+                onCall={(edit) => { ask(i); onCall(edit); }} onAddOwn={(f) => { setAim({ kind: "own" }); onAddOwn(f); }} />
+            ))}
             {rulebook.map((g) => (
               <li key={g.id} className="cf-row ow-row">
                 <Dot tone="blocking" />
@@ -154,28 +204,29 @@ export function OfficerReview({ headline, lede, rows, rulebook, dismissed, own, 
                 <span className="cf-faint cf-small">Required</span>
               </li>
             ))}
-            {own.map((item) => (
+            {own.map((item, j) => (
               <OwnItem key={item.key} item={item} targets={targets} limits={itemLimit}
-                onText={(t) => onOwnText(item.key, t)} onTarget={(t) => onOwnTarget(item.key, t)} onRemove={() => onOwnRemove(item.key)} />
+                onText={(t) => onOwnText(item.key, t)} onTarget={(t) => onOwnTarget(item.key, t)}
+                onRemove={() => { ask(rows.length + rulebook.length + j); onOwnRemove(item.key); }} />
             ))}
           </ul>
         )}
         {editable && (
-          <button type="button" className="cf-link-btn ow-add" onClick={onAdd}><CIcon name="plus" size={13} />Add your own</button>
+          <button type="button" className="cf-link-btn ow-add" onClick={() => { setAim({ kind: "own" }); onAdd(); }}><CIcon name="plus" size={13} />Add your own</button>
         )}
 
         {dismissed.length > 0 && (
           <details className="ow-fold">
             <summary className="cf-list-label">Not asking · {dismissed.length}</summary>
             <ul className="cf-rows">
-              {dismissed.map((r) => (
+              {dismissed.map((r, j) => (
                 <li key={r.finding.key} className="cf-row ow-row is-quiet">
                   <Dot tone="pending" />
                   <span className="cf-row-text">{sentence(r.finding.label)}
                     <span className="cf-faint cf-small"> · {DISMISS_REASONS.find((x) => x.id === r.state.reason)?.label ?? "Not asking"}</span>
                   </span>
                   {editable && !r.state.locked && (
-                    <button type="button" className="cf-row-go" onClick={() => onCall({ key: r.finding.key, state: r.askable ? "ask" : "verify", reason: null, note: "" })}>Ask again</button>
+                    <button type="button" className="cf-row-go" onClick={() => { setAim({ kind: "fold", index: j, key: r.finding.key }); onCall({ key: r.finding.key, state: r.askable ? "ask" : "verify", reason: null, note: "" }); }}>Ask again</button>
                   )}
                 </li>
               ))}
