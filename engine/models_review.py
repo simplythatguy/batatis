@@ -333,7 +333,7 @@ class RequestLimits(BaseModel):
     text: int = 12000
 
 
-class Workspace(BaseModel):
+class OfficerWorkspace(BaseModel):
     """The officer's working state for the latest version: per-finding states, counts and the accept gate."""
     model_config = ConfigDict(extra='forbid')
     version: int
@@ -353,7 +353,7 @@ class PackageReviewIndex(BaseModel):
     authority: str
     sessions: list[SessionSummary]
     latest: ReviewSession | None = None
-    workspace: Workspace | None = None  # for `latest`; None when there is no session
+    workspace: OfficerWorkspace | None = None  # for `latest`; None when there is no session
     close_out: CloseOut | None = None
 
 

@@ -1,5 +1,5 @@
 /** Placement and presentation only. Counts, dispositions and acceptance belong to the server. */
-import type { Case, Finding, FindingState, InputFile, Pointer, RequestTarget, ReviewSession, RulebookGap, Workspace } from "../../api/types.gen";
+import type { Case, Finding, FindingState, InputFile, Pointer, RequestTarget, ReviewSession, RulebookGap, OfficerWorkspace } from "../../api/types.gen";
 import type { ReviewQuestion } from "../../api/client";
 import { localField } from "../../intakeFields";
 import { pointerLabel, SECTION_LABEL, sentence } from "./packageView";
@@ -123,8 +123,8 @@ export function changedFields(c: Pick<Case, "submissions">): Map<string, Case["s
   return new Map((c.submissions?.at(-1)?.changes ?? []).map(change => [localField(change.field), change]));
 }
 
-/** Historical versions use their saved dispositions; current versions use Workspace.states. */
-export function findingState(f: Finding, session: ReviewSession, workspace: Workspace | null): FindingState {
+/** Historical versions use their saved dispositions; current versions use OfficerWorkspace.states. */
+export function findingState(f: Finding, session: ReviewSession, workspace: OfficerWorkspace | null): FindingState {
   return workspace?.states.find(s => s.key === f.key) ?? {
     locked: false, key: f.key, state: f.status === "not_found" || f.routed_to !== "applicant" ? "verify" : "ask",
     reason: null, note: "", at: null, by_name: null, ...session.dispositions?.find(s => s.key === f.key),
@@ -138,7 +138,7 @@ export function visibleFinding(f: Finding, state: FindingState, filter: FindingF
 export const visibleRulebook = (_gap: RulebookGap, filter: FindingFilter) => filter === "all" || filter === "required";
 
 /** Local save/ownership holds only. Never reimplement or recount the server's acceptance gate. */
-export function workspaceDecision({ workspace, editable, pending, busy }: { workspace: Workspace | null; editable: boolean; pending: boolean; busy: boolean }) {
+export function workspaceDecision({ workspace, editable, pending, busy }: { workspace: OfficerWorkspace | null; editable: boolean; pending: boolean; busy: boolean }) {
   const hold = !editable ? "This version is read-only." : pending ? "Save the request changes first." : busy ? "An action is in progress." : "";
   const returnReason = hold || (!workspace ? "Waiting for the saved review." : !workspace.tally.asked ? "Add an item to return the application." : "");
   const acceptReason = hold || (!workspace ? "Waiting for the saved review." : workspace.gate.reason);

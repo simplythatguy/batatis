@@ -1886,7 +1886,7 @@
           "type": "integer"
         },
         "workspace": {
-          "$ref": "#/$defs/engine__models_workspace__Workspace"
+          "$ref": "#/$defs/Workspace"
         }
       },
       "required": [
@@ -8171,6 +8171,67 @@
       "title": "NotificationsResult",
       "type": "object"
     },
+    "OfficerWorkspace": {
+      "additionalProperties": false,
+      "description": "The officer's working state for the latest version: per-finding states, counts and the accept gate.",
+      "properties": {
+        "case_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Case Version"
+        },
+        "current": {
+          "title": "Current",
+          "type": "boolean"
+        },
+        "gate": {
+          "$ref": "#/$defs/AcceptGate"
+        },
+        "limits": {
+          "$ref": "#/$defs/RequestLimits"
+        },
+        "rulebook": {
+          "items": {
+            "$ref": "#/$defs/RulebookGap"
+          },
+          "title": "Rulebook",
+          "type": "array"
+        },
+        "states": {
+          "items": {
+            "$ref": "#/$defs/FindingState"
+          },
+          "title": "States",
+          "type": "array"
+        },
+        "tally": {
+          "$ref": "#/$defs/ReviewTally"
+        },
+        "version": {
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "version",
+        "case_version",
+        "current",
+        "states",
+        "rulebook",
+        "tally",
+        "gate",
+        "limits"
+      ],
+      "title": "OfficerWorkspace",
+      "type": "object"
+    },
     "OnboardingRequest": {
       "additionalProperties": false,
       "properties": {
@@ -8525,7 +8586,7 @@
         "workspace": {
           "anyOf": [
             {
-              "$ref": "#/$defs/engine__models_review__Workspace"
+              "$ref": "#/$defs/OfficerWorkspace"
             },
             {
               "type": "null"
@@ -13835,6 +13896,42 @@
       "title": "WorkerHealth",
       "type": "object"
     },
+    "Workspace": {
+      "properties": {
+        "consent": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/WorkspaceConsent"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "history": {
+          "items": {
+            "$ref": "#/$defs/HistoryEntry"
+          },
+          "title": "History",
+          "type": "array"
+        },
+        "signatures": {
+          "items": {
+            "$ref": "#/$defs/WorkspaceSignature"
+          },
+          "title": "Signatures",
+          "type": "array"
+        }
+      },
+      "required": [
+        "signatures",
+        "consent",
+        "history"
+      ],
+      "title": "Workspace",
+      "type": "object"
+    },
     "WorkspaceConsent": {
       "properties": {
         "agreed": {
@@ -13974,103 +14071,6 @@
         "history"
       ],
       "title": "WorkspaceView",
-      "type": "object"
-    },
-    "engine__models_review__Workspace": {
-      "additionalProperties": false,
-      "description": "The officer's working state for the latest version: per-finding states, counts and the accept gate.",
-      "properties": {
-        "case_version": {
-          "anyOf": [
-            {
-              "type": "integer"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Case Version"
-        },
-        "current": {
-          "title": "Current",
-          "type": "boolean"
-        },
-        "gate": {
-          "$ref": "#/$defs/AcceptGate"
-        },
-        "limits": {
-          "$ref": "#/$defs/RequestLimits"
-        },
-        "rulebook": {
-          "items": {
-            "$ref": "#/$defs/RulebookGap"
-          },
-          "title": "Rulebook",
-          "type": "array"
-        },
-        "states": {
-          "items": {
-            "$ref": "#/$defs/FindingState"
-          },
-          "title": "States",
-          "type": "array"
-        },
-        "tally": {
-          "$ref": "#/$defs/ReviewTally"
-        },
-        "version": {
-          "title": "Version",
-          "type": "integer"
-        }
-      },
-      "required": [
-        "version",
-        "case_version",
-        "current",
-        "states",
-        "rulebook",
-        "tally",
-        "gate",
-        "limits"
-      ],
-      "title": "Workspace",
-      "type": "object"
-    },
-    "engine__models_workspace__Workspace": {
-      "properties": {
-        "consent": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/WorkspaceConsent"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null
-        },
-        "history": {
-          "items": {
-            "$ref": "#/$defs/HistoryEntry"
-          },
-          "title": "History",
-          "type": "array"
-        },
-        "signatures": {
-          "items": {
-            "$ref": "#/$defs/WorkspaceSignature"
-          },
-          "title": "Signatures",
-          "type": "array"
-        }
-      },
-      "required": [
-        "signatures",
-        "consent",
-        "history"
-      ],
-      "title": "Workspace",
       "type": "object"
     }
   },

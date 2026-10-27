@@ -6,7 +6,7 @@ of its own; a dismissal changes the officer's record, never the automated findin
 from __future__ import annotations
 
 from ..models_review import (AcceptGate, FindingState, RequestTarget, ReviewSession, ReviewTally,
-                             RulebookGap, Workspace)
+                             RulebookGap, OfficerWorkspace)
 
 PEER_SIGNAL = 'peer_review:signal'
 
@@ -17,7 +17,7 @@ def target(finding) -> RequestTarget:
     return RequestTarget(section=finding.section, field=finding.field, label=f'{section} · {label}'[:200])
 
 
-def build(session: ReviewSession, case=None, gaps=(), *, codes_available: bool = True) -> Workspace:
+def build(session: ReviewSession, case=None, gaps=(), *, codes_available: bool = True) -> OfficerWorkspace:
     findings = [f for f in session.findings if f.key != PEER_SIGNAL]
     blocking = [gap for gap in gaps if gap.severity == 'blocking'] if case is not None else []
     locked_fields = {gap.field for gap in blocking if gap.field}
@@ -64,7 +64,7 @@ def build(session: ReviewSession, case=None, gaps=(), *, codes_available: bool =
         reason = f'{tally.required} required {"item" if tally.required == 1 else "items"} still open'
     else:
         reason = ''
-    return Workspace(version=session.version, case_version=session.case_version, current=current, states=states,
+    return OfficerWorkspace(version=session.version, case_version=session.case_version, current=current, states=states,
                      rulebook=rulebook, tally=tally, gate=AcceptGate(can_accept=not reason, reason=reason))
 
 

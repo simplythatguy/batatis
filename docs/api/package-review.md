@@ -88,7 +88,7 @@ readings and quotes. An upload review on a case records the case version it ran 
 
 ## Draft and decision guarantees
 
-`Workspace` contains the effective finding states, uncovered canonical blocking gaps, one `ReviewTally`,
+`OfficerWorkspace` contains the effective finding states, uncovered canonical blocking gaps, one `ReviewTally`,
 `AcceptGate` and `RequestLimits`. `check_completeness` remains the only rulebook. Its blocking fields lock
 matching findings against dismissal. A blocking dismissal requires a reason and at least three non-space
 characters in its note. `ask` requires a linked request item; `included` on those items is server-owned.

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import type { Finding, InputFile, Pointer, Workspace } from "../../api/types.gen.ts";
+import type { Finding, InputFile, Pointer, OfficerWorkspace } from "../../api/types.gen.ts";
 import { anchoredItems, anchorFor, changedFields, findingSources, targetOptions, visibleFinding, workspaceDecision, type SheetAnchor } from "./workspaceView.ts";
 
 const anchors: SheetAnchor[] = [
@@ -9,7 +9,7 @@ const anchors: SheetAnchor[] = [
   { id: "ref", section: "C", field: "section_c.9.10.9.16.(1)", label: "9.10.9.16.(1)" },
   { id: "doc", section: "D", field: "evidence.report", label: "Test report" },
 ];
-const workspace: Workspace = { version: 3, case_version: 9, current: true, states: [], rulebook: [],
+const workspace: OfficerWorkspace = { version: 3, case_version: 9, current: true, states: [], rulebook: [],
   tally: { required: 7, to_check: 2, dismissed: 4, asked: 3, verify: 1, rulebook: 2 },
   gate: { can_accept: false, reason: "The server says this review is out of date." }, limits: { intro: 2000, item_text: 600, items: 50, text: 6000 } };
 

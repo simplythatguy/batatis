@@ -8,7 +8,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, typ
 import { AccountsError, claimConflict, review, type Claim, type Message } from "../../api/accounts";
 import { EngineError } from "../../api/client";
 import { packageReview, type ReviewTarget } from "../../api/packageReview";
-import type { Case, PackageReviewIndex, ProfessionalRequirementRequest, ReviewSession, Workspace } from "../../api/types.gen";
+import type { Case, PackageReviewIndex, ProfessionalRequirementRequest, ReviewSession, OfficerWorkspace } from "../../api/types.gen";
 import { accountSession, useAccount } from "../account";
 import { AcIcon, Avatar, PageHead } from "../auth/bits";
 import { ExpiryNotice } from "../ExpiryNotice";
@@ -519,7 +519,7 @@ const SHEET_SECTIONS: { id: string; title: string; icon: IconName; parts: string
 /** The review of one version: one screen, with the application and the messages one step away. */
 function SessionWorkspace({ stage, onStage, c, snapshot, session, workspace, target, applicant, editable, busy, showDecision, historical, status, messages, onMessages, me, messageDraft, onMessageDraft, onDraft, onSaved, onConflict, onReturn, onAccept, professional, outcome }: {
   stage: Stage; onStage: (s: Stage) => void;
-  c: Case; snapshot: Snapshot; session: ReviewSession; workspace: Workspace | null; target: ReviewTarget; applicant: string;
+  c: Case; snapshot: Snapshot; session: ReviewSession; workspace: OfficerWorkspace | null; target: ReviewTarget; applicant: string;
   editable: boolean; busy: boolean; showDecision: boolean; historical: boolean; status: string;
   messages: Message[] | null; onMessages: Dispatch<SetStateAction<Message[] | null>>; me: string | null; messageDraft: string; onMessageDraft: (v: string) => void;
   onDraft: (state: DraftReport) => void; onSaved: (index: PackageReviewIndex) => void; onConflict: () => void;

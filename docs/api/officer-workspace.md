@@ -4,7 +4,7 @@ How a Safety Codes Officer reads, decides and sends a request back, and what the
 each step. It builds on the [package review API](package-review.md). Completeness is administrative only:
 nothing here judges the design, and nothing claims compliance.
 
-Wire types: `engine/models_review.py` (`Workspace`, `FindingState`, `ReviewTally`, `AcceptGate`,
+Wire types: `engine/models_review.py` (`OfficerWorkspace`, `FindingState`, `ReviewTally`, `AcceptGate`,
 `RulebookGap`, `RequestLimits`, `RequestTarget`, `Disposition`, `InformationRequestEdit`, `DispositionEdit`,
 `ReturnWithRequest`, `VarianceIssued`, `CloseOut`), `DecisionRequest.review_version` and the extra
 `DecisionItem` fields in `engine/routes_review.py` and `engine/account_models.py`. The web reads them from
@@ -44,11 +44,11 @@ counts, the gate and the rendered
 
 ## One set of counts
 
-`Workspace.tally` is the only definition of every count. The client never recounts.
+`OfficerWorkspace.tally` is the only definition of every count. The client never recounts.
 
 - `required`: blocking findings not dismissed, plus rulebook blocking gaps that no finding covers.
 - `to_check`: warnings not dismissed. `verify`: findings still to look at. `dismissed`. `asked`: items in the
-  request text. `rulebook`: the uncovered rulebook gaps (listed in `Workspace.rulebook`).
+  request text. `rulebook`: the uncovered rulebook gaps (listed in `OfficerWorkspace.rulebook`).
 
 `SessionSummary.required` uses the same tally for older versions, with their saved canonical blocking-gap
 snapshot. Pre-migration sessions without that internal snapshot use current canonical gaps conservatively.
@@ -80,7 +80,7 @@ whose items carry their targets, the status becomes `returned`, and the request 
 happens or none of it does; the response is the saved `Case`. `text` must equal the server's rendering of the saved draft, so the applicant
 receives exactly what the officer previewed (409 when it differs: the draft changed, review it again).
 Before writing, the server checks the claim, the case version, that `version` is the latest session, that at
-least one item is included, and every limit in `Workspace.limits` (items, intro, item text, whole text). The
+least one item is included, and every limit in `OfficerWorkspace.limits` (items, intro, item text, whole text). The
 legacy `…/information-request/send` route and a plain `return` decision stay for older callers; the
 workspace uses only this route.
 

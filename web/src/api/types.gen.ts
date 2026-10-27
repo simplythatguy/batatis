@@ -263,7 +263,7 @@ export interface Case {
   title_is_manual: boolean;
   updated_at: string;
   version: number;
-  workspace: engine__models_workspace__Workspace;
+  workspace: Workspace;
 }
 
 export interface CaseChecklist {
@@ -1218,6 +1218,18 @@ export interface NotificationsResult {
   unread: number;
 }
 
+/** The officer's working state for the latest version: per-finding states, counts and the accept gate. */
+export interface OfficerWorkspace {
+  case_version: number | null;
+  current: boolean;
+  gate: AcceptGate;
+  limits: RequestLimits;
+  rulebook: RulebookGap[];
+  states: FindingState[];
+  tally: ReviewTally;
+  version: number;
+}
+
 export interface OnboardingRequest {
   access_code?: string | null;
   applicant_type?: "manufacturer" | "contractor" | "homebuilder" | null;
@@ -1270,7 +1282,7 @@ export interface PackageReviewIndex {
   latest: ReviewSession | null;
   package_id: string;
   sessions: SessionSummary[];
-  workspace: engine__models_review__Workspace | null;
+  workspace: OfficerWorkspace | null;
 }
 
 export interface PartScopeAssessment {
@@ -2141,6 +2153,12 @@ export interface WorkerHealth {
   worker_available: boolean;
 }
 
+export interface Workspace {
+  consent: WorkspaceConsent | null;
+  history: HistoryEntry[];
+  signatures: WorkspaceSignature[];
+}
+
 export interface WorkspaceConsent {
   agreed: boolean;
   at: string;
@@ -2168,22 +2186,4 @@ export interface WorkspaceView {
   history: HistoryEntry[];
   signatures: SignatureView[];
   signers: WorkspaceSigner[];
-}
-
-/** The officer's working state for the latest version: per-finding states, counts and the accept gate. */
-export interface engine__models_review__Workspace {
-  case_version: number | null;
-  current: boolean;
-  gate: AcceptGate;
-  limits: RequestLimits;
-  rulebook: RulebookGap[];
-  states: FindingState[];
-  tally: ReviewTally;
-  version: number;
-}
-
-export interface engine__models_workspace__Workspace {
-  consent: WorkspaceConsent | null;
-  history: HistoryEntry[];
-  signatures: WorkspaceSignature[];
 }
