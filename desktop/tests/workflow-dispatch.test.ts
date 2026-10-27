@@ -274,3 +274,28 @@ test("Batatis AI sends the pinned request with the vault's access code to the we
 test("the hosted address is the Batatis website over https", () => {
   assert.equal(HOSTED_AI, "https://batatis-vert.vercel.app/api/hosted-ai");
 });
+
+test("signing in to an account while AI is off turns it on, and never overrides a pick", async (t) => {
+  const userData = scratch(t);
+  let signedIn = false;
+  const listeners = new Set<() => void>();
+  const claude: HostProvider = {
+    ...unavailableProvider("", "claude"),
+    status: async () => (signedIn ? { state: "signed-in", plan: null } : { state: "signed-out" }),
+    onChange: (listener) => { listeners.add(listener); return () => listeners.delete(listener); },
+  };
+  const host = new DesktopHost({ paths: { userData, resources: "/unused", packaged: true, platform: process.platform }, version: "0.1.0", command: fakeCommand,
+    vault: new KeyVault(join(userData, "vault"), box), localSession: { load: async () => null, save: async () => {} }, provider: unavailableProvider(),
+    claude, log: () => {}, remount: () => {}, notify: () => {} });
+  t.after(() => host.dispose());
+  await host.boot();
+  const signIn = async (state: boolean) => { signedIn = state; for (const listener of listeners) listener(); await new Promise((done) => setTimeout(done, 50)); };
+  const picks = () => [host.configuration().workflow, host.configuration().chat];
+  assert.deepEqual(picks(), [{ source: "off" }, { source: "off" }]);
+  await signIn(true);
+  assert.deepEqual(picks(), [defaultPick("claude"), defaultPick("claude")]);
+  const chosen = { source: "claude" as const, model: "claude-opus-5-5", effort: "high" };
+  await host.selectModel("chat", chosen);
+  await signIn(false); await signIn(true);
+  assert.deepEqual(picks(), [defaultPick("claude"), chosen], "a later sign-in leaves the person's picks alone");
+});

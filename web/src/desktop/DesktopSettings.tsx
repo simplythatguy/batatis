@@ -221,7 +221,7 @@ function CodeDbSection({ info }: { info: DesktopInfo }) {
         {info.codeDb.available ? <span className="ac-saved">Ready</span> : <span className="ac-faint-tag">Not set up</span>}
       </Row>
       {note && <p className="ac-error is-row" role="alert">{note}</p>}
-      {!info.codeDb.available && <p className="ac-help">Code lookups, Section C and submitting need it. Choose a code database built by Batatis on this computer.</p>}
+      {!info.codeDb.available && <p className="ac-help">Code lookups, Section C and submitting need it. Reinstall Batatis, or choose a code database built by Batatis.</p>}
     </section>
   );
 }

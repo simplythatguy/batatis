@@ -1,3 +1,4 @@
+const { existsSync } = require("node:fs");
 const { join } = require("node:path");
 
 /**
@@ -52,6 +53,8 @@ module.exports = {
     { from: "build/engine-dist/batatis-engine", to: "engine", filter: ["**/*"] },
     // The Codex runtime itself is downloaded on first use (src/main/codex/install.ts); only its reviewed catalog ships.
     { from: "codex", to: "codex", filter: ["luna-models.json", "LICENSE", "NOTICE"] },
+    // Built by `python -m codedb build`; the app copies it into its own data on launch (src/main/codedb.ts).
+    ...(existsSync(join(__dirname, "../codedb/build/codedb.sqlite")) ? [{ from: "../codedb/build/codedb.sqlite", to: "codedb/codedb.sqlite" }] : []),
   ],
   electronFuses: {
     runAsNode: false,

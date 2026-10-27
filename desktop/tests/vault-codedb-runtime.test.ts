@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
-import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import test from "node:test";
-import { importCodeDb, inspectCodeDb } from "../src/main/codedb.ts";
+import { importCodeDb, inspectCodeDb, installBundledCodeDb } from "../src/main/codedb.ts";
 import { KeyVault, type SecretBox } from "../src/main/credentials.ts";
 import { engineCommand } from "../src/main/runtime.ts";
 import { REPO, scratch } from "./helpers.ts";
@@ -111,6 +111,23 @@ test("a rejected import leaves the active code database untouched", async (t) =>
   fakeCodeDb(bad, { build: "9" });
   assert.equal((await importCodeDb(bad, active, "2")).ok, false);
   assert.deepEqual(readFileSync(active), before);
+  assert.equal(existsSync(`${active}.partial`), false);
+});
+
+test("the installer's code database is copied in when the app has none or another build, and a same-build file is kept", async (t) => {
+  const dir = scratch(t);
+  const bundled = join(dir, "resources", "codedb.sqlite");
+  const active = join(dir, "data", "codedb", "codedb.sqlite");
+  mkdirSync(join(dir, "resources"), { recursive: true });
+  fakeCodeDb(bundled);
+  assert.equal(await installBundledCodeDb(join(dir, "missing.sqlite"), active), false, "nothing bundled, nothing installed");
+  assert.equal(await installBundledCodeDb(bundled, active), true, "first launch installs it");
+  assert.equal(inspectCodeDb(active, "2").ok, true);
+  assert.equal(await installBundledCodeDb(bundled, active), false, "already installed");
+  rmSync(active);
+  fakeCodeDb(active, { build: "1" });
+  assert.equal(await installBundledCodeDb(bundled, active), true, "an old build is replaced");
+  assert.equal(inspectCodeDb(active, "2").ok, true);
   assert.equal(existsSync(`${active}.partial`), false);
 });
 
