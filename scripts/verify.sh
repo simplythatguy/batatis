@@ -43,12 +43,16 @@ fi
 
 if [ $want_engine = 1 ]; then
   step "engine: tests (tests that need the code database or TEST_DATABASE_URL skip unless you set them up; -rs lists them. Run those for the areas you touched)"
-  py="$root/.venv/bin/python"
-  if [ ! -x "$py" ]; then
-    common=$(cd "$(git rev-parse --git-common-dir)" && pwd)
-    py="$(dirname "$common")/.venv/bin/python"
-  fi
-  [ -x "$py" ] || py=$(command -v python3)
+  common=$(cd "$(git rev-parse --git-common-dir)" && pwd)
+  py=""
+  for candidate in "$root/.venv/bin/python" "$root/.venv/Scripts/python.exe" \
+    "$(dirname "$common")/.venv/bin/python" "$(dirname "$common")/.venv/Scripts/python.exe"; do
+    if [ -x "$candidate" ]; then
+      py="$candidate"
+      break
+    fi
+  done
+  [ -n "$py" ] || py=$(command -v python3)
   "$py" -m pytest -q engine/tests codedb/tests evals_dev -rs
 fi
 

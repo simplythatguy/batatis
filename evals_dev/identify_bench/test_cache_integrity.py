@@ -69,6 +69,16 @@ def test_lexical_cache_changes_with_db_content_and_preserves_old_entry(monkeypat
     assert len(store.rows()) == 2
 
 
+def test_changed_bytes_change_fingerprint_even_when_file_metadata_is_unchanged(monkeypatch, tmp_path):
+    db = tmp_path / 'corpus.sqlite'
+    db.write_bytes(b'first corpus')
+    stamp = cache._stamp((db, db.with_name(db.name + '-wal')))
+    monkeypatch.setattr(cache, '_stamp', lambda _: stamp)
+    before = cache.corpus_fingerprint(db)
+    db.write_bytes(b'other corpus')
+    assert cache.corpus_fingerprint(db) != before
+
+
 def test_wal_content_is_part_of_corpus_identity(tmp_path):
     db = tmp_path / 'corpus.sqlite'
     db.write_bytes(b'database')
