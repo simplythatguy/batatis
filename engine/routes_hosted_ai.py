@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 
 from fastapi import APIRouter, Header, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
@@ -43,8 +44,14 @@ class HostedScreening(BaseModel):
     body: str = Field(max_length=MAX_TEXT)
 
 
-def unlocked(store, request: Request, code: str | None) -> str:
-    """The code's name. Too many wrong codes from one address stop all checks there for ten minutes."""
+INSTALL_ID = re.compile(r'[A-Za-z0-9_-]{16,80}')
+
+
+def unlocked(store, request: Request, code: str | None, install: str | None = None) -> str:
+    """The code's name. Too many wrong codes from one address stop all checks there for ten minutes.
+
+    A code with a seat limit also needs the desktop's install id: a new install takes a seat or is refused.
+    """
     from .accounts import digest
     bucket = digest('hosted-ai-code:' + client_ip_from(request))
     if store.account_rate_full(bucket, FAILED_CODES_PER_WINDOW):
@@ -53,6 +60,15 @@ def unlocked(store, request: Request, code: str | None) -> str:
     if name is None:
         store.account_rate(bucket, FAILED_CODES_PER_WINDOW, FAILED_CODE_WINDOW)
         raise HTTPException(403, 'That access code isn’t valid')
+    seats = ai_access.limit(name)
+    if seats is not None or install:
+        from .accounts import digest as hashed
+        if install is not None and not INSTALL_ID.fullmatch(install):
+            raise HTTPException(422, 'The install id is not valid')
+        if install is None:
+            raise HTTPException(403, 'Update Batatis to use this access code')
+        if not store.touch_install(name, hashed('install:' + install), seats):
+            raise HTTPException(403, 'That access code is full')
     ai_access.GRANTED.set(True)
     return name
 
@@ -71,8 +87,9 @@ def create_router(cases):
     router = APIRouter(prefix='/hosted-ai', tags=['hosted AI'])
 
     @router.post('/complete')
-    def complete(body: HostedCompletion, request: Request, x_batatis_access_code: str | None = Header(default=None)):
-        unlocked(cases(), request, x_batatis_access_code)
+    def complete(body: HostedCompletion, request: Request, x_batatis_access_code: str | None = Header(default=None),
+                 x_batatis_install: str | None = Header(default=None)):
+        unlocked(cases(), request, x_batatis_access_code, x_batatis_install)
         if body.task not in TASKS or body.model != MODEL or body.effort != EFFORT:
             raise HTTPException(422, 'The request does not match the pinned desktop workflow profile')
         if len((body.system + body.user).encode()) > MAX_TEXT:
@@ -125,8 +142,9 @@ def create_router(cases):
                 'usage': tokens and {'inputTokens': tokens['input_tokens'], 'outputTokens': tokens['output_tokens']}}
 
     @router.post('/screen')
-    def screen(body: HostedScreening, request: Request, x_batatis_access_code: str | None = Header(default=None)):
-        unlocked(cases(), request, x_batatis_access_code)
+    def screen(body: HostedScreening, request: Request, x_batatis_access_code: str | None = Header(default=None),
+                 x_batatis_install: str | None = Header(default=None)):
+        unlocked(cases(), request, x_batatis_access_code, x_batatis_install)
         try:
             parsed = json.loads(body.body)
         except ValueError:

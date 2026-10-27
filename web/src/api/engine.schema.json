@@ -15566,12 +15566,18 @@
     },
     "UserResult": {
       "properties": {
+        "admin": {
+          "default": false,
+          "title": "Admin",
+          "type": "boolean"
+        },
         "user": {
           "$ref": "#/$defs/User"
         }
       },
       "required": [
-        "user"
+        "user",
+        "admin"
       ],
       "title": "UserResult",
       "type": "object"

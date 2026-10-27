@@ -10,6 +10,7 @@ import { PageHead, clockText, useCountdown } from "../auth/bits";
 import { APPLICANT_CHOICES, APPLICANT_LABEL, AUTHORITY_CHOICES, codeNeeded } from "../auth/onboardingSteps";
 import { saveOnboarding, signOut } from "../auth/useAuthGate";
 import { useSignOutStatus } from "../auth/signOutGuard";
+import { AccessCodesSection } from "./AccessCodes";
 import { AiAccessSection } from "./AiAccess";
 import { ArchivedApplications } from "./ArchivedApplications";
 import { Chips, Row } from "./rows";
@@ -118,6 +119,7 @@ export function Settings({ phoneTools }: { phoneTools?: ReactNode }) {
               {editing && <RoleEditor onCancel={() => setEditing(false)} onSaved={() => { setEditing(false); setSaved(true); }} />}
             </section>
             <AiAccessSection />
+            <AccessCodesSection />
             <ArchivedApplications />
           </>
         ) : (

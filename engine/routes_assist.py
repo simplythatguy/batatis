@@ -177,7 +177,7 @@ def call_model(*, provider: str, model: str, context: str, body: AssistRequest, 
         return ModelAnswer(payload['answer'], usage['input_tokens'], usage['output_tokens'])
     if provider == 'anthropic':
         import anthropic
-        with anthropic.Anthropic(max_retries=0, timeout=30) as client:
+        with anthropic.Anthropic(max_retries=0, timeout=30, **llm_gate.anthropic_client_options()) as client:
             reply = client.messages.create(model=model, max_tokens=MAX_TOKENS, system=system,
                                            messages=[{'role': 'user', 'content': content}])
         return ModelAnswer(''.join(part.text for part in reply.content if part.type == 'text'),

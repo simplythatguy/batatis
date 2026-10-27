@@ -36,6 +36,7 @@ from .section_c import section_c_rows
 from .store import CaseStore, FileTooLarge, InvalidAttachment, VersionConflict, assert_durable_when_hosted, open_store
 from .uploads import (MULTIPART_MAX_OVERHEAD_BYTES, MULTIPART_MAX_PARTS,
                       PDF_MAX_BYTES, PDF_TOO_LARGE_DETAIL)
+from . import ai_access
 from .access import access_dependency
 from .account_models import Authority, reviewing_authority
 from .case_view import current_case
@@ -194,6 +195,7 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
     app = FastAPI(title='Batatis engine', dependencies=[Depends(access_dependency(cases))],
                   lifespan=worker_lifespan(jobs))
     app.state.jobs = jobs
+    ai_access.bind(cases)
 
     def sweep():
         current = state['store']
@@ -469,6 +471,7 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
     app.include_router(__import__('engine.routes_evidence', fromlist=['create_router']).create_router(cases, code))
     app.include_router(__import__('engine.routes_auth', fromlist=['create_router']).create_router(cases))
     app.include_router(__import__('engine.routes_hosted_ai', fromlist=['create_router']).create_router(cases))
+    app.include_router(__import__('engine.routes_admin', fromlist=['create_router']).create_router(cases))
     app.include_router(__import__('engine.routes_review', fromlist=['create_router']).create_router(cases, code))
     app.include_router(__import__('engine.routes_rewrite', fromlist=['create_router']).create_router(cases, code))
     app.include_router(__import__('engine.routes_assist', fromlist=['create_router']).create_router(cases, code))

@@ -350,8 +350,25 @@ export const notifications = {
 /** Whether this server needs an access code for AI, and whether the signed-in account has a current one. */
 export interface AiAccess { required: boolean; granted: boolean }
 
+/** One AI access code as the site admin sees it; the code itself is shown only when it is made. */
+export interface AccessCodeInfo {
+  name: string;
+  source: "managed" | "environment";
+  max_users: number | null;
+  accounts: number;
+  installs: number;
+  in_use: number;
+  revoked: boolean;
+}
+
 export const aiAccess = {
   read: () => call<AiAccess>("GET", "/auth/ai-access"),
   enter: (code: string) => call<AiAccess>("POST", "/auth/ai-access", { code }),
   remove: () => call<AiAccess>("DELETE", "/auth/ai-access", {}),
+};
+
+export const adminCodes = {
+  list: () => call<{ codes: AccessCodeInfo[] }>("GET", "/admin/access-codes").then((r) => r.codes),
+  create: (name: string, max_users: number | null) => call<{ code: string; info: AccessCodeInfo }>("POST", "/admin/access-codes", { name, max_users }),
+  change: (name: string, patch: { max_users?: number | null; revoked?: boolean }) => call<AccessCodeInfo>("PATCH", `/admin/access-codes/${enc(name)}`, patch),
 };

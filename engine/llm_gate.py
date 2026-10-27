@@ -164,6 +164,12 @@ def live_enabled(provider: str = 'openai') -> bool:
     return key is not None and os.environ.get('BATATIS_LIVE') == '1' and bool((os.environ.get(key) or '').strip())
 
 
+def anthropic_client_options() -> dict:
+    """Options for anthropic.Anthropic. A key that isn't scoped to a workspace needs ANTHROPIC_WORKSPACE_ID."""
+    workspace = (os.environ.get('ANTHROPIC_WORKSPACE_ID') or '').strip()
+    return {'default_headers': {'anthropic-workspace-id': workspace}} if workspace else {}
+
+
 def daily_cap() -> Decimal:
     raw = (os.environ.get('BATATIS_DAILY_SPEND_CAP_USD') or '5').strip()
     return Decimal(raw)
