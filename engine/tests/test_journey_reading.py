@@ -143,7 +143,7 @@ def test_scan_pages_go_to_vision_and_a_text_only_connection_reports_it_cannot_re
     def text_only(*args):
         return {'facts': []}, {}
     report = read_file('photo', 'picture.png', picture(), transport=text_only, status='fake').files[0]
-    assert report.pictures_not_read_reason == 'This AI connection cannot read pictures'
+    assert report.pictures_not_read_reason == 'this AI connection reads text only'
 
 
 def test_semantic_reading_reaches_every_text_page_and_the_tail_of_a_long_page():
@@ -435,3 +435,11 @@ def test_a_title_block_row_without_a_colon_gives_the_owner_and_address_but_not_g
     text = 'Civic address 10234 87 Ave NW, Edmonton, AB\r\nOwner Dana Whitfield\r\nOwner Approval Required\r\nOwner wants a bigger window\r\n'
     got = [(h.field, h.value) for h in read(text).hits if h.field in ('owner_name', 'municipal_address')]
     assert got == [('municipal_address', '10234 87 Ave NW, Edmonton, AB'), ('owner_name', 'Dana Whitfield')]
+
+
+def test_plans_alone_can_put_the_application_on_the_variance_route():
+    from engine.intake.plan import build_plan
+    plans = pdf([[(72, 700, 'We propose these larger windows instead of the smaller openings the table allows.')]])
+    case = Case()
+    service.apply(case, '', service.run('', [('plans', 'plans.pdf', plans)]))
+    assert build_plan(case).fork.variance_needed == 'likely'

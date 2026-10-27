@@ -252,7 +252,7 @@ def _pictures(out: Extraction, report: FileReport, pages: list[int], url, *, tra
         report.pictures_not_read_reason = 'AI is off'
         return
     if not getattr(transport, 'supports_images', False):
-        report.pictures_not_read_reason = 'This AI connection cannot read pictures'
+        report.pictures_not_read_reason = 'this AI connection reads text only'
         return
     if not allowed:
         # Pixels cannot be scrubbed like text: a picture leaves the machine only after the applicant allows it.
@@ -266,7 +266,7 @@ def _pictures(out: Extraction, report: FileReport, pages: list[int], url, *, tra
         try:
             image = url(page)
         except Exception:
-            report.pictures_not_read_reason = 'This picture could not be opened'
+            report.pictures_not_read_reason = 'it could not be opened'
             continue
         run = model_pass.vision(image, transport, status=status, outbound=lambda text: outbound(text, []))
         counts = ModelPass(status=run.status, model=READER_VERSION if run.status == 'live' else None,
