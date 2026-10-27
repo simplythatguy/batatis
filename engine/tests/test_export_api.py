@@ -56,7 +56,8 @@ def test_final_roundtrip_and_direct_api_bypass(ctx):
     final = client.post(f'/cases/{complete.id}/export')
     assert final.status_code == 200
     pdf = PdfReader(io.BytesIO(final.content))
-    assert not pdf.get_fields() and '/AcroForm' not in pdf.trailer['/Root']
+    assert set(pdf.get_fields()) == {'Signature1', 'Signature2', 'Signature3', 'Signature4',
+                                     'Date1', 'Date2', 'SCO Date', 'SCO Date1', 'Check Box14'}
     text = ' '.join(p.extract_text() for p in pdf.pages)
     assert 'SYNTHETIC applicant risk passage' in text and 'SYNTHETIC product-literature attachment' in text
     assert codes.citation('9.25.2.2.(1)', 'B') in text

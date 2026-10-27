@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Prototype B · Paper + focus, three steps</title>
+<style>
+:root{--bg:#f5f6f8;--t:#14161b;--t2:#4a505c;--t3:#6b7280;--t4:#a3a8b3;--l:rgba(17,24,39,.08);--l2:rgba(17,24,39,.14);--hov:rgba(17,24,39,.04);--sel:rgba(17,24,39,.07);--accent:#f25a2a;--block:#e5484d;--warn:#f0a20b;--done:#18a058;--pend:#9aa0ab;--pri:#16181d;--font:Inter,ui-sans-serif,system-ui,sans-serif;--mono:ui-monospace,"SF Mono",monospace}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:14px/1.55 var(--font)}button{font:inherit;color:inherit;cursor:pointer}
+.app{display:grid;grid-template-rows:52px 1fr;height:820px;overflow:hidden}
+.hdr{display:flex;align-items:center;gap:14px;padding:0 18px;border-bottom:1px solid var(--l)}
+.brand{width:22px;height:22px;border-radius:7px;background:var(--accent)}.ttl{font-weight:600}
+.stages{margin:0 auto;display:flex;gap:18px;color:var(--t3)}.stages span{opacity:.6}.stages .cur{opacity:1;color:var(--t);font-weight:500}
+.save{font:12px var(--mono);color:var(--t3);display:flex;gap:6px;align-items:center}
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex:none}.d-done{background:var(--done)}.d-block{background:var(--block)}.d-warn{background:var(--warn)}.d-pend{background:var(--pend)}
+.sub{display:flex;align-items:center;gap:6px;padding:12px 22px}
+.steps{display:flex;gap:2px;background:rgba(17,24,39,.04);border-radius:999px;padding:3px}
+.steps button{border:0;background:transparent;border-radius:999px;padding:6px 14px;color:var(--t3);font-size:13px;display:flex;gap:6px;align-items:center}
+.steps .on{background:#fff;color:var(--t);box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.steps .cnt{font:11px var(--mono);color:var(--t3)}
+.sp{flex:1}.tb{border:0;background:transparent;border-radius:9px;padding:6px 9px;color:var(--t2);font-size:13px}.tb:hover{background:var(--hov)}
+.status{font-size:12px;color:var(--t3);display:flex;gap:6px;align-items:center}
+.pri{background:var(--pri);color:#fff;border:0;border-radius:999px;padding:9px 18px;font-weight:500;font-size:13px}
+.ghost{background:#fff;border:1px solid var(--l2);border-radius:999px;padding:7px 14px;font-size:13px}
+.body{display:grid;grid-template-columns:1fr 380px;min-height:0;height:calc(820px - 52px - 58px)}
+.body.nofocus{grid-template-columns:1fr 0}
+.docwrap{overflow:auto;padding:0 20px 60px}
+.paper{background:#fff;max-width:700px;margin:0 auto;border-radius:6px;box-shadow:0 30px 80px -20px rgba(17,24,39,.16);padding:44px 56px;font-size:13.5px;line-height:1.6;color:#111}
+.paper h1{font-size:18px;margin:0}.paper .meta{font:11px var(--mono);color:#63636b;margin-bottom:22px}
+.paper h2{font-size:14px;margin:26px 0 8px;display:flex;gap:10px;align-items:baseline}.paper h2 .k{font:11px var(--mono);color:var(--t3);font-weight:400}
+.blk{display:grid;grid-template-columns:160px 1fr 18px;gap:14px;padding:7px 10px;margin:0 -10px;border-radius:9px;cursor:pointer;align-items:baseline}
+.blk:hover{background:var(--hov)}.blk.on{background:var(--sel)}
+.blk .lab{color:#63636b;font-size:12.5px}.blk .st{font-size:11px;color:var(--t3)}
+.blk.narr{grid-template-columns:1fr 18px}.blk.narr .lab{display:block;margin-bottom:2px}
+.miss{color:#b42318}
+.ai{color:#6d28d9}
+.focus{background:#fff;border-left:1px solid var(--l);overflow:auto;padding:20px 22px;display:flex;flex-direction:column;gap:14px}
+.focus .eb{font:11px var(--mono);color:var(--t3);display:flex;justify-content:space-between}
+.focus h3{margin:0;font-size:20px;letter-spacing:-.01em}
+.ed{border:1px solid var(--l2);border-radius:12px;padding:12px 14px;min-height:120px;font-size:14.5px;line-height:1.6;outline:none}
+.ed:focus{border-color:var(--t3)}
+.diff{border:1px dashed #b9a3f5;border-radius:12px;padding:12px 14px;font-size:14px}
+.diff .tag{font:10.5px var(--mono);color:#6d28d9;display:block;margin-bottom:4px}
+ins{text-decoration:none;background:#f1ebfe}del{color:var(--t4)}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+.mini{border:1px solid var(--l2);background:#fff;border-radius:999px;padding:5px 12px;font-size:12.5px}.mini.dark{background:var(--pri);color:#fff;border-color:var(--pri)}
+.hist{font-size:12.5px;color:var(--t2)}.hist div{display:flex;gap:8px;padding:5px 0;border-top:1px solid var(--l)}.hist .w{font:11px var(--mono);color:var(--t3);width:58px;flex:none}
+/* sign */
+.signpage{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.scard{background:#fff;border-radius:16px;box-shadow:0 1px 2px rgba(17,24,39,.05),0 4px 16px -6px rgba(17,24,39,.08);padding:18px 20px;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}
+.scard .who{font-weight:600}.scard .role{font-size:12.5px;color:var(--t3)}
+.sigslot{grid-column:1/-1;border:1px dashed var(--l2);border-radius:12px;height:86px;display:grid;place-items:center;color:var(--t4)}
+.consent{display:flex;gap:10px;font-size:13px;color:var(--t2);background:#fff;border-radius:16px;padding:16px 20px;box-shadow:0 1px 2px rgba(17,24,39,.05)}
+.box{width:16px;height:16px;border:1px solid var(--t3);border-radius:4px;flex:none;margin-top:2px}
+/* send */
+.sendgrid{display:grid;grid-template-columns:1fr 360px;gap:20px;max-width:1180px;margin:0 auto;height:100%}
+.pages{display:flex;flex-direction:column;gap:12px;overflow:auto;padding-bottom:40px}
+.pg{background:#fff;border-radius:4px;box-shadow:0 10px 30px -12px rgba(17,24,39,.2);aspect-ratio:8.5/11;max-width:560px;width:100%;margin:0 auto;position:relative;padding:26px 30px;font-size:8px;color:#333}
+.pg .ln{height:6px;background:#eef0f3;border-radius:2px;margin:6px 0}
+.pin{position:absolute;right:-10px;width:20px;height:20px;border-radius:50%;background:var(--block);color:#fff;font:600 11px var(--font);display:grid;place-items:center}
+.flags{background:#fff;border-radius:16px;padding:18px;box-shadow:0 1px 2px rgba(17,24,39,.05),0 4px 16px -6px rgba(17,24,39,.08);display:flex;flex-direction:column;gap:12px;align-self:start}
+.it{display:flex;gap:10px;align-items:baseline;font-size:13px}.it .go{margin-left:auto;color:var(--t3);font-size:12px}
+.label{font:11px var(--mono);color:var(--t3)}
+.hidden{display:none!important}
+</style></head><body>
+<div class="app">
+ <div class="hdr"><div class="brand"></div><div class="ttl">NailBase siding</div>
+  <div class="stages"><span>✎</span><span>?</span><span>☰</span><span class="cur">▤ Application</span></div><div class="save"><span class="dot d-done"></span>Saved</div></div>
+ <div>
+  <div class="sub">
+   <div class="steps" role="tablist"><button class="on" data-s="edit">✎ Edit <span class="cnt">2</span></button><button data-s="sign">✍ Sign <span class="cnt">0/2</span></button><button data-s="send">➤ Send</button></div>
+   <button class="tb">⌕</button><button class="tb">↺</button><div class="sp"></div>
+   <span class="status"><span class="dot d-pend"></span>Draft</span>
+  </div>
+  <!-- EDIT -->
+  <div class="body" id="edit">
+   <div class="docwrap"><article class="paper">
+    <h1>Request for an alternative solution</h1><div class="meta">NBC 2023 Alberta Edition, 2nd printing · City of Edmonton</div>
+    <h2>About you <span class="k">A</span></h2>
+    <div class="blk"><span class="lab">Owner's name</span><span>Birchfield Homes Ltd.</span><span class="st"></span></div>
+    <div class="blk"><span class="lab">Owner's representative</span><span>Dana Example, Example Design Co.</span><span class="st"></span></div>
+    <div class="blk"><span class="lab">Mailing address</span><span>000 Example Road NW, Edmonton AB</span><span class="st"></span></div>
+    <h2>Your project <span class="k">B</span></h2>
+    <div class="blk"><span class="lab">Municipal address</span><span>0000 Example Way NW</span><span class="st"></span></div>
+    <div class="blk"><span class="lab">Proposed alternative</span><span>On wall type W1, vertical vinyl siding is fastened with ring-shank nails at 400 mm o.c. directly into the 6 mm fibre-cement facer of a 50 mm insulating sheathing panel.</span><span class="st"></span></div>
+    <h2>Your case <span class="k">Appendix</span></h2>
+    <div class="blk narr"><div><span class="lab">Why a variance</span>The benchmark is Sentence 9.27.5.1.(2): cladding fastened to sheathing of the kind and thickness it lists.</div><span class="st"></span></div>
+    <div class="blk narr on"><div><span class="lab">Risk</span>If the facer cannot hold the nails, siding could loosen in high wind and fall.</div><span class="st ai">✦</span></div>
+    <div class="blk narr"><div><span class="lab">Assumptions and limits</span><span class="miss">● Missing</span></div><span class="st"></span></div>
+    <h2>Which rules apply <span class="k">C</span></h2>
+    <div class="blk narr"><div><span class="lab">9.27.5.1.(2) · Attachment of cladding</span><span class="label">OS2.3 · F20 · OP2.3 · lookup</span></div><span class="st">›</span></div>
+    <h2>Supporting documents <span class="k">D</span></h2>
+    <div class="blk"><span class="lab">Test report summary</span><span>Example Materials Testing · 📎</span><span class="st"></span></div>
+    <div class="blk"><span class="lab">Engineer's letter</span><span>J. Example, P.Eng. · <span class="miss">no file</span></span><span class="st"></span></div>
+   </article></div>
+   <aside class="focus">
+    <div class="eb"><span>Your case · Risk</span><span>✕</span></div>
+    <h3>Risk</h3>
+    <div class="ed" contenteditable>If the facer cannot hold the nails, siding could loosen in high wind and fall.</div>
+    <div class="acts"><button class="mini">✦ Ask</button><button class="mini">✦ Rewrite</button><button class="mini">Clearer</button><button class="mini">Shorter</button></div>
+    <div class="diff"><span class="tag">✦ AI suggestion · not yet yours</span>…could loosen in high wind <del>and fall</del> <ins>and detach from the wall, mainly at corners and upper storeys</ins>.
+     <div class="acts" style="margin-top:10px"><button class="mini dark">Accept</button><button class="mini">Reject</button></div></div>
+    <div class="label">Officer looks for</div><div style="font-size:13px;color:var(--t2)">What could go wrong, how likely, how bad.</div>
+    <div class="hist"><div class="label" style="border:0">History</div>
+     <div><span class="w">2:41 pm</span>You typed 14 words</div><div><span class="w">2:39 pm</span>AI draft rejected</div><div><span class="w">Oct 21</span>From your description</div></div>
+   </aside>
+  </div>
+  <!-- SIGN -->
+  <div class="body nofocus hidden" id="sign"><div class="docwrap"><div class="signpage">
+   <div class="consent"><span class="box"></span><span>I agree to the described use of the information provided. <u>Read it</u></span></div>
+   <div class="scard"><div><div class="who">Birchfield Homes Ltd.</div><div class="role">Owner · signs and dates</div></div><button class="ghost">↗ Send link</button><div class="sigslot">✍ Sign here</div></div>
+   <div class="scard"><div><div class="who">Dana Example</div><div class="role">Owner's representative · you</div></div><span></span><div class="sigslot">✍ Sign here</div></div>
+   <p class="label">Professionals sign their own documents. Batatis never signs or seals for them.</p>
+  </div></div></div>
+  <!-- SEND -->
+  <div class="body nofocus hidden" id="send"><div class="docwrap"><div class="sendgrid">
+   <div class="pages"><div class="label" style="text-align:center">What the officer receives · 11 pages</div>
+    <div class="pg"><b>Part 1 · Section A</b><div class="ln"></div><div class="ln" style="width:70%"></div><div class="ln"></div><div class="ln" style="width:50%"></div><b>Section B</b><div class="ln"></div><div class="ln"></div><div class="ln" style="width:80%"></div></div>
+    <div class="pg"><b>Section D · Signatures</b><div class="ln"></div><div class="ln" style="width:60%"></div><span class="pin" style="top:60%">1</span><div class="ln"></div></div>
+   </div>
+   <div class="flags"><div style="font-weight:600">Officer would flag 2</div>
+    <div class="it"><span class="dot d-block"></span>Assumptions and limits are empty<span class="go">Fix ›</span></div>
+    <div class="it"><span class="dot d-block"></span>Owner hasn't signed<span class="go">Sign ›</span></div>
+    <div class="label" style="margin-top:6px">In the package</div>
+    <div class="it">▤ Form, Part 1<span class="go">7 p</span></div><div class="it">¶ Appendix<span class="go">2 p</span></div><div class="it">📎 Test report summary<span class="go">6 p</span></div>
+    <button class="pri" disabled style="opacity:.4">Submit to Edmonton</button><span class="label">Fix 2 items to submit</span>
+   </div>
+  </div></div></div>
+ </div>
+</div>
+<script>
+document.querySelectorAll('.steps button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.steps button').forEach(x=>x.classList.toggle('on',x===b));['edit','sign','send'].forEach(id=>document.getElementById(id).classList.toggle('hidden',id!==b.dataset.s))});
+window.step=s=>document.querySelector(`[data-s=${s}]`).click();
+</script></body></html>

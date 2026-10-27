@@ -1884,6 +1884,9 @@
           "minimum": 1,
           "title": "Version",
           "type": "integer"
+        },
+        "workspace": {
+          "$ref": "#/$defs/engine__models_workspace__Workspace"
         }
       },
       "required": [
@@ -1901,6 +1904,7 @@
         "submissions",
         "return_snapshot",
         "messages",
+        "workspace",
         "professional_resolutions",
         "created_at",
         "updated_at",
@@ -2956,6 +2960,20 @@
       "title": "ConditionAnswer",
       "type": "object"
     },
+    "ConsentInput": {
+      "additionalProperties": false,
+      "properties": {
+        "agreed": {
+          "title": "Agreed",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "agreed"
+      ],
+      "title": "ConsentInput",
+      "type": "object"
+    },
     "ContextDefinition": {
       "properties": {
         "code": {
@@ -3503,7 +3521,7 @@
     },
     "Disposition": {
       "additionalProperties": false,
-      "description": "The officer's call on one automated finding, kept with the session. It never edits the finding.\n\nAbsent means the default: `ask` for an applicant finding the review established, `verify` for a\nnot-found or officer-routed one. `dismissed` needs a reason, and a note when the finding is blocking.",
+      "description": "The officer's call on one automated finding, kept with the session. It never edits the finding.\n\nAbsent means the default: `ask` for an applicant finding the review established, `verify` for a\nnot-found or officer-routed one. `dismissed` needs a reason; the note is optional.",
       "properties": {
         "at": {
           "anyOf": [
@@ -5439,6 +5457,82 @@
         "source"
       ],
       "title": "HistoricalPackage",
+      "type": "object"
+    },
+    "HistoryEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "maxLength": 60000,
+          "title": "After",
+          "type": "string"
+        },
+        "at": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "At",
+          "type": "string"
+        },
+        "before": {
+          "maxLength": 60000,
+          "title": "Before",
+          "type": "string"
+        },
+        "block": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Block",
+          "type": "string"
+        },
+        "by": {
+          "enum": [
+            "you",
+            "ai",
+            "restore"
+          ],
+          "title": "By",
+          "type": "string"
+        },
+        "id": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "maxLength": 500,
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "at",
+        "block",
+        "label",
+        "before",
+        "after",
+        "by"
+      ],
+      "title": "HistoryEntry",
+      "type": "object"
+    },
+    "HistoryInput": {
+      "additionalProperties": false,
+      "properties": {
+        "entries": {
+          "items": {
+            "$ref": "#/$defs/HistoryEntry"
+          },
+          "maxItems": 300,
+          "title": "Entries",
+          "type": "array"
+        }
+      },
+      "required": [
+        "entries"
+      ],
+      "title": "HistoryInput",
       "type": "object"
     },
     "IdentifyArticle": {
@@ -8334,6 +8428,49 @@
       "title": "PackSource",
       "type": "object"
     },
+    "PackagePreview": {
+      "properties": {
+        "filename": {
+          "title": "Filename",
+          "type": "string"
+        },
+        "page_count": {
+          "title": "Page Count",
+          "type": "integer"
+        },
+        "pages": {
+          "items": {
+            "$ref": "#/$defs/PreviewPage"
+          },
+          "title": "Pages",
+          "type": "array"
+        },
+        "pdf": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pdf"
+        },
+        "start": {
+          "title": "Start",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "filename",
+        "page_count",
+        "start",
+        "pages"
+      ],
+      "title": "PackagePreview",
+      "type": "object"
+    },
     "PackageReviewIndex": {
       "additionalProperties": false,
       "properties": {
@@ -8388,7 +8525,7 @@
         "workspace": {
           "anyOf": [
             {
-              "$ref": "#/$defs/Workspace"
+              "$ref": "#/$defs/engine__models_review__Workspace"
             },
             {
               "type": "null"
@@ -11214,6 +11351,82 @@
       "title": "ReviewerName",
       "type": "object"
     },
+    "RewriteRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "end": {
+          "minimum": 0,
+          "title": "End",
+          "type": "integer"
+        },
+        "field": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Field",
+          "type": "string"
+        },
+        "instruction": {
+          "maxLength": 1500,
+          "minLength": 1,
+          "title": "Instruction",
+          "type": "string"
+        },
+        "start": {
+          "minimum": 0,
+          "title": "Start",
+          "type": "integer"
+        },
+        "text": {
+          "maxLength": 60000,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "field",
+        "text",
+        "start",
+        "end",
+        "instruction"
+      ],
+      "title": "RewriteRequest",
+      "type": "object"
+    },
+    "RewriteResult": {
+      "properties": {
+        "cited": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Cited",
+          "type": "array"
+        },
+        "notice": {
+          "title": "Notice",
+          "type": "string"
+        },
+        "removed_citations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Removed Citations",
+          "type": "array"
+        },
+        "replacement": {
+          "title": "Replacement",
+          "type": "string"
+        }
+      },
+      "required": [
+        "replacement",
+        "cited",
+        "removed_citations",
+        "notice"
+      ],
+      "title": "RewriteResult",
+      "type": "object"
+    },
     "RouteBullet": {
       "properties": {
         "citations": {
@@ -12359,6 +12572,88 @@
         "sent_at"
       ],
       "title": "SessionSummary",
+      "type": "object"
+    },
+    "SignatureInput": {
+      "additionalProperties": false,
+      "properties": {
+        "image": {
+          "maxLength": 273090,
+          "title": "Image",
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "drawn",
+            "typed"
+          ],
+          "title": "Method",
+          "type": "string"
+        },
+        "name": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "method",
+        "image"
+      ],
+      "title": "SignatureInput",
+      "type": "object"
+    },
+    "SignatureView": {
+      "properties": {
+        "content_hash": {
+          "title": "Content Hash",
+          "type": "string"
+        },
+        "current": {
+          "title": "Current",
+          "type": "boolean"
+        },
+        "image": {
+          "title": "Image",
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "drawn",
+            "typed"
+          ],
+          "title": "Method",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "owner",
+            "owner_rep"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "signed_on": {
+          "title": "Signed On",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "method",
+        "image",
+        "role",
+        "signed_on",
+        "content_hash",
+        "current"
+      ],
+      "title": "SignatureView",
       "type": "object"
     },
     "SignupRequest": {
@@ -13540,7 +13835,148 @@
       "title": "WorkerHealth",
       "type": "object"
     },
-    "Workspace": {
+    "WorkspaceConsent": {
+      "properties": {
+        "agreed": {
+          "title": "Agreed",
+          "type": "boolean"
+        },
+        "at": {
+          "title": "At",
+          "type": "string"
+        }
+      },
+      "required": [
+        "agreed",
+        "at"
+      ],
+      "title": "WorkspaceConsent",
+      "type": "object"
+    },
+    "WorkspaceSignature": {
+      "description": "A saved signature. Its image was checked once on the way in (SignatureInput); loading a case never decodes it.",
+      "properties": {
+        "content_hash": {
+          "title": "Content Hash",
+          "type": "string"
+        },
+        "image": {
+          "title": "Image",
+          "type": "string"
+        },
+        "method": {
+          "enum": [
+            "drawn",
+            "typed"
+          ],
+          "title": "Method",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "owner",
+            "owner_rep"
+          ],
+          "title": "Role",
+          "type": "string"
+        },
+        "signed_on": {
+          "title": "Signed On",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "method",
+        "image",
+        "role",
+        "signed_on",
+        "content_hash"
+      ],
+      "title": "WorkspaceSignature",
+      "type": "object"
+    },
+    "WorkspaceSigner": {
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "required": {
+          "default": true,
+          "title": "Required",
+          "type": "boolean"
+        },
+        "role": {
+          "enum": [
+            "owner",
+            "owner_rep"
+          ],
+          "title": "Role",
+          "type": "string"
+        }
+      },
+      "required": [
+        "role",
+        "name",
+        "required"
+      ],
+      "title": "WorkspaceSigner",
+      "type": "object"
+    },
+    "WorkspaceView": {
+      "properties": {
+        "consent": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/WorkspaceConsent"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "content_hash": {
+          "title": "Content Hash",
+          "type": "string"
+        },
+        "history": {
+          "items": {
+            "$ref": "#/$defs/HistoryEntry"
+          },
+          "title": "History",
+          "type": "array"
+        },
+        "signatures": {
+          "items": {
+            "$ref": "#/$defs/SignatureView"
+          },
+          "title": "Signatures",
+          "type": "array"
+        },
+        "signers": {
+          "items": {
+            "$ref": "#/$defs/WorkspaceSigner"
+          },
+          "title": "Signers",
+          "type": "array"
+        }
+      },
+      "required": [
+        "content_hash",
+        "signers",
+        "signatures",
+        "consent",
+        "history"
+      ],
+      "title": "WorkspaceView",
+      "type": "object"
+    },
+    "engine__models_review__Workspace": {
       "additionalProperties": false,
       "description": "The officer's working state for the latest version: per-finding states, counts and the accept gate.",
       "properties": {
@@ -13597,6 +14033,42 @@
         "tally",
         "gate",
         "limits"
+      ],
+      "title": "Workspace",
+      "type": "object"
+    },
+    "engine__models_workspace__Workspace": {
+      "properties": {
+        "consent": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/WorkspaceConsent"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "history": {
+          "items": {
+            "$ref": "#/$defs/HistoryEntry"
+          },
+          "title": "History",
+          "type": "array"
+        },
+        "signatures": {
+          "items": {
+            "$ref": "#/$defs/WorkspaceSignature"
+          },
+          "title": "Signatures",
+          "type": "array"
+        }
+      },
+      "required": [
+        "signatures",
+        "consent",
+        "history"
       ],
       "title": "Workspace",
       "type": "object"

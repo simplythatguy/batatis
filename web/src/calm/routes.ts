@@ -6,7 +6,10 @@
 
 export type Screen = "start" | "questions" | "review" | "application" | "code" | "comments";
 
+export type WorkspaceStep = "edit" | "sign" | "send";
+
 export interface CalmRoute {
+  applicationStep: WorkspaceStep;
   screen: Screen;
   /** Deck item key for `questions`, or `authority` on Start. */
   focus: string | null;
@@ -51,8 +54,9 @@ function build(screen: Screen, focus: string | null = null, extra: Partial<CalmR
   if (extra.codeFirst) query.set("first", "code");
   if (extra.download) query.set("download", extra.download);
   if (extra.filter) query.set("filter", extra.filter);
+  if (extra.applicationStep && extra.applicationStep !== "edit") query.set("step", extra.applicationStep);
   const q = query.toString();
-  return { screen, focus, codeFirst: false, download: "", article: null, filter: "", ...extra, canonical: q ? `${base}?${q}` : base };
+  return { screen, focus, applicationStep: "edit", codeFirst: false, download: "", article: null, filter: "", ...extra, canonical: q ? `${base}?${q}` : base };
 }
 
 /** `#/code/<article id>` for links. Ids keep their dots and brackets readable after decoding. */
@@ -91,13 +95,15 @@ export function resolveRoute(path: string, params: URLSearchParams): CalmRoute {
       return build("review");
     case "/application": {
       const tab = params.get("tab");
-      // Without a field, a tab means its end: Section D's "Previous" lands on the last process card.
-      if (tab) return build("questions", focus ?? (tab === "D" ? "section-d" : tab === "alt" ? "field-qualifications" : null));
+      const rawFocus = params.get("focus");
+      const applicationFocus = rawFocus?.startsWith("prof-") || focus === "section-d" ? "evidence" : focus;
+      if (tab) return build("application", applicationFocus ?? `section-${tab === "alt" ? "case" : tab}`);
       if (params.get("review") === "1") return build("review");
       const download = params.get("download");
-      if (download === "draft") return build("application", null, { download: "draft" });
-      if (download) return build("application", null, { download: "options" });
-      return build("application");
+      if (download === "draft") return build("application", null, { download: "draft", applicationStep: "send" });
+      if (download) return build("application", null, { download: "options", applicationStep: "send" });
+      const step = params.get("step");
+      return build("application", applicationFocus, { applicationStep: step === "sign" || step === "send" ? step : "edit" });
     }
     case "/officer":
       return build("review");
@@ -106,7 +112,8 @@ export function resolveRoute(path: string, params: URLSearchParams): CalmRoute {
 
     case "/section-c":
     case "/references":
-      return build("application");
+      // Section C now lives on the paper.
+      return build("application", "section-C");
     default:
       return build("start");
   }

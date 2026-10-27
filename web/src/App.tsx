@@ -74,7 +74,7 @@ export function App() {
       body = <Review />;
       break;
     case "application":
-      body = <Application download={calm.download} />;
+      body = <Application download={calm.download} step={calm.applicationStep} focus={calm.focus} />;
       break;
     case "code":
       body = <CodeLibrary route={calm} />;

@@ -60,7 +60,9 @@ def test_draft_export_has_no_added_red_stamp_and_retains_metadata_projection_and
     assert 'SYNTHETIC UNCONFIRMED VALUE' not in text
     assert len(pdf.pages) > 5  # current official form AND generated appendix
     assert all(not batatis_stamp_text(pdf, page) for page in pdf.pages)
-    assert '/AcroForm' not in pdf.trailer['/Root'] and not pdf.get_fields()
+    assert set(pdf.get_fields()) == {'Signature1', 'Signature2', 'Signature3', 'Signature4',
+                                     'Date1', 'Date2', 'SCO Date', 'SCO Date1', 'Check Box14'}
+    assert all('Draft · not for submission' in page.extract_text() for page in pdf.pages)
     result = export_case(case, draft=True, codes=codes)
     assert result.draft is True and result.open_items
     assert store.get(case.id).model_dump() == before

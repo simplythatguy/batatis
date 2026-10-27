@@ -316,6 +316,17 @@ test("a saved reviewing authority is preserved beyond the current picker choices
   assert.equal(c.authority, "red-deer");
 });
 
+test("reopening writing drafts keeps the confirmed narrative beside the proposal until acceptance", () => {
+  const before = fact("own-risk", "process.risk_assessment", "Applicant’s original risk.", "Typed on the alternative path");
+  const proposal = { ...fact("writing-risk", "process.risk", "Suggested risk."), kind: "proposed" as const, status: "unconfirmed" as const };
+  const c = caseFromEngine(saved({ facts: [before, proposal] }), "homebuilder");
+  assert.equal(c.process.risk, "Applicant’s original risk.");
+  assert.deepEqual(c.facts.map(f => [f.id, f.value]), [[before.id, before.value], [proposal.id, proposal.value]]);
+  const rejected = reducer(c, { type: "dismissFact", id: proposal.id });
+  assert.equal(rejected.process.risk, "Applicant’s original risk.");
+  assert.deepEqual(rejected.facts.map(f => f.id), [before.id]);
+});
+
 test("legacy Section A aliases used by shared gaps reopen on their canonical editor", () => {
   const c = caseFromEngine(saved({ facts: [fact("rep", "section_a.representative", "Legacy representative"), fact("mail", "section_a.mailing_address", "Legacy mailing address")] }), "homebuilder");
   assert.equal(factFor(c, "representative")?.value, "Legacy representative");

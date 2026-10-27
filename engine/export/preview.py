@@ -5,9 +5,9 @@ application screen shows these images on its own light background instead, besid
 were drawn from. PDFium draws them, as in Chrome's viewer. A 32-colour PNG at twice the PDF size keeps the
 form's text sharp.
 
-The PDF and its images travel as base64 in one JSON response, which must stay under the 4.5 MB serverless
-response cap. `PAYLOAD_BUDGET` bounds their encoded size. A PDF whose own encoding does not fit is never
-encoded (`fits` is checked first); the screen offers the draft download instead, which sends the bytes as is.
+Images travel as base64 under the 4.5 MB serverless response cap. `PAYLOAD_BUDGET` bounds their encoded
+size. Legacy previews reserve space for the PDF. Windowed previews spend the budget on the requested pages
+first, then include the PDF only when both fit, so a large package can still be inspected page by page.
 """
 from __future__ import annotations
 
@@ -17,6 +17,7 @@ from dataclasses import dataclass
 from ..pdfium_lock import pdfium_locked
 
 SCALE = 2.0                   # image pixels per PDF point
+WINDOW_MAX_EDGE = 1920        # large drawing sheets still yield a bounded, viewable first image
 COLORS = 32
 MAX_PAGES = 60
 RESPONSE_CAP = 4_500_000      # serverless response body limit
@@ -43,19 +44,22 @@ def fits(pdf_size: int, budget: int = PAYLOAD_BUDGET) -> bool:
 
 @pdfium_locked
 def page_images(pdf: bytes, *, budget: int = PAYLOAD_BUDGET,
-                max_pages: int = MAX_PAGES) -> tuple[list[PageImage], int]:
-    """The first pages, in order, whose images fit the encoded `budget` beside the PDF; and its page count."""
+                max_pages: int = MAX_PAGES, start: int = 0,
+                reserve_pdf: bool = True) -> tuple[list[PageImage], int]:
+    """A page window in order within the encoded budget, and the complete PDF page count."""
     import pypdfium2 as pdfium
     from PIL import Image
 
     images: list[PageImage] = []
-    used = encoded(len(pdf)) + ENTRY_BYTES
+    used = (encoded(len(pdf)) if reserve_pdf else 0) + ENTRY_BYTES
     with pdfium.PdfDocument(pdf) as doc:
+        doc.init_forms()
         count = len(doc)
-        for index in range(min(count, max_pages)):
+        for index in range(start, min(count, start + max_pages)):
             page = doc[index]
             width, height = page.get_size()
-            bitmap = page.render(scale=SCALE, may_draw_forms=False)
+            scale = SCALE if reserve_pdf else min(SCALE, WINDOW_MAX_EDGE / max(width, height))
+            bitmap = page.render(scale=scale, may_draw_forms=True)
             try:
                 image = bitmap.to_pil().convert('RGB').quantize(colors=COLORS, method=Image.Quantize.FASTOCTREE)
             finally:

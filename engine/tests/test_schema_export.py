@@ -60,3 +60,12 @@ def test_formula_and_inputs_only_on_computed_facts():
     assert f.export()['inputs'] == ['a', 'b']
     with pytest.raises(ValueError):
         Fact(field='ratio', value=0.26, kind='pointed', source=src, formula='0.88 / 3.34')
+
+
+def test_workspace_wire_types_include_routes_and_truthfully_optional_preview_pdf():
+    defs = schema_export.schema()['$defs']
+    assert {'WorkspaceView', 'WorkspaceSignature', 'WorkspaceSigner', 'SignatureView', 'RewriteRequest',
+            'RewriteResult', 'SignatureInput', 'HistoryInput', 'ConsentInput', 'PackagePreview'} <= set(defs)
+    assert set(defs['WorkspaceView']['required']) == {
+        'content_hash', 'signers', 'signatures', 'consent', 'history'}
+    assert 'pdf' not in defs['PackagePreview']['required']
