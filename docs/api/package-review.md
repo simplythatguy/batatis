@@ -185,9 +185,9 @@ Sessions and close-out records live in `package_review_sessions` and `package_re
 migrations add nullable `issued_on`/`issued_by_name` to close-outs and internal `rulebook_json` to sessions.
 Historical summaries use the canonical blocking-gap snapshot from creation or the last draft save;
 pre-migration sessions without that snapshot conservatively use current canonical gaps. Existing sending
-records are preserved without inventing issuance dates. Rows for a case are
-removed when the case is deleted or purged (swept on every package-review access); standalone packages follow
-the same seven-day creation-based retention. At most 50 versions per package. Retention durations are unchanged. No new Case or package-review wire fields were added beyond the committed officer-workspace contract.
+records are preserved without inventing issuance dates. Rows for a case are removed when the case is deleted or
+purged (swept on every package-review access); linked records follow [case retention](../application-retention.md).
+Standalone packages expire seven days after creation. At most 50 versions per package.
 
 ## Saved-case completeness report (ported)
 

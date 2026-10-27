@@ -16,10 +16,25 @@ from engine.routes_intake import create_router
 
 atexit.register(lambda: print('request-lifetime: Python atexit', file=sys.stderr, flush=True))
 
-document = io.BytesIO()
-pdf = canvas.Canvas(document)
-pdf.drawString(40, 750, 'Synthetic wall documentation. A novel cladding is proposed.')
-pdf.save()
+def pdf(lines):
+    document = io.BytesIO()
+    page = canvas.Canvas(document)
+    for index, line in enumerate(lines):
+        page.drawString(40, 775 - index * 20, line)
+    page.save()
+    return document.getvalue()
+
+
+project = ['Project brief', 'Our new building is a two-storey house.', 'Site address: 42 Project Street',
+           'Synthetic wall documentation. A novel cladding is proposed.']
+reference = ['Owner: Reference Owner', 'Site address: 10111 104 Avenue NW',
+             'A four-storey office building.', 'Article 9.10.11.2.(2)']
+documents = {
+    'file_synthetic': pdf(project),
+    'file_reference': pdf(['Policy: Synthetic reference guidance', *reference]),
+    'file_unknown': pdf(['Unclassified record', *reference]),
+    'file_mixed': pdf([*project, 'Appendix: reference guidance', *reference]),
+}
 
 
 class Store:
@@ -29,7 +44,7 @@ class Store:
         return self.case.model_copy(deep=True)
 
     def get_file(self, case_id, file_id):
-        return {'name': 'synthetic.pdf', 'data': document.getvalue()}
+        return {'name': f'{file_id}.pdf', 'data': documents[file_id]}
 
     def put(self, case, expected_version):
         self.case = case

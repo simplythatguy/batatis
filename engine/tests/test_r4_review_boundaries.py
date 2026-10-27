@@ -110,7 +110,8 @@ def test_row_handling_does_not_turn_clips_or_wrapping_into_conflicts(text, quote
 def pdf(text):
     buf = io.BytesIO()
     page = canvas.Canvas(buf)
-    page.drawString(72, 700, text)
+    for index, line in enumerate(text.splitlines()):
+        page.drawString(72, 700 - index * 20, line)
     page.showPage()
     page.save()
     return buf.getvalue()
@@ -134,7 +135,7 @@ def test_service_partial_attached_page_failure_is_operationally_incomplete():
         return {'facts': []}, {}
 
     request = 'Review the submitted building proposal.'
-    out = service.run(request, [('file1', 'record.pdf', pdf('Attached record of wall dimensions.'))],
+    out = service.run(request, [('file1', 'record.pdf', pdf('Project brief: Attached record of wall dimensions.'))],
                       transport=intake_model, status='live')
     assert len(sent) == 2 and 'Attached record' not in sent[0] and 'Attached record' in sent[1]
     assert out.model.status == 'live' and out.model.reason == 'ReadTimeout'
@@ -148,4 +149,54 @@ def test_service_success_with_unread_attachment_is_not_an_operational_failure():
                       review_transport=lambda *args: ({}, {}), review_status='live')
     assert out.model.status == 'live' and out.model.reason is None
     assert any(flag.kind == 'not_read' for flag in out.review.flags)
+    assert checks.completion(as_result(out, request)) == []
+
+
+@pytest.mark.parametrize('context', ['reference', 'unknown', 'mixed'])
+def test_service_excluded_passages_remain_review_context_without_project_answers(context):
+    reference = ('Owner: Reference Owner\nSite address: 10111 104 Avenue NW\n'
+                 'A four-storey office building.\nArticle 9.10.11.2.(2)')
+    text = {
+        'reference': 'Policy: Synthetic reference guidance\n' + reference,
+        'unknown': 'Unclassified record\n' + reference,
+        'mixed': ('Project brief\nOur new building is a two-storey house.\n'
+                  'Site address: 42 Project Street\nAppendix: reference guidance\n' + reference),
+    }[context]
+    intake_requests, review_requests = [], []
+
+    def intake_model(system, user, schema):
+        intake_requests.append(json.loads(user)['text'])
+        return {'facts': []}, {}
+
+    def document_review(system, user, schema, model, effort):
+        review_requests.append(user)
+        return {'facts': [{'text': 'A four-storey office building.', 'status': 'stated',
+                           'evidence': [{'file': 'file1', 'page': 1,
+                                         'quote': 'A four-storey office building.'}]}]}, {}
+
+    request = 'Review the submitted wall proposal.'
+    out = service.run(request, [('file1', 'record.pdf', pdf(text))],
+                      transport=intake_model, status='live',
+                      review_transport=document_review, review_status='live')
+    case = Case()
+    service.apply(case, request, out)
+    assert len(intake_requests) == (2 if context == 'mixed' else 1)
+    assert all('four-storey' not in sent for sent in intake_requests)
+    assert len(review_requests) == 1 and 'four-storey' in review_requests[0]
+    for sent in [*intake_requests, *review_requests]:
+        assert all(value not in sent for value in ('Reference Owner', '10111 104 Avenue NW', '42 Project Street'))
+    assert case.intake.conflicts == []
+    assert case.intake.files[0].status == 'read'
+    assert case.intake.review.status == 'live'
+    assert [fact.text for fact in case.intake.review.facts] == ['A four-storey office building.']
+    assert [(c.entered, c.source_ref, c.page) for c in case.intake.unresolved_citations] == [
+        ('9.10.11.2.(2)', 'file1', 1)]
+    file_facts = [fact for fact in case.facts if fact.source.ref == 'file1']
+    if context == 'mixed':
+        assert [(fact.value, fact.status) for fact in file_facts if fact.field == 'storeys'] == [(2, 'confirmed')]
+        assert [fact.value for fact in file_facts if fact.field == 'municipal_address'] == ['42 Project Street']
+        assert not [fact for fact in file_facts if fact.field == 'owner_name']
+    else:
+        assert file_facts == []
+        assert case.intake.files[0].reason
     assert checks.completion(as_result(out, request)) == []

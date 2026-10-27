@@ -61,7 +61,8 @@ def test_a_scan_is_not_read_and_says_so():
 
 
 def test_mixed_text_and_scan_is_partly_read():
-    out = read_file('file_m', 'mixed.pdf', pdf([[(72, 700, 'A four-storey office building.')], []], shapes_only={1}))
+    out = read_file('file_m', 'mixed.pdf', pdf([[(72, 720, 'Project brief'),
+                                             (72, 700, 'A four-storey office building.')], []], shapes_only={1}))
     report = out.files[0]
     assert (report.status, report.pages_read, report.pages_not_read) == ('partly_read', [1], [2])
     assert report.reason == NO_TEXT
@@ -141,7 +142,8 @@ def test_upload_then_intake_reads_the_file(tmp_path):
     store = CaseStore(tmp_path / 'cases.sqlite')
     http = TestClient(create_app(store))
     case_id = http.post('/cases', json={}).json()['id']
-    data = pdf([[(72, 700, 'Owner: Jane Example'), (72, 680, 'A single-storey bungalow, 140 m2, unsprinklered.')]])
+    data = pdf([[(72, 720, 'Project brief'), (72, 700, 'Owner: Jane Example'),
+                 (72, 680, 'A single-storey bungalow, 140 m2, unsprinklered.')]])
     upload = http.post(f'/cases/{case_id}/files', content=data,
                        headers={'content-type': 'application/pdf', 'x-filename': 'brief.pdf'}).json()
     scan = http.post(f'/cases/{case_id}/files', content=pdf([[]], shapes_only={0}),
@@ -156,7 +158,7 @@ def test_upload_then_intake_reads_the_file(tmp_path):
 
 
 def test_files_and_description_merge_without_losing_pointers():
-    data = pdf([[(72, 700, 'The building is not sprinklered.')]])
+    data = pdf([[(72, 720, 'Project brief'), (72, 700, 'The building is not sprinklered.')]])
     out = service.run('A two-storey house.', [('f1', 'a.pdf', data)])
     assert {(p.field, p.source_ref) for p in out.pointers} >= {('storeys', 'description'), ('sprinklered', 'f1')}
 

@@ -161,6 +161,8 @@ def test_current_expiry_is_checked_after_a_real_write_lock(store, monkeypatch, o
     case = store.put(Case(created_at=(cutoff[0] + timedelta(seconds=1)).isoformat(),
                           facts=[fact('evidence.wall.title')]))
     store.put_file(case.id, 'old.pdf', b'%PDF-1.4 old')
+    from engine.tests.test_retention import _set_last_activity
+    _set_last_activity(store, case.id, (cutoff[0] + timedelta(seconds=1)).isoformat())
     attempted, done = threading.Event(), threading.Event()
     results, errors = [], []
 

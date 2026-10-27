@@ -75,8 +75,8 @@ def test_gone_case_cannot_return_prior_success_or_touch_corpus(tmp_path, state):
     if state == 'deleted':
         store.delete(case.id)
     else:
-        case.created_at = (datetime.now(timezone.utc) - timedelta(days=8)).isoformat()
-        store.put(case, expected_version=case.version)
+        from engine.tests.test_retention import _set_last_activity
+        _set_last_activity(store, case.id, (datetime.now(timezone.utc) - timedelta(days=8)).isoformat())
 
     class Forbidden:
         def __getattribute__(self, name):

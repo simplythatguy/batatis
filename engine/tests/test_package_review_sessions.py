@@ -56,6 +56,8 @@ def test_retention_purge_removes_reviews_without_a_review_request(tmp_path):
     store = CaseStore(tmp_path / 'cases.sqlite')
     sessions = Sessions(store)
     old = store.put(Case(title='expired', created_at='2000-01-01T00:00:00+00:00'))
+    from engine.tests.test_retention import _set_last_activity
+    _set_last_activity(store, old.id, '2000-01-01T00:00:00+00:00')
     sessions.add(_session(old.id, 1, old.id))
     sessions.record_issuance(old.id, '2000-01-02T00:00:00+00:00', '2000-01-02', 'Reviewer')
     sessions.record_closeout(old.id, '2000-01-02T00:00:00+00:00', '2000-01-03T00:00:00+00:00', 'Reviewer')

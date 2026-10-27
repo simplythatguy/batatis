@@ -5,6 +5,7 @@
  */
 import { useSyncExternalStore } from "react";
 import type { ApplicantType } from "../types";
+import { applicationEditsPaused } from "./applicationEditing";
 
 export interface HeldFile {
   id: string;
@@ -48,21 +49,33 @@ export function getSession(): Session {
 }
 
 export function updateSession(patch: Partial<Session> | ((s: Session) => Partial<Session>)) {
+  if (applicationEditsPaused()) return;
+  updateSavedSession(patch);
+}
+
+/** Save acknowledgements may retire uploads while applicant callbacks are paused. */
+export function updateSavedSession(patch: Partial<Session> | ((s: Session) => Partial<Session>)) {
   const next = typeof patch === "function" ? patch(state) : patch;
   state = { ...state, ...next };
   for (const l of listeners) l();
 }
 
 export function resetSession(keep: Partial<Session> = {}) {
+  if (applicationEditsPaused()) return;
+  resetSavedSession(keep);
+}
+
+/** Clearing or replacing the visit (account change, opening a saved case) is never an applicant edit. */
+export function resetSavedSession(keep: Partial<Session> = {}) {
   state = { ...EMPTY, ...keep };
   for (const l of listeners) l();
 }
 
-function subscribe(l: () => void) {
+export function subscribeSession(l: () => void) {
   listeners.add(l);
   return () => listeners.delete(l);
 }
 
 export function useSession(): Session {
-  return useSyncExternalStore(subscribe, getSession, getSession);
+  return useSyncExternalStore(subscribeSession, getSession, getSession);
 }

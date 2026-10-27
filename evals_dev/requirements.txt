@@ -1,0 +1,1 @@
+portalocker[win32]==4.4.1; sys_platform == "win32"

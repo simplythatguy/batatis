@@ -36,6 +36,7 @@ def execute(*, failed=False, partial=False):
 
     data = io.BytesIO()
     document = canvas.Canvas(data)
+    document.drawString(30, 775, 'Project brief')
     document.drawString(30, 750, PAGE)
     document.save()
     result = service.run(REQUEST, [('file1', 'proposal.pdf', data.getvalue())],

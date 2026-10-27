@@ -1,4 +1,4 @@
-"""Delete cases older than 7 days, with their files and package reviews.
+"""Purge inactive drafts and completed records under the purpose-based retention policy.
 
 `python -m engine.retention` runs one purge and prints how many cases it deleted.
 A second run deletes nothing. Request traffic calls `maybe_purge`, which runs at most
