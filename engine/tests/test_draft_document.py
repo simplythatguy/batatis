@@ -12,6 +12,7 @@ from engine.codes import Codes
 from engine.export import ExportBlocked, export_case, form_path
 from engine.export.g3 import appendix_text, norm, page_texts
 from engine.models import Case, Fact, Source
+from engine.package_format import CONTEXT
 from engine.review.package import review_uploads
 from engine.review.pdf_reader import read_pdf
 from engine.section_c import section_c_rows
@@ -56,7 +57,10 @@ def test_a_draft_with_only_form_answers_adds_no_pages_yet_stays_blocked_and_read
         assert required in reasons
     result = export_case(case, codes=codes, draft=True)
     assert result.form_pages == 7 and result.appendix_pages == 0 and result.appendix_text == []
-    assert len(PdfReader(io.BytesIO(result.pdf)).pages) == 7
+    # The only pages after the form are the labelled source records an officer's reading needs.
+    pages = page_texts(result.pdf)
+    assert len(PdfReader(io.BytesIO(result.pdf)).pages) == len(pages) == 7 + result.record_pages
+    assert result.record_pages and all(text.startswith(CONTEXT) for text in pages[7:])
     assert result.open_items and any('risk_assessment' in item for item in result.open_items)
     read = read_pdf(result.pdf, 'draft.pdf')
     assert (read.fields['Owner'].status, read.fields['Owner'].value) == ('present', OWNER)

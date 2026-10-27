@@ -207,7 +207,8 @@ def test_supporting_document_entries_continue_across_pages_at_10_pt(codes):
     for n in range(1, 81):
         case.facts += [confirmed(f'evidence.typed_{n:02d}.title', f'SYNTHETIC document {n:03d}'),
                        confirmed(f'evidence.typed_{n:02d}.responsible_party', f'SYNTHETIC organisation {n:03d}')]
-    result = export_case(case, codes=codes)
+    # Named documents without files block the official export, so the layout is checked on the draft.
+    result = export_case(case, codes=codes, draft=True)
     boxes = segments(result, 'Supporting Doc')
     assert len(boxes) >= 2 and all(p.size == 10 for p in boxes)
     listing = drawn(result, boxes)

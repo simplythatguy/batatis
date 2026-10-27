@@ -258,7 +258,8 @@ def from_uploads(uploads: list[tuple[str, bytes]]) -> Snapshot:
     snapshot.context_items = remaining_context
     for declaration in snapshot.professional_declarations:
         owner, location = values.get('owner_name'), values.get('civic_address')
-        norm = lambda value: ' '.join(value.split())
+        # A record page breaks a word wider than the page across lines, so compare without whitespace.
+        norm = lambda value: ''.join(value.split())
         declaration.bound_to_application = bool(owner and location and owner.confirmed and location.confirmed
             and owner.status != 'not_found' and location.status != 'not_found'
             and norm(owner.value) == norm(declaration.owner) and norm(location.value) == norm(declaration.location))

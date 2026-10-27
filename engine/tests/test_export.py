@@ -21,6 +21,7 @@ from engine.process_fields import process_fields
 from engine.section_c import section_c_rows
 from engine.section_d import supporting_documents
 from engine.models import INTENT_LABEL, Fact, Gap, Source
+from engine.package_format import CONTEXT
 from engine.tests.form_layout_helpers import drawn, segments, shown_fields
 
 FORM = form_path()
@@ -99,7 +100,7 @@ def test_blocks_on_unconfirmed_facts_and_blocking_gaps(case, codes):
     with pytest.raises(ExportBlocked) as e:
         export_case(blocked, codes=codes)
     text = ' '.join(e.value.reasons)
-    assert 'risk assessment not written' in text and 'required field "owner_name"' in text
+    assert 'risk assessment not written' in text and 'section A, owner_name:' in text
     assert 'unconfirmed proposed fact "lot"' in text  # the newer unknown revision supersedes the old value
     blocked.facts.append(Fact(field='storeys', value=2, kind='proposed', source=src, confidence=0.6))
     with pytest.raises(ExportBlocked, match='unconfirmed proposed fact "storeys"'):
@@ -109,9 +110,12 @@ def test_blocks_on_unconfirmed_facts_and_blocking_gaps(case, codes):
     texts = page_texts(draft.pdf)
     assert draft.draft is True
     assert pypdf.PdfReader(io.BytesIO(draft.pdf)).metadata.title.endswith(' (DRAFT)')
-    # The draft keeps its open items in the result; the document itself carries no to-do list.
+    # The draft keeps its open items in the result. The form and appendix carry no to-do list; a saved open
+    # item travels only as a labelled administrative source record after them, so an officer reads the same gap.
     assert any('risk assessment not written' in item for item in draft.open_items)
-    assert 'risk assessment not written' not in ' '.join(texts)
+    document = draft.form_pages + draft.appendix_pages
+    assert 'risk assessment not written' not in ' '.join(texts[:document])
+    assert any(text.startswith(CONTEXT) and 'risk assessment not written' in text for text in texts[document:])
     assert '99' not in norm(texts[0]).split()          # proposed value never reaches the form
     assert 'Lot' not in {p.field for p in draft.placements}  # the older lot value must not silently return
 
@@ -313,10 +317,10 @@ def test_source_units_use_explicit_fallbacks_instead_of_question_marks(codes):
     case = sample_case(codes, provisions=['9.25.2.2.(1)'])
     for fact in case.facts:
         if fact.field == 'assumptions_limits':
-            fact.value = 'SYNTHETIC units passage: 10⁻⁴ W/(m²·K), m⁴, CO₂ and μ.'
+            fact.value = 'SYNTHETIC units passage, assumed only: 10⁻⁴ W/(m²·K), m⁴, CO₂ and μ.'
             fact.source.quote = fact.value
     result = export_case(case, codes=codes)
-    assert '10^(-4) W/(m²·K), m^(4), CO_(2) and µ.' in appendix_text(result.pdf, result.form_pages)
+    assert 'assumed only: 10^(-4) W/(m²·K), m^(4), CO_(2) and µ.' in appendix_text(result.pdf, result.form_pages)
 
 
 def test_scientific_notation_in_real_provision_text_survives_export(codes):

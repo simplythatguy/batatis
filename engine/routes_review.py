@@ -358,7 +358,7 @@ def create_router(cases, code):
                 raise HTTPException(409, 'Only draft or returned applications may be submitted')
             if body and body.expected_version is not None and case.version != body.expected_version:
                 raise HTTPException(409, 'The saved application changed. Review it before submitting again.')
-            blocking = [gap for gap in check_completeness(case, code())
+            blocking = [gap for gap in check_completeness(case, code(), store=cases())
                         if gap.severity == 'blocking' and gap.submission_blocking]
             if blocking:
                 raise HTTPException(409, {'message': 'Resolve blocking administrative gaps before submitting',
@@ -457,7 +457,8 @@ def create_router(cases, code):
                 raise HTTPException(409, 'The application changed. Refresh it before recording a decision.')
             if body.outcome == 'accept':
                 # Handoffs allowed at submission still block acceptance and the official PDF.
-                blocking = [gap for gap in check_completeness(case, code()) if gap.severity == 'blocking']
+                blocking = [gap for gap in check_completeness(case, code(), store=cases())
+                            if gap.severity == 'blocking']
                 if blocking:
                     raise HTTPException(409, {'message': 'Resolve blocking administrative gaps before accepting',
                                               'gaps': [gap.model_dump() for gap in blocking]})

@@ -116,7 +116,7 @@ def prepare_context(scope: VoiceScope, *, store, code, user) -> VoiceContext:
         codes = code() if case is not None or scope.focus is not None else None
         body = AssistRequest(case_id=scope.case_id, screen=scope.screen, focus=scope.focus,
                              question='Voice reference context', destinations=scope.destinations)
-        built = build_context(body, case, codes)
+        built = build_context(body, case, codes, store=store)
         known = known_values(case, people_names(store, case, user))
         for name in ('application', 'focused_card', 'screen'):
             if name in built:

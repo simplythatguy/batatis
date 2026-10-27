@@ -83,7 +83,7 @@ class ExportResult:
     pdf: bytes
     field_map: str
     form_pages: int
-    appendix_pages: int
+    appendix_pages: int                  # the Batatis appendix only
     draft: bool
     placements: list[Placement] = field(default_factory=list)
     blank_fields: list[str] = field(default_factory=list)
@@ -91,6 +91,11 @@ class ExportResult:
     not_applicable: list[str] = field(default_factory=list)   # form fields showing N/A from an applicant fact
     form_text: list[str] = field(default_factory=list)        # 'field: full value' for every filled form field
     appendix_text: list[str] = field(default_factory=list)    # appendix paragraphs and '| a | b |' table rows
+    record_pages: int = 0     # after the appendix: visible source records and supporting-document pages
+
+    @property
+    def page_count(self) -> int:
+        return self.form_pages + self.appendix_pages + self.record_pages
 
     @property
     def text(self) -> list[str]:

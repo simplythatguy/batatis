@@ -39,6 +39,18 @@ class PolicyResult:
         return VariantResult(variant, document_id, self.elements)
 
 
+_PROCESS_PROVISIONS = {fid: pid for fid, _label, _prompt, _structure, pid in _FIELDS}
+
+
+def _process_citation(codes, field_id) -> list[str]:
+    """The Division C provision a process passage documents, from the code database only."""
+    try:
+        record = codes.provision(_PROCESS_PROVISIONS[field_id], 'C')
+    except (OSError, sqlite3.Error):
+        return []
+    return [record['citation']] if record and record.get('citation') else []
+
+
 def _source_pointer(source, fallback):
     return {'file': source.get('ref') or fallback, 'page': source.get('page'),
             'bbox': source.get('bbox'), 'quote': source.get('quote')}
@@ -139,6 +151,8 @@ def evaluate(snapshot: Snapshot, codes, *, professional=None, documents=None) ->
         elif element.verdict != 'present' and not element.lookup_skipped:
             element.in_export_preflight = True
             element.severity = 'blocking'
+        if element.verdict != 'present' and not element.citations and spec.field in _PROCESS_PROVISIONS:
+            element.citations = _process_citation(codes, spec.field)
         out.append(element)
 
     scope = doc.values.get('scope')

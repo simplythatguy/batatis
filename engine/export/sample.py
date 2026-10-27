@@ -123,7 +123,7 @@ def main(out_dir: str = '/tmp/batatis-export') -> None:
                 finally:
                     bitmap.close()
                 print(png)
-        print(out / name, f'{res.form_pages} form pages + {res.appendix_pages} appendix pages;',
+        print(out / name, f'{res.form_pages} form pages + {res.appendix_pages} appendix pages + {res.record_pages} record pages;',
               'blank:', ', '.join(res.blank_fields) or 'none')
 
 

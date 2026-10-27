@@ -1,8 +1,12 @@
 """Synthetic administrative fixtures only; no actual testing, licence or opinion is asserted."""
+from pathlib import Path
+
 from engine.codes import Codes
 from engine.models import Case, Fact, Jurisdiction, Source
 from engine.section_c import section_c_rows
 from engine.section_d import section_d_plan
+
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def fact(field, value, **changes):
@@ -15,8 +19,9 @@ def fact(field, value, **changes):
 def store_with_synthetic_files(store, case):
     """API fixtures need actual case-owned bytes, not file-presence metadata alone.
 
-    The deliberately synthetic bytes exercise storage binding only; no test result,
-    professional authentication, parsed document or real evidence is asserted.
+    The package carries each named attachment's readable bytes, so the store holds the
+    referenced synthetic fixture file itself. No test result, professional authentication,
+    parsed document or real evidence is asserted.
     """
     store.put(case)
     references = {}
@@ -25,8 +30,10 @@ def store_with_synthetic_files(store, case):
                 and entry.status == 'confirmed' and entry.source.type == 'file'
                 and entry.value == entry.source.ref):
             if entry.source.ref not in references:
-                saved = store.put_file(case.id, 'SYNTHETIC-storage-fixture.pdf',
-                                       b'%PDF-1.4\nSYNTHETIC storage-binding bytes, not a document or result.\n')
+                source = ROOT / entry.source.ref          # an absolute reference stays as it is
+                data = (source.read_bytes() if source.is_file()
+                        else b'SYNTHETIC storage-binding text, not a document or result.\n')
+                saved = store.put_file(case.id, f'SYNTHETIC-storage-{source.name or "fixture.txt"}', data)
                 references[entry.source.ref] = saved['id']
             entry.value = references[entry.source.ref]
             entry.source = entry.source.model_copy(update={'ref': entry.value})

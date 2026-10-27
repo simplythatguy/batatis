@@ -43,7 +43,11 @@ def test_preview_is_the_draft_pdf_and_an_image_of_each_page(tmp_path):
     reader = PdfReader(io.BytesIO(decoded(body['pdf'], 'application/pdf')))
     assert reader.metadata['/Title'].endswith('(DRAFT)') and not reader.get_fields()
     assert marker not in ' '.join(page.extract_text() for page in reader.pages)     # confirmed values only
-    assert body['page_count'] == len(reader.pages) == len(body['pages']) > 20      # a long package, every page
+    # A long package. The pages stop only at the response budget: this fixture's whole form and appendix are
+    # shown, and the trailing source records and supporting documents may be left to the draft download.
+    package = export_case(case, codes=codes, store=store, draft=True)
+    assert body['page_count'] == len(reader.pages) == package.page_count > 20
+    assert package.form_pages + package.appendix_pages <= len(body['pages']) <= body['page_count']
     for page, preview in zip(reader.pages, body['pages']):
         assert (preview['width'], preview['height']) == (float(page.mediabox.width), float(page.mediabox.height))
         image = Image.open(io.BytesIO(decoded(preview['image'], 'image/png')))
@@ -57,8 +61,11 @@ def entry(size: int) -> int:
 def test_page_images_keep_page_order_and_stop_at_the_encoded_budget():
     codes = Codes()
     pdf = export_case(sample_case(codes), codes=codes, draft=True).pdf
-    every, count = page_images(pdf)
-    assert len(every) == count and entry(len(pdf)) + sum(entry(len(p.png)) for p in every) <= PAYLOAD_BUDGET
+    every, count = page_images(pdf, budget=10 ** 9)
+    assert len(every) == count
+    fitted, total = page_images(pdf)
+    assert total == count and [p.png for p in fitted] == [p.png for p in every[:len(fitted)]]
+    assert entry(len(pdf)) + sum(entry(len(p.png)) for p in fitted) <= PAYLOAD_BUDGET
     three = entry(len(pdf)) + sum(entry(len(p.png)) for p in every[:3])
     for budget, shown in ((three, 3), (three - 1, 2), (entry(len(pdf)), 0)):
         first, total = page_images(pdf, budget=budget)
