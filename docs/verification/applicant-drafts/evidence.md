@@ -4,13 +4,15 @@ The implementation prepares source-linked applicant writing and requires an expl
 
 ## Interface walkthrough
 
-[Recorded walkthrough](media/interface-demo.webm), [desktop screenshot](media/desktop.png), [phone screenshot](media/phone.png).
+![Recorded walkthrough](media/interface-demo.gif)
+
+[Original recording (WebM)](media/interface-demo.webm), [desktop screenshot](media/desktop.png), [phone screenshot](media/phone.png).
 
 The recording shows the actual `ApplicantDrafts` component under the production `CaseProvider`, compiled from the branch, with **simulated API responses and synthetic wording**. Its visible banner labels that limitation. It demonstrates opening a claim's sources, accepting the proposed alternative, retaining the source/question display, choosing another piece and rejecting it without adding an answer. It does not demonstrate live text generation, HTTP/provider integration or professional correctness.
 
 The visual implementation is the signed-in panel at `e8862ca43d542f188834849e4c8018dbebeb8651`. The walkthrough ran at `873c54be` with the same visual source. Desktop (1440 × 1000) and phone (390 × 844) fixture interactions passed acceptance, rejection, source-retention and JavaScript-error checks. Scoped Lint Apple 0.1.20 page checks found no findings under the project's typography and control policy. Layout annotations and an automated keyboard interaction plan were absent; these are coverage limits, not passes.
 
-T3 screenshot capture timed out twice with `Preview automation snapshot timed out after 15000ms`. T3 recording start also timed out twice with `Preview automation recordingStart timed out after 15000ms`; no T3 recording path was returned. The fallback used the browser's built-in recording with the existing local Chromium/FFmpeg, without starting another application server. The saved 8.28-second WebM was inspected through seven extracted frames covering the initial state, sources, acceptance, piece selection and rejection. That frame-based inspection does not establish motion or timing quality. The exact saved desktop and phone images were separately inspected.
+T3 screenshot capture timed out twice with `Preview automation snapshot timed out after 15000ms`. T3 recording start also timed out twice with `Preview automation recordingStart timed out after 15000ms`; no T3 recording path was returned. The fallback used the browser's built-in recording with the existing local Chromium/FFmpeg, without starting another application server. The saved 8.28-second WebM was inspected through seven extracted frames covering the initial state, sources, acceptance, piece selection and rejection. That frame-based inspection does not establish motion or timing quality. The GIF is the same recording at 10 frames per second and 960 pixels wide, without the three blank loading frames, so GitHub can play it inline. The exact saved desktop and phone images were separately inspected.
 
 ## Live writing quality
 
