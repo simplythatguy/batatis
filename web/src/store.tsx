@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState, type Dispatch, type ReactNode } from "react";
 import { engine, EngineError, failureText, isCaseConflict, isCaseGone, type EngineGap, type UploadedFile } from "./api/client";
-import type { Case as EngineCase, IntakeResult, Question as PlanQuestion } from "./api/types.gen";
+import type { Case as EngineCase, IntakeResult, Question as PlanQuestion, RequirementRecord } from "./api/types.gen";
 import { type CompletenessRecord } from "./humanReview";
 import { acknowledgedVersion, acknowledgeWrite, adoptEngineCase, clearEngineSession, CONFLICT_TEXT, engineCaseId, engineGeneration, isEngineGeneration, ensureEngineCase, isReadOnlyCase, needsReconcile, noteConflict, notePosted, noteShownSelection, pushDeletedEvidence, pushDraft, pushListedEvidence, refreshGaps, selectionKey, type EvidenceOutcome } from "./api/sync";
 import { engineNotices, factSignature, groupEvidenceGaps, missingFromEngine, uploadMessage } from "./rules";
@@ -19,6 +19,7 @@ import { useSectionC } from "./api/sectionC";
 import { readSectionD, SectionDRecoveryError, type SectionDRead } from "./api/sectionD";
 import { isProvision, reconcileSectionC, sameCards } from "./provisions";
 import { caseFromEngine, latestFacts, openedCase, reviewedDescription, selectedArticles } from "./calm/openCase";
+import { requirementDecision, type RequirementAnswer, type RequirementDecision } from "./calm/requirements";
 import { normalizeTitle, saveTitle, TITLE_EMPTY, titleError } from "./calm/rename";
 import { refreshCase, resetExtras, setChecklist } from "./calm/caseExtras";
 import { accounts } from "./api/accounts";
@@ -88,6 +89,11 @@ interface Store {
   overrideScope: (buildingCode: boolean) => Promise<string | null>;
   /** Yes, No or Not sure on a code card; identified cards also go to the decision route. */
   decide: (candidate: Candidate, answer: CandidateAnswer) => Promise<string | null>;
+  /**
+   * One requirement-ledger answer (`include` / `exclude` / `review`): applicability only, decided
+   * independently of any departure. Resolves to an error text, or null when the engine stored it.
+   */
+  decideRequirement: (requirement: RequirementRecord, answer: RequirementAnswer, reason?: string) => Promise<string | null>;
   /**
    * One standing-package answer through the checklist answers route, with `expected_version`, in the
    * save queue. Resolves to an error text (a 409 says so and waits for `reloadChecklists`), or null.
@@ -1195,6 +1201,52 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     });
   }
 
+  /**
+   * One requirement-ledger answer: applicability only, through its own route with the version the
+   * engine requires. The reply carries the updated ledger, so the next batch appears on its own.
+   */
+  function decideRequirement(requirement: RequirementRecord, answer: RequirementAnswer, reason = ""): Promise<string | null> {
+    if (applicationEditsPaused()) return Promise.resolve("Editing is paused. Try again when it resumes.");
+    let decision: RequirementDecision;
+    try {
+      decision = requirementDecision(requirement, answer, reason);
+    } catch (e) {
+      return Promise.resolve(e instanceof Error ? e.message : "A reason is required for this answer.");
+    }
+    const token = engineGeneration();
+    const live = () => isEngineGeneration(token);
+    return enqueue(async () => {
+      const id = engineCaseId();
+      if (!id || !live()) return null;
+      const expected = acknowledgedVersion(id) ?? latestCase.current.identify?.case_version;
+      if (!expected) return "The code check isn’t saved yet. Try again in a moment.";
+      try {
+        const body = await engine.decideRequirement(id, requirement.id, {
+          disposition: decision.disposition,
+          role: decision.role,
+          reason: decision.reason,
+          expected_version: expected,
+        });
+        if (!live()) return null;
+        acknowledgeWrite(id, body.case_version);
+        derive({ type: "noteIdentify", result: body });
+        return null;
+      } catch (e) {
+        if (!live()) return null;
+        if (isCaseConflict(e)) {
+          noteConflict(id);
+          return CONFLICT_TEXT;
+        }
+        if (isCaseGone(e)) {
+          goneCase.current = id;
+          markGone((e as EngineError).detail);
+        }
+        if (e instanceof EngineError && e.status === 0) return "Not saved: Batatis could not be reached. Answer again to resend it.";
+        return failureText(e);
+      }
+    });
+  }
+
   /** Queue a versioned checklist answer and update shared extras, preserving conflict and missing-case feedback. */
   function answerChecklist(checklistId: string, conditionId: string, state: "confirmed" | "not_yet" | "does_not_apply", reason?: string): Promise<string | null> {
     if (applicationEditsPaused()) return Promise.resolve("Editing is paused. Try again when it resumes.");
@@ -1705,7 +1757,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         if (!entry.saved) throw new Error("The file was replaced before uploading.");
         return entry.saved;
       });
-    }, answerPlan, overrideScope, decide, answerChecklist, reloadChecklists, renameCase,
+    }, answerPlan, overrideScope, decide, decideRequirement, answerChecklist, reloadChecklists, renameCase,
     sectionCLookup, retrySectionC: () => setLookupAttempt(n => n + 1),
     snapshotKey: `${renderGeneration}:${renderPlanRevision}:${remoteEpoch}:${JSON.stringify(c.candidates)}:${JSON.stringify(c.sectionC)}:${sectionCLookup.source}`,
     loadSectionD,

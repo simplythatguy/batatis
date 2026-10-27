@@ -29,6 +29,7 @@ import type {
   IntakeResult,
   Jurisdiction,
   NewCase,
+  RequirementDecisionRequest,
   SectionCRow,
   SelectedArticlesRequest,
 } from "./types.gen";
@@ -187,20 +188,20 @@ export function createEngine(base: string) {
   return {
     createCase: (body: NewCase = {}, signal?: AbortSignal) => call<Case>("POST", "/cases", body, signal),
     patchDraft: (caseId: string, body: DraftPatch, signal?: AbortSignal) =>
-      call<SavedCase>("PATCH", `/cases/${enc(caseId)}/draft`, body, signal),
+      call<SavedCase>("PATCH", `/cases/${enc(caseId)}/draft`, body, signal, CASE_WAIT_MS),
     /**
      * PUT /cases/{id}/jurisdiction: `{ jurisdiction, expected_version }`, returning the full Case.
      * Engines without this route answer 404/405; the caller never treats that as saved.
      */
     setJurisdiction: (caseId: string, body: JurisdictionBody, signal?: AbortSignal) =>
-      call<Case>("PUT", `/cases/${enc(caseId)}/jurisdiction`, body, signal),
+      call<Case>("PUT", `/cases/${enc(caseId)}/jurisdiction`, body, signal, CASE_WAIT_MS),
     /**
      * PUT /cases/{id}/selected-articles: replace the saved code-check selection (docs/api/selected-articles.md),
      * returning the full saved Case. A snapshot only: it never confirms a reference or changes Section C/D.
      */
     setSelectedArticles: (caseId: string, body: SelectedArticlesRequest, signal?: AbortSignal) =>
-      call<Case>("PUT", `/cases/${enc(caseId)}/selected-articles`, body, signal),
-    getCase: (id: string, signal?: AbortSignal) => call<SavedCase>("GET", `/cases/${enc(id)}`, undefined, signal),
+      call<Case>("PUT", `/cases/${enc(caseId)}/selected-articles`, body, signal, CASE_WAIT_MS),
+    getCase: (id: string, signal?: AbortSignal) => call<SavedCase>("GET", `/cases/${enc(id)}`, undefined, signal, CASE_WAIT_MS),
     jobs: (caseId: string, signal?: AbortSignal) => call<ItemEnvelope<Job>>("GET", `/cases/${enc(caseId)}/jobs`, undefined, signal).then(unwrapItems),
     workerHealth: (caseId: string, signal?: AbortSignal) => call<WorkerHealth>("GET", `/cases/${enc(caseId)}/jobs/health`, undefined, signal),
     job: (caseId: string, id: string, signal?: AbortSignal) => call<Job>("GET", `/cases/${enc(caseId)}/jobs/${enc(id)}`, undefined, signal),
@@ -216,9 +217,9 @@ export function createEngine(base: string) {
      * accepted or refused application cannot be renamed.
      */
     renameCase: (caseId: string, title: string, signal?: AbortSignal) =>
-      call<Case>("PATCH", `/cases/${enc(caseId)}/title`, { title }, signal),
+      call<Case>("PATCH", `/cases/${enc(caseId)}/title`, { title }, signal, CASE_WAIT_MS),
     addFact: (caseId: string, fact: FactInput, signal?: AbortSignal) =>
-      call<Case>("POST", `/cases/${enc(caseId)}/facts`, fact, signal),
+      call<Case>("POST", `/cases/${enc(caseId)}/facts`, fact, signal, CASE_WAIT_MS),
     provision: (id: string, division?: Division, signal?: AbortSignal) =>
       call<CodeRecord>("GET", `/code/${enc(id)}${division ? `?division=${division}` : ""}`, undefined, signal),
     search: (q: string, opts: { division?: Division; limit?: number } = {}, signal?: AbortSignal) => {
@@ -300,7 +301,7 @@ export function createEngine(base: string) {
       call<IntakeResult>("POST", `/cases/${enc(caseId)}/intake/plan`, withVersion({}, expectedVersion), signal),
     /** GET /cases/{id}/identify. 404 detail `identify result not found` when nothing is stored. */
     storedIdentify: (caseId: string, signal?: AbortSignal) =>
-      call<IdentifyResult>("GET", `/cases/${enc(caseId)}/identify`, undefined, signal),
+      call<IdentifyResult>("GET", `/cases/${enc(caseId)}/identify`, undefined, signal, CASE_WAIT_MS),
 
     /**
      * POST /cases/{id}/identify/{provision}/decision.
@@ -313,36 +314,50 @@ export function createEngine(base: string) {
         `/cases/${enc(caseId)}/identify/${enc(provisionId)}/decision`,
         withVersion({ decision }, expectedVersion),
         signal,
+        CASE_WAIT_MS,
       ),
     /** GET /cases/{id}/identify/information-request. Read-only questions and legacy not_sure items. */
     informationRequest: (caseId: string, signal?: AbortSignal) =>
       call<InformationRequest>("GET", `/cases/${enc(caseId)}/identify/information-request`, undefined, signal),
+    /**
+     * POST /cases/{id}/identify/requirements/{requirement_id}/decision. Applicability only
+     * (`include` / `exclude` / `review`); `expected_version` is required. The reply is the identify
+     * result with the updated ledger and `case_version`.
+     */
+    decideRequirement: (caseId: string, requirementId: string, body: RequirementDecisionRequest, signal?: AbortSignal) =>
+      call<IdentifyResult>(
+        "POST",
+        `/cases/${enc(caseId)}/identify/requirements/${enc(requirementId)}/decision`,
+        body,
+        signal,
+        CASE_WAIT_MS,
+      ),
     /** POST /cases/{id}/evidence. 409 = stale version or existing ID; 404 = case gone or slot absent. */
     saveEvidence: (caseId: string, body: EvidenceWrite, signal?: AbortSignal) =>
       call<EvidenceSaved>("POST", `/cases/${enc(caseId)}/evidence`, body, signal),
     /** DELETE /cases/{id}/evidence/{evidence_id} with `{ expected_version }`. Removes exactly one
      * slot and returns the full saved Case; other slots and uploaded bytes stay. */
     deleteEvidence: (caseId: string, evidenceId: string, expectedVersion: number, signal?: AbortSignal) =>
-      call<Case>("DELETE", `/cases/${enc(caseId)}/evidence/${enc(evidenceId)}`, { expected_version: expectedVersion }, signal),
+      call<Case>("DELETE", `/cases/${enc(caseId)}/evidence/${enc(evidenceId)}`, { expected_version: expectedVersion }, signal, CASE_WAIT_MS),
     /** GET /rules: the rule definitions the browser evaluator runs (docs/api/rules.md). No case, no provider. */
     rules: (signal?: AbortSignal) =>
       call<{ version: number; edition: string; index: RuleIndex; rules: RuleDef[] }>("GET", "/rules", undefined, signal),
     /** GET /cases/{id}/rules: the stored state of record for every coded rule. Read-only. */
-    caseRules: (caseId: string, signal?: AbortSignal) => call<CaseRules>("GET", `/cases/${enc(caseId)}/rules`, undefined, signal),
+    caseRules: (caseId: string, signal?: AbortSignal) => call<CaseRules>("GET", `/cases/${enc(caseId)}/rules`, undefined, signal, CASE_WAIT_MS),
     /** GET /jurisdictions: every pack, the coverage labels and their meanings (docs/api/jurisdictions.md). */
     jurisdictions: (signal?: AbortSignal) => call<JurisdictionsResult>("GET", "/jurisdictions", undefined, signal),
     /** GET /jurisdictions/{id}: one pack with the province's items merged in. */
     jurisdiction: (id: string, signal?: AbortSignal) => call<JurisdictionDetail>("GET", `/jurisdictions/${enc(id)}`, undefined, signal),
     /** GET /cases/{id}/jurisdiction/pack: the pack the case resolves to, or null. */
-    casePack: (caseId: string, signal?: AbortSignal) => call<CaseJurisdictionPack>("GET", `/cases/${enc(caseId)}/jurisdiction/pack`, undefined, signal),
+    casePack: (caseId: string, signal?: AbortSignal) => call<CaseJurisdictionPack>("GET", `/cases/${enc(caseId)}/jurisdiction/pack`, undefined, signal, CASE_WAIT_MS),
     /** GET /cases/{id}/checklists: standing-package checklists with the applicant's answers (docs/api/checklists.md). */
-    caseChecklists: (caseId: string, signal?: AbortSignal) => call<CaseChecklists>("GET", `/cases/${enc(caseId)}/checklists`, undefined, signal),
+    caseChecklists: (caseId: string, signal?: AbortSignal) => call<CaseChecklists>("GET", `/cases/${enc(caseId)}/checklists`, undefined, signal, CASE_WAIT_MS),
     /** POST one checklist answer with `expected_version`. 409 = stale version: reload and let the person answer again. */
     answerChecklist: (caseId: string, checklistId: string, body: ChecklistAnswerRequest, signal?: AbortSignal) =>
       call<ChecklistAnswerResult>("POST", `/cases/${enc(caseId)}/checklists/${enc(checklistId)}/answers`, body, signal),
     /** POST /cases/{id}/identify/confirm. Writes provisions after a code-database check. */
     confirmIdentify: (caseId: string, provisions: string[], signal?: AbortSignal, expectedVersion?: number) =>
-      call<Case>("POST", `/cases/${enc(caseId)}/identify/confirm`, withVersion({ provisions }, expectedVersion), signal),
+      call<Case>("POST", `/cases/${enc(caseId)}/identify/confirm`, withVersion({ provisions }, expectedVersion), signal, CASE_WAIT_MS),
   };
 }
 
@@ -514,6 +529,14 @@ export class ExportBlockedError extends EngineError {
 
 /** Bound so a slow engine cannot leave the screen on "waiting". */
 const ENGINE_WAIT_MS = 8000;
+/**
+ * A saved case carries its identification result, and the production requirement profile stores a
+ * ledger of about 2,000 Division B rows: the case payload is ~15 MB and a local read measured ~9 s.
+ * Answers, applicability writes and the ledger's own decisions all return that payload, so they get a
+ * budget that fits the bytes rather than the 8 s command bound. Still bounded, and still cancelled
+ * with the caller or the account.
+ */
+export const CASE_WAIT_MS = 60_000;
 
 /**
  * An export, or its preview, fills the whole form and appendix. The review's 500-reference draft took 49.8 s
