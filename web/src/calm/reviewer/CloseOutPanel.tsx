@@ -32,7 +32,7 @@ function Records({ label, items }: { label: string; items: RecordItem[] }) {
 
 function Step({ tone, title, children }: { tone: string; title: string; children?: ReactNode }) {
   return (
-    <li className="rw-step">
+    <li className="rw-step-row">
       <span className={`cf-dot is-${tone}`} aria-hidden="true" />
       <div><b>{title}</b>{children}</div>
     </li>
@@ -65,31 +65,24 @@ export function CloseOutPanel({ c, canRecord, onChange }: { c: CloseOut; canReco
   return (
     <section className="rw-close" aria-label="Close-out">
       <ol className="rw-steps">
-        {refused ? (
-          <Step tone="blocking" title="Refused">
-            <small>{dayLabel(c.decided_at)} · with the appeal notice · nothing goes to the Council</small>
-          </Step>
-        ) : (
+        {!refused && (
           <>
-            <Step tone="done" title="Administratively complete">
-              <small>{dayLabel(c.decided_at)} · technical review next · not a variance</small>
-            </Step>
             {c.issued_on ? (
               <Step tone="done" title={`Variance issued ${dayLabel(c.issued_on)}`}>
                 {c.issued_by_name && <small>Recorded by {c.issued_by_name}</small>}
               </Step>
             ) : (
               <Step tone="pending" title="Variance not issued">
-                <small>When you issue it, record the date. The Council copy is due 10 days after.</small>
+                <small>The Council copy is due 10 days after you issue it.</small>
                 {canRecord && !picking && (
-                  <button type="button" className="cf-btn is-xs" onClick={() => { setDate(""); setPicking(true); }}>Record the issue date</button>
+                  <button type="button" className="cf-btn" onClick={() => { setDate(""); setPicking(true); }}>Record the issue date</button>
                 )}
                 {picking && (
                   <div className="rw-issue">
                     <DatePicker label="Issued on" value={date} onChange={setDate} />
-                    <div className="rw-edit-row">
-                      <button type="button" className="cf-btn is-xs is-ghost" disabled={busy} onClick={() => setPicking(false)}>Cancel</button>
-                      <button type="button" className="cf-btn is-xs is-primary" disabled={busy || !date} onClick={() => void save("issued")}>{busy ? "Saving…" : "Save"}</button>
+                    <div className="rw-own-row">
+                      <button type="button" className="cf-btn is-primary" disabled={busy || !date} onClick={() => void save("issued")}>{busy ? "Saving…" : "Save"}</button>
+                      <button type="button" className="cf-link-btn" disabled={busy} onClick={() => setPicking(false)}>Cancel</button>
                     </div>
                   </div>
                 )}
@@ -99,8 +92,8 @@ export function CloseOutPanel({ c, canRecord, onChange }: { c: CloseOut; canReco
               <Step tone={due.tone} title={c.sent ? "Copy sent to the Council" : "Copy to the Council"}>
                 <small>{due.text}</small>
                 {!c.sent && canRecord && (
-                  <button type="button" className="cf-btn is-xs" disabled={busy} onClick={() => setConfirmSent(true)}>
-                    <AcIcon name="check" size={13} />Mark as sent
+                  <button type="button" className="cf-btn" disabled={busy} onClick={() => setConfirmSent(true)}>
+                    <AcIcon name="check" size={15} />Mark as sent
                   </button>
                 )}
               </Step>
@@ -108,7 +101,7 @@ export function CloseOutPanel({ c, canRecord, onChange }: { c: CloseOut; canReco
           </>
         )}
       </ol>
-      {error && <p className="rw-why" role="alert">{error}</p>}
+      {error && <p className="rw-hint is-error" role="alert">{error}</p>}
       {!refused && c.issued_on && <Records label="To send" items={c.record_package.send_to_council} />}
       <Records label="Keep on file" items={c.record_package.retain_on_file} />
       <ConfirmDialog

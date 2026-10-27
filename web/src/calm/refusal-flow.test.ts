@@ -378,7 +378,7 @@ test("acceptance pins both the case and the package-review version that was on s
   assert.equal(workspaceNode(tree).props.editable, true);
   workspaceNode(tree).props.onAccept();
   tree = await h.render();
-  click(tree, "Accept as complete");
+  click(tree, "Accept");
   await h.render();
   assert.deepEqual(h.calls.decisions, [{ outcome: "accept", expected_version: 7, review_version: 3 }]);
   h.unmount();
@@ -390,7 +390,7 @@ test("return sends the exact saved server text and expected version in one call"
   const h = await workspaceHarness({ status: "in_review", claim: mine, version: 7 }, { latest: saved });
   let tree = await h.render({ caseId: "c1" });
   workspaceNode(tree).props.onReturn(); tree = await h.render();
-  assert.ok(text(tree).includes(saved.information_request.text));
+  assert.match(text(tree), /Return to Mira\?/, "the confirmation names who receives it");
   click(tree, "Return"); await h.render();
   assert.deepEqual(h.calls.returns, [{ caseId: "c1", version: 3, body: { expected_version: 7, text: saved.information_request.text } }]);
   assert.deepEqual(h.calls.decisions, [], "no separate send or return decision can leave the applicant locked out");
@@ -413,7 +413,7 @@ test("after a return the same version is read again, so the rail shows the reque
   workspaceNode(tree).props.onReturn(); tree = await h.render();
   click(tree, "Return"); tree = await h.render(); tree = await h.render(); tree = await h.render();
   assert.equal(workspaceNode(tree).props.session.information_request.sent_at, sent.information_request.sent_at, "never the stale draft");
-  assert.match(text(tree), /Returned .* read-only until Mira sends it again/, "the status line says it was returned");
+  assert.equal(workspaceNode(tree).props.status, "returned");
   h.unmount();
 });
 

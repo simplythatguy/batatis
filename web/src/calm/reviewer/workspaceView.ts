@@ -2,7 +2,7 @@
 import type { Case, Finding, FindingState, InputFile, Pointer, RequestTarget, ReviewSession, RulebookGap, Workspace } from "../../api/types.gen";
 import type { ReviewQuestion } from "../../api/client";
 import { localField } from "../../intakeFields";
-import { pointerLabel, SECTION_LABEL } from "./packageView";
+import { pointerLabel, SECTION_LABEL, sentence } from "./packageView";
 import type { SheetRow, SheetView } from "./sheet";
 
 export type Section = Finding["section"];
@@ -80,7 +80,14 @@ export function anchoredItems<T extends { section: Section | null; field: string
   return result;
 }
 
-export interface FindingSource { where: string; quote: string | null; page: number | null; fileId: string | null; href: string | null }
+export interface FindingSource { where: string; chip: string; quote: string | null; page: number | null; fileId: string | null; href: string | null }
+
+/** A source as a short chip: "scc-form.pdf · p. 2", "Saved application", "Applicant’s answer". */
+export function sourceChip(p: Pointer): string {
+  const file = p.file || "";
+  const name = file.startsWith("case:") ? "Saved application" : /\.pdf$/i.test(file) ? file : /description/i.test(file) ? "Description" : file ? "Applicant’s answer" : "";
+  return [name, p.page ? `p. ${p.page}` : ""].filter(Boolean).join(" · ");
+}
 export function filePath(caseId: string, fileId: string, page?: number | null): string {
   return `/cases/${encodeURIComponent(caseId)}/files/${encodeURIComponent(fileId)}${page ? `#page=${page}` : ""}`;
 }
@@ -88,7 +95,7 @@ export function findingSources(pointers: Pointer[], files: InputFile[], caseId: 
   return pointers.map(p => {
     const file = files.find(f => f.name === p.file);
     const fileId = file?.file_id ?? null;
-    return { where: pointerLabel(p), quote: p.quote, page: p.page, fileId, href: fileId ? filePath(caseId, fileId, p.page) : null };
+    return { where: pointerLabel(p), chip: sourceChip(p), quote: p.quote, page: p.page, fileId, href: fileId ? filePath(caseId, fileId, p.page) : null };
   });
 }
 
@@ -136,4 +143,13 @@ export function workspaceDecision({ workspace, editable, pending, busy }: { work
   const returnReason = hold || (!workspace ? "Waiting for the saved review." : !workspace.tally.asked ? "Add an item to return the application." : "");
   const acceptReason = hold || (!workspace ? "Waiting for the saved review." : workspace.gate.reason);
   return { canReturn: !returnReason, canAccept: !hold && Boolean(workspace?.gate.can_accept), canRefuse: editable && !pending && !busy, returnReason, acceptReason };
+}
+
+/** A few words naming what is wrong, built from the finding's own status and label. */
+export function findingTitle(f: Finding): string {
+  const label = f.label;
+  if (f.status === "blank") return `${sentence(label)} is blank`;
+  if (f.status === "missing") return `${sentence(label)} is missing`;
+  if (f.status === "not_found") return `Couldn’t read the ${label}`;
+  return `${sentence(label)} needs a look`;
 }

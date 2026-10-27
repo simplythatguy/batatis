@@ -10,11 +10,12 @@ Wire types: `engine/models_review.py` (`Workspace`, `FindingState`, `ReviewTally
 `DecisionItem` fields in `engine/routes_review.py` and `engine/account_models.py`. The web reads them from
 `web/src/api/types.gen.ts`.
 
-## One workspace, no steps
+## Three places, one thing at a time
 
-The officer works on one screen: the application itself, with each finding shown under the field it is
-about, and a side rail with the counts, the exact request text and the decision. There are no review steps,
-so nothing is marked done because it was passed.
+The officer's review has three places in the header: the Application (the paper sheet, each field with a finding
+marked), Findings (one finding at a time in the question-deck layout: the field, a few words, the applicant's
+own words and sources, then Ask for it or Dismiss) and Decide (the exact request text and one primary action).
+Nothing is marked done because it was passed: the Findings count is what still needs a look.
 
 ## The officer's call on a finding
 

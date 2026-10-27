@@ -10,16 +10,12 @@ const base = { case_id: "c1", outcome: "accept", decided_at: "2026-10-26T10:00:0
 const words = (tree: unknown) => [text(tree), ...nodes(tree, (n) => typeof n.props?.title === "string").map((n) => n.props.title)].join(" ");
 const button = (tree: unknown, label: string) => nodes(tree, (n) => n.type === "button" && text(n).includes(label));
 
-test("an acceptance is administratively complete, not a variance; nothing is due until it is issued", async () => {
+test("after an acceptance nothing is due until the variance is issued; a refusal sends nothing", async () => {
   const h = await componentHarness(new URL("./CloseOutPanel.tsx", import.meta.url), "CloseOutPanel", { "./packageView": packageView });
   let tree = await h.render({ c: base, canRecord: true, onChange() {} });
-  assert.match(words(tree), /Administratively complete/);
-  assert.match(text(tree), /not a variance/);
   assert.match(words(tree), /Variance not issued/);
   assert.doesNotMatch(text(tree), /Due |To send|Mark as sent/);
   tree = await h.render({ c: { ...base, outcome: "refuse" }, canRecord: true, onChange() {} });
-  assert.match(words(tree), /Refused/);
-  assert.match(text(tree), /nothing goes to the Council/);
   assert.doesNotMatch(words(tree), /Variance not issued|To send|Mark as sent/);
   h.unmount();
 });

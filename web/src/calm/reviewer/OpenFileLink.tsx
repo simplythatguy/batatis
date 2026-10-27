@@ -2,8 +2,9 @@
 import { useEffect, useRef, useState } from "react";
 import { engine, failureText } from "../../api/client";
 import { useCaseFileRequest } from "../../useCaseFileRequest";
+import { Icon24 } from "../icons";
 
-export function OpenFileLink({ caseId, fileId, page, name }: { caseId: string; fileId: string; page?: number | null; name: string }) {
+export function OpenFileLink({ caseId, fileId, page, name, label }: { caseId: string; fileId: string; page?: number | null; name: string; /** Chip text; defaults to "Open page N". */ label?: string }) {
   const { scope, start } = useCaseFileRequest(caseId, fileId);
   const [state, setState] = useState({ scope, busy: false, error: "" });
   const url = useRef("");
@@ -30,9 +31,11 @@ export function OpenFileLink({ caseId, fileId, page, name }: { caseId: string; f
     }
   }
   return <span className="rw-file-link">
-    <a className="ac-link" href={`${engine.fileUrl(caseId, fileId)}${page ? `#page=${page}` : ""}`} target="_blank" rel="noopener noreferrer"
+    <a className="cf-cite" href={`${engine.fileUrl(caseId, fileId)}${page ? `#page=${page}` : ""}`} target="_blank" rel="noopener noreferrer"
       aria-label={`Open ${name}${page ? `, page ${page}` : ""}`} aria-disabled={current.busy}
-      onClick={event => { event.preventDefault(); void open(); }}>{current.busy ? "Opening…" : page ? `Open page ${page}` : "Open"}</a>
-    {current.error && <span className="rw-hint" role="alert">{current.error} Try Open again.</span>}
+      onClick={event => { event.preventDefault(); void open(); }}>
+      <Icon24 name="file" size={14} />{current.busy ? "Opening…" : label || (page ? `Open page ${page}` : "Open")}
+    </a>
+    {current.error && <span className="rw-hint" role="alert">{current.error}</span>}
   </span>;
 }

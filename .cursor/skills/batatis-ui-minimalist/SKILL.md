@@ -41,14 +41,16 @@ Every icon-only control or icon metadata has an accessible name and a hover labe
 ## Example: stage navigation
 
 - Before: `1 Describe  2 Questions  3 Review  4 Application` with thin underlines.
-- After: four icons, in order, never with a fill, pill or shadow (at rest, current, hover, pressed or focus). Only the current one shows its one-word name beside its icon, at full opacity (`Describe`, `Questions`, `Review`, `Application`); the others are the icon alone, dimmed and brighter on hover or keyboard focus, fainter when locked (user decision 2026-10-22, "Option A+B"; it replaces "never with words beside them"). Compact cues keep the state in one neutral ink: a small green check mark when done, a thin line at the foot while part of the way through. "Questions, 40% done" is the accessible name and the hover/focus label (one label open at a time). The officer's review steps use the same control: Changes (history icon), Request (document), Missing (alert), Checks (list), Decide (scales), the current one named with its real open count after the name (`Missing 9`), another step's count as a quiet number beside its icon.
-- Code: `StageButton` and `StageRings` in `web/src/calm/shell/AppHeader.tsx`, `StepTabs` in `web/src/calm/reviewer/PackageReview.tsx`.
+- After: four icons, in order, never with a fill, pill or shadow (at rest, current, hover, pressed or focus). Only the current one shows its one-word name beside its icon, at full opacity (`Describe`, `Questions`, `Review`, `Application`); the others are the icon alone, dimmed and brighter on hover or keyboard focus, fainter when locked (user decision 2026-10-22, "Option A+B"; it replaces "never with words beside them"). Compact cues keep the state in one neutral ink: a small green check mark when done, a thin line at the foot while part of the way through. "Questions, 40% done" is the accessible name and the hover/focus label (one label open at a time). The officer's review uses the same control: Application (document), Findings (alert, the count still to look at as a quiet number), Decide (scales).
+- Code: `StageButton` and `StageRings` in `web/src/calm/shell/AppHeader.tsx`; the officer's stages in `web/src/calm/reviewer/ReviewWorkspace.tsx`.
 
 ## Example: the officer's review
 
-- One step on screen, its title the task in a few words ("Read the request", "What to ask for", "Look over the checks", "Decide"), drawn in ink; only status dots keep colour. Where each item was read, its message and code chips open on demand.
-- Opening an application nobody has picked up picks it up; there is no second "Pick up" or "start review" button on a page you are already in. "Stop reviewing" (⋯) goes back to the queue.
-- Code: `web/src/calm/reviewer/ReviewDetail.tsx`, `PackageReview.tsx`, `ReviewQueue.tsx`.
+- Three places in the header, as stage icons: Application (document), Findings (alert, with the count still to look at), Decide (scales). The current one shows its word.
+- Findings is the question deck: one finding at a time. The field as the eyebrow ("B · Legal description"), a few words as the title ("Couldn't read the plan number"), the applicant's own words as the only context, every source as a chip that opens the file, then two choices: 1 Ask for it, 2 Dismiss. A dismissal shows its three reasons and a note; the check's explanation waits behind "Why". One primary: Next (Decide on the last one). The footer shows the findings per section.
+- Decide: one title that says what happens ("Return with 4 items", "Ready to accept"), the reason Accept waits when it does, the exact request text, Add item and Opening line as links, one primary (Return or Accept), and "Completeness only · not a design approval". Messages fold underneath.
+- Opening an application nobody has picked up picks it up; "Stop reviewing" (⋯) goes back to the queue.
+- Code: `web/src/calm/reviewer/ReviewWorkspace.tsx`, `FindingStep.tsx`, `DecideStage.tsx`, `ReadSheet.tsx`.
 
 ## Example: an application title
 
