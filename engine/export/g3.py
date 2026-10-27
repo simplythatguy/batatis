@@ -92,7 +92,8 @@ def page_texts(pdf: bytes) -> list[str]:
 
 def appendix_text(result: ExportResult) -> str:
     """The Batatis appendix only; the source records and supporting documents that follow it are not appendix text."""
-    pages = page_texts(result.pdf)[result.form_pages:result.form_pages + result.appendix_pages]
+    count = getattr(result, 'appendix_pages', None)   # a bare render result has no package pages after it
+    pages = page_texts(result.pdf)[result.form_pages:None if count is None else result.form_pages + count]
     return norm(' '.join(FOOTER.sub(' ', t) for t in pages))
 
 

@@ -15,7 +15,7 @@ from types import SimpleNamespace
 from .completeness import Gap, _case_constraints
 from .completeness_elements import BY_FIELD, ELEMENTS, ElementSpec
 from .completeness_snapshot import Snapshot
-from .completeness_snapshot import _label, _pointer
+from .completeness_snapshot import NOT_APPLICABLE, _label, _pointer
 from .completeness_rules import (ElementVerdict, QuoteSpan, VariantResult, _one, _presence_class,
                                     format_export_reason)
 from .fact_aliases import FIELD_KEYS, LOGICAL_KEYS, latest
@@ -46,6 +46,8 @@ _PROCESS_PROVISIONS = {fid: pid for fid, _label, _prompt, _structure, pid in _FI
 
 def _process_citation(codes, field_id) -> list[str]:
     """The Division C provision a process passage documents, from the code database only."""
+    if codes is None:
+        return []
     try:
         record = codes.provision(_PROCESS_PROVISIONS[field_id], 'C')
     except (OSError, sqlite3.Error):
@@ -483,7 +485,7 @@ def _rows(form, fmap, codes, parts, description) -> None:
     for number, row in enumerate(fmap['section_c_rows'], start=1):
         cells = {key: fields.get(widget) for key, widget in row.items()}
         article = cells['article']
-        if article is None or article.status != 'present':
+        if article is None or article.status != 'present' or NOT_APPLICABLE.match(article.value):
             continue
         rows.extend(_overflow_rows(form, article) or [(number, cells)])
     for number, cells in rows:

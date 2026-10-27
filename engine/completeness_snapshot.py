@@ -32,6 +32,10 @@ class Snapshot:
     professional_declarations: list[ProfessionalDeclaration] = field(default_factory=list)
 
 
+# A cell the applicant confirmed as not applicable prints "N/A"; it names no document or provision.
+NOT_APPLICABLE = re.compile(r'\s*N/?A\b', re.I)
+
+
 def _label(fmap: dict, name: str) -> tuple[str, str]:
     if name == LEGAL_ROW and name in fmap.get('printed', {}):
         return 'Legal description', 'B'
@@ -317,13 +321,13 @@ def from_uploads(uploads: list[tuple[str, bytes]]) -> Snapshot:
                 title, separator, who = text.rpartition(' - ')
                 listed.append((int(entry.group(1)), title if separator else text, who if separator else '',
                                _pointer(form, combined), _pointer(form, combined)))
-            if not entries:
+            if not entries and not NOT_APPLICABLE.match(combined.value):
                 listed.append((1, combined.value, '', _pointer(form, combined), _pointer(form, combined)))
         for number, row in enumerate(fmap['section_d_rows'], start=1):
             name, who = form.fields.get(row['document']), form.fields.get(row['responsible'])
             if name and name.status == 'present' and re.fullmatch(r'Documents \d+-\d+: see Appendix D', name.value.strip()):
                 continue   # Batatis's overflow marker, not a title; those documents are listed in its appendix
-            if name and name.status == 'present':
+            if name and name.status == 'present' and not NOT_APPLICABLE.match(name.value):
                 listed.append((number, name.value, who.value if who and who.status == 'present' else '',
                                _pointer(form, name), _pointer(form, who) if who else _pointer(form, name)))
     snapshot.documents = merge_section_d(rows, listed)

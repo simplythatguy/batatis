@@ -9,6 +9,7 @@ from engine.codes import Codes
 from engine.export import export_case, load_field_map
 from engine.export.scc import load_form
 from engine.export.sample import sample_case
+from engine.package_format import CONTEXT
 from engine.review.package import review_uploads
 from engine.review.pdf_reader import read_pdf
 from engine.tests.test_supplied_form_export import PROVISIONS, prepare_form, legacy_form
@@ -51,7 +52,9 @@ def test_official_export_reupload_uses_only_actual_rows_and_generated_appendix(c
     assert 'Supporting Doc' in read.fields
     assert read.fields['Owner'].status == 'present'
     assert read.text_pages and read.text_pages[0].page == result.form_pages
-    assert not any('Part 4' in p.text or 'Professional Design' in p.text for p in read.text_pages)
+    # Labelled administrative records may state the professional basis; the form and appendix do not.
+    assert not any('Part 4' in p.text or 'Professional Design' in p.text for p in read.text_pages
+                   if not p.text.lstrip().startswith(CONTEXT))
     parts = review_uploads([('official.pdf', result.pdf)], codes)
     assert len(parts.section_c) == count
     assert any(f.field == 'Supporting Doc' and f.section == 'D' for f in parts.fields)
