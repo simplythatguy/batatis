@@ -9,7 +9,7 @@ import { readDecisionBody, wireDecision } from "./identify";
 import { asLocal } from "./intakeFields";
 import { picturesAllowed } from "./intakeView";
 import { toViewRow } from "./api/sectionC";
-import { getSession, resetSavedSession, subscribeSession, updateSavedSession } from "./calm/session";
+import { getSession, resetSavedSession, subscribeSession, updateSavedSession, type Session } from "./calm/session";
 import { applicantDraft, draftAccount, restoreApplicantDraft, sessionDraft } from "./calm/applicantDraft";
 import { questionDrafts } from "./calm/questionDrafts";
 import { checkCurrent, newCheckState, type CheckState, type SaveStatus } from "./checkState";
@@ -350,10 +350,16 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         }
       }
       if (next !== principal) {
+        // Signing in or finishing onboarding keeps what the visitor typed on Start; any other account change clears it.
+        const { draft, draftFiles, draftFilesLost, startRequested } = getSession();
+        const [before, beforeRole] = principal ? JSON.parse(principal) as [string, string | null] : [null, null];
+        const [after] = next ? JSON.parse(next) as [string] : [null];
+        const frontDoor = after !== null && (before === null || (before === after && beforeRole === null));
+        const keep = frontDoor ? { draft, draftFiles, draftFilesLost, startRequested } : {};
         principal = next;
         resetSignOutStatus();
         questionDrafts.selectAccount(next);
-        clearVisit(emptyCase("homebuilder"));
+        clearVisit(emptyCase("homebuilder"), keep);
         setPhase("who");
         if (!next) {
           sessionStorage.removeItem("batatis-open-application");
@@ -1624,7 +1630,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   }, [phase, editEpoch, c.facts, c.authority, c.title, c.listedEvidence, c.deletedEvidence, c.evidenceDrafts, selection]);
 
   /** Reset the save session, case extras and visible request state before adopting another case. */
-  function clearVisit(next: Case) {
+  function clearVisit(next: Case, keep: Partial<Session> = {}) {
     for (const observer of jobObservers.current.values()) { observer.ctl.abort(); observer.stop(); }
     jobObservers.current.clear();
     currentJobs.current.clear();
@@ -1636,7 +1642,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     setSaveConflictReview({ kind: "closed" });
     evidenceUploads.current.clear();
     restoring.current = true;
-    resetSavedSession();
+    resetSavedSession(keep);
     restoring.current = false;
     activeSave.current = null;
     savedSelection.current = null;

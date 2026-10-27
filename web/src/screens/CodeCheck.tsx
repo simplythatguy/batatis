@@ -129,10 +129,12 @@ export function useCandidateAnswer() {
   const { decide } = useCase();
   // Kept per card, so an error on one card never shows on the next; a new answer clears it.
   const [note, setNote] = useState<{ id: string; text: string } | null>(null);
-  function onAnswer(candidate: Candidate, answer: CandidateAnswer) {
+  function onAnswer(candidate: Candidate, answer: CandidateAnswer, onError?: () => void) {
     setNote(null);
     void decide(candidate, answer).then((error) => {
-      if (error) setNote({ id: candidate.id, text: error });
+      if (!error) return;
+      setNote({ id: candidate.id, text: error });
+      onError?.();
     });
   }
   return { onAnswer, decisionNote: note?.text ?? "", decisionNoteFor: (id: string) => (note?.id === id ? note.text : "") };

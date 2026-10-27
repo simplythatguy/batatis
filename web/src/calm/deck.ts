@@ -6,7 +6,6 @@
  * Journey order decides what is asked; section letters retain the form mapping.
  */
 import type { Question as PlanQuestion } from "../api/types.gen";
-import { AUTHORITIES } from "../config";
 import { confirmedAnswer, localField } from "../intakeFields";
 import { codeQuestion, fileNotes, type ReadCopy, planInput, planQuestions, plannedFields, readGroups, scopeRedirect, legalFromFacts } from "../intakeView";
 import { DETAIL_FIELDS, DETAIL_IDS, PROCESS_FIELDS, answeredByDescription, factFor, questionAnsweredByFact, valueText } from "../model";
@@ -525,7 +524,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
     eyebrow: sectionEyebrow("B"),
     title: "Who will review your application?",
     context: "",
-    why: `The authority that issues your permit: ${AUTHORITIES.map((a) => a.name).join(" or ")}. Each has its own submission rules. Batatis never picks one for you.`,
+    why: "The town, city or county that issues your permit. Each has its own submission rules. Batatis never picks one for you.",
     ref: "authority",
     // Read from the site's municipality, it is a quiet confirmation offered once (with the office's
     // pack); unanswered, it is required.
@@ -956,13 +955,16 @@ export function sectionProgress(items: DeckItem[]): { id: SectionId; label: stri
 
 /** Choices for a card, in keyboard order (A, B, C). */
 function answerChoices(item: DeckItem): { value: string; label: string }[] {
+  // Which way the wall faces is asked in place words (neighbour's lot, lane, street), not the rule's Yes/No.
+  if (item.kind === "rule-input" && item.input?.field === "faces_public_way") return planInput("faces_public_way").choices ?? [];
   if (item.choices) return item.choices;
   if (item.kind === "plan" && item.plan) {
     const input = planInput(item.plan.field);
     return input.kind === "choices" ? input.choices ?? [] : [];
   }
   if (item.kind === "fact") return [{ value: "confirm", label: item.confirmLabels?.confirm ?? "Yes, that’s right" }, { value: "dismiss", label: item.confirmLabels?.dismiss ?? "No, something else" }];
-  if (item.kind === "authority") return AUTHORITIES.map((a) => ({ value: a.id, label: a.name }));
+  // The office is found by typing in its own search box; letter keys would pick an arbitrary place.
+  if (item.kind === "authority") return [];
   if (item.kind === "candidate") {
     return item.provision
       ? [{ value: "yes", label: "Yes, it differs" }, { value: "no", label: "No, it follows" }]

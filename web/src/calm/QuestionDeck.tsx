@@ -102,6 +102,38 @@ function useDirection(index: number): "down" | "up" {
   return dir.current;
 }
 
+/**
+ * The card being replaced leaves in the direction of travel while the next one enters. React has
+ * already let go of the old card when its ref detaches, so an inert copy plays the exit and is removed.
+ */
+function useLeavingCard(dir: "down" | "up") {
+  const stage = useRef<HTMLDivElement>(null);
+  const card = useRef<HTMLDivElement | null>(null);
+  const travel = useRef(dir);
+  travel.current = dir;
+  const ref = useRef((node: HTMLDivElement | null) => {
+    const old = card.current;
+    card.current = node;
+    const host = stage.current;
+    if (node || !old || !host?.isConnected || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    host.querySelectorAll(".cf-q-leave").forEach((layer) => layer.remove());
+    const copy = old.cloneNode(true) as HTMLDivElement;
+    const fields = old.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input, textarea");
+    copy.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input, textarea").forEach((f, i) => { f.value = fields[i]?.value ?? ""; });
+    copy.querySelectorAll("[id]").forEach((el) => el.removeAttribute("id"));
+    copy.classList.remove("is-from-down", "is-from-up");
+    const layer = document.createElement("div");
+    layer.className = `cf-q-leave is-to-${travel.current === "down" ? "up" : "down"}`;
+    layer.setAttribute("aria-hidden", "true");
+    layer.inert = true;
+    layer.append(copy);
+    host.append(layer);
+    copy.addEventListener("animationend", () => layer.remove(), { once: true });
+    window.setTimeout(() => layer.remove(), 400);
+  }).current;
+  return { stage, ref };
+}
+
 /* —— Journey progress and the map, shared with the end screen —— */
 
 const ANSWERER_ICON = { you: "user", designer: "compose", office: "landmark", batatis: "spark" } as const;
@@ -252,10 +284,8 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
     }
     const publicWay = field === "faces_public_way";
     const current = item.deferred ?? (unsure ? "not_sure" : publicWay && fact?.value != null ? fact.value === false ? "neighbour" : fact.source.quote === "A street" ? "street" : "lane" : fact?.value === undefined || fact?.value === null ? undefined : String(fact.value));
-    const defer = deferralFor(item);
-    const options = publicWay ? [...(planInput(field).choices ?? []), ...(defer ? [defer] : [])] : choices;
     return <>
-      <Choices choices={options} current={current} onPick={onPick} />
+      <Choices choices={choices} current={current} onPick={onPick} />
       {unsure && <p className="cf-note"><span className="cf-dot is-pending" aria-hidden="true" />Saved as Not sure. The rule stays open.</p>}
     </>;
   }
@@ -602,6 +632,8 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
   const wrapRef = useRef<HTMLDivElement>(null);
   const formPos = currentKey ? all.findIndex((i) => i.key === currentKey) : all.length;
   const dir = useDirection(formPos < 0 ? index : formPos);
+  const leaving = useLeavingCard(dir);
+  const setWrap = (node: HTMLDivElement | null) => { wrapRef.current = node; leaving.ref(node); };
 
   // Help starts closed on each card; unconfirmed text stays with that application and card.
   useEffect(() => {
@@ -691,7 +723,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
   useEffect(() => {
     if (item?.kind === "paperwork") return;
     const w = wrapRef.current;
-    const field = w?.querySelector<HTMLElement>(".cf-q-body input.cf-uline, .cf-q-body textarea");
+    const field = w?.querySelector<HTMLElement>(".cf-q-body input.cf-uline, .cf-q-body textarea, .cf-q-body .cf-ap-input");
     (field ?? w?.querySelector<HTMLElement>("h2"))?.focus({ preventScroll: true });
   }, [currentKey]);
 
@@ -725,6 +757,16 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
     if (to < 0) return;
     goToKey(to >= navigable.length ? null : navigable[to].key);
   };
+
+  /** A server-saved answer moves on at once; if the save fails, the card comes back with its error. */
+  function advanceNow(key: string) {
+    const s = getSession();
+    if (s.queue[s.index] === key) moveFrom(s.index, true);
+  }
+  function bringBack(key: string) {
+    const s = getSession();
+    if (s.queue[s.index] !== key) goToKey(key);
+  }
 
   /** Check whether the current answer can advance, including pending writes and required reasons. */
   function canContinue(it: Shown): boolean {
@@ -854,15 +896,16 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
       return;
     }
     const generation = engineGeneration();
+    if (advance) advanceNow(key);
     void answerPlan(it.plan, answer).then((error) => {
       if (engineGeneration() !== generation) return;
       if (error) {
         setAdvanceAfter(null);
         setPlanNotes((n) => ({ ...n, [key]: error }));
+        if (advance) bringBack(key);
       } else {
         dispatch(deferred ? journeyAnswerAction(it, deferred) : clearJourneyAnswerAction(it));
         confirmDraft(answer);
-        if (advance && getSession().queue[getSession().index] === key) setAdvanceAfter({ key, generation });
       }
     });
   }
@@ -887,6 +930,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
     // The case this answer belongs to: a switch to another application stops the sibling answers and the UI update.
     const startCase = getExtras().caseId;
     const sameCase = () => getExtras().caseId === startCase;
+    if (advance) advanceNow(key);
     void (async () => {
       let error = await answerChecklist(cl.id, row.id, state, reason);
       if (!error && state === "confirmed") {
@@ -903,16 +947,11 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
         setPicked((p) => { const { [key]: _drop, ...rest } = p; return rest; });
         noteFor(key, error);
         setConflicted(error === CONFLICT_TEXT ? key : null);
+        if (advance) bringBack(key);
         return;
       }
       setConflicted(null);
       dispatch(deferred ? journeyAnswerAction(it, deferred) : clearJourneyAnswerAction(it));
-      if (!advance) return;
-      // Move on only if the applicant is still on this card; a first answer moves once it renders.
-      const s = getSession();
-      if (s.queue[s.index] !== key) return;
-      if (!row.answer || deferred) setAdvanceAfter({ key, generation: engineGeneration() });
-      else moveFrom(index, true);
     })();
   }
 
@@ -930,6 +969,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
     // The case this answer belongs to: a switch to another application stops the UI update.
     const startCase = getExtras().caseId;
     const sameCase = () => getExtras().caseId === startCase;
+    if (advance) advanceNow(key);
     void decideRequirement(record, answer, reason).then((error) => {
       if (!sameCase()) return;
       setBusyKey((k) => (k === key ? null : k));
@@ -938,15 +978,11 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
         setPicked((p) => { const { [key]: _drop, ...rest } = p; return rest; });
         noteFor(key, error);
         setConflicted(error === CONFLICT_TEXT ? key : null);
+        if (advance) bringBack(key);
         return;
       }
       setConflicted(null);
       confirmDraft(reason);
-      if (!advance) return;
-      // Move on only if the applicant is still on this card; the saved ledger removes the row.
-      const s = getSession();
-      if (s.queue[s.index] !== key) return;
-      setAdvanceAfter({ key, generation: engineGeneration() });
     });
   }
 
@@ -1038,7 +1074,12 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
       dispatch({ type: "setAuthority", authority: value === "unsure" ? "" : (value as typeof c.authority) });
     } else if (item.kind === "candidate") {
       const cand = c.candidates.find((a) => a.id === item.ref);
-      if (cand) onAnswer(cand, value as "yes" | "no" | "not-sure");
+      if (cand) {
+        const key = item.key;
+        onAnswer(cand, value as "yes" | "no" | "not-sure", () => bringBack(key));
+        advanceNow(key);
+        return;
+      }
     } else if (item.kind === "detail" && item.suggestedValue) {
       if (value === "edit-suggested") return;
       dispatch({ type: "setDetail", field: item.ref, value: item.suggestedValue, section: item.section });
@@ -1109,7 +1150,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
       )}
       <DocumentReview intake={c.intake} files={c.files} description={c.description} intakeStatus={reading.intake} />
       <PictureConsent />
-      <div className={`cf-q-stage${item?.kind === "paperwork" ? " is-paperwork" : ""}`}>
+      <div ref={leaving.stage} className={`cf-q-stage${item?.kind === "paperwork" ? " is-paperwork" : ""}`}>
         {/* A submission on its way only pauses the mounted card (App's edit lock); a sent one is read-only. */}
         {readOnly ? (
           <div className="cf-q-wrap" aria-labelledby="cf-q" role="group">
@@ -1123,7 +1164,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
         ) : item?.kind === "scope" && !item.gone ? (
           <RedirectPage />
         ) : item ? (
-          <div ref={wrapRef} key={item.key} className={`cf-q-wrap is-from-${dir}${item.kind === "section-d" || item.kind === "code-triage" || item.kind === "paperwork" ? " is-wide" : ""}`} aria-labelledby="cf-q" role="group">
+          <div ref={setWrap} key={item.key} className={`cf-q-wrap is-from-${dir}${item.kind === "section-d" || item.kind === "code-triage" || item.kind === "paperwork" ? " is-wide" : ""}`} aria-labelledby="cf-q" role="group">
             <p className="cf-eyebrow is-plain">{item.plan?.kind === "conflict" ? "You wrote two things" : STAGES.find((s) => s.stage === item.stage)?.label}<span className="cf-faint"> · Section {item.section}</span></p>
             <h2 id="cf-q" className="cf-q-text" tabIndex={-1}>{item.title}</h2>
             {item.answerer === "designer" && <span className="cf-answerer-tag"><Icon24 name="compose" size={15} />Usually your designer knows</span>}
@@ -1133,7 +1174,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
                 {item.quote && <> <q>{item.quote}</q></>}
               </p>
             )}
-            <fieldset className="cf-q-body" disabled={locked || busyKey === item.key || reading.busy === item.ref || advanceAfter?.key === item.key}>
+            <fieldset className="cf-q-body" disabled={locked || busyKey === item.key || reading.busy === item.ref || advanceAfter?.key === item.key} data-busy={!locked && (busyKey === item.key || reading.busy === item.ref || advanceAfter?.key === item.key) ? "" : undefined}>
               <legend className="cf-sr">Your answer</legend>
               <CardBody
                 item={item}
@@ -1160,14 +1201,14 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
             )}
             <OkRow label={item.kind === "understood" ? "Looks right" : "Continue"} primary={item.kind !== "paperwork" && (choicesFor(item).length === 0 || item.kind === "authority" || (item.kind === "detail" && (picked[item.key] === "dismiss" || picked[item.key] === "edit-suggested")) || (item.kind === "condition" && (picked[item.key] ?? currentState(item)) === "does_not_apply"))} disabled={!canContinue(item)} onOk={next} typed={typed}>
               <span className="cf-ok-more">
-                {deferralFor(item) && (choicesFor(item).length === 0 || item.kind === "authority") && <button type="button" className="cf-link-btn" disabled={locked || reading.busy === item.ref || busyKey === item.key} onClick={() => { const choice = deferralFor(item); if (choice) deferCurrent(choice.value); }}>{deferralFor(item)?.label}</button>}
+                {deferralFor(item) && choicesFor(item).length === 0 && item.kind !== "authority" && <button type="button" className="cf-link-btn" disabled={locked || reading.busy === item.ref || busyKey === item.key} onClick={() => { const choice = deferralFor(item); if (choice) deferCurrent(choice.value); }}>{deferralFor(item)?.label}</button>}
                 <HelpButton item={item} n={n} open={why} onToggle={() => setWhy((v) => !v)} />
               </span>
             </OkRow>
             {why && item.why && <HelpPanel item={item} n={n} />}
           </div>
         ) : (
-          <div ref={wrapRef} key="finish" className={`cf-q-wrap is-from-${dir}`} aria-labelledby="cf-q" role="group">
+          <div ref={setWrap} key="finish" className={`cf-q-wrap is-from-${dir}`} aria-labelledby="cf-q" role="group">
             <JourneyEnd items={all} standard={routeChoice(c) === "standard"} product={productScope(c) === "product_acceptance"} onJump={goToKey} onReview={next} />
           </div>
         )}

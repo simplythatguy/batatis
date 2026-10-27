@@ -5,7 +5,7 @@ import { emptyCase } from "../intake.ts";
 import { readGroups, snippet, spokenValue } from "../intakeView.ts";
 import { DETAIL_IDS, factFor, getGaps, NOT_RIGHT, reducer } from "../model.ts";
 import type { Case } from "../types.ts";
-import { aliasKey, alternativeChoice, buildDeck, choicesFor, deckProgress, gapKey, mergeQueue, preCaseState, questionProgress, QUESTION_PROGRESS_LABEL, sectionProgress } from "./deck.ts";
+import { aliasKey, alternativeChoice, buildDeck, choicesFor, deckProgress, deferralFor, gapKey, mergeQueue, preCaseState, questionProgress, QUESTION_PROGRESS_LABEL, sectionProgress } from "./deck.ts";
 import { journeyAnswerAction, journeyProgress, STAGES } from "./journey.ts";
 import { calmHref, resolveRoute } from "./routes.ts";
 
@@ -349,13 +349,13 @@ test("every local gap that routes to questions has a card", () => {
   }
 });
 
-test("authority offers real choices, while legacy uncertainty leaves its gap open", () => {
+test("authority is found by search, not letter keys, while legacy uncertainty leaves its gap open", () => {
   const c = demoCase();
   const card = paperworkRows(buildDeck(c, [])).find((i) => i.key === "authority")!;
   assert.equal(c.authority, "");
   assert.equal(card.done, false);
-  assert.ok(["calgary", "edmonton", "red-deer"].every((place) => choicesFor(card).some((choice) => choice.value === place)));
-  assert.ok(choicesFor(card).some((choice) => choice.value === "later"));
+  assert.deepEqual(choicesFor(card), []);
+  assert.equal(deferralFor(card)?.value, "later");
   const gap = { id: "jurisdiction", severity: "blocking" as const, label: "Reviewing authority", href: "#/describe?focus=authority" };
   assert.equal(gapKey(c, gap), "authority");
   assert.equal(paperworkRows(buildDeck(c, [gap], { seen: new Set(["authority"]), includeDone: true })).find((i) => i.key === "authority")?.done, true);
@@ -571,4 +571,10 @@ test("a typed answer quotes the applicant's own words, so the officer's check tr
   const owner = factFor(c, "owner");
   assert.equal(owner?.status, "confirmed");
   assert.equal(owner?.source.quote, "SYNTHETIC Larkspur Row Homes");
+});
+
+test("letter keys on the wall-faces card pick the place words the card shows", () => {
+  const card = { key: "ri-faces", kind: "rule-input", section: "B", title: "What is on the other side of that wall?", ref: "faces_public_way", done: false, optional: false, input: { field: "faces_public_way" }, choices: [{ value: "true", label: "Yes" }, { value: "false", label: "No" }] } as unknown as Parameters<typeof choicesFor>[0];
+  const labels = choicesFor(card).map((choice) => choice.label);
+  assert.deepEqual(labels.slice(0, 3), ["Neighbour’s lot", "A lane", "A street"]);
 });
