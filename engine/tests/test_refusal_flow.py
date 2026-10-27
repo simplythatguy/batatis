@@ -5,6 +5,7 @@ import pytest
 from pypdf import PdfReader
 
 from engine.store import VersionConflict
+from engine.tests.case_builder_fixtures import fact
 from engine.tests.test_review import owned, scene  # noqa: F401 - isolated account fixture
 
 
@@ -33,7 +34,10 @@ def test_refusal_is_terminal_and_preserves_history_notices_and_pdf(scene):
         'outcome': 'return', 'message': 'SYNTHETIC request to clarify the attachment revision.'})
     assert returned.status_code == 200
     prior = returned.json()['decision']
-    assert owner.post(f'/cases/{case.id}/submit', json={'expected_version': returned.json()['version']}).status_code == 200
+    corrected = owner.post(f'/cases/{case.id}/facts', json=fact('request_answer.revision',
+        'SYNTHETIC corrected attachment revision.').model_dump())
+    assert corrected.status_code == 200
+    assert owner.post(f'/cases/{case.id}/submit', json={'expected_version': corrected.json()['version']}).status_code == 200
     assert officer.post(f'/review/{case.id}/claim', json={}).status_code == 200
     case = store.get(case.id)
     before = case.model_dump()
@@ -141,7 +145,7 @@ def test_refusal_with_gaps_is_distinct_from_acceptance_and_return(scene):
     store, clients, _ = scene
     case = in_review(scene, complete=False)
     assert clients['owner'].get(f'/cases/{case.id}/gaps').json()['items']
-    assert clients['reviewer'].post(f'/review/{case.id}/decision', json={'outcome': 'accept'}).status_code == 409
+    assert clients['reviewer'].post(f'/review/{case.id}/decision', json={'outcome': 'accept', 'expected_version': store.get(case.id).version}).status_code == 409
     response = refuse(clients['reviewer'], case)
     assert response.status_code == 200, response.text
     assert response.json()['status'] == 'refused'

@@ -8,9 +8,10 @@ from __future__ import annotations
 
 import hashlib
 import re
+import uuid
 
 from ..models_review import (DiffEntry, EditedItem, Finding, InformationRequest, InformationRequestItem,
-                             ReviewDiff)
+                             RequestLimits, ReviewDiff)
 
 INTRO = ('To continue the administrative review of this variance application, please provide or confirm the '
          'items below. This request concerns completeness only; it is not a decision on the application.')
@@ -105,6 +106,7 @@ def render(request: InformationRequest) -> str:
 
 
 def build(findings: list[Finding]) -> InformationRequest:
+    from .workspace import target
     items = []
     seen = set()
     for finding in findings:
@@ -119,27 +121,59 @@ def build(findings: list[Finding]) -> InformationRequest:
             text = f'Please provide or confirm the {finding.label}.'
         items.append(InformationRequestItem(
             id=item_id(finding.key), finding_key=finding.key, section=finding.section, field=finding.field,
-            text=text, included=finding.status != 'not_found', officer_check=finding.status == 'not_found'))
+            text=text, included=finding.status != 'not_found' and finding.routed_to == 'applicant',
+            officer_check=finding.status == 'not_found', target=target(finding)))
     request = InformationRequest(intro=INTRO, items=items)
     request.text = render(request)
     return request
 
 
+def validate(request: InformationRequest, *, targets: bool = False) -> str:
+    """Validate the complete saved draft before any mutation or send; never truncate correspondence."""
+    limits = RequestLimits()
+    if len(request.items) > limits.items:
+        raise ValueError(f'A request may contain at most {limits.items} items')
+    if len(request.intro) > limits.intro:
+        raise ValueError(f'The request introduction may contain at most {limits.intro} characters')
+    for item in request.items:
+        if not item.text.strip() or len(item.text) > limits.item_text:
+            raise ValueError(f'Each request item needs 1–{limits.item_text} characters of text')
+        if targets and item.included and item.target is None:
+            raise ValueError('Choose where the applicant answers each included request item')
+    text = render(request)
+    if len(text) > limits.text:
+        raise ValueError(f'The rendered request may contain at most {limits.text} characters')
+    return text
+
+
 def edit(request: InformationRequest, items: list[EditedItem], intro: str | None) -> InformationRequest:
-    """Replace the item list. Existing ids keep their link; new ids are officer items."""
+    """Reorder/reword linked items and add/remove officer items. Findings own linked inclusion."""
     by_id = {item.id: item for item in request.items}
-    out = []
-    for index, change in enumerate(items):
+    out, seen = [], set()
+    for change in items:
         current = by_id.get(change.id) if change.id else None
         if change.id and current is None:
             raise KeyError(change.id)
+        if change.id in seen:
+            raise ValueError('A request item may appear only once')
+        if change.id:
+            seen.add(change.id)
         if current is None:
-            out.append(InformationRequestItem(id=f'ir_officer_{index}_{item_id(change.text)[3:9]}', text=change.text,
-                                              authored_by='officer', included=change.included))
+            if change.target is None:
+                raise ValueError('Choose where the applicant answers the new officer item')
+            out.append(InformationRequestItem(id=f'ir_officer_{uuid.uuid4().hex[:12]}', text=change.text,
+                authored_by='officer', included=change.included, target=change.target,
+                section=change.target.section, field=change.target.field))
             continue
+        if not current.finding_key and change.target is None and current.target is None:
+            raise ValueError('Choose where the applicant answers the officer item')
         authored = current.authored_by if change.text == current.text else 'officer'
+        target = current.target if current.finding_key else change.target or current.target
         out.append(current.model_copy(update={'text': change.text, 'included': change.included,
-                                              'authored_by': authored}))
+            'authored_by': authored, 'target': target,
+            'section': target.section if target else current.section,
+            'field': target.field if target else current.field}))
+    out.extend(item for item in request.items if item.finding_key and item.id not in seen)
     updated = request.model_copy(update={'items': out, 'edited': True,
                                          'intro': intro if intro is not None else request.intro})
     updated.text = render(updated)
@@ -153,13 +187,24 @@ def open_gaps(findings: list[Finding]) -> dict[str, Finding]:
             if finding.field not in OFFICER_ONLY and finding.routed_to != 'officer' and finding.status != 'not_found'}
 
 
-def diff(previous_version: int, previous: list[Finding], current: list[Finding]) -> ReviewDiff:
+def diff(previous_version: int, previous: list[Finding], current: list[Finding], *, lookup_skipped=False) -> ReviewDiff:
     before, after = open_gaps(previous), open_gaps(current)
 
     def entry(finding: Finding) -> DiffEntry:
         return DiffEntry(key=finding.key, section=finding.section, label=finding.label, message=finding.message)
 
-    resolved = [entry(before[key]) for key in before if key not in after]
+    all_current = {f.key: f for f in current}
+    uncertain_fields = {f.field for f in current if f.status == 'not_found' or f.routed_to != 'applicant'}
+    # A gap read from a file this version could not read was not fixed; nobody can tell yet.
+    unreadable = {f.field[len('file.'):] for f in current
+                  if f.key.startswith('file:') and f.key.endswith(':unreadable') and f.field.startswith('file.')}
+    unverified_keys = {key for key, finding in before.items() if key not in after and
+                       (key in all_current or finding.field in uncertain_fields
+                        or any(p.file in unreadable for p in finding.pointers)
+                        or (lookup_skipped and finding.field.startswith(('citation.', 'section_c.')))
+                        or any(f.key == 'form:presence' and f.status == 'not_found' for f in current))}
+    resolved = [entry(before[key]) for key in before if key not in after and key not in unverified_keys]
+    unverified = [entry(all_current.get(key, before[key])) for key in before if key in unverified_keys]
     still = [entry(after[key]) for key in before if key in after]
     new = [entry(after[key]) for key in after if key not in before]
     statement = f'{len(resolved)} of {len(before)} gaps resolved'
@@ -167,5 +212,27 @@ def diff(previous_version: int, previous: list[Finding], current: list[Finding])
         statement += f', {len(still)} still open'
     if new:
         statement += f', {len(new)} new'
+    if unverified:
+        statement += f", {len(unverified)} can't tell"
     return ReviewDiff(previous_version=previous_version, previous_gaps=len(before), resolved=resolved,
-                      still_open=still, new=new, statement=statement)
+                      still_open=still, new=new, unverified=unverified, statement=statement)
+
+
+def carry_unverified(previous: list[Finding], current: list[Finding], diff_: ReviewDiff) -> list[Finding]:
+    """Earlier blocking gaps this version could not check stay on the officer's list as "look first".
+
+    A gap never stops counting because its file became unreadable: the officer checks it and dismisses
+    it ("I checked it"), or asks for it. Gaps the new version still reports under their own key need
+    nothing carried.
+    """
+    present = {f.key for f in current}
+    earlier = {f.key: f for f in previous}
+    carried = []
+    for entry in diff_.unverified:
+        finding = earlier.get(entry.key)
+        if finding is None or finding.key in present or finding.severity != 'blocking':
+            continue
+        carried.append(finding.model_copy(update={
+            'status': 'not_found', 'routed_to': 'officer',
+            'message': f"This version couldn't check it again. Before: {finding.message}"}))
+    return carried

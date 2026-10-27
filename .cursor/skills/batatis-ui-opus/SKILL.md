@@ -7,7 +7,7 @@ description: Batatis UI implementation and review with the current model policy,
 
 ## Model
 
-Use **GPT-6.1-Sol at max** for UI implementation and independent UI review (user override, 2026-10-23). Read `.cursor/rules/pstack-models.mdc` for the shared role map. In T3 set the exact supported model/options through the task tool and verify the returned selection. User instructions govern subsequent model changes.
+**Claude Opus 5.5 designs and implements UI** (prototypes, components, CSS, copy) and runs UI review (user decision 2026-10-26: GPT output on visible surfaces was confident slop). GPT-6.1-Sol may write engine/API code and non-visual web logic only; Opus reads that before it ships. Read `.cursor/rules/pstack-models.mdc` for the shared role map. In T3 set the exact supported model/options through the task tool and verify the returned selection. User instructions govern subsequent model changes.
 
 ## Default look
 

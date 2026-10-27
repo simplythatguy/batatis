@@ -31,7 +31,8 @@ from .routes_rewrite import RewriteRequest, RewriteResult
 from .routes_intake import AnswersRequest, IntakeRequest, IntakeResult, PlanRequest, ScopeRequest
 from .identify.http_models import (BenchmarkConfirmRequest, IdentifyConfirmRequest, IdentifyDecisionRequest,
                                    IdentifyDecisionResponse, IdentifyRequest, RequirementDecisionRequest)
-from .models_review import InformationRequestEdit, PackageReviewIndex, ReviewSession, SentInformationRequests
+from .models_review import (InformationRequestEdit, PackageReviewIndex, ReturnWithRequest, ReviewSession,
+                            SentInformationRequests, VarianceIssued)
 from .models_jurisdictions import JurisdictionDetail, JurisdictionsResult
 from .routes_jurisdictions import CaseJurisdictionPack
 from .routes_case import DraftPatch, SelectedArticlesRequest, TitleRequest
@@ -51,7 +52,7 @@ RESPONSES = (Case, SectionCRow, CodeTOC, ProvisionContext, UserResult, MessagesR
              RewriteResult, Job, JobList, WorkerHealth)  # responses carry every field
 REQUESTS = (Fact, NewCase, SectionCRequest, SignupRequest, LoginRequest, OnboardingRequest,
             ClaimRequest, DecisionRequest, MessageRequest, MessageReadRequest, ProfessionalRequirementRequest,
-            SubmitRequest, AssistRequest, InformationRequestEdit,
+            SubmitRequest, AssistRequest, InformationRequestEdit, ReturnWithRequest, VarianceIssued,
             IntakeRequest, AnswersRequest, ScopeRequest, PlanRequest,
             IdentifyRequest, IdentifyDecisionRequest, IdentifyConfirmRequest, BenchmarkConfirmRequest,
             RequirementDecisionRequest,

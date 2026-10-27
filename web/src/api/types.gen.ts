@@ -2,6 +2,12 @@
 // Do not edit: change the engine model, run `python -m engine.schema_export`, then `npm run gen:types`.
 // Fields with a default are optional here because the engine accepts them omitted; responses always carry them.
 
+/** Whether this version can be accepted now, decided by the server (the decision route rechecks it). */
+export interface AcceptGate {
+  can_accept: boolean;
+  reason: string;
+}
+
 export interface AnswerCounts {
   confirmed: number;
   does_not_apply: number;
@@ -405,12 +411,14 @@ export interface ClaimResult {
   claim: Claim;
 }
 
-/** Close-out after a final decision: the copy goes to the Council within 10 days of the decision. */
+/** Close-out after a final decision. */
 export interface CloseOut {
   case_id: string;
-  days_remaining: number;
+  days_remaining: number | null;
   decided_at: string;
-  due_date: string;
+  due_date: string | null;
+  issued_by_name: string | null;
+  issued_on: string | null;
   notice: string;
   outcome: "accept" | "refuse";
   overdue: boolean;
@@ -488,21 +496,30 @@ export interface Decision {
 
 export interface DecisionItem {
   field: string | null;
+  finding_key: string | null;
   gap_id: string | null;
+  label: string | null;
   note: string;
+  request_item_id: string | null;
+  section: "A" | "B" | "C" | "D" | "process" | null;
 }
 
 export interface DecisionItemInput {
   field?: string | null;
+  finding_key?: string | null;
   gap_id?: string | null;
+  label?: string | null;
   note: string;
+  request_item_id?: string | null;
+  section?: "A" | "B" | "C" | "D" | "process" | null;
 }
 
 export interface DecisionRequest {
-  /** Required for a refusal; the displayed saved application version. */ expected_version?: number | null;
+  /** Required for an acceptance and a refusal; the displayed saved application version. */ expected_version?: number | null;
   items?: DecisionItemInput[];
   message?: string | null;
   outcome: "accept" | "return" | "refuse";
+  review_version?: number | null;
 }
 
 export interface DecisionSummary {
@@ -516,6 +533,23 @@ export interface DiffEntry {
   label: string;
   message: string;
   section: "A" | "B" | "C" | "D" | "process";
+}
+
+/** The officer's call on one automated finding, kept with the session. It never edits the finding. */
+export interface Disposition {
+  at: string | null;
+  by_name: string | null;
+  key: string;
+  note: string;
+  reason: "checked" | "not_needed" | "does_not_fit" | null;
+  state: "ask" | "verify" | "dismissed";
+}
+
+export interface DispositionEdit {
+  key: string;
+  note?: string;
+  reason?: "checked" | "not_needed" | "does_not_fit" | null;
+  state: "ask" | "verify" | "dismissed";
 }
 
 /** What the model read across every readable page, kept only where it checks out against the text. */
@@ -649,6 +683,7 @@ export interface DroppedPick {
 export interface EditedItem {
   id?: string | null;
   included?: boolean;
+  target?: RequestTargetInput | null;
   text: string;
 }
 
@@ -800,6 +835,17 @@ export interface Finding {
   section: "A" | "B" | "C" | "D" | "process";
   severity: "blocking" | "warning";
   status: "blank" | "not_found" | "missing" | "unclear";
+}
+
+/** A finding's effective officer state (stored disposition or default), as the server counts it. */
+export interface FindingState {
+  at: string | null;
+  by_name: string | null;
+  key: string;
+  locked: boolean;
+  note: string;
+  reason: "checked" | "not_needed" | "does_not_fit" | null;
+  state: "ask" | "verify" | "dismissed";
 }
 
 /** Acceptable-solution path or alternative-solution path, read early (before Section C). */
@@ -1012,8 +1058,9 @@ export interface InformationRequest {
   text: string;
 }
 
-/** Officer edits: replace the item list (text, inclusion, order) and optionally the intro. */
+/** Officer edits, saved as one write: the item list (text, order, officer items), the intro, and the */
 export interface InformationRequestEdit {
+  findings?: DispositionEdit[];
   intro?: string | null;
   items: EditedItem[];
 }
@@ -1026,10 +1073,12 @@ export interface InformationRequestItem {
   included: boolean;
   officer_check: boolean;
   section: "A" | "B" | "C" | "D" | "process" | null;
+  target: RequestTarget | null;
   text: string;
 }
 
 export interface InputFile {
+  file_id: string | null;
   form_version: string | null;
   name: string;
   note: string;
@@ -1258,6 +1307,18 @@ export interface NotificationsResult {
   unread: number;
 }
 
+/** The officer's working state for the latest version: per-finding states, counts and the accept gate. */
+export interface OfficerWorkspace {
+  case_version: number | null;
+  current: boolean;
+  gate: AcceptGate;
+  limits: RequestLimits;
+  rulebook: RulebookGap[];
+  states: FindingState[];
+  tally: ReviewTally;
+  version: number;
+}
+
 export interface OnboardingRequest {
   access_code?: string | null;
   applicant_type?: "manufacturer" | "contractor" | "homebuilder" | null;
@@ -1310,6 +1371,7 @@ export interface PackageReviewIndex {
   latest: ReviewSession | null;
   package_id: string;
   sessions: SessionSummary[];
+  workspace: OfficerWorkspace | null;
 }
 
 export interface PartScopeAssessment {
@@ -1526,6 +1588,28 @@ export interface RemoveFileBindingInput {
   kind?: "remove";
 }
 
+/** Checked when the draft is saved and again on return; the client shows them, never enforces others. */
+export interface RequestLimits {
+  intro: number;
+  item_text: number;
+  items: number;
+  text: number;
+}
+
+/** Where the applicant answers a request item: a form section and, when known, one field. */
+export interface RequestTarget {
+  field: string | null;
+  label: string;
+  section: "A" | "B" | "C" | "D" | "process";
+}
+
+/** Where the applicant answers a request item: a form section and, when known, one field. */
+export interface RequestTargetInput {
+  field?: string | null;
+  label: string;
+  section: "A" | "B" | "C" | "D" | "process";
+}
+
 export interface RequirementCondition {
   fact_ids: string[];
   field: string;
@@ -1669,6 +1753,12 @@ export interface RetainFileBindingInput {
   kind?: "retain";
 }
 
+/** Send the saved request and return the application, as one write. Both or neither. */
+export interface ReturnWithRequest {
+  expected_version: number;
+  text: string;
+}
+
 export interface ReviewConflict {
   evidence: EvidenceRef[];
   text: string;
@@ -1681,6 +1771,7 @@ export interface ReviewDiff {
   resolved: DiffEntry[];
   statement: string;
   still_open: DiffEntry[];
+  unverified: DiffEntry[];
 }
 
 export interface ReviewFact {
@@ -1709,6 +1800,7 @@ export interface ReviewSession {
   created_at: string;
   created_by_name: string;
   diff: ReviewDiff | null;
+  dispositions: Disposition[];
   documents: DocumentRow[];
   fields: FieldReading[];
   files: InputFile[];
@@ -1729,6 +1821,16 @@ export interface ReviewSnapshot {
   authority: string | null;
   returned_at: string;
   values: Record<string, string>;
+}
+
+/** The one definition of every count the officer sees, for one session. The client never recounts. */
+export interface ReviewTally {
+  asked: number;
+  dismissed: number;
+  required: number;
+  rulebook: number;
+  to_check: number;
+  verify: number;
 }
 
 export interface ReviewedDocument {
@@ -1827,6 +1929,14 @@ export interface RuleSet {
   index: Record<string, unknown>;
   rules: (Record<string, unknown>)[];
   version: number;
+}
+
+/** A blocking gap from the shared completeness rules that no finding covers. Shown as-is. */
+export interface RulebookGap {
+  field: string | null;
+  id: string;
+  message: string;
+  section: "A" | "B" | "C" | "D" | "process" | null;
 }
 
 export interface ScopeBasis {
@@ -1932,7 +2042,7 @@ export interface SessionSummary {
   created_at: string;
   created_by_name: string;
   input_kind: "case" | "upload";
-  open_gaps: number;
+  required: number;
   sent_at: string | null;
   statement: string | null;
   version: number;
@@ -2131,6 +2241,11 @@ export interface User {
 
 export interface UserResult {
   user: User;
+}
+
+/** The officer's statement that they issued the variance (outside Batatis) on this date. */
+export interface VarianceIssued {
+  issued_on: string;
 }
 
 export interface WordingDraft {

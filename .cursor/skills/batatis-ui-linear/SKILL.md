@@ -9,7 +9,7 @@ Read [the calm design system](../../../docs/design-system-calm.md) before produc
 
 ## Scope
 
-Simplify without losing supported capabilities. Pair with [minimalist content guidance](../batatis-ui-minimalist/SKILL.md) and [model and quality policy](../batatis-ui-opus/SKILL.md). Formal UI review uses a fresh independent reviewer under `.cursor/rules/pstack-models.mdc` (GPT-6.1-Sol at max).
+Simplify without losing supported capabilities. Pair with [minimalist content guidance](../batatis-ui-minimalist/SKILL.md) and [model and quality policy](../batatis-ui-opus/SKILL.md). Formal UI review uses a fresh independent Claude Opus 5.5 reviewer (user decision 2026-10-26; see `../batatis-ui-opus/SKILL.md`).
 
 ## UI P0 (must not fail)
 

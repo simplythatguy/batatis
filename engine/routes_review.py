@@ -14,13 +14,14 @@ from .account_models import (reviewing_authority, ApplicationPreferences, Applic
                              Role, ThreadMessage, User)
 from .accounts import require_user
 from .completeness import check_completeness
+from .codes import CodeDbMissing
 from .jurisdictions import reviewing_authority_names
 from .models import Case, ProfessionalRequirementResolution, now
 from .process_fields import confirmed_value
 from .professional import professional_involvement
 from .professional_resolution import requirement_fingerprint
-from .review_lifecycle import remember_decision, snapshot, submit_round
-from .store import VersionConflict
+from .review_lifecycle import remember_decision, resubmission_changes, snapshot, submit_round
+from .store import ReviewConflict, ReviewRevision, VersionConflict
 
 ACCEPT_TEXT = 'Accepted as administratively complete. Technical review remains the responsibility of the authority.'
 RETURN_TEXT = 'Returned for administrative information.'
@@ -109,14 +110,18 @@ class DecisionRequest(BaseModel):
     outcome: DecisionOutcome
     # Legacy accept/return callers may omit this. New final refusals pin their displayed revision.
     expected_version: int | None = Field(default=None, ge=1, strict=True,
-                                        description='Required for a refusal; the displayed saved application version.')
+                                        description='Required for an acceptance and a refusal; the displayed saved application version.')
+    # The package-review version on screen. An acceptance needs it whenever the case has a package review:
+    # it must be the latest version, read from the saved application as it is now, with nothing required open.
+    review_version: int | None = Field(default=None, ge=1, strict=True)
     message: str | None = Field(default=None, max_length=4000)
     items: list[DecisionItem] = Field(default_factory=list, max_length=50)
 
     @model_validator(mode='after')
     def _reason_required(self):
-        if self.outcome == 'refuse' and self.expected_version is None:
-            raise ValueError('A refusal requires the displayed application expected_version')
+        if self.outcome in {'accept', 'refuse'} and self.expected_version is None:
+            decision = 'An acceptance' if self.outcome == 'accept' else 'A refusal'
+            raise ValueError(f'{decision} requires the displayed application expected_version')
         if self.outcome in {'return', 'refuse'} and (self.message is None or len(self.message.strip()) < 10):
             noun = 'return' if self.outcome == 'return' else 'refusal'
             raise ValueError(f'A {noun} requires a message of at least 10 characters')
@@ -189,7 +194,10 @@ def mutate(store, case_id, user, operation):
         if result is UNCHANGED:
             return case, result  # No write: an idempotent operation must not bump the version.
         try:
-            return store.put(case, expected_version=version), result
+            options = {'expected_review': result} if isinstance(result, ReviewRevision) else {}
+            return store.put(case, expected_version=version, **options), result
+        except ReviewConflict:
+            continue
         except VersionConflict as error:
             if error.actual is None:
                 raise HTTPException(404, 'case not found') from None
@@ -358,6 +366,8 @@ def create_router(cases, code):
                 raise HTTPException(409, 'Only draft or returned applications may be submitted')
             if body and body.expected_version is not None and case.version != body.expected_version:
                 raise HTTPException(409, 'The saved application changed. Review it before submitting again.')
+            at = now()
+            resubmission_changes(case, cases(), at)
             blocking = [gap for gap in check_completeness(case, code())
                         if gap.severity == 'blocking' and gap.submission_blocking]
             if blocking:
@@ -365,7 +375,6 @@ def create_router(cases, code):
                                           'gaps': [gap.model_dump() for gap in blocking]})
             if not reviewing_authority(case.authority):
                 raise HTTPException(409, f'Choose {reviewing_authority_names()} as the reviewing authority before submitting')
-            at = now()
             number = submit_round(case, cases(), at)
             label = 'Resubmitted' if number > 1 else 'Submitted'
             transition(case, user, 'submitted', f'{label} for administrative review · submission {number}')
@@ -456,8 +465,31 @@ def create_router(cases, code):
             if body.expected_version is not None and case.version != body.expected_version:
                 raise HTTPException(409, 'The application changed. Refresh it before recording a decision.')
             if body.outcome == 'accept':
-                # Handoffs allowed at submission still block acceptance and the official PDF.
-                blocking = [gap for gap in check_completeness(case, code()) if gap.severity == 'blocking']
+                from .review.sessions import Sessions
+                from .review.workspace import build
+                codes = None
+                try:
+                    codes = code()
+                except CodeDbMissing:
+                    pass
+                except HTTPException as error:
+                    if error.status_code != 503 or error.detail != 'code database not found':
+                        raise
+                reviews = Sessions(cases())
+                found = reviews.list(case_id)
+                if not found and codes is not None:
+                    raise HTTPException(409, 'Run the package review before accepting')
+                # When CodeDB is absent, the legacy path still respects previously saved canonical gaps.
+                gaps = check_completeness(case, codes) if codes is not None else case.gaps
+                if found:
+                    if body.review_version != found[-1].version:
+                        raise HTTPException(409, 'Review the latest package review before accepting')
+                    review, raw = reviews.get(case_id, found[-1].version)
+                    revision = ReviewRevision(review.version, raw)
+                    gate = build(review, case, gaps, codes_available=codes is not None).gate
+                    if not gate.can_accept:
+                        raise HTTPException(409, gate.reason)
+                blocking = [gap for gap in gaps if gap.severity == 'blocking']
                 if blocking:
                     raise HTTPException(409, {'message': 'Resolve blocking administrative gaps before accepting',
                                               'gaps': [gap.model_dump() for gap in blocking]})
@@ -470,9 +502,11 @@ def create_router(cases, code):
                                      message=text, items=body.items)
             case.decision_history.append(case.decision.model_copy(deep=True))
             if body.outcome == 'return':
-                case.return_snapshot = snapshot(case, case.decision.at)
+                case.return_snapshot = snapshot(case, case.decision.at, cases())
             transition(case, user, status, label)
             append_message(case, user, text, kind='decision', items=body.items)
+            if body.outcome == 'accept' and found:
+                return revision
 
         return mutate(cases(), case_id, user, apply)[0]
 

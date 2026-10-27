@@ -41,14 +41,18 @@ Every icon-only control or icon metadata has an accessible name and a hover labe
 ## Example: stage navigation
 
 - Before: `1 Describe  2 Questions  3 Review  4 Application` with thin underlines.
-- After: four icons, in order, never with a fill, pill or shadow (at rest, current, hover, pressed or focus). Only the current one shows its one-word name beside its icon, at full opacity (`Describe`, `Questions`, `Review`, `Application`); the others are the icon alone, dimmed and brighter on hover or keyboard focus, fainter when locked (user decision 2026-10-22, "Option A+B"; it replaces "never with words beside them"). Compact cues keep the state in one neutral ink: a small green check mark when done, a thin line at the foot while part of the way through. "Questions, 40% done" is the accessible name and the hover/focus label (one label open at a time). The officer's review steps use the same control: Changes (history icon), Request (document), Missing (alert), Checks (list), Decide (scales), the current one named with its real open count after the name (`Missing 9`), another step's count as a quiet number beside its icon.
-- Code: `StageButton` and `StageRings` in `web/src/calm/shell/AppHeader.tsx`, `StepTabs` in `web/src/calm/reviewer/PackageReview.tsx`.
+- After: four icons, in order, never with a fill, pill or shadow (at rest, current, hover, pressed or focus). Only the current one shows its one-word name beside its icon, at full opacity (`Describe`, `Questions`, `Review`, `Application`); the others are the icon alone, dimmed and brighter on hover or keyboard focus, fainter when locked (user decision 2026-10-22, "Option A+B"; it replaces "never with words beside them"). Compact cues keep the state in one neutral ink: a small green check mark when done, a thin line at the foot while part of the way through. "Questions, 40% done" is the accessible name and the hover/focus label (one label open at a time).
+- Code: `StageButton` and `StageRings` in `web/src/calm/shell/AppHeader.tsx`.
 
 ## Example: the officer's review
 
-- One step on screen, its title the task in a few words ("Read the request", "What to ask for", "Look over the checks", "Decide"), drawn in ink; only status dots keep colour. Where each item was read, its message and code chips open on demand.
-- Opening an application nobody has picked up picks it up; there is no second "Pick up" or "start review" button on a page you are already in. "Stop reviewing" (⋯) goes back to the queue.
-- Code: `web/src/calm/reviewer/ReviewDetail.tsx`, `PackageReview.tsx`, `ReviewQueue.tsx`.
+- One screen, the same layout as the applicant's Review (user correction 2026-10-26: the three-place deck was "too much"; a review is a list you scan, not a deck you page through). No header stages, no steps, no Next.
+- A headline that counts ("Ask for 3 things.", "Complete. Ready to accept."), one quiet lede line only when the application was resent ("Since version 2: 1 fixed · 1 new").
+- "To ask": one row per item, a status dot (a ring when it couldn't be read: look first) and a few words. The row opens in place to the applicant's own words in full and a chip per source file. ✕ means don't ask; a required item asks why with three one-tap reasons, no note. A rule-required item says "Required" and has no ✕. "Add your own" is a link. What isn't asked folds under "Not asking · n".
+- The card: the four sections (icon, letter, a short count) open the application at that section; then the one primary (Accept when complete, otherwise "Return · n"), and "Completeness only". Messages and the menu (⋯) hold everything else.
+- The application one step away is not a paper form with coloured dots (user correction 2026-10-26: "a child playing around with colors and circles on a document"). It is sections headed like the card (icon tile, title, faint letter), then label and value lines in one ink. "Not given" in grey, never red. A line with an open item gets a light shade and one word (Asking, Look first, Not asking, with a count when several share a line).
+- Opening an application nobody has picked up picks it up; "Stop reviewing" (⋯) goes back to the queue.
+- Code: `web/src/calm/reviewer/ReviewWorkspace.tsx`, `OfficerReview.tsx`, `ReadSheet.tsx`.
 
 ## Example: an application title
 

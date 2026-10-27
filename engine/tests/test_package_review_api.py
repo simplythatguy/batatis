@@ -4,6 +4,7 @@ from __future__ import annotations
 from contextlib import ExitStack
 import os
 import uuid
+from datetime import timedelta
 
 import pytest
 from fastapi.testclient import TestClient
@@ -11,8 +12,9 @@ from fastapi.testclient import TestClient
 from engine.api import create_app
 from engine.codes import Codes
 from engine.models import Case
+from engine.review import sessions as review_sessions
 from engine.store import CaseStore
-from engine.tests.case_builder_fixtures import complete_case, fact, store_with_synthetic_files
+from engine.tests.case_builder_fixtures import acceptance_request, complete_case, fact, store_with_synthetic_files
 from engine.tests.package_review_fixtures import (CLEAN_FORM, CLEAN_NARRATIVE, annotated_rationale_pdf,
                                                 covered_scan_pdf, package, repeated_rationale_pdf, text_pdf)
 from engine.tests.test_package_review_rationale import raster_rationale_pdf, split_rationale_pdf
@@ -165,11 +167,12 @@ def test_case_review_request_send_and_applicant_view(scene):
     assert clients['owner'].get(f'/cases/{case.id}/information-request').json()['requests'] == []
     items = [{'id': item['id'], 'text': item['text'], 'included': item['included']}
              for item in session['information_request']['items']]
-    items.append({'text': 'Please send the stamped drawing set referenced in Section D.', 'included': True})
+    items.append({'text': 'Please send the stamped drawing set referenced in Section D.', 'included': True,
+                  'target': {'section': 'D', 'label': 'Section D · Drawing set'}})
     edited = clients['reviewer'].put(f'/review/{case.id}/package-review/1/information-request',
                                      json={'items': items, 'intro': 'Officer intro.'})
     assert edited.status_code == 200, edited.text
-    request = edited.json()['information_request']
+    request = edited.json()['latest']['information_request']
     assert request['edited'] and request['intro'] == 'Officer intro.'
     assert request['items'][-1]['authored_by'] == 'officer'
     assert 'stamped drawing set' in request['text']
@@ -266,9 +269,10 @@ def test_saved_rationale_gap_blocks_acceptance_until_applicant_supplies_it(scene
     assert first.status_code == 201, first.text
     finding = next(f for f in first.json()['findings'] if f['field'] == 'rationale')
     assert finding['status'] == 'blank' and finding['severity'] == 'blocking'
-    blocked = clients['reviewer'].post(f'{path}/decision', json={'outcome': 'accept'})
+    blocked = clients['reviewer'].post(f'{path}/decision', json={'outcome': 'accept',
+        'expected_version': store.get(case.id).version, 'review_version': 1})
     assert blocked.status_code == 409, blocked.text
-    assert any(g['field'] == 'rationale' for g in blocked.json()['detail']['gaps'])
+    assert 'completeness rules' in blocked.json()['detail']
     assert store.get(case.id).status == 'in_review' and store.get(case.id).decision is None
     saved = store.get(case.id)
     saved.facts.append(fact('process.rationale', 'SYNTHETIC applicant rationale: the existing assembly rating is '
@@ -278,7 +282,7 @@ def test_saved_rationale_gap_blocks_acceptance_until_applicant_supplies_it(scene
     assert second.status_code == 201, second.text
     assert not any(f['field'] == 'rationale' for f in second.json()['findings'])
     assert finding['key'] in {e['key'] for e in second.json()['diff']['resolved']}
-    accepted = clients['reviewer'].post(f'{path}/decision', json={'outcome': 'accept'})
+    accepted = clients['reviewer'].post(f'{path}/decision', json=acceptance_request(clients['reviewer'], case.id, run=False))
     assert accepted.status_code == 200, accepted.text
     assert accepted.json()['decision']['message'] == (
         'Accepted as administratively complete. Technical review remains the responsibility of the authority.')
@@ -542,9 +546,10 @@ def test_close_out_after_decision_with_record_package(scene, outcome):
     assert reviewed.status_code == 201
     source_version = reviewed.json()['case_version']
     assert clients['reviewer'].get(f'/review/{case.id}/close-out').status_code == 404   # no decision yet
+    payload = (acceptance_request(clients['reviewer'], case.id, run=False) if outcome == 'accept' else
+               {'outcome': 'refuse', 'expected_version': source_version})
     decided = clients['reviewer'].post(f'/review/{case.id}/decision',
-                                      json={'outcome': outcome, 'message': 'Officer recorded the written reason.',
-                                            'expected_version': source_version})
+                                      json=payload | {'message': 'Officer recorded the written reason.'})
     assert decided.status_code == 200, decided.text
     close = clients['second'].get(f'/review/{case.id}/close-out')
     assert close.status_code == 200, close.text
@@ -559,12 +564,11 @@ def test_close_out_after_decision_with_record_package(scene, outcome):
         method = 'put' if payload is not None else 'post'
         assert clients['reviewer'].request(method, f'/review/{case.id}' + path, json=payload).status_code == 409
     from datetime import datetime, timedelta, timezone
-    decided_at = datetime.fromisoformat(body['decided_at']).date()
-    assert body['due_date'] == (decided_at + timedelta(days=10)).isoformat()
-    assert body['days_remaining'] == (decided_at + timedelta(days=10) - datetime.now(timezone.utc).date()).days
+    assert body['due_date'] is None and body['days_remaining'] is None
+    assert body['issued_on'] is None
     assert body['sent'] is False and body['overdue'] is False
     package_ = body['record_package']
-    assert package_['send_to_council'][0]['label'] == 'Copy of the variance as decided'
+    assert package_['send_to_council'][0]['label'] == 'Copy of the variance as issued' if outcome == 'accept' else not package_['send_to_council']
     assert {item['label'] for item in package_['retain_on_file']} >= {'Supporting documents',
                                                                       'Section C code references and attributions'}
     assert 'IB-2025-11-18' in package_['basis'][0]
@@ -576,10 +580,19 @@ def test_close_out_after_decision_with_record_package(scene, outcome):
     for name in ['owner', 'other', 'foreign', 'anonymous']:
         assert clients[name].post(f'/review/{case.id}/close-out/sent').status_code == 404, name
     assert clients['second'].post(f'/review/{case.id}/close-out/sent').status_code == 409
-    sent = clients['reviewer'].post(f'/review/{case.id}/close-out/sent')
-    assert sent.status_code == 200 and sent.json()['sent'] and sent.json()['sent_by_name'] == 'Reviewer'
     assert clients['reviewer'].post(f'/review/{case.id}/close-out/sent').status_code == 409
-    assert clients['second'].get(f'/review/{case.id}/close-out').json()['sent']
+    from zoneinfo import ZoneInfo
+    if outcome == 'accept':
+        issued_on = datetime.now(ZoneInfo('America/Edmonton')).date()
+        issued = clients['reviewer'].post(f'/review/{case.id}/close-out/issued', json={'issued_on': issued_on.isoformat()})
+        assert issued.status_code == 200, issued.text
+        assert issued.json()['due_date'] == (issued_on + timedelta(days=10)).isoformat()
+        sent = clients['reviewer'].post(f'/review/{case.id}/close-out/sent')
+        assert sent.status_code == 200 and sent.json()['sent'] and sent.json()['sent_by_name'] == 'Reviewer'
+        assert clients['reviewer'].post(f'/review/{case.id}/close-out/sent').status_code == 409
+        assert clients['second'].get(f'/review/{case.id}/close-out').json()['sent']
+    else:
+        assert clients['reviewer'].post(f'/review/{case.id}/close-out/issued', json={'issued_on': '2026-10-26'}).status_code == 409
     assert store.get(case.id).model_dump() == decided_case
     store.delete(case.id)
 
@@ -661,7 +674,7 @@ def test_a_stuck_claim_keeps_the_original_error_is_hidden_and_expires(scene, mon
     assert clients['owner'].get(f'/cases/{case.id}/information-request').json()['requests'] == []
     busy = clients['reviewer'].post(f'/review/{case.id}/package-review/1/information-request/send')
     assert busy.status_code == 409 and busy.headers['retry-after']
-    monkeypatch.setattr(routes, 'SEND_CLAIM_TTL', routes.timedelta(0))   # the claim has expired
+    monkeypatch.setattr(review_sessions, 'SEND_CLAIM_TTL', timedelta(0))   # the claim has expired
     monkeypatch.setattr(routes, 'mutate', real_mutate)
     sent = clients['reviewer'].post(f'/review/{case.id}/package-review/1/information-request/send')
     assert sent.status_code == 200, sent.text

@@ -478,7 +478,8 @@ def test_officer_review_completeness_and_close_out_name_no_provider(reviewing):
     assert first.status_code == 201, first.text
     items = [{'id': item['id'], 'text': item['text'], 'included': item['included']}
              for item in first.json()['information_request']['items']]
-    items.append({'text': 'Please send the stamped drawing set referenced in Section D.', 'included': True})
+    items.append({'text': 'Please send the stamped drawing set referenced in Section D.', 'included': True,
+                  'target': {'section': 'D', 'label': 'Section D · Drawing set'}})
     edited = reviewer.put(f'/review/{case.id}/package-review/1/information-request',
                           json={'items': items, 'intro': 'Officer intro.'})
     assert edited.status_code == 200, edited.text
@@ -493,7 +494,12 @@ def test_officer_review_completeness_and_close_out_name_no_provider(reviewing):
     assert index.status_code == 200 and [s['version'] for s in index.json()['sessions']] == [1, 2]
     assert reviewer.get(f'/review/{case.id}/package-review/2').status_code == 200
     assert reviewer.get(f'/review/{case.id}/close-out').status_code == 404       # no decision yet
-    assert reviewer.post(f'/review/{case.id}/decision', json={'outcome': 'accept'}).status_code == 200
+    from engine.tests.case_builder_fixtures import acceptance_request
+    assert reviewer.post(f'/review/{case.id}/decision', json=acceptance_request(reviewer, case.id, run=False)).status_code == 200
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    issued_on = datetime.now(ZoneInfo('America/Edmonton')).date().isoformat()
+    assert reviewer.post(f'/review/{case.id}/close-out/issued', json={'issued_on': issued_on}).status_code == 200
     assert reviewer.get(f'/review/{case.id}/close-out').status_code == 200
     assert reviewer.post(f'/review/{case.id}/close-out/sent').status_code == 200
     assert reviewer.get('/review/queue').status_code == 200
@@ -518,7 +524,8 @@ def test_officer_uploads_and_standalone_reviews_name_no_provider(reviewing):
     assert reviewer.get(f'/package-review/{package_id}').status_code == 200
     assert reviewer.get(f'/package-review/{package_id}/2').status_code == 200
     edit = reviewer.put(f'/package-review/{package_id}/2/information-request',
-                        json={'items': [{'text': 'Please confirm the owner name.', 'included': True}]})
+                        json={'items': [{'text': 'Please confirm the owner name.', 'included': True,
+                                            'target': {'section': 'A', 'field': 'owner_name', 'label': 'Section A · Owner'}}]})
     assert edit.status_code == 200, edit.text
     unreadable = reviewer.post('/package-review', files=[('files', ('notes.txt', b'hello', 'text/plain'))])
     assert unreadable.status_code == 201 and unreadable.json()['files'][0]['role'] == 'unreadable'

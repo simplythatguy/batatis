@@ -72,10 +72,10 @@ test("reviewer steps use the same control, with the open count beside the icon",
   assert.equal(visible(tree).trim(), "", "no visible step names");
   const controls = nodes(tree, (n) => n.type === "StageButton");
   assert.equal(controls.length, 4);
-  assert.deepEqual(controls.map((c) => c.props.ariaLabel), ["Step 1 of 4: Request, done", "Step 2 of 4: Missing, 3 to look at", "Step 3 of 4: Checks", "Step 4 of 4: Decide"], "a passed step says done, like the applicant stages");
+  assert.deepEqual(controls.map((c) => c.props.ariaLabel), ["Step 1 of 4: Request", "Step 2 of 4: Missing, 3 to look at", "Step 3 of 4: Checks", "Step 4 of 4: Decide"], "passing a package view never completes an administrative check");
   assert.deepEqual(controls.map((c) => c.props.label), ["Request", "Missing", "Checks", "Decide"], "the name is the on-demand label");
   assert.deepEqual(controls.map((c) => Boolean(c.props.current)), [false, true, false, false]);
-  assert.deepEqual(controls.map((c) => Boolean(c.props.done)), [true, false, false, false], "a passed step shows done");
+  assert.deepEqual(controls.map((c) => Boolean(c.props.done)), [false, false, false, false], "navigation never marks a check done");
   assert.equal(controls[1].props.count, 3, "the open count stays visible beside its icon");
   assert.deepEqual(controls.map((c) => c.props.icon.props.name), ["doc", "alert", "list", "scale"], "Request is a document; Missing, Checks and Decide keep their icons");
 });

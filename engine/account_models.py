@@ -68,6 +68,12 @@ class DecisionItem(BaseModel):
     gap_id: str | None = Field(default=None, min_length=1, max_length=200)
     field: str | None = Field(default=None, min_length=1, max_length=200)
     note: str = Field(min_length=1, max_length=2000)
+    # Set by a return with an information request: where the applicant answers, and which request item
+    # and finding it came from. The applicant workspace maps `field` (else `section`) to the place to fix it.
+    section: Literal['A', 'B', 'C', 'D', 'process'] | None = None
+    label: str | None = Field(default=None, max_length=200)
+    request_item_id: str | None = Field(default=None, max_length=100)
+    finding_key: str | None = Field(default=None, max_length=300)
 
     @model_validator(mode='after')
     def _location(self):

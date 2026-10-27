@@ -4,10 +4,11 @@ import * as libraryContext from "./libraryContext.ts";
 import { componentHarness, nodes, text } from "../../scripts/component-harness.mjs";
 import type { ApplicationSummary, Message } from "../api/accounts.ts";
 import * as packageView from "./reviewer/packageView.ts";
-import * as queue from "./reviewer/queue.ts";
 import * as thread from "./comments/thread.ts";
 import * as requestedItems from "./requestedItems.ts";
-import * as threadMessages from "./reviewer/threadMessages.ts";
+import * as requestDraft from "./reviewer/requestDraft.ts";
+import * as workspaceView from "./reviewer/workspaceView.ts";
+import { workspaceHarness, workspaceNode, reviewSession, indexFor, mine, menuItem, EngineError, AccountsError } from "./reviewer/tests/workspaceHarness.mjs";
 import { emptyCase } from "../intake.ts";
 
 const app = (over: Partial<ApplicationSummary> = {}): ApplicationSummary => ({
@@ -261,50 +262,31 @@ test("a notification for the open file refreshes only its summary and exposes th
   b.unmount(); h.unmount();
 });
 
-const request = {
-  package_id: "c1", version: 1, findings: [],
-  information_request: { intro: "Please provide the requested drawing.", edited: false, sent_at: null, items: [] },
-};
-
-test("terminal officer files pass a historical read-only reason to the information request", async () => {
-  const terminalOfficer = { user: { id: "officer" } };
-  for (const status of ["refused", "accepted"]) {
-    const h = await componentHarness(new URL("./reviewer/ReviewDetail.tsx", import.meta.url), "ReviewDetail", {
-      "../../api/client": { engine: { getCase: async () => ({ id: "c1", status, version: 1 }), gaps: async () => [] } },
-      "../../api/accounts": { accounts: { messages: async () => [] } },
-      "../../api/packageReview": { packageReview: { index: async () => ({ latest: request, sessions: [request], close_out: null }) } },
-      "../account": { useAccount: () => terminalOfficer, accountSession: () => "officer-session" },
-      "./reviewSnapshot": { readReviewSnapshot: async () => ({ c: { id: "c1", status, version: 1 }, gaps: [], information: null, messages: [], gapError: "", questionError: "" }) },
-      "./threadMessages": threadMessages,
-      "./sheet": { sheetFromEngine: () => ({ questions: [] }) },
-      "./reviewData": { useQueue: () => ({ rows: [{ id: "c1", status, applicant: { name: "Mira" } }] }), setBlocking() {}, patchRow() {}, loadQueue: async () => {} },
-      "./queue": queue,
-      "./packageView": packageView,
-      "./InfoRequest": { InfoRequest: "InfoRequest" },
-    });
-    let tree = await h.render({ caseId: "c1" });
-    click(tree, "Information request");
-    tree = await h.render();
-    const info = nodes(tree, (n) => n.type === "InfoRequest")[0];
-    assert.ok(info);
-    const ir = await componentHarness(new URL("./reviewer/InfoRequest.tsx", import.meta.url), "InfoRequest", { "./packageView": packageView });
-    const requestTree = await ir.render(info.props);
-    assert.match(text(requestTree), /historical.*read-only/i);
-    assert.ok(text(requestTree).includes(status));
-    assert.doesNotMatch(text(requestTree), /Pick up this application \(or take over\)/);
-    assert.equal(nodes(requestTree, (n) => n.type === "fieldset")[0].props.disabled, true);
-    assert.equal(nodes(requestTree, (n) => n.type === "button" && text(n).startsWith("Send to"))[0].props.disabled, true);
-    ir.unmount(); h.unmount();
+test("terminal officer files keep the request in the workspace as a read-only record", async () => {
+  for (const status of ["refused", "accepted", "returned"]) {
+    const h = await workspaceHarness({ status }, { latest: reviewSession(1) });
+    const tree = await h.render({ caseId: "c1" });
+    const workspace = workspaceNode(tree);
+    assert.ok(workspace, "the saved request remains alongside the sheet");
+    assert.equal(workspace.props.editable, false);
+    assert.equal(workspace.props.showDecision, false, "a decided or returned file has no decision bar");
+    assert.equal(nodes(tree, n => n.type === "InfoRequest" || n.type === "Drawer").length, 0);
+    h.unmount();
   }
 });
 
-test("an unclaimed editable file keeps takeover guidance; standalone packages keep copy", async () => {
-  const h = await componentHarness(new URL("./reviewer/InfoRequest.tsx", import.meta.url), "InfoRequest", { "./packageView": packageView });
-  const props = { target: { kind: "case", id: "c1" }, session: request, latest: true, canEdit: false, applicant: "Mira", onChange() {} };
-  assert.match(text(await h.render(props)), /Pick up this application \(or take over\)/);
-  const tree = await h.render({ ...props, target: { kind: "package", id: "p1" }, canEdit: true });
-  assert.ok(nodes(tree, (n) => n.type === "button" && text(n) === "Copy the text").length);
-  assert.doesNotMatch(text(tree), /historical|Pick up this application/);
+test("a standalone package retains copy-out and never offers a case decision", async () => {
+  let copied = "";
+  const h = await componentHarness(new URL("./reviewer/InfoRequest.tsx", import.meta.url), "InfoRequest", {
+    "./requestDraft": requestDraft, "./workspaceView": workspaceView,
+  }, { navigator: { clipboard: { writeText: async (value: string) => { copied = value; } } } });
+  const tree = await h.render({ target: { kind: "package", id: "pkg_1" }, session: reviewSession(1), latest: true, canEdit: true, onChange() {} });
+  const copy = nodes(tree, n => n.type === "button" && text(n) === "Copy the text")[0];
+  assert.ok(copy);
+  await copy.props.onClick();
+  await h.render();
+  assert.equal(copied, "Exact server preview");
+  assert.doesNotMatch(text(tree), /Send and return|Accept|Refuse|Take over/);
   h.unmount();
 });
 
@@ -381,150 +363,124 @@ test("the one-line notice links to comments, counts what is new, and reads nothi
   h.unmount(); line.unmount();
 });
 
-const reviewSession = (version: number) => ({ package_id: "c1", version, case_version: 1, findings: [], information_request: { items: [] } });
-
-async function reviewHarness(opts: { index: () => Promise<unknown> }) {
-  const officer = { user: { id: "officer", name: "Morgan" } };
-  const claim = { reviewer_id: "officer", reviewer_name: "Morgan", claimed_at: "2026-10-22T12:00:00Z" };
-  const current = { id: "c1", title: "Synthetic review refresh", status: "in_review", version: 1, claim };
-  class EngineError extends Error { status: number; constructor(status: number) { super("Synthetic failure"); this.status = status; } }
-  let runs = 0;
-  const decisions: unknown[] = [];
-  const h = await componentHarness(new URL("./reviewer/ReviewDetail.tsx", import.meta.url), "ReviewDetail", {
-    "../../api/client": { EngineError, engine: { getCase: async () => current, gaps: async () => [] } },
-    "../../api/accounts": { AccountsError: EngineError, accounts: { messages: async () => [] },
-      review: { decide: async (_id: string, body: unknown) => { decisions.push(JSON.parse(JSON.stringify(body))); return current; } } },
-    "../../api/packageReview": { packageReview: { index: opts.index, run: async () => { runs++; return reviewSession(2); } } },
-    "../account": { useAccount: () => officer, accountSession: () => "officer-session" },
-    "./reviewData": { useQueue: () => ({ rows: [{ ...current, applicant: { name: "Mira", applicant_type: "homebuilder" } }] }), setBlocking() {}, patchRow() {}, loadQueue: async () => {} },
-    // The page reads the case, its gaps, questions and thread as one snapshot (reviewSnapshot.ts).
-    "./reviewSnapshot": { readReviewSnapshot: async () => ({ c: current, gaps: [], information: null, messages: [], gapError: "", questionError: "" }) },
-    "./threadMessages": threadMessages,
-    "./sheet": { sheetFromEngine: () => ({ questions: [] }) },
-    "./queue": queue,
-    "./packageView": packageView,
-    "./PackageReview": { PackageReview: "PackageReview", StepTitle: "StepTitle" },
-    "../shell/MoreMenu": { MoreMenu: "MoreMenu" },
-    "./InfoRequest": { InfoRequest: "InfoRequest" },
-  }, { EngineError });
-  return { ...h, EngineError, current, decisions, get runs() { return runs; } };
-}
-
-const runAgain = (tree) => {
-  const head = nodes(tree, (n) => n.props?.right)[0];
-  const menu = nodes(head.props.right, (n) => n.type === "MoreMenu")[0];
-  const item = menu.props.items.find((i) => i.label === "Run the review again");
-  assert.ok(item, "the claimed case can run again");
-  item.onClick();
-};
-/** Accept is in the failure panel, or in the review's last step (the PackageReview `final` prop). */
-const accept = (tree) => {
-  const isAccept = (n) => n.type === "button" && text(n).startsWith("Accept");
-  const final = nodes(tree, (n) => n.type === "PackageReview")[0]?.props.final.content;
-  return nodes(tree, isAccept)[0] ?? nodes(final, isAccept)[0];
-};
-
-test("a refusal from the review page pins the version on screen and sends the officer's reasons with the appeal notice, no correction list", async () => {
-  const h = await reviewHarness({ index: async () => ({ latest: reviewSession(1), sessions: [reviewSession(1)], close_out: null }) });
-  h.current.version = 7;
+test("a refusal pins the saved case version and includes the appeal notice without a correction list", async () => {
+  const h = await workspaceHarness({ status: "in_review", claim: mine, version: 7 }, { latest: reviewSession(1, 7) });
   const tree = await h.render({ caseId: "c1" });
-  // The refusal dialog: the only element taking both onSend and onRefresh (its module is not stubbed here).
-  const dialog = nodes(tree, (n) => typeof n.props?.onSend === "function" && typeof n.props?.onRefresh === "function")[0];
-  assert.ok(dialog, "the refusal dialog is mounted for this case");
-  const reasons = "The requested fire separation drawings were not provided.";
-  await dialog.props.onSend(reasons);
-  assert.equal(h.decisions.length, 1);
-  assert.deepEqual(h.decisions[0], { outcome: "refuse", message: packageView.refusalMessage(reasons), expected_version: 7 });
-  assert.ok((h.decisions[0] as { message: string }).message.includes(packageView.APPEAL_NOTICE));
+  const dialog = nodes(tree, n => typeof n.props?.onSend === "function" && typeof n.props?.onRefresh === "function")[0];
+  await dialog.props.onSend("The requested fire separation drawings were not provided.");
+  assert.deepEqual(h.calls.decisions, [{ outcome: "refuse", message: packageView.refusalMessage("The requested fire separation drawings were not provided."), expected_version: 7 }]);
   h.unmount();
 });
 
-test("a review that ran stays on screen when the background index refresh fails; Accept stays blocked", async () => {
-  let failRefresh = false, Err: new (s: number) => Error;
-  const h = await reviewHarness({ index: async () => { if (failRefresh) throw new Err(503); return { latest: reviewSession(1), sessions: [reviewSession(1)], close_out: null }; } });
-  Err = h.EngineError;
+test("acceptance pins both the case and the package-review version that was on screen", async () => {
+  const h = await workspaceHarness({ status: "in_review", claim: mine, version: 7 }, { latest: reviewSession(3, 7) });
   let tree = await h.render({ caseId: "c1" });
-  assert.equal(nodes(tree, (n) => n.type === "PackageReview")[0]?.props.session.version, 1);
-  failRefresh = true;
-  runAgain(tree);
+  assert.equal(workspaceNode(tree).props.editable, true);
+  workspaceNode(tree).props.onAccept();
   tree = await h.render();
-  const after = nodes(tree, (n) => n.type === "PackageReview");
-  assert.equal(after.length, 1, "the successful review remains visible");
-  assert.equal(after[0].props.session.version, 2, "the version that just ran stays selected");
-  assert.equal(accept(tree)?.props.disabled, true, "an unknown index still blocks acceptance");
-  assert.ok(nodes(tree, (n) => n.type === "button" && text(n) === "Try again").length, "the refresh failure has a retry");
-  // Retrying succeeds with an index that lags behind: the selected version is not replaced.
-  failRefresh = false;
-  click(tree, "Try again");
-  tree = await h.render();
-  assert.equal(nodes(tree, (n) => n.type === "PackageReview")[0].props.session.version, 2, "retry keeps the selected newer version");
-  assert.equal(nodes(tree, (n) => n.type === "button" && text(n) === "Try again").length, 0);
+  click(tree, "Accept");
+  await h.render();
+  assert.deepEqual(h.calls.decisions, [{ outcome: "accept", expected_version: 7, review_version: 3 }]);
   h.unmount();
 });
 
-test("a first review load that fails still shows the error and retry, with Accept blocked", async () => {
-  let fail = true, Err: new (s: number) => Error;
-  const h = await reviewHarness({ index: async () => { if (fail) throw new Err(503); return { latest: reviewSession(1), sessions: [reviewSession(1)], close_out: null }; } });
-  Err = h.EngineError;
+test("return sends the exact saved server text and expected version in one call", async () => {
+  const saved = reviewSession(3, 7);
+  saved.information_request.text = "The server's exact\n\n1. Request — with punctuation.";
+  const h = await workspaceHarness({ status: "in_review", claim: mine, version: 7 }, { latest: saved });
   let tree = await h.render({ caseId: "c1" });
+  workspaceNode(tree).props.onReturn(); tree = await h.render();
+  assert.match(text(tree), /Return to Mira\?/, "the confirmation names who receives it");
+  click(tree, "Return"); await h.render();
+  assert.deepEqual(h.calls.returns, [{ caseId: "c1", version: 3, body: { expected_version: 7, text: saved.information_request.text } }]);
+  assert.deepEqual(h.calls.decisions, [], "no separate send or return decision can leave the applicant locked out");
+  h.unmount();
+});
+
+test("after a return the same version is read again, so the rail shows the request as sent", async () => {
+  const draft = reviewSession(3, 7);
+  const sent = { ...draft, information_request: { ...draft.information_request, sent_at: "2026-10-26T14:41:00Z", message_id: "m1" } };
+  let returned = false;
+  const h = await workspaceHarness({ status: "in_review", claim: mine, version: 7 }, {
+    index: async () => indexFor(returned ? sent : draft),
+    returnWithRequest: async () => {
+      returned = true; h.current.status = "returned";
+      h.current.decision = { outcome: "return", by_id: mine.reviewer_id, by_name: mine.reviewer_name, at: "2026-10-26T14:41:00Z", message: "", items: [] };
+      return { ...h.current };
+    },
+  });
+  let tree = await h.render({ caseId: "c1" });
+  workspaceNode(tree).props.onReturn(); tree = await h.render();
+  click(tree, "Return"); tree = await h.render(); tree = await h.render(); tree = await h.render();
+  assert.equal(workspaceNode(tree).props.session.information_request.sent_at, sent.information_request.sent_at, "never the stale draft");
+  assert.equal(workspaceNode(tree).props.status, "returned");
+  h.unmount();
+});
+
+test("a return conflict shows the server reason and refreshes without sending a second decision", async () => {
+  let reads = 0;
+  const h = await workspaceHarness({ status: "in_review", claim: mine }, { latest: reviewSession(1),
+    getCase: async () => { reads++; return { ...h.current }; },
+    returnWithRequest: async () => { throw new AccountsError(409, "The saved request changed. Review it again."); },
+  });
+  let tree = await h.render({ caseId: "c1" }); const before = reads;
+  workspaceNode(tree).props.onReturn(); tree = await h.render(); click(tree, "Return"); tree = await h.render();
+  assert.match(text(tree), /The saved request changed\. Review it again\./);
+  assert.ok(reads > before, "the displayed application is read again after the 409");
+  assert.equal(h.calls.returns.length, 1); assert.equal(h.calls.decisions.length, 0);
+  assert.equal(nodes(tree, n => n.type === "button" && text(n) === "Return")[0].props.disabled, true);
+  h.unmount();
+});
+
+test("a successful run stays visible when the index refresh fails; editing and decisions wait", async () => {
+  let failing = false;
+  const h = await workspaceHarness({ status: "in_review", claim: mine }, {
+    index: async () => { if (failing) throw new EngineError(503); return indexFor(reviewSession(1)); },
+    run: async () => reviewSession(2),
+  });
+  let tree = await h.render({ caseId: "c1" });
+  failing = true; menuItem(tree, "Run the review again").onClick(); tree = await h.render();
+  assert.equal(workspaceNode(tree).props.session.version, 2);
+  assert.equal(workspaceNode(tree).props.editable, false);
   assert.match(text(tree), /The review didn’t load/);
-  assert.equal(nodes(tree, (n) => n.type === "PackageReview").length, 0);
-  assert.equal(accept(tree)?.props.disabled, true);
-  assert.equal(h.runs, 0, "an unknown index does not trigger a new review run");
-  fail = false;
-  click(tree, "Try again");
-  tree = await h.render();
-  assert.equal(nodes(tree, (n) => n.type === "PackageReview")[0]?.props.session.version, 1);
   h.unmount();
 });
 
-test("asking for more after a review ran but the index refresh failed: the newest run, no 'earlier', editing waits for the retry", async () => {
-  let failRefresh = false, newest = 1, Err: new (s: number) => Error;
-  const index = () => ({ latest: reviewSession(newest), sessions: [reviewSession(1), ...(newest > 1 ? [reviewSession(newest)] : [])], close_out: null });
-  const h = await reviewHarness({ index: async () => { if (failRefresh) throw new Err(503); return index(); } });
-  Err = h.EngineError;
+test("a failed first index load offers a retry and never starts a review against an unknown index", async () => {
+  let failing = true;
+  const h = await workspaceHarness({ status: "in_review", claim: mine }, {
+    index: async () => { if (failing) throw new EngineError(503); return indexFor(reviewSession(1)); },
+  });
   let tree = await h.render({ caseId: "c1" });
-  failRefresh = true;
-  runAgain(tree);
-  tree = await h.render();
-  const final = nodes(tree, (n) => n.type === "PackageReview")[0].props.final.content;
-  const ask = nodes(final, (n) => n.type === "button" && /rv-choice is-amber/.test(n.props.className || ""))[0];
-  ask.props.onClick();
-  tree = await h.render();
-  let ir = nodes(tree, (n) => n.type === "InfoRequest")[0];
-  assert.equal(ir.props.session.version, 2, "the review that just ran stays");
-  assert.equal(ir.props.latest, true, "an unknown index never makes the newest run 'an earlier version'");
-  assert.equal(ir.props.canEdit, false, "editing and sending wait until the index is known again");
-  assert.ok(nodes(tree, (n) => n.type === "button" && text(n) === "Try again").length, "the request view offers the retry");
-  // The retry finds the run: the newest actual version is edited.
-  failRefresh = false;
-  newest = 2;
-  click(tree, "Try again");
-  tree = await h.render();
-  ir = nodes(tree, (n) => n.type === "InfoRequest")[0];
-  assert.deepEqual([ir.props.session.version, ir.props.latest, ir.props.canEdit], [2, true, true]);
-  assert.equal(nodes(tree, (n) => n.type === "button" && text(n) === "Try again").length, 0);
-  assert.equal(accept(tree), undefined, "no accept control in the request view");
+  assert.equal(workspaceNode(tree), undefined); assert.equal(h.calls.run, 0);
+  assert.match(text(tree), /The review didn’t load/);
+  failing = false; click(tree, "Try again"); tree = await h.render();
+  assert.equal(workspaceNode(tree).props.session.version, 1);
+  assert.equal(workspaceNode(tree).props.editable, true);
   h.unmount();
 });
 
-test("after recovery the request moves to a newer version another run saved", async () => {
-  let failRefresh = false, newest = 1, Err: new (s: number) => Error;
-  const h = await reviewHarness({ index: async () => { if (failRefresh) throw new Err(503); return { latest: reviewSession(newest), sessions: [reviewSession(newest)], close_out: null }; } });
-  Err = h.EngineError;
+test("unsaved request changes hold decisions, release and switching to another version", async () => {
+  const h = await workspaceHarness({ status: "in_review", claim: mine }, { latest: reviewSession(2) });
   let tree = await h.render({ caseId: "c1" });
-  failRefresh = true;
-  runAgain(tree);
-  tree = await h.render();
-  const final = nodes(tree, (n) => n.type === "PackageReview")[0].props.final.content;
-  nodes(final, (n) => n.type === "button" && /rv-choice is-amber/.test(n.props.className || ""))[0].props.onClick();
-  tree = await h.render();
-  failRefresh = false;
-  newest = 3;
-  click(tree, "Try again");
-  tree = await h.render();
-  const ir = nodes(tree, (n) => n.type === "InfoRequest")[0];
-  assert.deepEqual([ir.props.session.version, ir.props.latest, ir.props.canEdit], [3, true, true]);
+  workspaceNode(tree).props.onDraft({ pending: true, trouble: "", discard() {} }); tree = await h.render();
+  assert.equal(menuItem(tree, "Stop reviewing").disabled, true);
+  workspaceNode(tree).props.onAccept(); tree = await h.render();
+  const open = nodes(tree, n => n.props?.labelledBy === "rw-decision-title")[0];
+  assert.equal(open.props.open, false);
+  assert.equal(h.calls.decisions.length, 0);
+  h.unmount();
+});
+
+test("a draft the server refused shows in the status line with a way out", async () => {
+  const h = await workspaceHarness({ status: "in_review", claim: mine }, { latest: reviewSession(2) });
+  let tree = await h.render({ caseId: "c1" });
+  let discarded = 0;
+  workspaceNode(tree).props.onDraft({ pending: true, trouble: "The request changed. Review it again.", discard() { discarded++; } }); tree = await h.render();
+  const alert = nodes(tree, n => n.props?.role === "alert").find(n => text(n).includes("The request changed"));
+  assert.ok(alert, "the trouble is on screen, not only on the Request tab");
+  nodes(alert, n => n.type === "button" && text(n) === "Discard my changes")[0].props.onClick();
+  assert.equal(discarded, 1);
   h.unmount();
 });
 

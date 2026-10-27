@@ -111,7 +111,10 @@ def main():
         add('evidence.synthetic.date', '2026-10-21')
         request(owner, 'POST', f'/cases/{cid}/submit', json={}, label='Applicant resubmits')
         request(officer, 'POST', f'/review/{cid}/claim', json={}, label='Reviewer reclaims')
-        request(officer, 'POST', f'/review/{cid}/decision', json={'outcome': 'accept'}, expected=409,
+        review = request(officer, 'POST', f'/review/{cid}/package-review', expected=201)
+        current = request(officer, 'GET', f'/cases/{cid}')
+        request(officer, 'POST', f'/review/{cid}/decision', json={'outcome': 'accept',
+            'expected_version': current['version'], 'review_version': review['version']}, expected=409,
                 label='Unresolved professional requirement blocks acceptance')
         current = request(officer, 'GET', f'/cases/{cid}')
         request(officer, 'POST', f'/review/{cid}/professional-requirement', json={
@@ -119,7 +122,8 @@ def main():
             'scope': 'SYNTHETIC complete submitted alternative including component and professional-law scope',
             'basis': 'SYNTHETIC authority scope determination for the HTTP fixture; no technical approval.',
             'reference': 'SYNTHETIC authority record J02'}, label='Reviewer records scoped professional requirement determination')
-        accepted = request(officer, 'POST', f'/review/{cid}/decision', json={'outcome': 'accept'},
+        from engine.tests.case_builder_fixtures import acceptance_request
+        accepted = request(officer, 'POST', f'/review/{cid}/decision', json=acceptance_request(officer, cid),
                            label='Reviewer accepts as administratively complete')
         assert accepted['status'] == 'accepted'
         request(owner, 'POST', f'/cases/{cid}/facts', expected=409,

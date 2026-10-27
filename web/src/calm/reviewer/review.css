@@ -1,4 +1,4 @@
-/* Officer package review (WP-36). Calm light theme: hairlines, one hue per step, no all caps. */
+/* Officer package review (WP-36). Calm light theme: hairlines, neutral surfaces and status dots. */
 
 .pr { width: 100%; max-width: 720px; display: flex; flex-direction: column; min-width: 0; }
 .pr-head .pr-title { margin-bottom: 4px; }
@@ -181,15 +181,15 @@
 
 /* Header buttons: Application, Messages (with an unread count), ⋯ */
 .rv-head-btn { position: relative; gap: 7px; }
-.rv-badge { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--cf-accent); color: #fff; font: 600 11px/18px var(--cf-font); text-align: center; }
+.rv-badge { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--cf-selected); color: var(--cf-text); font: 600 11px/18px var(--cf-font); text-align: center; }
 
 /* Not picked up yet: one bar above the application */
-.rv-chip { display: inline-flex; align-items: center; gap: 7px; height: 26px; padding: 0 11px; border-radius: 999px; background: var(--hue-t); color: var(--hue); font-size: 12.5px; font-weight: 600; }
-.rv-chip .cf-dot { background: var(--hue); }
+.rv-chip { display: inline-flex; align-items: center; gap: 7px; height: 26px; padding: 0 11px; border-radius: 999px; background: var(--cf-hover); color: var(--cf-text-2); font-size: 12.5px; font-weight: 600; }
+.rv-chip .cf-dot { background: var(--cf-text-2); }
 .rv-start-acts { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 24px; }
 .rv-scope { display: inline-flex; align-items: center; gap: 7px; margin: 18px 0 0; padding: 4px 10px; border-radius: 999px; background: var(--cf-hover); color: var(--cf-text-3); font-size: 12.5px; }
 
-/* The decision: three coloured tiles, icon first */
+/* Legacy package decision geometry. */
 .rv-decide .rv-scope { margin: 0 0 18px; }
 .rv-choices { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .rv-choice {
@@ -216,11 +216,11 @@
 .rv-choice:disabled { cursor: not-allowed; box-shadow: none; background: transparent; }
 .rv-choice:disabled .pr-ico { background: var(--cf-hover); color: var(--cf-text-4); }
 .rv-choice:disabled .rv-choice-t { color: var(--cf-text-3); }
-.rv-choice:disabled .rv-choice-d { color: var(--cf-hue-rose); }
-@media (hover: hover) { .rv-choice:not(:disabled):hover { border-color: var(--hue); background: var(--hue-t); } }
+.rv-choice:disabled .rv-choice-d { color: var(--cf-text-2); }
+@media (hover: hover) { .rv-choice:not(:disabled):hover { border-color: var(--cf-text-2); background: var(--cf-hover); } }
 .rv-choice-t { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; }
 .rv-choice-d { color: var(--cf-text-3); font-size: 13px; line-height: 1.45; }
-.rv-tag { display: inline-block; padding: 2px 9px; border-radius: 999px; background: var(--hue-t); color: var(--hue); font-size: 12px; font-weight: 600; }
+.rv-tag { display: inline-block; padding: 2px 9px; border-radius: 999px; background: var(--cf-hover); color: var(--cf-text-2); font-size: 12px; font-weight: 600; }
 
 /* Drawers: the application (paper sheet) needs more width than the code drawer */
 .cf-drawer.rv-drawer { width: min(680px, calc(100vw - 32px)); }
@@ -240,21 +240,21 @@
   .cf-drawer.rv-drawer { width: 100%; }
 }
 
-/* —— Colour: one hue per step or section. Solid for icons and bars, a tint for fills —— */
+/* Package headings and supporting panels. */
 
 .pr-title-row { display: flex; align-items: center; gap: 14px; }
 .pr-title-row > span:nth-child(2) { min-width: 0; }
-.pr-ico { flex: none; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 10px; background: var(--hue-t); color: var(--hue); }
-.pr-count-pill { min-width: 26px; height: 24px; padding: 0 8px; border-radius: 999px; background: var(--hue-t); color: var(--hue); font: 600 13px/24px var(--cf-font); text-align: center; }
+.pr-ico { flex: none; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 10px; background: var(--cf-hover); color: var(--cf-text-2); }
+.pr-count-pill { min-width: 26px; height: 24px; padding: 0 8px; border-radius: 999px; background: var(--cf-hover); color: var(--cf-text-2); font: 600 13px/24px var(--cf-font); text-align: center; }
 
 /* Summary tiles */
 .pr-metrics { border: 0; gap: 10px; margin: 20px 0 0; }
-.pr-metrics > div, .pr-metrics > div + div { position: relative; padding: 14px 16px; border: 0; border-radius: var(--cf-r-tile); background: var(--hue-t); }
-.pr-metrics > div > svg { color: var(--hue); }
-.pr-metrics b { color: var(--hue); font-size: 30px; font-weight: 600; line-height: 1.1; margin-top: 6px; }
+.pr-metrics > div, .pr-metrics > div + div { position: relative; padding: 14px 16px; border: 0; border-radius: var(--cf-r-tile); background: var(--cf-hover); }
+.pr-metrics > div > svg { color: var(--cf-text-2); }
+.pr-metrics b { color: var(--cf-text-2); font-size: 30px; font-weight: 600; line-height: 1.1; margin-top: 6px; }
 .pr-metrics span { color: var(--cf-text-2); font-size: 13px; }
 .pr-quote figcaption { margin: 0 0 6px; }
-.pr-quote blockquote { border-left-color: var(--cf-hue-blue); }
+.pr-quote blockquote { border-left-color: var(--cf-line-2); }
 .pr-facts dt { display: flex; align-items: center; gap: 8px; }
 .pr-facts dt svg { color: var(--cf-text-3); }
 .pr-facts { grid-template-columns: 140px minmax(0, 1fr); }
@@ -268,10 +268,10 @@
 .pr-where { padding: 1px 8px; border-radius: 999px; background: var(--cf-hover); color: var(--cf-text-3); font-size: 12px; }
 .pr-group-h { display: flex; align-items: center; gap: 6px; }
 .pr-sec { color: var(--cf-text-2); }
-.pr-sec-badge { width: 20px; height: 20px; display: grid; place-items: center; border-radius: 6px; background: var(--hue-t); color: var(--hue); font: 700 11.5px var(--cf-font); }
+.pr-sec-badge { width: 20px; height: 20px; display: grid; place-items: center; border-radius: 6px; background: var(--cf-hover); color: var(--cf-text-2); font: 700 11.5px var(--cf-font); }
 
-/* Close-out: the due date as one coloured card with its action */
-.co-due { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 6px 0 4px; padding: 16px 18px; border-radius: var(--cf-r-card); background: var(--hue-t); }
+/* Close-out geometry. */
+.co-due { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 6px 0 4px; padding: 16px 18px; border-radius: var(--cf-r-card); background: var(--cf-hover); }
 .co-due .pr-ico { background: var(--cf-surface); }
 .co-due-txt { flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: 2px; }
 .co-due-txt b { font-size: 16px; font-weight: 600; color: var(--cf-text); }
@@ -357,7 +357,7 @@ ul.pr-metrics span { color: var(--cf-text-3); font-size: 13.5px; }
 .rv-choices { gap: 10px; }
 .rv-choice { min-height: 0; padding: 16px; gap: 6px; box-shadow: none; }
 .rv-choice .pr-ico { width: 36px; height: 36px; border-radius: 10px; margin-bottom: 4px; }
-.rv-choice:disabled .rv-choice-d { color: var(--cf-blocking-ink); }
+.rv-choice:disabled .rv-choice-d { color: var(--cf-text-2); }
 .rv-choice-t { font-size: 15.5px; }
 @media (hover: hover) { .rv-choice:not(:disabled):hover { border-color: var(--cf-line-2); background: var(--cf-hover); } }
 .rv-tag { background: var(--cf-selected); color: var(--cf-text); }
@@ -373,3 +373,155 @@ ul.pr-metrics span { color: var(--cf-text-3); font-size: 13.5px; }
    screen reader lands there); they are not controls and need no ring. */
 .cf-app .ac-page-body.rv[tabindex="-1"]:focus-visible,
 .cf-app .pr-body[tabindex="-1"]:focus-visible { outline: none; }
+
+/* —— The officer review ——————————————————————————————————————————————————
+   The applicant's Review layout (cf-review, cf-rows, cf-sections) with the officer's job in it: a
+   headline that counts, the list of what to ask for, one card with the sections and the one main
+   action. The application and the messages are one step away, full page, never in a drawer. */
+
+.rw-page { height: 100%; min-height: 0; overflow: hidden; }
+.rw-body { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.rw-stage { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-bottom: 64px; }
+
+/* One status line, only when something needs attention. */
+.rw-line { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 8px 28px; border-bottom: 1px solid var(--cf-line); color: var(--cf-text-2); font-size: 14px; }
+.rw-line > .cf-dot { flex: none; background: var(--cf-pending); }
+.rw-line.is-blocking > .cf-dot { background: var(--cf-blocking); }
+.rw-line.is-warning > .cf-dot { background: var(--cf-warning); }
+.rw-line.is-accent > .cf-dot { background: var(--cf-accent); }
+.rw-line-t { display: inline-flex; align-items: center; gap: 8px; min-width: 0; }
+
+.cf-dot.is-ring { background: transparent !important; box-shadow: inset 0 0 0 2px var(--cf-blocking); }
+.cf-dot.is-warning.is-ring { box-shadow: inset 0 0 0 2px var(--cf-warning); }
+
+/* A row: tap the name to see the applicant's words and the sources in place. */
+.ow-row { flex-wrap: wrap; align-items: center; }
+.ow-row .cf-dot { translate: 0 0; }
+.ow-row-t { padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.ow-row.is-quiet .cf-row-text { color: var(--cf-text-3); }
+/* The 28px target overhangs the row so a row with ✕ is as tall as one without. */
+.ow-x { flex: none; width: 28px; height: 28px; margin-block: -6px; color: var(--cf-text-3); }
+.ow-ev, .ow-why { flex-basis: 100%; padding-left: 20px; }
+.ow-ev { display: grid; gap: 8px; padding-top: 4px; padding-bottom: 4px; }
+.ow-ev q { display: block; color: var(--cf-text); font-size: 15px; line-height: 1.5; quotes: "“" "”"; overflow-wrap: anywhere; }
+.ow-ev-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.ow-ev .cf-small { margin: 0; }
+.ow-why { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.ow-own-body { flex: 1; min-width: 0; display: grid; gap: 8px; }
+.ow-own-input { width: 100%; padding: 2px 0 6px; border: 0; border-bottom: 1px solid var(--cf-line-ctl); background: none; color: var(--cf-text); font: 15px/1.45 var(--cf-font); outline: none; }
+.ow-own-input:focus { border-bottom-color: var(--cf-text); box-shadow: 0 1px 0 var(--cf-text); }
+.ow-own .rw-select { max-width: 360px; }
+.cf-app .ow .ow-own-input:focus-visible { outline: none; }
+/* Two lines (text, then where they answer): the dot and ✕ sit on the first. */
+.ow-row.ow-own { align-items: flex-start; }
+.ow-own > .cf-dot { margin-top: 9px; }
+.ow-own > .ow-x { margin-top: 2px; }
+.ow-add { margin-top: 8px; }
+.ow-fold { margin-top: 22px; }
+.ow-fold > summary { list-style: none; cursor: pointer; }
+.ow-fold > summary::-webkit-details-marker { display: none; }
+.ow-hint { flex-basis: 100%; margin: 8px 0 0; }
+.rw-letter.ow-sent { margin-top: 18px; }
+
+/* The card: sections open the application there. */
+.ow-sec { padding: 0; }
+.ow-sec-btn { display: flex; align-items: center; gap: 14px; width: 100%; padding: 14px 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.ow-sec:first-child .ow-sec-btn { padding-top: 4px; }
+.ow-sec-btn .cf-sec-t > span { display: block; }
+.ow-sec-btn .cf-sec-t > span:first-child { font-size: 15px; }
+.ow-sec-btn .cf-sec-t > span:last-child { font-size: 13px; margin-top: 3px; }
+
+/* One step away: the application, the messages. */
+.rw-read { max-width: 760px; margin: 0 auto; padding: 24px 24px 64px; }
+.ow-back { margin-bottom: 14px; }
+/* The application, one step from the review: sections headed like the review's card, a label and the
+   applicant's value on each line. Monotone: a line with an open item is shaded and says what is happening. */
+.ap { width: 100%; }
+.ap-sec { margin-top: 40px; scroll-margin-top: 16px; }
+.ap-sec-h { display: flex; align-items: center; gap: 12px; margin: 0 0 10px; color: var(--cf-text); font: 600 15px/1.3 var(--cf-font); }
+.ap-sec-h .cf-faint { font-weight: 400; }
+.ap-line { display: grid; grid-template-columns: 184px minmax(0, 1fr) auto; gap: 4px 20px; align-items: baseline; margin: 0 -12px; padding: 12px; border-top: 1px solid var(--cf-line); font-size: 15px; line-height: 1.5; }
+.ap-line:first-child, .ap-line.is-open, .ap-line.is-open + .ap-line { border-top-color: transparent; }
+.ap-line.is-open { border-radius: 10px; background: rgba(17, 24, 39, 0.04); }
+.ap-line.is-open + .ap-line.is-open { margin-top: 3px; }
+.ap .cf-sheet-sources { margin-top: 18px; }
+.ap-k { color: var(--cf-text-3); font-size: 14px; }
+.ap-v { min-width: 0; overflow-wrap: anywhere; color: var(--cf-text); }
+.ap-text { white-space: pre-wrap; }
+.ap-none { color: var(--cf-text-3); }
+.ap-chg { margin-left: 10px; color: var(--cf-text-3); font-size: 13px; text-decoration: underline dotted var(--cf-line-2); text-underline-offset: 3px; cursor: help; }
+.ap-ref { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.ap-tags { display: inline-flex; gap: 14px; justify-self: end; }
+.ap-tag { padding: 0; border: 0; background: none; color: var(--cf-text-2); font: 500 13px var(--cf-font); white-space: nowrap; cursor: pointer; }
+.ap-tag.is-static { color: var(--cf-text-3); cursor: default; }
+.ap-empty { margin: 10px 0 0; color: var(--cf-text-3); font-size: 14px; }
+.rw-legacy { margin: 28px 0 0; }
+.rw-acts { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 20px; margin-top: 22px; }
+.rw-scope { margin: 14px 0 0; color: var(--cf-text-3); font-size: 13px; }
+.rw-hint { display: flex; align-items: center; gap: 8px; margin: 10px 0 0; color: var(--cf-text-3); font-size: 13px; }
+.rw-hint.is-error { color: var(--cf-blocking-ink); }
+.ow-messages > .ac-side-sec { margin: 0; padding: 0; border: 0; }
+.rw-qs { display: grid; gap: 10px; margin: 6px 0 0; padding: 0; list-style: none; }
+.rw-q { padding: 12px 0; border-top: 1px solid var(--cf-line); font-size: 15px; line-height: 1.5; }
+.rw-q p { margin: 2px 0 0; }
+.rw-q-t { color: var(--cf-text); font-weight: 500; }
+.rw-fold > summary { list-style: none; cursor: pointer; }
+.rw-fold > summary::-webkit-details-marker { display: none; }
+.rw-empty { margin: 8px 0; color: var(--cf-text-3); font-size: 13px; }
+.rw-file-link { display: inline-flex; flex-direction: column; gap: 4px; }
+.rw-file-link .cf-cite { gap: 8px; text-decoration: none; }
+.cf-cite.is-static { cursor: default; }
+
+/* The sent request, and the confirmation before it goes. */
+.rw-letter { margin: 0; padding: 18px 20px; border-radius: 14px; background: var(--cf-surface); box-shadow: var(--cf-shadow); color: var(--cf-text);
+  font: 15px/1.6 var(--cf-font); white-space: pre-wrap; overflow-wrap: anywhere; max-height: 360px; overflow-y: auto; overscroll-behavior: contain; }
+.rw-letter.is-dialog { max-height: 46vh; box-shadow: inset 0 0 0 1px var(--cf-line); }
+.rw-dialog .cf-modal-body { display: grid; gap: 12px; }
+.rw-dialog .cf-modal-body > p { margin: 0; }
+
+/* After the decision */
+.rw-close { display: grid; gap: 10px; margin-top: 22px; }
+.rw-steps { display: grid; gap: 18px; margin: 0; padding: 0; list-style: none; }
+.rw-step-row { display: flex; gap: 12px; font-size: 15px; }
+.rw-step-row > .cf-dot { flex: none; margin-top: 7px; }
+.rw-step-row > div { display: grid; gap: 6px; min-width: 0; }
+.rw-step-row b { font-weight: 550; }
+.rw-step-row small { color: var(--cf-text-3); font-size: 14px; line-height: 1.5; }
+.rw-step-row .cf-btn { justify-self: start; margin-top: 6px; }
+.rw-issue { display: grid; gap: 10px; margin-top: 8px; width: min(320px, 100%); }
+.rw-own-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.rw-records { display: grid; gap: 10px; margin: 12px 0 0; padding: 0; list-style: none; font-size: 14px; }
+.rw-records > li { display: flex; align-items: baseline; gap: 10px; }
+.rw-records > li > .cf-dot { flex: none; translate: 0 -1px; }
+.rw-records small { display: block; color: var(--cf-text-3); font-size: 13px; }
+
+/* Where they answer */
+.rw-select { position: relative; min-width: 0; }
+.rw-select-btn { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; height: 32px; padding: 0 10px; border: 1px solid var(--cf-line-2); border-radius: 9px; background: var(--cf-surface); color: var(--cf-text-2); font: 13px var(--cf-font); text-align: left; cursor: pointer; }
+.rw-select-btn > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rw-select-btn > svg { flex: none; rotate: 90deg; color: var(--cf-text-3); }
+.rw-select-list { position: absolute; z-index: 20; left: 0; right: 0; top: calc(100% + 4px); max-height: 260px; margin: 0; padding: 4px; overflow-y: auto; overscroll-behavior: contain; border-radius: 12px; background: var(--cf-surface); box-shadow: 0 0 0 1px var(--cf-line), 0 12px 32px -8px rgba(17, 24, 39, 0.2); list-style: none; }
+.rw-select-list:focus { outline: none; }
+.rw-select-list > li { padding: 8px 10px; border-radius: 8px; color: var(--cf-text); font-size: 13.5px; cursor: pointer; }
+.rw-select-list > li.is-active { background: var(--cf-hover); }
+.rw-select-list > li[aria-selected="true"] { font-weight: 600; }
+
+.rw-n { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 999px; background: var(--cf-selected); color: var(--cf-text); font: 600 11px/18px var(--cf-font); text-align: center; font-variant-numeric: tabular-nums; }
+.rw-n.is-new { background: var(--cf-accent); color: #fff; }
+.rw-head-msg { position: relative; display: inline-flex; align-items: center; gap: 6px; width: auto; padding: 0 8px; }
+.rw-head-msg[aria-pressed="true"] { background: var(--cf-selected); }
+
+.pr-code-q { white-space: pre-wrap; }
+
+@media (hover: hover) {
+  .ap-tag:not(.is-static):hover, .ow-row-t:hover { color: var(--cf-text); }
+  .ow-sec-btn:hover .cf-sec-icon { background: rgba(17, 24, 39, 0.09); }
+}
+.rw-stage :is(button, summary, a, input, [role=listbox]):focus-visible { outline: 2px solid var(--cf-focus); outline-offset: 2px; }
+
+@container main (max-width: 900px) {
+  .rw-line { padding: 8px 16px; }
+  .rw-read { padding: 16px 12px 48px; }
+  .ap-line { grid-template-columns: minmax(0, 1fr) auto; margin: 0 -6px; padding: 12px 6px; }
+  .ap-k { grid-column: 1 / -1; }
+}

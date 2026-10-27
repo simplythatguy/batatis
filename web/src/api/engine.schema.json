@@ -1,5 +1,26 @@
 {
   "$defs": {
+    "AcceptGate": {
+      "additionalProperties": false,
+      "description": "Whether this version can be accepted now, decided by the server (the decision route rechecks it).",
+      "properties": {
+        "can_accept": {
+          "title": "Can Accept",
+          "type": "boolean"
+        },
+        "reason": {
+          "default": "",
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "can_accept",
+        "reason"
+      ],
+      "title": "AcceptGate",
+      "type": "object"
+    },
     "AnswerCounts": {
       "additionalProperties": false,
       "properties": {
@@ -2829,23 +2850,63 @@
     },
     "CloseOut": {
       "additionalProperties": false,
-      "description": "Close-out after a final decision: the copy goes to the Council within 10 days of the decision.",
+      "description": "Close-out after a final decision.\n\nAn administrative acceptance is not a variance: it only says the file is complete. The copy to the\nCouncil is due within 10 days of the variance being issued, which happens outside Batatis and which\nthe officer records (`issued_on`). Before that, and after a refusal, nothing is due.",
       "properties": {
         "case_id": {
           "title": "Case Id",
           "type": "string"
         },
         "days_remaining": {
-          "title": "Days Remaining",
-          "type": "integer"
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Days Remaining"
         },
         "decided_at": {
           "title": "Decided At",
           "type": "string"
         },
         "due_date": {
-          "title": "Due Date",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Due Date"
+        },
+        "issued_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Issued By Name"
+        },
+        "issued_on": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Issued On"
         },
         "notice": {
           "default": "Batatis does not send anything to the Safety Codes Council. The officer sends the copy and records it here.",
@@ -2861,6 +2922,7 @@
           "type": "string"
         },
         "overdue": {
+          "default": false,
           "title": "Overdue",
           "type": "boolean"
         },
@@ -2900,6 +2962,8 @@
         "case_id",
         "outcome",
         "decided_at",
+        "issued_on",
+        "issued_by_name",
         "due_date",
         "days_remaining",
         "overdue",
@@ -3253,6 +3317,19 @@
           "default": null,
           "title": "Field"
         },
+        "finding_key": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Finding Key"
+        },
         "gap_id": {
           "anyOf": [
             {
@@ -3267,17 +3344,66 @@
           "default": null,
           "title": "Gap Id"
         },
+        "label": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
         "note": {
           "maxLength": 2000,
           "minLength": 1,
           "title": "Note",
           "type": "string"
+        },
+        "request_item_id": {
+          "anyOf": [
+            {
+              "maxLength": 100,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Item Id"
+        },
+        "section": {
+          "anyOf": [
+            {
+              "enum": [
+                "A",
+                "B",
+                "C",
+                "D",
+                "process"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Section"
         }
       },
       "required": [
         "gap_id",
         "field",
-        "note"
+        "note",
+        "section",
+        "label",
+        "request_item_id",
+        "finding_key"
       ],
       "title": "DecisionItem",
       "type": "object"
@@ -3299,6 +3425,19 @@
           "default": null,
           "title": "Field"
         },
+        "finding_key": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Finding Key"
+        },
         "gap_id": {
           "anyOf": [
             {
@@ -3313,11 +3452,56 @@
           "default": null,
           "title": "Gap Id"
         },
+        "label": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
         "note": {
           "maxLength": 2000,
           "minLength": 1,
           "title": "Note",
           "type": "string"
+        },
+        "request_item_id": {
+          "anyOf": [
+            {
+              "maxLength": 100,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Item Id"
+        },
+        "section": {
+          "anyOf": [
+            {
+              "enum": [
+                "A",
+                "B",
+                "C",
+                "D",
+                "process"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Section"
         }
       },
       "required": [
@@ -3340,7 +3524,7 @@
             }
           ],
           "default": null,
-          "description": "Required for a refusal; the displayed saved application version.",
+          "description": "Required for an acceptance and a refusal; the displayed saved application version.",
           "title": "Expected Version"
         },
         "items": {
@@ -3372,6 +3556,19 @@
           ],
           "title": "Outcome",
           "type": "string"
+        },
+        "review_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Review Version"
         }
       },
       "required": [
@@ -3442,6 +3639,131 @@
         "message"
       ],
       "title": "DiffEntry",
+      "type": "object"
+    },
+    "Disposition": {
+      "additionalProperties": false,
+      "description": "The officer's call on one automated finding, kept with the session. It never edits the finding.\n\nAbsent means the default: `ask` for an applicant finding the review established, `verify` for a\nnot-found or officer-routed one. `dismissed` needs a reason; the note is optional.",
+      "properties": {
+        "at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "At"
+        },
+        "by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "By Name"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "note": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Note",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "enum": [
+                "checked",
+                "not_needed",
+                "does_not_fit"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "state": {
+          "enum": [
+            "ask",
+            "verify",
+            "dismissed"
+          ],
+          "title": "State",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "state",
+        "reason",
+        "note",
+        "by_name",
+        "at"
+      ],
+      "title": "Disposition",
+      "type": "object"
+    },
+    "DispositionEdit": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "note": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Note",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "enum": [
+                "checked",
+                "not_needed",
+                "does_not_fit"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "state": {
+          "enum": [
+            "ask",
+            "verify",
+            "dismissed"
+          ],
+          "title": "State",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "state"
+      ],
+      "title": "DispositionEdit",
       "type": "object"
     },
     "DocumentReview": {
@@ -4266,6 +4588,17 @@
           "default": true,
           "title": "Included",
           "type": "boolean"
+        },
+        "target": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RequestTargetInput"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         },
         "text": {
           "maxLength": 2000,
@@ -5322,6 +5655,87 @@
         "citations"
       ],
       "title": "Finding",
+      "type": "object"
+    },
+    "FindingState": {
+      "additionalProperties": false,
+      "description": "A finding's effective officer state (stored disposition or default), as the server counts it.",
+      "properties": {
+        "at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "At"
+        },
+        "by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "By Name"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "locked": {
+          "default": false,
+          "title": "Locked",
+          "type": "boolean"
+        },
+        "note": {
+          "default": "",
+          "title": "Note",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "enum": [
+                "checked",
+                "not_needed",
+                "does_not_fit"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "state": {
+          "enum": [
+            "ask",
+            "verify",
+            "dismissed"
+          ],
+          "title": "State",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "state",
+        "reason",
+        "note",
+        "by_name",
+        "at",
+        "locked"
+      ],
+      "title": "FindingState",
       "type": "object"
     },
     "Fork": {
@@ -6767,8 +7181,16 @@
     },
     "InformationRequestEdit": {
       "additionalProperties": false,
-      "description": "Officer edits: replace the item list (text, inclusion, order) and optionally the intro.",
+      "description": "Officer edits, saved as one write: the item list (text, order, officer items), the intro, and the\nofficer's call on findings. `findings` lists changes only; findings left out keep their state.",
       "properties": {
+        "findings": {
+          "items": {
+            "$ref": "#/$defs/DispositionEdit"
+          },
+          "maxItems": 200,
+          "title": "Findings",
+          "type": "array"
+        },
         "intro": {
           "anyOf": [
             {
@@ -6786,6 +7208,7 @@
           "items": {
             "$ref": "#/$defs/EditedItem"
           },
+          "maxItems": 50,
           "title": "Items",
           "type": "array"
         }
@@ -6865,6 +7288,17 @@
           "default": null,
           "title": "Section"
         },
+        "target": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RequestTarget"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "text": {
           "title": "Text",
           "type": "string"
@@ -6878,7 +7312,8 @@
         "text",
         "authored_by",
         "included",
-        "officer_check"
+        "officer_check",
+        "target"
       ],
       "title": "InformationRequestItem",
       "type": "object"
@@ -6886,6 +7321,18 @@
     "InputFile": {
       "additionalProperties": false,
       "properties": {
+        "file_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "File Id"
+        },
         "form_version": {
           "anyOf": [
             {
@@ -6948,7 +7395,8 @@
         "pages",
         "role",
         "form_version",
-        "note"
+        "note",
+        "file_id"
       ],
       "title": "InputFile",
       "type": "object"
@@ -8289,6 +8737,67 @@
       "title": "NotificationsResult",
       "type": "object"
     },
+    "OfficerWorkspace": {
+      "additionalProperties": false,
+      "description": "The officer's working state for the latest version: per-finding states, counts and the accept gate.",
+      "properties": {
+        "case_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Case Version"
+        },
+        "current": {
+          "title": "Current",
+          "type": "boolean"
+        },
+        "gate": {
+          "$ref": "#/$defs/AcceptGate"
+        },
+        "limits": {
+          "$ref": "#/$defs/RequestLimits"
+        },
+        "rulebook": {
+          "items": {
+            "$ref": "#/$defs/RulebookGap"
+          },
+          "title": "Rulebook",
+          "type": "array"
+        },
+        "states": {
+          "items": {
+            "$ref": "#/$defs/FindingState"
+          },
+          "title": "States",
+          "type": "array"
+        },
+        "tally": {
+          "$ref": "#/$defs/ReviewTally"
+        },
+        "version": {
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "version",
+        "case_version",
+        "current",
+        "states",
+        "rulebook",
+        "tally",
+        "gate",
+        "limits"
+      ],
+      "title": "OfficerWorkspace",
+      "type": "object"
+    },
     "OnboardingRequest": {
       "additionalProperties": false,
       "properties": {
@@ -8639,6 +9148,17 @@
           },
           "title": "Sessions",
           "type": "array"
+        },
+        "workspace": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OfficerWorkspace"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
@@ -8647,6 +9167,7 @@
         "authority",
         "sessions",
         "latest",
+        "workspace",
         "close_out"
       ],
       "title": "PackageReviewIndex",
@@ -9907,6 +10428,125 @@
       "title": "RemoveFileBinding",
       "type": "object"
     },
+    "RequestLimits": {
+      "additionalProperties": false,
+      "description": "Checked when the draft is saved and again on return; the client shows them, never enforces others.",
+      "properties": {
+        "intro": {
+          "default": 2000,
+          "title": "Intro",
+          "type": "integer"
+        },
+        "item_text": {
+          "default": 2000,
+          "title": "Item Text",
+          "type": "integer"
+        },
+        "items": {
+          "default": 50,
+          "title": "Items",
+          "type": "integer"
+        },
+        "text": {
+          "default": 12000,
+          "title": "Text",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "items",
+        "intro",
+        "item_text",
+        "text"
+      ],
+      "title": "RequestLimits",
+      "type": "object"
+    },
+    "RequestTarget": {
+      "additionalProperties": false,
+      "description": "Where the applicant answers a request item: a form section and, when known, one field.\n\n`field` is an engine field id the applicant workspace maps to the place to fix it (see\ndocs/api/package-review.md, \"Where the applicant answers\"). `label` is what both sides show.",
+      "properties": {
+        "field": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Field"
+        },
+        "label": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "section": {
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "process"
+          ],
+          "title": "Section",
+          "type": "string"
+        }
+      },
+      "required": [
+        "section",
+        "field",
+        "label"
+      ],
+      "title": "RequestTarget",
+      "type": "object"
+    },
+    "RequestTargetInput": {
+      "additionalProperties": false,
+      "description": "Where the applicant answers a request item: a form section and, when known, one field.\n\n`field` is an engine field id the applicant workspace maps to the place to fix it (see\ndocs/api/package-review.md, \"Where the applicant answers\"). `label` is what both sides show.",
+      "properties": {
+        "field": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Field"
+        },
+        "label": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "section": {
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "process"
+          ],
+          "title": "Section",
+          "type": "string"
+        }
+      },
+      "required": [
+        "section",
+        "label"
+      ],
+      "title": "RequestTarget",
+      "type": "object"
+    },
     "RequirementCondition": {
       "properties": {
         "fact_ids": {
@@ -10895,6 +11535,29 @@
       "title": "RetainFileBinding",
       "type": "object"
     },
+    "ReturnWithRequest": {
+      "additionalProperties": false,
+      "description": "Send the saved request and return the application, as one write. Both or neither.",
+      "properties": {
+        "expected_version": {
+          "minimum": 1,
+          "title": "Expected Version",
+          "type": "integer"
+        },
+        "text": {
+          "maxLength": 12000,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "expected_version",
+        "text"
+      ],
+      "title": "ReturnWithRequest",
+      "type": "object"
+    },
     "ReviewConflict": {
       "properties": {
         "evidence": {
@@ -10951,6 +11614,13 @@
           },
           "title": "Still Open",
           "type": "array"
+        },
+        "unverified": {
+          "items": {
+            "$ref": "#/$defs/DiffEntry"
+          },
+          "title": "Unverified",
+          "type": "array"
         }
       },
       "required": [
@@ -10959,6 +11629,7 @@
         "resolved",
         "still_open",
         "new",
+        "unverified",
         "statement"
       ],
       "title": "ReviewDiff",
@@ -11117,6 +11788,13 @@
           ],
           "default": null
         },
+        "dispositions": {
+          "items": {
+            "$ref": "#/$defs/Disposition"
+          },
+          "title": "Dispositions",
+          "type": "array"
+        },
         "documents": {
           "items": {
             "$ref": "#/$defs/DocumentRow"
@@ -11216,7 +11894,8 @@
         "section_c",
         "information_request",
         "diff",
-        "lookup_skipped"
+        "lookup_skipped",
+        "dispositions"
       ],
       "title": "ReviewSession",
       "type": "object"
@@ -11253,6 +11932,46 @@
         "values"
       ],
       "title": "ReviewSnapshot",
+      "type": "object"
+    },
+    "ReviewTally": {
+      "additionalProperties": false,
+      "description": "The one definition of every count the officer sees, for one session. The client never recounts.",
+      "properties": {
+        "asked": {
+          "title": "Asked",
+          "type": "integer"
+        },
+        "dismissed": {
+          "title": "Dismissed",
+          "type": "integer"
+        },
+        "required": {
+          "title": "Required",
+          "type": "integer"
+        },
+        "rulebook": {
+          "title": "Rulebook",
+          "type": "integer"
+        },
+        "to_check": {
+          "title": "To Check",
+          "type": "integer"
+        },
+        "verify": {
+          "title": "Verify",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "required",
+        "to_check",
+        "verify",
+        "dismissed",
+        "asked",
+        "rulebook"
+      ],
+      "title": "ReviewTally",
       "type": "object"
     },
     "ReviewedDocument": {
@@ -11812,6 +12531,59 @@
         "rules"
       ],
       "title": "RuleSet",
+      "type": "object"
+    },
+    "RulebookGap": {
+      "additionalProperties": false,
+      "description": "A blocking gap from the shared completeness rules that no finding covers. Shown as-is.",
+      "properties": {
+        "field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Field"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "section": {
+          "anyOf": [
+            {
+              "enum": [
+                "A",
+                "B",
+                "C",
+                "D",
+                "process"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Section"
+        }
+      },
+      "required": [
+        "id",
+        "field",
+        "section",
+        "message"
+      ],
+      "title": "RulebookGap",
       "type": "object"
     },
     "ScopeBasis": {
@@ -12463,8 +13235,8 @@
           "title": "Input Kind",
           "type": "string"
         },
-        "open_gaps": {
-          "title": "Open Gaps",
+        "required": {
+          "title": "Required",
           "type": "integer"
         },
         "sent_at": {
@@ -12501,7 +13273,7 @@
         "created_at",
         "created_by_name",
         "input_kind",
-        "open_gaps",
+        "required",
         "statement",
         "sent_at"
       ],
@@ -13706,6 +14478,22 @@
         "user"
       ],
       "title": "UserResult",
+      "type": "object"
+    },
+    "VarianceIssued": {
+      "additionalProperties": false,
+      "description": "The officer's statement that they issued the variance (outside Batatis) on this date.",
+      "properties": {
+        "issued_on": {
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "title": "Issued On",
+          "type": "string"
+        }
+      },
+      "required": [
+        "issued_on"
+      ],
+      "title": "VarianceIssued",
       "type": "object"
     },
     "WordingDraft": {
