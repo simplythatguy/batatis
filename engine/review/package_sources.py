@@ -66,8 +66,9 @@ def visible_sources(read):
                                'Requirement', 'Applicant confirmation', 'Name', 'Role', 'Basis', 'Owner', 'Location', 'Pathway'))
         if values.get('Record type') == 'professional declaration':
             involvement = values.get('Involvement', 'unresolved')
+            # Involvement needs the applicant-confirmed engineer or architect role, as the screen does.
             if involvement == 'professional_involved' and not (
-                    values.get('Applicant confirmation') == 'yes' and values.get('Name') and role_confirmed(values.get('Role', ''))):
+                    values.get('Applicant confirmation') == 'yes' and role_confirmed(values.get('Role', ''))):
                 involvement = 'unresolved'
             if involvement == 'not_required' and not values.get('Basis'):
                 involvement = 'unresolved'

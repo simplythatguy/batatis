@@ -28,7 +28,7 @@ from ..not_applicable import LABEL as NA_LABEL, ROWS as NA_ROWS, NotApplicable, 
 from ..codes import Codes
 from ..completeness import check_completeness
 from ..professional import NOT_ENGAGED_ITEM
-from ..process_fields import PROCESS_ALIASES
+from ..process_fields import PROCESS_ALIASES, confirmed_value
 from ..section_c import section_c_rows
 from ..section_d import supporting_documents, text_evidence
 from .edition import code_or_standard_value
@@ -313,6 +313,10 @@ def _documents(case: Case) -> list[tuple[str, str]]:
     attached = supporting_documents(case)
     docs = [(pdf_safe(d.title), pdf_safe(d.responsible_party)) for d in attached]
     typed = [(pdf_safe(title), pdf_safe(who)) for title, who in text_evidence(case)]
+    # The Section D prompt saves a plain listing; it must reach the outgoing form to be read back.
+    listing, who = confirmed_value(case, 'supporting_doc'), confirmed_value(case, 'responsible_party')
+    if isinstance(listing, str) and listing.strip() and pdf_safe(listing.strip()) not in {t for t, _w in docs + typed}:
+        typed.append((pdf_safe(listing.strip()), pdf_safe(who.strip()) if isinstance(who, str) else ''))
     named = {title for title, _who in docs + typed}
     ids = {document.id for document in attached}
     standalone = [(pdf_safe(entry.description), '') for entry in case.evidence

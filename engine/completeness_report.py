@@ -233,7 +233,25 @@ def _applicant_projection(policy, case, codes, variant):
     related = {'single_location': ('civic_address', 'additional_location', 'second_location', 'extra_location'),
                'section_c.edition': ('code_or_standard',),
                'professional_requirement': ('professional_status', 'professional.status')}
+    # The form names a document by title; the applicant attaches the file to their saved document slot.
+    from .completeness_policy import _title_key
+    from .export.text import pdf_safe
+    from .process_fields import confirmed_value
+    titles = {}
+    for slot in dict.fromkeys([entry.id for entry in case.evidence] + [f.field.split('.')[1] for f in case.facts
+                                                                     if f.field.startswith('evidence.')]):
+        title = confirmed_value(case, f'evidence.{slot}.title', f'evidence.{slot}.description') or next(
+            (entry.description for entry in case.evidence if entry.id == slot), None)
+        if isinstance(title, str) and title.strip():
+            key = _title_key(pdf_safe(title.strip()))
+            titles.setdefault(f'attachment.{key}', []).append((slot, 'file_ref'))
+            titles.setdefault(f'document.{key}.responsible_party', []).append((slot, 'responsible_party'))
     for element in result.elements:
+        slots = titles.get(element.field, [])
+        if len(slots) == 1:
+            element.field = element.export_field = 'evidence.{}.{}'.format(*slots[0])
+            if element.prompt:
+                element.prompt['field'] = element.field
         target = element.prompt.get('field') if element.prompt else None
         fact = current.get(canonical.get(target, target)) if target else None
         if fact is not None:
@@ -255,4 +273,5 @@ def _applicant_projection(policy, case, codes, variant):
                 match = next((f for f in facts if f is not None and f.source and str(f.value) == quote.text), None)
                 if match:
                     quote.source = match.source.model_dump(mode='json')
+                    quote.source_ref = match.source.ref
     return result
