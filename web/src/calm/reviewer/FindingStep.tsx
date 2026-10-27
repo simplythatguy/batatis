@@ -186,7 +186,7 @@ export function FindingFooter({ sections, at, onJump }: {
                   {s.steps.map((x) => <i key={x.index} className={x.index === at ? "is-cur" : x.decided ? "is-done" : ""} />)}
                 </span>
                 <span className="cf-qsec-lab" aria-hidden="true">
-                  <span className="cf-qsec-name">{s.name}</span>
+                  <span className={`cf-qsec-name${s.id.length === 1 ? "" : " is-alone"}`}>{s.name}</span>
                   {s.id.length === 1 && <span className="cf-qsec-l">{s.id}</span>}
                   <span className="cf-qsec-count">{done}<span className="cf-qsec-of"> of </span><span className="cf-qsec-slash">/</span>{s.steps.length}</span>
                 </span>

@@ -401,7 +401,9 @@ ul.pr-metrics span { color: var(--cf-text-3); font-size: 13.5px; }
 .rw-more-q { margin: 10px 0 0; max-width: 600px; color: var(--cf-text-2); font-size: 15px; line-height: 1.55; }
 .rw-more-q q { quotes: "“" "”"; }
 .rw-before { margin: 8px 0 0; color: var(--cf-text-3); font-size: 14px; }
-.rw-srcs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.rw-srcs { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 18px; }
+.rw-srcs .pr-cites, .rw-srcs > span { display: inline-flex; }
+.rw-foot .cf-qsec-name.is-alone::after { content: none; }
 .rw-srcs .cf-cite, .rw-file-link .cf-cite { gap: 8px; text-decoration: none; }
 .cf-cite.is-static { cursor: default; }
 .rw-file-link { display: inline-flex; flex-direction: column; gap: 4px; }
@@ -423,7 +425,7 @@ ul.pr-metrics span { color: var(--cf-text-3); font-size: 13.5px; }
 .rw-since-v { color: var(--cf-text-3); }
 .rw-own { display: grid; gap: 14px; margin-top: 14px; }
 .rw-own-item { display: grid; gap: 10px; }
-.rw-own-item .cf-uline { margin-top: 0; }
+.rw-own-item .cf-uline { margin-top: 0; padding: 8px 0 10px; font-size: 16px; line-height: 1.5; }
 .rw-own-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .rw-own-row > .rw-select { flex: 1; min-width: 200px; max-width: 420px; }
 .rw-links { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 20px; }
