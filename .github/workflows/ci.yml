@@ -58,7 +58,8 @@ jobs:
   engine:
     name: engine
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    # The full suite already takes 56-58 minutes on main; 60 left no room as tests are added.
+    timeout-minutes: 90
     services:
       postgres:
         image: postgres:16
