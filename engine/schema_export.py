@@ -18,6 +18,8 @@ from pydantic.json_schema import GenerateJsonSchema, models_json_schema
 from .api import ExportPreview, ExportPreviewTooLarge, NewCase, PackagePreview, SectionCRequest
 from .code_library import CodeTOC, ProvisionContext
 from .models import Case, Fact, SectionCRow
+from .completeness_report import CompletenessResponse
+from .review.routes_completeness import CompletenessRequest
 from .models_jobs import Job, JobList, WorkerHealth
 from .account_models import ApplicationPreferences, ApplicationPreferencesPatch, UserResult, MessagesResult
 from .routes_auth import SignupRequest, LoginRequest, OnboardingRequest
@@ -31,10 +33,12 @@ from .routes_rewrite import RewriteRequest, RewriteResult
 from .routes_intake import AnswersRequest, IntakeRequest, IntakeResult, PlanRequest, ScopeRequest
 from .identify.http_models import (BenchmarkConfirmRequest, IdentifyConfirmRequest, IdentifyDecisionRequest,
                                    IdentifyDecisionResponse, IdentifyRequest, RequirementDecisionRequest)
-from .models_review import InformationRequestEdit, PackageReviewIndex, ReviewSession, SentInformationRequests
+from .models_review import (InformationRequestEdit, PackageReviewIndex, ReturnWithRequest, ReviewSession,
+                            SentInformationRequests, VarianceIssued)
 from .models_jurisdictions import JurisdictionDetail, JurisdictionsResult
 from .routes_jurisdictions import CaseJurisdictionPack
 from .routes_case import DraftPatch, SelectedArticlesRequest, TitleRequest
+from .routes_drafting import GenerateDrafts, DecideDraft
 from .rules.models import CaseRules, RuleSet
 from .models_checklists import (CaseChecklists, ChecklistAnswerRequest, ChecklistAnswerResult,
                                 JurisdictionChecklists)
@@ -47,15 +51,16 @@ RESPONSES = (Case, SectionCRow, CodeTOC, ProvisionContext, UserResult, MessagesR
              JurisdictionChecklists, CaseChecklists, ChecklistAnswerResult,
              ApplicationPreferences, ExportPreview,
              ExportPreviewTooLarge, PackagePreview, WorkspaceView, WorkspaceSignature, WorkspaceConsent,
-             RewriteResult, Job, JobList, WorkerHealth)  # responses carry every field
+             RewriteResult, Job, JobList, WorkerHealth, CompletenessResponse)  # responses carry every field
 REQUESTS = (Fact, NewCase, SectionCRequest, SignupRequest, LoginRequest, OnboardingRequest,
             ClaimRequest, DecisionRequest, MessageRequest, MessageReadRequest, ProfessionalRequirementRequest,
-            SubmitRequest, AssistRequest, InformationRequestEdit,
+            SubmitRequest, AssistRequest, InformationRequestEdit, ReturnWithRequest, VarianceIssued,
             IntakeRequest, AnswersRequest, ScopeRequest, PlanRequest,
             IdentifyRequest, IdentifyDecisionRequest, IdentifyConfirmRequest, BenchmarkConfirmRequest,
             RequirementDecisionRequest,
             ChecklistAnswerRequest, DraftPatch, TitleRequest, SelectedArticlesRequest, ApplicationPreferencesPatch,
-            SignatureInput, ConsentInput, HistoryInput, RewriteRequest)  # defaulted fields optional
+            SignatureInput, ConsentInput, HistoryInput, RewriteRequest,
+            GenerateDrafts, DecideDraft, CompletenessRequest)  # defaulted fields optional
 
 
 class _ResponsesCarryDefaults(GenerateJsonSchema):

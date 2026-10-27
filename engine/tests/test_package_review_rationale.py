@@ -92,7 +92,7 @@ def test_saved_case_rationale_uses_the_latest_applicant_passage(codes, alias, st
         assert ir.build([finding]).items[0].included
         if state == 'unconfirmed':
             assert finding.problem == 'unconfirmed'
-            assert reading.value == 'SYNTHETIC latest reason.'
+            assert reading.status == 'not_found' and reading.value is None and reading.pointer.quote is None
         else:
             assert reading.status == 'blank' and reading.value is None
 
@@ -118,10 +118,20 @@ def test_official_export_rationale_round_trip(codes, present):
         assert reading.pointer.file == 'official-export.pdf' and reading.pointer.page > result.form_pages
         assert not any(f.field == 'rationale' for f in parts.findings)
     else:
-        # A draft prints no placeholder for a missing passage, so the reader cannot call it blank: the absent
-        # rationale stays an officer check rather than a certain applicant gap.
+        # A draft prints no placeholder passage, but its visible administrative record marks the rationale
+        # unanswered, so the same file reads as a certain applicant gap on both sides.
         assert not any('Rationale' in line for line in result.appendix_text)
-        _assert_officer_check(parts)
+        _assert_blank_applicant_gap(parts)
+
+
+def _assert_blank_applicant_gap(parts):
+    reading = next(f for f in parts.fields if f.field == 'rationale')
+    finding = next(f for f in parts.findings if f.field == 'rationale')
+    assert reading.status == finding.status == 'blank'
+    assert finding.severity == 'blocking' and finding.routed_to == 'applicant'
+
+
+HEADING_QUOTES = {None, 'Rationale', 'Rationale for variance'}
 
 
 def _assert_officer_check(parts):
@@ -129,6 +139,8 @@ def _assert_officer_check(parts):
     finding = next(f for f in parts.findings if f.field == 'rationale')
     assert reading.status == finding.status == 'not_found'
     assert reading.value is None
+    # An uncertain passage keeps only the heading that locates it, never words of the unestablished answer.
+    assert {reading.pointer.quote, *(pointer.quote for pointer in finding.pointers)} <= HEADING_QUOTES
     request = ir.build(parts.findings)
     item = next(i for i in request.items if i.finding_key == finding.key)
     assert item.officer_check and not item.included and item.text not in request.text
@@ -149,7 +161,7 @@ def test_long_official_rationale_is_complete_or_an_officer_check(codes):
     else:
         finding = _assert_officer_check(parts)
         assert len({p.page for p in finding.pointers}) >= 2
-        assert any(ending.strip() in (p.quote or '') for p in finding.pointers)
+        assert all(p.quote is None for p in finding.pointers)
 
 
 def split_rationale_pdf(*, footer=False):
@@ -175,8 +187,7 @@ def test_rationale_heading_at_page_end_does_not_request_the_supplied_body(footer
     else:
         finding = _assert_officer_check(parts)
         assert {p.page for p in finding.pointers} >= {1, 2}
-        assert any(p.page == 2 and p.quote == 'SYNTHETIC applicant passage on the next page.'
-                   for p in finding.pointers)
+        assert any(p.page == 2 and p.quote is None for p in finding.pointers)
 
 
 def raster_rationale_pdf():
@@ -353,7 +364,9 @@ def test_multiple_rationale_candidates_keep_all_sources_and_stable_outcomes(layo
             item = ir.build([finding]).items[0]
             assert item.included and not item.officer_check
         assert len(finding.pointers) == 2, 'Both labelled candidates must retain their actual source pointers.'
-        assert sorted(p.quote for p in finding.pointers) == sorted(value or 'Rationale' for value in values)
+        # A blank candidate is located by its heading; a candidate's unestablished words are never quoted.
+        assert sorted(p.quote or '' for p in finding.pointers) == sorted(
+            'Rationale' if not value else '' for value in values)
         projection = (reading.model_dump(), finding.model_dump(), ir.build([finding]).model_dump())
         if before is not None:
             assert projection == before, 'Multipart order must not choose which rationale controls.'
@@ -368,7 +381,7 @@ def test_uncertain_rationale_sources_are_not_masked_by_other_candidates(other):
     for ordered in (uploads, list(reversed(uploads))):
         finding = _assert_officer_check(review_uploads(ordered, None))
         assert {p.file for p in finding.pointers} == {'a.pdf', 'b.pdf'}
-        assert any(p.file == 'a.pdf' and p.quote == (other or 'Rationale') for p in finding.pointers)
+        assert any(p.file == 'a.pdf' and p.quote == (None if other else 'Rationale') for p in finding.pointers)
         if before is not None:
             assert finding.model_dump() == before
         before = finding.model_dump()
@@ -399,8 +412,8 @@ def test_additional_recognized_forms_cannot_hide_a_supplied_rationale(codes):
     blank.facts = [f for f in blank.facts if f.field != 'rationale']
     uploads = [('blank-draft.pdf', export_case(blank, codes=codes, draft=True).pdf),
                ('supplied-form.pdf', export_case(supplied, codes=codes).pdf)]
-    # The draft alone has no rationale passage at all: absent, so an officer check.
-    _assert_officer_check(review_uploads(uploads[:1], codes))
+    # The draft alone records its rationale as unanswered.
+    _assert_blank_applicant_gap(review_uploads(uploads[:1], codes))
     before = None
     for ordered in (uploads, list(reversed(uploads))):
         parts = review_uploads(ordered, codes)

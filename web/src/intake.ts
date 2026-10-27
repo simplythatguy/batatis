@@ -16,14 +16,15 @@ const EMPTY_PROCESS: Case["process"] = {
   qualifications: "",
 };
 
-export function defaultTitle(type: ApplicantType): string {
+export function defaultTitle(type: ApplicantType | null): string {
   if (type === "manufacturer") return "New product application";
   if (type === "contractor") return "New construction application";
   if (type === "homebuilder" || type === "builder") return "New house application";
   return "New application";
 }
 
-export function applicantLabel(type: ApplicantType): string {
+export function applicantLabel(type: ApplicantType | null): string {
+  if (type === null) return "Applicant";
   if (type === "manufacturer") return "Manufacturer";
   if (type === "contractor") return "General contractor";
   if (type === "homebuilder" || type === "builder") return "Homebuilder";
@@ -31,10 +32,10 @@ export function applicantLabel(type: ApplicantType): string {
   return "Owner";
 }
 
-export function emptyCase(type: ApplicantType): Case {
-  const shaped = type === "contractor" || type === "homebuilder" || type === "manufacturer" ? type : "homebuilder";
+export function emptyCase(type: ApplicantType | null): Case {
+  const shaped = type === null || type === "contractor" || type === "homebuilder" || type === "manufacturer" ? type : "homebuilder";
   return {
-    id: `case-${shaped}`,
+    id: `case-${shaped ?? "new"}`,
     title: defaultTitle(shaped),
     applicantType: shaped,
     codeEdition: CODE_EDITION,

@@ -18,6 +18,22 @@ const drawn = (n): string => {
   if (String(n.props?.className ?? "").includes("cf-sr") || n.type === "Tip") return "";
   return drawn(n.props?.children);
 };
+/**
+ * What a stage control draws: every stage renders its name so it can slide open and shut, but only the
+ * current stage's name track is open (calm.css `.cf-stage[aria-current="step"] .cf-stage-word`).
+ */
+const drawnStage = (control): string => {
+  const open = control.props?.["aria-current"] === "step";
+  const walk = (n): string => {
+    if (Array.isArray(n)) return n.map(walk).join(" ");
+    if (n == null || typeof n === "boolean") return "";
+    if (typeof n !== "object") return String(n);
+    if (String(n.props?.className ?? "").includes("cf-sr") || n.type === "Tip") return "";
+    if (n.props?.className === "cf-stage-word" && !open) return "";
+    return walk(n.props?.children);
+  };
+  return walk(control);
+};
 /** Function components without hooks of their own are expanded so their markup can be read. */
 const expand = (n) => {
   if (Array.isArray(n)) return n.map(expand);
@@ -43,9 +59,13 @@ test("applicant stages: the current stage shows its one-word name beside its ico
   const controls = nodes(tree, (n) => /^cf-stage( |$)/.test(n.props?.className ?? ""));
   assert.equal(controls.length, 4);
   // User decision 2026-10-22 (Option A+B): only the current stage draws its name; no fill marks it.
-  assert.equal(drawn(tree).replace(/\s+/g, " ").trim(), "Questions", "the current stage's name is the only word in the stage bar");
-  assert.deepEqual(controls.map((c) => drawn(c).trim()), ["", "Questions", "", ""], "the other stages draw no name");
-  assert.equal(nodes(tree, (n) => n.props?.className === "cf-stage-word").length, 1, "one visible stage word");
+  assert.equal(controls.map(drawnStage).join(" ").replace(/\s+/g, " ").trim(), "Questions", "the current stage's name is the only word in the stage bar");
+  assert.deepEqual(controls.map((c) => drawnStage(c).trim()), ["", "Questions", "", ""], "the other stages draw no name");
+  // Every stage keeps its name mounted (folded shut) so switching stages slides one closed and the next open.
+  const words = nodes(tree, (n) => n.props?.className === "cf-stage-word");
+  assert.equal(words.length, 4, "each stage renders its foldable name");
+  assert.ok(words.every((w) => w.props["aria-hidden"] === "true"), "the name is visual only; the aria-label carries it");
+  assert.deepEqual(controls.map((c) => drawn(c).replace(/\s+/g, " ").trim()), ["Describe", "Questions", "Review", "Application"], "each name sits in its own stage, in order");
   assert.deepEqual(controls.map((c) => c.props["aria-label"]), [
     "1 Describe, done", "2 Questions, 40% done", "3 Review, 0% done", "4 Application, 0% done. Nothing filled in yet",
   ]);
@@ -72,10 +92,10 @@ test("reviewer steps use the same control, with the open count beside the icon",
   assert.equal(visible(tree).trim(), "", "no visible step names");
   const controls = nodes(tree, (n) => n.type === "StageButton");
   assert.equal(controls.length, 4);
-  assert.deepEqual(controls.map((c) => c.props.ariaLabel), ["Step 1 of 4: Request, done", "Step 2 of 4: Missing, 3 to look at", "Step 3 of 4: Checks", "Step 4 of 4: Decide"], "a passed step says done, like the applicant stages");
+  assert.deepEqual(controls.map((c) => c.props.ariaLabel), ["Step 1 of 4: Request", "Step 2 of 4: Missing, 3 to look at", "Step 3 of 4: Checks", "Step 4 of 4: Decide"], "passing a package view never completes an administrative check");
   assert.deepEqual(controls.map((c) => c.props.label), ["Request", "Missing", "Checks", "Decide"], "the name is the on-demand label");
   assert.deepEqual(controls.map((c) => Boolean(c.props.current)), [false, true, false, false]);
-  assert.deepEqual(controls.map((c) => Boolean(c.props.done)), [true, false, false, false], "a passed step shows done");
+  assert.deepEqual(controls.map((c) => Boolean(c.props.done)), [false, false, false, false], "navigation never marks a check done");
   assert.equal(controls[1].props.count, 3, "the open count stays visible beside its icon");
   assert.deepEqual(controls.map((c) => c.props.icon.props.name), ["doc", "alert", "list", "scale"], "Request is a document; Missing, Checks and Decide keep their icons");
 });
@@ -100,10 +120,10 @@ test("the current step draws its name and open count; another step draws only it
   }, { window: { addEventListener() {}, removeEventListener() {}, dispatchEvent() {} }, CustomEvent: class {} });
   const props = { id: "rv-missing", label: "Missing", ariaLabel: "Step 2 of 4: Missing, 7 to look at", icon: { type: "AcIcon", props: { name: "alert" } }, pct: 100, count: 7, onClick() {} };
   const current = expand(await h.render({ ...props, current: true }));
-  assert.equal(drawn(current).replace(/\s+/g, " ").trim(), "Missing 7", "name, then the count (the state's own number)");
+  assert.equal(drawnStage(current.props.children[0]).replace(/\s+/g, " ").trim(), "Missing 7", "name, then the count (the state's own number)");
   assert.equal(current.props.children[0].props["aria-current"], "step");
   const other = expand(await h.render({ ...props, current: false }));
-  assert.equal(drawn(other).replace(/\s+/g, " ").trim(), "7", "no name on a step that is not current");
+  assert.equal(drawnStage(other.props.children[0]).replace(/\s+/g, " ").trim(), "7", "no name on a step that is not current");
   assert.equal(other.props.children[0].props["aria-current"], undefined);
   const tips = nodes(other, (n) => n.type === "Tip");
   assert.equal(tips.length, 1, "the hover or focus label stays");

@@ -15,8 +15,9 @@ from psycopg.conninfo import conninfo_to_dict, make_conninfo
 from psycopg.types.json import Jsonb
 
 from .models import Case, Fact, now
-from .store import (FileTooLarge, InvalidAttachment, VersionConflict, attachment_reference,
-                    case_with_stored_files, retention_cutoff, retention_windows)
+from .store import (ReviewRevision, check_review_revision, FileTooLarge, InvalidAttachment, VersionConflict,
+                    attachment_reference, case_with_stored_files, file_fingerprints, retention_cutoff,
+                    retention_windows)
 from .uploads import PDF_MAX_BYTES
 from .account_store import ACCOUNT_MIGRATIONS, PostgresAccountsMixin, _DB, preserve_messages
 from .access import enforce_mutation, enforce_stored_mutation, enforce_read
@@ -153,7 +154,11 @@ class PostgresCaseStore(PostgresAccountsMixin):
         con.execute('DELETE FROM case_files WHERE case_id = ANY(%s)', (ids,))
         return con.execute('DELETE FROM cases WHERE id = ANY(%s)', (ids,)).rowcount
 
-    def put(self, case: Case, *, expected_version: int | None = None) -> Case:
+    def put(self, case: Case, *, expected_version: int | None = None,
+            expected_files: dict[str, tuple[str, str | None]] | None = None,
+            expected_review: ReviewRevision | None = None) -> Case:
+        if expected_files is not None and (expected_version is None or expected_version < 1):
+            raise ValueError('file CAS requires an existing case version')
         case.updated_at = now()
         conflict = None
         with self._conn() as con:
@@ -186,6 +191,7 @@ class PostgresCaseStore(PostgresAccountsMixin):
                     raise VersionConflict(case.id, 0, int(actual[0]) if actual else None)
                 case.version = int(row[0])
                 return case
+            check_review_revision(con, case.id, expected_review, postgres=True)
             row = con.execute('SELECT data, version FROM cases WHERE id=%s FOR UPDATE', (case.id,)).fetchone()
             if row is not None and self._purge_expired(con, case.id):
                 row = None
@@ -195,6 +201,11 @@ class PostgresCaseStore(PostgresAccountsMixin):
                 conflict = VersionConflict(case.id, expected_version, int(row[1]) if row else None)
             else:
                 preserve_messages(case, row[0])
+                if expected_files is not None:
+                    actual_files = file_fingerprints(con.execute(
+                        'SELECT id, name, data FROM case_files WHERE case_id=%s FOR UPDATE', (case.id,)))
+                    if actual_files != expected_files:
+                        raise VersionConflict(case.id, expected_version, int(row[1]))
                 payload = Jsonb(case.model_dump(mode='json', exclude={'version'}))
                 saved = con.execute('UPDATE cases SET data=%s, version=version+1, updated_at=%s '
                                   'WHERE id=%s AND version=%s RETURNING version',
@@ -255,7 +266,8 @@ class PostgresCaseStore(PostgresAccountsMixin):
                 raise VersionConflict(case_id, row[1])
             return case
 
-    def put_file(self, case_id: str, name: str, data: bytes, content_type: str = 'application/pdf') -> dict | None:
+    def put_file(self, case_id: str, name: str, data: bytes, content_type: str = 'application/pdf', *,
+                 touch: bool = True) -> dict | None:
         if len(data) > PDF_MAX_BYTES:
             raise FileTooLarge()
         file_id = f'file_{uuid.uuid4().hex[:12]}'
@@ -269,8 +281,9 @@ class PostgresCaseStore(PostgresAccountsMixin):
             con.execute('INSERT INTO case_files (id, case_id, name, content_type, size, data, created_at) '
                         'VALUES (%s, %s, %s, %s, %s, %s, %s)',
                         (file_id, case_id, name, content_type, len(data), data, stamp))
-            con.execute("UPDATE cases SET data=jsonb_set(data, '{updated_at}', to_jsonb(%s::text)), updated_at=%s WHERE id=%s",
-                        (stamp, stamp, case_id))
+            if touch:
+                con.execute("UPDATE cases SET data=jsonb_set(data, '{updated_at}', to_jsonb(%s::text)), updated_at=%s WHERE id=%s",
+                            (stamp, stamp, case_id))
         return {'id': file_id, 'case_id': case_id, 'name': name, 'content_type': content_type, 'size': len(data)}
 
     def get_file(self, case_id: str, file_id: str) -> dict | None:

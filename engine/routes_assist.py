@@ -47,9 +47,13 @@ from that list, which is what their Missing and Checks screens show, and say wha
 applicant for. Never tell the officer to correct or resubmit the application. Administrative completeness is not technical
 correctness or a determination of equivalent performance. A reviewer accepts an
 application as administratively complete. Never author Section D professional
-evidence, the applicant's risk assessment, mitigating measures or assumptions/limits
-for them. Explain what those fields need and ask for their own facts or responsible
-professional's work. Do not generate text for them to paste into those fields.
+evidence, analysis, calculations, test results, equivalence opinions or seals.
+The saved applicant drafting flow may draft the applicant's risk assessment, mitigating measures,
+assumptions/limits and other explanations as cited claims, labelled assumptions, future plans and gap
+questions. Direct applicants to that saved flow to generate and explicitly accept their wording.
+This chat explains what fields need and asks for their facts or a responsible professional's work;
+do not generate uncited freeform text for them to paste into fields. Reviewer and document help remain
+read-only: explain administrative gaps and source passages, never fill answers or professional evidence.
 Use the real destination names in navigation context for app help, never internal
 screen ids or invented screens. Never say you opened a screen: the app confirms
 navigation separately. Keep replies short. Cite only provision ids supplied in code context. Return plain
@@ -62,7 +66,8 @@ PRODUCT_HELP = (
     'from the officer to the applicant. Applicants correct and resubmit returned applications rather than '
     'replying in a chat. Reviewers claim an application and accept it as administratively complete, '
     'return it with questions, or record a refusal with written reasons. Acceptance is administrative. '
-    'Professional evidence must come from its responsible author. Risk, mitigating measures and '
+    'The saved applicant drafting flow creates source-cited explanations to review and accept; it does not '
+    'create professional evidence. Professional evidence must come from its responsible author. Risk, mitigating measures and '
     'assumptions/limits are process requirements on the alternative path.'
 )
 ARTICLE = re.compile(r'(?<![\w.])\d{1,2}(?:\.\d{1,3}){3}\.?(?:\(\d+\)(?:\([a-z]+\))?)?(?!\w|\.\d)')
@@ -74,6 +79,16 @@ CLAIM_WORDS = re.compile(r'\b(?:approved|compliant|complies|comply|complying|saf
                          r'|conforms?\s+(?:to|with)|in\s+compliance\s+with)\b', re.I)
 SAFE_HELP = ('I can explain source text and missing administrative information. Ask about a specific field '
              'or provision. The authority and responsible professionals must assess technical matters.')
+SAVED_DRAFT_HELP = ('Use the application’s saved drafting actions to create source-cited applicant wording, '
+                    'review its claims and gap questions, then accept it explicitly. Professional work must '
+                    'come from its responsible author.')
+# Only a request for the assistant to do the writing, not a question about what a field needs.
+_AUTHORING = re.compile(r'^\W*(?:please\s+)?(?:write|draft|compose|generate|fill|rewrite)\b'
+                        r'|\b(?:can|could|would|will)\s+you\s+(?:please\s+)?(?:write|draft|compose|generate|fill|rewrite)\b'
+                        r'|\b(?:write|draft|compose|generate|fill|rewrite)\b[^.?!]*\bfor\s+(?:me|us)\b', re.I)
+_DRAFT_FIELDS = re.compile(r'\b(?:rationale|risk|mitigat\w*|assumptions?|maintenance|qualifications?'
+                           r'|section\s+[bcd]|proposed alternative|evidence plan|engineering report'
+                           r'|professional evidence|calculations?|test results?|equivalence opinion|seals?)\b', re.I)
 
 
 class AssistFocus(BaseModel):
@@ -248,17 +263,19 @@ def _officer_review(findings) -> list[dict]:
             for f in findings if f.status != 'present'][:40]
 
 
-def build_context(body: AssistRequest, case, codes, review=None) -> dict:
+def build_context(body: AssistRequest, case, codes, review=None, store=None) -> dict:
     context = {'screen': body.screen, 'help': PRODUCT_HELP}
     if case is not None:
-        gaps = check_completeness(case, codes)
+        gaps = check_completeness(case, codes, store=store)
         fields = process_fields(case, codes)
         # Sentences quoted from the attachments are reading context, not answers; leaving them out keeps
         # the applicant's own answers within the context budget.
         facts = [fact for fact in case.facts if not fact.field.startswith('statement.')]
         context['application'] = {'id': case.id, 'title': case.title, 'status': case.status,
             'facts': [_fact_row(fact) for fact in facts[-100:]],
-            'open_gaps': [gap.model_dump() for gap in gaps],
+            'open_gaps': [{'id': gap.id, 'section': gap.section, 'field': gap.field, 'severity': gap.severity,
+                           'routed_to': gap.routed_to, 'message': gap.message[:240]}
+                          for gap in gaps],
             'process_fields': [field.model_dump(exclude={'example'}) for field in fields],   # examples: focused card only
             'provisions': case.provisions}
         if review is not None:
@@ -403,6 +420,14 @@ def create_router(cases, code):
                 documents.validate_files(store)
                 return AssistResult(answer=NO_READABLE_TEXT, cited=[], removed_citations=[], notice='',
                                     context=bound, attachments=documents.attachments)
+        if _AUTHORING.search(body.question) and _DRAFT_FIELDS.search(body.question):
+            if bound is not None or body.case_version is not None:
+                reauthorize(body, request, response, store, user)
+            if documents:
+                documents.validate_files(store)
+            return AssistResult(answer=SAVED_DRAFT_HELP if documents is None and user.role != 'reviewer' else SAFE_HELP,
+                                cited=[], removed_citations=[], notice='', context=bound,
+                                attachments=documents.attachments if documents else [])
         route = model_route()
         codes = code()
         # Personal information never leaves Batatis: scrub the application data and the user's own
@@ -413,7 +438,7 @@ def create_router(cases, code):
             from .review.sessions import Sessions
             found = Sessions(store).list(case.id)
             review = found[-1] if found else None
-        built = documents.prepared.data if documents else build_context(body, case, codes, review)
+        built = documents.prepared.data if documents else build_context(body, case, codes, review, store)
         if documents is None:
             built['navigation'] = [{'name': item.name} for item in available_destinations(user, case)]
             # Document projections are already scrubbed and checked. Redacting

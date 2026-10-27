@@ -5,6 +5,7 @@ from engine.api import create_app
 from engine.store import CaseStore
 from engine.accounts import COOKIE, digest, SCRYPT_N, SCRYPT_R, SCRYPT_P, password_hash
 from engine.models import Case
+from engine.account_models import User
 
 
 @pytest.fixture
@@ -45,6 +46,45 @@ def onboard(client, role='applicant', authority='edmonton'):
     response = client.post('/auth/onboarding', json=body)
     assert response.status_code == 200, response.text
     return response.json()['user']
+
+
+@pytest.mark.parametrize('fields', [{}, {'applicant_type': None}, {'applicant_type': 'manufacturer'}])
+def test_applicant_onboarding_accepts_no_type_and_keeps_existing_types(app, fields):
+    with TestClient(app, base_url='http://localhost') as client:
+        signup(client)
+        response = client.post('/auth/onboarding', json={'role': 'applicant', **fields})
+        assert response.status_code == 200, response.text
+        user = response.json()['user']
+        assert user['onboarded'] is True and user['role'] == 'applicant'
+        assert user['applicant_type'] == fields.get('applicant_type')
+        assert user['authority'] is None
+        assert client.get('/auth/me').json()['user'] == user
+
+
+def test_reviewer_leaving_role_without_type_still_needs_current_code(app):
+    with TestClient(app, base_url='http://localhost') as client:
+        signup(client)
+        onboard(client, 'reviewer')
+        assert client.post('/auth/onboarding', json={'role': 'applicant'}).status_code == 403
+        response = client.post('/auth/onboarding', json={'role': 'applicant', 'access_code': 'officer-secret'})
+        assert response.status_code == 200, response.text
+        assert response.json()['user']['applicant_type'] is None
+        assert response.json()['user']['authority'] is None
+
+
+def test_account_model_keeps_an_unknown_applicant_type():
+    user = User(email='owner@example.test', name='Owner', role='applicant', onboarded=True)
+    assert User.model_validate(user.model_dump()).applicant_type is None
+
+
+def test_product_scope_follows_the_words_not_the_account_role():
+    from engine.intake.questions import plan_questions
+
+    arguments = dict(known=set(), conflicts=[], candidates=[], not_sure=set(), departure_known=True)
+    asked = lambda prose, role: {q.field for q in plan_questions(prose=prose, role=role, **arguments)}  # noqa: E731
+    assert 'product_scope' in asked('A product for use across Alberta', None)
+    assert 'product_scope' in asked('A product for use across Alberta', 'manufacturer')
+    assert 'product_scope' not in asked('A two-storey house with larger side windows', None)
 
 
 def test_credentials_validation_normalization_and_generic_failure(app):

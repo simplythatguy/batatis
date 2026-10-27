@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Applicant journey: two directions</title>
+<style>
+  :root {
+    --bg: #f5f6f8; --s: #fff; --t: #14161b; --t2: #4a505c; --t3: #6b7280; --t4: #a3a8b3;
+    --line: rgba(17,24,39,.08); --line2: rgba(17,24,39,.14); --ctl: rgba(17,24,39,.42);
+    --sel: rgba(17,24,39,.06); --p: #16181d; --acc: #f25a2a;
+    --done: #18a058; --warn: #f0a20b; --block: #e5484d; --pend: #9aa0ab;
+    --teal: #0f9f8f; --teal-t: #e2f5f2; --teal-s: #0b6b60;
+    --violet: #8b5cf6; --violet-t: #f1ebfe; --violet-s: #6d28d9;
+    --font: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 13px/1.4 var(--font); color: var(--t); background: transparent; }
+  .board { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; padding: 4px 0 8px; }
+  .dir { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 10px; margin: 10px 0 -4px; }
+  .dir b { font-size: 15px; letter-spacing: -.01em; }
+  .dir span { color: var(--t3); font-size: 12px; }
+  .cap { font: 11px/1.3 var(--mono); color: var(--t3); margin: 0 0 6px 2px; }
+  .scr { background: var(--bg); border: 1px solid var(--line2); border-radius: 14px; height: 430px; overflow: hidden;
+         display: flex; flex-direction: column; position: relative; }
+  .top { display: flex; align-items: center; gap: 8px; padding: 10px 12px; }
+  .brand { width: 9px; height: 9px; border-radius: 3px; background: var(--acc); }
+  .top .ttl { font-weight: 600; font-size: 12px; }
+  .top .stages { margin-left: auto; display: flex; gap: 8px; color: var(--t4); }
+  .top .stages .on { color: var(--t); display: flex; gap: 4px; align-items: center; font-weight: 600; font-size: 11px; }
+  .body { flex: 1; padding: 4px 18px 12px; display: flex; flex-direction: column; min-height: 0; }
+  .center { justify-content: center; }
+  h1 { font-size: 24px; line-height: 1.08; letter-spacing: -.03em; margin: 0 0 12px; font-weight: 650; }
+  h2 { font-size: 19px; line-height: 1.15; letter-spacing: -.02em; margin: 0 0 10px; font-weight: 650; }
+  .eb { font: 11px/1 var(--mono); color: var(--t3); margin-bottom: 8px; display: flex; gap: 6px; align-items: center; }
+  .eb i { width: 7px; height: 7px; border-radius: 2px; background: var(--teal); display: inline-block; }
+  .card { background: var(--s); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 1px 2px rgba(17,24,39,.05), 0 4px 16px -6px rgba(17,24,39,.08); }
+  .drop { padding: 16px; display: grid; gap: 10px; }
+  .dz { border: 1.5px dashed var(--line2); border-radius: 12px; padding: 18px 10px; display: grid; justify-items: center; gap: 6px; color: var(--t3); }
+  .dz .ic { display: flex; gap: 10px; color: var(--t2); }
+  .dz small { font-size: 11px; }
+  .field { border: 1px solid var(--line2); border-radius: 10px; padding: 9px 10px; color: var(--t4); font-size: 12px; }
+  .field.v { color: var(--t); }
+  .row { display: flex; align-items: center; gap: 8px; }
+  .sp { flex: 1; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 8px 14px; font-weight: 600; font-size: 12px; white-space: nowrap; border: 1px solid var(--line2); background: var(--s); color: var(--t); }
+  .btn.p { background: var(--p); color: #fff; border-color: var(--p); }
+  .btn.g { border-color: transparent; background: transparent; color: var(--t2); }
+  .btn.sm { padding: 5px 10px; font-size: 11px; }
+  kbd { font: 10px var(--mono); opacity: .6; }
+  .files { display: grid; gap: 6px; }
+  .file { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: var(--s); border: 1px solid var(--line); border-radius: 10px; font-size: 12px; }
+  .file .n { font-weight: 550; }
+  .file .st { margin-left: auto; color: var(--t3); font-size: 11px; display: flex; gap: 5px; align-items: center; white-space: nowrap; }
+  .bar { height: 3px; background: var(--sel); border-radius: 2px; overflow: hidden; margin-top: 4px; }
+  .bar i { display: block; height: 100%; background: var(--t); border-radius: 2px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; flex: none; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 9px; border-radius: 999px; background: var(--s); border: 1px solid var(--line); font-size: 11.5px; }
+  .chip.new { animation: none; border-color: var(--line2); }
+  .facts { display: grid; gap: 0; padding: 4px 0; }
+  .fact { display: grid; grid-template-columns: 22px 1fr auto; gap: 8px; align-items: center; padding: 8px 12px; border-top: 1px solid var(--line); }
+  .fact:first-child { border-top: 0; }
+  .fact .v { font-weight: 560; font-size: 12.5px; }
+  .fact .k { color: var(--t3); font-size: 11px; }
+  .src { display: inline-flex; align-items: center; gap: 4px; font: 10.5px var(--mono); color: var(--t3); padding: 2px 6px; border-radius: 6px; background: var(--sel); white-space: nowrap; }
+  .src.assumed { background: transparent; border: 1px dashed var(--ctl); color: var(--t2); }
+  .ic16 { width: 16px; height: 16px; flex: none; }
+  .ic14 { width: 14px; height: 14px; flex: none; }
+  .ans { display: grid; gap: 7px; }
+  .tile { display: flex; align-items: center; gap: 10px; background: var(--s); border: 1px solid var(--line2); border-radius: 11px; padding: 10px 12px; font-size: 12.5px; font-weight: 520; }
+  .tile .k { margin-left: auto; font: 10px var(--mono); color: var(--t4); border: 1px solid var(--line2); border-radius: 4px; padding: 1px 5px; }
+  .tile.on { border-color: var(--t); box-shadow: inset 0 0 0 1px var(--t); }
+  .tile.unsure { color: var(--t2); border-style: dashed; }
+  .who { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--t2); padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line2); background: var(--s); }
+  .foot { padding: 9px 12px; border-top: 1px solid var(--line); background: var(--s); display: flex; align-items: center; gap: 12px; font-size: 11.5px; }
+  .tally { display: inline-flex; align-items: center; gap: 4px; color: var(--t2); font-weight: 560; }
+  .tally.you { color: var(--t); }
+  .steps { display: flex; gap: 3px; flex: 1; }
+  .steps i { height: 4px; flex: 1; border-radius: 2px; background: var(--sel); }
+  .steps i.d { background: var(--teal); }
+  .steps i.c { background: var(--teal-s); }
+  .fork { display: grid; gap: 8px; }
+  .path { display: grid; grid-template-columns: 26px 1fr; gap: 8px; align-items: center; padding: 10px 12px; border-radius: 12px; background: var(--s); border: 1px solid var(--line); }
+  .path.off { opacity: .55; }
+  .path.go { border-color: var(--t); }
+  .path b { font-size: 12.5px; }
+  .path small { display: block; color: var(--t3); font-size: 11px; }
+  .sheet { display: grid; gap: 0; }
+  .sheet .r { display: grid; grid-template-columns: 96px 1fr; gap: 8px; align-items: center; padding: 8px 12px; border-top: 1px solid var(--line); font-size: 12px; }
+  .sheet .r:first-child { border-top: 0; }
+  .sheet .r span:first-child { color: var(--t3); }
+  .hole { color: var(--t4); border-bottom: 1px dashed var(--ctl); }
+  .list { display: grid; gap: 6px; }
+  .li { display: flex; gap: 8px; align-items: center; background: var(--s); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font-size: 12px; }
+  .li small { color: var(--t3); }
+  .blocks { display: grid; gap: 7px; }
+  .blk { display: grid; grid-template-columns: 26px 1fr auto; gap: 8px; align-items: center; background: var(--s); border: 1px solid var(--line); border-radius: 12px; padding: 9px 11px; }
+  .blk b { font-size: 12.5px; display: block; }
+  .blk small { color: var(--t3); font-size: 11px; }
+  .blk .cnt { display: flex; gap: 8px; color: var(--t2); font-size: 11px; font-weight: 600; }
+  .blk .cnt span { display: inline-flex; gap: 3px; align-items: center; }
+  .ring { width: 22px; height: 22px; }
+  .dim { position: absolute; inset: 0; background: rgba(245,246,248,.7); }
+  .over { position: absolute; left: 10px; right: 10px; bottom: 10px; padding: 14px; }
+  .note { color: var(--t3); font-size: 11.5px; margin: 8px 0 0; }
+  .quote { border-left: 2px solid var(--line2); padding: 2px 0 2px 8px; color: var(--t2); font-size: 12px; margin: 0 0 10px; }
+  .unit { display: flex; border: 1px solid var(--line2); border-radius: 999px; overflow: hidden; font-size: 11px; }
+  .unit span { padding: 5px 9px; }
+  .unit .on { background: var(--t); color: #fff; }
+  .verdict { display: grid; gap: 4px; margin: 0 0 6px; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></symbol>
+    <symbol id="i-img" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m21 16-5-5-9 9"/></symbol>
+    <symbol id="i-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 7h16M4 12h10M4 17h13"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+    <symbol id="i-ruler" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="8" width="19" height="8" rx="1.5"/><path d="M6 8v3M10 8v4M14 8v3M18 8v4"/></symbol>
+    <symbol id="i-window" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M12 3v18M4 12h16"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></symbol>
+    <symbol id="i-you" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1.2-3.6 4-5 7-5s5.8 1.4 7 5"/></symbol>
+    <symbol id="i-pro" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18h16"/><path d="M6 18v-3a6 6 0 0 1 12 0v3"/><path d="M12 9V6"/><path d="M9 6h6"/></symbol>
+    <symbol id="i-office" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V9l7-5 7 5v12"/><path d="M9 21v-6h6v6"/><path d="M9 11h.01M15 11h.01"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4.5 4.5L19 7"/></symbol>
+    <symbol id="i-q" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5v.4"/><path d="M12 17h.01"/></symbol>
+    <symbol id="i-scale" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v16M7 20h10M5 8h14"/><path d="m5 8-3 6a3 3 0 0 0 6 0zM19 8l-3 6a3 3 0 0 0 6 0z"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 3 10 14"/><path d="m21 3-7 18-4-7-7-4z"/></symbol>
+    <symbol id="i-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></symbol>
+  </defs>
+</svg>
+
+<div class="board">
+  <!-- ───────────── Direction A ───────────── -->
+  <div class="dir"><b>A · Read first, then one question at a time</b><span>ordered by what decides the application</span></div>
+
+  <div>
+    <p class="cap">A1 · front door, no role, no sign-up yet</p>
+    <div class="scr">
+      <div class="top"><span class="brand"></span><span class="ttl">Batatis</span><span class="stages"><span class="btn g sm">Sign in</span></span></div>
+      <div class="body center">
+        <h1>What are you building?</h1>
+        <div class="card drop">
+          <div class="dz"><span class="ic"><svg class="ic16"><use href="#i-file"/></svg><svg class="ic16"><use href="#i-img"/></svg><svg class="ic16"><use href="#i-text"/></svg></span>Drop plans, photos or notes<small>PDF · JPG · PNG · HEIC · TXT</small></div>
+          <div class="field">…or say it in a few words (optional)</div>
+          <div class="row"><span class="sp"></span><span class="btn p">Start <kbd>⌘↵</kbd></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <p class="cap">A2 · reading, live and honest about coverage</p>
+    <div class="scr">
+      <div class="top"><span class="brand"></span><span class="ttl">Side windows</span></div>
+      <div class="body">
+        <h2>Reading your files</h2>
+        <div class="files">
+          <div class="file"><svg class="ic14"><use href="#i-file"/></svg><div style="flex:1"><span class="n">plans.pdf</span><div class="bar"><i style="width:66%"></i></div></div><span class="st">8 of 12 pages</span></div>
+          <div class="file"><svg class="ic14"><use href="#i-img"/></svg><div style="flex:1"><span class="n">side-yard.jpg</span><div class="bar"><i style="width:100%"></i></div></div><span class="st"><span class="dot" style="background:var(--done)"></span>Looked at</span></div>
+          <div class="file"><svg class="ic14"><use href="#i-text"/></svg><span class="n">Your words</span><span class="st"><span class="dot" style="background:var(--done)"></span>Read</span></div>
+        </div>
+        <p class="cap" style="margin-top:14px">Found so far</p>
+        <div class="chips">
+          <span class="chip"><svg class="ic14"><use href="#i-home"/></svg>House</span>
+          <span class="chip">2 storeys</span>
+          <span class="chip"><svg class="ic14"><use href="#i-pin"/></svg>Edmonton</span>
+          <span class="chip"><svg class="ic14"><use href="#i-window"/></svg>Window 3.1 m²</span>
+          <span class="chip"><svg class="ic14"><use href="#i-ruler"/></svg>1.2 m to line</span>
+        </div>
+        <span class="sp"></span>
+        <p class="note">Questions start when reading ends. Nothing is asked twice.</p>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <p class="cap">A3 · what we understood: one screen, one click</p>
+    <div class="scr">
+      <div class="top"><span class="brand"></span><span class="ttl">Side windows</span></div>
+      <div class="body">
+        <h2>Here’s what I understood</h2>
+        <div class="card facts">
+          <div class="fact"><svg class="ic16"><use href="#i-home"/></svg><div><div class="v">House · 2 storeys · 148 m²</div></div><span class="src"><svg class="ic14"><use href="#i-file"/></svg>p.1</span></div>
+          <div class="fact"><svg class="ic16"><use href="#i-pin"/></svg><div><div class="v">10234 87 Ave, Edmonton</div></div><span class="src"><svg class="ic14"><use href="#i-file"/></svg>p.1</span></div>
+          <div class="fact"><svg class="ic16"><use href="#i-window"/></svg><div><div class="v">Larger windows on the side wall</div><div class="k">what you do differently</div></div><span class="src"><svg class="ic14"><use href="#i-text"/></svg>you</span></div>
+          <div class="fact"><svg class="ic16"><use href="#i-ruler"/></svg><div><div class="v">1.2 m to the property line</div></div><span class="src"><svg class="ic14"><use href="#i-file"/></svg>p.3 · photo</span></div>
+          <div class="fact"><svg class="ic16"><use href="#i-office"/></svg><div><div class="v">City of Edmonton reviews it</div></div><span class="src assumed">from address</span></div>
+        </div>
+        <span class="sp"></span>
+        <div class="row"><span class="btn g">Fix something</span><span class="sp"></span><span class="btn p">Looks right <kbd>↵</kbd></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <p class="cap">A4 · the route decides the journey</p>
+    <div class="scr">
+      <div class="top"><span class="brand"></span><span class="ttl">Side windows</span></div>
+      <div class="body">
+        <div class="eb"><i></i>Your route</div>
+        <h2>You likely need a variance</h2>
+        <div class="fork">
+          <div class="path off"><svg class="ic16"><use href="#i-book"/></svg><div><b>The code’s standard way</b><small>Windows within the table limit for 1.2 m</small></div></div>
+          <div class="path go"><svg class="ic16"><use href="#i-scale"/></svg><div><b>Variance with an alternative solution</b><small>Your windows go past that limit</small></div></div>
+        </div>
+        <span class="sp"></span>
+        <div class="row"><span class="btn g">Could I use the standard way?</span><span class="sp"></span><span class="btn p">Continue <kbd>↵</kbd></span></div>
+        <p class="note">Batatis suggests a route. The officer decides.</p>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <p class="cap">A5 · a question only you can answer</p>
+    <div class="scr">
+      <div class="top"><span class="brand"></span><span class="ttl">Side windows</span></div>
+      <div class="body">
+        <div class="eb"><i></i>Your project</div>
+        <h2>What is on the other side of that wall?</h2>
+        <div class="ans">
+          <div class="tile">Neighbour’s lot<span class="k">A</span></div>
+          <div class="tile on">A lane<span class="k">B</span></div>
+          <div class="tile">A street<span class="k">C</span></div>
+          <div class="tile unsure"><svg class="ic14"><use href="#i-q"/></svg>Not sure<span class="k">D</span></div>
+        </div>
+      </div>
+      <div class="foot"><span class="steps"><i class="d"></i><i class="d"></i><i class="c"></i><i></i><i></i><i></i></span><span class="tally you"><svg class="ic14"><use href="#i-you"/></svg>4</span><span class="tally"><svg class="ic14"><use href="#i-pro"/></svg>2</span></div>
+    </div>
+  </div>
+
+  <div>
+    <p class="cap">A6 · an expert question is routed, not forced</p>
+    <div class="scr">
+      <div class="top"><span class="brand"></span><span class="ttl">Side windows</span></div>
+      <div class="body">
+        <div class="eb"><i></i>Your project</div>
+        <h2>Fire-resistance rating of that wall</h2>
+        <span class="who" style="margin:-2px 0 12px; width:max-content"><svg class="ic14"><use href="#i-pro"/></svg>Usually your designer knows</span>
+        <div class="ans">
+          <div class="tile">45 min<span class="k">A</span></div>
+          <div class="tile">1 hour<span class="k">B</span></div>
+          <div class="tile">Not rated<span class="k">C</span></div>
+          <div class="tile unsure"><svg class="ic14"><use href="#i-pro"/></svg>Ask my designer<span class="k">D</span></div>
+        </div>
+      </div>
+      <div class="foot"><span class="steps"><i class="d"></i><i class="d"></i><i class="d"></i><i class="c"></i><i></i><i></i></span><span class="tally you"><svg class="ic14"><use href="#i-you"/></svg>3</span><span class="tally"><svg class="ic14"><use href="#i-pro"/></svg>2</span></div>
+    </div>
+  </div>
+
+  <div>
+    <p class="cap">A7 · paperwork last, mostly filled</p>
+    <div class="scr">
+      <div class="top"><span class="brand"></span><span class="ttl">Side windows</span></div>
+      <div class="body">
+        <div class="eb"><i style="background:var(--violet)"></i>Paperwork</div>
+        <h2>Last details for the form</h2>
+        <div class="card sheet">
+          <div class="r"><span>Owner</span><span>Dana Whitfield <span class="src">p.1</span></span></div>
+          <div class="r"><span>Applying as</span><span>Owner</span></div>
+          <div class="r"><span>Mailing address</span><span class="hole">Same as site?</span></div>
+          <div class="r"><span>Legal description</span><span>Lot 4 Block 12 Plan 0721234 <span class="src">p.1</span></span></div>
+          <div class="r"><span>Request date</span><span>Today <span class="src assumed">default</span></span></div>
+        </div>
+        <span class="sp"></span>
+        <div class="row"><span class="btn g">Later</span><span class="sp"></span><span class="btn p">Done <kbd>↵</kbd></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <p class="cap">A8 · the end says exactly where you stand</p>
+    <div class="scr">
+      <div class="top"><span class="brand"></span><span class="ttl">Side windows</span></div>
+      <div class="body">
+        <h2>Your part is done</h2>
+        <div class="list">
+          <div class="li"><svg class="ic16" style="color:var(--done)"><use href="#i-check"/></svg><span>You</span><span class="sp"></span><small>11 answered</small></div>
+          <div class="li"><svg class="ic16"><use href="#i-pro"/></svg><span>Your designer</span><span class="sp"></span><small>2 open</small></div>
+          <div class="li"><svg class="ic16"><use href="#i-office"/></svg><span>The office</span><span class="sp"></span><small>1 to confirm</small></div>
+        </div>
+        <span class="sp"></span>
+        <div class="row"><span class="btn"><svg class="ic14"><use href="#i-send"/></svg>Send list to designer</span><span class="sp"></span><span class="btn p">See my application</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ───────────── Direction B ───────────── -->
+  <div class="dir" style="margin-top:22px"><b>B · The draft with holes</b><span>Batatis fills the whole application; you close the holes</span></div>
+
+  <div>
+    <p class="cap">B1 · after the read: the whole application at once</p>
+    <div class="scr">
+      <div class="top"><span class="brand"></span><span class="ttl">Side windows</span></div>
+      <div class="body">
+        <h2>Your application, drafted</h2>
+        <div class="blocks">
+          <div class="blk"><svg class="ic16"><use href="#i-home"/></svg><div><b>Project</b><small>House · 2 storeys · larger side windows</small></div><span class="cnt"><span><svg class="ic14" style="color:var(--done)"><use href="#i-check"/></svg></span></span></div>
+          <div class="blk"><svg class="ic16"><use href="#i-pin"/></svg><div><b>Site and office</b><small>Edmonton · 1.2 m to line</small></div><span class="cnt"><span><svg class="ic14"><use href="#i-you"/></svg>1</span></span></div>
+          <div class="blk"><svg class="ic16"><use href="#i-book"/></svg><div><b>Rules</b><small>2 rules your design departs from</small></div><span class="cnt"><span><svg class="ic14"><use href="#i-you"/></svg>1</span></span></div>
+          <div class="blk"><svg class="ic16"><use href="#i-pen"/></svg><div><b>Your case</b><small>6 drafts to accept</small></div><span class="cnt"><span><svg class="ic14"><use href="#i-you"/></svg>6</span></span></div>
+          <div class="blk"><svg class="ic16"><use href="#i-layers"/></svg><div><b>Proof</b><small>What the evidence must show</small></div><span class="cnt"><span><svg class="ic14"><use href="#i-pro"/></svg>2</span></span></div>
+          <div class="blk"><svg class="ic16"><use href="#i-list"/></svg><div><b>Paperwork</b><small>Owner, mailing, date</small></div><span class="cnt"><span><svg class="ic14"><use href="#i-you"/></svg>1</span></span></div>
+        </div>
+        <span class="sp"></span>
+        <div class="row"><span class="tally you"><svg class="ic14"><use href="#i-you"/></svg>9 for you</span><span class="sp"></span><span class="btn p">Next hole <kbd>↵</kbd></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <p class="cap">B2 · a hole opens over the draft</p>
+    <div class="scr">
+      <div class="top"><span class="brand"></span><span class="ttl">Side windows</span></div>
+      <div class="body">
+        <div class="blocks" style="filter:blur(1px)">
+          <div class="blk"><svg class="ic16"><use href="#i-home"/></svg><div><b>Project</b><small>House · 2 storeys</small></div><span></span></div>
+          <div class="blk"><svg class="ic16"><use href="#i-pin"/></svg><div><b>Site and office</b><small>Edmonton</small></div><span></span></div>
+          <div class="blk"><svg class="ic16"><use href="#i-book"/></svg><div><b>Rules</b><small>2 rules</small></div><span></span></div>
+        </div>
+      </div>
+      <div class="dim"></div>
+      <div class="card over">
+        <div class="eb"><i></i>Site and office</div>
+        <h2 style="font-size:16px">What is on the other side of that wall?</h2>
+        <div class="ans">
+          <div class="tile">Neighbour’s lot<span class="k">A</span></div>
+          <div class="tile on">A lane<span class="k">B</span></div>
+          <div class="tile">A street<span class="k">C</span></div>
+          <div class="tile unsure">Not sure<span class="k">D</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <p class="cap">B3 · route shown as a banner on the draft</p>
+    <div class="scr">
+      <div class="top"><span class="brand"></span><span class="ttl">Side windows</span></div>
+      <div class="body">
+        <div class="card" style="padding:10px 12px; margin-bottom:10px; display:flex; gap:8px; align-items:center"><svg class="ic16"><use href="#i-scale"/></svg><div><b style="font-size:12.5px">Variance route</b><div style="color:var(--t3); font-size:11px">Your windows go past the table limit</div></div><span class="sp"></span><span class="btn sm g">Why</span></div>
+        <div class="blocks">
+          <div class="blk"><svg class="ic16"><use href="#i-book"/></svg><div><b>Rules</b><small>Openings in an exposing face</small></div><span class="cnt"><span><svg class="ic14"><use href="#i-you"/></svg>1</span></span></div>
+          <div class="blk"><svg class="ic16"><use href="#i-pen"/></svg><div><b>Your case</b><small>6 drafts to accept</small></div><span class="cnt"><span><svg class="ic14"><use href="#i-you"/></svg>6</span></span></div>
+          <div class="blk"><svg class="ic16"><use href="#i-layers"/></svg><div><b>Proof</b><small>Fire rating · glazing test</small></div><span class="cnt"><span><svg class="ic14"><use href="#i-pro"/></svg>2</span></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <p class="cap">B4 · the end is the same draft, no holes for you</p>
+    <div class="scr">
+      <div class="top"><span class="brand"></span><span class="ttl">Side windows</span></div>
+      <div class="body">
+        <h2>No holes left for you</h2>
+        <div class="blocks">
+          <div class="blk"><svg class="ic16"><use href="#i-home"/></svg><div><b>Project</b></div><svg class="ic14" style="color:var(--done)"><use href="#i-check"/></svg></div>
+          <div class="blk"><svg class="ic16"><use href="#i-pin"/></svg><div><b>Site and office</b></div><svg class="ic14" style="color:var(--done)"><use href="#i-check"/></svg></div>
+          <div class="blk"><svg class="ic16"><use href="#i-book"/></svg><div><b>Rules</b></div><svg class="ic14" style="color:var(--done)"><use href="#i-check"/></svg></div>
+          <div class="blk"><svg class="ic16"><use href="#i-pen"/></svg><div><b>Your case</b></div><svg class="ic14" style="color:var(--done)"><use href="#i-check"/></svg></div>
+          <div class="blk"><svg class="ic16"><use href="#i-layers"/></svg><div><b>Proof</b></div><span class="cnt"><span><svg class="ic14"><use href="#i-pro"/></svg>2</span></span></div>
+        </div>
+        <span class="sp"></span>
+        <div class="row"><span class="btn"><svg class="ic14"><use href="#i-send"/></svg>Send to designer</span><span class="sp"></span><span class="btn p">Open application</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

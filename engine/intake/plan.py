@@ -45,7 +45,10 @@ def build_plan(case: Case) -> IntakePlan:
     scope = scope_check(case)
     identify = getattr(case, 'identify', None)
     decisions = {k: v.decision for k, v in (identify.decisions if identify else {}).items()}
-    fork = assess(text, decisions=decisions)
+    # Plans alone can state the departure: the proposed alternative read from a file joins the typed words.
+    alternative = _latest(case).get('alternative_description')
+    read = alternative.value if alternative is not None and isinstance(alternative.value, str) else ''
+    fork = assess(text if not read or read in text else f'{text}\n{read}'.strip(), decisions=decisions)
     if scope.status == 'redirect':
         fork = fork.model_copy(update={'variance_needed': 'unknown', 'explanation': (
             'This request reads as one for another safety-codes regime, so the building-code fork is not '
@@ -75,5 +78,6 @@ def build_plan(case: Case) -> IntakePlan:
     asked = {q.id: q for q in [*issued_questions(case.facts, previous), *questions]}
     return IntakePlan(next=step, scope=scope, fork=fork, questions=questions, asked=list(asked.values()), not_sure=not_sure,
                       pre_application=pre_application(case, value('municipality')),
-                      route_notice=route_notice(value('applicant_role'), value('scope')),
+                      route_notice=route_notice(value('applicant_role'),
+                                                'jurisdiction' if value('product_scope') == 'product_acceptance' else None),
                       candidates_seen=len(candidates))

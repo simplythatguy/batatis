@@ -2,7 +2,7 @@
 
 Every value is a Fact that points at its source. A fact's kind says how it was obtained:
   exact     - copied from the code database or a form field
-  pointed   - a span the model selected from the user's words or files (never generated)
+  pointed   - an applicant/file span, or wording explicitly accepted through saved applicant drafting
   computed  - code over exact and pointed values
   proposed  - model judgement; shown with confidence and never exported as confirmed
 """
@@ -23,6 +23,7 @@ from .models_intake import IntakeRecord
 from .models_draft import ApplicantDraft
 from .relevance_models import RelevanceRecord
 from .models_identify import IdentifyResult
+from .models_drafting import DraftingRecord
 
 FactKind = Literal['exact', 'pointed', 'computed', 'proposed']
 FactStatus = Literal['confirmed', 'unconfirmed']
@@ -230,6 +231,7 @@ class Case(BaseModel):
     relevance: RelevanceRecord | None = None   # explicit scoring only; GET recomputes its staleness
     identify: IdentifyResult | None = None     # last code identification (models_identify.py); never writes provisions
     intake: IntakeRecord | None = None         # last intake run: fact pointers and file reports (models_intake)
+    drafting: DraftingRecord | None = None     # applicant writing; never attribution or professional evidence
 
     @computed_field
     @property

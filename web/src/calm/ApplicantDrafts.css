@@ -1,0 +1,47 @@
+.cf-applicant-drafts {
+  min-width: 0;
+  margin: 28px 0;
+  padding: 22px 0;
+  border-block: 1px solid var(--cf-line-2);
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  line-height: 1.55;
+}
+.cf-applicant-drafts h2 { font-size: 17px; font-weight: 550; margin: 0; }
+.cf-draft-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.cf-applicant-drafts:focus { outline: none; }
+.cf-applicant-drafts h4 { font-size: 14px; font-weight: 550; margin: 18px 0 6px; }
+.cf-applicant-drafts p { margin: 8px 0; }
+.cf-draft-meta, .cf-draft-status { color: var(--cf-text-2); font-size: 12px; }
+.cf-draft-status { flex: none; }
+.cf-applicant-drafts summary { cursor: pointer; list-style: none; min-height: 36px; }
+.cf-applicant-drafts summary::-webkit-details-marker { display: none; }
+.cf-applicant-drafts summary:focus-visible { outline: 2px solid var(--cf-focus); outline-offset: 3px; border-radius: 4px; }
+.cf-draft-picker { margin: 18px 0; }
+.cf-draft-picker > summary { display: flex; align-items: center; gap: 12px; font-weight: 550; }
+.cf-draft-picker > summary > .cf-draft-status { margin-left: auto; }
+.cf-draft-picker > summary > svg { flex: none; }
+.cf-draft-picker > div { max-height: 280px; overflow-y: auto; overscroll-behavior: contain; padding: 6px 0; }
+.cf-draft-picker button { width: 100%; display: flex; gap: 12px; justify-content: space-between; text-align: left; padding: 12px; color: var(--cf-text); border: 0; border-radius: 6px; background: transparent; cursor: pointer; font: inherit; }
+.cf-draft-picker button[aria-pressed="true"] { background: var(--cf-line); }
+.cf-draft-wording { margin: 16px 0; }
+.cf-draft-wording p, .cf-draft-sources blockquote { white-space: pre-wrap; }
+.cf-draft-claim { margin: 16px 0; }
+.cf-draft-kind { display: block; font-size: 12px; font-weight: 600; color: var(--cf-text-2); }
+.cf-draft-sources > summary { display: inline-flex; align-items: center; gap: 6px; color: var(--cf-text-2); font-size: 12px; }
+.cf-draft-sources figure { margin: 8px 0 14px; }
+.cf-draft-sources figcaption { font-size: 12px; color: var(--cf-text-2); }
+.cf-draft-sources figcaption a { display: inline-flex; align-items: center; gap: 4px; }
+.cf-draft-sources blockquote { margin: 6px 0 0; padding: 10px 12px; border-left: 2px solid var(--cf-line-2); }
+.cf-draft-questions ul { list-style: none; padding: 0; }
+.cf-draft-questions li { margin: 12px 0; }
+.cf-draft-guidance { margin-top: 18px; }
+.cf-draft-guidance > summary { color: var(--cf-text-2); font-size: 12px; }
+.cf-draft-guidance > summary::before { content: "+"; margin-right: 8px; }
+.cf-draft-guidance[open] > summary::before { content: "−"; }
+.cf-draft-guidance ul { padding-left: 20px; }
+.cf-draft-error, .cf-draft-warning { font-weight: 500; }
+.cf-draft-error > button { margin-left: 8px; }
+.cf-draft-entry { display: inline-flex; align-items: center; gap: 6px; margin-block: 14px; width: fit-content; }
+@media (hover: hover) { .cf-draft-picker button:hover { background: var(--cf-line); } }
+@media (max-width: 480px) { .cf-draft-picker > summary { flex-wrap: wrap; gap: 6px 10px; } .cf-applicant-drafts .cf-row-actions { gap: 10px; } }

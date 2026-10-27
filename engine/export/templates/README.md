@@ -65,10 +65,13 @@ retain open items in `ExportResult.open_items`. Every page also has a small,
 light-grey `Draft · not for submission` mark in its top margin. No open-item
 list or unanswered placeholders are printed. The appendix prints only real
 content (notices, continued values, N/A reasons, confirmed answers and passages,
-Section C, listed documents). Attached supporting-document PDFs follow the
-appendix in Section D order. Form Part 1, the appendix and each attached
-document have their own bookmark. The API resolves files from this case's
-saved bytes; an offline caller supplies `file_loader` to append those bytes.
+Section C, listed documents). `prepare_package` then adds the labelled record
+pages and the attached supporting documents in Section D order, each after a
+short header page. Form Part 1, the appendix and each attached document have
+their own bookmark. The API resolves files from this case's saved bytes
+(`store=`); without a store, a repository-relative fixture path is read. An
+attachment that cannot be opened, including one that needs a password, becomes
+a named open item instead of pages.
 
 The legacy `scc_2026-10` map remains available explicitly, with its original
 five-page bytes and SHA-256

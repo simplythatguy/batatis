@@ -117,18 +117,19 @@ def test_a_withdrawn_na_is_not_honoured(codes):
     assert 'Permit' in export_case(case, codes=codes).blank_fields
 
 
-def test_owner_rep_na_clears_the_representative_gap_and_pre_flight_does_not_block(codes):
+def test_owner_rep_na_and_an_owner_only_application_do_not_block(codes):
     case = demo_case(CASE_A, codes)
     assert not [g for g in check_completeness(case, codes) if g.severity == 'blocking']
+    # The shared rule: the owner may apply without a representative, on both sides.
     removed = without(case, 'owner_rep')
-    assert any(g.field == 'representative' and g.severity == 'blocking' for g in check_completeness(removed, codes))
+    assert not any(g.field == 'representative' for g in check_completeness(removed, codes))
 
 
-def test_a_typed_n_a_value_is_still_a_placeholder_not_a_not_applicable_fact(codes):
+def test_a_typed_n_a_representative_is_owner_only_not_a_not_applicable_fact(codes):
     case = without(demo_case(CASE_A, codes), 'owner_rep')
     case.facts.append(Fact(field='owner_rep_name', value='N/A', kind='pointed', status='confirmed',
                            source=Source(type='user_text', ref='test:applicant', quote='N/A')))
-    assert any(g.field == 'representative' for g in check_completeness(case, codes))
+    assert not any(g.field == 'representative' for g in check_completeness(case, codes))
     assert 'owner_rep_name' not in not_applicable(case)
 
 

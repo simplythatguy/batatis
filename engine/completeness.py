@@ -25,6 +25,7 @@ from .professional import (
 )
 from .section_c import section_c_rows
 from .section_d import SupportingDocument, section_d_plan, supporting_documents
+from .drafting_questions import open_questions as open_drafting_questions
 
 
 class Gap(CaseGap):
@@ -32,16 +33,6 @@ class Gap(CaseGap):
     citation: str | None = None
 
 
-_CORE = (
-    ('D01', 'A', 'owner_name', 'owner name', ('owner_name', 'owner', 'section_a.owner_name')),
-    ('D02', 'A', 'application_date', 'application date', ('application_date', 'request_date', 'date', 'section_a.date')),
-    ('D03', 'B', 'civic_address', 'civic address', ('civic_address', 'municipal_address', 'municipalAddress', 'address')),
-    ('D04', 'B', 'legal_description', 'legal description', ('legal_description', 'legalDescription', 'section_b.legal_description')),
-    ('admin', 'A', 'representative', 'applicant representative', ('representative', 'owner_rep_name', 'applicant_name')),
-    ('admin', 'A', 'mailing_address', 'mailing address', ('mailing_address', 'mailingAddress')),
-    ('admin', 'B', 'alternative_description', 'description of the proposed alternative', ('alternative_description', 'alternative')),
-    ('admin', 'B', 'scope', 'site or jurisdiction-wide scope', ('scope',)),
-)
 _PLACEHOLDERS = {'tbd', 'tobedetermined', 'tobeprovided', 'unknown', 'pending', 'na', 'notprovided', 'placeholder'}
 _HISTORICAL = re.compile(r'\b(?:historical|history|superseded|not current|earlier edition)\b', re.I)
 _PID = re.compile(r'\d+(?:\.\d+){3}\.(?:\(\d+\)(?:\([a-z]+\))?)?')
@@ -159,7 +150,7 @@ def seal_is_professional_evidence(doc: SupportingDocument, *, quote: str = '') -
     return authentication_metadata_usable(doc.responsible_party, doc.issuer, doc.title, quote, seal)
 
 
-def check_completeness(case: Case, codes: Codes, *,
+def _case_constraints(case: Case, codes: Codes, *,
                        professional: ProfessionalResult | None = None,
                        documents: list[SupportingDocument] | None = None) -> list[Gap]:
     """Return stable, located findings. An empty list is no technical or acceptance determination."""
@@ -169,38 +160,6 @@ def check_completeness(case: Case, codes: Codes, *,
         gaps.append(Gap(id=f'{rule}:{field}', severity=severity, section=section, field=field,
                         message=f'Your application appears to be missing {missing}', fix_hint=fix_hint, citation=citation))
 
-    na = not_applicable(case)
-    for rule, section, field, label, aliases in _CORE:
-        if field == 'representative' and 'owner_rep_name' in na:
-            continue    # the applicant confirmed there is no representative; the form shows N/A
-        fact = latest_fact(case, *aliases)
-        value = confirmed_value(case, *aliases)
-        if field == 'legal_description' and fact is None:
-            for components in (('lot', 'block', 'plan'), ('ats_qtr', 'ats_sec', 'ats_twp', 'ats_rge', 'ats_mer')):
-                parts = [confirmed_value(case, key) for key in components]
-                if all(not _missing(part) for part in parts):
-                    value = ' / '.join(parts)
-                    break
-        if not _missing(value):
-            continue
-        presence = confirmed_value(case, f'presence.{field}', f'review.{field}.presence')
-        if presence in ('not_found', 'unreadable') or fact is None or fact.value is None:
-            state = f'a readable {label}; the field was not found. Please confirm it.'
-        elif isinstance(fact.value, str) and not fact.value.strip():
-            state = f'the {label} (the field is blank).'
-        elif _missing(fact.value):
-            state = f'a completed {label}; a placeholder does not supply this information.'
-        else:
-            state = f'a confirmed {label}; its current value has not been confirmed.'
-        add(rule, section, field, state, f'Ask the applicant to enter or confirm the {label}; retain its source.')
-
-    for name, signatures, dates in (
-        ('signature_date', ('signature', 'applicant_signature', 'section_a.signature'), ('signature_date', 'section_a.signature_date')),
-        ('owner_signature_date', ('owner_signature',), ('owner_signature_date',)),
-        ('owner_rep_signature_date', ('owner_rep_signature',), ('owner_rep_signature_date',)),
-    ):
-        if (latest_fact(case, *signatures, *dates) is not None) and _missing(confirmed_value(case, *dates)):
-            add('D02', 'A', name, f'the {name.replace("_", " ")}.', 'Ask the signatory to supply the signature date.')
     for field, missing, hint in not_applicable_problems(case):
         section = next((sec for token, sec in (('section_c', 'C'), ('section_d', 'D'), ('owner', 'A'),
                                                 ('representative', 'A')) if token in field), 'B')
@@ -209,13 +168,21 @@ def check_completeness(case: Case, codes: Codes, *,
             or not case.jurisdiction.name.strip()):
         add('admin', 'B', 'jurisdiction', 'the reviewing jurisdiction.', 'Ask which authority will receive the application.')
 
-    process = process_fields(case, codes)
-    for field in process:
-        if field.answer is None or _missing(field.answer.value):
-            rule = {'risk_assessment': 'D09', 'mitigating_measures': 'D10', 'assumptions_and_limits': 'D11'}.get(field.id, 'process')
-            add(rule, 'process', field.id, f'the applicant-written {field.label.lower()}.',
-                field.prompt + ' ' + ' '.join(field.reviewer_looks_for), field.citation)
-
+    try:
+        process = process_fields(case, codes)
+    except (KeyError, ValueError, OSError):
+        process = []
+        gaps.append(Gap(id='source:process', section='process', field='process_source',
+            message='The Division C documentation source could not be resolved; the source remains uncertain.',
+            fix_hint='Restore the source and rerun the review.', routed_to='officer'))
+    for pending in open_drafting_questions(case, accepted_only=True):
+        section = ('C' if pending.draft_field.startswith('section_c.') else
+                   'D' if pending.draft_field == 'evidence_plan' else
+                   'B' if pending.draft_field == 'alternative_description' else 'process')
+        # A warning until the question flow gives applicants a way to answer these.
+        gaps.append(Gap(id=pending.id, section=section, field=pending.field, severity='warning',
+                        message=pending.question.text, routed_to=pending.question.routed_to,
+                        fix_hint=pending.question.why + ' Accepting draft wording does not answer this question.'))
     expected = {}
     for pid in dict.fromkeys(case.provisions):
         try:
@@ -306,20 +273,9 @@ def check_completeness(case: Case, codes: Codes, *,
         if latest_fact(case, f'evidence.{doc.id}.title') is not None and _missing(confirmed_value(case, f'evidence.{doc.id}.title')):
             add('D13', 'D', f'evidence.{doc.id}.title', 'a confirmed title for a supporting document.',
                 'Ask the applicant to confirm the current document title; do not reuse an older title.')
-        if not doc.responsible_party.strip():
-            add('D13', 'D', f'evidence.{doc.id}.responsible_party', f'a responsible person or organisation for supporting document “{doc.title}”.',
-                'Ask who takes responsibility for this document and record their role and scope.', codes.citation('2.3.1.1.(4)', 'C'))
         if not doc.date or not doc.date.strip():
             add('D13', 'D', f'evidence.{doc.id}.date', f'the date/revision of supporting document “{doc.title}”.',
                 'Request the issue/revision date so the reviewer can identify the version supplied.', severity='warning')
-    attached_ids = {d.id for d in docs}
-    for evidence in case.evidence:
-        if evidence.status == 'evidence_listed' and evidence.id not in attached_ids:
-            add('attachment', 'D', f'evidence.{evidence.id}.file_ref', f'a file reference for the supporting document “{evidence.description}”.',
-                'Attach the file and retain its source; an evidence_listed status is not an attachment.')
-            if _missing(confirmed_value(case, f'evidence.{evidence.id}.responsible_party')):
-                add('D13', 'D', f'evidence.{evidence.id}.responsible_party', f'a responsible person for supporting document “{evidence.description}”.',
-                    'Ask for the author, issuer or responsible organisation and their scope.')
     if expected:
         # Use only verified provisions so a bad reference becomes a gap, not an exception/500.
         verified = case.model_copy(update={'provisions': list(expected)})
@@ -334,5 +290,11 @@ def check_completeness(case: Case, codes: Codes, *,
     # Information from the case's jurisdiction pack (for example a local form). Severity info never blocks.
     for notice in notices_for(case, 'gaps'):
         gaps.append(Gap(id=f'info:{notice.id}', severity='info', section=notice.section, field=notice.id,
-                        message=notice.message, fix_hint=notice.fix_hint))
+                        message=notice.message, fix_hint=notice.fix_hint, submission_blocking=False))
     return gaps
+
+
+def check_completeness(case: Case, codes: Codes, *, professional=None, documents=None, store=None) -> list[Gap]:
+    """Compatibility projection of the one shared policy, never a second evaluator."""
+    from .export.package import prepare_package
+    return prepare_package(case, codes, store=store).policy.gaps

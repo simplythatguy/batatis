@@ -1,7 +1,7 @@
 /**
  * Starting an application from the prepared draft (Start and the pre-application deck share it),
- * and the application row the open case belongs to. The role comes from the signed-in user's
- * onboarding; without one the deck asks it. Nothing is assumed for either.
+ * and the application row the open case belongs to. A new application has no applicant type;
+ * the person's part in the project is answered later, with the paperwork.
  */
 import type { ApplicationSummary, User } from "../api/accounts";
 import { useCase } from "../store";
@@ -11,27 +11,23 @@ import { readOnly } from "./applications";
 import { getSession, resetSession } from "./session";
 import { useApplicationEditsPaused } from "./applicationEditing";
 
-const ROLES: ReadonlySet<string> = new Set(["manufacturer", "contractor", "homebuilder"]);
-
 /** The applicant type from onboarding, or null when the user has none (or nobody is signed in). */
 export function roleOf(user: User | null | undefined): ApplicantType | null {
-  const t = user?.applicant_type ?? "";
-  return ROLES.has(t) ? (t as ApplicantType) : null;
+  const t = user?.applicant_type;
+  return t === "manufacturer" || t === "contractor" || t === "homebuilder" ? t : null;
 }
 
 export function useBegin() {
   const { beginEmpty, dispatch } = useCase();
   const account = useAccount();
-  const userRole = account.phase === "signed-in" ? roleOf(account.user) : null;
   return {
-    userRole,
-    /** Start from the session draft. False while the description or the role is still missing. */
-    begin(role?: ApplicantType | null): boolean {
+    /** Start from text or files, once sign-in is ready. No role is inferred from the account. */
+    begin(): boolean {
       const s = getSession();
-      const r = role ?? userRole ?? s.role;
-      if (!r || !s.draft.trim()) return false;
+      if (account.phase !== "anonymous" && (account.phase !== "signed-in" || !account.user?.onboarded || account.user.role === "reviewer")) return false;
+      if (s.draftFilesLost || (!s.draft.trim() && !s.draftFiles.length)) return false;
       const files = s.draftFiles;
-      beginEmpty(r);
+      beginEmpty(null);
       dispatch({ type: "setDescription", text: s.draft });
       if (files.length) dispatch({ type: "addFiles", files: files.map((f) => ({ id: f.id, name: f.file.name })) });
       resetSession({ held: files, readAfterStart: true });

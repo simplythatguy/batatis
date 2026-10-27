@@ -1,0 +1,5 @@
+.cf-unit-input { width: min(100%, 480px); }
+.cf-unit-input .cf-inline-answer { display: flex; align-items: center; gap: 16px; }
+.cf-unit-input .cf-uline { min-width: 0; flex: 1; width: 100%; }
+.cf-unit-toggle { display: flex; flex-shrink: 0; gap: 6px; }
+.cf-unit-input .cf-note { min-height: 1.5em; margin-top: 8px; }

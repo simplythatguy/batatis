@@ -116,6 +116,15 @@ def _row_story(k: int, row: SectionCRow, codes, in_form: bool, case: Case | None
         quote = identify_quote(case, row.provision_id, codes)
         if quote:
             out.append(_kv('Identification quote (word for word in the code database)', _nrc(quote, row.citation)))
+    if case is not None:
+        explanation = next((f for f in reversed(case.facts)
+                            if f.field == f'section_c.{row.provision_id}.explanation'), None)
+        if (explanation is not None and explanation.status == 'confirmed' and explanation.kind == 'pointed'
+                and explanation.source.type in {'user_click', 'user_text', 'file'}
+                and isinstance(explanation.value, str) and explanation.value.strip()
+                and explanation.value == explanation.source.quote):
+            out.append(_kv('Applicant explanation (confirmed wording)', explanation.value))
+            out.append(_kv('Applicant explanation source', explanation.source.ref))
     status = row.attribution_status
     if row.attributed_via:
         status += f' ({row.attributed_via})'
@@ -199,6 +208,20 @@ def story_text(story: list) -> list[str]:
     return out
 
 
+def _provenance(case: Case, draft_field: str, value: str, source) -> str:
+    from ..drafting_sources import contains_generated
+    if source.ref == AI_ACCEPTED_REF:
+        return 'Drafted with AI; accepted and confirmed by the applicant'
+    if source.ref.startswith('applicant-draft:'):
+        return 'Batatis applicant draft; wording accepted by the applicant; claim sources retained in the drafting record'
+    accepted = case.drafting is not None and any(d.status == 'accepted' and d.field == draft_field
+                                                 for d in case.drafting.drafts)
+    if accepted or contains_generated(value, case):
+        return ('Applicant revision of a Batatis applicant draft; confirmed by the applicant; '
+                'claim sources retained in the drafting record')
+    return f'{_SOURCE_KIND.get(source.type, source.type)}; confirmed by the applicant; not written by Batatis'
+
+
 def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None,
                    package_notes: list[str] | None = None, text: list[str] | None = None) -> bytes | None:
     """Render the appendix PDF, or None when nothing real belongs in it. When ``text`` is a list, the
@@ -250,8 +273,7 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None,
             story.append(KeepTogether([
                 Paragraph(f'P-{n}&nbsp;&nbsp;{escape(field.label)}', H3), _p(field.answer.value),
                 _kv('Applicant source', source.ref + (f', page {source.page}' if source.page else '')),
-                _kv('Provenance', 'Drafted with AI; accepted and confirmed by the applicant' if source.ref == AI_ACCEPTED_REF
-                    else f'{_SOURCE_KIND.get(source.type, source.type)}; confirmed by the applicant'),
+                _kv('Provenance', _provenance(case, 'process.' + field.id, field.answer.value, source)),
                 _p(field.citation, SMALL)]))
 
     bench = benchmark(case, codes)
@@ -319,6 +341,12 @@ def build_appendix(case: Case, plan, values: dict, fmap: dict, *, codes=None,
             Paragraph(escape(item.description), H3),
             _p('listed by applicant, no file attached, not reviewed'),
         ]))
+    plan_fact = next((f for f in reversed(case.facts) if f.field == 'evidence_plan'), None)
+    if (plan_fact is not None and plan_fact.status == 'confirmed' and plan_fact.kind == 'pointed'
+            and isinstance(plan_fact.value, str) and plan_fact.value.strip() and plan_fact.value == plan_fact.source.quote):
+        story += [Paragraph('Supporting evidence plan (applicant wording)', H2), _p(plan_fact.value),
+                  _kv('Provenance', _provenance(case, 'evidence_plan', plan_fact.value, plan_fact.source)),
+                  _p('A plan of the evidence to supply. It is not evidence and does not close any requirement.', SMALL)]
     if not story:
         return None
     printing = ', 2nd printing' if codes is not None and second_printing_proven(codes) else ''

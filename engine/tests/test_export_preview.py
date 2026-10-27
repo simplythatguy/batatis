@@ -45,9 +45,11 @@ def test_preview_is_the_draft_pdf_and_an_image_of_each_page(tmp_path):
     assert set(reader.get_fields()) == {'Signature1', 'Signature2', 'Signature3', 'Signature4',
                                         'Date1', 'Date2', 'SCO Date', 'SCO Date1', 'Check Box14'}
     assert marker not in ' '.join(page.extract_text() for page in reader.pages)     # confirmed values only
-    # A long package, attachments included. Images run in page order until the encoded budget; the PDF is whole.
-    assert body['page_count'] == len(reader.pages) > 20
-    assert 0 < len(body['pages']) <= body['page_count']
+    # A long package, attachments included. Images run in page order until the encoded budget (how many fit
+    # depends on the platform's rendering); the rest are fetched as windows, and the PDF is whole.
+    package = export_case(case, codes=codes, store=store, draft=True)
+    assert body['page_count'] == len(reader.pages) == package.page_count > 20
+    assert package.form_pages <= len(body['pages']) <= body['page_count']
     for page, preview in zip(reader.pages, body['pages']):
         assert (preview['width'], preview['height']) == pytest.approx(
             (float(page.mediabox.width), float(page.mediabox.height)), abs=0.001)
@@ -62,8 +64,11 @@ def entry(size: int) -> int:
 def test_page_images_keep_page_order_and_stop_at_the_encoded_budget():
     codes = Codes()
     pdf = export_case(sample_case(codes), codes=codes, draft=True).pdf
-    every, count = page_images(pdf)
-    assert len(every) == count and entry(len(pdf)) + sum(entry(len(p.png)) for p in every) <= PAYLOAD_BUDGET
+    every, count = page_images(pdf, budget=10 ** 9)
+    assert len(every) == count
+    fitted, total = page_images(pdf)
+    assert total == count and [p.png for p in fitted] == [p.png for p in every[:len(fitted)]]
+    assert entry(len(pdf)) + sum(entry(len(p.png)) for p in fitted) <= PAYLOAD_BUDGET
     three = entry(len(pdf)) + sum(entry(len(p.png)) for p in every[:3])
     for budget, shown in ((three, 3), (three - 1, 2), (entry(len(pdf)), 0)):
         first, total = page_images(pdf, budget=budget)

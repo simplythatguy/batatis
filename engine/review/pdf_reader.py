@@ -26,10 +26,14 @@ import re
 from dataclasses import dataclass, field
 from functools import lru_cache
 
+from ..package_format import PHOTO
 from ..export import scc
 from ..export.form_growth import Layout
 from ..pdfium import open_pdf
 from ..pdfium_lock import pdfium_locked
+from ..export.signatures import DRAFT_MARK
+
+_DRAFT_MARK = ''.join(DRAFT_MARK.split())   # line values below hold visible glyphs only
 
 FORM_TITLE = 'Variance Form for Proposed Alternative Solution'
 MAX_ATTRIBUTION_ROWS = 256  # bound untrusted reconstruction hints independently of upload byte limits
@@ -66,6 +70,7 @@ class ReadFile:
     note: str = ''
     data: bytes = b''
     field_map: dict | None = None    # verified runtime map for this form layout
+    _unreadable_cache: tuple[int, ...] | None = field(default=None, repr=False)
 
     def locate(self, page: int, quote: str) -> tuple[float, float, float, float] | None:
         return locate(self.data, page, quote)
@@ -112,19 +117,26 @@ class ReadFile:
         Paths on otherwise readable pages can be table borders/backgrounds, including in
         the official export. Paths inside a labelled passage are checked by passage_has_marks.
         """
+        if self._unreadable_cache is not None:
+            return list(self._unreadable_cache)
         import pypdfium2.raw as raw
         try:
             with open_pdf(self.data) as doc:
                 unreadable = []
                 for page in self.text_pages:
+                    # An attached photo is looked at, not read: its caption marks it as a picture, not a scan of text.
+                    if PHOTO in page.text:
+                        continue
                     pdf_page = doc[page.page]
                     if (page.uncertain_boxes or _annotation_boxes(pdf_page)
                             or (not page.text.strip() and _object_boxes(pdf_page)) or any(
                                 obj.type == raw.FPDF_PAGEOBJ_IMAGE for obj in pdf_page.get_objects(max_depth=4))):
                         unreadable.append(page.page)
+                self._unreadable_cache = tuple(unreadable)
                 return unreadable
         except Exception:  # noqa: BLE001 - a failed inspection cannot establish absence
-            return [page.page for page in self.text_pages]
+            self._unreadable_cache = tuple(page.page for page in self.text_pages)
+            return list(self._unreadable_cache)
 
 
 @dataclass(frozen=True)
@@ -209,42 +221,59 @@ def _passage_object_boxes(page) -> frozenset:
     """
     import pypdfium2.raw as raw
     boxes = set()
+    glyphs = None
     for obj in page.get_objects(max_depth=4):
         if obj.type in (raw.FPDF_PAGEOBJ_TEXT, raw.FPDF_PAGEOBJ_FORM):
             continue
         bounds = obj.get_bounds() if hasattr(obj, 'get_bounds') else obj.get_pos()
-        if obj.type == raw.FPDF_PAGEOBJ_PATH and _passage_underline(page, bounds):
-            continue
+        if obj.type == raw.FPDF_PAGEOBJ_PATH:
+            glyphs = _glyph_baselines(page) if glyphs is None else glyphs
+            if _passage_underline(page, bounds, glyphs):
+                continue
         boxes.add(tuple(bounds))
     return frozenset(boxes)
 
 
-def _passage_underline(page, bounds) -> bool:
-    """A thin rule immediately below at least two glyph origins is text decoration."""
+def _glyph_baselines(page) -> list:
+    """Each visible glyph's device baseline origin and doubled font size, read once per page.
+
+    None marks a glyph whose origin could not be read; an underline scan that reaches it fails.
+    """
     import ctypes
     import pypdfium2.raw as raw
-    left, top, right, bottom = _device_box(page, bounds, 2)
-    if right - left < 4 * max(1, bottom - top):
-        return False
     text = page.get_textpage()
-    matched = 0
+    glyphs = []
     try:
         for index in range(min(text.count_chars(), 65536)):
             if not text.get_text_range(index, 1).strip():
                 continue
             x, y = ctypes.c_double(), ctypes.c_double()
             if not raw.FPDFText_GetCharOrigin(text, index, ctypes.byref(x), ctypes.byref(y)):
-                return False
+                glyphs.append(None)
+                continue
             baseline_x, baseline_y, _right, _bottom = _device_box(page, (x.value, y.value, x.value, y.value), 2)
-            size = raw.FPDFText_GetFontSize(text, index) * 2
-            if (left <= baseline_x <= right and baseline_y <= top
-                    and bottom <= baseline_y + .3 * size + 1 and bottom - top <= .15 * size + 1):
-                matched += 1
-                if matched >= 2:
-                    return True
-        return False
+            glyphs.append((baseline_x, baseline_y, raw.FPDFText_GetFontSize(text, index) * 2))
     finally:
         text.close()
+    return glyphs
+
+
+def _passage_underline(page, bounds, glyphs) -> bool:
+    """A thin rule immediately below at least two glyph origins is text decoration."""
+    left, top, right, bottom = _device_box(page, bounds, 2)
+    if right - left < 4 * max(1, bottom - top):
+        return False
+    matched = 0
+    for glyph in glyphs:
+        if glyph is None:
+            return False
+        baseline_x, baseline_y, size = glyph
+        if (left <= baseline_x <= right and baseline_y <= top
+                and bottom <= baseline_y + .3 * size + 1 and bottom - top <= .15 * size + 1):
+            matched += 1
+            if matched >= 2:
+                return True
+    return False
 
 
 def _annotation_boxes(page) -> frozenset:
@@ -750,6 +779,11 @@ def _page_texts(data: bytes, pages) -> list[PageText]:
                     # Validate the whole source line, including any clipped suffix;
                     # validating only get_text_bounded(rect) would attest unseen text.
                     value = ''.join(units[i] for i, _box in chars)
+                    if value == _DRAFT_MARK:
+                        # A Batatis draft's page mark is not package content; it is blanked, not unsafe.
+                        for i, _box in chars:
+                            units[i] = ' ' * len(units[i])
+                        continue
                     if not valid or not _text_is_visible(page, rect, value, glyphs):
                         unsafe_boxes.append(bounds)
                         for i, _box in chars:

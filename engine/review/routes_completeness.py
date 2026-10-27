@@ -65,7 +65,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes]) -
         # is run for an absent case or an unavailable variant.
         try:
             codes = await run_in_threadpool(code)
-            report = await run_in_threadpool(saved_case_response, case, codes, variant)
+            report = await run_in_threadpool(saved_case_response, case, codes, variant, store=store)
         except HTTPException as exc:
             raise HTTPException(exc.status_code, exc.detail,
                                 headers={**(exc.headers or {}), **PRIVATE_HEADERS}) from None

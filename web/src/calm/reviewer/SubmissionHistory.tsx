@@ -31,11 +31,11 @@ export function SubmissionHistory({ c }: { c: Case }) {
   return <section className="ac-side-sec" aria-label="Submission history">
     <h3 className="ac-side-h">{number > 1 ? `Resubmitted · submission ${number}` : "First submission"}</h3>
     {number > 1 && <>
-      <p className="ac-faint ac-small">Changes from the return{latest?.returned_at ? ` on ${sentLabel(latest.returned_at)}` : ""}. Edits still need officer review.</p>
+      <p className="ac-faint ac-small">Changed since the return{latest?.returned_at ? ` on ${sentLabel(latest.returned_at)}` : ""}</p>
       {!latest?.comparison_available
-        ? <p className="ac-faint ac-small">A comparison is unavailable for this earlier return. Review the application and the original request.</p>
+        ? <p className="ac-faint ac-small">No comparison for this return</p>
         : changes.length === 0
-          ? <p className="ac-faint ac-small">No stored answers or evidence listings changed since the return.</p>
+          ? <p className="ac-faint ac-small">Nothing changed since the return</p>
           : <details>
             <summary className="ac-small">{changes.length} changed {changes.length === 1 ? "item" : "items"}</summary>
             <dl className="ac-small">
@@ -49,11 +49,10 @@ export function SubmissionHistory({ c }: { c: Case }) {
           </details>}
     </>}
     {decisions.length > 0 && <details>
-      <summary className="ac-small">Decision history ({decisions.length})</summary>
+      <summary className="ac-small">Decisions · {decisions.length}</summary>
       {decisions.map((decision, index) => <div key={`${decision.at}-${index}`} className="ac-small">
         <p>{decisionLabel(decision.outcome)} · {decision.by_name} · {sentLabel(decision.at)}</p>
       </div>)}
-      <p className="ac-faint ac-small">Read the original decision messages in the conversation below.</p>
     </details>}
   </section>;
 }

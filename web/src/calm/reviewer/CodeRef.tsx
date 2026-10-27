@@ -1,12 +1,15 @@
 /** A cited provision as a quiet chip; its verbatim code text stays hidden until the officer asks. */
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { engine } from "../../api/client";
 import { NrcCredit } from "../../components";
+import { usePresence } from "../usePresence";
 import { parseCitation } from "./packageView";
 
 export function CodeRef({ citation }: { citation: string }) {
   const parsed = parseCitation(citation);
   const [open, setOpen] = useState(false);
+  const box = useRef<HTMLSpanElement>(null);
+  const shown = usePresence(open, box);
   const [state, setState] = useState<{ phase: "idle" | "loading" | "ready" | "error"; text: string }>({ phase: "idle", text: "" });
 
   function toggle() {
@@ -15,7 +18,7 @@ export function CodeRef({ citation }: { citation: string }) {
     if (!next || !parsed || state.phase === "ready" || state.phase === "loading") return;
     setState({ phase: "loading", text: "" });
     engine.provision(parsed.id, parsed.division).then(
-      (r) => setState({ phase: "ready", text: r.text.replace(/\s+/g, " ").trim() }),
+      (r) => setState({ phase: "ready", text: r.text }),
       () => setState({ phase: "error", text: "" }),
     );
   }
@@ -27,7 +30,8 @@ export function CodeRef({ citation }: { citation: string }) {
         <span className="pr-mono">{short}</span>
         <span className="pr-code-act">{open ? "Hide the code" : "Show the code"}</span>
       </button>
-      {open && (
+      {shown.mounted && (
+        <span ref={box} className="ow-reveal" data-leaving={shown.leaving || undefined} inert={shown.leaving || undefined}><span>
         <span className="pr-code-box" role="region" aria-label={`Code text, ${short}`}>
           <span className="pr-code-label">Code text · verbatim</span>
           {state.phase === "loading" && <span className="pr-faint">Loading…</span>}
@@ -37,6 +41,7 @@ export function CodeRef({ citation }: { citation: string }) {
           {parsed && <span className="pr-code-cite">{citation}</span>}
           {state.phase === "ready" && <NrcCredit />}
         </span>
+        </span></span>
       )}
     </span>
   );

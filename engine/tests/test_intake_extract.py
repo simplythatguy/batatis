@@ -31,6 +31,18 @@ SECTION_AB = {'owner_name', 'owner_rep_name', 'mailing_address', 'municipal_addr
               'block', 'plan', 'ats_qtr', 'ats_sec', 'ats_twp', 'ats_rge', 'ats_mer', 'permit_number', 'request_date'}
 
 
+@pytest.mark.parametrize('text, field, expected', [
+    ('The owner is Dana Whitfield.', 'owner_name', 'Dana Whitfield'),
+    ('We are building at 10234 87 Ave NW, Edmonton.', 'municipal_address', '10234 87 Ave NW, Edmonton'),
+    ('The mailing address is 10234 87 Ave NW, Edmonton.', 'mailing_address', '10234 87 Ave NW, Edmonton'),
+    ('Owner: Dana Whitfield.\nRepresentative: Alex Chen.', 'owner_rep_name', 'Alex Chen'),
+])
+def test_names_and_addresses_leave_sentence_punctuation_out_of_values_and_spans(text, field, expected):
+    hit = next(h for h in read(text).hits if h.field == field)
+    assert hit.value == expected
+    assert text[hit.start:hit.end] == expected
+
+
 def _cases() -> list[dict]:
     return [json.loads(path.read_text()) for path in CASES]
 
@@ -167,7 +179,8 @@ def test_the_same_value_read_on_many_pages_is_kept_once_and_used():
     pages = [_pointed('municipality', 'Edmonton', Origin('file_a', page=n), 'Edmonton') for n in range(1, 22)]
     out = _settled(Case(), pages)
     assert [(f.value, f.status) for f in out.facts] == [('Edmonton', 'confirmed')]
-    assert [p.fact_id for p in out.pointers] == [out.facts[0].id]
+    assert {p.fact_id for p in out.pointers} == {out.facts[0].id}
+    assert [p.page for p in out.pointers] == list(range(1, 22))
 
 
 def test_context_sentences_and_cited_articles_are_kept_as_read():
@@ -414,7 +427,7 @@ def test_rerun_reads_the_new_words_and_keeps_what_the_applicant_gave(client):
     facts = store.get(case_id).facts
     assert [(f.value, f.status) for f in facts if f.field == 'building_area_m2'] == [(150, 'confirmed'), (160, 'confirmed')]
     assert [(f.value, f.status) for f in facts if f.field == 'storeys'][-1] == (2, 'confirmed')
-    assert 'storeys' not in {f['field'] for f in body['facts']}
+    assert len([f for f in body['facts'] if f['field'] == 'storeys']) == 1  # same saved fact, new source pointer
 
 
 def test_role_the_applicant_picked_is_confirmed_and_wins(client):

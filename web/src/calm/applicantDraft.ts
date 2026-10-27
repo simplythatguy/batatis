@@ -11,7 +11,8 @@ export function draftAccount(user: { id: string; role: string | null; authority?
 }
 
 export function sessionDraft(s: Session) {
-  return { skipped: s.skipped, seen: s.seen, authority_unsure: s.authorityUnsure, packages: s.packages, rule_unsure: s.ruleUnsure };
+  // Skips are gone, and Not sure answers are recorded on the case itself; the draft keeps only what is visit state.
+  return { skipped: [], seen: s.seen, authority_unsure: false, packages: s.packages, rule_unsure: [] };
 }
 
 export function applicantDraft(c: Case, account: string | null, generation: number, id: string | null): ApplicantDraft {
@@ -32,10 +33,7 @@ export function applicantDraft(c: Case, account: string | null, generation: numb
 export function restoreApplicantDraft(saved: ApplicantDraft | null | undefined, account: string | null, generation: number, id: string, preserveSession = false) {
   const scope = questionDrafts.scope(account, generation, id);
   questionDrafts.restore(scope, { question_text: saved?.question_text ?? {}, choices: saved?.choices ?? {} });
-  const patch = saved ? {
-    skipped: saved.skipped, seen: saved.seen, authorityUnsure: saved.authority_unsure,
-    packages: saved.packages, ruleUnsure: saved.rule_unsure,
-  } : { skipped: [], seen: [], authorityUnsure: false, packages: {}, ruleUnsure: [] };
+  const patch = saved ? { seen: saved.seen, packages: saved.packages } : { seen: [], packages: {} };
   if (preserveSession) updateSavedSession(patch);
   else resetSavedSession(patch);
 }

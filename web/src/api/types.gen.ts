@@ -2,6 +2,44 @@
 // Do not edit: change the engine model, run `python -m engine.schema_export`, then `npm run gen:types`.
 // Fields with a default are optional here because the engine accepts them omitted; responses always carry them.
 
+/** Whether this version can be accepted now, decided by the server (the decision route rechecks it). */
+export interface AcceptGate {
+  can_accept: boolean;
+  reason: string;
+}
+
+export interface AdministrativeItem {
+  certainty: "present" | "blank" | "not_found" | "not_applicable";
+  citations: string[];
+  export_blocking: boolean;
+  field: string;
+  finding_status: "blank" | "not_found" | "missing" | "unclear" | null;
+  fix_hint: string;
+  key: string;
+  label: string;
+  pointers: PolicyPointer[];
+  reason: string;
+  reason_code: string;
+  routed_to: "applicant" | "officer" | "professional";
+  section: "A" | "B" | "C" | "D" | "process";
+  severity: "blocking" | "warning" | "info";
+  sources: Source[];
+  submission_blocking: boolean;
+  value: string | null;
+  verdict: "present" | "missing" | "unclear";
+}
+
+export interface AdministrativeReport {
+  administrative_only: true;
+  export_reasons: string[];
+  items: AdministrativeItem[];
+  not_a_compliance_determination: true;
+  policy_version: "2026-10-26";
+  ready_for_export: boolean;
+  schema_version: "batatis.administrative_completeness.v1";
+  stage: "preparation";
+}
+
 export interface AnswerCounts {
   confirmed: number;
   does_not_apply: number;
@@ -35,7 +73,7 @@ export interface ApplicantDraft {
   intake_file_ids: string[] | null;
   packages: Record<string, "yes" | "no">;
   question_text: Record<string, DraftText>;
-  role: "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner";
+  role: "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner" | "engineer" | "other" | null;
   rule_unsure: string[];
   seen: string[];
   skipped: string[];
@@ -48,14 +86,14 @@ export interface ApplicantDraftInput {
   intake_file_ids?: string[] | null;
   packages?: Record<string, "yes" | "no">;
   question_text?: Record<string, DraftText>;
-  role?: "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner";
+  role?: "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner" | "engineer" | "other" | null;
   rule_unsure?: string[];
   seen?: string[];
   skipped?: string[];
 }
 
 export interface ApplicantSummary {
-  applicant_type: "manufacturer" | "contractor" | "homebuilder" | null;
+  applicant_type: "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner" | "engineer" | "other" | null;
   name: string;
 }
 
@@ -94,6 +132,18 @@ export interface ArticleDecision {
   decided_at: string;
   decision: "yes" | "no" | "not_sure";
   open_question_id: string | null;
+}
+
+export interface Assessment {
+  assessment_kind: "evaluation" | "listing";
+  date: string | null;
+  date_kind: "modified" | "issued" | null;
+  date_source_url: string | null;
+  manufacturer: string;
+  message: string;
+  number: string;
+  report_url: string;
+  title: string;
 }
 
 export interface AssistAttachment {
@@ -232,6 +282,7 @@ export interface Case {
   created_at: string;
   decision: Decision | null;
   decision_history: Decision[];
+  drafting: DraftingRecord | null;
   evidence: EvidenceItem[];
   expires_at: string | null;
   facts: Fact[];
@@ -392,12 +443,14 @@ export interface ClaimResult {
   claim: Claim;
 }
 
-/** Close-out after a final decision: the copy goes to the Council within 10 days of the decision. */
+/** Close-out after a final decision. */
 export interface CloseOut {
   case_id: string;
-  days_remaining: number;
+  days_remaining: number | null;
   decided_at: string;
-  due_date: string;
+  due_date: string | null;
+  issued_by_name: string | null;
+  issued_on: string | null;
   notice: string;
   outcome: "accept" | "refuse";
   overdue: boolean;
@@ -411,6 +464,25 @@ export interface CodeTOC {
   division: string;
   edition: string;
   parts: TocPart[];
+}
+
+export interface CompletenessRequest {
+  variant?: "A" | "B" | "C" | null;
+}
+
+export interface CompletenessResponse {
+  administrative_only: true;
+  case_id: string;
+  case_updated_at: string;
+  case_version: number;
+  llm: LLMUsageModel | null;
+  not_a_compliance_determination: true;
+  notice: string;
+  policy: AdministrativeReport | null;
+  reminder: ReminderModel;
+  reviews: ReviewModel[];
+  schema_version: "batatis.completeness.v1";
+  variant: "A" | "B";
 }
 
 export interface CompletenessSummary {
@@ -459,6 +531,11 @@ export interface CoverageEntry {
   roadmap: string | null;
 }
 
+export interface DecideDraft {
+  decision: "accept" | "reject";
+  expected_version: number;
+}
+
 export interface Decision {
   at: string;
   by_id: string;
@@ -470,21 +547,30 @@ export interface Decision {
 
 export interface DecisionItem {
   field: string | null;
+  finding_key: string | null;
   gap_id: string | null;
+  label: string | null;
   note: string;
+  request_item_id: string | null;
+  section: "A" | "B" | "C" | "D" | "process" | null;
 }
 
 export interface DecisionItemInput {
   field?: string | null;
+  finding_key?: string | null;
   gap_id?: string | null;
+  label?: string | null;
   note: string;
+  request_item_id?: string | null;
+  section?: "A" | "B" | "C" | "D" | "process" | null;
 }
 
 export interface DecisionRequest {
-  /** Required for a refusal; the displayed saved application version. */ expected_version?: number | null;
+  /** Required for an acceptance and a refusal; the displayed saved application version. */ expected_version?: number | null;
   items?: DecisionItemInput[];
   message?: string | null;
   outcome: "accept" | "return" | "refuse";
+  review_version?: number | null;
 }
 
 export interface DecisionSummary {
@@ -498,6 +584,23 @@ export interface DiffEntry {
   label: string;
   message: string;
   section: "A" | "B" | "C" | "D" | "process";
+}
+
+/** The officer's call on one automated finding, kept with the session. It never edits the finding. */
+export interface Disposition {
+  at: string | null;
+  by_name: string | null;
+  key: string;
+  note: string;
+  reason: "checked" | "not_needed" | "does_not_fit" | null;
+  state: "ask" | "verify" | "dismissed";
+}
+
+export interface DispositionEdit {
+  key: string;
+  note?: string;
+  reason?: "checked" | "not_needed" | "does_not_fit" | null;
+  state: "ask" | "verify" | "dismissed";
 }
 
 /** What the model read across every readable page, kept only where it checks out against the text. */
@@ -533,6 +636,17 @@ export interface DocumentRow {
   type: Attribute;
 }
 
+export interface DraftCitation {
+  quote: string;
+  source_id: string;
+}
+
+export interface DraftClaim {
+  kind: "fact" | "assumption" | "plan";
+  sources: DraftCitation[];
+  text: string;
+}
+
 export interface DraftFileBinding {
   file_id: string;
   kind: "file";
@@ -543,6 +657,20 @@ export interface DraftFileBindingInput {
   kind?: "file";
 }
 
+export interface DraftGeneration {
+  audit_input_tokens: number | null;
+  audit_output_tokens: number | null;
+  auditor_model: string;
+  effort: string;
+  generated_at: string;
+  id: string;
+  input_tokens: number | null;
+  model: string;
+  output_tokens: number | null;
+  provider: string;
+  validation: "grounded";
+}
+
 export interface DraftPatch {
   applicant_draft?: ApplicantDraftInput | null;
   expected_version: number;
@@ -551,9 +679,51 @@ export interface DraftPatch {
   selected_articles?: SelectedArticleInput[] | null;
 }
 
+export interface DraftQuestion {
+  routed_to: "applicant" | "professional";
+  sources: DraftCitation[];
+  text: string;
+  why: string;
+}
+
+export interface DraftRegistryQuery {
+  end: number;
+  query: string;
+  quote: string;
+  source_id: string;
+  start: number;
+}
+
+export interface DraftSource {
+  id: string;
+  kind: "description" | "fact" | "document" | "code" | "section_c" | "guidance" | "precedent_structure" | "professional_screen" | "registry";
+  label: string;
+  metadata: Record<string, string | number | boolean | null>;
+  page: number | null;
+  ref: string;
+  text: string;
+  url: string | null;
+}
+
 export interface DraftText {
   base: string;
   value: string;
+}
+
+export interface DraftingRecord {
+  drafts: WordingDraft[];
+  generated_at: string;
+  generated_texts: string[];
+  generations: DraftGeneration[];
+  input_fingerprint: string;
+  notices: string[];
+  registry_queries: DraftRegistryQuery[];
+  registry_searches: RegistrySearch[];
+  schema_version: "batatis.applicant_drafts.v1";
+  source_history: DraftSource[];
+  sources: DraftSource[];
+  stale: boolean;
+  stale_reasons: string[];
 }
 
 export interface DroppedPick {
@@ -564,7 +734,36 @@ export interface DroppedPick {
 export interface EditedItem {
   id?: string | null;
   included?: boolean;
+  target?: RequestTargetInput | null;
   text: string;
+}
+
+export interface ElementModel {
+  certainty: "present" | "blank" | "not_found" | "not_applicable";
+  citations: string[];
+  defect_class: string | null;
+  export_field: string;
+  export_section: "A" | "B" | "C" | "D" | "process";
+  field: string;
+  form_fields: string[];
+  group: string;
+  in_export_preflight: boolean;
+  key: string;
+  label: string;
+  lookup_skipped: boolean;
+  problem: string | null;
+  prompt: IntakePromptModel | null;
+  quotes: QuoteModel[];
+  reason: string;
+  related_fields: string[];
+  routed_to: "officer" | "professional" | "applicant" | null;
+  severity: "blocking" | "warning" | "info";
+  source: "applicant" | "registered_professional";
+  sources: Source[];
+  template_section: "A" | "B" | "C" | "D";
+  url: string | null;
+  value: string | null;
+  verdict: "present" | "missing" | "unclear";
 }
 
 export interface EvidenceDraft {
@@ -659,9 +858,11 @@ export interface FactPointer {
   end: number | null;
   fact_id: string;
   field: string;
-  method: "rules" | "form" | "model";
+  method: "rules" | "form" | "model" | "vision";
   page: number | null;
   project_context: boolean;
+  quote: string | null;
+  source_name: string | null;
   source_ref: string;
   start: number | null;
   verified: boolean;
@@ -673,6 +874,7 @@ export interface FieldConflict {
   page: number | null;
   quotes: string[];
   source_ref: string;
+  source_refs: string[];
   values: (string | number | boolean)[];
 }
 
@@ -693,13 +895,20 @@ export interface FileReport {
   form: "scc_variance" | "acroform" | null;
   form_fields_read: number;
   form_fields_skipped: string[];
+  image_pages_read: number[];
+  media_type: string;
   name: string;
   pages: number | null;
   pages_not_read: number[];
   pages_read: number[];
+  pictures_not_read_reason: string | null;
   project_pages: number[];
   reason: string | null;
+  semantic_pages_read: number[];
+  semantic_pages_sent: number[];
+  semantic_reason: string | null;
   status: "read" | "partly_read" | "not_read";
+  text_pages_read: number[];
 }
 
 export interface Finding {
@@ -715,6 +924,17 @@ export interface Finding {
   section: "A" | "B" | "C" | "D" | "process";
   severity: "blocking" | "warning";
   status: "blank" | "not_found" | "missing" | "unclear";
+}
+
+/** A finding's effective officer state (stored disposition or default), as the server counts it. */
+export interface FindingState {
+  at: string | null;
+  by_name: string | null;
+  key: string;
+  locked: boolean;
+  note: string;
+  reason: "checked" | "not_needed" | "does_not_fit" | null;
+  state: "ask" | "verify" | "dismissed";
 }
 
 /** Acceptable-solution path or alternative-solution path, read early (before Section C). */
@@ -733,6 +953,10 @@ export interface Gap {
   section: "A" | "B" | "C" | "D" | "process";
   severity: "blocking" | "warning" | "info";
   submission_blocking: boolean;
+}
+
+export interface GenerateDrafts {
+  expected_version: number;
 }
 
 /** A published guide for a design category or process. Guidance, not a variance or an approval. */
@@ -923,8 +1147,9 @@ export interface InformationRequest {
   text: string;
 }
 
-/** Officer edits: replace the item list (text, inclusion, order) and optionally the intro. */
+/** Officer edits, saved as one write: the item list (text, order, officer items), the intro, and the */
 export interface InformationRequestEdit {
+  findings?: DispositionEdit[];
   intro?: string | null;
   items: EditedItem[];
 }
@@ -937,10 +1162,12 @@ export interface InformationRequestItem {
   included: boolean;
   officer_check: boolean;
   section: "A" | "B" | "C" | "D" | "process" | null;
+  target: RequestTarget | null;
   text: string;
 }
 
 export interface InputFile {
+  file_id: string | null;
   form_version: string | null;
   name: string;
   note: string;
@@ -962,6 +1189,13 @@ export interface IntakePlan {
   scope: ScopeCheck;
 }
 
+export interface IntakePromptModel {
+  field: string;
+  form_fields: string[];
+  question: string;
+  source: "applicant" | "registered_professional";
+}
+
 export interface IntakeRecord {
   conflicts: FieldConflict[];
   files: FileReport[];
@@ -969,6 +1203,7 @@ export interface IntakeRecord {
   plan: IntakePlan | null;
   pointers: FactPointer[];
   ran_at: string;
+  removed_file_ids: string[];
   review: DocumentReview | null;
   text_sha256: string | null;
   unresolved_citations: UnresolvedCitation[];
@@ -978,6 +1213,7 @@ export interface IntakeRequest {
   expected_version?: number | null;
   file_ids?: string[];
   model?: boolean;
+  pictures?: boolean;
   role?: string | null;
   text?: string | null;
 }
@@ -1105,6 +1341,16 @@ export interface JurisdictionsResult {
   levels: Record<string, string>;
 }
 
+export interface LLMUsageModel {
+  estimated_usd: number;
+  input_tokens: number;
+  latency_s: number;
+  model: string | null;
+  output_tokens: number;
+  provider: string | null;
+  skipped: string | null;
+}
+
 export interface LoginRequest {
   email: string;
   password: string;
@@ -1169,9 +1415,21 @@ export interface NotificationsResult {
   unread: number;
 }
 
+/** The officer's working state for the latest version: per-finding states, counts and the accept gate. */
+export interface OfficerWorkspace {
+  case_version: number | null;
+  current: boolean;
+  gate: AcceptGate;
+  limits: RequestLimits;
+  rulebook: RulebookGap[];
+  states: FindingState[];
+  tally: ReviewTally;
+  version: number;
+}
+
 export interface OnboardingRequest {
   access_code?: string | null;
-  applicant_type?: "manufacturer" | "contractor" | "homebuilder" | null;
+  applicant_type?: "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner" | "engineer" | "other" | null;
   authority?: "calgary" | "edmonton" | null;
   role: "applicant" | "reviewer";
 }
@@ -1221,6 +1479,7 @@ export interface PackageReviewIndex {
   latest: ReviewSession | null;
   package_id: string;
   sessions: SessionSummary[];
+  workspace: OfficerWorkspace | null;
 }
 
 export interface PartScopeAssessment {
@@ -1242,6 +1501,14 @@ export interface PlanSource {
 
 /** Where a value or gap is: file and 1-based page, form field name, rectangle, exact quote. */
 export interface Pointer {
+  bbox: [number, number, number, number] | null;
+  file: string;
+  form_field: string | null;
+  page: number | null;
+  quote: string | null;
+}
+
+export interface PolicyPointer {
   bbox: [number, number, number, number] | null;
   file: string;
   form_field: string | null;
@@ -1358,6 +1625,13 @@ export interface QueueResult {
   reviewer_id: string;
 }
 
+export interface QuoteModel {
+  kind: "exact" | "pointed";
+  source: Record<string, unknown>;
+  source_ref: string;
+  text: string;
+}
+
 /** 'The code says X. Does your design do something different?' The id sits behind a disclosure. */
 export interface QuotedChoice {
   citation: string | null;
@@ -1395,6 +1669,20 @@ export interface Regime {
   route: string;
 }
 
+export interface RegistrySearch {
+  cached: boolean;
+  message: string;
+  notice: string;
+  query: string;
+  registry_date: string;
+  results: Assessment[];
+  searched_date: string;
+  snapshot_path: string | null;
+  source: "live" | "snapshot";
+  source_url: string;
+  total_matches: number;
+}
+
 export interface RelevanceBands {
   status: string;
   x: number;
@@ -1415,12 +1703,43 @@ export interface RelevanceRecord {
   status: "scored";
 }
 
+/** IB-2025-11-18 copy of the issued variance. Not a present/missing/unclear verdict and not an export blocker. */
+export interface ReminderModel {
+  bulletin_ids: string[];
+  links: string[];
+  source: Record<string, unknown>;
+  text: string;
+  verdict: "reminder";
+}
+
 export interface RemoveFileBinding {
   kind: "remove";
 }
 
 export interface RemoveFileBindingInput {
   kind?: "remove";
+}
+
+/** Checked when the draft is saved and again on return; the client shows them, never enforces others. */
+export interface RequestLimits {
+  intro: number;
+  item_text: number;
+  items: number;
+  text: number;
+}
+
+/** Where the applicant answers a request item: a form section and, when known, one field. */
+export interface RequestTarget {
+  field: string | null;
+  label: string;
+  section: "A" | "B" | "C" | "D" | "process";
+}
+
+/** Where the applicant answers a request item: a form section and, when known, one field. */
+export interface RequestTargetInput {
+  field?: string | null;
+  label: string;
+  section: "A" | "B" | "C" | "D" | "process";
 }
 
 export interface RequirementCondition {
@@ -1566,6 +1885,12 @@ export interface RetainFileBindingInput {
   kind?: "retain";
 }
 
+/** Send the saved request and return the application, as one write. Both or neither. */
+export interface ReturnWithRequest {
+  expected_version: number;
+  text: string;
+}
+
 export interface ReviewConflict {
   evidence: EvidenceRef[];
   text: string;
@@ -1578,6 +1903,7 @@ export interface ReviewDiff {
   resolved: DiffEntry[];
   statement: string;
   still_open: DiffEntry[];
+  unverified: DiffEntry[];
 }
 
 export interface ReviewFact {
@@ -1597,6 +1923,14 @@ export interface ReviewItem {
   why: string;
 }
 
+export interface ReviewModel {
+  document_id: string;
+  export_reasons: string[];
+  invented_values: number;
+  reasons_by_section: Record<string, string[]>;
+  sections: SectionModel[];
+}
+
 export interface ReviewSession {
   administrative_only: true;
   authority: string;
@@ -1606,6 +1940,7 @@ export interface ReviewSession {
   created_at: string;
   created_by_name: string;
   diff: ReviewDiff | null;
+  dispositions: Disposition[];
   documents: DocumentRow[];
   fields: FieldReading[];
   files: InputFile[];
@@ -1616,6 +1951,7 @@ export interface ReviewSession {
   not_a_compliance_determination: true;
   notice: string;
   package_id: string;
+  policy: AdministrativeReport | null;
   schema_version: "batatis.package_review.v1";
   section_c: SectionCCheck[];
   version: number;
@@ -1626,6 +1962,16 @@ export interface ReviewSnapshot {
   authority: string | null;
   returned_at: string;
   values: Record<string, string>;
+}
+
+/** The one definition of every count the officer sees, for one session. The client never recounts. */
+export interface ReviewTally {
+  asked: number;
+  dismissed: number;
+  required: number;
+  rulebook: number;
+  to_check: number;
+  verify: number;
 }
 
 export interface ReviewedDocument {
@@ -1726,6 +2072,14 @@ export interface RuleSet {
   version: number;
 }
 
+/** A blocking gap from the shared completeness rules that no finding covers. Shown as-is. */
+export interface RulebookGap {
+  field: string | null;
+  id: string;
+  message: string;
+  section: "A" | "B" | "C" | "D" | "process" | null;
+}
+
 export interface ScopeBasis {
   citation: string;
   division: "A";
@@ -1789,6 +2143,12 @@ export interface SectionCRow {
   related_root_method: string | null;
 }
 
+export interface SectionModel {
+  elements: ElementModel[];
+  section: "A" | "B" | "C" | "D";
+  title: string;
+}
+
 /** An applicant's code-check card, not a confirmed benchmark or code quotation. */
 export interface SelectedArticle {
   answer: "yes" | "no" | "not-sure" | null;
@@ -1829,7 +2189,7 @@ export interface SessionSummary {
   created_at: string;
   created_by_name: string;
   input_kind: "case" | "upload";
-  open_gaps: number;
+  required: number;
   sent_at: string | null;
   statement: string | null;
   version: number;
@@ -2015,7 +2375,7 @@ export interface UnresolvedCitation {
 export interface User {
   ai_access: string | null;
   ai_access_fingerprint: string | null;
-  applicant_type: "manufacturer" | "contractor" | "homebuilder" | null;
+  applicant_type: "manufacturer" | "contractor" | "homebuilder" | "builder" | "designer" | "owner" | "engineer" | "other" | null;
   authority: "calgary" | "edmonton" | null;
   created_at: string;
   email: string;
@@ -2028,6 +2388,29 @@ export interface User {
 
 export interface UserResult {
   user: User;
+}
+
+/** The officer's statement that they issued the variance (outside Batatis) on this date. */
+export interface VarianceIssued {
+  issued_on: string;
+}
+
+export interface WordingDraft {
+  accepted_fact_id: string | null;
+  claims: DraftClaim[];
+  decided_at: string | null;
+  decided_by: string | null;
+  decision_expected_version: number | null;
+  field: string;
+  generated_at: string;
+  generation_id: string;
+  id: string;
+  input_fingerprint: string;
+  questions: DraftQuestion[];
+  replaces_fact_id: string | null;
+  status: "draft" | "accepted" | "rejected";
+  text: string;
+  title: string;
 }
 
 export interface WorkerHealth {

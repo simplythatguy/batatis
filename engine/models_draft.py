@@ -5,6 +5,8 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from .account_models import ApplicantType
+
 Key = Annotated[str, Field(min_length=1, max_length=300)]
 Text = Annotated[str, Field(max_length=20000)]
 Keys = Annotated[list[Key], Field(max_length=1000)]
@@ -57,7 +59,7 @@ class EvidenceDraft(BaseModel):
 
 class ApplicantDraft(BaseModel):
     model_config = ConfigDict(extra='forbid')
-    role: Literal['manufacturer', 'contractor', 'homebuilder', 'builder', 'designer', 'owner'] = 'homebuilder'
+    role: ApplicantType | None = None         # unknown until the applicant answers; never assumed
     # None is a legacy snapshot; [] explicitly removes all composer inputs.
     intake_file_ids: Keys | None = None
     question_text: dict[Key, DraftText] = Field(default_factory=dict, max_length=1000)

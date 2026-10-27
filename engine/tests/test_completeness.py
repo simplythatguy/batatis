@@ -4,6 +4,7 @@ from engine.codes import Codes
 from engine.completeness import Gap, check_completeness
 from engine.models import EvidenceItem
 from engine.section_c import section_c_rows
+from engine.store import CaseStore
 from engine.tests.case_builder_fixtures import complete_case, fact
 
 
@@ -11,10 +12,29 @@ def remove(case, field):
     case.facts = [f for f in case.facts if f.field != field]
 
 
-def test_clean_control_and_no_mutations():
+def clean_case():
+    """complete_case plus the statements the shared check warns about when they are absent."""
     case = complete_case()
+    remove(case, 'alternative_description')
+    case.facts += [
+        fact('alternative_description', 'Synthetic test departure between two dwelling units, no technical conclusion.'),
+        fact('failure_conditions', 'Synthetic applicant statement of how the departure performs if a component fails.'),
+        fact('lapsed_maintenance', 'Synthetic applicant assumption if inspection or maintenance lapses.'),
+        fact('emergency_response', 'Synthetic applicant assumption about the fire-service response time.')]
+    return case
+
+
+def preparation_only(gaps):
+    """Batatis prepares pages for signing outside the app; the unread signature stays an officer check."""
+    rest = [g for g in gaps if g.id != 'signature:presence']
+    assert all(g.severity == 'warning' and g.routed_to == 'officer' for g in gaps if g.id == 'signature:presence')
+    return rest
+
+
+def test_clean_control_and_no_mutations():
+    case = clean_case()
     before = case.model_dump_json()
-    assert check_completeness(case, Codes()) == []
+    assert preparation_only(check_completeness(case, Codes())) == []
     assert case.model_dump_json() == before
 
 
@@ -125,11 +145,20 @@ def test_d12_explicit_required_case_flag_is_respected():
     assert any(g.id.startswith('D12:') for g in check_completeness(case, Codes()))
 
 
-def test_d13_attached_document_missing_responsible_party():
+def test_d13_attached_document_missing_responsible_party(tmp_path):
     case = complete_case()
     remove(case, 'evidence.synthetic.responsible_party')
-    gap = next(g for g in check_completeness(case, Codes()) if g.id.startswith('D13:'))
-    assert gap.field == 'evidence.synthetic.responsible_party'
+    # The attachment itself names no responsible person either; the check reads the actual bytes.
+    store = CaseStore(tmp_path / 'cases.sqlite')
+    store.put(case)
+    saved = store.put_file(case.id, 'synthetic.txt', b'SYNTHETIC TEST ATTACHMENT - no test was performed.\n', 'text/plain')
+    for f in case.facts:
+        if f.field == 'evidence.synthetic.file_ref':
+            f.value, f.source = saved['id'], f.source.model_copy(update={'ref': saved['id']})
+    store.put(case)
+    gap = next(g for g in check_completeness(case, Codes(), store=store) if g.id.startswith('D13:'))
+    assert gap.field == 'document.synthetic-test-attachment.responsible_party'
+    assert 'responsible person' in gap.message and gap.severity == 'blocking'
 
 
 def test_d16_every_confirmed_benchmark_requires_a_row():
@@ -151,16 +180,17 @@ def test_provided_flag_without_attachment_or_responsibility_still_has_gaps():
     case = complete_case()
     case.evidence.append(EvidenceItem(id='unattached', description='Claimed report', status='provided'))
     fields = {g.field for g in check_completeness(case, Codes())}
-    assert {'evidence.unattached.file_ref', 'evidence.unattached.responsible_party'} <= fields
+    # Fields name the document by the title the outgoing form shows.
+    assert {'attachment.claimed-report', 'document.claimed-report.responsible_party'} <= fields
 
 
 def test_current_process_aliases_and_structured_legal_description():
-    case = complete_case()
+    case = clean_case()
     for f in case.facts:
         f.field = {'assumptions_and_limits': 'assumptions_limits', 'maintenance_operation': 'operation_maintenance'}.get(f.field, f.field)
     remove(case, 'legal_description')
     case.facts += [fact('lot', '1'), fact('block', '2'), fact('plan', '3')]
-    assert check_completeness(case, Codes()) == []
+    assert preparation_only(check_completeness(case, Codes())) == []
 
 
 def test_checker_does_not_claim_compliance_or_write_process_answers():

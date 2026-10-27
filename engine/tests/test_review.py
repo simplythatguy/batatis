@@ -16,7 +16,7 @@ from engine.api import create_app
 from engine.codes import Codes
 from engine.models import Case
 from engine.store import CaseStore
-from engine.tests.case_builder_fixtures import complete_case, fact, store_with_synthetic_files
+from engine.tests.case_builder_fixtures import acceptance_request, complete_case, fact, store_with_synthetic_files
 from engine.tests.test_accounts import signup, onboard
 
 
@@ -265,7 +265,7 @@ def test_complete_submit_claim_return_messages_resubmit_and_accept(scene):
     store, clients, users = scene
     owner, first, second = (clients[n] for n in ('owner', 'reviewer', 'second'))
     case = owned(scene, complete=True)
-    assert owner.get(f'/cases/{case.id}/gaps').json()['items'] == []
+    assert not [g for g in owner.get(f'/cases/{case.id}/gaps').json()['items'] if g['severity'] == 'blocking']
     r = owner.post(f'/cases/{case.id}/submit', json={})
     assert r.status_code == 200 and r.json()['status'] == 'submitted', r.text
     assert r.json()['submitted_at']
@@ -278,7 +278,7 @@ def test_complete_submit_claim_return_messages_resubmit_and_accept(scene):
     conflict = second.post(f'/review/{case.id}/claim', json={})
     assert conflict.status_code == 409 and conflict.json()['detail'] == 'Already being reviewed'
     assert conflict.json()['claim'] == claim.json()['claim']
-    assert second.post(f'/review/{case.id}/decision', json={'outcome': 'accept'}).status_code == 409
+    assert second.post(f'/review/{case.id}/decision', json={'outcome': 'accept', 'expected_version': store.get(case.id).version}).status_code == 409
     assert first.post(f'/review/{case.id}/decision', json={'outcome': 'return', 'message': 'Too short'}).status_code == 422
     items = [{'field': 'risk_assessment', 'note': 'Please identify the scope.'}]
     r = first.post(f'/review/{case.id}/decision', json={'outcome': 'return',
@@ -292,7 +292,7 @@ def test_complete_submit_claim_return_messages_resubmit_and_accept(scene):
     assert entry['unread_messages'] == 2 and entry['reviewer']['name'] == 'Reviewer'
     messages = owner.get(f'/cases/{case.id}/messages').json()['messages']
     decision_message = next(message for message in messages if message['kind'] == 'decision')
-    assert decision_message['items'] == [dict(items[0], gap_id=None)]
+    assert decision_message['items'] == [dict(items[0], gap_id=None, section=None, label=None, request_item_id=None, finding_key=None)]
     assert not decision_message['read_by_me']
     assert owner.post(f'/cases/{case.id}/messages/read', json={}).status_code == 204
     assert owner.get(f'/cases/{case.id}/messages').json()['messages'][-1]['read_by_me']
@@ -300,14 +300,15 @@ def test_complete_submit_claim_return_messages_resubmit_and_accept(scene):
     assert reply.status_code == 403
     notice = first.post(f'/cases/{case.id}/messages', json={'body': '<script>plain text</script> Please confirm the revision.'})
     assert notice.status_code == 201 and notice.json()['body'].startswith('<script>')
-    correction = fact('scope', 'site').model_dump()
-    correction['source']['quote'] = 'SYNTHETIC applicant confirmation after the officer notice.'
+    # A real change, so the returned application is not resent unchanged; scope stays one readable site.
+    correction = fact('risk_assessment', complete_case().facts[[f.field for f in complete_case().facts].index(
+        'risk_assessment')].value + ' The applicant clarified the stated scope.').model_dump()
     assert owner.post(f'/cases/{case.id}/facts', json=correction).status_code == 200
     assert first.get('/review/queue?mine=true').json()['applications']
     assert owner.post(f'/cases/{case.id}/submit', json={}).json()['status'] == 'submitted'
     assert first.post(f'/review/{case.id}/claim', json={}).status_code == 200
     assert first.post(f'/cases/{case.id}/messages', json={'body': 'SYNTHETIC final note before acceptance.'}).status_code == 201
-    r = first.post(f'/review/{case.id}/decision', json={'outcome': 'accept', 'message': 'SYNTHETIC acceptance record note.'})
+    r = first.post(f'/review/{case.id}/decision', json=acceptance_request(first, case.id) | {'message': 'SYNTHETIC acceptance record note.'})
     assert r.status_code == 200 and r.json()['status'] == 'accepted'
     assert 'administratively complete' in r.json()['decision']['message']
     assert not any(word in r.json()['decision']['message'].lower() for word in ['approved', 'compliant', 'complies', 'safe'])
@@ -332,7 +333,7 @@ def test_takeover_history_release_and_message_limits(scene):
     assert second.post(f'/review/{case.id}/claim', json={'take_over': True}).status_code == 200
     changed = first.get(f'/cases/{case.id}').json()
     assert 'Reviewer' in changed['status_history'][-1]['note'] and 'Second' in changed['status_history'][-1]['note']
-    assert first.post(f'/review/{case.id}/decision', json={'outcome': 'accept'}).status_code == 409
+    assert first.post(f'/review/{case.id}/decision', json={'outcome': 'accept', 'expected_version': store.get(case.id).version}).status_code == 409
     assert second.delete(f'/review/{case.id}/claim').status_code == 204
     assert store.get(case.id).status == 'submitted' and store.get(case.id).claim is None
     for body in ['', '   ', 'x' * 4001]:
@@ -460,7 +461,7 @@ def test_an_owner_who_becomes_a_reviewer_cannot_review_their_own_application(sce
         assert clients['owner'].post(f'/review/{case.id}/claim', json={}).status_code == 404
         queue = clients['owner'].get('/review/queue').json()['applications']
         assert case.id not in {item['id'] for item in queue}
-        assert clients['owner'].post(f'/review/{case.id}/decision', json={'outcome': 'accept'}).status_code == 404
+        assert clients['owner'].post(f'/review/{case.id}/decision', json={'outcome': 'accept', 'expected_version': store.get(case.id).version}).status_code == 404
         before = clients['owner'].get(f'/cases/{case.id}').json()
         assert clients['owner'].post(f'/cases/{case.id}/messages', json={'body': 'I am also a reviewer now.'}).status_code == 404
         assert clients['owner'].get(f'/cases/{case.id}').json() == before
@@ -528,9 +529,11 @@ def test_accept_is_refused_while_blocking_gaps_remain(scene):
     store, clients, users = scene
     case = owned(scene, status='submitted')  # an incomplete application, e.g. edited outside the submit gate
     assert clients['reviewer'].post(f'/review/{case.id}/claim', json={}).status_code == 200
-    refused = clients['reviewer'].post(f'/review/{case.id}/decision', json={'outcome': 'accept'})
+    assert clients['reviewer'].post(f'/review/{case.id}/package-review').status_code == 201
+    refused = clients['reviewer'].post(f'/review/{case.id}/decision', json={'outcome': 'accept',
+        'expected_version': store.get(case.id).version, 'review_version': 1})
     assert refused.status_code == 409
-    assert refused.json()['detail']['gaps']
+    assert 'completeness rules' in refused.json()['detail']
     assert store.get(case.id).status == 'in_review'
     returned = clients['reviewer'].post(f'/review/{case.id}/decision',
                                         json={'outcome': 'return', 'message': 'Please complete the application.'})
@@ -648,19 +651,20 @@ def test_simultaneous_refusal_and_decision_have_exactly_one_winner(scene, monkey
     case = owned(scene, status='submitted', complete=True)
     reviewer = clients['reviewer']
     assert reviewer.post(f'/review/{case.id}/claim', json={}).status_code == 200
+    accept = acceptance_request(reviewer, case.id) if competing_outcome == 'accept' else {}
     before = store.get(case.id)
     barrier, real_put = threading.Barrier(2), store.put
 
-    def synchronized_put(candidate, *, expected_version=None):
+    def synchronized_put(candidate, *, expected_version=None, **options):
         if candidate.id == case.id and expected_version == before.version:
             barrier.wait(timeout=5)  # both requests decide from the same persisted source version
-        return real_put(candidate, expected_version=expected_version)
+        return real_put(candidate, expected_version=expected_version, **options)
 
     monkeypatch.setattr(store, 'put', synchronized_put)
     with ThreadPoolExecutor(max_workers=2) as pool:
         pending = [pool.submit(reviewer.post, f'/review/{case.id}/decision',
                                json={'outcome': outcome, 'message': f'Written reason from request {index}.',
-                                     'expected_version': before.version})
+                                     'expected_version': before.version, 'review_version': accept.get('review_version')})
                    for index, outcome in enumerate(['refuse', competing_outcome])]
         responses = [result.result(timeout=10) for result in pending]
     assert sorted(r.status_code for r in responses) == [200, 409], [r.text for r in responses]

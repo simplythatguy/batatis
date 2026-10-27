@@ -15,6 +15,7 @@ export function ProfessionalRequirement({ c, editable, busy, unresolved, onResol
 }) {
   const id = useId();
   const [screen, setScreen] = useState<ProfessionalResult | null>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [loadError, setLoadError] = useState("");
   const [open, setOpen] = useState(false);
   const [required, setRequired] = useState<boolean | null>(null);
@@ -28,10 +29,10 @@ export function ProfessionalRequirement({ c, editable, busy, unresolved, onResol
     setScreen(null);
     setLoadError("");
     engine.professional(c.id).then(result => { if (active) setScreen(result); }, () => {
-      if (active) setLoadError("The professional requirement check didn’t load. Reload to try again.");
+      if (active) setLoadError("The professional check didn’t load.");
     });
     return () => { active = false; };
-  }, [c.id, c.version]);
+  }, [c.id, c.version, loadAttempt]);
   useEffect(() => { if (!editable) setOpen(false); }, [editable]);
   useEffect(() => {
     onEditingChange?.(open);
@@ -72,14 +73,15 @@ export function ProfessionalRequirement({ c, editable, busy, unresolved, onResol
         </div>
       ) : (
         <p className="ac-faint ac-small">{loadError || (history.length
-          ? "The earlier determination does not resolve the current application. Review the requirement again."
-          : "The applicant has left this question for the officer. Acceptance waits for a requirement determination.")}</p>
+          ? "Earlier determination · decide again for this version"
+          : "Left for you · needed before accepting")}</p>
       )}
+      {loadError && <button type="button" className="cf-btn is-xs" onClick={() => setLoadAttempt(attempt => attempt + 1)}>Try again</button>}
       {editable && <button type="button" className="cf-btn is-sm" disabled={busy || !screen} onClick={begin}>{resolution ? "Update determination" : "Record determination"}</button>}
       <Modal open={open} onClose={() => { if (!busy) setOpen(false); }} labelledBy={`${id}-title`} className="ac-return">
         <div className="cf-modal-body">
           <h2 id={`${id}-title`} className="cf-modal-title">Record the professional requirement</h2>
-          <p className="ac-faint ac-small">Record your authority’s determination for this scope. Mandatory duties and evidence requirements still apply. This does not approve the design or authenticate a professional.</p>
+          <p className="ac-faint ac-small">Mandatory duties still apply. Not a design approval or a check of the professional.</p>
           <div role="group" aria-label="Is a registered professional required?" className="cf-chip-row">
             <button type="button" className="cf-chip" aria-pressed={required === true} disabled={busy} onClick={() => setRequired(true)}>Required</button>
             <button type="button" className="cf-chip" aria-pressed={required === false} disabled={busy || mandatory} onClick={() => setRequired(false)}>Not required for this scope</button>

@@ -69,8 +69,20 @@ export function Modal({ open, onClose, labelledBy, className = "", children }: {
   useEffect(() => {
     const d = ref.current;
     if (!d) return;
-    if (open && !d.open) d.showModal();
-    if (!open && d.open) d.close();
+    if (open) {
+      delete d.dataset.closing;
+      if (!d.open) d.showModal();
+      return;
+    }
+    if (!d.open) return;
+    // Let a stylesheet's exit transition (keyed on data-closing) finish before leaving the top layer.
+    d.dataset.closing = "";
+    const running = d.getAnimations?.() ?? [];
+    const finish = () => { delete d.dataset.closing; if (d.open) d.close(); };
+    if (!running.length) { finish(); return; }
+    let live = true;
+    void Promise.allSettled(running.map((a) => a.finished)).then(() => { if (live) finish(); });
+    return () => { live = false; };
   }, [open]);
   return (
     <dialog

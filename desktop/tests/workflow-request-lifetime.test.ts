@@ -329,6 +329,10 @@ for (const attachment of [
         assert.deepEqual(fileFacts.filter((fact) => fact.field === "storeys").map((fact) => fact.value), [2]);
         assert.deepEqual(fileFacts.filter((fact) => fact.field === "municipal_address").map((fact) => fact.value), ["42 Project Street"]);
         assert.deepEqual(fileFacts.filter((fact) => fact.field === "owner_name"), []);
+      } else if (attachment.context === "unknown") {
+        // An unmarked document may only propose values; nothing it says becomes an answer by itself.
+        assert.ok(fileFacts.every((fact) => fact.status === "unconfirmed"));
+        assert.deepEqual(body.record.files[0].project_pages, []);
       } else {
         assert.deepEqual(fileFacts, []);
         assert.deepEqual(body.record.files[0].project_pages, []);

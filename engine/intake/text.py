@@ -7,6 +7,7 @@ span here is a slice of the source text; conversions happen in code, never by re
 from __future__ import annotations
 
 import re
+import math
 
 FT_TO_M = 0.3048
 SQFT_TO_M2 = 0.09290304
@@ -91,12 +92,69 @@ def sentence_at(spans: list[tuple[int, int]], index: int) -> tuple[int, int] | N
 
 
 _WH = re.compile(r'(?i)^(?:what|how|why|when|where|which|who|can|could|do|does|is|are|should|would|will)\b')
+_OWN_PLAN = re.compile(
+    r'(?i)^(?:(?:can|could|may|should|would|will)\s+(?:I|we)\s+|'
+    r'is\s+it\s+possible\s+(?:for\s+(?:me|us)\s+)?to\s+|'
+    r'am\s+I\s+allowed\s+to\s+|are\s+we\s+allowed\s+to\s+|'
+    r'do\s+(?:I|we)\s+need\s+a\s+variance\s+to\s+)'
+    r'(?:build|add|use|install|replace|remove|omit|make|convert|renovate|have|put|leave|design|keep)\b')
+
+
+# A question about Batatis, a professional or examples is a question to the tool, whatever its opening verb.
+_ABOUT_TOOL = re.compile(r'(?i)\b(?:batatis|this\s+(?:app|tool|site)|you|examples?|explain|hir(?:e|ing)|professionals?)\b')
 
 
 def is_question(sentence: str) -> bool:
     """A question to the tool, not a statement that merely sits beside one."""
     stripped = sentence.strip()
-    return stripped.endswith('?') or (bool(_WH.match(stripped)) and '?' in stripped)
+    return not (_OWN_PLAN.match(stripped) and not _ABOUT_TOOL.search(stripped)) and (stripped.endswith('?') or (bool(_WH.match(stripped)) and '?' in stripped))
+
+
+def _exact(value: float) -> float:
+    """Float noise removed, precision kept: stored values may sit right at a rule threshold."""
+    return float(f'{value:.12g}')
+
+
+def measurement(text: str, dimension: str) -> int | float:
+    """A whole numeric answer in the field's metric unit. Unknown units never disappear."""
+    raw = text.strip().lower().rstrip('.').replace('′', "'").replace('″', '"')
+    if raw.startswith('.'):
+        raw = '0' + raw
+    n = rf'(?P<n>{NUMBER})'
+    feet = re.fullmatch(rf'{n}\s*(?:feet|foot|ft\.?|\')\s*(?:(?:and\s+)?(?P<in>\d+(?:\.\d+)?)\s*(?:inches|inch|in\.?|"))?', raw, re.I)
+    if dimension == 'length' and feet:
+        inches = float(feet.group('in') or 0)
+        if inches >= 12:
+            raise ValueError('Inches must be less than 12.')
+        value = number(feet.group('n'))
+        if value is None or not math.isfinite(value):
+            raise ValueError('Enter a finite number.')
+        return _exact((value + inches / 12) * FT_TO_M)
+    match = re.fullmatch(rf'{n}\s*(?P<unit>.*?)', raw, re.I)
+    if not match:
+        raise ValueError('Enter one number with its unit.')
+    value, unit = number(match.group('n')), match.group('unit').strip()
+    if value is None or not math.isfinite(value):
+        raise ValueError('Enter a finite number.')
+    if not unit:
+        return value
+    if dimension == 'count':
+        if re.fullmatch(r'storeys?|stories|story|units?|homes?|suites?|dwellings?', unit):
+            return value
+        raise ValueError('Enter a whole count, without distance or area units.')
+    lengths = {'m': 1, 'metre': 1, 'metres': 1, 'meter': 1, 'meters': 1,
+               'cm': .01, 'centimetres': .01, 'centimeters': .01,
+               'mm': .001, 'millimetres': .001, 'millimeters': .001,
+               'in': .0254, 'inch': .0254, 'inches': .0254, '"': .0254}
+    if dimension == 'length' and unit in lengths:
+        return _exact(value * lengths[unit])
+    if dimension == 'area':
+        normalized = re.sub(r'[\s.^]', '', unit).replace('²', '2')
+        if normalized in ('m2', 'sqm', 'squaremetres', 'squaremeters'):
+            return value
+        if normalized in ('ft2', 'sqft', 'squarefeet', 'squarefoot'):
+            return _exact(value * SQFT_TO_M2)
+    raise ValueError('Use m² or ft².' if dimension == 'area' else 'Use m, cm, mm, or ft and in.')
 
 
 def spaced(text: str) -> str:

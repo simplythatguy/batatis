@@ -5,6 +5,7 @@ plus `VersionConflict`. This module keeps the file backend; `store_postgres.py` 
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import sqlite3
@@ -12,6 +13,8 @@ import uuid
 from contextlib import closing
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from dataclasses import dataclass
+
 from typing import Callable, Protocol
 
 from .models import Case, Fact, now
@@ -41,6 +44,11 @@ class FileTooLarge(Exception):
 
 class InvalidAttachment(ValueError):
     """A confirmed attachment must name bytes owned by this case."""
+
+
+def file_fingerprints(rows) -> dict[str, tuple[str, str]]:
+    """Identity, display name and actual bytes; used under the case write lock by drafting CAS."""
+    return {row[0]: (row[1], hashlib.sha256(bytes(row[2])).hexdigest()) for row in rows}
 
 
 def attachment_reference(fact: Fact) -> str | None:
@@ -78,11 +86,36 @@ def case_with_stored_files(payload: str | dict, file_ids: set[str], version: int
     return Case.model_validate(case.model_dump())
 
 
+class ReviewConflict(Exception):
+    pass
+
+
+@dataclass(frozen=True)
+class ReviewRevision:
+    """The exact latest package review checked by a decision, pinned under the case write lock."""
+    version: int
+    json: str
+
+
+def check_review_revision(con, case_id: str, expected: ReviewRevision | None, *, postgres=False):
+    if expected is None:
+        return
+    if postgres:
+        con.execute('SELECT pg_advisory_xact_lock(hashtext(%s))', (case_id,))
+    placeholder = '%s' if postgres else '?'
+    row = con.execute('SELECT version, json FROM package_review_sessions WHERE package_id=' + placeholder +
+                      ' ORDER BY version DESC LIMIT 1', (case_id,)).fetchone()
+    if row is None or (row[0], row[1]) != (expected.version, expected.json):
+        raise ReviewConflict(case_id)
+
+
 class CaseBackend(Protocol):
     def get(self, case_id: str) -> Case | None: ...
     def get_snapshot(self, case_id: str) -> tuple[Case, int] | None: ...
     def get_version(self, case_id: str) -> int | None: ...
-    def put(self, case: Case, *, expected_version: int | None = None) -> Case: ...
+    def put(self, case: Case, *, expected_version: int | None = None,
+            expected_files: dict[str, tuple[str, str | None]] | None = None,
+            expected_review: ReviewRevision | None = None) -> Case: ...
     def mutate_messages(self, case_id: str, user: User, operation: Callable[[Case], object]) -> tuple[Case, object] | None: ...
     def add_fact(self, case_id: str, fact: Fact) -> Case | None: ...
     def patch_draft(self, case_id: str, changes: dict, *, expected_version: int) -> Case | None: ...
@@ -91,7 +124,7 @@ class CaseBackend(Protocol):
     def patch_application_preferences(self, application_id: str, user: User,
                                       changes: dict[str, bool]) -> ApplicationPreferences | None: ...
     def remove_evidence(self, case_id: str, evidence_id: str) -> Case | None: ...
-    def put_file(self, case_id: str, name: str, data: bytes, content_type: str = 'application/pdf') -> dict | None: ...
+    def put_file(self, case_id: str, name: str, data: bytes, content_type: str = 'application/pdf', *, touch: bool = True) -> dict | None: ...
     def get_file(self, case_id: str, file_id: str) -> dict | None: ...
     def list_files(self, case_id: str) -> list[dict] | None: ...
     def delete(self, case_id: str) -> bool: ...
@@ -166,7 +199,11 @@ class CaseStore(FileAccountsMixin):
             row = con.execute('SELECT version FROM cases WHERE id=?', (case_id,)).fetchone()
         return int(row[0]) if row else None
 
-    def put(self, case: Case, *, expected_version: int | None = None) -> Case:
+    def put(self, case: Case, *, expected_version: int | None = None,
+            expected_files: dict[str, tuple[str, str | None]] | None = None,
+            expected_review: ReviewRevision | None = None) -> Case:
+        if expected_files is not None and (expected_version is None or expected_version < 1):
+            raise ValueError('file CAS requires an existing case version')
         case.updated_at = now()
         conflict = None
         with closing(self._connect()) as con, con:
@@ -198,10 +235,16 @@ class CaseStore(FileAccountsMixin):
             # Lock before taking the cutoff, including time spent waiting for another writer.
             con.execute('BEGIN IMMEDIATE')
             self._purge_expired(con, case.id)
+            check_review_revision(con, case.id, expected_review)
             previous = con.execute('SELECT json FROM cases WHERE id=?', (case.id,)).fetchone()
             if previous:
                 enforce_stored_mutation(previous[0])
                 preserve_messages(case, previous[0])
+                if expected_files is not None:
+                    actual_files = file_fingerprints(con.execute(
+                        'SELECT id, name, data FROM case_files WHERE case_id=?', (case.id,)))
+                    if actual_files != expected_files:
+                        raise VersionConflict(case.id, expected_version, expected_version)
             payload = case.model_dump_json(exclude={'version'})
             row = con.execute('UPDATE cases SET json=?, updated_at=?, version=version+1 '
                               'WHERE id=? AND version=? RETURNING version',
@@ -359,7 +402,9 @@ class CaseStore(FileAccountsMixin):
                 con.close()
         raise VersionConflict(case_id)
 
-    def put_file(self, case_id: str, name: str, data: bytes, content_type: str = 'application/pdf') -> dict | None:
+    def put_file(self, case_id: str, name: str, data: bytes, content_type: str = 'application/pdf', *,
+                 touch: bool = True) -> dict | None:
+        """`touch=False` keeps an officer's review upload from counting as applicant activity."""
         if len(data) > PDF_MAX_BYTES:
             raise FileTooLarge()
         file_id = f'file_{uuid.uuid4().hex[:12]}'
@@ -372,8 +417,9 @@ class CaseStore(FileAccountsMixin):
             stamp = now()
             con.execute('INSERT INTO case_files VALUES (?,?,?,?,?,?,?)',
                         (file_id, case_id, name, content_type, len(data), data, stamp))
-            con.execute("UPDATE cases SET json=json_set(json, '$.updated_at', ?), updated_at=? WHERE id=?",
-                        (stamp, stamp, case_id))
+            if touch:
+                con.execute("UPDATE cases SET json=json_set(json, '$.updated_at', ?), updated_at=? WHERE id=?",
+                            (stamp, stamp, case_id))
         return {'id': file_id, 'case_id': case_id, 'name': name, 'content_type': content_type, 'size': len(data)}
 
     def get_file(self, case_id: str, file_id: str) -> dict | None:

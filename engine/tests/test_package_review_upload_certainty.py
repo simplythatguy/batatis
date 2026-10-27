@@ -46,15 +46,14 @@ def review(client, files):
     assert stored.status_code == 200, stored.text
     saved = stored.json()
     assert saved['latest'] == {key: value for key, value in result.items() if key != 'meta'}
-    assert saved['sessions'][0]['open_gaps'] == sum(
-        item['included'] for item in result['information_request']['items'])
+    assert saved['sessions'][0]['required'] == saved['workspace']['tally']['required']
     return result
 
 
-def officer_check(result, field, pointer):
+def officer_check(result, field, pointer, others=()):
     finding = next(item for item in result['findings'] if item['field'] == field)
     assert finding['status'] == 'not_found'
-    assert finding['pointers'] == [pointer]
+    assert finding['pointers'] == [pointer, *others]
     request = result['information_request']
     item = next(item for item in request['items'] if item['finding_key'] == finding['key'])
     assert item['officer_check'] and not item['included']
@@ -93,14 +92,19 @@ def test_upload_identity_keeps_raster_passage_uncertain_in_saved_review(client, 
     result = review(client, list(zip(names, data)))
     reading = next(item for item in result['fields'] if item['field'] == 'risk_assessment')
     assert reading['status'] == 'not_found' and reading['value'] is None
-    assert reading['pointer']['quote'] is None
+    # Only the heading that locates the passage may be quoted, never words of the unestablished answer.
+    assert reading['pointer']['quote'] in (None, 'Risk assessment')
     actual_names = [file['name'] for file in result['files']]
     assert len(set(actual_names)) == len(names), 'Each retained upload needs an unambiguous source name.'
     assert all(len(name) <= 200 for name in actual_names)
     assert [(file['sha256'], file['size']) for file in result['files']] == [
         (hashlib.sha256(pdf).hexdigest(), len(pdf)) for pdf in data]
-    assert reading['pointer']['file'] == actual_names[0] and reading['pointer']['page'] == 1
-    officer_check(result, 'risk_assessment', reading['pointer'])
+    # Both labelled uploads are candidates; neither upload order nor name picks one. Each keeps its own identity.
+    finding = next(item for item in result['findings'] if item['field'] == 'risk_assessment')
+    assert finding['pointers'][0] == reading['pointer']
+    assert sorted((p['file'], p['page']) for p in finding['pointers']) == sorted(
+        [(actual_names[0], 1), (actual_names[1], 1)])
+    officer_check(result, 'risk_assessment', reading['pointer'], finding['pointers'][1:])
     if len(names) == 3:
         assert actual_names[2] == 'report (2).pdf', 'A generated suffix must not take another supplied name.'
 

@@ -38,7 +38,7 @@ def test_upload_bind_scope_and_download_deliver_the_same_pdf_bytes(ledger):
     target = section_d_plan(case, Codes()).items[0]
     file, data = upload(client, case.id)
     inventory = client.get(f'/cases/{case.id}/files').json()['items']
-    assert inventory == [{key: file[key] for key in ('id', 'name', 'size', 'content_type')}]
+    assert inventory == [{**{key: file[key] for key in ('id', 'name', 'size', 'content_type')}, 'read_report': None}]
     assert store.get_version(case.id) == case.version, 'upload bytes do not acknowledge a content edit'
     response = post(client, case.id, payload(file_ref=file['id'], scope={'item_id': target.id}))
     assert response.status_code == 200, response.text

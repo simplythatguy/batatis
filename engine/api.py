@@ -115,9 +115,10 @@ async def read_capped(request: Request, limit: int = PDF_MAX_BYTES) -> bytes:
     return bytes(buf)
 
 
-def _pdf_from_body(body: bytes, content_type: str, filename: str | None) -> tuple[str, bytes]:
+def _pdf_from_body(body: bytes, content_type: str, filename: str | None) -> tuple[str, bytes, str]:
     if content_type.split(';', 1)[0].strip().lower() != 'multipart/form-data':
-        return filename or 'upload.pdf', body
+        declared = content_type.split(';', 1)[0].strip().lower()
+        return filename or ('note.txt' if declared == 'text/plain' else 'upload.pdf'), body, declared
     if len(body) > PDF_MAX_BYTES + MULTIPART_MAX_OVERHEAD_BYTES:
         raise HTTPException(413, PDF_TOO_LARGE_DETAIL)
     try:
@@ -165,13 +166,14 @@ def _pdf_from_body(body: bytes, content_type: str, filename: str | None) -> tupl
             raise ValueError('missing file payload')
         if len(data) > PDF_MAX_BYTES or len(body) - len(data) > MULTIPART_MAX_OVERHEAD_BYTES:
             raise HTTPException(413, PDF_TOO_LARGE_DETAIL)
-        return part.get_filename() or filename or 'upload.pdf', data
+        return part.get_filename() or filename or 'upload.pdf', data, part.get_content_type()
     except (ValueError, RecursionError) as error:
         raise HTTPException(400, 'invalid multipart body') from error
 
 
 def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
-               relevance_judge_factory: Callable[[], Judge] | None = None) -> FastAPI:
+               relevance_judge_factory: Callable[[], Judge] | None = None,
+               drafting_provider_factory=None, drafting_registry=None) -> FastAPI:
     if store is None:
         assert_durable_when_hosted()
     state = {'store': store, 'codes': codes}
@@ -252,6 +254,9 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
         case = cases().get(case_id)
         if case is None:
             raise HTTPException(404, 'case not found')
+        if case.drafting:
+            from .drafting_sources import refresh_staleness
+            refresh_staleness(case, cases(), code())
         return case
 
     @app.get('/cases/{case_id}', response_model=Case)
@@ -280,14 +285,30 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
         multipart = content_type.split(';', 1)[0].strip().lower() == 'multipart/form-data'
         limit = PDF_MAX_BYTES + (MULTIPART_MAX_OVERHEAD_BYTES if multipart else 0)
         body = await read_capped(request, limit)
-        name, data = _pdf_from_body(body, content_type,
+        name, data, declared_type = _pdf_from_body(body, content_type,
                                     request.headers.get('x-filename'))
         if len(data) > PDF_MAX_BYTES:
             raise HTTPException(413, PDF_TOO_LARGE_DETAIL)
-        if not data.startswith(b'%PDF'):
-            raise HTTPException(415, 'only PDF files are accepted')
+        from .intake.images import InvalidImage, image_format, image_type
+        if data.startswith(b'%PDF'):
+            media_type = 'application/pdf'
+        elif image_format(data):
+            try:
+                media_type = image_type(data)
+            except InvalidImage as error:
+                raise HTTPException(415, str(error)) from error
+        elif declared_type == 'text/plain' or name.lower().endswith('.txt'):
+            try:
+                text = data.decode('utf-8-sig')
+                if not text.strip() or any(ord(c) < 32 and c not in '\r\n\t' for c in text):
+                    raise ValueError()
+            except (ValueError, UnicodeError) as error:
+                raise HTTPException(415, 'Use a UTF-8 text note.') from error
+            media_type = 'text/plain'
+        else:
+            raise HTTPException(415, 'Use a PDF, JPG, PNG, WebP or text note.')
         try:
-            saved = cases().put_file(case_id, name, data)
+            saved = cases().put_file(case_id, name, data, content_type=media_type)
         except FileTooLarge as exc:
             raise HTTPException(413, exc.detail) from exc
         if saved is None:
@@ -296,10 +317,16 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
 
     @app.get('/cases/{case_id}/files')
     def list_files(case_id: str):
+        case = cases().get(case_id)
+        if case is None:
+            raise HTTPException(404, 'case not found')
         files = cases().list_files(case_id)
         if files is None:
             raise HTTPException(404, 'case not found')
-        return {'items': files}
+        removed = set(case.intake.removed_file_ids if case.intake else [])
+        reports = {r.file_id: r for r in case.intake.files} if case.intake else {}
+        return {'items': [{**file, 'read_report': reports[file['id']].model_dump() if file['id'] in reports else None}
+                          for file in files if file['id'] not in removed]}
 
     @app.get('/cases/{case_id}/files/{file_id}', response_class=Response)
     def download_file(case_id: str, file_id: str):
@@ -313,7 +340,7 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
         headers = {'Content-Disposition': f'attachment; filename="{fallback}"; filename*=UTF-8\'\'{quote(name, safe="")}',
                    'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff',
                    'Content-Security-Policy': "sandbox; default-src 'none'"}
-        return Response(saved['data'], media_type='application/pdf', headers=headers)
+        return Response(saved['data'], media_type=saved['content_type'], headers=headers)
 
     @app.delete('/cases/{case_id}', status_code=204)
     def delete_case(case_id: str):
@@ -323,8 +350,7 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
 
     def run_export(case: Case, draft: bool):
         try:
-            return export_case(case, draft=draft, codes=code(),
-                               file_loader=lambda file_id: cases().get_file(case.id, file_id))
+            return export_case(case, draft=draft, codes=code(), store=cases())
         except ExportBlocked as e:
             raise HTTPException(409, {'message': 'export blocked; resolve these or export a draft', 'reasons': e.reasons})
         except FormNotFound as exc:
@@ -372,8 +398,7 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
                 pages=[PreviewPage(width=item.width, height=item.height, image=data_url('image/png', item.png))
                        for item in images], pdf=pdf)
         if not preview_fits(len(res.pdf)):
-            return ExportPreviewTooLarge(page_count=res.form_pages + res.appendix_pages + res.attachment_pages,
-                                         pdf_bytes=len(res.pdf))
+            return ExportPreviewTooLarge(page_count=res.page_count, pdf_bytes=len(res.pdf))
         images, total = page_images(res.pdf)
         return ExportPreview(filename=filename, pdf=data_url('application/pdf', res.pdf), page_count=total,
             pages=[PreviewPage(width=item.width, height=item.height, image=data_url('image/png', item.png))
@@ -439,6 +464,8 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
 
     app.include_router(__import__('engine.routes_workspace', fromlist=['create_router']).create_router(cases))
     app.include_router(__import__('engine.routes_case', fromlist=['create_router']).create_router(cases, code))
+    app.include_router(__import__('engine.routes_drafting', fromlist=['create_router']).create_router(
+        cases, code, provider_factory=drafting_provider_factory, registry=drafting_registry))
     app.include_router(__import__('engine.routes_evidence', fromlist=['create_router']).create_router(cases, code))
     app.include_router(__import__('engine.routes_auth', fromlist=['create_router']).create_router(cases))
     app.include_router(__import__('engine.routes_hosted_ai', fromlist=['create_router']).create_router(cases))

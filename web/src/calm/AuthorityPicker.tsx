@@ -1,6 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { AUTHORITY_LIST_LIMIT, filterAuthorities, type AuthorityOption } from "./authorityFilter";
 import { Icon24 } from "./icons";
+import { resolveOffice } from "../config";
 import "./AuthorityPicker.css";
 
 /**
@@ -8,7 +9,7 @@ import "./AuthorityPicker.css";
  * two offices and four hundred read the same. Typing only filters; nothing is answered until an
  * option is chosen, and leaving the field puts the saved choice back.
  */
-export function AuthorityPicker({ options, value, onPick, label }: { options: readonly AuthorityOption[]; value: string; onPick: (id: string) => void; label: string }) {
+export function AuthorityPicker({ options, value, onPick, label, suggested, unsure = false, compact = false }: { options: readonly AuthorityOption[]; value: string; onPick: (id: string) => void; label: string; suggested?: AuthorityOption | null; unsure?: boolean; compact?: boolean }) {
   const listId = useId();
   const root = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
@@ -16,7 +17,13 @@ export function AuthorityPicker({ options, value, onPick, label }: { options: re
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
   const selected = options.find((o) => o.id === value);
-  const { shown, total } = useMemo(() => filterAuthorities(options, query ?? ""), [options, query]);
+  const { shown, total } = useMemo(() => {
+    const filtered = filterAuthorities(options, query ?? "");
+    const text = query?.trim();
+    const custom = text && !options.some((option) => option.id.toLowerCase() === text.toLowerCase() || option.name.toLowerCase() === text.toLowerCase())
+      ? [{ id: text, name: text }] : [];
+    return { shown: [...filtered.shown, ...custom, { id: "unsure", name: "Not sure" }], total: filtered.total + custom.length + 1 };
+  }, [options, query]);
   const optionId = (n: number) => `${listId}-${n}`;
 
   const close = () => { setOpen(false); setQuery(null); };
@@ -27,7 +34,7 @@ export function AuthorityPicker({ options, value, onPick, label }: { options: re
     setActive(at >= 0 ? at : 0);
   };
   const choose = (o: AuthorityOption) => {
-    if (o.id !== value) onPick(o.id);
+    onPick(resolveOffice(o.id)?.id ?? "unsure");
     close();
   };
   // A saved choice changed elsewhere (another application, a reload) closes any search in progress.
@@ -59,8 +66,9 @@ export function AuthorityPicker({ options, value, onPick, label }: { options: re
     }
   };
 
-  return (
-    <div className="cf-ap" ref={root} onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) close(); }}>
+  return <>
+    {!compact && suggested && !unsure && (!value || value === suggested.id) && <button type="button" className="cf-btn" onClick={() => choose(suggested)}>Yes, {suggested.name}</button>}
+    <div className={`cf-ap${compact ? " is-compact" : ""}`} ref={root} onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) close(); }}>
       <span className="cf-ap-lead" aria-hidden="true"><Icon24 name="search" size={18} /></span>
       <input
         ref={input}
@@ -75,8 +83,8 @@ export function AuthorityPicker({ options, value, onPick, label }: { options: re
         aria-activedescendant={open && shown[active] ? optionId(active) : undefined}
         autoComplete="off"
         spellCheck={false}
-        placeholder="Find an office"
-        value={query ?? selected?.name ?? value}
+        placeholder="Find an Alberta place"
+        value={query ?? selected?.name ?? (unsure ? "Not sure" : value)}
         onFocus={(e) => e.currentTarget.select()}
         onClick={show}
         onChange={(e) => { setQuery(e.target.value); setActive(0); setOpen(true); }}
@@ -115,5 +123,7 @@ export function AuthorityPicker({ options, value, onPick, label }: { options: re
       )}
       <span className="cf-sr" role="status" aria-live="polite">{open && query !== null ? (total === 0 ? "No match" : `${total} ${total === 1 ? "office" : "offices"}`) : ""}</span>
     </div>
-  );
+    {/* Compact (the paperwork sheet): Not sure stays in the list; the row's own Later handles deferral. */}
+    {!compact && <button type="button" className="cf-link-btn cf-ap-unsure" aria-pressed={unsure} onClick={() => choose({ id: "unsure", name: "Not sure" })}>Not sure</button>}
+  </>;
 }

@@ -43,7 +43,7 @@ const ROLE_NOTES: Record<"manufacturer" | "contractor" | "homebuilder", { engine
   },
 };
 
-export function roleNote(type: ApplicantType): { engineer: string; officer: string } {
+export function roleNote(type: ApplicantType | null): { engineer: string; officer: string } {
   if (type === "manufacturer" || type === "contractor" || type === "homebuilder") return ROLE_NOTES[type];
   if (type === "builder") return ROLE_NOTES.homebuilder;
   return {

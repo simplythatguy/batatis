@@ -2,17 +2,22 @@
 from __future__ import annotations
 
 from contextlib import ExitStack
+from io import BytesIO
 from types import SimpleNamespace
 
 import pytest
 from fastapi.testclient import TestClient
+from pypdf import PdfReader
 
 from engine.api import create_app
+from engine.codes import Codes
+from engine.export.sample import sample_case
 from engine.jurisdictions import registry
-from engine.models import Case
+from engine.models import Case, Jurisdiction
 from engine.privacy import PRIVACY_NOTICE
 from engine.store import CaseStore
 from engine.tests.test_accounts import onboard, signup
+from engine.tests.case_builder_fixtures import store_with_synthetic_files
 
 
 @pytest.fixture
@@ -60,8 +65,10 @@ def test_detail_merges_province_items_and_404s(scene):
 
 @pytest.mark.parametrize('jurisdiction, authority, expected, how', [
     ({'id': 'calgary', 'name': 'Calgary'}, None, 'calgary', 'id'),
+    ({'id': 'edmonton', 'name': 'Edmonton'}, None, 'edmonton', 'id'),
     ({'id': 'x-1', 'name': 'City of Edmonton'}, None, 'edmonton', 'name'),
     ({'id': 'red-deer', 'name': 'City of Red Deer'}, None, 'alberta-other', 'fallback'),
+    ({'id': 'Example Hamlet', 'name': 'Example Hamlet'}, None, 'alberta-other', 'fallback'),
     (None, 'edmonton', 'edmonton', 'reviewer_code'),
 ])
 def test_a_case_resolves_to_a_pack(scene, jurisdiction, authority, expected, how):
@@ -77,6 +84,50 @@ def test_a_case_without_a_jurisdiction_has_no_pack(scene):
     case = scene.clients['owner'].post('/cases', json={'title': 'Open'}).json()
     body = scene.clients['owner'].get(f'/cases/{case["id"]}/jurisdiction/pack').json()
     assert body['pack'] is None and body['matched_by'] is None
+
+
+def test_not_sure_is_persisted_without_fabricating_a_jurisdiction(scene):
+    client = scene.clients['owner']
+    case = client.post('/cases', json={'title': 'Office not known yet'}).json()
+    response = client.post(f'/cases/{case["id"]}/facts', json={
+        'field': 'office.choice', 'value': 'not_sure', 'kind': 'pointed', 'status': 'confirmed',
+        'source': {'type': 'user_click', 'ref': 'rules:office', 'quote': 'Not sure'},
+    })
+    assert response.status_code == 200
+    saved = client.get(f'/cases/{case["id"]}').json()
+    assert saved['authority'] is None and saved['jurisdiction'] is None
+    assert any(fact['field'] == 'office.choice' and fact['value'] == 'not_sure' for fact in saved['facts'])
+    assert client.get(f'/cases/{case["id"]}/jurisdiction/pack').json()['pack'] is None
+
+
+@pytest.mark.parametrize('place', ['Red Deer', 'Example Hamlet'])
+def test_other_offices_keep_their_place_and_pdf_path_without_reviewer_submission(scene, monkeypatch, place):
+    client = scene.clients['owner']
+    case = client.post('/cases', json={'jurisdiction': {'id': place, 'name': place}}).json()
+    assert case['authority'] is None
+    assert client.get(f'/cases/{case["id"]}').json()['jurisdiction']['name'] == place
+    pack = client.get(f'/cases/{case["id"]}/jurisdiction/pack').json()['pack']
+    assert pack['id'] == 'alberta-other' and pack['authority']['reviewer_code'] is None
+    assert any('/where-to-get-a-permit/' in source['url'] for source in pack['authority']['sources'])
+    # Isolate routing from the independent completeness gate and PDF renderer.
+    monkeypatch.setattr('engine.routes_review.check_completeness', lambda *_args, **_kw: [])
+    monkeypatch.setattr('engine.api.export_case', lambda *_args, **_kw: SimpleNamespace(pdf=b'%PDF-1.4 synthetic route fixture'))
+    response = client.post(f'/cases/{case["id"]}/submit', json={'expected_version': case['version']})
+    assert response.status_code == 409
+    assert client.post(f'/cases/{case["id"]}/export', json={'draft': True}).status_code == 200
+
+
+def test_other_office_exports_the_real_pdf_with_existing_completeness_gates(scene):
+    case = sample_case(Codes(), provisions=['9.25.2.2.(1)'])
+    case.owner_id = scene.users['owner']['id']
+    case.authority = None
+    case.jurisdiction = Jurisdiction(id='red-deer', name='Red Deer')
+    case = store_with_synthetic_files(scene.store, case)
+    for draft in (True, False):
+        response = scene.clients['owner'].post(f'/cases/{case.id}/export', json={'draft': draft})
+        assert response.status_code == 200, response.text
+        assert response.content.startswith(b'%PDF')
+        assert len(PdfReader(BytesIO(response.content)).pages) >= 1
 
 
 def test_a_case_pack_follows_the_case_access_policy(scene):

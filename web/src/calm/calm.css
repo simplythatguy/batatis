@@ -93,6 +93,8 @@ body {
   height: 100dvh;
   display: flex;
   overflow: hidden;
+  /* Clip, never scroll: focusing into a panel that is still sliding in must not shift the whole shell. */
+  overflow: clip;
   background: var(--cf-bg);
   color: var(--cf-text);
   font-family: var(--cf-font);
@@ -109,6 +111,9 @@ body {
 }
 
 .cf-rail {
+  /* Above the application list, which slides in and out from behind it. */
+  position: relative;
+  z-index: 1;
   width: 60px;
   flex: none;
   display: flex;
@@ -204,7 +209,8 @@ body {
 /* Application list */
 
 .cf-list {
-  width: 300px;
+  --cf-list-w: 300px;
+  width: var(--cf-list-w);
   flex: none;
   display: flex;
   flex-direction: column;
@@ -850,7 +856,8 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  /* No gap: a folded name must leave no space; the name and the count carry their own spacing. */
+  gap: 0;
   height: 34px;
   min-width: 34px;
   padding: 0 7px;
@@ -873,7 +880,6 @@ body {
 
 /* The icon, its count and its progress line carry the dimming; the done mark stays full strength. */
 .cf-stage-ico,
-.cf-stage-word,
 .cf-stage-count,
 .cf-stage-bar {
   opacity: var(--stage-o);
@@ -905,22 +911,58 @@ body {
   box-shadow: 0 0 0 1.5px var(--cf-bg);
 }
 
-/* The current stage's name, one word beside its icon. */
+/* The current stage's name, one word beside its icon. Every stage renders it; only the current one's
+   grid track is open. The outgoing name folds (0fr) while the incoming one unfolds (1fr) on the same
+   curve, so the group's width changes smoothly and the header's middle column keeps it centred. */
 .cf-stage-word {
-  margin-left: 2px;
+  display: grid;
+  grid-template-columns: 0fr;
+  opacity: 0;
+  transition-property: grid-template-columns, opacity;
+  /* The outgoing word fades well before its fold closes, so no half-cut letters show. */
+  transition-duration: 240ms, 90ms;
+  transition-timing-function: var(--cf-ease), ease-out;
+}
+
+.cf-stage-word-clip {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.cf-stage-word-clip > span {
+  display: block;
+  /* The space before the name lives inside the clip, so it folds away with the word. */
+  padding-left: 6px;
   font-size: 13.5px;
   font-weight: 550;
-  line-height: 1;
+  line-height: 1.3;
   letter-spacing: -0.005em;
   white-space: nowrap;
+  translate: -4px 0;
+  transition-property: translate;
+  transition-duration: 240ms;
+  transition-timing-function: var(--cf-ease);
 }
 
 /* Clear of the done mark, which sits over the icon's top-right corner. */
-.cf-stage.is-done .cf-stage-word {
-  margin-left: 5px;
+.cf-stage.is-done .cf-stage-word-clip > span {
+  padding-left: 9px;
+}
+
+.cf-stage[aria-current="step"] .cf-stage-word {
+  grid-template-columns: 1fr;
+  opacity: 1;
+  transition-duration: 240ms, 200ms;
+  transition-delay: 0ms, 40ms;
+  transition-timing-function: var(--cf-ease), ease-out;
+}
+
+.cf-stage[aria-current="step"] .cf-stage-word-clip > span {
+  translate: 0 0;
 }
 
 .cf-stage-count {
+  margin-left: 4px;
   font: 500 11.5px var(--cf-mono);
   font-variant-numeric: tabular-nums;
 }
@@ -985,6 +1027,8 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .cf-stage-ico,
   .cf-stage-word,
+  .cf-stage[aria-current="step"] .cf-stage-word,
+  .cf-stage-word-clip > span,
   .cf-stage-count,
   .cf-stage-bar {
     transition: none;
@@ -1095,7 +1139,8 @@ body {
 /* Assistant: a column beside main (pushes it), raised surface. */
 
 .cf-assist {
-  width: 400px;
+  --cf-assist-w: 400px;
+  width: var(--cf-assist-w);
   flex: none;
   display: flex;
   flex-direction: column;
@@ -1105,16 +1150,49 @@ body {
   border-left: 1px solid var(--cf-line);
 }
 
+/* The list and the assistant slide in from their edge and out again (shell/AppLayout.tsx keeps them
+   mounted for the exit). A negative margin, not a transform, so the work area resizes with them
+   every frame instead of jumping; the list passes behind the rail. Exit times match EXIT_MS (200ms). */
+.cf-slot {
+  display: contents;
+}
+
 @media (prefers-reduced-motion: no-preference) {
-  .cf-assist {
-    animation: cf-assist-in 300ms ease-out both;
+  .cf-slot[data-state="entering"] > .cf-list {
+    animation: cf-list-in 240ms var(--cf-ease) backwards;
+  }
+  .cf-slot[data-state="closing"] > .cf-list {
+    animation: cf-list-out 200ms cubic-bezier(0.4, 0, 1, 1) forwards;
+  }
+  .cf-slot[data-state="entering"] > .cf-assist {
+    animation: cf-assist-in 240ms var(--cf-ease) backwards;
+  }
+  .cf-slot[data-state="closing"] > .cf-assist {
+    animation: cf-assist-out 200ms cubic-bezier(0.4, 0, 1, 1) forwards;
+  }
+}
+
+@keyframes cf-list-in {
+  from {
+    margin-left: calc(-1 * var(--cf-list-w));
+  }
+}
+
+@keyframes cf-list-out {
+  to {
+    margin-left: calc(-1 * var(--cf-list-w));
   }
 }
 
 @keyframes cf-assist-in {
   from {
-    opacity: 0;
-    transform: translateX(12px);
+    margin-right: calc(-1 * var(--cf-assist-w));
+  }
+}
+
+@keyframes cf-assist-out {
+  to {
+    margin-right: calc(-1 * var(--cf-assist-w));
   }
 }
 
@@ -1287,6 +1365,43 @@ body {
 
 .cf-nav-sheet[open] {
   display: flex;
+}
+
+/* The phone sheet slides in from the left edge and back out. */
+.cf-modal.cf-nav-sheet {
+  opacity: 1;
+  scale: none;
+  translate: -100% 0;
+  transition-duration: 200ms;
+}
+
+.cf-modal.cf-nav-sheet[open] {
+  translate: 0 0;
+  transition-duration: 260ms;
+}
+
+@starting-style {
+  .cf-modal.cf-nav-sheet[open] {
+    opacity: 1;
+    scale: none;
+    translate: -100% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cf-modal.cf-nav-sheet,
+  .cf-modal.cf-nav-sheet[open] {
+    translate: none;
+  }
+  .cf-modal.cf-nav-sheet:not([open]) {
+    opacity: 0;
+  }
+  @starting-style {
+    .cf-modal.cf-nav-sheet[open] {
+      translate: none;
+      opacity: 0;
+    }
+  }
 }
 
 .cf-nav-sheet-body {
@@ -1826,6 +1941,68 @@ body {
   backdrop-filter: blur(2px);
 }
 
+/* Open and close: a quick fade with a slight scale, ease-out in and ease-in out. The dialog stays in
+   the top layer while it leaves (display and overlay transition discretely); the drawer and the phone
+   sheet slide instead (below). */
+.cf-modal {
+  opacity: 0;
+  scale: 0.97;
+  transition-property: opacity, scale, translate, display, overlay;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 1, 1);
+  transition-behavior: allow-discrete;
+}
+
+.cf-modal:not([open]) {
+  pointer-events: none;
+}
+
+.cf-modal[open] {
+  opacity: 1;
+  scale: 1;
+  transition-duration: 200ms;
+  transition-timing-function: var(--cf-ease);
+}
+
+@starting-style {
+  .cf-modal[open] {
+    opacity: 0;
+    scale: 0.97;
+  }
+}
+
+.cf-modal::backdrop {
+  opacity: 0;
+  transition-property: opacity, display, overlay;
+  transition-duration: 150ms;
+  transition-timing-function: ease-in;
+  transition-behavior: allow-discrete;
+}
+
+.cf-modal[open]::backdrop {
+  opacity: 1;
+  transition-duration: 200ms;
+  transition-timing-function: ease-out;
+}
+
+@starting-style {
+  .cf-modal[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cf-modal,
+  .cf-modal[open] {
+    scale: none;
+  }
+  @starting-style {
+    .cf-modal[open] {
+      scale: none;
+    }
+  }
+}
+
 .cf-confirm {
   width: min(440px, calc(100vw - 32px));
 }
@@ -2132,10 +2309,6 @@ body {
   height: auto;
   max-height: none;
   border-radius: var(--cf-r-card);
-  transition-property: translate, opacity, display, overlay;
-  transition-duration: 350ms;
-  transition-timing-function: var(--cf-ease);
-  transition-behavior: allow-discrete;
 }
 
 .cf-drawer[open] {
@@ -2143,19 +2316,52 @@ body {
   flex-direction: column;
 }
 
+/* Slides in from the right and back out the same way (the base state is where it closes to). */
+.cf-modal.cf-drawer {
+  opacity: 1;
+  scale: none;
+  translate: calc(100% + 24px) 0;
+  transition-duration: 200ms;
+}
+
+.cf-modal.cf-drawer[open] {
+  translate: 0 0;
+  transition-duration: 320ms;
+}
+
 @starting-style {
-  .cf-drawer[open] {
-    translate: 480px 0;
+  .cf-modal.cf-drawer[open] {
+    opacity: 1;
+    scale: none;
+    translate: calc(100% + 24px) 0;
   }
 }
 
+/* The drawer's and the sheet's backdrops fade over the same time as the panel moves. */
+.cf-modal.cf-drawer::backdrop,
+.cf-modal.cf-nav-sheet::backdrop {
+  transition-duration: 200ms;
+}
+
+.cf-modal.cf-drawer[open]::backdrop {
+  transition-duration: 320ms;
+}
+
+.cf-modal.cf-nav-sheet[open]::backdrop {
+  transition-duration: 260ms;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .cf-drawer {
-    transition-property: opacity, display, overlay;
+  .cf-modal.cf-drawer,
+  .cf-modal.cf-drawer[open] {
+    translate: none;
+  }
+  .cf-modal.cf-drawer:not([open]) {
+    opacity: 0;
   }
   @starting-style {
-    .cf-drawer[open] {
-      translate: 0 0;
+    .cf-modal.cf-drawer[open] {
+      translate: none;
       opacity: 0;
     }
   }
@@ -3115,10 +3321,10 @@ body {
 
 @media (max-width: 1180px) {
   .cf-list {
-    width: 260px;
+    --cf-list-w: 260px;
   }
   .cf-assist {
-    width: 340px;
+    --cf-assist-w: 340px;
   }
 }
 
@@ -3160,6 +3366,10 @@ body {
     display: inline;
     max-width: 90px;
   }
+  /* A problem with its own button: the button names it, so the label would only crowd the stages. */
+  .cf-save.is-problem:has(.cf-btn) .cf-save-label {
+    display: none;
+  }
   /* No room to push: the assistant covers the screen as a full sheet with its own close. */
   .cf-assist {
     position: fixed;
@@ -3168,6 +3378,26 @@ body {
     height: auto;
     z-index: 40;
     border-left: 0;
+  }
+  .cf-slot[data-state="entering"] > .cf-assist {
+    animation-name: cf-assist-sheet-in;
+  }
+  .cf-slot[data-state="closing"] > .cf-assist {
+    animation-name: cf-assist-sheet-out;
+  }
+}
+
+@keyframes cf-assist-sheet-in {
+  from {
+    opacity: 0;
+    translate: 0 16px;
+  }
+}
+
+@keyframes cf-assist-sheet-out {
+  to {
+    opacity: 0;
+    translate: 0 16px;
   }
 }
 
@@ -3229,9 +3459,22 @@ body {
     border-radius: 24px 24px 0 0;
     border-bottom: 0;
   }
+  .cf-modal.cf-drawer {
+    translate: 0 100%;
+  }
   @starting-style {
-    .cf-drawer[open] {
+    .cf-modal.cf-drawer[open] {
       translate: 0 100%;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cf-modal.cf-drawer {
+      translate: none;
+    }
+    @starting-style {
+      .cf-modal.cf-drawer[open] {
+        translate: none;
+      }
     }
   }
   .cf-drawer-scroll {
@@ -4641,6 +4884,7 @@ body {
 
 /* The deck page: question centred in the free height, the section footer pinned below. */
 .cf-deck-page {
+  position: relative;
   min-height: 100%;
   display: flex;
   flex-direction: column;
@@ -4670,10 +4914,21 @@ body {
 }
 
 .cf-q-stage {
+  position: relative;
   flex: 1;
   display: flex;
   align-items: center;
   padding: 48px 28px 48px 14%;
+}
+
+/* The replaced card, copied in place for its exit; the stage's padding keeps it where it was. */
+.cf-q-leave {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  padding: inherit;
+  pointer-events: none;
 }
 
 .cf-q-wrap {
@@ -4686,10 +4941,16 @@ body {
 
 @media (prefers-reduced-motion: no-preference) {
   .cf-q-wrap.is-from-down {
-    animation: cf-q-up 320ms var(--cf-ease) both;
+    animation: cf-q-up 320ms var(--cf-ease) 90ms both;
   }
   .cf-q-wrap.is-from-up {
-    animation: cf-q-down 320ms var(--cf-ease) both;
+    animation: cf-q-down 320ms var(--cf-ease) 90ms both;
+  }
+  .cf-q-leave.is-to-up > .cf-q-wrap {
+    animation: cf-q-leave-up 150ms cubic-bezier(0.2, 0, 0, 1) both;
+  }
+  .cf-q-leave.is-to-down > .cf-q-wrap {
+    animation: cf-q-leave-down 150ms cubic-bezier(0.2, 0, 0, 1) both;
   }
 }
 
@@ -4710,6 +4971,20 @@ body {
   from {
     opacity: 0;
     transform: translateY(-28px);
+  }
+}
+
+@keyframes cf-q-leave-up {
+  to {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+}
+
+@keyframes cf-q-leave-down {
+  to {
+    opacity: 0;
+    transform: translateY(16px);
   }
 }
 
@@ -4820,6 +5095,19 @@ body {
 .cf-choice:disabled {
   cursor: not-allowed;
   opacity: 0.55;
+}
+
+/* Saving an answer is not a locked card: the picked answer and its button stay as they are. */
+.cf-q-wrap[data-advancing] .cf-ok-row .cf-btn:disabled {
+  cursor: progress;
+  opacity: 1;
+}
+
+.cf-q-body[data-busy] .cf-choice:disabled,
+.cf-q-body[data-busy] .cf-uline:disabled {
+  cursor: progress;
+  opacity: 1;
+  color: var(--cf-text);
 }
 
 @media (hover: hover) {

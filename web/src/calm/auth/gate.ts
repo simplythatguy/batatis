@@ -45,7 +45,7 @@ export function gateRedirect(status: GateStatus, user: User | null, path: string
     case "loading":
       return null;
     case "signed-out":
-      return AUTH_PATHS.has(p) ? null : "#/signin";
+      return p === "/" || AUTH_PATHS.has(p) ? null : "#/signin";
     case "needs-onboarding":
       return p === "/onboarding" ? null : "#/onboarding";
     case "ready":

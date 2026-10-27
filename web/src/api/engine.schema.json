@@ -1,5 +1,251 @@
 {
   "$defs": {
+    "AcceptGate": {
+      "additionalProperties": false,
+      "description": "Whether this version can be accepted now, decided by the server (the decision route rechecks it).",
+      "properties": {
+        "can_accept": {
+          "title": "Can Accept",
+          "type": "boolean"
+        },
+        "reason": {
+          "default": "",
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "can_accept",
+        "reason"
+      ],
+      "title": "AcceptGate",
+      "type": "object"
+    },
+    "AdministrativeItem": {
+      "additionalProperties": false,
+      "properties": {
+        "certainty": {
+          "enum": [
+            "present",
+            "blank",
+            "not_found",
+            "not_applicable"
+          ],
+          "title": "Certainty",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Citations",
+          "type": "array"
+        },
+        "export_blocking": {
+          "title": "Export Blocking",
+          "type": "boolean"
+        },
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "finding_status": {
+          "anyOf": [
+            {
+              "enum": [
+                "blank",
+                "not_found",
+                "missing",
+                "unclear"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Finding Status"
+        },
+        "fix_hint": {
+          "default": "",
+          "title": "Fix Hint",
+          "type": "string"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "pointers": {
+          "items": {
+            "$ref": "#/$defs/PolicyPointer"
+          },
+          "title": "Pointers",
+          "type": "array"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "reason_code": {
+          "title": "Reason Code",
+          "type": "string"
+        },
+        "routed_to": {
+          "enum": [
+            "applicant",
+            "officer",
+            "professional"
+          ],
+          "title": "Routed To",
+          "type": "string"
+        },
+        "section": {
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "process"
+          ],
+          "title": "Section",
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "blocking",
+            "warning",
+            "info"
+          ],
+          "title": "Severity",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/Source"
+          },
+          "title": "Sources",
+          "type": "array"
+        },
+        "submission_blocking": {
+          "default": true,
+          "title": "Submission Blocking",
+          "type": "boolean"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "verdict": {
+          "enum": [
+            "present",
+            "missing",
+            "unclear"
+          ],
+          "title": "Verdict",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "field",
+        "section",
+        "label",
+        "verdict",
+        "reason_code",
+        "reason",
+        "value",
+        "certainty",
+        "finding_status",
+        "severity",
+        "routed_to",
+        "export_blocking",
+        "submission_blocking",
+        "fix_hint",
+        "citations",
+        "sources",
+        "pointers"
+      ],
+      "title": "AdministrativeItem",
+      "type": "object"
+    },
+    "AdministrativeReport": {
+      "additionalProperties": false,
+      "properties": {
+        "administrative_only": {
+          "const": true,
+          "default": true,
+          "title": "Administrative Only",
+          "type": "boolean"
+        },
+        "export_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Export Reasons",
+          "type": "array"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/AdministrativeItem"
+          },
+          "title": "Items",
+          "type": "array"
+        },
+        "not_a_compliance_determination": {
+          "const": true,
+          "default": true,
+          "title": "Not A Compliance Determination",
+          "type": "boolean"
+        },
+        "policy_version": {
+          "const": "2026-10-26",
+          "default": "2026-10-26",
+          "title": "Policy Version",
+          "type": "string"
+        },
+        "ready_for_export": {
+          "title": "Ready For Export",
+          "type": "boolean"
+        },
+        "schema_version": {
+          "const": "batatis.administrative_completeness.v1",
+          "default": "batatis.administrative_completeness.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "stage": {
+          "const": "preparation",
+          "default": "preparation",
+          "title": "Stage",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "policy_version",
+        "stage",
+        "administrative_only",
+        "not_a_compliance_determination",
+        "items",
+        "export_reasons",
+        "ready_for_export"
+      ],
+      "title": "AdministrativeReport",
+      "type": "object"
+    },
     "AnswerCounts": {
       "additionalProperties": false,
       "properties": {
@@ -220,17 +466,26 @@
           "type": "object"
         },
         "role": {
-          "default": "homebuilder",
-          "enum": [
-            "manufacturer",
-            "contractor",
-            "homebuilder",
-            "builder",
-            "designer",
-            "owner"
+          "anyOf": [
+            {
+              "enum": [
+                "manufacturer",
+                "contractor",
+                "homebuilder",
+                "builder",
+                "designer",
+                "owner",
+                "engineer",
+                "other"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
           ],
-          "title": "Role",
-          "type": "string"
+          "default": null,
+          "title": "Role"
         },
         "rule_unsure": {
           "items": {
@@ -358,17 +613,26 @@
           "type": "object"
         },
         "role": {
-          "default": "homebuilder",
-          "enum": [
-            "manufacturer",
-            "contractor",
-            "homebuilder",
-            "builder",
-            "designer",
-            "owner"
+          "anyOf": [
+            {
+              "enum": [
+                "manufacturer",
+                "contractor",
+                "homebuilder",
+                "builder",
+                "designer",
+                "owner",
+                "engineer",
+                "other"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
           ],
-          "title": "Role",
-          "type": "string"
+          "default": null,
+          "title": "Role"
         },
         "rule_unsure": {
           "items": {
@@ -412,7 +676,12 @@
               "enum": [
                 "manufacturer",
                 "contractor",
-                "homebuilder"
+                "homebuilder",
+                "builder",
+                "designer",
+                "owner",
+                "engineer",
+                "other"
               ],
               "type": "string"
             },
@@ -648,6 +917,92 @@
         "decided_at"
       ],
       "title": "ArticleDecision",
+      "type": "object"
+    },
+    "Assessment": {
+      "properties": {
+        "assessment_kind": {
+          "enum": [
+            "evaluation",
+            "listing"
+          ],
+          "title": "Assessment Kind",
+          "type": "string"
+        },
+        "date": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date"
+        },
+        "date_kind": {
+          "anyOf": [
+            {
+              "enum": [
+                "modified",
+                "issued"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date Kind"
+        },
+        "date_source_url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date Source Url"
+        },
+        "manufacturer": {
+          "title": "Manufacturer",
+          "type": "string"
+        },
+        "message": {
+          "default": "",
+          "title": "Message",
+          "type": "string"
+        },
+        "number": {
+          "title": "Number",
+          "type": "string"
+        },
+        "report_url": {
+          "title": "Report Url",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "number",
+        "title",
+        "manufacturer",
+        "assessment_kind",
+        "date",
+        "date_kind",
+        "date_source_url",
+        "report_url",
+        "message"
+      ],
+      "title": "Assessment",
       "type": "object"
     },
     "AssistAttachment": {
@@ -1640,6 +1995,17 @@
           "title": "Decision History",
           "type": "array"
         },
+        "drafting": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DraftingRecord"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "evidence": {
           "default": [],
           "items": {
@@ -1899,6 +2265,7 @@
         "relevance",
         "identify",
         "intake",
+        "drafting",
         "expires_at",
         "submission_number"
       ],
@@ -2731,23 +3098,63 @@
     },
     "CloseOut": {
       "additionalProperties": false,
-      "description": "Close-out after a final decision: the copy goes to the Council within 10 days of the decision.",
+      "description": "Close-out after a final decision.\n\nAn administrative acceptance is not a variance: it only says the file is complete. The copy to the\nCouncil is due within 10 days of the variance being issued, which happens outside Batatis and which\nthe officer records (`issued_on`). Before that, and after a refusal, nothing is due.",
       "properties": {
         "case_id": {
           "title": "Case Id",
           "type": "string"
         },
         "days_remaining": {
-          "title": "Days Remaining",
-          "type": "integer"
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Days Remaining"
         },
         "decided_at": {
           "title": "Decided At",
           "type": "string"
         },
         "due_date": {
-          "title": "Due Date",
-          "type": "string"
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Due Date"
+        },
+        "issued_by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Issued By Name"
+        },
+        "issued_on": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Issued On"
         },
         "notice": {
           "default": "Batatis does not send anything to the Safety Codes Council. The officer sends the copy and records it here.",
@@ -2763,6 +3170,7 @@
           "type": "string"
         },
         "overdue": {
+          "default": false,
           "title": "Overdue",
           "type": "boolean"
         },
@@ -2802,6 +3210,8 @@
         "case_id",
         "outcome",
         "decided_at",
+        "issued_on",
+        "issued_by_name",
         "due_date",
         "days_remaining",
         "overdue",
@@ -2839,6 +3249,127 @@
         "parts"
       ],
       "title": "CodeTOC",
+      "type": "object"
+    },
+    "CompletenessRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "variant": {
+          "anyOf": [
+            {
+              "enum": [
+                "A",
+                "B",
+                "C"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Variant"
+        }
+      },
+      "title": "CompletenessRequest",
+      "type": "object"
+    },
+    "CompletenessResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "administrative_only": {
+          "const": true,
+          "default": true,
+          "title": "Administrative Only",
+          "type": "boolean"
+        },
+        "case_id": {
+          "title": "Case Id",
+          "type": "string"
+        },
+        "case_updated_at": {
+          "title": "Case Updated At",
+          "type": "string"
+        },
+        "case_version": {
+          "minimum": 1,
+          "title": "Case Version",
+          "type": "integer"
+        },
+        "llm": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LLMUsageModel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "not_a_compliance_determination": {
+          "const": true,
+          "default": true,
+          "title": "Not A Compliance Determination",
+          "type": "boolean"
+        },
+        "notice": {
+          "default": "This review lists administrative gaps only. It is not a finding that the design is safe, that it complies with the code, or that a variance is granted.",
+          "title": "Notice",
+          "type": "string"
+        },
+        "policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AdministrativeReport"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "reminder": {
+          "$ref": "#/$defs/ReminderModel"
+        },
+        "reviews": {
+          "items": {
+            "$ref": "#/$defs/ReviewModel"
+          },
+          "title": "Reviews",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "batatis.completeness.v1",
+          "default": "batatis.completeness.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "variant": {
+          "enum": [
+            "A",
+            "B"
+          ],
+          "title": "Variant",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_version",
+        "variant",
+        "administrative_only",
+        "not_a_compliance_determination",
+        "notice",
+        "reviews",
+        "reminder",
+        "llm",
+        "policy",
+        "case_id",
+        "case_version",
+        "case_updated_at"
+      ],
+      "title": "CompletenessResponse",
       "type": "object"
     },
     "CompletenessSummary": {
@@ -3068,6 +3599,30 @@
       "title": "CoverageEntry",
       "type": "object"
     },
+    "DecideDraft": {
+      "additionalProperties": false,
+      "properties": {
+        "decision": {
+          "enum": [
+            "accept",
+            "reject"
+          ],
+          "title": "Decision",
+          "type": "string"
+        },
+        "expected_version": {
+          "minimum": 1,
+          "title": "Expected Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "expected_version",
+        "decision"
+      ],
+      "title": "DecideDraft",
+      "type": "object"
+    },
     "Decision": {
       "properties": {
         "at": {
@@ -3131,6 +3686,19 @@
           "default": null,
           "title": "Field"
         },
+        "finding_key": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Finding Key"
+        },
         "gap_id": {
           "anyOf": [
             {
@@ -3145,17 +3713,66 @@
           "default": null,
           "title": "Gap Id"
         },
+        "label": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
         "note": {
           "maxLength": 2000,
           "minLength": 1,
           "title": "Note",
           "type": "string"
+        },
+        "request_item_id": {
+          "anyOf": [
+            {
+              "maxLength": 100,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Item Id"
+        },
+        "section": {
+          "anyOf": [
+            {
+              "enum": [
+                "A",
+                "B",
+                "C",
+                "D",
+                "process"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Section"
         }
       },
       "required": [
         "gap_id",
         "field",
-        "note"
+        "note",
+        "section",
+        "label",
+        "request_item_id",
+        "finding_key"
       ],
       "title": "DecisionItem",
       "type": "object"
@@ -3177,6 +3794,19 @@
           "default": null,
           "title": "Field"
         },
+        "finding_key": {
+          "anyOf": [
+            {
+              "maxLength": 300,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Finding Key"
+        },
         "gap_id": {
           "anyOf": [
             {
@@ -3191,11 +3821,56 @@
           "default": null,
           "title": "Gap Id"
         },
+        "label": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
         "note": {
           "maxLength": 2000,
           "minLength": 1,
           "title": "Note",
           "type": "string"
+        },
+        "request_item_id": {
+          "anyOf": [
+            {
+              "maxLength": 100,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Request Item Id"
+        },
+        "section": {
+          "anyOf": [
+            {
+              "enum": [
+                "A",
+                "B",
+                "C",
+                "D",
+                "process"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Section"
         }
       },
       "required": [
@@ -3218,7 +3893,7 @@
             }
           ],
           "default": null,
-          "description": "Required for a refusal; the displayed saved application version.",
+          "description": "Required for an acceptance and a refusal; the displayed saved application version.",
           "title": "Expected Version"
         },
         "items": {
@@ -3250,6 +3925,19 @@
           ],
           "title": "Outcome",
           "type": "string"
+        },
+        "review_version": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Review Version"
         }
       },
       "required": [
@@ -3320,6 +4008,131 @@
         "message"
       ],
       "title": "DiffEntry",
+      "type": "object"
+    },
+    "Disposition": {
+      "additionalProperties": false,
+      "description": "The officer's call on one automated finding, kept with the session. It never edits the finding.\n\nAbsent means the default: `ask` for an applicant finding the review established, `verify` for a\nnot-found or officer-routed one. `dismissed` needs a reason; the note is optional.",
+      "properties": {
+        "at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "At"
+        },
+        "by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "By Name"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "note": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Note",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "enum": [
+                "checked",
+                "not_needed",
+                "does_not_fit"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "state": {
+          "enum": [
+            "ask",
+            "verify",
+            "dismissed"
+          ],
+          "title": "State",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "state",
+        "reason",
+        "note",
+        "by_name",
+        "at"
+      ],
+      "title": "Disposition",
+      "type": "object"
+    },
+    "DispositionEdit": {
+      "additionalProperties": false,
+      "properties": {
+        "key": {
+          "maxLength": 300,
+          "minLength": 1,
+          "title": "Key",
+          "type": "string"
+        },
+        "note": {
+          "default": "",
+          "maxLength": 500,
+          "title": "Note",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "enum": [
+                "checked",
+                "not_needed",
+                "does_not_fit"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "state": {
+          "enum": [
+            "ask",
+            "verify",
+            "dismissed"
+          ],
+          "title": "State",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "state"
+      ],
+      "title": "DispositionEdit",
       "type": "object"
     },
     "DocumentReview": {
@@ -3551,6 +4364,65 @@
       "title": "DocumentRow",
       "type": "object"
     },
+    "DraftCitation": {
+      "additionalProperties": false,
+      "properties": {
+        "quote": {
+          "maxLength": 8000,
+          "minLength": 1,
+          "title": "Quote",
+          "type": "string"
+        },
+        "source_id": {
+          "maxLength": 100,
+          "minLength": 1,
+          "title": "Source Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_id",
+        "quote"
+      ],
+      "title": "DraftCitation",
+      "type": "object"
+    },
+    "DraftClaim": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "fact",
+            "assumption",
+            "plan"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/DraftCitation"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        },
+        "text": {
+          "maxLength": 3000,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "kind",
+        "sources"
+      ],
+      "title": "DraftClaim",
+      "type": "object"
+    },
     "DraftFileBinding": {
       "additionalProperties": false,
       "properties": {
@@ -3594,6 +4466,104 @@
         "file_id"
       ],
       "title": "DraftFileBinding",
+      "type": "object"
+    },
+    "DraftGeneration": {
+      "additionalProperties": false,
+      "properties": {
+        "audit_input_tokens": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Audit Input Tokens"
+        },
+        "audit_output_tokens": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Audit Output Tokens"
+        },
+        "auditor_model": {
+          "title": "Auditor Model",
+          "type": "string"
+        },
+        "effort": {
+          "title": "Effort",
+          "type": "string"
+        },
+        "generated_at": {
+          "title": "Generated At",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "input_tokens": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Input Tokens"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "output_tokens": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Output Tokens"
+        },
+        "provider": {
+          "title": "Provider",
+          "type": "string"
+        },
+        "validation": {
+          "const": "grounded",
+          "default": "grounded",
+          "title": "Validation",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "generated_at",
+        "provider",
+        "model",
+        "effort",
+        "auditor_model",
+        "validation",
+        "input_tokens",
+        "output_tokens",
+        "audit_input_tokens",
+        "audit_output_tokens"
+      ],
+      "title": "DraftGeneration",
       "type": "object"
     },
     "DraftPatch": {
@@ -3656,6 +4626,174 @@
       "title": "DraftPatch",
       "type": "object"
     },
+    "DraftQuestion": {
+      "additionalProperties": false,
+      "properties": {
+        "routed_to": {
+          "enum": [
+            "applicant",
+            "professional"
+          ],
+          "title": "Routed To",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/DraftCitation"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Sources",
+          "type": "array"
+        },
+        "text": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        },
+        "why": {
+          "maxLength": 1500,
+          "minLength": 1,
+          "title": "Why",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "why",
+        "routed_to",
+        "sources"
+      ],
+      "title": "DraftQuestion",
+      "type": "object"
+    },
+    "DraftRegistryQuery": {
+      "additionalProperties": false,
+      "properties": {
+        "end": {
+          "title": "End",
+          "type": "integer"
+        },
+        "query": {
+          "title": "Query",
+          "type": "string"
+        },
+        "quote": {
+          "title": "Quote",
+          "type": "string"
+        },
+        "source_id": {
+          "title": "Source Id",
+          "type": "string"
+        },
+        "start": {
+          "title": "Start",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "query",
+        "source_id",
+        "quote",
+        "start",
+        "end"
+      ],
+      "title": "DraftRegistryQuery",
+      "type": "object"
+    },
+    "DraftSource": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "description",
+            "fact",
+            "document",
+            "code",
+            "section_c",
+            "guidance",
+            "precedent_structure",
+            "professional_screen",
+            "registry"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "metadata": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "integer"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "title": "Metadata",
+          "type": "object"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "ref": {
+          "title": "Ref",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "ref",
+        "page",
+        "label",
+        "text",
+        "url",
+        "metadata"
+      ],
+      "title": "DraftSource",
+      "type": "object"
+    },
     "DraftText": {
       "additionalProperties": false,
       "properties": {
@@ -3675,6 +4813,110 @@
         "value"
       ],
       "title": "DraftText",
+      "type": "object"
+    },
+    "DraftingRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "drafts": {
+          "items": {
+            "$ref": "#/$defs/WordingDraft"
+          },
+          "title": "Drafts",
+          "type": "array"
+        },
+        "generated_at": {
+          "title": "Generated At",
+          "type": "string"
+        },
+        "generated_texts": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Generated Texts",
+          "type": "array"
+        },
+        "generations": {
+          "items": {
+            "$ref": "#/$defs/DraftGeneration"
+          },
+          "title": "Generations",
+          "type": "array"
+        },
+        "input_fingerprint": {
+          "title": "Input Fingerprint",
+          "type": "string"
+        },
+        "notices": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Notices",
+          "type": "array"
+        },
+        "registry_queries": {
+          "items": {
+            "$ref": "#/$defs/DraftRegistryQuery"
+          },
+          "title": "Registry Queries",
+          "type": "array"
+        },
+        "registry_searches": {
+          "items": {
+            "$ref": "#/$defs/RegistrySearch"
+          },
+          "title": "Registry Searches",
+          "type": "array"
+        },
+        "schema_version": {
+          "const": "batatis.applicant_drafts.v1",
+          "default": "batatis.applicant_drafts.v1",
+          "title": "Schema Version",
+          "type": "string"
+        },
+        "source_history": {
+          "items": {
+            "$ref": "#/$defs/DraftSource"
+          },
+          "title": "Source History",
+          "type": "array"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/DraftSource"
+          },
+          "title": "Sources",
+          "type": "array"
+        },
+        "stale": {
+          "default": false,
+          "title": "Stale",
+          "type": "boolean"
+        },
+        "stale_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Stale Reasons",
+          "type": "array"
+        }
+      },
+      "required": [
+        "schema_version",
+        "input_fingerprint",
+        "generated_at",
+        "stale",
+        "stale_reasons",
+        "sources",
+        "drafts",
+        "generations",
+        "registry_searches",
+        "registry_queries",
+        "notices",
+        "generated_texts",
+        "source_history"
+      ],
+      "title": "DraftingRecord",
       "type": "object"
     },
     "DroppedPick": {
@@ -3716,6 +4958,17 @@
           "title": "Included",
           "type": "boolean"
         },
+        "target": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RequestTargetInput"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "text": {
           "maxLength": 2000,
           "minLength": 1,
@@ -3727,6 +4980,246 @@
         "text"
       ],
       "title": "EditedItem",
+      "type": "object"
+    },
+    "ElementModel": {
+      "additionalProperties": false,
+      "properties": {
+        "certainty": {
+          "default": "not_found",
+          "enum": [
+            "present",
+            "blank",
+            "not_found",
+            "not_applicable"
+          ],
+          "title": "Certainty",
+          "type": "string"
+        },
+        "citations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Citations",
+          "type": "array"
+        },
+        "defect_class": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Defect Class"
+        },
+        "export_field": {
+          "title": "Export Field",
+          "type": "string"
+        },
+        "export_section": {
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "process"
+          ],
+          "title": "Export Section",
+          "type": "string"
+        },
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "form_fields": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Form Fields",
+          "type": "array"
+        },
+        "group": {
+          "default": "",
+          "title": "Group",
+          "type": "string"
+        },
+        "in_export_preflight": {
+          "default": false,
+          "title": "In Export Preflight",
+          "type": "boolean"
+        },
+        "key": {
+          "default": "",
+          "title": "Key",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "lookup_skipped": {
+          "default": false,
+          "title": "Lookup Skipped",
+          "type": "boolean"
+        },
+        "problem": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Problem"
+        },
+        "prompt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/IntakePromptModel"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "quotes": {
+          "items": {
+            "$ref": "#/$defs/QuoteModel"
+          },
+          "title": "Quotes",
+          "type": "array"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        },
+        "related_fields": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Related Fields",
+          "type": "array"
+        },
+        "routed_to": {
+          "anyOf": [
+            {
+              "enum": [
+                "officer",
+                "professional",
+                "applicant"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Routed To"
+        },
+        "severity": {
+          "default": "warning",
+          "enum": [
+            "blocking",
+            "warning",
+            "info"
+          ],
+          "title": "Severity",
+          "type": "string"
+        },
+        "source": {
+          "enum": [
+            "applicant",
+            "registered_professional"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "sources": {
+          "items": {
+            "$ref": "#/$defs/Source"
+          },
+          "title": "Sources",
+          "type": "array"
+        },
+        "template_section": {
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ],
+          "title": "Template Section",
+          "type": "string"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value"
+        },
+        "verdict": {
+          "enum": [
+            "present",
+            "missing",
+            "unclear"
+          ],
+          "title": "Verdict",
+          "type": "string"
+        }
+      },
+      "required": [
+        "field",
+        "template_section",
+        "export_section",
+        "export_field",
+        "form_fields",
+        "label",
+        "group",
+        "verdict",
+        "reason",
+        "defect_class",
+        "problem",
+        "quotes",
+        "prompt",
+        "lookup_skipped",
+        "in_export_preflight",
+        "source",
+        "severity",
+        "related_fields",
+        "citations",
+        "routed_to",
+        "sources",
+        "url",
+        "key",
+        "value",
+        "certainty"
+      ],
+      "title": "ElementModel",
       "type": "object"
     },
     "EvidenceDraft": {
@@ -4353,7 +5846,8 @@
           "enum": [
             "rules",
             "form",
-            "model"
+            "model",
+            "vision"
           ],
           "title": "Method",
           "type": "string"
@@ -4374,6 +5868,30 @@
           "default": false,
           "title": "Project Context",
           "type": "boolean"
+        },
+        "quote": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Quote"
+        },
+        "source_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Source Name"
         },
         "source_ref": {
           "title": "Source Ref",
@@ -4406,6 +5924,8 @@
         "start",
         "end",
         "verified",
+        "source_name",
+        "quote",
         "project_context"
       ],
       "title": "FactPointer",
@@ -4442,6 +5962,14 @@
           "title": "Source Ref",
           "type": "string"
         },
+        "source_refs": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Source Refs",
+          "type": "array"
+        },
         "values": {
           "default": [],
           "items": {
@@ -4469,7 +5997,8 @@
         "values",
         "quotes",
         "source_ref",
-        "page"
+        "page",
+        "source_refs"
       ],
       "title": "FieldConflict",
       "type": "object"
@@ -4579,6 +6108,19 @@
           "title": "Form Fields Skipped",
           "type": "array"
         },
+        "image_pages_read": {
+          "default": [],
+          "items": {
+            "type": "integer"
+          },
+          "title": "Image Pages Read",
+          "type": "array"
+        },
+        "media_type": {
+          "default": "application/pdf",
+          "title": "Media Type",
+          "type": "string"
+        },
         "name": {
           "title": "Name",
           "type": "string"
@@ -4611,6 +6153,18 @@
           "title": "Pages Read",
           "type": "array"
         },
+        "pictures_not_read_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pictures Not Read Reason"
+        },
         "project_pages": {
           "default": [],
           "items": {
@@ -4631,6 +6185,34 @@
           "default": null,
           "title": "Reason"
         },
+        "semantic_pages_read": {
+          "default": [],
+          "items": {
+            "type": "integer"
+          },
+          "title": "Semantic Pages Read",
+          "type": "array"
+        },
+        "semantic_pages_sent": {
+          "default": [],
+          "items": {
+            "type": "integer"
+          },
+          "title": "Semantic Pages Sent",
+          "type": "array"
+        },
+        "semantic_reason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Semantic Reason"
+        },
         "status": {
           "enum": [
             "read",
@@ -4639,6 +6221,14 @@
           ],
           "title": "Status",
           "type": "string"
+        },
+        "text_pages_read": {
+          "default": [],
+          "items": {
+            "type": "integer"
+          },
+          "title": "Text Pages Read",
+          "type": "array"
         }
       },
       "required": [
@@ -4649,6 +6239,13 @@
         "pages",
         "pages_read",
         "pages_not_read",
+        "text_pages_read",
+        "semantic_pages_read",
+        "semantic_pages_sent",
+        "image_pages_read",
+        "semantic_reason",
+        "pictures_not_read_reason",
+        "media_type",
         "form",
         "form_fields_read",
         "form_fields_skipped",
@@ -4773,6 +6370,87 @@
       "title": "Finding",
       "type": "object"
     },
+    "FindingState": {
+      "additionalProperties": false,
+      "description": "A finding's effective officer state (stored disposition or default), as the server counts it.",
+      "properties": {
+        "at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "At"
+        },
+        "by_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "By Name"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        },
+        "locked": {
+          "default": false,
+          "title": "Locked",
+          "type": "boolean"
+        },
+        "note": {
+          "default": "",
+          "title": "Note",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "enum": [
+                "checked",
+                "not_needed",
+                "does_not_fit"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reason"
+        },
+        "state": {
+          "enum": [
+            "ask",
+            "verify",
+            "dismissed"
+          ],
+          "title": "State",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "state",
+        "reason",
+        "note",
+        "by_name",
+        "at",
+        "locked"
+      ],
+      "title": "FindingState",
+      "type": "object"
+    },
     "Fork": {
       "description": "Acceptable-solution path or alternative-solution path, read early (before Section C).",
       "properties": {
@@ -4883,6 +6561,21 @@
         "submission_blocking"
       ],
       "title": "Gap",
+      "type": "object"
+    },
+    "GenerateDrafts": {
+      "additionalProperties": false,
+      "properties": {
+        "expected_version": {
+          "minimum": 1,
+          "title": "Expected Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "expected_version"
+      ],
+      "title": "GenerateDrafts",
       "type": "object"
     },
     "Guide": {
@@ -6201,8 +7894,16 @@
     },
     "InformationRequestEdit": {
       "additionalProperties": false,
-      "description": "Officer edits: replace the item list (text, inclusion, order) and optionally the intro.",
+      "description": "Officer edits, saved as one write: the item list (text, order, officer items), the intro, and the\nofficer's call on findings. `findings` lists changes only; findings left out keep their state.",
       "properties": {
+        "findings": {
+          "items": {
+            "$ref": "#/$defs/DispositionEdit"
+          },
+          "maxItems": 200,
+          "title": "Findings",
+          "type": "array"
+        },
         "intro": {
           "anyOf": [
             {
@@ -6220,6 +7921,7 @@
           "items": {
             "$ref": "#/$defs/EditedItem"
           },
+          "maxItems": 50,
           "title": "Items",
           "type": "array"
         }
@@ -6299,6 +8001,17 @@
           "default": null,
           "title": "Section"
         },
+        "target": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RequestTarget"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "text": {
           "title": "Text",
           "type": "string"
@@ -6312,7 +8025,8 @@
         "text",
         "authored_by",
         "included",
-        "officer_check"
+        "officer_check",
+        "target"
       ],
       "title": "InformationRequestItem",
       "type": "object"
@@ -6320,6 +8034,18 @@
     "InputFile": {
       "additionalProperties": false,
       "properties": {
+        "file_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "File Id"
+        },
         "form_version": {
           "anyOf": [
             {
@@ -6382,7 +8108,8 @@
         "pages",
         "role",
         "form_version",
-        "note"
+        "note",
+        "file_id"
       ],
       "title": "InputFile",
       "type": "object"
@@ -6462,6 +8189,42 @@
       "title": "IntakePlan",
       "type": "object"
     },
+    "IntakePromptModel": {
+      "additionalProperties": false,
+      "properties": {
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "form_fields": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Form Fields",
+          "type": "array"
+        },
+        "question": {
+          "title": "Question",
+          "type": "string"
+        },
+        "source": {
+          "enum": [
+            "applicant",
+            "registered_professional"
+          ],
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "required": [
+        "question",
+        "field",
+        "form_fields",
+        "source"
+      ],
+      "title": "IntakePromptModel",
+      "type": "object"
+    },
     "IntakeRecord": {
       "properties": {
         "conflicts": {
@@ -6506,6 +8269,14 @@
           "title": "Ran At",
           "type": "string"
         },
+        "removed_file_ids": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Removed File Ids",
+          "type": "array"
+        },
         "review": {
           "anyOf": [
             {
@@ -6543,6 +8314,7 @@
         "text_sha256",
         "pointers",
         "files",
+        "removed_file_ids",
         "model",
         "conflicts",
         "unresolved_citations",
@@ -6579,6 +8351,11 @@
         "model": {
           "default": true,
           "title": "Model",
+          "type": "boolean"
+        },
+        "pictures": {
+          "default": false,
+          "title": "Pictures",
           "type": "boolean"
         },
         "role": {
@@ -7327,6 +9104,78 @@
       "title": "JurisdictionsResult",
       "type": "object"
     },
+    "LLMUsageModel": {
+      "additionalProperties": false,
+      "properties": {
+        "estimated_usd": {
+          "default": 0.0,
+          "title": "Estimated Usd",
+          "type": "number"
+        },
+        "input_tokens": {
+          "default": 0,
+          "title": "Input Tokens",
+          "type": "integer"
+        },
+        "latency_s": {
+          "default": 0.0,
+          "title": "Latency S",
+          "type": "number"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model"
+        },
+        "output_tokens": {
+          "default": 0,
+          "title": "Output Tokens",
+          "type": "integer"
+        },
+        "provider": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provider"
+        },
+        "skipped": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Skipped"
+        }
+      },
+      "required": [
+        "provider",
+        "model",
+        "input_tokens",
+        "output_tokens",
+        "latency_s",
+        "estimated_usd",
+        "skipped"
+      ],
+      "title": "LLMUsageModel",
+      "type": "object"
+    },
     "LoginRequest": {
       "additionalProperties": false,
       "properties": {
@@ -7723,6 +9572,67 @@
       "title": "NotificationsResult",
       "type": "object"
     },
+    "OfficerWorkspace": {
+      "additionalProperties": false,
+      "description": "The officer's working state for the latest version: per-finding states, counts and the accept gate.",
+      "properties": {
+        "case_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Case Version"
+        },
+        "current": {
+          "title": "Current",
+          "type": "boolean"
+        },
+        "gate": {
+          "$ref": "#/$defs/AcceptGate"
+        },
+        "limits": {
+          "$ref": "#/$defs/RequestLimits"
+        },
+        "rulebook": {
+          "items": {
+            "$ref": "#/$defs/RulebookGap"
+          },
+          "title": "Rulebook",
+          "type": "array"
+        },
+        "states": {
+          "items": {
+            "$ref": "#/$defs/FindingState"
+          },
+          "title": "States",
+          "type": "array"
+        },
+        "tally": {
+          "$ref": "#/$defs/ReviewTally"
+        },
+        "version": {
+          "title": "Version",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "version",
+        "case_version",
+        "current",
+        "states",
+        "rulebook",
+        "tally",
+        "gate",
+        "limits"
+      ],
+      "title": "OfficerWorkspace",
+      "type": "object"
+    },
     "OnboardingRequest": {
       "additionalProperties": false,
       "properties": {
@@ -7745,7 +9655,12 @@
               "enum": [
                 "manufacturer",
                 "contractor",
-                "homebuilder"
+                "homebuilder",
+                "builder",
+                "designer",
+                "owner",
+                "engineer",
+                "other"
               ],
               "type": "string"
             },
@@ -8073,6 +9988,17 @@
           },
           "title": "Sessions",
           "type": "array"
+        },
+        "workspace": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/OfficerWorkspace"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
         }
       },
       "required": [
@@ -8081,6 +10007,7 @@
         "authority",
         "sessions",
         "latest",
+        "workspace",
         "close_out"
       ],
       "title": "PackageReviewIndex",
@@ -8262,6 +10189,88 @@
         "quote"
       ],
       "title": "Pointer",
+      "type": "object"
+    },
+    "PolicyPointer": {
+      "additionalProperties": false,
+      "properties": {
+        "bbox": {
+          "anyOf": [
+            {
+              "maxItems": 4,
+              "minItems": 4,
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Bbox"
+        },
+        "file": {
+          "title": "File",
+          "type": "string"
+        },
+        "form_field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Form Field"
+        },
+        "page": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Page"
+        },
+        "quote": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Quote"
+        }
+      },
+      "required": [
+        "file",
+        "page",
+        "form_field",
+        "bbox",
+        "quote"
+      ],
+      "title": "PolicyPointer",
       "type": "object"
     },
     "PreApplication": {
@@ -8912,6 +10921,40 @@
       "title": "QueueResult",
       "type": "object"
     },
+    "QuoteModel": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "exact",
+            "pointed"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "source": {
+          "additionalProperties": true,
+          "title": "Source",
+          "type": "object"
+        },
+        "source_ref": {
+          "title": "Source Ref",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "kind",
+        "source_ref",
+        "source"
+      ],
+      "title": "QuoteModel",
+      "type": "object"
+    },
     "QuotedChoice": {
       "description": "'The code says X. Does your design do something different?' The id sits behind a disclosure.",
       "properties": {
@@ -9101,6 +11144,85 @@
       "title": "Regime",
       "type": "object"
     },
+    "RegistrySearch": {
+      "properties": {
+        "cached": {
+          "title": "Cached",
+          "type": "boolean"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "notice": {
+          "title": "Notice",
+          "type": "string"
+        },
+        "query": {
+          "title": "Query",
+          "type": "string"
+        },
+        "registry_date": {
+          "title": "Registry Date",
+          "type": "string"
+        },
+        "results": {
+          "items": {
+            "$ref": "#/$defs/Assessment"
+          },
+          "title": "Results",
+          "type": "array"
+        },
+        "searched_date": {
+          "title": "Searched Date",
+          "type": "string"
+        },
+        "snapshot_path": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Snapshot Path"
+        },
+        "source": {
+          "enum": [
+            "live",
+            "snapshot"
+          ],
+          "title": "Source",
+          "type": "string"
+        },
+        "source_url": {
+          "default": "https://nrc.canada.ca/en/certifications-evaluations-standards/canadian-construction-materials-centre/ccmc-publications/published_evaluations.html",
+          "title": "Source Url",
+          "type": "string"
+        },
+        "total_matches": {
+          "title": "Total Matches",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "query",
+        "searched_date",
+        "registry_date",
+        "source",
+        "source_url",
+        "snapshot_path",
+        "cached",
+        "total_matches",
+        "results",
+        "message",
+        "notice"
+      ],
+      "title": "RegistrySearch",
+      "type": "object"
+    },
     "RelevanceBands": {
       "properties": {
         "status": {
@@ -9233,6 +11355,50 @@
       "title": "RelevanceRecord",
       "type": "object"
     },
+    "ReminderModel": {
+      "additionalProperties": false,
+      "description": "IB-2025-11-18 copy of the issued variance. Not a present/missing/unclear verdict and not an export blocker.",
+      "properties": {
+        "bulletin_ids": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Bulletin Ids",
+          "type": "array"
+        },
+        "links": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Links",
+          "type": "array"
+        },
+        "source": {
+          "additionalProperties": true,
+          "title": "Source",
+          "type": "object"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "verdict": {
+          "const": "reminder",
+          "default": "reminder",
+          "title": "Verdict",
+          "type": "string"
+        }
+      },
+      "required": [
+        "verdict",
+        "bulletin_ids",
+        "text",
+        "links",
+        "source"
+      ],
+      "title": "ReminderModel",
+      "type": "object"
+    },
     "RemoveFileBinding": {
       "additionalProperties": false,
       "properties": {
@@ -9260,6 +11426,125 @@
         }
       },
       "title": "RemoveFileBinding",
+      "type": "object"
+    },
+    "RequestLimits": {
+      "additionalProperties": false,
+      "description": "Checked when the draft is saved and again on return; the client shows them, never enforces others.",
+      "properties": {
+        "intro": {
+          "default": 2000,
+          "title": "Intro",
+          "type": "integer"
+        },
+        "item_text": {
+          "default": 2000,
+          "title": "Item Text",
+          "type": "integer"
+        },
+        "items": {
+          "default": 50,
+          "title": "Items",
+          "type": "integer"
+        },
+        "text": {
+          "default": 12000,
+          "title": "Text",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "items",
+        "intro",
+        "item_text",
+        "text"
+      ],
+      "title": "RequestLimits",
+      "type": "object"
+    },
+    "RequestTarget": {
+      "additionalProperties": false,
+      "description": "Where the applicant answers a request item: a form section and, when known, one field.\n\n`field` is an engine field id the applicant workspace maps to the place to fix it (see\ndocs/api/package-review.md, \"Where the applicant answers\"). `label` is what both sides show.",
+      "properties": {
+        "field": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Field"
+        },
+        "label": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "section": {
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "process"
+          ],
+          "title": "Section",
+          "type": "string"
+        }
+      },
+      "required": [
+        "section",
+        "field",
+        "label"
+      ],
+      "title": "RequestTarget",
+      "type": "object"
+    },
+    "RequestTargetInput": {
+      "additionalProperties": false,
+      "description": "Where the applicant answers a request item: a form section and, when known, one field.\n\n`field` is an engine field id the applicant workspace maps to the place to fix it (see\ndocs/api/package-review.md, \"Where the applicant answers\"). `label` is what both sides show.",
+      "properties": {
+        "field": {
+          "anyOf": [
+            {
+              "maxLength": 200,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Field"
+        },
+        "label": {
+          "maxLength": 200,
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "section": {
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "process"
+          ],
+          "title": "Section",
+          "type": "string"
+        }
+      },
+      "required": [
+        "section",
+        "label"
+      ],
+      "title": "RequestTarget",
       "type": "object"
     },
     "RequirementCondition": {
@@ -10250,6 +12535,29 @@
       "title": "RetainFileBinding",
       "type": "object"
     },
+    "ReturnWithRequest": {
+      "additionalProperties": false,
+      "description": "Send the saved request and return the application, as one write. Both or neither.",
+      "properties": {
+        "expected_version": {
+          "minimum": 1,
+          "title": "Expected Version",
+          "type": "integer"
+        },
+        "text": {
+          "maxLength": 12000,
+          "minLength": 1,
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "expected_version",
+        "text"
+      ],
+      "title": "ReturnWithRequest",
+      "type": "object"
+    },
     "ReviewConflict": {
       "properties": {
         "evidence": {
@@ -10306,6 +12614,13 @@
           },
           "title": "Still Open",
           "type": "array"
+        },
+        "unverified": {
+          "items": {
+            "$ref": "#/$defs/DiffEntry"
+          },
+          "title": "Unverified",
+          "type": "array"
         }
       },
       "required": [
@@ -10314,6 +12629,7 @@
         "resolved",
         "still_open",
         "new",
+        "unverified",
         "statement"
       ],
       "title": "ReviewDiff",
@@ -10409,6 +12725,52 @@
       "title": "ReviewItem",
       "type": "object"
     },
+    "ReviewModel": {
+      "additionalProperties": false,
+      "properties": {
+        "document_id": {
+          "title": "Document Id",
+          "type": "string"
+        },
+        "export_reasons": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Export Reasons",
+          "type": "array"
+        },
+        "invented_values": {
+          "title": "Invented Values",
+          "type": "integer"
+        },
+        "reasons_by_section": {
+          "additionalProperties": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "title": "Reasons By Section",
+          "type": "object"
+        },
+        "sections": {
+          "items": {
+            "$ref": "#/$defs/SectionModel"
+          },
+          "title": "Sections",
+          "type": "array"
+        }
+      },
+      "required": [
+        "document_id",
+        "sections",
+        "reasons_by_section",
+        "export_reasons",
+        "invented_values"
+      ],
+      "title": "ReviewModel",
+      "type": "object"
+    },
     "ReviewSession": {
       "additionalProperties": false,
       "properties": {
@@ -10472,6 +12834,13 @@
           ],
           "default": null
         },
+        "dispositions": {
+          "items": {
+            "$ref": "#/$defs/Disposition"
+          },
+          "title": "Dispositions",
+          "type": "array"
+        },
         "documents": {
           "items": {
             "$ref": "#/$defs/DocumentRow"
@@ -10531,6 +12900,17 @@
           "title": "Package Id",
           "type": "string"
         },
+        "policy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AdministrativeReport"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
         "schema_version": {
           "const": "batatis.package_review.v1",
           "default": "batatis.package_review.v1",
@@ -10571,7 +12951,9 @@
         "section_c",
         "information_request",
         "diff",
-        "lookup_skipped"
+        "lookup_skipped",
+        "dispositions",
+        "policy"
       ],
       "title": "ReviewSession",
       "type": "object"
@@ -10608,6 +12990,46 @@
         "values"
       ],
       "title": "ReviewSnapshot",
+      "type": "object"
+    },
+    "ReviewTally": {
+      "additionalProperties": false,
+      "description": "The one definition of every count the officer sees, for one session. The client never recounts.",
+      "properties": {
+        "asked": {
+          "title": "Asked",
+          "type": "integer"
+        },
+        "dismissed": {
+          "title": "Dismissed",
+          "type": "integer"
+        },
+        "required": {
+          "title": "Required",
+          "type": "integer"
+        },
+        "rulebook": {
+          "title": "Rulebook",
+          "type": "integer"
+        },
+        "to_check": {
+          "title": "To Check",
+          "type": "integer"
+        },
+        "verify": {
+          "title": "Verify",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "required",
+        "to_check",
+        "verify",
+        "dismissed",
+        "asked",
+        "rulebook"
+      ],
+      "title": "ReviewTally",
       "type": "object"
     },
     "ReviewedDocument": {
@@ -11169,6 +13591,59 @@
       "title": "RuleSet",
       "type": "object"
     },
+    "RulebookGap": {
+      "additionalProperties": false,
+      "description": "A blocking gap from the shared completeness rules that no finding covers. Shown as-is.",
+      "properties": {
+        "field": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Field"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "section": {
+          "anyOf": [
+            {
+              "enum": [
+                "A",
+                "B",
+                "C",
+                "D",
+                "process"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Section"
+        }
+      },
+      "required": [
+        "id",
+        "field",
+        "section",
+        "message"
+      ],
+      "title": "RulebookGap",
+      "type": "object"
+    },
     "ScopeBasis": {
       "properties": {
         "citation": {
@@ -11612,6 +14087,39 @@
       "title": "SectionCRow",
       "type": "object"
     },
+    "SectionModel": {
+      "additionalProperties": false,
+      "properties": {
+        "elements": {
+          "items": {
+            "$ref": "#/$defs/ElementModel"
+          },
+          "title": "Elements",
+          "type": "array"
+        },
+        "section": {
+          "enum": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ],
+          "title": "Section",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "section",
+        "title",
+        "elements"
+      ],
+      "title": "SectionModel",
+      "type": "object"
+    },
     "SelectedArticle": {
       "additionalProperties": false,
       "description": "An applicant's code-check card, not a confirmed benchmark or code quotation.",
@@ -11818,8 +14326,8 @@
           "title": "Input Kind",
           "type": "string"
         },
-        "open_gaps": {
-          "title": "Open Gaps",
+        "required": {
+          "title": "Required",
           "type": "integer"
         },
         "sent_at": {
@@ -11856,7 +14364,7 @@
         "created_at",
         "created_by_name",
         "input_kind",
-        "open_gaps",
+        "required",
         "statement",
         "sent_at"
       ],
@@ -12958,7 +15466,12 @@
               "enum": [
                 "manufacturer",
                 "contractor",
-                "homebuilder"
+                "homebuilder",
+                "builder",
+                "designer",
+                "owner",
+                "engineer",
+                "other"
               ],
               "type": "string"
             },
@@ -13061,6 +15574,160 @@
         "user"
       ],
       "title": "UserResult",
+      "type": "object"
+    },
+    "VarianceIssued": {
+      "additionalProperties": false,
+      "description": "The officer's statement that they issued the variance (outside Batatis) on this date.",
+      "properties": {
+        "issued_on": {
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+          "title": "Issued On",
+          "type": "string"
+        }
+      },
+      "required": [
+        "issued_on"
+      ],
+      "title": "VarianceIssued",
+      "type": "object"
+    },
+    "WordingDraft": {
+      "additionalProperties": false,
+      "properties": {
+        "accepted_fact_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Accepted Fact Id"
+        },
+        "claims": {
+          "items": {
+            "$ref": "#/$defs/DraftClaim"
+          },
+          "maxItems": 16,
+          "title": "Claims",
+          "type": "array"
+        },
+        "decided_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decided At"
+        },
+        "decided_by": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decided By"
+        },
+        "decision_expected_version": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decision Expected Version"
+        },
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "generated_at": {
+          "title": "Generated At",
+          "type": "string"
+        },
+        "generation_id": {
+          "title": "Generation Id",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "input_fingerprint": {
+          "title": "Input Fingerprint",
+          "type": "string"
+        },
+        "questions": {
+          "items": {
+            "$ref": "#/$defs/DraftQuestion"
+          },
+          "maxItems": 12,
+          "title": "Questions",
+          "type": "array"
+        },
+        "replaces_fact_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Replaces Fact Id"
+        },
+        "status": {
+          "default": "draft",
+          "enum": [
+            "draft",
+            "accepted",
+            "rejected"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "generation_id",
+        "input_fingerprint",
+        "field",
+        "title",
+        "text",
+        "claims",
+        "questions",
+        "status",
+        "generated_at",
+        "decided_at",
+        "decided_by",
+        "decision_expected_version",
+        "accepted_fact_id",
+        "replaces_fact_id"
+      ],
+      "title": "WordingDraft",
       "type": "object"
     },
     "WorkerHealth": {

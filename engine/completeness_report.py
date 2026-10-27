@@ -1,15 +1,19 @@
 """HTTP shape for POST /cases/{id}/completeness. Grouped by SCC template Part 1 A–D."""
 from __future__ import annotations
 
+import json
+
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from .review.bulletin_gates import applicant_reminder
 from .completeness_elements import NOTICE, SECTION_TITLES
-from .completeness_variants import ElementVerdict, VariantResult, VariantUnavailable, format_export_reason, run_variant
+from .completeness_variants import (ElementVerdict, QuoteSpan, VariantResult, VariantUnavailable, format_export_reason,
+                                   run_variant)
 from .copyright import NRC_PUBLICATION_URL
 from .models import Source
+from .models_completeness import AdministrativeReport
 
 
 class IntakePromptModel(BaseModel):
@@ -47,12 +51,15 @@ class ElementModel(BaseModel):
     lookup_skipped: bool = False
     in_export_preflight: bool = False
     source: Literal['applicant', 'registered_professional']
-    severity: Literal['blocking', 'warning'] = 'warning'
+    severity: Literal['blocking', 'warning', 'info'] = 'warning'
     related_fields: list[str] = Field(default_factory=list)
     citations: list[str] = Field(default_factory=list)
     routed_to: Literal['officer', 'professional', 'applicant'] | None = None
     sources: list[Source] = Field(default_factory=list)
     url: str | None = None
+    key: str = ''
+    value: str | None = None
+    certainty: Literal['present', 'blank', 'not_found', 'not_applicable'] = 'not_found'
 
 
 class SectionModel(BaseModel):
@@ -103,6 +110,7 @@ class CompletenessResponse(BaseModel):
     reviews: list[ReviewModel]
     reminder: ReminderModel
     llm: LLMUsageModel | None = None
+    policy: AdministrativeReport | None = None
     case_id: str
     case_version: int = Field(ge=1)
     case_updated_at: str
@@ -112,6 +120,7 @@ def _review(result: VariantResult, export_reasons: list[str] | None = None) -> R
     grouped: dict[str, list[ElementModel]] = {key: [] for key in 'ABCD'}
     for element in result.elements:
         grouped[element.template_section].append(ElementModel(
+            key=element.key, value=element.value, certainty=element.certainty,
             field=element.field, template_section=element.template_section, export_section=element.export_section,
             export_field=element.export_field, form_fields=element.form_fields, label=element.label, group=element.group,
             verdict=element.verdict, reason=element.reason, defect_class=element.defect_class, problem=element.problem,
@@ -164,166 +173,105 @@ def gaps_to_export_reasons(gaps) -> list[str]:
             for gap in gaps if gap.severity == 'blocking']
 
 
-def saved_case_response(case, codes, variant: str = 'B') -> CompletenessResponse:
-    """Original B screens plus authoritative current administrative/export policy.
+def saved_case_response(case, codes, variant: str = 'B', *, store=None) -> CompletenessResponse:
+    """Read-only applicant projection of the same policy used by export and officer review."""
+    from .export.package import prepare_package
+    if variant not in ('A', 'B'):
+        raise VariantUnavailable('provider-assisted completeness is unavailable')
+    policy = prepare_package(case, codes, store=store).policy
+    response = build_response(variant, [_applicant_projection(policy, case, codes, variant)],
+        export_reasons=policy.report.export_reasons, case_id=case.id,
+        case_version=case.version, case_updated_at=case.updated_at)
+    response.policy = policy.report
+    return response
 
-    This function has no store or provider and cannot save, submit or export. The
-    caller must supply a normalized snapshot and revalidate it before publishing.
-    """
-    from .completeness import Gap, check_completeness
+
+def _applicant_projection(policy, case, codes, variant):
+    """Group existing findings for the screen; every decision remains in policy.items."""
+    from copy import deepcopy
     from .review.evidence_gaps import group_evidence_gaps, list_documents
-    from .export.scc import _FIELD_KEYS, _latest, blockers, confirmed_values, load_field_map
-    from .review.ingest import ingested_from_case
-    from .process_fields import _FIELDS, latest_fact
-    from .professional import _STATUS_FIELDS
     from .section_d import section_d_plan
-
-    document = ingested_from_case(case)
-    result = run_variant(variant, document, codes)
-    gaps = check_completeness(case, codes)
-    fmap = load_field_map()
-    reasons = blockers(case, fmap, codes)
-    # Old document-presence rules never define the current official gate.
-    for element in result.elements:
-        element.in_export_preflight = False
-        element.export_reason = None
-    # Current policy, including not_engaged/source-failure precedence, owns these
-    # tasks. The old engineering_required-only screen is not authoritative.
-    result.elements = [element for element in result.elements
-                       if element.field not in ('responsible_professional', 'professional_qualifications')]
-    by_field = {element.field: element for element in result.elements}
-    by_field['provisions'] = by_field['section_c.article']
-    process_specs = {key: (label, question) for key, label, question, _structure, _pid in _FIELDS}
-    # Map authoritative export keys to existing presentation elements. Physical
-    # aliases remain input targets, never independent versions of a logical field.
-    by_field['request_date'] = by_field['application_date']
-    by_field['municipal_address'] = by_field['civic_address']
-    by_field['owner_rep_name'] = by_field['representative']
-    for key in process_specs:
-        if key in by_field:
-            by_field[f'process.{key}'] = by_field[key]
-
-    def add_gap(gap):
-        element = by_field.get(gap.field)
-        source = 'registered_professional' if gap.field == 'professional_qualifications' else 'applicant'
-        target = f'process.{gap.field}' if gap.section == 'process' else gap.field
-        if element is None:
-            label, question = process_specs.get(gap.field, (gap.field.replace('_', ' '), gap.fix_hint))
-            element = ElementVerdict(
-                field=gap.field, template_section='B' if gap.section == 'process' else gap.section,
-                export_section=gap.section, export_field=gap.field, form_fields=[], label=label,
-                group='Current administrative policy', verdict='missing', reason=gap.message,
-                source=source)
-            result.elements.append(element)
-            by_field[gap.field] = element
-        else:
-            question = gap.fix_hint
-            # Keep the useful distinction between an absent and unconfirmed value.
-            element.verdict = 'unclear' if element.problem == 'unconfirmed' else 'missing'
-            if element.related_fields:
-                if gap.message not in element.reason:
-                    element.reason += ' ' + gap.message
-            else:
-                element.reason = gap.message
-        element.severity = 'blocking' if element.in_export_preflight else gap.severity
-        element.routed_to = gap.routed_to
-        element.in_export_preflight = element.in_export_preflight or gap.severity == 'blocking'
-        element.related_fields = list(dict.fromkeys([*element.related_fields, gap.field]))
-        if gap.citation and gap.citation not in element.citations:
-            element.citations.append(gap.citation)
-        if element.prompt and len(element.related_fields) > 1 and question not in element.prompt['question']:
-            question = element.prompt['question'] + ' ' + question
-        element.prompt = {'question': question, 'field': target, 'form_fields': element.form_fields, 'source': source}
-        if gap.field == 'professional_requirement' and gap.severity == 'warning':
-            element.verdict = 'unclear'
-
-    # Reuse canonical valid-provision planning. A malformed reference must remain
-    # a located gap instead of aborting the complete report or inventing coverage.
+    result = deepcopy(policy.variant_result(variant, case.id))
     plan_items = []
-    for provision_id in dict.fromkeys(case.provisions):
+    for provision in case.provisions:
         try:
-            plan_items.extend(section_d_plan(case.model_copy(update={'provisions': [provision_id]}), codes).items)
+            plan_items.extend(section_d_plan(case.model_copy(update={'provisions': [provision]}), codes).items)
         except (KeyError, ValueError):
             continue
-    grouped = group_evidence_gaps(gaps, plan_items)
+    grouped = group_evidence_gaps(policy.gaps, plan_items)
     grouped_fields = {gap.field for group in grouped for gap in group.gaps}
-    for gap in gaps:
-        if gap.field not in grouped_fields:
-            add_gap(gap)
+    result.elements = [element for element in result.elements if element.field not in grouped_fields]
     for group in grouped:
-        citations = list(dict.fromkeys(gap.citation for gap in group.gaps if gap.citation))
         result.elements.append(ElementVerdict(
-            field=group.field, template_section='D', export_section='D', export_field=group.field,
-            form_fields=[], label=f'Documents for Sentence {group.provision_id}', group='Supporting documents',
-            verdict='missing', reason=f'Your application appears to be missing documents for Sentence {group.provision_id}. '
-            + group.wording, source='applicant', severity='blocking', in_export_preflight=True,
-            related_fields=[gap.field for gap in group.gaps], citations=citations,
+            key=f'evidence:{group.provision_id}', field=group.field, template_section='D', export_section='D',
+            export_field=group.field, form_fields=[], label=f'Documents for Sentence {group.provision_id}',
+            group='Supporting documents', verdict='missing', reason=' '.join(gap.message for gap in group.gaps),
+            severity='blocking', in_export_preflight=True, related_fields=[gap.field for gap in group.gaps],
+            citations=list(dict.fromkeys(gap.citation for gap in group.gaps if gap.citation)),
             prompt={'question': list_documents(group.provision_id), 'field': group.gaps[0].field,
                     'form_fields': [], 'source': 'applicant'}))
-
-    # The saved ledger may supply a legal description as components, not a single
-    # text fact. Canonical policy accepts either complete component set.
-    if not any(gap.field == 'legal_description' for gap in gaps) and by_field['legal_description'].verdict == 'missing':
-        element = by_field['legal_description']
-        element.verdict, element.reason, element.prompt = 'present', 'The confirmed legal-description components are supplied.', None
-    paired = by_field['section_c.pair_match']
-    if case.section_c and not any(gap.section == 'C' for gap in gaps):
-        paired.verdict, paired.reason, paired.lookup_skipped, paired.prompt = (
-            'present', 'Every saved row matches the canonical attribution and intent payload, including its scope.', False, None)
-
-    # Include every extra exporter guard, not just deterministic completeness.
-    for gap in case.gaps:
-        add_gap(Gap(**gap.model_dump(), fix_hint='Resolve this saved administrative finding with its reviewer.'))
-    latest = _latest(case)
-    for field_name, entry in latest.items():
-        if entry.export()['status'] != 'confirmed':
-            element = by_field.get(field_name)
-            if element is None:
-                add_gap(Gap(id=f'export:unconfirmed:{entry.id}', section='B', field=entry.field,
-                            message='The latest saved fact is unconfirmed; confirm or withdraw it before official export.',
-                            fix_hint='Review the latest value and its source; do not restore an older answer.'))
-            else:
-                element.in_export_preflight, element.severity = True, 'blocking'
-                if element.verdict == 'present':
-                    # A field may be optional on this pathway, but its current
-                    # pending answer still needs the exporter's confirmation task.
-                    element.verdict, element.problem = 'unclear', 'unconfirmed'
-                    element.reason = 'The latest saved fact is unconfirmed; confirm or withdraw it before official export.'
-                    element.prompt = {
-                        'question': 'Confirm the latest value and its source, or withdraw it; do not restore an older answer.',
-                        'field': entry.field, 'form_fields': element.form_fields, 'source': element.source}
-                if element.prompt:
-                    element.prompt['field'] = entry.field
-    values = confirmed_values(case)
-    for field_name in fmap['required_facts']:
-        if field_name not in values:
-            logical = {'request_date': 'application_date', 'municipal_address': 'civic_address'}.get(field_name, field_name)
-            element = by_field[logical]
-            element.in_export_preflight, element.severity = True, 'blocking'
-            element.related_fields = list(dict.fromkeys([*element.related_fields, field_name]))
-            if element.prompt:
-                current = latest.get(field_name)
-                element.prompt['field'] = current.field if current is not None else field_name
-            elif element.verdict == 'present':
-                element.verdict, element.reason = 'missing', f'The official form requires the saved field {field_name}.'
-                element.prompt = {'question': f'Enter or confirm the {element.label} for the official form.',
-                                  'field': field_name, 'form_fields': element.form_fields, 'source': 'applicant'}
+    by_field = {}
     for element in result.elements:
-        source_facts = []
-        stored = document.values.get(element.field)
-        if stored and stored.source:
-            element.sources.append(stored.source)
-        for quote in element.quotes:
-            if quote.source is not None and quote.source not in element.sources:
-                element.sources.append(quote.source)
-        if element.prompt:
-            target = element.prompt['field']
-            source_facts.append(latest.get(_FIELD_KEYS.get(target, target)))
-        source_facts.extend(latest.get(_FIELD_KEYS.get(field, field)) for field in element.related_fields)
+        previous = by_field.get(element.field)
+        if previous is None:
+            by_field[element.field] = element
+            continue
+        rank = lambda item: (item.verdict != 'present', item.in_export_preflight, item.severity == 'blocking')
+        if rank(element) > rank(previous):
+            by_field[element.field], previous, element = element, element, previous
+        if element.reason not in previous.reason:
+            previous.reason += ' ' + element.reason
+        previous.sources.extend(source for source in element.sources if source not in previous.sources)
+        previous.related_fields.extend(field for field in element.related_fields if field not in previous.related_fields)
+        previous.citations.extend(citation for citation in element.citations if citation not in previous.citations)
+        previous.in_export_preflight |= element.in_export_preflight
+    result.elements = list(by_field.values())
+    # Decisions come from the outgoing file; the prompt points at the answer the applicant actually saved.
+    from .fact_aliases import LOGICAL_KEYS, latest
+    canonical = {logical: key for key, logical in LOGICAL_KEYS.items()}
+    current = latest(case)
+    related = {'single_location': ('civic_address', 'additional_location', 'second_location', 'extra_location'),
+               'section_c.edition': ('code_or_standard',),
+               'professional_requirement': ('professional_status', 'professional.status')}
+    # The form names a document by title; the applicant attaches the file to their saved document slot.
+    from .completeness_policy import _title_key
+    from .export.text import pdf_safe
+    from .process_fields import confirmed_value
+    titles = {}
+    for slot in dict.fromkeys([entry.id for entry in case.evidence] + [f.field.split('.')[1] for f in case.facts
+                                                                     if f.field.startswith('evidence.')]):
+        title = confirmed_value(case, f'evidence.{slot}.title', f'evidence.{slot}.description') or next(
+            (entry.description for entry in case.evidence if entry.id == slot), None)
+        if isinstance(title, str) and title.strip():
+            key = _title_key(pdf_safe(title.strip()))
+            titles.setdefault(f'attachment.{key}', []).append((slot, 'file_ref'))
+            titles.setdefault(f'document.{key}.responsible_party', []).append((slot, 'responsible_party'))
+    for element in result.elements:
+        slots = titles.get(element.field, [])
+        if len(slots) == 1:
+            element.field = element.export_field = 'evidence.{}.{}'.format(*slots[0])
+            if element.prompt:
+                element.prompt['field'] = element.field
+        target = element.prompt.get('field') if element.prompt else None
+        fact = current.get(canonical.get(target, target)) if target else None
+        if fact is not None:
+            element.prompt['field'] = fact.field
         if element.field == 'professional_requirement':
-            source_facts.append(latest_fact(case, *_STATUS_FIELDS))
-        for entry in source_facts:
-            if entry is not None and entry.source.model_dump() not in element.sources:
-                element.sources.append(entry.source.model_dump())
-    return build_response(variant, [result], export_reasons=reasons, case_id=case.id,
-                          case_version=case.version, case_updated_at=case.updated_at)
+            from .process_fields import latest_fact
+            facts = [latest_fact(case, *related['professional_requirement'])]
+        else:
+            facts = [current.get(canonical.get(key, key)) for key in related.get(element.field, (element.field,))]
+        saved = [fact.source.model_dump(mode='json') for fact in facts if fact is not None and fact.source]
+        if saved:
+            element.sources = list({json.dumps(source, sort_keys=True): source for source in saved}.values())
+            if len(related.get(element.field, ())) > 1:
+                # A composite answer is quoted from each saved answer it combines.
+                element.quotes = [QuoteSpan(text=str(f.value), kind='pointed', source_ref=f.source.ref,
+                                            source=f.source.model_dump(mode='json'))
+                                  for f in facts if f is not None and f.source and str(f.value or '').strip()]
+            for quote in element.quotes:
+                match = next((f for f in facts if f is not None and f.source and str(f.value) == quote.text), None)
+                if match:
+                    quote.source = match.source.model_dump(mode='json')
+                    quote.source_ref = match.source.ref
+    return result

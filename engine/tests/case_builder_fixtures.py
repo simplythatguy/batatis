@@ -1,8 +1,12 @@
 """Synthetic administrative fixtures only; no actual testing, licence or opinion is asserted."""
+from pathlib import Path
+
 from engine.codes import Codes
 from engine.models import Case, Fact, Jurisdiction, Source
 from engine.section_c import section_c_rows
 from engine.section_d import section_d_plan
+
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def fact(field, value, **changes):
@@ -15,8 +19,9 @@ def fact(field, value, **changes):
 def store_with_synthetic_files(store, case):
     """API fixtures need actual case-owned bytes, not file-presence metadata alone.
 
-    The deliberately synthetic bytes exercise storage binding only; no test result,
-    professional authentication, parsed document or real evidence is asserted.
+    The package carries each named attachment's readable bytes, so the store holds the
+    referenced synthetic fixture file itself. No test result, professional authentication,
+    parsed document or real evidence is asserted.
     """
     store.put(case)
     references = {}
@@ -25,13 +30,10 @@ def store_with_synthetic_files(store, case):
                 and entry.status == 'confirmed' and entry.source.type == 'file'
                 and entry.value == entry.source.ref):
             if entry.source.ref not in references:
-                import io
-                from reportlab.pdfgen import canvas
-                output = io.BytesIO()
-                draw = canvas.Canvas(output, invariant=1)
-                draw.drawString(48, 700, 'SYNTHETIC storage-binding fixture; no test result or professional evidence.')
-                draw.save()
-                saved = store.put_file(case.id, 'SYNTHETIC-storage-fixture.pdf', output.getvalue())
+                source = ROOT / entry.source.ref          # an absolute reference stays as it is
+                data = (source.read_bytes() if source.is_file()
+                        else b'SYNTHETIC storage-binding text, not a document or result.\n')
+                saved = store.put_file(case.id, f'SYNTHETIC-storage-{source.name or "fixture.txt"}', data)
                 references[entry.source.ref] = saved['id']
             entry.value = references[entry.source.ref]
             entry.source = entry.source.model_copy(update={'ref': entry.value})
@@ -55,7 +57,10 @@ def complete_case(provisions=None):
         civic_address='123 Synthetic Street', legal_description='Synthetic lot 1 block 2 plan 3',
         representative='Synthetic applicant', mailing_address='123 Synthetic Street', scope='site',
         alternative_description='Synthetic test departure, no technical conclusion.',
-        rationale='Synthetic applicant rationale.', risk_assessment='Synthetic applicant risk assessment.',
+        rationale='Synthetic applicant rationale.',
+        risk_assessment=('Synthetic applicant risk assessment: the departure could let smoke pass between the '
+                         'two suites if the separation is breached, delaying occupants leaving the building.'),
+        testing_procedures='Synthetic applicant testing procedures: the named test author describes the test method.',
         mitigating_measures='Synthetic applicant measures.', assumptions_and_limits='Synthetic applicant limits.',
         maintenance_operation='Synthetic applicant operation and maintenance conditions.',
         qualifications='Synthetic named test author and their stated test qualifications.',
@@ -67,9 +72,33 @@ def complete_case(provisions=None):
     case = Case(title='Synthetic administrative fixture', jurisdiction=Jurisdiction(id='alberta-other', name='Synthetic AHJ'),
         facts=[fact(k, v, source=_OFFICER) if k in _AUTHORITY_SCREEN else fact(k, v) for k, v in values.items()],
         provisions=provisions, section_c=section_c_rows(provisions, codes))
-    file = Source(type='file', ref='synthetic-evidence-fixture.txt', quote='Synthetic evidence metadata; no test was performed.')
+    file = Source(type='file', ref='engine/tests/fixtures/synthetic-evidence-fixture.txt', quote='Synthetic evidence metadata; no test was performed.')
     case.facts += [fact('evidence.synthetic.file_ref', file.ref, source=file),
                    fact('evidence.synthetic.responsible_party', 'Synthetic test author'),
                    fact('evidence.synthetic.date', '2026-10-20'), fact('evidence.synthetic.title', 'Synthetic test attachment')]
     case.facts += [fact(f'evidence.synthetic.covers.{item.id}', True) for item in section_d_plan(case, codes).items]
     return case
+
+
+def acceptance_request(client, case_id, *, run=True):
+    """A synthetic officer explicitly checks package blockers before an acceptance test."""
+    if run:
+        response = client.post(f'/review/{case_id}/package-review')
+        assert response.status_code == 201, response.text
+    index = client.get(f'/review/{case_id}/package-review').json()
+    session = index['latest']
+    assert not index['workspace']['rulebook'], index['workspace']
+    states = {state['key']: state for state in index['workspace']['states']}
+    dismiss = [dict(key=finding['key'], state='dismissed', reason='checked',
+                    note='Synthetic officer checked this fixture source.')
+               for finding in session['findings'] if finding['severity'] == 'blocking'
+               and finding['key'] in states and states[finding['key']]['state'] != 'dismissed']
+    assert not any(states[entry['key']]['locked'] for entry in dismiss)
+    if dismiss:
+        response = client.put(f'/review/{case_id}/package-review/{session["version"]}/information-request', json={
+            'items': [{'id': item['id'], 'text': item['text'], 'included': item['included']}
+                      for item in session['information_request']['items']], 'findings': dismiss})
+        assert response.status_code == 200, response.text
+        index = response.json()
+    assert index['workspace']['gate']['can_accept'], index['workspace']
+    return dict(outcome='accept', expected_version=session['case_version'], review_version=session['version'])
