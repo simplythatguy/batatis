@@ -81,7 +81,7 @@ async function scenario(name, run) {
     await op.getByRole('button', { name: 'Refuse', exact: true }).click();
     const dialog = op.getByRole('dialog', { name: 'Refuse the variance' });
     await dialog.getByRole('textbox', { name: 'Your reasons' }).fill(reason);
-    await dialog.getByRole('button', { name: 'Send the refusal', exact: true }).click();
+    await dialog.getByRole('button', { name: 'Refuse', exact: true }).click();
     return dialog;
   };
   // The officer's note once a refusal is recorded (its reasons and the appeal notice went to the applicant).
@@ -120,12 +120,12 @@ try {
     await applicant(); await reviewer();
     await op.getByRole('button', { name: 'Refuse', exact: true }).click();
     const dialog = op.getByRole('dialog', { name: 'Refuse the variance' });
-    await dialog.getByRole('button', { name: 'Send the refusal', exact: true }).click();
+    await dialog.getByRole('button', { name: 'Refuse', exact: true }).click();
     await dialog.getByText('Write your reasons for the refusal.', { exact: true }).waitFor();
     assert.equal(requests.filter(r => r.path.endsWith('/decision')).length, 0);
     await dialog.getByRole('textbox', { name: 'Your reasons' }).fill(REASON);
     const before = await remote();
-    await dialog.getByRole('button', { name: 'Send the refusal', exact: true }).click();
+    await dialog.getByRole('button', { name: 'Refuse', exact: true }).click();
     await refusedNote();
     const request = requests.find(r => r.path.endsWith('/decision'));
     // The displayed version, the officer's own reasons verbatim with the appeal notice below them, no correction list.
@@ -210,13 +210,13 @@ try {
     await dialog.getByRole('alert').getByText(/The application changed/).waitFor();
     assert.equal((await remote()).decision, null);
     assert.equal(await dialog.getByRole('textbox', { name: 'Your reasons' }).inputValue(), REASON);
-    await dialog.getByRole('button', { name: 'Refresh application', exact: true }).click();
+    await dialog.getByRole('button', { name: 'Refresh', exact: true }).click();
     // J12 refreshes the saved revision in place and keeps the active reason dialog (the Refuse choice
     // behind it is disabled while the read is in flight).
     await op.waitForFunction(() => { const refuse = document.querySelector('button[aria-label="Refuse"]'); return Boolean(refuse && !refuse.disabled); });
     assert.equal(await dialog.isVisible(), true);
     assert.equal(await dialog.getByRole('textbox', { name: 'Your reasons' }).inputValue(), REASON);
-    await dialog.getByRole('button', { name: 'Send the refusal', exact: true }).click();
+    await dialog.getByRole('button', { name: 'Refuse', exact: true }).click();
     await refusedNote();
     const after = await remote();
     assert.equal(after.status, 'refused'); assert.equal(after.version, before.version + 3);

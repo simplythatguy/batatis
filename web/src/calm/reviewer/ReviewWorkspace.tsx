@@ -348,11 +348,11 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
   const idle = !busy && !running && !draftPending;
   const menu = [
     ...(canReview ? [
-      { label: running ? "Reading…" : "Run the review again", onClick: () => void run(), disabled: !idle },
-      { label: "Review uploaded PDFs", onClick: () => upload.current?.click(), disabled: !idle },
+      { label: running ? "Reading…" : "Review again", onClick: () => void run(), disabled: !idle },
+      { label: "Review PDFs…", onClick: () => upload.current?.click(), disabled: !idle },
     ] : []),
     ...versions.filter((v) => v.version !== shown?.version).map((v, i) => ({
-      label: `Open v${v.version}${v.version === latest?.version ? " · latest" : ""}`,
+      label: `Version ${v.version}${v.version === latest?.version ? " · latest" : ""}`,
       onClick: () => void pickVersion(v.version), disabled: !idle, separator: i === 0 && canReview,
     })),
     { label: "Application", onClick: () => go("application"), separator: true },
@@ -369,7 +369,7 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
       <button type="button" className="cf-btn is-xs" disabled={disabled} onClick={onClick}>{label}</button>;
     if (unclaimed) {
       return busy === "claim" || !actionError
-        ? { tone: "pending", text: "Opening the review…", role: "status", float: true }
+        ? { tone: "pending", text: "Opening…", role: "status", float: true }
         : { tone: "blocking", text: `Not picked up · ${actionError}`, role: "alert", action: retry("Pick up", () => void doClaim()) };
     }
     if (draftTrouble) {
@@ -385,10 +385,10 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
     if (resumable) return { tone: "warning", text: "Resubmitted · reserved for you", action: retry("Resume review", () => void doClaim(), Boolean(busy)) };
     if (running) return { tone: "pending", text: "Reading the application…", role: "status", float: true };
     if (runError) return { tone: "blocking", text: runError, role: "alert", action: retry("Try again", () => void run(), !idle) };
-    if (indexState === "failed") return { tone: "blocking", text: "The review didn’t load · decisions wait", role: "alert", action: retry("Try again", () => { setIndexState("loading"); void loadIndex(true); }) };
-    if (indexState === "unavailable") return { tone: "pending", text: "No automatic review on this server · the completeness checklist decides" };
-    if (historical && latest) return { tone: "pending", text: `v${shown?.version} · an earlier review, read-only`, action: retry(`Back to v${latest.version}`, () => void pickVersion(latest.version)) };
-    if (canReview && shown && !currentReview) return { tone: "warning", text: "The application changed after this review", action: retry("Review again", () => void run(), !idle) };
+    if (indexState === "failed") return { tone: "blocking", text: "The review didn’t load", role: "alert", action: retry("Try again", () => { setIndexState("loading"); void loadIndex(true); }) };
+    if (indexState === "unavailable") return { tone: "pending", text: "No automatic review · checklist only" };
+    if (historical && latest) return { tone: "pending", text: `Version ${shown?.version} · read-only`, action: retry("Back to latest", () => void pickVersion(latest.version)) };
+    if (canReview && shown && !currentReview) return { tone: "warning", text: "Changed since this review", action: retry("Review again", () => void run(), !idle) };
     return null;
   }
   const line = c ? statusLine() : null;
@@ -497,8 +497,8 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
           <h2 id="rw-decision-title" className="cf-modal-title">{dialog?.kind === "return" ? `Return to ${applicant}?` : "Accept as administratively complete?"}</h2>
           {dialog?.kind === "return" && <pre className="rw-letter is-dialog" aria-label="Request to send">{dialog.text}</pre>}
           <p className="cf-muted">{dialog?.kind === "return"
-            ? "They fix the application and send it again. They can’t reply."
-            : `${applicant} is told the file is complete. Not a variance, not a design approval.`}</p>
+            ? "They fix it and resend. They can’t reply."
+            : `Tells ${applicant}. Not a variance or a design approval.`}</p>
           {decisionError && <p className="rw-hint is-error" role="alert"><span className="cf-dot is-blocking" aria-hidden="true" />{decisionError}</p>}
         </div>
         <div className="cf-modal-foot">
@@ -528,7 +528,7 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
 
       <RefuseDialog open={refusing && Boolean(c)} applicant={applicant} onClose={() => setRefusing(false)} onSend={sendRefusal} onRefresh={() => refresh(true)} />
       <ConfirmDialog open={takeover} title="Take over this review?"
-        body={<p>{lastOther.current} started this review. The history keeps both names.</p>}
+        body={<p>{lastOther.current} is reviewing it.</p>}
         cancel="Keep theirs" confirm="Take over" onClose={() => setTakeover(false)} onConfirm={() => void doClaim(true)} />
     </div>
   );

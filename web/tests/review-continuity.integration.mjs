@@ -154,7 +154,7 @@ try {
     await history.getByText('Resubmitted · submission 2', { exact: true }).waitFor();
     await history.getByText(/changed item/).click();
     assert.match(await history.innerText(), /Before: REVISION A.*Now: REVISION B/s);
-    await history.getByText('Decision history (1)', { exact: true }).click();
+    await history.getByText('Decisions · 1', { exact: true }).click();
     assert.match(await history.innerText(), /Returned · Synthetic reviewer/);
     await page.getByRole('button', { name: /^Messages/ }).click();
     await page.getByText('Clarify the synthetic lot.', { exact: true }).waitFor();

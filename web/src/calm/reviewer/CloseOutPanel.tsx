@@ -107,7 +107,7 @@ export function CloseOutPanel({ c, canRecord, onChange }: { c: CloseOut; canReco
       <ConfirmDialog
         open={confirmSent}
         title="Record that you sent the copy?"
-        body={<p>This records your statement that you sent the copy of the variance to the Safety Codes Council. Batatis doesn’t send it or check that it arrived.</p>}
+        body={<p>Batatis doesn’t send it or check that it arrived.</p>}
         cancel="Not yet"
         confirm="Record it"
         onClose={() => setConfirmSent(false)}

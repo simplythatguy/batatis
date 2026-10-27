@@ -26,7 +26,7 @@ test("while the pick-up is pending the page says so, with no Pick up button to p
   let resolve: (v: unknown) => void = () => {};
   const h = await harness({}, { claim: () => new Promise((r) => { resolve = r; }) });
   let tree = await h.render({ caseId: "c1" });
-  assert.match(text(tree), /Opening the review…/);
+  assert.match(text(tree), /Opening…/);
   assert.equal(button(tree, /Pick up/).length, 0);
   h.current.status = "in_review";
   h.current.claim = { reviewer_id: me.id, reviewer_name: me.name, claimed_at: "2026-10-22T12:00:00Z" };
@@ -135,7 +135,7 @@ test("older review versions are read-only and never expose a decision foot", asy
   });
   let tree = await h.render({ caseId: "c1" });
   const { menuItem } = await import("./tests/workspaceHarness.mjs");
-  const version = menuItem(tree, "Open v1");
+  const version = menuItem(tree, "Version 1");
   assert.ok(version, "earlier versions open from the ⋯ menu"); version.onClick(); tree = await h.render(); tree = await h.render();
   assert.deepEqual([workspaceNode(tree).props.session.version, workspaceNode(tree).props.editable, workspaceNode(tree).props.historical, workspaceNode(tree).props.showDecision], [1, false, true, false]);
   h.unmount();

@@ -439,7 +439,7 @@ test("a successful run stays visible when the index refresh fails; editing and d
     run: async () => reviewSession(2),
   });
   let tree = await h.render({ caseId: "c1" });
-  failing = true; menuItem(tree, "Run the review again").onClick(); tree = await h.render();
+  failing = true; menuItem(tree, "Review again").onClick(); tree = await h.render();
   assert.equal(workspaceNode(tree).props.session.version, 2);
   assert.equal(workspaceNode(tree).props.editable, false);
   assert.match(text(tree), /The review didn’t load/);
