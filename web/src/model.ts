@@ -2,7 +2,7 @@ import type { IntakeRecord, IntakeResult, IdentifyResult } from "./api/types.gen
 import { AUTHORITIES } from "./config";
 import { applyDescription } from "./intake";
 import { asLocal, confirmedAnswer, localField } from "./intakeFields";
-import { codeQuestion, identifyCandidates, readGroups } from "./intakeView";
+import { codeQuestion, identifyCandidates, legalFromFacts, readGroups } from "./intakeView";
 import { AUTHORITY_ONLY_FIELDS, professionalConfirmed } from "./professional";
 import type { Candidate, CandidateAnswer, Case, EvidenceDraft, Fact, Gap, ListedEvidence, ProcessFieldId, SectionCRow } from "./types";
 import { canonicalProvision, isProvision, keywordCandidate, reconcileSectionC } from "./provisions";
@@ -360,7 +360,7 @@ export function getGaps(c: Case): Gap[] {
   }
   for (const d of DETAIL_FIELDS) {
     const fact = factFor(c, d.id);
-    if (d.required && !valueText(fact).trim()) {
+    if (d.required && !valueText(fact).trim() && !(d.id === "legalDescription" && legalFromFacts(c.facts))) {
       gaps.push({ id: `detail-${d.id}`, severity: "blocking", label: DETAIL_GAP[d.id] ?? `${d.label} missing`, href: routeForDetail(d.id), field: d.id });
     }
   }

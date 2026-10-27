@@ -444,6 +444,15 @@ export function legalFromParts(parts: Readonly<Record<string, unknown>>): string
   return [lbp, ats].filter(Boolean).join("; ");
 }
 
+/** The legal description a case already has as confirmed parts, as engine/completeness.py accepts it: all of lot, block and plan, or a full ATS location. */
+export function legalFromFacts(facts: readonly Fact[]): string {
+  const value = (k: string) => confirmedAnswer(facts, k)?.value;
+  for (const set of [["lot", "block", "plan"], ["ats_qtr", "ats_sec", "ats_twp", "ats_rge", "ats_mer"]]) {
+    if (set.every((k) => value(k) != null && String(value(k)).trim())) return legalFromParts(Object.fromEntries(set.map((k) => [k, value(k)])));
+  }
+  return "";
+}
+
 /** The engine's reason while pictures wait for the applicant's OK (pixels cannot be scrubbed like text). */
 export const PICTURES_WAITING = "waiting for your OK";
 export const PICTURES_FIELD = "privacy.pictures";

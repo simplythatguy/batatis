@@ -1,13 +1,13 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { AUTHORITIES, authorityUnsure, officeChoiceAction, officeSuggestion } from "../config";
 import { localField } from "../intakeFields";
-import { LEGAL_PART_FIELDS, legalFromParts, sourceLine } from "../intakeView";
+import { legalFromFacts, sourceLine } from "../intakeView";
 import { DETAIL_FIELDS, factFor, valueText } from "../model";
 import { useCase } from "../store";
 import { AuthorityPicker } from "./AuthorityPicker";
 import { DatePicker } from "./DatePicker";
 import type { DeckItem } from "./deck";
-import { cleanReadValue, clearJourneyAnswerAction, journeyAnswerAction, journeyAnswers } from "./journey";
+import { cleanReadValue, clearJourneyAnswerAction, itemOpen, journeyAnswerAction, journeyAnswers } from "./journey";
 import { Icon24 } from "./icons";
 import { JurisdictionNote } from "./JurisdictionNote";
 import type { useDeckExtras } from "./useDeckExtras";
@@ -31,7 +31,7 @@ export function PaperworkSheet({ item, focusRow, onDone, extras }: { item: DeckI
   }, [focusRow]);
   // A legal description read as lot, block and plan parts is shown joined, as the form writes it.
   const savedValue = (id: string) => cleanReadValue(valueText(factFor(c, id)))
-    || (id === "legalDescription" ? legalFromParts(Object.fromEntries(LEGAL_PART_FIELDS.map((k) => [k, factFor(c, k)?.status === "confirmed" ? factFor(c, k)?.value : undefined]))) : "");
+    || (id === "legalDescription" ? legalFromFacts(c.facts) : "");
   const answer = (key: string, value: string, defaulted = false) => setDrafts((draft) => ({ ...draft, [key]: { kind: "answer", value, defaulted } }));
 
   function save() {
@@ -87,7 +87,7 @@ export function PaperworkSheet({ item, focusRow, onDone, extras }: { item: DeckI
         : field === "mailingAddress" && site ? [{ label: "Same as the site address", value: site }]
           : field === "date" && row.suggestedValue ? [{ label: "Today", value: row.suggestedValue }]
             : field === "scope" && site ? [{ label: "One building site", value: "site" }] : [];
-      return <div key={row.key} className="cf-paperwork-row" data-paperwork-row={row.key} role="group" aria-label={label}>
+      return <div key={row.key} className="cf-paperwork-row" data-paperwork-row={row.key} data-open={!row.optional && itemOpen(row) ? "" : undefined} role="group" aria-label={label}>
         <div className="cf-paperwork-label"><span>{label}</span>{row.optional && <span className="cf-faint">Optional</span>}</div>
         <div className="cf-paperwork-control">
           {row.kind === "authority" ? <>
