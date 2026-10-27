@@ -300,8 +300,9 @@ def test_complete_submit_claim_return_messages_resubmit_and_accept(scene):
     assert reply.status_code == 403
     notice = first.post(f'/cases/{case.id}/messages', json={'body': '<script>plain text</script> Please confirm the revision.'})
     assert notice.status_code == 201 and notice.json()['body'].startswith('<script>')
-    correction = fact('scope', 'site, synthetic clarified scope').model_dump()
-    correction['source']['quote'] = 'SYNTHETIC applicant confirmation after the officer notice.'
+    # A real change, so the returned application is not resent unchanged; scope stays one readable site.
+    correction = fact('risk_assessment', complete_case().facts[[f.field for f in complete_case().facts].index(
+        'risk_assessment')].value + ' The applicant clarified the stated scope.').model_dump()
     assert owner.post(f'/cases/{case.id}/facts', json=correction).status_code == 200
     assert first.get('/review/queue?mine=true').json()['applications']
     assert owner.post(f'/cases/{case.id}/submit', json={}).json()['status'] == 'submitted'
