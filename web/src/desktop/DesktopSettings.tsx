@@ -242,6 +242,7 @@ function updateStatus(view: UpdateView | null): ReactNode {
 function UpdatesSection({ info }: { info: DesktopInfo }) {
   const view = useUpdate();
   const idle = view?.status === "idle" || view?.status === "failed" || view?.status === "available";
+  const changeable = idle || view?.status === "ready";
   return (
     <section className="ac-section" aria-labelledby="dk-s-updates">
       <h2 id="dk-s-updates" className="ac-section-title">Updates</h2>
@@ -250,6 +251,12 @@ function UpdatesSection({ info }: { info: DesktopInfo }) {
       )}>
         {updateStatus(view)}
       </Row>
+      {view && view.status !== "unavailable" && (
+        <Row label="Updates from">
+          <Chips label="Update channel" value={view.beta ? "beta" : "stable"} onPick={(v) => { if (changeable) void desktop.updates.setBeta(v === "beta"); }}
+            options={[{ value: "stable", label: "Stable" }, { value: "beta", label: "Beta" }]} />
+        </Row>
+      )}
       {view?.status === "failed" && <p className="ac-error is-row" role="alert">{view.message}</p>}
     </section>
   );

@@ -9,7 +9,7 @@
  */
 import { createHash } from "node:crypto";
 import { createWriteStream } from "node:fs";
-import { access, constants, copyFile, mkdir, readdir, rm, stat, writeFile } from "node:fs/promises";
+import { access, constants, copyFile, mkdir, readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { basename, dirname, join } from "node:path";
 import { pipeline } from "node:stream/promises";
 import { Readable, Transform } from "node:stream";
@@ -19,6 +19,7 @@ export const RELEASES_PAGE = `https://github.com/${REPOSITORY}/releases`;
 export const RELEASES_FEED = `https://api.github.com/repos/${REPOSITORY}/releases?per_page=30`;
 const TAG = /^v(.+)$/;
 const SUMS = "SHA256SUMS";
+const CHANNEL_FILE = "channel.json";
 const MAX_NOTE_GROUPS = 5;
 const MAX_NOTE_ITEMS = 8;
 const MAX_NOTE_LENGTH = 220;
@@ -40,8 +41,9 @@ export interface Release {
   sums: string | null;
 }
 
-/** What the page sees. No path or download address leaves the host. */
-export type UpdateView =
+/** What the page sees. No path or download address leaves the host. `beta` is whether betas are offered. */
+export type UpdateView = UpdateState & { beta: boolean };
+type UpdateState =
   | { status: "unavailable"; current: string; message: string }
   | { status: "idle"; current: string; checked: boolean }
   | { status: "checking"; current: string }
@@ -112,7 +114,7 @@ export function newer(candidate: string, current: string): boolean {
   return a !== null && b !== null && compareVersions(a, b) > 0;
 }
 
-/** An install follows the channel its own version came from; a beta build also takes stable releases. */
+/** Without a saved choice an install follows the channel its own version came from; a beta also takes stable releases. */
 export function channelOf(version: string): Channel {
   return parseVersion(version)?.beta ? "beta" : "stable";
 }
@@ -143,9 +145,8 @@ export function noteItems(body: string): string[] {
 }
 
 /** Newer desktop releases from the releases API, newest first, with this platform's archive. */
-export function readReleases(value: unknown, current: string, platform: NodeJS.Platform, arch: string): Release | null {
+export function readReleases(value: unknown, current: string, platform: NodeJS.Platform, arch: string, beta = channelOf(current) === "beta"): Release | null {
   if (!Array.isArray(value)) throw new Error("The release list could not be read.");
-  const beta = channelOf(current) === "beta";
   const found: { version: string; url: string; body: string; assets: unknown[] }[] = [];
   for (const item of value) {
     if (!isRecord(item) || item.draft === true || typeof item.tag_name !== "string") continue;
@@ -205,7 +206,55 @@ export class Updater {
     this.deps = deps;
   }
 
+  /** The saved choice to get betas; null follows the installed version. */
+  private beta: boolean | null = null;
+
+  /** Betas are offered when chosen, or by default when this install is itself a beta. */
+  get betaUpdates(): boolean {
+    return this.beta ?? channelOf(this.deps.current) === "beta";
+  }
+
+  private channelFile(): string {
+    return join(this.deps.dir, CHANNEL_FILE);
+  }
+
+  /** Reads the saved choice; a missing or unreadable file means none. */
+  async load(): Promise<void> {
+    try {
+      const saved: unknown = JSON.parse(await readFile(this.channelFile(), "utf8"));
+      this.beta = isRecord(saved) && typeof saved.beta === "boolean" ? saved.beta : null;
+    } catch {
+      this.beta = null;
+    }
+  }
+
+  /** Saves the choice and looks again, so an offer from the other channel does not stay on screen. */
+  async setBeta(beta: boolean): Promise<UpdateView> {
+    const s = this.state;
+    if (!this.deps.feed || s.status === "checking" || s.status === "downloading" || beta === this.betaUpdates) return this.view();
+    this.beta = beta;
+    try {
+      await mkdir(this.deps.dir, { recursive: true });
+      await writeFile(this.channelFile(), JSON.stringify({ beta }));
+    } catch (error) {
+      this.deps.log(`update channel not saved: ${this.messageOf(error)}`);
+    }
+    // An offer, or a download already waiting, from a channel no longer chosen must not survive a failed look.
+    if (s.status === "available") this.state = { status: "idle", checked: false };
+    else if (s.status === "ready" && !beta && parseVersion(s.release.version)?.beta) {
+      await this.discard(s.staged);
+      this.state = { status: "idle", checked: false };
+    }
+    // The chosen channel shows at once; the look that follows may take a while, and stays quiet with a download waiting.
+    this.deps.notify();
+    return this.check();
+  }
+
   view(): UpdateView {
+    return { ...this.stateView(), beta: this.betaUpdates };
+  }
+
+  private stateView(): UpdateState {
     const current = this.deps.current;
     if (!this.deps.feed) return { status: "unavailable", current, message: "Updates are available in the installed app." };
     const s = this.state;
@@ -241,7 +290,7 @@ export class Updater {
     if (!quiet) this.set({ status: "checking" });
     try {
       const reply = await this.get(feed, AbortSignal.timeout(CHECK_TIMEOUT_MS), { Accept: "application/vnd.github+json" });
-      const release = readReleases(await reply.json(), this.deps.current, this.deps.platform, this.deps.arch);
+      const release = readReleases(await reply.json(), this.deps.current, this.deps.platform, this.deps.arch, this.betaUpdates);
       if (before.status === "ready" && release?.version === before.release.version) this.set({ ...before, release });
       else {
         if (before.status === "ready") await this.discard(before.staged);

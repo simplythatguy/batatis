@@ -336,6 +336,7 @@ function registerIpc() {
   answer("batatis:update-check", () => updater.check(), null);
   answer("batatis:update-download", () => updater.download(), null);
   answer("batatis:update-install", () => installUpdate(), refused);
+  answer("batatis:update-beta", (_e, beta) => (typeof beta === "boolean" ? updater.setBeta(beta) : updater.view()), null);
   answer("batatis:choose-codedb", async () => {
     if (!current) return refused;
     const picked = await dialog.showOpenDialog(current, {
@@ -445,6 +446,8 @@ if (!app.requestSingleInstanceLock()) {
       await host.installProvider(makeProviders.claude());
     }
     registerIpc();
+    // The saved channel is read before the first window, which asks for the update state as it paints.
+    await updater.load();
     await host.boot();
     host.openWindow(null);
     if (updateFeed && !smoke) {
