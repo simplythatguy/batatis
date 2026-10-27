@@ -256,7 +256,8 @@ class PostgresCaseStore(PostgresAccountsMixin):
                 raise VersionConflict(case_id, row[1])
             return case
 
-    def put_file(self, case_id: str, name: str, data: bytes, content_type: str = 'application/pdf') -> dict | None:
+    def put_file(self, case_id: str, name: str, data: bytes, content_type: str = 'application/pdf', *,
+                 touch: bool = True) -> dict | None:
         if len(data) > PDF_MAX_BYTES:
             raise FileTooLarge()
         file_id = f'file_{uuid.uuid4().hex[:12]}'
@@ -270,8 +271,9 @@ class PostgresCaseStore(PostgresAccountsMixin):
             con.execute('INSERT INTO case_files (id, case_id, name, content_type, size, data, created_at) '
                         'VALUES (%s, %s, %s, %s, %s, %s, %s)',
                         (file_id, case_id, name, content_type, len(data), data, stamp))
-            con.execute("UPDATE cases SET data=jsonb_set(data, '{updated_at}', to_jsonb(%s::text)), updated_at=%s WHERE id=%s",
-                        (stamp, stamp, case_id))
+            if touch:
+                con.execute("UPDATE cases SET data=jsonb_set(data, '{updated_at}', to_jsonb(%s::text)), updated_at=%s WHERE id=%s",
+                            (stamp, stamp, case_id))
         return {'id': file_id, 'case_id': case_id, 'name': name, 'content_type': content_type, 'size': len(data)}
 
     def get_file(self, case_id: str, file_id: str) -> dict | None:

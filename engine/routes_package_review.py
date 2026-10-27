@@ -223,7 +223,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes]) -
             parts.case_version = case.version
             for input_file, (name, data) in zip(parts.files, files):
                 try:
-                    kept = await run_in_threadpool(cases().put_file, case_id, input_file.name, data)
+                    kept = await run_in_threadpool(lambda: cases().put_file(case_id, input_file.name, data, touch=False))
                     input_file.file_id = kept['id'] if kept else None
                 except Exception:
                     logger.warning('package upload could not be kept: case=%s file=%s', case_id, name)

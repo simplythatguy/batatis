@@ -116,7 +116,7 @@ class CaseBackend(Protocol):
     def patch_application_preferences(self, application_id: str, user: User,
                                       changes: dict[str, bool]) -> ApplicationPreferences | None: ...
     def remove_evidence(self, case_id: str, evidence_id: str) -> Case | None: ...
-    def put_file(self, case_id: str, name: str, data: bytes, content_type: str = 'application/pdf') -> dict | None: ...
+    def put_file(self, case_id: str, name: str, data: bytes, content_type: str = 'application/pdf', *, touch: bool = True) -> dict | None: ...
     def get_file(self, case_id: str, file_id: str) -> dict | None: ...
     def list_files(self, case_id: str) -> list[dict] | None: ...
     def delete(self, case_id: str) -> bool: ...
@@ -385,7 +385,9 @@ class CaseStore(FileAccountsMixin):
                 con.close()
         raise VersionConflict(case_id)
 
-    def put_file(self, case_id: str, name: str, data: bytes, content_type: str = 'application/pdf') -> dict | None:
+    def put_file(self, case_id: str, name: str, data: bytes, content_type: str = 'application/pdf', *,
+                 touch: bool = True) -> dict | None:
+        """`touch=False` keeps an officer's review upload from counting as applicant activity."""
         if len(data) > PDF_MAX_BYTES:
             raise FileTooLarge()
         file_id = f'file_{uuid.uuid4().hex[:12]}'
@@ -398,8 +400,9 @@ class CaseStore(FileAccountsMixin):
             stamp = now()
             con.execute('INSERT INTO case_files VALUES (?,?,?,?,?,?,?)',
                         (file_id, case_id, name, content_type, len(data), data, stamp))
-            con.execute("UPDATE cases SET json=json_set(json, '$.updated_at', ?), updated_at=? WHERE id=?",
-                        (stamp, stamp, case_id))
+            if touch:
+                con.execute("UPDATE cases SET json=json_set(json, '$.updated_at', ?), updated_at=? WHERE id=?",
+                            (stamp, stamp, case_id))
         return {'id': file_id, 'case_id': case_id, 'name': name, 'content_type': content_type, 'size': len(data)}
 
     def get_file(self, case_id: str, file_id: str) -> dict | None:
