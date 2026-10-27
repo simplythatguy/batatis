@@ -110,7 +110,7 @@ def test_other_offices_keep_their_place_and_pdf_path_without_reviewer_submission
     assert pack['id'] == 'alberta-other' and pack['authority']['reviewer_code'] is None
     assert any('/where-to-get-a-permit/' in source['url'] for source in pack['authority']['sources'])
     # Isolate routing from the independent completeness gate and PDF renderer.
-    monkeypatch.setattr('engine.routes_review.check_completeness', lambda *_: [])
+    monkeypatch.setattr('engine.routes_review.check_completeness', lambda *_args, **_kw: [])
     monkeypatch.setattr('engine.api.export_case', lambda *_args, **_kw: SimpleNamespace(pdf=b'%PDF-1.4 synthetic route fixture'))
     response = client.post(f'/cases/{case["id"]}/submit', json={'expected_version': case['version']})
     assert response.status_code == 409
