@@ -3,9 +3,9 @@ from __future__ import annotations
 
 from typing import Callable
 
-from fastapi import APIRouter, Query, Request, Response
+from fastapi import APIRouter, BackgroundTasks, Query, Request, Response
 
-from .jobs import JobRuntime
+from .jobs import JobRuntime, schedule_hosted_drain
 from .models_jobs import Job, JobList, WorkerHealth
 
 
@@ -24,9 +24,13 @@ def create_router(jobs: Callable[[], JobRuntime]) -> APIRouter:
         return jobs().repository.list(case_id, user.id if user else None, kind=kind, limit=limit)
 
     @router.get('/cases/{case_id}/jobs/health', response_model=WorkerHealth)
-    def health(case_id: str, request: Request, response: Response):
+    def health(case_id: str, request: Request, response: Response, background: BackgroundTasks):
         response.headers['Cache-Control'] = 'no-store'
-        return jobs().health(case_id, actor(request))
+        runtime = jobs()
+        report = runtime.health(case_id, actor(request))
+        if report.queued or report.running:
+            schedule_hosted_drain(background.add_task, runtime)
+        return report
 
     @router.get('/cases/{case_id}/jobs/{job_id}', response_model=Job)
     def status(case_id: str, job_id: str, request: Request, response: Response):
@@ -41,8 +45,11 @@ def create_router(jobs: Callable[[], JobRuntime]) -> APIRouter:
         return jobs().repository.cancel(case_id, job_id, user.id if user else None)
 
     @router.post('/cases/{case_id}/jobs/{job_id}/retry', response_model=Job, status_code=202)
-    def retry(case_id: str, job_id: str, request: Request, response: Response):
+    def retry(case_id: str, job_id: str, request: Request, response: Response, background: BackgroundTasks):
         response.headers['Cache-Control'] = 'no-store'
-        return jobs().retry(case_id, job_id, actor(request))
+        runtime = jobs()
+        job = runtime.retry(case_id, job_id, actor(request))
+        schedule_hosted_drain(background.add_task, runtime)
+        return job
 
     return router

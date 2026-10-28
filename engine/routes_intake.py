@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Callable
 
-from fastapi import APIRouter, Header, HTTPException, Request, Response
+from fastapi import APIRouter, BackgroundTasks, Header, HTTPException, Request, Response
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from .codes import CodeDbMissing, Codes
@@ -138,7 +138,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes], *
                   transport_factory: Callable[[str], tuple[model_pass.Transport | None, str]] | None = None,
                   review_factory: Callable[[str], tuple[review_pass.Transport | None, str]] | None = None,
                   jobs: Callable | None = None) -> APIRouter:
-    from .jobs import ExecutionContext, JobRegistry, JobRuntime
+    from .jobs import ExecutionContext, JobRegistry, JobRuntime, schedule_hosted_drain
     router = APIRouter(tags=['intake'])
     handler = create_job_handler(code, transport_factory=transport_factory, review_factory=review_factory)
     local_runtime = []
@@ -192,9 +192,12 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes], *
 
     @router.post('/cases/{case_id}/intake/jobs', response_model=Job, status_code=202)
     def start_intake(case_id: str, body: IntakeRequest, request: Request, response: Response,
+                     background: BackgroundTasks,
                      idempotency_key: str | None = Header(default=None, alias='Idempotency-Key')):
-        job = runtime().enqueue(case_id, 'intake', body, getattr(request.state, 'user', None),
-                                idempotency_key=idempotency_key, client_ip=client_ip_from(request))
+        host = runtime()
+        job = host.enqueue(case_id, 'intake', body, getattr(request.state, 'user', None),
+                           idempotency_key=idempotency_key, client_ip=client_ip_from(request))
+        schedule_hosted_drain(background.add_task, host)
         response.headers['Cache-Control'] = 'no-store'
         response.headers['Location'] = f'/cases/{case_id}/jobs/{job.id}'
         return job

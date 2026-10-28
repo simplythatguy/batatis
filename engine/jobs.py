@@ -259,8 +259,31 @@ def worker_loop(runtime: JobRuntime, stop: threading.Event, *, poll_interval: fl
 
 
 def in_process_enabled() -> bool:
-    # A Vercel function is not a worker host even if the local switch was copied.
+    # The lifespan loop stays off on Vercel. Accepted work is drained by the
+    # request that queued it, and again by health checks while it is still waiting.
     return not os.environ.get('VERCEL') and os.environ.get('BATATIS_JOBS_WORKER') != '0'
+
+
+def drain_hosted(runtime: JobRuntime) -> None:
+    """Finish one ready attempt, then remove this attempt's worker row."""
+    worker_id = 'hosted_' + uuid.uuid4().hex
+    try:
+        runtime.run_once(worker_id=worker_id)
+    finally:
+        try:
+            runtime.repository.worker_stopped(worker_id)
+        except Exception as error:
+            logger.warning('hosted worker shutdown unavailable: %s', type(error).__name__)
+
+
+def schedule_hosted_drain(add_task: Callable[..., Any], runtime: JobRuntime) -> None:
+    """Queue one attempt after the response on Vercel.
+
+    The job row is already committed. If this function dies, the lease expires
+    and a later health check can claim the same attempt.
+    """
+    if os.environ.get('VERCEL'):
+        add_task(drain_hosted, runtime)
 
 
 def worker_lifespan(get_runtime: Callable[[], JobRuntime]):

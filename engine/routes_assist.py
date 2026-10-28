@@ -192,6 +192,7 @@ class ModelRoute:
 def model_route() -> ModelRoute:
     provider = 'anthropic' if (os.environ.get('ANTHROPIC_API_KEY') or '').strip() else 'openai'
     if not llm_gate.live_enabled(provider):
+        LOG.warning('assistant refused before the provider call: offline')
         raise HTTPException(503, 'Assistant unavailable')
     model = 'claude-haiku-5-5' if provider == 'anthropic' else llm_gate.DEFAULT_MODEL
     return ModelRoute(provider, model)
@@ -210,6 +211,7 @@ def model_reply(route: ModelRoute, *, request, body: AssistRequest, context: str
     decision = llm_gate.authorize_assist(model=route.model, provider=route.provider, max_input_tokens=max_input,
                     max_output_tokens=MAX_TOKENS, client_ip=llm_gate.client_ip_from(request))
     if decision is not None and not decision.allowed:
+        LOG.warning('assistant refused before the provider call: %s', decision.source)
         status = 429 if decision.source == 'rate-limited' else 503
         wait = llm_gate.assist_retry_after(llm_gate.client_ip_from(request)) if status == 429 else None
         raise HTTPException(status, 'Assistant unavailable', headers={'Retry-After': str(wait)} if wait else None)

@@ -14,7 +14,8 @@ cross-cutting notice is not a Job field.
   key for a retried HTTP submission. If omitted, semantic duplicate joining still
   works. A supplied key with a different normalized body returns 409.
 - Both return **202** with a persisted `Job`, including when rejoining a terminal
-  job. No AI computation happens in this request. `Location` identifies its status
+  job. The 202 returns before any AI computation. On Vercel the same function then
+  runs one ready attempt. `Location` identifies its status
   URL. Poll `GET /cases/{case_id}/jobs/{job_id}`; reload/cross-device recovery uses
   `GET /cases/{case_id}/jobs`, returning `{"items": [Job, ...]}` newest first.
   The listing accepts `kind` and `limit` (default 50, maximum 100).
@@ -161,9 +162,12 @@ Normal long-lived ASGI apps run a lifespan worker **by default outside Vercel**.
 That includes the existing local engine entrypoint when its ASGI
 lifespan runs. To manage execution separately or control tests, set
 `BATATIS_JOBS_WORKER=0`. `BATATIS_JOBS_WORKER=1` explicitly enables it, but never
-on Vercel. There is no response-owned BackgroundTask or fire-and-forget compute
-thread. The supervised lifespan task drains its current attempt on graceful
-shutdown; a killed process leaves a recoverable durable lease.
+on Vercel. The lifespan loop does not run there. After a Vercel function accepts
+a job, retries one, or reports health for a case that still has queued or running
+work, it runs one ready attempt after the response. The attempt uses the same
+lease fence as the standalone worker. A killed function leaves a recoverable
+lease, and the next health check can claim it. The supervised lifespan task on a
+long-lived host drains its current attempt on graceful shutdown.
 
 Standalone worker, from the repository with engine dependencies installed:
 
@@ -182,8 +186,9 @@ is 0.01–60 seconds; the CLI also accepts `BATATIS_JOBS_POLL_SECONDS`. Keep wor
 host clocks synchronized. One worker executes one computation at a time; multiple
 worker processes safely claim different jobs with SQL row locks and lease fences.
 
-**Vercel does not execute queued jobs.** Deploy a continuously supervised worker
-process on a long-lived host/container using `BATATIS_STORE=postgres` and the
+On Vercel the function that accepted the job also executes one ready attempt
+after its response. A separate worker is optional. For a long-lived API, deploy
+a continuously supervised worker process using `BATATIS_STORE=postgres` and the
 **same `DATABASE_URL`** as the API. Set `BATATIS_JOBS_WORKER=0` on any long-lived
 API replicas when using only external workers. The worker needs the same code
 database (`BATATIS_CODEDB` when configured), algorithm configuration, AI access

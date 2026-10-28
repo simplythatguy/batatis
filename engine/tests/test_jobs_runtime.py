@@ -514,6 +514,8 @@ def test_nonvercel_lifespan_default_and_vercel_external_health(database, monkeyp
         new_case = store.put(Case())
         accepted = client.post(f'/cases/{new_case.id}/intake/jobs', json={'text': 'A house', 'model': False})
         assert accepted.status_code == 202 and accepted.json()['state'] == 'queued'
+        followed = client.get(f'/cases/{new_case.id}/jobs/{accepted.json()["id"]}').json()
+        assert followed['state'] == 'succeeded'
         health = client.get(f'/cases/{new_case.id}/jobs/health').json()
-        assert health['execution'] == 'external_required' and health['queued'] == 1
-        assert not health['worker_available']
+        assert health['execution'] == 'external_required' and health['queued'] == 0
+        assert health['running'] == 0 and not health['worker_available']
