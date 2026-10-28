@@ -60,7 +60,7 @@ function isTextTarget(t: EventTarget | null): boolean {
 
 /** Cards answered by typing several lines continue with Cmd/Ctrl+Enter instead of Enter. */
 function multiline(item: DeckItem): boolean {
-  return item.kind === "route-detail" || item.kind === "question" || item.kind === "process" || (item.kind === "detail" && Boolean(DETAIL_FIELDS.find((d) => d.id === item.ref)?.multiline)) || (item.kind === "plan" && planInput(item.plan?.field ?? "").kind === "area");
+  return item.kind === "departure" || item.kind === "route-detail" || item.kind === "question" || item.kind === "process" || (item.kind === "detail" && Boolean(DETAIL_FIELDS.find((d) => d.id === item.ref)?.multiline)) || (item.kind === "plan" && planInput(item.plan?.field ?? "").kind === "area");
 }
 
 /* —— Typeform pieces —— */
@@ -411,7 +411,7 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
   }
   if (item.kind === "file") return null;
 
-  const cand = item.kind === "candidate" || item.kind === "storeys" ? c.candidates.find((a) => a.id === item.ref) : undefined;
+  const cand = item.kind === "candidate" || item.kind === "storeys" || item.kind === "departure" ? c.candidates.find((a) => a.id === item.ref) : undefined;
   const fact = item.kind === "detail" ? factFor(c, item.ref) : undefined;
   const def = item.kind === "detail" ? DETAIL_FIELDS.find((d) => d.id === item.ref) : undefined;
 
@@ -441,7 +441,12 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
           <b>{item.provision}</b> Show the code
         </button>
       ) : null}
-      {item.kind === "storeys" ? (
+      {item.kind === "departure" ? (
+        <div className="cf-inline-answer">
+          <label className="cf-sr" htmlFor={`field-${item.ref}-departure`}>What your design does instead</label>
+          <textarea id={`field-${item.ref}-departure`} className="cf-uline is-area" rows={2} aria-label="What your design does instead" value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="In one sentence." />
+        </div>
+      ) : item.kind === "storeys" ? (
         <div className="cf-inline-answer">
           <label className="cf-sr" htmlFor="cf-storeys">Number of storeys</label>
           <input id="cf-storeys" className="cf-uline is-number" type="number" inputMode="numeric" min={1} step={1} value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="e.g. 2" />
@@ -581,7 +586,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
   const { c, engineId, gaps, dispatch, requestCheck, sectionCLookup, reading, answerPlan, answerChecklist, reloadChecklists, applicationStatus, decideRequirement } = useCase();
   const session = useSession();
   const { app, locked, readOnly } = useCurrentApplication();
-  const { onAnswer, decisionNoteFor } = useCandidateAnswer();
+  const { onAnswer, onDeparture, decisionNoteFor } = useCandidateAnswer();
   const { options: deckExtras, extras } = useDeckExtras();
   const seen = useMemo(() => new Set(session.seen), [session.seen]);
   // A keyword lead opened from the grouped triage (or a saved link) stays on the deck while you answer it.
@@ -813,6 +818,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
     if (it.kind === "plan" || it.kind === "product-scope") return reading.busy !== it.ref && (it.done || Boolean(draft.trim()));
     if (it.kind === "question") return Boolean(draft.trim()) || it.done;
     if (it.kind === "storeys") return (Number.isInteger(Number(draft)) && Number(draft) > 0) || it.done;
+    if (it.kind === "departure") return busyKey !== it.key && Boolean(draft.trim());
     if (it.kind === "authority") return it.done || Boolean(c.authority);
     if (it.kind === "rule") return it.rule?.state !== "departs" || it.done || picked[it.key] === RULE_LEAVE;
     if (it.kind === "package-end") return true;
@@ -853,6 +859,23 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
       dispatch({ type: "setDetail", field: "alternative", value: draft.trim(), section: "B" });
       dispatch({ type: "setDetail", field: "journey.route", value: "variance", section: "B" });
       setAdvanceAfter({ key: item.key, generation: engineGeneration() });
+      return;
+    }
+    if (item.kind === "departure") {
+      const cand = c.candidates.find((a) => a.id === item.ref);
+      const text = draft.trim();
+      if (!cand || !text) return;
+      setBusyKey(item.key);
+      noteFor(item.key, "");
+      void onDeparture(cand, text).then((error) => {
+        setBusyKey((k) => (k === item.key ? null : k));
+        if (error) {
+          noteFor(item.key, error);
+          return;
+        }
+        setDraft("");
+        setAdvanceAfter({ key: item.key, generation: engineGeneration() });
+      });
       return;
     }
     if ((item.kind === "plan" || item.kind === "product-scope") && item.plan && draft.trim() && planInput(item.plan.field).kind !== "choices") {

@@ -13,7 +13,7 @@ import { isProvision, keywordCandidate, keywordGroups } from "../provisions";
 import { requirementQueue, requirementTopic } from "./requirements";
 import { quoteKind } from "../rules";
 import type { ApplicantType, Candidate, Case, Gap } from "../types";
-import type { CaseChecklists, CaseRules, RequirementRecord } from "../api/types.gen";
+import type { BenchmarkRecord, CaseChecklists, CaseRules, RequirementRecord } from "../api/types.gen";
 import type { InputSpec } from "../rules/evaluate";
 import { conditionChoices, coveredByOption, followedInFull, groupOf, matchingChecklists, tallyLine } from "./checklistView";
 import { calmHref } from "./routes";
@@ -42,6 +42,8 @@ export type DeckKind =
   | "code-ledger"
   /** One ledger rule: does it apply to this project? Departure is asked on its own card. */
   | "requirement"
+  /** The applicant's own words for the departure from the named benchmark sentence. */
+  | "departure"
   /** Keyword-only leads grouped by topic; each lead opens on request (never a relevance score). */
   | "code-triage"
   /** A number or answer a coded rule needs (docs/api/rules.md). */
@@ -159,6 +161,8 @@ export interface DeckOptions {
   confirmAuthority?: boolean;
   /** An optional keyword lead the applicant explicitly opened from grouped triage or a saved link. */
   focusedCandidate?: string;
+  /** The stored benchmark: once its departure is confirmed the deck stops asking for it. */
+  benchmark?: BenchmarkRecord | null;
   /** A visible default supplied by the caller, never a silently saved date. */
   today?: string;
 }
@@ -344,6 +348,32 @@ export function sectionDRelevant(c: Case, gaps: Gap[]): boolean {
 }
 
 const SCOPE_ITEM_KEY = "scope";
+
+/**
+ * The first card answered Yes whose departure the engine has not confirmed. One benchmark is
+ * recorded per application, so only this card asks for the applicant's words; the other Yes answers
+ * stay Section C rows.
+ */
+function departureCandidate(c: Case, opts: DeckOptions): Candidate | undefined {
+  if (opts.benchmark?.departure_status === "confirmed") return undefined;
+  return c.candidates.find((a) => a.answer === "yes" && !a.pending && isProvision(a.provision));
+}
+
+function departureItem(a: Candidate): UnpositionedItem {
+  return {
+    key: `dep-${a.id}`,
+    kind: "departure",
+    section: "C",
+    eyebrow: sectionEyebrow("C"),
+    title: "What does your design do instead?",
+    context: "",
+    why: "Batatis names this sentence as the benchmark in Section C of the application and records your words as the departure. The officer decides whether the departure is acceptable; Batatis never does.",
+    ref: a.id,
+    provision: a.provision,
+    done: false,
+    optional: false,
+  };
+}
 
 /** Derive ordered form cards from case facts, shared gaps, coded rules and package choices. */
 export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckItem[] {
@@ -796,14 +826,17 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       ref: "code-triage", done: seen.has("code-triage"), optional: true,
     });
   }
+  const asking = departureCandidate(c, opts);
   for (const a of c.candidates) {
-    if (behindTriage(a)) continue;
-    const r = linked.get(a.id);
-    if (r) ruleInputs(r);
-    const base = candidateItem(c, a);
-    const item = r && (r.state === "departs" || r.state === "follows") ? { ...base, rule: r } : base;
-    // An opened keyword lead stays optional: leaving it unanswered does not mean No.
-    push("C", keywordCandidate(c, a) && a.answer !== "yes" ? { ...item, optional: true } : item);
+    if (!behindTriage(a)) {
+      const r = linked.get(a.id);
+      if (r) ruleInputs(r);
+      const base = candidateItem(c, a);
+      const item = r && (r.state === "departs" || r.state === "follows") ? { ...base, rule: r } : base;
+      // An opened keyword lead stays optional: leaving it unanswered does not mean No.
+      push("C", keywordCandidate(c, a) && a.answer !== "yes" ? { ...item, optional: true } : item);
+    }
+    if (asking?.id === a.id) push("C", departureItem(a));
   }
 
   // 4b. The requirement ledger: its counts stay reachable, and the closest unanswered rules are asked
@@ -1018,7 +1051,9 @@ function answerChoices(item: DeckItem): { value: string; label: string }[] {
 }
 
 export function deferralFor(item: DeckItem): { value: Exclude<JourneyAnswerValue, "acknowledged">; label: string } | null {
-  if (["understood", "paperwork", "reading", "file", "code-run", "code-note", "code-triage", "package-end", "product-notice", "route", "scope"].includes(item.kind)) return null;
+  // A departure the applicant says exists cannot be deferred: without their words Section C names
+  // an acceptable solution the application never says it departs from.
+  if (["understood", "paperwork", "reading", "file", "code-run", "code-note", "code-triage", "package-end", "product-notice", "route", "scope", "departure"].includes(item.kind)) return null;
   if (item.stage === "paperwork") return { value: "later", label: "Later" };
   return item.answerer === "designer" ? { value: "designer", label: "Ask my designer" } : { value: "not_sure", label: "Not sure" };
 }

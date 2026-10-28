@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import type { IdentifyResult, IntakeResult } from "../api/types.gen.ts";
+import type { BenchmarkRecord, IdentifyResult, IntakeResult } from "../api/types.gen.ts";
 import { emptyCase } from "../intake.ts";
 import { readGroups, snippet, spokenValue } from "../intakeView.ts";
 import { DETAIL_IDS, factFor, getGaps, NOT_RIGHT, reducer } from "../model.ts";
@@ -368,6 +368,23 @@ test("Not sure on a code card keeps its clarifying question on that card", () =>
   assert.equal(gapKey(c, gap), card.key);
   assert.equal(aliasKey(c, `q-q-from-${card.ref}`), card.key);
   assert.equal(buildDeck(c, getGaps(c), { includeDone: true }).find((i) => i.key === card.key)?.done, true);
+});
+
+test("a card answered Yes asks for the departure until the engine confirms it", () => {
+  let c = demoCase();
+  c = reducer(c, { type: "noteIdentify", result: identifyResult() });
+  const card = buildDeck(c, getGaps(c)).find((i) => i.kind === "candidate" && /^\d/.test(i.provision ?? ""))!;
+  c = reducer(c, { type: "answerCandidate", id: card.ref, answer: "yes" });
+  const deck = buildDeck(c, getGaps(c), { includeDone: true });
+  const departure = deck.find((i) => i.kind === "departure")!;
+  assert.equal(departure.title, "What does your design do instead?");
+  assert.equal(departure.provision, card.provision, "the card names the sentence it departs from");
+  assert.equal(departure.done, false);
+  assert.equal(deck.findIndex((i) => i.kind === "departure"), deck.findIndex((i) => i.key === card.key) + 1, "it follows its own card");
+  assert.ok(buildDeck(c, getGaps(c)).some((i) => i.kind === "departure"), "the unanswered departure is open work");
+
+  const confirmed = { departure_status: "confirmed", departure: "A thinner assembly." } as BenchmarkRecord;
+  assert.equal(buildDeck(c, getGaps(c), { benchmark: confirmed }).find((i) => i.kind === "departure"), undefined, "a confirmed departure is not asked twice");
 });
 
 /* —— Unchanged rules —— */
