@@ -241,9 +241,7 @@ def model_reply(route: ModelRoute, *, request, body: AssistRequest, context: str
         if not isinstance(reply.text, str):
             raise ValueError('invalid assistant text')
     except Exception as error:
-        # A failed call can still cost tokens. Keep its reservation and keep
-        # provider diagnostics, prompts and credentials out of HTTP responses. The server log gets the
-        # provider's own error text (never the prompt), so a missing setting is findable.
+        # A failed call can still cost tokens, so keep its reservation.
         LOG.warning('Assistant call to %s failed: %s', route.provider, _provider_error(error))
         raise HTTPException(503, 'Assistant unavailable') from None
     if decision is not None:
@@ -253,13 +251,42 @@ def model_reply(route: ModelRoute, *, request, body: AssistRequest, context: str
     return reply
 
 
-def _provider_error(error: Exception) -> str:
-    """The error's class, HTTP status and the provider's own error message from its response body.
+# OpenAI's 401 text repeats the secret key.
+_KEY_TOKEN = re.compile(r'(?<![A-Za-z0-9])sk-[A-Za-z0-9_\-+/=*]{10,}(?![A-Za-z0-9_\-+/=*])')
+# The Anthropic SDK's HTTP errors are not httpx errors. Match those by class name.
+_TRANSPORT = frozenset({'APIConnectionError', 'APITimeoutError', 'ConnectError', 'TimeoutException'})
 
-    Never str(error): that can carry what was sent. A provider's message names the problem (a missing
-    workspace, a bad key, a limit), not the request.
+
+def _without_keys(text: str) -> str:
+    return re.sub(r'[ \t]{2,}', ' ', _KEY_TOKEN.sub('', text)).strip()[:300]
+
+
+def _connection_reason(error: BaseException) -> str | None:
+    found: list[str] = []
+    current: BaseException | None = error
+    seen: set[int] = set()
+    while current is not None and id(current) not in seen:
+        seen.add(id(current))
+        if type(current).__name__ in _TRANSPORT or isinstance(current, httpx.TransportError):
+            text = getattr(current, 'message', None)
+            if not isinstance(text, str) or not text.strip():
+                text = current.args[0] if current.args and isinstance(current.args[0], str) else None
+            if isinstance(text, str) and text.strip():
+                found.append(text.strip())
+        current = current.__cause__
+    specific = [item for item in found if item.lower().rstrip('.') != 'connection error']
+    chosen = specific[-1] if specific else (found[-1] if found else None)
+    cleaned = _without_keys(chosen) if chosen else ''
+    return cleaned or None
+
+
+def _provider_error(error: Exception) -> str:
+    """Class, HTTP status, connection reason, or provider message with key-shaped tokens removed.
+
+    Never str(error). That string can carry the request.
     """
     status = getattr(error, 'status_code', None) or getattr(getattr(error, 'response', None), 'status_code', None)
+    head = type(error).__name__ + (f' (HTTP {status})' if status else '')
     body = getattr(error, 'body', None)
     if body is None:
         try:
@@ -268,7 +295,11 @@ def _provider_error(error: Exception) -> str:
             body = None
     detail = body.get('error') if isinstance(body, dict) else None
     message = detail.get('message') if isinstance(detail, dict) else None
-    return f'{type(error).__name__}' + (f' (HTTP {status})' if status else '') + (f': {message[:300]}' if isinstance(message, str) else '')
+    cleaned = _without_keys(message) if isinstance(message, str) else ''
+    if cleaned:
+        return f'{head}: {cleaned}'
+    reason = _connection_reason(error)
+    return f'{head}: {reason}' if reason else head
 
 
 def _fact_row(fact) -> dict:
