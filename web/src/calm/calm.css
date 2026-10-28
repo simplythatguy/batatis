@@ -1056,6 +1056,12 @@ body {
   color: var(--cf-blocking-ink);
 }
 
+/* Hidden until the header is too narrow for the red words. Two classes so the icon button's own display does not win. */
+.cf-icon-btn.cf-save-warn {
+  display: none;
+  color: var(--cf-blocking-ink);
+}
+
 .cf-save-review {
   width: min(700px, calc(100vw - 32px));
   max-height: calc(100dvh - 32px);
@@ -3363,12 +3369,10 @@ body {
     display: none;
   }
   .cf-save.is-problem .cf-save-label {
-    display: inline;
-    max-width: 90px;
-  }
-  /* A problem with its own button: the button names it, so the label would only crowd the stages. */
-  .cf-save.is-problem:has(.cf-btn) .cf-save-label {
     display: none;
+  }
+  .cf-save.is-problem .cf-save-warn {
+    display: grid;
   }
   /* No room to push: the assistant covers the screen as a full sheet with its own close. */
   .cf-assist {
@@ -5736,10 +5740,15 @@ a.cf-save-check {
   .cf-app[data-assistant="open"] :is(.cf-save-label, .cf-ask-label) {
     display: none;
   }
-  .cf-app[data-assistant="open"] .cf-save.is-problem .cf-save-label {
-    display: inline;
-    max-width: 90px;
-  }
+}
+
+/* The assistant takes the header's spare width. The red words become a warning icon; the message is on hover, focus and tap. */
+.cf-app[data-assistant="open"] .cf-save.is-problem .cf-save-label {
+  display: none;
+}
+
+.cf-app[data-assistant="open"] .cf-save.is-problem .cf-save-warn {
+  display: grid;
 }
 
 /* Review and Application stack when the work area (not the window) is narrow:
@@ -5781,6 +5790,11 @@ a.cf-save-check {
 @container work (max-width: 940px) {
   .cf-stages {
     gap: 0;
+  }
+  /* Equal side columns centre the rings, and a wide save action then slides under them.
+     Give the actions their own width; the title is what shrinks. */
+  .cf-head {
+    grid-template-columns: minmax(0, 1fr) auto max-content;
   }
 }
 
