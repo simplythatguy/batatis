@@ -51,18 +51,17 @@ function RailButton({ d }: { d: RailDestination }) {
 
 /**
  * The far-left icon rail: brand, then the destinations; at the bottom the notifications bell and
- * the account avatar, with the desktop app's update control above them when one exists. Destinations are a prop, so the applicant (Applications, Code library)
+ * the account avatar. Destinations are a prop, so the applicant (Applications, Code library)
  * and the reviewer (Queue, Code library) share one component. The two
  * bottom slots are filled by the accounts UI (routes.extra.tsx).
  */
-export function Rail({ destinations, updateSlot, notificationsSlot, accountSlot }: { destinations: RailDestination[]; updateSlot?: ReactNode; notificationsSlot?: ReactNode; accountSlot?: ReactNode }) {
+export function Rail({ destinations, notificationsSlot, accountSlot }: { destinations: RailDestination[]; notificationsSlot?: ReactNode; accountSlot?: ReactNode }) {
   return (
     <nav className="cf-rail" aria-label="Main">
       <a className="cf-rail-mark" href="#/" aria-label="Batatis home"><span className="cf-mark" aria-hidden="true" /></a>
       {destinations.map((d) => <RailButton key={d.id} d={d} />)}
       <span className="cf-rail-spacer" />
       <div className="cf-rail-foot">
-        {updateSlot}
         {notificationsSlot}
         {accountSlot}
       </div>

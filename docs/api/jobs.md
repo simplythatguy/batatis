@@ -158,7 +158,7 @@ when retrying a lost HTTP response. New submissions still validate a supplied
 ## Run and deploy
 
 Normal long-lived ASGI apps run a lifespan worker **by default outside Vercel**.
-That includes the existing local and desktop engine entrypoints when their ASGI
+That includes the existing local engine entrypoint when its ASGI
 lifespan runs. To manage execution separately or control tests, set
 `BATATIS_JOBS_WORKER=0`. `BATATIS_JOBS_WORKER=1` explicitly enables it, but never
 on Vercel. There is no response-owned BackgroundTask or fire-and-forget compute

@@ -319,13 +319,6 @@ def fake_transport(system: str, user: str, body_schema: dict) -> tuple[dict, dic
 
 def default_transport(client_ip: str | None = None) -> tuple[Transport | None, str]:
     """The transport this deployment allows, and the status label for its results."""
-    from .. import provider_routing
-    if provider_routing.local_active():
-        selected = provider_routing.local_profile()
-        if selected.generation == 'off':
-            return None, 'off'
-        return provider_routing.local_transport('intake', model=MODEL, effort=EFFORT, max_output_tokens=MAX_OUTPUT_TOKENS,
-                                                lease=selected.lease), 'live'
     if (os.environ.get('BATATIS_PROVIDER') or '').strip().lower() == 'fake' and not os.environ.get('VERCEL'):
         return fake_transport, 'fake'
     if llm_gate.live_enabled('openai'):

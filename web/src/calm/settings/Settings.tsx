@@ -1,7 +1,5 @@
 /** #/settings: who you are, your role (change uses the onboarding endpoint), how data is handled, sign out. */
 import { useId, useState, type ReactNode } from "react";
-import { DesktopSettings } from "../../desktop/DesktopSettings";
-import { useDesktop } from "../../desktop/host";
 import { AccountsError, type ApplicantKind, type AuthorityKey, type Role } from "../../api/accounts";
 import { PRIVACY_NOTICE } from "../../privacy";
 import { useAccount } from "../account";
@@ -93,8 +91,6 @@ function RoleEditor({ onCancel, onSaved }: { onCancel: () => void; onSaved: () =
 
 export function Settings({ phoneTools }: { phoneTools?: ReactNode }) {
   const { user, codeLogin } = useAccount();
-  // Local development's test people keep their role; the person switch replaces sign-in and onboarding.
-  const testPerson = useDesktop()?.workspace === "dev";
   const [editing, setEditing] = useState(false);
   const [saved, setSaved] = useState(false);
   const leaving = useSignOutStatus();
@@ -112,7 +108,7 @@ export function Settings({ phoneTools }: { phoneTools?: ReactNode }) {
               {hasRealEmail(user) && <Row label="Email">{user.email}<span className="ac-faint-tag">Can’t be changed here</span></Row>}
               <Row
                 label="Role"
-                action={!editing && !testPerson && <button type="button" className="cf-btn is-xs" onClick={() => { setEditing(true); setSaved(false); }}>Change</button>}
+                action={!editing && <button type="button" className="cf-btn is-xs" onClick={() => { setEditing(true); setSaved(false); }}>Change</button>}
               >
                 {roleLine(user.role, user.applicant_type, user.authority)}
                 {saved && <span className="ac-saved" role="status">Saved</span>}
@@ -130,8 +126,6 @@ export function Settings({ phoneTools }: { phoneTools?: ReactNode }) {
           </section>
         )}
 
-        <DesktopSettings />
-
         <section className="ac-section" aria-labelledby="ac-s-data">
           <h2 id="ac-s-data" className="ac-section-title">How your data is handled</h2>
           <details className="cf-help">
@@ -140,7 +134,7 @@ export function Settings({ phoneTools }: { phoneTools?: ReactNode }) {
           </details>
         </section>
 
-        {user && !testPerson && (
+        {user && (
           <section className="ac-section is-last">
             <button type="button" className="cf-btn is-sm" disabled={leaving.pending} onClick={() => void signOut()}>
               {leaving.pending ? "Signing out…" : "Sign out"}

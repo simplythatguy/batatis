@@ -2,13 +2,13 @@
 
 Batatis helps builders in Alberta prepare a complete building-code variance application. It also shows Safety Codes Officers what an application is missing.
 
-[Open the app](https://batatis-vert.vercel.app) · [Download for Mac or Windows](https://github.com/simplythatguy/batatis/releases) · [Desktop setup](docs/desktop.md) · [License](LICENSE.md)
+[Open the app](https://batatis-vert.vercel.app) · [License](LICENSE.md)
 
 ## See it work
 
 ![Batatis from description to an officer's review: a homebuilder's application, then the City of Edmonton officer's review and the request back to the applicant](docs/readme/demo.gif)
 
-A homebuilder describes a project and attaches two City of Edmonton PDFs. Batatis reads them, asks only what they didn't already say, and fills in the variance form. The City of Edmonton officer then reviews it, asks for what is missing, and the applicant opens that request. The animation plays at 2.5 times the speed of the [full 5-minute video](docs/readme/demo.mp4). It uses example data and runs in the desktop app with Claude Haiku.
+A homebuilder describes a project and attaches two City of Edmonton PDFs. Batatis reads them, asks only what they didn't already say, and fills in the variance form. The City of Edmonton officer then reviews it, asks for what is missing, and the applicant opens that request. The animation plays at 2.5 times the speed of the [full 5-minute video](docs/readme/demo.mp4). It uses example data.
 
 ## The problem
 
@@ -137,15 +137,6 @@ For both:
 - Get notified when an application changes status or a message arrives.
 - Applications and their files are deleted 7 days after they are created.
 
-In the desktop app, for people who want to connect their own AI:
-
-- Run Batatis on your own Mac or Windows computer. Your applications stay on that computer.
-- Use AI through your own ChatGPT or Claude subscription, or your own OpenAI API key. Install, update, sign in, and sign out from Settings.
-- Or use the Batatis team's AI with an access code, without any key of your own.
-- Pick the AI model for the workflow and for chat separately, even in the middle of a chat.
-- Update the app in two clicks when a new version is out, and choose stable releases or early beta releases.
-- Switch between a test applicant and test officers without making accounts.
-
 ## Practice cases
 
 This repository includes 653 practice cases for testing how well Batatis reads real documents. Each case pairs a request, written the way an applicant might ask, with published documents to attach, such as feasibility studies, issued variances, and appeal decisions. No document in them was made up.
@@ -163,7 +154,7 @@ Many published decisions state their outcome, so the cases test reading and pape
 
 ## What's next
 
-- Offer the website as a paid service, with AI included. The desktop app stays for people who connect their own AI.
+- Offer the website as a paid service, with AI included.
 - Export Calgary's own Request for Specific Variance form next to the Council's form.
 - Register decided variances in the Council's Orders and Variances Portal, which becomes mandatory on December 1, 2026.
 - Add authorities beyond Edmonton and Calgary, then other provinces.
@@ -215,10 +206,6 @@ Twelve prompts still miss. Eight unresolved prompts were called a variance becau
 
 </details>
 
-The desktop app uses the same screens and workflow. Electron, a framework for desktop apps built from web code, runs the screens and a private copy of the Python engine on your computer. The two talk through a private pipe, not a network port. Desktop accounts and applications stay separate from the website.
-
-The desktop app gets its AI differently from the website. You can connect a ChatGPT subscription through Codex, OpenAI's command-line agent, or a Claude subscription through Claude Code, Anthropic's. The app downloads one exact version of each the first time you install it, and checks the file against a checksum before running it. Each request runs with every tool, plugin, and saved setting turned off. A picker for the workflow and one for chat choose the model: Luna at medium effort for ChatGPT, or Haiku 5.5 at low effort for Claude, by default. The app also updates itself from this repository's GitHub releases. The [desktop guide](docs/desktop.md) explains all of this, plus local development and building the app.
-
 For applicants:
 
 1. **Describe the project.** Rules read facts, such as the owner and the address, from the description and from the text and fields of any PDFs. If AI is on, GPT-6 Luna, an OpenAI model, points at more facts, and each one must quote the text it came from. When you attach files, Luna also reviews them page by page, and the questions screen lists what it found.
@@ -242,7 +229,7 @@ The filter catches common phrasings, not every one. The questions screen shows t
 
 CodeDB is a SQLite database of the building code. You build it on your computer from the official PDFs of the National Building Code, 2023 Alberta Edition, second printing. Applications and accounts live in SQLite on your computer, or in PostgreSQL on Neon when the app is hosted. The web assistant answers with GPT-4.1 mini by default, or with Claude Sonnet 5.5 when `ANTHROPIC_API_KEY` is set. Web voice uses Grok from xAI.
 
-Before any text goes to an AI service, Batatis removes the names, contact details, and addresses that it recognizes. The web engine's daily spend cap, US$5 by default, stops its AI calls when it is reached. The desktop guide explains its separate connections and billing.
+Before any text goes to an AI service, Batatis removes the names, contact details, and addresses that it recognizes. The web engine's daily spend cap, US$5 by default, stops its AI calls when it is reached.
 
 <details>
 <summary>Why Batatis uses Luna and Jev, and what isn't measured yet</summary>
@@ -285,10 +272,6 @@ The frontend, meaning the files that build the screens and their look:
 
 ![The frontend files: the web app's entry, the screens in web/src/calm, and the design rules and tokens in docs](docs/readme/folder-structure-frontend.png)
 
-The desktop app, which lives across four folders:
-
-<img src="docs/readme/folder-structure-desktop.png" width="760" alt="The desktop files: the app in desktop/, its updater and AI installers, its release and icon scripts, the engine's private link, the desktop screens, and the release workflow">
-
 The pictures show the main folders and files, not every one. They leave out these parts:
 
 - [`engine/path_decision.py`](engine/path_decision.py) chooses the package, and [`web/src/pathDecision.ts`](web/src/pathDecision.ts) repeats that choice on the screen.
@@ -301,22 +284,7 @@ The pictures show the main folders and files, not every one. They leave out thes
 
 ## Get started
 
-The steps below run the website locally, with email and a password. The public site asks for an access code and your name. To use the desktop app, download it from the [releases page](https://github.com/simplythatguy/batatis/releases), or on a Mac run the one-line installer in [Open the desktop app the first time](#open-the-desktop-app-the-first-time). To build it yourself, follow [Desktop setup](docs/desktop.md). Desktop builds and the complete repository checks need Node.js 24 or newer.
-
-### Open the desktop app the first time
-
-The app isn't signed by Apple or Microsoft yet, so a copy downloaded in a browser gets a warning the first time it opens.
-
-- **Mac:** open **Terminal** and paste this line. It downloads the latest release, checks it, puts `Batatis.app` in **Applications** and opens it, with no warning:
-
-  ```bash
-  curl -fsSL https://raw.githubusercontent.com/simplythatguy/batatis/main/scripts/install-mac.sh | bash
-  ```
-
-  You can also download the `.dmg` from the releases page and drag Batatis to **Applications**. macOS blocks an app downloaded in a browser until Apple has checked it, so the first time it says "Apple could not verify Batatis". Click **Done**, then run `xattr -dr com.apple.quarantine /Applications/Batatis.app` in Terminal to remove the browser's "downloaded" mark, and open it again.
-- **Windows:** unzip the download and open `Batatis.exe`. If Windows says "Windows protected your PC", click **More info**, then **Run anyway**.
-
-The app's own updates don't ask again. [Desktop setup](docs/desktop.md#sign-and-notarize-the-macos-build) explains how to sign both builds so nobody sees these messages.
+The steps below run the website locally, with email and a password. The public site asks for an access code and your name. The complete repository checks need Node.js 24 or newer.
 
 ### Set it up with an AI agent
 
@@ -580,11 +548,11 @@ The admin code is separate. Signing in with it makes that person the site admin.
 BATATIS_ADMIN_CODE=replace-with-20-or-more-letters
 ```
 
-An account keeps only the code's name and a fingerprint of it, never the code. Removing a name, or changing its code, turns AI off for every account that used it. After ten wrong codes in ten minutes, the server stops checking codes from that address for a while. A code also lets the desktop app use the server's keys through **Batatis AI**: the app sends each AI step with the code to the website, which makes the call and never shares a key. Every use counts against the daily spend cap.
+An account keeps only the code's name and a fingerprint of it, never the code. Removing a name, or changing its code, turns AI off for every account that used it. After ten wrong codes in ten minutes, the server stops checking codes from that address for a while. Every use counts against the daily spend cap.
 
 On your own computer, leave the setting empty and AI follows `BATATIS_LIVE` as before. The hosted site, where `VERCEL` is set, always needs a code.
 
-[`engine/ai_access.py`](engine/ai_access.py) checks the codes, and [`engine/routes_hosted_ai.py`](engine/routes_hosted_ai.py) answers the desktop app.
+[`engine/ai_access.py`](engine/ai_access.py) checks the codes.
 
 #### Officer access
 
@@ -635,16 +603,10 @@ A few words first, if you haven't used Git or GitHub before:
 - **Branch:** a separate line of commits, so you can work without touching anyone else's. Each change gets its own short-lived branch.
 - **`main`:** the one permanent branch. Whatever is on `main` is what people use. Nobody changes it directly.
 - **Pull request:** a request to add your branch to `main`. GitHub shows your changes, runs the checks, and lets the team comment before anything is merged.
-- **Checks:** tests that GitHub runs on every pull request, on Linux, macOS and Windows. A red check means something broke.
+- **Checks:** tests that GitHub runs on every pull request. A red check means something broke.
 - **Merge:** adding the pull request's commits to `main`. Only the project owner merges, and GitHub then deletes the branch.
 
-![A change goes from your branch to a pull request, through the checks, into main. Main updates the website within minutes and the beta app in about 20 minutes. A stable release comes later, when the team promotes a beta](docs/readme/release-flow.png)
-
-Once a pull request is merged into `main`:
-
-1. **The website** updates by itself within a few minutes. Vercel, the service that hosts it, deploys only `main`.
-2. **A beta release of the desktop app** follows in about 20 minutes. Every merge into `main` makes GitHub build the app for macOS and Windows, test it, and publish it as a beta, such as `v0.1.1-beta.20261026.57`. Anyone using a beta gets it the next time they select **Check for updates** in Settings, or by itself the next time the app opens.
-3. **A stable release** comes later, when the team decides a beta is good. Stable releases, such as `v0.1.1`, go to everyone else. A stable is always the exact code of a beta that people already used.
+Once a pull request is merged into `main`, the website updates by itself within a few minutes. Vercel, the service that hosts it, deploys only `main`.
 
 ### Make a change and test it on your computer
 
@@ -690,13 +652,7 @@ scripts/local-app.sh start
 scripts/verify.sh
 ```
 
-While you work, you can run only part of it: `scripts/verify.sh --web`, `--engine`, or `--desktop`.
-
-To try a change to the desktop app, build it and open it. On macOS, the app appears at `desktop/build/release/mac-arm64/Batatis.app`. On Windows, it appears at `desktop/build/release/win-unpacked/Batatis.exe`. The [desktop guide](docs/desktop.md#build-from-source) lists what to install first.
-
-```bash
-npm run package:dir --prefix desktop
-```
+While you work, you can run only part of it: `scripts/verify.sh --web` or `--engine`.
 
 ### Open a pull request
 
@@ -732,7 +688,7 @@ On GitHub, you can instead click **Compare & pull request** and check that the b
 
 5. Fill in the description's three sections, **New features added**, **Improvements**, and **Bug Fixes**, in everyday words. Write "None." under an empty section. Add your screenshot.
 
-6. Wait for the checks. The website and engine checks take about ten minutes, and the desktop app's macOS and Windows checks about twenty. If one turns red, open it, read the error, fix it on your computer, commit, and push again. The pull request updates by itself.
+6. Wait for the checks. The website and engine checks take about ten minutes. If one turns red, open it, read the error, fix it on your computer, commit, and push again. The pull request updates by itself.
 
 7. The project owner tests the pull request and merges it. Never merge it yourself, and never push to `main`.
 
@@ -766,30 +722,6 @@ To go back to `main`:
 git switch main
 ```
 
-### Beta and stable releases
-
-The desktop app has two kinds of release, like T3 Code's nightly and stable builds.
-
-| | Beta | Stable |
-| --- | --- | --- |
-| For | Testers who want changes early | Everyone else |
-| Contains | Everything merged into `main` | A beta that the team has checked |
-| Published | By itself, about 20 minutes after each merge | When the team promotes a beta |
-| Named like | `v0.1.1-beta.20261026.57` | `v0.1.1` |
-| On GitHub | Marked **Pre-release** | Marked **Latest** |
-
-An installed app stays on its kind of release. A stable app only updates to stable releases. A beta app updates to newer betas, and to the stable release when it ships.
-
-To try a beta, open the [releases page](https://github.com/simplythatguy/batatis/releases), pick the newest **Pre-release**, and download the file for your computer under **Assets**.
-
-To publish a beta again without a merge, or to promote the latest beta to stable:
-
-1. Open the repository's **Actions** tab on GitHub.
-2. Choose **Desktop native acceptance** on the left.
-3. Click **Run workflow**, keep the branch on `main`, and choose **beta** or **stable**.
-
-A stable release publishes the latest beta's exact code as the version it previewed. Each beta previews the version after the latest stable. To start a bigger version, such as `0.2.0`, raise `version` in [`desktop/package.json`](desktop/package.json) in a pull request. [`desktop/scripts/release-plan.mjs`](desktop/scripts/release-plan.mjs) decides what each run publishes, and the [desktop guide](docs/desktop.md#beta-and-stable-releases) has the details.
-
 ## For AI agents
 
 Read [`AGENTS.md`](AGENTS.md) and the skills it names before you write any code. Read them again when the task moves to a new area, such as from the engine to the screens.
@@ -799,7 +731,6 @@ Read [`AGENTS.md`](AGENTS.md) and the skills it names before you write any code.
 | Start any task | [`AGENTS.md`](AGENTS.md) and [`batatis-hackathon`](.cursor/skills/batatis-hackathon/SKILL.md) |
 | Change the application flow or the engine | [`batatis-variance-workflow`](.cursor/skills/batatis-variance-workflow/SKILL.md) |
 | Change an AI model or how articles are found | The [workflow decision record](docs/evaluations/workflow-decision-20261025.md) and [`engine/tests/test_workflow_profile.py`](engine/tests/test_workflow_profile.py) |
-| Change the desktop app or its releases | The [desktop guide](docs/desktop.md) |
 | Change anything on screen | [`batatis-ui-linear`](.cursor/skills/batatis-ui-linear/SKILL.md), [`batatis-ui-opus`](.cursor/skills/batatis-ui-opus/SKILL.md), [`batatis-ui-minimalist`](.cursor/skills/batatis-ui-minimalist/SKILL.md), and [`docs/design-system-calm.md`](docs/design-system-calm.md) |
 | Change a skill or a rule | [`evals/fixtures/understanding-checklist.md`](evals/fixtures/understanding-checklist.md) |
 | Plan, build, debug, or review code | The engineering skills in [`.agents/skills/`](.agents/skills/) and [pstack](docs/pstack.md) |

@@ -373,23 +373,6 @@ def test_context_keeps_the_applicants_answers_and_the_officers_open_items():
     assert 'officer_review' not in applicant
 
 
-def test_a_desktop_reply_has_room_for_the_local_runtimes_reasoning(monkeypatch):
-    from types import SimpleNamespace
-    from engine import provider_routing
-    seen = {}
-
-    def transport(task, **options):
-        seen.update(options, task=task)
-        return lambda system, user, schema: ({'answer': 'Ask for the signature.'}, {'input_tokens': 10, 'output_tokens': 3000})
-
-    monkeypatch.setattr(provider_routing, 'local_transport', transport)
-    body = routes_assist.AssistRequest(screen='review-missing', question='What is still missing?')
-    reply = routes_assist.call_model(provider='desktop', model='m', context='{}', body=body,
-                                     desktop_profile=SimpleNamespace(lease='lease'))
-    assert reply.text == 'Ask for the signature.'
-    assert seen['task'] == 'assistant' and seen['max_output_tokens'] > routes_assist.MAX_TOKENS
-
-
 def test_a_failed_provider_call_is_logged_without_the_prompt_and_answered_with_a_plain_503(assistant, monkeypatch, caplog):
     client, _, calls = assistant
     enable(monkeypatch)

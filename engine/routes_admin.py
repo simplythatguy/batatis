@@ -20,7 +20,6 @@ class AccessCodeInfo(BaseModel):
     source: Literal['managed', 'environment']
     max_users: int | None
     accounts: int
-    installs: int
     in_use: int
     revoked: bool
     created_at: str | None = None
@@ -56,10 +55,9 @@ def create_router(cases):
         row = ai_access.rows().get(name) or store.access_code(name)
         managed = bool(row and row['code_hash'])
         accounts = len(store.accounts_using_code(name))
-        installs = store.installs_using_code(name)
         return AccessCodeInfo(name=name, source='managed' if managed else 'environment',
-                              max_users=row['max_users'] if row else None, accounts=accounts, installs=installs,
-                              in_use=accounts + installs, revoked=bool(row and row['revoked']), created_at=row['created_at'] if row else None)
+                              max_users=row['max_users'] if row else None, accounts=accounts,
+                              in_use=accounts, revoked=bool(row and row['revoked']), created_at=row['created_at'] if row else None)
 
     @router.get('/access-codes', response_model=AccessCodeList)
     def list_codes(request: Request):
@@ -100,7 +98,6 @@ def create_router(cases):
 
     @router.delete('/access-codes/{name}', status_code=204)
     def remove_code(name: str, request: Request):
-        """Deletes a managed code that nobody uses. A code in use or from the environment is refused."""
         require_admin(request)
         store = cases()
         row = store.access_code(name)
@@ -108,7 +105,7 @@ def create_router(cases):
             raise HTTPException(404, 'No such access code')
         if row is None or not row['code_hash']:
             raise HTTPException(409, 'This code comes from the server settings; switch it off instead of removing it')
-        used = len(store.accounts_using_code(name)) + store.installs_using_code(name)
+        used = len(store.accounts_using_code(name))
         if used:
             raise HTTPException(409, f'{used} still using this code. Turn it off instead of removing it.')
         if not store.delete_access_code(name):

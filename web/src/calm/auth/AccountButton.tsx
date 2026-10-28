@@ -1,8 +1,6 @@
 /** Rail footer avatar: initials that open a small menu (Settings, Sign out). */
 import { useEffect, useRef, useState } from "react";
 import { hasRealEmail } from "./codeAccount";
-import { useDesktop } from "../../desktop/host";
-import { PeopleMenu } from "../../desktop/People";
 import { initials, useAccount } from "../account";
 import { Tip } from "../RelevanceRing";
 import { AcIcon, usePopover } from "./bits";
@@ -11,7 +9,6 @@ import { useSignOutStatus } from "./signOutGuard";
 
 export function AccountButton() {
   const { user } = useAccount();
-  const testPerson = useDesktop()?.workspace === "dev";
   const pop = usePopover();
   const [tip, setTip] = useState(false);
   const leaving = useSignOutStatus();
@@ -65,15 +62,12 @@ export function AccountButton() {
             {user.name && hasRealEmail(user) && <span className="ac-account-email">{user.email}</span>}
           </div>
           <hr role="separator" />
-          {testPerson && <><PeopleMenu /><hr role="separator" /></>}
           <a role="menuitem" tabIndex={-1} href="#/settings" onClick={close}>
             <AcIcon name="cog" size={16} />Settings
           </a>
-          {!testPerson && (
-            <button role="menuitem" tabIndex={-1} type="button" disabled={leaving.pending} onClick={() => void signOut()}>
-              <AcIcon name="out" size={16} />{leaving.pending ? "Signing out…" : "Sign out"}
-            </button>
-          )}
+          <button role="menuitem" tabIndex={-1} type="button" disabled={leaving.pending} onClick={() => void signOut()}>
+            <AcIcon name="out" size={16} />{leaving.pending ? "Signing out…" : "Sign out"}
+          </button>
           {leaving.error && <p className="cf-note" role="status">{leaving.error}</p>}
         </div>
       )}

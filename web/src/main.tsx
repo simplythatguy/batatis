@@ -6,15 +6,12 @@ import "../../docs/design/tokens.css";
 import "./shared.css";
 import "./calm/calm.css";
 import { App } from "./App";
-import { DesktopGate } from "./desktop/DesktopGate";
 import { CaseProvider } from "./store";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <DesktopGate>
-      <CaseProvider>
-        <App />
-      </CaseProvider>
-    </DesktopGate>
+    <CaseProvider>
+      <App />
+    </CaseProvider>
   </StrictMode>,
 );

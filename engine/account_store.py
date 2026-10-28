@@ -59,12 +59,7 @@ ACCOUNT_MIGRATIONS = (
     # limit or revocation of a code that lives in BATATIS_AI_ACCESS_CODES.
     'CREATE TABLE IF NOT EXISTS access_codes (name TEXT PRIMARY KEY, code_hash TEXT, max_users INTEGER, '
     'revoked BOOLEAN NOT NULL DEFAULT FALSE, created_at TEXT NOT NULL)',
-    # Desktop installs that used a code, by hashed install id: the desktop half of "people using this code".
-    'CREATE TABLE IF NOT EXISTS access_installs (code_name TEXT NOT NULL, install_hash TEXT NOT NULL, '
-    'last_seen DOUBLE PRECISION NOT NULL, PRIMARY KEY(code_name, install_hash))',
 )
-
-INSTALL_WINDOW = 30 * 86400.0
 
 
 class DuplicateEmail(Exception):
@@ -295,34 +290,20 @@ class AccountsMixin(DraftWritesMixin):
         users = (User.model_validate(json.loads(row[0])['user']) for row in rows)
         return [user for user in users if user.ai_access == name and user.id != excluding]
 
-    def installs_using_code(self, name: str, *, excluding: str | None = None) -> int:
-        with self.account_db() as db:
-            row = db.execute('SELECT COUNT(*) FROM access_installs WHERE code_name=? AND last_seen>? AND install_hash<>?',
-                             (name, time.time() - INSTALL_WINDOW, excluding or '')).fetchone()
-        return row[0]
-
-    def touch_install(self, name: str, install_hash: str, max_users: int | None) -> bool:
-        """Records a desktop install's use of a code. False, and nothing recorded, when the code is full for a new install."""
-        stamp = time.time()
-        accounts = len(self.accounts_using_code(name)) if max_users is not None else 0
-        with self.account_db() as db:
-            db.execute('DELETE FROM access_installs WHERE last_seen<=?', (stamp - INSTALL_WINDOW,))
-            known = db.execute('SELECT 1 FROM access_installs WHERE code_name=? AND install_hash=?', (name, install_hash)).fetchone()
-            if known is None and max_users is not None:
-                installs = db.execute('SELECT COUNT(*) FROM access_installs WHERE code_name=?', (name,)).fetchone()[0]
-                if accounts + installs >= max_users:
-                    return False
-            db.execute('INSERT INTO access_installs(code_name, install_hash, last_seen) VALUES (?,?,?) '
-                       'ON CONFLICT(code_name, install_hash) DO UPDATE SET last_seen=?', (name, install_hash, stamp, stamp))
-        return True
-
     def delete_all_accounts(self) -> dict:
         """Every account, with its sessions, sign-ins and application list flags. Applications keep no owner to find them."""
         with self.account_db() as db:
             counts = {table: db.execute(f'SELECT COUNT(*) FROM {table}').fetchone()[0]
-                      for table in ('account_users', 'account_sessions', 'account_identities', 'account_oauth', 'account_rates', 'access_installs')}
+                      for table in ('account_users', 'account_sessions', 'account_identities', 'account_oauth', 'account_rates')}
+            legacy_installs = db.execute(
+                "SELECT to_regclass('access_installs') IS NOT NULL" if db.postgres else
+                "SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name='access_installs')"
+            ).fetchone()[0]
+            if legacy_installs:
+                counts['access_installs'] = db.execute('SELECT COUNT(*) FROM access_installs').fetchone()[0]
+                db.execute('DELETE FROM access_installs')
             for table in ('account_application_preferences', 'account_sessions', 'account_identities', 'account_oauth', 'account_rates',
-                          'access_installs', 'account_users'):
+                          'account_users'):
                 db.execute(f'DELETE FROM {table}')
         return counts
 

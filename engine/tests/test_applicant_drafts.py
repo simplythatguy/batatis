@@ -11,7 +11,7 @@ import pytest
 from fastapi.testclient import TestClient
 from reportlab.pdfgen.canvas import Canvas
 
-from engine import drafting_sources, provider_routing
+from engine import drafting_sources
 from engine.api import create_app
 from engine.ccmc import Assessment, RegistrySearch, RegistryUnavailable
 from engine.codes import Codes
@@ -611,22 +611,6 @@ def test_no_live_provider_means_honest_503_without_canned_drafts(app):
     response = plain.post(f'/cases/{case.id}/drafts', json={'expected_version': case.version})
     assert response.status_code == 503 and store.get(case.id).drafting is None
     assert not connection.calls and not registry.calls
-
-
-def test_desktop_uses_supported_leased_workflow_slot_and_never_hosted_fallback(monkeypatch):
-    from types import SimpleNamespace
-    calls = []
-    monkeypatch.setattr(provider_routing, 'local_active', lambda: True)
-    monkeypatch.setattr(provider_routing, 'local_profile', lambda slot: SimpleNamespace(generation='chatgpt', lease='lease'))
-    monkeypatch.setattr(provider_routing, 'local_transport', lambda *a, **kw: calls.append((a, kw)) or
-                        (lambda *args: ({'ok': True}, {'input_tokens': None})))
-    selected = configured_provider()
-    assert selected.provider == 'desktop-workflow:chatgpt'
-    assert calls[0][0] == ('document-review',)
-    assert calls[0][1]['lease'] == 'lease' and calls[0][1]['model'] == provider_routing.LOCAL_MODEL
-    monkeypatch.setattr(provider_routing, 'local_profile', lambda slot: SimpleNamespace(generation='off', lease=''))
-    with pytest.raises(DraftingUnavailable):
-        configured_provider()
 
 
 @pytest.mark.skipif(not form_path().exists(), reason='Copyrighted supplied form is not installed in this worktree')
