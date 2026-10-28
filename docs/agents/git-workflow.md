@@ -48,7 +48,7 @@ Confirm that the saved description covers the whole pull request and has exactly
 
 ## Screen-recorded demos
 
-Agents opening or updating a pull request must provide a screen-recorded demo **if and only if the PR includes visual changes**. Judge the whole PR, including changes to appearance, visible content, layout, navigation, or interactions in the web app, desktop app, or other rendered output. Backend, tooling, tests, and agent-instruction changes with no visual effect require no recording.
+Agents opening or updating a pull request must provide a screen-recorded demo **if and only if the PR includes visual changes**. Judge the whole PR, including changes to appearance, visible content, layout, navigation, or interactions in the web app or other rendered output. Backend, tooling, tests, and agent-instruction changes with no visual effect require no recording.
 
 For a visual PR, capture and inspect the demo before opening it or handing off an update, then attach the evidence as soon as the PR exists:
 

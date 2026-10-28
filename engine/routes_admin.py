@@ -20,7 +20,6 @@ class AccessCodeInfo(BaseModel):
     source: Literal['managed', 'environment']
     max_users: int | None
     accounts: int
-    installs: int
     in_use: int
     revoked: bool
     created_at: str | None = None
@@ -56,10 +55,9 @@ def create_router(cases):
         row = ai_access.rows().get(name) or store.access_code(name)
         managed = bool(row and row['code_hash'])
         accounts = len(store.accounts_using_code(name))
-        installs = store.installs_using_code(name)
         return AccessCodeInfo(name=name, source='managed' if managed else 'environment',
-                              max_users=row['max_users'] if row else None, accounts=accounts, installs=installs,
-                              in_use=accounts + installs, revoked=bool(row and row['revoked']), created_at=row['created_at'] if row else None)
+                              max_users=row['max_users'] if row else None, accounts=accounts,
+                              in_use=accounts, revoked=bool(row and row['revoked']), created_at=row['created_at'] if row else None)
 
     @router.get('/access-codes', response_model=AccessCodeList)
     def list_codes(request: Request):

@@ -1,4 +1,4 @@
-/** Settings rows and choice chips, shared by the account settings and the desktop sections. */
+/** Settings rows and choice chips. */
 import type { ReactNode } from "react";
 
 export function Chips<T extends string>({ options, value, onPick, label }: { options: { value: T; label: string }[]; value: T | undefined; onPick: (v: T) => void; label: string }) {

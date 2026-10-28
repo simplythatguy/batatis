@@ -303,10 +303,6 @@ def transports(client_ip: str | None = None, *, jev_model: str = JEV_MODEL, anth
     The full-text OpenAI verifier is separate from Decisions. An Anthropic client is built only
     when the run's config asks for it (`anthropic=True`), regardless of credential presence.
     """
-    from .. import provider_routing
-    if provider_routing.local_active():
-        return provider_routing.local_identify_transports(scoring=scoring if scoring is not None else {'jev'},
-                                                         jev_model=jev_model, anthropic=anthropic)
     if scoring is None:
         from .config import load_config
         config = load_config()

@@ -611,9 +611,6 @@ class GateClosed(Exception):
 
 
 def configured() -> tuple[str, str]:
-    from .. import provider_routing
-    if provider_routing.local_active():
-        return provider_routing.LOCAL_MODEL, provider_routing.LOCAL_EFFORT
     model = (os.environ.get('BATATIS_REVIEW_MODEL') or DEFAULT_MODEL).strip()
     effort = (os.environ.get('BATATIS_REVIEW_EFFORT') or ('low' if model == 'gpt-6.1-sol' else DEFAULT_EFFORT)).strip()
     if model not in MODELS or effort not in MODELS[model]:
@@ -858,9 +855,6 @@ def fake_transport(system: str, user: str, body_schema: dict, model: str, effort
 
 
 def default_transport(client_ip: str | None = None) -> tuple[Transport | None, str]:
-    from .. import provider_routing
-    if provider_routing.local_active():
-        return provider_routing.local_review_transport()
     if (os.environ.get('BATATIS_PROVIDER') or '').strip().lower() == 'fake' and not os.environ.get('VERCEL'):
         return fake_transport, 'fake'
     if llm_gate.live_enabled('openai') and os.environ.get('BATATIS_REVIEW', '1') != '0':

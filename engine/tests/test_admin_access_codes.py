@@ -1,4 +1,4 @@
-"""The site admin makes, limits and revokes AI access codes; accounts and desktop installs share a code's seats."""
+"""The site admin makes, limits and revokes AI access codes; accounts take a code's seats."""
 import contextvars
 
 import pytest
@@ -125,26 +125,7 @@ def test_environment_codes_can_be_limited_and_revoked_too(app, monkeypatch):
         assert probe(one) is False
 
 
-def test_desktop_installs_take_seats_and_a_limited_code_needs_an_install_id(app, monkeypatch):
-    with TestClient(app, base_url='http://localhost') as admin, TestClient(app, base_url='http://localhost') as desktop:
-        as_admin(admin)
-        code = admin.post('/admin/access-codes', json={'name': 'desk', 'max_users': 1})
-        code = code.json()['code']
-        body = {'body': '{"model": "wrong"}'}
-        headers = lambda install=None: {'X-Batatis-Access-Code': code, **({'X-Batatis-Install': install} if install else {})}  # noqa: E731
-        # Past the seat check the request fails on its own profile (422), which is how the check is seen to pass.
-        assert desktop.post('/hosted-ai/screen', json=body, headers=headers()).status_code == 403
-        assert desktop.post('/hosted-ai/screen', json=body, headers=headers('install-one-aaaaaaaaaaaa')).status_code == 422
-        assert desktop.post('/hosted-ai/screen', json=body, headers=headers('install-two-bbbbbbbbbbbb')).status_code == 403
-        assert desktop.post('/hosted-ai/screen', json=body, headers=headers('install-one-aaaaaaaaaaaa')).status_code == 422
-        info = admin.get('/admin/access-codes').json()['codes'][0]
-        assert (info['installs'], info['accounts'], info['in_use']) == (1, 0, 1)
-        admin.patch('/admin/access-codes/desk', json={'max_users': 2})
-        assert desktop.post('/hosted-ai/screen', json=body, headers=headers('install-two-bbbbbbbbbbbb')).status_code == 422
-        assert desktop.post('/hosted-ai/screen', json=body, headers=headers('bad id')).status_code == 422
-
-
-def test_deleting_all_accounts_clears_users_sessions_and_installs(app, tmp_path):
+def test_deleting_all_accounts_clears_users_and_sessions(app, tmp_path):
     with TestClient(app, base_url='http://localhost') as client:
         as_admin(client)
     from engine.store import CaseStore

@@ -49,7 +49,7 @@ def signup(client, email):
 
 def test_named_codes_are_parsed_and_matched_without_revealing_them(monkeypatch):
     monkeypatch.setenv('BATATIS_AI_ACCESS_CODES', CODES)
-    assert ai_access.codes() == {'judges': 'judges-code-aaaaaaaaaaaaaaaa', 'team': 'team-code-bbbbbbbbbbbbbbbbbbbb'}, 'short codes and codes a header or the desktop vault can’t carry never count'
+    assert ai_access.codes() == {'judges': 'judges-code-aaaaaaaaaaaaaaaa', 'team': 'team-code-bbbbbbbbbbbbbbbbbbbb'}, 'short codes and codes a header can’t carry never count'
     assert ai_access.name_for(' team-code-bbbbbbbbbbbbbbbbbbbb ') == 'team'
     assert ai_access.name_for('x') is None and ai_access.name_for('') is None and ai_access.name_for(None) is None
     monkeypatch.setenv('BATATIS_AI_ACCESS_CODES', 'not json')

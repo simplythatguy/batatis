@@ -371,7 +371,7 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
         if os.environ.get('VERCEL') and len(res.pdf) > RESPONSE_CAP:
             # The hosted app cannot return a body this large; say so instead of failing without a reason.
             raise HTTPException(413, f'This package is {len(res.pdf) / 1_000_000:.1f} MB, more than the website can '
-                                     'send. Use the desktop app, or attach smaller supporting documents.')
+                                     'send. Attach smaller supporting documents.')
         name = f'{case_id}-scc-variance{"-DRAFT" if draft else ""}.pdf'
         headers = {'Content-Disposition': f'attachment; filename="{name}"'}
         notice = export_notice(case)   # from the case's jurisdiction pack; never a block
@@ -470,7 +470,6 @@ def create_app(store: CaseStore | None = None, codes: Codes | None = None, *,
         cases, code, provider_factory=drafting_provider_factory, registry=drafting_registry))
     app.include_router(__import__('engine.routes_evidence', fromlist=['create_router']).create_router(cases, code))
     app.include_router(__import__('engine.routes_auth', fromlist=['create_router']).create_router(cases))
-    app.include_router(__import__('engine.routes_hosted_ai', fromlist=['create_router']).create_router(cases))
     app.include_router(__import__('engine.routes_admin', fromlist=['create_router']).create_router(cases))
     app.include_router(__import__('engine.routes_review', fromlist=['create_router']).create_router(cases, code))
     app.include_router(__import__('engine.routes_rewrite', fromlist=['create_router']).create_router(cases, code))

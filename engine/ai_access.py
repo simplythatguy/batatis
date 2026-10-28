@@ -17,7 +17,7 @@ import secrets
 import time
 from typing import Callable
 
-# Long random codes make guessing hopeless; the same characters work in a header and in the desktop vault.
+# Long random codes make guessing hopeless; the same characters work in a header and on the sign-in page.
 CODE = re.compile(r'[A-Za-z0-9_-]{20,128}')
 
 # Set per request by the access guard; worker threads must run in a copy of the request's context.

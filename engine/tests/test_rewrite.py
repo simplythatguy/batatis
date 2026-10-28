@@ -1,11 +1,10 @@
 import json
 import re
-from types import SimpleNamespace
 
 import pytest
 from fastapi.testclient import TestClient
 
-from engine import llm_gate, provider_routing, routes_assist
+from engine import llm_gate, routes_assist
 from engine.models import Case
 from engine.routes_rewrite import REWRITE_SYSTEM
 from engine.tests.case_builder_fixtures import fact
@@ -126,18 +125,6 @@ def test_owner_only_draft_or_returned_and_case_change_during_reply(rewriting, mo
     monkeypatch.setattr(routes_assist, 'call_model', change_during_call)
     result = rewrite(client, case)
     assert result.status_code == 409 and 'Older draft' not in result.text
-
-
-def test_desktop_rewrite_uses_profile_and_does_not_spend_shared_budget(rewriting, monkeypatch):
-    client, _, case, calls = rewriting
-    monkeypatch.setattr(provider_routing, 'local_active', lambda: True)
-    profile = SimpleNamespace(generation='on', lease='synthetic-desktop-lease')
-    monkeypatch.setattr(provider_routing, 'local_profile', lambda task: profile)
-    result = rewrite(client, case)
-    assert result.status_code == 200, result.text
-    assert calls[0]['desktop_profile'] is profile and calls[0]['provider'] == 'desktop'
-    assert 'desktop AI connection' in result.headers['x-batatis-notice']
-    assert llm_gate._memory.today() == 0
 
 
 def test_selected_section_c_explanation_is_scoped_to_application_references(rewriting):

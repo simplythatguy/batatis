@@ -30,7 +30,7 @@ All six narratives reuse `process_fields` reviewer guidance and `process_example
 
 The generator receives source IDs and exact excerpts. The server validates the requested fields, quotation membership, allowed article identifiers, numerical sourcing and prohibited verdicts. A second model call checks the full claims and questions for entailment, project specificity and the professional-work limit. Failed or incomplete validation saves no partial batch. This is model checking, not professional or human verification.
 
-Hosted generation and the semantic auditor use the configured metered Sol connection; desktop uses the existing leased workflow connection and its supported profile. The live switch, account access and spend controls apply. No provider connection means no generated writing. GET, open and refresh never incur generation or registry requests.
+Hosted generation and the semantic auditor use the configured metered Sol connection. The live switch, account access and spend controls apply. No provider connection means no generated writing. GET, open and refresh never incur generation or registry requests.
 
 Sources are bounded to 30 owned files, 60 pages per file, 16,000 characters per source and 150,000 source-context characters. Notices identify omissions, unread pages and truncation. Registry discovery uses at most three source-derived name queries and five results per query. `registry_queries` retains the exact source span used for each query; `registry_searches` retains the actual response, live/snapshot provenance, dates and limitations. Neither a match nor a negative search proves applicability or current project acceptance.
 

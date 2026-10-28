@@ -4,7 +4,6 @@ import { AccountsError, auth, type AuthProvider } from "../../api/accounts";
 import { ProviderMark, clockText, useCountdown } from "./bits";
 import { afterSignIn, rememberedReturn, signIn, signInWithCode, signUp } from "./useAuthGate";
 import { useAccount } from "../account";
-import { DesktopEntry } from "../../desktop/Entry";
 import { useSession } from "../session";
 
 export const PASSWORD_MIN = 10;
@@ -143,7 +142,6 @@ function PasswordAuth({ mode }: { mode: "signin" | "signup" }) {
       <form className="ac-auth-box" onSubmit={submit} noValidate aria-labelledby={`${id}-title`}>
         <span className="cf-mark ac-auth-mark" aria-hidden="true" />
         <h1 id={`${id}-title`} className="ac-auth-title">{signup ? "Create account" : "Sign in"}</h1>
-        {!signup && <DesktopEntry />}
 
         {signup && (
           <div className="ac-field">

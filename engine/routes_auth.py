@@ -112,7 +112,7 @@ def create_router(cases):
         data = store.user_credentials(email)
         if data is None:
             seats = ai_access.limit(code_name)
-            if seats is not None and len(store.accounts_using_code(code_name)) + store.installs_using_code(code_name) >= seats:
+            if seats is not None and len(store.accounts_using_code(code_name)) >= seats:
                 raise HTTPException(403, 'That access code is full')
             user = User(email=email, name=body.name, ai_access=code_name, ai_access_fingerprint=fingerprint)
             if not store.create_user(user, None):
@@ -182,8 +182,8 @@ def create_router(cases):
         name, fingerprint = found
         seats = ai_access.limit(name)
         if seats is not None and user.ai_access != name:
-            # Accounts and desktop installs share the seats; the person's own account never counts against itself.
-            if len(store.accounts_using_code(name, excluding=user.id)) + store.installs_using_code(name) >= seats:
+            # Seats count accounts; the person's own account never counts against itself.
+            if len(store.accounts_using_code(name, excluding=user.id)) >= seats:
                 raise HTTPException(403, 'That access code is full')
         user.ai_access, user.ai_access_fingerprint = name, fingerprint
         store.update_user(user, revoke_sessions=False)

@@ -360,7 +360,6 @@ export interface AccessCodeInfo {
   source: "managed" | "environment";
   max_users: number | null;
   accounts: number;
-  installs: number;
   in_use: number;
   revoked: boolean;
 }
