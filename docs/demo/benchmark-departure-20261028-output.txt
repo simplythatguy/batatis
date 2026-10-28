@@ -1,0 +1,24 @@
+== 1. a described case, identified against the code source ==
+POST identify -> 200
+benchmark.identified=False departure_status='none'
+
+== 2. the card is answered Yes, as before ==
+POST decision -> 200
+benchmark.identified=False departure_status='none'
+appendix says 'Benchmark acceptable solution': False
+appendix states the departure: False
+
+== 3. the new card's one call ==
+POST identify/benchmark -> 200
+benchmark.identified=True status='confirmed'
+departure stored='Doors open 100 mm wider than the sentence allows, with a 900 mm clear width.'
+section C rows written by the call: ['9.1.1.1.(1)']
+case provisions=['9.1.1.1.'] section_c=['9.1.1.1.(1)']
+appendix says 'Benchmark acceptable solution': True
+appendix states the departure: True
+appendix labels it confirmed: True
+
+PDFs: C:\Users\Omer\AppData\Local\Temp\departure-demo-43e7mdzx\before.pdf
+      C:\Users\Omer\AppData\Local\Temp\departure-demo-43e7mdzx\after.pdf
+Text: C:\Users\Omer\AppData\Local\Temp\departure-demo-43e7mdzx\before.txt
+      C:\Users\Omer\AppData\Local\Temp\departure-demo-43e7mdzx\after.txt
