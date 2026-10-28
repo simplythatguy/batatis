@@ -69,7 +69,7 @@ Quoted sentence: An egress window must open.
 Departure: Doors open 100 mm wider than the sentence allows, with a 900 mm clear width. (confirmed by the applicant)
 ```
 
-Checks run here. The identify service tests pass (144 tests), including the extended benchmark case, plus a new unit test for the shared helper. Web typecheck, 570 unit tests and the production build pass. `evals/ui-artifacts/smoke.mjs` passes the P0 contract checks. The full engine, code-database and eval suite runs in CI and locally in parallel; its count is recorded on the pull request.
+Checks run here. The identify service tests pass (144 tests), including the extended benchmark case, plus a new unit test for the shared helper. Web typecheck, 570 unit tests and the production build pass. `evals/ui-artifacts/smoke.mjs` passes the P0 contract checks. The full engine, code-database and eval suite passed in CI on the commit that carries this change, across its eight shards.
 
 The demo output and both draft exports are kept with the repository's other demo evidence.
 
