@@ -51,17 +51,37 @@ When a design doesn't follow the code as written, the builder prepares the varia
 
 ![The applicant describes the project, answers questions, confirms code articles, and submits. The officer reviews and accepts or returns it](docs/readme/solution.png)
 
-Batatis turns the variance form into a guided flow for the applicant and a checklist for the officer. It checks that an application is complete. It never says that a design is safe or meets the code. Engineers and the officer make those decisions.
+Batatis guides the application that matches the project, then gives the officer a checklist. A design that follows the code's standard way stays on that path. A design that departs becomes a variance. Batatis checks that an application is complete. It never says that a design is safe or meets the code. Engineers and the officer make those decisions.
+
+### Which application you prepare
+
+![From the project description, the checks lead to a stop, a standard package, a variance package, or a request for the missing fact](docs/readme/which-path.png)
+
+Batatis runs the checks in order. The first one that settles the project chooses the package. The picture shows where each answer leads.
+
+1. **Describe the project.** You write it in your own words, or you drop in PDFs.
+2. **What do the checks find?**
+   - **Another code.** The project belongs to a different safety code. Batatis stops and points you there. No building-code form opens.
+   - **Follows.** The numbers of one named rule show that the design follows the standard way. You get the standard package, which asks for evidence only.
+   - **Departs.** Those numbers show a departure. You get the variance package, which asks for six statements, then proof.
+   - **Does not apply.** The rule does not apply. No form opens.
+   - **Not sure.** None of the checks settle it. Batatis stops and asks you to name the missing fact. It does not open a variance form.
+
+The checks run in this order. A different safety code is first. Then the numbers of one named rule, and only when they are firm. A guess you have not confirmed does not count. Then a path you already confirmed. Then the words you wrote. A confirmed request for a variance counts as a chosen path. A firm result from the numbers still wins over it.
+
+The six statements are why you want the change, what could go wrong, what you add, what the plan depends on, how it will be maintained, and who is responsible. They are part of the process. They are not extra proof. The standard package does not ask for them, and it does not ask whether the request covers one site or every site in a municipality. The variance package asks for both.
+
+Batatis does not ask you for the rule's purpose, the job the rule does, or the intent behind it. Once an article is named, that part of the form comes from the code's own tables.
 
 ### For applicants
 
 Manufacturers, homebuilders, and general contractors use Batatis to prepare the application.
 
 1. Describe the project in your own words, or drop in PDFs.
-2. Answer the questions that Batatis still needs, one at a time.
+2. Answer the questions that Batatis still needs, one at a time. The checks above choose the package before the form opens.
 3. Confirm the code articles that Batatis found. Each one quotes the code.
 4. Section C of the form fills in from the code's own tables.
-5. Plan your evidence. Batatis flags when an engineer or another professional is required.
+5. Plan the evidence for the package you are on. A variance also asks for the six statements. Batatis flags when an engineer or another professional is required.
 6. Fix anything the checklist marks as missing. Then download the official form, or submit it to Edmonton or Calgary.
 
 ### For Safety Codes Officers
@@ -77,9 +97,11 @@ Officers use Batatis to see what an application is missing.
 
 For applicants:
 
-- Sign up with email. The server can also offer Google and Microsoft sign-in.
+- On the hosted website, sign in with an access code and your name. The same code and name open the same account.
+- On your own computer, sign up with email. The server can also offer Google and Microsoft sign-in.
 - Describe a project in text or PDFs. Batatis reads the facts and asks only for what is missing.
-- Answer Sections A to D one question at a time, including the rationale, risk assessment, mitigating measures, and assumptions that an alternative solution needs.
+- See which package you are preparing. If Batatis cannot tell, it stops and names the missing fact.
+- Answer the open items one at a time. A variance asks for six statements: why you want the change, what could go wrong, what you add, what the plan depends on, how it will be maintained, and who is responsible. A design that follows the standard way does not ask for those.
 - Confirm the code articles that apply, each with a quote from the code.
 - Get Section C filled in from the code's tables.
 - Get a Section D evidence plan that flags when a professional is required.
@@ -91,13 +113,13 @@ For applicants:
 - Submit to the City of Edmonton or the City of Calgary, and resubmit after a return.
 - Read messages from the officer.
 - Ask the assistant about your application, by text or by voice.
-- Turn on the AI features with an access code from the Batatis team.
+- On the hosted website, the sign-in code turns the AI features on.
 - See which facts AI suggested and which still need your check.
 - Rename, pin, archive, or delete applications.
 
 For Safety Codes Officers:
 
-- Sign up with your authority's access code.
+- Choose to review applications, then enter your authority's access code.
 - Find applications in a queue with tabs for new, resubmitted, mine, returned, accepted, and refused.
 - Claim an application so that no one else reviews it at the same time.
 - Review it on the official form, with missing items, code checks, and what changed since the last submission.
@@ -109,6 +131,7 @@ For Safety Codes Officers:
 
 For both:
 
+- The person who signs in with the admin code manages access codes in Settings.
 - Get notified when an application changes status or a message arrives.
 - Applications and their files are deleted 7 days after they are created.
 
@@ -146,13 +169,48 @@ Many published decisions state their outcome, so the cases test reading and pape
 
 This diagram shows the hosted website. It has the same steps as the one in [Our solution](#our-solution), with the technology that runs each step. The colors mark the same four stages in both diagrams. The website is React and TypeScript, built with Vite. It calls the engine, a Python API built with FastAPI. Vercel hosts the website and its engine.
 
+### How the path is chosen
+
+The picture in [Which application you prepare](#which-application-you-prepare) is this decision. `decide_path` in [`engine/path_decision.py`](engine/path_decision.py) runs the checks. `decidePath` in [`web/src/pathDecision.ts`](web/src/pathDecision.ts) repeats them on the screen, so the questions match the package the engine will build.
+
+The checks run in order. The first one that settles the project wins.
+
+1. A different safety code is first. The picture labels that result "Another code". [`engine/intake/scope.py`](engine/intake/scope.py) classifies the text. A redirect stops the question list.
+2. A firm coded check is next. A labeled assumption is not firm. "Follows" opens the standard package. "Departs" opens the variance package. "Does not apply" stops. The check can name one Division B sentence. Section C for that sentence is a lookup in CodeDB, the SQLite copy of the code. A miss says the lookup missed that sentence.
+3. When the check is not firm, a recorded pathway or route is used. A confirmed request for a variance counts too, even when the description is empty. A firm check still wins over that request.
+4. Then the words. [`engine/intake/fork.py`](engine/intake/fork.py) reads them. If they do not decide, the result is **Not sure**. The variance package stays closed.
+
+`alternative_path` in [`engine/process_fields.py`](engine/process_fields.py) is true only when the path is alternative. Only then does the question list open the six process fields. Both the acceptable path and the alternative path use the shared evidence ladder. The question about one site or a whole municipality appears only on the alternative path.
+
+The applicant is not asked for objectives, functional statements, or intent.
+
+<details>
+<summary>How this path compared with the old rule and with the flowchart</summary>
+
+On 27 October 2026 the team ran 152 frozen prompts through four ways of choosing the package. The prompts, the rubric, and the saved rows are in [`experiments/workflow-bakeoff/`](experiments/workflow-bakeoff/). The write-up is [`PROOF.md`](experiments/workflow-bakeoff/PROOF.md). No model was called. The judge is a fixed set of ten paperwork checks. It is not a safety result, and it does not say a design complies.
+
+Balanced quality gives equal weight to 63 application prompts and 89 rule prompts. The same weights apply to the question counts. The comparison used `origin/main` at `e34b4e4`. The access-code sign-in that landed after that commit does not change this decision.
+
+| Way of choosing | Balanced quality | Balanced questions | Path match |
+| --- | ---: | ---: | ---: |
+| The previous rule | 8.513 | 20.53 | 84 of 152 |
+| The official flowchart, asked in order | 7.709 | 14.72 | 61 of 152 |
+| That flowchart, with the code database in place of the purpose questions | 8.709 | 10.98 | 61 of 152 |
+| The path above | 9.739 | 13.02 | 140 of 152 |
+
+The path above is 1.226 balanced points higher than the previous rule, and it asks 7.51 fewer balanced questions. It is 2.030 points higher than the flowchart asked in order. The flowchart with the database lookup asks fewer questions because it stops early. Its path match stays 61 of 152. The rubric keeps the higher quality when the gap is larger than 0.25.
+
+Twelve prompts still miss. Eight unresolved prompts were called a variance because of the wording. Three variance prompts stayed unresolved, with no coded rule and no departure cue. One standard-way prompt stayed unresolved because a labeled assumption kept the check from being firm. The flowchart, asked as a list of questions, never chose the standard package on this set. A missing answer was treated as not sure, and that did not count as yes.
+
+</details>
+
 For applicants:
 
 1. **Describe the project.** Rules read facts, such as the owner and the address, from the description and from the text and fields of any PDFs. If AI is on, GPT-6 Luna, an OpenAI model, points at more facts, and each one must quote the text it came from. When you attach files, Luna also reviews them page by page, and the questions screen lists what it found.
-2. **Answer a few questions.** A rule-based planner picks up to five questions. It starts with conflicts in what you wrote, then facts that narrow down the code articles. The website then shows one card for each item that is still open. No AI writes the questions.
+2. **Answer a few questions.** A rule-based planner picks up to five questions. It starts with conflicts in what you wrote, then facts that narrow down the code articles. The website then shows one card for each item that is still open. No AI writes the questions. This step is also where the path is chosen. See [How the path is chosen](#how-the-path-is-chosen).
 3. **Confirm the code articles.** Jev 1.13.0, a TypeSafe model that answers with a probability, scores all 2,080 articles in Division B of the code and reranks the top 60. Luna then reads the top 15 in full and quotes the sentences that apply. Batatis shows up to 10 articles, and you confirm each one. With AI off, or if scoring fails, a keyword search over CodeDB suggests articles instead.
 4. **Section C fills itself in.** The objectives, functions, and intent of each confirmed article come from the code's own tables in CodeDB. No AI is involved.
-5. **Plan the evidence.** Rules match each article to the kinds of evidence it needs, and flag when an engineer or another professional is required. No AI is involved.
+5. **Plan the evidence.** Rules match each article to the kinds of evidence it needs, and flag when an engineer or another professional is required. No AI is involved. The six process fields are added only when the path is alternative.
 6. **Anything missing?** Completeness rules check every required part of Sections A to D. Anything missing sends you back to the questions.
 7. **Submit the official form.** The engine fills in the Council's variance form, adds an appendix with the full code text, and saves the exact version you sent.
 
@@ -214,6 +272,7 @@ The frontend, meaning the files that build the screens and their look:
 
 The pictures show the main folders and files, not every one. They leave out these parts:
 
+- [`engine/path_decision.py`](engine/path_decision.py) chooses the package, and [`web/src/pathDecision.ts`](web/src/pathDecision.ts) repeats that choice on the screen.
 - [`engine/intake/review.py`](engine/intake/review.py) runs the document review and checks what it returns.
 - [`engine/identify/pipeline.json`](engine/identify/pipeline.json) holds the settings for finding code articles.
 - [`web/src/calm/DocumentReview.tsx`](web/src/calm/DocumentReview.tsx) shows the document review on the questions screen.
@@ -223,7 +282,7 @@ The pictures show the main folders and files, not every one. They leave out thes
 
 ## Get started
 
-The steps below run the website locally. The complete repository checks need Node.js 24 or newer.
+The steps below run the website locally, with email and a password. The public site asks for an access code and your name. The complete repository checks need Node.js 24 or newer.
 
 ### Set it up with an AI agent
 
@@ -469,14 +528,22 @@ Get a key at [openrouter.ai/settings/keys](https://openrouter.ai/settings/keys).
 | `BATATIS_LIVE_ELEPHANT` | `1` turns on Elephant 1, even when `BATATIS_LIVE` is `0`, but Elephant runs only when you choose it as above. `0` turns it off, even when `BATATIS_LIVE` is `1`. Left empty, it follows `BATATIS_LIVE`. |
 | `BATATIS_DAILY_SPEND_CAP_USD` | Stops AI calls for the day after this many US dollars. |
 
-Voice needs an xAI key, `XAI_API_KEY`, which is not in the example file. See the [voice notes](docs/api/voice.md).
+Voice needs an xAI key, `XAI_API_KEY`, which is not in the example file.
 
 #### AI access codes
 
-On the hosted website, AI features stay off for an account until it enters an access code in **Settings**. Each code has a name, so you can turn one off without touching the others. Set the codes on the server, as JSON from names to codes. Each code needs at least 20 characters, using only letters, digits, `-` and `_`, so that nobody can guess one:
+On the hosted website, you sign in with an access code and your name. That code turns AI on for the account. The same code and name always open the same account.
+
+Set named codes on the server, as JSON from names to codes. Each code needs at least 20 characters, using only letters, digits, `-` and `_`, so that nobody can guess one:
 
 ```dotenv
 BATATIS_AI_ACCESS_CODES='{"judges":"bat-3fK9qLm2Xw7pTz1vRb8Nc","team":"bat-Q7mZ2xK8pL4wR9vT1bN6c"}'
+```
+
+The admin code is separate. Signing in with it makes that person the site admin. In **Settings** they can make more codes, cap how many people use one, and turn one off.
+
+```dotenv
+BATATIS_ADMIN_CODE=replace-with-20-or-more-letters
 ```
 
 An account keeps only the code's name and a fingerprint of it, never the code. Removing a name, or changing its code, turns AI off for every account that used it. After ten wrong codes in ten minutes, the server stops checking codes from that address for a while. Every use counts against the daily spend cap.
@@ -674,6 +741,7 @@ These rules always apply:
 - Section C comes from lookup, never from a model.
 - Never write Section D professional evidence. Say what the evidence must cover and when an engineer is required.
 - On the alternative-solution path, keep the risk assessment, mitigating measures, and assumptions.
+- Open a variance package only when the path is alternative. An unknown path, a rule that does not apply, and another safety code do not open one.
 - Cite the National Building Code, 2023 Alberta Edition, second printing, first.
 - Keep AI provider names out of everything the app shows. Tests enforce this.
 - `main` is the only permanent branch. Do each batch of work on a short-lived branch, and let GitHub delete it after its pull request merges. Never recreate `dev`.

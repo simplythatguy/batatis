@@ -36,6 +36,7 @@ FACTS = {
     # An explicit applicant "not applicable" fact: the lot is described by lot/block/plan, so ATS boxes show N/A.
     'not_applicable.ats': 'SYNTHETIC: urban lot described by lot, block and plan; no ATS location applies.',
     'scope': 'site',
+    'pathway': 'alternative',
     'alternative_description': 'SYNTHETIC TEST: Continuous exterior sheathing insulation on a Part 9 wood-frame house. '
                                'This exercises administrative fields and contains no technical equivalency conclusion.',
     'rationale': 'SYNTHETIC applicant rationale: test an exterior-insulation departure against the selected benchmark.',

@@ -77,6 +77,10 @@ def demo_case(name: str, codes: Codes | None = None) -> Case:
     ref = f'demo-case:{name}:applicant'
     facts = [_fact(key, value, ref) for key, value in data['facts'].items()]
     facts += [_fact(f'not_applicable.{key}', reason, ref, 'user_click') for key, reason in data['not_applicable'].items()]
+    # Completed variance examples already carry the process passages and a site scope.
+    # The wording fork does not always name the departure, and an unrecorded path stays closed.
+    if not any(key in ('pathway', 'path') for key in data['facts']):
+        facts.append(_fact('pathway', 'alternative', ref))
     case = Case(title=data['title'], jurisdiction=Jurisdiction(**data['jurisdiction']), facts=facts)
     case.identify = _identify(data['identify'], codes)
     for article in data['identify']['decisions']:

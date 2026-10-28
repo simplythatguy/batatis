@@ -68,8 +68,10 @@ a run also produce 409. GET never calls a provider.
 - `POST /cases/{id}/identify/confirm`: source-validates an explicit Division B
   provision selection and rebuilds Section C.
 - `POST /cases/{id}/identify/benchmark`: source-validates the selected article or
-  sentence and records an applicant-confirmed departure. Objective and function
-  statements remain deterministic lookups.
+  sentence and records an applicant-confirmed departure. The same call adds the
+  article to `provisions`, writes its Section C row and marks the Division B
+  requirement `varied`, so the appendix states the departure exactly once.
+  Objective and function statements remain deterministic lookups.
 - `POST /cases/{id}/identify/requirements/{requirement_id}/decision`: records
   `disposition` (`include`, `exclude`, `review`), `role` (`varied`, `supporting`,
   `admin`, `conditional`, `unresolved`), a nonempty `reason`, and required

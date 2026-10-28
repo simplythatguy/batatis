@@ -44,7 +44,10 @@ def test_the_data_holds_no_paste_able_answer_text():
 
 
 def test_process_fields_carry_the_example_and_never_an_answer():
-    fields = process_fields(Case(), Codes())
+    from engine.models import Fact, Source
+    case = Case(facts=[Fact(field='pathway', value='alternative', kind='pointed', status='confirmed',
+                            source=Source(type='user_click', ref='test', quote='alternative'))])
+    fields = process_fields(case, Codes())
     assert [f.id for f in fields] == list(FIELD_IDS)
     for field in fields:
         assert isinstance(field.example, ProcessExample) and field.answer is None

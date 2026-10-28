@@ -278,6 +278,12 @@ class AccountsMixin(DraftWritesMixin):
                        'ON CONFLICT(name) DO UPDATE SET max_users=?, revoked=?',
                        (name, None, max_users, revoked, now(), max_users, revoked))
 
+    def delete_access_code(self, name: str) -> bool:
+        """Removes a managed code; False when there is no managed row to delete."""
+        with self.account_db() as db:
+            row = db.execute('DELETE FROM access_codes WHERE name=? AND code_hash IS NOT NULL RETURNING name', (name,)).fetchone()
+        return row is not None
+
     def accounts_using_code(self, name: str, *, excluding: str | None = None) -> list[User]:
         with self.account_db() as db:
             rows = db.execute('SELECT data FROM account_users').fetchall()

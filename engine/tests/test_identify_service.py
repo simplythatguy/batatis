@@ -526,9 +526,15 @@ def test_acceptable_solution_wording_is_a_valid_departure(client):
     http, _ = client
     case_id = described(http)
     http.post(f'/cases/{case_id}/identify', json={})
+    departure = 'Departs from the acceptable solution by a 450 mm soffit.'
     ok = http.post(f'/cases/{case_id}/identify/benchmark', json={
-        'provision': '9.10.15.5.(8)', 'departure': 'Departs from the acceptable solution by a 450 mm soffit.'})
+        'provision': '9.10.15.5.(8)', 'departure': departure})
     assert ok.status_code == 200 and ok.json()['benchmark']['departure_status'] == 'confirmed'
+    # One call names the benchmark and records the departure, so Section C carries the row the export prints.
+    assert '9.10.15.5.(8)' in [row['provision_id'] for row in ok.json()['section_c']]
+    saved = http.get(f'/cases/{case_id}').json()
+    assert '9.10.15.5.' in saved['provisions']
+    assert '9.10.15.5.(8)' in [row['provision_id'] for row in saved['section_c']]
 
 
 @pytest.fixture

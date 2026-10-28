@@ -13,13 +13,14 @@ import { isProvision, keywordCandidate, keywordGroups } from "../provisions";
 import { requirementQueue, requirementTopic } from "./requirements";
 import { quoteKind } from "../rules";
 import type { ApplicantType, Candidate, Case, Gap } from "../types";
-import type { CaseChecklists, CaseRules, RequirementRecord } from "../api/types.gen";
+import type { BenchmarkRecord, CaseChecklists, CaseRules, RequirementRecord } from "../api/types.gen";
 import type { InputSpec } from "../rules/evaluate";
 import { conditionChoices, coveredByOption, followedInFull, groupOf, matchingChecklists, tallyLine } from "./checklistView";
 import { calmHref } from "./routes";
 import { caseRuleResults, inputChoices, linkedCandidate, plainResult, RULE_REF, ruleFacts, ruleInPlay, ruleTopic, type RuleData, type ShownRule } from "./rulesView";
 import { preparationGaps } from "./preparation";
 import { professionalCounts } from "../professional";
+import { decidePath, namedRuleInputs, pathStopCopy } from "../pathDecision";
 import { answererOf, itemOpen, journeyAnswers, journeyProgress, orderJourney, PAPERWORK_FIELDS, productScope, routeChoice, stageOf, understandingAnswerKey, understandingRows, type UnderstandingRow, type Answerer, type JourneyAnswerValue, type Stage } from "./journey";
 
 /** Choice values on rule and package cards. */
@@ -41,6 +42,8 @@ export type DeckKind =
   | "code-ledger"
   /** One ledger rule: does it apply to this project? Departure is asked on its own card. */
   | "requirement"
+  /** The applicant's own words for the departure from the named benchmark sentence. */
+  | "departure"
   /** Keyword-only leads grouped by topic; each lead opens on request (never a relevance score). */
   | "code-triage"
   /** A number or answer a coded rule needs (docs/api/rules.md). */
@@ -158,6 +161,8 @@ export interface DeckOptions {
   confirmAuthority?: boolean;
   /** An optional keyword lead the applicant explicitly opened from grouped triage or a saved link. */
   focusedCandidate?: string;
+  /** The stored benchmark: once its departure is confirmed the deck stops asking for it. */
+  benchmark?: BenchmarkRecord | null;
   /** A visible default supplied by the caller, never a silently saved date. */
   today?: string;
 }
@@ -344,6 +349,32 @@ export function sectionDRelevant(c: Case, gaps: Gap[]): boolean {
 
 const SCOPE_ITEM_KEY = "scope";
 
+/**
+ * The first card answered Yes whose departure the engine has not confirmed. One benchmark is
+ * recorded per application, so only this card asks for the applicant's words; the other Yes answers
+ * stay Section C rows.
+ */
+function departureCandidate(c: Case, opts: DeckOptions): Candidate | undefined {
+  if (opts.benchmark?.departure_status === "confirmed") return undefined;
+  return c.candidates.find((a) => a.answer === "yes" && !a.pending && isProvision(a.provision));
+}
+
+function departureItem(a: Candidate): UnpositionedItem {
+  return {
+    key: `dep-${a.id}`,
+    kind: "departure",
+    section: "C",
+    eyebrow: sectionEyebrow("C"),
+    title: "What does your design do instead?",
+    context: "",
+    why: "Batatis names this sentence as the benchmark in Section C of the application and records your words as the departure. The officer decides whether the departure is acceptable; Batatis never does.",
+    ref: a.id,
+    provision: a.provision,
+    done: false,
+    optional: false,
+  };
+}
+
 /** Derive ordered form cards from case facts, shared gaps, coded rules and package choices. */
 export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckItem[] {
   const seen = opts.seen ?? new Set<string>();
@@ -395,6 +426,10 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       optional: false,
     })];
   }
+
+  const decision = decidePath(c);
+  const acceptance = productScope(c) === "product_acceptance";
+  const packaged = decision.path === "acceptable" || decision.path === "alternative";
 
   const unread = !c.intake && Boolean(c.description.trim()) && opts.intake !== undefined;
   if (opts.intake === "error" || (unread && opts.intake === "idle")) {
@@ -450,7 +485,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
   }
   const route = routeChoice(c);
   const fork = c.intake?.record.plan?.fork;
-  if (fork && fork.variance_needed !== "unknown") push("B", {
+  if (fork && fork.variance_needed !== "unknown" && !decision.firm) push("B", {
     key: "route", kind: "route", section: "B", eyebrow: "Route · Section B",
     title: fork.variance_needed === "likely" ? "You likely need a variance" : "You may not need a variance",
     // The applicant's own sentence explains the route; the bare cue ("instead of") does not.
@@ -469,6 +504,15 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
     title: "A product acceptance route", context: "Across Alberta means product acceptance, for example a CCMC evaluation. A site variance is a separate request for one building or site.",
     why: "The engine’s sourced product-route notice explains the available routes.", ref: "product_scope", done: seen.has("product-notice"), optional: true,
   });
+  if ((decision.path === "not_applicable" || (decision.path === "unresolved" && !decision.asksRuleInputs)) && (c.description.trim() || c.facts.length > 0) && !acceptance) {
+    const copy = pathStopCopy(decision);
+    push("B", {
+      key: "path-stop", kind: "code-note", section: "B", eyebrow: "Route",
+      title: copy.title, context: copy.context,
+      why: "The package stays closed. Batatis does not decide that the design complies or is safe.",
+      ref: "path-stop", done: seen.has("path-stop"), optional: true,
+    });
+  }
   // Files intake could not read in full say so, with the reason, once.
   for (const f of fileNotes(c)) {
     const key = `file-${f.file_id}`;
@@ -489,7 +533,15 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
   // Every issued planner question takes its journey position, retaining the form mapping.
   const plan = planQuestions(c);
   const planFields = new Set(plan.map(({ q }) => localField(q.field)));
+  // A description that names one coded solution asks only that solution's inputs.
+  const namedInputs = decision.ruleId ? new Set(namedRuleInputs(decision.ruleId) ?? []) : null;
   for (const { q, done, notSure } of plan) {
+    if (q.field === "product_scope" && decision.path !== "alternative") continue;
+    if ((q.field === "alternative_description" || localField(q.field) === "alternative") && decision.path !== "alternative") continue;
+    // A firm check has the inputs it needs. A named rule asks only its own remaining inputs.
+    if (decision.firm && q.priority !== "administrative" && q.field !== "product_scope") continue;
+    if (namedInputs && q.priority !== "administrative" && q.field !== "product_scope"
+        && !namedInputs.has(q.field) && !namedInputs.has(localField(q.field))) continue;
     if (PAPERWORK_FIELDS.has(localField(q.field)) && q.kind !== "conflict") continue;
     if (readFields.has(localField(q.field)) && q.kind !== "conflict") continue;
     const detail = DETAIL_FIELDS.find((d) => d.id === localField(q.field));
@@ -536,6 +588,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
   });
   const planned = plannedFields(c);
   for (const d of DETAIL_FIELDS) {
+    if ((d.id === "scope" || d.id === "alternative") && decision.path !== "alternative") continue;
     const paperwork = PAPERWORK_FIELDS.has(d.id);
     if (readFields.has(d.id) && !paperwork) continue;
     const fact = factFor(c, d.id);
@@ -695,12 +748,18 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
   // article that already has a code-check card sits on that card instead of a second one.
   const index = opts.rules?.index;
   const facts = index ? ruleFacts(c, index) : new Map();
-  const missing = new Set(inPlay.flatMap((r) => r.missing.map((m) => m.field)));
+  const pool = opts.rules ? caseRuleResults(c, opts.rules, opts.storedRules) : [];
+  const namedRule = decision.ruleId ? pool.find((r) => r.rule_id === decision.ruleId) : undefined;
+  const rulesToShow = namedRule ? [namedRule] : inPlay;
+  const missing = new Set([
+    ...rulesToShow.flatMap((r) => r.missing.map((m) => m.field)),
+    ...(decision.ruleId ? decision.missing : []),
+  ]);
   const asked = new Set<string>();
   /** Add each needed rule input once, leaving fields already handled by the planner on its cards. */
   const ruleInputs = (r: ShownRule) => {
     if (!index) return;
-    const mine = new Set(r.missing.map((m) => m.field));
+    const mine = new Set([...r.missing.map((m) => m.field), ...(decision.ruleId === r.rule_id ? decision.missing : [])]);
     const fields = r.inputs.map((i) => i.field).filter((f) => mine.has(f) || facts.get(f)?.source.ref?.startsWith(RULE_REF));
     for (const f of fields) {
       // A planner question asks this field already (or it was answered Not sure there).
@@ -748,7 +807,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
   // A keyword-only lead stays behind the topic triage until the applicant opens it (or answers Yes).
   const behindTriage = (a: Candidate) => keywordCandidate(c, a) && a.answer !== "yes" && opts.focusedCandidate !== `cand-${a.id}`;
   const linked = new Map<string, ShownRule>();
-  for (const r of inPlay) {
+  for (const r of rulesToShow) {
     const card = linkedCandidate(c, r);
     // A rule never hides on a lead that is not shown: it keeps its own card instead.
     if (card && !behindTriage(card)) { linked.set(card.id, r); continue; }
@@ -767,14 +826,17 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       ref: "code-triage", done: seen.has("code-triage"), optional: true,
     });
   }
+  const asking = departureCandidate(c, opts);
   for (const a of c.candidates) {
-    if (behindTriage(a)) continue;
-    const r = linked.get(a.id);
-    if (r) ruleInputs(r);
-    const base = candidateItem(c, a);
-    const item = r && (r.state === "departs" || r.state === "follows") ? { ...base, rule: r } : base;
-    // An opened keyword lead stays optional: leaving it unanswered does not mean No.
-    push("C", keywordCandidate(c, a) && a.answer !== "yes" ? { ...item, optional: true } : item);
+    if (!behindTriage(a)) {
+      const r = linked.get(a.id);
+      if (r) ruleInputs(r);
+      const base = candidateItem(c, a);
+      const item = r && (r.state === "departs" || r.state === "follows") ? { ...base, rule: r } : base;
+      // An opened keyword lead stays optional: leaving it unanswered does not mean No.
+      push("C", keywordCandidate(c, a) && a.answer !== "yes" ? { ...item, optional: true } : item);
+    }
+    if (asking?.id === a.id) push("C", departureItem(a));
   }
 
   // 4b. The requirement ledger: its counts stay reachable, and the closest unanswered rules are asked
@@ -812,8 +874,8 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
     }
   }
 
-  // 5. The alternative-solution case, written by the applicant.
-  for (const p of PROCESS_FIELDS) {
+  // 5. The six process fields are the alternative path only. They are not evidence.
+  if (decision.path === "alternative" && !acceptance) for (const p of PROCESS_FIELDS) {
     push("D", {
       key: `field-${p.id}`,
       kind: "process",
@@ -828,8 +890,8 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
     });
   }
 
-  // 6. Section D: professional and evidence documents.
-  if (sectionDRelevant(c, gaps)) {
+  // 6. Shared evidence ladder on the acceptable path, plus the alternative types on that path.
+  if (packaged && !acceptance) {
     const dGaps = sectionDGaps(gaps);
     const actions = preparationGaps(c, dGaps);
     const pendingForOfficer = dGaps.length > 0 && actions.applicant.length === 0 && actions.checkNeeded.length === 0;
@@ -841,7 +903,9 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       eyebrow: sectionEyebrow("D"),
       title: "Who is responsible, and which documents back this up?",
       context: "Review a draft evidence plan. Your engineer or architect supplies the professional evidence.",
-      why: "This part of the form (Section D) names the engineer or architect responsible and lists the proof for each rule your design differs from. Batatis does not write that proof.",
+      why: decision.path === "acceptable"
+        ? "This lists the shared evidence ladder. It is not a finding that the design complies or is safe."
+        : "This part of the form (Section D) names the engineer or architect responsible and lists the proof for each rule your design differs from. Process fields are separate from these documents. Batatis does not write that proof.",
       ref: "section-d",
       done: (seen.has("section-d") && dGaps.length === 0) || pendingForOfficer || needsCheck,
       optional: pendingForOfficer || needsCheck,
@@ -852,8 +916,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
   }
   const items = [...groups.read, ...groups.plan, ...groups.A, ...groups.B, ...groups.questions, ...groups.C, ...groups.D];
   const paperworkRows = orderJourney(items.filter((item) => item.stage === "paperwork"));
-  const usualRoute = route === "standard" || productScope(c) === "product_acceptance";
-  const rowsForRoute = paperworkRows.filter((row) => !usualRoute || row.ref !== "scope");
+  const rowsForRoute = paperworkRows.filter((row) => (decision.path === "alternative" && !acceptance) || row.ref !== "scope");
   const counts: DeckItem["counts"] = {};
   for (const row of rowsForRoute.filter((row) => !row.optional)) {
     const count = counts[row.answerer] ??= { open: 0, done: 0 };
@@ -867,7 +930,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
     ref: "paperwork", optional: false, done: rowsForRoute.every((row) => row.done || row.optional),
     paperworkRows: rowsForRoute, counts,
   };
-  const cards = items.filter((item) => item.stage !== "paperwork" && (!usualRoute || (item.stage !== "case" && item.stage !== "proof" && item.kind !== "candidate" && item.kind !== "rule" && item.kind !== "package" && item.kind !== "condition" && item.kind !== "package-end")));
+  const cards = items.filter((item) => item.stage !== "paperwork" && (!acceptance || (item.stage !== "case" && item.stage !== "proof" && item.kind !== "candidate" && item.kind !== "rule" && item.kind !== "package" && item.kind !== "condition" && item.kind !== "package-end")));
   if (opts.includeDone || !sheet.done) cards.push(sheet);
   return orderJourney(cards);
 }
@@ -988,7 +1051,9 @@ function answerChoices(item: DeckItem): { value: string; label: string }[] {
 }
 
 export function deferralFor(item: DeckItem): { value: Exclude<JourneyAnswerValue, "acknowledged">; label: string } | null {
-  if (["understood", "paperwork", "reading", "file", "code-run", "code-note", "code-triage", "package-end", "product-notice", "route", "scope"].includes(item.kind)) return null;
+  // A departure the applicant says exists cannot be deferred: without their words Section C names
+  // an acceptable solution the application never says it departs from.
+  if (["understood", "paperwork", "reading", "file", "code-run", "code-note", "code-triage", "package-end", "product-notice", "route", "scope", "departure"].includes(item.kind)) return null;
   if (item.stage === "paperwork") return { value: "later", label: "Later" };
   return item.answerer === "designer" ? { value: "designer", label: "Ask my designer" } : { value: "not_sure", label: "Not sure" };
 }

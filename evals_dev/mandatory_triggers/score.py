@@ -21,7 +21,7 @@ _OCCUPANCY = {
 }
 _SKIP_KEYS = frozenset({
     'element', 'uses', 'climate_source', 'location', 'crp_name', 'owner_grounds',
-    'request', 'intake_action', 'jurisdiction', 'schedule_a_provided', 'schedule_b_provided',
+    'intake_action', 'jurisdiction', 'schedule_a_provided', 'schedule_b_provided',
 })
 _DROP_KEYS = frozenset({'cite', 'quote', 'act', 'citation'})
 _BANNED = (
@@ -67,6 +67,10 @@ def case_from_facts(raw: dict) -> Case:
             facts.append(fact('variance_scope', value))
         elif key == 'variance_requested':
             facts.append(fact('variance_requested', bool(value)))
+        elif key == 'request':
+            # The fixture says "variance" on a key the screen does not store.
+            if value == 'variance':
+                facts.append(fact('variance_requested', True))
         else:
             facts.append(fact(key, value))
     return Case(provisions=provisions, facts=facts)

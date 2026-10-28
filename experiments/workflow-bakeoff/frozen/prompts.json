@@ -1,0 +1,1374 @@
+{
+  "frozen_before_scoring": true,
+  "count": 152,
+  "prompts": [
+    {
+      "id": "dev-001",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-001.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-002",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-002.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-003",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-003.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-004",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-004.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-005",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-005.json",
+      "rule_id": null,
+      "gold_path": "unresolved",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-006",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-006.json",
+      "rule_id": null,
+      "gold_path": "unresolved",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-007",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-007.json",
+      "rule_id": null,
+      "gold_path": "unresolved",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-008",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-008.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-009",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-009.json",
+      "rule_id": null,
+      "gold_path": "unresolved",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-010",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-010.json",
+      "rule_id": null,
+      "gold_path": "unresolved",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-011",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-011.json",
+      "rule_id": null,
+      "gold_path": "unresolved",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-012",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-012.json",
+      "rule_id": null,
+      "gold_path": "unresolved",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-013",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-013.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-014",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-014.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-015",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-015.json",
+      "rule_id": null,
+      "gold_path": "unresolved",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-016",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-016.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-017",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-017.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-018",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-018.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-019",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-019.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-020",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-020.json",
+      "rule_id": null,
+      "gold_path": "unresolved",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-021",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-021.json",
+      "rule_id": null,
+      "gold_path": "unresolved",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-022",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-022.json",
+      "rule_id": null,
+      "gold_path": "unresolved",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-023",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-023.json",
+      "rule_id": null,
+      "gold_path": "unresolved",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-024",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-024.json",
+      "rule_id": null,
+      "gold_path": "redirect",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-025",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-025.json",
+      "rule_id": null,
+      "gold_path": "redirect",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-026",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-026.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-027",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-027.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-028",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-028.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-029",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-029.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-030",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-030.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-031",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-031.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-032",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-032.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-033",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-033.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-034",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-034.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-035",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-035.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-036",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-036.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-037",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-037.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-038",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-038.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-039",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-039.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-040",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-040.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-041",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-041.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-042",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-042.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-043",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-043.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-044",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-044.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-045",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-045.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-046",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-046.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-047",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-047.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-048",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-048.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-049",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-049.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-050",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-050.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-051",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-051.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-052",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-052.json",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-053",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-053.json",
+      "rule_id": null,
+      "gold_path": "unresolved",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-054",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-054.json",
+      "rule_id": null,
+      "gold_path": "unresolved",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-055",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-055.json",
+      "rule_id": null,
+      "gold_path": "unresolved",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-056",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-056.json",
+      "rule_id": null,
+      "gold_path": "unresolved",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-057",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-057.json",
+      "rule_id": null,
+      "gold_path": "unresolved",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-058",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-058.json",
+      "rule_id": null,
+      "gold_path": "unresolved",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-059",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-059.json",
+      "rule_id": null,
+      "gold_path": "redirect",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "dev-060",
+      "kind": "case",
+      "source": "evals_dev/cases/dev-060.json",
+      "rule_id": null,
+      "gold_path": "redirect",
+      "basis": "evals_dev case: nonempty gold.departure \u2192 alternative; empty departure with intake_action ask \u2192 unresolved; redirect or out_of_scope \u2192 redirect.",
+      "slice": "application"
+    },
+    {
+      "id": "G01",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "glazed-openings-houses",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "G02",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "glazed-openings-houses",
+      "gold_path": "alternative",
+      "basis": "vector expect.state departs \u2192 alternative",
+      "slice": "rule"
+    },
+    {
+      "id": "G03",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "glazed-openings-houses",
+      "gold_path": "unresolved",
+      "basis": "vector expect.state needs_info \u2192 unresolved",
+      "slice": "rule"
+    },
+    {
+      "id": "G04",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "glazed-openings-houses",
+      "gold_path": "alternative",
+      "basis": "vector expect.state departs \u2192 alternative",
+      "slice": "rule"
+    },
+    {
+      "id": "G05",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "glazed-openings-houses",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "G06",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "glazed-openings-houses",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "G07",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "glazed-openings-houses",
+      "gold_path": "alternative",
+      "basis": "vector expect.state departs \u2192 alternative",
+      "slice": "rule"
+    },
+    {
+      "id": "G08",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "glazed-openings-houses",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "G09",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "glazed-openings-houses",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "G10",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "glazed-openings-houses",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "G11",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "glazed-openings-houses",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "G12",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "glazed-openings-houses",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "G13",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "glazed-openings-houses",
+      "gold_path": "alternative",
+      "basis": "vector expect.state departs \u2192 alternative",
+      "slice": "rule"
+    },
+    {
+      "id": "G14",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "glazed-openings-houses",
+      "gold_path": "not_applicable",
+      "basis": "vector expect.state not_applicable \u2192 not_applicable",
+      "slice": "rule"
+    },
+    {
+      "id": "G15",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "glazed-openings-houses",
+      "gold_path": "not_applicable",
+      "basis": "vector expect.state not_applicable \u2192 not_applicable",
+      "slice": "rule"
+    },
+    {
+      "id": "G16",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "glazed-openings-houses",
+      "gold_path": "not_applicable",
+      "basis": "vector expect.state not_applicable \u2192 not_applicable",
+      "slice": "rule"
+    },
+    {
+      "id": "G17",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "glazed-openings-houses",
+      "gold_path": "unresolved",
+      "basis": "vector expect.state needs_info \u2192 unresolved",
+      "slice": "rule"
+    },
+    {
+      "id": "G18",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "glazed-openings-houses",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "G19",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "glazed-openings-houses",
+      "gold_path": "unresolved",
+      "basis": "vector expect.state needs_info \u2192 unresolved",
+      "slice": "rule"
+    },
+    {
+      "id": "G20",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "glazed-openings-houses",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "G21",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "glazed-openings-houses",
+      "gold_path": "alternative",
+      "basis": "vector expect.state departs \u2192 alternative",
+      "slice": "rule"
+    },
+    {
+      "id": "U01",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "unprotected-openings",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "U02",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "unprotected-openings",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "U03",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "unprotected-openings",
+      "gold_path": "alternative",
+      "basis": "vector expect.state departs \u2192 alternative",
+      "slice": "rule"
+    },
+    {
+      "id": "U04",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "unprotected-openings",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "U05",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "unprotected-openings",
+      "gold_path": "unresolved",
+      "basis": "vector expect.state needs_info \u2192 unresolved",
+      "slice": "rule"
+    },
+    {
+      "id": "U06",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "unprotected-openings",
+      "gold_path": "not_applicable",
+      "basis": "vector expect.state not_applicable \u2192 not_applicable",
+      "slice": "rule"
+    },
+    {
+      "id": "U07",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "unprotected-openings",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "U08",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "unprotected-openings",
+      "gold_path": "not_applicable",
+      "basis": "vector expect.state not_applicable \u2192 not_applicable",
+      "slice": "rule"
+    },
+    {
+      "id": "U09",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "unprotected-openings",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "U10",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "unprotected-openings",
+      "gold_path": "alternative",
+      "basis": "vector expect.state departs \u2192 alternative",
+      "slice": "rule"
+    },
+    {
+      "id": "U11",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "unprotected-openings",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "U12",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "unprotected-openings",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "U13",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "unprotected-openings",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "U14",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "unprotected-openings",
+      "gold_path": "alternative",
+      "basis": "vector expect.state departs \u2192 alternative",
+      "slice": "rule"
+    },
+    {
+      "id": "U15",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "unprotected-openings",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "U16",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "unprotected-openings",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "U17",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "unprotected-openings",
+      "gold_path": "not_applicable",
+      "basis": "vector expect.state not_applicable \u2192 not_applicable",
+      "slice": "rule"
+    },
+    {
+      "id": "S01",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "soffits-houses",
+      "gold_path": "alternative",
+      "basis": "vector expect.state departs \u2192 alternative",
+      "slice": "rule"
+    },
+    {
+      "id": "S02",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "soffits-houses",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "S03",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "soffits-houses",
+      "gold_path": "alternative",
+      "basis": "vector expect.state departs \u2192 alternative",
+      "slice": "rule"
+    },
+    {
+      "id": "S04",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "soffits-houses",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "S05",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "soffits-houses",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "S06",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "soffits-houses",
+      "gold_path": "not_applicable",
+      "basis": "vector expect.state not_applicable \u2192 not_applicable",
+      "slice": "rule"
+    },
+    {
+      "id": "S07",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "soffits-houses",
+      "gold_path": "alternative",
+      "basis": "vector expect.state departs \u2192 alternative",
+      "slice": "rule"
+    },
+    {
+      "id": "S08",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "soffits-houses",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "S09",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "soffits-houses",
+      "gold_path": "unresolved",
+      "basis": "vector expect.state needs_info \u2192 unresolved",
+      "slice": "rule"
+    },
+    {
+      "id": "S10",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "soffits-houses",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "S11",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "soffits-houses",
+      "gold_path": "unresolved",
+      "basis": "vector expect.state needs_info \u2192 unresolved",
+      "slice": "rule"
+    },
+    {
+      "id": "S12",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "soffits-houses",
+      "gold_path": "not_applicable",
+      "basis": "vector expect.state not_applicable \u2192 not_applicable",
+      "slice": "rule"
+    },
+    {
+      "id": "S13",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "soffits-houses",
+      "gold_path": "unresolved",
+      "basis": "vector expect.state needs_info \u2192 unresolved",
+      "slice": "rule"
+    },
+    {
+      "id": "S14",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "soffits-houses",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "F01",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "firewall-suite-rowhouses",
+      "gold_path": "alternative",
+      "basis": "vector expect.state departs \u2192 alternative",
+      "slice": "rule"
+    },
+    {
+      "id": "F02",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "firewall-suite-rowhouses",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "F03",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "firewall-suite-rowhouses",
+      "gold_path": "alternative",
+      "basis": "vector expect.state departs \u2192 alternative",
+      "slice": "rule"
+    },
+    {
+      "id": "F04",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "firewall-suite-rowhouses",
+      "gold_path": "not_applicable",
+      "basis": "vector expect.state not_applicable \u2192 not_applicable",
+      "slice": "rule"
+    },
+    {
+      "id": "F05",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "firewall-suite-rowhouses",
+      "gold_path": "not_applicable",
+      "basis": "vector expect.state not_applicable \u2192 not_applicable",
+      "slice": "rule"
+    },
+    {
+      "id": "F06",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "firewall-suite-rowhouses",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "F07",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "firewall-suite-rowhouses",
+      "gold_path": "unresolved",
+      "basis": "vector expect.state needs_info \u2192 unresolved",
+      "slice": "rule"
+    },
+    {
+      "id": "F08",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "firewall-suite-rowhouses",
+      "gold_path": "not_applicable",
+      "basis": "vector expect.state not_applicable \u2192 not_applicable",
+      "slice": "rule"
+    },
+    {
+      "id": "F09",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "firewall-suite-rowhouses",
+      "gold_path": "unresolved",
+      "basis": "vector expect.state needs_info \u2192 unresolved",
+      "slice": "rule"
+    },
+    {
+      "id": "F10",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "firewall-suite-rowhouses",
+      "gold_path": "not_applicable",
+      "basis": "vector expect.state not_applicable \u2192 not_applicable",
+      "slice": "rule"
+    },
+    {
+      "id": "F11",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "firewall-suite-rowhouses",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "F12",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "firewall-suite-rowhouses",
+      "gold_path": "alternative",
+      "basis": "vector expect.state departs \u2192 alternative",
+      "slice": "rule"
+    },
+    {
+      "id": "D01",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "fire-dampers",
+      "gold_path": "not_applicable",
+      "basis": "vector expect.state not_applicable \u2192 not_applicable",
+      "slice": "rule"
+    },
+    {
+      "id": "D02",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "fire-dampers",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "D03",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "fire-dampers",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "D04",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "fire-dampers",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "D05",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "fire-dampers",
+      "gold_path": "alternative",
+      "basis": "vector expect.state departs \u2192 alternative",
+      "slice": "rule"
+    },
+    {
+      "id": "D06",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "fire-dampers",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "D07",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "fire-dampers",
+      "gold_path": "alternative",
+      "basis": "vector expect.state departs \u2192 alternative",
+      "slice": "rule"
+    },
+    {
+      "id": "D08",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "fire-dampers",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "D09",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "fire-dampers",
+      "gold_path": "alternative",
+      "basis": "vector expect.state departs \u2192 alternative",
+      "slice": "rule"
+    },
+    {
+      "id": "D10",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "fire-dampers",
+      "gold_path": "alternative",
+      "basis": "vector expect.state departs \u2192 alternative",
+      "slice": "rule"
+    },
+    {
+      "id": "D11",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "fire-dampers",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "D12",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "fire-dampers",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "D13",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "fire-dampers",
+      "gold_path": "alternative",
+      "basis": "vector expect.state departs \u2192 alternative",
+      "slice": "rule"
+    },
+    {
+      "id": "D14",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "fire-dampers",
+      "gold_path": "alternative",
+      "basis": "vector expect.state departs \u2192 alternative",
+      "slice": "rule"
+    },
+    {
+      "id": "D15",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "fire-dampers",
+      "gold_path": "unresolved",
+      "basis": "vector expect.state needs_info \u2192 unresolved",
+      "slice": "rule"
+    },
+    {
+      "id": "D16",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "fire-dampers",
+      "gold_path": "unresolved",
+      "basis": "vector expect.state needs_info \u2192 unresolved",
+      "slice": "rule"
+    },
+    {
+      "id": "D17",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "fire-dampers",
+      "gold_path": "unresolved",
+      "basis": "vector expect.state needs_info \u2192 unresolved",
+      "slice": "rule"
+    },
+    {
+      "id": "D18",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "fire-dampers",
+      "gold_path": "alternative",
+      "basis": "vector expect.state departs \u2192 alternative",
+      "slice": "rule"
+    },
+    {
+      "id": "G22",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "glazed-openings-houses",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "U18",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "unprotected-openings",
+      "gold_path": "not_applicable",
+      "basis": "vector expect.state not_applicable \u2192 not_applicable",
+      "slice": "rule"
+    },
+    {
+      "id": "S15",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "soffits-houses",
+      "gold_path": "not_applicable",
+      "basis": "vector expect.state not_applicable \u2192 not_applicable",
+      "slice": "rule"
+    },
+    {
+      "id": "S16",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "soffits-houses",
+      "gold_path": "not_applicable",
+      "basis": "vector expect.state not_applicable \u2192 not_applicable",
+      "slice": "rule"
+    },
+    {
+      "id": "D19",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "fire-dampers",
+      "gold_path": "not_applicable",
+      "basis": "vector expect.state not_applicable \u2192 not_applicable",
+      "slice": "rule"
+    },
+    {
+      "id": "D20",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "fire-dampers",
+      "gold_path": "acceptable",
+      "basis": "vector expect.state follows \u2192 acceptable",
+      "slice": "rule"
+    },
+    {
+      "id": "G23",
+      "kind": "rule",
+      "source": "evals_dev/rules/vectors.json",
+      "rule_id": "glazed-openings-houses",
+      "gold_path": "unresolved",
+      "basis": "vector expect.state needs_info \u2192 unresolved",
+      "slice": "rule"
+    },
+    {
+      "id": "demo-a",
+      "kind": "case",
+      "source": "evals/demo-cases/a-manufacturer-nailbase-sheathing/input/project-brief.md",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "README route table: vinyl on the nail-base panel is a departure from the cladding fastening rule.",
+      "slice": "application"
+    },
+    {
+      "id": "demo-b",
+      "kind": "case",
+      "source": "evals/demo-cases/b-contractor-firestop-nonconformance/input/project-brief.md",
+      "rule_id": null,
+      "gold_path": "unresolved",
+      "basis": "README: remediate to a tested system first; a variance is only where no tested system exists, which this brief does not establish.",
+      "slice": "application"
+    },
+    {
+      "id": "demo-c",
+      "kind": "case",
+      "source": "evals/demo-cases/c-homebuilder-infill-house/input/project-brief.md",
+      "rule_id": null,
+      "gold_path": "alternative",
+      "basis": "README: the bedroom window is the departure.",
+      "slice": "application"
+    }
+  ]
+}

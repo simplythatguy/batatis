@@ -374,4 +374,5 @@ export const adminCodes = {
   list: () => call<{ codes: AccessCodeInfo[] }>("GET", "/admin/access-codes").then((r) => r.codes),
   create: (name: string, max_users: number | null) => call<{ code: string; info: AccessCodeInfo }>("POST", "/admin/access-codes", { name, max_users }),
   change: (name: string, patch: { max_users?: number | null; revoked?: boolean }) => call<AccessCodeInfo>("PATCH", `/admin/access-codes/${enc(name)}`, patch),
+  remove: (name: string) => call<null>("DELETE", `/admin/access-codes/${enc(name)}`),
 };

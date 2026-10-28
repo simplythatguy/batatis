@@ -126,7 +126,7 @@ function CandidateCard({
  * binds the officer's open question.
  */
 export function useCandidateAnswer() {
-  const { decide } = useCase();
+  const { decide, confirmDeparture } = useCase();
   // Kept per card, so an error on one card never shows on the next; a new answer clears it.
   const [note, setNote] = useState<{ id: string; text: string } | null>(null);
   function onAnswer(candidate: Candidate, answer: CandidateAnswer, onError?: () => void) {
@@ -137,7 +137,14 @@ export function useCandidateAnswer() {
       onError?.();
     });
   }
-  return { onAnswer, decisionNote: note?.text ?? "", decisionNoteFor: (id: string) => (note?.id === id ? note.text : "") };
+  /** Yes is not a departure until the applicant says what the design does instead. */
+  async function onDeparture(candidate: Candidate, departure: string) {
+    setNote(null);
+    const error = await confirmDeparture(candidate, departure);
+    if (error) setNote({ id: candidate.id, text: error });
+    return error;
+  }
+  return { onAnswer, onDeparture, decisionNote: note?.text ?? "", decisionNoteFor: (id: string) => (note?.id === id ? note.text : "") };
 }
 
 type Filter = "all" | "open" | "yes";

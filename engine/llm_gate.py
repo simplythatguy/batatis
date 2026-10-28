@@ -34,6 +34,9 @@ PRICES = {
     'gpt-4.1-2025-04-14': (Decimal('2'), Decimal('8')),
     'claude-sonnet-5-5': (Decimal('2'), Decimal('10')),
     'claude-opus-5-5': (Decimal('4'), Decimal('20')),
+    # The assistant's default at its API's own default effort (medium). First-party list price,
+    # base tier (platform.claude.com/docs/en/models/haiku-5-5, read 2026-10-27); assistant requests stay in it.
+    'claude-haiku-5-5': (Decimal('0.10'), Decimal('0.50')),
     'jev-1.13.0': (Decimal('0.042'), Decimal('0.042')),
     # The exact free Decisions request route only; no paid aliases inherit this price.
     'baseten/elephant-1:free': (Decimal('0'), Decimal('0')),

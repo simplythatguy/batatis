@@ -409,7 +409,7 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
         # `section_c`: the rows a `yes` wrote for this article (empty for no and not_sure).
         return IdentifyDecisionResponse(**_current(saved.identify, saved, cases(), code).model_dump(), section_c=written)
 
-    @router.post('/cases/{case_id}/identify/benchmark', response_model=IdentifyResult)
+    @router.post('/cases/{case_id}/identify/benchmark', response_model=IdentifyDecisionResponse)
     def confirm_benchmark(case_id: str, body: BenchmarkConfirmRequest):
         """The applicant's benchmark acceptable solution: a codedb Division B sentence or article, plus their
         one-line departure. The sentence and the objective and function codes are looked up, never typed."""
@@ -438,10 +438,11 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
             bench.departure, bench.departure_status = reason, 'confirmed'
             bench.objectives, bench.functions, bench.attribution_missing = objectives, functions, missing
             bench.question = None
-            from .identify.requirement_decisions import departure
-            departure(case.identify, bench.provision, 'yes', reason=reason)
-        saved, _ = save(case_id, write, expected_version=body.expected_version)
-        return _current(saved.identify, saved, cases(), code)
+            from .identify.decisions import record_departure
+            return record_departure(case, record['id'], codes, reason=reason)
+
+        saved, written = save(case_id, write, expected_version=body.expected_version)
+        return IdentifyDecisionResponse(**_current(saved.identify, saved, cases(), code).model_dump(), section_c=written)
 
     @router.post('/cases/{case_id}/identify/requirements/{requirement_id}/decision', response_model=IdentifyResult)
     def decide_requirement(case_id: str, requirement_id: str, body: RequirementDecisionRequest):

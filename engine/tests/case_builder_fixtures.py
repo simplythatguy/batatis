@@ -64,6 +64,7 @@ def complete_case(provisions=None):
         mitigating_measures='Synthetic applicant measures.', assumptions_and_limits='Synthetic applicant limits.',
         maintenance_operation='Synthetic applicant operation and maintenance conditions.',
         qualifications='Synthetic named test author and their stated test qualifications.',
+        pathway='alternative',
         occupancy='single_family', part4_design=False, preserved_wood_foundation_part4=False,
         roof_trusses=False, prescriptive_route_confirmed=False, ahj_requires_professional=False,
         special_safety_concerns=False, professional_judgement_required=True, professional_scope_resolved=True,

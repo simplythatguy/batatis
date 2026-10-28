@@ -40,7 +40,8 @@ SUPPLIER_NOTE = 'Window supplier note'
 
 
 def _case(answers: dict, *, engineer: bool) -> Case:
-    facts = [fact(field, value) for field, value in answers.items()]
+    facts = [fact('pathway', 'alternative')]
+    facts += [fact(field, value) for field, value in answers.items()]
     if engineer:
         facts.extend(ENGINEER)
     return Case(facts=facts)

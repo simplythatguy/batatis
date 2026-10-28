@@ -77,7 +77,7 @@ def test_grounded_provision_lookup_citations_removal_and_spend_receipt(assistant
     assert '9.99.99.99.' not in result['answer']
     invocation = calls[0]
     assert invocation['provider'] == provider
-    assert invocation['model'] == ('claude-sonnet-5-5' if provider == 'anthropic' else llm_gate.DEFAULT_MODEL)
+    assert invocation['model'] == ('claude-haiku-5-5' if provider == 'anthropic' else llm_gate.DEFAULT_MODEL)
     context = json.loads(invocation['context'])
     assert context['focused_provision']['text'] == Codes().provision('9.10.9.16.(1)', 'B')['text']
     assert context['section_c'][0]['pairs'][0]['function'] == 'F03'
@@ -90,7 +90,10 @@ def test_grounded_provision_lookup_citations_removal_and_spend_receipt(assistant
 def test_case_context_and_focus_only_follow_authorization(assistant, monkeypatch):
     client, store, calls = assistant
     enable(monkeypatch)
-    legacy = store.put(Case(facts=[fact('alternative_description', 'A synthetic proposal to explain.')]))
+    legacy = store.put(Case(facts=[
+        fact('alternative_description', 'A synthetic proposal to explain.'),
+        fact('pathway', 'alternative'),
+    ]))
     assert ask(client, case_id=legacy.id, focus={'kind': 'field', 'id': 'risk_assessment'}).status_code == 200
     context = json.loads(calls[-1]['context'])
     assert context['application']['facts'][0]['value'] == 'A synthetic proposal to explain.'
@@ -136,7 +139,7 @@ def test_planner_question_focus_uses_the_issued_question_including_answered_hist
 def test_deck_process_card_ids_resolve_to_the_canonical_requirements(assistant, monkeypatch, card, field):
     client, store, calls = assistant
     enable(monkeypatch, 'openai')
-    case = store.put(Case())
+    case = store.put(Case(facts=[fact('pathway', 'alternative')]))
     result = ask(client, case_id=case.id, screen='question', focus={'kind': 'card', 'id': card},
                  question="I don't understand")
     assert result.status_code == 200, result.text

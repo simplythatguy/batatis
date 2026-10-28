@@ -126,7 +126,8 @@ def app(tmp_path, monkeypatch):
         assert signup(client).status_code == 201
         owner = onboard(client)
         case = store.put(Case(owner_id=owner['id'], authority='edmonton',
-            facts=[fact('project.description', DESCRIPTION)], provisions=['9.27.3.8.(1)'],
+            facts=[fact('project.description', DESCRIPTION), fact('pathway', 'alternative')],
+            provisions=['9.27.3.8.(1)'],
             section_c=section_c_rows(['9.27.3.8.(1)'], codes)))
         yield client, store, codes, connection, registry, case
 

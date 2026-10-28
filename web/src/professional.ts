@@ -1,3 +1,4 @@
+import { decidePath } from "./pathDecision";
 import type { Case, Fact } from "./types";
 import { localField } from "./intakeFields";
 
@@ -210,7 +211,7 @@ export function professionalQuestions(c: Case, missing?: readonly string[]): Pro
   const part9 = !part3 && (["single_family", "multi_family", "farm", "hotel", "business", "mercantile", "industrial", "relocatable_industrial_camp"].includes(String(occupancy)) || provisions.some((provision) => provision.startsWith("9.")));
   const text = [c.description, ...c.facts.filter((fact) => fact.status === "confirmed" && ["alternative", "alternative_description", "project.description"].includes(localField(fact.field))).map((fact) => String(fact.value))].join(" ").toLowerCase();
   const fireOnly = /fire[ -]?(?:stop|separation)|penetration/.test(text) && !provisions.some((provision) => /^(?:4\.|9\.(?:4|15|23)\.)/.test(provision));
-  const alternative = !["acceptable", "acceptable_solution"].includes(String(get("pathway") ?? get("path")));
+  const onAcceptablePath = decidePath(c).path === "acceptable";
   const needed = missing && new Set(missing.flatMap((name) => name.split(" or ")).map((name) => name.replace(/^professional\./, "")));
   const exception = ["single_family", "relocatable_industrial_camp"].includes(String(occupancy)) || (occupancy === "farm" && get("farm_public_use") === false);
   const roleDeferred = deferredProfessional(c, "role");
@@ -227,7 +228,7 @@ export function professionalQuestions(c: Case, missing?: readonly string[]): Pro
     if (field === "preserved_wood_foundation_part4") return get(field) !== undefined || (part9 && !fireOnly && (get("part4_design") === true || /preserved[ -]wood|wood foundation/.test(text) || provisions.some((provision) => provision.startsWith("9.15.2"))));
     if (field === "part4_design") return get(field) !== undefined || !fireOnly;
     if (field === "fire_suppression" || field === "fire_alarm") return get(field) !== undefined || !exception || needed?.has(field);
-    if (field === "prescriptive_route_confirmed") return !alternative;
+    if (field === "prescriptive_route_confirmed") return onAcceptablePath;
     if (field === "role" && resolvedNotRequired) return false;
     if (field === "registration_number") return get(field) !== undefined || (!resolvedNotRequired && !roleDeferred && !professionalConfirmed(c.facts));
     return true;

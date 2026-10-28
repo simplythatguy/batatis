@@ -8,8 +8,14 @@ from engine.section_d import (ALTERNATIVE_EVIDENCE_TYPES, CONFIDENCE_LADDER, Sup
                               section_d_plan, supporting_documents, text_evidence)
 
 
+def _alternative(case: Case) -> Case:
+    case.facts.append(Fact(field='pathway', value='alternative', kind='pointed', status='confirmed',
+                           source=Source(type='user_click', ref='test', quote='alternative')))
+    return case
+
+
 def test_every_confirmed_pair_gets_an_issue_and_ordered_types():
-    case = Case(provisions=['9.10.9.16.(1)', '3.1.7.1.(1)'])
+    case = _alternative(Case(provisions=['9.10.9.16.(1)', '3.1.7.1.(1)']))
     plan = section_d_plan(case, Codes())
     expected = {(r.provision_id, p.function, p.objective) for r in section_c_rows(case.provisions, Codes()) for p in r.pairs}
     assert {(e.provision_id, e.function, e.objective) for e in plan.items} == expected

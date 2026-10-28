@@ -191,7 +191,7 @@ def model_route() -> ModelRoute:
     provider = 'anthropic' if (os.environ.get('ANTHROPIC_API_KEY') or '').strip() else 'openai'
     if not llm_gate.live_enabled(provider):
         raise HTTPException(503, 'Assistant unavailable')
-    model = 'claude-sonnet-5-5' if provider == 'anthropic' else llm_gate.DEFAULT_MODEL
+    model = 'claude-haiku-5-5' if provider == 'anthropic' else llm_gate.DEFAULT_MODEL
     return ModelRoute(provider, model)
 
 

@@ -283,11 +283,22 @@ def from_uploads(uploads: list[tuple[str, bytes]]) -> Snapshot:
         declaration.bound_to_application = bool(owner and location and owner.confirmed and location.confirmed
             and owner.status != 'not_found' and location.status != 'not_found'
             and norm(owner.value) == norm(declaration.owner) and norm(location.value) == norm(declaration.location))
-    if len(snapshot.professional_declarations) == 1 and snapshot.professional_declarations[0].bound_to_application:
+    if len(snapshot.professional_declarations) == 1:
         declaration = snapshot.professional_declarations[0]
-        values['pathway'] = StoredValue('pathway', declaration.pathway, 'exact', declaration.pathway,
-            source={'type': 'file', 'ref': declaration.pointer.file, 'page': declaration.pointer.page,
-                    'quote': declaration.pathway})
+        # Pathway is the package path, not a professional credential. Apply it when the
+        # declaration is this application's, including before the owner and site are filled.
+        # A declaration that names a different owner or site does not set the path.
+        owner, location = values.get('owner_name'), values.get('civic_address')
+
+        def filled(stored):
+            return bool(stored and stored.confirmed and stored.status != 'not_found' and stored.value.strip())
+
+        same_unidentified = (not declaration.owner.strip() and not declaration.location.strip()
+                             and not filled(owner) and not filled(location))
+        if declaration.bound_to_application or same_unidentified:
+            values['pathway'] = StoredValue('pathway', declaration.pathway, 'exact', declaration.pathway,
+                source={'type': 'file', 'ref': declaration.pointer.file, 'page': declaration.pointer.page,
+                        'quote': declaration.pathway})
     snapshot.document = doc
     snapshot.corpus = [(form.name, value.page + 1, value.value) for value in form.fields.values()
                        if value.status == 'present'] if form else []

@@ -53,6 +53,33 @@ def overlay_decisions(result: IdentifyResult) -> IdentifyResult:
     return result
 
 
+def record_departure(case, provision_id: str, codes, *, reason: str | None = None) -> list:
+    """Name `provision_id` as an acceptable solution the design departs from.
+
+    Writes the citation fact, keeps the article in `case.provisions`, rebuilds Section C and marks
+    the Division B requirement varied. Returns the Section C rows written for that article. The
+    code-check card and the benchmark confirmation both come through here, so a departure leaves
+    the same state whichever route recorded it.
+    """
+    article = article_of(provision_id)
+    result: IdentifyResult = case.identify
+    record = codes.provision(article, 'B') if codes is not None else None
+    if record is None:
+        raise KeyError(article)
+    case.facts = [f for f in case.facts if f.field != f'{CITATION_PREFIX}{article}']
+    case.provisions = [p for p in case.provisions if article_of(p) != article]   # the article and its sentences
+    case.facts.append(Fact(id=stable_id(case.id, 'cite', article), field=f'{CITATION_PREFIX}{article}',
+                           value=article, kind='exact', status='confirmed',
+                           source=Source(type='user_click', ref=article, quote=record.get('citation'))))
+    case.provisions = list(dict.fromkeys([*case.provisions, article]))
+    case.section_c = section_c_rows(case.provisions, codes) if case.provisions else []
+    result.decisions[article] = ArticleDecision(decision='yes', decided_at=now(), open_question_id=None)
+    from .requirement_decisions import departure
+    departure(result, article, 'yes', reason=reason)
+    overlay_decisions(result)
+    return [row for row in case.section_c if article_of(row.provision_id) == article]
+
+
 def record_decision(case, provision_id: str, decision: str, codes) -> list:
     """Apply one decision to `case` (its identify result must exist). Returns the Section C rows a yes wrote."""
     if decision not in DECISIONS:
@@ -60,27 +87,18 @@ def record_decision(case, provision_id: str, decision: str, codes) -> list:
     result: IdentifyResult = case.identify
     card = match_article(result, provision_id)
     article = card.provision
+    if decision == 'yes':
+        return record_departure(case, article, codes)
     case.facts = [f for f in case.facts if f.field != f'{CITATION_PREFIX}{article}']
     case.provisions = [p for p in case.provisions if article_of(p) != article]   # the article and its sentences
-    written = []
-    if decision == 'yes':
-        record = codes.provision(article, 'B') if codes is not None else None
-        if record is None:
-            raise KeyError(article)
-        case.facts.append(Fact(id=stable_id(case.id, 'cite', article), field=f'{CITATION_PREFIX}{article}',
-                               value=article, kind='exact', status='confirmed',
-                               source=Source(type='user_click', ref=article, quote=record.get('citation'))))
-        case.provisions = list(dict.fromkeys([*case.provisions, article]))
     case.section_c = section_c_rows(case.provisions, codes) if case.provisions else []
-    if decision == 'yes':
-        written = [row for row in case.section_c if article_of(row.provision_id) == article]
     result.decisions[article] = ArticleDecision(
         decision=decision, decided_at=now(),
         open_question_id=stable_id(case.id, 'oq', article) if decision == 'not_sure' else None)
     from .requirement_decisions import departure
     departure(result, article, decision)
     overlay_decisions(result)
-    return written
+    return []
 
 
 def information_request(case) -> dict:

@@ -12,8 +12,8 @@ test("paperwork is one sheet with row counts and field focus aliases", () => {
   assert.equal(paperwork.length, 1);
   const sheet = paperwork[0];
   assert.equal(sheet.title, "Last details for the form");
-  assert.equal(sheet.paperworkRows?.filter((row) => !row.optional && !row.done).length, 8);
-  assert.equal(journeyProgress([sheet]).open.you + journeyProgress([sheet]).open.batatis, 8);
+  assert.equal(sheet.paperworkRows?.filter((row) => !row.optional && !row.done).length, 7);
+  assert.equal(journeyProgress([sheet]).open.you + journeyProgress([sheet]).open.batatis, 7);
   assert.equal(sheet.paperworkRows?.find((row) => row.ref === "permit")?.optional, true);
 });
 
@@ -36,12 +36,13 @@ test("Later is case data, stays open, and is not automatically asked again", () 
   assert.equal(journeyProgress(all).yourPartDone, false);
 });
 
-test("a saved standard route removes case, proof, and departure questions", () => {
+test("a saved acceptable route keeps the evidence ladder and drops the variance package", () => {
   let c = emptyCase();
   c = reducer(c, { type: "setDetail", field: "journey.route", value: "standard", section: "B" });
   assert.equal(routeChoice(c), "standard");
   const deck = buildDeck(c, [], { includeDone: true });
-  assert.ok(!deck.some((i) => i.stage === "case" || i.stage === "proof" || i.kind === "candidate" || i.ref === "alternative"));
+  assert.ok(deck.some((i) => i.stage === "proof"));
+  assert.ok(!deck.some((i) => i.stage === "case" || i.ref === "alternative" || i.ref === "scope"));
 });
 
 test("equal readings retain their sources in one row, while picture proposals stay individual", () => {
