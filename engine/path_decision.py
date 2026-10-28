@@ -166,6 +166,9 @@ def _recorded(case: Case) -> Literal['acceptable', 'alternative'] | None:
         return 'acceptable'
     if route in ('variance', 'different'):
         return 'alternative'
+    # An explicit request is a recorded variance. An empty description is not.
+    if _confirmed(case, 'variance_requested') is True:
+        return 'alternative'
     return None
 
 

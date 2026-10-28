@@ -259,6 +259,17 @@ test("Not sure on a planner question never blocks and is not asked again on its 
   assert.ok(!buildDeck(c, gaps).some((i) => i.key === "field-mailingAddress"));
 });
 
+test("an explicit variance request opens the six process fields", () => {
+  const c = emptyCase("homebuilder");
+  c.facts = [{
+    id: "vr", field: "variance_requested", value: true, kind: "pointed", status: "confirmed",
+    source: { type: "user_text", ref: "request", quote: "variance" },
+  }];
+  const deck = buildDeck(c, getGaps(c));
+  assert.equal(deck.filter((item) => item.kind === "process").length, 6);
+  assert.equal(deck.some((item) => item.kind === "section-d"), true);
+});
+
 test("an acceptable path does not ask for a departure sentence", () => {
   let c = undecidedHouse();
   c = { ...c, description: "A standard house built to the Part 9 tables." };

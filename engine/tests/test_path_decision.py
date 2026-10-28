@@ -23,6 +23,13 @@ def soffit(**overrides):
     return Case(facts=facts)
 
 
+def test_explicit_variance_request_opens_the_alternative_package():
+    case = Case(facts=[fact('variance_requested', True)])
+    decision = decide_path(case)
+    assert decision.path == 'alternative' and decision.source == 'recorded' and not decision.firm
+    assert len(process_fields(case, Codes())) == 6
+
+
 def test_unknown_path_opens_no_process_fields():
     decision = decide_path(Case())
     assert decision.path == 'unresolved' and not decision.firm

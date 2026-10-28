@@ -134,6 +134,8 @@ function recorded(c: Case): "acceptable" | "alternative" | null {
   const route = confirmed(c, "journey.route");
   if (route === "standard") return "acceptable";
   if (route === "variance" || route === "different") return "alternative";
+  // An explicit request is a recorded variance. An empty description is not.
+  if (confirmed(c, "variance_requested") === true) return "alternative";
   return null;
 }
 
