@@ -144,19 +144,21 @@ def test_removing_an_unused_managed_code_deletes_only_it(app):
         assert admin.delete('/admin/access-codes/admin').status_code == 404, "the admin code is the server's own setting"
 
 
-def test_removing_refuses_a_code_in_use_and_an_environment_code(app, monkeypatch):
+def test_removing_a_code_in_use_deletes_it_and_an_environment_code_stays(app, monkeypatch):
     monkeypatch.setenv('BATATIS_AI_ACCESS_CODES', '{"judges": "judges-code-aaaaaaaaaaaaaaaa"}')
     with TestClient(app, base_url='http://localhost') as admin, TestClient(app, base_url='http://localhost') as person:
         as_admin(admin)
         code = admin.post('/admin/access-codes', json={'name': 'team'}).json()['code']
         signup(person, 'person@example.test')
         person.post('/auth/ai-access', json={'code': code})
-        busy = admin.delete('/admin/access-codes/team')
-        assert busy.status_code == 409 and 'Turn it off' in busy.json()['detail']
+        assert probe(person) is True
+        gone = admin.delete('/admin/access-codes/team')
+        assert gone.status_code == 204
         listed = {c['name']: c for c in admin.get('/admin/access-codes').json()['codes']}
-        assert listed['team']['in_use'] == 1 and listed['team']['revoked'] is False
-        assert admin.patch('/admin/access-codes/team', json={'revoked': True}).status_code == 200, 'turn it off, then remove is still refused while accounts hold it'
-        assert admin.delete('/admin/access-codes/team').status_code == 409, 'a code accounts still reference is never deleted out from under them'
+        assert 'team' not in listed
+        assert person.get('/auth/me').json()['user']['ai_access'] is None
+        assert probe(person) is False, 'a removed code no longer grants AI to the accounts that held it'
+        assert person.post('/auth/ai-access', json={'code': code}).status_code == 403
         environmental = admin.delete('/admin/access-codes/judges')
         assert environmental.status_code == 409 and 'server settings' in environmental.json()['detail']
 
@@ -267,6 +269,65 @@ def test_the_admin_code_alone_makes_an_admin_and_changing_it_ends_admin_sign_ins
         assert person.get('/admin/access-codes').status_code == 403
         monkeypatch.setenv('BATATIS_ADMIN_CODE', 'another-admin-code-zzzzzzzzzzzz')
         assert admin.get('/admin/access-codes').status_code == 403, 'a changed admin code locks out the old sign-in'
+
+
+def test_a_valid_access_code_opens_reviewer_without_an_authority_code(app, monkeypatch):
+    """A testing access code admits the whole product. Reviewer must not ask for a second authority code."""
+    monkeypatch.setenv('BATATIS_REVIEWER_CODES', '{"edmonton":"officer-secret","calgary":"calgary-secret"}')
+    with TestClient(app, base_url='http://localhost') as admin, TestClient(app, base_url='http://localhost') as person, \
+            TestClient(app, base_url='http://localhost') as password, TestClient(app, base_url='http://localhost') as entered, \
+            TestClient(app, base_url='http://localhost') as late:
+        as_admin(admin)
+        code = admin.post('/admin/access-codes', json={'name': 'Judges'}).json()['code']
+        admin_reviewer = admin.post('/auth/onboarding', json={'role': 'reviewer', 'authority': 'calgary'})
+        assert admin_reviewer.status_code == 200, admin_reviewer.text
+        assert admin_reviewer.json()['app_access'] is True
+        assert admin_reviewer.json()['user']['role'] == 'reviewer'
+        assert admin.get('/review/queue').status_code == 200
+
+        signed = sign_in(person, code, 'Ada')
+        assert signed['app_access'] is True
+        opened = person.post('/auth/onboarding', json={'role': 'reviewer', 'authority': 'edmonton'})
+        assert opened.status_code == 200, opened.text
+        assert opened.json()['user']['role'] == 'reviewer' and opened.json()['user']['authority'] == 'edmonton'
+        assert 'officer-secret' not in opened.text and 'calgary-secret' not in opened.text
+        queue = person.get('/review/queue')
+        assert queue.status_code == 200, queue.text
+        assert queue.json()['authority'] == 'edmonton'
+        # A wrong authority code is not a second gate, and leaving the role does not demand one either.
+        switched = person.post('/auth/onboarding', json={'role': 'reviewer', 'authority': 'calgary', 'access_code': 'not-the-authority-code'})
+        assert switched.status_code == 200, switched.text
+        assert switched.json()['user']['authority'] == 'calgary'
+        left = person.post('/auth/onboarding', json={'role': 'applicant'})
+        assert left.status_code == 200, left.text
+        assert left.json()['user']['role'] == 'applicant' and left.json()['user']['authority'] is None
+
+        signup(password, 'officer@example.test')
+        blocked = password.post('/auth/onboarding', json={'role': 'reviewer', 'authority': 'edmonton'})
+        assert blocked.status_code == 403
+        assert blocked.json()['detail'] == 'Reviewer access code is incorrect'
+        assert password.get('/review/queue').status_code == 403
+        allowed = password.post('/auth/onboarding', json={'role': 'reviewer', 'authority': 'edmonton', 'access_code': 'officer-secret'})
+        assert allowed.status_code == 200, allowed.text
+        assert allowed.json()['app_access'] is False
+
+        signup(entered, 'builder@example.test')
+        assert entered.post('/auth/ai-access', json={'code': code}).status_code == 200
+        became = entered.post('/auth/onboarding', json={'role': 'reviewer', 'authority': 'edmonton'})
+        assert became.status_code == 200, became.text
+        assert became.json()['app_access'] is True and became.json()['user']['role'] == 'reviewer'
+        assert entered.get('/review/queue').status_code == 200
+
+        assert admin.patch('/admin/access-codes/Judges', json={'revoked': True}).status_code == 200
+        refused = person.post('/auth/onboarding', json={'role': 'reviewer', 'authority': 'edmonton'})
+        assert refused.status_code == 403
+        assert refused.json()['detail'] == 'Reviewer access code is incorrect'
+        assert person.get('/review/queue').status_code == 403
+        # The authority code still works for an account whose testing code was turned off.
+        restored = person.post('/auth/onboarding', json={'role': 'reviewer', 'authority': 'edmonton', 'access_code': 'officer-secret'})
+        assert restored.status_code == 200, restored.text
+        assert person.get('/review/queue').status_code == 200
+        assert late.post('/auth/code-login', json={'code': code, 'name': 'Eve'}).status_code == 403
 
 
 def test_nobody_can_sign_up_or_log_in_with_a_code_account_address(app):

@@ -32,7 +32,8 @@ function RoleEditor({ onCancel, onSaved }: { onCancel: () => void; onSaved: () =
   const [error, setError] = useState("");
   const [wait, startWait] = useCountdown();
   if (!user) return null;
-  const need = role ? codeNeeded({ role: user.role, authority: user.authority }, role, authority) : null;
+  const appAccess = user.app_access === true;
+  const need = role ? codeNeeded({ role: user.role, authority: user.authority }, role, authority, appAccess) : null;
   const complete = role === "applicant" || (role === "reviewer" && Boolean(authority));
   const canSave = complete && (!need || code.trim().length > 0) && !busy && wait === 0;
 
@@ -43,7 +44,7 @@ function RoleEditor({ onCancel, onSaved }: { onCancel: () => void; onSaved: () =
     try {
       await saveOnboarding(role === "applicant"
         ? { role, applicant_type: type, ...(need ? { access_code: code.trim() } : {}) }
-        : { role, authority, access_code: code.trim() });
+        : { role, authority, ...(need ? { access_code: code.trim() } : {}) });
       onSaved();
     } catch (e) {
       if (e instanceof AccountsError && e.status === 429) startWait(e.retryAfter);

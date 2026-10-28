@@ -20,6 +20,8 @@ export interface User {
   authority: string | null;
   onboarded: boolean;
   created_at: string;
+  /** True when this account holds a live testing access code. The server sets it; reviewer does not ask again. */
+  app_access?: boolean;
 }
 
 export type ApplicationStatus = "draft" | "submitted" | "in_review" | "returned" | "accepted" | "refused" | "withdrawn";
@@ -195,7 +197,7 @@ export async function call<T>(method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE
 const enc = encodeURIComponent;
 
 export const accounts = {
-  me: (signal?: AbortSignal) => call<{ user: User }>("GET", "/auth/me", undefined, signal).then((r) => r.user ?? (r as unknown as User)),
+  me: (signal?: AbortSignal) => call<{ user: User; app_access?: boolean }>("GET", "/auth/me", undefined, signal).then((r) => sessionUser(r) ?? (r as unknown as User)),
   /** Every owned application, archived ones included; a server without preferences reads as neither. */
   applications: (signal?: AbortSignal) =>
     call<{ applications: ApplicationSummary[] }>("GET", "/me/applications", undefined, signal).then((r) =>
@@ -310,7 +312,18 @@ export function claimConflict(e: unknown): Claim | null {
   return c && typeof c.reviewer_name === "string" ? c : null;
 }
 
-const userOf = (r: { user?: User } | User) => ("user" in r && r.user ? r.user : (r as User));
+/** The account inside an auth response, keeping the server's decision that a testing access code is live. */
+export function sessionUser(body: unknown): User | null {
+  if (!body || typeof body !== "object") return null;
+  const record = body as { user?: unknown; app_access?: unknown };
+  const nested = record.user;
+  const user = nested && typeof nested === "object" && typeof (nested as User).id === "string" ? (nested as User) : null;
+  if (user) return typeof record.app_access === "boolean" ? { ...user, app_access: record.app_access } : user;
+  const direct = body as User;
+  return typeof direct.id === "string" ? direct : null;
+}
+
+const userOf = (r: { user?: User; app_access?: boolean } | User) => sessionUser(r) ?? (r as User);
 
 export const auth = {
   providers: (signal?: AbortSignal) =>

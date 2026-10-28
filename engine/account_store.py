@@ -279,10 +279,21 @@ class AccountsMixin(DraftWritesMixin):
                        (name, None, max_users, revoked, now(), max_users, revoked))
 
     def delete_access_code(self, name: str) -> bool:
-        """Removes a managed code; False when there is no managed row to delete."""
+        """Removes a managed code, in use or not, and drops it from every account that held it."""
         with self.account_db() as db:
             row = db.execute('DELETE FROM access_codes WHERE name=? AND code_hash IS NOT NULL RETURNING name', (name,)).fetchone()
-        return row is not None
+            if row is None:
+                return False
+            for user_id, raw in db.execute('SELECT id, data FROM account_users').fetchall():
+                payload = json.loads(raw)
+                user = payload.get('user') or {}
+                if user.get('ai_access') != name:
+                    continue
+                user['ai_access'] = None
+                user['ai_access_fingerprint'] = None
+                payload['user'] = user
+                db.execute('UPDATE account_users SET data=? WHERE id=?', (json.dumps(payload), user_id))
+        return True
 
     def accounts_using_code(self, name: str, *, excluding: str | None = None) -> list[User]:
         with self.account_db() as db:

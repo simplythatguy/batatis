@@ -7,12 +7,12 @@ import { AcIcon, clockText, useCountdown } from "./bits";
 import {
   AUTHORITY_CHOICES,
   KEYS,
-  USE_CHOICES,
   answered,
   nextStep,
   onboardingPayload,
   previousStep,
   stepsFor,
+  useChoices,
   type Answers,
   type Choice,
   type StepId,
@@ -57,11 +57,12 @@ export function Onboarding() {
   const [error, setError] = useState("");
   const [wait, startWait] = useCountdown();
   const codeRef = useRef<HTMLInputElement>(null);
-  const steps = stepsFor(answers);
+  const appAccess = account.user?.app_access === true;
+  const steps = stepsFor(answers, appAccess);
   const n = steps.indexOf(step) + 1;
   const ready = answered(step, answers);
 
-  const choices: Choice<string>[] = step === "use" ? USE_CHOICES : step === "authority" ? AUTHORITY_CHOICES : [];
+  const choices: Choice<string>[] = step === "use" ? useChoices(appAccess) : step === "authority" ? AUTHORITY_CHOICES : [];
 
   function pick(value: string) {
     setError("");
@@ -75,13 +76,13 @@ export function Onboarding() {
 
   async function ok() {
     if (!ready || busy || wait > 0) return;
-    const next = nextStep(step, answers);
+    const next = nextStep(step, answers, appAccess);
     if (next) {
       setError("");
       setStep(next);
       return;
     }
-    const body = onboardingPayload(answers);
+    const body = onboardingPayload(answers, appAccess);
     if (!body) return;
     setBusy(true);
     setError("");
@@ -99,7 +100,7 @@ export function Onboarding() {
   }
 
   function back() {
-    const prev = previousStep(step, answers);
+    const prev = previousStep(step, answers, appAccess);
     if (prev) {
       setError("");
       setStep(prev);
@@ -137,7 +138,7 @@ export function Onboarding() {
 
   const value = step === "use" ? answers.use : step === "authority" ? answers.authority : undefined;
   const q = QUESTION[step];
-  const last = ready && !nextStep(step, answers);
+  const last = ready && !nextStep(step, answers, appAccess);
 
   return (
     <div className="ac-onb">
