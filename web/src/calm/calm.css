@@ -5791,6 +5791,11 @@ a.cf-save-check {
   .cf-stages {
     gap: 0;
   }
+  /* Equal side columns centre the rings, and a wide save action then slides under them.
+     Give the actions their own width; the title is what shrinks. */
+  .cf-head {
+    grid-template-columns: minmax(0, 1fr) auto max-content;
+  }
 }
 
 /* Questions before anything is described: one quiet line and the way back to Start. */
