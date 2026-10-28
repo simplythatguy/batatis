@@ -2,6 +2,7 @@ import json
 import re
 
 from fastapi.testclient import TestClient
+import anthropic
 import httpx
 import pytest
 
@@ -372,3 +373,90 @@ def test_context_keeps_the_applicants_answers_and_the_officers_open_items():
     assert 'officer_review' not in applicant
 
 
+def test_a_failed_provider_call_is_logged_without_the_prompt_and_answered_with_a_plain_503(assistant, monkeypatch, caplog):
+    client, _, calls = assistant
+    enable(monkeypatch)
+
+    class WorkspaceError(Exception):
+        status_code = 400
+        body = {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'This API key is not scoped to a workspace'}}
+
+    def failing(**kwargs):
+        raise WorkspaceError('fake-secret and the private question: ' + kwargs['body'].question)
+
+    monkeypatch.setattr(routes_assist, 'call_model', failing)
+    with caplog.at_level('WARNING', logger='engine.assist'):
+        r = ask(client, question='My secret question about a ramp.')
+    assert r.status_code == 503 and r.json()['detail'] == 'Assistant unavailable'
+    assert 'not scoped to a workspace' not in r.text
+    logged = ' '.join(record.getMessage() for record in caplog.records)
+    assert 'anthropic' in logged and 'HTTP 400' in logged and 'not scoped to a workspace' in logged
+    assert 'secret question' not in logged and 'fake-secret' not in logged
+
+
+def _assist_log(caplog) -> str:
+    return ' '.join(record.getMessage() for record in caplog.records if record.name == 'engine.assist')
+
+
+def test_an_openai_401_is_logged_without_the_api_key_and_answered_with_a_plain_503(assistant, monkeypatch, caplog):
+    client, _, _ = assistant
+    enable(monkeypatch, 'openai')
+    key = 'sk-proj-' + ('a' * 40)
+    question = 'My secret question about a ramp.'
+    original_client = httpx.Client
+    adapter = routes_assist.call_model.adapter
+
+    def respond(request):
+        assert str(request.url) == 'https://api.openai.com/v1/chat/completions'
+        return httpx.Response(401, json={'error': {
+            'message': (
+                f'Incorrect API key provided: {key}. You can find your API key at '
+                'https://platform.openai.com/account/api-keys.'),
+            'type': 'invalid_request_error',
+            'code': 'invalid_api_key'}})
+
+    monkeypatch.setattr(routes_assist, 'call_model', adapter)
+    monkeypatch.setattr(routes_assist.httpx, 'Client', lambda **kwargs: original_client(
+        **kwargs, transport=httpx.MockTransport(respond)))
+    with caplog.at_level('WARNING', logger='engine.assist'):
+        response = ask(client, question=question)
+    assert response.status_code == 503 and response.json()['detail'] == 'Assistant unavailable'
+    logged = _assist_log(caplog)
+    assert 'openai' in logged and 'HTTP 401' in logged
+    assert 'Incorrect API key provided' in logged and 'account/api-keys' in logged
+    assert key not in logged and question not in logged and 'fake-secret' not in logged
+    assert key not in response.text and question not in response.text
+    assert 'Incorrect API key' not in response.text and 'HTTP 401' not in response.text
+
+
+@pytest.mark.parametrize('provider', ['openai', 'anthropic'])
+def test_a_refused_connection_is_logged_with_its_reason_and_answered_with_a_plain_503(
+        assistant, monkeypatch, caplog, provider):
+    client, _, _ = assistant
+    enable(monkeypatch, provider)
+    question = 'My secret question about a ramp.'
+    adapter = routes_assist.call_model.adapter
+    monkeypatch.setattr(routes_assist, 'call_model', adapter)
+    if provider == 'openai':
+        original_client = httpx.Client
+
+        def respond(request):
+            raise httpx.ConnectError('[Errno 61] Connection refused')
+
+        monkeypatch.setattr(routes_assist.httpx, 'Client', lambda **kwargs: original_client(
+            **kwargs, transport=httpx.MockTransport(respond)))
+    else:
+        import socket
+        with socket.socket() as sock:
+            sock.bind(('127.0.0.1', 0))
+            port = sock.getsockname()[1]
+        monkeypatch.setenv('ANTHROPIC_BASE_URL', f'http://127.0.0.1:{port}')
+    with caplog.at_level('WARNING', logger='engine.assist'):
+        response = ask(client, question=question)
+    assert response.status_code == 503 and response.json()['detail'] == 'Assistant unavailable'
+    logged = _assist_log(caplog)
+    failure = httpx.ConnectError if provider == 'openai' else anthropic.APIConnectionError
+    assert provider in logged and failure.__name__ in logged and 'connection refused' in logged.lower()
+    assert question not in logged and 'fake-secret' not in logged
+    assert 'connection refused' not in response.text.lower() and question not in response.text
+    assert 'ConnectError' not in response.text and 'APIConnectionError' not in response.text

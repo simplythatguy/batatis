@@ -1,5 +1,7 @@
 """The site admin makes, limits and revokes AI access codes; accounts take a code's seats."""
 import contextvars
+import os
+import uuid
 
 import pytest
 from fastapi.testclient import TestClient
@@ -185,6 +187,43 @@ def test_deleting_all_accounts_clears_users_and_sessions(app, tmp_path):
     with TestClient(app, base_url='http://localhost') as again:
         assert again.get('/auth/me').status_code == 401, 'the old session is gone with its account'
         assert as_admin(again)['admin'] is True
+
+
+@pytest.fixture(params=['sqlite', 'postgres'])
+def cleanup_store(request, tmp_path):
+    if request.param == 'sqlite':
+        yield CaseStore(tmp_path / 'accounts.sqlite')
+        return
+    url = os.environ.get('TEST_DATABASE_URL')
+    if not url:
+        pytest.skip('TEST_DATABASE_URL is not set; real isolated Postgres required')
+    import psycopg
+    from psycopg import sql
+    from psycopg.conninfo import make_conninfo
+    from engine.store_postgres import PostgresCaseStore
+    schema = 'account_cleanup_' + uuid.uuid4().hex
+    with psycopg.connect(url, autocommit=True) as con:
+        con.execute(sql.SQL('CREATE SCHEMA {}').format(sql.Identifier(schema)))
+    try:
+        yield PostgresCaseStore(make_conninfo(url, options=f'-c search_path={schema}'))
+    finally:
+        with psycopg.connect(url, autocommit=True) as con:
+            con.execute(sql.SQL('DROP SCHEMA {} CASCADE').format(sql.Identifier(schema)))
+
+
+def test_deleting_all_accounts_clears_legacy_install_records(cleanup_store):
+    store = cleanup_store
+    assert 'access_installs' not in store.delete_all_accounts()
+    with store.account_db() as db:
+        db.execute('CREATE TABLE access_installs (code_name TEXT, install_hash TEXT, last_seen DOUBLE PRECISION)')
+        db.execute('INSERT INTO access_installs VALUES (?, ?, ?)', ('old', 'digest', 0))
+
+    counts = store.delete_all_accounts()
+
+    with store.account_db() as db:
+        assert db.execute('SELECT COUNT(*) FROM access_installs').fetchone()[0] == 0
+    assert counts['access_installs'] == 1
+    assert store.delete_all_accounts()['access_installs'] == 0
 
 
 def test_signing_in_with_a_code_and_a_name_makes_one_account_per_name_and_turns_ai_on(app):

@@ -55,21 +55,23 @@ Batatis guides the application that matches the project, then gives the officer 
 
 ### Which application you prepare
 
-![From the project description, the checks lead to a stop, a standard package, a variance package, or a request for the missing fact](docs/readme/which-path.png)
+![From the design, through the building-code check and one coded rule, to a stop, the shared evidence ladder and permit paperwork, or the six process statements, the evidence types, and the site paperwork](docs/diagrams/applicant-path-decision.png)
 
-Batatis runs the checks in order. The first one that settles the project chooses the package. The picture shows where each answer leads.
+The picture in [Our solution](#our-solution) is the whole product, from the first description through the officer's decision. This picture is the package that path opens. It keeps every stop, the shared evidence ladder, the six process statements, and the paperwork.
 
-1. **Describe the project.** You write it in your own words, or you drop in PDFs.
-2. **What do the checks find?**
-   - **Another code.** The project belongs to a different safety code. Batatis stops and points you there. No building-code form opens.
-   - **Follows.** The numbers of one named rule show that the design follows the standard way. You get the standard package, which asks for evidence only.
-   - **Departs.** Those numbers show a departure. You get the variance package, which asks for six statements, then proof.
-   - **Does not apply.** The rule does not apply. No form opens.
-   - **Not sure.** None of the checks settle it. Batatis stops and asks you to name the missing fact. It does not open a variance form.
+Batatis starts from the design you describe.
 
-The checks run in this order. A different safety code is first. Then the numbers of one named rule, and only when they are firm. A guess you have not confirmed does not count. Then a path you already confirmed. Then the words you wrote. A confirmed request for a variance counts as a chosen path. A firm result from the numbers still wins over it.
+1. **Is this a National Building Code, Alberta Edition question?** If it belongs to another safety code, Batatis stops. No package opens.
+2. **Use facts already written.** Batatis reads the description and the files before it asks anything.
+3. **One coded rule.** Batatis asks only for the inputs that rule still needs.
+4. **Does the design meet or exceed the acceptable solution?** A firm coded check decides this. A labeled assumption is not firm. When the check is not firm, a path you already confirmed is next, and then the words you wrote. A confirmed request for a variance counts as a chosen path. A firm result from the numbers still wins over it.
+   - **Acceptable solution.** The shared evidence ladder, then the permit paperwork. No process fields on this path. The ladder is the manufacturer's technical literature, an existing STANDATA variance, a test report, an evaluation, a qualification, and a certification.
+   - **Not decided.** Batatis stops and names the missing fact. No package opens. A rule that does not apply stops the same way.
+   - **Alternative solution.** Six process statements, then the evidence types to discuss, then paperwork that asks whether the request covers one site or the whole municipality.
 
-The six statements are why you want the change, what could go wrong, what you add, what the plan depends on, how it will be maintained, and who is responsible. They are part of the process. They are not extra proof. The standard package does not ask for them, and it does not ask whether the request covers one site or every site in a municipality. The variance package asks for both.
+The six statements are rationale, risk assessment, mitigating measures, assumptions and limits, maintenance and operation, and qualifications. The picture marks them as process fields, not evidence. They are why you want the change, what could go wrong, what you add, what the plan depends on, how it will be maintained, and who is responsible. The variance path discusses the same ladder, and also a CCMC evaluation, an ICC-ES evaluation, a registered professional opinion, and an engineering review.
+
+Both packages end at an administrative review. That review checks the paperwork. It is not a technical decision.
 
 Batatis does not ask you for the rule's purpose, the job the rule does, or the intent behind it. Once an article is named, that part of the form comes from the code's own tables.
 
@@ -171,16 +173,16 @@ This diagram shows the hosted website. It has the same steps as the one in [Our 
 
 ### How the path is chosen
 
-The picture in [Which application you prepare](#which-application-you-prepare) is this decision. `decide_path` in [`engine/path_decision.py`](engine/path_decision.py) runs the checks. `decidePath` in [`web/src/pathDecision.ts`](web/src/pathDecision.ts) repeats them on the screen, so the questions match the package the engine will build.
+The picture in [Which application you prepare](#which-application-you-prepare) is this decision, and it shows the package each result opens. `decide_path` in [`engine/path_decision.py`](engine/path_decision.py) runs the checks. `decidePath` in [`web/src/pathDecision.ts`](web/src/pathDecision.ts) repeats them on the screen, so the questions match the package the engine will build.
 
 The checks run in order. The first one that settles the project wins.
 
-1. A different safety code is first. The picture labels that result "Another code". [`engine/intake/scope.py`](engine/intake/scope.py) classifies the text. A redirect stops the question list.
+1. A different safety code is first. The picture labels that result "Other regime. Stop. No package." [`engine/intake/scope.py`](engine/intake/scope.py) classifies the text. A redirect stops the question list.
 2. A firm coded check is next. A labeled assumption is not firm. "Follows" opens the standard package. "Departs" opens the variance package. "Does not apply" stops. The check can name one Division B sentence. Section C for that sentence is a lookup in CodeDB, the SQLite copy of the code. A miss says the lookup missed that sentence.
 3. When the check is not firm, a recorded pathway or route is used. A confirmed request for a variance counts too, even when the description is empty. A firm check still wins over that request.
-4. Then the words. [`engine/intake/fork.py`](engine/intake/fork.py) reads them. If they do not decide, the result is **Not sure**. The variance package stays closed.
+4. Then the words. [`engine/intake/fork.py`](engine/intake/fork.py) reads them. If they do not decide, the picture says "Not decided. Stop. No package." The variance package stays closed.
 
-`alternative_path` in [`engine/process_fields.py`](engine/process_fields.py) is true only when the path is alternative. Only then does the question list open the six process fields. Both the acceptable path and the alternative path use the shared evidence ladder. The question about one site or a whole municipality appears only on the alternative path.
+`alternative_path` in [`engine/process_fields.py`](engine/process_fields.py) is true only when the path is alternative. Only then does the question list open the six process fields. Both the acceptable path and the alternative path use the shared evidence ladder. The question about one site or a whole municipality appears only on the alternative path. `CONFIDENCE_LADDER` and `ALTERNATIVE_EVIDENCE_TYPES` in [`engine/section_d.py`](engine/section_d.py) are those evidence types. The code ladder also includes evaluation plus testing, between evaluation and qualification.
 
 The applicant is not asked for objectives, functional statements, or intent.
 

@@ -295,6 +295,13 @@ class AccountsMixin(DraftWritesMixin):
         with self.account_db() as db:
             counts = {table: db.execute(f'SELECT COUNT(*) FROM {table}').fetchone()[0]
                       for table in ('account_users', 'account_sessions', 'account_identities', 'account_oauth', 'account_rates')}
+            legacy_installs = db.execute(
+                "SELECT to_regclass('access_installs') IS NOT NULL" if db.postgres else
+                "SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE type='table' AND name='access_installs')"
+            ).fetchone()[0]
+            if legacy_installs:
+                counts['access_installs'] = db.execute('SELECT COUNT(*) FROM access_installs').fetchone()[0]
+                db.execute('DELETE FROM access_installs')
             for table in ('account_application_preferences', 'account_sessions', 'account_identities', 'account_oauth', 'account_rates',
                           'account_users'):
                 db.execute(f'DELETE FROM {table}')
