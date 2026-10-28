@@ -1,0 +1,404 @@
+{
+  "models": {
+    "screen": "jev-1.13.0",
+    "rerank": "jev-1.13.0",
+    "verifier": "claude-haiku-5-5",
+    "verifier_effort": "medium"
+  },
+  "summary": {
+    "all": {
+      "passed": 17,
+      "cases": 17,
+      "fallbacks": 0
+    },
+    "places": {
+      "Calgary": {
+        "passed": 13,
+        "cases": 13,
+        "fallbacks": 0
+      },
+      "Edmonton": {
+        "passed": 4,
+        "cases": 4,
+        "fallbacks": 0
+      }
+    },
+    "quotes_dropped": 3,
+    "usd": 0.3114
+  },
+  "rows": [
+    {
+      "id": "ab-calgary-airborne-sound-between-dwellings",
+      "place": "Calgary",
+      "type": "interpretation",
+      "passed": true,
+      "rule": "a cited article is among the three quoted choices",
+      "fallback": false,
+      "gold": [
+        "9.11.1.1.",
+        "9.11.1.4.",
+        "5.8.1.4.",
+        "5.8.1.5."
+      ],
+      "first_shown": "9.11.1.1.",
+      "choices": [
+        "9.11.1.1.",
+        "9.11.1.3.",
+        "9.11.1.2."
+      ],
+      "dropped": 0,
+      "usd": 0.018012,
+      "seconds": 9.928,
+      "verifier": "7 picked, 0 dropped"
+    },
+    {
+      "id": "ab-calgary-existing-secondary-suite-legalization",
+      "place": "Calgary",
+      "type": "interpretation",
+      "passed": true,
+      "rule": "first article shown is a cited Part 9 article",
+      "fallback": false,
+      "gold": [
+        "9.9.10.1.",
+        "9.32.3.9."
+      ],
+      "first_shown": "9.9.10.1.",
+      "choices": [
+        "9.9.10.1.",
+        "9.7.2.2.",
+        "9.32.3.9."
+      ],
+      "dropped": 0,
+      "usd": 0.017975,
+      "seconds": 8.972,
+      "verifier": "4 picked, 0 dropped"
+    },
+    {
+      "id": "ab-calgary-f3-garage-wall-facing-dwellings",
+      "place": "Calgary",
+      "type": "variance",
+      "passed": true,
+      "rule": "first article shown is a cited Part 9 article",
+      "fallback": false,
+      "gold": [
+        "9.10.14.2.",
+        "9.10.14.5."
+      ],
+      "first_shown": "9.10.14.2.",
+      "choices": [
+        "9.10.14.2.",
+        "9.10.14.5.",
+        "3.1.5.1."
+      ],
+      "dropped": 1,
+      "usd": 0.018516,
+      "seconds": 9.331,
+      "verifier": "4 picked, 1 dropped"
+    },
+    {
+      "id": "ab-calgary-fire-access-rear-part9-building",
+      "place": "Calgary",
+      "type": "interpretation",
+      "passed": true,
+      "rule": "a cited article is among the three quoted choices",
+      "fallback": false,
+      "gold": [
+        "9.10.20.3.",
+        "3.2.5.6."
+      ],
+      "first_shown": "9.10.20.3.",
+      "choices": [
+        "9.10.20.3.",
+        "3.2.5.6.",
+        "3.2.5.5."
+      ],
+      "dropped": 0,
+      "usd": 0.019058,
+      "seconds": 18.527,
+      "verifier": "7 picked, 0 dropped"
+    },
+    {
+      "id": "ab-calgary-micro-brewery-tasting-room-separation",
+      "place": "Calgary",
+      "type": "interpretation",
+      "passed": true,
+      "rule": "a cited article is among the three quoted choices",
+      "fallback": false,
+      "gold": [
+        "3.1.3.1.",
+        "3.3.1.1."
+      ],
+      "first_shown": "3.2.2.8.",
+      "choices": [
+        "3.2.2.8.",
+        "3.1.3.1.",
+        "3.1.2.1."
+      ],
+      "dropped": 0,
+      "usd": 0.018031,
+      "seconds": 9.108,
+      "verifier": "5 picked, 0 dropped"
+    },
+    {
+      "id": "ab-calgary-newer-ashrae-ventilation-edition",
+      "place": "Calgary",
+      "type": "variance",
+      "passed": true,
+      "rule": "a cited article is among the three quoted choices",
+      "fallback": false,
+      "gold": [
+        "1.3.1.2."
+      ],
+      "first_shown": "1.3.1.2.",
+      "choices": [
+        "1.3.1.2.",
+        "1.3.1.1.",
+        "6.3.1.1."
+      ],
+      "dropped": 0,
+      "usd": 0.017895,
+      "seconds": 10.496,
+      "verifier": "4 picked, 0 dropped"
+    },
+    {
+      "id": "ab-calgary-openings-near-exterior-exit-stair",
+      "place": "Calgary",
+      "type": "interpretation",
+      "passed": true,
+      "rule": "first article shown is a cited Part 9 article",
+      "fallback": false,
+      "gold": [
+        "9.9.4.4."
+      ],
+      "first_shown": "9.9.4.4.",
+      "choices": [
+        "9.9.4.4.",
+        "9.9.4.1.",
+        "3.2.5.12."
+      ],
+      "dropped": 0,
+      "usd": 0.018346,
+      "seconds": 11.934,
+      "verifier": "6 picked, 0 dropped"
+    },
+    {
+      "id": "ab-calgary-permanent-hail-shelter",
+      "place": "Calgary",
+      "type": "interpretation",
+      "passed": true,
+      "rule": "a cited article is among the three quoted choices",
+      "fallback": false,
+      "gold": [
+        "3.2.2.2."
+      ],
+      "first_shown": "3.2.2.2.",
+      "choices": [
+        "3.2.2.2.",
+        "4.4.1.1.",
+        "4.1.6.10."
+      ],
+      "dropped": 0,
+      "usd": 0.018396,
+      "seconds": 8.76,
+      "verifier": "6 picked, 0 dropped"
+    },
+    {
+      "id": "ab-calgary-rowhouse-suites-without-firewall",
+      "place": "Calgary",
+      "type": "variance",
+      "passed": true,
+      "rule": "first article shown is a cited Part 9 article",
+      "fallback": false,
+      "gold": [
+        "9.10.11.2.",
+        "9.10.13.13."
+      ],
+      "first_shown": "9.10.11.2.",
+      "choices": [
+        "9.10.11.2.",
+        "9.9.9.3.",
+        "9.9.8.2."
+      ],
+      "dropped": 0,
+      "usd": 0.018586,
+      "seconds": 11.723,
+      "verifier": "8 picked, 0 dropped"
+    },
+    {
+      "id": "ab-calgary-side-yard-egress-widths",
+      "place": "Calgary",
+      "type": "interpretation",
+      "passed": true,
+      "rule": "first article shown is a cited Part 9 article",
+      "fallback": false,
+      "gold": [
+        "9.9.3.1.",
+        "9.5.4.1.",
+        "9.8.2.1.",
+        "9.8.6.3.",
+        "9.9.10.1."
+      ],
+      "first_shown": "9.9.10.1.",
+      "choices": [
+        "9.9.10.1.",
+        "9.7.2.2.",
+        "3.8.3.6."
+      ],
+      "dropped": 0,
+      "usd": 0.018415,
+      "seconds": 11.225,
+      "verifier": "6 picked, 0 dropped"
+    },
+    {
+      "id": "ab-calgary-smoking-room-ventilation",
+      "place": "Calgary",
+      "type": "interpretation",
+      "passed": true,
+      "rule": "a cited article is among the three quoted choices",
+      "fallback": false,
+      "gold": [
+        "6.3.1.1."
+      ],
+      "first_shown": "6.3.1.1.",
+      "choices": [
+        "6.3.1.1.",
+        "1.3.1.2.",
+        "1.3.1.1."
+      ],
+      "dropped": 0,
+      "usd": 0.01801,
+      "seconds": 10.957,
+      "verifier": "5 picked, 0 dropped"
+    },
+    {
+      "id": "ab-calgary-temporary-bleachers",
+      "place": "Calgary",
+      "type": "interpretation",
+      "passed": true,
+      "rule": "a cited article is among the three quoted choices",
+      "fallback": false,
+      "gold": [
+        "3.3.2.12.",
+        "3.3.2.9.",
+        "4.1.5.14."
+      ],
+      "first_shown": "3.3.2.12.",
+      "choices": [
+        "3.3.2.12.",
+        "3.3.2.9.",
+        "4.1.5.14."
+      ],
+      "dropped": 0,
+      "usd": 0.018596,
+      "seconds": 11.045,
+      "verifier": "10 picked, 0 dropped"
+    },
+    {
+      "id": "ab-calgary-zero-lot-line-soffits",
+      "place": "Calgary",
+      "type": "variance",
+      "passed": true,
+      "rule": "first article shown is a cited Part 9 article",
+      "fallback": false,
+      "gold": [
+        "9.10.15.5."
+      ],
+      "first_shown": "9.10.15.5.",
+      "choices": [
+        "9.10.15.5.",
+        "9.10.15.4.",
+        "9.10.15.1."
+      ],
+      "dropped": 2,
+      "usd": 0.018988,
+      "seconds": 12.363,
+      "verifier": "4 picked, 2 dropped"
+    },
+    {
+      "id": "ab-edmonton-exterior-stair-opening-protection-thresholds",
+      "place": "Edmonton",
+      "type": "interpretation",
+      "passed": true,
+      "rule": "first article shown is a cited Part 9 article",
+      "fallback": false,
+      "gold": [
+        "9.9.4.4."
+      ],
+      "first_shown": "9.9.4.4.",
+      "choices": [
+        "9.9.4.4.",
+        "9.9.4.1.",
+        "9.9.4.2."
+      ],
+      "dropped": 0,
+      "usd": 0.018251,
+      "seconds": 11.781,
+      "verifier": "5 picked, 0 dropped"
+    },
+    {
+      "id": "ab-edmonton-rowhouse-one-hour-party-wall",
+      "place": "Edmonton",
+      "type": "variance",
+      "passed": true,
+      "rule": "first article shown is a cited Part 9 article",
+      "fallback": false,
+      "gold": [
+        "9.10.11.2."
+      ],
+      "first_shown": "9.10.11.2.",
+      "choices": [
+        "9.10.11.2.",
+        "9.10.11.1.",
+        "9.10.15.1."
+      ],
+      "dropped": 0,
+      "usd": 0.017683,
+      "seconds": 8.013,
+      "verifier": "3 picked, 0 dropped"
+    },
+    {
+      "id": "ab-edmonton-single-stair-point-access-block",
+      "place": "Edmonton",
+      "type": "alternative-solution-example",
+      "passed": true,
+      "rule": "a cited article is among the three quoted choices",
+      "fallback": false,
+      "gold": [
+        "3.4.2.1."
+      ],
+      "first_shown": "3.4.2.1.",
+      "choices": [
+        "3.4.2.1.",
+        "3.4.1.1.",
+        "3.4.2.5."
+      ],
+      "dropped": 0,
+      "usd": 0.017842,
+      "seconds": 7.918,
+      "verifier": "3 picked, 0 dropped"
+    },
+    {
+      "id": "ab-edmonton-suite-exit-door-window-exposure",
+      "place": "Edmonton",
+      "type": "interpretation",
+      "passed": true,
+      "rule": "first article shown is a cited Part 9 article",
+      "fallback": false,
+      "gold": [
+        "9.9.4.6.",
+        "9.9.4.4.",
+        "9.9.9.3."
+      ],
+      "first_shown": "9.9.4.6.",
+      "choices": [
+        "9.9.4.6.",
+        "9.10.12.3.",
+        "3.2.3.14."
+      ],
+      "dropped": 0,
+      "usd": 0.018766,
+      "seconds": 12.862,
+      "verifier": "6 picked, 0 dropped"
+    }
+  ]
+}
