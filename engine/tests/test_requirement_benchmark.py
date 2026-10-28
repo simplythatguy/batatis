@@ -2,7 +2,9 @@
 import sqlite3
 
 from engine.identify.config import IdentifyConfig
+from engine.identify.decisions import record_departure
 from engine.identify.pipeline import run
+from engine.models import Case
 from engine.models_identify import BenchmarkRecord
 from engine.tests.test_requirement_identification import database, fact
 
@@ -42,3 +44,15 @@ def test_unverified_source_retains_human_prose_without_releasing_old_citations(t
     assert result.benchmark.departure == previous.benchmark.departure
     assert result.benchmark.citation is result.benchmark.sentence is result.benchmark.provision is None
     assert result.benchmark.departure_status == 'proposed' and not result.benchmark.identified
+
+
+def test_recorded_departure_marks_the_requirement_varied_in_the_applicants_words(tmp_path):
+    codes, result = initial(tmp_path)
+    case = Case(id='case_departure', identify=result)
+    written = record_departure(case, '9.1.1.1.(1)', codes, reason='Use a different opening arrangement.')
+    assert [row.provision_id for row in written] == ['9.1.1.1.(1)']
+    assert case.provisions == ['9.1.1.1.']
+    varied = [row for row in result.requirements if row.provision_id == '9.1.1.1.']
+    assert varied and varied[0].role == 'varied' and varied[0].disposition == 'include'
+    assert varied[0].confirmation_reason == 'Use a different opening arrangement.'
+    assert varied[0].human_confirmed and not varied[0].needs_review
