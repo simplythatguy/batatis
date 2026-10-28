@@ -1,4 +1,4 @@
-"""The site admin's access-code manager: make a code, see who uses it, cap its seats, switch it off, remove an unused one."""
+"""The site admin's access-code manager: make a code, see who uses it, cap its seats, switch it off, remove it."""
 from __future__ import annotations
 
 import re
@@ -105,9 +105,6 @@ def create_router(cases):
             raise HTTPException(404, 'No such access code')
         if row is None or not row['code_hash']:
             raise HTTPException(409, 'This code comes from the server settings; switch it off instead of removing it')
-        used = len(store.accounts_using_code(name))
-        if used:
-            raise HTTPException(409, f'{used} still using this code. Turn it off instead of removing it.')
         if not store.delete_access_code(name):
             raise HTTPException(404, 'No such access code')
         ai_access.forget()

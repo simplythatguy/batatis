@@ -132,12 +132,25 @@ def limit(name: str) -> int | None:
     return row['max_users'] if row else None
 
 
+def holds(user) -> bool:
+    """True when this account entered an app access code that is still live.
+
+    `granted()` is also true on a local engine that has no codes at all. That vacuous
+    grant is not an access code, and it does not open the reviewer role.
+    """
+    name = getattr(user, 'ai_access', None) if user is not None else None
+    if not name:
+        return False
+    expected = current(name)
+    if expected is None:
+        return False
+    return secrets.compare_digest(expected, getattr(user, 'ai_access_fingerprint', None) or '')
+
+
 def granted(user) -> bool:
     if not required():
         return True
-    name = getattr(user, 'ai_access', None) if user is not None else None
-    expected = current(name)
-    return expected is not None and secrets.compare_digest(expected, getattr(user, 'ai_access_fingerprint', None) or '')
+    return holds(user)
 
 
 def allowed() -> bool:

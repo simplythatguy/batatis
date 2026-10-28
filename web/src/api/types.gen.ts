@@ -2388,6 +2388,7 @@ export interface User {
 
 export interface UserResult {
   admin: boolean;
+  app_access: boolean;
   user: User;
 }
 

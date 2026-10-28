@@ -31,7 +31,7 @@ The composer accepts PDF, JPG, PNG, WebP, TXT and MD. PDF and image files wait f
 
 Pressing Start remembers the intent to start through sign-in, sign-up and onboarding. The pre-application text and that intent use tab-scoped `sessionStorage`, never `localStorage`; they clear when the application begins or the person signs out. File objects stay in memory during email sign-in. After a full-page OAuth reload, Start says "Attach your files again" and waits for reattachment, or an explicit choice to use the description alone.
 
-Onboarding asks apply or review. The applicant choice is "I have a building project" with "Owner, designer, builder, engineer or manufacturer" beneath it. There is no applicant-type step. Reviewers still choose their authority and enter its access code. A new application starts with `applicantType: null`; an account's older applicant type is never used to choose one for it. Settings accepts an unanswered applicant type, and changing into or out of the reviewer role keeps the access-code rule.
+Onboarding asks apply or review. The applicant choice is "I have a building project" with "Owner, designer, builder, engineer or manufacturer" beneath it. There is no applicant-type step. Reviewers still choose their authority. An account that already holds a live testing access code does not enter an authority access code; other accounts do. A new application starts with `applicantType: null`; an account's older applicant type is never used to choose one for it. Settings accepts an unanswered applicant type. Changing into or out of the reviewer role asks for the authority access code, except when the account already holds a live testing access code.
 
 ### Deck order
 
