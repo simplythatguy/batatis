@@ -152,6 +152,29 @@ For example, one Calgary case hands Batatis the city's zero-lot-line variance. P
 
 Many published decisions state their outcome, so the cases test reading and paperwork, not whether a design should be approved. To try one, open a case folder, paste its `prompt.txt` into Batatis, and attach the documents it lists. The [practice cases guide](Data%20Prompts/README.md) explains how to restore the original documents, which Git doesn't store, and how to check the results. The Calgary example is case [L04-001](Data%20Prompts/Canada/Alberta/Calgary/Prompts/L04-001-calgary-spv-001-zero-lot-line-revision-5-with-revision-4-history/prompt.txt).
 
+## What we measured
+
+These checks record what Batatis did on public city documents and on practice text. They do not say an officer approved a design. Batatis never makes that decision.
+
+| What | Result | Where it came from |
+| --- | --- | --- |
+| Calgary and Edmonton writeups where it showed a code section the writeup actually cites | 17 of 17 | Real public Calgary and Edmonton documents, shortened into text |
+| Made-up code quotes the user saw | 0. It wrote 3 and threw them away before they appeared | Same 17 documents. The 3 quotes were written by the app during the test |
+| Blanks it filled that matched the description | 159 of 159 | Made up. 60 practice descriptions written from the code book |
+| Mistakes we hid in sample forms that it caught | 18 of 18 | Made up. We planted the mistakes in sample forms |
+| Cases where an engineer was needed and it said so | 33 of 33 | Made up. Same 60 practice descriptions. The engineer labels were written with the cases |
+| Real applications an officer has tested | 0. No one has tested this | No officer has used the app |
+
+The 17 of 17 is the row to say out loud. Those writeups are real public documents from Calgary and Edmonton, shortened into text. The shortened text left the article numbers out. No made-up quote reached the screen.
+
+In the app, article search starts from the code's own requirement rules. Jev, a search model, can rerank that list. This run asked Jev 1.13.0 to rank the articles from the start. Claude Haiku 5.5, at medium effort, then checked that each quote was word for word. Nine of the writeups are houses under Part 9, the part of the code for houses and small buildings. Those counted when the first section shown was one the document cites. The other eight counted when a cited section was among the three shown. In one of those eight, the first section was a different article, and a cited section was still among the three.
+
+The 159, the 18, and the 33 look perfect because we wrote the practice cases and the answer key. A judge who asks where the data came from should treat those rows as a demo. On those 60 descriptions the engineer check said yes or not sure, so it caught every case where an engineer was needed. The receipt scores a match against every label at 50 of 60. This table counts the 33 cases where an engineer was needed.
+
+The last row stays at 0. No officer has tried a real application.
+
+The saved rows are in the [city-document run](evals_dev/judge_bench_results.json). The documents are listed in the [Alberta cases](docs/research/2026-10-23-elephant/cases-alberta.md). The blanks are in the [accuracy report](docs/accuracy/report.md). The planted mistakes are in the [form-check test](engine/tests/test_package_review_planted.py). The engineer labels are in the [Section D receipt](evals_dev/section_d_flag/RESULTS.md).
+
 ## What's next
 
 - Offer the website as a paid service, with AI included.
