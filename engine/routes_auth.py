@@ -115,12 +115,18 @@ def create_router(cases):
             if seats is not None and len(store.accounts_using_code(code_name)) + store.installs_using_code(code_name) >= seats:
                 raise HTTPException(403, 'That access code is full')
             user = User(email=email, name=body.name, ai_access=code_name, ai_access_fingerprint=fingerprint)
+            if code_name == ai_access.ADMIN:
+                # The admin account exists for the manager, onboarding offers nothing it needs to answer.
+                user.onboarded = True
             if not store.create_user(user, None):
                 data = store.user_credentials(email)
         if data is not None:
             user = User.model_validate(data['user'])
             user.name = body.name
             user.ai_access, user.ai_access_fingerprint = code_name, fingerprint
+            if code_name == ai_access.ADMIN:
+                # The admin signs the account in even before this change existed: old admin accounts skip onboarding too.
+                user.onboarded = True
             store.update_user(user, revoke_sessions=False)
         issue_session(store, user, request, response)
         return UserResult(user=user)

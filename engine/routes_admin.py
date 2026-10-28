@@ -1,4 +1,4 @@
-"""The site admin's access-code manager: make a code, see who uses it, cap its seats, switch it off."""
+"""The site admin's access-code manager: make a code, see who uses it, cap its seats, switch it off, remove an unused one."""
 from __future__ import annotations
 
 import re
@@ -97,5 +97,22 @@ def create_router(cases):
         store.set_access_code(name, max_users=max_users, revoked=revoked)
         ai_access.forget()
         return info(store, name)
+
+    @router.delete('/access-codes/{name}', status_code=204)
+    def remove_code(name: str, request: Request):
+        """Deletes a managed code that nobody uses. A code in use or from the environment is refused."""
+        require_admin(request)
+        store = cases()
+        row = store.access_code(name)
+        if name == ai_access.ADMIN or (row is None and name not in ai_access.codes()):
+            raise HTTPException(404, 'No such access code')
+        if row is None or not row['code_hash']:
+            raise HTTPException(409, 'This code comes from the server settings; switch it off instead of removing it')
+        used = len(store.accounts_using_code(name)) + store.installs_using_code(name)
+        if used:
+            raise HTTPException(409, f'{used} still using this code. Turn it off instead of removing it.')
+        if not store.delete_access_code(name):
+            raise HTTPException(404, 'No such access code')
+        ai_access.forget()
 
     return router

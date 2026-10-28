@@ -5,6 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from engine import ai_access, llm_gate
+from engine.account_models import User
 from engine.api import create_app
 from engine.store import CaseStore
 
@@ -50,14 +51,30 @@ def probe(client):
 
 def test_only_the_admin_code_makes_an_admin_and_only_the_admin_reaches_the_manager(app):
     with TestClient(app, base_url='http://localhost') as admin, TestClient(app, base_url='http://localhost') as other:
-        assert as_admin(admin)['admin'] is True
+        made = as_admin(admin)
+        assert made['admin'] is True
+        assert made['user']['onboarded'] is True, 'the admin skips onboarding: the manager is all their account is for'
         assert admin.get('/auth/me').json()['admin'] is True
+        assert admin.get('/auth/me').json()['user']['onboarded'] is True
         assert signup(other, "someone@example.test")["admin"] is False
         assert other.get('/admin/access-codes').status_code == 403
         assert other.post('/admin/access-codes', json={'name': 'x'}).status_code == 403
         assert admin.get('/admin/access-codes').status_code == 200
     with TestClient(app, base_url='http://localhost') as anonymous:
         assert anonymous.get('/admin/access-codes').status_code == 401
+
+
+def test_an_admin_account_from_an_older_build_skips_onboarding_on_its_next_sign_in(app, tmp_path):
+    with TestClient(app, base_url='http://localhost') as admin:
+        made = as_admin(admin)
+    store = CaseStore(tmp_path / 'accounts.sqlite')
+    user = User.model_validate(store.user_credentials(made['user']['email'])['user'])
+    user.onboarded = False
+    store.update_user(user)
+    with TestClient(app, base_url='http://localhost') as back:
+        assert as_admin(back)['user']['onboarded'] is True
+    store = CaseStore(tmp_path / 'accounts.sqlite')
+    assert User.model_validate(store.user_credentials(made['user']['email'])['user']).onboarded is True
 
 
 def test_a_made_code_turns_ai_on_shows_in_use_and_stops_at_its_limit(app):
@@ -108,6 +125,38 @@ def test_revoking_a_code_turns_its_accounts_off_and_restoring_turns_them_back_on
         assert probe(person) is True
         assert admin.patch('/admin/access-codes/nope', json={'revoked': True}).status_code == 404
         assert admin.post('/admin/access-codes', json={'name': 'team'}).status_code == 409
+
+
+def test_removing_an_unused_managed_code_deletes_only_it(app):
+    with TestClient(app, base_url='http://localhost') as admin, TestClient(app, base_url='http://localhost') as first:
+        as_admin(admin)
+        spare = admin.post('/admin/access-codes', json={'name': 'spare'}).json()['code']
+        used = admin.post('/admin/access-codes', json={'name': 'used'}).json()['code']
+        assert first.post('/auth/code-login', json={'code': used, 'name': 'First'}).status_code == 200
+        assert admin.delete('/admin/access-codes/spare').status_code == 204
+        listed = [(c['name'], c['source']) for c in admin.get('/admin/access-codes').json()['codes']]
+        assert listed == [('used', 'managed')], 'only the removed code is gone'
+        assert first.post('/auth/code-login', json={'code': spare, 'name': 'Anyone'}).status_code == 403, 'a removed code no longer signs anybody in'
+        assert first.get('/auth/me').json()['user']['ai_access'] == 'used', "users of a kept code keep their access"
+        assert admin.delete('/admin/access-codes/nope').status_code == 404
+        assert admin.delete('/admin/access-codes/admin').status_code == 404, "the admin code is the server's own setting"
+
+
+def test_removing_refuses_a_code_in_use_and_an_environment_code(app, monkeypatch):
+    monkeypatch.setenv('BATATIS_AI_ACCESS_CODES', '{"judges": "judges-code-aaaaaaaaaaaaaaaa"}')
+    with TestClient(app, base_url='http://localhost') as admin, TestClient(app, base_url='http://localhost') as person:
+        as_admin(admin)
+        code = admin.post('/admin/access-codes', json={'name': 'team'}).json()['code']
+        signup(person, 'person@example.test')
+        person.post('/auth/ai-access', json={'code': code})
+        busy = admin.delete('/admin/access-codes/team')
+        assert busy.status_code == 409 and 'Turn it off' in busy.json()['detail']
+        listed = {c['name']: c for c in admin.get('/admin/access-codes').json()['codes']}
+        assert listed['team']['in_use'] == 1 and listed['team']['revoked'] is False
+        assert admin.patch('/admin/access-codes/team', json={'revoked': True}).status_code == 200, 'turn it off, then remove is still refused while accounts hold it'
+        assert admin.delete('/admin/access-codes/team').status_code == 409, 'a code accounts still reference is never deleted out from under them'
+        environmental = admin.delete('/admin/access-codes/judges')
+        assert environmental.status_code == 409 and 'server settings' in environmental.json()['detail']
 
 
 def test_environment_codes_can_be_limited_and_revoked_too(app, monkeypatch):

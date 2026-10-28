@@ -1,4 +1,4 @@
-/** Settings → Access codes, for the site admin only: make a code, see who is using it, cap its seats, switch it off. */
+/** Settings → Access codes, for the site admin only: make a code, see who is using it, cap its seats, switch it off, remove an unused one. */
 import { useEffect, useState } from "react";
 import { AccountsError, adminCodes, type AccessCodeInfo } from "../../api/accounts";
 import { Row } from "./rows";
@@ -7,7 +7,7 @@ const message = (e: unknown) => (e instanceof AccountsError && e.detail ? e.deta
 const seats = (text: string): number | null => (text.trim() === "" ? null : Math.max(1, Math.floor(Number(text))));
 const validSeats = (text: string) => text.trim() === "" || (Number.isFinite(Number(text)) && Number(text) >= 1);
 
-function CodeRow({ info, onChange, onError }: { info: AccessCodeInfo; onChange: (next: AccessCodeInfo) => void; onError: (text: string) => void }) {
+function CodeRow({ info, onChange, onRemove, onError }: { info: AccessCodeInfo; onChange: (next: AccessCodeInfo) => void; onRemove: (name: string) => void; onError: (text: string) => void }) {
   const [limit, setLimit] = useState(info.max_users === null ? "" : String(info.max_users));
   const [busy, setBusy] = useState(false);
   const dirty = limit.trim() !== (info.max_users === null ? "" : String(info.max_users));
@@ -18,6 +18,18 @@ function CodeRow({ info, onChange, onError }: { info: AccessCodeInfo; onChange: 
       const next = await adminCodes.change(info.name, patch);
       onChange(next);
       setLimit(next.max_users === null ? "" : String(next.max_users));
+    } catch (e) {
+      onError(message(e));
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function remove() {
+    setBusy(true);
+    onError("");
+    try {
+      await adminCodes.remove(info.name);
+      onRemove(info.name);
     } catch (e) {
       onError(message(e));
     } finally {
@@ -38,6 +50,7 @@ function CodeRow({ info, onChange, onError }: { info: AccessCodeInfo; onChange: 
       <span className="ac-row-action">
         {dirty && <button type="button" className="cf-btn is-xs is-primary" disabled={busy || !validSeats(limit)} onClick={() => void save({ max_users: seats(limit) })}>Save</button>}
         <button type="button" className="cf-btn is-xs is-ghost" disabled={busy} onClick={() => void save({ revoked: !info.revoked })}>{info.revoked ? "Turn on" : "Turn off"}</button>
+        {info.source === "managed" && <button type="button" className="cf-btn is-xs is-ghost" disabled={busy} onClick={() => void remove()}>Remove</button>}
       </span>
     </div>
   );
@@ -85,6 +98,7 @@ export function AccessCodesSection() {
       {codes.length === 0 && <p className="ac-help">No codes yet.</p>}
       {codes.map((info) => (
         <CodeRow key={info.name} info={info} onError={setError}
+          onRemove={(name) => setCodes((all) => all && all.filter((item) => item.name !== name))}
           onChange={(next) => setCodes((all) => all && all.map((item) => (item.name === next.name ? next : item)))} />
       ))}
       <form className="ac-row" onSubmit={(e) => { e.preventDefault(); void make(); }}>

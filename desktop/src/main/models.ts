@@ -21,7 +21,8 @@ const CLAUDE_EFFORTS = ["low", "medium", "high"] as const;
 
 /**
  * ChatGPT and the OpenAI key stay on the reviewed Luna profile: the managed Codex runtime's catalog and
- * context checks cover that model and effort only. Claude defaults to Haiku at low effort.
+ * context checks cover that model and effort only. Claude defaults to Haiku 5.5 at medium effort, the
+ * model's own default effort on the Anthropic API.
  */
 export const MENU: Readonly<Record<Source, SourceMenu>> = {
   chatgpt: { label: "ChatGPT", billing: "subscription", models: [{ id: "gpt-6-luna", label: "Luna", efforts: ["medium"] }], default: { model: "gpt-6-luna", effort: "medium" } },
@@ -32,7 +33,7 @@ export const MENU: Readonly<Record<Source, SourceMenu>> = {
       { id: "claude-sonnet-5-5", label: "Sonnet 5.5", efforts: CLAUDE_EFFORTS },
       { id: "claude-opus-5-5", label: "Opus 5.5", efforts: CLAUDE_EFFORTS },
     ],
-    default: { model: "claude-haiku-5-5", effort: "low" },
+    default: { model: "claude-haiku-5-5", effort: "medium" },
   },
   openai: { label: "OpenAI API key", billing: "api", models: [{ id: "gpt-6-luna", label: "Luna", efforts: ["medium"] }], default: { model: "gpt-6-luna", effort: "medium" } },
   batatis: { label: "Batatis AI", billing: "included", models: [{ id: "gpt-6-luna", label: "Luna", efforts: ["medium"] }], default: { model: "gpt-6-luna", effort: "medium" } },
