@@ -24,15 +24,22 @@ CODE = re.compile(r'[A-Za-z0-9_-]{20,128}')
 GRANTED: contextvars.ContextVar[bool] = contextvars.ContextVar('ai_access_granted', default=False)
 
 
+# The name the admin code goes by. Whoever signs in with BATATIS_ADMIN_CODE is the site admin.
+ADMIN = 'admin'
+
+
 def codes() -> dict[str, str]:
-    """The codes set in the environment. Codes the admin made in the app live in the database (managed())."""
+    """The codes set in the environment, with the admin code. Codes the admin made in the app live in the database."""
     try:
         raw = json.loads(os.environ.get('BATATIS_AI_ACCESS_CODES') or '{}')
     except (ValueError, TypeError):
-        return {}
-    if not isinstance(raw, dict):
-        return {}
-    return {name: code for name, code in raw.items() if isinstance(name, str) and name and isinstance(code, str) and CODE.fullmatch(code)}
+        raw = {}
+    found = {name: code for name, code in raw.items() if isinstance(name, str) and name and name != ADMIN
+             and isinstance(code, str) and CODE.fullmatch(code)} if isinstance(raw, dict) else {}
+    admin = (os.environ.get('BATATIS_ADMIN_CODE') or '').strip()
+    if CODE.fullmatch(admin):
+        found[ADMIN] = admin
+    return found
 
 
 def fingerprint(code: str) -> str:
@@ -74,6 +81,8 @@ def rows() -> dict[str, dict]:
 
 
 def _live(name: str) -> bool:
+    if name == ADMIN:
+        return True
     row = rows().get(name)
     return row is None or not row['revoked']
 
@@ -117,6 +126,8 @@ def name_for(code: str | None) -> str | None:
 
 
 def limit(name: str) -> int | None:
+    if name == ADMIN:
+        return None
     row = rows().get(name)
     return row['max_users'] if row else None
 

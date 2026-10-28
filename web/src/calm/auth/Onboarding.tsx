@@ -1,6 +1,7 @@
 /** #/onboarding: one question at a time, letter keys pick, Enter continues (Typeform style). */
 import { useEffect, useId, useRef, useState } from "react";
 import { AccountsError } from "../../api/accounts";
+import { hasRealEmail } from "./codeAccount";
 import { useAccount } from "../account";
 import { AcIcon, clockText, useCountdown } from "./bits";
 import {
@@ -144,7 +145,7 @@ export function Onboarding() {
         <span className="cf-mark" aria-hidden="true" />
         {account.user && (
           <span className="ac-onb-who">
-            <span className="cf-faint">{account.user.email}</span>
+            <span className="cf-faint">{hasRealEmail(account.user) ? account.user.email : account.user.name}</span>
             <button type="button" className="cf-btn is-ghost is-xs" onClick={() => void signOut()}>Sign out</button>
           </span>
         )}

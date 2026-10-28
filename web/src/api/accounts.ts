@@ -315,6 +315,10 @@ const userOf = (r: { user?: User } | User) => ("user" in r && r.user ? r.user : 
 export const auth = {
   providers: (signal?: AbortSignal) =>
     call<{ providers: AuthProvider[] }>("GET", "/auth/providers", undefined, signal).then((r) => r.providers ?? []),
+  /** "code" where an access code is the only way in (the hosted site); "password" for a local engine. */
+  signInMode: (signal?: AbortSignal) =>
+    call<{ sign_in?: string }>("GET", "/auth/providers", undefined, signal).then((r) => (r.sign_in === "code" ? "code" as const : "password" as const)),
+  codeLogin: (body: { code: string; name: string }) => call<{ user: User }>("POST", "/auth/code-login", body).then(userOf),
   signup: (body: { name: string; email: string; password: string }) => call<{ user: User }>("POST", "/auth/signup", body).then(userOf),
   login: (body: { email: string; password: string }) => call<{ user: User }>("POST", "/auth/login", body).then(userOf),
   logout: () => call<void>("POST", "/auth/logout", {}),

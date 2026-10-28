@@ -9,6 +9,7 @@ from fastapi import APIRouter, HTTPException, Request, Response
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from . import ai_access
+from .llm_gate import client_ip_from
 from .account_models import ApplicantType, Authority, Role, User, UserResult
 from .accounts import (COOKIE, cookie_secure, digest, email_address, issue_session, limit_auth,
                        password_hash, password_matches, require_user)
@@ -21,6 +22,23 @@ class SignupRequest(BaseModel):
     name: str = Field(min_length=1, max_length=160)
 
     _email = field_validator('email')(email_address)
+
+    @field_validator('name')
+    @classmethod
+    def _name(cls, value):
+        if not value.strip() or any(ord(char) < 32 for char in value):
+            raise ValueError('Enter a name')
+        return value.strip()
+
+
+# Accounts made by signing in with an access code get an address on this domain; nobody can sign up with one.
+CODE_ACCOUNT_DOMAIN = 'code.batatis.invalid'
+
+
+class CodeLoginRequest(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    code: str = Field(min_length=1, max_length=200)
+    name: str = Field(min_length=1, max_length=80)
 
     @field_validator('name')
     @classmethod
@@ -76,10 +94,43 @@ def reviewer_code(authority: str, supplied: str | None):
 def create_router(cases):
     router = APIRouter(prefix='/auth', tags=['accounts'])
 
+    @router.post('/code-login', response_model=UserResult)
+    def code_login(body: CodeLoginRequest, request: Request, response: Response):
+        """Sign in with an access code and a name. The same code and name always reach the same account."""
+        store = cases()
+        # Only wrong codes count against the limit, so a room of people on one network can all sign in.
+        bucket = digest('code-login-fail:' + client_ip_from(request))
+        limit, window = int(os.environ.get('BATATIS_AUTH_RATE_LIMIT') or '10'), float(os.environ.get('BATATIS_AUTH_RATE_WINDOW_SECONDS') or '600')
+        if store.account_rate_full(bucket, limit):
+            raise HTTPException(429, 'Too many attempts; try again later', headers={'Retry-After': str(int(window))})
+        found = ai_access.find(body.code)
+        if found is None:
+            store.account_rate(bucket, limit, window)
+            raise HTTPException(403, 'That access code isn’t valid')
+        code_name, fingerprint = found
+        email = f"{digest('code-login:' + code_name + ':' + body.name.casefold())[:32]}@{CODE_ACCOUNT_DOMAIN}"
+        data = store.user_credentials(email)
+        if data is None:
+            seats = ai_access.limit(code_name)
+            if seats is not None and len(store.accounts_using_code(code_name)) + store.installs_using_code(code_name) >= seats:
+                raise HTTPException(403, 'That access code is full')
+            user = User(email=email, name=body.name, ai_access=code_name, ai_access_fingerprint=fingerprint)
+            if not store.create_user(user, None):
+                data = store.user_credentials(email)
+        if data is not None:
+            user = User.model_validate(data['user'])
+            user.name = body.name
+            user.ai_access, user.ai_access_fingerprint = code_name, fingerprint
+            store.update_user(user, revoke_sessions=False)
+        issue_session(store, user, request, response)
+        return UserResult(user=user)
+
     @router.post('/signup', response_model=UserResult, status_code=201)
     def signup(body: SignupRequest, request: Request, response: Response):
         store = cases()
         limit_auth(store, request, 'signup')
+        if body.email.endswith('@' + CODE_ACCOUNT_DOMAIN):
+            raise HTTPException(422, 'Enter a valid email address')
         user = User(email=body.email, name=body.name)
         if not store.create_user(user, password_hash(body.password)):
             raise HTTPException(409, 'An account with this email already exists')
@@ -90,6 +141,8 @@ def create_router(cases):
     def login(body: LoginRequest, request: Request, response: Response):
         store = cases()
         email = body.email.strip().casefold()
+        if email.endswith('@' + CODE_ACCOUNT_DOMAIN):
+            raise HTTPException(401, 'Email or password is incorrect')
         limit_auth(store, request, 'login', email)
         # Also cap the IP across different email guesses.
         limit_auth(store, request, 'login-ip')

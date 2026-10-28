@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { componentHarness, nodes, text } from "../../../scripts/component-harness.mjs";
 import * as steps from "./onboardingSteps.ts";
+import { hasRealEmail } from "./codeAccount.ts";
 import { getSession, resetSession, updateSession } from "../session.ts";
 import type { OnboardingRequest, User } from "../../api/accounts.ts";
 
@@ -34,6 +35,7 @@ test("the applicant finishes onboarding with one choice and sends no applicant t
   const location = { hash: "#/onboarding" };
   const h = await componentHarness(new URL("./Onboarding.tsx", import.meta.url), "Onboarding", {
     "../account": { useAccount: () => ({ user: { ...person, onboarded: false } }) },
+    "./codeAccount": { hasRealEmail },
     "./onboardingSteps": steps,
     "./bits": { AcIcon: "AcIcon", useCountdown: () => [0, () => {}] },
     "./useAuthGate": { saveOnboarding: async (body: OnboardingRequest) => { sent.push(body); return person; }, afterSignIn: () => "#/" },
