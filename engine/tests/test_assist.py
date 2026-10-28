@@ -384,3 +384,24 @@ def test_a_desktop_reply_has_room_for_the_local_runtimes_reasoning(monkeypatch):
                                      desktop_profile=SimpleNamespace(lease='lease'))
     assert reply.text == 'Ask for the signature.'
     assert seen['task'] == 'assistant' and seen['max_output_tokens'] > routes_assist.MAX_TOKENS
+
+
+def test_a_failed_provider_call_is_logged_without_the_prompt_and_answered_with_a_plain_503(assistant, monkeypatch, caplog):
+    client, _, calls = assistant
+    enable(monkeypatch)
+
+    class WorkspaceError(Exception):
+        status_code = 400
+        body = {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'This API key is not scoped to a workspace'}}
+
+    def failing(**kwargs):
+        raise WorkspaceError('fake-secret and the private question: ' + kwargs['body'].question)
+
+    monkeypatch.setattr(routes_assist, 'call_model', failing)
+    with caplog.at_level('WARNING', logger='engine.assist'):
+        r = ask(client, question='My secret question about a ramp.')
+    assert r.status_code == 503 and r.json()['detail'] == 'Assistant unavailable'
+    assert 'not scoped to a workspace' not in r.text
+    logged = ' '.join(record.getMessage() for record in caplog.records)
+    assert 'anthropic' in logged and 'HTTP 400' in logged and 'not scoped to a workspace' in logged
+    assert 'secret question' not in logged and 'fake-secret' not in logged

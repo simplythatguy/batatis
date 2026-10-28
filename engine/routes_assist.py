@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 import re
 from dataclasses import dataclass
@@ -24,6 +25,7 @@ from .process_fields import PROCESS_ALIASES, process_fields
 from .section_c import section_c_rows
 from .redact import known_values, people_names, scrub, scrub_obj
 
+LOG = logging.getLogger('engine.assist')
 MAX_TOKENS = 1200
 # A local runtime reports its reasoning as output too (Claude Code's thinking), so the same short reply
 # needs more room there; the person's own subscription answers it, not the shared budget.
@@ -238,15 +240,35 @@ def model_reply(route: ModelRoute, *, request, body: AssistRequest, context: str
                            **({'desktop_profile': route.desktop_profile} if route.desktop_profile is not None else {}))
         if not isinstance(reply.text, str):
             raise ValueError('invalid assistant text')
-    except Exception:
+    except Exception as error:
         # A failed call can still cost tokens. Keep its reservation and keep
-        # provider diagnostics, prompts and credentials out of HTTP responses.
+        # provider diagnostics, prompts and credentials out of HTTP responses. The server log gets the
+        # provider's own error text (never the prompt), so a missing setting is findable.
+        LOG.warning('Assistant call to %s failed: %s', route.provider, _provider_error(error))
         raise HTTPException(503, 'Assistant unavailable') from None
     if decision is not None:
         llm_gate.record(model=route.model, input_tokens=reply.input_tokens, output_tokens=reply.output_tokens,
                         reserved_usd=decision.reserved_usd)
     guard()
     return reply
+
+
+def _provider_error(error: Exception) -> str:
+    """The error's class, HTTP status and the provider's own error message from its response body.
+
+    Never str(error): that can carry what was sent. A provider's message names the problem (a missing
+    workspace, a bad key, a limit), not the request.
+    """
+    status = getattr(error, 'status_code', None) or getattr(getattr(error, 'response', None), 'status_code', None)
+    body = getattr(error, 'body', None)
+    if body is None:
+        try:
+            body = error.response.json()
+        except Exception:
+            body = None
+    detail = body.get('error') if isinstance(body, dict) else None
+    message = detail.get('message') if isinstance(detail, dict) else None
+    return f'{type(error).__name__}' + (f' (HTTP {status})' if status else '') + (f': {message[:300]}' if isinstance(message, str) else '')
 
 
 def _fact_row(fact) -> dict:
