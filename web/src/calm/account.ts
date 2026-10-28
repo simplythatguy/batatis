@@ -4,7 +4,7 @@
  * single-visit flow it had before.
  */
 import { useSyncExternalStore } from "react";
-import { accounts, notAvailable, type ApplicationPreferences, type ApplicationSummary, type User } from "../api/accounts";
+import { accounts, auth, notAvailable, type ApplicationPreferences, type ApplicationSummary, type User } from "../api/accounts";
 import { EngineError } from "../api/client";
 import { probeAuth } from "../api/engineAuth";
 import { replaceAccountRequests } from "../api/requestLifetime";
@@ -18,9 +18,11 @@ export interface AccountState {
   applications: ApplicationSummary[] | null;
   listError: string;
   loadingList: boolean;
+  /** The server needs an access code to sign in: the sign-in page asks for one and nothing else. */
+  codeLogin: boolean;
 }
 
-let state: AccountState = { phase: "probing", user: null, applications: null, listError: "", loadingList: false };
+let state: AccountState = { phase: "probing", user: null, applications: null, listError: "", loadingList: false, codeLogin: false };
 let session = 0;
 let listRequest = 0;
 let listController: AbortController | null = null;
@@ -53,10 +55,16 @@ export function bootAccount() {
       const body = p.body as { user?: User } | User | null;
       const user = (body && "user" in body ? body.user : (body as User | null)) ?? null;
       set({ phase: user ? "signed-in" : "anonymous", user });
+      const settled = session;
+      if (user) void auth.signInMode().then((mode) => { if (settled === session) set({ codeLogin: mode === "code" }); }, () => {});
       if (user) await refreshApplications();
       return;
     }
-    set({ phase: p.status === 401 ? "signed-out" : "anonymous" });
+    if (p.status !== 401) return set({ phase: "anonymous" });
+    // The sign-in page is decided before anything draws, so a code-only server never flashes the Start page.
+    const mode = await auth.signInMode().catch(() => "password" as const);
+    if (token !== session) return;
+    set({ phase: "signed-out", codeLogin: mode === "code" });
   });
 }
 

@@ -10,6 +10,8 @@ import { PageHead, clockText, useCountdown } from "../auth/bits";
 import { APPLICANT_CHOICES, APPLICANT_LABEL, AUTHORITY_CHOICES, codeNeeded } from "../auth/onboardingSteps";
 import { saveOnboarding, signOut } from "../auth/useAuthGate";
 import { useSignOutStatus } from "../auth/signOutGuard";
+import { hasRealEmail } from "../auth/codeAccount";
+import { AccessCodesSection } from "./AccessCodes";
 import { AiAccessSection } from "./AiAccess";
 import { ArchivedApplications } from "./ArchivedApplications";
 import { Chips, Row } from "./rows";
@@ -90,7 +92,7 @@ function RoleEditor({ onCancel, onSaved }: { onCancel: () => void; onSaved: () =
 }
 
 export function Settings({ phoneTools }: { phoneTools?: ReactNode }) {
-  const { user } = useAccount();
+  const { user, codeLogin } = useAccount();
   // Local development's test people keep their role; the person switch replaces sign-in and onboarding.
   const testPerson = useDesktop()?.workspace === "dev";
   const [editing, setEditing] = useState(false);
@@ -107,7 +109,7 @@ export function Settings({ phoneTools }: { phoneTools?: ReactNode }) {
             <section className="ac-section" aria-labelledby="ac-s-profile">
               <h2 id="ac-s-profile" className="ac-section-title">Account</h2>
               <Row label="Name">{user.name || "—"}</Row>
-              <Row label="Email">{user.email}<span className="ac-faint-tag">Can’t be changed here</span></Row>
+              {hasRealEmail(user) && <Row label="Email">{user.email}<span className="ac-faint-tag">Can’t be changed here</span></Row>}
               <Row
                 label="Role"
                 action={!editing && !testPerson && <button type="button" className="cf-btn is-xs" onClick={() => { setEditing(true); setSaved(false); }}>Change</button>}
@@ -117,7 +119,8 @@ export function Settings({ phoneTools }: { phoneTools?: ReactNode }) {
               </Row>
               {editing && <RoleEditor onCancel={() => setEditing(false)} onSaved={() => { setEditing(false); setSaved(true); }} />}
             </section>
-            <AiAccessSection />
+            {!codeLogin && <AiAccessSection />}
+            <AccessCodesSection />
             <ArchivedApplications />
           </>
         ) : (

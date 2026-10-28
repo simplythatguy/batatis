@@ -1,5 +1,6 @@
 /** Rail footer avatar: initials that open a small menu (Settings, Sign out). */
 import { useEffect, useRef, useState } from "react";
+import { hasRealEmail } from "./codeAccount";
 import { useDesktop } from "../../desktop/host";
 import { PeopleMenu } from "../../desktop/People";
 import { initials, useAccount } from "../account";
@@ -61,7 +62,7 @@ export function AccountButton() {
         <div ref={pop.panel} className="ac-pop ac-account-menu" role="menu" aria-label="Account" style={pop.style} onKeyDown={onMenuKey}>
           <div className="ac-account-who" role="none">
             <span className="ac-account-name">{name}</span>
-            {user.name && <span className="ac-account-email">{user.email}</span>}
+            {user.name && hasRealEmail(user) && <span className="ac-account-email">{user.email}</span>}
           </div>
           <hr role="separator" />
           {testPerson && <><PeopleMenu /><hr role="separator" /></>}

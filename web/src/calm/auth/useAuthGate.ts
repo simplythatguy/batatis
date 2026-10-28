@@ -55,7 +55,8 @@ export function useAuthGate(): { status: GateStatus; user: User | null } {
  */
 export function useAuthRedirect(route: Route): boolean {
   const { status, user } = useAuthGate();
-  const target = gateRedirect(status, user, route.path, readReturn());
+  const { codeLogin } = useAccount();
+  const target = gateRedirect(status, user, route.path, readReturn(), codeLogin);
   useEffect(() => {
     if (!target) return;
     // A screen may already have navigated on (sign-in sends the person to their return place).
@@ -83,6 +84,12 @@ function signedIn(user: User) {
 
 export async function signIn(email: string, password: string): Promise<User> {
   const user = await auth.login({ email: email.trim(), password });
+  signedIn(user);
+  return user;
+}
+
+export async function signInWithCode(code: string, name: string): Promise<User> {
+  const user = await auth.codeLogin({ code: code.trim(), name: name.trim() });
   signedIn(user);
   return user;
 }

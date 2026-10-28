@@ -2,7 +2,8 @@
 import { useEffect, useId, useState, type FormEvent } from "react";
 import { AccountsError, auth, type AuthProvider } from "../../api/accounts";
 import { ProviderMark, clockText, useCountdown } from "./bits";
-import { afterSignIn, rememberedReturn, signIn, signUp } from "./useAuthGate";
+import { afterSignIn, rememberedReturn, signIn, signInWithCode, signUp } from "./useAuthGate";
+import { useAccount } from "../account";
 import { DesktopEntry } from "../../desktop/Entry";
 import { useSession } from "../session";
 
@@ -30,7 +31,64 @@ function errorText(e: unknown, mode: "signin" | "signup"): string {
   return e.detail || "Something went wrong. Try again.";
 }
 
+/** Where an access code is the only way in: a code and a name, nothing else. */
+function CodeLogin() {
+  const id = useId();
+  const [code, setCode] = useState("");
+  const [name, setName] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [wait, startWait] = useCountdown();
+
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    if (busy || wait > 0) return;
+    if (!code.trim() || !name.trim()) {
+      setError("Enter your access code and your name.");
+      return;
+    }
+    setBusy(true);
+    setError("");
+    try {
+      location.hash = afterSignIn(await signInWithCode(code, name));
+    } catch (err) {
+      if (err instanceof AccountsError && err.status === 429) startWait(err.retryAfter);
+      else if (err instanceof AccountsError && err.status === 403) setError(err.detail || "That access code isn’t valid.");
+      else if (err instanceof AccountsError && err.status === 0) setError("Batatis couldn’t reach the server. Check your connection and try again.");
+      else setError("Something went wrong. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="ac-auth">
+      <form className="ac-auth-box" onSubmit={submit} noValidate aria-labelledby={`${id}-title`}>
+        <span className="cf-mark ac-auth-mark" aria-hidden="true" />
+        <h1 id={`${id}-title`} className="ac-auth-title">Batatis</h1>
+        <div className="ac-field">
+          <label htmlFor={`${id}-code`}>Access code</label>
+          <input id={`${id}-code`} className="ac-in" type="password" autoComplete="off" spellCheck={false} maxLength={200} value={code}
+            onChange={(e) => { setCode(e.target.value); setError(""); }} autoFocus />
+        </div>
+        <div className="ac-field">
+          <label htmlFor={`${id}-name`}>Your name</label>
+          <input id={`${id}-name`} className="ac-in" autoComplete="name" maxLength={80} value={name} onChange={(e) => { setName(e.target.value); setError(""); }} />
+        </div>
+        {error && <p className="ac-error" role="alert">{error}</p>}
+        {wait > 0 && <p className="ac-error" role="status">Too many attempts. Try again in {clockText(wait)}.</p>}
+        <button type="submit" className="cf-btn is-primary is-center ac-auth-go" disabled={busy || wait > 0}>{busy ? "Signing in…" : "Continue"}</button>
+      </form>
+    </div>
+  );
+}
+
 export function AuthPage({ mode }: { mode: "signin" | "signup" }) {
+  const { codeLogin } = useAccount();
+  return codeLogin ? <CodeLogin /> : <PasswordAuth mode={mode} />;
+}
+
+function PasswordAuth({ mode }: { mode: "signin" | "signup" }) {
   const session = useSession();
   const providers = useProviders();
   const id = useId();

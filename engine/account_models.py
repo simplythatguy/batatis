@@ -37,6 +37,14 @@ class User(BaseModel):
 
 class UserResult(BaseModel):
     user: User
+    # Whether this account may manage access codes; decided by engine/admin.py from the email.
+    admin: bool = False
+
+    @model_validator(mode='after')
+    def _admin(self):
+        from .admin import is_admin
+        self.admin = is_admin(self.user)
+        return self
 
 
 class ApplicationPreferences(BaseModel):

@@ -55,7 +55,16 @@ ACCOUNT_MIGRATIONS = (
     'PRIMARY KEY(user_id, application_id))',
     'CREATE INDEX IF NOT EXISTS account_application_preferences_case '
     'ON account_application_preferences(application_id)',
+    # Access codes the admin manages in the app. A code is stored only as its hash; a row with no hash holds the
+    # limit or revocation of a code that lives in BATATIS_AI_ACCESS_CODES.
+    'CREATE TABLE IF NOT EXISTS access_codes (name TEXT PRIMARY KEY, code_hash TEXT, max_users INTEGER, '
+    'revoked BOOLEAN NOT NULL DEFAULT FALSE, created_at TEXT NOT NULL)',
+    # Desktop installs that used a code, by hashed install id: the desktop half of "people using this code".
+    'CREATE TABLE IF NOT EXISTS access_installs (code_name TEXT NOT NULL, install_hash TEXT NOT NULL, '
+    'last_seen DOUBLE PRECISION NOT NULL, PRIMARY KEY(code_name, install_hash))',
 )
+
+INSTALL_WINDOW = 30 * 86400.0
 
 
 class DuplicateEmail(Exception):
@@ -249,6 +258,67 @@ class AccountsMixin(DraftWritesMixin):
                              'ON CONFLICT(bucket) DO UPDATE SET hits=account_rates.hits+1 '
                              'WHERE account_rates.hits<? RETURNING hits', (bucket, stamp + seconds, limit)).fetchone()
         return limit > 0 and row is not None
+
+    def access_code_rows(self) -> list[dict]:
+        with self.account_db() as db:
+            rows = db.execute('SELECT name, code_hash, max_users, revoked, created_at FROM access_codes ORDER BY created_at, name').fetchall()
+        return [{'name': r[0], 'code_hash': r[1], 'max_users': r[2], 'revoked': bool(r[3]), 'created_at': r[4]} for r in rows]
+
+    def access_code(self, name: str) -> dict | None:
+        return next((row for row in self.access_code_rows() if row['name'] == name), None)
+
+    def access_code_by_hash(self, code_hash: str) -> dict | None:
+        return next((row for row in self.access_code_rows() if row['code_hash'] == code_hash), None)
+
+    def create_access_code(self, name: str, code_hash: str, max_users: int | None) -> bool:
+        with self.account_db() as db:
+            row = db.execute('INSERT INTO access_codes(name, code_hash, max_users, revoked, created_at) VALUES (?,?,?,?,?) '
+                             'ON CONFLICT DO NOTHING RETURNING name', (name, code_hash, max_users, False, now())).fetchone()
+        return row is not None
+
+    def set_access_code(self, name: str, *, max_users: int | None, revoked: bool) -> None:
+        """Writes the limit and revocation of a code, creating the hash-less row an environment code needs."""
+        with self.account_db() as db:
+            db.execute('INSERT INTO access_codes(name, code_hash, max_users, revoked, created_at) VALUES (?,?,?,?,?) '
+                       'ON CONFLICT(name) DO UPDATE SET max_users=?, revoked=?',
+                       (name, None, max_users, revoked, now(), max_users, revoked))
+
+    def accounts_using_code(self, name: str, *, excluding: str | None = None) -> list[User]:
+        with self.account_db() as db:
+            rows = db.execute('SELECT data FROM account_users').fetchall()
+        users = (User.model_validate(json.loads(row[0])['user']) for row in rows)
+        return [user for user in users if user.ai_access == name and user.id != excluding]
+
+    def installs_using_code(self, name: str, *, excluding: str | None = None) -> int:
+        with self.account_db() as db:
+            row = db.execute('SELECT COUNT(*) FROM access_installs WHERE code_name=? AND last_seen>? AND install_hash<>?',
+                             (name, time.time() - INSTALL_WINDOW, excluding or '')).fetchone()
+        return row[0]
+
+    def touch_install(self, name: str, install_hash: str, max_users: int | None) -> bool:
+        """Records a desktop install's use of a code. False, and nothing recorded, when the code is full for a new install."""
+        stamp = time.time()
+        accounts = len(self.accounts_using_code(name)) if max_users is not None else 0
+        with self.account_db() as db:
+            db.execute('DELETE FROM access_installs WHERE last_seen<=?', (stamp - INSTALL_WINDOW,))
+            known = db.execute('SELECT 1 FROM access_installs WHERE code_name=? AND install_hash=?', (name, install_hash)).fetchone()
+            if known is None and max_users is not None:
+                installs = db.execute('SELECT COUNT(*) FROM access_installs WHERE code_name=?', (name,)).fetchone()[0]
+                if accounts + installs >= max_users:
+                    return False
+            db.execute('INSERT INTO access_installs(code_name, install_hash, last_seen) VALUES (?,?,?) '
+                       'ON CONFLICT(code_name, install_hash) DO UPDATE SET last_seen=?', (name, install_hash, stamp, stamp))
+        return True
+
+    def delete_all_accounts(self) -> dict:
+        """Every account, with its sessions, sign-ins and application list flags. Applications keep no owner to find them."""
+        with self.account_db() as db:
+            counts = {table: db.execute(f'SELECT COUNT(*) FROM {table}').fetchone()[0]
+                      for table in ('account_users', 'account_sessions', 'account_identities', 'account_oauth', 'account_rates', 'access_installs')}
+            for table in ('account_application_preferences', 'account_sessions', 'account_identities', 'account_oauth', 'account_rates',
+                          'access_installs', 'account_users'):
+                db.execute(f'DELETE FROM {table}')
+        return counts
 
     def _purge_accounts(self, db):
         stamp = time.time()

@@ -315,6 +315,10 @@ const userOf = (r: { user?: User } | User) => ("user" in r && r.user ? r.user : 
 export const auth = {
   providers: (signal?: AbortSignal) =>
     call<{ providers: AuthProvider[] }>("GET", "/auth/providers", undefined, signal).then((r) => r.providers ?? []),
+  /** "code" where an access code is the only way in (the hosted site); "password" for a local engine. */
+  signInMode: (signal?: AbortSignal) =>
+    call<{ sign_in?: string }>("GET", "/auth/providers", undefined, signal).then((r) => (r.sign_in === "code" ? "code" as const : "password" as const)),
+  codeLogin: (body: { code: string; name: string }) => call<{ user: User }>("POST", "/auth/code-login", body).then(userOf),
   signup: (body: { name: string; email: string; password: string }) => call<{ user: User }>("POST", "/auth/signup", body).then(userOf),
   login: (body: { email: string; password: string }) => call<{ user: User }>("POST", "/auth/login", body).then(userOf),
   logout: () => call<void>("POST", "/auth/logout", {}),
@@ -350,8 +354,25 @@ export const notifications = {
 /** Whether this server needs an access code for AI, and whether the signed-in account has a current one. */
 export interface AiAccess { required: boolean; granted: boolean }
 
+/** One AI access code as the site admin sees it; the code itself is shown only when it is made. */
+export interface AccessCodeInfo {
+  name: string;
+  source: "managed" | "environment";
+  max_users: number | null;
+  accounts: number;
+  installs: number;
+  in_use: number;
+  revoked: boolean;
+}
+
 export const aiAccess = {
   read: () => call<AiAccess>("GET", "/auth/ai-access"),
   enter: (code: string) => call<AiAccess>("POST", "/auth/ai-access", { code }),
   remove: () => call<AiAccess>("DELETE", "/auth/ai-access", {}),
+};
+
+export const adminCodes = {
+  list: () => call<{ codes: AccessCodeInfo[] }>("GET", "/admin/access-codes").then((r) => r.codes),
+  create: (name: string, max_users: number | null) => call<{ code: string; info: AccessCodeInfo }>("POST", "/admin/access-codes", { name, max_users }),
+  change: (name: string, patch: { max_users?: number | null; revoked?: boolean }) => call<AccessCodeInfo>("PATCH", `/admin/access-codes/${enc(name)}`, patch),
 };

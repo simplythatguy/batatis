@@ -217,7 +217,7 @@ def anthropic_opted_in() -> bool:
 
 def live_anthropic():
     import anthropic
-    return anthropic.Anthropic(max_retries=0, timeout=60)
+    return anthropic.Anthropic(max_retries=0, timeout=60, **llm_gate.anthropic_client_options())
 
 
 class UnreadableResponse(RuntimeError):
