@@ -24,6 +24,12 @@ test("distance and the other side of the wall save independent facts used by the
   assert.deepEqual(planInput("faces_public_way").choices?.map((choice) => choice.label), ["Neighbour’s lot", "A lane", "A street"]);
 });
 
+test("a storey count has to be a whole number", () => {
+  assert.equal(planFactAnswer("storeys", "20"), null);
+  assert.equal(planFactAnswer("storeys", "20 you")?.error, "Enter a whole number.");
+  assert.equal(planFactAnswer("dwelling_units", "2.5")?.error, "Enter a whole number.");
+});
+
 test("bad units produce an inline error instead of a fact", () => {
   assert.ok("error" in (planFactAnswer("building_area_m2", "140 bananas") ?? {}));
   assert.equal(planInput("building_area_m2").unit, "m²");

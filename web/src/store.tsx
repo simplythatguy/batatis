@@ -1240,6 +1240,12 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   function readDescription(): Promise<void> { return startJob("intake"); }
   function runIdentify(): Promise<void> { return startJob("identify"); }
 
+  /** A version conflict is why the save failed; say so instead of a generic retry. */
+  function blockedSave(fallback: string): string {
+    const id = engineCaseId();
+    return id && needsReconcile(id) ? CONFLICT_TEXT : fallback;
+  }
+
   function answerPlan(q: PlanQuestion, answer: string): Promise<string | null> {
     if (applicationEditsPaused()) return Promise.resolve("Editing is paused. Try again when it resumes.");
     const token = engineGeneration();
@@ -1249,7 +1255,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       try {
         const id = await performSync(live);
         if (!live()) return null;
-        if (!id) return "Your draft wasn’t saved, so the answer wasn’t either. Try again.";
+        if (!id) return blockedSave("Your draft wasn’t saved, so the answer wasn’t either. Try again.");
         let result: IntakeResult;
         try {
           result = await engine.intakeAnswers(id, [{ question_id: q.id, answer }], acknowledgedVersion(id) ?? undefined);
@@ -1280,7 +1286,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       try {
         const id = await performSync(live);
         if (!live()) return null;
-        if (!id) return "Your draft wasn’t saved. Try again.";
+        if (!id) return blockedSave("Your draft wasn’t saved. Try again.");
         let result: IntakeResult;
         try {
           result = await engine.intakeScope(id, buildingCode, acknowledgedVersion(id) ?? undefined);
@@ -1442,7 +1448,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     return enqueue(async () => {
       const id = await performSync(live);
       if (!live()) return null;
-      if (!id) return "Your draft wasn’t saved, so the answer wasn’t either. Try again.";
+      if (!id) return blockedSave("Your draft wasn’t saved, so the answer wasn’t either. Try again.");
       const expected = acknowledgedVersion(id);
       if (needsReconcile(id) || expected === null) {
         noteConflict(id);

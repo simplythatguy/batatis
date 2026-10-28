@@ -34,6 +34,7 @@ import { AccountButton, NotificationsBell } from "./routes.extra";
 import { useNotifications } from "./notifications/notifications";
 import { useRoute } from "../router";
 import { resetRelevance } from "./useRelevance";
+import { Tip } from "./RelevanceRing";
 import { CIcon, ConfirmDialog, Dot, MOD_KEY, type DotTone } from "./ui";
 import { activeJob, jobLabel } from "../api/jobs";
 import { SaveConflictDialog } from "./SaveConflictDialog";
@@ -61,6 +62,34 @@ function useLasting(on: boolean, ms: number): boolean {
   return on && lasting;
 }
 
+/** The red status words, as an icon, once the header has no room for them. Hover, focus or tap shows the message. */
+function SaveWarn({ message, detail }: { message: string; detail?: string }) {
+  const ref = useRef<HTMLButtonElement>(null);
+  const [open, setOpen] = useState(false);
+  const text = [message, detail].filter(Boolean).join(" ");
+  return (
+    <>
+      <button
+        ref={ref}
+        type="button"
+        className="cf-icon-btn is-xs is-plain cf-save-warn"
+        aria-label={text}
+        onPointerEnter={() => setOpen(true)}
+        onPointerLeave={() => setOpen(false)}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setOpen(false)}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <CIcon name="warn" size={15} />
+      </button>
+      <Tip anchor={ref.current} open={open} id="cf-save-warn-tip" side="bottom">
+        <span>{message}</span>
+        {detail ? <p>{detail}</p> : null}
+      </Tip>
+    </>
+  );
+}
+
 export function SaveStatus() {
   const { phase, saveStatus, savedNote, saveDetail, saveDraft, saveConflict: conflicted, saveConflictReview, reviewSaveConflict } = useCase();
   const saveConflict = useLasting(conflicted, 1500) || (saveConflictReview?.kind ?? "closed") !== "closed";
@@ -81,10 +110,13 @@ export function SaveStatus() {
   };
   const s = map[saveStatus] ?? map.idle;
   const problem = saveStatus === "failed" || saveStatus === "gone";
+  const label = saveConflict ? "Saved changes need review" : s.label;
+  const detail = saveDetail && saveDetail !== label ? saveDetail : "";
   return (
     <><div className={`cf-save${problem || saveConflict ? " is-problem" : ""}`} role="status" title={[savedNote, saveDetail].filter(Boolean).join(" · ") || undefined}>
       <Dot tone={s.tone} />
-      <span className="cf-save-label">{saveConflict ? "Saved changes need review" : s.label}</span>
+      <span className="cf-save-label">{label}</span>
+      {(problem || saveConflict) && <SaveWarn message={label} detail={detail} />}
       {saveConflict && <button type="button" className="cf-btn is-xs" disabled={saveConflictReview?.kind === "loading"} onClick={() => void reviewSaveConflict()}>{saveConflictReview?.kind === "loading" ? "Loading…" : "Review changes"}</button>}
       {!saveConflict && saveStatus === "unsaved" && <button type="button" className="cf-btn is-xs is-ghost" onClick={() => void saveDraft()}>Save now</button>}
       {!saveConflict && saveStatus === "failed" && <button type="button" className="cf-btn is-xs" onClick={() => void saveDraft()}><CIcon name="retry" size={13} />Retry</button>}

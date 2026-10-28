@@ -267,6 +267,10 @@ export function planFactAnswer(field: string, raw: string): { value: number | bo
     const choice = planInput(field).choices?.find((choice) => choice.value === raw);
     return choice ? { value: raw !== "neighbour", quote: choice.label } : null;
   }
+  if (field === "storeys" || field === "dwelling_units") {
+    if (!/^[1-9]\d*$/.test(raw.trim())) return { error: "Enter a whole number." };
+    return null;
+  }
   const unit = metricUnit(planInput(field).unit);
   if (!unit) return null;
   const parsed = parseMeasurement(raw, unit);

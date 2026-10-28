@@ -34,6 +34,7 @@ from .copyright import attach_meta, attribute_code
 from .identify.answers import AnswerRejected, apply_answers, check_answers
 from .identify.config import ConfigError, load_config
 from .identify.case_input import active_facts, compose, fingerprint, is_requirement_run, refresh as refresh_identification
+from .identify.compact import compact_identify
 from .identify.decisions import information_request, overlay_decisions, record_decision
 from .identify.http_models import (BenchmarkConfirmRequest, IdentifyConfirmRequest, IdentifyDecisionRequest,
                                    IdentifyDecisionResponse, IdentifyRequest, RequirementDecisionRequest)
@@ -84,7 +85,7 @@ def _current(result: IdentifyResult, case: Case, store=None, code_reader=None) -
     for item in out.requirements:
         if item.role == 'varied' and item.provision_id not in kept:
             item.applicability, item.disposition, item.needs_review = 'needs_review', 'review', True
-    return overlay_decisions(out)
+    return compact_identify(overlay_decisions(out))
 
 
 def _relevance(output: RunOutput, text: str) -> RelevanceRecord | None:
@@ -186,7 +187,7 @@ def _apply_identification(case: Case, output: IdentifyComputation):
         result.title = case.title
     else:
         result.title = generated if not case.title_is_manual and case.title == generated else None
-    case.identify = result
+    case.identify = compact_identify(result)
     if output.relevance is not None:
         case.relevance = output.relevance
 
