@@ -330,6 +330,19 @@ export function createEngine(base: string) {
     informationRequest: (caseId: string, signal?: AbortSignal) =>
       call<InformationRequest>("GET", `/cases/${enc(caseId)}/identify/information-request`, undefined, signal),
     /**
+     * POST /cases/{id}/identify/benchmark. The applicant names the Division B sentence their design
+     * departs from and states the departure in their own words. The reply is the identify result with
+     * the Section C rows the call wrote and `case_version`.
+     */
+    confirmBenchmark: (caseId: string, provision: string, departure: string, signal?: AbortSignal, expectedVersion?: number) =>
+      call<IdentifyDecisionResponse>(
+        "POST",
+        `/cases/${enc(caseId)}/identify/benchmark`,
+        withVersion({ provision, departure }, expectedVersion),
+        signal,
+        CASE_WAIT_MS,
+      ),
+    /**
      * POST /cases/{id}/identify/requirements/{requirement_id}/decision. Applicability only
      * (`include` / `exclude` / `review`); `expected_version` is required. The reply is the identify
      * result with the updated ledger and `case_version`.

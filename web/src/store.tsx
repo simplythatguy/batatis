@@ -23,7 +23,7 @@ import { isProvision, reconcileSectionC, sameCards } from "./provisions";
 import { caseFromEngine, latestFacts, openedCase, reviewedDescription, selectedArticles } from "./calm/openCase";
 import { requirementDecision, type RequirementAnswer, type RequirementDecision } from "./calm/requirements";
 import { normalizeTitle, saveTitle, TITLE_EMPTY, titleError } from "./calm/rename";
-import { refreshCase, resetExtras, setChecklist } from "./calm/caseExtras";
+import { refreshCase, resetExtras, setChecklist, setIdentify } from "./calm/caseExtras";
 import { accounts } from "./api/accounts";
 import { accountSession, getAccountState, patchApplication, refreshApplications, subscribeAccount, useAccount } from "./calm/account";
 import { readOnly } from "./calm/applications";
@@ -102,6 +102,11 @@ interface Store {
   overrideScope: (buildingCode: boolean) => Promise<string | null>;
   /** Yes, No or Not sure on a code card; identified cards also go to the decision route. */
   decide: (candidate: Candidate, answer: CandidateAnswer) => Promise<string | null>;
+  /**
+   * The applicant's one-line departure from a card they answered Yes: records the benchmark, the
+   * Section C row and the varied requirement in one call. Resolves to an error text, or null.
+   */
+  confirmDeparture: (candidate: Candidate, departure: string) => Promise<string | null>;
   /**
    * One requirement-ledger answer (`include` / `exclude` / `review`): applicability only, decided
    * independently of any departure. Resolves to an error text, or null when the engine stored it.
@@ -1341,6 +1346,49 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   }
 
   /**
+   * The applicant's one-line departure from a card they answered Yes. One engine call records the
+   * benchmark, the Section C row and the varied requirement, so the appendix prints a departure.
+   */
+  function confirmDeparture(candidate: Candidate, departure: string): Promise<string | null> {
+    if (applicationEditsPaused()) return Promise.resolve("Editing is paused. Try again when it resumes.");
+    const text = departure.trim();
+    if (!text) return Promise.resolve("Describe what the design does instead.");
+    dispatch({ type: "answerCandidate", id: candidate.id, answer: "yes" });
+    if (!/^\d/.test(candidate.provision)) return Promise.resolve(null);
+    const token = engineGeneration();
+    const live = () => isEngineGeneration(token);
+    const provision = candidate.provision;
+    return enqueue(async () => {
+      const id = engineCaseId();
+      if (!id || !live()) return null;
+      try {
+        const body = await engine.confirmBenchmark(id, provision, text, undefined, acknowledgedVersion(id) ?? undefined);
+        if (!live()) return null;
+        acknowledgeWrite(id, body.case_version);
+        derive({ type: "markDecisionPending", id: candidate.id, pending: false });
+        setIdentify(id, body);
+        const read = readDecisionBody(body, provision);
+        if (read.row) derive({ type: "noteSectionC", rows: [toViewRow(read.row, candidate.id)] });
+        derive({ type: "noteIdentify", result: body });
+        try {
+          const planned = await engine.intakePlan(id, acknowledgedVersion(id) ?? undefined);
+          if (live()) {
+            acknowledgeWrite(id, planned.case_version);
+            derive({ type: "noteIntakeRecord", record: planned.record });
+          }
+        } catch {
+          /* no intake run on this case, or the plan is unchanged */
+        }
+        return null;
+      } catch (e) {
+        if (isCaseConflict(e)) noteConflict(id);
+        if (live()) derive({ type: "markDecisionPending", id: candidate.id, pending: true });
+        return e instanceof EngineError && e.status === 0 ? "Not saved yet: Batatis could not be reached. Your answer is kept here; answer again to resend it." : failureText(e);
+      }
+    });
+  }
+
+  /**
    * One requirement-ledger answer: applicability only, through its own route with the version the
    * engine requires. The reply carries the updated ledger, so the next batch appears on its own.
    */
@@ -1968,7 +2016,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         if (!entry.saved) throw new Error("The file was replaced before uploading.");
         return entry.saved;
       });
-    }, answerPlan, overrideScope, decide, decideRequirement, answerChecklist, reloadChecklists, renameCase,
+    }, answerPlan, overrideScope, decide, confirmDeparture, decideRequirement, answerChecklist, reloadChecklists, renameCase,
     sectionCLookup, retrySectionC: () => setLookupAttempt(n => n + 1),
     snapshotKey: `${renderGeneration}:${renderPlanRevision}:${remoteEpoch}:${JSON.stringify(c.candidates)}:${JSON.stringify(c.sectionC)}:${sectionCLookup.source}`,
     loadSectionD,

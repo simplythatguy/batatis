@@ -21,6 +21,7 @@ export function useDeckExtras(): { options: DeckOptions; extras: CaseExtras } {
     checklists: extras.checklists,
     packages: session.packages,
     confirmAuthority: true,
-  }), [extras.rules, extras.caseRules, extras.checklists, session.packages]);
+    benchmark: extras.identify?.benchmark ?? null,
+  }), [extras.rules, extras.caseRules, extras.checklists, extras.identify, session.packages]);
   return { options, extras };
 }

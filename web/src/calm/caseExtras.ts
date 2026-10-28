@@ -7,7 +7,7 @@
  */
 import { useEffect, useSyncExternalStore } from "react";
 import { engine } from "../api/client";
-import type { CaseChecklists, CaseJurisdictionPack, CaseRules, JurisdictionDetail, JurisdictionsResult } from "../api/types.gen";
+import type { CaseChecklists, CaseJurisdictionPack, CaseRules, IdentifyResult, JurisdictionDetail, JurisdictionsResult } from "../api/types.gen";
 import type { RuleData } from "./rulesView";
 
 export interface CaseExtras {
@@ -17,6 +17,8 @@ export interface CaseExtras {
   /** GET /cases/{id}/rules: the stored state of record. */
   caseRules: CaseRules | null;
   checklists: CaseChecklists | null;
+  /** GET /cases/{id}/identify: the stored benchmark and its departure, read by the deck and Review. */
+  identify: IdentifyResult | null;
   pack: CaseJurisdictionPack | null;
   /** GET /jurisdictions: coverage labels and the fallback pack for places Batatis has no local pack for. */
   directory: JurisdictionsResult | null;
@@ -26,7 +28,7 @@ export interface CaseExtras {
   failed: { rules?: boolean; case?: boolean; directory?: boolean; details: Record<string, boolean> };
 }
 
-const EMPTY: CaseExtras = { caseId: null, rules: null, caseRules: null, checklists: null, pack: null, directory: null, details: {}, failed: { details: {} } };
+const EMPTY: CaseExtras = { caseId: null, rules: null, caseRules: null, checklists: null, identify: null, pack: null, directory: null, details: {}, failed: { details: {} } };
 let state: CaseExtras = EMPTY;
 const listeners = new Set<() => void>();
 let loadedKey = "";
@@ -99,6 +101,8 @@ export async function refreshCase(caseId: string, onError?: (e: unknown) => void
     engine.caseRules(caseId).then((r) => { if (live() && r.case_version >= (state.caseRules?.case_version ?? 0)) set({ caseRules: r }); }, miss),
     engine.caseChecklists(caseId).then((r) => { if (live() && r.case_version >= (state.checklists?.case_version ?? 0)) set({ checklists: r }); }, miss),
     engine.casePack(caseId).then((r) => { if (live() && seq === refreshSeq) set({ pack: r }); }, miss),
+    // No stored identification yet is a normal state, not a failed read.
+    engine.storedIdentify(caseId).then((r) => { if (live() && seq === refreshSeq) set({ identify: r }); }, () => { if (live() && seq === refreshSeq) set({ identify: null }); }),
   ]);
   if (live() && seq === refreshSeq) fail({ case: !ok });
   return ok;
@@ -109,6 +113,12 @@ export function setChecklist(caseId: string, checklist: CaseChecklists["checklis
   const cur = state.checklists;
   if (state.caseId !== caseId || !cur) return;
   set({ checklists: { ...cur, case_version: caseVersion, checklists: cur.checklists.map((x) => (x.id === checklist.id ? checklist : x)) } });
+}
+
+/** A written identification response: the deck reads the same benchmark the engine just stored. */
+export function setIdentify(caseId: string, result: IdentifyResult) {
+  if (state.caseId !== caseId) return;
+  set({ identify: result });
 }
 
 /** Try again after a failed read: the rule data, the case's reads, the directory and any failed pack. */
