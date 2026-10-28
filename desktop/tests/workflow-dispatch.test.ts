@@ -234,7 +234,9 @@ test("Batatis AI sends the pinned request with the vault's access code to the we
   const vault = new KeyVault(join(scratch(t), "vault"), box);
   const sent: { path: string; code: string; body: Record<string, unknown> }[] = [];
   let status = 200;
-  const post: HostedPost = async (path, code, body) => {
+  const installs: (string | undefined)[] = [];
+  const post: HostedPost = async (path, code, body, _signal, install) => {
+    installs.push(install);
     sent.push({ path, code, body: JSON.parse(body) });
     if (status !== 200) return { status, body: "{}" };
     return path === "complete"
@@ -265,6 +267,9 @@ test("Batatis AI sends the pinned request with the vault's access code to the we
     body: JSON.stringify({ model: "jev-1.13.0", questions: { q0: "Does A0 govern?" }, state: {} }) }, signal());
   assert.ok(screened.ok);
   assert.equal(sent.at(-1)?.path, "screen");
+  assert.match(installs[0] ?? "", /^[A-Za-z0-9_-]{16,80}$/, "the website counts installs by this id");
+  assert.ok(installs.length >= 2 && installs.every((id) => id === installs[0]), "one install keeps one id across requests");
+  assert.equal(await vault.installId(), installs[0], "and across restarts, since it is kept in the vault folder");
 
   status = 403;
   const refused = await dispatch.call("provider.completeJson", { ...request, lease: await lease(dispatch) }, signal());

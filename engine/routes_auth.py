@@ -123,10 +123,16 @@ def create_router(cases):
         user = require_user(request).model_copy()
         store = cases()
         limit_auth(store, request, 'ai-access')
-        name = ai_access.name_for(body.code)
-        if name is None:
+        found = ai_access.find(body.code)
+        if found is None:
             raise HTTPException(403, 'That access code isn’t valid')
-        user.ai_access, user.ai_access_fingerprint = name, ai_access.fingerprint(ai_access.codes()[name])
+        name, fingerprint = found
+        seats = ai_access.limit(name)
+        if seats is not None and user.ai_access != name:
+            # Accounts and desktop installs share the seats; the person's own account never counts against itself.
+            if len(store.accounts_using_code(name, excluding=user.id)) + store.installs_using_code(name) >= seats:
+                raise HTTPException(403, 'That access code is full')
+        user.ai_access, user.ai_access_fingerprint = name, fingerprint
         store.update_user(user, revoke_sessions=False)
         return AiAccess(required=ai_access.required(), granted=True)
 

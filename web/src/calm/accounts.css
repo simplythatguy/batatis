@@ -79,6 +79,9 @@
   transition-timing-function: ease-out;
 }
 .ac-in:focus { border-color: var(--cf-focus); }
+.ac-row-value .ac-in { width: 160px; height: 34px; font-size: 14px; }
+.ac-row-value .ac-in.ac-in-short { width: 96px; }
+.ac-code { font: 500 13px var(--cf-mono, ui-monospace, monospace); user-select: all; overflow-wrap: anywhere; }
 .ac-in[aria-invalid="true"] { border-color: var(--cf-blocking); }
 
 .ac-help { margin: 8px 0 0; font-size: 12.5px; color: var(--cf-text-3); }

@@ -2387,6 +2387,7 @@ export interface User {
 }
 
 export interface UserResult {
+  admin: boolean;
   user: User;
 }
 

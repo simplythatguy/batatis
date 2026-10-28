@@ -3,6 +3,7 @@
  * Fail closed: with no OS encryption nothing is written, and there is no plaintext fallback.
  * Nothing here reads a key back out for a renderer; status is all a window ever learns.
  */
+import { randomBytes } from "node:crypto";
 import { mkdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { KeyProviderId } from "./providers";
@@ -68,6 +69,22 @@ export class KeyVault {
 
   async remove(id: KeyProviderId): Promise<void> {
     await rm(this.#file(id), { force: true });
+  }
+
+  /**
+   * A random id for this install, made once. It is not a secret: the Batatis website counts the installs that
+   * use one access code with it, so a code's seat limit covers desktop installs too.
+   */
+  async installId(): Promise<string> {
+    const file = join(this.#dir, "install.id");
+    try {
+      const saved = (await readFile(file, "utf8")).trim();
+      if (/^[A-Za-z0-9_-]{16,80}$/.test(saved)) return saved;
+    } catch { /* made below */ }
+    const made = randomBytes(24).toString("base64url");
+    await mkdir(this.#dir, { recursive: true, mode: 0o700 });
+    await writeFile(file, made, { mode: 0o600 });
+    return made;
   }
 
   /** Main-only use. A missing file returns before touching the OS keyring. */
