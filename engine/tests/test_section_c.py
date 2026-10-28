@@ -66,5 +66,12 @@ def test_differs_flag_comes_from_intent_comparison(codes):
 
 
 def test_unknown_provision_is_an_error(codes):
-    with pytest.raises(KeyError):
+    with pytest.raises(KeyError, match=r'Section C lookup missed 9\.99\.99\.99\.\(1\)'):
         section_c_rows(['9.99.99.99.(1)'], codes)
+
+
+def test_soffit_sentence_reports_pair_and_intent_codes(codes):
+    [row] = section_c_rows(['9.10.15.5.(8)'], codes)
+    assert row.attribution_status == 'direct'
+    assert [(pair.function, pair.objective) for pair in row.pairs] == [('F03', 'OP3.1')]
+    assert [(block.objective, len(block.intents)) for block in row.intents] == [('OP3', 1)]

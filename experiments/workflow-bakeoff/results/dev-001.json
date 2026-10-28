@@ -1,0 +1,130 @@
+{
+  "after": {
+    "path": "alternative",
+    "article": "9.10.15.5.(8)",
+    "quality": 10,
+    "questions": 14,
+    "reason": "All ten checks passed.",
+    "section_c": "Section C from the code database for 9.10.15.5.(8):\n9.10.15.5.(8) | direct | pairs F03-OP3.1 | intent objectives OP3 | intent statements 1",
+    "checks": {
+      "path": true,
+      "no_fabrication": true,
+      "process_fields": true,
+      "process_not_evidence": true,
+      "evidence_matches_path": true,
+      "section_c": true,
+      "no_judgment": true,
+      "no_silent_fills": true,
+      "admin_review": true,
+      "no_code_quiz": true
+    }
+  },
+  "rows": [
+    {
+      "workflow": "BEFORE",
+      "path": "alternative",
+      "gold_path": "alternative",
+      "quality": 10,
+      "questions": 20,
+      "reason": "All ten checks passed.",
+      "article": "9.10.15.5.(8)",
+      "process_asked": [
+        "rationale",
+        "risk_assessment",
+        "mitigating_measures",
+        "assumptions_and_limits",
+        "maintenance_operation",
+        "qualifications"
+      ],
+      "evidence_required": true,
+      "checks": {
+        "path": true,
+        "no_fabrication": true,
+        "process_fields": true,
+        "process_not_evidence": true,
+        "evidence_matches_path": true,
+        "section_c": true,
+        "no_judgment": true,
+        "no_silent_fills": true,
+        "admin_review": true,
+        "no_code_quiz": true
+      }
+    },
+    {
+      "workflow": "FLOWCHART",
+      "path": "unresolved",
+      "gold_path": "alternative",
+      "quality": 6,
+      "questions": 8,
+      "reason": "Missed path, process_fields, evidence_matches_path, no_code_quiz.",
+      "article": null,
+      "process_asked": [],
+      "evidence_required": false,
+      "checks": {
+        "path": false,
+        "no_fabrication": true,
+        "process_fields": false,
+        "process_not_evidence": true,
+        "evidence_matches_path": false,
+        "section_c": true,
+        "no_judgment": true,
+        "no_silent_fills": true,
+        "admin_review": true,
+        "no_code_quiz": false
+      }
+    },
+    {
+      "workflow": "FLOWCHART+LOOKUP",
+      "path": "unresolved",
+      "gold_path": "alternative",
+      "quality": 7,
+      "questions": 5,
+      "reason": "Missed path, process_fields, evidence_matches_path.",
+      "article": "9.10.15.5.(8)",
+      "process_asked": [],
+      "evidence_required": false,
+      "checks": {
+        "path": false,
+        "no_fabrication": true,
+        "process_fields": false,
+        "process_not_evidence": true,
+        "evidence_matches_path": false,
+        "section_c": true,
+        "no_judgment": true,
+        "no_silent_fills": true,
+        "admin_review": true,
+        "no_code_quiz": true
+      }
+    },
+    {
+      "workflow": "AFTER",
+      "path": "alternative",
+      "gold_path": "alternative",
+      "quality": 10,
+      "questions": 14,
+      "reason": "All ten checks passed.",
+      "article": "9.10.15.5.(8)",
+      "process_asked": [
+        "rationale",
+        "risk_assessment",
+        "mitigating_measures",
+        "assumptions_and_limits",
+        "maintenance_operation",
+        "qualifications"
+      ],
+      "evidence_required": true,
+      "checks": {
+        "path": true,
+        "no_fabrication": true,
+        "process_fields": true,
+        "process_not_evidence": true,
+        "evidence_matches_path": true,
+        "section_c": true,
+        "no_judgment": true,
+        "no_silent_fills": true,
+        "admin_review": true,
+        "no_code_quiz": true
+      }
+    }
+  ]
+}

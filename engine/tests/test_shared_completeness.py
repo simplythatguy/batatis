@@ -28,7 +28,7 @@ def elements(case, codes):
 
 def test_officer_code_analysis_testing_and_coordinator_reach_applicant_and_export():
     codes = Codes()
-    case = Case(facts=[fact('professional_name', 'SYNTHETIC designer')])
+    case = Case(facts=[fact('pathway', 'alternative'), fact('professional_name', 'SYNTHETIC designer')])
     officer = {f.field for f in review_case(case, codes).findings}
     applicant = {g.field for g in check_completeness(case, codes)}
     assert {'div_c.code_analysis', 'div_c.testing_procedures'} <= officer
@@ -65,7 +65,7 @@ def test_real_demo_export_import_agrees_on_process_gaps(name):
                                 'Testing procedures: not provided.', 'Testing procedures'])
 def test_negated_or_heading_only_testing_does_not_establish_presence(text):
     codes = Codes()
-    case = Case(facts=[fact('testing_procedures', text)])
+    case = Case(facts=[fact('pathway', 'alternative'), fact('testing_procedures', text)])
     assert any(g.field == 'div_c.testing_procedures' for g in check_completeness(case, codes))
     uploaded = review_uploads(package(narrative=dict(CLEAN_NARRATIVE, **{'Testing procedures': text}), report=[]), codes)
     assert any(f.field == 'div_c.testing_procedures' for f in uploaded.findings)
@@ -74,7 +74,7 @@ def test_negated_or_heading_only_testing_does_not_establish_presence(text):
 @pytest.mark.parametrize('key', ['rationale', 'risk_assessment', 'mitigating_measures', 'assumptions_and_limits'])
 def test_embedded_unknown_in_real_narrative_is_not_a_placeholder(key):
     text = 'SYNTHETIC wall fire spread assessment: the response interval is unknown and remains an assumption for this wall.'
-    entry = elements(Case(facts=[fact(key, text)]), Codes())[key]
+    entry = elements(Case(facts=[fact('pathway', 'alternative'), fact(key, text)]), Codes())[key]
     assert entry.problem != 'placeholder'
     assert entry.value == text
 
@@ -148,7 +148,8 @@ def test_hidden_or_conflicting_process_answer_is_whole_field_uncertainty():
 @pytest.mark.parametrize('field', ['demonstrate.failure_conditions', 'demonstrate.lapsed_maintenance',
                                   'demonstrate.emergency_response'])
 def test_demonstration_assumptions_are_shared_administrative_prompts(field):
-    case = Case(facts=[fact('alternative_description', 'SYNTHETIC dwelling wall departure.')])
+    case = Case(facts=[fact('pathway', 'alternative'),
+                       fact('alternative_description', 'SYNTHETIC dwelling wall departure.')])
     codes = Codes()
     gap = next(gap for gap in check_completeness(case, codes) if gap.field == field)
     saved = next(item for item in saved_case_response(case, codes).policy.items if item.field == field)
@@ -172,7 +173,8 @@ def test_signature_preparation_stage_is_shared_and_started_signature_requires_da
 
 def test_jurisdiction_wide_scope_is_a_shared_single_location_gap():
     codes = Codes()
-    saved = saved_case_response(Case(facts=[fact('municipal_address', 'SYNTHETIC one street'),
+    saved = saved_case_response(Case(facts=[fact('pathway', 'alternative'),
+                                          fact('municipal_address', 'SYNTHETIC one street'),
                                           fact('scope', 'jurisdiction')]), codes)
     from engine.tests.package_review_fixtures import CLEAN_FORM
     uploaded = review_uploads(package(dict(CLEAN_FORM, **{'Check Box': '/Yes'})), codes)

@@ -4,6 +4,7 @@ import { AI_ACCEPTED_REF, applyDescription } from "./intake";
 import { asLocal, confirmedAnswer, isWritingField, localField } from "./intakeFields";
 import { codeQuestion, identifyCandidates, legalFromFacts, readGroups } from "./intakeView";
 import { AUTHORITY_ONLY_FIELDS, professionalConfirmed } from "./professional";
+import { decidePath, pathStopCopy } from "./pathDecision";
 import type { Candidate, CandidateAnswer, Case, EvidenceDraft, Fact, Gap, ListedEvidence, ProcessFieldId, SectionCRow } from "./types";
 import { canonicalProvision, isProvision, keywordCandidate, reconcileSectionC } from "./provisions";
 import { evidenceBinding } from "./evidence";
@@ -339,6 +340,8 @@ export function questionAnsweredByFact(c: Case, q: Case["questions"][number]): b
 
 export function getGaps(c: Case): Gap[] {
   const gaps: Gap[] = [];
+  const decision = decidePath(c);
+  const alternative = decision.path === "alternative";
   const redirect = c.facts.find((f) => f.field === "scope.redirect" && f.status === "unconfirmed");
   if (redirect) {
     const regime = c.intake?.record.plan?.scope.regime?.name ?? String(redirect.value ?? "another regime");
@@ -359,6 +362,7 @@ export function getGaps(c: Case): Gap[] {
     });
   }
   for (const d of DETAIL_FIELDS) {
+    if ((d.id === "scope" || d.id === "alternative") && !alternative) continue;
     const fact = factFor(c, d.id);
     if (d.required && !valueText(fact).trim() && !(d.id === "legalDescription" && legalFromFacts(c.facts))) {
       gaps.push({ id: `detail-${d.id}`, severity: "blocking", label: DETAIL_GAP[d.id] ?? `${d.label} missing`, href: routeForDetail(d.id), field: d.id });
@@ -395,7 +399,7 @@ export function getGaps(c: Case): Gap[] {
   if (c.candidates.some((a) => keywordCandidate(c, a) && a.answer === null)) {
     gaps.push({ id: "keyword-triage", severity: "warning", label: "Keyword matches are unconfirmed leads. Review them by topic, or choose a code reference yourself.", href: "#/questions?focus=code-triage", field: "identify.keyword_triage" });
   }
-  for (const p of PROCESS_FIELDS) {
+  if (alternative) for (const p of PROCESS_FIELDS) {
     if (!c.process[p.id].trim()) {
       gaps.push({
         id: `process-${p.id}`,
@@ -427,6 +431,16 @@ export function getGaps(c: Case): Gap[] {
         field: q.field,
       });
     }
+  }
+  if ((decision.path === "not_applicable" || (decision.path === "unresolved" && !decision.asksRuleInputs)) && (c.description.trim() || c.facts.length > 0)) {
+    const copy = pathStopCopy(decision);
+    gaps.push({
+      id: "path-stop",
+      severity: "warning",
+      label: `${copy.title}. ${copy.context}`,
+      href: "#/questions?focus=path-stop",
+      field: "path",
+    });
   }
   if (c.practiceOfEngineering === true && !professionalConfirmed(c.facts)) {
     gaps.push({

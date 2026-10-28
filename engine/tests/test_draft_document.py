@@ -37,7 +37,7 @@ def fact(field, value, status='confirmed'):
 
 
 def sparse(codes, provisions=(), **answers):
-    facts = [fact('owner_name', OWNER), fact('municipal_address', ADDRESS),
+    facts = [fact('pathway', 'alternative'), fact('owner_name', OWNER), fact('municipal_address', ADDRESS),
              fact('mailing_address', 'SYNTHETIC unconfirmed mailing address', 'unconfirmed')]
     facts += [fact(key, value) for key, value in answers.items()]
     return Case(title='SYNTHETIC sparse draft', facts=facts, provisions=list(provisions),

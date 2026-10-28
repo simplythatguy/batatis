@@ -1,0 +1,11 @@
+{
+  "arm": "run_w2c",
+  "note": "AFTER's path procedure plus the deck's reading-confirmation card. run_w2 matched decide_path on all 152 prompts in the main comparison.",
+  "n": 152,
+  "balanced_quality": 9.739432851792403,
+  "balanced_questions": 13.991795969324059,
+  "application_quality": 9.523809523809524,
+  "rule_quality": 9.955056179775282,
+  "path_matches": 140,
+  "fabricated_prompts": 0
+}

@@ -102,6 +102,16 @@ function demoCase(type: Case["applicantType"] = "homebuilder"): Case {
   return c;
 }
 
+/** Same plan, without the facts that name one rule and finish its check. */
+function undecidedHouse(): Case {
+  const c = demoCase();
+  return {
+    ...c,
+    description: "A house on a narrow lot.",
+    facts: c.facts.filter((f) => !["occupancy", "storeys", "building_area_m2", "limiting_distance_m", "alternative", "alternative_description", "project.description"].includes(f.field)),
+  };
+}
+
 /* —— Routes —— */
 
 test("legacy hrefs translate to calm routes", () => {
@@ -207,20 +217,23 @@ test("the journey asks deciding facts before paperwork while retaining form sect
   assert.equal(deck[0].kind, "understood");
   const stages = deck.map((i) => STAGES.findIndex((s) => s.stage === i.stage));
   assert.deepEqual(stages, [...stages].sort((a, b) => a - b));
-  assert.ok(deck.findIndex((i) => i.ref === "intake.part4_design") < deck.findIndex((i) => i.kind === "paperwork"));
+  assert.ok(!deck.some((i) => i.ref === "intake.part4_design" || i.ref === "intake.assembly.description" || i.ref === "intake.sprinklered"), "a firm check does not keep asking inputs it no longer needs");
   assert.ok(deck.findIndex((i) => i.kind === "candidate") < deck.findIndex((i) => i.kind === "paperwork"));
   assert.equal(paperworkRows(deck).find((i) => i.key === "field-representative")?.section, "A");
-  assert.equal(deck.filter((i) => i.kind === "process").length, 6);
+  assert.equal(deck.filter((i) => i.kind === "process").length, 0);
+  assert.equal(deck.find((i) => i.key === "path-stop")?.title, "This rule doesn’t apply");
 });
 
 test("planner cards follow their form fields, and each field has one editable card", () => {
   const c = demoCase();
   const deck = buildDeck(c, getGaps(c));
   const plan = deck.filter((i) => i.kind === "plan");
-  assert.deepEqual(plan.map((i) => i.ref), ["intake.part4_design", "intake.assembly.description", "intake.sprinklered"]);
-  assert.equal(plan[0].context, "", "the question stands alone");
-  assert.equal(plan.find((i) => i.ref === "intake.part4_design")?.why, "Why part4_design.", "Help keeps the contextual reason without boilerplate");
-  assert.deepEqual(choicesFor(plan.find((i) => i.ref === "intake.sprinklered")!).map((x) => x.label), ["Yes", "No", "Partly", "Not sure"]);
+  assert.deepEqual(plan.map((i) => i.ref), [], "the description names one rule and the check is already firm, so its planner questions are not asked again");
+  const asked = buildDeck(undecidedHouse(), getGaps(undecidedHouse())).filter((i) => i.kind === "plan");
+  assert.deepEqual(asked.map((i) => i.ref), ["intake.part4_design", "intake.assembly.description", "intake.sprinklered"]);
+  assert.equal(asked[0].context, "", "the question stands alone");
+  assert.equal(asked.find((i) => i.ref === "intake.part4_design")?.why, "Why part4_design.", "Help keeps the contextual reason without boilerplate");
+  assert.deepEqual(choicesFor(asked.find((i) => i.ref === "intake.sprinklered")!).map((x) => x.label), ["Yes", "No", "Partly", "Not sure"]);
   // Paperwork is edited once on the sheet, including fields previously issued by the planner.
   assert.ok(!deck.some((i) => i.key === "field-legalDescription" || i.key === "field-mailingAddress"));
   assert.equal(paperworkRows(deck).find((i) => i.ref === "legalDescription")?.section, "B");
@@ -246,8 +259,29 @@ test("Not sure on a planner question never blocks and is not asked again on its 
   assert.ok(!buildDeck(c, gaps).some((i) => i.key === "field-mailingAddress"));
 });
 
+test("an explicit variance request opens the six process fields", () => {
+  const c = emptyCase("homebuilder");
+  c.facts = [{
+    id: "vr", field: "variance_requested", value: true, kind: "pointed", status: "confirmed",
+    source: { type: "user_text", ref: "request", quote: "variance" },
+  }];
+  const deck = buildDeck(c, getGaps(c));
+  assert.equal(deck.filter((item) => item.kind === "process").length, 6);
+  assert.equal(deck.some((item) => item.kind === "section-d"), true);
+});
+
+test("an acceptable path does not ask for a departure sentence", () => {
+  let c = undecidedHouse();
+  c = { ...c, description: "A standard house built to the Part 9 tables." };
+  const record = intakeResult({ plan: { questions: [question("alternative_description", "In a sentence or two, what does your design do differently from the usual code requirement?")] } }).record;
+  c = reducer(c, { type: "noteIntakeRecord", record });
+  assert.equal(buildDeck(c, getGaps(c)).some((i) => /differently/.test(i.title)), false);
+  assert.equal(buildDeck(c, getGaps(c)).some((i) => i.kind === "section-d"), true);
+  assert.equal(buildDeck(c, getGaps(c)).some((i) => i.kind === "process"), false);
+});
+
 test("an answered planner field is done (the engine's fact, under the browser's name)", () => {
-  let c = demoCase();
+  let c = undecidedHouse();
   c = reducer(c, { type: "adoptFacts", facts: [{ id: "ans", field: "sprinklered", value: "no", kind: "pointed", status: "confirmed", source: { type: "user_text", ref: "intake answer", quote: "no" } }] });
   assert.equal(buildDeck(c, getGaps(c), { includeDone: true }).find((i) => i.ref === "intake.sprinklered")?.done, true);
 });
@@ -319,10 +353,10 @@ test("the code check shows its progress until identification is back, and says s
   assert.equal(running.title, "Checking the code for your project…");
   assert.equal(running.optional, true, "it never blocks the applicant");
   const wide = reducer(c, { type: "noteIdentify", result: identifyResult({ narrowed: false, message: "I could not narrow this down. Answer the questions so the next check can.", choices: [] }) });
-  const note = buildDeck(wide, getGaps(wide)).find((i) => i.kind === "code-note")!;
+  const note = buildDeck(wide, getGaps(wide)).find((i) => i.title === "I could not narrow this down.")!;
   assert.equal(note.title, "I could not narrow this down.");
   const fallback = reducer(c, { type: "noteIdentify", result: identifyResult({ mode: "bm25_fallback" }) });
-  assert.equal(buildDeck(fallback, getGaps(fallback)).find((i) => i.kind === "code-note")?.title, "This list comes from a keyword search.");
+  assert.equal(buildDeck(fallback, getGaps(fallback)).find((i) => i.title === "This list comes from a keyword search.")?.title, "This list comes from a keyword search.");
 });
 
 test("Not sure on a code card keeps its clarifying question on that card", () => {
@@ -380,14 +414,15 @@ test("once described, no card asks again what the applicant is building", () => 
 });
 
 test("without a departure read, the proposed alternative offers the description instead of asking for it again", () => {
-  let c = reducer(emptyCase("homebuilder"), { type: "setDescription", text: DEMO });
+  const departure = "We will use a rainscreen instead of the required sheathing.";
+  let c = reducer(emptyCase("homebuilder"), { type: "setDescription", text: departure });
   let card = buildDeck(c, getGaps(c)).find((i) => i.key === "field-alternative")!;
   assert.equal(card.title, "Is this what you want to do differently?");
   assert.deepEqual(choicesFor(card).map((x) => x.label), ["Yes, use my description", "No, I’ll write it", "Not sure"]);
   c = reducer(c, { type: "setDetail", field: "alternative", value: c.description.trim(), section: "B" });
   card = buildDeck(c, getGaps(c), { includeDone: true }).find((i) => i.key === "field-alternative")!;
   assert.equal(card.done, true);
-  assert.equal(alternativeChoice(c.description, DEMO), "confirm");
+  assert.equal(alternativeChoice(c.description, departure), "confirm");
   assert.equal(alternativeChoice(c.description, "A rainscreen instead of housewrap."), "dismiss");
   assert.equal(alternativeChoice(c.description, " "), undefined);
 });
@@ -401,13 +436,13 @@ test("section progress counts tracked cards per section", () => {
 });
 
 test("progress marks one current item, answers, recorded uncertainty and future questions", () => {
-  let c = demoCase();
+  let c = undecidedHouse();
   c = reducer(c, { type: "setDetail", field: "date", value: "2026-10-25", section: "A" });
   const deck = buildDeck(c, getGaps(c), { includeDone: true });
   const current = deck.find((i) => i.kind === "paperwork")!;
   const deferred = { ...paperworkRows(deck).find((i) => i.key === "field-representative")!, done: true, settled: true };
   const answered = paperworkRows(deck).find((i) => i.key === "field-date")!;
-  const future = deck.find((i) => i.key === "field-risk")!;
+  const future = deck.find((i) => i.kind === "plan")!;
   const states = deck.map((i) => questionProgress(i, current.key));
   assert.equal(states.filter((s) => s === "current").length, 1);
   assert.equal(questionProgress(answered, current.key), "done");
@@ -421,6 +456,11 @@ test("progress marks one current item, answers, recorded uncertainty and future 
 
 test("issued planner cards stay editable after a later plan replaces them, without duplicate form cards", () => {
   let c = demoCase();
+  c = {
+    ...c,
+    description: "We will use a rainscreen instead of the required sheathing.",
+    facts: c.facts.filter((f) => !["occupancy", "storeys", "building_area_m2", "limiting_distance_m", "alternative_description"].includes(f.field)),
+  };
   const scope = question("scope", "One building or site, or many sites?");
   const record = intakeResult({ plan: { asked: [scope], questions: [] } }).record;
   c = reducer(c, { type: "noteIntakeRecord", record });
@@ -465,8 +505,9 @@ test("permit is optional and offered once", () => {
 });
 
 test("Section D joins the deck with a real reference and stays open while its gaps remain", () => {
-  let c = demoCase();
-  assert.ok(!buildDeck(c, []).some((i) => i.kind === "section-d"));
+  let c = reducer(emptyCase("homebuilder"), { type: "setDescription", text: "We will use a rainscreen instead of the required sheathing." });
+  assert.ok(buildDeck(c, []).some((i) => i.kind === "section-d"));
+  assert.ok(!buildDeck(demoCase(), []).some((i) => i.kind === "section-d"));
   c = reducer(c, {
     type: "addCandidate",
     candidate: {

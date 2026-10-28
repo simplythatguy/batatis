@@ -47,10 +47,10 @@ def review(context, case):
 
 @pytest.mark.parametrize('old_key,new_key', [('pathway', 'path'), ('path', 'pathway')])
 @pytest.mark.parametrize('value,confirmed,kind,applies', [
-    ('acceptable', False, 'pointed', True),
-    ('acceptable', False, 'proposed', True),
-    ('', True, 'pointed', True),
-    (None, True, 'exact', True),
+    ('acceptable', False, 'pointed', False),
+    ('acceptable', False, 'proposed', False),
+    ('', True, 'pointed', False),
+    (None, True, 'exact', False),
     ('alternative', True, 'pointed', True),
     ('acceptable', True, 'pointed', False),
     ('acceptable_solution', True, 'pointed', False),
@@ -105,7 +105,8 @@ def test_topic_screen_covers_every_selection_in_either_order(context, descriptio
 ])
 def test_single_location_uses_one_current_logical_address(context, key, value, confirmed, kind, verdict):
     latest = fact(key, value, confirmed=confirmed, kind=kind, ref='SYNTHETIC current source')
-    entry = review(context, Case(facts=[fact('municipal_address', 'SYNTHETIC old site'), latest]))['single_location']
+    entry = review(context, Case(facts=[fact('pathway', 'alternative'),
+        fact('municipal_address', 'SYNTHETIC old site'), latest]))['single_location']
     assert entry['verdict'] == verdict
     assert all(q['text'] != 'SYNTHETIC old site' for q in entry['quotes'])
     if verdict != 'present':
@@ -120,7 +121,8 @@ def test_single_location_uses_one_current_logical_address(context, key, value, c
     ('', True, 'pointed', 'present'),
 ])
 def test_explicit_additional_location_keeps_its_current_state(context, value, confirmed, kind, verdict):
-    entry = review(context, Case(facts=[fact('municipal_address', 'SYNTHETIC primary site'),
+    entry = review(context, Case(facts=[fact('pathway', 'alternative'),
+        fact('municipal_address', 'SYNTHETIC primary site'),
         fact('additional_location', 'SYNTHETIC former second site'),
         fact('additional_location', value, confirmed=confirmed, kind=kind)]))['single_location']
     assert entry['verdict'] == verdict

@@ -218,7 +218,7 @@ def test_long_section_a_value_grows_its_form_box(case, codes):
 
 def test_direct_export_cannot_bypass_authoritative_completeness(case, codes):
     bypass = case.model_copy(deep=True)
-    keep = {'owner_name', 'mailing_address', 'request_date', 'municipal_address'}
+    keep = {'owner_name', 'mailing_address', 'request_date', 'municipal_address', 'pathway'}
     bypass.facts = [f for f in bypass.facts if f.field in keep]
     bypass.evidence = []
     bypass.gaps = []

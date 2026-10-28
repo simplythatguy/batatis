@@ -12,6 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from .codes import Codes
 from .models import Case, ProfessionalRequirementResolution
+from .path_decision import decide_path
 from .process_fields import alternative_path, confirmed_value, latest_fact
 from .professional_resolution import current_resolution
 
@@ -661,11 +662,12 @@ def _screen_involvement(facts: ProfessionalFacts | Case, codes: Codes, *,
             and confirmed and not other_depends):
         involvement: Involvement = 'professional_involved'
         missing: tuple[str, ...] = ()
-    elif required == 'no' and not alternative:
+    elif required == 'no' and (case is None or decide_path(case).path == 'acceptable'):
         involvement = 'not_required'
         missing = ()
     else:
-        # An alternative case does not become not_required by answering the prescriptive route as yes.
+        # Only a firm or recorded acceptable path clears involvement. Unknown stays unresolved,
+        # and an alternative case does not become not_required by answering the prescriptive route as yes.
         involvement = 'unresolved'
         missing = _missing_facts(facts, reasons, confirmed=confirmed)
     if (blocked or any(reason.source_unresolved for reason in reasons)) and required != 'yes':

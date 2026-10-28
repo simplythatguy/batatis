@@ -15,6 +15,7 @@ from reportlab.pdfgen import canvas
 
 from ..completeness import Gap, _case_constraints
 from ..fact_aliases import LOGICAL_KEYS, latest
+from ..path_decision import decide_path
 from ..process_fields import confirmed_value
 from ..professional import professional_confirmed, professional_involvement
 from ..section_d import supporting_documents
@@ -200,7 +201,7 @@ def prepare_package(case, codes, *, store=None, draft=False, form=None, version=
         f'Applicant confirmation: {"yes" if professional_confirmed(case) else "no"}',
         f'Name: {name}', f'Role: {role}', f'Basis: {basis}',
         f'Owner: {values.get("owner_name") or ""}', f'Location: {"; ".join(dict.fromkeys(locations))}',
-        f'Pathway: {confirmed_value(case, "pathway", "path") or "alternative"}',
+        f'Pathway: {decide_path(case).path}',
         'End administrative source record']
     append(_page(declaration))
     for gap in constraints:
@@ -217,14 +218,16 @@ def prepare_package(case, codes, *, store=None, draft=False, form=None, version=
             append_gap(Gap(id=f'presence:{key}', section=spec.export_section if spec else 'B', field=key,
                 message=f'The {key.replace("_", " ")} was not found or could not be read. Check its source.',
                 fix_hint='Check the indicated source and confirm this answer.', routed_to='officer'), 'not_found')
-    # The appendix prints answered passages only; record each unanswered one so a reader can call it blank.
-    unanswered = [(key, 'process', f'process.{key}', (*names, *(f'process.{name}' for name in names)))
-                  for key, names in PROCESS_ALIASES.items()] + [('scope', 'B', 'scope', ('scope',))]
-    for key, section, canonical, names in unanswered:
-        fact = latest_fact(case, *names)
-        if fact is None or (_stored(fact, canonical).confirmed and not str(fact.value or '').strip()):
-            append_gap(Gap(id=f'{key}:unanswered', section=section, field=key, severity='warning',
-                message=f'No {key.replace("_", " ")} was supplied.', fix_hint='Supply this answer.'), 'blank')
+    # The appendix prints answered passages only. On the alternative path, record each
+    # unanswered process field and the site-versus-municipality scope so a reader can call it blank.
+    if decide_path(case).path == 'alternative':
+        unanswered = [(key, 'process', f'process.{key}', (*names, *(f'process.{name}' for name in names)))
+                      for key, names in PROCESS_ALIASES.items()] + [('scope', 'B', 'scope', ('scope',))]
+        for key, section, canonical, names in unanswered:
+            fact = latest_fact(case, *names)
+            if fact is None or (_stored(fact, canonical).confirmed and not str(fact.value or '').strip()):
+                append_gap(Gap(id=f'{key}:unanswered', section=section, field=key, severity='warning',
+                    message=f'No {key.replace("_", " ")} was supplied.', fix_hint='Supply this answer.'), 'blank')
     # Statements not represented in the template's ordinary A-D/process fields stay visible.
     for key in ('code_analysis', 'testing_procedures', 'coordinator', 'failure_conditions',
                 'lapsed_maintenance', 'emergency_response', 'engineering_required'):
