@@ -6,9 +6,9 @@ import { ProviderDispatch, parseCompleteJson } from "../src/main/provider-dispat
 import { KeyProviders, type ProviderPost } from "../src/main/provider-http.ts";
 import { HOSTED_AI, HostedAi, type HostedPost } from "../src/main/provider-hosted.ts";
 import { unavailableProvider, type CompleteJsonResult, type HostProvider } from "../src/main/providers.ts";
+import { defaultPick } from "../src/main/models.ts";
 import { DesktopHost } from "../src/main/controller.ts";
 import { both, fakeCommand, scratch, waitFor } from "./helpers.ts";
-import { defaultPick } from "../src/main/models.ts";
 
 const signal = () => new AbortController().signal;
 const shape = { type: "object", additionalProperties: false, required: ["answer"], properties: { answer: { type: "string" } } };
@@ -186,11 +186,11 @@ test("each kind of work goes to its own pick; the engine keeps its profile and l
   const intake = await dispatch.call("provider.completeJson", { ...request, task: "intake", lease: leased }, signal());
   assert.ok(intake.ok);
   assert.deepEqual(intake.value, { json: { answer: "claude" }, model: "gpt-6-luna", effort: "medium", usage: { inputTokens: 3, outputTokens: 4 },
-    served: { source: "claude", model: "claude-haiku-5-5", effort: "low" }, billing: "subscription" });
+    served: { source: "claude", model: "claude-haiku-5-5", effort: defaultPick("claude").effort }, billing: "subscription" });
   const chat = await dispatch.call("provider.completeJson", { ...request, task: "assistant", lease: leased }, signal());
   assert.ok(chat.ok && (chat.value as { served: { source: string } }).served.source === "chatgpt");
   assert.deepEqual(asked, [
-    { account: "claude", model: "claude-haiku-5-5", effort: "low", task: "intake" },
+    { account: "claude", model: "claude-haiku-5-5", effort: defaultPick("claude").effort, task: "intake" },
     { account: "chatgpt", model: "gpt-6-luna", effort: "medium", task: "assistant" },
   ]);
 });

@@ -77,7 +77,7 @@ def test_grounded_provision_lookup_citations_removal_and_spend_receipt(assistant
     assert '9.99.99.99.' not in result['answer']
     invocation = calls[0]
     assert invocation['provider'] == provider
-    assert invocation['model'] == ('claude-sonnet-5-5' if provider == 'anthropic' else llm_gate.DEFAULT_MODEL)
+    assert invocation['model'] == ('claude-haiku-5-5' if provider == 'anthropic' else llm_gate.DEFAULT_MODEL)
     context = json.loads(invocation['context'])
     assert context['focused_provision']['text'] == Codes().provision('9.10.9.16.(1)', 'B')['text']
     assert context['section_c'][0]['pairs'][0]['function'] == 'F03'

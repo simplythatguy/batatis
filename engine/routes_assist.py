@@ -210,7 +210,7 @@ def model_route() -> ModelRoute:
             or (profile is None and not llm_gate.live_enabled(provider))):
         raise HTTPException(503, 'Assistant unavailable')
     model = (provider_routing.LOCAL_MODEL if profile is not None else
-             'claude-sonnet-5-5' if provider == 'anthropic' else llm_gate.DEFAULT_MODEL)
+             'claude-haiku-5-5' if provider == 'anthropic' else llm_gate.DEFAULT_MODEL)
     return ModelRoute(provider, model, profile)
 
 
