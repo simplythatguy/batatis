@@ -42,9 +42,12 @@ Owned applications allow content edits only while draft or returned. A blocked
 edit returns 409 `Submitted applications are read-only until returned`. Owners
 may delete their application in any status. Updating an owned case's jurisdiction
 also updates its reviewing authority. A role change in either direction requires
-an authority code: applicants use the target authority's code; reviewers leaving
-the role use their current authority's code. This prevents switching role through
-a less restrictive onboarding payload. Privilege changes invalidate all existing
+an authority code, unless the account holds a live testing access code
+(`app_access` on the auth response): applicants use the target authority's code;
+reviewers leaving the role use their current authority's code. This prevents
+switching role through a less restrictive onboarding payload. A testing access
+code already opened the product, so that account can take or leave the reviewer
+role without a second code. Privilege changes invalidate all existing
 sessions and issue a fresh session.
 
 List organization is separate from application content. Archiving does not withdraw

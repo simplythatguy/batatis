@@ -4,7 +4,7 @@
  * single-visit flow it had before.
  */
 import { useSyncExternalStore } from "react";
-import { accounts, auth, notAvailable, type ApplicationPreferences, type ApplicationSummary, type User } from "../api/accounts";
+import { accounts, auth, notAvailable, sessionUser, type ApplicationPreferences, type ApplicationSummary, type User } from "../api/accounts";
 import { EngineError } from "../api/client";
 import { probeAuth } from "../api/engineAuth";
 import { replaceAccountRequests } from "../api/requestLifetime";
@@ -52,8 +52,7 @@ export function bootAccount() {
   void probeAuth().then(async (p) => {
     if (token !== session) return;
     if (p.status === 200) {
-      const body = p.body as { user?: User } | User | null;
-      const user = (body && "user" in body ? body.user : (body as User | null)) ?? null;
+      const user = sessionUser(p.body);
       set({ phase: user ? "signed-in" : "anonymous", user });
       const settled = session;
       if (user) void auth.signInMode().then((mode) => { if (settled === session) set({ codeLogin: mode === "code" }); }, () => {});

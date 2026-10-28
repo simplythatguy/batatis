@@ -1,4 +1,4 @@
-/** Settings → Access codes, for the site admin only: make a code, see who is using it, cap its seats, switch it off, remove an unused one. */
+/** Settings → Access codes, for the site admin only: make a code, see who is using it, cap its seats, switch it off, remove it. */
 import { useEffect, useState } from "react";
 import { AccountsError, adminCodes, type AccessCodeInfo } from "../../api/accounts";
 import { Row } from "./rows";

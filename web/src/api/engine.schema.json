@@ -15571,13 +15571,19 @@
           "title": "Admin",
           "type": "boolean"
         },
+        "app_access": {
+          "default": false,
+          "title": "App Access",
+          "type": "boolean"
+        },
         "user": {
           "$ref": "#/$defs/User"
         }
       },
       "required": [
         "user",
-        "admin"
+        "admin",
+        "app_access"
       ],
       "title": "UserResult",
       "type": "object"

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import type { User } from "../../api/accounts.ts";
 import { gateRedirect, gateStatus, homeFor, returnTarget } from "./gate.ts";
-import { USE_CHOICES, codeNeeded, nextStep, onboardingPayload, previousStep, stepsFor } from "./onboardingSteps.ts";
+import { USE_CHOICES, codeNeeded, nextStep, onboardingPayload, previousStep, stepsFor, useChoices } from "./onboardingSteps.ts";
 
 const user = (over: Partial<User> = {}): User => ({
   id: "u1", email: "mira@example.test", name: "Mira Kaur", role: "applicant", applicant_type: "homebuilder",
@@ -73,6 +73,20 @@ test("settings asks for a code when becoming or leaving a reviewer", () => {
   assert.deepEqual(codeNeeded({ role: "reviewer", authority: "calgary" }, "applicant"), { authority: "calgary" });
   assert.equal(codeNeeded({ role: "applicant", authority: null }, "applicant"), null);
   assert.equal(codeNeeded({ role: "applicant", authority: null }, "reviewer", null), null);
+});
+
+test("an access-code account reaches reviewer without an authority code", () => {
+  const reviewer = { use: "reviewer" as const, authority: "edmonton" as const, code: "" };
+  assert.deepEqual(stepsFor(reviewer, true), ["use", "authority"]);
+  assert.equal(nextStep("authority", reviewer, true), null);
+  assert.equal(previousStep("authority", reviewer, true), "use");
+  assert.deepEqual(onboardingPayload(reviewer, true), { role: "reviewer", authority: "edmonton" });
+  assert.equal(codeNeeded({ role: "applicant", authority: null }, "reviewer", "edmonton", true), null);
+  assert.equal(codeNeeded({ role: "reviewer", authority: "edmonton" }, "applicant", undefined, true), null);
+  assert.doesNotMatch(useChoices(true)[1].sub ?? "", /access code/i);
+  assert.match(USE_CHOICES[1].sub ?? "", /access code/i);
+  assert.deepEqual(stepsFor({ use: "reviewer", code: "" }, false), ["use", "authority", "code"]);
+  assert.equal(onboardingPayload({ use: "reviewer", authority: "edmonton", code: "" }, false), null);
 });
 
 test("where an access code is needed, a signed-out visitor gets the sign-in page and nothing else", () => {

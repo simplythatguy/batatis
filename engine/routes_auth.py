@@ -207,11 +207,13 @@ def create_router(cases):
         user = require_user(request).model_copy()
         store = cases()
         limit_auth(store, request, 'onboarding')
-        if body.role == 'reviewer':
-            reviewer_code(body.authority, body.access_code)
-        elif user.role == 'reviewer':
-            # A reviewer leaving the role must demonstrate the same authority code.
-            reviewer_code(user.authority, body.access_code)
+        # A live testing access code already opened the product, including reviewer.
+        if not ai_access.holds(user):
+            if body.role == 'reviewer':
+                reviewer_code(body.authority, body.access_code)
+            elif user.role == 'reviewer':
+                # A reviewer leaving the role must demonstrate the same authority code.
+                reviewer_code(user.authority, body.access_code)
         user.role, user.onboarded = body.role, True
         user.applicant_type = body.applicant_type if body.role == 'applicant' else None
         user.authority = body.authority if body.role == 'reviewer' else None

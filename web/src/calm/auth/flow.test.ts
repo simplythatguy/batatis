@@ -54,3 +54,43 @@ test("the applicant finishes onboarding with one choice and sends no applicant t
   assert.equal(location.hash, "#/");
   h.unmount();
 });
+
+test("an access-code account opens reviewer without an authority code", async () => {
+  const sent: OnboardingRequest[] = [];
+  const location = { hash: "#/onboarding" };
+  const ada: User = {
+    ...person, name: "Ada", role: null, applicant_type: null, authority: null, onboarded: false,
+    app_access: true, email: "ada@code.batatis.invalid",
+  };
+  const h = await componentHarness(new URL("./Onboarding.tsx", import.meta.url), "Onboarding", {
+    "../account": { useAccount: () => ({ user: ada }) },
+    "./codeAccount": { hasRealEmail },
+    "./onboardingSteps": steps,
+    "./bits": { AcIcon: "AcIcon", useCountdown: () => [0, () => {}] },
+    "./useAuthGate": {
+      saveOnboarding: async (body: OnboardingRequest) => { sent.push(body); return { ...ada, role: "reviewer", authority: "edmonton", onboarded: true }; },
+      afterSignIn: () => "#/review",
+      signOut: async () => false,
+    },
+  }, { location, document: { addEventListener() {}, removeEventListener() {} } });
+  const primary = (tree: unknown) => nodes(tree, (n: { type: string; props?: { className?: string } }) => n.type === "button" && Boolean(n.props?.className?.includes("is-primary")))[0];
+  const choiceList = (tree: unknown) => nodes(tree, (n: { props?: { choices?: unknown } }) => Boolean(n.props?.choices))[0];
+  let tree = await h.render();
+  const reviewerChoice = choiceList(tree).props.choices.find((c: { value: string; sub?: string }) => c.value === "reviewer");
+  assert.doesNotMatch(reviewerChoice?.sub ?? "", /access code/i);
+  assert.doesNotMatch(text(tree), /Enter your authority/);
+  choiceList(tree).props.onPick("reviewer");
+  tree = await h.render();
+  primary(tree).props.onClick();
+  tree = await h.render();
+  assert.doesNotMatch(text(tree), /access code/i);
+  assert.match(text(tree), /Which authority/);
+  choiceList(tree).props.onPick("edmonton");
+  tree = await h.render();
+  assert.match(text(primary(tree)), /Finish/);
+  primary(tree).props.onClick();
+  await h.render();
+  assert.deepEqual(sent, [{ role: "reviewer", authority: "edmonton" }]);
+  assert.equal(location.hash, "#/review");
+  h.unmount();
+});

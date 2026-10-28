@@ -36,9 +36,15 @@ export const APPLICANT_LABEL: Record<string, string> = { manufacturer: "Manufact
 /** Letter keys for choices: A, B, C… */
 export const KEYS = "ABCDEFGH";
 
-export function stepsFor(a: Answers): StepId[] {
-  if (a.use === "reviewer") return ["use", "authority", "code"];
+export function stepsFor(a: Answers, appAccess = false): StepId[] {
+  if (a.use === "reviewer") return appAccess ? ["use", "authority"] : ["use", "authority", "code"];
   return ["use"];
+}
+
+/** The first question. A testing access code is already enough, so that path does not mention an authority code. */
+export function useChoices(appAccess = false): Choice<Role>[] {
+  if (!appAccess) return USE_CHOICES;
+  return [USE_CHOICES[0], { value: "reviewer", label: USE_CHOICES[1].label, sub: "Safety Codes Officer" }];
 }
 
 export function answered(step: StepId, a: Answers): boolean {
@@ -53,30 +59,36 @@ export function answered(step: StepId, a: Answers): boolean {
 }
 
 /** The step after `step`, or null when this answer completes onboarding. */
-export function nextStep(step: StepId, a: Answers): StepId | null {
-  const steps = stepsFor(a);
+export function nextStep(step: StepId, a: Answers, appAccess = false): StepId | null {
+  const steps = stepsFor(a, appAccess);
   const i = steps.indexOf(step);
   return i >= 0 && i < steps.length - 1 ? steps[i + 1] : null;
 }
 
-export function previousStep(step: StepId, a: Answers): StepId | null {
-  const steps = stepsFor(a);
+export function previousStep(step: StepId, a: Answers, appAccess = false): StepId | null {
+  const steps = stepsFor(a, appAccess);
   const i = steps.indexOf(step);
   return i > 0 ? steps[i - 1] : null;
 }
 
 /** The POST /auth/onboarding body once every question is answered; null before that. */
-export function onboardingPayload(a: Answers): OnboardingRequest | null {
+export function onboardingPayload(a: Answers, appAccess = false): OnboardingRequest | null {
   if (a.use === "applicant") return { role: "applicant" };
-  if (a.use === "reviewer" && a.authority && a.code.trim()) return { role: "reviewer", authority: a.authority, access_code: a.code.trim() };
+  if (a.use === "reviewer" && a.authority && (appAccess || a.code.trim())) {
+    return appAccess
+      ? { role: "reviewer", authority: a.authority }
+      : { role: "reviewer", authority: a.authority, access_code: a.code.trim() };
+  }
   return null;
 }
 
 /**
  * Settings role change. Becoming a reviewer needs the target authority's code; leaving the reviewer
- * role needs the current authority's code (server rule). Returns the code requirement or null.
+ * role needs the current authority's code (server rule). A live testing access code is already enough,
+ * so `appAccess` skips both. Returns the code requirement or null.
  */
-export function codeNeeded(current: { role: Role | null; authority: string | null }, target: Role, targetAuthority?: string | null): { authority: string } | null {
+export function codeNeeded(current: { role: Role | null; authority: string | null }, target: Role, targetAuthority?: string | null, appAccess = false): { authority: string } | null {
+  if (appAccess) return null;
   if (target === "reviewer" && targetAuthority) return { authority: targetAuthority };
   if (target === "applicant" && current.role === "reviewer" && current.authority) return { authority: current.authority };
   return null;

@@ -39,11 +39,15 @@ class UserResult(BaseModel):
     user: User
     # Whether this account may manage access codes; decided by engine/admin.py from the email.
     admin: bool = False
+    # A live testing access code already opened the product. Reviewer setup does not ask again.
+    app_access: bool = False
 
     @model_validator(mode='after')
     def _admin(self):
+        from . import ai_access
         from .admin import is_admin
         self.admin = is_admin(self.user)
+        self.app_access = ai_access.holds(self.user)
         return self
 
 
