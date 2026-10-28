@@ -66,7 +66,7 @@ def create_router(cases):
         require_admin(request)
         store = cases()
         ai_access.forget()
-        names = sorted({*ai_access.codes(), *(row['name'] for row in store.access_code_rows())})
+        names = sorted({*ai_access.codes(), *(row['name'] for row in store.access_code_rows())} - {ai_access.ADMIN})
         return AccessCodeList(codes=[info(store, name) for name in names])
 
     @router.post('/access-codes', response_model=AccessCodeCreated, status_code=201)
@@ -74,7 +74,7 @@ def create_router(cases):
         require_admin(request)
         store = cases()
         name = body.name.strip()
-        if name in ai_access.codes():
+        if name in ai_access.codes() or name.casefold() == ai_access.ADMIN:
             raise HTTPException(409, 'A code with that name already exists')
         code = secrets.token_urlsafe(24)
         if not store.create_access_code(name, ai_access.fingerprint(code), body.max_users):
@@ -88,7 +88,7 @@ def create_router(cases):
         store = cases()
         ai_access.forget()
         row = store.access_code(name)
-        if row is None and name not in ai_access.codes():
+        if name == ai_access.ADMIN or (row is None and name not in ai_access.codes()):
             raise HTTPException(404, 'No such access code')
         if not body.model_fields_set:
             raise HTTPException(422, 'Supply max_users or revoked')

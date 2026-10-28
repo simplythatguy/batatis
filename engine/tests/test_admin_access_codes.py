@@ -8,14 +8,14 @@ from engine import ai_access, llm_gate
 from engine.api import create_app
 from engine.store import CaseStore
 
-ADMIN = 'aabdelwaly7@gmail.com'
+ADMIN_CODE = 'admin-code-zzzzzzzzzzzzzzzzzzzz'
 
 
 @pytest.fixture
 def app(tmp_path, monkeypatch):
     monkeypatch.delenv('VERCEL', raising=False)
     monkeypatch.delenv('BATATIS_AI_ACCESS_CODES', raising=False)
-    monkeypatch.delenv('BATATIS_ADMIN_EMAILS', raising=False)
+    monkeypatch.setenv('BATATIS_ADMIN_CODE', ADMIN_CODE)
     monkeypatch.setenv('BATATIS_LIVE', '1')
     monkeypatch.setenv('OPENAI_API_KEY', 'sk-synthetic-not-used')
     monkeypatch.setenv('BATATIS_AUTH_RATE_LIMIT', '1000')
@@ -34,15 +34,25 @@ def signup(client, email):
     return response.json()
 
 
+def sign_in(client, code, name='Person'):
+    response = client.post('/auth/code-login', json={'code': code, 'name': name})
+    assert response.status_code == 200, response.text
+    return response.json()
+
+
+def as_admin(client, name='Admin'):
+    return sign_in(client, ADMIN_CODE, name)
+
+
 def probe(client):
     return client.get('/probe-ai').json()['request']
 
 
-def test_only_the_admin_email_is_admin_and_only_the_admin_reaches_the_manager(app):
+def test_only_the_admin_code_makes_an_admin_and_only_the_admin_reaches_the_manager(app):
     with TestClient(app, base_url='http://localhost') as admin, TestClient(app, base_url='http://localhost') as other:
-        assert signup(admin, ADMIN.upper())['admin'] is True
+        assert as_admin(admin)['admin'] is True
         assert admin.get('/auth/me').json()['admin'] is True
-        assert signup(other, 'someone@example.test')['admin'] is False
+        assert signup(other, "someone@example.test")["admin"] is False
         assert other.get('/admin/access-codes').status_code == 403
         assert other.post('/admin/access-codes', json={'name': 'x'}).status_code == 403
         assert admin.get('/admin/access-codes').status_code == 200
@@ -53,7 +63,7 @@ def test_only_the_admin_email_is_admin_and_only_the_admin_reaches_the_manager(ap
 def test_a_made_code_turns_ai_on_shows_in_use_and_stops_at_its_limit(app):
     with TestClient(app, base_url='http://localhost') as admin, TestClient(app, base_url='http://localhost') as first, \
             TestClient(app, base_url='http://localhost') as second:
-        signup(admin, ADMIN)
+        as_admin(admin)
         made = admin.post('/admin/access-codes', json={'name': 'Judges', 'max_users': 1})
         assert made.status_code == 201, made.text
         code = made.json()['code']
@@ -86,7 +96,7 @@ def test_a_made_code_turns_ai_on_shows_in_use_and_stops_at_its_limit(app):
 
 def test_revoking_a_code_turns_its_accounts_off_and_restoring_turns_them_back_on(app):
     with TestClient(app, base_url='http://localhost') as admin, TestClient(app, base_url='http://localhost') as person:
-        signup(admin, ADMIN)
+        as_admin(admin)
         code = admin.post('/admin/access-codes', json={'name': 'team'}).json()['code']
         signup(person, 'person@example.test')
         person.post('/auth/ai-access', json={'code': code})
@@ -104,7 +114,7 @@ def test_environment_codes_can_be_limited_and_revoked_too(app, monkeypatch):
     monkeypatch.setenv('BATATIS_AI_ACCESS_CODES', '{"judges": "judges-code-aaaaaaaaaaaaaaaa"}')
     with TestClient(app, base_url='http://localhost') as admin, TestClient(app, base_url='http://localhost') as one, \
             TestClient(app, base_url='http://localhost') as two:
-        signup(admin, ADMIN)
+        as_admin(admin)
         listed = admin.get('/admin/access-codes').json()['codes']
         assert [(c['name'], c['source'], c['max_users']) for c in listed] == [('judges', 'environment', None)]
         assert admin.patch('/admin/access-codes/judges', json={'max_users': 1}).json()['max_users'] == 1
@@ -117,7 +127,7 @@ def test_environment_codes_can_be_limited_and_revoked_too(app, monkeypatch):
 
 def test_desktop_installs_take_seats_and_a_limited_code_needs_an_install_id(app, monkeypatch):
     with TestClient(app, base_url='http://localhost') as admin, TestClient(app, base_url='http://localhost') as desktop:
-        signup(admin, ADMIN)
+        as_admin(admin)
         code = admin.post('/admin/access-codes', json={'name': 'desk', 'max_users': 1})
         code = code.json()['code']
         body = {'body': '{"model": "wrong"}'}
@@ -136,7 +146,7 @@ def test_desktop_installs_take_seats_and_a_limited_code_needs_an_install_id(app,
 
 def test_deleting_all_accounts_clears_users_sessions_and_installs(app, tmp_path):
     with TestClient(app, base_url='http://localhost') as client:
-        signup(client, ADMIN)
+        as_admin(client)
     from engine.store import CaseStore
     direct = CaseStore(tmp_path / 'accounts.sqlite')
     counts = direct.delete_all_accounts()
@@ -144,4 +154,62 @@ def test_deleting_all_accounts_clears_users_sessions_and_installs(app, tmp_path)
     assert direct.delete_all_accounts()['account_users'] == 0
     with TestClient(app, base_url='http://localhost') as again:
         assert again.get('/auth/me').status_code == 401, 'the old session is gone with its account'
-        assert signup(again, ADMIN)['admin'] is True
+        assert as_admin(again)['admin'] is True
+
+
+def test_signing_in_with_a_code_and_a_name_makes_one_account_per_name_and_turns_ai_on(app):
+    with TestClient(app, base_url='http://localhost') as admin:
+        as_admin(admin)
+        code = admin.post('/admin/access-codes', json={'name': 'Judges', 'max_users': 2}).json()['code']
+    with TestClient(app, base_url='http://localhost') as ada, TestClient(app, base_url='http://localhost') as again, \
+            TestClient(app, base_url='http://localhost') as bob, TestClient(app, base_url='http://localhost') as carol:
+        first = sign_in(ada, code, 'Ada')
+        assert first['user']['name'] == 'Ada' and first['admin'] is False and first['user']['email'].endswith('@code.batatis.invalid')
+        assert probe(ada) is True, 'the code that signed her in turns AI on'
+        assert sign_in(again, code, ' ada ')['user']['id'] == first['user']['id'], 'the same code and name reach the same account'
+        sign_in(bob, code, 'Bob')
+        full = carol.post('/auth/code-login', json={'code': code, 'name': 'Carol'})
+        assert full.status_code == 403 and 'full' in full.json()['detail']
+        assert sign_in(again, code, 'Ada')['user']['id'] == first['user']['id'], 'a returning person keeps their seat when the code is full'
+
+
+def test_a_wrong_code_is_refused_and_counted_while_right_ones_never_are(app, monkeypatch):
+    monkeypatch.setenv('BATATIS_AUTH_RATE_LIMIT', '3')
+    with TestClient(app, base_url='http://localhost') as admin:
+        as_admin(admin)
+        code = admin.post('/admin/access-codes', json={'name': 'team'}).json()['code']
+    for number in range(5):
+        with TestClient(app, base_url='http://localhost') as person:
+            sign_in(person, code, f'Person {number}')
+    with TestClient(app, base_url='http://localhost') as guesser:
+        statuses = [guesser.post('/auth/code-login', json={'code': 'x' * 24, 'name': 'Eve'}).status_code for _ in range(5)]
+    assert statuses == [403, 403, 403, 429, 429]
+
+
+def test_the_admin_code_alone_makes_an_admin_and_changing_it_ends_admin_sign_ins(app, monkeypatch):
+    with TestClient(app, base_url='http://localhost') as admin, TestClient(app, base_url='http://localhost') as person:
+        as_admin(admin)
+        assert admin.get('/admin/access-codes').status_code == 200
+        assert admin.get('/admin/access-codes').json()['codes'] == [], 'the admin code is never listed'
+        assert admin.patch('/admin/access-codes/admin', json={'revoked': True}).status_code == 404
+        assert admin.post('/admin/access-codes', json={'name': 'Admin'}).status_code == 409
+        code = admin.post('/admin/access-codes', json={'name': 'team'}).json()['code']
+        assert sign_in(person, code, 'Person')['admin'] is False
+        assert person.get('/admin/access-codes').status_code == 403
+        monkeypatch.setenv('BATATIS_ADMIN_CODE', 'another-admin-code-zzzzzzzzzzzz')
+        assert admin.get('/admin/access-codes').status_code == 403, 'a changed admin code locks out the old sign-in'
+
+
+def test_nobody_can_sign_up_or_log_in_with_a_code_account_address(app):
+    with TestClient(app, base_url='http://localhost') as client:
+        address = 'abc@code.batatis.invalid'
+        assert client.post('/auth/signup', json={'email': address, 'password': 'a long test password', 'name': 'X'}).status_code == 422
+        assert client.post('/auth/login', json={'email': address, 'password': 'a long test password'}).status_code == 401
+
+
+def test_the_sign_in_page_asks_for_a_code_only_where_codes_are_needed(app, monkeypatch, tmp_path):
+    with TestClient(app, base_url='http://localhost') as client:
+        assert client.get('/auth/providers').json()['sign_in'] == 'code'
+    monkeypatch.delenv('BATATIS_ADMIN_CODE')
+    with TestClient(create_app(store=CaseStore(tmp_path / 'plain.sqlite')), base_url='http://localhost') as plain:
+        assert plain.get('/auth/providers').json()['sign_in'] == 'password'

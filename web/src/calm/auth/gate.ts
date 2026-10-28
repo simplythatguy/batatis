@@ -39,12 +39,14 @@ export function returnTarget(hash: string): string | null {
  * The hash this visitor should be sent to, or null to stay. `path` is the router path
  * ("/review/abc"), `returnTo` the remembered place from before sign-in.
  */
-export function gateRedirect(status: GateStatus, user: User | null, path: string, returnTo: string | null = null): string | null {
+export function gateRedirect(status: GateStatus, user: User | null, path: string, returnTo: string | null = null, codeLogin = false): string | null {
   const p = path || "/";
   switch (status) {
     case "loading":
       return null;
     case "signed-out":
+      // Where an access code is needed, the sign-in page is the only page a signed-out visitor gets.
+      if (codeLogin) return p === "/signin" ? null : "#/signin";
       return p === "/" || AUTH_PATHS.has(p) ? null : "#/signin";
     case "needs-onboarding":
       return p === "/onboarding" ? null : "#/onboarding";

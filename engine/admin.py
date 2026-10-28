@@ -1,21 +1,18 @@
-"""The site admin: the account whose email is listed in BATATIS_ADMIN_EMAILS (default: the project owner's)."""
+"""The site admin: whoever signed in with the admin code (BATATIS_ADMIN_CODE)."""
 from __future__ import annotations
 
-import os
+import secrets
 
 from fastapi import HTTPException, Request
 
-DEFAULT_ADMIN_EMAILS = 'aabdelwaly7@gmail.com'
-
-
-def admin_emails() -> frozenset[str]:
-    raw = os.environ.get('BATATIS_ADMIN_EMAILS') or DEFAULT_ADMIN_EMAILS
-    return frozenset(part.strip().casefold() for part in raw.split(',') if part.strip())
-
 
 def is_admin(user) -> bool:
-    email = getattr(user, 'email', None)
-    return bool(email) and email.strip().casefold() in admin_emails()
+    """Signed in with the admin code as it is now, so changing the code in the server settings ends every admin sign-in."""
+    from . import ai_access
+    if user is None or getattr(user, 'ai_access', None) != ai_access.ADMIN:
+        return False
+    expected = ai_access.current(ai_access.ADMIN)
+    return expected is not None and secrets.compare_digest(expected, getattr(user, 'ai_access_fingerprint', None) or '')
 
 
 def require_admin(request: Request):

@@ -142,7 +142,9 @@ class OAuthClient:
 def add_oauth_routes(router, cases):
     @router.get('/providers')
     def providers():
-        return {'providers': [{'id': 'password', 'label': 'Email'}] + [
+        from . import ai_access
+        # Where an access code is needed (the hosted site), the code is the only way in.
+        return {'sign_in': 'code' if ai_access.required() else 'password', 'providers': [{'id': 'password', 'label': 'Email'}] + [
             {'id': provider, 'label': label} for provider, label in [('google', 'Google'), ('microsoft', 'Microsoft')]
             if configuration(provider)]}
 

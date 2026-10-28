@@ -74,3 +74,11 @@ test("settings asks for a code when becoming or leaving a reviewer", () => {
   assert.equal(codeNeeded({ role: "applicant", authority: null }, "applicant"), null);
   assert.equal(codeNeeded({ role: "applicant", authority: null }, "reviewer", null), null);
 });
+
+test("where an access code is needed, a signed-out visitor gets the sign-in page and nothing else", () => {
+  for (const path of ["/", "/signup", "/settings", "/review", "/application"]) {
+    assert.equal(gateRedirect("signed-out", null, path, null, true), "#/signin", path);
+  }
+  assert.equal(gateRedirect("signed-out", null, "/signin", null, true), null);
+  assert.equal(gateRedirect("signed-out", null, "/", null, false), null, "a local engine keeps its start page");
+});
