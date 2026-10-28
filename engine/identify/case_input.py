@@ -104,7 +104,8 @@ def compose(case, store=None, *, prose: str | None = None) -> CaseInput:
 
 
 def is_requirement_run(result) -> bool:
-    return result is not None and result.trace.config.get('screen') == 'requirements'
+    from .compact import requirement_screen
+    return requirement_screen(result)
 
 
 def refresh(case, store, codes, *, force=False):
@@ -139,4 +140,5 @@ def refresh(case, store, codes, *, force=False):
     result.input_sha256 = context.sha256
     result.input_coverage_gaps = list(context.gaps)
     result.decisions = dict(previous.decisions) if previous else {}
-    case.identify = result
+    from .compact import compact_identify
+    case.identify = compact_identify(result)
