@@ -73,6 +73,19 @@ def test_scope_on_dev_cases_and_boundary_sets(capsys):
     assert blind['redirect_ok'] >= 28 and blind['false'] <= 1
 
 
+def test_no_real_alberta_building_code_record_is_sent_to_another_code():
+    """64 published Alberta records, each answered under the building code (docs/research/2026-10-23-elephant).
+
+    The workflow bakeoff found two of them stopped as another regime's question: photoluminescent exit signs on
+    their own charging circuit (NBC(AE) 3.4.5.1. and 9.9.11.3.) and the energy rules for small equipment shelters
+    (Section 9.36)."""
+    records = json.loads((ROOT / 'docs/research/2026-10-23-elephant/cases-alberta.json').read_text())
+    records = records if isinstance(records, list) else records['cases']
+    assert len(records) == 64
+    redirected = [r['id'] for r in records if classify(r['description']).status == 'redirect']
+    assert redirected == []
+
+
 def test_redirect_copy_follows_the_scc_deck():
     for regime in REGIMES.values():
         text = redirect_message(regime)
@@ -139,6 +152,30 @@ def test_fork_on_labelled_cases(capsys):
     assert report['not_indicated'][0] == report['not_indicated'][1]          # never "not indicated" by mistake
     assert report['likely'][0] / report['likely'][2] >= 0.9
     assert report['not_indicated'][0] / report['not_indicated'][2] >= 0.9
+
+
+def test_no_real_alberta_variance_reads_as_following_the_code():
+    """The 24 published variances in docs/research/2026-10-23-elephant each departed from an acceptable solution.
+
+    The workflow bakeoff found one read as "not indicated": an owner who "would rather install a regular passenger
+    elevator" and asks whether "the stretcher-size rule [can] be set aside", while the car "would meet the minimum"
+    size for a lift."""
+    records = json.loads((ROOT / 'docs/research/2026-10-23-elephant/cases-alberta.json').read_text())
+    records = records if isinstance(records, list) else records['cases']
+    variances = [r for r in records if r['type'] == 'variance']
+    assert len(variances) == 24
+    assert [r['id'] for r in variances if assess(r['description']).variance_needed == 'not_indicated'] == []
+
+
+@pytest.mark.parametrize('text, expected', [
+    ('We are asking for the stretcher-size rule to be set aside.', 'likely'),
+    ('Can the stretcher-size rule be set aside here?', 'unknown'),        # a question to the tool decides nothing
+    ('We ask that the requirement be waived for this small shed.', 'likely'),
+    ('The owner would rather install a regular passenger elevator.', 'likely'),
+    ('We set aside space in the basement for storage and our house follows the code.', 'not_indicated'),
+])
+def test_fork_reads_a_request_to_set_a_rule_aside(text, expected):
+    assert assess(text).variance_needed == expected
 
 
 def test_fork_wording_keeps_the_two_halves_distinct():

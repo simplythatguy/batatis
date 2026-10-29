@@ -1,4 +1,6 @@
 """W2 path: a firm check chooses the package. An unknown fork does not open one."""
+from pathlib import Path
+
 import pytest
 
 from engine.codes import Codes
@@ -243,13 +245,32 @@ def test_labeled_assumption_is_not_a_firm_departure():
     assert process_fields(case, Codes()) == []
 
 
-def test_not_applicable_opens_no_package():
+def test_a_rule_that_does_not_apply_does_not_decide_the_path():
     case = soffit(storeys=5, building_area_m2=100)
     decision = decide_path(case)
-    assert decision.path == 'not_applicable' and decision.firm
-    assert decision.article == '1.3.3.3.(1)'
+    assert decision.path == 'unresolved' and not decision.firm and decision.source == 'unresolved'
     assert process_fields(case, Codes()) == []
     assert section_d_plan(case, Codes()).items == []
+
+
+def test_a_rule_that_does_not_apply_still_lets_a_variance_request_open_the_package():
+    case = soffit(storeys=5, building_area_m2=100)
+    case.facts.append(fact('variance_requested', True))
+    decision = decide_path(case)
+    assert decision.path == 'alternative' and decision.source == 'recorded'
+    assert len(process_fields(case, Codes())) == 6
+
+
+def test_a_keyword_in_a_negation_does_not_stop_a_real_project():
+    # Real Alberta appeal (cases-alberta.json, ab-appeal-stair-door-frame-foam-gap): "no glazing"
+    # used to name the house glazing rule, which does not apply to a ten-storey building, and the
+    # whole application stopped with no package.
+    text = ('We are the developer of a ten-storey building with seven levels of underground parking. '
+            'The exit stairwell doors and frames were installed with a wide gap between the frame and the '
+            'concrete opening, filled with foam and sealed with firestop sealant. We had a small-scale fire '
+            'test done with the door swinging into the furnace and no glazing. We want approval to keep them.')
+    decision = decide_path(Case(facts=[fact('project.description', text)]))
+    assert decision.path != 'not_applicable'
 
 
 def test_wording_that_follows_is_acceptable_without_process_fields():
@@ -297,3 +318,17 @@ def test_section_c_lookup_miss_names_the_id():
         section_c_rows(['1.3.3.3.(1)'], Codes())
     with pytest.raises(KeyError, match=r'Section C lookup missed 9\.99\.99\.99\.\(1\)'):
         section_c_rows(['9.99.99.99.(1)'], Codes())
+
+
+def test_the_screen_reads_the_same_departure_and_follows_words_as_the_engine():
+    """web/src/pathDecision.ts repeats engine/intake/fork.py's cues; a cue added to one must reach the other."""
+    import re as _re
+    from engine.intake import fork as _fork
+    web = (Path(__file__).resolve().parents[2] / 'web/src/pathDecision.ts').read_text()
+
+    def web_pattern(name: str) -> str:
+        block = web.split(f'const {name} = new RegExp(', 1)[1].split('"i",', 1)[0]
+        return ''.join(_re.findall(r'String\.raw`([^`]*)`', block))
+
+    assert web_pattern('DEPARTS') == _fork._DEPARTS.pattern.removeprefix('(?i)')
+    assert web_pattern('FOLLOWS') == _fork._FOLLOWS.pattern.removeprefix('(?i)')

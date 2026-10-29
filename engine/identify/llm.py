@@ -63,8 +63,6 @@ class OpenAIVerifier:
 
     def __init__(self, transport: OpenAIJson, arts: dict, *, model: str, chars: int | None = None,
                  effort: str | None = None, max_output_tokens: int = 8000):
-        if 'haiku' in model.lower():
-            raise ValueError('Haiku models are not used')
         self.transport, self.arts, self.model, self.chars = transport, arts, model, chars
         self.max_output_tokens, self.effort = max_output_tokens, effort
 

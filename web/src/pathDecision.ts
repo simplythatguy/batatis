@@ -1,6 +1,7 @@
 /**
- * The same path as engine/path_decision.py. A firm coded check chooses the package.
- * An unknown fork does not open the alternative package. Identify decisions are not consulted.
+ * The same path as engine/path_decision.py. A firm coded check chooses the package. A rule that
+ * does not apply to the building decides nothing, so the path falls through. An unknown fork does
+ * not open the alternative package. Identify decisions are not consulted.
  */
 import indexJson from "../../engine/data/rules/index.json" with { type: "json" };
 import dampers from "../../engine/data/rules/fire-dampers.json" with { type: "json" };
@@ -68,7 +69,10 @@ const DEPARTS = new RegExp(
   String.raw`|\breplacing\s+the\s+required\b|\bnot\s+to\s+meet\b|\bagainst\s+the\s+direction\b|\b(?:left|leave|leaving)\s+(?:fully\s+)?exposed\b` +
   String.raw`|\bnot\s+(?:a|one\s+of\s+the)\b[^.]{0,40}\bprescriptive\b|\bon\s+the\s+strength\s+of\b[^.]{0,40}\balone\b` +
   String.raw`|\b\d+\s*%\s+(?:less|lower|fewer|smaller)\b|\b(?:just|only)\s+one\s+(?:\w+\s+)?(?:exit|stair)\b` +
-  String.raw`|\bonly\b(?=.{0,40}\b(?:apart|procedure|checks?|data|test|alone|route|values?)\b)|\bpartly\b|\blet\s+the\b`,
+  String.raw`|\bonly\b(?=.{0,40}\b(?:apart|procedure|checks?|data|test|alone|route|values?)\b)|\bpartly\b|\blet\s+the\b` +
+  String.raw`|\b(?:rule|requirement|limit|provision)s?\b[^.?!]{0,40}\b(?:set\s+aside|waived|relaxed)\b` +
+  String.raw`|\b(?:set\s+aside|waive|relax)\s+(?:the|this|that)\s+(?:[\w-]+\s+)?(?:rule|requirement|limit|provision)s?\b` +
+  String.raw`|\bwould\s+rather\b`,
   "i",
 );
 const FOLLOWS = new RegExp(
@@ -174,6 +178,11 @@ function firm(result: RuleResult): boolean {
   return result.state in STATE && result.assumptions.length === 0;
 }
 
+/** A keyword can name a rule the building is outside of ("no glazing" names the glazing rule). */
+function decides(result: RuleResult): boolean {
+  return firm(result) && result.state !== "not_applicable";
+}
+
 function needs(result: RuleResult): string[] {
   const missing = result.missing.map((item) => item.field);
   if (result.assumptions.length) {
@@ -232,15 +241,16 @@ export function decidePath(c: Case): PathDecision {
   const named = selectRule(text);
   if (named) {
     const result = byId.get(named);
-    if (result && firm(result)) return fromCheck(result);
-    return fallback(c, text, named, result ? needs(result) : []);
+    if (result && decides(result)) return fromCheck(result);
+    if (!result || !firm(result)) return fallback(c, text, named, result ? needs(result) : []);
+    // The words named a rule this building is outside of; the other rules still get their say.
   }
-  const playing = results.filter(inPlay);
+  const playing = results.filter((result) => result.rule_id !== named && inPlay(result));
   const decided = playing.filter(firm);
   const departed = decided.find((result) => result.state === "departs");
   if (departed) return fromCheck(departed);
-  if (playing.length && decided.length === playing.length && decided.every((result) => result.state === "follows")) return fromCheck(decided[0]);
-  if (playing.length && decided.length === playing.length && decided.every((result) => result.state === "not_applicable")) return fromCheck(decided[0]);
+  const deciding = decided.filter(decides);
+  if (deciding.length && decided.length === playing.length && deciding.every((result) => result.state === "follows")) return fromCheck(deciding[0]);
   const missing = [...new Set(playing.filter((result) => !firm(result)).flatMap(needs))];
   return fallback(c, text, null, missing);
 }

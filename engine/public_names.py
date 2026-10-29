@@ -16,6 +16,7 @@ from .relevance_models import DECISIONS_PUBLIC_MODEL, ELEPHANT_PUBLIC_MODEL, PUB
 
 # Private: model pin -> the opaque version a client sees. A pin that is not listed reads as CUSTOM.
 MODEL_VERSIONS = {'jev-1.13.0': PUBLIC_MODEL, 'gpt-6-luna': 'verifier-1', 'claude-sonnet-5-5': 'verifier-2',
+                  'claude-haiku-5-5': 'verifier-3',
                   'baseten/elephant-1:free': ELEPHANT_PUBLIC_MODEL,
                   'baseten/elephant-1-20261021': ELEPHANT_PUBLIC_MODEL}
 CUSTOM = 'custom'
@@ -78,7 +79,7 @@ def public_label(label: str, mode: str | None) -> str:
 def public_config(config: dict) -> dict:
     """The run's configuration with services read as 'model' and pins as opaque versions. Unused stages hold None."""
     out = dict(config)
-    for stage in ('screen', 'rerank', 'verifier'):
+    for stage in ('screen', 'rerank', 'verifier', 'model_rank'):
         method = out.get(stage)
         if stage in out:
             out[stage] = public_method(method)

@@ -102,6 +102,11 @@ def _firm(result: RuleResult) -> bool:
     return result.state in _STATE and not result.assumptions and not result.unconfirmed_inputs
 
 
+def _decides(result: RuleResult) -> bool:
+    # A keyword can name a rule the building is outside of ("no glazing" names the glazing rule).
+    return _firm(result) and result.state != 'not_applicable'
+
+
 def _needs(result: RuleResult, rule: dict) -> tuple[str, ...]:
     missing = list(dict.fromkeys([item.field for item in result.missing] + result.unconfirmed_inputs))
     if result.assumptions:

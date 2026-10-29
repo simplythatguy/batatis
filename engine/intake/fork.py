@@ -42,7 +42,10 @@ _DEPARTS = re.compile(
     r"|\breplacing\s+the\s+required\b|\bnot\s+to\s+meet\b|\bagainst\s+the\s+direction\b|\b(?:left|leave|leaving)\s+(?:fully\s+)?exposed\b"
     r"|\bnot\s+(?:a|one\s+of\s+the)\b[^.]{0,40}\bprescriptive\b|\bon\s+the\s+strength\s+of\b[^.]{0,40}\balone\b"
     r"|\b\d+\s*%\s+(?:less|lower|fewer|smaller)\b|\b(?:just|only)\s+one\s+(?:\w+\s+)?(?:exit|stair)\b"
-    r"|\bonly\b(?=.{0,40}\b(?:apart|procedure|checks?|data|test|alone|route|values?)\b)|\bpartly\b|\blet\s+the\b")
+    r"|\bonly\b(?=.{0,40}\b(?:apart|procedure|checks?|data|test|alone|route|values?)\b)|\bpartly\b|\blet\s+the\b"
+    r"|\b(?:rule|requirement|limit|provision)s?\b[^.?!]{0,40}\b(?:set\s+aside|waived|relaxed)\b"
+    r"|\b(?:set\s+aside|waive|relax)\s+(?:the|this|that)\s+(?:[\w-]+\s+)?(?:rule|requirement|limit|provision)s?\b"
+    r"|\bwould\s+rather\b")
 _FOLLOWS = re.compile(
     r"(?i)\b(?:meets?|meeting|follows?|following|according\s+to|per|as\s+(?:set\s+out\s+)?in|built\s+to|matches?|within)\s+"
     r"(?:the\s+|all\s+the\s+|every\s+)?(?:code|building\s+code|tables?|span\s+tables?|prescriptive|acceptable\s+solutions?|Part\s+9)"
