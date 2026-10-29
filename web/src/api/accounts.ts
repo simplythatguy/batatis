@@ -22,6 +22,8 @@ export interface User {
   created_at: string;
   /** True when this account holds a live testing access code. The server sets it; reviewer does not ask again. */
   app_access?: boolean;
+  /** True for the site admin, who manages access codes. The server decides it. */
+  admin?: boolean;
 }
 
 export type ApplicationStatus = "draft" | "submitted" | "in_review" | "returned" | "accepted" | "refused" | "withdrawn";
@@ -318,10 +320,16 @@ export function claimConflict(e: unknown): Claim | null {
 /** The account inside an auth response, keeping the server's decision that a testing access code is live. */
 export function sessionUser(body: unknown): User | null {
   if (!body || typeof body !== "object") return null;
-  const record = body as { user?: unknown; app_access?: unknown };
+  const record = body as { user?: unknown; app_access?: unknown; admin?: unknown };
   const nested = record.user;
   const user = nested && typeof nested === "object" && typeof (nested as User).id === "string" ? (nested as User) : null;
-  if (user) return typeof record.app_access === "boolean" ? { ...user, app_access: record.app_access } : user;
+  if (user) {
+    const decided = {
+      ...(typeof record.app_access === "boolean" ? { app_access: record.app_access } : {}),
+      ...(typeof record.admin === "boolean" ? { admin: record.admin } : {}),
+    };
+    return Object.keys(decided).length ? { ...user, ...decided } : user;
+  }
   const direct = body as User;
   return typeof direct.id === "string" ? direct : null;
 }
