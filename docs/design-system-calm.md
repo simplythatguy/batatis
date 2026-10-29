@@ -2,7 +2,7 @@
 
 This document is the single design authority for Batatis product UI. The UI skills carry interaction safeguards and review methods; historical Linear tokens and layouts do not override this contract.
 
-Prototype reference: [`docs/design/calm-flow-prototype.html`](design/calm-flow-prototype.html) (`?screen=describe|questions|review|application`). Where the prototype differs, this document governs.
+Prototype reference: [`docs/design/calm-flow-prototype.html`](design/calm-flow-prototype.html) (`?screen=describe|questions|review|application`). Where the prototype differs, this document governs. Its eyebrow labels and its pill or tile choices predate the 2026-10-28 rules below (nothing above titles, no box per item); do not copy them.
 Implementation: `web/src/calm/` with styles in `web/src/calm/calm.css` and a shared baseline in `web/src/shared.css`.
 
 ## Idea
@@ -92,18 +92,18 @@ Journey answers use the existing case fact action. `journey.answer.${encodeURICo
 
 Section hues, used only where they identify: **A blue, B teal, C violet, D amber** (the current section in the applicant's question footer, Review badges). The officer's review is drawn in ink (user direction 2026-10-22: one task at a time, no multi-colour tiles): section icons and letters are neutral; only status dots keep colour.
 
-Type scale: display 54/1.04 (−3.5%), review headline 40, card question 32 (26 on phones), drawer title 22, lede 18, body 14–15, eyebrow 12 mono.
+Type scale: display 54/1.04 (−3.5%), review headline 40, card question 32 (26 on phones), drawer title 22, lede 18, body 14–15, small mono 12 (counts and code labels, never above a title).
 
-**No all-caps anywhere** (user decision 2026-10-21): no `text-transform: uppercase` and no uppercase copy. Eyebrows and small mono labels are sentence case. Acronyms (NBC, PDF) stay as written.
+**No all-caps anywhere** (user decision 2026-10-21): no `text-transform: uppercase` and no uppercase copy. Small mono labels are sentence case. Acronyms (NBC, PDF) stay as written.
 
 ## Components
 
 - **Shell**: far-left icon rail, application sidebar and work area. The header starts with the sidebar toggle and short application name; stages sit in the remaining space, with save status and actions on the right. On phones the toggle opens the rail and list as a sheet. Stage icons show only the active word, as defined above; they have no fill, pill or shadow.
 - **Buttons** (`.cf-btn`): pill, 44px; `is-primary` uses `--cf-primary-bg` (`#16181d`) and `--cf-primary-text` (white), with a readable light `kbd` hint; `is-ghost`, `is-sm`, `is-xs`. Labels never wrap; rows wrap instead of clipping.
-- **Chips** (`.cf-chip`, `aria-pressed`): role and authority choices.
-- **Eyebrow** (`.cf-eyebrow`): small mono label in sentence case.
-- **Question card** (`.cf-q-wrap`): stage and quiet form letter, the question (a short label such as "Request date" when the field is obvious), a context line only when it carries something the control cannot (the applicant's own quote or a professional boundary), then the answer controls. Choices save and advance. Typed answers use Continue; uncertainty is Not sure, Ask my designer or Later. Help opens the reason and the assistant on that card.
-- **Answer tiles** (`.cf-answer`): 60px, number hint on the right.
+- **Nothing above titles, no box per item** (user decisions 2026-10-28): no eyebrow, section letter, stage name or tag sits over a title or question, and items inside a component (places, choices, suggestions, rows) are plain text, not a pill or tile each. `.cf-eyebrow` is retired, and so are `.cf-chip` pills and `.cf-answer` tiles for choices; remove them when a screen that uses them is next changed. Rules: `.agents/skills/minimal-ui/SKILL.md` rules 4 and 6.
+- **Chips** (`.cf-chip`, `aria-pressed`): retired for new or changed screens (see above). Role and authority choices become plain rows.
+- **Question card** (`.cf-q-wrap`): the question with nothing above it (a short label such as "Request date" when the field is obvious), a context line only when it carries something the control cannot (the applicant's own quote or a professional boundary), then the answer controls. Choices save and advance. Typed answers use Continue; uncertainty is Not sure, Ask my designer or Later. Help opens the reason and the assistant on that card.
+- **Answer rows**: plain rows, label on the left and the number hint on the right, no tile or border each. The old `.cf-answer` 60px tiles are retired for new or changed screens.
 - **Citation chip** (`.cf-cite`): `9.27.3.4.(1) Show the code`; opens the drawer.
 - **Code drawer** (`CodeDrawer.tsx`): modal `<dialog>` (focus-trapped, Esc closes, `overscroll-behavior: contain`), right side; bottom sheet under 640px. Shows "Code text · verbatim" only for code-database text, with the NRC credit; "Why this rule exists" = NBC 2020 intent statements labelled explanatory, plus the `differs` note; objectives and functions from the Section C row (or the no-row statement); any AI text in a dashed box labelled "not code text". Links: All code references, Add a code reference (manual search).
 - **Metric tiles** (`.cf-metrics`): Complete n/total, Left to answer (+ required count).
