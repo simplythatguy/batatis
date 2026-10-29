@@ -11,7 +11,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from . import ai_access
 from .llm_gate import client_ip_from
 from .account_models import ApplicantType, Authority, Role, User, UserResult
-from .accounts import (COOKIE, cookie_secure, digest, email_address, issue_session, limit_auth,
+from .accounts import (CODE_ACCOUNT_DOMAIN, COOKIE, cookie_secure, digest, email_address, issue_session, limit_auth,
                        password_hash, password_matches, require_user)
 
 
@@ -29,10 +29,6 @@ class SignupRequest(BaseModel):
         if not value.strip() or any(ord(char) < 32 for char in value):
             raise ValueError('Enter a name')
         return value.strip()
-
-
-# Accounts made by signing in with an access code get an address on this domain; nobody can sign up with one.
-CODE_ACCOUNT_DOMAIN = 'code.batatis.invalid'
 
 
 class CodeLoginRequest(BaseModel):
@@ -98,15 +94,15 @@ def create_router(cases):
     def code_login(body: CodeLoginRequest, request: Request, response: Response):
         """Sign in with an access code and a name. The same code and name always reach the same account."""
         store = cases()
-        # Only wrong codes count against the limit, so a room of people on one network can all sign in.
-        bucket = digest('code-login-fail:' + client_ip_from(request))
-        limit, window = int(os.environ.get('BATATIS_AUTH_RATE_LIMIT') or '10'), float(os.environ.get('BATATIS_AUTH_RATE_WINDOW_SECONDS') or '600')
-        if store.account_rate_full(bucket, limit):
-            raise HTTPException(429, 'Too many attempts; try again later', headers={'Retry-After': str(int(window))})
+        # Only wrong codes count and only wrong codes are refused for it: a room on one network address
+        # keeps signing in with the right code while somebody there mistypes. Codes are too long to guess.
         found = ai_access.find(body.code)
         if found is None:
-            store.account_rate(bucket, limit, window)
-            raise HTTPException(403, 'That access code isn’t valid')
+            bucket = digest('code-login-fail:' + client_ip_from(request))
+            limit, window = int(os.environ.get('BATATIS_AUTH_RATE_LIMIT') or '10'), float(os.environ.get('BATATIS_AUTH_RATE_WINDOW_SECONDS') or '600')
+            if not store.account_rate(bucket, limit, window):
+                raise HTTPException(429, 'Too many wrong codes. Try again later.', headers={'Retry-After': str(int(window))})
+            raise HTTPException(403, 'That access code isn’t valid.')
         code_name, fingerprint = found
         email = f"{digest('code-login:' + code_name + ':' + body.name.casefold())[:32]}@{CODE_ACCOUNT_DOMAIN}"
         data = store.user_credentials(email)
@@ -184,7 +180,7 @@ def create_router(cases):
         limit_auth(store, request, 'ai-access')
         found = ai_access.find(body.code)
         if found is None:
-            raise HTTPException(403, 'That access code isn’t valid')
+            raise HTTPException(403, 'That access code isn’t valid.')
         name, fingerprint = found
         seats = ai_access.limit(name)
         if seats is not None and user.ai_access != name:

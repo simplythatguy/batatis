@@ -3,7 +3,7 @@ import { useSyncExternalStore } from "react";
 import { QueueSessionChanged, review, type QueueApplication } from "../../api/accounts";
 import { packageReview } from "../../api/packageReview";
 import { engine, EngineError } from "../../api/client";
-import { accountSession, getAccountState, setAccountState, subscribeAccount } from "../account";
+import { accountSession, getAccountState, sessionEnded, subscribeAccount } from "../account";
 import { getNotificationsState, subscribeNotifications } from "../notifications/notifications";
 
 export interface QueueState {
@@ -78,7 +78,7 @@ export function loadQueue(refresh = false): Promise<void> {
     .catch(e => {
       if (!current()) return;
       if (e instanceof EngineError && e.status === 401) {
-        setAccountState({ phase: "signed-out", user: null });
+        sessionEnded(e);
         return;
       }
       if (e instanceof QueueSessionChanged) {

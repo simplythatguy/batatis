@@ -139,10 +139,13 @@ export class QueueSessionChanged extends AccountsError {
 /** The route is not on this server (or the browser could not reach it with credentials). */
 export const notAvailable = (e: unknown) => e instanceof EngineError && (e.status === 404 || e.status === 405 || e.status === 0);
 
+/** The engine's 401 detail when an access code that signed this account in was turned off or removed. */
+export const CODE_TURNED_OFF = "Your access code was turned off.";
+
 function plain(status: number, raw: string, path: string): string {
   if (status === 0) return "The service did not respond.";
   if (status === 401 && path === "/auth/login") return "Email or password is incorrect.";
-  if (status === 401) return "Sign in to continue.";
+  if (status === 401) return raw === CODE_TURNED_OFF ? raw : "Sign in to continue.";
   if (status === 429) return "Too many attempts right now. Try again in a moment.";
   if (status === 422) return "Some of what you entered isn't valid.";
   if (status === 403) return raw || "You don't have access to this.";
