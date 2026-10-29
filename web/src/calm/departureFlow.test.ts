@@ -9,7 +9,7 @@ import type { Candidate, Case, Fact } from "../types.ts";
 import * as deck from "./deck.ts";
 import * as journey from "./journey.ts";
 import * as calendarDate from "./calendarDate.ts";
-import { DEPARTURE_MAX, departureComparison } from "./departure.ts";
+import { CLAIM_NOTE, CLAIM_WORDS, DEPARTURE_MAX, departureComparison } from "./departure.ts";
 
 const DESCRIPTION = "Owner: Larkspur Example Ltd.\nRepresentative: Priya Natarajan\nMailing address: 100 Example St, Edmonton\n\nWe are building a two-storey house on a narrow lot.";
 const card: Candidate = {
@@ -88,4 +88,26 @@ test("Confirm records exactly the words the card shows", async () => {
   const card2 = await compare.render({ lines, onEdit() {} });
   assert.equal(text(nodes(card2, (n) => n.type === "q")[0]), lines.departure, "the card shows every word Confirm records");
   m.h.unmount();
+});
+
+test("words the engine refuses open the words to edit with a short note, and nothing is sent", async () => {
+  const m = await mounted(departureCase([alternative("We want approval to sell it across Alberta.")]));
+  let tree = await m.render();
+  m.ok(tree).props.onOk();
+  tree = await m.render();
+  assert.equal(m.sent.length, 0, "the browser never sends a departure the engine refuses");
+  assert.equal(m.shown(tree).props.picked, "edit");
+  assert.equal(m.shown(tree).props.draft, "We want approval to sell it across Alberta.");
+  assert.equal(m.shown(tree).props.note, CLAIM_NOTE);
+  m.typed.value = "A wider window than the table allows, facing the neighbour.";
+  tree = await m.render();
+  m.ok(tree).props.onOk();
+  await m.render();
+  assert.deepEqual(m.sent, ["A wider window than the table allows, facing the neighbour."]);
+  m.h.unmount();
+});
+
+test("the browser's refusal words behave like the engine's", () => {
+  for (const words of ["We want approval to sell it across Alberta.", "The wall complies.", "It is SAFE.", "Fire safety is kept."]) assert.match(words, CLAIM_WORDS);
+  for (const words of ["The design departs from the acceptable solution.", "A thinner assembly than the table allows.", "Safeguards stay in place."]) assert.doesNotMatch(words, CLAIM_WORDS);
 });

@@ -41,7 +41,7 @@ import { useAccount } from "./account";
 import { useQuestionDraft } from "./useQuestionDraft";
 import { ApplicantDraftLink, processDraftField } from "./ApplicantDrafts";
 import { StatementReview } from "./StatementReview";
-import { departureComparison, departureRecordsVariance } from "./departure";
+import { CLAIM_NOTE, CLAIM_WORDS, departureComparison, departureRecordsVariance } from "./departure";
 import { DepartureCompare } from "./DepartureCompare";
 import { UnitInput } from "./UnitInput";
 import { measurementText, metricUnit, parseMeasurement } from "./units";
@@ -893,6 +893,12 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
       const text = departureText(item);
       if (!cand || !text) return;
       const key = item.key;
+      // The engine refuses these words; the applicant rewords them here instead of meeting a refusal.
+      if (CLAIM_WORDS.test(text)) {
+        if (picked[key] !== DEPARTURE_EDIT) { setPicked((p) => ({ ...p, [key]: DEPARTURE_EDIT })); setDraft(text); }
+        noteFor(key, CLAIM_NOTE);
+        return;
+      }
       const variance = departureRecordsVariance(c);
       setBusyKey(key);
       noteFor(key, "");

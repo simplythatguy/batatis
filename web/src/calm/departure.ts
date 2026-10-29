@@ -21,6 +21,15 @@ export interface DepartureComparison {
   departure: string;
 }
 
+/**
+ * Words the engine refuses in a departure (engine/identify/cards.py `_COMPLIANCE`, a 422). The two
+ * must match; engine/tests/test_departure_words.py compares them.
+ */
+export const CLAIM_WORDS = new RegExp(String.raw`\b(?:compl(?:y|ies|ied|iant|iance)|safe(?:ly|ty)?|approv(?:e|ed|al))\b`, "i");
+
+/** Shown on the card instead of sending words the engine would refuse. */
+export const CLAIM_NOTE = "Say what the design does, without words like comply, safe or approval.";
+
 /** Whole sentences up to `max` characters; one long sentence is cut with an ellipsis. */
 export function fitDeparture(text: string, max = DEPARTURE_MAX): string {
   const t = text.replace(/\s+/g, " ").trim();
