@@ -19,7 +19,7 @@ export interface Stage {
 const T = {
   slide: 450, // dissolve between slides of one group
   group: 700, // dissolve between groups and into or out of a card
-  rise: 10, // a changed title lifts this far into place during the dissolve
+  rise: 10, // a changed title lifts this far into place in the second half of the dissolve
   camera: 650,
   cameraOut: 420,
 };
@@ -132,13 +132,28 @@ export function makeStage(canvas: HTMLCanvasElement, deck: Deck, hooks: { before
     cur = { content, at: now + (dissolve ? dissolve.dur / 2 : 0), clip };
   }
 
-  function paintLayer(c: Ctx, l: Layer, now: number, rise = 0) {
+  function paintLayer(c: Ctx, l: Layer, now: number, withTitle = true) {
     const content = l.content;
     if (content.kind === "card") return paintCard(c, content.card, now - l.at, deck.team);
     l.clip?.tick();
     const title = titleOf(content);
-    if (title) paintTitle(c, title, rise);
+    if (title && withTitle) paintTitle(c, title);
     paintSlide(c, content.slide, { video: l.clip?.el });
+  }
+
+  /** A changed title never double-exposes: the old one fades out over the first half, the new one rises in over the second. */
+  function paintTitles(d: Dissolve, p: number) {
+    const out = titleOf(d.from.content), inn = cur && titleOf(cur.content);
+    if (out && p < 0.5) {
+      ctx.globalAlpha = 1 - inOutSine(p * 2);
+      paintTitle(ctx, out);
+    }
+    if (inn && p > 0.5) {
+      const q = outCubic((p - 0.5) * 2);
+      ctx.globalAlpha = q;
+      paintTitle(ctx, inn, T.rise * (1 - q));
+    }
+    ctx.globalAlpha = 1;
   }
 
   function paintCamera(now: number) {
@@ -188,14 +203,16 @@ export function makeStage(canvas: HTMLCanvasElement, deck: Deck, hooks: { before
     if (fontsReady && cur) {
       if (dissolve) {
         const p = clamp01((now - dissolve.start) / dissolve.dur);
-        paintLayer(ctx, dissolve.from, now);
+        const keep = !dissolve.titleChanges;
+        paintLayer(ctx, dissolve.from, now, keep);
         bctx.globalAlpha = 1;
         bctx.fillStyle = C.white;
         bctx.fillRect(0, 0, STAGE_W, STAGE_H);
-        paintLayer(bctx, cur, now, dissolve.titleChanges ? T.rise * (1 - outCubic(p)) : 0);
+        paintLayer(bctx, cur, now, keep);
         ctx.globalAlpha = inOutSine(p);
         ctx.drawImage(buffer, 0, 0);
         ctx.globalAlpha = 1;
+        if (!keep) paintTitles(dissolve, p);
       } else paintLayer(ctx, cur, now);
     }
     paintCamera(now);
