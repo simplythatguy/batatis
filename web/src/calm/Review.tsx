@@ -127,7 +127,7 @@ function CaseReview() {
   const [showAll, setShowAll] = useState(false);
   const { options } = useDeckExtras();
   const ruleFlags = caseRules(c, options).filter((r) => r.state === "departs").length;
-  const deck = buildDeck(c, gaps, { ...options, seen: new Set(session.seen), includeDone: true, identify: reading.identify });
+  const deck = buildDeck(c, gaps, { ...options, seen: new Set(session.seen), includeDone: true, identify: reading.identify, intake: reading.intake });
   const { done, total } = deckProgress(deck);
   const openCards = deck.filter((i) => !i.done && !i.optional).length;
   const blocking = gaps.filter((g) => g.severity === "blocking");
