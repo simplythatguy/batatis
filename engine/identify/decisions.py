@@ -103,7 +103,13 @@ def record_decision(case, provision_id: str, decision: str, codes) -> list:
     if named == article:
         case.provisions = [p for p in case.provisions if article_of(p) != article]   # the article and its sentences
     else:
-        case.provisions = [p for p in case.provisions if p not in (article, named)]
+        kept = []
+        for p in case.provisions:
+            if p == article:     # the whole rule was stored: keep every sentence but the one answered No
+                kept += [row.provision_id for row in section_c_rows([article], codes) if row.provision_id != named]
+            elif p != named:
+                kept.append(p)
+        case.provisions = list(dict.fromkeys(kept))
     case.section_c = section_c_rows(case.provisions, codes) if case.provisions else []
     if any(article_of(p) == article for p in case.provisions):
         return []   # another sentence of this rule still differs, so its citation and Yes stand

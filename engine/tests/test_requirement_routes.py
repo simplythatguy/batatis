@@ -294,3 +294,18 @@ def test_no_on_one_sentence_keeps_the_other_sentence_of_the_rule(scene):
     assert saved.provisions == ['9.10.14.4.(1)']
     assert [row.provision_id for row in saved.section_c] == ['9.10.14.4.(1)']
     assert any(f.field == 'citation.9.10.14.4.' for f in saved.facts)
+
+
+def test_no_on_one_sentence_of_a_whole_stored_rule_keeps_its_other_sentences(scene):
+    """A rule stored whole (its sentence was not found) loses only the sentence answered No."""
+    client, store = scene
+    case = store.put(Case(facts=[input_fact('project.description', '9.10.14.4.')]))
+    assert client.post(f'/cases/{case.id}/identify', json={}).status_code == 200
+    stored = store.get(case.id)
+    stored.provisions = ['9.10.14.4.']
+    store.put(stored)
+    assert client.post(f'/cases/{case.id}/identify/9.10.14.4.(2)/decision', json={'decision': 'no'}).status_code == 200
+    saved = store.get(case.id)
+    rows = [row.provision_id for row in saved.section_c]
+    assert rows and '9.10.14.4.(2)' not in rows and all(r.startswith('9.10.14.4.') for r in rows)
+    assert '9.10.14.4.' not in saved.provisions and '9.10.14.4.(2)' not in saved.provisions
