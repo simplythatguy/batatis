@@ -320,3 +320,10 @@ def test_a_drafted_open_question_is_named_not_shown_as_its_key():
     from engine.models_completeness import field_label
     assert field_label('drafting.questions.draft_8a33dedfa8b9.0') == 'Open question from the drafted wording'
     assert field_label('owner_name') == 'owner name'
+
+
+def test_a_stored_raw_label_reads_as_the_drafted_question():
+    from engine.review.package_sources import _label
+    field = 'drafting.questions.draft_8a33dedfa8b9.0'
+    assert _label({'Field': field, 'Label': field.replace('_', ' ')}) == 'Open question from the drafted wording'
+    assert _label({'Field': 'owner_name', 'Label': "Owner's name"}) == "Owner's name"

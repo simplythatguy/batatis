@@ -24,6 +24,14 @@ def _fields(text, names):
     return values
 
 
+def _label(values):
+    # Packages submitted before labels were named carry the raw field id as their Label.
+    label = values.get('Label') or ''
+    if not label or label == values['Field'].replace('_', ' '):
+        return field_label(values['Field'])
+    return label
+
+
 def visible_sources(read):
     records, sources, consumed, declarations = [], [], set(), []
     pages = {page.page: page for page in read.text_pages}
@@ -88,7 +96,7 @@ def visible_sources(read):
             severity = values['Severity']
             route = values['Route']
             records.append(AdministrativeItem(key=values['Requirement key'], field=values['Field'], section=values['Section'],
-                label=values.get('Label') or field_label(values['Field']), verdict='unclear' if route == 'officer' or
+                label=_label(values), verdict='unclear' if route == 'officer' or
                 values['Reason code'] == 'unconfirmed' else 'missing', reason_code=values['Reason code'],
                 reason=values['Message'], certainty='not_found' if route == 'officer' or values['Reason code'] == 'unconfirmed' else 'blank',
                 severity=severity, routed_to=route, export_blocking=severity == 'blocking',

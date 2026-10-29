@@ -13,6 +13,7 @@ from pypdf import PdfReader, PdfWriter
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
 
+from ..models_completeness import field_label
 from ..completeness import Gap, _case_constraints
 from ..fact_aliases import LOGICAL_KEYS, is_withdrawal, latest
 from ..path_decision import decide_path
@@ -218,7 +219,7 @@ def prepare_package(case, codes, *, store=None, draft=False, form=None, version=
     def append_gap(gap, reason_code=None):
         missing = 'Your application appears to be missing '
         label = (gap.message[len(missing):].rstrip('.') if gap.message.startswith(missing)
-                 else gap.field.replace('_', ' '))
+                 else field_label(gap.field))
         append(_page([CONTEXT, 'Record type: unresolved input', f'Requirement key: {gap.id}',
             f'Section: {gap.section}', f'Field: {gap.field}', f'Label: {label}',
             f'Reason code: {reason_code or ("unconfirmed" if gap.id.startswith("export:unconfirmed:") else "saved_constraint")}',
