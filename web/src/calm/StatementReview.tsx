@@ -60,8 +60,8 @@ export function StatementReview() {
     const answer = answers[key]?.trim();
     if (!answer) return;
     const current = c.process[id].trimEnd();
-    // After a reload the added list is gone; an answer the statement already holds is not added again.
-    if (!current.includes(answer)) setText(id, current ? `${current}\n\n${answer}` : answer);
+    // After a reload the added list is gone; an answer an earlier Add made its own paragraph is not added again.
+    if (!current.split(/\n\s*\n/).some((part) => part.trim() === answer)) setText(id, current ? `${current}\n\n${answer}` : answer);
     setAdded((s) => { const next = new Set(s).add(key); ADDED.set(engineId ?? "", next); return next; });
   }
 
