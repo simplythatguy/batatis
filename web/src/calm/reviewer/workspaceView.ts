@@ -1,5 +1,5 @@
 /** Placement and presentation only. Counts, dispositions and acceptance belong to the server. */
-import type { Case, Finding, FindingState, InputFile, Pointer, RequestTarget, ReviewSession, RulebookGap, OfficerWorkspace } from "../../api/types.gen";
+import type { Case, Finding, FindingState, InputFile, Pointer, RequestTarget, ReviewDiff, ReviewSession, RulebookGap, OfficerWorkspace, SessionSummary } from "../../api/types.gen";
 import type { ReviewQuestion } from "../../api/client";
 import { formField, formLabel, formValue } from "./formFields";
 import { pointerLabel, SECTION_LABEL, sentence } from "./packageView";
@@ -150,6 +150,9 @@ export function workspaceDecision({ workspace, editable, pending, busy }: { work
   return { canReturn: !returnReason, canAccept: !hold && Boolean(workspace?.gate.can_accept), canRefuse: editable && !pending && !busy, returnReason, acceptReason };
 }
 
+/** "the professional", never "the a professional". */
+export const withThe = (label: string): string => (/^(?:the|a|an)\s/i.test(label) ? label : `the ${label}`);
+
 /** A few words naming what is wrong, built from the finding's own status and label. */
 export function findingTitle(f: Finding): string {
   const label = f.label;
@@ -157,4 +160,18 @@ export function findingTitle(f: Finding): string {
   if (f.status === "missing") return `${sentence(label)} is missing`;
   if (f.status === "not_found") return `Couldn’t read the ${label}`;
   return `${sentence(label)} needs a look`;
+}
+
+/**
+ * What the applicant's resubmission changed, in plain words. Only a review read against the version the
+ * officer returned says anything: a review re-run after the officer's own save compares with itself.
+ */
+export function sinceReturn(diff: ReviewDiff | null, versions: Pick<SessionSummary, "version" | "sent_at">[]): string {
+  if (!diff || !versions.find(v => v.version === diff.previous_version)?.sent_at) return "";
+  const parts = [
+    diff.resolved.length ? `${diff.resolved.length} fixed` : "",
+    diff.new.length ? `${diff.new.length} new` : "",
+    diff.unverified?.length ? `${diff.unverified.length} can’t tell` : "",
+  ].filter(Boolean);
+  return parts.length ? `Since the return: ${parts.join(" · ")}` : "";
 }

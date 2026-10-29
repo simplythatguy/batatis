@@ -9,13 +9,17 @@ the officer registers, for one specific location, with the supporting documentat
 """
 from __future__ import annotations
 
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timedelta
+from zoneinfo import ZoneInfo
 
+from ..data.jurisdictions.time_zones import ALBERTA_TIME_ZONE
 from ..models_review import CloseOut, Pointer, RecordItem, RecordPackage, ReviewSession
 from .bulletins import BULLETINS, PORTAL_URL
 from .workspace import build as workspace
 
 DAYS = 10
+# Every authority Batatis serves is in Alberta: a 7:53 PM decision on Oct 28 is dated Oct 28, not by UTC.
+LOCAL = ZoneInfo(ALBERTA_TIME_ZONE)
 # Outcomes that end the file; a return remains open for applicant revisions.
 FINAL_OUTCOMES = {'accept', 'refuse'}
 
@@ -26,11 +30,22 @@ def _decided(case) -> datetime | None:
     return datetime.fromisoformat(case.decision.at)
 
 
+def _day(value: str) -> str:
+    """The app's date: "Oct 28, 2026", in Alberta time."""
+    moment = datetime.fromisoformat(value)
+    day = (moment.astimezone(LOCAL) if moment.tzinfo else moment).date()
+    return f'{day:%b} {day.day}, {day.year}'
+
+
+def _count(n: int, word: str) -> str:
+    return f'{"No" if n == 0 else n} {word}{"" if n == 1 else "s"}'
+
+
 def build(case, sessions: list[ReviewSession], recorded, documents, *, today: date | None = None, gaps=()) -> CloseOut | None:
     decided = _decided(case)
     if decided is None:
         return None
-    today = today or datetime.now(timezone.utc).date()
+    today = today or datetime.now(LOCAL).date()
     recorded = recorded if recorded is not None and recorded[0] == case.decision.at else None
     accepted = case.decision.outcome == 'accept'
     issued_on = recorded.issued_on if accepted and recorded else None
@@ -43,7 +58,7 @@ def build(case, sessions: list[ReviewSession], recorded, documents, *, today: da
     latest = sessions[-1] if sessions else None
     send = [
         RecordItem(label='Copy of the variance as issued',
-                   detail=(f'Variance for case {case.id}, issued {issued_on}.' if issued_on else
+                   detail=(f'Issued {_day(issued_on)}.' if issued_on else
                            'Administratively complete · technical review next. Record issuance when the variance is issued.'),
                    present=bool(issued_on),
                    source=Pointer(file=record)),
@@ -57,19 +72,19 @@ def build(case, sessions: list[ReviewSession], recorded, documents, *, today: da
                    detail='; '.join(row.citation for row in case.section_c) or 'None saved.',
                    present=bool(case.section_c), source=Pointer(file=record)),
         RecordItem(label='Supporting documents',
-                   detail='; '.join(f'{row.title.value} ({row.file or "listed only"})' for row in documents)
+                   detail='; '.join(f'{row.title.value} ({"attached" if row.file else "listed only"})' for row in documents)
                    or 'None listed.', present=bool(documents), source=Pointer(file=record)),
         RecordItem(label='Information requests and applicant revisions',
-                   detail=f'{len(sent_requests)} request(s) sent; applicant changes are in the submission history.',
+                   detail=f'{_count(len(sent_requests), "request")} sent; applicant changes are in the submission history.',
                    present=True, source=Pointer(file=record)),
         RecordItem(label='Latest administrative package review',
-                   detail=(f'Version {latest.version} of {latest.created_at[:10]}: '
-                           f'{workspace(latest, case, gaps).tally.required} required item(s), '
+                   detail=(f'{_day(latest.created_at)}: '
+                           f'{_count(workspace(latest, case, gaps).tally.required, "required item")}, '
                            f'{workspace(latest, case, gaps).tally.to_check} to check.')
                    if latest else 'No package review was run.', present=latest is not None,
                    source=Pointer(file=record)),
         RecordItem(label='Decision record and status history',
-                   detail=f'{len(case.status_history)} status change(s).', source=Pointer(file=record)),
+                   detail=f'{_count(len(case.status_history), "status change")}.', source=Pointer(file=record)),
     ]
     package = RecordPackage(
         send_to_council=send, retain_on_file=retain,

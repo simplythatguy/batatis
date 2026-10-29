@@ -162,16 +162,23 @@ def _count_app_signatures(snapshot, case) -> None:
     """A signature made in the app is painted as an image, which reading the package cannot establish.
     The workspace records it against this exact content, so it counts as signed and dated."""
     from ..review.ingest import StoredValue
-    from .signatures import current_signatures
+    from .signatures import SIGNATURE_FIELDS, current_signatures
 
     values = snapshot.document.values
+    readings = {}
     for role, signature in current_signatures(case).items():
         key = f'{role}_signature'
         if key in values:
-            values[key] = StoredValue(key, f'Signed in the application by {signature.name}', 'exact', None,
+            signed = f'Signed in the application by {signature.name}'
+            values[key] = StoredValue(key, signed, 'exact', None,
                                       status='present', input_field=key, pointers=values[key].pointers)
             values[f'{key}_date'] = StoredValue(f'{key}_date', signature.signed_on, 'exact', signature.signed_on,
                                                 status='present', input_field=f'{key}_date')
+            widget, date = SIGNATURE_FIELDS[role]
+            readings.update({widget: signed, date: signature.signed_on})
+    # The officer's reading of the form says the same as the checks do.
+    snapshot.fields = [reading.model_copy(update={'status': 'present', 'value': readings[reading.field], 'reason': ''})
+                       if reading.field in readings else reading for reading in snapshot.fields]
 
 
 def prepare_package(case, codes, *, store=None, draft=False, form=None, version=CURRENT_MAP):

@@ -4,7 +4,7 @@ import type { FieldReading, Finding, InputFile, Pointer, OfficerWorkspace, Revie
 import { changeLabel, formValue } from "./formFields.ts";
 import type { SheetView } from "./sheet.ts";
 import { visibleSubmissionChanges } from "./submissionChanges.ts";
-import { allAnchors, anchoredItems, anchorFor, changedFields, findingSources, sheetRows, targetOptions, visibleFinding, workspaceDecision, type SheetAnchor } from "./workspaceView.ts";
+import { allAnchors, anchoredItems, anchorFor, changedFields, findingSources, sheetRows, sinceReturn, targetOptions, visibleFinding, withThe, workspaceDecision, type SheetAnchor } from "./workspaceView.ts";
 
 const anchors: SheetAnchor[] = [
   { id: "owner", section: "A", field: "owner_name", label: "Owner" },
@@ -146,4 +146,16 @@ test("booleans and saved slugs read as words; only form fields are named in the 
   const changes = [{ field: "journey.answer.understood%3A7222da7704cc11b", before: null, after: '{"key":"understood"}' },
     { field: "building_area_m2", before: null, after: "120" }];
   assert.deepEqual(visibleSubmissionChanges(changes).map(c => c.field), ["building_area_m2"]);
+});
+
+test("the change line speaks of the return, and an officer's own re-run adds no counter", () => {
+  // QA 2026-10-28: "Since version 6: 3 new" grew with every officer save.
+  const entry = (key: string) => ({ key, section: "D" as const, label: key, message: "" });
+  const diff = { previous_version: 6, previous_gaps: 3, resolved: [entry("a"), entry("b")], still_open: [], new: [entry("c")], unverified: [], statement: "" };
+  const versions = [{ version: 5, sent_at: null }, { version: 6, sent_at: "2026-10-29T01:46:00Z" }, { version: 7, sent_at: null }];
+  assert.equal(sinceReturn(diff, versions), "Since the return: 2 fixed · 1 new");
+  assert.equal(sinceReturn({ ...diff, previous_version: 7 }, versions), "");
+  assert.equal(sinceReturn(null, versions), "");
+  assert.equal(withThe("a named registered professional"), "a named registered professional");
+  assert.equal(withThe("applicant signature"), "the applicant signature");
 });
