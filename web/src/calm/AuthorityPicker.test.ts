@@ -35,3 +35,22 @@ test("the site place confirms in one tap and Not sure is a deliberate choice", a
   assert.equal(nodes(tree, (node) => node.type === "input")[0].props.value, "Not sure");
   h.unmount();
 });
+
+test("a known place typed another way is listed once, and an unknown name is offered as typed", async () => {
+  const h = await componentHarness(new URL("./AuthorityPicker.tsx", import.meta.url), "AuthorityPicker", { "./authorityFilter": filter, "../config": config });
+  const props = { options: config.AUTHORITIES, value: "", label: "Office", onPick: () => {} };
+  let tree = await h.render(props);
+  const input = () => nodes(tree, (node) => node.type === "input")[0];
+  const options = () => nodes(tree, (node) => node.props?.role === "option").map((node) => text(node));
+  for (const [typed, first, offeredAsTyped] of [["St. Johns", "St. John's", false], ["Red Deer, AB", "Red Deer", false],
+    ["Strathcona", "Strathcona County", true]] as const) {
+    input().props.onChange({ target: { value: typed } });
+    tree = await h.render(props);
+    assert.equal(options()[0], first, typed);
+    assert.equal(options().includes(typed), offeredAsTyped, `${typed} offered as typed`);
+  }
+  input().props.onChange({ target: { value: "Example Hamlet" } });
+  tree = await h.render(props);
+  assert.ok(options().includes("Example Hamlet"));
+  h.unmount();
+});

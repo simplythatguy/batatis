@@ -8,11 +8,11 @@ import fallbackPack from "../../engine/data/jurisdictions/packs/alberta-other.js
 /** NBC edition this product cites. One string, used by intake, examples, and screen headers. */
 export const CODE_EDITION = "NBC(AE) 2023, 2nd printing";
 
-type PlaceRow = { id: string; name: string; aliases: string[]; province: string; kind: string; covered: boolean; office: string; ask: string };
+type PlaceRow = { id: string; name: string; label: string; aliases: string[]; province: string; kind: string; covered: boolean; office: string; ask: string };
 /** Every place the engine knows (generated from the jurisdiction research; see engine/jurisdictions/places_build.py). */
 const PLACES: PlaceRow[] = placeIndex.places;
-/** In Alberta the short name when it is unambiguous ("Red Deer"), else the legal name; elsewhere the full name ("Ontario"). */
-const shown = (p: PlaceRow) => (p.province === "AB" ? p.aliases[0] ?? p.name : p.name);
+/** The place's own shorter name when it has one ("Red Deer"), never a community inside it (Sherwood Park); see places_build. */
+const shown = (p: PlaceRow) => p.label;
 /** The registry's key rule: case, accents, periods, apostrophes and spacing do not matter ("St. Johns"). */
 const fold = (s: string) => s.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[.'\u2018\u2019]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
 

@@ -36,6 +36,15 @@ test("only Calgary and Edmonton are covered; everywhere else says who to ask, fr
   assert.deepEqual(placeIndex.places.filter((p) => p.covered).map((p) => p.id).sort(), ["calgary", "edmonton"]);
 });
 
+test("each place shows a shorter form of its own name, never a community inside it", () => {
+  const label = (id: string) => AUTHORITIES.find((a) => a.id === id)?.name;
+  assert.equal(label("red-deer"), "Red Deer");
+  assert.equal(label("strathcona-county"), "Strathcona County");
+  assert.equal(label("wood-buffalo"), "Wood Buffalo");
+  assert.equal(label("calgary-international-airport"), "Calgary International Airport");
+  assert.equal(label("maskwacis"), "Maskwacis");
+});
+
 test("Not sure is a confirmed case fact and survives a JSON round trip", () => {
   const c = reducer(emptyCase("owner"), officeChoiceAction("unsure"));
   assert.equal(c.authority, "");
