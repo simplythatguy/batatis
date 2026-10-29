@@ -7,7 +7,7 @@
     "preview": "Roadmap only. Batatis has neither the adopted code nor a pack; nothing it shows is specific to this region."
   },
   "regions": [
-    {"id": "AB", "name": "Alberta", "coverage": "full", "note": "NBC(AE) 2023, 2nd printing. Packs: City of Calgary, City of Edmonton, rest of Alberta.", "roadmap": null},
+    {"id": "AB", "name": "Alberta", "coverage": "full", "note": "NBC(AE) 2023, 2nd printing. Packs: City of Calgary, City of Edmonton; every other Alberta place names its office from places/alberta.json; rest of Alberta for a name Batatis does not know.", "roadmap": null},
     {"id": "SK", "name": "Saskatchewan", "coverage": "preview", "note": "No adopted code text or pack in Batatis. Alberta citations do not apply.", "roadmap": "Province packs, wave 1 (with Manitoba)"},
     {"id": "MB", "name": "Manitoba", "coverage": "preview", "note": "No adopted code text or pack in Batatis. Alberta citations do not apply.", "roadmap": "Province packs, wave 1 (with Saskatchewan)"},
     {"id": "BC", "name": "British Columbia", "coverage": "preview", "note": "No adopted code text or pack in Batatis. Alberta citations do not apply.", "roadmap": "Province packs, wave 2"},

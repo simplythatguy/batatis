@@ -172,7 +172,7 @@ def _case_constraints(case: Case, codes: Codes, *,
         if found is not None and found.pack.coverage != 'full':
             # Outside Alberta, reserve land, national parks, places not confirmed: never an Alberta application.
             gaps.append(Gap(id='coverage:jurisdiction', severity='blocking', section='B', field='jurisdiction',
-                            message=f'Batatis does not prepare applications for {found.pack.name}. {found.pack.summary}',
+                            message=f'{found.pack.name}: {found.pack.summary}',
                             fix_hint=found.pack.authority.contact or 'Ask who reviews building work there.'))
 
     try:

@@ -7,7 +7,7 @@
   "alberta-jurisdiction-overrides.json": "70c0e9715d6b4cfd8cb037a9347a12e7d0124b298e062efd43aafc597e81400b",
   "alberta-scc-snapshot.json": "4edff7d5af31fb359087e83742633d233b0568338875abd16269d9eb2131a1d6",
   "Alberta Jurisdiction Sources.json": "ac5fe6131fe2773fcb53efc7db55816442fe85cc8acea73cc49758b41cdf80a5",
-  "place_inputs.json": "71967445387622ef161da88581aa57873aebbc3742ffd15cf9f7a70507fcfb13"
+  "place_inputs.json": "412a6771c219858bcfed0f140bd000fdbbcc03523dd18f396f2e4a0efe26e6b3"
  },
  "places": [
   {
@@ -23,7 +23,7 @@
    "covered": false,
    "code_edition": "Ontario Building Code (O. Reg. 163/24)",
    "climate_location": null,
-   "note": "Brampton is outside Alberta (Ontario). Batatis prepares Alberta applications only; Brampton uses the Ontario Building Code (O. Reg. 163/24).",
+   "note": "Brampton is outside Alberta (Ontario) and uses the Ontario Building Code (O. Reg. 163/24). Batatis does not prepare applications outside Alberta.",
    "ask": "Ask City of Brampton.",
    "sources": [
     {
@@ -45,12 +45,12 @@
    "lg_code": null,
    "type": "Province or territory",
    "kind": "outside_alberta",
-   "office": "The local building authority in British Columbia",
+   "office": "the local building authority in British Columbia",
    "accreditation": [],
    "covered": false,
    "code_edition": "BC Building Code 2024",
    "climate_location": null,
-   "note": "British Columbia is outside Alberta. Batatis prepares Alberta applications only; British Columbia uses the BC Building Code 2024.",
+   "note": "British Columbia is outside Alberta and uses the BC Building Code 2024. Batatis does not prepare applications outside Alberta.",
    "ask": "Ask the building authority where the project is.",
    "sources": [
     {
@@ -74,7 +74,7 @@
    "covered": false,
    "code_edition": "BC Building Code 2024",
    "climate_location": null,
-   "note": "Burnaby is outside Alberta (British Columbia). Batatis prepares Alberta applications only; Burnaby uses the BC Building Code 2024.",
+   "note": "Burnaby is outside Alberta (British Columbia) and uses the BC Building Code 2024. Batatis does not prepare applications outside Alberta.",
    "ask": "Ask City of Burnaby.",
    "sources": [
     {
@@ -98,7 +98,7 @@
    "covered": false,
    "code_edition": "National Building Code 2020",
    "climate_location": null,
-   "note": "Charlottetown is outside Alberta (Prince Edward Island). Batatis prepares Alberta applications only; Charlottetown uses the National Building Code 2020.",
+   "note": "Charlottetown is outside Alberta (Prince Edward Island) and uses the National Building Code 2020. Batatis does not prepare applications outside Alberta.",
    "ask": "Ask City of Charlottetown.",
    "sources": [
     {
@@ -122,7 +122,7 @@
    "covered": false,
    "code_edition": "National Building Code 2020 (N.B. Reg. 2021-2)",
    "climate_location": null,
-   "note": "Fredericton is outside Alberta (New Brunswick). Batatis prepares Alberta applications only; Fredericton uses the National Building Code 2020 (N.B. Reg. 2021-2).",
+   "note": "Fredericton is outside Alberta (New Brunswick) and uses the National Building Code 2020 (N.B. Reg. 2021-2). Batatis does not prepare applications outside Alberta.",
    "ask": "Ask City of Fredericton.",
    "sources": [
     {
@@ -146,7 +146,7 @@
    "covered": false,
    "code_edition": "Quebec Construction Code, Chapter I",
    "climate_location": null,
-   "note": "Gatineau is outside Alberta (Quebec). Batatis prepares Alberta applications only; Gatineau uses the Quebec Construction Code, Chapter I.",
+   "note": "Gatineau is outside Alberta (Quebec) and uses the Quebec Construction Code, Chapter I. Batatis does not prepare applications outside Alberta.",
    "ask": "Ask Régie du bâtiment du Québec, or the City of Gatineau for exempt buildings.",
    "sources": [
     {
@@ -170,7 +170,7 @@
    "covered": false,
    "code_edition": "Nova Scotia Building Code Regulations (N.S. Reg. 198/2024)",
    "climate_location": null,
-   "note": "Halifax is outside Alberta (Nova Scotia). Batatis prepares Alberta applications only; Halifax uses the Nova Scotia Building Code Regulations (N.S. Reg. 198/2024).",
+   "note": "Halifax is outside Alberta (Nova Scotia) and uses the Nova Scotia Building Code Regulations (N.S. Reg. 198/2024). Batatis does not prepare applications outside Alberta.",
    "ask": "Ask Halifax Regional Municipality.",
    "sources": [
     {
@@ -194,7 +194,7 @@
    "covered": false,
    "code_edition": "Ontario Building Code (O. Reg. 163/24)",
    "climate_location": null,
-   "note": "Hamilton is outside Alberta (Ontario). Batatis prepares Alberta applications only; Hamilton uses the Ontario Building Code (O. Reg. 163/24).",
+   "note": "Hamilton is outside Alberta (Ontario) and uses the Ontario Building Code (O. Reg. 163/24). Batatis does not prepare applications outside Alberta.",
    "ask": "Ask City of Hamilton.",
    "sources": [
     {
@@ -218,7 +218,7 @@
    "covered": false,
    "code_edition": "National Building Code 2015",
    "climate_location": null,
-   "note": "Iqaluit is outside Alberta (Nunavut). Batatis prepares Alberta applications only; Iqaluit uses the National Building Code 2015.",
+   "note": "Iqaluit is outside Alberta (Nunavut) and uses the National Building Code 2015. Batatis does not prepare applications outside Alberta.",
    "ask": "Ask Government of Nunavut building office.",
    "sources": [
     {
@@ -242,7 +242,7 @@
    "covered": false,
    "code_edition": "Ontario Building Code (O. Reg. 163/24)",
    "climate_location": null,
-   "note": "Kitchener is outside Alberta (Ontario). Batatis prepares Alberta applications only; Kitchener uses the Ontario Building Code (O. Reg. 163/24).",
+   "note": "Kitchener is outside Alberta (Ontario) and uses the Ontario Building Code (O. Reg. 163/24). Batatis does not prepare applications outside Alberta.",
    "ask": "Ask City of Kitchener.",
    "sources": [
     {
@@ -266,7 +266,7 @@
    "covered": false,
    "code_edition": "Quebec Construction Code, Chapter I",
    "climate_location": null,
-   "note": "Laval is outside Alberta (Quebec). Batatis prepares Alberta applications only; Laval uses the Quebec Construction Code, Chapter I.",
+   "note": "Laval is outside Alberta (Quebec) and uses the Quebec Construction Code, Chapter I. Batatis does not prepare applications outside Alberta.",
    "ask": "Ask Régie du bâtiment du Québec, or the City of Laval for exempt buildings.",
    "sources": [
     {
@@ -290,7 +290,7 @@
    "covered": false,
    "code_edition": "Ontario Building Code (O. Reg. 163/24)",
    "climate_location": null,
-   "note": "London is outside Alberta (Ontario). Batatis prepares Alberta applications only; London uses the Ontario Building Code (O. Reg. 163/24).",
+   "note": "London is outside Alberta (Ontario) and uses the Ontario Building Code (O. Reg. 163/24). Batatis does not prepare applications outside Alberta.",
    "ask": "Ask City of London.",
    "sources": [
     {
@@ -314,7 +314,7 @@
    "covered": false,
    "code_edition": "Quebec Construction Code, Chapter I",
    "climate_location": null,
-   "note": "Longueuil is outside Alberta (Quebec). Batatis prepares Alberta applications only; Longueuil uses the Quebec Construction Code, Chapter I.",
+   "note": "Longueuil is outside Alberta (Quebec) and uses the Quebec Construction Code, Chapter I. Batatis does not prepare applications outside Alberta.",
    "ask": "Ask Régie du bâtiment du Québec, or the City of Longueuil for exempt buildings.",
    "sources": [
     {
@@ -335,12 +335,12 @@
    "lg_code": null,
    "type": "Province or territory",
    "kind": "outside_alberta",
-   "office": "The local building authority in Manitoba",
+   "office": "the local building authority in Manitoba",
    "accreditation": [],
    "covered": false,
    "code_edition": "Manitoba Building Code (M.R. 78/2023)",
    "climate_location": null,
-   "note": "Manitoba is outside Alberta. Batatis prepares Alberta applications only; Manitoba uses the Manitoba Building Code (M.R. 78/2023).",
+   "note": "Manitoba is outside Alberta and uses the Manitoba Building Code (M.R. 78/2023). Batatis does not prepare applications outside Alberta.",
    "ask": "Ask the building authority where the project is.",
    "sources": [
     {
@@ -364,7 +364,7 @@
    "covered": false,
    "code_edition": "Ontario Building Code (O. Reg. 163/24)",
    "climate_location": null,
-   "note": "Markham is outside Alberta (Ontario). Batatis prepares Alberta applications only; Markham uses the Ontario Building Code (O. Reg. 163/24).",
+   "note": "Markham is outside Alberta (Ontario) and uses the Ontario Building Code (O. Reg. 163/24). Batatis does not prepare applications outside Alberta.",
    "ask": "Ask City of Markham.",
    "sources": [
     {
@@ -388,7 +388,7 @@
    "covered": false,
    "code_edition": "Ontario Building Code (O. Reg. 163/24)",
    "climate_location": null,
-   "note": "Mississauga is outside Alberta (Ontario). Batatis prepares Alberta applications only; Mississauga uses the Ontario Building Code (O. Reg. 163/24).",
+   "note": "Mississauga is outside Alberta (Ontario) and uses the Ontario Building Code (O. Reg. 163/24). Batatis does not prepare applications outside Alberta.",
    "ask": "Ask City of Mississauga.",
    "sources": [
     {
@@ -412,7 +412,7 @@
    "covered": false,
    "code_edition": "National Building Code 2020 (N.B. Reg. 2021-2)",
    "climate_location": null,
-   "note": "Moncton is outside Alberta (New Brunswick). Batatis prepares Alberta applications only; Moncton uses the National Building Code 2020 (N.B. Reg. 2021-2).",
+   "note": "Moncton is outside Alberta (New Brunswick) and uses the National Building Code 2020 (N.B. Reg. 2021-2). Batatis does not prepare applications outside Alberta.",
    "ask": "Ask City of Moncton.",
    "sources": [
     {
@@ -438,7 +438,7 @@
    "covered": false,
    "code_edition": "Quebec Construction Code, Chapter I",
    "climate_location": null,
-   "note": "Montréal is outside Alberta (Quebec). Batatis prepares Alberta applications only; Montréal uses the Quebec Construction Code, Chapter I.",
+   "note": "Montréal is outside Alberta (Quebec) and uses the Quebec Construction Code, Chapter I. Batatis does not prepare applications outside Alberta.",
    "ask": "Ask Régie du bâtiment du Québec, or the City of Montréal for exempt buildings.",
    "sources": [
     {
@@ -459,12 +459,12 @@
    "lg_code": null,
    "type": "Province or territory",
    "kind": "outside_alberta",
-   "office": "The local building authority in New Brunswick",
+   "office": "the local building authority in New Brunswick",
    "accreditation": [],
    "covered": false,
    "code_edition": "National Building Code 2020 (N.B. Reg. 2021-2)",
    "climate_location": null,
-   "note": "New Brunswick is outside Alberta. Batatis prepares Alberta applications only; New Brunswick uses the National Building Code 2020 (N.B. Reg. 2021-2).",
+   "note": "New Brunswick is outside Alberta and uses the National Building Code 2020 (N.B. Reg. 2021-2). Batatis does not prepare applications outside Alberta.",
    "ask": "Ask the building authority where the project is.",
    "sources": [
     {
@@ -486,12 +486,12 @@
    "lg_code": null,
    "type": "Province or territory",
    "kind": "outside_alberta",
-   "office": "The local building authority in Newfoundland and Labrador",
+   "office": "the local building authority in Newfoundland and Labrador",
    "accreditation": [],
    "covered": false,
    "code_edition": "National Building Code 2025 (per the CBHCC tracker)",
    "climate_location": null,
-   "note": "Newfoundland and Labrador is outside Alberta. Batatis prepares Alberta applications only; Newfoundland and Labrador uses the National Building Code 2025 (per the CBHCC tracker).",
+   "note": "Newfoundland and Labrador is outside Alberta and uses the National Building Code 2025 (per the CBHCC tracker). Batatis does not prepare applications outside Alberta.",
    "ask": "Ask the building authority where the project is.",
    "sources": [
     {
@@ -513,12 +513,12 @@
    "lg_code": null,
    "type": "Province or territory",
    "kind": "outside_alberta",
-   "office": "The local building authority in Northwest Territories",
+   "office": "the local building authority in Northwest Territories",
    "accreditation": [],
    "covered": false,
    "code_edition": "National Building Code 2020",
    "climate_location": null,
-   "note": "Northwest Territories is outside Alberta. Batatis prepares Alberta applications only; Northwest Territories uses the National Building Code 2020.",
+   "note": "Northwest Territories is outside Alberta and uses the National Building Code 2020. Batatis does not prepare applications outside Alberta.",
    "ask": "Ask the building authority where the project is.",
    "sources": [
     {
@@ -539,12 +539,12 @@
    "lg_code": null,
    "type": "Province or territory",
    "kind": "outside_alberta",
-   "office": "The local building authority in Nova Scotia",
+   "office": "the local building authority in Nova Scotia",
    "accreditation": [],
    "covered": false,
    "code_edition": "Nova Scotia Building Code Regulations (N.S. Reg. 198/2024)",
    "climate_location": null,
-   "note": "Nova Scotia is outside Alberta. Batatis prepares Alberta applications only; Nova Scotia uses the Nova Scotia Building Code Regulations (N.S. Reg. 198/2024).",
+   "note": "Nova Scotia is outside Alberta and uses the Nova Scotia Building Code Regulations (N.S. Reg. 198/2024). Batatis does not prepare applications outside Alberta.",
    "ask": "Ask the building authority where the project is.",
    "sources": [
     {
@@ -565,12 +565,12 @@
    "lg_code": null,
    "type": "Province or territory",
    "kind": "outside_alberta",
-   "office": "The local building authority in Nunavut",
+   "office": "the local building authority in Nunavut",
    "accreditation": [],
    "covered": false,
    "code_edition": "National Building Code 2015",
    "climate_location": null,
-   "note": "Nunavut is outside Alberta. Batatis prepares Alberta applications only; Nunavut uses the National Building Code 2015.",
+   "note": "Nunavut is outside Alberta and uses the National Building Code 2015. Batatis does not prepare applications outside Alberta.",
    "ask": "Ask the building authority where the project is.",
    "sources": [
     {
@@ -591,12 +591,12 @@
    "lg_code": null,
    "type": "Province or territory",
    "kind": "outside_alberta",
-   "office": "The local building authority in Ontario",
+   "office": "the local building authority in Ontario",
    "accreditation": [],
    "covered": false,
    "code_edition": "Ontario Building Code (O. Reg. 163/24)",
    "climate_location": null,
-   "note": "Ontario is outside Alberta. Batatis prepares Alberta applications only; Ontario uses the Ontario Building Code (O. Reg. 163/24).",
+   "note": "Ontario is outside Alberta and uses the Ontario Building Code (O. Reg. 163/24). Batatis does not prepare applications outside Alberta.",
    "ask": "Ask the building authority where the project is.",
    "sources": [
     {
@@ -620,7 +620,7 @@
    "covered": false,
    "code_edition": "Ontario Building Code (O. Reg. 163/24)",
    "climate_location": null,
-   "note": "Ottawa is outside Alberta (Ontario). Batatis prepares Alberta applications only; Ottawa uses the Ontario Building Code (O. Reg. 163/24).",
+   "note": "Ottawa is outside Alberta (Ontario) and uses the Ontario Building Code (O. Reg. 163/24). Batatis does not prepare applications outside Alberta.",
    "ask": "Ask City of Ottawa.",
    "sources": [
     {
@@ -642,12 +642,12 @@
    "lg_code": null,
    "type": "Province or territory",
    "kind": "outside_alberta",
-   "office": "The local building authority in Prince Edward Island",
+   "office": "the local building authority in Prince Edward Island",
    "accreditation": [],
    "covered": false,
    "code_edition": "National Building Code 2020",
    "climate_location": null,
-   "note": "Prince Edward Island is outside Alberta. Batatis prepares Alberta applications only; Prince Edward Island uses the National Building Code 2020.",
+   "note": "Prince Edward Island is outside Alberta and uses the National Building Code 2020. Batatis does not prepare applications outside Alberta.",
    "ask": "Ask the building authority where the project is.",
    "sources": [
     {
@@ -669,12 +669,12 @@
    "lg_code": null,
    "type": "Province or territory",
    "kind": "outside_alberta",
-   "office": "The local building authority in Quebec",
+   "office": "the local building authority in Quebec",
    "accreditation": [],
    "covered": false,
    "code_edition": "Quebec Construction Code, Chapter I",
    "climate_location": null,
-   "note": "Quebec is outside Alberta. Batatis prepares Alberta applications only; Quebec uses the Quebec Construction Code, Chapter I.",
+   "note": "Quebec is outside Alberta and uses the Quebec Construction Code, Chapter I. Batatis does not prepare applications outside Alberta.",
    "ask": "Ask the building authority where the project is.",
    "sources": [
     {
@@ -701,7 +701,7 @@
    "covered": false,
    "code_edition": "Quebec Construction Code, Chapter I",
    "climate_location": null,
-   "note": "Québec City is outside Alberta (Quebec). Batatis prepares Alberta applications only; Québec City uses the Quebec Construction Code, Chapter I.",
+   "note": "Québec City is outside Alberta (Quebec) and uses the Quebec Construction Code, Chapter I. Batatis does not prepare applications outside Alberta.",
    "ask": "Ask Régie du bâtiment du Québec, or the City of Québec for exempt buildings.",
    "sources": [
     {
@@ -725,7 +725,7 @@
    "covered": false,
    "code_edition": "National Building Code 2020 with Saskatchewan amendments",
    "climate_location": null,
-   "note": "Regina is outside Alberta (Saskatchewan). Batatis prepares Alberta applications only; Regina uses the National Building Code 2020 with Saskatchewan amendments.",
+   "note": "Regina is outside Alberta (Saskatchewan) and uses the National Building Code 2020 with Saskatchewan amendments. Batatis does not prepare applications outside Alberta.",
    "ask": "Ask City of Regina.",
    "sources": [
     {
@@ -749,7 +749,7 @@
    "covered": false,
    "code_edition": "National Building Code 2020 (N.B. Reg. 2021-2)",
    "climate_location": null,
-   "note": "Saint John is outside Alberta (New Brunswick). Batatis prepares Alberta applications only; Saint John uses the National Building Code 2020 (N.B. Reg. 2021-2).",
+   "note": "Saint John is outside Alberta (New Brunswick) and uses the National Building Code 2020 (N.B. Reg. 2021-2). Batatis does not prepare applications outside Alberta.",
    "ask": "Ask City of Saint John.",
    "sources": [
     {
@@ -770,12 +770,12 @@
    "lg_code": null,
    "type": "Province or territory",
    "kind": "outside_alberta",
-   "office": "The local building authority in Saskatchewan",
+   "office": "the local building authority in Saskatchewan",
    "accreditation": [],
    "covered": false,
    "code_edition": "National Building Code 2020 with Saskatchewan amendments",
    "climate_location": null,
-   "note": "Saskatchewan is outside Alberta. Batatis prepares Alberta applications only; Saskatchewan uses the National Building Code 2020 with Saskatchewan amendments.",
+   "note": "Saskatchewan is outside Alberta and uses the National Building Code 2020 with Saskatchewan amendments. Batatis does not prepare applications outside Alberta.",
    "ask": "Ask the building authority where the project is.",
    "sources": [
     {
@@ -799,7 +799,7 @@
    "covered": false,
    "code_edition": "National Building Code 2020 with Saskatchewan amendments",
    "climate_location": null,
-   "note": "Saskatoon is outside Alberta (Saskatchewan). Batatis prepares Alberta applications only; Saskatoon uses the National Building Code 2020 with Saskatchewan amendments.",
+   "note": "Saskatoon is outside Alberta (Saskatchewan) and uses the National Building Code 2020 with Saskatchewan amendments. Batatis does not prepare applications outside Alberta.",
    "ask": "Ask City of Saskatoon.",
    "sources": [
     {
@@ -825,7 +825,7 @@
    "covered": false,
    "code_edition": "National Building Code 2025 (per the CBHCC tracker)",
    "climate_location": null,
-   "note": "St. John's is outside Alberta (Newfoundland and Labrador). Batatis prepares Alberta applications only; St. John's uses the National Building Code 2025 (per the CBHCC tracker).",
+   "note": "St. John's is outside Alberta (Newfoundland and Labrador) and uses the National Building Code 2025 (per the CBHCC tracker). Batatis does not prepare applications outside Alberta.",
    "ask": "Ask City of St. John's.",
    "sources": [
     {
@@ -849,7 +849,7 @@
    "covered": false,
    "code_edition": "BC Building Code 2024",
    "climate_location": null,
-   "note": "Surrey is outside Alberta (British Columbia). Batatis prepares Alberta applications only; Surrey uses the BC Building Code 2024.",
+   "note": "Surrey is outside Alberta (British Columbia) and uses the BC Building Code 2024. Batatis does not prepare applications outside Alberta.",
    "ask": "Ask City of Surrey.",
    "sources": [
     {
@@ -873,7 +873,7 @@
    "covered": false,
    "code_edition": "Ontario Building Code (O. Reg. 163/24)",
    "climate_location": null,
-   "note": "Toronto is outside Alberta (Ontario). Batatis prepares Alberta applications only; Toronto uses the Ontario Building Code (O. Reg. 163/24).",
+   "note": "Toronto is outside Alberta (Ontario) and uses the Ontario Building Code (O. Reg. 163/24). Batatis does not prepare applications outside Alberta.",
    "ask": "Ask City of Toronto (Toronto Building).",
    "sources": [
     {
@@ -897,7 +897,7 @@
    "covered": false,
    "code_edition": "Vancouver Building By-law, not the BC Building Code",
    "climate_location": null,
-   "note": "Vancouver is outside Alberta (British Columbia). Batatis prepares Alberta applications only; Vancouver uses the Vancouver Building By-law, not the BC Building Code.",
+   "note": "Vancouver is outside Alberta (British Columbia) and uses the Vancouver Building By-law, not the BC Building Code. Batatis does not prepare applications outside Alberta.",
    "ask": "Ask City of Vancouver.",
    "sources": [
     {
@@ -921,7 +921,7 @@
    "covered": false,
    "code_edition": "Ontario Building Code (O. Reg. 163/24)",
    "climate_location": null,
-   "note": "Vaughan is outside Alberta (Ontario). Batatis prepares Alberta applications only; Vaughan uses the Ontario Building Code (O. Reg. 163/24).",
+   "note": "Vaughan is outside Alberta (Ontario) and uses the Ontario Building Code (O. Reg. 163/24). Batatis does not prepare applications outside Alberta.",
    "ask": "Ask City of Vaughan.",
    "sources": [
     {
@@ -945,7 +945,7 @@
    "covered": false,
    "code_edition": "BC Building Code 2024",
    "climate_location": null,
-   "note": "Victoria is outside Alberta (British Columbia). Batatis prepares Alberta applications only; Victoria uses the BC Building Code 2024.",
+   "note": "Victoria is outside Alberta (British Columbia) and uses the BC Building Code 2024. Batatis does not prepare applications outside Alberta.",
    "ask": "Ask City of Victoria.",
    "sources": [
     {
@@ -969,7 +969,7 @@
    "covered": false,
    "code_edition": "National Building Code 2020 with Yukon variations",
    "climate_location": null,
-   "note": "Whitehorse is outside Alberta (Yukon). Batatis prepares Alberta applications only; Whitehorse uses the National Building Code 2020 with Yukon variations.",
+   "note": "Whitehorse is outside Alberta (Yukon) and uses the National Building Code 2020 with Yukon variations. Batatis does not prepare applications outside Alberta.",
    "ask": "Ask City of Whitehorse.",
    "sources": [
     {
@@ -993,7 +993,7 @@
    "covered": false,
    "code_edition": "Ontario Building Code (O. Reg. 163/24)",
    "climate_location": null,
-   "note": "Windsor is outside Alberta (Ontario). Batatis prepares Alberta applications only; Windsor uses the Ontario Building Code (O. Reg. 163/24).",
+   "note": "Windsor is outside Alberta (Ontario) and uses the Ontario Building Code (O. Reg. 163/24). Batatis does not prepare applications outside Alberta.",
    "ask": "Ask City of Windsor.",
    "sources": [
     {
@@ -1017,7 +1017,7 @@
    "covered": false,
    "code_edition": "Manitoba Building Code (M.R. 78/2023)",
    "climate_location": null,
-   "note": "Winnipeg is outside Alberta (Manitoba). Batatis prepares Alberta applications only; Winnipeg uses the Manitoba Building Code (M.R. 78/2023).",
+   "note": "Winnipeg is outside Alberta (Manitoba) and uses the Manitoba Building Code (M.R. 78/2023). Batatis does not prepare applications outside Alberta.",
    "ask": "Ask City of Winnipeg.",
    "sources": [
     {
@@ -1041,7 +1041,7 @@
    "covered": false,
    "code_edition": "National Building Code 2020",
    "climate_location": null,
-   "note": "Yellowknife is outside Alberta (Northwest Territories). Batatis prepares Alberta applications only; Yellowknife uses the National Building Code 2020.",
+   "note": "Yellowknife is outside Alberta (Northwest Territories) and uses the National Building Code 2020. Batatis does not prepare applications outside Alberta.",
    "ask": "Ask City of Yellowknife.",
    "sources": [
     {
@@ -1062,12 +1062,12 @@
    "lg_code": null,
    "type": "Province or territory",
    "kind": "outside_alberta",
-   "office": "The local building authority in Yukon",
+   "office": "the local building authority in Yukon",
    "accreditation": [],
    "covered": false,
    "code_edition": "National Building Code 2020 with Yukon variations",
    "climate_location": null,
-   "note": "Yukon is outside Alberta. Batatis prepares Alberta applications only; Yukon uses the National Building Code 2020 with Yukon variations.",
+   "note": "Yukon is outside Alberta and uses the National Building Code 2020 with Yukon variations. Batatis does not prepare applications outside Alberta.",
    "ask": "Ask the building authority where the project is.",
    "sources": [
     {

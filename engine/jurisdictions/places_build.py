@@ -66,11 +66,6 @@ def inputs() -> dict:
     return json.loads(INPUTS.read_text(encoding='utf-8'))
 
 
-def fold(name: str) -> str:
-    """Case- and accent-free, so 'Kikino Métis Settlement' (Council) matches 'Kikino Metis Settlement' (population list)."""
-    return unicodedata.normalize('NFKD', name).encode('ascii', 'ignore').decode().casefold()
-
-
 def slug(text: str) -> str:
     ascii_text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode()
     return re.sub(r'[^a-z0-9]+', '-', ascii_text.lower().replace("'", '')).strip('-')
@@ -116,12 +111,14 @@ def alberta_place(row: dict, overrides: dict, numbers: tuple[dict, dict], hand: 
             'code_edition': NBC_AE}
     if row['type'] == 'Airport lands':
         airport = hand['airports'][name]
-        pid, aliases, office = airport['id'], airport['aliases'], airport['office']
+        pid, aliases, office, caveat = airport['id'], airport['aliases'], airport['office'], airport.get('caveat')
         url = next(iter(re.findall(r'https://\S+', row['source'])), None)
+        note = f'The airport authority authorizes the project first; then {office} reviews building work.'
         return {**base, 'id': pid, 'aliases': aliases, 'kind': 'accredited_municipality', 'office': office, 'covered': True,
-                'note': f'The airport authority authorizes the project first; then {office} reviews building work.',
+                'note': f'{note} {caveat}' if caveat else note,
                 'ask': f'Ask the airport authority for its letter of authorization, then {office}.',
-                'sources': [source({'title': f'{name}: who reviews building work', 'url': url, 'retrieved': RETRIEVED})]}
+                'sources': [source({'title': f'{name}: who reviews building work', 'url': url, 'retrieved': RETRIEVED},
+                                   caveat, 'unverified' if caveat else 'verified')]}
     if kind == 'accredited_municipality' or kind == 'metis_settlement':
         number = f' ({", ".join(accreditation)})' if accreditation else ''
         return {**base, 'id': slug(short(name)), 'aliases': [short(name)] if short(name) != name else [],
@@ -139,12 +136,13 @@ def alberta_place(row: dict, overrides: dict, numbers: tuple[dict, dict], hand: 
                             source(ASCA_ORDER, 'Areas with no accredited organization go to the Authority; applying the rule to this place is an inference.'),
                             source(ASCA_AGENCIES), source(MAPL)]}
     if kind == 'first_nation':
-        return {**base, 'id': slug(name), 'kind': 'first_nation', 'office': name, 'covered': False,
-                'code_edition': 'Set by the Nation',
-                'note': ('Building rules on reserve land are set by the Nation, by its own by-law or land code; '
-                         'a Safety Codes Act variance does not decide them.'),
+        return {**base, 'id': slug(name), 'aliases': hand['first_nation_aliases'].get(name, []), 'kind': 'first_nation',
+                'office': name, 'covered': False, 'code_edition': 'Set by the Nation',
+                'note': ('This is reserve land. The Nation may set its own building rules (Indian Act s.81(1)(h)); '
+                         'Batatis does not prepare applications here.'),
                 'ask': f'Ask {name} which building rules apply and who reviews them.',
-                'sources': [source(INDIAN_ACT), source(SCC_SEARCH, 'No accreditation under this name on the search date.')]}
+                'sources': [source(INDIAN_ACT, 'Supports that a band council may make building by-laws.'),
+                            source(SCC_SEARCH, 'No accreditation under this name on the search date.')]}
     if kind == 'federal':
         parks = overrides['national_park_improvement_districts']
         hit = parks.get(lg) if lg else None
@@ -155,20 +153,23 @@ def alberta_place(row: dict, overrides: dict, numbers: tuple[dict, dict], hand: 
             pid, label = slug(short(name)), short(name)
         return {**base, 'id': pid, 'aliases': sorted({label, *aliases} - {name}), 'kind': 'federal',
                 'office': 'Parks Canada', 'covered': False,
-                'code_edition': 'Parks Canada permit conditions',
-                'note': ('Parks Canada issues building permits here under its land use planning regulations; '
-                         'a Safety Codes Act variance does not decide the outcome.'),
+                'code_edition': 'Set by the Parks Canada permit (a provincial or national code)',
+                'note': 'Parks Canada issues the building permit here. Batatis does not prepare applications in national parks.',
                 'ask': 'Ask Parks Canada, realty and development, for this park.',
                 'sources': [source({'title': f'Parks Canada: building permits, {label or name}', 'url': url,
                                     'retrieved': RETRIEVED}), source(PARKS_POLICY)]}
     # other: Lloydminster (own charter) and Redwood Meadows (not determined)
     special = overrides['special_rows'].get(lg or '', {})
     url = special.get('source') if str(special.get('source', '')).startswith('https://') else MAPL['url']
+    known_office = bool(special.get('ahj'))
+    office = name if known_office else 'Not confirmed'
+    note = (f'{name} reviews building work under its own bylaw, and Batatis has not confirmed which code that bylaw '
+            'adopts, so it does not prepare applications here.' if known_office else
+            f'Batatis has not confirmed who reviews building work in {short(name)}, so it does not prepare applications here.')
     return {**base, 'id': slug(short(name)), 'aliases': [short(name)] if short(name) != name else [],
-            'kind': 'unconfirmed', 'office': name if lg else 'Not confirmed', 'covered': False,
-            'code_edition': 'Not confirmed',
-            'note': f'Batatis has not confirmed which code applies or who reviews building work in {short(name)}.',
-            'ask': f'Ask {short(name)} which building code applies and who reviews it.',
+            'kind': 'unconfirmed', 'office': office, 'covered': False,
+            'code_edition': 'Not confirmed', 'note': note,
+            'ask': f'Ask {name if known_office else "the townsite administration"} which building code applies and who reviews it.',
             'sources': [source({'title': f'{name}: what the research could confirm', 'url': url, 'retrieved': RETRIEVED},
                                special.get('note') or 'Building authority not determined.', 'unverified')]}
 
@@ -179,9 +180,9 @@ def outside_places(hand: dict) -> list[dict]:
     for p in hand['provinces']:
         prov, name, aliases, code, src = p['province'], p['name'], p['aliases'], p['code'], p['source']
         out.append({'id': slug(name), 'name': name, 'aliases': aliases, 'province': prov, 'lg_code': None,
-                    'type': 'Province or territory', 'kind': 'outside_alberta', 'office': f'The local building authority in {name}',
+                    'type': 'Province or territory', 'kind': 'outside_alberta', 'office': f'the local building authority in {name}',
                     'accreditation': [], 'covered': False, 'code_edition': code, 'climate_location': None,
-                    'note': f'{name} is outside Alberta. Batatis prepares Alberta applications only; {name} uses the {code}.',
+                    'note': f'{name} is outside Alberta and uses the {code}. Batatis does not prepare applications outside Alberta.',
                     'ask': f'Ask the building authority where the project is.',
                     'sources': [source(src)]})
     for c in hand['cities']:
@@ -191,26 +192,63 @@ def outside_places(hand: dict) -> list[dict]:
         out.append({'id': slug(name), 'name': name, 'aliases': aliases, 'province': prov, 'lg_code': None,
                     'type': 'City outside Alberta', 'kind': 'outside_alberta', 'office': office,
                     'accreditation': [], 'covered': False, 'code_edition': code, 'climate_location': None,
-                    'note': f'{name} is outside Alberta ({pname}). Batatis prepares Alberta applications only; {name} uses the {code}.',
+                    'note': f'{name} is outside Alberta ({pname}) and uses the {code}. Batatis does not prepare applications outside Alberta.',
                     'ask': f'Ask {office}.',
                     'sources': [source(src)]})
     return out
 
 
+MUNICIPAL = {'accredited_municipality', 'alberta_safety_codes_authority'}
+
+
+def group_places(hand: dict, alberta: list[dict]) -> list[dict]:
+    """Names several Nations share (Maskwacis, Stoney Nakoda): not covered, like each member."""
+    by_name = {p['name']: p for p in alberta}
+    out = []
+    for g in hand['first_nation_groups']:
+        members = [m for m in g['members'] if m in by_name]
+        out.append({'id': g['id'], 'name': g['name'], 'aliases': g['aliases'], 'province': 'AB', 'lg_code': None,
+                    'type': 'First Nations', 'kind': 'first_nation', 'office': ' or '.join(members), 'accreditation': [],
+                    'covered': False, 'code_edition': 'Set by each Nation', 'climate_location': None,
+                    'note': (f'This is reserve land of {", ".join(members[:-1])} and {members[-1]}. Each Nation may set its own '
+                             'building rules (Indian Act s.81(1)(h)); Batatis does not prepare applications here.'),
+                    'ask': 'Ask the Nation where the project is which building rules apply and who reviews them.',
+                    'sources': [source(INDIAN_ACT, 'Supports that a band council may make building by-laws.'),
+                                source(MAPL, 'The members are population-list rows; grouping them under one name is ours.',
+                                       'unverified')]})
+    return out
+
+
+def add_community_aliases(hand: dict, alberta: list[dict]) -> None:
+    by_name = {p['name']: p for p in alberta}
+    for alias, name in hand['community_aliases']['aliases'].items():
+        by_name[name]['aliases'] = [*by_name[name]['aliases'], alias]
+
+
+def fold(name: str) -> str:
+    """Case-, accent- and apostrophe-free, so 'Kikino Métis Settlement' matches 'Kikino Metis Settlement'."""
+    text = unicodedata.normalize('NFKD', name.replace('\u2019', "'").replace('\u2018', "'")).encode('ascii', 'ignore').decode()
+    return ' '.join(text.split()).casefold()
+
+
 def dedupe_aliases(places: list[dict]) -> list[str]:
-    """Drop any alias that two places share or that equals another place's name; return what was dropped."""
+    """An alias two places share stays with the municipality when exactly one place is a municipality (so
+    "Cold Lake" stays the City of Cold Lake); otherwise it is dropped from all of them. Returns what was dropped."""
     seen: dict[str, set[str]] = {}
     for p in places:
         for n in [p['name'], *p['aliases']]:
-            seen.setdefault(' '.join(n.split()).casefold(), set()).add(p['id'])
+            seen.setdefault(fold(n), set()).add(p['id'])
+    kinds = {p['id']: p['kind'] for p in places}
     dropped = []
     for p in places:
         keep = []
         for a in p['aliases']:
-            if len(seen[' '.join(a.split()).casefold()]) > 1:
-                dropped.append(f'{p["id"]}: {a}')
-            else:
+            owners = seen[fold(a)]
+            municipal = [o for o in owners if kinds[o] in MUNICIPAL]
+            if len(owners) == 1 or (len(municipal) == 1 and municipal[0] == p['id']):
                 keep.append(a)
+            else:
+                dropped.append(f'{p["id"]}: {a}')
         p['aliases'] = keep
     return dropped
 
@@ -221,6 +259,8 @@ def build() -> dict[Path, str]:
     numbers = building_accreditations()
     hand = inputs()
     alberta = [alberta_place(r, overrides, numbers, hand) for r in rows]
+    add_community_aliases(hand, alberta)
+    alberta += group_places(hand, alberta)
     outside = outside_places(hand)
     ids = [p['id'] for p in alberta + outside]
     dup = {i for i in ids if ids.count(i) > 1}

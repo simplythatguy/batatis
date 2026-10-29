@@ -11,8 +11,10 @@ export const CODE_EDITION = "NBC(AE) 2023, 2nd printing";
 type PlaceRow = { id: string; name: string; aliases: string[]; province: string; kind: string; covered: boolean; office: string };
 /** Every place the engine knows (generated from the jurisdiction research; see engine/jurisdictions/places_build.py). */
 const PLACES: PlaceRow[] = placeIndex.places;
-/** The short name when it is unambiguous ("Red Deer"), else the legal name ("Lacombe County", "Town of Taber"). */
-const shown = (p: PlaceRow) => p.aliases[0] ?? p.name;
+/** In Alberta the short name when it is unambiguous ("Red Deer"), else the legal name; elsewhere the full name ("Ontario"). */
+const shown = (p: PlaceRow) => (p.province === "AB" ? p.aliases[0] ?? p.name : p.name);
+/** The registry's key rule: case, accents, curly apostrophes and spacing do not matter. */
+const fold = (s: string) => s.replace(/[\u2018\u2019]/g, "'").normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").trim().toLowerCase();
 
 /**
  * Places the applicant can pick: every Alberta place, then the places outside Alberta that Batatis
@@ -23,16 +25,18 @@ const LOCAL_PACKS = [calgaryPack, edmontonPack];
 export const OFFICE_CHOICE_FIELD = "office.choice";
 
 function findPlace(key: string): PlaceRow | undefined {
-  return PLACES.find((p) => p.id === key || p.name.toLowerCase() === key || p.aliases.some((a) => a.toLowerCase() === key));
+  const k = fold(key);
+  return PLACES.find((p) => p.id === k || fold(p.name) === k || p.aliases.some((a) => fold(a) === k));
 }
 
 /** A place is a jurisdiction, never an invented reviewer account code. Free text stays intact. */
 export function resolveOffice(value: string): { id: string; name: string; packId: string; reviewerCode: string | null } | null {
   const raw = value.trim().replace(/\s+/g, " ");
   if (!raw || /^(?:unsure|not[ _]sure)$/i.test(raw)) return null;
-  const key = raw.toLowerCase();
-  const pack = LOCAL_PACKS.find((pack) => [pack.id, pack.name, ...pack.match.ids, ...pack.match.names].some((name) => name.toLowerCase() === key));
-  const place = findPlace(pack?.id ?? key) ?? findPlace(key);
+  const key = fold(raw);
+  const head = raw.includes(",") ? fold(raw.split(",")[0]) : key;   // "Toronto, ON", "Red Deer, AB"
+  const pack = LOCAL_PACKS.find((pack) => [pack.id, pack.name, ...pack.match.ids, ...pack.match.names].some((name) => [key, head].includes(fold(name))));
+  const place = findPlace(pack?.id ?? key) ?? findPlace(key) ?? findPlace(head);
   return { id: pack?.id ?? place?.id ?? raw, name: place ? shown(place) : pack?.name ?? raw, packId: pack?.id ?? place?.id ?? fallbackPack.id, reviewerCode: pack?.authority.reviewer_code ?? null };
 }
 
@@ -70,7 +74,9 @@ export function officeSuggestion(c: Case): { id: string; name: string } | null {
 
 export function submissionOfficeReason(c: Case): string {
   if (!c.authority) return "Choose a reviewing office.";
-  return resolveOffice(c.authority)?.reviewerCode ? "" : "This office receives your PDF outside Batatis. Export it below.";
+  const office = resolveOffice(c.authority);
+  if (office && PLACES.some((p) => p.id === office.packId && !p.covered)) return `Batatis does not prepare applications for ${office.name}.`;
+  return office?.reviewerCode ? "" : "This office receives your PDF outside Batatis. Export it below.";
 }
 
 /** Exit-count sentences. 9.9.4.4 is openings near exterior exit stairs, not this. */

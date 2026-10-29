@@ -122,6 +122,12 @@ def office_check() -> list[dict]:
                   and (pack.id == LOCAL_PACKS.get(row['legal_name'], pack.id)))
             out.append({'place': row['legal_name'], 'typed': typed, 'kind': kind, 'expected_office': office,
                         'office': pack.authority.name, 'covered': pack.coverage == 'full', 'ok': ok})
+    from engine.tests.test_every_place import EVERYDAY
+    for typed, kind, covered, office in EVERYDAY:   # what applicants type, answers written by hand
+        pack = reg.resolve(Jurisdiction(id='x-typed', name=typed)).pack
+        ok = pack.authority.kind == kind and (pack.coverage == 'full') is covered and (office is None or pack.authority.name == office)
+        out.append({'place': typed, 'typed': typed, 'kind': kind, 'expected_office': office, 'everyday': True,
+                    'office': pack.authority.name, 'covered': pack.coverage == 'full', 'ok': ok})
     for p in OUTSIDE:
         for typed in [p['name'], *p['aliases']]:
             pack = reg.resolve(Jurisdiction(id='x-typed', name=typed)).pack
@@ -221,10 +227,12 @@ def main(argv=None) -> int:
         table[kind_of[r['place']]]['refused_runs'] += 1
         table[kind_of[r['place']]]['refused_ok'] += r['ok']
     by_place = defaultdict(list)
+    everyday = [o for o in offices if o.get('everyday')]
     for o in offices:
-        by_place[o['place']].append(o['ok'])
+        if not o.get('everyday'):
+            by_place[o['place']].append(o['ok'])
     for name, oks in by_place.items():
-        kind = next(o['kind'] for o in offices if o['place'] == name)
+        kind = next(o['kind'] for o in offices if o['place'] == name and not o.get('everyday'))
         table[kind]['places'] += 1
         table[kind]['office_ok'] += all(oks)
     failures = ([f"office: {o['typed']} -> {o['office']} (expected {o['expected_office']})" for o in offices if not o['ok']]
@@ -234,6 +242,8 @@ def main(argv=None) -> int:
     result = {'generated_at': datetime.now(timezone.utc).isoformat(timespec='seconds'), 'commit': commit(),
               'mode': 'quick' if args.quick else 'every place', 'workers': args.workers, 'seconds': seconds,
               'names_checked': len(offices), 'places': len(by_place), 'covered_runs': len(same), 'not_covered_runs': len(refused),
+              'everyday_names': {'checked': len(everyday), 'ok': sum(o['ok'] for o in everyday),
+                                 'examples': [o['typed'] for o in everyday]},
               'calgary_baseline': {'code_references': len(base['ids']), 'pdf_pages': base['pages'],
                                    'findings': len(base['core_gaps'])},
               'identification_texts': texts, 'leaks': leaks, 'failures': failures,
@@ -273,6 +283,8 @@ Run {r['generated_at']} on commit `{r['commit']}` ({r['mode']}, {r['workers']} w
 
 - **Office**: {r['names_checked']} names typed ({r['places']} places, by legal name, every short name and id); the
   expected office comes from the Safety Codes Council accreditation snapshot and the research table.
+- **What people type**: {r['everyday_names']['ok']} / {r['everyday_names']['checked']} everyday names answered as written
+  by hand from the research, for example {', '.join(r['everyday_names']['examples'][:6])}.
 - **Same application**: the sample application exported for each covered Alberta place has the same
   {base['code_references']} code references as Calgary's ({base['pdf_pages']} pages), the same {base['findings']}
   completeness findings, and no Calgary-only form note. Only Calgary and Edmonton can send it to an officer

@@ -22,7 +22,9 @@
   {
    "id": "alexis-nakota-sioux-nation",
    "name": "Alexis Nakota Sioux Nation",
-   "aliases": [],
+   "aliases": [
+    "Alexis"
+   ],
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
@@ -67,7 +69,9 @@
   {
    "id": "beaver-lake-cree-nation",
    "name": "Beaver Lake Cree Nation",
-   "aliases": [],
+   "aliases": [
+    "Beaver Lake Cree"
+   ],
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
@@ -85,7 +89,9 @@
   {
    "id": "bigstone-cree-nation",
    "name": "Bigstone Cree Nation",
-   "aliases": [],
+   "aliases": [
+    "Bigstone"
+   ],
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
@@ -103,7 +109,10 @@
   {
    "id": "blood-tribe",
    "name": "Blood Tribe",
-   "aliases": [],
+   "aliases": [
+    "Kainai",
+    "Kainai Nation"
+   ],
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
@@ -556,7 +565,9 @@
   {
    "id": "dene-tha-first-nation",
    "name": "Dene Tha' First Nation",
-   "aliases": [],
+   "aliases": [
+    "Dene Tha'"
+   ],
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
@@ -565,7 +576,9 @@
   {
    "id": "driftpile-cree-nation",
    "name": "Driftpile Cree Nation",
-   "aliases": [],
+   "aliases": [
+    "Driftpile"
+   ],
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
@@ -612,7 +625,10 @@
   {
    "id": "enoch-cree-nation-440",
    "name": "Enoch Cree Nation #440",
-   "aliases": [],
+   "aliases": [
+    "Enoch Cree Nation",
+    "Enoch"
+   ],
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
@@ -621,7 +637,9 @@
   {
    "id": "ermineskin-tribe",
    "name": "Ermineskin Tribe",
-   "aliases": [],
+   "aliases": [
+    "Ermineskin"
+   ],
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
@@ -796,7 +814,9 @@
   {
    "id": "kehewin-cree-nation",
    "name": "Kehewin Cree Nation",
-   "aliases": [],
+   "aliases": [
+    "Kehewin"
+   ],
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
@@ -877,7 +897,9 @@
   {
    "id": "little-red-river-cree-nation",
    "name": "Little Red River Cree Nation",
-   "aliases": [],
+   "aliases": [
+    "Little Red River"
+   ],
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
@@ -886,7 +908,9 @@
   {
    "id": "loon-river-cree",
    "name": "Loon River Cree",
-   "aliases": [],
+   "aliases": [
+    "Loon River"
+   ],
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
@@ -895,7 +919,9 @@
   {
    "id": "louis-bull-tribe",
    "name": "Louis Bull Tribe",
-   "aliases": [],
+   "aliases": [
+    "Louis Bull"
+   ],
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
@@ -904,7 +930,10 @@
   {
    "id": "lubicon-lake-band",
    "name": "Lubicon Lake Band",
-   "aliases": [],
+   "aliases": [
+    "Lubicon Lake",
+    "Lubicon"
+   ],
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
@@ -920,9 +949,22 @@
    "office": "Mackenzie County"
   },
   {
+   "id": "maskwacis",
+   "name": "Maskwacis",
+   "aliases": [
+    "Maskwacis Cree Nations"
+   ],
+   "province": "AB",
+   "kind": "first_nation",
+   "covered": false,
+   "office": "Samson Cree Nation or Ermineskin Tribe or Louis Bull Tribe or Montana First Nation"
+  },
+  {
    "id": "mikisew-cree-first-nation",
    "name": "Mikisew Cree First Nation",
-   "aliases": [],
+   "aliases": [
+    "Mikisew Cree"
+   ],
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
@@ -1208,7 +1250,9 @@
   {
    "id": "piikani-nation",
    "name": "Piikani Nation",
-   "aliases": [],
+   "aliases": [
+    "Piikani"
+   ],
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
@@ -1236,7 +1280,8 @@
    "id": "wood-buffalo",
    "name": "Regional Municipality of Wood Buffalo",
    "aliases": [
-    "Wood Buffalo"
+    "Wood Buffalo",
+    "Fort McMurray"
    ],
    "province": "AB",
    "kind": "accredited_municipality",
@@ -1264,7 +1309,9 @@
   {
    "id": "saddle-lake-cree-nation",
    "name": "Saddle Lake Cree Nation",
-   "aliases": [],
+   "aliases": [
+    "Saddle Lake"
+   ],
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
@@ -1273,7 +1320,9 @@
   {
    "id": "samson-cree-nation",
    "name": "Samson Cree Nation",
-   "aliases": [],
+   "aliases": [
+    "Samson"
+   ],
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
@@ -1291,7 +1340,9 @@
   {
    "id": "siksika-nation",
    "name": "Siksika Nation",
-   "aliases": [],
+   "aliases": [
+    "Siksika"
+   ],
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
@@ -1338,7 +1389,10 @@
   {
    "id": "stoney-bearspaw-first-nation",
    "name": "Stoney (Bearspaw) First Nation",
-   "aliases": [],
+   "aliases": [
+    "Bearspaw First Nation",
+    "Bearspaw"
+   ],
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
@@ -1347,7 +1401,10 @@
   {
    "id": "stoney-chiniki-first-nation",
    "name": "Stoney (Chiniki) First Nation",
-   "aliases": [],
+   "aliases": [
+    "Chiniki First Nation",
+    "Chiniki"
+   ],
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
@@ -1356,16 +1413,33 @@
   {
    "id": "stoney-goodstoney-first-nation",
    "name": "Stoney (Goodstoney) First Nation",
-   "aliases": [],
+   "aliases": [
+    "Goodstoney First Nation",
+    "Goodstoney"
+   ],
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
    "office": "Stoney (Goodstoney) First Nation"
   },
   {
+   "id": "stoney-nakoda",
+   "name": "Stoney Nakoda Nations",
+   "aliases": [
+    "Stoney Nakoda",
+    "Stoney Nakoda First Nation"
+   ],
+   "province": "AB",
+   "kind": "first_nation",
+   "covered": false,
+   "office": "Stoney (Bearspaw) First Nation or Stoney (Chiniki) First Nation or Stoney (Goodstoney) First Nation"
+  },
+  {
    "id": "strathcona-county",
    "name": "Strathcona County",
-   "aliases": [],
+   "aliases": [
+    "Sherwood Park"
+   ],
    "province": "AB",
    "kind": "accredited_municipality",
    "covered": true,
@@ -1383,7 +1457,9 @@
   {
    "id": "sturgeon-lake-cree-nation",
    "name": "Sturgeon Lake Cree Nation",
-   "aliases": [],
+   "aliases": [
+    "Sturgeon Lake"
+   ],
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
@@ -1980,7 +2056,9 @@
   {
    "id": "tallcree-tribal-government",
    "name": "Tallcree Tribal Government",
-   "aliases": [],
+   "aliases": [
+    "Tallcree"
+   ],
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
@@ -3151,16 +3229,22 @@
   {
    "id": "townsite-of-redwood-meadows-administration-society",
    "name": "Townsite of Redwood Meadows Administration Society",
-   "aliases": [],
+   "aliases": [
+    "Redwood Meadows"
+   ],
    "province": "AB",
    "kind": "unconfirmed",
    "covered": false,
-   "office": "Townsite of Redwood Meadows Administration Society"
+   "office": "Not confirmed"
   },
   {
    "id": "tsuutina-nation",
    "name": "Tsuut'ina Nation",
-   "aliases": [],
+   "aliases": [
+    "Tsuut'ina",
+    "Tsuu T'ina",
+    "Tsuu T'ina Nation"
+   ],
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
@@ -4113,7 +4197,7 @@
    "province": "BC",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "The local building authority in British Columbia"
+   "office": "the local building authority in British Columbia"
   },
   {
    "id": "burnaby",
@@ -4223,7 +4307,7 @@
    "province": "MB",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "The local building authority in Manitoba"
+   "office": "the local building authority in Manitoba"
   },
   {
    "id": "markham",
@@ -4272,7 +4356,7 @@
    "province": "NB",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "The local building authority in New Brunswick"
+   "office": "the local building authority in New Brunswick"
   },
   {
    "id": "newfoundland-and-labrador",
@@ -4284,7 +4368,7 @@
    "province": "NL",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "The local building authority in Newfoundland and Labrador"
+   "office": "the local building authority in Newfoundland and Labrador"
   },
   {
    "id": "northwest-territories",
@@ -4296,7 +4380,7 @@
    "province": "NT",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "The local building authority in Northwest Territories"
+   "office": "the local building authority in Northwest Territories"
   },
   {
    "id": "nova-scotia",
@@ -4307,7 +4391,7 @@
    "province": "NS",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "The local building authority in Nova Scotia"
+   "office": "the local building authority in Nova Scotia"
   },
   {
    "id": "nunavut",
@@ -4318,7 +4402,7 @@
    "province": "NU",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "The local building authority in Nunavut"
+   "office": "the local building authority in Nunavut"
   },
   {
    "id": "ontario",
@@ -4329,7 +4413,7 @@
    "province": "ON",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "The local building authority in Ontario"
+   "office": "the local building authority in Ontario"
   },
   {
    "id": "ottawa",
@@ -4350,7 +4434,7 @@
    "province": "PE",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "The local building authority in Prince Edward Island"
+   "office": "the local building authority in Prince Edward Island"
   },
   {
    "id": "quebec",
@@ -4362,7 +4446,7 @@
    "province": "QC",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "The local building authority in Quebec"
+   "office": "the local building authority in Quebec"
   },
   {
    "id": "quebec-city",
@@ -4403,7 +4487,7 @@
    "province": "SK",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "The local building authority in Saskatchewan"
+   "office": "the local building authority in Saskatchewan"
   },
   {
    "id": "saskatoon",
@@ -4515,7 +4599,7 @@
    "province": "YT",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "The local building authority in Yukon"
+   "office": "the local building authority in Yukon"
   }
  ]
 }

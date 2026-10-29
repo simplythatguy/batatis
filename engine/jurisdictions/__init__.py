@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import json
 import os
+import unicodedata
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal, get_args
@@ -37,6 +38,8 @@ DISCLAIMER = ('Process notes say where an application goes and what the office h
               'codes officer decides.')
 
 MatchedBy = Literal['id', 'name', 'reviewer_code', 'fallback']
+# Who decides where a Safety Codes Act variance does not, or where Batatis has not confirmed it.
+OUTSIDE_THE_ACT = {'first_nation', 'federal', 'outside_alberta', 'unconfirmed'}
 
 
 class PackError(ValueError):
@@ -50,7 +53,10 @@ class Resolution:
 
 
 def _key(value: str | None) -> str:
-    return ' '.join((value or '').split()).casefold()
+    """Case-, accent- and curly-apostrophe-free: "Tsuut\u2019ina", "Kikino Métis" and "Montreal" match."""
+    text = (value or '').replace('\u2019', "'").replace('\u2018', "'")
+    text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode()
+    return ' '.join(text.split()).casefold()
 
 
 def place_pack(place: Place) -> JurisdictionPack:
@@ -153,6 +159,8 @@ class Registry:
                 if pack.province in fallbacks:
                     raise PackError(f'{where}: {pack.province} already has fallback pack {fallbacks[pack.province]}')
                 fallbacks[pack.province] = pack.id
+            if pack.authority.kind in OUTSIDE_THE_ACT and pack.coverage == 'full':
+                raise PackError(f'{where}: a {pack.authority.kind} authority is never full coverage')
             code = pack.authority.reviewer_code
             if code is not None and code not in reviewer_codes:
                 raise PackError(f'{where}: reviewer_code {code!r} is not an account Authority')
@@ -182,6 +190,10 @@ class Registry:
                 return Resolution(self.packs[hit], 'id')
             for raw in (jurisdiction.name, jurisdiction.authority):
                 hit = self._names.get(_key(raw))
+                if hit:
+                    return Resolution(self.packs[hit], 'name')
+            for raw in (jurisdiction.name, jurisdiction.authority):   # "Toronto, ON", "Red Deer, AB"
+                hit = self._names.get(_key(raw.split(',')[0])) if raw and ',' in raw else None
                 if hit:
                     return Resolution(self.packs[hit], 'name')
         pack = self.by_reviewer_code(authority)

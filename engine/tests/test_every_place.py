@@ -148,6 +148,49 @@ def test_every_researched_city_outside_alberta_is_not_covered():
         assert 'outside Alberta' in pack.summary and pack.code_edition != places_build.NBC_AE
 
 
+# What applicants actually type, with the answer written by hand from the research (not read from the place files).
+EVERYDAY = [
+    ('Siksika', 'first_nation', False, 'Siksika Nation'),
+    ('Tsuut\u2019ina Nation', 'first_nation', False, "Tsuut'ina Nation"),        # a curly apostrophe
+    ("Tsuut'ina", 'first_nation', False, "Tsuut'ina Nation"),
+    ('Enoch', 'first_nation', False, 'Enoch Cree Nation #440'),
+    ('Kainai', 'first_nation', False, 'Blood Tribe'),
+    ('Stoney Nakoda', 'first_nation', False, None),
+    ('Maskwacis', 'first_nation', False, None),
+    ('Redwood Meadows', 'unconfirmed', False, None),
+    ('Lloydminster, SK', 'unconfirmed', False, 'City of Lloydminster'),
+    ('Toronto, ON', 'outside_alberta', False, None),
+    ('Montreal', 'outside_alberta', False, None),
+    ('Kikino Métis Settlement', 'accredited_municipality', True, 'Kikino Metis Settlement'),   # the Council's spelling
+    ('Red Deer, AB', 'accredited_municipality', True, 'City of Red Deer'),
+    ('Fort McMurray', 'accredited_municipality', True, 'Regional Municipality of Wood Buffalo'),
+    ('Sherwood Park', 'accredited_municipality', True, 'Strathcona County'),
+    ('Cold Lake', 'accredited_municipality', True, 'City of Cold Lake'),           # not Cold Lake First Nations
+    ('Lake Louise', 'federal', False, 'Parks Canada'),
+]
+
+
+@pytest.mark.parametrize('typed, kind, covered, office', EVERYDAY, ids=[e[0] for e in EVERYDAY])
+def test_what_applicants_actually_type(typed, kind, covered, office):
+    pack = resolve(typed, 'x-typed').pack
+    assert (pack.authority.kind, pack.coverage == 'full') == (kind, covered)
+    assert office is None or pack.authority.name == office
+
+
+# The code in force outside Alberta, as the research read it (ontario-quebec.md, rest-of-canada.md).
+CODE_IN_FORCE = [('Vancouver', 'Vancouver Building By-law'), ('Surrey', 'BC Building Code 2024'), ('Winnipeg', 'M.R. 78/2023'),
+                 ('Regina', 'Saskatchewan'), ('Toronto', 'O. Reg. 163/24'), ('Ottawa', 'O. Reg. 163/24'),
+                 ('Montréal', 'Chapter I'), ('Halifax', 'N.S. Reg. 198/2024'), ('Fredericton', '2021-2'),
+                 ("St. John's", '2025'), ('Iqaluit', '2015'), ('Whitehorse', 'Yukon')]
+
+
+@pytest.mark.parametrize('city, code', CODE_IN_FORCE, ids=[c[0] for c in CODE_IN_FORCE])
+def test_outside_alberta_names_the_code_the_research_found(city, code):
+    pack = resolve(city, 'x-typed').pack
+    assert pack.authority.kind == 'outside_alberta' and code in pack.code_edition and code in pack.summary
+    assert pack.coverage == 'preview'
+
+
 @pytest.mark.parametrize('name', ['Example Hamlet', 'Taber'])
 def test_an_unknown_or_ambiguous_name_keeps_the_generic_alberta_answer(name):
     found = resolve(name)

@@ -52,7 +52,8 @@
    "aliases": [
     "Edmonton International Airport"
    ],
-   "office": "Leduc County"
+   "office": "Leduc County",
+   "caveat": "Confirm the office for the parcel: some parcels may differ."
   }
  },
  "provinces": [
@@ -478,5 +479,123 @@
    "code": null,
    "source": null
   }
- ]
+ ],
+ "first_nation_aliases": {
+  "Siksika Nation": [
+   "Siksika"
+  ],
+  "Blood Tribe": [
+   "Kainai",
+   "Kainai Nation"
+  ],
+  "Tsuut'ina Nation": [
+   "Tsuut'ina",
+   "Tsuu T'ina",
+   "Tsuu T'ina Nation"
+  ],
+  "Enoch Cree Nation #440": [
+   "Enoch Cree Nation",
+   "Enoch"
+  ],
+  "Piikani Nation": [
+   "Piikani"
+  ],
+  "Samson Cree Nation": [
+   "Samson"
+  ],
+  "Ermineskin Tribe": [
+   "Ermineskin"
+  ],
+  "Louis Bull Tribe": [
+   "Louis Bull"
+  ],
+  "Alexis Nakota Sioux Nation": [
+   "Alexis"
+  ],
+  "Saddle Lake Cree Nation": [
+   "Saddle Lake"
+  ],
+  "Bigstone Cree Nation": [
+   "Bigstone"
+  ],
+  "Mikisew Cree First Nation": [
+   "Mikisew Cree"
+  ],
+  "Little Red River Cree Nation": [
+   "Little Red River"
+  ],
+  "Sturgeon Lake Cree Nation": [
+   "Sturgeon Lake"
+  ],
+  "Driftpile Cree Nation": [
+   "Driftpile"
+  ],
+  "Kehewin Cree Nation": [
+   "Kehewin"
+  ],
+  "Beaver Lake Cree Nation": [
+   "Beaver Lake Cree"
+  ],
+  "Lubicon Lake Band": [
+   "Lubicon Lake",
+   "Lubicon"
+  ],
+  "Tallcree Tribal Government": [
+   "Tallcree"
+  ],
+  "Dene Tha' First Nation": [
+   "Dene Tha'"
+  ],
+  "Loon River Cree": [
+   "Loon River"
+  ],
+  "Stoney (Bearspaw) First Nation": [
+   "Bearspaw First Nation",
+   "Bearspaw"
+  ],
+  "Stoney (Chiniki) First Nation": [
+   "Chiniki First Nation",
+   "Chiniki"
+  ],
+  "Stoney (Goodstoney) First Nation": [
+   "Goodstoney First Nation",
+   "Goodstoney"
+  ]
+ },
+ "first_nation_groups": [
+  {
+   "id": "maskwacis",
+   "name": "Maskwacis",
+   "aliases": [
+    "Maskwacis Cree Nations"
+   ],
+   "members": [
+    "Samson Cree Nation",
+    "Ermineskin Tribe",
+    "Louis Bull Tribe",
+    "Montana First Nation"
+   ]
+  },
+  {
+   "id": "stoney-nakoda",
+   "name": "Stoney Nakoda Nations",
+   "aliases": [
+    "Stoney Nakoda",
+    "Stoney Nakoda First Nation"
+   ],
+   "members": [
+    "Stoney (Bearspaw) First Nation",
+    "Stoney (Chiniki) First Nation",
+    "Stoney (Goodstoney) First Nation"
+   ]
+  }
+ ],
+ "community_aliases": {
+  "note": "Communities that are not municipalities but that applicants type as if they were. Fort McMurray and Sherwood Park are urban service areas (alberta.md, boundary layer municipal_communities_public); Redwood Meadows is the townsite row of the population list.",
+  "aliases": {
+   "Fort McMurray": "Regional Municipality of Wood Buffalo",
+   "Sherwood Park": "Strathcona County",
+   "Redwood Meadows": "Townsite of Redwood Meadows Administration Society"
+  }
+ }
 }
