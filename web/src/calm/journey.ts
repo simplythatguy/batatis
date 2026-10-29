@@ -191,6 +191,13 @@ export function understandingRows(c: Case, detailIds: ReadonlySet<string>): Unde
 /** Lot, block and plan are one thing to the applicant: one "Legal description" row. */
 function joinLegalRows(rows: UnderstandingRow[]): UnderstandingRow[] {
   const parts = rows.filter((r) => !r.separate && (LEGAL_PART_FIELDS as readonly string[]).includes(r.field));
+  // A labelled legal description already is that row: its parts fold into it, so Looks right still confirms them.
+  const labelled = rows.find((r) => !r.separate && r.field === "legalDescription");
+  if (labelled && parts.length) {
+    const merged: UnderstandingRow = { ...labelled, ids: [...new Set([...labelled.ids, ...parts.flatMap((r) => r.ids)])],
+      sources: [...new Set([...labelled.sources, ...parts.flatMap((r) => r.sources)])], done: labelled.done && parts.every((r) => r.done) };
+    return rows.flatMap((r) => (r === labelled ? [merged] : parts.includes(r) ? [] : [r]));
+  }
   if (parts.length < 2) return rows;
   const value = legalFromParts(Object.fromEntries(parts.map((r) => [r.field, r.value])));
   const first = parts[0];

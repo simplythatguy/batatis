@@ -71,7 +71,7 @@ test("final statuses stay read-only and never promise an officer return", () => 
   for (const status of ["submitted", "in_review"]) assert.match(readOnlyStatus(status).next, /if the officer returns it/);
 });
 
-import { answerBlocks } from "./assistant/assistant.ts";
+import { answerBlocks, answerSpans } from "./assistant/assistant.ts";
 
 test("assistant answers split prose and quoted code text", () => {
   assert.deepEqual(answerBlocks("Cladding is the outer finish. The sentence says:\n> Gypsum sheathing, rigid insulation\n> shall not be used.\nSo if the nails only grip the foam, that departs."), [
@@ -80,6 +80,20 @@ test("assistant answers split prose and quoted code text", () => {
     { kind: "p", text: "So if the nails only grip the foam, that departs." },
   ]);
   assert.deepEqual(answerBlocks("One.\n\nTwo."), [{ kind: "p", text: "One." }, { kind: "p", text: "Two." }]);
+});
+
+test("assistant answers show bold and bullet lists, not raw markdown", () => {
+  // QA 2026-10-28: the panel printed "**Still open:** - **Signature…" as one paragraph.
+  assert.deepEqual(answerBlocks("**Still open:**\n- **Signature (warning):** Sign it.\n- **Registered professional:** The officer\n  decides.\n\n## Status\nSubmitted."), [
+    { kind: "p", text: "**Still open:**" },
+    { kind: "list", items: ["**Signature (warning):** Sign it.", "**Registered professional:** The officer decides."] },
+    { kind: "p", text: "Status" },
+    { kind: "p", text: "Submitted." },
+  ]);
+  assert.deepEqual(answerSpans("The application lists **9.10.15.4.(1)** and *this*."), [
+    { text: "The application lists ", bold: false }, { text: "9.10.15.4.(1)", bold: true }, { text: " and this.", bold: false },
+  ]);
+  assert.deepEqual(answerSpans("<b>not html</b> 2 * 3 = 6"), [{ text: "<b>not html</b> 2 * 3 = 6", bold: false }]);
 });
 
 /** The sidebar row as rendered: what is visible, what a screen reader and a hover hear. */

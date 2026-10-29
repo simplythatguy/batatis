@@ -49,8 +49,12 @@ def fingerprint(case, store=None) -> str:
 
 
 def _fingerprint(case, files) -> str:
+    # What identification reads from a fact: its value, whether it is confirmed and how it was derived.
+    # Re-confirming the same value ("Looks right") gives the fact a new id and a click source; that is
+    # not an input change and must not make the result stale.
     payload = {
-        'facts': [fact.model_dump() for fact in active_facts(case)],
+        'facts': [fact.model_dump(include={'field', 'value', 'status', 'kind', 'formula'})
+                  for fact in active_facts(case)],
         'jurisdiction': case.jurisdiction.model_dump() if case.jurisdiction else None,
         'files': [{**meta, 'sha256': hashlib.sha256(saved['data']).hexdigest() if saved else None}
                   for meta, saved in files],

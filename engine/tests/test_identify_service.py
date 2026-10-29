@@ -362,6 +362,22 @@ def test_benchmark_confirmation_looks_up_the_sentence_and_refuses_compliance_cla
                      json={'provision': '9.99.1.1.', 'departure': 'x'}).status_code == 404
 
 
+def test_a_sentence_benchmark_keeps_only_the_sentences_that_differ_in_section_c(client, codes):
+    """Sentence cards from a library article: "Yes, it differs" on (1) and (3) only. Section C lists those
+    two sentences, never every sentence of 9.10.15.4., and the article's citation stays recorded."""
+    http, store = client
+    case_id = described(http)
+    http.post(f'/cases/{case_id}/identify', json={})
+    for sentence in ('9.10.15.4.(1)', '9.10.15.4.(3)'):
+        ok = http.post(f'/cases/{case_id}/identify/benchmark',
+                       json={'provision': sentence, 'departure': 'A larger glazed area faces the side lot line.'})
+        assert ok.status_code == 200, ok.text
+    case = store.get(case_id)
+    assert case.provisions == ['9.10.15.4.(1)', '9.10.15.4.(3)']
+    assert [row.provision_id for row in case.section_c] == ['9.10.15.4.(1)', '9.10.15.4.(3)']
+    assert any(f.field == 'citation.9.10.15.4.' and f.value for f in case.facts)
+    assert [row['provision_id'] for row in ok.json()['section_c']] == ['9.10.15.4.(1)', '9.10.15.4.(3)']
+
 def test_process_refs_route_is_read_only_lookup(client, codes):
     http, _ = client
     case_id = described(http)
@@ -533,8 +549,8 @@ def test_acceptable_solution_wording_is_a_valid_departure(client):
     # One call names the benchmark and records the departure, so Section C carries the row the export prints.
     assert '9.10.15.5.(8)' in [row['provision_id'] for row in ok.json()['section_c']]
     saved = http.get(f'/cases/{case_id}').json()
-    assert '9.10.15.5.' in saved['provisions']
-    assert '9.10.15.5.(8)' in [row['provision_id'] for row in saved['section_c']]
+    assert saved['provisions'] == ['9.10.15.5.(8)'], 'the named sentence, not every sentence of the article'
+    assert [row['provision_id'] for row in saved['section_c']] == ['9.10.15.5.(8)']
 
 
 @pytest.fixture

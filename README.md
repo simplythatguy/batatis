@@ -227,8 +227,8 @@ The AI costs cents per application. People's time is the real cost, and most of 
 
 | What | About | Kind |
 | --- | --- | --- |
-| AI for one application, at list prices | US$0.56, or US$0.05 if every step ran on Claude Haiku 5.5 | Estimate. No application has run with metering on yet |
-| AI search and ranking of the code articles, per application | US$0.008 | Estimate |
+| AI for one application, at list prices | US$0.57, or US$0.05 if every step ran on Claude Haiku 5.5 | Estimate. No application has run with metering on yet |
+| AI search and ranking of the code articles, per search | US$0.008 | Estimate |
 | Hosting, per application at pilot volume | C$0.62 | Estimate |
 | An officer's time | C$43.92 to C$56.53 an hour | Published. City of Edmonton, Safety Codes Officer II |
 | One extra "more information" round on a custom application | C$3,600, of which 59% is the builder's cost of waiting | Estimate |

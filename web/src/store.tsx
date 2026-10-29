@@ -2,7 +2,8 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useReducer,
 import { engine, EngineError, failureText, isCaseConflict, isCaseGone, type EngineGap, type UploadedFile } from "./api/client";
 import type { Case as EngineCase, DraftingRecord, IntakeResult, Question as PlanQuestion, RequirementRecord } from "./api/types.gen";
 import { acceptedApplicantFact, applicantDraftInputKey, unchangedDraftField, type ApplicantDraftActivity, type ApplicantDraftCommand } from "./applicantDrafts";
-import { type CompletenessRecord } from "./humanReview";
+import { forApplicant, type CompletenessRecord } from "./humanReview";
+import { hrefFor } from "./gapHref";
 import { acknowledgedVersion, acknowledgeWrite, adoptEngineCase, clearEngineSession, CONFLICT_TEXT, engineCaseId, engineGeneration, isEngineGeneration, ensureEngineCase, isReadOnlyCase, needsReconcile, noteConflict, notePosted, noteShownSelection, pushDeletedEvidence, pushDraft, pushListedEvidence, refreshGaps, selectionKey, type EvidenceOutcome } from "./api/sync";
 import { engineNotices, factSignature, groupEvidenceGaps, missingFromEngine, uploadMessage } from "./rules";
 import { readDecisionBody, wireDecision } from "./identify";
@@ -166,6 +167,8 @@ interface Store {
   resetNote: string;
   dispatch: Dispatch<Action>;
   saveDraft: () => Promise<string | null>;
+  /** Run another versioned write (history, signatures, consent) in the save queue, so versions advance one at a time. */
+  queueWrite: <T>(work: () => Promise<T>) => Promise<T>;
   /** Save this displayed revision and submit it in the same queue. Rejects unacknowledged or stale work. */
   submitDraft: (caseId: string) => Promise<void>;
   submitting: boolean;
@@ -194,27 +197,6 @@ const Ctx = createContext<Store | null>(null);
 export const GONE_NOTE = "Case deleted or expired. Your answers stay here.";
 const CONFLICT_NOTE = "Not saved. The saved case changed somewhere else.";
 
-const FIELD_HREF: Record<string, string> = {
-  owner_name: "#/application?tab=A&focus=field-owner",
-  representative: "#/application?tab=A&focus=field-representative",
-  mailing_address: "#/application?tab=A&focus=field-mailingAddress",
-  application_date: "#/application?tab=A&focus=field-date",
-  civic_address: "#/application?tab=B&focus=field-municipalAddress",
-  legal_description: "#/application?tab=B&focus=field-legalDescription",
-  alternative_description: "#/application?tab=B&focus=field-alternative",
-  scope: "#/application?tab=B&focus=field-scope",
-  jurisdiction: "#/describe?focus=authority",
-  rationale: "#/application?tab=alt&focus=field-rationale",
-  risk_assessment: "#/application?tab=alt&focus=field-risk",
-  mitigating_measures: "#/application?tab=alt&focus=field-mitigation",
-  assumptions_and_limits: "#/application?tab=alt&focus=field-assumptions",
-  maintenance_operation: "#/application?tab=alt&focus=field-maintenance",
-  qualifications: "#/application?tab=alt&focus=field-qualifications",
-  provisions: "#/code-check",
-  professional_qualifications: "#/application?tab=alt&focus=field-qualifications",
-  professional_requirement: "#/application?tab=D&focus=prof-role",
-  responsible_professional: "#/application?tab=D&focus=prof-role",
-};
 
 const FIELD_ALIASES: Record<string, string[]> = {
   owner_name: ["owner_name", "owner", "section_a.owner_name"],
@@ -252,12 +234,12 @@ function composeGaps(localCase: Case, source: Store["gapsSource"], engine: Engin
     const keys = aliasKeys(g.field);
     if (keys.some((key) => seen.has(key))) continue;
     for (const key of keys) seen.add(key);
-    const label = gapLabel(g.message, g.fix_hint);
+    const label = forApplicant(gapLabel(g.message, g.fix_hint));
     admin.push({
       id: g.id,
       severity: g.severity,
       label,
-      href: hrefFor(g.field),
+      href: hrefFor(g.field, g.section),
       field: g.field,
       submissionBlocking: g.submission_blocking,
     });
@@ -279,13 +261,6 @@ function composeGaps(localCase: Case, source: Store["gapsSource"], engine: Engin
 /** The code cards on a case, ignoring order. */
 const selectionSet = (c: Case) => selectionKey([...selectedArticles(c)].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)));
 
-/** The app link that fixes a field (engine gap field or a reviewer's ticked item). */
-export function hrefFor(field: string): string {
-  if (FIELD_HREF[field]) return FIELD_HREF[field];
-  if (field.startsWith("section_c") || field.startsWith("provisions")) return "#/section-c";
-  if (field.startsWith("evidence") || field.startsWith("professional")) return "#/application?tab=D";
-  return "#/describe";
-}
 
 export function CaseProvider({ children }: { children: ReactNode }) {
   const editsPaused = useApplicationEditsPaused();
@@ -2047,6 +2022,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     readSync: () => syncState.current,
     engineId, applicationIdentity: JSON.stringify([renderGeneration, renderSession, engineId]), applicationStatus, factsEpoch, phase, resetNote, dispatch,
     saveDraft: () => sync(),
+    queueWrite: enqueue,
     refreshCurrentCase,
     submitDraft, submitting, submissionDispatched,
     beginEmpty: (type) => {

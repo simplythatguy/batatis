@@ -18,6 +18,8 @@ export type RequirementAnswer = "applies" | "does-not-apply" | "not-sure";
 export interface RequirementQueue {
   /** The closest undecided Division B requirements, at most `limit`. */
   batch: RequirementRecord[];
+  /** Division B requirements the applicant already answered; their cards stay so an answer can change. */
+  answered: RequirementRecord[];
   /** Division B requirements still waiting for an applicant decision. */
   reviewable: number;
   /** Every Division B requirement the ledger discovered, decided or not. */
@@ -36,7 +38,8 @@ export function askable(record: RequirementRecord): boolean {
 export function requirementQueue(result: IdentifyResult | null | undefined, limit: number = REVIEW_BATCH): RequirementQueue {
   const rows = (result?.requirements ?? []).filter((record) => record.division === "B" && record.source_status === "verified");
   const waiting = rows.filter(askable);
-  return { batch: waiting.slice(0, limit), reviewable: waiting.length, found: rows.length };
+  const answered = rows.filter((record) => Boolean(record.provision_id) && decided(record));
+  return { batch: waiting.slice(0, limit), answered, reviewable: waiting.length, found: rows.length };
 }
 
 /** The stored answer on a ledger row, or null while it still waits for the applicant. */

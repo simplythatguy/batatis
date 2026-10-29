@@ -5,7 +5,7 @@ import { Icon24 } from "../icons";
 import { MOD_KEY } from "../ui";
 import { useAccount } from "../account";
 import {
-  answerBlocks, ask, assistantKey, cancelQuestion, closeAssistant, goBack, MAX_QUESTION, retry, setDraft, useAssistant,
+  answerBlocks, answerSpans, ask, assistantKey, cancelQuestion, closeAssistant, goBack, MAX_QUESTION, retry, setDraft, useAssistant,
   type Turn,
 } from "./assistant";
 import { AttachButton, Attachments } from "./Attachments";
@@ -152,6 +152,11 @@ const NAV_TEXT: Record<NonNullable<Turn["nav"]>["state"], (label: string) => str
   "not-offered": (l) => `${l} isn’t available here`,
 };
 
+/** Plain text with bold runs. React escapes every span; no HTML from the answer is ever parsed. */
+function Spans({ text }: { text: string }) {
+  return <>{answerSpans(text).map((s, i) => (s.bold ? <strong key={i}>{s.text}</strong> : s.text))}</>;
+}
+
 function TurnView({ t }: { t: Turn }) {
   if (t.nav) {
     const n = t.nav;
@@ -179,7 +184,9 @@ function TurnView({ t }: { t: Turn }) {
   }
   return (
     <div className="cf-msg-ai">
-      {answerBlocks(t.text).map((b, i) => (b.kind === "quote" ? <blockquote key={i} className="cf-code-text is-inline">{b.text}</blockquote> : <p key={i}>{b.text}</p>))}
+      {answerBlocks(t.text).map((b, i) => (b.kind === "quote" ? <blockquote key={i} className="cf-code-text is-inline">{b.text}</blockquote>
+        : b.kind === "list" ? <ul key={i}>{b.items.map((item, j) => <li key={j}><Spans text={item} /></li>)}</ul>
+        : <p key={i}><Spans text={b.text} /></p>))}
       {t.cited && t.cited.length > 0 && (
         <div className="cf-chip-row">
           {t.cited.map((id) => <a key={id} className="cf-code-chip is-link" href={codeHref(articleOf(id) ?? id)}>{id}</a>)}

@@ -130,7 +130,8 @@ def test_failures_preserve_saved_scores_and_label_identify_fallback(world, monke
     assert not fallback['trace']['exhaustive']
     assert fallback['trace']['fallback_reason'] == 'scoring unavailable'
     assert not PRIVATE.search(json.dumps(fallback))
-    assert client.get(path).json() == previous
+    # The identify run saved the case; only the returned case version moves.
+    assert client.get(path).json() == {**previous, 'case_version': previous['case_version'] + 1}
 
 
 def test_library_judge_and_offline_fake_have_same_distinct_identity(world, monkeypatch):
@@ -154,7 +155,7 @@ def test_changed_description_marks_previous_record_stale_without_scoring(world):
     record = client.post(f'/cases/{case_id}/relevance').json()
     count = len(calls)
     client.post(f'/cases/{case_id}/facts', json={**description_fact('SYNTHETIC: different project.'), 'id': 'later'})
-    assert client.get(f'/cases/{case_id}/relevance').json() == {**record, 'stale': True}
+    assert client.get(f'/cases/{case_id}/relevance').json() == {**record, 'stale': True, 'case_version': record['case_version'] + 1}
     assert len(calls) == count
 
 

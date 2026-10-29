@@ -81,3 +81,19 @@ test("the ring legend gives no cut-offs for uncalibrated estimates, and keeps th
   assert.match(rated, /Likely applies · address this\. 85% or more\./);
   assert.match(rated, /Unlikely to apply\. Above 0 and under 30%\./);
 });
+
+test("useRelevance: Score relevance acknowledges the case version the scores were saved under", async () => {
+  const acknowledged: [string, unknown][] = [];
+  const h = await componentHarness(new URL("./useRelevance.ts", import.meta.url), "useRelevance", {
+    "../api/codeLibrary": { CodeLibraryError, codeLibrary: { score: async () => ({ ...record("relevance-2", null), case_version: 7 }) } },
+    "../api/sync": { acknowledgeWrite: (id: string, version: unknown) => acknowledged.push([id, version]) },
+    "../store": { useCase: () => ({ engineId: "c1", c: { description: "Synthetic project." }, phase: "case", saveDraft: async () => "c1" }) },
+    "./codeScope": { useCodeScope: () => "application" },
+    "./libraryContext": { libraryEpoch: () => 0 },
+    "./relevance": relevance,
+  });
+  await (await h.render({})).score();
+  assert.deepEqual(acknowledged, [["c1", 7]], "the next draft save sends the version scoring wrote, not a stale one");
+  assert.equal((await h.render()).phase, "ready");
+  h.unmount();
+});

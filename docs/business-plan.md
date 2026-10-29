@@ -96,23 +96,24 @@ The **Safety Codes Council and Build Forward Alberta** run the Council's "front 
 
 ## 6. Cost per application
 
-The model cost of one application is small and measured. The prices come from `engine/llm_gate.py`, and the usage comes from the benchmark ledger in draft PR #58 (unmerged, branch tip 6a42795). The method and the script are in source checks §5. Prices are US$ per million tokens at list. Canadian dollars use the Bank of Canada rate of 1.4057 CAD per USD on Oct 21, 2026 (verified).
+The model cost of one application is small, and it is an estimate. The token use per call comes from the code's caps and the usage assumptions in the [cost model](research/2026-10-28-bakeoff/cost-model.md); no application has run with metering on. Prices are US$ per million tokens at list, from `engine/llm_gate.py`: Claude Sonnet 5.5 at US$2 in and US$10 out, Claude Haiku 5.5 at US$0.10 and US$0.50. Canadian dollars use the Bank of Canada rate of 1.4057 CAD per USD on Oct 21, 2026. This section replaces the Oct 21 figures, which priced a pipeline that screened all 2,080 articles with a paid model.
 
-| Step | Model | Measured use per call | Cost (US$) | Kind |
-|---|---|---|---:|---|
-| Relevance screen of all 2,080 Division B articles | A third-party relevance model. 20 requests | About 375,000 tokens in and 37,000 out. 291 draws | 0.0173 | Measured |
-| Re-rank of the top 60 | The same model. One request | About 12,000 in and 1,100 out. 284 calls | 0.00056 | Measured |
-| Verifier reads the full text of the top 15 and quotes it | A third-party language model | About 4,500 in and 1,100 out. 636 calls | 0.0010 at list price. 0.0017 at the gate's higher reserve price | Measured |
-| **One identification run** | | | **0.019 to 0.020** (C$0.027 to C$0.028) | Measured |
-| Intake model pass (optional) | A third-party language model | 19 live calls cost about US$0.012 in total (PR #54) | About 0.0006 | Measured |
-| Assistant answer | A third-party language model at US$0.40 in and US$1.60 out per million tokens | Output is capped at 1,200 tokens. Input is assumed at up to 10,000 tokens | At most 0.0059 | Assumption on input size |
-| Section C lookup, completeness checks, officer package review, form export | None | | 0 | By construction |
+| Step, with assumed use per application | Model | Base cost (US$) | Kind |
+|---|---|---:|---|
+| Reading the description, two reads | Claude Sonnet 5.5 | 0.08 | Estimate |
+| Document review, one run | Claude Sonnet 5.5 | 0.22 | Estimate |
+| Drafting the statements, one run | Claude Sonnet 5.5 | 0.14 | Estimate |
+| Independent audit of the drafts, one run | Claude Sonnet 5.5 | 0.11 | Estimate |
+| Ranking code articles, two searches | Claude Haiku 5.5 | 0.004 | Estimate |
+| Assistant, five answers | Claude Haiku 5.5 | 0.006 | Estimate |
+| Section C lookup, completeness checks, officer package review, form export | None | 0 | By construction |
+| **One application** | | **about 0.56** (C$0.79) | Estimate |
 
-**One application, with stated usage (assumptions).** A typical application has one identification run, one intake pass and five assistant answers: 0.0196 + 0.0006 + 5 x 0.0059 = US$0.05, or C$0.07. A generous one has three identification runs and ten assistant answers: 3 x 0.0196 + 0.0006 + 10 x 0.0059 = US$0.12, or C$0.17. No applicant has used the assistant yet, so the answer counts are illustrative. Even the generous case is about 0.1% of the low end of the price hypothesis (C$150).
+**What else it costs.** Hosting adds about C$0.62 an application at pilot volume. Half a person for jurisdiction packs, support and domain review adds about C$60, for a loaded cost of about C$61. If every step ran on Claude Haiku 5.5, the model cost would be about US$0.04. Even the base case is about 0.5% of the low end of the price hypothesis (C$150).
 
-**What this means.** Model cost does not decide whether Batatis is a business. Upkeep of jurisdiction packs, domain review, support, officer onboarding and Canadian-region hosting do, and none of those has been priced. Hosting today is a free-tier demo.
+**What this means.** Model cost does not decide whether Batatis is a business. Upkeep of jurisdiction packs, domain review, support, officer onboarding and Canadian-region hosting do. One extra "more information" round on a custom application costs about C$3,600, mostly the builder's cost of waiting, so Batatis pays for itself if it saves one such round in every 60 custom applications. The cost model also prices a rival that is 99% cheaper and 5 points less accurate: it saves a builder under C$1 on a custom application and adds about C$240 to C$840 of expected rework.
 
-**Spend controls (built).** Each model call reserves its worst-case cost first and settles with the reported tokens afterward. A daily cap (default US$5) is kept in a shared database ledger. Per-IP limits apply, and the product falls back to a labelled keyword search when the gate is shut (`docs/deploy.md`, `engine/llm_gate.py`). The cost may change when the benchmark fixes the final pipeline, which is why this section reports ranges from the ledger and not a promise.
+**Spend controls (built).** Each model call reserves its worst-case cost first and settles with the reported tokens afterward. A daily cap (default US$5) is kept in a shared database ledger. Per-IP limits apply, and when the gate is shut the code search keeps its deterministic order (`docs/deploy.md`, `engine/llm_gate.py`). These are estimates until applications run with metering on.
 
 ## 7. How big, and how it grows
 
