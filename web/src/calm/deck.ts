@@ -541,8 +541,10 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
   // Every issued planner question takes its journey position, retaining the form mapping.
   const plan = planQuestions(c);
   const planFields = new Set(plan.map(({ q }) => localField(q.field)));
-  // A description that names one coded solution asks only that solution's inputs.
-  const namedInputs = decision.ruleId ? new Set(namedRuleInputs(decision.ruleId) ?? []) : null;
+  // A description that names one coded solution asks only that solution's inputs; rules in play that
+  // still need inputs ask only those.
+  const namedInputs = decision.ruleId ? new Set(namedRuleInputs(decision.ruleId) ?? [])
+    : decision.asksRuleInputs ? new Set(decision.missing) : null;
   for (const { q, done, notSure } of plan) {
     if (q.field === "product_scope" && decision.path !== "alternative") continue;
     if ((q.field === "alternative_description" || localField(q.field) === "alternative") && decision.path !== "alternative") continue;

@@ -80,10 +80,11 @@ class ClaudeVerifier:
     key in the environment alone never reaches Anthropic.
     """
 
+    system = SYSTEM
+    output_format = Picks
+
     def __init__(self, db_path: Path | str, *, client=None, model: str = VERIFIER_MODEL, effort: str = 'medium',
                  max_tokens: int = 16000):
-        if 'haiku' in model.lower():
-            raise ValueError('Haiku models are not used for verification')
         self.arts = articles(Path(db_path))
         self.model, self.effort, self.max_tokens = model, effort, max_tokens
         if client is None:
@@ -108,8 +109,8 @@ class ClaudeVerifier:
         candidates = [a for a in candidates if a in self.arts]
         t0 = time.monotonic()
         resp = self.client.messages.parse(
-            model=self.model, max_tokens=self.max_tokens, system=SYSTEM,
-            output_config={'effort': self.effort}, output_format=Picks,
+            model=self.model, max_tokens=self.max_tokens, system=self.system,
+            output_config={'effort': self.effort}, output_format=self.output_format,
             messages=[{'role': 'user', 'content': self.prompt(query, candidates)}])
         seconds = time.monotonic() - t0
         usage = {'input_tokens': resp.usage.input_tokens, 'output_tokens': resp.usage.output_tokens}

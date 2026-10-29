@@ -24,17 +24,23 @@ def clean_gate(monkeypatch):
 
 # --- config ---------------------------------------------------------------------------------------
 
-def test_selected_config_is_local_requirements_and_legacy_models_are_inactive():
+def test_selected_config_is_local_requirements_with_a_model_rank_and_legacy_models_inactive():
     config = load_config(env={})
     assert config.screen == 'requirements' and not config.exhaustive
     assert config.as_dict()['rerank'] == config.as_dict()['verifier'] == 'none'
-    assert config.model_ids() == {'screen': None, 'rerank': None, 'verifier': None}
+    assert config.as_dict()['model_rank_model'] == 'claude-haiku-5-5'
+    assert config.model_ids() == {'screen': None, 'rerank': None, 'verifier': 'claude-haiku-5-5'}
 
 
-def test_anthropic_verifier_is_opt_in_and_haiku_is_refused():
-    assert load_config(env={'BATATIS_IDENTIFY_VERIFIER': 'anthropic'}).verifier_model == 'claude-sonnet-5-5'
+def test_the_model_rank_never_moves_a_historical_configuration_hash():
+    jev = load_config(env={'BATATIS_IDENTIFY_SCREEN': 'jev'})
+    assert jev.config_hash == load_config(env={'BATATIS_IDENTIFY_SCREEN': 'jev', 'BATATIS_IDENTIFY_MODEL_RANK': 'none'}).config_hash
     with pytest.raises(ConfigError):
-        IdentifyConfig(verifier_model='claude-haiku-5-5')
+        IdentifyConfig(model_rank='openai')
+
+
+def test_anthropic_verifier_is_opt_in_and_models_are_pinned():
+    assert load_config(env={'BATATIS_IDENTIFY_VERIFIER': 'anthropic'}).verifier_model == 'claude-sonnet-5-5'
     with pytest.raises(ConfigError):
         IdentifyConfig(screen_model='jev-latest')                  # Jev is pinned
     with pytest.raises(ConfigError):

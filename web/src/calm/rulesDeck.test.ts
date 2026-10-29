@@ -317,6 +317,13 @@ test("a firm soffit follow keeps the shared ladder and drops the variance packag
   assert.equal(getGaps(c).some((g) => g.id.startsWith("process-")), false);
 });
 
+test("the demo house is not stopped by the larger-building rule; the house rules ask their inputs", () => {
+  const deck = buildDeck(demo(), getGaps(demo()), opts());
+  assert.equal(deck.find((i) => i.key === "path-stop"), undefined);
+  assert.ok(deck.some((i) => i.kind === "rule-input" && i.input?.rule === "glazed-openings-houses"),
+    "the house glazing rule asks what it still needs");
+});
+
 test("an unknown path and a rule that does not apply open no package", () => {
   const unknown = { ...emptyCase("homebuilder"), description: "SYNTHETIC exterior cladding departure." };
   const unknownDeck = buildDeck(unknown, getGaps(unknown), opts());
@@ -324,9 +331,10 @@ test("an unknown path and a rule that does not apply open no package", () => {
   assert.equal(unknownDeck.filter((i) => i.kind === "process").length, 0);
   assert.equal(unknownDeck.some((i) => i.kind === "section-d"), false);
 
+  // The soffit rule is for houses; it decides nothing for a five-storey building, so the path stays open.
   const missed = soffitCase([fact("storeys", 5), fact("building_area_m2", 100)]);
   const missedDeck = buildDeck(missed, getGaps(missed), opts());
-  assert.equal(missedDeck.find((i) => i.key === "path-stop")?.title, "This rule doesn’t apply");
+  assert.equal(missedDeck.find((i) => i.key === "path-stop")?.title, "Path not decided");
   assert.equal(missedDeck.filter((i) => i.kind === "process").length, 0);
   assert.equal(missedDeck.some((i) => i.kind === "section-d"), false);
 });

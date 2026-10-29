@@ -1,6 +1,6 @@
 {
-  "chosen_by": "Source-verified deterministic requirement discovery; historical provider arms remain explicit experiments",
-  "chosen_at": "2026-10-26",
+  "chosen_by": "Source-verified deterministic requirement discovery, then a quote-checked model rank of its leading candidates (experiments/workflow-bakeoff-v2)",
+  "chosen_at": "2026-10-28",
   "screen": "requirements",
   "card_chars": 700,
   "rerank": "jev",
@@ -10,5 +10,8 @@
   "verify_n": 15,
   "fallback": "bm25",
   "top_k": 10,
-  "choices_k": 3
+  "choices_k": 3,
+  "model_rank": "anthropic",
+  "model_rank_model": "claude-haiku-5-5",
+  "model_rank_effort": "medium"
 }
