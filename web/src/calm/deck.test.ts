@@ -295,6 +295,31 @@ test("an explicit variance request opens the six process fields", () => {
   assert.equal(deck.some((item) => item.kind === "section-d"), true);
 });
 
+test("while drafting can run, the six statements are one review card that counts as six", () => {
+  let c = emptyCase("homebuilder");
+  c.facts = [{
+    id: "vr", field: "variance_requested", value: true, kind: "pointed", status: "confirmed",
+    source: { type: "user_text", ref: "request", quote: "variance" },
+  }];
+  const review = (x: Case) => buildDeck(x, getGaps(x), { statements: "review", includeDone: true });
+  let deck = review(c);
+  assert.equal(deck.filter((item) => item.kind === "process").length, 0);
+  const card = deck.find((item) => item.kind === "drafts")!;
+  assert.equal(card.stage, "case");
+  assert.deepEqual(card.counts, { you: { open: 6, done: 0 } });
+  assert.equal(deferralFor(card), null, "Continue leaves it open on Review; there is nothing to defer");
+  const caseStage = (items: typeof deck) => journeyProgress(items).stages.find((s) => s.stage === "case")!;
+  const cards = buildDeck(c, getGaps(c), { statements: "cards", includeDone: true });
+  assert.deepEqual(caseStage(deck), caseStage(cards), "progress counts the same either way");
+  c = reducer(c, { type: "setProcess", field: "risk", value: "Smoke could reach the neighbour's window." });
+  deck = review(c);
+  assert.deepEqual(deck.find((item) => item.kind === "drafts")?.counts, { you: { open: 5, done: 1 } });
+  for (const id of ["rationale", "mitigation", "assumptions", "maintenance", "qualifications"] as const) c = reducer(c, { type: "setProcess", field: id, value: "Written." });
+  assert.equal(review(c).find((item) => item.kind === "drafts")?.done, true);
+  assert.equal(buildDeck(c, getGaps(c), { statements: "review" }).some((item) => item.kind === "drafts"), false);
+  assert.equal(buildDeck(c, getGaps(c), { statements: "cards", includeDone: true }).filter((item) => item.kind === "process").length, 6, "the fallback keeps one card per statement");
+});
+
 test("an acceptable path does not ask for a departure sentence", () => {
   let c = undecidedHouse();
   c = { ...c, description: "A standard house built to the Part 9 tables." };

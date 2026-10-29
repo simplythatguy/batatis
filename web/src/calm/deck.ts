@@ -44,6 +44,8 @@ export type DeckKind =
   | "requirement"
   /** The applicant's own words for the departure from the named benchmark sentence. */
   | "departure"
+  /** The six variance statements on one screen: drafted wording to accept, reject or write. */
+  | "drafts"
   /** Keyword-only leads grouped by topic; each lead opens on request (never a relevance score). */
   | "code-triage"
   /** A number or answer a coded rule needs (docs/api/rules.md). */
@@ -165,6 +167,11 @@ export interface DeckOptions {
   benchmark?: BenchmarkRecord | null;
   /** A visible default supplied by the caller, never a silently saved date. */
   today?: string;
+  /**
+   * How the six variance statements are asked: one review of the drafted wording, or one card each
+   * (the default, and the fallback whenever drafting is unavailable).
+   */
+  statements?: "review" | "cards";
 }
 
 /** Planner fields that only narrow which articles apply; the ranking pass reads the description instead. */
@@ -896,7 +903,22 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
   }
 
   // 5. The six process fields are the alternative path only. They are not evidence.
-  if (decision.path === "alternative" && !acceptance) for (const p of PROCESS_FIELDS) {
+  if (decision.path === "alternative" && !acceptance && opts.statements === "review") {
+    const open = PROCESS_FIELDS.filter((p) => !c.process[p.id].trim()).length;
+    push("D", {
+      key: "drafts",
+      kind: "drafts",
+      section: "D",
+      eyebrow: sectionEyebrow("D"),
+      title: "Your case",
+      context: "",
+      why: "Because your design differs from the code’s standard way, the form needs these six statements. Batatis drafts each one from what you gave it, with its sources. Nothing is added until you accept it, and you can edit any of them. Engineering work and seals still come from your professional.",
+      ref: "drafts",
+      done: open === 0,
+      optional: false,
+      counts: { you: { open, done: PROCESS_FIELDS.length - open } },
+    });
+  } else if (decision.path === "alternative" && !acceptance) for (const p of PROCESS_FIELDS) {
     push("D", {
       key: `field-${p.id}`,
       kind: "process",
@@ -1074,7 +1096,7 @@ function answerChoices(item: DeckItem): { value: string; label: string }[] {
 export function deferralFor(item: DeckItem): { value: Exclude<JourneyAnswerValue, "acknowledged">; label: string } | null {
   // A departure the applicant says exists cannot be deferred: without their words Section C names
   // an acceptable solution the application never says it departs from.
-  if (["understood", "paperwork", "reading", "file", "code-run", "code-note", "code-triage", "package-end", "product-notice", "route", "scope", "departure"].includes(item.kind)) return null;
+  if (["understood", "paperwork", "reading", "file", "code-run", "code-note", "code-triage", "package-end", "product-notice", "route", "scope", "departure", "drafts"].includes(item.kind)) return null;
   if (item.stage === "paperwork") return { value: "later", label: "Later" };
   return item.answerer === "designer" ? { value: "designer", label: "Ask my designer" } : { value: "not_sure", label: "Not sure" };
 }

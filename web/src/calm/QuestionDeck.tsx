@@ -40,6 +40,7 @@ import { PACKAGE_YES, RULE_ADD, RULE_LEAVE } from "./deck";
 import { useAccount } from "./account";
 import { useQuestionDraft } from "./useQuestionDraft";
 import { ApplicantDraftLink, processDraftField } from "./ApplicantDrafts";
+import { StatementReview } from "./StatementReview";
 import { UnitInput } from "./UnitInput";
 import { measurementText, metricUnit, parseMeasurement } from "./units";
 import { todayIn, toIso } from "./calendarDate";
@@ -80,10 +81,10 @@ export function Choices({ choices, current, onPick }: { choices: { value: string
   );
 }
 
-function OkRow({ label = "Continue", disabled, onOk, typed, children, primary = true }: { label?: string; disabled?: boolean; onOk: () => void; typed: boolean; children?: ReactNode; primary?: boolean }) {
+function OkRow({ label = "Continue", disabled, onOk, typed, children, primary = true, quiet = false }: { label?: string; disabled?: boolean; onOk: () => void; typed: boolean; children?: ReactNode; primary?: boolean; quiet?: boolean }) {
   return (
     <div className="cf-ok-row" data-deck-foot>
-      {primary && <button type="button" className="cf-btn is-primary is-lg" disabled={disabled} onClick={onOk} aria-keyshortcuts={typed ? "Meta+Enter Control+Enter" : "Enter"}>
+      {primary && <button type="button" className={`cf-btn is-lg${quiet ? "" : " is-primary"}`} disabled={disabled} onClick={onOk} aria-keyshortcuts={typed ? "Meta+Enter Control+Enter" : "Enter"}>
         {label} <Icon24 name="check" size={16} stroke={2} />
       </button>}
       {children}
@@ -355,6 +356,7 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
     return <><ApplicantDraftLink field="evidence_plan" /><div className="cf-embed cf-sectiond"><Recommendations /></div></>;
   }
   if (item.kind === "understood") return <UnderstoodFacts item={item} />;
+  if (item.kind === "drafts") return <StatementReview />;
   if (item.kind === "paperwork") return <PaperworkSheet key={engineGeneration()} item={item} focusRow={focusRow} onDone={onPaperworkDone} extras={extras} />;
   if (item.kind === "route") {
     const saved = routeChoice(c);
@@ -697,7 +699,9 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
       if (first && item?.done && !item.gone) moveFrom(index, false);
       return;
     }
-    const key = focus ? aliasKey(c, focus) : all.find((i) => (i.kind === "candidate" || i.kind === "storeys" || i.kind === "code-triage") && !i.done)?.key;
+    const alias = focus ? aliasKey(c, focus) : all.find((i) => (i.kind === "candidate" || i.kind === "storeys" || i.kind === "code-triage") && !i.done)?.key;
+    // A link to one statement opens the review that holds all six.
+    const key = alias && !byKey.has(alias) && PROCESS_FIELDS.some((p) => alias === `field-${p.id}`) && byKey.has("drafts") ? "drafts" : alias;
     if (key && byKey.has(key) && byKey.get(key)?.answerer !== "office") {
       updateSession((s) => {
         const base = s.queue.length >= queue.length ? s.queue : queue;
@@ -729,7 +733,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
 
   // A code card the lookup replaced (article split into sentences) has nothing left to answer.
   useEffect(() => {
-    if (item?.gone && (item.kind === "candidate" || item.kind === "storeys" || item.kind === "rule" || item.kind === "rule-input" || item.kind === "condition" || item.kind === "package" || item.kind === "package-end" || item.kind === "requirement")) moveFrom(index, false);
+    if (item?.gone && (item.kind === "drafts" || item.kind === "candidate" || item.kind === "storeys" || item.kind === "rule" || item.kind === "rule-input" || item.kind === "condition" || item.kind === "package" || item.kind === "package-end" || item.kind === "requirement")) moveFrom(index, false);
     // The code check finished while its card was open: the code questions take its place.
     if (item?.gone && item.kind === "code-run") {
       const code = queue.findIndex((k) => { const it = itemFor(k); return Boolean(it && !it.done && it.section === "C"); });
@@ -809,7 +813,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
   /** Check whether the current answer can advance, including pending writes and required reasons. */
   function canContinue(it: Shown): boolean {
     if (locked || busyKey === it.key || advanceAfter?.key === it.key) return false;
-    if (it.kind === "section-d" || it.kind === "file" || it.kind === "code-run" || it.kind === "code-note" || it.kind === "code-triage" || it.kind === "code-ledger") return true;
+    if (it.kind === "section-d" || it.kind === "drafts" || it.kind === "file" || it.kind === "code-run" || it.kind === "code-note" || it.kind === "code-triage" || it.kind === "code-ledger") return true;
     if (it.kind === "reading") return reading.intake !== "running";
     if (it.kind === "scope") return false;
     if (it.kind === "understood" || it.kind === "paperwork") return true;
@@ -1163,7 +1167,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
     if (drawer || e.defaultPrevented || document.querySelector("dialog[open]")) return;
     const t = e.target as HTMLElement | null;
     // Keys typed in the menu, a popover, the assistant or any dialog belong to them.
-    if (t?.closest?.(".cf-pop, dialog, [role='menu'], .cf-palette, .cf-assist, .cf-document-review, .cf-understood, .cf-paperwork")) return;
+    if (t?.closest?.(".cf-pop, dialog, [role='menu'], .cf-palette, .cf-assist, .cf-document-review, .cf-understood, .cf-paperwork, .cf-statements")) return;
     const inText = isTextTarget(t);
     const embedded = item?.kind === "section-d" && t && t !== document.body && !t.closest("[data-deck-foot]") && t.tagName !== "H2";
     if (embedded) return;
@@ -1228,7 +1232,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
         ) : item?.kind === "scope" && !item.gone ? (
           <RedirectPage />
         ) : item ? (
-          <div ref={setWrap} key={item.key} data-advancing={advanceAfter?.key === item.key ? "" : undefined} className={`cf-q-wrap is-from-${dir}${item.kind === "section-d" || item.kind === "code-triage" || item.kind === "paperwork" ? " is-wide" : ""}`} aria-labelledby="cf-q" role="group">
+          <div ref={setWrap} key={item.key} data-advancing={advanceAfter?.key === item.key ? "" : undefined} className={`cf-q-wrap is-from-${dir}${item.kind === "section-d" || item.kind === "drafts" || item.kind === "code-triage" || item.kind === "paperwork" ? " is-wide" : ""}`} aria-labelledby="cf-q" role="group">
             <p className="cf-eyebrow is-plain">{item.plan?.kind === "conflict" ? "You wrote two things" : STAGES.find((s) => s.stage === item.stage)?.label}<span className="cf-faint"> · Section {item.section}</span></p>
             <h2 id="cf-q" className="cf-q-text" tabIndex={-1}>{item.title}</h2>
             {item.answerer === "designer" && <span className="cf-answerer-tag"><Icon24 name="compose" size={15} />Usually your designer knows</span>}
@@ -1263,7 +1267,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
             {item.section === "C" && (extras.failed.rules || extras.failed.case) && (
               <p className="cf-note" role="status"><span className="cf-dot is-warning" aria-hidden="true" />Rule checks didn’t load, so some rule questions may be missing. <button type="button" className="cf-link-btn" onClick={retryExtras}>Try again</button></p>
             )}
-            <OkRow label={item.kind === "understood" ? "Looks right" : "Continue"} primary={item.kind !== "paperwork" && (choicesFor(item).length === 0 || (item.done && !item.deferred) || item.kind === "authority" || (item.kind === "detail" && (picked[item.key] === "dismiss" || picked[item.key] === "edit-suggested")) || (item.kind === "condition" && (picked[item.key] ?? currentState(item)) === "does_not_apply"))} disabled={!canContinue(item)} onOk={next} typed={typed}>
+            <OkRow label={item.kind === "understood" ? "Looks right" : "Continue"} primary={item.kind !== "paperwork" && (choicesFor(item).length === 0 || (item.done && !item.deferred) || item.kind === "authority" || (item.kind === "detail" && (picked[item.key] === "dismiss" || picked[item.key] === "edit-suggested")) || (item.kind === "condition" && (picked[item.key] ?? currentState(item)) === "does_not_apply"))} quiet={item.kind === "drafts" && !item.done} disabled={!canContinue(item)} onOk={next} typed={typed}>
               <span className="cf-ok-more">
                 {deferralFor(item) && choicesFor(item).length === 0 && item.kind !== "authority" && <button type="button" className="cf-link-btn" disabled={locked || reading.busy === item.ref || busyKey === item.key} onClick={() => { const choice = deferralFor(item); if (choice) deferCurrent(choice.value); }}>{deferralFor(item)?.label}</button>}
                 <HelpButton item={item} n={n} open={why} onToggle={() => setWhy((v) => !v)} />
