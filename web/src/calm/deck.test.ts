@@ -455,7 +455,9 @@ test("the departure card compares the code, the design and the drafted differenc
   const ranked = { ...card, quote: { ...card.quote, source: "ranking" as const } };
   assert.equal(departureComparison(c, ranked, null).code, undefined, "a ranking reason is never shown as code text");
   const bare = { ...c, facts: c.facts.filter((f) => f.field !== "alternative") };
-  assert.equal(departureComparison(bare, card, null).design, DEMO.trim(), "without an alternative the description stands in");
+  assert.deepEqual([departureComparison(bare, card, null).design, departureComparison(bare, card, null).departure], [undefined, ""], "without an alternative nothing stands in for the design");
+  const rejected = reducer(c, { type: "rejectFacts", ids: c.facts.filter((f) => f.field === "alternative").map((f) => f.id) });
+  assert.equal(departureComparison(rejected, card, null).departure, "", "a reading marked Not right is not recorded as the departure");
   const long = fitDeparture(`${"The east wall has larger windows. ".repeat(12)}`);
   assert.ok(long.length <= DEPARTURE_MAX && long.endsWith("."), "whole sentences within the engine's limit");
   assert.equal(fitDeparture("x".repeat(400)).length, DEPARTURE_MAX);
