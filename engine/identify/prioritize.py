@@ -20,10 +20,10 @@ def order(result, prose):
     frequency = Counter(word for found in tokens.values() for word in found)
     total = len(result.requirements)
     priority = {'human': 0, 'previous': 0, 'explicit': 1, 'lexical': 2, 'administrative': 3,
-                'reference': 4, 'reverse_reference': 5}
+                'reference': 4, 'reverse_reference': 5, 'model_search': 6}
 
     def rank(item):
-        kind = min((priority[d.kind] for d in item.discoveries), default=6)
+        kind = min((priority[d.kind] for d in item.discoveries), default=7)
         weight = sum(math.log(1 + total / frequency[w]) for w in tokens[item.id])
         # A deterministic lexical ordering is not a calibrated applicability score.
         return kind, -weight, item.division or '', tuple(int(x) for x in re.findall(r'\d+', item.provision_id or ''))

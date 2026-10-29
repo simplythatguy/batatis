@@ -14,6 +14,7 @@ import sqlite3
 import time
 from collections import Counter, deque
 from datetime import datetime, timezone
+from pathlib import Path
 
 from engine.codes import Codes
 from engine.models_identify import (BenchmarkRecord, IdentifyArticle, IdentifyResult, IdentifyTrace, ProcessRef,
@@ -21,6 +22,7 @@ from engine.models_identify import (BenchmarkRecord, IdentifyArticle, IdentifyRe
                                     RequirementGap, RequirementRecord, StageRecord)
 
 from .config import IdentifyConfig
+from .corpus import articles
 from .requirement_corpus import LIMITS, Corpus, Key, SourceUnavailable, load, qualified
 from .requirement_graph import build, external_gaps, references
 
@@ -96,6 +98,38 @@ def _dedup_gaps(gaps: list[RequirementGap]) -> list[RequirementGap]:
     return list(unique.values())
 
 
+def _record(corpus: Corpus, key: Key, facts: list[dict]) -> RequirementRecord:
+    """A new ledger row for one source article: its title, citation, pages and scope conditions."""
+    row = corpus.articles[key]
+    text = '\n'.join(r.get('text') or '' for r in corpus.by_article.get(key, []))
+    conditions = _conditions(text, facts)
+    record = RequirementRecord(
+        id=qualified(key), division=key[0], provision_id=key[1], title=row.get('title') or '',
+        role='admin' if key[0] in ('A', 'C') else 'conditional' if _CONDITIONAL.search(text) else 'unresolved',
+        citation=corpus.citation(row), pdf_page=row.get('pdf_page'), pdf_page_end=row.get('pdf_page_end'),
+        source_sha256=corpus.source.text_sha256, conditions=conditions,
+        review_reasons=['Discovery does not establish applicability or a departure.'])
+    for condition in conditions:
+        if condition.status != 'provided':
+            record.review_reasons.append(f'{condition.field}: {condition.status}; scope remains unresolved.')
+    return record
+
+
+def _shown(corpus: Corpus, record: RequirementRecord, rank: int, quote_source: str = 'codedb') -> IdentifyArticle:
+    """The article card for a verified Division B ledger row, with Section C terms from the attribution tables."""
+    row = corpus.articles[('B', record.provision_id)]
+    objectives, functions, missing = corpus.terms(record.provision_id, record.quote_provision_id)
+    quote_row = corpus.rows.get(('B', record.quote_provision_id)) if record.quote_provision_id else None
+    return IdentifyArticle(
+        rank=rank, provision=record.provision_id, provision_id=record.quote_provision_id,
+        title=record.title, part=row['part'], citation=corpus.citation(quote_row or row),
+        link=f'/code/{record.provision_id}?division=B', quote=record.quote,
+        quote_source=quote_source if record.quote else None, status='candidate',
+        reason='Requirement candidate; see the source evidence and applicability review state.',
+        commit_reason='Requirement discovery does not automatically confirm applicability or a departure.',
+        objectives=objectives, functions=functions, attribution_missing=missing)
+
+
 def _discover(prose: str, facts: list[dict], corpus: Corpus, previous: IdentifyResult | None,
               confirmed_provisions, fingerprint: str):
     records: dict[Key, RequirementRecord] = {}
@@ -116,19 +150,8 @@ def _discover(prose: str, facts: list[dict], corpus: Corpus, previous: IdentifyR
 
     def add(key: Key, kind: str, detail: str, *, evidence=None, origin=None, path=None):
         if key not in records:
-            row = corpus.articles[key]
-            text = '\n'.join(r.get('text') or '' for r in corpus.by_article.get(key, []))
-            conditions = _conditions(text, facts)
-            records[key] = RequirementRecord(
-                id=qualified(key), division=key[0], provision_id=key[1], title=row.get('title') or '',
-                role='admin' if key[0] in ('A', 'C') else 'conditional' if _CONDITIONAL.search(text) else 'unresolved',
-                citation=corpus.citation(row), pdf_page=row.get('pdf_page'), pdf_page_end=row.get('pdf_page_end'),
-                source_sha256=corpus.source.text_sha256, conditions=conditions,
-                review_reasons=['Discovery does not establish applicability or a departure.'])
+            records[key] = _record(corpus, key, facts)
             paths[key] = path or [qualified(key)]
-            for condition in conditions:
-                if condition.status != 'provided':
-                    records[key].review_reasons.append(f'{condition.field}: {condition.status}; scope remains unresolved.')
         record = records[key]
         discovery_key = (key, kind, origin)
         discovery = discoveries.get(discovery_key)
@@ -315,17 +338,7 @@ def run(prose: str, *, codes: Codes, config: IdentifyConfig, facts=(), previous:
         for record in records:
             if record.division != 'B' or record.source_status != 'verified' or record.provision_id is None:
                 continue
-            row = corpus.articles[('B', record.provision_id)]
-            objectives, functions, missing = corpus.terms(record.provision_id, record.quote_provision_id)
-            quote_row = corpus.rows.get(('B', record.quote_provision_id)) if record.quote_provision_id else None
-            shown.append(IdentifyArticle(
-                rank=len(shown) + 1, provision=record.provision_id, provision_id=record.quote_provision_id,
-                title=record.title, part=row['part'], citation=corpus.citation(quote_row or row),
-                link=f'/code/{record.provision_id}?division=B', quote=record.quote,
-                quote_source='codedb' if record.quote else None, status='candidate',
-                reason='Requirement candidate; see the source evidence and applicability review state.',
-                commit_reason='Requirement discovery does not automatically confirm applicability or a departure.',
-                objectives=objectives, functions=functions, attribution_missing=missing))
+            shown.append(_shown(corpus, record, len(shown) + 1))
         for div, pid in (('A', '1.2.1.1.'), ('C', '2.3.1.1.')):
             row = corpus.articles.get((div, pid))
             if row:
@@ -361,3 +374,51 @@ def run(prose: str, *, codes: Codes, config: IdentifyConfig, facts=(), previous:
         commit_policy=dict(status='human_review', reason='Applicability and departures require explicit human decisions.'),
         scored_at=datetime.now(timezone.utc).isoformat(timespec='seconds'),
         description_sha256=description_sha256 or hashlib.sha256(prose.encode()).hexdigest(), trace=trace)
+
+
+def _flat(text: str | None) -> str:
+    return ' '.join((text or '').split())
+
+
+QUOTE_WORDS = 6                                   # the rank prompt asks for a quote of 6 to 40 words
+
+
+def add_found(result: IdentifyResult, db_path, facts, found: list[tuple[str, str]]) -> list[str]:
+    """Add Division B articles the model rank picked that discovery did not reach. Returns the added ids.
+
+    Each row is built from the source like any discovered requirement (title, citation, scope conditions,
+    Section C terms); the model contributes only the choice of article and a quote, which must be word for
+    word in that article. The quote's sentence, when exactly one holds it, is its evidence. Applicability
+    stays unreviewed.
+    """
+    present = {r.provision_id for r in result.requirements if r.division == 'B'}
+    found = [(article, quote) for article, quote in dict(found).items() if article not in present and _flat(quote)]
+    if not found or result.requirement_coverage.source is None:
+        return []
+    corpus, texts = load(db_path), articles(Path(db_path))
+    if corpus.source != result.requirement_coverage.source:
+        return []
+    fact_data = [_data(f) for f in facts]
+    added = []
+    for article, quote in found:
+        key, quote = ('B', article), _flat(quote)
+        body = _flat(texts[article]['text']) if article in texts else ''
+        # The card the model read starts with the title and headings; only the article's own text is a quote.
+        if key not in corpus.articles or len(quote.split()) < QUOTE_WORDS or quote not in body:
+            continue
+        sentences = [r for r in corpus.by_article.get(key, [])
+                     if r['level'] == 'sentence' and quote in _flat(r.get('text'))]
+        evidence = corpus.evidence(sentences[0]) if len(sentences) == 1 else None
+        record = _record(corpus, key, fact_data)
+        record.quote, record.quote_provision_id = quote, evidence.provision_id if evidence else None
+        record.discoveries.append(RequirementDiscovery(
+            kind='model_search', path=[record.id], evidence_id=evidence.id if evidence else None,
+            evidence_ids=[evidence.id] if evidence else [],
+            detail='The model rank picked this article and its quote is word for word in the source; applicability is unreviewed.'))
+        if evidence:
+            record.evidence, record.evidence_ids = [evidence], [evidence.id]
+        result.requirements.append(record)
+        result.articles.append(_shown(corpus, record, len(result.articles) + 1, 'verifier'))
+        added.append(article)
+    result.requirement_coverage.discovered += len(added)
+    return added

@@ -101,6 +101,9 @@ class ClaudeVerifier:
                 client = MeteredAnthropic(live_anthropic())
         self.client = client
 
+    def picks(self, parsed) -> list:
+        return parsed.picks
+
     def prompt(self, query: str, candidates: list[str]) -> str:
         listed = '\n\n'.join(f'<article id="{a}">\n{card(self.arts[a], None)}\n</article>' for a in candidates)
         return f'<proposal>\n{query}\n</proposal>\n\n<candidates>\n{listed}\n</candidates>'
@@ -116,5 +119,5 @@ class ClaudeVerifier:
         usage = {'input_tokens': resp.usage.input_tokens, 'output_tokens': resp.usage.output_tokens}
         if resp.stop_reason == 'refusal' or resp.parsed_output is None:
             return Verification([], [], resp.stop_reason, usage, seconds)
-        keep, dropped = check_quotes(resp.parsed_output.picks, candidates, self.arts)
+        keep, dropped = check_quotes(self.picks(resp.parsed_output), candidates, self.arts)
         return Verification(keep, dropped, resp.stop_reason, usage, seconds)

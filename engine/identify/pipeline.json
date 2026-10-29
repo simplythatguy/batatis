@@ -1,5 +1,5 @@
 {
-  "chosen_by": "Source-verified deterministic requirement discovery, then a quote-checked model rank of its leading candidates (experiments/workflow-bakeoff-v2)",
+  "chosen_by": "Source-verified deterministic requirement discovery, then a table-of-contents search and a quote-checked model rank of the widened candidates (experiments/workflow-bakeoff-v2)",
   "chosen_at": "2026-10-28",
   "screen": "requirements",
   "card_chars": 700,
@@ -13,5 +13,6 @@
   "choices_k": 3,
   "model_rank": "anthropic",
   "model_rank_model": "claude-haiku-5-5",
-  "model_rank_effort": "medium"
+  "model_rank_effort": "medium",
+  "model_rank_toc": 12
 }

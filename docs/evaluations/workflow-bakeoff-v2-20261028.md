@@ -47,7 +47,7 @@ The table-of-contents step raises the share of cited articles that reach the can
 
 The AI costs cents per application; people's time is the cost. Full model with sources: [cost model](../research/2026-10-28-bakeoff/cost-model.md).
 
-- About US$0.56 of model calls per application with tonight's models (intake, document review and drafting on Claude Sonnet 5.5), and about US$0.04 if they all move to Claude Haiku 5.5. The code-article ranking adds about US$0.002. These use the cost model's token assumptions; no applicant has run the full flow with metering on.
+- About US$0.57 of model calls per application with tonight's models (intake, document review and drafting on Claude Sonnet 5.5), and about US$0.05 if they all move to Claude Haiku 5.5. Finding and ranking the code articles adds about US$0.008 a search, most of it the table-of-contents step. These use the cost model's token assumptions; no applicant has run the full flow with metering on.
 - An extra "more information" round on a custom application costs about C$3,600, most of it the builder's carrying cost while the project waits.
 - Batatis pays for itself if it saves one extra round in every 60 custom applications.
 
@@ -59,11 +59,13 @@ LangChain, LangGraph, LangSmith and Deep Agents would not move any of these numb
 
 Shipped in this pull request: the Haiku ranking of code articles, the fix for rules that do not apply, and the fixes for the three wrong turns above.
 
-Recommended next, in order:
+Shipped in the follow-up pull request:
 
-1. Put the comparison step on screen: the requirement, the design's departure, the gap, with a confirm button.
-2. Show the six drafts on one review screen, and skip the planner's five questions when the AI ranking is on.
-3. Add the table-of-contents step before the ranking.
+1. The comparison step on screen: the code text, the design's departure, and the drafted difference, with Confirm.
+2. The six drafts on one review screen with Accept all, and the planner's article-narrowing questions skipped once the AI ranking has read the description.
+3. The table-of-contents step before the ranking. The engine sends the measured requests, except that the table of contents goes inline instead of as a file and its candidates are capped at 12.
+
+Next: run the 64-record test again on the app's own flow, end to end.
 
 ## What these numbers are not
 

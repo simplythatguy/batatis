@@ -140,3 +140,12 @@
   color: var(--cf-text);
   font-weight: 550;
 }
+/* The departure card: the code's words (solid edge, verbatim), the design, the drafted difference (dashed, not code text). */
+.cf-compare { display: grid; gap: 14px; margin: 24px 0 6px; }
+.cf-compare > div { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 16px; align-items: baseline; }
+.cf-compare dt { font-size: 13px; color: var(--cf-text-3); }
+.cf-compare dd { margin: 0; font-size: 15px; line-height: 1.55; color: var(--cf-text); overflow-wrap: anywhere; }
+.cf-compare blockquote { margin: 0; padding-left: 12px; border-left: 2px solid var(--cf-text); }
+.cf-compare dd > q { display: block; padding-left: 12px; border-left: 2px solid transparent; }
+.cf-compare-gap { padding-left: 12px; border-left: 2px dashed var(--cf-line-2); color: var(--cf-text-2); }
+@media (max-width: 640px) { .cf-compare > div { grid-template-columns: minmax(0, 1fr); gap: 2px; } }

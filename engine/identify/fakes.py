@@ -24,6 +24,8 @@ _PROPOSAL = re.compile(r'<proposal>\n(.*?)\n</proposal>', re.S)
 # The model rank's numbered form (model_rank.RankVerifier).
 _NUMBERED = re.compile(r'^\[\d+\] (\S+) (.*)$', re.M)
 _DESCRIPTION = re.compile(r'Applicant description:\n<<<\n(.*?)\n>>>', re.S)
+# The table-of-contents search's lines (model_rank.toc_text).
+_TOC_LINE = re.compile(r'^(\d+\.\d+\.\d+\.\d+\.) (.*)$', re.M)
 _STOP = set('the and for with that this from are was were has have not but its into our their will shall '
             'any all each other than then there which when where who whom what been being such also only'.split())
 
@@ -122,28 +124,41 @@ def honest_picks(user: str, n: int = 2) -> list[dict]:
     return out
 
 
+def toc_search(user: str, n: int = 12) -> list[dict]:
+    """The table-of-contents lines sharing the most words with the description, as the search answers."""
+    description = _DESCRIPTION.search(user)
+    proposal = description.group(1) if description else ''
+    lines = sorted(_TOC_LINE.findall(user.split('\n>>>\n', 1)[-1]), key=lambda item: -overlap(proposal, item[1]))
+    return [{'id': article, 'why': 'The title matches the description.'}
+            for article, title in lines[:n] if overlap(proposal, title) > 0.01]
+
+
 def _usage(prompt: str, out: int = 200):
     return SimpleNamespace(input_tokens=_tokens(prompt), output_tokens=out)
 
 
 class _Messages:
-    def __init__(self, picker):
-        self.picker = picker
+    def __init__(self, picker, searcher):
+        self.picker, self.searcher = picker, searcher
         self.calls: list[dict] = []
 
     def parse(self, **kw):
         self.calls.append(kw)
         user = kw['messages'][0]['content']
-        picks = Picks(picks=[Pick(**p) for p in self.picker(user)])
-        return SimpleNamespace(parsed_output=picks, stop_reason='end_turn',
+        output = kw.get('output_format')
+        if output is not None and 'candidates' in output.model_fields:     # the table-of-contents search
+            parsed = output.model_validate({'candidates': self.searcher(user)})
+        else:
+            parsed = Picks(picks=[Pick(**p) for p in self.picker(user)])
+        return SimpleNamespace(parsed_output=parsed, stop_reason='end_turn',
                                usage=_usage((kw.get('system') or '') + user), model=kw['model'])
 
 
 class FakeAnthropic:
     """messages.parse(...) like the Anthropic SDK, picking honestly from the listed articles."""
 
-    def __init__(self, picker=honest_picks):
-        self.messages = _Messages(picker)
+    def __init__(self, picker=honest_picks, searcher=toc_search):
+        self.messages = _Messages(picker, searcher)
 
 
 def lying_picks(seed: int):

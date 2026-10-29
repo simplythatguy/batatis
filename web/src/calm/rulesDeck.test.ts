@@ -12,6 +12,7 @@ import { conditionChoices, coveredByOption, followedInFull, matchingChecklists, 
 import { buildDeck, caseRules, choicesFor, PACKAGE_YES, RULE_ADD, type DeckOptions } from "./deck.ts";
 import { BUILDING_WIDE, caseRuleResults, numbersUsed, plainResult, readNumber, ruleFacts, ruleInPlay, type RuleData } from "./rulesView.ts";
 import { journeyAnswerAction } from "./journey.ts";
+import { departureRecordsVariance } from "./departure.ts";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 /** Load a checked-in JSON fixture relative to the repository root. */
@@ -306,6 +307,12 @@ test("a firm soffit departure opens the six process fields, the ladder, and site
   assert.equal(deck.find((i) => i.kind === "paperwork")?.paperworkRows?.some((row) => row.ref === "scope"), true);
   assert.equal(getGaps(c).some((g) => g.id === "process-rationale"), true);
   assert.equal(deck.some((i) => i.key === "path-stop"), false);
+});
+
+test("a firm coded check decides the path: confirming a departure records no route", () => {
+  for (const extra of [[fact("soffit_to_property_line_m", 0.1), fact("faces_public_way", false), fact("limiting_distance_m", 0.3)], [fact("soffit_to_property_line_m", 0.8), fact("faces_public_way", false), fact("limiting_distance_m", 1.2)]]) {
+    assert.equal(departureRecordsVariance(soffitCase(extra)), false);
+  }
 });
 
 test("a firm soffit follow keeps the shared ladder and drops the variance package", () => {
