@@ -5,13 +5,13 @@ The pitch lives in `web/src/studio/deck.ts` and is recorded at `/studio`. Every 
 | Said in the video | Source | Limits |
 |---|---|---|
 | 366 variances on 9.10.11.2. in six months ("two a day") | `docs/business-plan.md` (Safety Codes Council Data Hub, Q1–Q2 2026) | Entries per article, not distinct applications; 366 ÷ 181 days |
-| About $3,600 per extra round trip | `docs/research/2026-10-28-bakeoff/cost-model.md` finding 2 | Estimate from published wages, fees and rates |
+| About CA$3,600 per extra round trip | `docs/research/2026-10-28-bakeoff/cost-model.md` finding 2 | Estimate from published wages, fees and rates |
 | The real Edmonton solution | City of Edmonton, *Alternative Solution for Secondary Suites in Rowhouses* (v02, 31 Jul 2024; Policy B23-01), `Data Prompts/.../L05-014-*` | A city demonstration, not one applicant's file; the applicant and site on the demo form are fictional |
 | The deleted rule ranked first, ten runs out of ten | `docs/studio/edmonton-verification.md` (10 fresh applications, 29 Oct 2026, local app) | Our own runs on one case; Section C matched codedb in every run |
 | Right article first: 26 → 54 of 64 (10 of 64 not first) | `experiments/workflow-bakeoff-v2/RESULTS.md` ranking table; shipped config `engine/identify/pipeline.json` (`model_rank_toc: 12`) | 64 real Alberta records, article numbers removed from the descriptions |
 | Zero made-up articles shown | `docs/evaluations/workflow-bakeoff-v2-20261028.md` | Same 64 records |
 | First-time applicant 2.0 → 5.6 of 10 | `experiments/workflow-bakeoff-v2/RESULTS.md`, `README.md` | Simulated applicants, model grader, one run |
-| About $61 all in; pays for itself at one saved round in 60 | `docs/business-plan.md` cost table; `cost-model.md` finding 4 | Estimate; no metered application yet |
+| Under one dollar of AI per application (CA$0.97 measured; US$0.69 × 1.4057) | `docs/studio/measured-cost.md` (metered runs, 29 Oct 2026) | Metered on the Edmonton case; the officer's review uses no AI |
 | 435 places mapped to their office; live in Calgary and Edmonton | `docs/verification/every-place/README.md` | 43 of the 435 are outside Alberta; other places are a draft, switched off |
 | A new office is a data file, zero code changes | `docs/api/jurisdictions.md` (synthetic fourth pack test) | |
 | 13,743 provisions | `codedb/README.md` | NBC(AE) 2023, 2nd printing |

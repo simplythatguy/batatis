@@ -1,0 +1,278 @@
+[
+  {
+    "file": "c01-start.mp4",
+    "seconds": 12.47,
+    "moments": [
+      {
+        "t": 0,
+        "what": "start"
+      },
+      {
+        "t": 0.8,
+        "what": "click the description box"
+      },
+      {
+        "t": 2.1,
+        "what": "paste the project description"
+      },
+      {
+        "t": 3.1,
+        "what": "type the last sentence"
+      },
+      {
+        "t": 7.1,
+        "what": "attach incomplete.pdf"
+      },
+      {
+        "t": 10.1,
+        "what": "Start"
+      }
+    ],
+    "bytes": 246407,
+    "shows": "New application: project description pasted (last sentence typed live), the incomplete SCC form (incomplete.pdf) attached, Start",
+    "pointerStart": [
+      1100,
+      700
+    ],
+    "pointerEnd": [
+      1152,
+      565
+    ]
+  },
+  {
+    "file": "c02-understood.mp4",
+    "seconds": 19.83,
+    "moments": [
+      {
+        "t": 0,
+        "what": "start"
+      },
+      {
+        "t": 0.8,
+        "what": "what Batatis understood"
+      },
+      {
+        "t": 2.5,
+        "what": "site: Edmonton"
+      },
+      {
+        "t": 4.2,
+        "what": "proposed alternative: 1-hour fire-separation party walls"
+      },
+      {
+        "t": 9.9,
+        "what": "barrier, self-closing doors, interconnected smoke alarms; no article read from the form"
+      },
+      {
+        "t": 11.2,
+        "what": "Looks right"
+      },
+      {
+        "t": 13.2,
+        "what": "flattened form: only its Section C table read (and it is empty)"
+      },
+      {
+        "t": 17.2,
+        "what": "route: you likely need a variance"
+      }
+    ],
+    "bytes": 409959,
+    "shows": "What Batatis understood from the description and incomplete.pdf: use, site Edmonton, the proposed 1-hour party-wall alternative, the barrier, door and smoke-alarm measures; no article taken from the form (its Section C is empty); then: you likely need a variance",
+    "pointerStart": [
+      1152,
+      565
+    ],
+    "pointerEnd": [
+      471,
+      367
+    ]
+  },
+  {
+    "file": "c03-rules.mp4",
+    "seconds": 19.53,
+    "moments": [
+      {
+        "t": 0,
+        "what": "start"
+      },
+      {
+        "t": 0.6,
+        "what": "departure: more than two neighbouring suite houses without a firewall"
+      },
+      {
+        "t": 2.9,
+        "what": "Add this rule to my application"
+      },
+      {
+        "t": 4.5,
+        "what": "how the design differs from 9.10.11.2.(2)"
+      },
+      {
+        "t": 6.9,
+        "what": "Confirm"
+      },
+      {
+        "t": 9.5,
+        "what": "rules that may apply: 2079 mention the project"
+      },
+      {
+        "t": 10.5,
+        "what": "open the code library"
+      },
+      {
+        "t": 12.7,
+        "what": "score relevance for this project"
+      },
+      {
+        "t": 14.6,
+        "what": "likely related to your project"
+      },
+      {
+        "t": 15.7,
+        "what": "9.10.19.5. in the likely list"
+      },
+      {
+        "t": 17,
+        "what": "9.10.19.3. in the likely list"
+      },
+      {
+        "t": 18.2,
+        "what": "9.10.9.2. in the likely list"
+      }
+    ],
+    "bytes": 379975,
+    "shows": "Rules for this project: the departure from 9.10.11.2.(2) (more than two suite houses without a firewall) is added to the application and confirmed; then the code library ranks rules likely related to the project, including the smoke-alarm rules and the continuous smoke-tight barrier",
+    "pointerStart": [
+      471,
+      367
+    ],
+    "pointerEnd": [
+      628,
+      515
+    ]
+  },
+  {
+    "file": "c04-questions.mp4",
+    "seconds": 11.4,
+    "moments": [
+      {
+        "t": 0,
+        "what": "start"
+      },
+      {
+        "t": 0.7,
+        "what": "gap question: how many principal homes, excluding secondary suites"
+      },
+      {
+        "t": 4.2,
+        "what": "answer 4, save and continue"
+      },
+      {
+        "t": 5.9,
+        "what": "gap question: is a fire suppression system being installed"
+      },
+      {
+        "t": 7.8,
+        "what": "answer No"
+      }
+    ],
+    "bytes": 166484,
+    "shows": "Gap questions, one at a time: how many principal homes excluding secondary suites (4), is a fire suppression system being installed (No); the next question appears",
+    "pointerStart": [
+      628,
+      515
+    ],
+    "pointerEnd": [
+      475,
+      397
+    ]
+  },
+  {
+    "file": "c05-engineer.mp4",
+    "seconds": 19.43,
+    "moments": [
+      {
+        "t": 0,
+        "what": "start"
+      },
+      {
+        "t": 0.6,
+        "what": "does the design need reserved professional judgement: No"
+      },
+      {
+        "t": 2.4,
+        "what": "who is the registered professional: not engaged yet"
+      },
+      {
+        "t": 5.6,
+        "what": "to confirm with the office: whether a registered professional is required"
+      },
+      {
+        "t": 8.7,
+        "what": "continue to evidence"
+      },
+      {
+        "t": 10.4,
+        "what": "Section D evidence task: 9.10.11.2.(2) people: fire spread"
+      },
+      {
+        "t": 12.1,
+        "what": "document guidance: what the evidence must cover"
+      }
+    ],
+    "bytes": 322116,
+    "shows": "Professional questions: no reserved professional judgement, registered professional not engaged yet; Batatis routes to the office whether a registered professional is required; Section D evidence task for 9.10.11.2.(2) with guidance on what the evidence must cover",
+    "pointerStart": [
+      475,
+      397
+    ],
+    "pointerEnd": [
+      500,
+      700
+    ]
+  },
+  {
+    "file": "c06-section-c.mp4",
+    "seconds": 18.5,
+    "moments": [
+      {
+        "t": 0,
+        "what": "start"
+      },
+      {
+        "t": 0.5,
+        "what": "open the application"
+      },
+      {
+        "t": 3.8,
+        "what": "jump to Which rules apply (Section C)"
+      },
+      {
+        "t": 5.7,
+        "what": "Section C: 9.10.11.2.(2) with OS1.2, F03, OP3.1"
+      },
+      {
+        "t": 9,
+        "what": "open the sentence: verbatim code and NBC intent"
+      },
+      {
+        "t": 12.3,
+        "what": "intent (OS1): fire spreading to the dwelling unit not originally involved in the fire"
+      },
+      {
+        "t": 15.7,
+        "what": "close"
+      }
+    ],
+    "bytes": 1173360,
+    "shows": "Filled application, Section C (Which rules apply): one row, 9.10.11.2.(2) Firewalls Not Required with OS1.2, F03, OP3.1; opening it shows the verbatim NBC(AE) 2023 sentence and the NBC intent (fire spreading to the dwelling unit not originally involved), matching the complete form",
+    "pointerStart": [
+      500,
+      700
+    ],
+    "pointerEnd": [
+      554,
+      516
+    ]
+  }
+]

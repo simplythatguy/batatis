@@ -22,8 +22,8 @@ from ..models_intake import DocumentReview, FactPointer, FieldConflict, FileRepo
 from . import model as model_pass
 from .context import project_pages, reference_widget
 from .images import InvalidImage, image_format, image_type, picture_url
-from .pdf import (FORM_ONLY, MAX_PAGES, NO_TEXT, NOT_A_PDF, SCC_MAP, TOO_LONG, NotAPdf, Page, PdfContent,
-                  is_pdf, picture_page, read_pdf)
+from .pdf import (FLATTENED_SCC, FORM_ONLY, MAX_PAGES, NO_TEXT, NOT_A_PDF, SCC_MAP, TOO_LONG, NotAPdf, Page,
+                  PdfContent, is_pdf, picture_page, read_pdf, section_c_articles)
 from .review import personal_values
 from .rules import FIELDS, LEGAL_PARTS, PERSONAL, Hit, canonical_citation, read
 from .text import find_quote
@@ -354,6 +354,10 @@ def _form_field(name: str) -> str | None:
     return next((key for key, pattern in _FORM_LABELS if re.fullmatch(pattern, label)), None)
 
 
+def _inside(box, region) -> bool:
+    return box is not None and region[0] <= box[0] and box[2] <= region[2] and region[1] <= box[1] and box[3] <= region[3]
+
+
 def _parsed(cache: dict | None, file_id: str, data: bytes):
     """read_pdf once per file per run: the model pass runs the same files a second time."""
     if cache is None:
@@ -406,6 +410,21 @@ def read_file(file_id: str, name: str, data: bytes, *, codes=None, outbound: Out
         report.pages_not_read = list(range(1, content.pages + 1))
         return out
     out.personal = personal_values([page.text for page in content.text_pages])
+    if content.form == 'scc_flattened':
+        report.form, report.reason = 'scc_variance', FLATTENED_SCC
+        regions = section_c_articles(content.text_pages)
+        for page in content.text_pages:
+            region = regions.get(page.number)
+            if region is None:
+                continue
+            spans = [c for c in read(page.text).citations if _inside(page.box(c[1], c[2]), region)]
+            _citations(out, Origin(file_id, page.number, page.box, project_context=True), page.text, spans, codes)
+        deduplicate(out)
+        report.pages_read = sorted(regions)
+        report.pages_not_read = sorted(set(range(1, content.pages + 1)) - set(regions))
+        report.facts = len(out.facts)
+        report.status = 'partly_read' if regions else 'not_read'
+        return out
     if content.form:
         report.form = content.form
         mapped = _scc_map() if content.form == 'scc_variance' else {}

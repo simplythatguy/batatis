@@ -24,7 +24,7 @@ NOT_A_PDF = 'This file is not a readable PDF.'
 ENCRYPTED = 'The PDF is password-protected, so it was not read.'
 NO_TEXT = 'Pictures not read: AI is off'
 FLATTENED_SCC = ('This looks like a flattened copy of the SCC variance form: its fill-in fields are gone, so '
-                 'the values cannot be told apart from the printed form. Attach the fillable PDF instead.')
+                 'only the articles in its Section C table were read. Attach the fillable PDF to read the rest.')
 BATATIS_EXPORT = ('This PDF was exported from Batatis. Its answers are already in the application it came from: open '
                   'that application instead. Reading the printed form again would mix the form\'s own words into yours.')
 FORM_ONLY = ('The form fields were read. The pages have no text layer, so nothing else was taken from them.')
@@ -64,7 +64,7 @@ class PdfContent:
     text_pages: list[Page]
     blank_pages: list[int]
     widgets: list[Widget]
-    form: str | None                            # 'scc_variance', 'acroform' or None
+    form: str | None                            # 'scc_variance', 'scc_flattened', 'acroform' or None
     reason: str | None = None                   # set when nothing at all could be read
     truncated: bool = False
 
@@ -191,6 +191,39 @@ def picture_page(data: bytes, number: int) -> str:
             page.close()
 
 
+def _find(page: Page, label: str, start: int = 0) -> tuple[int, tuple[float, float, float, float]] | None:
+    at = page.text.find(label, start)
+    box = page.box(at, at + len(label)) if at >= 0 else None
+    return (at, box) if box else None
+
+
+def section_c_articles(pages: list[Page]) -> dict[int, tuple[float, float, float, float]]:
+    """Page number -> the region of a flattened SCC form's Section C Article(s) column.
+
+    The form's instructions and Part 4 Appendix quote articles of their own; only this column holds the
+    applicant's. The column runs from its header down the Section C table, across continuation pages, to the
+    Section D heading. An unrecognised layout gives no region, so nothing is read.
+    """
+    for index, page in enumerate(pages):
+        heading = _find(page, 'Section C:')
+        header = heading and _find(page, 'Article(s)', heading[0])
+        objective = header and _find(page, 'Objective', header[0])
+        if not objective:
+            continue
+        left, right = header[1][0] - 6, objective[1][0]
+        regions = {page.number: (left, float('-inf'), right, header[1][1])}
+        for later in pages[index:]:
+            end = _find(later, 'Section D:')
+            if later is not page:
+                regions[later.number] = (left, end[1][3] if end else float('-inf'), right, float('inf'))
+            elif end and end[1][3] < header[1][1]:
+                regions[page.number] = (left, end[1][3], right, header[1][1])
+            if end:
+                return regions
+        return {}
+    return {}
+
+
 def read_pdf(data: bytes) -> PdfContent:
     """Everything this PDF lets Batatis read. Raises NotAPdf for bytes that are not a PDF."""
     if not is_pdf(data):
@@ -216,6 +249,7 @@ def read_pdf(data: bytes) -> PdfContent:
         raise NotAPdf() from exc
     if batatis_export and form != 'scc_variance':
         return PdfContent(count, [], [], [], None, BATATIS_EXPORT)
-    if form is None and pages and all(h in pages[0].text for h in SCC_HEADING):
-        return PdfContent(count, [], [], [], None, FLATTENED_SCC)
+    if form != 'scc_variance' and pages and all(h in pages[0].text for h in SCC_HEADING):
+        # Flattened, perhaps with its signature boxes still live: the printed form is not the applicant's words.
+        return PdfContent(count, pages, blank, [], 'scc_flattened', truncated=count > MAX_PAGES)
     return PdfContent(count, pages, blank, widgets, form, truncated=count > MAX_PAGES)
