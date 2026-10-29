@@ -46,7 +46,7 @@ export const deck: Deck = {
           },
         },
         { kind: "statement", id: "villain-back", text: "More information\nrequired.", accent: "required.", sub: "Weeks later." },
-        { kind: "count", id: "villain-cost", value: 3600, prefix: "$", label: "estimated cost of one extra round trip, mostly waiting" },
+        { kind: "count", id: "villain-cost", value: 3600, prefix: "$", label: "estimated cost of one extra round trip, in Canadian dollars, mostly waiting" },
       ],
       script: [
         "😏 NOW watch. We delete Section C, the rule this design varies and why. 🤔 Would a first-time builder know what goes there? ⏸️ Most DON'T.",
@@ -143,17 +143,14 @@ export const deck: Deck = {
           ],
           note: "Simulated applicants, not people. Blind model grader, one run, same 64 cases.",
         },
-        {
-          kind: "count", id: "proof-cost", value: 61, prefix: "$",
-          label: "estimated all-in cost per application. Pays for itself if 1 in 60 custom applications skips a trip back.",
-        },
+        { kind: "count", id: "proof-cost", value: 0.97, prefix: "$", decimals: 2, label: "of AI per application, measured, in Canadian dollars. The officer's review uses none." }
       ],
       script: [
         "🤔 Does it REALLY work? We tested sixty-four real Alberta records, variances, appeals and code rulings, with the article numbers hidden.",
         "💪 Plain search put the right article first TWENTY-SIX times. ⏸️ Batatis put it first... FIFTY-FOUR... times.",
         "💪 And it showed applicants... ZERO... made-up articles.",
         "😌 A simulated first-time applicant scored two out of ten with the official flowchart, and FIVE POINT SIX with Batatis.",
-        "💪 It costs about sixty-one dollars an application, so saving one trip back in sixty pays for it.",
+        "💪 And the AI behind one application costs under... ONE... dollar. Reviewing it costs the officer nothing.",
       ],
     },
     {
