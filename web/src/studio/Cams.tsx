@@ -82,10 +82,25 @@ function Tile({ person, mine, stream, failed, presenting, audible, locked, onRem
     if (v.srcObject !== stream) v.srcObject = stream;
     if (stream) void v.play().catch(() => undefined);
   }, [stream]);
-  // React does not keep the `muted` property in sync; set it directly.
+  // Sound plays from its own <audio>: the video stays muted so it can always autoplay. Browsers refuse
+  // unmuted playback until the page has had a click or key press, so retry on the next one.
+  const sound = useRef<HTMLAudioElement>(null);
   useEffect(() => {
-    if (video.current) video.current.muted = !audible;
-  }, [audible, stream]);
+    const a = sound.current;
+    if (!a) return;
+    if (a.srcObject !== stream) a.srcObject = mine ? null : stream;
+    a.muted = !audible;
+    if (!stream || mine || !audible) return;
+    const play = () => void a.play().catch(() => undefined);
+    play();
+    const retry = () => { if (a.paused) play(); };
+    window.addEventListener("pointerdown", retry);
+    window.addEventListener("keydown", retry);
+    return () => {
+      window.removeEventListener("pointerdown", retry);
+      window.removeEventListener("keydown", retry);
+    };
+  }, [audible, mine, stream]);
   useEffect(() => {
     onVideo?.(stream ? video.current : null);
     return () => onVideo?.(null);
@@ -96,6 +111,7 @@ function Tile({ person, mine, stream, failed, presenting, audible, locked, onRem
   return (
     <figure className={`st-tile${presenting ? " is-on" : ""}${picture ? "" : " is-empty"}${mine ? " is-mine" : ""}`}>
       <video ref={video} autoPlay playsInline muted />
+      <audio ref={sound} autoPlay />
       {!picture && <span className="st-tile-face" aria-hidden="true">{initials(person.name)}</span>}
       <figcaption>
         {firstName(person.name)}
