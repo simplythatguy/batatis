@@ -104,12 +104,12 @@ The model cost of one application is small, and it is an estimate. The token use
 | Document review, one run | Claude Sonnet 5.5 | 0.22 | Estimate |
 | Drafting the statements, one run | Claude Sonnet 5.5 | 0.14 | Estimate |
 | Independent audit of the drafts, one run | Claude Sonnet 5.5 | 0.11 | Estimate |
-| Ranking code articles, two searches | Claude Haiku 5.5 | 0.004 | Estimate |
+| Finding and ranking code articles, two searches (table of contents, then the leading 72) | Claude Haiku 5.5 | 0.016 | Estimate |
 | Assistant, five answers | Claude Haiku 5.5 | 0.006 | Estimate |
 | Section C lookup, completeness checks, officer package review, form export | None | 0 | By construction |
-| **One application** | | **about 0.56** (C$0.79) | Estimate |
+| **One application** | | **about 0.57** (C$0.80) | Estimate |
 
-**What else it costs.** Hosting adds about C$0.62 an application at pilot volume. Half a person for jurisdiction packs, support and domain review adds about C$60, for a loaded cost of about C$61. If every step ran on Claude Haiku 5.5, the model cost would be about US$0.04. Even the base case is about 0.5% of the low end of the price hypothesis (C$150).
+**What else it costs.** Hosting adds about C$0.62 an application at pilot volume. Half a person for jurisdiction packs, support and domain review adds about C$60, for a loaded cost of about C$61. If every step ran on Claude Haiku 5.5, the model cost would be about US$0.05. Even the base case is about 0.5% of the low end of the price hypothesis (C$150).
 
 **What this means.** Model cost does not decide whether Batatis is a business. Upkeep of jurisdiction packs, domain review, support, officer onboarding and Canadian-region hosting do. One extra "more information" round on a custom application costs about C$3,600, mostly the builder's cost of waiting, so Batatis pays for itself if it saves one such round in every 60 custom applications. The cost model also prices a rival that is 99% cheaper and 5 points less accurate: it saves a builder under C$1 on a custom application and adds about C$240 to C$840 of expected rework.
 
