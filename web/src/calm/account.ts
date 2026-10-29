@@ -4,7 +4,7 @@
  * single-visit flow it had before.
  */
 import { useSyncExternalStore } from "react";
-import { accounts, auth, notAvailable, sessionUser, type ApplicationPreferences, type ApplicationSummary, type User } from "../api/accounts";
+import { CODE_TURNED_OFF, accounts, auth, notAvailable, sessionUser, type ApplicationPreferences, type ApplicationSummary, type User } from "../api/accounts";
 import { EngineError } from "../api/client";
 import { probeAuth } from "../api/engineAuth";
 import { replaceAccountRequests } from "../api/requestLifetime";
@@ -20,9 +20,11 @@ export interface AccountState {
   loadingList: boolean;
   /** The server needs an access code to sign in: the sign-in page asks for one and nothing else. */
   codeLogin: boolean;
+  /** Why the server ended the sign-in, for the sign-in page: only a turned-off access code says so. */
+  endedReason: string;
 }
 
-let state: AccountState = { phase: "probing", user: null, applications: null, listError: "", loadingList: false, codeLogin: false };
+let state: AccountState = { phase: "probing", user: null, applications: null, listError: "", loadingList: false, codeLogin: false, endedReason: "" };
 let session = 0;
 let listRequest = 0;
 let listController: AbortController | null = null;
@@ -63,7 +65,7 @@ export function bootAccount() {
     // The sign-in page is decided before anything draws, so a code-only server never flashes the Start page.
     const mode = await auth.signInMode().catch(() => "password" as const);
     if (token !== session) return;
-    set({ phase: "signed-out", codeLogin: mode === "code" });
+    set({ phase: "signed-out", codeLogin: mode === "code", endedReason: endedReason((p.body as { detail?: unknown } | null)?.detail) });
   });
 }
 
@@ -84,7 +86,7 @@ export async function refreshApplications() {
   } catch (e) {
     if (!current()) return;
     if (e instanceof EngineError && e.status === 401) {
-      set({ phase: "signed-out", user: null });
+      sessionEnded(e);
       return;
     }
     if (notAvailable(e)) set({ applications: null, loadingList: false, phase: "anonymous", user: null });
@@ -92,6 +94,13 @@ export async function refreshApplications() {
   } finally {
     if (listController === controller) listController = null;
   }
+}
+
+const endedReason = (detail: unknown) => (detail === CODE_TURNED_OFF ? CODE_TURNED_OFF : "");
+
+/** A request came back 401: the sign-in is over, and the gate sends the person to sign in with the server's reason. */
+export function sessionEnded(e: unknown) {
+  set({ phase: "signed-out", user: null, applications: null, endedReason: endedReason(e instanceof EngineError ? e.detail : null) });
 }
 
 /** Patch one row locally after an action (submit, read), before the next refresh. */

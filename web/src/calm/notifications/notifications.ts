@@ -4,7 +4,7 @@
  */
 import { useSyncExternalStore } from "react";
 import { notAvailable, notifications as api, type AppNotification, type Role } from "../../api/accounts";
-import { accountSession, getAccountState, setAccountState, subscribeAccount } from "../account";
+import { accountSession, getAccountState, sessionEnded, subscribeAccount } from "../account";
 
 export type NotificationsPhase = "idle" | "loading" | "ready" | "unavailable" | "error";
 
@@ -51,7 +51,7 @@ export function loadNotifications(): Promise<void> {
       // The session ended: drop what the previous person could see and let the gate ask to sign in.
       if (status === 401) {
         set({ phase: "idle", items: [], unread: 0, fresh: [] });
-        setAccountState({ phase: "signed-out", user: null, applications: null });
+        sessionEnded(e);
         return;
       }
       set(notAvailable(e) && status !== 0 ? { phase: "unavailable", items: [], unread: 0 } : { phase: state.items.length ? "ready" : "error" });

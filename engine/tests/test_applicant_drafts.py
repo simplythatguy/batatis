@@ -248,16 +248,42 @@ def test_reject_writes_no_fact_and_regeneration_keeps_decisions_not_duplicate_ac
     assert len(saved['drafting']['generations']) == 2
 
 
+def saved_writing(store, case) -> str:
+    drafting = store.get(case.id).drafting
+    return '' if drafting is None else json.dumps([d.model_dump() for d in drafting.drafts])
+
+
+def assert_dropped(app, response, banned: str):
+    """A claim that breaks a rule is dropped; the rest of the batch is saved without it."""
+    _, store, _, _, _, case = app
+    assert response.status_code == 200, response.text
+    assert banned not in saved_writing(store, case)
+    first = next(d for d in store.get(case.id).drafting.drafts if d.field == 'alternative_description')
+    assert first.claims == [] and first.questions
+
+
+@pytest.mark.parametrize('change,banned', [
+    (lambda raw, ctx: raw['drafts'][0]['claims'][0].update(
+        sources=[{**raw['drafts'][0]['claims'][0]['sources'][0], 'quote': 'Invented quotation'}]), 'Invented quotation'),
+    (lambda raw, ctx: raw['drafts'][0]['claims'][0].update(
+        sources=[{**raw['drafts'][0]['claims'][0]['sources'][0], 'source_id': 'src_absent'}]), 'src_absent'),
+    (lambda raw, ctx: raw['drafts'][0]['claims'][0].update(text='The panel is 98765 mm thick.'), '98765'),
+    (lambda raw, ctx: raw['drafts'][0]['claims'][0].update(text='Article 9.99.99.99.(1) applies.'), '9.99.99.99'),
+    (lambda raw, ctx: raw['drafts'][0]['claims'][0].update(text='The wall is safe and equivalent.'), 'safe and equivalent'),
+])
+def test_a_claim_that_breaks_a_rule_is_dropped_and_never_saved(app, change, banned):
+    _, store, _, connection, _, case = app
+    connection.change = change
+    assert_dropped(app, run(app), banned)
+    assert [c[0] for c in connection.calls] == ['applicant_drafts', 'applicant_draft_audit']
+
+
 @pytest.mark.parametrize('change', [
-    lambda raw, ctx: raw['drafts'][0]['claims'][0]['sources'][0].update(quote='Invented quotation'),
-    lambda raw, ctx: raw['drafts'][0]['claims'][0]['sources'][0].update(source_id='src_absent'),
-    lambda raw, ctx: raw['drafts'][0]['claims'][0].update(text='The panel is 98765 mm thick.'),
-    lambda raw, ctx: raw['drafts'][0]['claims'][0].update(text='Article 9.99.99.99.(1) applies.'),
-    lambda raw, ctx: raw['drafts'][0]['claims'][0].update(text='The wall is safe and equivalent.'),
     lambda raw, ctx: raw['drafts'][0].update(text='Uncited extra prose.'),
     lambda raw, ctx: raw['drafts'].pop(),
+    lambda raw, ctx: raw['drafts'][0].update(claims=[], questions=[]),
 ])
-def test_invalid_or_unsafe_output_never_reaches_saved_case(app, change):
+def test_a_malformed_batch_is_retried_and_never_saved(app, change):
     _, store, _, connection, _, case = app
     connection.change = change
     response = run(app)
@@ -265,6 +291,7 @@ def test_invalid_or_unsafe_output_never_reaches_saved_case(app, change):
     assert 'no writing was saved' in response.json()['detail']
     assert store.get(case.id).drafting is None and store.get(case.id).version == case.version
     assert [c[0] for c in connection.calls] == ['applicant_drafts'] * GENERATION_ATTEMPTS
+    assert connection.calls[1][2]['previous_attempt_rejected_because']
 
 
 def test_real_quote_does_not_make_unsupported_claim_grounded(app):
@@ -273,10 +300,7 @@ def test_real_quote_does_not_make_unsupported_claim_grounded(app):
         text='The panel includes a concealed steel anchor at the window opening.')
     connection.audit_change = lambda raw: raw['items'][0].update(supported=False,
         reason='The actual source describes timber and drainage, and does not state a steel anchor exists.')
-    response = run(app)
-    assert response.status_code == 503 and store.get(case.id).drafting is None
-    assert [c[0] for c in connection.calls] == ['applicant_drafts', 'applicant_draft_audit'] * GENERATION_ATTEMPTS
-    assert 'unsupported by their quotes' in connection.calls[2][2]['previous_attempt_rejected_because']
+    assert_dropped(app, run(app), 'steel anchor')
 
 
 def test_applicant_code_allegation_is_not_whitelisted_legal_authority(app):
@@ -288,27 +312,33 @@ def test_applicant_code_allegation_is_not_whitelisted_legal_authority(app):
         raw['drafts'][0]['claims'][0].update(text='Article 9.10.9.16.(1) applies.', sources=[
             {'source_id': allegation['id'], 'quote': allegation['text']}])
     connection.change = invent
-    assert run(app).status_code == 503
-    assert store.get(case.id).drafting is None
+    assert_dropped(app, run(app), '9.10.9.16')
 
 
 def test_unresolved_professional_screen_cannot_become_a_mandatory_engineer_claim(app):
     _, store, _, connection, _, case = app
     connection.change = lambda raw, ctx: raw['drafts'][0]['claims'][0].update(text='An engineer is required for this panel.')
-    assert run(app).status_code == 503
-    assert store.get(case.id).drafting is None
+    assert_dropped(app, run(app), 'engineer is required')
 
 
-@pytest.mark.parametrize('change', [
-    lambda raw: raw['items'].pop(),
-    lambda raw: raw['issues'].append('The evidence plan is an irrelevant generic catalogue.'),
-    lambda raw: raw['items'][0].update(boundary='professional_work'),
-])
-def test_incomplete_or_failed_semantic_audit_fails_closed(app, change):
+def test_an_incomplete_audit_fails_closed(app):
     _, store, _, connection, _, case = app
-    connection.audit_change = change
+    connection.audit_change = lambda raw: raw['items'].pop()
     assert run(app).status_code == 503
     assert store.get(case.id).drafting is None
+
+
+def test_an_item_the_audit_rejects_is_dropped_and_batch_notes_do_not_block(app):
+    _, store, _, connection, _, case = app
+
+    def audit(raw):
+        raw['items'][0].update(boundary='professional_work')
+        raw['issues'].append('The evidence plan is thin but acceptable.')
+    connection.audit_change = audit
+    response = run(app)
+    assert response.status_code == 200, response.text
+    first = next(d for d in store.get(case.id).drafting.drafts if d.field == 'alternative_description')
+    assert first.claims == [] and first.questions
 
 
 def test_all_owned_pdf_pages_are_sources_and_old_review_facts_need_current_quotes(app):

@@ -1,9 +1,11 @@
 import type { SubmissionChange } from "../../api/types.gen";
+import { changeLabel } from "./formFields";
 
-/** Old rounds stored the same evidence attribute as both a fact and listing. */
+/** Changes to fields on the form only. Old rounds stored the same evidence attribute as both a fact and listing. */
 export function visibleSubmissionChanges(changes: readonly SubmissionChange[]): SubmissionChange[] {
   const byField = new Map(changes.map(change => [change.field, change]));
   return changes.filter(change => {
+    if (!changeLabel(change.field, () => null)) return false;
     if (!change.field.startsWith("evidence.") || !change.field.includes(".listing.")) return true;
     const fact = byField.get(change.field.replace(".listing.", "."));
     // Keep conflicting representations visible; display never edits the saved history.

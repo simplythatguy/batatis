@@ -414,7 +414,7 @@ export function AddToApplication({ id, record }: { id: string; record: CodeRecor
   );
 }
 
-function Reading({ id, filter, index, narrow }: { id: string; filter: Filter; index: ReturnType<typeof tocIndex>; narrow: boolean }) {
+export function Reading({ id, filter, index, narrow }: { id: string; filter: Filter; index: ReturnType<typeof tocIndex>; narrow: boolean }) {
   const scope = useCodeScope();
   const text = useText(id);
   const ctx = useContext(id);
@@ -441,6 +441,17 @@ function Reading({ id, filter, index, narrow }: { id: string; filter: Filter; in
   };
   const link = (r: string) => <a key={r} className="cf-code-chip is-link" href={codeHref(r, filter)}>{r}</a>;
   const page = (cx?.pdf_page ?? (text.state === "ready" ? text.value.pdf_page : null)) || null;
+
+  // An id the code does not have (a made-up or malformed link: 404 or 400) is one plain not-found state:
+  // no citation, no retry.
+  const status = text.state === "error" ? (text.error as { status?: number }).status : undefined;
+  if (status === 404 || status === 400) return (
+    <article className="cf-read" aria-labelledby="cf-read-title">
+      <a className="cf-lib-back" href={codeHref(null, filter === "all" ? "all" : filter)}><CIcon name="back" size={13} />Chapters</a>
+      <h1 ref={heading} id="cf-read-title" className="cf-read-title" tabIndex={-1}>{id}</h1>
+      <p className="cf-faint cf-read-wait" role="status">This provision is not in the code.</p>
+    </article>
+  );
 
   return (
     <article className="cf-read" aria-labelledby="cf-read-title">
