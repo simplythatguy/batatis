@@ -1,0 +1,88 @@
+// Demo Studio contract shared by the shell (room, recording, transcript) and the stage (painting, export).
+// The deck itself lives in deck.ts. Slides are painted on a 1920×1080 canvas as stills: the only motion is the
+// transition between slides, the app clips, the presenter's camera and the logo cards.
+
+/** Script markup: one script segment per slide. The transcript shows a blue arrow between
+ *  segments (advance to the next slide, keep talking) and a red box after the last one (stop). */
+export interface Group {
+  id: string;
+  /** Short name shown in the studio, never in the video. */
+  name: string;
+  /** Who we expect to present it; the room assignment overrides this. */
+  suggested?: string;
+  slides: Slide[];
+  /** script[i] is what the presenter says while slides[i] is on screen. Same length as slides. */
+  script: string[];
+}
+
+export interface Deck {
+  title: string;
+  team: string[];
+  groups: Group[];
+}
+
+export type Tone = "blue" | "ink" | "grey";
+
+/** A rectangle in the image's own pixel space (natural width/height). */
+export interface Rect { x: number; y: number; w: number; h: number }
+
+export interface Mark { rect: Rect; tone?: Tone; label?: string; strike?: boolean }
+
+export type Slide =
+  /** One idea, huge, centred. `text` may use \n. `sub` is a small grey line under it. */
+  | { kind: "statement"; id: string; text: string; sub?: string; accent?: string }
+  /** A pre-recorded app clip under a short title. Plays from `from` to `to` (seconds) at `rate`, then holds its last frame. */
+  | { kind: "clip"; id: string; title: string; src: string; from?: number; to?: number; rate?: number }
+  /** A still (e.g. a filled form page) under a title, cropped to `focus` when given, with `marks` over it. */
+  | { kind: "image"; id: string; title: string; src: string; focus?: Rect; marks?: Mark[] }
+  /** Two stills side by side, each with a small label underneath and its marks. */
+  | { kind: "compare"; id: string; title: string; left: Panel; right: Panel }
+  /** Horizontal bars. `value` and `max` share one unit. */
+  | { kind: "bars"; id: string; title: string; max: number; unit?: string; bars: Bar[]; note?: string }
+  /** One big number with a label. `of` draws "54 / 64" style. */
+  | { kind: "count"; id: string; title?: string; value: number; of?: number; prefix?: string; suffix?: string; decimals?: number; label: string }
+  /** A grid of `total` dots; the first `lit` are blue. */
+  | { kind: "dots"; id: string; title: string; total: number; lit: number; label: string; litLabel?: string }
+  /** Steps left to right joined by a line; `active` steps are blue. */
+  | { kind: "flow"; id: string; title: string; steps: { label: string; sub?: string }[]; active?: number[] }
+  /** The Batatis mark and name. `names` adds the team underneath (intro). */
+  | { kind: "logo"; id: string; names?: string[]; line?: string };
+
+export interface Panel { src: string; label: string; marks?: Mark[] }
+export interface Bar { label: string; value: number; highlight?: boolean; note?: string }
+
+/** A slide change inside a take: slide index within the group, ms from the take's first frame. */
+export interface Cue { slide: number; atMs: number }
+
+/** One recorded group: the presenter's camera + mic only, plus when each slide was shown. */
+export interface TakeMedia { blob: Blob; mime: string; cues: Cue[]; durationMs: number }
+
+export interface Person { id: string; name: string }
+
+export interface TakeInfo {
+  id: string;
+  groupId: string;
+  personId: string;
+  durationMs: number;
+  cues: Cue[];
+  mime: string;
+  size: number;
+  chunks: number;
+  /** Chunks the server already holds; equals `chunks` when the upload is complete. */
+  received: number;
+  createdAt: number;
+}
+
+export interface RoomState {
+  code: string;
+  people: Person[];
+  /** groupId → personId */
+  assignments: Record<string, string>;
+  /** groupId → latest take */
+  takes: Record<string, TakeInfo>;
+  updatedAt: number;
+}
+
+/** Spoken pace for every timing in the studio. */
+export const WORDS_PER_MINUTE = 120;
+export const VIDEO_LIMIT_MS = 5 * 60_000;

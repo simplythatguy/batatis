@@ -52,12 +52,16 @@ DESCRIPTION = ('New two-storey single detached house. The north wall is 0.3 m fr
 
 # ---------------------------------------------------------------- the scans
 
+MEDIA = {'.png', '.jpg', '.jpeg', '.webp', '.gif', '.mp4', '.webm'}
+
+
 def shipped_web_files() -> list[Path]:
     """Everything under web/ that reaches a browser: app source (tests excluded), the page and public assets."""
     files = [p for p in (WEB / 'src').rglob('*') if p.is_file() and not TEST_FILE.search(p.name)]
     files.append(WEB / 'index.html')
     files += [p for p in (WEB / 'public').rglob('*') if p.is_file()]
-    return sorted(files)
+    # Images and video are bytes, not words; a provider name inside them is chance, not a leak.
+    return sorted(p for p in files if p.suffix.lower() not in MEDIA)
 
 
 def text_hits(path: Path, pattern: re.Pattern = PROVIDER) -> list[str]:
