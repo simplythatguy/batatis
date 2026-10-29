@@ -27,8 +27,11 @@ export async function exportVideo(opts: {
   onProgress?: (fraction: number, label: string) => void;
   signal?: AbortSignal;
   canvas?: HTMLCanvasElement;
+  cards?: boolean;
 }): Promise<{ blob: Blob; mime: string }> {
   const { deck, takes, onProgress, signal } = opts;
+  const intro = opts.cards === false ? 0 : INTRO_MS;
+  const outro = opts.cards === false ? 0 : OUTRO_MS;
   if (signal?.aborted) throw aborted();
   const parts = deck.groups.flatMap((group, index) => (takes[group.id] ? [{ group, index, take: takes[group.id] }] : []));
   if (!parts.length) throw new Error("No recorded groups to export.");
@@ -77,7 +80,7 @@ export async function exportVideo(opts: {
       ),
     );
 
-    const total = INTRO_MS + parts.reduce((s, p) => s + p.take.durationMs, 0) + OUTRO_MS;
+    const total = intro + parts.reduce((s, p) => s + p.take.durationMs, 0) + outro;
     let doneMs = 0;
     let label = "Intro";
     let phaseStart = performance.now();
@@ -105,10 +108,10 @@ export async function exportVideo(opts: {
     const stopped = new Promise<void>((r) => (rec.onstop = () => r()));
     cleanup.push(() => rec.state !== "inactive" && rec.stop());
 
-    stage.showCard("intro");
+    if (intro) stage.showCard("intro");
     rec.start(1000);
-    await sleep(INTRO_MS);
-    doneMs += INTRO_MS;
+    await sleep(intro);
+    doneMs += intro;
 
     for (const [k, { group, index, take }] of parts.entries()) {
       const v = videos[k];
@@ -138,9 +141,11 @@ export async function exportVideo(opts: {
 
     label = "Outro";
     phaseStart = performance.now();
-    stage.setCamera(null);
-    stage.showCard("outro");
-    await sleep(OUTRO_MS);
+    if (outro) {
+      stage.setCamera(null);
+      stage.showCard("outro");
+      await sleep(outro);
+    }
     rec.stop();
     await race(stopped);
     onProgress?.(1, "Done");
