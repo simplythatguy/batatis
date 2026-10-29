@@ -34,18 +34,15 @@ export const deck: Deck = {
       suggested: "Omer Abdelwahab",
       slides: [
         {
-          kind: "compare", id: "villain-diff", title: "Spot the difference",
-          // Page 1 is identical in both; the two removed Section C rows are on page 2.
+          kind: "compare", id: "villain-diff", title: "Section C, deleted",
+          // The one Section C row sits at the foot of page 1 (rects from /studio/img/forms.json).
           left: {
-            src: "/studio/img/form-complete-p2.png", label: "Complete",
-            marks: [
-              { rect: { x: 72, y: 717, w: 1077, h: 140 }, tone: "blue", label: "9.10.9.16.(4)" },
-              { rect: { x: 72, y: 855, w: 1077, h: 140 }, tone: "blue", label: "9.10.19.5.(2)" },
-            ],
+            src: "/studio/img/form-complete-p1.png", label: "Complete",
+            marks: [{ rect: { x: 72, y: 1316, w: 1077, h: 129 }, tone: "blue", label: "9.10.11.2.(2)" }],
           },
           right: {
-            src: "/studio/img/form-incomplete-p2.png", label: "Two articles removed",
-            marks: [{ rect: { x: 72, y: 717, w: 1077, h: 250 }, tone: "ink", label: "Missing" }],
+            src: "/studio/img/form-incomplete-p1.png", label: "Section C removed",
+            marks: [{ rect: { x: 72, y: 1316, w: 1077, h: 129 }, tone: "ink", label: "Missing" }],
           },
         },
         { kind: "statement", id: "villain-back", text: "More information\nrequired.", accent: "required.", sub: "Weeks later." },
@@ -56,8 +53,8 @@ export const deck: Deck = {
         { kind: "logo", id: "three-one", line: "One app." },
       ],
       script: [
-        "😏 NOW watch. We take out two articles, the smoke barrier and the smoke alarms. 🤔 Can anyone spot it? ⏸️ Most people CAN'T.",
-        "😬 But the officer CAN, and WEEKS later the application comes back.",
+        "😏 NOW watch. We delete Section C, the rule this design varies and why. 🤔 Would a first-time builder know what goes there? ⏸️ Most DON'T.",
+        "😬 But the officer does, and WEEKS later the application comes back.",
         "😬 Every trip back costs about thirty-six hundred dollars, and most of that is just... WAITING.",
         "🙂 So today, we're introducing THREE things. An application writer.",
         "🙂 A code expert.",
@@ -78,7 +75,7 @@ export const deck: Deck = {
       script: [
         "🙂 We describe the rowhouse in plain words and drop in the broken form.",
         "🙂 It reads both and finds the owner, the site and the city.",
-        "🙂 Here are the rules it found, ranked, with the firewall rule at the top. ⏸️ 😮 And it found... BOTH... articles we took out. 😄 Isn't that COOL?",
+        "🙂 Here are the rules it found, ranked. ⏸️ 😮 At the TOP... the exact rule we deleted. 😄 Isn't that COOL? Ten runs out of ten.",
         "🙂 Then it asks ONLY for what's still missing, one question at a time.",
       ],
     },
@@ -94,7 +91,7 @@ export const deck: Deck = {
       ],
       script: [
         "💪 It also knows where to STOP. This project needs an engineer, and Batatis lists what the evidence must cover.",
-        "💪 Section C comes straight from the 2023 code. Batatis looks it up instead of GUESSING.",
+        "💪 Here's Section C, straight from the 2023 code. ⏸️ Same article, same objectives, same function as the City's.",
         "🙂 One click checks the application before anyone else sees it.",
         "😄 And there's the official form, filled in. ⏸️ 🔥 BOOM. It goes to Edmonton.",
       ],
@@ -111,7 +108,7 @@ export const deck: Deck = {
       script: [
         "🙂 Now let's switch sides. The application is in the Edmonton officer's inbox.",
         "😌 The officer sees what's there and what's missing, with every citation linked to the code. Batatis checks completeness, and the compliance call stays with the officer.",
-        "🙂 The officer sends one clear message, and the applicant fixes it and sends it back.",
+        "🙂 The officer sends one clear message, and the applicant fixes it and resends.",
       ],
     },
     {
