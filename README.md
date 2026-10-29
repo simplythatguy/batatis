@@ -92,7 +92,7 @@ Manufacturers, homebuilders, and general contractors use Batatis to prepare the 
 4. Section C of the form, the purpose of each article, fills in from the code's own tables.
 5. For a variance, review the case Batatis drafted: the six statements on one screen, each claim with the words it came from. Accept them all at once, or accept, reject, or rewrite each one.
 6. Plan the evidence. Batatis flags when an engineer or another professional is required.
-7. Fix anything the checklist marks as missing. Then download the official form, or submit it to Edmonton or Calgary. For a project anywhere else, Batatis names the office that reviews it, says who to ask, and keeps your draft.
+7. Fix anything the checklist marks as missing. For a project in Calgary or Edmonton, download the official form or submit it. For a project anywhere else, Batatis names the office that reviews it, says who to ask, and keeps your draft.
 
 ### For Safety Codes Officers
 
@@ -152,7 +152,7 @@ For applicants:
 - On the hosted website, sign in with an access code and your name. The same code and name open the same account.
 - On your own computer, sign up with email. The server can also offer Google and Microsoft sign-in.
 - Describe a project in text or PDFs. Batatis reads the facts and asks only for what is missing.
-- Choose the office that reviews your project by any of its names, such as "City of Red Deer", "Fort McMurray", or "Sherwood Park". Batatis knows the office for 435 places. They are every Alberta municipality, Métis settlement, First Nation, national park, and airport, plus the provinces and major cities outside Alberta.
+- Choose the office that reviews your project by any of its names, such as "City of Red Deer", "Fort McMurray", or "Sherwood Park". Batatis knows 435 places. They include every Alberta municipality, Métis settlement, First Nation, and national park, plus the Calgary, Edmonton, and Springbank airports. Outside Alberta, they include every other province and territory, and 31 major cities. For every place but Redwood Meadows, Batatis names the office that reviews building work.
 - Prepare the final application for a project in Calgary or Edmonton, the two offices whose own steps Batatis has checked. For any other place, Batatis says it does not prepare the application yet and who to ask.
 - See which package you are preparing. If Batatis cannot tell, it stops and names the missing fact.
 - Answer the open items one at a time. A variance asks for six statements: why you want the change, what could go wrong, what you add, what the plan depends on, how it will be maintained, and who is responsible. A design that follows the standard way does not ask for those.
@@ -221,7 +221,7 @@ The 159, the 18, and the 33 look perfect because we wrote the practice cases and
 
 The last row stays at 0. No officer has tried a real application.
 
-A script also checks every place. Batatis names the office that reviews building work for all 435 places it knows. The expected office comes from the Safety Codes Council's accreditation list, not from the app's own files. Batatis prepares the final application for 2 of those places, Calgary and Edmonton, and refuses it with a reason and a contact for the other 433. The tables are in the [every-place report](docs/verification/every-place/README.md), and `scripts/every_place_proof.py` runs the check again.
+A script also checks all 435 places Batatis knows, by legal name, short names, and id. The expected office for the 390 Alberta places in the research table comes from that table and the Safety Codes Council's accreditation list. It never comes from the app's own files. For the 43 places outside Alberta, the script checks that Batatis treats them as outside Alberta, not which office it names. Batatis prepares the final application for 2 of the 435 places, Calgary and Edmonton, and refuses it with a reason and a contact for the other 433. The tables are in the [every-place report](docs/verification/every-place/README.md), and `scripts/every_place_proof.py` runs the check again.
 
 The real-record rows are in the [bakeoff results](experiments/workflow-bakeoff-v2/RESULTS.md). The records are listed in the [Alberta cases](docs/research/2026-10-23-elephant/cases-alberta.md). The blanks are in the [accuracy report](docs/accuracy/report.md). The planted mistakes are in the [form-check test](engine/tests/test_package_review_planted.py). The engineer labels are in the [Section D receipt](evals_dev/section_d_flag/RESULTS.md).
 
@@ -302,7 +302,7 @@ For applicants:
 5. **Review the drafted case.** The six statements appear on one screen, with Accept all. Answers to the drafts' open questions are added to the statements after you accept them.
 6. **Plan the evidence.** Rules match each article to the kinds of evidence it needs, and flag when an engineer or another professional is required. No AI is involved. The six process fields are added only when the path is alternative.
 7. **Anything missing?** Completeness rules check every required part of Sections A to D. Anything missing sends you back to the questions.
-8. **Submit the official form.** For a project in Calgary or Edmonton, the engine fills in the Council's variance form, adds an appendix with the full code text, and saves the exact version you sent.
+8. **Submit the official form.** For a project in Calgary or Edmonton, the engine fills in the Council's variance form and adds an appendix with the full code text. It saves the exact version you sent.
 
 For Safety Codes Officers:
 
