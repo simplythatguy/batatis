@@ -130,6 +130,23 @@ def test_a_save_carries_the_last_model_order_without_calling_the_model(codes, fa
     assert not any(stage.stage == 'model_rank' for stage in again.trace.stages)
 
 
+def test_a_save_keeps_the_model_order_after_the_case_is_stored(codes, fake_gate):
+    """A stored result is compacted: its article cards are gone, its trace keeps the picks."""
+    from engine.identify.compact import compact_identify
+    first = ranked(codes, fakes.honest_picks)
+    stored = compact_identify(first)
+    assert stored.articles == [] and stored.trace.picks
+
+    class Refuse:
+        def verify(self, query, candidates):
+            pytest.fail('a save called the model')
+
+    again = run(PROSE, codes=codes, config=load_config(env={}), previous=stored, ranker=Refuse(), rank=False).result
+    picks = list(first.trace.picks)
+    assert [r.provision_id for r in again.requirements if r.division == 'B'][:len(picks)] == picks
+    assert [a.provision for a in again.articles][:len(picks)] == picks
+
+
 def test_refresh_after_a_save_never_asks_for_a_model_rank(monkeypatch):
     from engine.identify import case_input
     seen = {}

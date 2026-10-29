@@ -133,6 +133,7 @@ def model_rank(result: IdentifyResult, prose: str, db: Path, verifier: Verifier,
 
 
 def carry(result: IdentifyResult, previous: IdentifyResult) -> None:
-    """A save re-runs the deterministic search; the last model order carries over without a new call."""
-    picked = sorted((a for a in previous.articles if a.verifier == 'picked'), key=lambda a: a.rank)
-    apply(result, [(a.provision, a.reason) for a in picked])
+    """A save re-runs the deterministic search; the last model order carries over without a new call.
+    A stored result keeps its picks in the trace, not its article cards (`compact.compact_identify`)."""
+    reasons = {a.provision: a.reason for a in previous.articles if a.verifier == 'picked'}
+    apply(result, [(article, reasons.get(article)) for article in previous.trace.picks])
