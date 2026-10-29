@@ -327,3 +327,11 @@ def test_a_stored_raw_label_reads_as_the_drafted_question():
     field = 'drafting.questions.draft_8a33dedfa8b9.0'
     assert _label({'Field': field, 'Label': field.replace('_', ' ')}) == 'Open question from the drafted wording'
     assert _label({'Field': 'owner_name', 'Label': "Owner's name"}) == "Owner's name"
+
+
+def test_a_drafted_question_reads_mid_sentence_in_the_return_message():
+    from engine.review.information_request import _the
+    assert _the('Open question from the drafted wording') == 'the open question from the drafted wording'
+    assert _the('NBC(AE) reference') == 'the NBC(AE) reference'
+    assert _the('Edmonton Policy B23-01 letter') == 'the Edmonton Policy B23-01 letter'
+    assert _the('a professional') == 'a professional'
