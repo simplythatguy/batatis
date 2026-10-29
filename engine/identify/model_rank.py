@@ -99,11 +99,24 @@ class RankPicks(BaseModel):
     picks: list[RankPick]
 
 
+_BARE_ID = re.compile(r'^\s*(\d{1,2}(?:\.\d{1,2}){3})\.?\s*$')
+
+
+def article_id(text: str) -> str:
+    """An article id as the code writes it, with its trailing period; anything else is left as it came."""
+    match = _BARE_ID.match(text or '')
+    return f'{match.group(1)}.' if match else text
+
+
 class RankVerifier(ClaudeVerifier):
     """The request the bakeoff measured: numbered candidates, each its title, place and first 700 characters."""
 
     system = RANK_SYSTEM
     output_format = RankPicks
+
+    def picks(self, parsed) -> list:
+        """The bakeoff read each id with its trailing period restored; a pick written "9.10.15.4" counts."""
+        return [pick.model_copy(update={'article': article_id(pick.article)}) for pick in parsed.picks]
 
     def prompt(self, query: str, candidates: list[str]) -> str:
         listed = '\n'.join(f'[{n}] {a} {card(self.arts[a], CARD_CHARS)}' for n, a in enumerate(candidates, 1))
@@ -206,6 +219,7 @@ def model_rank(result: IdentifyResult, prose: str, db: Path, verifier: Verifier,
     record.seconds = round(time.monotonic() - started, 3)
     record.input_tokens = checked.usage.get('input_tokens')
     record.output_tokens = checked.usage.get('output_tokens')
+    record.detail = rank_detail(checked)
     result.trace.stages.append(record)
     if lead is not None:
         _add(result, db, facts, [(pick.article, pick.quote) for pick in checked.picks])
@@ -213,6 +227,21 @@ def model_rank(result: IdentifyResult, prose: str, db: Path, verifier: Verifier,
     if checked.picks:
         from engine.public_names import public_stage_model
         result.model_ids = {**result.model_ids, 'verifier': public_stage_model('anthropic', model)}
+
+
+def rank_detail(checked) -> str:
+    """How many picks the quote check kept and dropped, and why, so an empty rank is never silent."""
+    reasons: dict[str, int] = {}
+    for _, why in checked.dropped:
+        reasons[why] = reasons.get(why, 0) + 1
+    detail = f'{len(checked.picks)} kept, {len(checked.dropped)} dropped'
+    if reasons:
+        detail += ' (' + ', '.join(f'{n} {why}' for why, n in reasons.items()) + ')'
+    if not checked.picks and not checked.dropped:
+        detail += '; no picks returned'
+    if checked.stop_reason not in (None, 'end_turn'):
+        detail += f'; stopped: {checked.stop_reason}'
+    return detail
 
 
 def _add(result: IdentifyResult, db: Path, facts, found: list[tuple[str, str]]) -> None:
