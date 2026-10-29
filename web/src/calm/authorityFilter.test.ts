@@ -40,6 +40,14 @@ test("a narrow search over hundreds finds one office and reports the real total"
   assert.equal(broad.total, 430);
 });
 
+test("a comma ends the search, and periods and apostrophes do not matter", () => {
+  const list: AuthorityOption[] = [{ id: "red-deer-county", name: "Red Deer County" }, { id: "red-deer", name: "Red Deer", aliases: ["City of Red Deer"] },
+    { id: "st-johns", name: "St. John's", aliases: ["St Johns"] }];
+  assert.equal(filterAuthorities(list, "Red Deer, AB").shown[0].id, "red-deer");
+  assert.equal(filterAuthorities(list, "St. Johns").shown[0].id, "st-johns");
+  assert.deepEqual(filterAuthorities(list, "st johns, nl").shown.map((o) => o.id), ["st-johns"]);
+});
+
 test("a place named exactly as typed comes first, so Enter picks it", () => {
   const list: AuthorityOption[] = [{ id: "calgary-international-airport", name: "Calgary International Airport", aliases: ["Calgary International Airport lands"] },
     { id: "calgary", name: "Calgary", aliases: ["City of Calgary"] }, { id: "springbank-airport", name: "Springbank Airport", aliases: ["Calgary Airport Authority"] }];

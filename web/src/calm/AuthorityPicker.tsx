@@ -1,7 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { AUTHORITY_LIST_LIMIT, filterAuthorities, type AuthorityOption } from "./authorityFilter";
 import { Icon24 } from "./icons";
-import { resolveOffice } from "../config";
+import { knownPlace, resolveOffice } from "../config";
 import "./AuthorityPicker.css";
 
 /**
@@ -20,7 +20,8 @@ export function AuthorityPicker({ options, value, onPick, label, suggested, unsu
   const { shown, total } = useMemo(() => {
     const filtered = filterAuthorities(options, query ?? "");
     const text = query?.trim();
-    const custom = text && !options.some((option) => [option.id, option.name, ...(option.aliases ?? [])].some((n) => n.toLowerCase() === text.toLowerCase()))
+    // Typed text is offered as its own row only for a place Batatis does not know; a known one is already listed.
+    const custom = text && !knownPlace(text) && !options.some((option) => [option.id, option.name, ...(option.aliases ?? [])].some((n) => n.toLowerCase() === text.toLowerCase()))
       ? [{ id: text, name: text }] : [];
     return { shown: [...filtered.shown, ...custom, { id: "unsure", name: "Not sure" }], total: filtered.total + custom.length + 1 };
   }, [options, query]);

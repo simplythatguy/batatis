@@ -9,12 +9,14 @@ export type AuthorityOption = { id: string; name: string; aliases?: readonly str
 /** How many matches the list renders at once; the rest wait behind "keep typing". */
 export const AUTHORITY_LIST_LIMIT = 50;
 
+/** Case, accents, periods and apostrophes do not matter: "St. Johns" finds St. John's. */
 function fold(s: string): string {
-  return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  return s.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[.'\u2018\u2019]/g, "").toLowerCase();
 }
 
 export function filterAuthorities(options: readonly AuthorityOption[], query: string, limit = AUTHORITY_LIST_LIMIT): { shown: AuthorityOption[]; total: number } {
-  const words = fold(query).split(/\s+/).filter(Boolean);
+  // A province after a comma ("Red Deer, AB") names no office, so the search stops at the comma.
+  const words = fold(query.split(",")[0]).split(/\s+/).filter(Boolean);
   if (!words.length) return { shown: options.slice(0, limit), total: options.length };
   const whole = words.join(" ");
   const ranked: { o: AuthorityOption; rank: number; at: number }[] = [];
