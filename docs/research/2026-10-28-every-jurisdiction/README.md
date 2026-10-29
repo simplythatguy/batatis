@@ -10,6 +10,7 @@ Research of 2026-10-28. Target design, not built. Facts carry the status of the 
 | [`ontario-quebec.md`](ontario-quebec.md) | Ontario and Quebec codes, 15 cities, traps |
 | [`rest-of-canada.md`](rest-of-canada.md) | BC, Prairies, Atlantic, territories, 16 cities, national data (adoption, licensing, intent statements, climate) |
 | [`ui-mock.html`](ui-mock.html) | The multi-place flow in the calm style (three screens) |
+| [`evidence/evidence.md`](evidence/evidence.md) | Tests of today's app for other places against Calgary and Edmonton, with the scripts and their outputs |
 
 ## The short answer
 
@@ -20,8 +21,12 @@ Research of 2026-10-28. Target design, not built. Facts carry the status of the 
 5. **Free to read is not free to use.** The NRC requires written consent to reproduce code text commercially, and that includes the Alberta edition Batatis already shows. BC requires a licence agreement. Quebec requires prior authorization even to store its text. Ontario's free code PDF is marked non-commercial. VERIFIED in the lane files. The hackathon does not need these answers, but a public launch and every province pack do, so ask early.
 6. **One project, one application per place.** The applicant describes the work once and picks places. Batatis creates one application per place. Each application pins its own office, code edition, form and site values, and shares the description and evidence.
 7. **A site variance does not travel.** One variance can cover several sites inside one office's area, but it does not carry to another office, and from 2026-12-01 each location is registered separately (IB-2026-10-01). Only the province's own STANDATA variances apply everywhere. So a manufacturer needs one dossier, a STANDATA and CCMC check, and one application per office. VERIFIED.
+8. **Tested today, not before.** In [`evidence/evidence.md`](evidence/evidence.md), one application run through the real engine for 18 places gives the same code references, Section C, warnings and PDF for every Alberta place as for Calgary and Edmonton. The office side is worse: 329 Alberta places get a generic "Rest of Alberta" office, with no local items and no in-app officer review. The app gives the wrong answer for 90 places: First Nations, national parks, airport lands, Lloydminster and every city outside Alberta.
 
-**Fix in Batatis now.** `engine/data/jurisdictions/provinces/AB.json` (note `ab-who-requests`) says a variance may be issued by "a safety codes officer, a technical administrator or the Safety Codes Council". The Safety Codes Act s.38(1) says "An Administrator or a safety codes officer may issue a written variance", and the Council's page now says the same (VERIFIED, `alberta.md` trap 5).
+**Fix in Batatis now.** Two things the work found in today's app:
+
+- `Registry.resolve` (`engine/jurisdictions/__init__.py`) sends any place it does not recognize to the Alberta fallback pack. Vancouver, Toronto and Iqaluit therefore get an Alberta office and an Alberta application. It should answer "not covered" (`evidence/evidence.md`, test 1).
+- `engine/data/jurisdictions/provinces/AB.json` (note `ab-who-requests`) says a variance may be issued by "a safety codes officer, a technical administrator or the Safety Codes Council". The Safety Codes Act s.38(1) says "An Administrator or a safety codes officer may issue a written variance", and the Council's page now says the same (VERIFIED, `alberta.md` trap 5).
 
 ## How many places there are
 
@@ -174,9 +179,9 @@ So the honest output for a manufacturer is one dossier, a STANDATA and CCMC chec
 
 [`ui-mock.html`](ui-mock.html) draws three screens in the calm style. Rules from `minimal-ui` and `batatis-ui-minimalist`:
 
-1. **Where** is one question card with one component: type an address or town, and each place becomes a chip. The suggestion list shows the office each place resolves to, so the Lacombe and Lacombe County difference is visible before the applicant chooses. A place Batatis cannot cover gets the only coloured chip and one short reason. The primary button states the outcome: "Create 3 applications".
-2. **One application on screen at a time.** A place picker in the header shows the current place ("Vancouver ⌄"). Its menu lists the project's applications with their code edition, a pin and a count for questions only that place asks, and "Add a place". With one place, the picker is not shown.
-3. **Local rules become ordinary questions.** Vancouver requires a BC architect or engineer, so the Vancouver application asks "Who seals it", tagged "Vancouver only". Office details stay one step away in the existing "Office details" disclosure.
+1. **Where** has nothing above the title and no box per item. The places and the typed text share one line, with one hairline under it, and each place has a ×. Suggestions are plain rows showing the office each place resolves to, so the Lacombe and Lacombe County difference is visible before the applicant chooses. A place Batatis cannot cover is the only coloured item ("not covered"). The one filled shape is the primary button, which states the outcome: "Create 3 applications".
+2. **One application on screen at a time.** The place in the header is plain text with a ⌄ ("Vancouver ⌄"). Its menu is the screen's one extra surface while open. It lists the project's applications with their code edition, a pin and a count for questions only that place asks, and "Add a place". The current application has a check, not a fill. With one place, the picker is not shown.
+3. **Local rules become ordinary questions.** Vancouver requires a BC architect or engineer, so the Vancouver application asks "Who seals it", with the choices as plain rows and number keys. It carries no tag: the header already says Vancouver. Office details stay one step away in the existing "Office details" disclosure.
 4. **The officer's side does not change.** An officer sees only the applications sent to their office.
 
 ## Traps an AI falls into
