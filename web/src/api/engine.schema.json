@@ -7711,6 +7711,14 @@
     },
     "IdentifyTrace": {
       "properties": {
+        "added": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Added",
+          "type": "array"
+        },
         "articles_expected": {
           "title": "Articles Expected",
           "type": "integer"
@@ -7810,6 +7818,7 @@
         "fallback_reason",
         "verifier",
         "picks",
+        "added",
         "dropped",
         "stages",
         "spend",
@@ -11797,7 +11806,8 @@
             "reverse_reference",
             "administrative",
             "human",
-            "previous"
+            "previous",
+            "model_search"
           ],
           "title": "Kind",
           "type": "string"

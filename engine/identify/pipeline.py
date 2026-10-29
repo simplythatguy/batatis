@@ -273,9 +273,10 @@ def run(prose: str, *, codes: Codes, config: IdentifyConfig | None = None, trans
             from .model_rank import carry, model_rank
             ranker = (ranker or _rank_verifier(config, codes)) if rank else None
             if ranker is not None:
-                model_rank(result, prose, Path(codes.db_path), ranker, config.model_rank_model)
+                model_rank(result, prose, Path(codes.db_path), ranker, config.model_rank_model,
+                           toc=config.model_rank_toc, facts=facts)
             elif not rank and previous is not None:
-                carry(result, previous)
+                carry(result, previous, Path(codes.db_path), facts)
         compact(result)
         result.trace.seconds = round(result.trace.seconds + time.monotonic() - finish, 3)
         return RunOutput(result, None, None)
