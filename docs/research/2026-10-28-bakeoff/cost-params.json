@@ -1,0 +1,701 @@
+{
+ "meta": {
+  "title": "Batatis cost model parameters",
+  "written": "2026-10-28",
+  "currency": "CAD unless the unit says USD",
+  "columns": "low/base/high. For case-type parameters, low = repeat Part 9 house, base = bespoke Part 9 or small building, high = complex Part 3.",
+  "kinds": "published = a primary or official page states it; measured = a repo run produced it; assumed = our choice, basis in source_note"
+ },
+ "parameters": [
+  {
+   "id": "variances_per_year",
+   "description": "Building-code variance applications in Alberta per year",
+   "unit": "applications/year",
+   "low": 837,
+   "base": 1700,
+   "high": 6176,
+   "kind": "published",
+   "source_url": "https://ebs.safetycodes.ab.ca/documents/webdocs/SR/Annual%20Report%202023.pdf",
+   "source_note": "Low: 2023 registered building variances (837, Council says incomplete). Base: 2021-2022 average (1,698 and 1,713). High: Data Hub H1 2026 building article entries 3,088 x 2 = 6,176, a ceiling because one variance can cite several articles (https://www.safetycodes.ab.ca/data-hub/variance-data/, counts read 2026-10-20 by docs/research/2026-10-20-vision/C-market-provinces-business.md section 2.0).",
+   "date_read": "2026-10-20"
+  },
+  {
+   "id": "mix_repeat",
+   "description": "Share of applications that are repeat Part 9 house variances",
+   "unit": "fraction",
+   "low": 0.95,
+   "base": 0.88,
+   "high": 0.8,
+   "kind": "assumed",
+   "source_url": "https://www.safetycodes.ab.ca/data-hub/variance-data/",
+   "source_note": "Top article 9.10.15.5.(8) is 49% of H1 2026 entries and the top five are 81%, all Part 9 section 9.10. The split is our assumption; the Council does not record variance type. Low column = most repeats.",
+   "date_read": "2026-10-20"
+  },
+  {
+   "id": "mix_bespoke",
+   "description": "Share that are bespoke Part 9 or small-building cases",
+   "unit": "fraction",
+   "low": 0.045,
+   "base": 0.1,
+   "high": 0.15,
+   "kind": "assumed",
+   "source_url": "none (our assumption; basis in source_note)",
+   "source_note": "Repo research assumes 5% to 15% bespoke (C-market-provinces-business.md section 2.5).",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "mix_complex",
+   "description": "Share that are complex Part 3 cases needing a fire engineer",
+   "unit": "fraction",
+   "low": 0.005,
+   "base": 0.02,
+   "high": 0.05,
+   "kind": "assumed",
+   "source_url": "none (our assumption; basis in source_note)",
+   "source_note": "No public split exists.",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "sco_wage",
+   "description": "Safety Codes Officer II hourly wage, City of Edmonton",
+   "unit": "CAD/hour",
+   "low": 43.92,
+   "base": 50.23,
+   "high": 56.53,
+   "kind": "published",
+   "source_url": "https://safety.kardow.com/companies/city-of-edmonton/jobs/building-safety-code-officer-ii-480e01d3868e45a6a5691bfb84cca42b",
+   "source_note": "City of Edmonton posting Apr 14, 2026, 40 h/week range C$43.923 to C$56.527; base is the midpoint. Cross-check: ALIS NOC 22233 construction inspectors average C$46.50/h, 2023 survey (https://alis.alberta.ca/occinfo/wages-and-salaries-in-alberta/construction-inspectors/22233/).",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "loaded_multiplier",
+   "description": "Benefits and overhead on top of wage",
+   "unit": "multiplier",
+   "low": 1.25,
+   "base": 1.35,
+   "high": 1.5,
+   "kind": "assumed",
+   "source_url": "none (our assumption; basis in source_note)",
+   "source_note": "Common public-sector range; not published for Edmonton. Upper check: the Council lets the Alberta Safety Codes Authority charge C$125/h for an alternative solution or variance (https://ebs.safetycodes.ab.ca/documents/webdocs/sr/council%20fee%20schedule%20asca%20v2.pdf, effective 2022).",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "engineer_rate",
+   "description": "Consulting engineer billing rate",
+   "unit": "CAD/hour",
+   "low": 160,
+   "base": 225,
+   "high": 265,
+   "kind": "published",
+   "source_url": "https://files.constantcontact.com/9bb518af501/05afdab0-eaaf-4475-99c6-0913c26c358c.pdf",
+   "source_note": "ACEC Saskatchewan 2026 recommended minimum rates: E1 C$160, E3 project engineer C$225, E4 specialist C$265. Saskatchewan, not Alberta; no Alberta schedule found.",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "builder_rate",
+   "description": "Builder or designer staff time for repeat filings",
+   "unit": "CAD/hour",
+   "low": 75,
+   "base": 100,
+   "high": 120,
+   "kind": "assumed",
+   "source_url": "none (our assumption; basis in source_note)",
+   "source_note": "Repo assumption C$75 to C$120 (C-market-provinces-business.md section 2.5).",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "rate_carry",
+   "description": "Annual interest on money tied up in the project",
+   "unit": "percent/year",
+   "low": 5.7,
+   "base": 7.0,
+   "high": 9.0,
+   "kind": "assumed",
+   "source_url": "https://www.bankofcanada.ca/core-functions/monetary-policy/key-interest-rates/",
+   "source_note": "Bank of Canada raised its policy rate to 2.5% on Oct 28, 2026 (published). Prime is usually policy plus 2.2 points (about 4.7%); construction loans usually price at prime plus 1 to 4 points. The spread is our assumption.",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "outstanding",
+   "description": "Money tied up while the decision waits",
+   "unit": "CAD",
+   "low": 250000,
+   "base": 400000,
+   "high": 2000000,
+   "kind": "assumed",
+   "source_url": "https://www.bildgta.ca/?p=8770",
+   "source_note": "Low: one production house. Base: the repo business plan figure for one house. High: a small multi-unit project. Cross-check: BILD/Altus 2022 put each month of approval delay at C$2,600 per GTA apartment (Ontario, development approvals, not variances).",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "prep_cost",
+   "description": "Applicant cost to prepare the first submission",
+   "unit": "CAD",
+   "low": 400,
+   "base": 8000,
+   "high": 40000,
+   "kind": "assumed",
+   "source_url": "https://files.constantcontact.com/9bb518af501/05afdab0-eaaf-4475-99c6-0913c26c358c.pdf",
+   "source_note": "No Alberta consultant fee is published. Low: 4 h of builder time at C$100. Base: inside the repo range C$3,000 to C$15,000, about 35 h at C$225. High: 150 h at C$265 for a fire-engineering case; an Australian 2026 memo puts performance-based fire engineering at 15,000 to 40,000+ (AUD, https://ccc-engineering-website.pages.dev/design-memos/fire-protection-design-cost/).",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "officer_hours_first",
+   "description": "Officer hours on the first review",
+   "unit": "hours",
+   "low": 1,
+   "base": 6,
+   "high": 16,
+   "kind": "assumed",
+   "source_url": "https://www.cityofkingston.ca/media/kwmpr0xh/building-permit-fee-summary-january-1-2026.pdf",
+   "source_note": "Not published in Alberta. Base anchor: Kingston, Ontario charges C$318.25/h with a C$2,000 minimum for an alternative solution, about 6.3 h of recovered review time. Toronto charges C$2,368.32 and Ottawa C$430 to C$1,080 (2026 schedules).",
+   "date_read": "2026-10-20"
+  },
+  {
+   "id": "extra_rounds_today",
+   "description": "Extra \"more information\" rounds per application today",
+   "unit": "rounds",
+   "low": 0.6,
+   "base": 1.6,
+   "high": 2.4,
+   "kind": "published",
+   "source_url": "https://www.archistar.ai/blog/city-of-surrey/",
+   "source_note": "No Alberta figure exists. Base: Surrey, BC averaged 1.6 resubmissions on residential permits (vendor blog quoting the city); Denver accepts about 37% on first submittal (https://www.coloradopolitics.com/2026/03/09/denver-approves-4-6m-ai-powered-permit-review-contract/), which implies 1.7. High: Honolulu averaged 3.4 review cycles, 2.4 extra (Stateline, https://www.newstribune.com/news/2026/aug/21/cities-turn-to-ai-to-speed-up-housing-permitting/). These are ordinary permits, not variances. Low is our assumption for repeat filings.",
+   "date_read": "2026-10-20"
+  },
+  {
+   "id": "officer_hours_round",
+   "description": "Officer hours per extra round",
+   "unit": "hours",
+   "low": 0.5,
+   "base": 2,
+   "high": 6,
+   "kind": "assumed",
+   "source_url": "none (our assumption; basis in source_note)",
+   "source_note": "Reading the resubmission and writing the request.",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "applicant_hours_round",
+   "description": "Applicant hours per extra round",
+   "unit": "hours",
+   "low": 2,
+   "base": 6,
+   "high": 20,
+   "kind": "assumed",
+   "source_url": "none (our assumption; basis in source_note)",
+   "source_note": "Priced at builder_rate (low) or engineer_rate (base, high).",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "delay_weeks_round",
+   "description": "Calendar delay per extra round",
+   "unit": "weeks",
+   "low": 1,
+   "base": 4,
+   "high": 6,
+   "kind": "published",
+   "source_url": "https://github.com/simplythatguy/batatis/blob/main/reference/text/CWC-Alternative-Solutions-Guide.jsonl",
+   "source_note": "CWC and WoodWorks BC Alternative Solutions Guide pp.4-6: allow one to two months for correspondence and two to four months for comments (BC guidance, not a measurement). Organizers: each round adds weeks (Challenge Scope p.2). Low is our assumption for repeat filings.",
+   "date_read": "2026-10-20"
+  },
+  {
+   "id": "round_reduction",
+   "description": "Share of extra rounds Batatis removes",
+   "unit": "fraction",
+   "low": 0.2,
+   "base": 0.35,
+   "high": 0.6,
+   "kind": "assumed",
+   "source_url": "https://www.newstribune.com/news/2026/aug/21/cities-turn-to-ai-to-speed-up-housing-permitting/",
+   "source_note": "Not measured for Batatis. Comparable AI pre-checks on ordinary permits: Seattle 35% fewer correction cycles; Honolulu 3.4 to 1.4 review cycles (city-reported via Stateline, Aug 2026).",
+   "date_read": "2026-10-20"
+  },
+  {
+   "id": "price_haiku55",
+   "description": "Claude Haiku 5.5 list price, prompts up to 100K tokens",
+   "unit": "USD per 1M tokens in / out",
+   "low": "0.10 / 0.50",
+   "base": "0.10 / 0.50",
+   "high": "0.50 / 2.50",
+   "kind": "published",
+   "source_url": "https://platform.claude.com/docs/en/about-claude/pricing",
+   "source_note": "High column is the over-100K-token price. Matches engine/llm_gate.py.",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "price_luna",
+   "description": "GPT-6 Luna list price, standard tier",
+   "unit": "USD per 1M tokens in / out",
+   "low": "0.10 / 0.50",
+   "base": "0.10 / 0.50",
+   "high": "0.20 / 0.75",
+   "kind": "published",
+   "source_url": "https://developers.openai.com/api/docs/pricing",
+   "source_note": "High column is the over-272K-token price, which engine/llm_gate.py reserves as a ceiling.",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "price_sol",
+   "description": "GPT-6.1 Sol list price, standard tier",
+   "unit": "USD per 1M tokens in / out",
+   "low": "2 / 10",
+   "base": "2 / 10",
+   "high": "4 / 15",
+   "kind": "published",
+   "source_url": "https://developers.openai.com/api/docs/pricing",
+   "source_note": "High column is the over-272K-token price, used by engine/llm_gate.py as a ceiling.",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "price_jev",
+   "description": "Jev 1.13.0 reranker price",
+   "unit": "USD per 1M input tokens",
+   "low": 0.042,
+   "base": 0.042,
+   "high": 0.042,
+   "kind": "measured",
+   "source_url": "https://github.com/simplythatguy/batatis/blob/main/docs/research/2026-10-20-vision/jev-benchmark/README.md",
+   "source_note": "Measured in the repo benchmark; output is free (engine/identify/jev_runtime.py). Provider page not re-read today.",
+   "date_read": "2026-10-20"
+  },
+  {
+   "id": "fx",
+   "description": "Canadian dollars per US dollar",
+   "unit": "CAD/USD",
+   "low": 1.4057,
+   "base": 1.4057,
+   "high": 1.4057,
+   "kind": "published",
+   "source_url": "https://www.bankofcanada.ca/rates/exchange/daily-exchange-rates/",
+   "source_note": "Bank of Canada rate on Oct 21, 2026, as recorded in docs/business-plan.md.",
+   "date_read": "2026-10-21"
+  },
+  {
+   "id": "tokens_identify_rerank",
+   "description": "Tokens per call, identify_rerank (jev)",
+   "unit": "tokens in / out per call",
+   "low": "8000 / 0",
+   "base": "11000 / 0",
+   "high": "65536 / 0",
+   "kind": "assumed",
+   "source_url": "https://github.com/simplythatguy/batatis/blob/main/engine/",
+   "source_note": "60 cards of 700 characters (engine/identify/pipeline.json). High is the 65,536-token reserve cap.",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "calls_identify_rerank",
+   "description": "Calls per application, identify_rerank",
+   "unit": "calls",
+   "low": 1,
+   "base": 2,
+   "high": 4,
+   "kind": "assumed",
+   "source_url": "none (our assumption; basis in source_note)",
+   "source_note": "No applicant has used the full flow; counts are illustrative.",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "tokens_identify_verifier",
+   "description": "Tokens per call, identify_verifier (luna)",
+   "unit": "tokens in / out per call",
+   "low": "4500 / 1100",
+   "base": "6000 / 2500",
+   "high": "15000 / 6000",
+   "kind": "assumed",
+   "source_url": "https://github.com/simplythatguy/batatis/blob/main/engine/",
+   "source_note": "Top 15 articles, medium effort. 4,500 in / 1,100 out was measured on the Oct 21 pipeline (docs/business-plan.md section 6); medium-effort reasoning adds output.",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "calls_identify_verifier",
+   "description": "Calls per application, identify_verifier",
+   "unit": "calls",
+   "low": 1,
+   "base": 2,
+   "high": 4,
+   "kind": "assumed",
+   "source_url": "none (our assumption; basis in source_note)",
+   "source_note": "No applicant has used the full flow; counts are illustrative.",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "tokens_intake_read",
+   "description": "Tokens per call, intake_read (luna)",
+   "unit": "tokens in / out per call",
+   "low": "2000 / 1000",
+   "base": "4000 / 3000",
+   "high": "8000 / 6000",
+   "kind": "assumed",
+   "source_url": "https://github.com/simplythatguy/batatis/blob/main/engine/",
+   "source_note": "engine/intake/model.py caps output at 6,000 tokens and input at 8,000 characters.",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "calls_intake_read",
+   "description": "Calls per application, intake_read",
+   "unit": "calls",
+   "low": 1,
+   "base": 2,
+   "high": 4,
+   "kind": "assumed",
+   "source_url": "none (our assumption; basis in source_note)",
+   "source_note": "No applicant has used the full flow; counts are illustrative.",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "tokens_document_review",
+   "description": "Tokens per call, document_review (luna)",
+   "unit": "tokens in / out per call",
+   "low": "10000 / 4000",
+   "base": "50000 / 12000",
+   "high": "150000 / 32000",
+   "kind": "assumed",
+   "source_url": "https://github.com/simplythatguy/batatis/blob/main/engine/",
+   "source_note": "engine/intake/review.py caps input near 150K tokens and output at 32,000.",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "calls_document_review",
+   "description": "Calls per application, document_review",
+   "unit": "calls",
+   "low": 1,
+   "base": 1,
+   "high": 3,
+   "kind": "assumed",
+   "source_url": "none (our assumption; basis in source_note)",
+   "source_note": "No applicant has used the full flow; counts are illustrative.",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "tokens_drafting",
+   "description": "Tokens per call, drafting (sol)",
+   "unit": "tokens in / out per call",
+   "low": "10000 / 4000",
+   "base": "25000 / 9000",
+   "high": "80000 / 14000",
+   "kind": "assumed",
+   "source_url": "https://github.com/simplythatguy/batatis/blob/main/engine/",
+   "source_note": "Draft call, medium effort, output cap 14,000 (engine/drafting_provider.py). One generation = draft + audit.",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "calls_drafting",
+   "description": "Calls per application, drafting",
+   "unit": "calls",
+   "low": 1,
+   "base": 1,
+   "high": 3,
+   "kind": "assumed",
+   "source_url": "none (our assumption; basis in source_note)",
+   "source_note": "No applicant has used the full flow; counts are illustrative.",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "tokens_drafting_audit",
+   "description": "Tokens per call, drafting_audit (sol)",
+   "unit": "tokens in / out per call",
+   "low": "12000 / 2000",
+   "base": "30000 / 5000",
+   "high": "90000 / 14000",
+   "kind": "assumed",
+   "source_url": "https://github.com/simplythatguy/batatis/blob/main/engine/",
+   "source_note": "Independent audit call on the same generation (engine/drafting_generation.py).",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "calls_drafting_audit",
+   "description": "Calls per application, drafting_audit",
+   "unit": "calls",
+   "low": 1,
+   "base": 1,
+   "high": 3,
+   "kind": "assumed",
+   "source_url": "none (our assumption; basis in source_note)",
+   "source_note": "No applicant has used the full flow; counts are illustrative.",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "tokens_assistant",
+   "description": "Tokens per call, assistant (haiku)",
+   "unit": "tokens in / out per call",
+   "low": "3000 / 300",
+   "base": "8000 / 800",
+   "high": "20000 / 1200",
+   "kind": "assumed",
+   "source_url": "https://github.com/simplythatguy/batatis/blob/main/engine/",
+   "source_note": "Haiku 5.5 when an Anthropic key is set (engine/routes_assist.py); output cap 1,200.",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "calls_assistant",
+   "description": "Calls per application, assistant",
+   "unit": "calls",
+   "low": 0,
+   "base": 5,
+   "high": 20,
+   "kind": "assumed",
+   "source_url": "none (our assumption; basis in source_note)",
+   "source_note": "No applicant has used the full flow; counts are illustrative.",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "vercel_fixed",
+   "description": "Vercel Pro seats",
+   "unit": "USD/month",
+   "low": 20,
+   "base": 40,
+   "high": 60,
+   "kind": "published",
+   "source_url": "https://vercel.com/pricing",
+   "source_note": "US$20 per developer seat per month; 1 to 3 seats assumed. Includes US$20 usage credit.",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "neon_monthly",
+   "description": "Neon Launch compute and storage",
+   "unit": "USD/month",
+   "low": 0,
+   "base": 4,
+   "high": 36,
+   "kind": "published",
+   "source_url": "https://neon.com/pricing",
+   "source_note": "US$0.106 per CU-hour and US$0.35 per GB-month, no minimum. Usage of 0, 30 and 300 CU-hours assumed.",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "apps_per_month",
+   "description": "Applications per month at pilot scale",
+   "unit": "applications/month",
+   "low": 300,
+   "base": 100,
+   "high": 20,
+   "kind": "assumed",
+   "source_url": "none (our assumption; basis in source_note)",
+   "source_note": "Low column = busiest pilot (cheapest per application).",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "people_fte",
+   "description": "Staff for pack upkeep, support and domain review",
+   "unit": "FTE",
+   "low": 0.25,
+   "base": 0.5,
+   "high": 1.0,
+   "kind": "assumed",
+   "source_url": "none (our assumption; basis in source_note)",
+   "source_note": "Not priced in the repo before. Salary C$120,000 loaded assumed.",
+   "date_read": "2026-10-28"
+  },
+  {
+   "id": "apps_per_year_served",
+   "description": "Applications served per year",
+   "unit": "applications/year",
+   "low": 3000,
+   "base": 1000,
+   "high": 300,
+   "kind": "assumed",
+   "source_url": "none (our assumption; basis in source_note)",
+   "source_note": "Low column = most applications (cheapest per application).",
+   "date_read": "2026-10-28"
+  }
+ ],
+ "derived": {
+  "ai_usd_by_step": {
+   "identify_rerank": [
+    0.00034,
+    0.00092,
+    0.01101
+   ],
+   "identify_verifier": [
+    0.001,
+    0.0037,
+    0.018
+   ],
+   "intake_read": [
+    0.0007,
+    0.0038,
+    0.0152
+   ],
+   "document_review": [
+    0.003,
+    0.011,
+    0.093
+   ],
+   "drafting": [
+    0.06,
+    0.14,
+    0.9
+   ],
+   "drafting_audit": [
+    0.044,
+    0.11,
+    0.96
+   ],
+   "assistant": [
+    0.0,
+    0.006,
+    0.052
+   ]
+  },
+  "ai_usd_total": [
+   0.109,
+   0.2754,
+   2.0492
+  ],
+  "ai_cad_total": [
+   0.153,
+   0.387,
+   2.881
+  ],
+  "hosting_usd_per_app": [
+   0.067,
+   0.44,
+   4.8
+  ],
+  "marginal_cad_per_app": [
+   0.25,
+   1.01,
+   9.63
+  ],
+  "people_cad_per_app": [
+   10.0,
+   60.0,
+   400.0
+  ],
+  "loaded_cad_per_app": [
+   10.25,
+   61.01,
+   409.63
+  ],
+  "ai_usd_base_if_drafting_on_haiku": 0.0379,
+  "officer_loaded_cad_hour": [
+   54.9,
+   67.81,
+   84.8
+  ],
+  "case": {
+   "repeat_house": {
+    "round_cost": 507,
+    "round_officer": 34,
+    "round_applicant": 200,
+    "round_delay": 273,
+    "carry_month": 1188,
+    "first_submission": 468,
+    "rounds": 0.6,
+    "rework_today": 304,
+    "total_today": 772,
+    "officer_hours_total": 1.3,
+    "saved_by_batatis": {
+     "0.2": 61,
+     "0.35": 107,
+     "0.6": 183
+    }
+   },
+   "bespoke": {
+    "round_cost": 3634,
+    "round_officer": 136,
+    "round_applicant": 1350,
+    "round_delay": 2148,
+    "carry_month": 2333,
+    "first_submission": 8407,
+    "rounds": 1.6,
+    "rework_today": 5814,
+    "total_today": 14221,
+    "officer_hours_total": 9.2,
+    "saved_by_batatis": {
+     "0.2": 1163,
+     "0.35": 2035,
+     "0.6": 3488
+    }
+   },
+   "complex": {
+    "round_cost": 26420,
+    "round_officer": 407,
+    "round_applicant": 5300,
+    "round_delay": 20713,
+    "carry_month": 15000,
+    "first_submission": 41085,
+    "rounds": 2.4,
+    "rework_today": 63409,
+    "total_today": 104494,
+    "officer_hours_total": 30.4,
+    "saved_by_batatis": {
+     "0.2": 12682,
+     "0.35": 22193,
+     "0.6": 38045
+    }
+   }
+  },
+  "province_per_year": {
+   "low": {
+    "applications": 837,
+    "mix": [
+     0.95,
+     0.045,
+     0.005
+    ],
+    "rework_delay_cad": 726077,
+    "total_process_cad": 1586797,
+    "officer_hours": 1507,
+    "officer_cost_cad": 102220,
+    "officer_fte": 0.91,
+    "saved_at_35pct": 254607
+   },
+   "base": {
+    "applications": 1700,
+    "mix": [
+     0.88,
+     0.1,
+     0.02
+    ],
+    "rework_delay_cad": 3599070,
+    "total_process_cad": 7125278,
+    "officer_hours": 4542,
+    "officer_cost_cad": 308022,
+    "officer_fte": 2.75,
+    "saved_at_35pct": 1260584
+   },
+   "high": {
+    "applications": 6176,
+    "mix": [
+     0.8,
+     0.15,
+     0.05
+    ],
+    "rework_delay_cad": 26468792,
+    "total_process_cad": 49256379,
+    "officer_hours": 24333,
+    "officer_cost_cad": 1650063,
+    "officer_fte": 14.75,
+    "saved_at_35pct": 9267088
+   }
+  },
+  "competitor_delta": {
+   "0.9": {
+    "delta_rounds": 0.065,
+    "repeat_house": 33,
+    "bespoke": 238,
+    "complex": 1727
+   },
+   "0.75": {
+    "delta_rounds": 0.095,
+    "repeat_house": 48,
+    "bespoke": 346,
+    "complex": 2516
+   },
+   "0.6": {
+    "delta_rounds": 0.152,
+    "repeat_house": 77,
+    "bespoke": 551,
+    "complex": 4003
+   },
+   "0.385": {
+    "delta_rounds": 0.388,
+    "repeat_house": 197,
+    "bespoke": 1409,
+    "complex": 10242
+   }
+  }
+ }
+}
