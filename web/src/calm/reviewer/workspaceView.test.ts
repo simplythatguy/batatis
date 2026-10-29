@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import type { Finding, InputFile, Pointer, OfficerWorkspace } from "../../api/types.gen.ts";
-import { anchoredItems, anchorFor, changedFields, findingSources, targetOptions, visibleFinding, workspaceDecision, type SheetAnchor } from "./workspaceView.ts";
+import type { FieldReading, Finding, InputFile, Pointer, OfficerWorkspace, ReviewSession } from "../../api/types.gen.ts";
+import { changeLabel, formValue } from "./formFields.ts";
+import type { SheetView } from "./sheet.ts";
+import { visibleSubmissionChanges } from "./submissionChanges.ts";
+import { allAnchors, anchoredItems, anchorFor, changedFields, findingSources, sheetRows, targetOptions, visibleFinding, workspaceDecision, type SheetAnchor } from "./workspaceView.ts";
 
 const anchors: SheetAnchor[] = [
   { id: "owner", section: "A", field: "owner_name", label: "Owner" },
@@ -73,4 +76,74 @@ test("the Required filter retains unreadable verify findings", () => {
   const state = { key: "x", state: "verify", locked: false, note: "", reason: null, at: null, by_name: null } as const;
   assert.equal(visibleFinding(f, state, "required"), true);
   assert.equal(visibleFinding(f, { ...state, state: "dismissed" }, "required"), false);
+});
+
+test("the officer's application view shows form fields once, never raw case answers or form widget names", () => {
+  // QA 2026-10-28: the view listed "Journey.answer.plan-intake.building area m2" with raw JSON, "Office.choice",
+  // "Ebf area m2", True/False, and the form's own copies of Owner, Lot, Block, Plan and Permit beside the case's.
+  const row = (field: string, label: string, value: string | null) => ({ field, label, value, required: true });
+  const sheet: SheetView = {
+    applicant: [row("owner_name", "Owner", "Larkspur Example Ltd"), row("representative", "Representative", "Priya Natarajan"),
+      row("mailing_address", "Mailing address", "0000 Example Way NW"), row("application_date", "Date of request", "2026-10-28")],
+    project: [row("authority", "Reviewing authority", "Edmonton"), row("scope", "Jurisdiction-wide variance", "No, one site"),
+      row("permit", "Permit number", "Not yet issued"), row("civic_address", "Municipal address", "0000 Example Crescent NW"),
+      row("legal_description", "Legal description", "Lot 0, Block 0, Plan 0000000")],
+    alternative: row("alternative_description", "Proposed alternative", "A rated window assembly."),
+    references: [], process: [row("process.rationale", "Rationale", "Daylight."), row("process.qualifications", "Qualifications", "Example Engineer.")],
+    supporting: [row("professional.role", "Registered professional", "engineer"),
+      row("professional.registration_number", "Registration or seal", "EXAMPLE-0000"), row("documents", "Documents listed", "1 document")],
+    documents: [], questions: [],
+  };
+  const reading = (section: FieldReading["section"], field: string, label: string, value: string | null, formField: string | null = null): FieldReading =>
+    ({ section, field, label, value, status: value ? "present" : "not_found", reason: "",
+      pointer: { file: formField ? "application.pdf" : "case:1", page: null, quote: null, bbox: null, form_field: formField } });
+  const session = { fields: [
+    reading("B", "journey.answer.plan-intake.building_area_m2", "journey.answer.plan-intake.building area m2", '{"key":"plan-intake.building_area_m2"}'),
+    reading("B", "office.choice", "office.choice", "edmonton"),
+    reading("B", "ebf_area_m2", "ebf area m2", "40"),
+    reading("B", "glass_blocks", "glass blocks", "False"),
+    reading("D", "professional.part4_design", "professional.part4 design", "False"),
+    reading("B", "lot", "lot", "0"),
+    reading("B", "permit_number", "permit number", "Not yet issued"),
+    reading("C", "code_or_standard", "code or standard", "NBC(AE) 2023 p2, Div B [PDF p.901]"),
+    reading("A", "Owner", "Owner's Name", "Larkspur Example Ltd", "Owner"),
+    reading("A", "Date of Reqeuest", "Date of Request", "2026-10-28", "Date of Reqeuest"),
+    reading("B", "Lot", "Lot", "0", "Lot"),
+    reading("B", "MER", "ATS MER", null, "MER"),
+    reading("B", "Permit", "Permit Number (if applicable)", "Not yet issued", "Permit"),
+    reading("B", "Check Box", "Proposed alternative solution is for a jurisdiction and is not site-specific", null, "Check Box"),
+    reading("C", "Code or Standard", "Applicable Code or Standard", "National Building Code - 2023 Alberta Edition (2nd printing)", "Code or Standard"),
+    reading("C", "Article(s)", "Section C row 1 article", "9.10.15.4.(1)", "Article(s)"),
+    reading("D", "Supporting Doc", "Supporting documents and responsible persons", "D-1: Report - Example Engineer", "Supporting Doc"),
+    reading("A", "Signature1", "owner signature", "Signed in the application by Larkspur Example Ltd", "Signature1"),
+    reading("D", "professional_name", "responsible professional", null),
+    reading("D", "professional_qualifications", "qualifications of the responsible professional", "Example Engineer."),
+    reading("B", "storeys", "storeys", "2"),
+  ] } as unknown as ReviewSession;
+  const rows = sheetRows(sheet, session);
+  const extra = rows.slice(rows.findIndex(r => r.field === "documents") + 1);
+  assert.deepEqual(extra.map(r => [r.label, r.reading.value]), [
+    ["Code or standard", "National Building Code - 2023 Alberta Edition (2nd printing)"],
+    ["Owner signature", "Signed in the application by Larkspur Example Ltd"],
+    ["Storeys", "2"],
+  ]);
+  assert.equal(new Set(rows.map(r => r.label)).size, rows.length);
+  const targets = targetOptions(session, allAnchors(rows, sheet, session)).map(t => t.label);
+  assert.ok(!targets.some(t => /journey|office|ebf|part4|Owner's Name|ATS/i.test(t)), targets.join("\n"));
+});
+
+test("booleans and saved slugs read as words; only form fields are named in the submission history", () => {
+  assert.equal(formValue("False"), "No");
+  assert.equal(formValue("true"), "Yes");
+  assert.equal(formValue("single_family"), "Single family");
+  assert.equal(formValue("EXAMPLE-0000"), "EXAMPLE-0000");
+  const title = (id: string) => (id === "ev_1" ? "Assembly listing" : null);
+  assert.equal(changeLabel("journey.answer.understood%3A7222da7704cc11b", title), null);
+  assert.equal(changeLabel("evidence.ev_1.auto_link", title), null);
+  assert.equal(changeLabel("evidence.ev_1.file_ref", title), "Assembly listing · attachment");
+  assert.equal(changeLabel("building_area_m2", title), "Building area (m²)");
+  assert.equal(changeLabel("civic_address", title), "Municipal address");
+  const changes = [{ field: "journey.answer.understood%3A7222da7704cc11b", before: null, after: '{"key":"understood"}' },
+    { field: "building_area_m2", before: null, after: "120" }];
+  assert.deepEqual(visibleSubmissionChanges(changes).map(c => c.field), ["building_area_m2"]);
 });

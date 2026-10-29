@@ -462,7 +462,7 @@ ul.pr-metrics span { color: var(--cf-text-3); font-size: 13.5px; }
 .ap-line.is-open { border-radius: 10px; background: rgba(17, 24, 39, 0.04); }
 .ap-line.is-open + .ap-line.is-open { margin-top: 3px; }
 .ap .cf-sheet-sources { margin-top: 18px; }
-.ap-k { color: var(--cf-text-3); font-size: 14px; }
+.ap-k { min-width: 0; overflow-wrap: anywhere; color: var(--cf-text-3); font-size: 14px; }
 .ap-v { min-width: 0; overflow-wrap: anywhere; color: var(--cf-text); }
 .ap-text { white-space: pre-wrap; }
 .ap-none { color: var(--cf-text-3); }
