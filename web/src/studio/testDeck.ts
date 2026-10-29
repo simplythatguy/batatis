@@ -12,6 +12,7 @@ export const testDeck: Deck = {
   groups: [
     {
       id: "test-open",
+      speaker: 0,
       name: "Opening",
       slides: [
         { kind: "statement", id: "t-rule", text: "Every new idea\nbreaks a rule.", accent: "breaks a rule.", sub: "Weeks later." },
@@ -42,6 +43,7 @@ export const testDeck: Deck = {
     },
     {
       id: "test-results",
+      speaker: 1,
       name: "Results",
       slides: [
         {

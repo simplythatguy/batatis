@@ -71,6 +71,22 @@ export function Room({ deck, room, me, camera, apply, onLeave }: {
   const missing = deck.groups.filter((g) => !complete(room.takes[g.id]) || progress[g.id] !== undefined);
   const total = deckMs(deck);
   const assign = (gi: number, personId: string | null) => void roomApi.assign(room.code, deck.groups[gi].id, personId).then(apply);
+  // When someone joins, unassigned groups go to their speaker slot: the room's first, second or third
+  // person to join. Only on a join, so a group set to Nobody stays that way.
+  const seen = useRef(0);
+  useEffect(() => {
+    const people = room.people;
+    if (people.length <= seen.current) {
+      seen.current = people.length;
+      return;
+    }
+    seen.current = people.length;
+    const open = deck.groups.filter((g) => !room.assignments[g.id] && people[g.speaker]);
+    if (!open.length) return;
+    void (async () => {
+      for (const g of open) apply(await roomApi.assign(room.code, g.id, people[g.speaker].id));
+    })().catch(() => undefined);
+  }, [apply, deck.groups, room.assignments, room.code, room.people]);
   const remove = (id: string) => void roomApi.leave(room.code, id).then((next) => {
     apply(next);
     if (id === me.id) onLeave();

@@ -9,7 +9,7 @@ export const deck: Deck = {
     {
       id: "open",
       name: "Open: the real form",
-      suggested: "Abdel Abdelwaly",
+      speaker: 0,
       slides: [
         { kind: "statement", id: "open-rule", text: "Every new idea\nbreaks a rule.", accent: "breaks a rule." },
         {
@@ -29,9 +29,9 @@ export const deck: Deck = {
       ],
     },
     {
-      id: "villain",
-      name: "The send-back, and the reveal",
-      suggested: "Omer Abdelwahab",
+      id: "sendback",
+      name: "The send-back",
+      speaker: 1,
       slides: [
         {
           kind: "compare", id: "villain-diff", title: "Section C, deleted",
@@ -47,15 +47,24 @@ export const deck: Deck = {
         },
         { kind: "statement", id: "villain-back", text: "More information\nrequired.", accent: "required.", sub: "Weeks later." },
         { kind: "count", id: "villain-cost", value: 3600, prefix: "$", label: "estimated cost of one extra round trip, mostly waiting" },
+      ],
+      script: [
+        "😏 NOW watch. We delete Section C, the rule this design varies and why. 🤔 Would a first-time builder know what goes there? ⏸️ Most DON'T.",
+        "😬 But the officer does, and WEEKS later the application comes back.",
+        "😬 Every trip back costs about thirty-six hundred dollars, and most of that is just... WAITING.",
+      ],
+    },
+    {
+      id: "reveal",
+      name: "The reveal",
+      speaker: 0,
+      slides: [
         { kind: "statement", id: "three-writer", text: "An application\nwriter." },
         { kind: "statement", id: "three-expert", text: "A code\nexpert." },
         { kind: "statement", id: "three-checker", text: "A completeness\nchecker.", sub: "For officers." },
         { kind: "logo", id: "three-one", line: "One app." },
       ],
       script: [
-        "😏 NOW watch. We delete Section C, the rule this design varies and why. 🤔 Would a first-time builder know what goes there? ⏸️ Most DON'T.",
-        "😬 But the officer does, and WEEKS later the application comes back.",
-        "😬 Every trip back costs about thirty-six hundred dollars, and most of that is just... WAITING.",
         "🙂 So today, we're introducing THREE things. An application writer.",
         "🙂 A code expert.",
         "🙂 And a completeness checker for officers.",
@@ -65,7 +74,7 @@ export const deck: Deck = {
     {
       id: "apply-in",
       name: "Applicant: intake and rules",
-      suggested: "Alameen Elnur",
+      speaker: 2,
       slides: [
         { kind: "clip", id: "apply-start", title: "Describe it. Drop it in.", src: "/studio/clips/c01-start.mp4" },
         { kind: "clip", id: "apply-read", title: "It reads both", src: "/studio/clips/c02-understood.mp4" },
@@ -82,7 +91,7 @@ export const deck: Deck = {
     {
       id: "apply-out",
       name: "Applicant: engineer to form",
-      suggested: "Abdel Abdelwaly",
+      speaker: 0,
       slides: [
         { kind: "clip", id: "apply-stop", title: "It knows where to stop", src: "/studio/clips/c05-engineer.mp4" },
         { kind: "clip", id: "apply-c", title: "Section C, by lookup", src: "/studio/clips/c06-section-c.mp4" },
@@ -99,7 +108,7 @@ export const deck: Deck = {
     {
       id: "officer",
       name: "Officer",
-      suggested: "Alameen Elnur",
+      speaker: 2,
       slides: [
         { kind: "clip", id: "officer-queue", title: "The officer's inbox", src: "/studio/clips/c09-queue.mp4" },
         { kind: "clip", id: "officer-review", title: "Complete at a glance", src: "/studio/clips/c10-officer-review.mp4" },
@@ -114,7 +123,7 @@ export const deck: Deck = {
     {
       id: "proof",
       name: "Proof",
-      suggested: "Omer Abdelwahab",
+      speaker: 1,
       slides: [
         { kind: "statement", id: "proof-q", text: "Does it\nreally work?" },
         {
@@ -150,7 +159,7 @@ export const deck: Deck = {
     {
       id: "scale",
       name: "Ready to scale",
-      suggested: "Alameen Elnur",
+      speaker: 2,
       slides: [
         {
           kind: "dots", id: "scale-places", title: "Every place, mapped", total: 435, lit: 2,
@@ -174,7 +183,7 @@ export const deck: Deck = {
     {
       id: "honest",
       name: "What we haven't proven",
-      suggested: "Omer Abdelwahab",
+      speaker: 1,
       slides: [
         { kind: "statement", id: "honest-gaps", text: "What we\nhaven't proven.", accent: "haven't proven." },
         { kind: "count", id: "honest-officers", value: 0, label: "real Batatis applications reviewed by an officer, so far" },
@@ -197,7 +206,7 @@ export const deck: Deck = {
     {
       id: "close",
       name: "Close",
-      suggested: "Abdel Abdelwaly",
+      speaker: 0,
       slides: [
         { kind: "statement", id: "close-quote", text: "“I skate to where\nthe puck is going to be.”", sub: "Wayne Gretzky, Edmonton Oilers" },
         { kind: "statement", id: "close-ideas", text: "New ideas\nare coming.", accent: "coming." },
