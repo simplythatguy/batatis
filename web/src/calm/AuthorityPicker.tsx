@@ -20,7 +20,7 @@ export function AuthorityPicker({ options, value, onPick, label, suggested, unsu
   const { shown, total } = useMemo(() => {
     const filtered = filterAuthorities(options, query ?? "");
     const text = query?.trim();
-    const custom = text && !options.some((option) => option.id.toLowerCase() === text.toLowerCase() || option.name.toLowerCase() === text.toLowerCase())
+    const custom = text && !options.some((option) => [option.id, option.name, ...(option.aliases ?? [])].some((n) => n.toLowerCase() === text.toLowerCase()))
       ? [{ id: text, name: text }] : [];
     return { shown: [...filtered.shown, ...custom, { id: "unsure", name: "Not sure" }], total: filtered.total + custom.length + 1 };
   }, [options, query]);

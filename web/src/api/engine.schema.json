@@ -1630,7 +1630,7 @@
     },
     "Authority": {
       "additionalProperties": false,
-      "description": "The authority having jurisdiction is an organisation, not an officer (SCC IB-2026-10-16).",
+      "description": "The authority having jurisdiction is an organisation, not an officer (SCC IB-2026-10-16).\n\n`first_nation`, `federal`, `outside_alberta` and `unconfirmed` name who decides where the Safety Codes Act\nvariance does not, or where Batatis has not confirmed it; those packs are never `full` coverage.",
       "properties": {
         "contact": {
           "anyOf": [
@@ -1648,7 +1648,11 @@
           "enum": [
             "accredited_municipality",
             "alberta_safety_codes_authority",
-            "accredited_organisation"
+            "accredited_organisation",
+            "first_nation",
+            "federal",
+            "outside_alberta",
+            "unconfirmed"
           ],
           "title": "Kind",
           "type": "string"

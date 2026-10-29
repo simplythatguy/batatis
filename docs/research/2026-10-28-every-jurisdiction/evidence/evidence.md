@@ -1,5 +1,7 @@
 # Proof: does Batatis work as well outside Calgary and Edmonton?
 
+> **Before the every-place change.** These tests describe the app on 2026-10-28, before it named the office for every place and said "not covered" elsewhere. For the app after that change, see [`docs/verification/every-place/README.md`](../../../verification/every-place/README.md).
+
 Tests run on 2026-10-28 against the engine at `origin/main` 268b7bc3, with the local code database (NBC(AE) 2023, 2nd printing). Nothing here was tested before this date: the research in the parent folder checked sources and designed the next step, but it did not run the app for other places.
 
 ## The answer

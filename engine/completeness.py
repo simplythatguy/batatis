@@ -14,7 +14,7 @@ from pathlib import Path
 from codedb import validate_text
 
 from .codes import Codes
-from .jurisdictions import notices_for
+from .jurisdictions import notices_for, registry
 from .models import INTENT_LABEL, Case, Gap as CaseGap
 from .not_applicable import not_applicable, problems as not_applicable_problems
 from .process_fields import confirmed_value, latest_fact, process_fields
@@ -185,6 +185,13 @@ def _case_constraints(case: Case, codes: Codes, *,
     if (case.jurisdiction is None or not case.jurisdiction.id.strip()
             or not case.jurisdiction.name.strip()):
         add('admin', 'B', 'jurisdiction', 'the reviewing jurisdiction.', 'Ask which authority will receive the application.')
+    else:
+        found = registry().resolve_case(case)
+        if found is not None and found.pack.coverage != 'full':
+            # Everywhere but an office whose own steps a hand-written pack records: never a final application.
+            gaps.append(Gap(id='coverage:jurisdiction', severity='blocking', section='B', field='jurisdiction',
+                            message=f'{found.pack.name}: {found.pack.summary}',
+                            fix_hint=found.pack.authority.contact or 'Ask who reviews building work there.'))
 
     try:
         process = process_fields(case, codes)

@@ -39,3 +39,10 @@ test("a narrow search over hundreds finds one office and reports the real total"
   assert.equal(broad.shown.length, AUTHORITY_LIST_LIMIT);
   assert.equal(broad.total, 430);
 });
+
+test("a place named exactly as typed comes first, so Enter picks it", () => {
+  const list: AuthorityOption[] = [{ id: "calgary-international-airport", name: "Calgary International Airport", aliases: ["Calgary International Airport lands"] },
+    { id: "calgary", name: "Calgary", aliases: ["City of Calgary"] }, { id: "springbank-airport", name: "Springbank Airport", aliases: ["Calgary Airport Authority"] }];
+  assert.deepEqual(filterAuthorities(list, "calgary").shown.map((o) => o.id), ["calgary", "calgary-international-airport", "springbank-airport"]);
+  assert.equal(filterAuthorities(list, "City of Calgary").shown[0].id, "calgary");
+});

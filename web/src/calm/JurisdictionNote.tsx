@@ -44,6 +44,16 @@ function PackDetail({ pack, extras }: { pack: JurisdictionDetail; extras: CaseEx
   const local = pack.process_notes.filter((n) => n.scope === "local");
   const historical = extras.checklists?.jurisdiction === pack.id ? extras.checklists.historical : [];
   const current = pack.standing_packages.filter((p) => p.status === "current");
+  if (!pack.fallback && pack.coverage !== "full") {
+    // Outside Alberta, reserve land, a national park, or a place not confirmed: say so, and who to ask.
+    return (
+      <div className="cf-juris" role="note">
+        <p className="cf-note"><Dot tone="warning" />{pack.summary}</p>
+        {pack.authority.contact && <p className="cf-faint cf-small">{pack.authority.contact}</p>}
+        <Sources sources={pack.authority.sources} />
+      </div>
+    );
+  }
   return (
     <div className="cf-juris" role="note">
       {pack.fallback && <>
@@ -51,9 +61,12 @@ function PackDetail({ pack, extras }: { pack: JurisdictionDetail; extras: CaseEx
         <Sources sources={pack.authority.sources} />
         <p className="cf-faint cf-small">Export your PDF and send it to that office.</p>
       </>}
+      {/* The picker shows the place; the office shows only when it is someone else (the Alberta Safety Codes Authority). */}
+      {!pack.fallback && pack.authority.name !== pack.name && <p>{pack.authority.name}</p>}
       {/* The picker above is the answer; the office's contact, process notes and their limits wait here. */}
       <details className="cf-juris-more">
       <summary>Office details</summary>
+      {!pack.fallback && <p className="cf-faint">{pack.summary} <Sources sources={pack.authority.sources} /></p>}
       {pack.authority.contact && <p>{pack.authority.contact}</p>}
       {current.length > 0 && (
         <p className="cf-faint">

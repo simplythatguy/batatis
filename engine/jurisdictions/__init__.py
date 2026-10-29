@@ -4,6 +4,8 @@
     engine/data/jurisdictions/provinces/<XX>.json  items every pack in a province shares
     engine/data/jurisdictions/coverage.json        coverage labels for every province and territory
     engine/data/jurisdictions/checklists/<id>.json standing-package checklists (see checklists.py)
+    engine/data/jurisdictions/places/<group>.json  generated places (see places_build.py); each place without a
+                                                   hand-written pack becomes a pack that names its office
 
 `BATATIS_JURISDICTIONS_DIR` points the loader at another directory with the same layout, so a new
 pack is a new file and no code changes. Nothing here names a particular city.
@@ -14,6 +16,8 @@ from __future__ import annotations
 
 import json
 import os
+import re
+import unicodedata
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Literal, get_args
@@ -22,8 +26,9 @@ from pydantic import ValidationError
 
 from ..account_models import Authority as ReviewerAuthority
 from ..models import Case, Jurisdiction
-from ..models_jurisdictions import (CoverageFile, JurisdictionDetail, JurisdictionPack, JurisdictionSummary,
-                                    JurisdictionsResult, PackNotice, ProvinceShared, ResolvedForm, ResolvedNote)
+from ..models_jurisdictions import (Authority, CoverageFile, JurisdictionDetail, JurisdictionPack, JurisdictionSummary,
+                                    JurisdictionsResult, Match, PackNotice, Place, PlacesFile, ProvinceShared,
+                                    ResolvedForm, ResolvedNote)
 
 DATA_DIR = Path(__file__).resolve().parent.parent / 'data' / 'jurisdictions'
 ENV_DIR = 'BATATIS_JURISDICTIONS_DIR'
@@ -34,6 +39,8 @@ DISCLAIMER = ('Process notes say where an application goes and what the office h
               'codes officer decides.')
 
 MatchedBy = Literal['id', 'name', 'reviewer_code', 'fallback']
+# Who decides where a Safety Codes Act variance does not, or where Batatis has not confirmed it.
+OUTSIDE_THE_ACT = {'first_nation', 'federal', 'outside_alberta', 'unconfirmed'}
 
 
 class PackError(ValueError):
@@ -47,7 +54,19 @@ class Resolution:
 
 
 def _key(value: str | None) -> str:
-    return ' '.join((value or '').split()).casefold()
+    """Case-, accent-, period- and apostrophe-free: "Tsuut\u2019ina", "Kikino Métis", "Montreal" and "St. Johns" match."""
+    text = unicodedata.normalize('NFKD', value or '').encode('ascii', 'ignore').decode()
+    return ' '.join(re.sub(r"[.']", '', text).split()).casefold()
+
+
+def place_pack(place: Place) -> JurisdictionPack:
+    """The pack a generated place resolves to: its office and its sources. It is never `full` coverage: Batatis
+    prepares applications only where a hand-written pack records the office's own checked steps."""
+    return JurisdictionPack(
+        id=place.id, name=place.name, province=place.province, coverage='preview',
+        code_edition=place.code_edition, summary=place.note,
+        authority=Authority(name=place.office, kind=place.kind, contact=place.ask, sources=place.sources),
+        match=Match(names=place.aliases))
 
 
 def _read(path: Path, model):
@@ -67,6 +86,9 @@ class Registry:
     _names: dict[str, str] = field(default_factory=dict)
     fallbacks: dict[str, str] = field(default_factory=dict)
     checklists: dict = field(default_factory=dict)      # id -> StandingChecklist, see checklists.py
+    places: dict[str, Place] = field(default_factory=dict)       # place id -> generated place
+    place_packs: dict[str, str] = field(default_factory=dict)    # place id -> the pack it resolves to
+    generated: set[str] = field(default_factory=set)             # pack ids built from places, not hand-written
 
     @classmethod
     def load(cls, root: Path | str | None = None) -> 'Registry':
@@ -83,6 +105,9 @@ class Registry:
             reg.provinces[shared.province] = shared
         for path in sorted((root / 'packs').glob('*.json')):
             reg._add(path, _read(path, JurisdictionPack))
+        for path in sorted((root / 'places').glob('*.json')):
+            for place in _read(path, PlacesFile).places:
+                reg._add_place(path, place)
         reg._check()
         from .checklists import load_dir
         load_dir(reg)
@@ -91,6 +116,27 @@ class Registry:
     def _add(self, path: Path, pack: JurisdictionPack):
         if path.stem != pack.id:
             raise PackError(f'{path.name}: file name must be the pack id {pack.id}')
+        self._register(path, pack)
+
+    def _add_place(self, path: Path, place: Place):
+        """A hand-written pack that already names the place keeps it; otherwise the place becomes a pack."""
+        if place.id in self.places:
+            raise PackError(f'{path.name}: duplicate place id {place.id}')
+        self.places[place.id] = place
+        owner = place.id if place.id in self.packs else next(
+            (self._names[_key(n)] for n in [place.name, *place.aliases]
+             if _key(n) in self._names and not self.packs[self._names[_key(n)]].fallback), None)
+        if owner:
+            self.place_packs[place.id] = owner
+            return
+        for alias in place.aliases:   # a name another pack already claims as its id would make the place ambiguous
+            if _key(alias) in self._ids:
+                raise PackError(f'{path.name}: place {place.id} alias "{alias}" is pack {self._ids[_key(alias)]}\'s id')
+        self._register(path, place_pack(place))
+        self.place_packs[place.id] = place.id
+        self.generated.add(place.id)
+
+    def _register(self, path: Path, pack: JurisdictionPack):
         if pack.id in self.packs:
             raise PackError(f'{path.name}: duplicate pack id {pack.id}')
         self.packs[pack.id] = pack
@@ -113,6 +159,8 @@ class Registry:
                 if pack.province in fallbacks:
                     raise PackError(f'{where}: {pack.province} already has fallback pack {fallbacks[pack.province]}')
                 fallbacks[pack.province] = pack.id
+            if pack.authority.kind in OUTSIDE_THE_ACT and pack.coverage == 'full':
+                raise PackError(f'{where}: a {pack.authority.kind} authority is never full coverage')
             code = pack.authority.reviewer_code
             if code is not None and code not in reviewer_codes:
                 raise PackError(f'{where}: reviewer_code {code!r} is not an account Authority')
@@ -144,6 +192,10 @@ class Registry:
                 hit = self._names.get(_key(raw))
                 if hit:
                     return Resolution(self.packs[hit], 'name')
+            for raw in (jurisdiction.name, jurisdiction.authority):   # "Toronto, ON", "Red Deer, AB"
+                hit = self._names.get(_key(raw.split(',')[0])) if raw and ',' in raw else None
+                if hit:
+                    return Resolution(self.packs[hit], 'name')
         pack = self.by_reviewer_code(authority)
         if pack:
             return Resolution(pack, 'reviewer_code')
@@ -158,13 +210,18 @@ class Registry:
 
     # Views
 
+    def _shared(self, pack: JurisdictionPack) -> ProvinceShared | None:
+        """The province's items, where its Act applies: never on reserve or federal land, outside the province,
+        or at a place whose office Batatis has not confirmed."""
+        return None if pack.authority.kind in OUTSIDE_THE_ACT else self.provinces.get(pack.province)
+
     def forms(self, pack: JurisdictionPack) -> list[ResolvedForm]:
-        shared = self.provinces.get(pack.province)
+        shared = self._shared(pack)
         return ([ResolvedForm(**f.model_dump(), scope='province') for f in (shared.forms if shared else [])]
                 + [ResolvedForm(**f.model_dump(), scope='local') for f in pack.forms])
 
     def detail(self, pack: JurisdictionPack) -> JurisdictionDetail:
-        shared = self.provinces.get(pack.province)
+        shared = self._shared(pack)
         notes = ([ResolvedNote(**n.model_dump(), scope='province') for n in (shared.process_notes if shared else [])]
                  + [ResolvedNote(**n.model_dump(), scope='local') for n in pack.process_notes])
         return JurisdictionDetail(

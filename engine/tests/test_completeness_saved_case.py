@@ -381,7 +381,7 @@ def test_saved_source_page_bbox_and_applicant_quote_are_preserved_without_code_a
 
 def _complete_package(store, codes):
     case = _selected_case(codes, ('3.1.8.1.(1)',))
-    case.jurisdiction = Jurisdiction(id='synthetic-ahj', name='SYNTHETIC reviewing jurisdiction')
+    case.jurisdiction = Jurisdiction(id='edmonton', name='City of Edmonton')
     case.facts += [fact(field, value) for field, value in {
         'owner_name': 'SYNTHETIC owner', 'request_date': '2026-10-21',
         'owner_rep_name': 'SYNTHETIC representative', 'mailing_address': 'SYNTHETIC mailing address',

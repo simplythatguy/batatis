@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState } from "react";
-import { AUTHORITIES, authorityUnsure, officeChoiceAction, officeSuggestion } from "../config";
+import { AUTHORITIES, authorityUnsure, officeChoiceAction, officeCoverage, officeSuggestion } from "../config";
 import { localField } from "../intakeFields";
 import { legalFromFacts, sourceLine } from "../intakeView";
 import { DETAIL_FIELDS, factFor, valueText } from "../model";
@@ -9,6 +9,7 @@ import { DatePicker } from "./DatePicker";
 import type { DeckItem } from "./deck";
 import { cleanReadValue, clearJourneyAnswerAction, itemOpen, journeyAnswerAction, journeyAnswers } from "./journey";
 import { Icon24 } from "./icons";
+import { Dot } from "./ui";
 import type { useDeckExtras } from "./useDeckExtras";
 
 /** The form field a row edits: a planner question carries its own id, the field lives on the question. */
@@ -23,6 +24,12 @@ const GROUPS = [
 const SHORT_LABEL: Record<string, string> = { applicant_role: "Your part", scope: "Sites covered", date: "Request date", permit: "Permit number" };
 
 type RowDraft = { kind: "answer"; value: string; defaulted?: boolean } | { kind: "later" | "not_sure" };
+
+/** Under Office: where Batatis has not checked the office's own steps (everywhere but Calgary and Edmonton), it says it stops, and who to ask. */
+function officeLine(value: string) {
+  const office = officeCoverage(value);
+  return office && !office.covered ? <p className="cf-pw-office"><Dot tone="warning" />Batatis doesn’t prepare applications here. {office.ask}</p> : null;
+}
 
 /** Edits and defaults belong to this sheet until the applicant presses Done. */
 export function PaperworkSheet({ item, focusRow, onDone }: { item: DeckItem; focusRow: string | null; onDone: () => void; extras?: ReturnType<typeof useDeckExtras>["extras"] }) {
@@ -111,6 +118,7 @@ export function PaperworkSheet({ item, focusRow, onDone }: { item: DeckItem; foc
           </details>
           : field === "date" ? <DatePicker id={row.key} label={label} value={value} onChange={choose} />
             : <input id={row.key} type="text" className="cf-pw-input" aria-label={label} placeholder={placeholder} value={value} onChange={(e) => choose(e.target.value)} />}
+        {row.kind === "authority" && !deferred && officeLine(value)}
         {!value && !deferred && suggestions.length > 0 && <div className="cf-pw-suggest">{suggestions.map((s) => <button key={s.label} type="button" className="cf-link-btn" onClick={() => choose(s.value, true)}>{s.label}</button>)}</div>}
       </div>
       <span className="cf-pw-end">

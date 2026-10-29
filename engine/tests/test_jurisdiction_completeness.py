@@ -28,7 +28,8 @@ def context(tmp_path):
 def jurisdiction_gaps(client, case_id):
     response = client.get(f'/api/cases/{case_id}/gaps')
     assert response.status_code == 200, response.text
-    return [gap for gap in response.json()['items'] if gap['field'] == 'jurisdiction']
+    # The missing-jurisdiction gap; whether Batatis covers a named place is test_every_place's question.
+    return [gap for gap in response.json()['items'] if gap['id'] == 'admin:jurisdiction']
 
 
 @pytest.mark.parametrize('jurisdiction', INCOMPLETE)

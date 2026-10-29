@@ -70,7 +70,7 @@ def complete_case(provisions=None):
         special_safety_concerns=False, professional_judgement_required=True, professional_scope_resolved=True,
         fire_suppression=False, fire_alarm=False,
         **{'professional.role': 'R. Singh, P.Eng.', 'professional.registration_number': 'A00000'})
-    case = Case(title='Synthetic administrative fixture', jurisdiction=Jurisdiction(id='alberta-other', name='Synthetic AHJ'),
+    case = Case(title='Synthetic administrative fixture', jurisdiction=Jurisdiction(id='edmonton', name='City of Edmonton'),
         facts=[fact(k, v, source=_OFFICER) if k in _AUTHORITY_SCREEN else fact(k, v) for k, v in values.items()],
         provisions=provisions, section_c=section_c_rows(provisions, codes))
     file = Source(type='file', ref='engine/tests/fixtures/synthetic-evidence-fixture.txt', quote='Synthetic evidence metadata; no test was performed.')

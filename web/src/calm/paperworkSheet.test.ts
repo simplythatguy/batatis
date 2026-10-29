@@ -8,10 +8,11 @@ import * as config from "../config.ts";
 import * as journey from "./journey.ts";
 import { aliasKey, buildDeck, gapKey, paperworkRowKey } from "./deck.ts";
 
-async function mounted() {
+async function mounted(extra: Action[] = []) {
   let c = model.reducer(emptyCase(), { type: "setDetail", field: "municipalAddress", value: "10234 87 Ave NW, Edmonton", section: "B" });
   c = model.reducer(c, { type: "setDetail", field: "owner", value: "Dana Whitfield", section: "A" });
   c = model.reducer(c, { type: "setDetail", field: "pathway", value: "alternative", section: "B" });
+  c = extra.reduce(model.reducer, c);
   const actions: Action[] = [];
   let done = 0;
   const h = await componentHarness(new URL("./PaperworkSheet.tsx", import.meta.url), "PaperworkSheet", {
@@ -19,7 +20,7 @@ async function mounted() {
     "../model": model, "../config": config, "./journey": journey,
     "../intakeView": await import("../intakeView.ts"),
     "./AuthorityPicker": { AuthorityPicker: "authority-picker" }, "./DatePicker": { DatePicker: "date-picker" },
-    "./icons": { Icon24: "icon" }, "./JurisdictionNote": { JurisdictionNote: "jurisdiction-note" },
+    "./icons": { Icon24: "icon" }, "./ui": { Dot: "dot" }, "./JurisdictionNote": { JurisdictionNote: "jurisdiction-note" },
   });
   const sheet = () => buildDeck(c, model.getGaps(c), { includeDone: true, today: "2026-10-26", confirmAuthority: true }).find((i) => i.kind === "paperwork")!;
   const render = (focusRow: string | null = null) => h.render({ item: sheet(), focusRow, extras: {}, onDone: () => done++ });
@@ -130,4 +131,18 @@ test("a paperwork row asked by the planner shows and saves its form field, not t
   submit(await h.render({ item: sheet, focusRow: null, extras: {}, onDone: () => {} }));
   assert.ok(actions.every((a) => !("field" in a) || !String(a.field).startsWith("intake.")), "never saved under a question id");
   h.unmount();
+});
+
+test("the Office row says where Batatis stops, and who to ask", async () => {
+  for (const [authority, line] of [
+    ["lacombe-county", "Batatis doesn’t prepare applications here. Ask the Alberta Safety Codes Authority or one of its contracted agencies."],
+    ["red-deer", "Batatis doesn’t prepare applications here. Ask City of Red Deer about its variance steps and forms."],
+    ["vancouver", "Batatis doesn’t prepare applications here. Ask City of Vancouver."],
+    ["edmonton", ""],
+  ] as const) {
+    const m = await mounted([{ type: "setAuthority", authority }]);
+    const office = nodes(await m.render(), (n) => typeof n.props?.className === "string" && n.props.className.startsWith("cf-pw-office"));
+    assert.equal(text(office), line, authority);
+    m.h.unmount();
+  }
 });

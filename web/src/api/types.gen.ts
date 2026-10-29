@@ -234,7 +234,7 @@ export interface AttributionPair {
 /** The authority having jurisdiction is an organisation, not an officer (SCC IB-2026-10-16). */
 export interface Authority {
   contact: string | null;
-  kind: "accredited_municipality" | "alberta_safety_codes_authority" | "accredited_organisation";
+  kind: "accredited_municipality" | "alberta_safety_codes_authority" | "accredited_organisation" | "first_nation" | "federal" | "outside_alberta" | "unconfirmed";
   name: string;
   /** The account `Authority` code when Batatis has reviewer accounts for this office; else null. */ reviewer_code: string | null;
   sources: PackSource[];

@@ -3,10 +3,10 @@
   "id": "alberta-other",
   "name": "Rest of Alberta",
   "province": "AB",
-  "coverage": "full",
+  "coverage": "preview",
   "fallback": true,
   "code_edition": "NBC(AE) 2023, 2nd printing",
-  "summary": "Any Alberta location outside a city that has its own pack: an accredited municipality, or the Alberta Safety Codes Authority and its contracted agencies in unaccredited areas. Province-wide variances go to Municipal Affairs.",
+  "summary": "An Alberta place Batatis does not know by name. Its office is an accredited municipality, or the Alberta Safety Codes Authority and its contracted agencies in unaccredited areas; province-wide variances go to Municipal Affairs. Batatis does not prepare applications here: it prepares them only for the City of Calgary and the City of Edmonton, whose own variance steps it has checked.",
   "authority": {
     "name": "Accredited municipality, or the Alberta Safety Codes Authority in unaccredited areas",
     "kind": "accredited_organisation",

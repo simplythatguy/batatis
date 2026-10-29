@@ -1,5 +1,5 @@
 import type { IntakeRecord, IntakeResult, IdentifyResult } from "./api/types.gen";
-import { AUTHORITIES } from "./config";
+import { knownPlace } from "./config";
 import { AI_ACCEPTED_REF, applyDescription } from "./intake";
 import { asLocal, confirmedAnswer, isWritingField, localField } from "./intakeFields";
 import { codeQuestion, identifyCandidates, legalFromFacts, readGroups } from "./intakeView";
@@ -746,7 +746,7 @@ export function reducer(c: Case, a: Action): Case {
         if (!old) continue;
         next = { ...next, facts: next.facts.filter((f) => f.id !== old.id && !(f.field === old.field && f.source.ref === NOT_RIGHT)).concat(confirmedCopy(old)) };
         // The site's municipality is the reviewing authority when it is one Batatis knows.
-        const authority = old.field === "municipality" ? AUTHORITIES.find((x) => x.name.toLowerCase() === String(old.value).trim().toLowerCase()) : undefined;
+        const authority = old.field === "municipality" ? knownPlace(String(old.value)) : null;
         if (authority && !next.authority) next = { ...next, authority: authority.id };
       }
       return next;

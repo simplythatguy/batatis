@@ -116,7 +116,11 @@ def test_removing_a_pack_file_removes_its_behaviour(tmp_path, monkeypatch):
     monkeypatch.setenv(jurisdictions.ENV_DIR, str(root))
     jurisdictions.clear_cache()
     try:
-        assert registry().resolve_case(calgary_case).matched_by == 'fallback'
+        found = registry().resolve_case(calgary_case)
+        # The place still names its office, from the generated place file; the local items are gone.
+        assert found.pack.id in registry().generated and found.matched_by == 'id'
+        assert found.pack.coverage == 'preview'          # without its checked pack, Batatis stops preparing it
+        assert found.pack.standing_packages == [] and found.pack.notices == []
         assert export_notice(calgary_case) is None
     finally:
         jurisdictions.clear_cache()

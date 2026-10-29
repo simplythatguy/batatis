@@ -58,7 +58,8 @@ def normalise(text: str) -> str:
 def load_dir(reg: 'Registry') -> None:
     """Load `<root>/checklists/*.json` into `reg.checklists` and cross-check with the packs.
 
-    A checklist whose pack is absent is skipped, so removing a pack file removes its checklists too."""
+    A checklist whose pack is absent, or only generated from a place, is skipped, so removing a pack file
+    removes its checklists too."""
     from . import PackError, _read
     folder = reg.root / 'checklists'
     for path in sorted(folder.glob('*.json')) if folder.is_dir() else []:
@@ -66,7 +67,7 @@ def load_dir(reg: 'Registry') -> None:
         if path.stem != checklist.id:
             raise PackError(f'{path.name}: file name must be the checklist id {checklist.id}')
         pack = reg.packs.get(checklist.jurisdiction)
-        if pack is None:
+        if pack is None or pack.id in reg.generated:
             continue
         where = f'checklists/{path.name}'
         pkg = next((p for p in pack.standing_packages if p.id == checklist.package), None)
