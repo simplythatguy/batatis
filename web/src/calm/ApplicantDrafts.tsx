@@ -10,6 +10,7 @@ import { useCase } from "../store";
 import type { Case } from "../types";
 import { useAccount } from "./account";
 import { useCurrentApplication } from "./begin";
+import { Icon24 } from "./icons";
 import { CIcon } from "./ui";
 import "./ApplicantDrafts.css";
 
@@ -180,7 +181,7 @@ export function ApplicantDrafts() {
     <div className="cf-draft-head">
       <h2 id="cf-drafts-heading">Your application wording</h2>
       <button type="button" className="cf-btn is-sm" disabled={disabled || !c.description.trim()} onClick={() => { if (!disabled && c.description.trim()) act(generateApplicantDrafts); }}>
-        <CIcon name="spark" size={14} />{draftActivity.kind === "generating" ? "Drafting…" : "Draft my application"}
+        <Icon24 name="spark" size={14} />{draftActivity.kind === "generating" ? "Drafting…" : "Draft my application"}
       </button>
     </div>
     {busy && <p className="cf-draft-meta" role="status">{draftActivity.kind === "generating" ? "Writing your drafts. This can take a few minutes." : "Saving your decision…"}</p>}

@@ -111,8 +111,8 @@ def fan(svg: Svg, parent, child) -> None:
 
 # ---------------------------------------------------------------- solution and how it works
 
-GAP = 60
-BOX_W, BOX_H = 152, 70
+GAP = 50
+BOX_W, BOX_H = 148, 70
 DIAMOND = 144
 
 
@@ -124,7 +124,7 @@ class Tech:
 
 def flow(row1: float, row2: float) -> dict[str, Node]:
     xs, x = [], 268
-    for kind in ('box', 'box', 'box', 'box', 'box', 'diamond', 'box'):
+    for kind in ('box', 'box', 'box', 'box', 'box', 'box', 'diamond', 'box'):
         width = DIAMOND if kind == 'diamond' else BOX_W
         if xs:
             x += GAP + width / 2
@@ -135,13 +135,14 @@ def flow(row1: float, row2: float) -> dict[str, Node]:
         'answer': Node(xs[1], row1, BOX_W, BOX_H, 'Answer a few\nquestions', 'blue'),
         'confirm': Node(xs[2], row1, BOX_W, BOX_H, 'Confirm the\ncode articles', 'violet'),
         'sectionc': Node(xs[3], row1, BOX_W, BOX_H, 'Section C\nfills itself in', 'violet'),
-        'evidence': Node(xs[4], row1, BOX_W, BOX_H, 'Plan the\nevidence', 'green'),
-        'missing': Node(xs[5], row1, DIAMOND, DIAMOND, 'Anything\nmissing?', 'green', diamond=True),
-        'submit': Node(xs[6], row1, BOX_W, BOX_H, 'Submit the\nofficial form', 'green'),
+        'drafts': Node(xs[4], row1, BOX_W, BOX_H, 'Review the\ndrafted case', 'green'),
+        'evidence': Node(xs[5], row1, BOX_W, BOX_H, 'Plan the\nevidence', 'green'),
+        'missing': Node(xs[6], row1, DIAMOND, DIAMOND, 'Anything\nmissing?', 'green', diamond=True),
+        'submit': Node(xs[7], row1, BOX_W, BOX_H, 'Submit the\nofficial form', 'green'),
     }
-    n['pick'] = Node(xs[6], row2, BOX_W, BOX_H, 'Pick it up\nfrom the queue', 'amber')
-    n['review'] = Node(xs[6] - 340, row2, BOX_W + 14, BOX_H, 'Review the\napplication', 'amber')
-    n['decide'] = Node(xs[6] - 680, row2, DIAMOND + 10, DIAMOND + 10, 'Decide', 'amber', diamond=True)
+    n['pick'] = Node(xs[7], row2, BOX_W, BOX_H, 'Pick it up\nfrom the queue', 'amber')
+    n['review'] = Node(xs[7] - 360, row2, BOX_W + 14, BOX_H, 'Review the\napplication', 'amber')
+    n['decide'] = Node(xs[7] - 740, row2, DIAMOND + 10, DIAMOND + 10, 'Decide', 'amber', diamond=True)
     n['close'] = Node(xs[1] + 20, row2, BOX_W, BOX_H, 'Close-out', 'amber')
     return n
 
@@ -150,14 +151,16 @@ REVIEW_PARTS = ('Form view', 'Missing items', 'Code checks')
 CAPTIONS = {
     'describe': 'Type or drop in PDFs',
     'answer': 'One at a time',
-    'confirm': 'Found, ranked and quoted',
+    'confirm': 'Found, ranked, compared',
     'sectionc': 'Looked up from the code',
+    'drafts': 'Six statements, one screen',
     'evidence': 'Flags when an engineer\nis needed',
 }
 TECH = {
     'describe': [Tech('Rules read facts,\nSonnet reviews', ('python', 'claude'))],
-    'answer': [Tech('Rules pick up\nto 5 questions', ('python',)), Tech('Sonnet writes\nthe drafts', ('claude',))],
-    'confirm': [Tech('Searches the\ncode text', ('sqlite',)), Tech('Haiku ranks,\nwith quotes', ('claude',))],
+    'answer': [Tech('Rules pick up\nto 5 questions', ('python',))],
+    'confirm': [Tech('Searches the\ncode text', ('sqlite',)), Tech('Haiku searches\nand ranks', ('claude',))],
+    'drafts': [Tech('Sonnet drafts,\nchecks sources', ('claude',))],
     'sectionc': [Tech('Lookup in\nCodeDB', ('sqlite',))],
     'evidence': [Tech('Evidence rules,\nno AI', ('python',))],
     'missing': [Tech('Completeness\nrules', ('python',))],
@@ -188,7 +191,7 @@ def tech_box(svg: Svg, cx, top, tech: Tech, tint: str, w=96, h=96) -> None:
 
 def loops(svg: Svg, n: dict[str, Node], top_y: float, low_y: float) -> None:
     """The arrows shared by both diagrams: the main flow, the two loops and the officer row."""
-    order = ['describe', 'answer', 'confirm', 'sectionc', 'evidence', 'missing']
+    order = ['describe', 'answer', 'confirm', 'sectionc', 'drafts', 'evidence', 'missing']
     for a, b in zip(order, order[1:]):
         arrow(svg, n[a].right, n[b].left)
     arrow(svg, n['missing'].right, n['submit'].left)
@@ -219,7 +222,7 @@ def loops(svg: Svg, n: dict[str, Node], top_y: float, low_y: float) -> None:
 
 
 def solution() -> Svg:
-    svg = Svg(1720, 760)
+    svg = Svg(1900, 760)
     n = flow(row1=170, row2=520)
     loops(svg, n, top_y=70, low_y=300)
     for node in n.values():
@@ -238,7 +241,7 @@ def solution() -> Svg:
 
 
 def how_it_works() -> Svg:
-    svg = Svg(1720, 1180)
+    svg = Svg(1900, 1180)
     n = flow(row1=360, row2=760)
     # Header: where it runs.
     svg.rect(330, 26, 600, 156, width=1.2, radius=8)

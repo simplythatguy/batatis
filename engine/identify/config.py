@@ -12,7 +12,9 @@ does not use provider stages or the historical top-N limits. Historical dataclas
 for compatibility; explicit profiles and environment overrides select other configurations with
 different hashes. With model_rank='anthropic' the
 requirements profile adds a model rank (model_rank.py): the verifier reads the leading candidates and
-its quote-checked picks move to the front. Without a key or an access code the order stays deterministic.
+its quote-checked picks move to the front. With model_rank_toc > 0 a table-of-contents search first names up
+to that many Division B articles, which lead a widened pool, and picks discovery missed join the ledger.
+Without a key or an access code the order stays deterministic.
 """
 from __future__ import annotations
 
@@ -67,6 +69,7 @@ class IdentifyConfig:
     model_rank: str = 'none'             # requirements screen only: 'anthropic' reorders the ledger (model_rank.py)
     model_rank_model: str = 'claude-haiku-5-5'
     model_rank_effort: str = 'medium'
+    model_rank_toc: int = 0              # table-of-contents candidates before the rank (12 measured; 0 off)
 
     def __post_init__(self):
         checks = [('screen', SCREENS), ('rerank', RERANKS), ('verifier', VERIFIERS), ('fallback', FALLBACKS),
@@ -78,6 +81,8 @@ class IdentifyConfig:
             raise ConfigError('model_rank must be anthropic or none')
         if self.model_rank_effort not in EFFORTS:
             raise ConfigError(f'model_rank_effort must be one of {", ".join(EFFORTS)}')
+        if type(self.model_rank_toc) is not int or not 0 <= self.model_rank_toc <= 12:
+            raise ConfigError('model_rank_toc must be an integer from 0 to 12')
         if self.question_style not in ('shared', 'self'):
             raise ConfigError('question_style must be shared or self')
         if self.question_style == 'self' and 'elephant' not in (self.screen, self.rerank):
@@ -117,13 +122,16 @@ class IdentifyConfig:
         if self.screen == 'requirements':
             from .requirements import IDENTITY
             if self.model_rank == 'anthropic':
-                from .model_rank import KEYWORD_N, LEDGER_N, POOL_N
-                return dict(screen='requirements', strategy=IDENTITY, rerank='none', verifier='none',
-                            model_rank=self.model_rank, model_rank_model=self.model_rank_model,
-                            model_rank_effort=self.model_rank_effort, model_rank_pool=[LEDGER_N, KEYWORD_N, POOL_N])
+                from .model_rank import KEYWORD_N, LEDGER_N, POOL_N, TOC_POOL_N
+                values = dict(screen='requirements', strategy=IDENTITY, rerank='none', verifier='none',
+                              model_rank=self.model_rank, model_rank_model=self.model_rank_model,
+                              model_rank_effort=self.model_rank_effort, model_rank_pool=[LEDGER_N, KEYWORD_N, POOL_N])
+                if self.model_rank_toc:       # off keeps the hash of the rank without it
+                    values.update(model_rank_toc=self.model_rank_toc, model_rank_toc_pool=TOC_POOL_N)
+                return values
             return dict(screen='requirements', strategy=IDENTITY, rerank='none', verifier='none')
         values = asdict(self)
-        for name in ('model_rank', 'model_rank_model', 'model_rank_effort'):
+        for name in ('model_rank', 'model_rank_model', 'model_rank_effort', 'model_rank_toc'):
             values.pop(name)                  # requirements-only settings never move historical hashes
         # Inactive options must not invalidate historical hashes or calibration.
         if self.question_style == 'shared':

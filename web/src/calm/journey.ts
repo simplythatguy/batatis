@@ -51,7 +51,7 @@ export function stageOf(item: Positioned): Stage {
   if (item.kind === "understood" || item.kind === "fact" || item.kind === "file" || item.kind === "reading" || item.plan?.kind === "conflict") return "understand";
   if (item.kind === "route" || item.kind === "route-detail" || item.kind === "product-scope" || item.kind === "product-notice" || item.kind === "scope" || field === "product_scope") return "route";
   if (item.kind === "paperwork" || item.kind === "role" || item.kind === "authority" || PAPERWORK_FIELDS.has(field)) return "paperwork";
-  if (item.kind === "process" || field === "alternative") return "case";
+  if (item.kind === "process" || item.kind === "drafts" || field === "alternative") return "case";
   if (item.kind === "section-d" || field.startsWith("professional.") || field.startsWith("evidence.")) return "proof";
   if (item.kind === "storeys" || (item.kind === "plan" && item.plan?.priority !== "administrative") || PROJECT.has(field)) return "project";
   if (item.section === "C") return "rules";

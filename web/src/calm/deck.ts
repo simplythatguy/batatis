@@ -44,6 +44,8 @@ export type DeckKind =
   | "requirement"
   /** The applicant's own words for the departure from the named benchmark sentence. */
   | "departure"
+  /** The six variance statements on one screen: drafted wording to accept, reject or write. */
+  | "drafts"
   /** Keyword-only leads grouped by topic; each lead opens on request (never a relevance score). */
   | "code-triage"
   /** A number or answer a coded rule needs (docs/api/rules.md). */
@@ -165,9 +167,23 @@ export interface DeckOptions {
   benchmark?: BenchmarkRecord | null;
   /** A visible default supplied by the caller, never a silently saved date. */
   today?: string;
+  /**
+   * How the six variance statements are asked: one review of the drafted wording, or one card each
+   * (the default, and the fallback whenever drafting is unavailable).
+   */
+  statements?: "review" | "cards";
 }
 
-const RULE_WHY = "Batatis compares the numbers you give with one acceptable solution in the code. It flags where your design departs from it; it never decides whether the design is acceptable. The officer decides.";
+/** Planner fields that only narrow which articles apply; the ranking pass reads the description instead. */
+const NARROWING_FIELDS = new Set(["storeys", "building_area_m2", "occupancy", "sprinklered", "limiting_distance_m", "faces_public_way", "dwelling_units", "part4_design", "assembly.description"]);
+
+/** The model ranking ran on this identification: it picked articles, or finished without an error. */
+export function aiRanked(c: Case): boolean {
+  const trace = c.identify?.trace;
+  return Boolean(trace?.picks?.length || trace?.stages?.some((s) => s.stage === "model_rank" && s.errors === 0));
+}
+
+const RULE_WHY ="Batatis compares the numbers you give with one acceptable solution in the code. It flags where your design departs from it; it never decides whether the design is acceptable. The officer decides.";
 
 /** Coded rules and standing packages that apply to this case, ready to place in the Rules step. */
 export function caseRules(c: Case, opts: DeckOptions): ShownRule[] {
@@ -363,7 +379,8 @@ const SCOPE_ITEM_KEY = "scope";
  * stay Section C rows.
  */
 function departureCandidate(c: Case, opts: DeckOptions): Candidate | undefined {
-  if (opts.benchmark?.departure_status === "confirmed") return undefined;
+  // The case carries its stored identification when it opens; the deck's own fetch can land later.
+  if ((opts.benchmark ?? c.identify?.benchmark)?.departure_status === "confirmed") return undefined;
   return c.candidates.find((a) => a.answer === "yes" && !a.pending && isProvision(a.provision));
 }
 
@@ -373,7 +390,7 @@ function departureItem(a: Candidate): UnpositionedItem {
     kind: "departure",
     section: "C",
     eyebrow: sectionEyebrow("C"),
-    title: "What does your design do instead?",
+    title: "How does your design differ?",
     context: "",
     why: "Batatis names this sentence as the benchmark in Section C of the application and records your words as the departure. The officer decides whether the departure is acceptable; Batatis never does.",
     ref: a.id,
@@ -545,7 +562,18 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
   // still need inputs ask only those.
   const namedInputs = decision.ruleId ? new Set(namedRuleInputs(decision.ruleId) ?? [])
     : decision.asksRuleInputs ? new Set(decision.missing) : null;
+  // Once the ranking ran, narrowing questions are not asked. While the first identification runs they
+  // wait too, so a card never appears and then vanishes. A failed, cancelled or never-started check
+  // (idle after an edit) asks them, so Review and the deck count the same cards.
+  const rankPending = !c.identify && opts.identify === "running";
+  const skipNarrowing = aiRanked(c) || rankPending;
+  /** Narrowing fields the planner did not ask; a coded rule that needs one still asks it as a rule input. */
+  const skipped = new Set<string>();
   for (const { q, done, notSure } of plan) {
+    if (skipNarrowing && !done && q.kind !== "conflict" && NARROWING_FIELDS.has(q.field) && !namedInputs?.has(q.field)) {
+      skipped.add(localField(q.field));
+      continue;
+    }
     if (q.field === "product_scope" && decision.path !== "alternative") continue;
     if ((q.field === "alternative_description" || localField(q.field) === "alternative") && decision.path !== "alternative") continue;
     // A firm check has the inputs it needs. A named rule asks only its own remaining inputs.
@@ -773,7 +801,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
     const fields = r.inputs.map((i) => i.field).filter((f) => mine.has(f) || facts.get(f)?.source.ref?.startsWith(RULE_REF));
     for (const f of fields) {
       // A planner question asks this field already (or it was answered Not sure there).
-      if (asked.has(f) || planned.has(f) || readFields.has(f) || !index.inputs[f]) continue;
+      if (asked.has(f) || (planned.has(f) && !skipped.has(f)) || readFields.has(f) || !index.inputs[f]) continue;
       asked.add(f);
       push("C", {
         key: `rulein-${f}`,
@@ -887,7 +915,22 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
   }
 
   // 5. The six process fields are the alternative path only. They are not evidence.
-  if (decision.path === "alternative" && !acceptance) for (const p of PROCESS_FIELDS) {
+  if (decision.path === "alternative" && !acceptance && opts.statements === "review") {
+    const open = PROCESS_FIELDS.filter((p) => !c.process[p.id].trim()).length;
+    push("D", {
+      key: "drafts",
+      kind: "drafts",
+      section: "D",
+      eyebrow: sectionEyebrow("D"),
+      title: "Your case",
+      context: "",
+      why: "Because your design differs from the code’s standard way, the form needs these six statements. Batatis drafts each one from what you gave it, with its sources. Nothing is added until you accept it, and you can edit any of them. Engineering work and seals still come from your professional.",
+      ref: "drafts",
+      done: open === 0,
+      optional: false,
+      counts: { you: { open, done: PROCESS_FIELDS.length - open } },
+    });
+  } else if (decision.path === "alternative" && !acceptance) for (const p of PROCESS_FIELDS) {
     push("D", {
       key: `field-${p.id}`,
       kind: "process",
@@ -1065,7 +1108,7 @@ function answerChoices(item: DeckItem): { value: string; label: string }[] {
 export function deferralFor(item: DeckItem): { value: Exclude<JourneyAnswerValue, "acknowledged">; label: string } | null {
   // A departure the applicant says exists cannot be deferred: without their words Section C names
   // an acceptable solution the application never says it departs from.
-  if (["understood", "paperwork", "reading", "file", "code-run", "code-note", "code-triage", "package-end", "product-notice", "route", "scope", "departure"].includes(item.kind)) return null;
+  if (["understood", "paperwork", "reading", "file", "code-run", "code-note", "code-triage", "package-end", "product-notice", "route", "scope", "departure", "drafts"].includes(item.kind)) return null;
   if (item.stage === "paperwork") return { value: "later", label: "Later" };
   return item.answerer === "designer" ? { value: "designer", label: "Ask my designer" } : { value: "not_sure", label: "Not sure" };
 }

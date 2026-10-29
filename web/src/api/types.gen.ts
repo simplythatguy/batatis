@@ -1121,6 +1121,7 @@ export interface IdentifyResult {
 }
 
 export interface IdentifyTrace {
+  added: string[];
   articles_expected: number;
   articles_scored: number;
   config: Record<string, unknown>;
@@ -1779,7 +1780,7 @@ export interface RequirementDiscovery {
   evidence_id: string | null;
   evidence_ids: string[];
   from_requirement: string | null;
-  kind: "lexical" | "explicit" | "reference" | "reverse_reference" | "administrative" | "human" | "previous";
+  kind: "lexical" | "explicit" | "reference" | "reverse_reference" | "administrative" | "human" | "previous" | "model_search";
   path: string[];
 }
 

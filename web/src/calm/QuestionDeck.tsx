@@ -40,6 +40,9 @@ import { PACKAGE_YES, RULE_ADD, RULE_LEAVE } from "./deck";
 import { useAccount } from "./account";
 import { useQuestionDraft } from "./useQuestionDraft";
 import { ApplicantDraftLink, processDraftField } from "./ApplicantDrafts";
+import { StatementReview } from "./StatementReview";
+import { CLAIM_NOTE, CLAIM_WORDS, departureComparison, departureRecordsVariance } from "./departure";
+import { DepartureCompare } from "./DepartureCompare";
 import { UnitInput } from "./UnitInput";
 import { measurementText, metricUnit, parseMeasurement } from "./units";
 import { todayIn, toIso } from "./calendarDate";
@@ -80,10 +83,10 @@ export function Choices({ choices, current, onPick }: { choices: { value: string
   );
 }
 
-function OkRow({ label = "Continue", disabled, onOk, typed, children, primary = true }: { label?: string; disabled?: boolean; onOk: () => void; typed: boolean; children?: ReactNode; primary?: boolean }) {
+function OkRow({ label = "Continue", disabled, onOk, typed, children, primary = true, quiet = false }: { label?: string; disabled?: boolean; onOk: () => void; typed: boolean; children?: ReactNode; primary?: boolean; quiet?: boolean }) {
   return (
     <div className="cf-ok-row" data-deck-foot>
-      {primary && <button type="button" className="cf-btn is-primary is-lg" disabled={disabled} onClick={onOk} aria-keyshortcuts={typed ? "Meta+Enter Control+Enter" : "Enter"}>
+      {primary && <button type="button" className={`cf-btn is-lg${quiet ? "" : " is-primary"}`} disabled={disabled} onClick={onOk} aria-keyshortcuts={typed ? "Meta+Enter Control+Enter" : "Enter"}>
         {label} <Icon24 name="check" size={16} stroke={2} />
       </button>}
       {children}
@@ -292,9 +295,11 @@ function PlanBody({ item, onPick, draft, setDraft, note }: { item: Shown; onPick
   );
 }
 
+const DEPARTURE_EDIT = "edit";
+
 /** Render the current card’s inputs, saved answer, source details and loading or failure feedback. */
 function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote, extras, note, busy, onReload, position, focusRow, onPaperworkDone }: { item: Shown; picked?: string; onPick: (value: string) => void; draft: string; setDraft: (v: string) => void; openDrawer: (s: DrawerState) => void; planNote: string; extras: ReturnType<typeof useDeckExtras>["extras"]; note: string; busy: boolean; onReload?: () => void; position: number; focusRow: string | null; onPaperworkDone: () => void }) {
-  const { c, dispatch } = useCase();
+  const { c, dispatch, drafting } = useCase();
   const session = useSession();
   const [tips, setTips] = useState(false);
   const choices = choicesFor(item);
@@ -355,6 +360,7 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
     return <><ApplicantDraftLink field="evidence_plan" /><div className="cf-embed cf-sectiond"><Recommendations /></div></>;
   }
   if (item.kind === "understood") return <UnderstoodFacts item={item} />;
+  if (item.kind === "drafts") return <StatementReview />;
   if (item.kind === "paperwork") return <PaperworkSheet key={engineGeneration()} item={item} focusRow={focusRow} onDone={onPaperworkDone} extras={extras} />;
   if (item.kind === "route") {
     const saved = routeChoice(c);
@@ -443,10 +449,16 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
         </button>
       ) : null}
       {item.kind === "departure" ? (
-        <div className="cf-inline-answer">
-          <label className="cf-sr" htmlFor={`field-${item.ref}-departure`}>What your design does instead</label>
-          <textarea id={`field-${item.ref}-departure`} className="cf-uline is-area" rows={2} aria-label="What your design does instead" value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="In one sentence." />
-        </div>
+        <>
+          {picked === DEPARTURE_EDIT || !cand ? (
+            <div className="cf-inline-answer">
+              <label className="cf-sr" htmlFor={`field-${item.ref}-departure`}>What your design does instead</label>
+              <textarea id={`field-${item.ref}-departure`} className="cf-uline is-area" rows={2} aria-label="What your design does instead" value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="In one sentence." autoFocus={picked === DEPARTURE_EDIT} />
+            </div>
+          ) : <DepartureCompare lines={departureComparison(c, cand, drafting)} onEdit={() => onPick(DEPARTURE_EDIT)} />}
+          {busy && <p className="cf-note" role="status"><span className="cf-dot is-pending" aria-hidden="true" />Saving…</p>}
+          {!busy && note && <p className="cf-note" role="alert"><span className="cf-dot is-warning" aria-hidden="true" />{note}</p>}
+        </>
       ) : item.kind === "storeys" ? (
         <div className="cf-inline-answer">
           <label className="cf-sr" htmlFor="cf-storeys">Number of storeys</label>
@@ -584,11 +596,11 @@ function NoQuestionsYet() {
 
 /** Coordinate the visit queue, rule and checklist answers, and navigation through the case’s cards. */
 export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boolean }) {
-  const { c, engineId, gaps, dispatch, requestCheck, sectionCLookup, reading, answerPlan, answerChecklist, reloadChecklists, applicationStatus, decideRequirement } = useCase();
+  const { c, engineId, gaps, dispatch, requestCheck, sectionCLookup, reading, answerPlan, answerChecklist, reloadChecklists, applicationStatus, decideRequirement, drafting } = useCase();
   const session = useSession();
   const { app, locked, readOnly } = useCurrentApplication();
   const { onAnswer, onDeparture, decisionNoteFor } = useCandidateAnswer();
-  const { options: deckExtras, extras } = useDeckExtras();
+  const { options: deckExtras, extras, fallbackNote } = useDeckExtras();
   const seen = useMemo(() => new Set(session.seen), [session.seen]);
   // A keyword lead opened from the grouped triage (or a saved link) stays on the deck while you answer it.
   const [focusedCandidate, setFocusedCandidate] = useState(focus?.startsWith("cand-") ? focus : undefined);
@@ -633,6 +645,9 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
   }, [queueSig]);
 
   const account = useAccount();
+  // A drafting request that fell back to the six cards says why once, on the first open one.
+  const processCards = all.filter((i) => i.kind === "process");
+  const fallbackKey = fallbackNote ? (processCards.find((i) => !i.done) ?? processCards[0])?.key : undefined;
   const savedDraft = (() => {
     if (!item) return "";
     if (item.kind === "route-detail") return String(factFor(c, "journey.departure")?.value ?? "");
@@ -698,7 +713,9 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
       if (first && item?.done && !item.gone) moveFrom(index, false);
       return;
     }
-    const key = focus ? aliasKey(c, focus) : all.find((i) => (i.kind === "candidate" || i.kind === "storeys" || i.kind === "code-triage") && !i.done)?.key;
+    const alias = focus ? aliasKey(c, focus) : all.find((i) => (i.kind === "candidate" || i.kind === "storeys" || i.kind === "code-triage") && !i.done)?.key;
+    // A link to one statement opens the review that holds all six.
+    const key = alias && !byKey.has(alias) && PROCESS_FIELDS.some((p) => alias === `field-${p.id}`) && byKey.has("drafts") ? "drafts" : alias;
     if (key && byKey.has(key) && byKey.get(key)?.answerer !== "office") {
       updateSession((s) => {
         const base = s.queue.length >= queue.length ? s.queue : queue;
@@ -730,7 +747,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
 
   // A code card the lookup replaced (article split into sentences) has nothing left to answer.
   useEffect(() => {
-    if (item?.gone && (item.kind === "candidate" || item.kind === "storeys" || item.kind === "rule" || item.kind === "rule-input" || item.kind === "condition" || item.kind === "package" || item.kind === "package-end" || item.kind === "requirement")) moveFrom(index, false);
+    if (item?.gone && (item.kind === "drafts" || item.kind === "process" || item.kind === "candidate" || item.kind === "storeys" || item.kind === "rule" || item.kind === "rule-input" || item.kind === "condition" || item.kind === "package" || item.kind === "package-end" || item.kind === "requirement")) moveFrom(index, false);
     // The code check finished while its card was open: the code questions take its place.
     if (item?.gone && item.kind === "code-run") {
       const code = queue.findIndex((k) => { const it = itemFor(k); return Boolean(it && !it.done && it.section === "C"); });
@@ -807,10 +824,22 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
     if (s.queue[s.index] !== key) goToKey(key);
   }
 
+  /** The departure the card would send: the typed words when editing, otherwise the compared design. */
+  function departureText(it: Shown): string {
+    const cand = c.candidates.find((a) => a.id === it.ref);
+    if (picked[it.key] === DEPARTURE_EDIT || !cand) return draft.trim();
+    return departureComparison(c, cand, drafting).departure;
+  }
+
+  /** No words for the design yet: the card's one action opens the words to write. */
+  function writesDeparture(it: Shown): boolean {
+    return it.kind === "departure" && picked[it.key] !== DEPARTURE_EDIT && c.candidates.some((a) => a.id === it.ref) && !departureText(it);
+  }
+
   /** Check whether the current answer can advance, including pending writes and required reasons. */
   function canContinue(it: Shown): boolean {
     if (locked || busyKey === it.key || advanceAfter?.key === it.key) return false;
-    if (it.kind === "section-d" || it.kind === "file" || it.kind === "code-run" || it.kind === "code-note" || it.kind === "code-triage" || it.kind === "code-ledger") return true;
+    if (it.kind === "section-d" || it.kind === "drafts" || it.kind === "file" || it.kind === "code-run" || it.kind === "code-note" || it.kind === "code-triage" || it.kind === "code-ledger") return true;
     if (it.kind === "reading") return reading.intake !== "running";
     if (it.kind === "scope") return false;
     if (it.kind === "understood" || it.kind === "paperwork") return true;
@@ -819,7 +848,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
     if (it.kind === "plan" || it.kind === "product-scope") return reading.busy !== it.ref && (it.done || Boolean(draft.trim()));
     if (it.kind === "question") return Boolean(draft.trim()) || it.done;
     if (it.kind === "storeys") return (Number.isInteger(Number(draft)) && Number(draft) > 0) || it.done;
-    if (it.kind === "departure") return busyKey !== it.key && Boolean(draft.trim());
+    if (it.kind === "departure") return busyKey !== it.key && (writesDeparture(it) || Boolean(departureText(it)));
     if (it.kind === "authority") return it.done || Boolean(c.authority);
     if (it.kind === "rule") return it.rule?.state !== "departs" || it.done || picked[it.key] === RULE_LEAVE;
     if (it.kind === "package-end") return true;
@@ -866,20 +895,32 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
       setAdvanceAfter({ key: item.key, generation: engineGeneration() });
       return;
     }
+    if (writesDeparture(item)) { pick(DEPARTURE_EDIT); return; }
     if (item.kind === "departure") {
       const cand = c.candidates.find((a) => a.id === item.ref);
-      const text = draft.trim();
+      const text = departureText(item);
       if (!cand || !text) return;
-      setBusyKey(item.key);
-      noteFor(item.key, "");
+      const key = item.key;
+      // The engine refuses these words; the applicant rewords them here instead of meeting a refusal.
+      if (CLAIM_WORDS.test(text)) {
+        if (picked[key] !== DEPARTURE_EDIT) { setPicked((p) => ({ ...p, [key]: DEPARTURE_EDIT })); setDraft(text); }
+        noteFor(key, CLAIM_NOTE);
+        return;
+      }
+      const variance = departureRecordsVariance(c);
+      setBusyKey(key);
+      noteFor(key, "");
       void onDeparture(cand, text).then((error) => {
-        setBusyKey((k) => (k === item.key ? null : k));
+        setBusyKey((k) => (k === key ? null : k));
         if (error) {
-          noteFor(item.key, error);
+          // A refusal (for example wording the server will not record) opens the words to edit.
+          if (picked[key] !== DEPARTURE_EDIT) { setPicked((p) => ({ ...p, [key]: DEPARTURE_EDIT })); setDraft(text); }
+          noteFor(key, error);
           return;
         }
+        if (variance) dispatch({ type: "setDetail", field: "journey.route", value: "variance", section: "B" });
         setDraft("");
-        setAdvanceAfter({ key: item.key, generation: engineGeneration() });
+        setAdvanceAfter({ key, generation: engineGeneration() });
       });
       return;
     }
@@ -1085,6 +1126,11 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
   function pick(value: string) {
     if (!item || locked || busyKey === item.key || reading.busy === item.ref || advanceAfter?.key === item.key) return;
     if (value === "not_sure" || value === "unsure" || (value === "designer" && item.kind !== "role") || value === "later" || value === NOT_SURE_RULE) { deferCurrent(value === "designer" ? "designer" : value === "later" ? "later" : "not_sure"); return; }
+    if (item.kind === "departure") {
+      if (value === DEPARTURE_EDIT && !draft.trim()) setDraft(departureText(item));
+      setPicked((p) => ({ ...p, [item.key]: value }));
+      return;
+    }
     if (!item.plan && item.kind !== "condition") dispatch(clearJourneyAnswerAction(item));
     const advance = () => setAdvanceAfter({ key: item.key, generation: engineGeneration() });
     if (item.kind === "route") {
@@ -1168,7 +1214,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
     if (drawer || e.defaultPrevented || document.querySelector("dialog[open]")) return;
     const t = e.target as HTMLElement | null;
     // Keys typed in the menu, a popover, the assistant or any dialog belong to them.
-    if (t?.closest?.(".cf-pop, dialog, [role='menu'], .cf-palette, .cf-assist, .cf-document-review, .cf-understood, .cf-paperwork")) return;
+    if (t?.closest?.(".cf-pop, dialog, [role='menu'], .cf-palette, .cf-assist, .cf-document-review, .cf-understood, .cf-paperwork, .cf-statements")) return;
     const inText = isTextTarget(t);
     const embedded = item?.kind === "section-d" && t && t !== document.body && !t.closest("[data-deck-foot]") && t.tagName !== "H2";
     if (embedded) return;
@@ -1233,7 +1279,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
         ) : item?.kind === "scope" && !item.gone ? (
           <RedirectPage />
         ) : item ? (
-          <div ref={setWrap} key={item.key} data-advancing={advanceAfter?.key === item.key ? "" : undefined} className={`cf-q-wrap is-from-${dir}${item.kind === "section-d" || item.kind === "code-triage" || item.kind === "paperwork" ? " is-wide" : ""}`} aria-labelledby="cf-q" role="group">
+          <div ref={setWrap} key={item.key} data-advancing={advanceAfter?.key === item.key ? "" : undefined} className={`cf-q-wrap is-from-${dir}${item.kind === "section-d" || item.kind === "drafts" || item.kind === "code-triage" || item.kind === "paperwork" ? " is-wide" : ""}`} aria-labelledby="cf-q" role="group">
             <p className="cf-eyebrow is-plain">{item.plan?.kind === "conflict" ? "You wrote two things" : STAGES.find((s) => s.stage === item.stage)?.label}<span className="cf-faint"> · Section {item.section}</span></p>
             <h2 id="cf-q" className="cf-q-text" tabIndex={-1}>{item.title}</h2>
             {item.answerer === "designer" && <span className="cf-answerer-tag"><Icon24 name="compose" size={15} />Usually your designer knows</span>}
@@ -1265,10 +1311,11 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
             {item.deferred && item.kind !== "plan" && item.kind !== "product-scope" && item.kind !== "rule-input" && <p className="cf-note" role="status">{item.deferred === "later" ? "Saved for later" : item.deferred === "designer" ? "For your designer" : "Not sure"} · open on Review</p>}
             {draftConflict && <p className="cf-note" role="status">The saved answer changed. Your unfinished text is kept here; review it before confirming.</p>}
             {item.kind === "candidate" && decisionNoteFor(item.ref) && <p className="cf-note">{decisionNoteFor(item.ref)}</p>}
+            {item.key === fallbackKey && <p className="cf-note" role="alert"><span className="cf-dot is-warning" aria-hidden="true" />{fallbackNote}</p>}
             {item.section === "C" && (extras.failed.rules || extras.failed.case) && (
               <p className="cf-note" role="status"><span className="cf-dot is-warning" aria-hidden="true" />Rule checks didn’t load, so some rule questions may be missing. <button type="button" className="cf-link-btn" onClick={retryExtras}>Try again</button></p>
             )}
-            <OkRow label={item.kind === "understood" ? "Looks right" : "Continue"} primary={item.kind !== "paperwork" && (choicesFor(item).length === 0 || (item.done && !item.deferred) || item.kind === "authority" || (item.kind === "detail" && (picked[item.key] === "dismiss" || picked[item.key] === "edit-suggested")) || (item.kind === "condition" && (picked[item.key] ?? currentState(item)) === "does_not_apply") || (item.kind === "requirement" && (picked[item.key] === "does-not-apply" || picked[item.key] === "not-sure")))} disabled={!canContinue(item)} onOk={next} typed={typed}>
+            <OkRow label={item.kind === "understood" ? "Looks right" : item.kind === "departure" && picked[item.key] !== DEPARTURE_EDIT ? (writesDeparture(item) ? "Write it" : "Confirm") : "Continue"} primary={item.kind !== "paperwork" && (choicesFor(item).length === 0 || (item.done && !item.deferred) || item.kind === "authority" || (item.kind === "detail" && (picked[item.key] === "dismiss" || picked[item.key] === "edit-suggested")) || (item.kind === "condition" && (picked[item.key] ?? currentState(item)) === "does_not_apply") || (item.kind === "requirement" && (picked[item.key] === "does-not-apply" || picked[item.key] === "not-sure")))} quiet={item.kind === "drafts" && !item.done} disabled={!canContinue(item)} onOk={next} typed={typed}>
               <span className="cf-ok-more">
                 {deferralFor(item) && choicesFor(item).length === 0 && item.kind !== "authority" && <button type="button" className="cf-link-btn" disabled={locked || reading.busy === item.ref || busyKey === item.key} onClick={() => { const choice = deferralFor(item); if (choice) deferCurrent(choice.value); }}>{deferralFor(item)?.label}</button>}
                 <HelpButton item={item} n={n} open={why} onToggle={() => setWhy((v) => !v)} />

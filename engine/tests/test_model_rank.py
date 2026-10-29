@@ -1,4 +1,5 @@
 """The model rank reorders the requirement ledger with quote-checked picks and never adds, removes or rewrites a rule."""
+import re
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -187,3 +188,20 @@ def test_the_rank_sends_the_measured_request_and_leaves_the_historical_verifier_
     assert all(len(line) < 900 for line in text.splitlines() if line.startswith('['))
     assert v.system == RANK_SYSTEM and verify.ClaudeVerifier.system == verify.SYSTEM != RANK_SYSTEM
     assert 'meets' not in RankVerifier.output_format.model_json_schema()['$defs']['RankPick']['properties']['reason']['description']
+
+
+@pytest.mark.parametrize('seed', range(2))
+def test_the_trace_says_how_many_picks_were_kept_and_why_others_were_dropped(codes, seed, fake_gate):
+    stage = next(s for s in ranked(codes, fakes.lying_picks(seed)).trace.stages if s.stage == 'model_rank')
+    kept, dropped = (int(n) for n in re.match(r'(\d+) kept, (\d+) dropped', stage.detail).groups())
+    assert dropped > 0 and ('quote not found' in stage.detail or 'not in candidate list' in stage.detail)
+
+
+def test_a_pick_written_without_the_trailing_period_still_counts(codes, fake_gate):
+    """The bakeoff harness restored the period before checking ids; the engine reads them the same way."""
+    def picker(user):
+        return [{**pick, 'article': pick['article'].rstrip('.')} for pick in fakes.honest_picks(user)]
+
+    with_period = [a.provision for a in ranked(codes, fakes.honest_picks).articles if a.verifier == 'picked']
+    without = ranked(codes, picker)
+    assert with_period and [a.provision for a in without.articles if a.verifier == 'picked'] == with_period

@@ -145,6 +145,7 @@ class IdentifyTrace(BaseModel):
     fallback_reason: str | None = None
     verifier: str
     picks: list[str] = []
+    added: list[str] = []                       # Division B articles the model rank added to the requirement ledger
     dropped: list[DroppedPick] = []
     stages: list[StageRecord] = []
     spend: dict = {}
@@ -213,7 +214,9 @@ class RequirementEvidence(BaseModel):
 
 
 class RequirementDiscovery(BaseModel):
-    kind: Literal['lexical', 'explicit', 'reference', 'reverse_reference', 'administrative', 'human', 'previous']
+    # model_search: the model rank picked an article discovery did not reach, with a quote found word for word.
+    kind: Literal['lexical', 'explicit', 'reference', 'reverse_reference', 'administrative', 'human', 'previous',
+                  'model_search']
     detail: str
     from_requirement: str | None = None
     path: list[str] = Field(default_factory=list)  # one discovery path, not every walk through a cycle
