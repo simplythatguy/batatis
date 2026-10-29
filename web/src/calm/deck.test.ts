@@ -244,6 +244,31 @@ test("planner cards follow their form fields, and each field has one editable ca
   assert.equal(paperworkRows(all).filter((i) => i.ref === "mailingAddress").length, 1);
 });
 
+test("after the AI ranking, narrowing questions are not asked; conflicts and paperwork still are", () => {
+  const narrowing = ["intake.part4_design", "intake.assembly.description", "intake.sprinklered"];
+  const planRefs = (c: Case, o = {}) => buildDeck(c, getGaps(c), o).filter((i) => i.kind === "plan").map((i) => i.ref);
+  const conflict = { ...question("storeys", "You wrote 2 storeys and 3 storeys. Which is it?"), id: "intake.conflict.storeys", kind: "conflict" as const };
+  const record = intakeResult({ plan: { questions: [conflict, ...intakeResult().record.plan!.questions] } }).record;
+  const house = reducer(undecidedHouse(), { type: "noteIntakeRecord", record });
+  const ranked = reducer(house, { type: "noteIdentify", result: identifyResult({ trace: { picks: ["9.10.14.4."], stages: [] } as unknown as IdentifyResult["trace"] }) });
+  assert.deepEqual(planRefs(ranked), ["intake.conflict.storeys"], "a conflict between two readings is still the applicant's to settle");
+  assert.ok(paperworkRows(buildDeck(ranked, getGaps(ranked))).some((i) => i.ref === "legalDescription"), "administrative questions stay on the paperwork sheet");
+  const clean = reducer(house, { type: "noteIdentify", result: identifyResult({ trace: { picks: [], stages: [{ stage: "model_rank", errors: 0 }] } as unknown as IdentifyResult["trace"] }) });
+  assert.ok(!planRefs(clean).some((r) => narrowing.includes(r)), "a ranking pass that picked nothing still read the description");
+  const failed = reducer(house, { type: "noteIdentify", result: identifyResult({ trace: { picks: [], stages: [{ stage: "model_rank", errors: 1 }] } as unknown as IdentifyResult["trace"] }) });
+  assert.deepEqual(planRefs(failed).filter((r) => narrowing.includes(r)), narrowing, "without the ranking the planner narrows the search as before");
+  assert.deepEqual(planRefs(house).filter((r) => narrowing.includes(r)), narrowing);
+});
+
+test("narrowing questions wait for the first identification instead of appearing and then vanishing", () => {
+  const c = undecidedHouse();
+  const narrowing = (o: Parameters<typeof buildDeck>[2]) => buildDeck(c, getGaps(c), o).filter((i) => i.kind === "plan").length;
+  assert.equal(narrowing({ identify: "running" }), 0);
+  assert.equal(narrowing({ identify: "idle", intake: "done" }), 0, "between reading and the code check");
+  assert.equal(narrowing({ identify: "error" }), 3, "a failed check falls back to the questions");
+  assert.equal(narrowing({ identify: "idle", intake: "idle" }), 3, "an application opened later, never checked, still asks");
+});
+
 test("Not sure on a planner question never blocks and is not asked again on its form card", () => {
   let c = demoCase();
   const record = intakeResult({ plan: { not_sure: ["intake.mailing_address"] } }).record;

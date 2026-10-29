@@ -167,7 +167,16 @@ export interface DeckOptions {
   today?: string;
 }
 
-const RULE_WHY = "Batatis compares the numbers you give with one acceptable solution in the code. It flags where your design departs from it; it never decides whether the design is acceptable. The officer decides.";
+/** Planner fields that only narrow which articles apply; the ranking pass reads the description instead. */
+const NARROWING_FIELDS = new Set(["storeys", "building_area_m2", "occupancy", "sprinklered", "limiting_distance_m", "faces_public_way", "dwelling_units", "part4_design", "assembly.description"]);
+
+/** The model ranking ran on this identification: it picked articles, or finished without an error. */
+export function aiRanked(c: Case): boolean {
+  const trace = c.identify?.trace;
+  return Boolean(trace?.picks?.length || trace?.stages?.some((s) => s.stage === "model_rank" && s.errors === 0));
+}
+
+const RULE_WHY ="Batatis compares the numbers you give with one acceptable solution in the code. It flags where your design departs from it; it never decides whether the design is acceptable. The officer decides.";
 
 /** Coded rules and standing packages that apply to this case, ready to place in the Rules step. */
 export function caseRules(c: Case, opts: DeckOptions): ShownRule[] {
@@ -537,7 +546,17 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
   // still need inputs ask only those.
   const namedInputs = decision.ruleId ? new Set(namedRuleInputs(decision.ruleId) ?? [])
     : decision.asksRuleInputs ? new Set(decision.missing) : null;
+  // Once the ranking ran, narrowing questions are not asked. Until the first identification lands in
+  // this visit they wait too, so a card never appears and then vanishes.
+  const rankPending = !c.identify && (opts.identify === "running" || (opts.identify === "idle" && opts.intake === "done"));
+  const skipNarrowing = aiRanked(c) || rankPending;
+  /** Narrowing fields the planner did not ask; a coded rule that needs one still asks it as a rule input. */
+  const skipped = new Set<string>();
   for (const { q, done, notSure } of plan) {
+    if (skipNarrowing && !done && q.kind !== "conflict" && NARROWING_FIELDS.has(q.field) && !namedInputs?.has(q.field)) {
+      skipped.add(localField(q.field));
+      continue;
+    }
     if (q.field === "product_scope" && decision.path !== "alternative") continue;
     if ((q.field === "alternative_description" || localField(q.field) === "alternative") && decision.path !== "alternative") continue;
     // A firm check has the inputs it needs. A named rule asks only its own remaining inputs.
@@ -765,7 +784,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
     const fields = r.inputs.map((i) => i.field).filter((f) => mine.has(f) || facts.get(f)?.source.ref?.startsWith(RULE_REF));
     for (const f of fields) {
       // A planner question asks this field already (or it was answered Not sure there).
-      if (asked.has(f) || planned.has(f) || readFields.has(f) || !index.inputs[f]) continue;
+      if (asked.has(f) || (planned.has(f) && !skipped.has(f)) || readFields.has(f) || !index.inputs[f]) continue;
       asked.add(f);
       push("C", {
         key: `rulein-${f}`,
