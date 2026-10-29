@@ -109,7 +109,7 @@ def create_router(cases):
         if data is None:
             seats = ai_access.limit(code_name)
             if seats is not None and len(store.accounts_using_code(code_name)) >= seats:
-                raise HTTPException(403, 'That access code is full')
+                raise HTTPException(403, 'That access code is full.')
             user = User(email=email, name=body.name, ai_access=code_name, ai_access_fingerprint=fingerprint)
             if code_name == ai_access.ADMIN:
                 # The admin account exists for the manager, onboarding offers nothing it needs to answer.
@@ -186,7 +186,7 @@ def create_router(cases):
         if seats is not None and user.ai_access != name:
             # Seats count accounts; the person's own account never counts against itself.
             if len(store.accounts_using_code(name, excluding=user.id)) >= seats:
-                raise HTTPException(403, 'That access code is full')
+                raise HTTPException(403, 'That access code is full.')
         user.ai_access, user.ai_access_fingerprint = name, fingerprint
         store.update_user(user, revoke_sessions=False)
         return AiAccess(required=ai_access.required(), granted=True)

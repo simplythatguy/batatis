@@ -390,3 +390,40 @@ def test_a_code_account_is_signed_out_when_its_code_is_turned_off_or_removed(app
             assert gone.status_code == 401 and gone.json()['detail'] == 'Your access code was turned off.'
         assert rex.get('/review/queue').status_code == 401, 'a reviewer whose code was removed no longer reaches the queue'
         assert admin.get('/admin/access-codes').status_code == 200, 'the admin stays signed in'
+
+
+@pytest.mark.parametrize('name', ['qa1 bad/name', '-lead', 'a<script>', '.hidden', 'tab\there', 'a' * 41])
+def test_a_code_name_must_match_the_rule_as_a_whole(app, name):
+    with TestClient(app, base_url='http://localhost') as admin:
+        as_admin(admin)
+        refused = admin.post('/admin/access-codes', json={'name': name})
+        assert refused.status_code in (400, 422), refused.text
+        if refused.status_code == 400:
+            assert refused.json()['detail'].startswith('Use letters, numbers')
+        assert admin.get('/admin/access-codes').json()['codes'] == []
+
+
+def test_names_differing_only_in_case_are_one_name(app, monkeypatch):
+    monkeypatch.setenv('BATATIS_AI_ACCESS_CODES', '{"Judges": "judges-code-aaaaaaaaaaaaaaaa"}')
+    with TestClient(app, base_url='http://localhost') as admin:
+        as_admin(admin)
+        assert admin.post('/admin/access-codes', json={'name': 'qa1-team'}).status_code == 201
+        for name in ('QA1-TEAM', 'Qa1-Team', 'judges', 'ADMIN'):
+            taken = admin.post('/admin/access-codes', json={'name': name})
+            assert taken.status_code == 409 and taken.json()['detail'] == 'A code with that name already exists.', name
+        assert sorted(c['name'] for c in admin.get('/admin/access-codes').json()['codes']) == ['Judges', 'qa1-team']
+
+
+def test_a_stored_code_with_a_slash_in_its_name_can_still_be_turned_off_and_removed(app, tmp_path):
+    """Names were not checked whole before; one already stored as 'qa1 bad/name' must not be stuck."""
+    store = CaseStore(tmp_path / 'accounts.sqlite')
+    with TestClient(app, base_url='http://localhost') as admin:
+        as_admin(admin)
+        assert store.create_access_code('qa1 bad/name', ai_access.fingerprint('bad-name-code-xxxxxxxxxxxx'), None)
+        ai_access.forget()
+        encoded = '/admin/access-codes/qa1%20bad%2Fname'
+        off = admin.patch(encoded, json={'revoked': True})
+        assert off.status_code == 200 and off.json()['revoked'] is True, off.text
+        assert admin.delete(encoded).status_code == 204
+        assert admin.get('/admin/access-codes').json()['codes'] == []
+        assert admin.delete(encoded).status_code == 404
