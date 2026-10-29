@@ -613,25 +613,44 @@ export function useAssistant(): AssistantState {
   return useSyncExternalStore(subscribe, () => state, () => state);
 }
 
+export type AnswerBlock = { kind: "p" | "quote"; text: string } | { kind: "list"; items: string[] };
+
 /**
- * Split an answer into prose and quoted code. Lines starting with ">" are quotes; the engine
- * keeps verbatim code text in quotes so it can be shown in the code-text style.
+ * Split an answer into prose, bullet lists and quoted code. Lines starting with ">" are quotes; the engine
+ * keeps verbatim code text in quotes so it can be shown in the code-text style. Models write a little
+ * markdown: "- " / "1. " lines become a list and "#" heading marks are dropped. Bold is inline (`answerSpans`).
  */
-export function answerBlocks(text: string): { kind: "p" | "quote"; text: string }[] {
-  const out: { kind: "p" | "quote"; text: string }[] = [];
-  let cur: { kind: "p" | "quote"; lines: string[] } | null = null;
+export function answerBlocks(text: string): AnswerBlock[] {
+  const out: AnswerBlock[] = [];
+  let cur: { kind: "p" | "quote" | "list"; lines: string[] } | null = null;
   const flush = () => {
-    if (cur && cur.lines.join(" ").trim()) out.push({ kind: cur.kind, text: cur.lines.join(" ").replace(/\s+/g, " ").trim() });
+    if (cur?.kind === "list") { if (cur.lines.length) out.push({ kind: "list", items: cur.lines }); }
+    else if (cur && cur.lines.join(" ").trim()) out.push({ kind: cur.kind, text: cur.lines.join(" ").replace(/\s+/g, " ").trim() });
     cur = null;
   };
   for (const line of text.split("\n")) {
     // The engine verifies quote lines that start with spaces or tabs and ">"; anything else is plain text.
     const quote = /^[ \t]*>/.test(line);
+    const bullet = !quote && /^[ \t]*(?:[-*•]|\d{1,2}[.)])[ \t]+\S/.test(line);
+    const heading = !quote && /^[ \t]*#{1,6}[ \t]+/.test(line);
     if (!line.trim()) { flush(); continue; }
-    const kind = quote ? "quote" : "p";
-    if (!cur || cur.kind !== kind) { flush(); cur = { kind, lines: [] }; }
-    cur.lines.push(quote ? line.replace(/^[ \t]*>[ \t]?/, "") : line);
+    if (heading) { flush(); out.push({ kind: "p", text: line.replace(/^[ \t]*#+[ \t]+/, "").trim() }); continue; }
+    const kind = quote ? "quote" : bullet ? "list" : "p";
+    if (!cur || cur.kind !== kind) {
+      // A wrapped bullet continues its item.
+      if (cur?.kind === "list" && kind === "p" && /^[ \t]+/.test(line)) { cur.lines[cur.lines.length - 1] += ` ${line.trim()}`; continue; }
+      flush(); cur = { kind, lines: [] };
+    }
+    cur.lines.push(quote ? line.replace(/^[ \t]*>[ \t]?/, "") : bullet ? line.replace(/^[ \t]*(?:[-*•]|\d{1,2}[.)])[ \t]+/, "").trim() : line);
   }
   flush();
   return out;
+}
+
+/** Bold runs in one line of answer text (`**bold**`). Other markdown marks are shown as the words they wrap. */
+export function answerSpans(text: string): { text: string; bold: boolean }[] {
+  return text.split(/\*\*(.+?)\*\*/g).flatMap((part, i) => {
+    const plain = i % 2 ? part : part.replace(/(^|\W)[*_]([^*_\s][^*_]*?)[*_](?=\W|$)/g, "$1$2").replace(/\*\*/g, "");
+    return plain ? [{ text: plain, bold: i % 2 === 1 }] : [];
+  });
 }

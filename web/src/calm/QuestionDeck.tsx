@@ -49,7 +49,7 @@ import { todayIn, toIso } from "./calendarDate";
 import { clearJourneyAnswerAction, journeyAnswerAction, journeyProgress, itemOpen, productScope, routeChoice, STAGES, type Answerer } from "./journey";
 import "./journey.css";
 import { codeHref } from "./routes";
-import type { RequirementAnswer } from "./requirements";
+import { requirementAnswer, type RequirementAnswer } from "./requirements";
 
 type Shown = DeckItem & { gone?: boolean };
 
@@ -391,7 +391,8 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
     );
   }
   if (item.kind === "requirement" && item.requirement) {
-    const chosen = (picked as RequirementAnswer | undefined) ?? null;
+    // The stored answer shows until the applicant picks another one.
+    const chosen = (picked as RequirementAnswer | undefined) ?? requirementAnswer(item.requirement);
     const needsReason = chosen === "does-not-apply" || chosen === "not-sure";
     return (
       <>
@@ -854,7 +855,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
     if (it.kind === "rule-input" && it.input && (it.input.spec.type === "number" || it.input.spec.type === "int")) return it.done || Boolean(draft.trim());
     if (it.kind === "condition") return busyKey !== it.key && ((picked[it.key] ?? currentState(it)) === "does_not_apply" ? Boolean(draft.trim()) : it.done);
     // "It applies" goes on its own; "No" and "Not sure" need the applicant's reason first.
-    if (it.kind === "requirement") return busyKey !== it.key && (picked[it.key] === "applies" || (Boolean(picked[it.key]) && Boolean(draft.trim())));
+    if (it.kind === "requirement") return busyKey !== it.key && (picked[it.key] === "applies" || (Boolean(picked[it.key]) && Boolean(draft.trim())) || (it.done && !picked[it.key]));
     if (it.kind === "route" && choicesFor(it).length === 0) return true;
     return it.done;
   }
@@ -869,6 +870,10 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
     if (!canContinue(item)) return;
     if (item.kind === "understood") {
       dispatch({ type: "confirmFacts", ids: item.ids ?? [] });
+      // A site read from labelled text is already confirmed, so confirmFacts never sees it. Acknowledging
+      // the rows still proposes the office it names; the office card then only asks to confirm it.
+      const office = !c.authority && item.rows?.some((r) => r.field === "municipality" || r.field === "municipalAddress") ? officeSuggestion(c) : null;
+      if (office && AUTHORITIES.some((a) => a.id === office.id)) dispatch({ type: "setAuthority", authority: office.id as typeof c.authority });
       dispatch(journeyAnswerAction({ ...item, key: item.acknowledgementKey ?? item.key }, "acknowledged"));
       setAdvanceAfter({ key: item.key, generation: engineGeneration() });
       return;
@@ -1310,7 +1315,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
             {item.section === "C" && (extras.failed.rules || extras.failed.case) && (
               <p className="cf-note" role="status"><span className="cf-dot is-warning" aria-hidden="true" />Rule checks didn’t load, so some rule questions may be missing. <button type="button" className="cf-link-btn" onClick={retryExtras}>Try again</button></p>
             )}
-            <OkRow label={item.kind === "understood" ? "Looks right" : item.kind === "departure" && picked[item.key] !== DEPARTURE_EDIT ? (writesDeparture(item) ? "Write it" : "Confirm") : "Continue"} primary={item.kind !== "paperwork" && (choicesFor(item).length === 0 || (item.done && !item.deferred) || item.kind === "authority" || (item.kind === "detail" && (picked[item.key] === "dismiss" || picked[item.key] === "edit-suggested")) || (item.kind === "condition" && (picked[item.key] ?? currentState(item)) === "does_not_apply"))} quiet={item.kind === "drafts" && !item.done} disabled={!canContinue(item)} onOk={next} typed={typed}>
+            <OkRow label={item.kind === "understood" ? "Looks right" : item.kind === "departure" && picked[item.key] !== DEPARTURE_EDIT ? (writesDeparture(item) ? "Write it" : "Confirm") : "Continue"} primary={item.kind !== "paperwork" && (choicesFor(item).length === 0 || (item.done && !item.deferred) || item.kind === "authority" || (item.kind === "detail" && (picked[item.key] === "dismiss" || picked[item.key] === "edit-suggested")) || (item.kind === "condition" && (picked[item.key] ?? currentState(item)) === "does_not_apply") || (item.kind === "requirement" && (picked[item.key] === "does-not-apply" || picked[item.key] === "not-sure")))} quiet={item.kind === "drafts" && !item.done} disabled={!canContinue(item)} onOk={next} typed={typed}>
               <span className="cf-ok-more">
                 {deferralFor(item) && choicesFor(item).length === 0 && item.kind !== "authority" && <button type="button" className="cf-link-btn" disabled={locked || reading.busy === item.ref || busyKey === item.key} onClick={() => { const choice = deferralFor(item); if (choice) deferCurrent(choice.value); }}>{deferralFor(item)?.label}</button>}
                 <HelpButton item={item} n={n} open={why} onToggle={() => setWhy((v) => !v)} />

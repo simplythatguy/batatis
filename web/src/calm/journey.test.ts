@@ -60,6 +60,16 @@ test("equal readings retain their sources in one row, while picture proposals st
   assert.equal(items.find((i) => i.kind === "fact")?.ref, "picture");
 });
 
+test("a labelled legal description and its lot, block and plan show one Legal description row", () => {
+  const read = (id: string, field: string, value: string) => ({ id, field, value, kind: "pointed" as const, status: "unconfirmed" as const, source: { type: "user_text" as const, ref: "intake:description", quote: value } });
+  const c = { ...emptyCase("owner"), facts: [
+    read("legal", "legal_description", "Lot 0, Block 0, Plan 0000000"), read("lot", "lot", "0"), read("block", "block", "0"), read("plan", "plan", "0000000"),
+  ] };
+  const legal = understandingRows(c, DETAIL_IDS).filter((r) => r.copy.title === "Legal description");
+  assert.equal(legal.length, 1);
+  assert.deepEqual([...legal[0].ids].sort(), ["block", "legal", "lot", "plan"], "Looks right still confirms every part");
+});
+
 test("derived confirmations are explicit suggestions and never silently fill the case", () => {
   const c = reducer(emptyCase("owner"), { type: "setDetail", field: "municipalAddress", value: "Synthetic site address", section: "B" });
   const items = buildDeck(c, [], { today: "2026-10-26", includeDone: true });

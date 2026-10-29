@@ -30,9 +30,8 @@ def _where(finding: Finding) -> str:
     parts = []
     if finding.section in 'ABCD':
         parts.append(f'Section {finding.section}')
+    # A form widget's internal name ("Signature1") means nothing to the applicant; the page does.
     if pointer is not None:
-        if pointer.form_field:
-            parts.append(f'field "{pointer.form_field}"')
         if pointer.page:
             parts.append(f'page {pointer.page} of {pointer.file}')
     return ', '.join(parts)
@@ -47,16 +46,23 @@ def _ask(finding: Finding) -> str:
     return _OFFICER_SENTENCE.sub('', _ask_text(finding)).strip()
 
 
+def _the(label: str) -> str:
+    """"the professional", never "the a professional"."""
+    return label if re.match(r'(?:the|a|an)\s', label, re.I) else f'the {label}'
+
+
 def _ask_text(finding: Finding) -> str:
     where = _where(finding)
     at = f' ({where})' if where else ''
     label = finding.label
+    if finding.problem in ('signature_unread',):
+        return f'Please confirm that the application is signed and dated{at}.'
     if finding.status == 'blank':
-        return f'Please provide the {label}{at}. The field is blank.'
+        return f'Please provide {_the(label)}{at}. The field is blank.'
     if finding.status == 'not_found':
-        return f'Please provide or point to the {label}{at}. The review could not find it.'
+        return f'Please provide or point to {_the(label)}{at}. The review could not find it.'
     if finding.problem in ('placeholder',):
-        return f'Please replace the placeholder in the {label}{at} with the actual information.'
+        return f'Please replace the placeholder in {_the(label)}{at} with the actual information.'
     if finding.problem in ('wrong_pair', 'pair_mismatch', 'no_table_row_pair'):
         return (f'Please check the objective and function for {label}{at} against the Division B attribution '
                 f'table. {finding.message}')
@@ -77,7 +83,7 @@ def _ask_text(finding: Finding) -> str:
     if finding.problem in ('no_date',):
         return f'Please give the issue or revision date of {label}{at}.'
     if finding.problem in ('generic', 'thin', 'unrelated', 'stated_as_fact'):
-        return (f'Please expand the {label}{at} so it addresses this specific departure, written by you. '
+        return (f'Please expand {_the(label)}{at} so it addresses this specific departure, written by you. '
                 f'{finding.message}')
     if finding.problem in ('missing_row',):
         return f'Please add a Section C row for {label}. {finding.message}'
@@ -85,10 +91,8 @@ def _ask_text(finding: Finding) -> str:
         return (f'Please state in the documentation {label}{at}, or say that it does not apply. '
                 f'{finding.message}')
     if finding.problem in ('absent',):
-        return f'Please include the {label}{at}. {finding.message}'
-    if finding.problem in ('signature_unread',):
-        return f'Please confirm that the application is signed and dated{at}.'
-    return f'Please provide or confirm the {label}{at}. {finding.message}'
+        return f'Please include {_the(label)}{at}. {finding.message}'
+    return f'Please provide or confirm {_the(label)}{at}. {finding.message}'
 
 
 def item_id(key: str) -> str:
@@ -118,7 +122,7 @@ def build(findings: list[Finding]) -> InformationRequest:
         text = _ask(finding)
         if FORBIDDEN.search(text):
             # A message carried from a finding must not smuggle verdict language into a request.
-            text = f'Please provide or confirm the {finding.label}.'
+            text = f'Please provide or confirm {_the(finding.label)}.'
         items.append(InformationRequestItem(
             id=item_id(finding.key), finding_key=finding.key, section=finding.section, field=finding.field,
             text=text, included=finding.status != 'not_found' and finding.routed_to == 'applicant',

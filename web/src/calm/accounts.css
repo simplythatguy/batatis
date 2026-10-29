@@ -110,7 +110,6 @@
   display: block;
   width: 28px;
   height: 28px;
-  background: var(--cf-text);
 }
 .ac-auth-title { margin: 16px 0 22px; font-size: 17px; font-weight: 500; letter-spacing: -0.01em; line-height: 1.2; color: var(--cf-text-2); }
 .ac-auth-go { height: 46px; margin-top: 6px; }
@@ -354,6 +353,9 @@
   font-size: 14.5px;
 }
 .ac-row-label { color: var(--cf-text-3); font-size: 13.5px; }
+.ac-row-label.is-code { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* As wide as the new-code name box, so every seat-limit box sits in one column. */
+.ac-code-tally { flex: 0 0 160px; font-variant-numeric: tabular-nums; }
 .ac-row-value { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-width: 0; overflow-wrap: anywhere; }
 .ac-faint-tag { color: var(--cf-text-3); font-size: 12.5px; }
 .ac-saved { display: inline-flex; align-items: center; gap: 6px; color: var(--cf-text-3); font-size: 12.5px; }

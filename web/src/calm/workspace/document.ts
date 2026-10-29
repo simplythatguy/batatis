@@ -89,9 +89,12 @@ export function buildDocument(c: Case, gaps: readonly Gap[], requests: readonly 
   for (const f of PROCESS_FIELDS) add("case", {
     id: PROCESS_FACT[f.id], label: f.label, text: c.process[f.id], required: true, target: { kind: "process", field: f.id },
   });
-  // The chosen references are the rows below; a summary line only appears while none is chosen.
-  if (!c.sectionC.length) add("C", { id: "provisions", label: "Code references", text: c.candidates.filter(a => a.answer === "yes").map(a => a.provision).join(" · "), required: true, target: { kind: "card", href: "#/questions?first=code" } });
-  for (const row of c.sectionC) {
+  // The chosen references are the rows below; a summary line only appears while none is chosen. The lookup
+  // also holds a row for every card still asked or answered No (each sentence of a library article): only a
+  // Yes ("it differs") puts a sentence in Section C.
+  const chosen = c.sectionC.filter(r => c.candidates.some(a => a.id === r.candidateId && a.answer === "yes"));
+  if (!chosen.length) add("C", { id: "provisions", label: "Code references", text: c.candidates.filter(a => a.answer === "yes").map(a => a.provision).join(" · "), required: true, target: { kind: "card", href: "#/questions?first=code" } });
+  for (const row of chosen) {
     add("C", { id: `section_c.${row.provision}`, label: articleTitle(c, row.provision) || "Code reference", text: row.citation, required: false,
       reference: row, target: { kind: "card", href: "#/questions?first=code" } });
     // No explanation line yet: the package does not print one, and the paper shows only what the officer receives.

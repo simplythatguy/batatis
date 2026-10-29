@@ -90,6 +90,24 @@ def test_refuses_a_form_with_a_different_hash(case, codes, tmp_path):
         export_case(case, codes=codes, form=other)
 
 
+def test_cleared_answers_are_withdrawn_and_pending_ones_read_plainly(case, codes):
+    # QA 2026-10-28: typing a permit number, then clearing it, blocked submission with
+    # 'unconfirmed pointed fact "permit" (f-…-withdrawn)' in Review, the Send flags and the PDF.
+    from engine.export.package import prepare_package
+    cleared = Source(type='user_click', ref='Answer withdrawn by applicant', quote='')
+    edited = case.model_copy(deep=True)
+    edited.facts += [
+        Fact(id='f-permit', field='permit', value='BP-1', kind='pointed', status='confirmed', source=Source(type='user_text', ref='m1')),
+        Fact(id='f-permit-withdrawn', field='permit', value='', kind='pointed', status='unconfirmed', source=cleared),
+        Fact(id='cite_1-withdrawn', field='citation.9.10.15.4.', value='', kind='pointed', status='unconfirmed', source=cleared),
+    ]
+    assert prepare_package(edited, codes).policy.report.export_reasons == prepare_package(case, codes).policy.report.export_reasons
+    edited.facts.append(Fact(id='f-permit-2', field='permit', value='BP-2', kind='pointed', status='unconfirmed',
+                             source=Source(type='user_text', ref='m2')))
+    gaps = [gap for gap in prepare_package(edited, codes).policy.gaps if gap.id.startswith('export:unconfirmed:')]
+    assert [(gap.message, gap.fix_hint) for gap in gaps] == [('Permit number is not confirmed yet.', 'Confirm it, change it or clear it.')]
+
+
 def test_blocks_on_unconfirmed_facts_and_blocking_gaps(case, codes):
     src = Source(type='user_text', ref='m1')
     blocked = case.model_copy(deep=True)
@@ -101,9 +119,9 @@ def test_blocks_on_unconfirmed_facts_and_blocking_gaps(case, codes):
         export_case(blocked, codes=codes)
     text = ' '.join(e.value.reasons)
     assert 'risk assessment not written' in text and 'section A, owner_name:' in text
-    assert 'unconfirmed proposed fact "lot"' in text  # the newer unknown revision supersedes the old value
+    assert 'Lot number is not confirmed yet.' in text  # the newer unknown revision supersedes the old value
     blocked.facts.append(Fact(field='storeys', value=2, kind='proposed', source=src, confidence=0.6))
-    with pytest.raises(ExportBlocked, match='unconfirmed proposed fact "storeys"'):
+    with pytest.raises(ExportBlocked, match='Number of storeys is not confirmed yet.'):
         export_case(blocked, codes=codes)
 
     draft = export_case(blocked, codes=codes, draft=True)
