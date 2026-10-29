@@ -4,6 +4,7 @@ import { AccountsError } from "../../api/accounts";
 import { engine, type ProfessionalResult } from "../../api/client";
 import type { Case, ProfessionalRequirementRequest } from "../../api/types.gen";
 import { Modal } from "../ui";
+import { sentLabel } from "./queue";
 
 export function ProfessionalRequirement({ c, editable, busy, unresolved, onResolve, onEditingChange }: {
   c: Case;
@@ -69,7 +70,7 @@ export function ProfessionalRequirement({ c, editable, busy, unresolved, onResol
         <div className="ac-small">
           <p>{resolution.required ? "Required" : "Not required"} for {resolution.scope}.</p>
           <p className="ac-faint">{resolution.basis}</p>
-          <p className="ac-faint">{resolution.reference} · recorded by {resolution.by_name} · {new Date(resolution.at).toLocaleString()}</p>
+          <p className="ac-faint">{resolution.reference} · recorded by {resolution.by_name} · {sentLabel(resolution.at)}</p>
         </div>
       ) : (
         <p className="ac-faint ac-small">{loadError || (history.length
