@@ -319,3 +319,19 @@ test("Add writes to the application the library reads for, and its note never fo
   assert.ok(button(b), "B can add it itself");
   h.unmount();
 });
+
+test("a made-up article link shows one not-found state and never cites the article", async () => {
+  const missing = Object.assign(new Error("That provision was not found."), { status: 404, detail: "That provision was not found." });
+  const h = await componentHarness(new URL("./CodeLibrary.tsx", import.meta.url), "Reading", {
+    "./codeData": { useText: () => ({ state: "error", error: missing, retry() {} }), useContext: () => ({ state: "error", error: missing, retry() {} }), errorText: (e: Error) => ({ text: e.message }) },
+    "./codeScope": { useCodeScope: () => "application" },
+    "./routes": { codeHref: () => "#/code" },
+    "./ui": { CIcon: () => null },
+  });
+  const tree = await h.render({ id: "99.99.99.", filter: "all", index: new Map(), narrow: false });
+  const shown = text(tree);
+  assert.doesNotMatch(shown, /Article 99\.99\.99\.|NBC\(AE\)/, "no citation for a provision that does not exist");
+  assert.equal(nodes(tree, (n: { type: unknown }) => n.type === "button").length, 0, "no Try again for a missing provision");
+  assert.equal(shown.match(/not in the code/g)?.length, 1);
+  h.unmount();
+});
