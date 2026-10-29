@@ -1,25 +1,13 @@
 import type { Case } from "../../api/types.gen";
+import { changeLabel, formValue } from "./formFields";
 import { sentLabel } from "./queue";
 import { visibleSubmissionChanges } from "./submissionChanges";
 
-const LABELS: Record<string, string> = {
-  legal_description: "Legal description", legalDescription: "Legal description", owner_name: "Owner", owner: "Owner",
-  civic_address: "Municipal address", municipalAddress: "Municipal address", application_date: "Application date",
-  alternative_description: "Proposed alternative", mailing_address: "Mailing address", provisions: "Code references",
-};
 const decisionLabel = (outcome: string) => ({ return: "Returned", accept: "Accepted as administratively complete", refuse: "Refused" })[outcome] ?? "Decision recorded";
-const label = (field: string, c: Case) => {
-  if (field.startsWith("clarification.")) return "Applicant clarification";
-  if (field.startsWith("codecheck.")) return "Applicant code check answer";
-  if (field.startsWith("identify.")) return "Applicant code question answer";
-  const document = /^evidence\.([^.]+)\.(?:listing\.)?(.*)$/.exec(field);
-  if (document) {
-    const title = [...c.facts].reverse().find(fact => fact.field === `evidence.${document[1]}.title`)?.value;
-    const attribute = document[2] === "file_ref" ? "attachment" : document[2].replace(/_/g, " ");
-    return `${title || "Document"} · ${attribute}`;
-  }
-  return LABELS[field] ?? field.replace(/^process\./, "").replace(/_/g, " ").replace(/([a-z])([A-Z])/g, "$1 $2");
-};
+const label = (field: string, c: Case) => changeLabel(field, id => {
+  const title = [...c.facts].reverse().find(fact => fact.field === `evidence.${id}.title`)?.value;
+  return typeof title === "string" ? title : null;
+});
 
 /** Stored deltas describe edits; they never say an officer's requested item was resolved. */
 export function SubmissionHistory({ c }: { c: Case }) {
@@ -43,7 +31,7 @@ export function SubmissionHistory({ c }: { c: Case }) {
                 <dt>{label(change.field, c)}</dt>
                 <dd>{change.field.endsWith(".file_ref")
                   ? change.before && change.after ? "The attached file was replaced." : change.after ? "A file was attached." : "The file attachment was removed."
-                  : <>Before: {change.before || "—"}<br />Now: {change.after || "—"}</>}</dd>
+                  : <>Before: {formValue(change.before) || "—"}<br />Now: {formValue(change.after) || "—"}</>}</dd>
               </div>)}
             </dl>
           </details>}

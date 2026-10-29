@@ -144,7 +144,8 @@ function CaseReview() {
   // Rings never count as Section C; this only points at the library.
   const rel = useRelevance();
   const likely = rankedIn(rel.display, rel.cutoffs, ["high"], rel.rerank).length;
-  const pre = c.intake?.record.plan?.pre_application;
+  // Pre-submission advice ends once the application is sent.
+  const pre = readOnly ? undefined : c.intake?.record.plan?.pre_application;
   const departures = confirmedProvisions(c).length;
 
   const sections = [

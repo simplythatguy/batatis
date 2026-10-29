@@ -8,7 +8,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, typ
 import { AccountsError, claimConflict, review, type Claim, type Message } from "../../api/accounts";
 import { EngineError } from "../../api/client";
 import { packageReview, type ReviewTarget } from "../../api/packageReview";
-import type { Case, PackageReviewIndex, ProfessionalRequirementRequest, ReviewSession, OfficerWorkspace } from "../../api/types.gen";
+import type { Case, PackageReviewIndex, ProfessionalRequirementRequest, ReviewSession, OfficerWorkspace, SessionSummary } from "../../api/types.gen";
 import { accountSession, useAccount } from "../account";
 import { AcIcon, Avatar, PageHead } from "../auth/bits";
 import { ExpiryNotice } from "../ExpiryNotice";
@@ -36,7 +36,7 @@ import { CIcon } from "../ui";
 import type { IconName } from "../icons";
 import { Icon24 } from "../icons";
 import { StatusPill } from "./ReviewQueue";
-import { allAnchors, anchorFor, findingState, SECTIONS, sheetRows, targetOptions, workspaceDecision } from "./workspaceView";
+import { allAnchors, anchorFor, findingState, SECTIONS, sheetRows, sinceReturn, targetOptions, withThe, workspaceDecision } from "./workspaceView";
 import "./review.css";
 
 type Snapshot = Awaited<ReturnType<typeof readReviewSnapshot>>;
@@ -453,7 +453,7 @@ export function ReviewWorkspace({ caseId, phoneTools }: { caseId: string; phoneT
           )}
           {shown && indexState !== "unavailable" ? (
             <SessionWorkspace key={`${shown.package_id}:${shown.version}:${me}`} stage={at} onStage={go}
-              c={c} snapshot={snapshot} session={shown} workspace={workspace} target={target} applicant={applicant}
+              c={c} snapshot={snapshot} session={shown} versions={versions} workspace={workspace} target={target} applicant={applicant}
               editable={editable} busy={Boolean(busy) || running || refreshing} showDecision={canReview && !historical && !closeOut}
               historical={historical} status={status} messages={messages} onMessages={setMessages} me={me}
               messageDraft={messageDraft} onMessageDraft={setMessageDraft} onDraft={draftChanged} onSaved={adoptIndex}
@@ -543,9 +543,9 @@ const SHEET_SECTIONS: { id: string; title: string; icon: IconName; parts: string
 ];
 
 /** The review of one version: one screen, with the application and the messages one step away. */
-function SessionWorkspace({ stage, onStage, c, snapshot, session, workspace, target, applicant, editable, busy, showDecision, historical, status, messages, onMessages, me, messageDraft, onMessageDraft, onDraft, onSaved, onConflict, onReturn, onAccept, professional, outcome }: {
+function SessionWorkspace({ stage, onStage, c, snapshot, session, versions, workspace, target, applicant, editable, busy, showDecision, historical, status, messages, onMessages, me, messageDraft, onMessageDraft, onDraft, onSaved, onConflict, onReturn, onAccept, professional, outcome }: {
   stage: Stage; onStage: (s: Stage) => void;
-  c: Case; snapshot: Snapshot; session: ReviewSession; workspace: OfficerWorkspace | null; target: ReviewTarget; applicant: string;
+  c: Case; snapshot: Snapshot; session: ReviewSession; versions: SessionSummary[]; workspace: OfficerWorkspace | null; target: ReviewTarget; applicant: string;
   editable: boolean; busy: boolean; showDecision: boolean; historical: boolean; status: string;
   messages: Message[] | null; onMessages: Dispatch<SetStateAction<Message[] | null>>; me: string | null; messageDraft: string; onMessageDraft: (v: string) => void;
   onDraft: (state: DraftReport) => void; onSaved: (index: PackageReviewIndex) => void; onConflict: () => void;
@@ -602,16 +602,11 @@ function SessionWorkspace({ stage, onStage, c, snapshot, session, workspace, tar
     : asked ? `Ask for ${plural(asked, "thing")}.`
     : required ? `${plural(required, "required item")} to look at.`
     : "Nothing to ask.";
-  const d = session.diff;
-  const since = d && !decided ? [
-    d.resolved.length ? `${d.resolved.length} fixed` : "",
-    d.new.length ? `${d.new.length} new` : "",
-    d.unverified?.length ? `${d.unverified.length} can’t tell` : "",
-  ].filter(Boolean).join(" · ") : "";
+  const since = decided ? "" : sinceReturn(session.diff, versions);
   const lede = status === "accepted" ? `${day(c.decision?.at)} · technical review next · not a variance`
     : status === "refused" ? `${day(c.decision?.at)} · with the appeal notice`
     : status === "returned" ? `Sent ${day(c.decision?.at)}`
-    : since ? `Since version ${d!.previous_version}: ${since}` : "";
+    : since;
 
   const sections: SectionRow[] = SHEET_SECTIONS.map((s) => {
     const open = active.filter((r) => s.parts.includes(r.finding.section));
@@ -726,7 +721,7 @@ function SessionWorkspace({ stage, onStage, c, snapshot, session, workspace, tar
         onCall={(edit) => dispatch({ type: "finding", edit })}
         onAddOwn={(f) => {
           const t = targets.find((x) => x.field === f.field) ?? targets.find((x) => x.section === f.section && !x.field) ?? { section: f.section, field: f.field, label: sentence(f.label) };
-          dispatch({ type: "add", item: officerItem(`Please provide or confirm the ${f.label}.`, t) });
+          dispatch({ type: "add", item: officerItem(`Please provide or confirm ${withThe(f.label)}.`, t) });
         }}
         onAdd={() => dispatch({ type: "add", item: officerItem("", targets.find((t) => t.section === "B" && !t.field) ?? targets[0]) })}
         onOwnText={(key, text) => dispatch({ type: "item", key, patch: { text } })}

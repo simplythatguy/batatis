@@ -6,6 +6,7 @@
  */
 import { useCallback, useMemo, useSyncExternalStore } from "react";
 import { CodeLibraryError, codeLibrary, type RelevanceResult } from "../api/codeLibrary";
+import { acknowledgeWrite } from "../api/sync";
 import { useCase } from "../store";
 import { useCodeScope, type CodeScope } from "./codeScope";
 import { libraryEpoch } from "./libraryContext";
@@ -79,6 +80,8 @@ export async function scoreRelevance(caseId: string) {
   set({ phase: "running", error: null, startedAt: Date.now(), retryAt: null });
   try {
     const result = await codeLibrary.score(caseId, ctl.signal);
+    // Saving the scores bumped the case version; keep the next draft save from a false conflict.
+    acknowledgeWrite(caseId, result.case_version);
     if (ctl.signal.aborted || state.caseId !== caseId) return;
     set({ phase: "ready", result, startedAt: null });
   } catch (e) {

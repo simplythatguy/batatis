@@ -81,7 +81,7 @@ export function useWorkspace(contentKey: string) {
       const id = await current.saveDraft();
       if (lifetime.current.signal.aborted || accountSession() !== session || engineGeneration() !== generation) return;
       if (!id || !live.current.store.readSync().saved) throw new Error("Save to sync change history.");
-      await journal.flush(entries => workspaceApi.history(id, entries, lifetime.current.signal));
+      await journal.flush(entries => current.queueWrite(() => workspaceApi.history(id, entries, lifetime.current.signal)));
       if (!lifetime.current.signal.aborted) setHistoryNote("");
     } catch (e) {
       if (!lifetime.current.signal.aborted) setHistoryNote(workspaceFailure(e, "History"));

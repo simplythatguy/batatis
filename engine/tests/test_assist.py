@@ -373,6 +373,14 @@ def test_context_keeps_the_applicants_answers_and_the_officers_open_items():
     assert 'officer_review' not in applicant
 
 
+def test_context_shows_yes_or_no_answers_in_words_not_python_booleans():
+    # QA 2026-10-28: the assistant quoted 'professional judgement required: True'.
+    case = Case(facts=[fact('professional.judgement_required', True), fact('professional.fire_alarm', False)])
+    body = routes_assist.AssistRequest(screen='review-missing', question='What is still missing?')
+    values = [f['value'] for f in routes_assist.build_context(body, case, Codes())['application']['facts']]
+    assert values == ['Yes', 'No']
+
+
 def test_a_failed_provider_call_is_logged_without_the_prompt_and_answered_with_a_plain_503(assistant, monkeypatch, caplog):
     client, _, calls = assistant
     enable(monkeypatch)
@@ -456,7 +464,7 @@ def test_a_refused_connection_is_logged_with_its_reason_and_answered_with_a_plai
     assert response.status_code == 503 and response.json()['detail'] == 'Assistant unavailable'
     logged = _assist_log(caplog)
     failure = httpx.ConnectError if provider == 'openai' else anthropic.APIConnectionError
-    assert provider in logged and failure.__name__ in logged and 'connection refused' in logged.lower()
+    assert provider in logged and failure.__name__ in logged and 'refused' in logged.lower()
     assert question not in logged and 'fake-secret' not in logged
-    assert 'connection refused' not in response.text.lower() and question not in response.text
+    assert 'refused' not in response.text.lower() and question not in response.text
     assert 'ConnectError' not in response.text and 'APIConnectionError' not in response.text

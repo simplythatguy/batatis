@@ -28,6 +28,7 @@ async function mounted(initial: Case, focus: string | null = null, answerError: 
   const updateSession = (patch) => { session = { ...session, ...(typeof patch === "function" ? patch(session) : patch) }; };
   const actions: Action[] = [];
   const dispatch = (action: Action) => { actions.push(action); c = reducer(c, action); };
+  let choices: Record<string, string> = {};
   const reading = { intake: "done", identify: "done", busy: null };
   const h = await componentHarness(new URL("./QuestionDeck.tsx", import.meta.url), "CaseDeck", {
     "../store": { useCase: () => ({ c, dispatch, gaps: getGaps(c), engineId: "case-test", sectionCLookup: { source: "live" }, reading, requestCheck() {}, answerPlan: async (q, value) => {
@@ -48,11 +49,12 @@ async function mounted(initial: Case, focus: string | null = null, answerError: 
     "./begin": { useCurrentApplication: () => ({ app: { status: "draft" }, locked: false, readOnly: false }) },
     "./useDeckExtras": { useDeckExtras: () => ({ options: {}, extras: { failed: {}, checklists: null } }) },
     "./account": { useAccount: () => ({ user: { id: "test", role: "applicant" } }) },
-    "./useQuestionDraft": { useQuestionDraft: (_a, _g, _e, _k, saved) => ({ value: saved, setValue() {}, choices: {}, setChoices() {}, conflict: null, confirmValue() {} }) },
+    "./useQuestionDraft": { useQuestionDraft: (_a, _g, _e, _k, saved) => ({ value: saved, setValue() {}, choices, setChoices: (next) => { choices = typeof next === "function" ? next(choices) : next; }, conflict: null, confirmValue() {} }) },
     "./assistant/assistant": { setAssistantContext() {} },
     "./assistant/questionContext": { questionContext: () => ({}) },
     "./applications": { readOnlyStatus: () => ({}) },
     "../api/sync": { engineGeneration: () => 1 },
+    "../config": await import("../config.ts"),
     "./icons": { Icon24: "icon" },
   }, { location: { hash: "#/questions", replace() {} }, window: {}, document: { addEventListener() {}, removeEventListener() {} } });
   const render = async () => { await h.render({ focus, codeFirst: false }); return h.render({ focus, codeFirst: false }); };
@@ -101,6 +103,20 @@ test("auto-confirmed readings still ask for acknowledgement once, and a new read
   nodes(tree, (node) => node.type?.name === "OkRow")[0].props.onOk();
   tree = await m.render();
   assert.equal(m.shown(tree)?.props.item.kind, "understood", "a prior visit to the card cannot suppress a new reading");
+  m.h.unmount();
+});
+
+test("Looks right on a site read as Edmonton proposes Edmonton as the reviewing office", async () => {
+  const site = { ...field("municipality", "Edmonton"), status: "confirmed" as const };
+  const address = { ...field("municipalAddress", "0000 Example Crescent NW, Edmonton, AB"), status: "confirmed" as const };
+  const initial = plannedCase();
+  const m = await mounted({ ...initial, facts: [site, address], intake: { ...initial.intake!, facts: [site, address], factIds: [site.id, address.id] } });
+  let tree = await m.render();
+  assert.equal(m.shown(tree)?.props.item.kind, "understood");
+  assert.equal(m.case().authority, "");
+  nodes(tree, (node) => node.type?.name === "OkRow")[0].props.onOk();
+  tree = await m.render();
+  assert.equal(m.case().authority, "edmonton", "the applicant only confirms the proposed office");
   m.h.unmount();
 });
 
@@ -251,6 +267,26 @@ test("an office link opens the office row in the sheet", async () => {
   assert.equal(body.props.item.kind, "paperwork");
   assert.equal(body.props.focusRow, "authority");
   assert.ok(body.props.item.paperworkRows.some((row) => row.kind === "authority"));
+  m.h.unmount();
+});
+
+test("a rule card shows Continue once No or Not sure is picked, not only the keyboard shortcut", async () => {
+  const rule = {
+    id: "B:9.10.15.4.", provision_id: "9.10.15.4.", division: "B", title: "Glazed openings", role: "unresolved", disposition: "review",
+    applicability: "unknown", human_confirmed: false, confirmation_fingerprint: null, confirmation_reason: null, confirmed_at: null,
+    needs_review: true, source_status: "verified", citation: "NBC(AE) 2023 p2, Div B, Article 9.10.15.4.", quote: "Glazed openings.",
+    quote_provision_id: "9.10.15.4.(1)", pdf_page: 1, pdf_page_end: null, source_sha256: "abc", discoveries: [], evidence: [],
+    evidence_ids: [], conditions: [], review_reasons: [],
+  };
+  const identify = { mode: "live", narrowed: false, committed: [], choices: [], decisions: {}, articles: [], questions: [], requirements: [rule] };
+  const m = await mounted({ ...plannedCase("likely"), identify } as unknown as Case, `req-${rule.id}`);
+  for (const answer of ["does-not-apply", "not-sure"]) {
+    let tree = await m.render();
+    assert.equal(m.shown(tree).props.item.kind, "requirement");
+    m.shown(tree).props.onPick(answer);
+    tree = await m.render();
+    assert.equal(nodes(tree, (node) => node.type?.name === "OkRow")[0].props.primary, true, `${answer} waits for a reason and a visible Continue`);
+  }
   m.h.unmount();
 });
 

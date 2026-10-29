@@ -77,7 +77,7 @@ def test_without_the_fact_the_field_stays_blank_and_is_never_shown_as_n_a(codes,
 def test_unconfirmed_na_blocks_the_final_export_and_draft_shows_blank(codes):
     case = without(demo_case(CASE_A, codes), 'permit_number')
     case.facts.append(na_fact('permit_number', status='unconfirmed'))
-    with pytest.raises(ExportBlocked, match='not_applicable.permit_number'):
+    with pytest.raises(ExportBlocked, match='permit number is not confirmed'):
         export_case(case, codes=codes)
     draft = export_case(case, codes=codes, draft=True)
     assert 'Permit' not in shown(draft) and 'Permit' in draft.blank_fields
