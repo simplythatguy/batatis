@@ -110,7 +110,6 @@
   display: block;
   width: 28px;
   height: 28px;
-  background: var(--cf-text);
 }
 .ac-auth-title { margin: 16px 0 22px; font-size: 17px; font-weight: 500; letter-spacing: -0.01em; line-height: 1.2; color: var(--cf-text-2); }
 .ac-auth-go { height: 46px; margin-top: 6px; }
