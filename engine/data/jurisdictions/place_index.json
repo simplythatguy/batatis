@@ -7,8 +7,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "alexander-first-nation",
@@ -17,7 +18,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Alexander First Nation"
+   "office": "Alexander First Nation",
+   "ask": "Ask Alexander First Nation which building rules apply and who reviews them."
   },
   {
    "id": "alexis-nakota-sioux-nation",
@@ -28,7 +30,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Alexis Nakota Sioux Nation"
+   "office": "Alexis Nakota Sioux Nation",
+   "ask": "Ask Alexis Nakota Sioux Nation which building rules apply and who reviews them."
   },
   {
    "id": "athabasca-chipewyan-first-nation",
@@ -37,7 +40,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Athabasca Chipewyan First Nation"
+   "office": "Athabasca Chipewyan First Nation",
+   "ask": "Ask Athabasca Chipewyan First Nation which building rules apply and who reviews them."
   },
   {
    "id": "athabasca-county",
@@ -45,8 +49,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "beaver-county",
@@ -54,8 +59,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Beaver County"
+   "covered": false,
+   "office": "Beaver County",
+   "ask": "Ask Beaver County about its variance steps and forms."
   },
   {
    "id": "beaver-first-nation",
@@ -64,7 +70,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Beaver First Nation"
+   "office": "Beaver First Nation",
+   "ask": "Ask Beaver First Nation which building rules apply and who reviews them."
   },
   {
    "id": "beaver-lake-cree-nation",
@@ -75,7 +82,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Beaver Lake Cree Nation"
+   "office": "Beaver Lake Cree Nation",
+   "ask": "Ask Beaver Lake Cree Nation which building rules apply and who reviews them."
   },
   {
    "id": "big-lakes-county",
@@ -83,8 +91,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Big Lakes County"
+   "covered": false,
+   "office": "Big Lakes County",
+   "ask": "Ask Big Lakes County about its variance steps and forms."
   },
   {
    "id": "bigstone-cree-nation",
@@ -95,7 +104,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Bigstone Cree Nation"
+   "office": "Bigstone Cree Nation",
+   "ask": "Ask Bigstone Cree Nation which building rules apply and who reviews them."
   },
   {
    "id": "birch-hills-county",
@@ -103,8 +113,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Birch Hills County"
+   "covered": false,
+   "office": "Birch Hills County",
+   "ask": "Ask Birch Hills County about its variance steps and forms."
   },
   {
    "id": "blood-tribe",
@@ -116,7 +127,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Blood Tribe"
+   "office": "Blood Tribe",
+   "ask": "Ask Blood Tribe which building rules apply and who reviews them."
   },
   {
    "id": "brazeau-county",
@@ -124,8 +136,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "buffalo-lake-metis-settlement",
@@ -133,8 +146,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Buffalo Lake Metis Settlement"
+   "covered": false,
+   "office": "Buffalo Lake Metis Settlement",
+   "ask": "Ask Buffalo Lake Metis Settlement about its variance steps and forms."
   },
   {
    "id": "calgary-international-airport",
@@ -144,8 +158,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "City of Calgary"
+   "covered": false,
+   "office": "City of Calgary",
+   "ask": "Ask the airport authority for its letter of authorization, then City of Calgary."
   },
   {
    "id": "camrose-county",
@@ -153,8 +168,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Camrose County"
+   "covered": false,
+   "office": "Camrose County",
+   "ask": "Ask Camrose County about its variance steps and forms."
   },
   {
    "id": "cardston-county",
@@ -162,8 +178,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Cardston County"
+   "covered": false,
+   "office": "Cardston County",
+   "ask": "Ask Cardston County about its variance steps and forms."
   },
   {
    "id": "chipewyan-prairie-first-nation",
@@ -172,7 +189,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Chipewyan Prairie First Nation"
+   "office": "Chipewyan Prairie First Nation",
+   "ask": "Ask Chipewyan Prairie First Nation which building rules apply and who reviews them."
   },
   {
    "id": "airdrie",
@@ -182,8 +200,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "City of Airdrie"
+   "covered": false,
+   "office": "City of Airdrie",
+   "ask": "Ask City of Airdrie about its variance steps and forms."
   },
   {
    "id": "beaumont",
@@ -193,8 +212,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "City of Beaumont"
+   "covered": false,
+   "office": "City of Beaumont",
+   "ask": "Ask City of Beaumont about its variance steps and forms."
   },
   {
    "id": "brooks",
@@ -204,8 +224,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "City of Brooks"
+   "covered": false,
+   "office": "City of Brooks",
+   "ask": "Ask City of Brooks about its variance steps and forms."
   },
   {
    "id": "calgary",
@@ -216,7 +237,8 @@
    "province": "AB",
    "kind": "accredited_municipality",
    "covered": true,
-   "office": "City of Calgary"
+   "office": "City of Calgary",
+   "ask": "Ask City of Calgary about its intake steps and fees."
   },
   {
    "id": "camrose",
@@ -226,8 +248,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "City of Camrose"
+   "covered": false,
+   "office": "City of Camrose",
+   "ask": "Ask City of Camrose about its variance steps and forms."
   },
   {
    "id": "chestermere",
@@ -237,8 +260,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "City of Chestermere"
+   "covered": false,
+   "office": "City of Chestermere",
+   "ask": "Ask City of Chestermere about its variance steps and forms."
   },
   {
    "id": "cold-lake",
@@ -248,8 +272,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "City of Cold Lake"
+   "covered": false,
+   "office": "City of Cold Lake",
+   "ask": "Ask City of Cold Lake about its variance steps and forms."
   },
   {
    "id": "edmonton",
@@ -260,7 +285,8 @@
    "province": "AB",
    "kind": "accredited_municipality",
    "covered": true,
-   "office": "City of Edmonton"
+   "office": "City of Edmonton",
+   "ask": "Ask City of Edmonton about its intake steps and fees."
   },
   {
    "id": "fort-saskatchewan",
@@ -270,8 +296,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "City of Fort Saskatchewan"
+   "covered": false,
+   "office": "City of Fort Saskatchewan",
+   "ask": "Ask City of Fort Saskatchewan about its variance steps and forms."
   },
   {
    "id": "grande-prairie",
@@ -281,8 +308,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "City of Grande Prairie"
+   "covered": false,
+   "office": "City of Grande Prairie",
+   "ask": "Ask City of Grande Prairie about its variance steps and forms."
   },
   {
    "id": "lacombe",
@@ -292,8 +320,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "City of Lacombe"
+   "covered": false,
+   "office": "City of Lacombe",
+   "ask": "Ask City of Lacombe about its variance steps and forms."
   },
   {
    "id": "leduc",
@@ -303,8 +332,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "City of Leduc"
+   "covered": false,
+   "office": "City of Leduc",
+   "ask": "Ask City of Leduc about its variance steps and forms."
   },
   {
    "id": "lethbridge",
@@ -314,8 +344,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "City of Lethbridge"
+   "covered": false,
+   "office": "City of Lethbridge",
+   "ask": "Ask City of Lethbridge about its variance steps and forms."
   },
   {
    "id": "lloydminster",
@@ -326,7 +357,8 @@
    "province": "AB",
    "kind": "unconfirmed",
    "covered": false,
-   "office": "City of Lloydminster"
+   "office": "City of Lloydminster",
+   "ask": "Ask City of Lloydminster which building code applies and who reviews it."
   },
   {
    "id": "medicine-hat",
@@ -336,8 +368,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "City of Medicine Hat"
+   "covered": false,
+   "office": "City of Medicine Hat",
+   "ask": "Ask City of Medicine Hat about its variance steps and forms."
   },
   {
    "id": "red-deer",
@@ -347,8 +380,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "City of Red Deer"
+   "covered": false,
+   "office": "City of Red Deer",
+   "ask": "Ask City of Red Deer about its variance steps and forms."
   },
   {
    "id": "spruce-grove",
@@ -358,8 +392,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "City of Spruce Grove"
+   "covered": false,
+   "office": "City of Spruce Grove",
+   "ask": "Ask City of Spruce Grove about its variance steps and forms."
   },
   {
    "id": "st-albert",
@@ -369,8 +404,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "City of St. Albert"
+   "covered": false,
+   "office": "City of St. Albert",
+   "ask": "Ask City of St. Albert about its variance steps and forms."
   },
   {
    "id": "wetaskiwin",
@@ -380,8 +416,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "City of Wetaskiwin"
+   "covered": false,
+   "office": "City of Wetaskiwin",
+   "ask": "Ask City of Wetaskiwin about its variance steps and forms."
   },
   {
    "id": "clear-hills-county",
@@ -389,8 +426,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "clearwater-county",
@@ -398,8 +436,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "cold-lake-first-nations",
@@ -408,7 +447,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Cold Lake First Nations"
+   "office": "Cold Lake First Nations",
+   "ask": "Ask Cold Lake First Nations which building rules apply and who reviews them."
   },
   {
    "id": "barrhead-no-11",
@@ -418,8 +458,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "forty-mile-no-8",
@@ -429,8 +470,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "grande-prairie-no-1",
@@ -440,8 +482,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "County of Grande Prairie No. 1"
+   "covered": false,
+   "office": "County of Grande Prairie No. 1",
+   "ask": "Ask County of Grande Prairie No. 1 about its variance steps and forms."
   },
   {
    "id": "minburn-no-27",
@@ -451,8 +494,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "County of Minburn No. 27"
+   "covered": false,
+   "office": "County of Minburn No. 27",
+   "ask": "Ask County of Minburn No. 27 about its variance steps and forms."
   },
   {
    "id": "newell",
@@ -462,8 +506,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "County of Newell"
+   "covered": false,
+   "office": "County of Newell",
+   "ask": "Ask County of Newell about its variance steps and forms."
   },
   {
    "id": "northern-lights",
@@ -473,8 +518,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "paintearth-no-18",
@@ -484,8 +530,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "County of Paintearth No. 18"
+   "covered": false,
+   "office": "County of Paintearth No. 18",
+   "ask": "Ask County of Paintearth No. 18 about its variance steps and forms."
   },
   {
    "id": "st-paul-no-19",
@@ -495,8 +542,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "County of St. Paul No. 19"
+   "covered": false,
+   "office": "County of St. Paul No. 19",
+   "ask": "Ask County of St. Paul No. 19 about its variance steps and forms."
   },
   {
    "id": "stettler-no-6",
@@ -506,8 +554,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "two-hills-no-21",
@@ -517,8 +566,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "County of Two Hills No. 21"
+   "covered": false,
+   "office": "County of Two Hills No. 21",
+   "ask": "Ask County of Two Hills No. 21 about its variance steps and forms."
   },
   {
    "id": "vermilion-river",
@@ -528,8 +578,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "County of Vermilion River"
+   "covered": false,
+   "office": "County of Vermilion River",
+   "ask": "Ask County of Vermilion River about its variance steps and forms."
   },
   {
    "id": "warner-no-5",
@@ -539,8 +590,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "wetaskiwin-no-10",
@@ -550,8 +602,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "County of Wetaskiwin No. 10"
+   "covered": false,
+   "office": "County of Wetaskiwin No. 10",
+   "ask": "Ask County of Wetaskiwin No. 10 about its variance steps and forms."
   },
   {
    "id": "cypress-county",
@@ -559,8 +612,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "dene-tha-first-nation",
@@ -571,7 +625,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Dene Tha' First Nation"
+   "office": "Dene Tha' First Nation",
+   "ask": "Ask Dene Tha' First Nation which building rules apply and who reviews them."
   },
   {
    "id": "driftpile-cree-nation",
@@ -582,7 +637,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Driftpile Cree Nation"
+   "office": "Driftpile Cree Nation",
+   "ask": "Ask Driftpile Cree Nation which building rules apply and who reviews them."
   },
   {
    "id": "duncans-first-nation",
@@ -591,7 +647,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Duncan's First Nation"
+   "office": "Duncan's First Nation",
+   "ask": "Ask Duncan's First Nation which building rules apply and who reviews them."
   },
   {
    "id": "east-prairie-metis-settlement",
@@ -599,8 +656,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "edmonton-international-airport",
@@ -610,8 +668,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Leduc County"
+   "covered": false,
+   "office": "Leduc County",
+   "ask": "Ask the airport authority for its letter of authorization, then Leduc County."
   },
   {
    "id": "elizabeth-metis-settlement",
@@ -619,8 +678,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "enoch-cree-nation-440",
@@ -632,7 +692,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Enoch Cree Nation #440"
+   "office": "Enoch Cree Nation #440",
+   "ask": "Ask Enoch Cree Nation #440 which building rules apply and who reviews them."
   },
   {
    "id": "ermineskin-tribe",
@@ -643,7 +704,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Ermineskin Tribe"
+   "office": "Ermineskin Tribe",
+   "ask": "Ask Ermineskin Tribe which building rules apply and who reviews them."
   },
   {
    "id": "fishing-lake-metis-settlement",
@@ -651,8 +713,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Fishing Lake Metis Settlement"
+   "covered": false,
+   "office": "Fishing Lake Metis Settlement",
+   "ask": "Ask Fishing Lake Metis Settlement about its variance steps and forms."
   },
   {
    "id": "flagstaff-county",
@@ -660,8 +723,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Flagstaff County"
+   "covered": false,
+   "office": "Flagstaff County",
+   "ask": "Ask Flagstaff County about its variance steps and forms."
   },
   {
    "id": "foothills-county",
@@ -669,8 +733,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Foothills County"
+   "covered": false,
+   "office": "Foothills County",
+   "ask": "Ask Foothills County about its variance steps and forms."
   },
   {
    "id": "fort-mckay-first-nation",
@@ -679,7 +744,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Fort McKay First Nation"
+   "office": "Fort McKay First Nation",
+   "ask": "Ask Fort McKay First Nation which building rules apply and who reviews them."
   },
   {
    "id": "fort-mcmurray-468-first-nation",
@@ -688,7 +754,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Fort McMurray #468 First Nation"
+   "office": "Fort McMurray #468 First Nation",
+   "ask": "Ask Fort McMurray #468 First Nation which building rules apply and who reviews them."
   },
   {
    "id": "frog-lake-first-nation",
@@ -697,7 +764,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Frog Lake First Nation"
+   "office": "Frog Lake First Nation",
+   "ask": "Ask Frog Lake First Nation which building rules apply and who reviews them."
   },
   {
    "id": "gift-lake-metis-settlement",
@@ -705,8 +773,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "heart-lake-first-nation",
@@ -715,7 +784,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Heart Lake First Nation"
+   "office": "Heart Lake First Nation",
+   "ask": "Ask Heart Lake First Nation which building rules apply and who reviews them."
   },
   {
    "id": "horse-lake-first-nation",
@@ -724,7 +794,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Horse Lake First Nation"
+   "office": "Horse Lake First Nation",
+   "ask": "Ask Horse Lake First Nation which building rules apply and who reviews them."
   },
   {
    "id": "waterton-lakes-national-park",
@@ -737,7 +808,8 @@
    "province": "AB",
    "kind": "federal",
    "covered": false,
-   "office": "Parks Canada"
+   "office": "Parks Canada",
+   "ask": "Ask Parks Canada, realty and development, for this park."
   },
   {
    "id": "banff-national-park",
@@ -749,7 +821,8 @@
    "province": "AB",
    "kind": "federal",
    "covered": false,
-   "office": "Parks Canada"
+   "office": "Parks Canada",
+   "ask": "Ask Parks Canada, realty and development, for this park."
   },
   {
    "id": "jasper-national-park",
@@ -760,7 +833,8 @@
    "province": "AB",
    "kind": "federal",
    "covered": false,
-   "office": "Parks Canada"
+   "office": "Parks Canada",
+   "ask": "Ask Parks Canada, realty and development, for this park."
   },
   {
    "id": "elk-island-national-park",
@@ -771,7 +845,8 @@
    "province": "AB",
    "kind": "federal",
    "covered": false,
-   "office": "Parks Canada"
+   "office": "Parks Canada",
+   "ask": "Ask Parks Canada, realty and development, for this park."
   },
   {
    "id": "wood-buffalo-national-park",
@@ -782,7 +857,8 @@
    "province": "AB",
    "kind": "federal",
    "covered": false,
-   "office": "Parks Canada"
+   "office": "Parks Canada",
+   "ask": "Ask Parks Canada, realty and development, for this park."
   },
   {
    "id": "improvement-district-no-25-willmore-wilderness",
@@ -790,8 +866,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "kananaskis-improvement-district",
@@ -799,8 +876,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Kananaskis Improvement District"
+   "covered": false,
+   "office": "Kananaskis Improvement District",
+   "ask": "Ask Kananaskis Improvement District about its variance steps and forms."
   },
   {
    "id": "kapaweno-first-nation",
@@ -809,7 +887,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Kapawe'no First Nation"
+   "office": "Kapawe'no First Nation",
+   "ask": "Ask Kapawe'no First Nation which building rules apply and who reviews them."
   },
   {
    "id": "kehewin-cree-nation",
@@ -820,7 +899,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Kehewin Cree Nation"
+   "office": "Kehewin Cree Nation",
+   "ask": "Ask Kehewin Cree Nation which building rules apply and who reviews them."
   },
   {
    "id": "kikino-metis-settlement",
@@ -828,8 +908,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Kikino Metis Settlement"
+   "covered": false,
+   "office": "Kikino Metis Settlement",
+   "ask": "Ask Kikino Metis Settlement about its variance steps and forms."
   },
   {
    "id": "kneehill-county",
@@ -837,8 +918,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Kneehill County"
+   "covered": false,
+   "office": "Kneehill County",
+   "ask": "Ask Kneehill County about its variance steps and forms."
   },
   {
    "id": "lac-la-biche-county",
@@ -846,8 +928,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Lac La Biche County"
+   "covered": false,
+   "office": "Lac La Biche County",
+   "ask": "Ask Lac La Biche County about its variance steps and forms."
   },
   {
    "id": "lac-ste-anne-county",
@@ -855,8 +938,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Lac Ste. Anne County"
+   "covered": false,
+   "office": "Lac Ste. Anne County",
+   "ask": "Ask Lac Ste. Anne County about its variance steps and forms."
   },
   {
    "id": "lacombe-county",
@@ -864,8 +948,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "lamont-county",
@@ -873,8 +958,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Lamont County"
+   "covered": false,
+   "office": "Lamont County",
+   "ask": "Ask Lamont County about its variance steps and forms."
   },
   {
    "id": "leduc-county",
@@ -882,8 +968,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Leduc County"
+   "covered": false,
+   "office": "Leduc County",
+   "ask": "Ask Leduc County about its variance steps and forms."
   },
   {
    "id": "lethbridge-county",
@@ -891,8 +978,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Lethbridge County"
+   "covered": false,
+   "office": "Lethbridge County",
+   "ask": "Ask Lethbridge County about its variance steps and forms."
   },
   {
    "id": "little-red-river-cree-nation",
@@ -903,7 +991,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Little Red River Cree Nation"
+   "office": "Little Red River Cree Nation",
+   "ask": "Ask Little Red River Cree Nation which building rules apply and who reviews them."
   },
   {
    "id": "loon-river-cree",
@@ -914,7 +1003,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Loon River Cree"
+   "office": "Loon River Cree",
+   "ask": "Ask Loon River Cree which building rules apply and who reviews them."
   },
   {
    "id": "louis-bull-tribe",
@@ -925,7 +1015,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Louis Bull Tribe"
+   "office": "Louis Bull Tribe",
+   "ask": "Ask Louis Bull Tribe which building rules apply and who reviews them."
   },
   {
    "id": "lubicon-lake-band",
@@ -937,7 +1028,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Lubicon Lake Band"
+   "office": "Lubicon Lake Band",
+   "ask": "Ask Lubicon Lake Band which building rules apply and who reviews them."
   },
   {
    "id": "mackenzie-county",
@@ -945,8 +1037,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Mackenzie County"
+   "covered": false,
+   "office": "Mackenzie County",
+   "ask": "Ask Mackenzie County about its variance steps and forms."
   },
   {
    "id": "maskwacis",
@@ -957,7 +1050,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Samson Cree Nation or Ermineskin Tribe or Louis Bull Tribe or Montana First Nation"
+   "office": "Samson Cree Nation or Ermineskin Tribe or Louis Bull Tribe or Montana First Nation",
+   "ask": "Ask the Nation where the project is which building rules apply and who reviews them."
   },
   {
    "id": "mikisew-cree-first-nation",
@@ -968,7 +1062,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Mikisew Cree First Nation"
+   "office": "Mikisew Cree First Nation",
+   "ask": "Ask Mikisew Cree First Nation which building rules apply and who reviews them."
   },
   {
    "id": "montana-first-nation",
@@ -977,7 +1072,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Montana First Nation"
+   "office": "Montana First Nation",
+   "ask": "Ask Montana First Nation which building rules apply and who reviews them."
   },
   {
    "id": "mountain-view-county",
@@ -985,8 +1081,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Mountain View County"
+   "covered": false,
+   "office": "Mountain View County",
+   "ask": "Ask Mountain View County about its variance steps and forms."
   },
   {
    "id": "acadia-no-34",
@@ -996,8 +1093,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Municipal District of Acadia No. 34"
+   "covered": false,
+   "office": "Municipal District of Acadia No. 34",
+   "ask": "Ask Municipal District of Acadia No. 34 about its variance steps and forms."
   },
   {
    "id": "bighorn-no-8",
@@ -1007,8 +1105,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Municipal District of Bighorn No. 8"
+   "covered": false,
+   "office": "Municipal District of Bighorn No. 8",
+   "ask": "Ask Municipal District of Bighorn No. 8 about its variance steps and forms."
   },
   {
    "id": "bonnyville-no-87",
@@ -1018,8 +1117,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Municipal District of Bonnyville No. 87"
+   "covered": false,
+   "office": "Municipal District of Bonnyville No. 87",
+   "ask": "Ask Municipal District of Bonnyville No. 87 about its variance steps and forms."
   },
   {
    "id": "fairview-no-136",
@@ -1029,8 +1129,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "greenview-no-16",
@@ -1040,8 +1141,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "lesser-slave-river-no-124",
@@ -1051,8 +1153,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "opportunity-no-17",
@@ -1062,8 +1165,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Municipal District of Opportunity No. 17"
+   "covered": false,
+   "office": "Municipal District of Opportunity No. 17",
+   "ask": "Ask Municipal District of Opportunity No. 17 about its variance steps and forms."
   },
   {
    "id": "peace-no-135",
@@ -1073,8 +1177,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "pincher-creek-no-9",
@@ -1084,8 +1189,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Municipal District of Pincher Creek No. 9"
+   "covered": false,
+   "office": "Municipal District of Pincher Creek No. 9",
+   "ask": "Ask Municipal District of Pincher Creek No. 9 about its variance steps and forms."
   },
   {
    "id": "provost-no-52",
@@ -1095,8 +1201,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Municipal District of Provost No. 52"
+   "covered": false,
+   "office": "Municipal District of Provost No. 52",
+   "ask": "Ask Municipal District of Provost No. 52 about its variance steps and forms."
   },
   {
    "id": "ranchland-no-66",
@@ -1106,8 +1213,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Municipal District of Ranchland No. 66"
+   "covered": false,
+   "office": "Municipal District of Ranchland No. 66",
+   "ask": "Ask Municipal District of Ranchland No. 66 about its variance steps and forms."
   },
   {
    "id": "smoky-river-no-130",
@@ -1117,8 +1225,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "spirit-river-no-133",
@@ -1128,8 +1237,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Municipal District of Spirit River No. 133"
+   "covered": false,
+   "office": "Municipal District of Spirit River No. 133",
+   "ask": "Ask Municipal District of Spirit River No. 133 about its variance steps and forms."
   },
   {
    "id": "taber-0312",
@@ -1137,8 +1247,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "wainwright-no-61",
@@ -1148,8 +1259,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Municipal District of Wainwright No. 61"
+   "covered": false,
+   "office": "Municipal District of Wainwright No. 61",
+   "ask": "Ask Municipal District of Wainwright No. 61 about its variance steps and forms."
   },
   {
    "id": "willow-creek-no-26",
@@ -1159,8 +1271,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Municipal District of Willow Creek No. 26"
+   "covered": false,
+   "office": "Municipal District of Willow Creek No. 26",
+   "ask": "Ask Municipal District of Willow Creek No. 26 about its variance steps and forms."
   },
   {
    "id": "crowsnest-pass",
@@ -1170,8 +1283,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Municipality of Crowsnest Pass"
+   "covered": false,
+   "office": "Municipality of Crowsnest Pass",
+   "ask": "Ask Municipality of Crowsnest Pass about its variance steps and forms."
   },
   {
    "id": "jasper",
@@ -1182,7 +1296,8 @@
    "province": "AB",
    "kind": "federal",
    "covered": false,
-   "office": "Parks Canada"
+   "office": "Parks Canada",
+   "ask": "Ask Parks Canada, realty and development, for this park."
   },
   {
    "id": "northern-sunrise-county",
@@ -1190,8 +1305,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "ochiese-first-nation",
@@ -1200,7 +1316,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "O'Chiese First Nation"
+   "office": "O'Chiese First Nation",
+   "ask": "Ask O'Chiese First Nation which building rules apply and who reviews them."
   },
   {
    "id": "paddle-prairie-metis-settlement",
@@ -1208,8 +1325,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "parkland-county",
@@ -1217,8 +1335,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Parkland County"
+   "covered": false,
+   "office": "Parkland County",
+   "ask": "Ask Parkland County about its variance steps and forms."
   },
   {
    "id": "paul-first-nation",
@@ -1227,7 +1346,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Paul First Nation"
+   "office": "Paul First Nation",
+   "ask": "Ask Paul First Nation which building rules apply and who reviews them."
   },
   {
    "id": "peavine-metis-settlement",
@@ -1235,8 +1355,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "peerless-trout-first-nation",
@@ -1245,7 +1366,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Peerless Trout First Nation"
+   "office": "Peerless Trout First Nation",
+   "ask": "Ask Peerless Trout First Nation which building rules apply and who reviews them."
   },
   {
    "id": "piikani-nation",
@@ -1256,7 +1378,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Piikani Nation"
+   "office": "Piikani Nation",
+   "ask": "Ask Piikani Nation which building rules apply and who reviews them."
   },
   {
    "id": "ponoka-county",
@@ -1264,8 +1387,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Ponoka County"
+   "covered": false,
+   "office": "Ponoka County",
+   "ask": "Ask Ponoka County about its variance steps and forms."
   },
   {
    "id": "red-deer-county",
@@ -1273,8 +1397,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Red Deer County"
+   "covered": false,
+   "office": "Red Deer County",
+   "ask": "Ask Red Deer County about its variance steps and forms."
   },
   {
    "id": "wood-buffalo",
@@ -1285,8 +1410,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Regional Municipality of Wood Buffalo"
+   "covered": false,
+   "office": "Regional Municipality of Wood Buffalo",
+   "ask": "Ask Regional Municipality of Wood Buffalo about its variance steps and forms."
   },
   {
    "id": "rocky-view-county",
@@ -1294,8 +1420,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Rocky View County"
+   "covered": false,
+   "office": "Rocky View County",
+   "ask": "Ask Rocky View County about its variance steps and forms."
   },
   {
    "id": "saddle-hills-county",
@@ -1303,8 +1430,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "saddle-lake-cree-nation",
@@ -1315,7 +1443,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Saddle Lake Cree Nation"
+   "office": "Saddle Lake Cree Nation",
+   "ask": "Ask Saddle Lake Cree Nation which building rules apply and who reviews them."
   },
   {
    "id": "samson-cree-nation",
@@ -1326,7 +1455,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Samson Cree Nation"
+   "office": "Samson Cree Nation",
+   "ask": "Ask Samson Cree Nation which building rules apply and who reviews them."
   },
   {
    "id": "sawridge-first-nation",
@@ -1335,7 +1465,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Sawridge First Nation"
+   "office": "Sawridge First Nation",
+   "ask": "Ask Sawridge First Nation which building rules apply and who reviews them."
   },
   {
    "id": "siksika-nation",
@@ -1346,7 +1477,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Siksika Nation"
+   "office": "Siksika Nation",
+   "ask": "Ask Siksika Nation which building rules apply and who reviews them."
   },
   {
    "id": "smoky-lake-county",
@@ -1354,8 +1486,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Smoky Lake County"
+   "covered": false,
+   "office": "Smoky Lake County",
+   "ask": "Ask Smoky Lake County about its variance steps and forms."
   },
   {
    "id": "special-areas-board",
@@ -1363,8 +1496,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Special Areas Board"
+   "covered": false,
+   "office": "Special Areas Board",
+   "ask": "Ask Special Areas Board about its variance steps and forms."
   },
   {
    "id": "springbank-airport",
@@ -1374,8 +1508,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Rocky View County"
+   "covered": false,
+   "office": "Rocky View County",
+   "ask": "Ask the airport authority for its letter of authorization, then Rocky View County."
   },
   {
    "id": "starland-county",
@@ -1383,8 +1518,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Starland County"
+   "covered": false,
+   "office": "Starland County",
+   "ask": "Ask Starland County about its variance steps and forms."
   },
   {
    "id": "stoney-bearspaw-first-nation",
@@ -1396,7 +1532,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Stoney (Bearspaw) First Nation"
+   "office": "Stoney (Bearspaw) First Nation",
+   "ask": "Ask Stoney (Bearspaw) First Nation which building rules apply and who reviews them."
   },
   {
    "id": "stoney-chiniki-first-nation",
@@ -1408,7 +1545,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Stoney (Chiniki) First Nation"
+   "office": "Stoney (Chiniki) First Nation",
+   "ask": "Ask Stoney (Chiniki) First Nation which building rules apply and who reviews them."
   },
   {
    "id": "stoney-goodstoney-first-nation",
@@ -1420,7 +1558,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Stoney (Goodstoney) First Nation"
+   "office": "Stoney (Goodstoney) First Nation",
+   "ask": "Ask Stoney (Goodstoney) First Nation which building rules apply and who reviews them."
   },
   {
    "id": "stoney-nakoda",
@@ -1432,7 +1571,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Stoney (Bearspaw) First Nation or Stoney (Chiniki) First Nation or Stoney (Goodstoney) First Nation"
+   "office": "Stoney (Bearspaw) First Nation or Stoney (Chiniki) First Nation or Stoney (Goodstoney) First Nation",
+   "ask": "Ask the Nation where the project is which building rules apply and who reviews them."
   },
   {
    "id": "strathcona-county",
@@ -1442,8 +1582,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Strathcona County"
+   "covered": false,
+   "office": "Strathcona County",
+   "ask": "Ask Strathcona County about its variance steps and forms."
   },
   {
    "id": "sturgeon-county",
@@ -1451,8 +1592,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Sturgeon County"
+   "covered": false,
+   "office": "Sturgeon County",
+   "ask": "Ask Sturgeon County about its variance steps and forms."
   },
   {
    "id": "sturgeon-lake-cree-nation",
@@ -1463,7 +1605,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Sturgeon Lake Cree Nation"
+   "office": "Sturgeon Lake Cree Nation",
+   "ask": "Ask Sturgeon Lake Cree Nation which building rules apply and who reviews them."
   },
   {
    "id": "sucker-creek-first-nation",
@@ -1472,7 +1615,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Sucker Creek First Nation"
+   "office": "Sucker Creek First Nation",
+   "ask": "Ask Sucker Creek First Nation which building rules apply and who reviews them."
   },
   {
    "id": "argentia-beach",
@@ -1482,8 +1626,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Argentia Beach"
+   "covered": false,
+   "office": "Summer Village of Argentia Beach",
+   "ask": "Ask Summer Village of Argentia Beach about its variance steps and forms."
   },
   {
    "id": "betula-beach",
@@ -1493,8 +1638,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "birch-cove",
@@ -1504,8 +1650,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Birch Cove"
+   "covered": false,
+   "office": "Summer Village of Birch Cove",
+   "ask": "Ask Summer Village of Birch Cove about its variance steps and forms."
   },
   {
    "id": "birchcliff",
@@ -1515,8 +1662,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Birchcliff"
+   "covered": false,
+   "office": "Summer Village of Birchcliff",
+   "ask": "Ask Summer Village of Birchcliff about its variance steps and forms."
   },
   {
    "id": "bondiss",
@@ -1526,8 +1674,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "bonnyville-beach",
@@ -1537,8 +1686,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Bonnyville Beach"
+   "covered": false,
+   "office": "Summer Village of Bonnyville Beach",
+   "ask": "Ask Summer Village of Bonnyville Beach about its variance steps and forms."
   },
   {
    "id": "burnstick-lake",
@@ -1548,8 +1698,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Burnstick Lake"
+   "covered": false,
+   "office": "Summer Village of Burnstick Lake",
+   "ask": "Ask Summer Village of Burnstick Lake about its variance steps and forms."
   },
   {
    "id": "castle-island",
@@ -1559,8 +1710,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Castle Island"
+   "covered": false,
+   "office": "Summer Village of Castle Island",
+   "ask": "Ask Summer Village of Castle Island about its variance steps and forms."
   },
   {
    "id": "crystal-springs",
@@ -1570,8 +1722,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Crystal Springs"
+   "covered": false,
+   "office": "Summer Village of Crystal Springs",
+   "ask": "Ask Summer Village of Crystal Springs about its variance steps and forms."
   },
   {
    "id": "ghost-lake",
@@ -1581,8 +1734,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "golden-days",
@@ -1592,8 +1746,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Golden Days"
+   "covered": false,
+   "office": "Summer Village of Golden Days",
+   "ask": "Ask Summer Village of Golden Days about its variance steps and forms."
   },
   {
    "id": "grandview",
@@ -1603,8 +1758,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Grandview"
+   "covered": false,
+   "office": "Summer Village of Grandview",
+   "ask": "Ask Summer Village of Grandview about its variance steps and forms."
   },
   {
    "id": "gull-lake",
@@ -1614,8 +1770,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Gull Lake"
+   "covered": false,
+   "office": "Summer Village of Gull Lake",
+   "ask": "Ask Summer Village of Gull Lake about its variance steps and forms."
   },
   {
    "id": "half-moon-bay",
@@ -1625,8 +1782,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Half Moon Bay"
+   "covered": false,
+   "office": "Summer Village of Half Moon Bay",
+   "ask": "Ask Summer Village of Half Moon Bay about its variance steps and forms."
   },
   {
    "id": "horseshoe-bay",
@@ -1636,8 +1794,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "island-lake",
@@ -1647,8 +1806,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Island Lake"
+   "covered": false,
+   "office": "Summer Village of Island Lake",
+   "ask": "Ask Summer Village of Island Lake about its variance steps and forms."
   },
   {
    "id": "island-lake-south",
@@ -1658,8 +1818,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Island Lake South"
+   "covered": false,
+   "office": "Summer Village of Island Lake South",
+   "ask": "Ask Summer Village of Island Lake South about its variance steps and forms."
   },
   {
    "id": "itaska-beach",
@@ -1669,8 +1830,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Itaska Beach"
+   "covered": false,
+   "office": "Summer Village of Itaska Beach",
+   "ask": "Ask Summer Village of Itaska Beach about its variance steps and forms."
   },
   {
    "id": "jarvis-bay",
@@ -1680,8 +1842,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Jarvis Bay"
+   "covered": false,
+   "office": "Summer Village of Jarvis Bay",
+   "ask": "Ask Summer Village of Jarvis Bay about its variance steps and forms."
   },
   {
    "id": "kapasiwin",
@@ -1691,8 +1854,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Kapasiwin"
+   "covered": false,
+   "office": "Summer Village of Kapasiwin",
+   "ask": "Ask Summer Village of Kapasiwin about its variance steps and forms."
   },
   {
    "id": "lakeview",
@@ -1702,8 +1866,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Lakeview"
+   "covered": false,
+   "office": "Summer Village of Lakeview",
+   "ask": "Ask Summer Village of Lakeview about its variance steps and forms."
   },
   {
    "id": "larkspur",
@@ -1713,8 +1878,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "ma-me-o-beach",
@@ -1724,8 +1890,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Ma-Me-O Beach"
+   "covered": false,
+   "office": "Summer Village of Ma-Me-O Beach",
+   "ask": "Ask Summer Village of Ma-Me-O Beach about its variance steps and forms."
   },
   {
    "id": "mewatha-beach",
@@ -1735,8 +1902,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Mewatha Beach"
+   "covered": false,
+   "office": "Summer Village of Mewatha Beach",
+   "ask": "Ask Summer Village of Mewatha Beach about its variance steps and forms."
   },
   {
    "id": "nakamun-park",
@@ -1746,8 +1914,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Nakamun Park"
+   "covered": false,
+   "office": "Summer Village of Nakamun Park",
+   "ask": "Ask Summer Village of Nakamun Park about its variance steps and forms."
   },
   {
    "id": "norglenwold",
@@ -1757,8 +1926,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Norglenwold"
+   "covered": false,
+   "office": "Summer Village of Norglenwold",
+   "ask": "Ask Summer Village of Norglenwold about its variance steps and forms."
   },
   {
    "id": "norris-beach",
@@ -1768,8 +1938,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Norris Beach"
+   "covered": false,
+   "office": "Summer Village of Norris Beach",
+   "ask": "Ask Summer Village of Norris Beach about its variance steps and forms."
   },
   {
    "id": "parkland-beach",
@@ -1779,8 +1950,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Parkland Beach"
+   "covered": false,
+   "office": "Summer Village of Parkland Beach",
+   "ask": "Ask Summer Village of Parkland Beach about its variance steps and forms."
   },
   {
    "id": "pelican-narrows",
@@ -1790,8 +1962,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Pelican Narrows"
+   "covered": false,
+   "office": "Summer Village of Pelican Narrows",
+   "ask": "Ask Summer Village of Pelican Narrows about its variance steps and forms."
   },
   {
    "id": "point-alison",
@@ -1801,8 +1974,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "poplar-bay",
@@ -1812,8 +1986,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Poplar Bay"
+   "covered": false,
+   "office": "Summer Village of Poplar Bay",
+   "ask": "Ask Summer Village of Poplar Bay about its variance steps and forms."
   },
   {
    "id": "rochon-sands",
@@ -1823,8 +1998,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Rochon Sands"
+   "covered": false,
+   "office": "Summer Village of Rochon Sands",
+   "ask": "Ask Summer Village of Rochon Sands about its variance steps and forms."
   },
   {
    "id": "ross-haven",
@@ -1834,8 +2010,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Ross Haven"
+   "covered": false,
+   "office": "Summer Village of Ross Haven",
+   "ask": "Ask Summer Village of Ross Haven about its variance steps and forms."
   },
   {
    "id": "sandy-beach",
@@ -1845,8 +2022,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Sandy Beach"
+   "covered": false,
+   "office": "Summer Village of Sandy Beach",
+   "ask": "Ask Summer Village of Sandy Beach about its variance steps and forms."
   },
   {
    "id": "seba-beach",
@@ -1856,8 +2034,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Seba Beach"
+   "covered": false,
+   "office": "Summer Village of Seba Beach",
+   "ask": "Ask Summer Village of Seba Beach about its variance steps and forms."
   },
   {
    "id": "silver-beach",
@@ -1867,8 +2046,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Silver Beach"
+   "covered": false,
+   "office": "Summer Village of Silver Beach",
+   "ask": "Ask Summer Village of Silver Beach about its variance steps and forms."
   },
   {
    "id": "silver-sands",
@@ -1878,8 +2058,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Silver Sands"
+   "covered": false,
+   "office": "Summer Village of Silver Sands",
+   "ask": "Ask Summer Village of Silver Sands about its variance steps and forms."
   },
   {
    "id": "south-baptiste",
@@ -1889,8 +2070,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of South Baptiste"
+   "covered": false,
+   "office": "Summer Village of South Baptiste",
+   "ask": "Ask Summer Village of South Baptiste about its variance steps and forms."
   },
   {
    "id": "south-view",
@@ -1900,8 +2082,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of South View"
+   "covered": false,
+   "office": "Summer Village of South View",
+   "ask": "Ask Summer Village of South View about its variance steps and forms."
   },
   {
    "id": "sunbreaker-cove",
@@ -1911,8 +2094,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Sunbreaker Cove"
+   "covered": false,
+   "office": "Summer Village of Sunbreaker Cove",
+   "ask": "Ask Summer Village of Sunbreaker Cove about its variance steps and forms."
   },
   {
    "id": "sundance-beach",
@@ -1922,8 +2106,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Sundance Beach"
+   "covered": false,
+   "office": "Summer Village of Sundance Beach",
+   "ask": "Ask Summer Village of Sundance Beach about its variance steps and forms."
   },
   {
    "id": "sunrise-beach",
@@ -1933,8 +2118,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Sunrise Beach"
+   "covered": false,
+   "office": "Summer Village of Sunrise Beach",
+   "ask": "Ask Summer Village of Sunrise Beach about its variance steps and forms."
   },
   {
    "id": "sunset-beach",
@@ -1944,8 +2130,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Sunset Beach"
+   "covered": false,
+   "office": "Summer Village of Sunset Beach",
+   "ask": "Ask Summer Village of Sunset Beach about its variance steps and forms."
   },
   {
    "id": "sunset-point",
@@ -1955,8 +2142,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "val-quentin",
@@ -1966,8 +2154,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Val Quentin"
+   "covered": false,
+   "office": "Summer Village of Val Quentin",
+   "ask": "Ask Summer Village of Val Quentin about its variance steps and forms."
   },
   {
    "id": "waiparous",
@@ -1977,8 +2166,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "west-baptiste",
@@ -1988,8 +2178,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "west-cove",
@@ -1999,8 +2190,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of West Cove"
+   "covered": false,
+   "office": "Summer Village of West Cove",
+   "ask": "Ask Summer Village of West Cove about its variance steps and forms."
   },
   {
    "id": "whispering-hills",
@@ -2010,8 +2202,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of Whispering Hills"
+   "covered": false,
+   "office": "Summer Village of Whispering Hills",
+   "ask": "Ask Summer Village of Whispering Hills about its variance steps and forms."
   },
   {
    "id": "white-sands",
@@ -2021,8 +2214,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Summer Village of White Sands"
+   "covered": false,
+   "office": "Summer Village of White Sands",
+   "ask": "Ask Summer Village of White Sands about its variance steps and forms."
   },
   {
    "id": "yellowstone",
@@ -2032,8 +2226,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "sunchild-first-nation",
@@ -2042,7 +2237,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Sunchild First Nation"
+   "office": "Sunchild First Nation",
+   "ask": "Ask Sunchild First Nation which building rules apply and who reviews them."
   },
   {
    "id": "swan-river-first-nation",
@@ -2051,7 +2247,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Swan River First Nation"
+   "office": "Swan River First Nation",
+   "ask": "Ask Swan River First Nation which building rules apply and who reviews them."
   },
   {
    "id": "tallcree-tribal-government",
@@ -2062,7 +2259,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Tallcree Tribal Government"
+   "office": "Tallcree Tribal Government",
+   "ask": "Ask Tallcree Tribal Government which building rules apply and who reviews them."
   },
   {
    "id": "thorhild-county",
@@ -2070,8 +2268,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Thorhild County"
+   "covered": false,
+   "office": "Thorhild County",
+   "ask": "Ask Thorhild County about its variance steps and forms."
   },
   {
    "id": "athabasca",
@@ -2081,8 +2280,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Athabasca"
+   "covered": false,
+   "office": "Town of Athabasca",
+   "ask": "Ask Town of Athabasca about its variance steps and forms."
   },
   {
    "id": "banff",
@@ -2092,8 +2292,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Banff"
+   "covered": false,
+   "office": "Town of Banff",
+   "ask": "Ask Town of Banff about its variance steps and forms."
   },
   {
    "id": "barrhead",
@@ -2103,8 +2304,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "bashaw",
@@ -2114,8 +2316,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Bashaw"
+   "covered": false,
+   "office": "Town of Bashaw",
+   "ask": "Ask Town of Bashaw about its variance steps and forms."
   },
   {
    "id": "bassano",
@@ -2125,8 +2328,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Bassano"
+   "covered": false,
+   "office": "Town of Bassano",
+   "ask": "Ask Town of Bassano about its variance steps and forms."
   },
   {
    "id": "beaverlodge",
@@ -2136,8 +2340,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Beaverlodge"
+   "covered": false,
+   "office": "Town of Beaverlodge",
+   "ask": "Ask Town of Beaverlodge about its variance steps and forms."
   },
   {
    "id": "bentley",
@@ -2147,8 +2352,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "blackfalds",
@@ -2158,8 +2364,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Blackfalds"
+   "covered": false,
+   "office": "Town of Blackfalds",
+   "ask": "Ask Town of Blackfalds about its variance steps and forms."
   },
   {
    "id": "bon-accord",
@@ -2169,8 +2376,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Bon Accord"
+   "covered": false,
+   "office": "Town of Bon Accord",
+   "ask": "Ask Town of Bon Accord about its variance steps and forms."
   },
   {
    "id": "bonnyville",
@@ -2180,8 +2388,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Bonnyville"
+   "covered": false,
+   "office": "Town of Bonnyville",
+   "ask": "Ask Town of Bonnyville about its variance steps and forms."
   },
   {
    "id": "bow-island",
@@ -2191,8 +2400,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Bow Island"
+   "covered": false,
+   "office": "Town of Bow Island",
+   "ask": "Ask Town of Bow Island about its variance steps and forms."
   },
   {
    "id": "bowden",
@@ -2202,8 +2412,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Bowden"
+   "covered": false,
+   "office": "Town of Bowden",
+   "ask": "Ask Town of Bowden about its variance steps and forms."
   },
   {
    "id": "bruderheim",
@@ -2213,8 +2424,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Bruderheim"
+   "covered": false,
+   "office": "Town of Bruderheim",
+   "ask": "Ask Town of Bruderheim about its variance steps and forms."
   },
   {
    "id": "calmar",
@@ -2224,8 +2436,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Calmar"
+   "covered": false,
+   "office": "Town of Calmar",
+   "ask": "Ask Town of Calmar about its variance steps and forms."
   },
   {
    "id": "canmore",
@@ -2235,8 +2448,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Canmore"
+   "covered": false,
+   "office": "Town of Canmore",
+   "ask": "Ask Town of Canmore about its variance steps and forms."
   },
   {
    "id": "cardston",
@@ -2246,8 +2460,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Cardston"
+   "covered": false,
+   "office": "Town of Cardston",
+   "ask": "Ask Town of Cardston about its variance steps and forms."
   },
   {
    "id": "carstairs",
@@ -2257,8 +2472,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Carstairs"
+   "covered": false,
+   "office": "Town of Carstairs",
+   "ask": "Ask Town of Carstairs about its variance steps and forms."
   },
   {
    "id": "castor",
@@ -2268,8 +2484,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Castor"
+   "covered": false,
+   "office": "Town of Castor",
+   "ask": "Ask Town of Castor about its variance steps and forms."
   },
   {
    "id": "claresholm",
@@ -2279,8 +2496,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Claresholm"
+   "covered": false,
+   "office": "Town of Claresholm",
+   "ask": "Ask Town of Claresholm about its variance steps and forms."
   },
   {
    "id": "coaldale",
@@ -2290,8 +2508,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Coaldale"
+   "covered": false,
+   "office": "Town of Coaldale",
+   "ask": "Ask Town of Coaldale about its variance steps and forms."
   },
   {
    "id": "coalhurst",
@@ -2301,8 +2520,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Coalhurst"
+   "covered": false,
+   "office": "Town of Coalhurst",
+   "ask": "Ask Town of Coalhurst about its variance steps and forms."
   },
   {
    "id": "cochrane",
@@ -2312,8 +2532,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Cochrane"
+   "covered": false,
+   "office": "Town of Cochrane",
+   "ask": "Ask Town of Cochrane about its variance steps and forms."
   },
   {
    "id": "coronation",
@@ -2323,8 +2544,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Coronation"
+   "covered": false,
+   "office": "Town of Coronation",
+   "ask": "Ask Town of Coronation about its variance steps and forms."
   },
   {
    "id": "crossfield",
@@ -2334,8 +2556,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Crossfield"
+   "covered": false,
+   "office": "Town of Crossfield",
+   "ask": "Ask Town of Crossfield about its variance steps and forms."
   },
   {
    "id": "daysland",
@@ -2345,8 +2568,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Daysland"
+   "covered": false,
+   "office": "Town of Daysland",
+   "ask": "Ask Town of Daysland about its variance steps and forms."
   },
   {
    "id": "devon",
@@ -2356,8 +2580,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Devon"
+   "covered": false,
+   "office": "Town of Devon",
+   "ask": "Ask Town of Devon about its variance steps and forms."
   },
   {
    "id": "diamond-valley",
@@ -2367,8 +2592,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Diamond Valley"
+   "covered": false,
+   "office": "Town of Diamond Valley",
+   "ask": "Ask Town of Diamond Valley about its variance steps and forms."
   },
   {
    "id": "didsbury",
@@ -2378,8 +2604,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Didsbury"
+   "covered": false,
+   "office": "Town of Didsbury",
+   "ask": "Ask Town of Didsbury about its variance steps and forms."
   },
   {
    "id": "drayton-valley",
@@ -2389,8 +2616,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Drayton Valley"
+   "covered": false,
+   "office": "Town of Drayton Valley",
+   "ask": "Ask Town of Drayton Valley about its variance steps and forms."
   },
   {
    "id": "drumheller",
@@ -2400,8 +2628,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Drumheller"
+   "covered": false,
+   "office": "Town of Drumheller",
+   "ask": "Ask Town of Drumheller about its variance steps and forms."
   },
   {
    "id": "eckville",
@@ -2411,8 +2640,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Eckville"
+   "covered": false,
+   "office": "Town of Eckville",
+   "ask": "Ask Town of Eckville about its variance steps and forms."
   },
   {
    "id": "edson",
@@ -2422,8 +2652,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "elk-point",
@@ -2433,8 +2664,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Elk Point"
+   "covered": false,
+   "office": "Town of Elk Point",
+   "ask": "Ask Town of Elk Point about its variance steps and forms."
   },
   {
    "id": "fairview",
@@ -2444,8 +2676,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Fairview"
+   "covered": false,
+   "office": "Town of Fairview",
+   "ask": "Ask Town of Fairview about its variance steps and forms."
   },
   {
    "id": "falher",
@@ -2455,8 +2688,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "fort-macleod",
@@ -2466,8 +2700,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Fort Macleod"
+   "covered": false,
+   "office": "Town of Fort Macleod",
+   "ask": "Ask Town of Fort Macleod about its variance steps and forms."
   },
   {
    "id": "fox-creek",
@@ -2477,8 +2712,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Fox Creek"
+   "covered": false,
+   "office": "Town of Fox Creek",
+   "ask": "Ask Town of Fox Creek about its variance steps and forms."
   },
   {
    "id": "gibbons",
@@ -2488,8 +2724,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Gibbons"
+   "covered": false,
+   "office": "Town of Gibbons",
+   "ask": "Ask Town of Gibbons about its variance steps and forms."
   },
   {
    "id": "grimshaw",
@@ -2499,8 +2736,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "hanna",
@@ -2510,8 +2748,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Hanna"
+   "covered": false,
+   "office": "Town of Hanna",
+   "ask": "Ask Town of Hanna about its variance steps and forms."
   },
   {
    "id": "hardisty",
@@ -2521,8 +2760,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Hardisty"
+   "covered": false,
+   "office": "Town of Hardisty",
+   "ask": "Ask Town of Hardisty about its variance steps and forms."
   },
   {
    "id": "high-level",
@@ -2532,8 +2772,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of High Level"
+   "covered": false,
+   "office": "Town of High Level",
+   "ask": "Ask Town of High Level about its variance steps and forms."
   },
   {
    "id": "high-prairie",
@@ -2543,8 +2784,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of High Prairie"
+   "covered": false,
+   "office": "Town of High Prairie",
+   "ask": "Ask Town of High Prairie about its variance steps and forms."
   },
   {
    "id": "high-river",
@@ -2554,8 +2796,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of High River"
+   "covered": false,
+   "office": "Town of High River",
+   "ask": "Ask Town of High River about its variance steps and forms."
   },
   {
    "id": "hinton",
@@ -2565,8 +2808,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Hinton"
+   "covered": false,
+   "office": "Town of Hinton",
+   "ask": "Ask Town of Hinton about its variance steps and forms."
   },
   {
    "id": "innisfail",
@@ -2576,8 +2820,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Innisfail"
+   "covered": false,
+   "office": "Town of Innisfail",
+   "ask": "Ask Town of Innisfail about its variance steps and forms."
   },
   {
    "id": "irricana",
@@ -2587,8 +2832,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Irricana"
+   "covered": false,
+   "office": "Town of Irricana",
+   "ask": "Ask Town of Irricana about its variance steps and forms."
   },
   {
    "id": "killam",
@@ -2598,8 +2844,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Killam"
+   "covered": false,
+   "office": "Town of Killam",
+   "ask": "Ask Town of Killam about its variance steps and forms."
   },
   {
    "id": "lamont",
@@ -2609,8 +2856,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Lamont"
+   "covered": false,
+   "office": "Town of Lamont",
+   "ask": "Ask Town of Lamont about its variance steps and forms."
   },
   {
    "id": "legal",
@@ -2620,8 +2868,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Legal"
+   "covered": false,
+   "office": "Town of Legal",
+   "ask": "Ask Town of Legal about its variance steps and forms."
   },
   {
    "id": "magrath",
@@ -2631,8 +2880,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Magrath"
+   "covered": false,
+   "office": "Town of Magrath",
+   "ask": "Ask Town of Magrath about its variance steps and forms."
   },
   {
    "id": "manning",
@@ -2642,8 +2892,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "mayerthorpe",
@@ -2653,8 +2904,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "mclennan",
@@ -2664,8 +2916,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "milk-river",
@@ -2675,8 +2928,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Milk River"
+   "covered": false,
+   "office": "Town of Milk River",
+   "ask": "Ask Town of Milk River about its variance steps and forms."
   },
   {
    "id": "millet",
@@ -2686,8 +2940,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Millet"
+   "covered": false,
+   "office": "Town of Millet",
+   "ask": "Ask Town of Millet about its variance steps and forms."
   },
   {
    "id": "morinville",
@@ -2697,8 +2952,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Morinville"
+   "covered": false,
+   "office": "Town of Morinville",
+   "ask": "Ask Town of Morinville about its variance steps and forms."
   },
   {
    "id": "mundare",
@@ -2708,8 +2964,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Mundare"
+   "covered": false,
+   "office": "Town of Mundare",
+   "ask": "Ask Town of Mundare about its variance steps and forms."
   },
   {
    "id": "nanton",
@@ -2719,8 +2976,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Nanton"
+   "covered": false,
+   "office": "Town of Nanton",
+   "ask": "Ask Town of Nanton about its variance steps and forms."
   },
   {
    "id": "nobleford",
@@ -2730,8 +2988,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Nobleford"
+   "covered": false,
+   "office": "Town of Nobleford",
+   "ask": "Ask Town of Nobleford about its variance steps and forms."
   },
   {
    "id": "okotoks",
@@ -2741,8 +3000,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Okotoks"
+   "covered": false,
+   "office": "Town of Okotoks",
+   "ask": "Ask Town of Okotoks about its variance steps and forms."
   },
   {
    "id": "olds",
@@ -2752,8 +3012,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Olds"
+   "covered": false,
+   "office": "Town of Olds",
+   "ask": "Ask Town of Olds about its variance steps and forms."
   },
   {
    "id": "onoway",
@@ -2763,8 +3024,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Onoway"
+   "covered": false,
+   "office": "Town of Onoway",
+   "ask": "Ask Town of Onoway about its variance steps and forms."
   },
   {
    "id": "oyen",
@@ -2774,8 +3036,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Oyen"
+   "covered": false,
+   "office": "Town of Oyen",
+   "ask": "Ask Town of Oyen about its variance steps and forms."
   },
   {
    "id": "peace-river",
@@ -2785,8 +3048,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Peace River"
+   "covered": false,
+   "office": "Town of Peace River",
+   "ask": "Ask Town of Peace River about its variance steps and forms."
   },
   {
    "id": "penhold",
@@ -2796,8 +3060,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Penhold"
+   "covered": false,
+   "office": "Town of Penhold",
+   "ask": "Ask Town of Penhold about its variance steps and forms."
   },
   {
    "id": "picture-butte",
@@ -2807,8 +3072,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Picture Butte"
+   "covered": false,
+   "office": "Town of Picture Butte",
+   "ask": "Ask Town of Picture Butte about its variance steps and forms."
   },
   {
    "id": "pincher-creek",
@@ -2818,8 +3084,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Pincher Creek"
+   "covered": false,
+   "office": "Town of Pincher Creek",
+   "ask": "Ask Town of Pincher Creek about its variance steps and forms."
   },
   {
    "id": "ponoka",
@@ -2829,8 +3096,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Ponoka"
+   "covered": false,
+   "office": "Town of Ponoka",
+   "ask": "Ask Town of Ponoka about its variance steps and forms."
   },
   {
    "id": "provost",
@@ -2840,8 +3108,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Provost"
+   "covered": false,
+   "office": "Town of Provost",
+   "ask": "Ask Town of Provost about its variance steps and forms."
   },
   {
    "id": "rainbow-lake",
@@ -2851,8 +3120,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "raymond",
@@ -2862,8 +3132,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Raymond"
+   "covered": false,
+   "office": "Town of Raymond",
+   "ask": "Ask Town of Raymond about its variance steps and forms."
   },
   {
    "id": "redcliff",
@@ -2873,8 +3144,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Redcliff"
+   "covered": false,
+   "office": "Town of Redcliff",
+   "ask": "Ask Town of Redcliff about its variance steps and forms."
   },
   {
    "id": "redwater",
@@ -2884,8 +3156,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Redwater"
+   "covered": false,
+   "office": "Town of Redwater",
+   "ask": "Ask Town of Redwater about its variance steps and forms."
   },
   {
    "id": "rimbey",
@@ -2895,8 +3168,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Rimbey"
+   "covered": false,
+   "office": "Town of Rimbey",
+   "ask": "Ask Town of Rimbey about its variance steps and forms."
   },
   {
    "id": "rocky-mountain-house",
@@ -2906,8 +3180,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Rocky Mountain House"
+   "covered": false,
+   "office": "Town of Rocky Mountain House",
+   "ask": "Ask Town of Rocky Mountain House about its variance steps and forms."
   },
   {
    "id": "sedgewick",
@@ -2917,8 +3192,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Sedgewick"
+   "covered": false,
+   "office": "Town of Sedgewick",
+   "ask": "Ask Town of Sedgewick about its variance steps and forms."
   },
   {
    "id": "sexsmith",
@@ -2928,8 +3204,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Sexsmith"
+   "covered": false,
+   "office": "Town of Sexsmith",
+   "ask": "Ask Town of Sexsmith about its variance steps and forms."
   },
   {
    "id": "slave-lake",
@@ -2939,8 +3216,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "smoky-lake",
@@ -2950,8 +3228,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Smoky Lake"
+   "covered": false,
+   "office": "Town of Smoky Lake",
+   "ask": "Ask Town of Smoky Lake about its variance steps and forms."
   },
   {
    "id": "spirit-river",
@@ -2961,8 +3240,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Spirit River"
+   "covered": false,
+   "office": "Town of Spirit River",
+   "ask": "Ask Town of Spirit River about its variance steps and forms."
   },
   {
    "id": "st-paul",
@@ -2972,8 +3252,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of St. Paul"
+   "covered": false,
+   "office": "Town of St. Paul",
+   "ask": "Ask Town of St. Paul about its variance steps and forms."
   },
   {
    "id": "stavely",
@@ -2983,8 +3264,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Stavely"
+   "covered": false,
+   "office": "Town of Stavely",
+   "ask": "Ask Town of Stavely about its variance steps and forms."
   },
   {
    "id": "stettler",
@@ -2994,8 +3276,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Stettler"
+   "covered": false,
+   "office": "Town of Stettler",
+   "ask": "Ask Town of Stettler about its variance steps and forms."
   },
   {
    "id": "stony-plain",
@@ -3005,8 +3288,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Stony Plain"
+   "covered": false,
+   "office": "Town of Stony Plain",
+   "ask": "Ask Town of Stony Plain about its variance steps and forms."
   },
   {
    "id": "strathmore",
@@ -3016,8 +3300,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Strathmore"
+   "covered": false,
+   "office": "Town of Strathmore",
+   "ask": "Ask Town of Strathmore about its variance steps and forms."
   },
   {
    "id": "sundre",
@@ -3027,8 +3312,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Sundre"
+   "covered": false,
+   "office": "Town of Sundre",
+   "ask": "Ask Town of Sundre about its variance steps and forms."
   },
   {
    "id": "swan-hills",
@@ -3038,8 +3324,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Swan Hills"
+   "covered": false,
+   "office": "Town of Swan Hills",
+   "ask": "Ask Town of Swan Hills about its variance steps and forms."
   },
   {
    "id": "sylvan-lake",
@@ -3049,8 +3336,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Sylvan Lake"
+   "covered": false,
+   "office": "Town of Sylvan Lake",
+   "ask": "Ask Town of Sylvan Lake about its variance steps and forms."
   },
   {
    "id": "taber-0311",
@@ -3058,8 +3346,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Taber"
+   "covered": false,
+   "office": "Town of Taber",
+   "ask": "Ask Town of Taber about its variance steps and forms."
   },
   {
    "id": "thorsby",
@@ -3069,8 +3358,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Thorsby"
+   "covered": false,
+   "office": "Town of Thorsby",
+   "ask": "Ask Town of Thorsby about its variance steps and forms."
   },
   {
    "id": "three-hills",
@@ -3080,8 +3370,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Three Hills"
+   "covered": false,
+   "office": "Town of Three Hills",
+   "ask": "Ask Town of Three Hills about its variance steps and forms."
   },
   {
    "id": "tofield",
@@ -3091,8 +3382,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Tofield"
+   "covered": false,
+   "office": "Town of Tofield",
+   "ask": "Ask Town of Tofield about its variance steps and forms."
   },
   {
    "id": "trochu",
@@ -3102,8 +3394,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Trochu"
+   "covered": false,
+   "office": "Town of Trochu",
+   "ask": "Ask Town of Trochu about its variance steps and forms."
   },
   {
    "id": "two-hills",
@@ -3113,8 +3406,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Two Hills"
+   "covered": false,
+   "office": "Town of Two Hills",
+   "ask": "Ask Town of Two Hills about its variance steps and forms."
   },
   {
    "id": "valleyview",
@@ -3124,8 +3418,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Valleyview"
+   "covered": false,
+   "office": "Town of Valleyview",
+   "ask": "Ask Town of Valleyview about its variance steps and forms."
   },
   {
    "id": "vauxhall",
@@ -3135,8 +3430,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Vauxhall"
+   "covered": false,
+   "office": "Town of Vauxhall",
+   "ask": "Ask Town of Vauxhall about its variance steps and forms."
   },
   {
    "id": "vegreville",
@@ -3146,8 +3442,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Vegreville"
+   "covered": false,
+   "office": "Town of Vegreville",
+   "ask": "Ask Town of Vegreville about its variance steps and forms."
   },
   {
    "id": "vermilion",
@@ -3157,8 +3454,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Vermilion"
+   "covered": false,
+   "office": "Town of Vermilion",
+   "ask": "Ask Town of Vermilion about its variance steps and forms."
   },
   {
    "id": "viking",
@@ -3168,8 +3466,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Viking"
+   "covered": false,
+   "office": "Town of Viking",
+   "ask": "Ask Town of Viking about its variance steps and forms."
   },
   {
    "id": "vulcan",
@@ -3179,8 +3478,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Vulcan"
+   "covered": false,
+   "office": "Town of Vulcan",
+   "ask": "Ask Town of Vulcan about its variance steps and forms."
   },
   {
    "id": "wainwright",
@@ -3190,8 +3490,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Wainwright"
+   "covered": false,
+   "office": "Town of Wainwright",
+   "ask": "Ask Town of Wainwright about its variance steps and forms."
   },
   {
    "id": "wembley",
@@ -3201,8 +3502,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Wembley"
+   "covered": false,
+   "office": "Town of Wembley",
+   "ask": "Ask Town of Wembley about its variance steps and forms."
   },
   {
    "id": "westlock",
@@ -3212,8 +3514,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Westlock"
+   "covered": false,
+   "office": "Town of Westlock",
+   "ask": "Ask Town of Westlock about its variance steps and forms."
   },
   {
    "id": "whitecourt",
@@ -3223,8 +3526,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Town of Whitecourt"
+   "covered": false,
+   "office": "Town of Whitecourt",
+   "ask": "Ask Town of Whitecourt about its variance steps and forms."
   },
   {
    "id": "townsite-of-redwood-meadows-administration-society",
@@ -3235,7 +3539,8 @@
    "province": "AB",
    "kind": "unconfirmed",
    "covered": false,
-   "office": "Not confirmed"
+   "office": "Not confirmed",
+   "ask": "Ask the townsite administration which building code applies and who reviews it."
   },
   {
    "id": "tsuutina-nation",
@@ -3248,7 +3553,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Tsuut'ina Nation"
+   "office": "Tsuut'ina Nation",
+   "ask": "Ask Tsuut'ina Nation which building rules apply and who reviews them."
   },
   {
    "id": "tthebatthie-denesuline-nation",
@@ -3257,7 +3563,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Tthebatthie Denesuliné Nation"
+   "office": "Tthebatthie Denesuliné Nation",
+   "ask": "Ask Tthebatthie Denesuliné Nation which building rules apply and who reviews them."
   },
   {
    "id": "acme",
@@ -3267,8 +3574,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Acme"
+   "covered": false,
+   "office": "Village of Acme",
+   "ask": "Ask Village of Acme about its variance steps and forms."
   },
   {
    "id": "alix",
@@ -3278,8 +3586,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "alliance",
@@ -3289,8 +3598,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Alliance"
+   "covered": false,
+   "office": "Village of Alliance",
+   "ask": "Ask Village of Alliance about its variance steps and forms."
   },
   {
    "id": "amisk",
@@ -3300,8 +3610,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Amisk"
+   "covered": false,
+   "office": "Village of Amisk",
+   "ask": "Ask Village of Amisk about its variance steps and forms."
   },
   {
    "id": "andrew",
@@ -3311,8 +3622,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Andrew"
+   "covered": false,
+   "office": "Village of Andrew",
+   "ask": "Ask Village of Andrew about its variance steps and forms."
   },
   {
    "id": "arrowwood",
@@ -3322,8 +3634,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Arrowwood"
+   "covered": false,
+   "office": "Village of Arrowwood",
+   "ask": "Ask Village of Arrowwood about its variance steps and forms."
   },
   {
    "id": "barnwell",
@@ -3333,8 +3646,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "barons",
@@ -3344,8 +3658,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "bawlf",
@@ -3355,8 +3670,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Bawlf"
+   "covered": false,
+   "office": "Village of Bawlf",
+   "ask": "Ask Village of Bawlf about its variance steps and forms."
   },
   {
    "id": "beiseker",
@@ -3366,8 +3682,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Beiseker"
+   "covered": false,
+   "office": "Village of Beiseker",
+   "ask": "Ask Village of Beiseker about its variance steps and forms."
   },
   {
    "id": "berwyn",
@@ -3377,8 +3694,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "big-valley",
@@ -3388,8 +3706,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "bittern-lake",
@@ -3399,8 +3718,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Bittern Lake"
+   "covered": false,
+   "office": "Village of Bittern Lake",
+   "ask": "Ask Village of Bittern Lake about its variance steps and forms."
   },
   {
    "id": "boyle",
@@ -3410,8 +3730,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Boyle"
+   "covered": false,
+   "office": "Village of Boyle",
+   "ask": "Ask Village of Boyle about its variance steps and forms."
   },
   {
    "id": "breton",
@@ -3421,8 +3742,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "carbon",
@@ -3432,8 +3754,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Carbon"
+   "covered": false,
+   "office": "Village of Carbon",
+   "ask": "Ask Village of Carbon about its variance steps and forms."
   },
   {
    "id": "carmangay",
@@ -3443,8 +3766,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "champion",
@@ -3454,8 +3778,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Champion"
+   "covered": false,
+   "office": "Village of Champion",
+   "ask": "Ask Village of Champion about its variance steps and forms."
   },
   {
    "id": "chauvin",
@@ -3465,8 +3790,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "chipman",
@@ -3476,8 +3802,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Chipman"
+   "covered": false,
+   "office": "Village of Chipman",
+   "ask": "Ask Village of Chipman about its variance steps and forms."
   },
   {
    "id": "clive",
@@ -3487,8 +3814,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Clive"
+   "covered": false,
+   "office": "Village of Clive",
+   "ask": "Ask Village of Clive about its variance steps and forms."
   },
   {
    "id": "clyde",
@@ -3498,8 +3826,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Clyde"
+   "covered": false,
+   "office": "Village of Clyde",
+   "ask": "Ask Village of Clyde about its variance steps and forms."
   },
   {
    "id": "consort",
@@ -3509,8 +3838,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Consort"
+   "covered": false,
+   "office": "Village of Consort",
+   "ask": "Ask Village of Consort about its variance steps and forms."
   },
   {
    "id": "coutts",
@@ -3520,8 +3850,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "cowley",
@@ -3531,8 +3862,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "cremona",
@@ -3542,8 +3874,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Cremona"
+   "covered": false,
+   "office": "Village of Cremona",
+   "ask": "Ask Village of Cremona about its variance steps and forms."
   },
   {
    "id": "czar",
@@ -3553,8 +3886,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Czar"
+   "covered": false,
+   "office": "Village of Czar",
+   "ask": "Ask Village of Czar about its variance steps and forms."
   },
   {
    "id": "delburne",
@@ -3564,8 +3898,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Delburne"
+   "covered": false,
+   "office": "Village of Delburne",
+   "ask": "Ask Village of Delburne about its variance steps and forms."
   },
   {
    "id": "delia",
@@ -3575,8 +3910,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Delia"
+   "covered": false,
+   "office": "Village of Delia",
+   "ask": "Ask Village of Delia about its variance steps and forms."
   },
   {
    "id": "donalda",
@@ -3586,8 +3922,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "donnelly",
@@ -3597,8 +3934,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "duchess",
@@ -3608,8 +3946,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Duchess"
+   "covered": false,
+   "office": "Village of Duchess",
+   "ask": "Ask Village of Duchess about its variance steps and forms."
   },
   {
    "id": "edberg",
@@ -3619,8 +3958,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Edberg"
+   "covered": false,
+   "office": "Village of Edberg",
+   "ask": "Ask Village of Edberg about its variance steps and forms."
   },
   {
    "id": "edgerton",
@@ -3630,8 +3970,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "elnora",
@@ -3641,8 +3982,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Elnora"
+   "covered": false,
+   "office": "Village of Elnora",
+   "ask": "Ask Village of Elnora about its variance steps and forms."
   },
   {
    "id": "empress",
@@ -3652,8 +3994,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Empress"
+   "covered": false,
+   "office": "Village of Empress",
+   "ask": "Ask Village of Empress about its variance steps and forms."
   },
   {
    "id": "foremost",
@@ -3663,8 +4006,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "forestburg",
@@ -3674,8 +4018,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Forestburg"
+   "covered": false,
+   "office": "Village of Forestburg",
+   "ask": "Ask Village of Forestburg about its variance steps and forms."
   },
   {
    "id": "girouxville",
@@ -3685,8 +4030,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "glendon",
@@ -3696,8 +4042,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Glendon"
+   "covered": false,
+   "office": "Village of Glendon",
+   "ask": "Ask Village of Glendon about its variance steps and forms."
   },
   {
    "id": "glenwood",
@@ -3707,8 +4054,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "hay-lakes",
@@ -3718,8 +4066,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Hay Lakes"
+   "covered": false,
+   "office": "Village of Hay Lakes",
+   "ask": "Ask Village of Hay Lakes about its variance steps and forms."
   },
   {
    "id": "heisler",
@@ -3729,8 +4078,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Heisler"
+   "covered": false,
+   "office": "Village of Heisler",
+   "ask": "Ask Village of Heisler about its variance steps and forms."
   },
   {
    "id": "hill-spring",
@@ -3740,8 +4090,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "hines-creek",
@@ -3751,8 +4102,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "holden",
@@ -3762,8 +4114,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Holden"
+   "covered": false,
+   "office": "Village of Holden",
+   "ask": "Ask Village of Holden about its variance steps and forms."
   },
   {
    "id": "hughenden",
@@ -3773,8 +4126,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Hughenden"
+   "covered": false,
+   "office": "Village of Hughenden",
+   "ask": "Ask Village of Hughenden about its variance steps and forms."
   },
   {
    "id": "hussar",
@@ -3784,8 +4138,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Hussar"
+   "covered": false,
+   "office": "Village of Hussar",
+   "ask": "Ask Village of Hussar about its variance steps and forms."
   },
   {
    "id": "innisfree",
@@ -3795,8 +4150,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "irma",
@@ -3806,8 +4162,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Irma"
+   "covered": false,
+   "office": "Village of Irma",
+   "ask": "Ask Village of Irma about its variance steps and forms."
   },
   {
    "id": "kitscoty",
@@ -3817,8 +4174,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Kitscoty"
+   "covered": false,
+   "office": "Village of Kitscoty",
+   "ask": "Ask Village of Kitscoty about its variance steps and forms."
   },
   {
    "id": "linden",
@@ -3828,8 +4186,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Linden"
+   "covered": false,
+   "office": "Village of Linden",
+   "ask": "Ask Village of Linden about its variance steps and forms."
   },
   {
    "id": "lomond",
@@ -3839,8 +4198,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Lomond"
+   "covered": false,
+   "office": "Village of Lomond",
+   "ask": "Ask Village of Lomond about its variance steps and forms."
   },
   {
    "id": "longview",
@@ -3850,8 +4210,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Longview"
+   "covered": false,
+   "office": "Village of Longview",
+   "ask": "Ask Village of Longview about its variance steps and forms."
   },
   {
    "id": "lougheed",
@@ -3861,8 +4222,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Lougheed"
+   "covered": false,
+   "office": "Village of Lougheed",
+   "ask": "Ask Village of Lougheed about its variance steps and forms."
   },
   {
    "id": "mannville",
@@ -3872,8 +4234,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "marwayne",
@@ -3883,8 +4246,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "milo",
@@ -3894,8 +4258,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Milo"
+   "covered": false,
+   "office": "Village of Milo",
+   "ask": "Ask Village of Milo about its variance steps and forms."
   },
   {
    "id": "morrin",
@@ -3905,8 +4270,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Morrin"
+   "covered": false,
+   "office": "Village of Morrin",
+   "ask": "Ask Village of Morrin about its variance steps and forms."
   },
   {
    "id": "munson",
@@ -3916,8 +4282,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Munson"
+   "covered": false,
+   "office": "Village of Munson",
+   "ask": "Ask Village of Munson about its variance steps and forms."
   },
   {
    "id": "myrnam",
@@ -3927,8 +4294,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "nampa",
@@ -3938,8 +4306,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "paradise-valley",
@@ -3949,8 +4318,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Paradise Valley"
+   "covered": false,
+   "office": "Village of Paradise Valley",
+   "ask": "Ask Village of Paradise Valley about its variance steps and forms."
   },
   {
    "id": "rockyford",
@@ -3960,8 +4330,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Rockyford"
+   "covered": false,
+   "office": "Village of Rockyford",
+   "ask": "Ask Village of Rockyford about its variance steps and forms."
   },
   {
    "id": "rosalind",
@@ -3971,8 +4342,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Rosalind"
+   "covered": false,
+   "office": "Village of Rosalind",
+   "ask": "Ask Village of Rosalind about its variance steps and forms."
   },
   {
    "id": "rosemary",
@@ -3982,8 +4354,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Rosemary"
+   "covered": false,
+   "office": "Village of Rosemary",
+   "ask": "Ask Village of Rosemary about its variance steps and forms."
   },
   {
    "id": "rycroft",
@@ -3993,8 +4366,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "ryley",
@@ -4004,8 +4378,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Ryley"
+   "covered": false,
+   "office": "Village of Ryley",
+   "ask": "Ask Village of Ryley about its variance steps and forms."
   },
   {
    "id": "spring-lake",
@@ -4015,8 +4390,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Spring Lake"
+   "covered": false,
+   "office": "Village of Spring Lake",
+   "ask": "Ask Village of Spring Lake about its variance steps and forms."
   },
   {
    "id": "standard",
@@ -4026,8 +4402,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Standard"
+   "covered": false,
+   "office": "Village of Standard",
+   "ask": "Ask Village of Standard about its variance steps and forms."
   },
   {
    "id": "stirling",
@@ -4037,8 +4414,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Stirling"
+   "covered": false,
+   "office": "Village of Stirling",
+   "ask": "Ask Village of Stirling about its variance steps and forms."
   },
   {
    "id": "veteran",
@@ -4048,8 +4426,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Veteran"
+   "covered": false,
+   "office": "Village of Veteran",
+   "ask": "Ask Village of Veteran about its variance steps and forms."
   },
   {
    "id": "vilna",
@@ -4059,8 +4438,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Vilna"
+   "covered": false,
+   "office": "Village of Vilna",
+   "ask": "Ask Village of Vilna about its variance steps and forms."
   },
   {
    "id": "warburg",
@@ -4070,8 +4450,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Warburg"
+   "covered": false,
+   "office": "Village of Warburg",
+   "ask": "Ask Village of Warburg about its variance steps and forms."
   },
   {
    "id": "warner",
@@ -4081,8 +4462,9 @@
    ],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "waskatenau",
@@ -4092,8 +4474,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Waskatenau"
+   "covered": false,
+   "office": "Village of Waskatenau",
+   "ask": "Ask Village of Waskatenau about its variance steps and forms."
   },
   {
    "id": "youngstown",
@@ -4103,8 +4486,9 @@
    ],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Village of Youngstown"
+   "covered": false,
+   "office": "Village of Youngstown",
+   "ask": "Ask Village of Youngstown about its variance steps and forms."
   },
   {
    "id": "vulcan-county",
@@ -4112,8 +4496,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Vulcan County"
+   "covered": false,
+   "office": "Vulcan County",
+   "ask": "Ask Vulcan County about its variance steps and forms."
   },
   {
    "id": "westlock-county",
@@ -4121,8 +4506,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Westlock County"
+   "covered": false,
+   "office": "Westlock County",
+   "ask": "Ask Westlock County about its variance steps and forms."
   },
   {
    "id": "wheatland-county",
@@ -4130,8 +4516,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "accredited_municipality",
-   "covered": true,
-   "office": "Wheatland County"
+   "covered": false,
+   "office": "Wheatland County",
+   "ask": "Ask Wheatland County about its variance steps and forms."
   },
   {
    "id": "whitefish-goodfish-lake-first-nation",
@@ -4140,7 +4527,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Whitefish (Goodfish) Lake First Nation"
+   "office": "Whitefish (Goodfish) Lake First Nation",
+   "ask": "Ask Whitefish (Goodfish) Lake First Nation which building rules apply and who reviews them."
   },
   {
    "id": "whitefish-lake-first-nation",
@@ -4149,7 +4537,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Whitefish Lake First Nation"
+   "office": "Whitefish Lake First Nation",
+   "ask": "Ask Whitefish Lake First Nation which building rules apply and who reviews them."
   },
   {
    "id": "woodland-cree-first-nation",
@@ -4158,7 +4547,8 @@
    "province": "AB",
    "kind": "first_nation",
    "covered": false,
-   "office": "Woodland Cree First Nation"
+   "office": "Woodland Cree First Nation",
+   "ask": "Ask Woodland Cree First Nation which building rules apply and who reviews them."
   },
   {
    "id": "woodlands-county",
@@ -4166,8 +4556,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "yellowhead-county",
@@ -4175,8 +4566,9 @@
    "aliases": [],
    "province": "AB",
    "kind": "alberta_safety_codes_authority",
-   "covered": true,
-   "office": "Alberta Safety Codes Authority"
+   "covered": false,
+   "office": "Alberta Safety Codes Authority",
+   "ask": "Ask the Alberta Safety Codes Authority or one of its contracted agencies."
   },
   {
    "id": "brampton",
@@ -4185,7 +4577,8 @@
    "province": "ON",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "City of Brampton"
+   "office": "City of Brampton",
+   "ask": "Ask City of Brampton."
   },
   {
    "id": "british-columbia",
@@ -4197,7 +4590,8 @@
    "province": "BC",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "the local building authority in British Columbia"
+   "office": "the local building authority in British Columbia",
+   "ask": "Ask the building authority where the project is."
   },
   {
    "id": "burnaby",
@@ -4206,7 +4600,8 @@
    "province": "BC",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "City of Burnaby"
+   "office": "City of Burnaby",
+   "ask": "Ask City of Burnaby."
   },
   {
    "id": "charlottetown",
@@ -4215,7 +4610,8 @@
    "province": "PE",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "City of Charlottetown"
+   "office": "City of Charlottetown",
+   "ask": "Ask City of Charlottetown."
   },
   {
    "id": "fredericton",
@@ -4224,7 +4620,8 @@
    "province": "NB",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "City of Fredericton"
+   "office": "City of Fredericton",
+   "ask": "Ask City of Fredericton."
   },
   {
    "id": "gatineau",
@@ -4233,7 +4630,8 @@
    "province": "QC",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "Régie du bâtiment du Québec, or the City of Gatineau for exempt buildings"
+   "office": "Régie du bâtiment du Québec, or the City of Gatineau for exempt buildings",
+   "ask": "Ask Régie du bâtiment du Québec, or the City of Gatineau for exempt buildings."
   },
   {
    "id": "halifax",
@@ -4242,7 +4640,8 @@
    "province": "NS",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "Halifax Regional Municipality"
+   "office": "Halifax Regional Municipality",
+   "ask": "Ask Halifax Regional Municipality."
   },
   {
    "id": "hamilton",
@@ -4251,7 +4650,8 @@
    "province": "ON",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "City of Hamilton"
+   "office": "City of Hamilton",
+   "ask": "Ask City of Hamilton."
   },
   {
    "id": "iqaluit",
@@ -4260,7 +4660,8 @@
    "province": "NU",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "Government of Nunavut building office"
+   "office": "Government of Nunavut building office",
+   "ask": "Ask Government of Nunavut building office."
   },
   {
    "id": "kitchener",
@@ -4269,7 +4670,8 @@
    "province": "ON",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "City of Kitchener"
+   "office": "City of Kitchener",
+   "ask": "Ask City of Kitchener."
   },
   {
    "id": "laval",
@@ -4278,7 +4680,8 @@
    "province": "QC",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "Régie du bâtiment du Québec, or the City of Laval for exempt buildings"
+   "office": "Régie du bâtiment du Québec, or the City of Laval for exempt buildings",
+   "ask": "Ask Régie du bâtiment du Québec, or the City of Laval for exempt buildings."
   },
   {
    "id": "london",
@@ -4287,7 +4690,8 @@
    "province": "ON",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "City of London"
+   "office": "City of London",
+   "ask": "Ask City of London."
   },
   {
    "id": "longueuil",
@@ -4296,7 +4700,8 @@
    "province": "QC",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "Régie du bâtiment du Québec, or the City of Longueuil for exempt buildings"
+   "office": "Régie du bâtiment du Québec, or the City of Longueuil for exempt buildings",
+   "ask": "Ask Régie du bâtiment du Québec, or the City of Longueuil for exempt buildings."
   },
   {
    "id": "manitoba",
@@ -4307,7 +4712,8 @@
    "province": "MB",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "the local building authority in Manitoba"
+   "office": "the local building authority in Manitoba",
+   "ask": "Ask the building authority where the project is."
   },
   {
    "id": "markham",
@@ -4316,7 +4722,8 @@
    "province": "ON",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "City of Markham"
+   "office": "City of Markham",
+   "ask": "Ask City of Markham."
   },
   {
    "id": "mississauga",
@@ -4325,7 +4732,8 @@
    "province": "ON",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "City of Mississauga"
+   "office": "City of Mississauga",
+   "ask": "Ask City of Mississauga."
   },
   {
    "id": "moncton",
@@ -4334,7 +4742,8 @@
    "province": "NB",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "City of Moncton"
+   "office": "City of Moncton",
+   "ask": "Ask City of Moncton."
   },
   {
    "id": "montreal",
@@ -4345,7 +4754,8 @@
    "province": "QC",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "Régie du bâtiment du Québec, or the City of Montréal for exempt buildings"
+   "office": "Régie du bâtiment du Québec, or the City of Montréal for exempt buildings",
+   "ask": "Ask Régie du bâtiment du Québec, or the City of Montréal for exempt buildings."
   },
   {
    "id": "new-brunswick",
@@ -4356,7 +4766,8 @@
    "province": "NB",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "the local building authority in New Brunswick"
+   "office": "the local building authority in New Brunswick",
+   "ask": "Ask the building authority where the project is."
   },
   {
    "id": "newfoundland-and-labrador",
@@ -4368,7 +4779,8 @@
    "province": "NL",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "the local building authority in Newfoundland and Labrador"
+   "office": "the local building authority in Newfoundland and Labrador",
+   "ask": "Ask the building authority where the project is."
   },
   {
    "id": "northwest-territories",
@@ -4380,7 +4792,8 @@
    "province": "NT",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "the local building authority in Northwest Territories"
+   "office": "the local building authority in Northwest Territories",
+   "ask": "Ask the building authority where the project is."
   },
   {
    "id": "nova-scotia",
@@ -4391,7 +4804,8 @@
    "province": "NS",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "the local building authority in Nova Scotia"
+   "office": "the local building authority in Nova Scotia",
+   "ask": "Ask the building authority where the project is."
   },
   {
    "id": "nunavut",
@@ -4402,7 +4816,8 @@
    "province": "NU",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "the local building authority in Nunavut"
+   "office": "the local building authority in Nunavut",
+   "ask": "Ask the building authority where the project is."
   },
   {
    "id": "ontario",
@@ -4413,7 +4828,8 @@
    "province": "ON",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "the local building authority in Ontario"
+   "office": "the local building authority in Ontario",
+   "ask": "Ask the building authority where the project is."
   },
   {
    "id": "ottawa",
@@ -4422,7 +4838,8 @@
    "province": "ON",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "City of Ottawa"
+   "office": "City of Ottawa",
+   "ask": "Ask City of Ottawa."
   },
   {
    "id": "prince-edward-island",
@@ -4434,7 +4851,8 @@
    "province": "PE",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "the local building authority in Prince Edward Island"
+   "office": "the local building authority in Prince Edward Island",
+   "ask": "Ask the building authority where the project is."
   },
   {
    "id": "quebec",
@@ -4446,7 +4864,8 @@
    "province": "QC",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "the local building authority in Quebec"
+   "office": "the local building authority in Quebec",
+   "ask": "Ask the building authority where the project is."
   },
   {
    "id": "quebec-city",
@@ -4458,7 +4877,8 @@
    "province": "QC",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "Régie du bâtiment du Québec, or the City of Québec for exempt buildings"
+   "office": "Régie du bâtiment du Québec, or the City of Québec for exempt buildings",
+   "ask": "Ask Régie du bâtiment du Québec, or the City of Québec for exempt buildings."
   },
   {
    "id": "regina",
@@ -4467,7 +4887,8 @@
    "province": "SK",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "City of Regina"
+   "office": "City of Regina",
+   "ask": "Ask City of Regina."
   },
   {
    "id": "saint-john",
@@ -4476,7 +4897,8 @@
    "province": "NB",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "City of Saint John"
+   "office": "City of Saint John",
+   "ask": "Ask City of Saint John."
   },
   {
    "id": "saskatchewan",
@@ -4487,7 +4909,8 @@
    "province": "SK",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "the local building authority in Saskatchewan"
+   "office": "the local building authority in Saskatchewan",
+   "ask": "Ask the building authority where the project is."
   },
   {
    "id": "saskatoon",
@@ -4496,7 +4919,8 @@
    "province": "SK",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "City of Saskatoon"
+   "office": "City of Saskatoon",
+   "ask": "Ask City of Saskatoon."
   },
   {
    "id": "st-johns",
@@ -4507,7 +4931,8 @@
    "province": "NL",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "City of St. John's"
+   "office": "City of St. John's",
+   "ask": "Ask City of St. John's."
   },
   {
    "id": "surrey",
@@ -4516,7 +4941,8 @@
    "province": "BC",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "City of Surrey"
+   "office": "City of Surrey",
+   "ask": "Ask City of Surrey."
   },
   {
    "id": "toronto",
@@ -4525,7 +4951,8 @@
    "province": "ON",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "City of Toronto (Toronto Building)"
+   "office": "City of Toronto (Toronto Building)",
+   "ask": "Ask City of Toronto (Toronto Building)."
   },
   {
    "id": "vancouver",
@@ -4534,7 +4961,8 @@
    "province": "BC",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "City of Vancouver"
+   "office": "City of Vancouver",
+   "ask": "Ask City of Vancouver."
   },
   {
    "id": "vaughan",
@@ -4543,7 +4971,8 @@
    "province": "ON",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "City of Vaughan"
+   "office": "City of Vaughan",
+   "ask": "Ask City of Vaughan."
   },
   {
    "id": "victoria",
@@ -4552,7 +4981,8 @@
    "province": "BC",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "City of Victoria"
+   "office": "City of Victoria",
+   "ask": "Ask City of Victoria."
   },
   {
    "id": "whitehorse",
@@ -4561,7 +4991,8 @@
    "province": "YT",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "City of Whitehorse"
+   "office": "City of Whitehorse",
+   "ask": "Ask City of Whitehorse."
   },
   {
    "id": "windsor",
@@ -4570,7 +5001,8 @@
    "province": "ON",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "City of Windsor"
+   "office": "City of Windsor",
+   "ask": "Ask City of Windsor."
   },
   {
    "id": "winnipeg",
@@ -4579,7 +5011,8 @@
    "province": "MB",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "City of Winnipeg"
+   "office": "City of Winnipeg",
+   "ask": "Ask City of Winnipeg."
   },
   {
    "id": "yellowknife",
@@ -4588,7 +5021,8 @@
    "province": "NT",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "City of Yellowknife"
+   "office": "City of Yellowknife",
+   "ask": "Ask City of Yellowknife."
   },
   {
    "id": "yukon",
@@ -4599,7 +5033,8 @@
    "province": "YT",
    "kind": "outside_alberta",
    "covered": false,
-   "office": "the local building authority in Yukon"
+   "office": "the local building authority in Yukon",
+   "ask": "Ask the building authority where the project is."
   }
  ]
 }

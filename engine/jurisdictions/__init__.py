@@ -60,10 +60,10 @@ def _key(value: str | None) -> str:
 
 
 def place_pack(place: Place) -> JurisdictionPack:
-    """The pack a generated place resolves to: its office, its sources, and coverage `preview` when Batatis
-    does not prepare applications there."""
+    """The pack a generated place resolves to: its office and its sources. It is never `full` coverage: Batatis
+    prepares applications only where a hand-written pack records the office's own checked steps."""
     return JurisdictionPack(
-        id=place.id, name=place.name, province=place.province, coverage='full' if place.covered else 'preview',
+        id=place.id, name=place.name, province=place.province, coverage='preview',
         code_edition=place.code_edition, summary=place.note,
         authority=Authority(name=place.office, kind=place.kind, contact=place.ask, sources=place.sources),
         match=Match(names=place.aliases))

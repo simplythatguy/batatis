@@ -188,7 +188,7 @@ def _case_constraints(case: Case, codes: Codes, *,
     else:
         found = registry().resolve_case(case)
         if found is not None and found.pack.coverage != 'full':
-            # Outside Alberta, reserve land, national parks, places not confirmed: never an Alberta application.
+            # Everywhere but an office whose own steps a hand-written pack records: never a final application.
             gaps.append(Gap(id='coverage:jurisdiction', severity='blocking', section='B', field='jurisdiction',
                             message=f'{found.pack.name}: {found.pack.summary}',
                             fix_hint=found.pack.authority.contact or 'Ask who reviews building work there.'))

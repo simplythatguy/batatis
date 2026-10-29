@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { AUTHORITIES, authorityUnsure, officeChoiceAction, officeSuggestion, placeOffice, resolveOffice, submissionOfficeReason } from "../config.ts";
+import { AUTHORITIES, authorityUnsure, officeChoiceAction, officeCoverage, officeSuggestion, resolveOffice, submissionOfficeReason } from "../config.ts";
 import { emptyCase } from "../intake.ts";
 import { reducer } from "../model.ts";
 import { jurisdictionBody } from "../rules.ts";
@@ -24,13 +24,16 @@ for (const [place, pack, reviewer, shown] of [
   });
 }
 
-test("the office comes from the place data: someone else, the place itself, not covered, or unknown", () => {
-  assert.deepEqual(placeOffice("Lacombe County"), { office: "Alberta Safety Codes Authority", differs: true, covered: true });
-  assert.deepEqual(placeOffice("City of Red Deer"), { office: "City of Red Deer", differs: false, covered: true });
-  assert.deepEqual(placeOffice("Calgary"), { office: "City of Calgary", differs: false, covered: true });
-  assert.deepEqual(placeOffice("Vancouver"), { office: "City of Vancouver", differs: true, covered: false });
-  assert.equal(placeOffice("Example Hamlet"), null);
-  assert.equal(placeOffice("unsure"), null);
+test("only Calgary and Edmonton are covered; everywhere else says who to ask, from the place data", () => {
+  assert.deepEqual(officeCoverage("Calgary"), { covered: true, ask: "Ask City of Calgary about its intake steps and fees." });
+  assert.equal(officeCoverage("Edmonton")?.covered, true);
+  assert.deepEqual(officeCoverage("City of Red Deer"), { covered: false, ask: "Ask City of Red Deer about its variance steps and forms." });
+  assert.deepEqual(officeCoverage("Lacombe County"), { covered: false, ask: "Ask the Alberta Safety Codes Authority or one of its contracted agencies." });
+  assert.deepEqual(officeCoverage("Vancouver"), { covered: false, ask: "Ask City of Vancouver." });
+  assert.equal(officeCoverage("Example Hamlet")?.covered, false);
+  assert.match(officeCoverage("Example Hamlet")!.ask, /Where to get a Permit/);
+  assert.equal(officeCoverage("unsure"), null);
+  assert.deepEqual(placeIndex.places.filter((p) => p.covered).map((p) => p.id).sort(), ["calgary", "edmonton"]);
 });
 
 test("Not sure is a confirmed case fact and survives a JSON round trip", () => {

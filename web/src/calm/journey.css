@@ -100,10 +100,8 @@
 .cf-pw-suggest { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 4px; }
 .cf-pw-suggest .cf-link-btn { font-size: 13px; color: var(--cf-text-3); }
 @media (hover: hover) { .cf-pw-suggest .cf-link-btn:hover { color: var(--cf-text); } }
-.cf-pw-office { display: flex; align-items: baseline; gap: 6px; margin: 2px 0 0; font-size: 13px; line-height: 1.45; color: var(--cf-text-3); }
-.cf-pw-office svg { flex: none; translate: 0 2px; }
+.cf-pw-office { display: flex; align-items: baseline; gap: 6px; margin: 2px 0 0; font-size: 13px; line-height: 1.45; color: var(--cf-text-2); }
 .cf-pw-office .cf-dot { flex: none; translate: 0 -1px; }
-.cf-pw-office.is-warning { color: var(--cf-text-2); }
 .cf-pw-source { display: inline-flex; color: var(--cf-text-4); cursor: default; }
 .cf-pw-later { font-size: 12px; color: var(--cf-text-3); opacity: 0; transition: opacity 150ms var(--cf-ease); }
 .cf-pw-row:focus-within .cf-pw-later, .cf-pw-later:focus-visible, .cf-pw-later[aria-pressed="true"] { opacity: 1; }

@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState } from "react";
-import { AUTHORITIES, authorityUnsure, officeChoiceAction, officeSuggestion, placeOffice } from "../config";
+import { AUTHORITIES, authorityUnsure, officeChoiceAction, officeCoverage, officeSuggestion } from "../config";
 import { localField } from "../intakeFields";
 import { legalFromFacts, sourceLine } from "../intakeView";
 import { DETAIL_FIELDS, factFor, valueText } from "../model";
@@ -25,12 +25,10 @@ const SHORT_LABEL: Record<string, string> = { applicant_role: "Your part", scope
 
 type RowDraft = { kind: "answer"; value: string; defaulted?: boolean } | { kind: "later" | "not_sure" };
 
-/** Under Office: the office when it is not the place itself (the Alberta Safety Codes Authority), or why Batatis stops there. */
+/** Under Office: where Batatis has not checked the office's own steps (everywhere but Calgary and Edmonton), it says it stops, and who to ask. */
 function officeLine(value: string) {
-  const place = placeOffice(value);
-  if (place && !place.covered) return <p className="cf-pw-office is-warning"><Dot tone="warning" />Batatis doesn’t prepare applications here. Ask {place.office}.</p>;
-  if (place?.differs) return <p className="cf-pw-office" title={`Reviewed through ${place.office}`}><Icon24 name="landmark" size={14} /><span className="cf-sr">Reviewed through </span>{place.office}</p>;
-  return null;
+  const office = officeCoverage(value);
+  return office && !office.covered ? <p className="cf-pw-office"><Dot tone="warning" />Batatis doesn’t prepare applications here. {office.ask}</p> : null;
 }
 
 /** Edits and defaults belong to this sheet until the applicant presses Done. */

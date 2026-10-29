@@ -8,7 +8,7 @@ import fallbackPack from "../../engine/data/jurisdictions/packs/alberta-other.js
 /** NBC edition this product cites. One string, used by intake, examples, and screen headers. */
 export const CODE_EDITION = "NBC(AE) 2023, 2nd printing";
 
-type PlaceRow = { id: string; name: string; aliases: string[]; province: string; kind: string; covered: boolean; office: string };
+type PlaceRow = { id: string; name: string; aliases: string[]; province: string; kind: string; covered: boolean; office: string; ask: string };
 /** Every place the engine knows (generated from the jurisdiction research; see engine/jurisdictions/places_build.py). */
 const PLACES: PlaceRow[] = placeIndex.places;
 /** In Alberta the short name when it is unambiguous ("Red Deer"), else the legal name; elsewhere the full name ("Ontario"). */
@@ -46,11 +46,15 @@ export function knownPlace(value: string): { id: string; name: string } | null {
   return office && office.packId !== fallbackPack.id ? { id: office.id, name: office.name } : null;
 }
 
-/** Who reviews building work at a chosen place, and whether Batatis prepares applications there; null for a place it does not know. */
-export function placeOffice(value: string): { office: string; differs: boolean; covered: boolean } | null {
+/**
+ * Whether Batatis prepares applications for a chosen office (only where it has checked the office's own steps:
+ * Calgary and Edmonton), and who to ask when it does not; null while no office is chosen.
+ */
+export function officeCoverage(value: string): { covered: boolean; ask: string } | null {
   const office = resolveOffice(value);
-  const place = office && PLACES.find((p) => p.id === office.packId);
-  return place ? { office: place.office, differs: place.office !== place.name, covered: place.covered } : null;
+  if (!office) return null;
+  const place = PLACES.find((p) => p.id === office.packId);
+  return { covered: Boolean(place?.covered), ask: place?.ask ?? fallbackPack.authority.contact };
 }
 
 export function authorityUnsure(c: Case): boolean {
@@ -82,7 +86,7 @@ export function officeSuggestion(c: Case): { id: string; name: string } | null {
 export function submissionOfficeReason(c: Case): string {
   if (!c.authority) return "Choose a reviewing office.";
   const office = resolveOffice(c.authority);
-  if (office && PLACES.some((p) => p.id === office.packId && !p.covered)) return `Batatis does not prepare applications for ${office.name}.`;
+  if (!officeCoverage(c.authority)?.covered) return `Batatis does not prepare applications for ${office?.name ?? c.authority}.`;
   return office?.reviewerCode ? "" : "This office receives your PDF outside Batatis. Export it below.";
 }
 

@@ -124,17 +124,18 @@ def test_other_offices_keep_their_place_and_pdf_path_without_reviewer_submission
     assert client.post(f'/cases/{case["id"]}/export', json={'draft': True}).status_code == 200
 
 
-def test_other_office_exports_the_real_pdf_with_existing_completeness_gates(scene):
+def test_another_office_gets_a_draft_pdf_but_no_final_application(scene):
     case = sample_case(Codes(), provisions=['9.25.2.2.(1)'])
     case.owner_id = scene.users['owner']['id']
     case.authority = None
     case.jurisdiction = Jurisdiction(id='red-deer', name='Red Deer')
     case = store_with_synthetic_files(scene.store, case)
-    for draft in (True, False):
-        response = scene.clients['owner'].post(f'/cases/{case.id}/export', json={'draft': draft})
-        assert response.status_code == 200, response.text
-        assert response.content.startswith(b'%PDF')
-        assert len(PdfReader(BytesIO(response.content)).pages) >= 1
+    draft = scene.clients['owner'].post(f'/cases/{case.id}/export', json={'draft': True})
+    assert draft.status_code == 200, draft.text
+    assert draft.content.startswith(b'%PDF') and len(PdfReader(BytesIO(draft.content)).pages) >= 1
+    final = scene.clients['owner'].post(f'/cases/{case.id}/export', json={'draft': False})
+    assert final.status_code == 409
+    assert any('does not prepare applications' in reason for reason in final.json()['detail']['reasons'])
 
 
 def test_a_case_pack_follows_the_case_access_policy(scene):

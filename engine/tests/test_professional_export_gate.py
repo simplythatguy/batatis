@@ -36,7 +36,7 @@ def package(monkeypatch):
         professional_seal='SYNTHETIC authentication metadata',
     )
     case = Case(title='SYNTHETIC export-gate fixture',
-                jurisdiction=Jurisdiction(id='alberta-other', name='SYNTHETIC authority'),
+                jurisdiction=Jurisdiction(id='edmonton', name='City of Edmonton'),
                 facts=[fact(key, value) for key, value in values.items()],
                 provisions=[NO_ROW], section_c=section_c_rows([NO_ROW], codes))
     # Section D names one readable attachment, so only professional identity is open.

@@ -133,9 +133,10 @@ test("a paperwork row asked by the planner shows and saves its form field, not t
   h.unmount();
 });
 
-test("the Office row names the office when it is someone else, and says where Batatis stops", async () => {
+test("the Office row says where Batatis stops, and who to ask", async () => {
   for (const [authority, line] of [
-    ["lacombe-county", "Reviewed through Alberta Safety Codes Authority"],
+    ["lacombe-county", "Batatis doesn’t prepare applications here. Ask the Alberta Safety Codes Authority or one of its contracted agencies."],
+    ["red-deer", "Batatis doesn’t prepare applications here. Ask City of Red Deer about its variance steps and forms."],
     ["vancouver", "Batatis doesn’t prepare applications here. Ask City of Vancouver."],
     ["edmonton", ""],
   ] as const) {

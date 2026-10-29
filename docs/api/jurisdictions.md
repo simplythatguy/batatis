@@ -33,21 +33,25 @@ it to add a synthetic fourth pack.
 |---|---|---|---|---|---|---|
 | `calgary` | full | City of Calgary (reviewer code `calgary`) | Request for Specific Variance, R2014-06 (export not yet) | SPV-001 (Rev. 5, 2026-03-05), SPV-006 (2025-06-19) | Guide to Applying for an Alternative Solution (2023-11-23) | `calgary_variance_form` (from PR #40) |
 | `edmonton` | full | City of Edmonton (reviewer code `edmonton`) | none found | B23-01 (2024-07-30), B14-01 **historical** (cites ABC 2014) | Point Access Block guide (2025-02-28), emergency-services guideline (2025-04-15) | none |
-| `alberta-other` | full, `fallback: true` | accredited municipality or Alberta Safety Codes Authority | none | none | none | none |
+| `alberta-other` | preview, `fallback: true` | accredited municipality or Alberta Safety Codes Authority | none | none | none | none |
 
 Generated place packs: 433, one for every place that no hand-written pack names (Calgary and Edmonton keep theirs).
+Batatis prepares applications only where a hand-written pack records the office's own checked variance steps, so
+only `calgary` and `edmonton` are `full`. Every generated pack is `preview`: it names the office and who to ask, and
+says Batatis does not prepare applications there yet.
 
 | Kind (`authority.kind`) | Packs | Coverage | What the pack says |
 |---|---:|---|---|
-| `accredited_municipality` | 259 | full | The municipality or Metis settlement is accredited for building (its Safety Codes Council number); three airport-land places name the municipality after the airport authority |
-| `alberta_safety_codes_authority` | 73 | full | Not accredited for building: the Alberta Safety Codes Authority oversees permits; the owner picks one of its agencies |
+| `accredited_municipality` | 259 | preview | The municipality or Metis settlement is accredited for building (its Safety Codes Council number); three airport-land places name the municipality after the airport authority |
+| `alberta_safety_codes_authority` | 73 | preview | Not accredited for building: the Alberta Safety Codes Authority oversees permits; the owner picks one of its agencies |
 | `first_nation` | 50 | preview | Reserve land: the Nation may set its own building rules (Indian Act s.81(1)(h)) |
 | `federal` | 6 | preview | Parks Canada issues the building permit (five park districts and the Jasper townsite) |
 | `unconfirmed` | 2 | preview | Lloydminster (own bylaw, code not confirmed) and Redwood Meadows (office not confirmed) |
 | `outside_alberta` | 43 | preview | The place is outside Alberta; names the code it uses |
 
 The loader also rejects a place alias that another pack claims as its id, and a `first_nation`, `federal`,
-`outside_alberta` or `unconfirmed` pack with full coverage.
+`outside_alberta` or `unconfirmed` pack with full coverage. A generated pack is never `full`, so removing a
+hand-written pack leaves its place named but not covered.
 
 Alberta shared items (`provinces/AB.json`): the SCC Variance Form for Proposed Alternative Solution
 (`scc_2026-10`, sha256 pinned, ported from PR #12's `forms.json`), bulletins IB-2026-10-01,
@@ -127,9 +131,9 @@ bulletins. `404` detail `jurisdiction not found`.
 
 | Label | Meaning |
 |---|---|
-| `full` | Code database, Section C lookup, and jurisdiction packs. Alberta only. |
+| `full` | Code database, Section C lookup, and a jurisdiction pack with the office's own checked steps. The City of Calgary and the City of Edmonton only. |
 | `code_only` | Code lookup for the adopted code, but no pack. No region has this today. |
-| `preview` | Roadmap only. Neither the adopted code nor a pack. Every other province and territory, and the Alberta places Batatis does not cover (reserve land, national parks, places not confirmed). |
+| `preview` | Batatis does not prepare applications. Every other province and territory, and every other Alberta place: the office is named, but its own steps are not checked (or, for reserve land, national parks and places not confirmed, the Safety Codes Act may not decide). |
 
 ## The one allowed city literal
 
