@@ -88,6 +88,18 @@ def test_a_passing_component_does_not_close_a_stated_wider_departure(description
     assert len(process_fields(case, Codes())) == 6
 
 
+@pytest.mark.parametrize('requested', [False, True])
+def test_an_uncoded_proposal_is_not_resolved_by_a_passing_component(requested):
+    case = soffit(limiting_distance_m=1.2, soffit_to_property_line_m=0.8)
+    case.facts.append(fact('alternative_description', 'A composite structural sheathing panel will support this wall.'))
+    if requested:
+        case.facts.append(fact('variance_requested', True))
+    decision = decide_path(case)
+    assert decision.path == ('alternative' if requested else 'unresolved') and not decision.firm
+    assert decision.article is None
+    assert len(process_fields(case, Codes())) == (6 if requested else 0)
+
+
 def test_an_inapplicable_component_cannot_hide_another_departure():
     case = soffit()
     case.facts.append(fact('project.description', 'Unprotected openings and aluminum soffits.'))
