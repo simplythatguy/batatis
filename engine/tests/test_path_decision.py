@@ -76,10 +76,13 @@ def test_a_requested_variance_keeps_unresolved_scope_with_a_passing_component():
     assert len(process_fields(case, Codes())) == 6
 
 
-def test_a_passing_component_does_not_close_a_stated_wider_departure():
+@pytest.mark.parametrize('description', [
+    'We will omit the structural sheathing on this wall.',
+    'The soffit follows the Part 9 tables. We will omit the structural sheathing on this wall.',
+])
+def test_a_passing_component_does_not_close_a_stated_wider_departure(description):
     case = soffit(limiting_distance_m=1.2, soffit_to_property_line_m=0.8)
-    case.facts += [fact('alternative_description', 'We will omit the structural sheathing on this wall.'),
-                   fact('variance_requested', True)]
+    case.facts += [fact('alternative_description', description), fact('variance_requested', True)]
     decision = decide_path(case)
     assert decision.path == 'alternative' and not decision.firm
     assert len(process_fields(case, Codes())) == 6
