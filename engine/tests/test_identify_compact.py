@@ -1,6 +1,11 @@
 """A requirement profile must stay small enough to save with the case."""
 from types import SimpleNamespace
 
+import pytest
+
+from engine.codes import Codes
+from engine.identify.decisions import record_decision
+
 from engine.case_view import current_case
 from engine.identify.case_input import is_requirement_run, refresh
 from engine.identify.compact import compact_identify
@@ -76,3 +81,24 @@ def test_refresh_stores_the_compact_profile(monkeypatch):
     assert case.identify.requirement_evidence == []
     assert case.identify.articles == []
     assert case.identify.trace.config.get('screen') == 'requirements'
+
+
+@pytest.mark.parametrize('decision', ['yes', 'no', 'not_sure'])
+def test_departure_decisions_work_after_compaction(decision):
+    case = Case(identify=compact_identify(_result()))
+    record_decision(case, '9.10.15.4.', decision, Codes())
+    assert case.identify.decisions['9.10.15.4.'].decision == decision
+    assert case.provisions == (['9.10.15.4.'] if decision == 'yes' else [])
+    assert bool(case.section_c) is (decision == 'yes')
+    assert case.identify.articles == []
+    assert len(case.identify.requirements) == 1
+
+
+@pytest.mark.parametrize('division,source_status', [('A', 'verified'), ('C', 'verified'), ('B', 'unavailable')])
+def test_compact_decisions_reject_unverified_or_non_division_b_entries(division, source_status):
+    case = Case(identify=compact_identify(_result()))
+    case.identify.requirements[0].division = division
+    case.identify.requirements[0].source_status = source_status
+    with pytest.raises(KeyError):
+        record_decision(case, '9.10.15.4.', 'yes', Codes())
+    assert case.provisions == [] and case.identify.decisions == {}
