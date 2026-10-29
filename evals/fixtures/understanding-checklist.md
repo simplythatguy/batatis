@@ -17,6 +17,8 @@ Agents (or humans editing skills) should answer all items correctly. Expected an
 13. After “complies with applicable acceptable solution(s)?”: **Yes** = evidence ladder → permit; **No** = SSRIA variance path.
 14. On alternative path, must include **risk assessment, mitigating measures, assumptions/limits** (never skip).
 15. Evidence ladder (low→high): manufacturer lit → STANDATA → ISO 17025 test → evaluation → eval+testing → qualification → ISO 17065 certification (plus CCMC / ICC-ES / professional opinion / engineering review on alt path). Never invent these.
+16. **Nothing**: no eyebrow, section letter, stage name or tag above a title or question (user decision 2026-10-28).
+17. **Plain rows or inline text**: no pill, tile or border per item, no box inside a box; the active item is marked by ink, weight or a check (user decision 2026-10-28).
 
 ## Fixture prompt (for manual or CI agent evals)
 
