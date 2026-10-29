@@ -92,7 +92,7 @@ Manufacturers, homebuilders, and general contractors use Batatis to prepare the 
 4. Section C of the form, the purpose of each article, fills in from the code's own tables.
 5. For a variance, review the case Batatis drafted: the six statements on one screen, each claim with the words it came from. Accept them all at once, or accept, reject, or rewrite each one.
 6. Plan the evidence. Batatis flags when an engineer or another professional is required.
-7. Fix anything the checklist marks as missing. For a project in Calgary or Edmonton, download the official form or submit it. For a project anywhere else, Batatis names the office that reviews it, says who to ask, and keeps your draft.
+7. Fix anything the checklist marks as missing. For a project in Calgary or Edmonton, download the official form or submit it. For a project anywhere else, Batatis says it prepares applications only for Calgary and Edmonton, and keeps your draft.
 
 ### For Safety Codes Officers
 
@@ -152,8 +152,7 @@ For applicants:
 - On the hosted website, sign in with an access code and your name. The same code and name open the same account.
 - On your own computer, sign up with email. The server can also offer Google and Microsoft sign-in.
 - Describe a project in text or PDFs. Batatis reads the facts and asks only for what is missing.
-- Choose the office that reviews your project by any of its names, such as "City of Red Deer", "Fort McMurray", or "Sherwood Park". Batatis knows 435 places. They include every Alberta municipality, Métis settlement, First Nation, and national park, plus the Calgary, Edmonton, and Springbank airports. Outside Alberta, they include every other province and territory, and 31 major cities. For every place but Redwood Meadows, Batatis names the office that reviews building work.
-- Prepare the final application for a project in Calgary or Edmonton, the two offices whose own steps Batatis has checked. For any other place, Batatis says it does not prepare the application yet and who to ask.
+- Choose Calgary or Edmonton as the office that reviews your project. Batatis prepares the final application only for those two cities, whose own steps it has checked. For any other place, it says so and keeps your draft.
 - See which package you are preparing. If Batatis cannot tell, it stops and names the missing fact.
 - Answer the open items one at a time. A variance asks for six statements: why you want the change, what could go wrong, what you add, what the plan depends on, how it will be maintained, and who is responsible. A design that follows the standard way does not ask for those.
 - Get the six statements drafted from your description and files, and review them on one screen. Every claim shows its source. Accept them all at once, or accept, reject, or rewrite each one.
@@ -221,8 +220,6 @@ The 159, the 18, and the 33 look perfect because we wrote the practice cases and
 
 The last row stays at 0. No officer has tried a real application.
 
-A script also checks all 435 places Batatis knows, by legal name, short names, and id. The expected office for the 390 Alberta places in the research table comes from that table and the Safety Codes Council's accreditation list. It never comes from the app's own files. For the 43 places outside Alberta, the script checks that Batatis treats them as outside Alberta, not which office it names. Batatis prepares the final application for 2 of the 435 places, Calgary and Edmonton, and refuses it with a reason and a contact for the other 433. The tables are in the [every-place report](docs/verification/every-place/README.md), and `scripts/every_place_proof.py` runs the check again.
-
 The real-record rows are in the [bakeoff results](experiments/workflow-bakeoff-v2/RESULTS.md). The records are listed in the [Alberta cases](docs/research/2026-10-23-elephant/cases-alberta.md). The blanks are in the [accuracy report](docs/accuracy/report.md). The planted mistakes are in the [form-check test](engine/tests/test_package_review_planted.py). The engineer labels are in the [Section D receipt](evals_dev/section_d_flag/RESULTS.md).
 
 ## What it costs
@@ -248,7 +245,7 @@ Every figure, its source, and its assumptions are in the [cost model](docs/resea
 - Offer the website as a paid service, with AI included.
 - Export Calgary's own Request for Specific Variance form next to the Council's form.
 - Register decided variances in the Council's Orders and Variances Portal, which becomes mandatory on December 1, 2026.
-- Read more Alberta offices' own variance steps and forms into Batatis, so that it can prepare their applications too. Lethbridge, Medicine Hat, Rocky View County, Airdrie, and Chestermere publish theirs. Then add other provinces.
+- Turn on more offices. A draft already lists 435 places in and outside Alberta, with who reviews building work where that is known. `scripts/every_place_proof.py` checks it (see the [every-place report](docs/verification/every-place/README.md)). An office turns on once its own variance steps and forms are read from its official sources. Lethbridge, Medicine Hat, Rocky View County, Airdrie, and Chestermere publish theirs. Then add other provinces.
 - Draft the officer's Part 2 decision page from the review findings.
 - Search the CCMC product evaluation registry from inside the app.
 - Have Safety Codes Officers grade real applications, and calibrate the relevance scores.
@@ -358,8 +355,8 @@ The pictures show the main folders and files, not every one. They leave out thes
 - [`engine/identify/model_rank.py`](engine/identify/model_rank.py) runs the AI ranking of code articles and checks every quote.
 - [`experiments/workflow-bakeoff-v2/`](experiments/workflow-bakeoff-v2/) holds the workflow test on 64 real records, and [`docs/evaluations/workflow-bakeoff-v2-20261028.md`](docs/evaluations/workflow-bakeoff-v2-20261028.md) summarizes it.
 - [`docs/research/2026-10-28-bakeoff/`](docs/research/2026-10-28-bakeoff/) holds the cost model and the review of LangChain and similar tools.
-- [`engine/data/jurisdictions/`](engine/data/jurisdictions/) holds an office pack for Calgary and one for Edmonton. An office pack is a data file with that office's own steps, forms, and notes. The folder also holds the place files that name the office for every other place, which [`engine/jurisdictions/places_build.py`](engine/jurisdictions/places_build.py) builds from the [jurisdiction research](docs/research/2026-10-28-every-jurisdiction/).
-- [`scripts/every_place_proof.py`](scripts/every_place_proof.py) checks every place and writes the [every-place report](docs/verification/every-place/README.md).
+- [`engine/data/jurisdictions/`](engine/data/jurisdictions/) holds an office pack for Calgary and one for Edmonton. An office pack is a data file with that office's own steps, forms, and notes. The folder also holds a draft of the place files that name the office for every other place, which [`engine/jurisdictions/places_build.py`](engine/jurisdictions/places_build.py) builds from the [jurisdiction research](docs/research/2026-10-28-every-jurisdiction/). The app does not load the draft. `BATATIS_DRAFT_PLACES=1` turns it on.
+- [`scripts/every_place_proof.py`](scripts/every_place_proof.py) checks the draft places and writes the [every-place report](docs/verification/every-place/README.md).
 - [`docs/readme/src/diagrams.py`](docs/readme/src/diagrams.py) draws the README's diagrams and chart from code, with the official logos in [`docs/readme/src/logos/`](docs/readme/src/logos/).
 
 ## Get started
@@ -817,7 +814,7 @@ Read [`AGENTS.md`](AGENTS.md) and the skills it names before you write any code.
 | Change the application flow or the engine | [`batatis-variance-workflow`](.cursor/skills/batatis-variance-workflow/SKILL.md) |
 | Change an AI model, how articles are found, or the application flow's steps | The [workflow bakeoff summary](docs/evaluations/workflow-bakeoff-v2-20261028.md), the [workflow decision record](docs/evaluations/workflow-decision-20261025.md), and [`engine/tests/test_workflow_profile.py`](engine/tests/test_workflow_profile.py) |
 | Change anything on screen | [`batatis-ui-linear`](.cursor/skills/batatis-ui-linear/SKILL.md), [`batatis-ui-opus`](.cursor/skills/batatis-ui-opus/SKILL.md), [`batatis-ui-minimalist`](.cursor/skills/batatis-ui-minimalist/SKILL.md), and [`docs/design-system-calm.md`](docs/design-system-calm.md) |
-| Change where Batatis prepares applications, or which office a place names | [`docs/api/jurisdictions.md`](docs/api/jurisdictions.md) and [`engine/tests/test_every_place.py`](engine/tests/test_every_place.py) |
+| Change where Batatis prepares applications, or the draft offices for other places | [`docs/api/jurisdictions.md`](docs/api/jurisdictions.md) and [`engine/tests/test_every_place.py`](engine/tests/test_every_place.py) |
 | Change a skill or a rule | [`evals/fixtures/understanding-checklist.md`](evals/fixtures/understanding-checklist.md) |
 | Plan, build, debug, or review code | The engineering skills in [`.agents/skills/`](.agents/skills/) and [pstack](docs/pstack.md) |
 | Change this README or its diagrams | [`prettyme`](.agents/skills/prettyme/SKILL.md), then redraw with [`docs/readme/src/diagrams.py`](docs/readme/src/diagrams.py) |
@@ -831,7 +828,7 @@ These rules always apply:
 - On the alternative-solution path, keep the risk assessment, mitigating measures, and assumptions.
 - Open a variance package only when the path is alternative. An unknown path and another safety code never open one, and a rule that does not apply never decides the path.
 - Cite the National Building Code, 2023 Alberta Edition, second printing, first.
-- Prepare a final application only for an office whose own steps an office pack records. Today that is Calgary and Edmonton. Everywhere else, name the office and say who to ask.
+- Prepare a final application only for an office whose own steps an office pack records. Today that is Calgary and Edmonton. Keep the draft places off in the app until an office's own steps are checked.
 - Keep AI provider names out of everything the app shows. Tests enforce this.
 - `main` is the only permanent branch. Do each batch of work on a short-lived branch, and let GitHub delete it after its pull request merges. Never recreate `dev`.
 - Contribute through a pull request into `main`, after `scripts/verify.sh` passes, with the three-section description in everyday words. Never push to, merge into, or delete `main`.

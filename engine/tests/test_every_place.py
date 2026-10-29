@@ -22,12 +22,23 @@ from engine.api import create_app
 from engine.codes import Codes
 from engine.export.sample import sample_case
 from engine.identify.case_input import compose
-from engine.jurisdictions import export_notice, notices_for, places_build, registry
+from engine.jurisdictions import DRAFTS_ENV, export_notice, notices_for, places_build, registry
 from engine.models import Case, Fact, Jurisdiction, Source
 from engine.store import CaseStore
 from engine.tests._db_skip import require_repo_db
 from engine.tests.case_builder_fixtures import store_with_synthetic_files
 from engine.tests.test_accounts import onboard, signup
+
+
+
+@pytest.fixture(autouse=True, scope='module')
+def draft_places():
+    """These tests check the draft places, which the app leaves off (BATATIS_DRAFT_PLACES)."""
+    mp = pytest.MonkeyPatch()
+    mp.setenv(DRAFTS_ENV, '1')
+    yield
+    mp.undo()
+
 
 RESEARCH = places_build.RESEARCH
 ROWS = list(csv.DictReader((RESEARCH / 'alberta-jurisdictions.csv').open(encoding='utf-8')))
@@ -80,7 +91,7 @@ def expected(row: dict) -> tuple[str, str | None, bool]:
 
 
 def resolve(name: str, place_id: str | None = None):
-    return registry().resolve(Jurisdiction(id=place_id or name, name=name))
+    return registry(drafts=True).resolve(Jurisdiction(id=place_id or name, name=name))
 
 
 def test_the_committed_place_files_are_what_the_research_builds():
@@ -107,13 +118,13 @@ def test_every_alberta_place_names_the_office_that_reviews_building_work(row):
     if row['legal_name'] in LOCAL_PACKS:
         assert pack.id == LOCAL_PACKS[row['legal_name']] and pack.authority.reviewer_code
     else:
-        assert pack.id in registry().generated and pack.authority.reviewer_code is None
+        assert pack.id in registry(drafts=True).generated and pack.authority.reviewer_code is None
 
 
-@pytest.mark.parametrize('place_id', sorted(registry().places), ids=sorted(registry().places))
+@pytest.mark.parametrize('place_id', sorted(registry(drafts=True).places), ids=sorted(registry(drafts=True).places))
 def test_a_place_resolves_the_same_by_id_and_by_every_name(place_id):
-    place = registry().places[place_id]
-    target = registry().place_packs[place_id]
+    place = registry(drafts=True).places[place_id]
+    target = registry(drafts=True).place_packs[place_id]
     assert resolve(place_id, place_id).pack.id == target
     for name in [place.name, *place.aliases]:
         assert resolve(name, 'x-unknown-id').pack.id == target, name
@@ -203,15 +214,15 @@ def test_an_unknown_or_ambiguous_name_keeps_the_generic_alberta_answer(name):
 
 
 def test_only_offices_whose_own_steps_were_checked_prepare_applications():
-    assert sorted(p.id for p in registry().packs.values() if p.coverage == 'full') == sorted(LOCAL_PACKS.values())
-    assert all(not place.covered for pid, place in registry().places.items() if pid not in LOCAL_PACKS.values())
+    assert sorted(p.id for p in registry(drafts=True).packs.values() if p.coverage == 'full') == sorted(LOCAL_PACKS.values())
+    assert all(not place.covered for pid, place in registry(drafts=True).places.items() if pid not in LOCAL_PACKS.values())
 
 
 def test_local_items_never_leak_to_another_place():
-    for place_id, pack_id in registry().place_packs.items():
-        case = Case(title='SYNTHETIC leak check', jurisdiction=Jurisdiction(id=place_id, name=registry().places[place_id].name))
+    for place_id, pack_id in registry(drafts=True).place_packs.items():
+        case = Case(title='SYNTHETIC leak check', jurisdiction=Jurisdiction(id=place_id, name=registry(drafts=True).places[place_id].name))
         local = notices_for(case, 'gaps') + notices_for(case, 'export_appendix')
-        pack = registry().get(pack_id)
+        pack = registry(drafts=True).get(pack_id)
         if pack_id in LOCAL_PACKS.values():
             continue
         assert local == [] and export_notice(case) is None, place_id
@@ -223,7 +234,7 @@ NOT_UNDER_THE_ACT = {'first_nation', 'federal', 'outside_alberta', 'unconfirmed'
 
 
 def test_alberta_process_items_reach_only_places_under_the_act():
-    reg = registry()
+    reg = registry(drafts=True)
     shared = reg.provinces['AB']
     everything = ([n.id for n in shared.process_notes], [f.id for f in shared.forms], shared.bulletins)
     for pack in reg.packs.values():
@@ -249,12 +260,12 @@ def test_identification_reads_the_same_text_whatever_the_place():
 
 # Same application, place changed. Needs the code database.
 
-COVERED = sorted({pid for pid, pack in registry().place_packs.items()
-                  if registry().get(pack).coverage == 'full' and registry().get(pack).province == 'AB'})
-NOT_COVERED = sorted(pid for pid, pack in registry().place_packs.items() if registry().get(pack).coverage != 'full')
+COVERED = sorted({pid for pid, pack in registry(drafts=True).place_packs.items()
+                  if registry(drafts=True).get(pack).coverage == 'full' and registry(drafts=True).get(pack).province == 'AB'})
+NOT_COVERED = sorted(pid for pid, pack in registry(drafts=True).place_packs.items() if registry(drafts=True).get(pack).coverage != 'full')
 KINDS = {}
 for pid in COVERED + NOT_COVERED:
-    KINDS.setdefault(registry().get(registry().place_packs[pid]).authority.kind, pid)
+    KINDS.setdefault(registry(drafts=True).get(registry(drafts=True).place_packs[pid]).authority.kind, pid)
 # One place of every kind here; scripts/every_place_proof.py runs every place (about six minutes on eight workers).
 SAMPLE_COVERED = sorted(set(COVERED) - {'calgary'})
 SAMPLE_NOT_COVERED = sorted({p for p in KINDS.values() if p in NOT_COVERED} | {'red-deer', 'lacombe-county', 'kikino-metis-settlement',
@@ -284,11 +295,11 @@ def monkeypatch_module():
 
 def run_application(engine_client, place_id, *, draft=True, name=None):
     client, store, owner = engine_client
-    jurisdiction = Jurisdiction(id=place_id, name=name or registry().places[place_id].name)
+    jurisdiction = Jurisdiction(id=place_id, name=name or registry(drafts=True).places[place_id].name)
     case = sample_case(Codes())
     case.owner_id = owner['id']
     case.jurisdiction = jurisdiction
-    case.authority = registry().resolve(jurisdiction).pack.authority.reviewer_code
+    case.authority = registry(drafts=True).resolve(jurisdiction).pack.authority.reviewer_code
     case = store_with_synthetic_files(store, case)
     body = client.get(f'/cases/{case.id}/gaps').json()
     gaps = body['items'] if isinstance(body, dict) else body
@@ -320,7 +331,7 @@ def test_a_covered_place_gets_the_same_application_as_calgary(engine_client, cal
 @pytest.mark.parametrize('place_id', SAMPLE_NOT_COVERED)
 def test_a_place_batatis_does_not_cover_blocks_the_final_application(engine_client, place_id):
     run = run_application(engine_client, place_id)
-    pack = registry().get(registry().place_packs[place_id])
+    pack = registry(drafts=True).get(registry(drafts=True).place_packs[place_id])
     blocker = [g for g in run['gaps'] if g['id'] == 'coverage:jurisdiction']
     assert blocker and blocker[0]['severity'] == 'blocking' and pack.name in blocker[0]['message']
     assert run['final'].status_code == 409

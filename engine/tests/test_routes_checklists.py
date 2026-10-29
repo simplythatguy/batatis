@@ -60,7 +60,7 @@ def test_case_checklists_follow_the_case_jurisdiction(scene):
     assert [c['code'] for c in edmonton['checklists']] == ['B23-01']
     assert [h['code'] for h in edmonton['historical']] == ['B14-01']
     other = client.get(f'/cases/{_case(client, {"id": "red-deer", "name": "Red Deer"})["id"]}/checklists').json()
-    assert other['matched_by'] == 'id' and other['checklists'] == [] and other['none_reason'] == NONE_IN_PACK
+    assert other['matched_by'] == 'fallback' and other['checklists'] == [] and other['none_reason'] == NONE_IN_PACK
     unknown = client.get(f'/cases/{_case(client, {"id": "example-hamlet", "name": "Example Hamlet"})["id"]}/checklists').json()
     assert unknown['matched_by'] == 'fallback' and unknown['checklists'] == [] and unknown['none_reason'] == NONE_IN_PACK
     none = client.get(f'/cases/{_case(client, None)["id"]}/checklists').json()

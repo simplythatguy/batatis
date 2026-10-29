@@ -133,12 +133,12 @@ test("a paperwork row asked by the planner shows and saves its form field, not t
   h.unmount();
 });
 
-test("the Office row says where Batatis stops, and who to ask", async () => {
+test("the Office row says Batatis prepares applications only for Calgary and Edmonton", async () => {
   for (const [authority, line] of [
-    ["lacombe-county", "Batatis doesn’t prepare applications here. Ask the Alberta Safety Codes Authority or one of its contracted agencies."],
-    ["red-deer", "Batatis doesn’t prepare applications here. Ask City of Red Deer about its variance steps and forms."],
-    ["vancouver", "Batatis doesn’t prepare applications here. Ask City of Vancouver."],
+    ["Lacombe County", "Batatis prepares applications only for Calgary and Edmonton."],
+    ["Red Deer", "Batatis prepares applications only for Calgary and Edmonton."],
     ["edmonton", ""],
+    ["calgary", ""],
   ] as const) {
     const m = await mounted([{ type: "setAuthority", authority }]);
     const office = nodes(await m.render(), (n) => typeof n.props?.className === "string" && n.props.className.startsWith("cf-pw-office"));

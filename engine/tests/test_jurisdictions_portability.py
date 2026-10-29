@@ -117,9 +117,9 @@ def test_removing_a_pack_file_removes_its_behaviour(tmp_path, monkeypatch):
     jurisdictions.clear_cache()
     try:
         found = registry().resolve_case(calgary_case)
-        # The place still names its office, from the generated place file; the local items are gone.
-        assert found.pack.id in registry().generated and found.matched_by == 'id'
-        assert found.pack.coverage == 'preview'          # without its checked pack, Batatis stops preparing it
+        # Without its checked pack the city gets the Rest of Alberta answer: no local items, no final application.
+        assert found.pack.fallback and found.matched_by == 'fallback'
+        assert found.pack.coverage == 'preview'
         assert found.pack.standing_packages == [] and found.pack.notices == []
         assert export_notice(calgary_case) is None
     finally:
