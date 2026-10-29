@@ -187,9 +187,9 @@ export const deck: Deck = {
         {
           kind: "flow", id: "honest-plan", title: "How we'll prove it",
           steps: [
-            { label: "One office", sub: "90 days, beside today's process" },
-            { label: "Real files", sub: "graded by officers" },
-            { label: "Every number", sub: "measured again, in public" },
+            { label: "Officers and applicants", sub: "real feedback" },
+            { label: "Real-world data", sub: "at a larger scale" },
+            { label: "Every number", sub: "measured again" },
           ],
           active: [0, 1, 2],
         },
@@ -197,7 +197,7 @@ export const deck: Deck = {
       script: [
         "😌 Now, what we HAVEN'T proven. Our first-time builder scores are simulated, and ten times out of sixty-four the right rule wasn't first.",
         "😌 And no officer has reviewed a real Batatis application... YET.",
-        "💪 Here's the plan. A ninety-day pilot with one office, beside how they work today. Officers grade real files, and we re-measure EVERY number in public.",
+        "💪 Once we can scale, phase one is feedback from safety codes officers and applicants, to see how Batatis performs on real-world data at a larger scale.",
       ],
     },
     {

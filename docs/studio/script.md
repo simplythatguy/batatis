@@ -16,5 +16,5 @@ The pitch lives in `web/src/studio/deck.ts` and is recorded at `/studio`. Every 
 | A new office is a data file, zero code changes | `docs/api/jurisdictions.md` (synthetic fourth pack test) | |
 | 13,743 provisions | `codedb/README.md` | NBC(AE) 2023, 2nd printing |
 | No officer has reviewed a real Batatis application | `README.md` "What we measured" | Said in the video |
-| One office, ninety days, beside today's process | `docs/pilot-adoption-plan.md` §1 | A target; no partner has agreed yet |
+| Phase one: feedback from officers and applicants on real-world data | `docs/pilot-adoption-plan.md` | A plan; no partner has agreed yet |
 | Better models don't keep an office's rules current | `docs/business-plan.md` (why us, jurisdiction packs) | Positioning, not a measurement |
