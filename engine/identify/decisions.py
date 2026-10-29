@@ -66,12 +66,16 @@ def record_departure(case, provision_id: str, codes, *, reason: str | None = Non
     record = codes.provision(article, 'B') if codes is not None else None
     if record is None:
         raise KeyError(article)
+    # A named sentence stays that sentence, beside any other sentence of the article the applicant said
+    # differs: Section C lists what differs, not every sentence of the article.
+    chosen = provision_id if provision_id != article and codes.provision(provision_id, 'B') else article
     case.facts = [f for f in case.facts if f.field != f'{CITATION_PREFIX}{article}']
-    case.provisions = [p for p in case.provisions if article_of(p) != article]   # the article and its sentences
+    case.provisions = [p for p in case.provisions
+                       if article_of(p) != article or (chosen != article and p not in (article, chosen))]
     case.facts.append(Fact(id=stable_id(case.id, 'cite', article), field=f'{CITATION_PREFIX}{article}',
                            value=article, kind='exact', status='confirmed',
                            source=Source(type='user_click', ref=article, quote=record.get('citation'))))
-    case.provisions = list(dict.fromkeys([*case.provisions, article]))
+    case.provisions = list(dict.fromkeys([*case.provisions, chosen]))
     case.section_c = section_c_rows(case.provisions, codes) if case.provisions else []
     result.decisions[article] = ArticleDecision(decision='yes', decided_at=now(), open_question_id=None)
     from .requirement_decisions import departure

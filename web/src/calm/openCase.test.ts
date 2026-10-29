@@ -186,6 +186,25 @@ test("reopening the API fixture and saving at once sends nothing: no re-post, no
   assert.deepEqual(requests, []);
 });
 
+test("a save never withdraws the citation the engine recorded for a Yes on a sentence card", async () => {
+  const store = new Map<string, string>();
+  const sent: string[] = [];
+  Object.assign(globalThis, {
+    sessionStorage: { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => store.set(k, v), removeItem: (k: string) => store.delete(k) },
+    fetch: async (_url: string, init?: { method?: string; body?: string }) => { sent.push(init?.body ?? ""); return new Response("{}", { status: 500 }); },
+  });
+  const sync = await import("../api/sync.ts");
+  sync.clearEngineSession();
+  // The benchmark route saved `citation.9.10.15.4.`; the browser's own facts never hold that field.
+  const cite = { id: "cite_1", field: "citation.9.10.15.4.", value: "9.10.15.4.", kind: "exact", status: "confirmed", confidence: null, formula: null, inputs: [],
+    source: { type: "user_click", ref: "9.10.15.4.", quote: "NBC(AE) 2023 p2, Div B, Article 9.10.15.4.", page: null, bbox: null } } as EngineCase["facts"][number];
+  sync.adoptEngineCase({ ...API_CASE, facts: [...API_CASE.facts, cite] });
+  const local = caseFromEngine(API_CASE, "manufacturer");
+  await sync.pushFacts(API_CASE.id, local.facts);
+  await sync.pushDraft(API_CASE.id, { facts: local.facts, authority: local.authority, selected: selectedArticles(local), draft: null as never }).catch(() => null);
+  assert.ok(!sent.some((body) => body.includes("citation.9.10.15.4.")), "the Yes stays recorded");
+});
+
 /* —— Saved code-check selections (docs/api/selected-articles.md) —— */
 
 const pick = (id: string, provision: string, answer: "yes" | "no" | "not-sure" | null = null, pending = false) => ({ id, provision, answer, pending });

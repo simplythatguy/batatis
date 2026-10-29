@@ -103,7 +103,7 @@ def test_supporting_application_scope_survives_no_departure_and_a_rerun(scene):
     assert store.get(case.id).provisions == []
 
 
-def test_stale_applicability_decision_rejected_then_confirmation_retained_for_review(scene):
+def test_input_change_keeps_an_earlier_confirmation_for_review_after_a_rerun(scene):
     client, store = scene
     case = store.put(Case(facts=[input_fact('project.description', '9.10.15.5.'), input_fact('storeys', 2)]))
     first = client.post(f'/cases/{case.id}/identify', json={}).json()
@@ -113,9 +113,7 @@ def test_stale_applicability_decision_rejected_then_confirmation_retained_for_re
             'expected_version': first['case_version']}
     chosen = client.post(url, json=body)
     assert chosen.status_code == 200, chosen.text
-    changed = store.add_fact(case.id, input_fact('storeys', 8))
-    body['expected_version'] = changed.version
-    assert client.post(url, json=body).status_code == 409
+    store.add_fact(case.id, input_fact('storeys', 8))
     rerun = client.post(f'/cases/{case.id}/identify', json={}).json()
     kept = next(r for r in rerun['requirements'] if r['id'] == requirement['id'])
     assert kept['human_confirmed'] and kept['needs_review'] and kept['disposition'] == 'review'
@@ -151,3 +149,70 @@ def test_stored_identification_becomes_stale_when_the_code_source_changes(tmp_pa
             con.execute("UPDATE docs SET label='NBC(AE) 2023 p1' WHERE doc='NBC-AE'")
         current = client.get(f'/cases/{case.id}/identify')
         assert current.status_code == 200 and current.json()['stale']
+
+
+DEMO_TEXT = """Owner: Larkspur Example Ltd.
+Representative: Priya Natarajan
+Mailing address: 0000 Example Way NW, Edmonton, AB
+Municipal address: 0000 Example Crescent NW, Edmonton, AB
+Legal description: Lot 0, Block 0, Plan 0000000
+
+We are building a two-storey house on a narrow lot. The side wall faces the neighbouring lot and is 1.2 m from \
+the property line. The architect drew a large window wall on that side. Its glazed area is bigger than the limit \
+for that distance in the code's table. We propose a fire-rated window assembly and an exterior wall rated for fire \
+exposure instead."""
+
+
+def _read_and_check(client, store):
+    case = store.put(Case())
+    read = client.post(f'/cases/{case.id}/intake', json={'text': DEMO_TEXT, 'model': False})
+    assert read.status_code == 200, read.text
+    first = client.get(f'/cases/{case.id}/identify')
+    assert first.status_code == 200 and not first.json()['stale'], first.text
+    requirement = next(r for r in first.json()['requirements']
+                       if r['division'] == 'B' and r['provision_id'] == '9.10.15.4.')
+    return store.get(case.id), requirement
+
+
+def _patch_facts(client, case, facts):
+    patched = client.patch(f'/cases/{case.id}/draft', json={
+        'expected_version': case.version, 'facts': [f.model_dump(mode='json') for f in facts]})
+    assert patched.status_code == 200, patched.text
+    return patched.json()['version']
+
+
+def _answer(client, case_id, requirement, version):
+    return client.post(f'/cases/{case_id}/identify/requirements/{requirement["id"]}/decision', json={
+        'disposition': 'include', 'role': 'supporting', 'reason': 'The side wall is 1.2 m from the property line.',
+        'expected_version': version})
+
+
+def test_demo_rule_card_answer_after_looks_right_is_saved(scene):
+    """Reading runs the code check; "Looks right" then re-confirms every row with the same value (new fact
+    ids and a click source). That is not an input change: the result stays current and the answer saves."""
+    client, store = scene
+    case, requirement = _read_and_check(client, store)
+    looks_right = [Fact(field=f.field, value=f.value, kind='pointed', status='confirmed',
+                        source=Source(type='user_click', ref='Confirmed by applicant', quote=str(f.value)))
+                   for f in case.facts if f.field != 'project.description']
+    version = _patch_facts(client, case, looks_right)
+    assert not client.get(f'/cases/{case.id}/identify').json()['stale']
+    answer = _answer(client, case.id, requirement, version)
+    assert answer.status_code == 200, answer.text
+    kept = next(r for r in answer.json()['requirements'] if r['id'] == requirement['id'])
+    assert kept['human_confirmed'] and kept['disposition'] == 'include'
+
+
+def test_rule_card_answer_after_a_changed_fact_reruns_the_local_check_first(scene):
+    """A real input change saved through the draft makes the result stale; the next rule-card answer
+    recomputes the deterministic profile in the same save instead of failing with a 409."""
+    client, store = scene
+    case, requirement = _read_and_check(client, store)
+    version = _patch_facts(client, case, [input_fact('limiting_distance_m', 1.5)])
+    assert client.get(f'/cases/{case.id}/identify').json()['stale']
+    answer = _answer(client, case.id, requirement, version)
+    assert answer.status_code == 200, answer.text
+    result = answer.json()
+    assert not result['stale']
+    kept = next(r for r in result['requirements'] if r['id'] == requirement['id'])
+    assert kept['human_confirmed'] and kept['disposition'] == 'include'

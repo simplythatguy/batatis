@@ -27,7 +27,16 @@ def _failure_reason(error: Exception) -> str:
     return f'{type(error).__name__}/{type(cause).__name__}: {getattr(cause, "code", "provider failure")}'
 
 
-def _save_record(store: CaseBackend, case_id: str, record: RelevanceRecord) -> RelevanceRecord:
+class RelevanceResponse(RelevanceRecord):
+    # Saving scores bumps the case version; the browser sends this as its next `expected_version`.
+    case_version: int
+
+
+def _response(record: RelevanceRecord, case: Case) -> RelevanceResponse:
+    return RelevanceResponse(**record.model_dump(), case_version=case.version)
+
+
+def _save_record(store: CaseBackend, case_id: str, record: RelevanceRecord) -> Case:
     """Attach to the latest case using both backends' existing optimistic write contract.
 
     A concurrent description edit is preserved and the result is marked stale. A deleted
@@ -40,7 +49,7 @@ def _save_record(store: CaseBackend, case_id: str, record: RelevanceRecord) -> R
         case, version = snapshot
         case.relevance = current_record(record, case)
         try:
-            return store.put(case, expected_version=version).relevance
+            return store.put(case, expected_version=version)
         except VersionConflict as error:
             if error.actual is None:
                 raise HTTPException(404, 'case not found') from error
@@ -59,15 +68,15 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
             raise HTTPException(404, 'case not found')
         return case
 
-    @router.get('/cases/{case_id}/relevance', response_model=RelevanceRecord)
+    @router.get('/cases/{case_id}/relevance', response_model=RelevanceResponse)
     def get_relevance(case_id: str, response: Response):
         response.headers['Cache-Control'] = 'no-store'
         case = get_case(case_id)
         if case.relevance is None:
             raise HTTPException(404, 'not scored')
-        return current_record(case.relevance, case)
+        return _response(current_record(case.relevance, case), case)
 
-    @router.post('/cases/{case_id}/relevance', response_model=RelevanceRecord)
+    @router.post('/cases/{case_id}/relevance', response_model=RelevanceResponse)
     def score_relevance(case_id: str, request: Request, response: Response):
         response.headers['Cache-Control'] = 'no-store'
         try:
@@ -99,7 +108,8 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
                             'screen_seconds=%.3f rerank_seconds=%.3f',
                             case_id, result.model, len(result.screen), result.usage['requests'], result.usage['errors'],
                             result.screen_seconds, result.rerank_seconds)
-                return _save_record(cases(), case_id, record)
+                saved = _save_record(cases(), case_id, record)
+                return _response(saved.relevance, saved)
         except RelevanceInProgress:
             raise HTTPException(409, 'Relevance scoring already in progress', headers={'Retry-After': '1'}) from None
 
