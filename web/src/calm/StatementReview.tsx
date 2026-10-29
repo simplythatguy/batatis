@@ -13,6 +13,7 @@ import "./ApplicantDrafts.css";
 type Run = { done: number; total: number; stopped: boolean };
 
 const HELD = "Accept or reject the drafts first.";
+const ADDED = new Map<string, ReadonlySet<string>>();
 
 /** A draft that still waits on the applicant: wording to accept, for a statement not yet written. */
 const waiting = (draft: WordingDraft | undefined, written: string): WordingDraft | null =>
@@ -28,7 +29,8 @@ export function StatementReview() {
   const [run, setRun] = useState<Run | null>(null);
   const [writing, setWriting] = useState<ProcessFieldId | null>(null);
   const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [added, setAdded] = useState<ReadonlySet<string>>(new Set());
+  // Gap answers already added, kept per application so leaving the card and coming back can't add one twice.
+  const [added, setAdded] = useState<ReadonlySet<string>>(() => ADDED.get(engineId ?? "") ?? new Set());
   // Accept all awaits each decision; the latest store function holds the latest draft record.
   const decide = useRef(decideApplicantDraft);
   decide.current = decideApplicantDraft;
@@ -58,8 +60,9 @@ export function StatementReview() {
     const answer = answers[key]?.trim();
     if (!answer) return;
     const current = c.process[id].trimEnd();
-    setText(id, current ? `${current}\n\n${answer}` : answer);
-    setAdded((s) => new Set(s).add(key));
+    // After a reload the added list is gone; an answer an earlier Add made its own paragraph is not added again.
+    if (!current.split(/\n\s*\n/).some((part) => part.trim() === answer)) setText(id, current ? `${current}\n\n${answer}` : answer);
+    setAdded((s) => { const next = new Set(s).add(key); ADDED.set(engineId ?? "", next); return next; });
   }
 
   const primary = drafts.size === 0 && !generating && open > 0 ? { label: "Draft my case", icon: true, act: () => void generateApplicantDrafts(), off: locked || busy || !c.description.trim() }

@@ -162,3 +162,31 @@ test("while any draft waits, gap answers and own wording wait too, with one hint
   assert.equal(button(rows(tree)[3], "Write it")[0].props.disabled, false, "stale drafts are drafted again, so writing is not held");
   h.unmount();
 });
+
+test("a gap answer is added once, even after leaving the review and coming back", async () => {
+  const s = store();
+  let h = await harness(s);
+  let tree = await h.render();
+  await button(tree, "Accept all")[0].props.onClick();
+  const add = async () => {
+    tree = await h.render();
+    nodes(rows(tree)[1], (n) => n.type === "input")[0].props.onChange({ target: { value: "A detached garage on the east lot." } });
+    tree = await h.render();
+    button(rows(tree)[1], "Add")[0].props.onClick();
+  };
+  await add();
+  h.unmount();
+  // Coming back (or reloading) forgets which answers were added; the statement still holds it once.
+  h = await harness(s);
+  await add();
+  assert.equal(s.c.process.risk, "Risk assessment wording.\n\nA detached garage on the east lot.");
+  h.unmount();
+  // An answer that merely appears inside the wording is still added as its own paragraph.
+  h = await harness(s);
+  tree = await h.render();
+  nodes(rows(tree)[1], (n) => n.type === "input")[0].props.onChange({ target: { value: "garage" } });
+  tree = await h.render();
+  button(rows(tree)[1], "Add")[0].props.onClick();
+  assert.equal(s.c.process.risk, "Risk assessment wording.\n\nA detached garage on the east lot.\n\ngarage");
+  h.unmount();
+});
