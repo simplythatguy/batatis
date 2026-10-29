@@ -5,6 +5,8 @@ Takes arrive in fixed-size chunks so each request stays under the host's 4.5 MB 
 Every write locks the room row first and bumps `updated_at`, which clients poll.
 Signals are the WebRTC handshake between two people's browsers: a per-room sequence orders them, readers poll
 by cursor, and nothing outlives ten minutes. They do not touch `updated_at`, so the room poll stays quiet.
+The live row is the take in progress (slide and timer), for people whose WebRTC link is down. The presenter
+refreshes it about once a second; a row older than LIVE_MS reads as nothing.
 """
 from __future__ import annotations
 
@@ -27,6 +29,7 @@ SIGNAL_DATA_BYTES = 64 * 1024
 SIGNAL_MS = 10 * 60 * 1000
 SIGNAL_PAGE = 200
 ROOM_MAX_SIGNALS = 2000
+LIVE_MS = 10_000
 
 MIGRATIONS = (
     """CREATE TABLE IF NOT EXISTS studio_rooms (
@@ -76,11 +79,20 @@ MIGRATIONS = (
         PRIMARY KEY(room_code, seq))""",
     'CREATE INDEX IF NOT EXISTS studio_signals_to ON studio_signals(room_code, to_id, seq)',
     'CREATE INDEX IF NOT EXISTS studio_signals_at ON studio_signals(at)',
+    """CREATE TABLE IF NOT EXISTS studio_live (
+        room_code TEXT PRIMARY KEY REFERENCES studio_rooms(code) ON DELETE CASCADE,
+        person_id TEXT NOT NULL,
+        data TEXT NOT NULL,
+        stored_at BIGINT NOT NULL)""",
 )
 
 
 def normal_code(code: str) -> str:
     return code.strip().upper()
+
+
+def valid_code(code: str) -> bool:
+    return len(code) == CODE_LENGTH and all(c in CODE_ALPHABET for c in code)
 
 
 def expected_chunks(size: int) -> int:
@@ -128,7 +140,19 @@ class StudioStore:
         takes = {row[1]: self._take(row, received.get(row[0], 0)) for row in
                  db.execute('SELECT id,group_id,person_id,duration_ms,cues_json,mime,size,chunks,created_at '
                             'FROM studio_takes WHERE room_code=?', (code,))}
-        return {'code': code, 'people': people, 'assignments': assignments, 'takes': takes, 'updated_at': int(updated)}
+        return {'code': code, 'people': people, 'assignments': assignments, 'takes': takes, 'updated_at': int(updated),
+                'live': self._live(db, code)}
+
+    @staticmethod
+    def _live(db, code: str) -> dict | None:
+        """The take in progress, its timer moved on to now, or None once the presenter stopped refreshing it."""
+        row = db.execute('SELECT data,stored_at FROM studio_live WHERE room_code=?', (code,)).fetchone()
+        age = int(time.time() * 1000) - int(row[1]) if row else LIVE_MS + 1
+        if age > LIVE_MS:
+            return None
+        live = json.loads(row[0])
+        live['remaining_ms'] = max(0, live['remaining_ms'] - max(0, age))
+        return live
 
     @staticmethod
     def _take(row, received: int) -> dict:
@@ -136,17 +160,26 @@ class StudioStore:
                 'cues': json.loads(row[4]), 'mime': row[5], 'size': int(row[6]), 'chunks': int(row[7]),
                 'received': int(received), 'created_at': int(row[8])}
 
-    def create_room(self) -> dict:
+    def create_room(self, code: str | None = None) -> tuple[dict, bool]:
+        """A new room, or with `code` the room by that name, made if it does not exist yet. True when it is new."""
+        if code is not None:
+            code = normal_code(code)
+            if not valid_code(code):
+                raise HTTPException(422, f'A room code is {CODE_LENGTH} of {CODE_ALPHABET}')
         with self.store.account_db() as db:
             now = time.time()
             db.execute('DELETE FROM studio_rooms WHERE created_at<?', (now - ROOM_SECONDS,))
+            if code is not None:
+                created = db.execute('INSERT INTO studio_rooms(code,created_at,updated_at) VALUES (?,?,?) '
+                                     'ON CONFLICT(code) DO NOTHING', (code, now, int(now * 1000))).rowcount == 1
+                return self._state(db, code), created
             while True:
                 code = ''.join(secrets.choice(CODE_ALPHABET) for _ in range(CODE_LENGTH))
                 if db.execute('SELECT 1 FROM studio_rooms WHERE code=?', (code,)).fetchone() is None:
                     break
             db.execute('INSERT INTO studio_rooms(code,created_at,updated_at) VALUES (?,?,?)',
                        (code, now, int(now * 1000)))
-            return self._state(db, code)
+            return self._state(db, code), True
 
     def room(self, code: str) -> dict:
         with self.store.account_db() as db:
@@ -238,6 +271,24 @@ class StudioStore:
             if row is None:
                 raise HTTPException(404, 'Chunk not found')
             return bytes(row[0])
+
+    def put_live(self, code: str, person_id: str, live: dict | None) -> dict | None:
+        """Publish the take `person_id` is recording, or clear it. Clearing only ends their own take
+        (or one nobody refreshes any more), so a late stop from an earlier presenter leaves the current one alone."""
+        if live is not None and live['presenter_id'] != person_id:
+            raise HTTPException(403, 'Only the presenter publishes their take')
+        with self.store.account_db() as db:
+            code = self._room(db, code, lock=False)
+            self._person(db, code, person_id)
+            now = int(time.time() * 1000)
+            if live is None:
+                db.execute('DELETE FROM studio_live WHERE room_code=? AND (person_id=? OR stored_at<?)',
+                           (code, person_id, now - LIVE_MS))
+            else:
+                db.execute('INSERT INTO studio_live(room_code,person_id,data,stored_at) VALUES (?,?,?,?) '
+                           'ON CONFLICT(room_code) DO UPDATE SET person_id=excluded.person_id,data=excluded.data,'
+                           'stored_at=excluded.stored_at', (code, person_id, json.dumps(live), now))
+            return self._live(db, code)
 
     def send_signal(self, code: str, *, from_id: str, to_id: str, kind: str, data: str) -> int:
         """Queue one signal for `to_id` and return its sequence number. Expired signals go first."""

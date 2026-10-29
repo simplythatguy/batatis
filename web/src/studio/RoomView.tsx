@@ -8,9 +8,9 @@ import { createStage, exportVideo, preload, type Stage } from "./stage";
 import { Cams } from "./Cams";
 import { Filmstrip, groupColor } from "./Filmstrip";
 import { Brand, CopyLink, firstName, initials, type Camera } from "./parts";
-import { usePeers, type LiveState } from "./peers";
+import { usePeers } from "./peers";
 import { clock, deckMs, targetMs } from "./timing";
-import { VIDEO_LIMIT_MS, type Cue, type Deck, type Group, type Person, type RoomState, type TakeInfo, type TakeMedia } from "./types";
+import { liveLeft, newerLive, VIDEO_LIMIT_MS, type Cue, type Deck, type Group, type HeardLive, type LiveState, type Person, type RoomState, type TakeInfo, type TakeMedia } from "./types";
 import { uploads, useUploads } from "./uploads";
 
 type Phase =
@@ -29,9 +29,16 @@ function slideAt(cues: Cue[], ms: number): number {
   return slide;
 }
 
-export function Room({ deck, room, me, camera, apply, onLeave }: {
+/** A WebRTC sample this old is from a link that died mid-take; the presenter sends one every 250 ms. */
+const RTC_STALE_MS = 3000;
+/** The room copy of my take is refreshed at least this often, and on every slide change. */
+const PUBLISH_MS = 1000;
+
+export function Room({ deck, room, serverLive, me, camera, apply, onLeave }: {
   deck: Deck;
   room: RoomState;
+  /** The take in progress as the room poll last heard it, for when WebRTC is down or behind. */
+  serverLive: HeardLive | null;
   me: Person;
   camera: Camera;
   apply(next: RoomState): void;
@@ -59,8 +66,24 @@ export function Room({ deck, room, me, camera, apply, onLeave }: {
     // Once per room: later polls must not restart uploads in flight.
   }, [room.code]);
 
+  // My take reaches the team over WebRTC and through the room, which works when WebRTC cannot connect.
+  // Room writes go one at a time so a stop never lands before the sample it follows.
+  const published = useRef({ key: "", at: 0, on: false, queue: Promise.resolve() });
+  const peerBroadcast = peers.broadcast;
+  const publish = useCallback((state: LiveState | null) => {
+    peerBroadcast(state);
+    const p = published.current;
+    const key = state ? `${state.groupId}:${state.slide}:${state.recording}` : "";
+    if (state ? key === p.key && Date.now() - p.at < PUBLISH_MS : !p.on) return;
+    p.key = key;
+    p.at = Date.now();
+    p.on = !!state;
+    p.queue = p.queue.then(() => roomApi.live(room.code, me.id, state)).then(() => undefined, () => undefined);
+  }, [peerBroadcast, room.code, me.id]);
+
   // A teammate's take: my stage, transcript and timer follow it while I am not busy with my own.
-  const live = peers.live;
+  const rtcLive = peers.live && Date.now() - peers.live.seen < RTC_STALE_MS ? peers.live : null;
+  const live = newerLive(rtcLive, serverLive);
   const followIndex = live?.recording && live.presenterId !== me.id && !busy(phase) && !rendering
     ? deck.groups.findIndex((g) => g.id === live.groupId)
     : -1;
@@ -145,7 +168,7 @@ export function Room({ deck, room, me, camera, apply, onLeave }: {
           setPreview={setPreview}
           follow={follow}
           followVideo={follow ? peerVideos.current[follow.presenterId] ?? null : null}
-          broadcast={peers.broadcast}
+          broadcast={publish}
           onShown={setShown}
           onAssign={(personId) => assign(index, personId)}
         />
@@ -205,7 +228,7 @@ function Booth({ deck, index, room, me, camera, phase, setPhase, preview, setPre
   preview: number;
   setPreview(slide: number): void;
   /** A teammate's take in this group, mirrored read-only. */
-  follow: LiveState | null;
+  follow: HeardLive | null;
   followVideo: HTMLVideoElement | null;
   broadcast(state: LiveState | null): void;
   /** The slide on stage, for the filmstrip. */
@@ -355,7 +378,7 @@ function Booth({ deck, index, room, me, camera, phase, setPhase, preview, setPre
       const ms = performance.now() - phase.startedAt;
       setElapsed(ms);
       sent.current = true;
-      send.current({ presenterId: me.id, groupId: group.id, slide: phase.slide, recording: true, remainingMs: Math.max(0, target - ms), targetMs: target, at: Date.now() });
+      send.current({ presenterId: me.id, groupId: group.id, slide: phase.slide, recording: true, remainingMs: Math.max(0, Math.round(target - ms)), targetMs: target, at: Date.now() });
     };
     tick();
     const t = window.setInterval(tick, 250);
@@ -446,7 +469,14 @@ function Booth({ deck, index, room, me, camera, phase, setPhase, preview, setPre
   useEffect(() => onShown(onStage), [onStage, onShown]);
 
   // The left column's clock: my take, the teammate's take, or the group's planned length.
-  const followLeft = follow ? Math.max(0, follow.remainingMs - (Date.now() - follow.at)) : 0;
+  // A followed take's samples can be a second apart, so the clock ticks on its own in between.
+  const [, tickFollow] = useState(0);
+  useEffect(() => {
+    if (!following) return;
+    const t = window.setInterval(() => tickFollow((n) => n + 1), 200);
+    return () => window.clearInterval(t);
+  }, [following]);
+  const followLeft = follow ? liveLeft(follow) : 0;
   const left = phase.k === "recording" ? Math.max(0, target - elapsed) : follow ? followLeft : target;
   const span = follow ? follow.targetMs || target : target;
   const live = phase.k === "recording" || !!follow;

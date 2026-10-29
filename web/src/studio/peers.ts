@@ -1,5 +1,5 @@
 // Live room: everyone's camera and mic reach everyone else over WebRTC, and the presenter's slide and timer
-// travel on a data channel. The handshake rides the room's signal queue (engine/routes_studio.py), polled.
+// travel on a data channel (and through the room, see RoomView). The handshake rides the room's signal queue (engine/routes_studio.py), polled.
 //
 // Every RTCPeerConnection has a random id. Signals carry the sender's connection id (`pc`) and the receiver
 // connection they answer (`to`, null while the sender does not know one yet). That keeps a reloaded page, a
@@ -12,12 +12,20 @@
 // offer to it. Unanswered offers are retried with backoff, failed links after RETRY_MS.
 import { useCallback, useEffect, useRef, useState } from "react";
 import { credentialsMode, ENGINE_BASE } from "../api/engineAuth";
-import type { Person } from "./types";
+import type { HeardLive, LiveState, Person } from "./types";
 
-export interface LiveState { presenterId: string; groupId: string; slide: number; recording: boolean; remainingMs: number; targetMs: number; at: number }
 export type PeerStatus = "connecting" | "live" | "failed";
 
-const ICE_SERVERS: RTCIceServer[] = [{ urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun1.l.google.com:19302" }];
+// The relay carries media when two networks block a direct link; a free public one, so it may be down.
+const ICE_SERVERS: RTCIceServer[] = [
+  { urls: "stun:stun.l.google.com:19302" },
+  { urls: "stun:stun1.l.google.com:19302" },
+  {
+    urls: ["turn:openrelay.metered.ca:80", "turn:openrelay.metered.ca:443", "turn:openrelay.metered.ca:443?transport=tcp"],
+    username: "openrelayproject",
+    credential: "openrelayproject",
+  },
+];
 const FAST_POLL_MS = 1000;
 const SLOW_POLL_MS = 5000;
 /** Once both descriptions are set, a link that is not up by then has failed. */
@@ -54,7 +62,7 @@ interface Peer {
   timers: Partial<Record<"connect" | "disconnected" | "retry" | "unanswered" | "flush", number>>;
 }
 
-interface Snapshot { streams: Record<string, MediaStream>; status: Record<string, PeerStatus>; live: LiveState | null }
+interface Snapshot { streams: Record<string, MediaStream>; status: Record<string, PeerStatus>; live: HeardLive | null }
 
 const randomId = () => Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 const signalsUrl = (room: string, query = "") => `${ENGINE_BASE}/studio/rooms/${encodeURIComponent(room)}/signals${query}`;
@@ -73,7 +81,7 @@ class Mesh {
   /** Gives every outgoing track the same stream id, so each side sees one remote stream per person. */
   private msid = new MediaStream();
   private mine: LiveState | null = null;
-  private live: LiveState | null = null;
+  private live: HeardLive | null = null;
   private liveFrom: string | null = null;
   private cursor: number | null = null;
   private alive = true;
@@ -132,7 +140,7 @@ class Mesh {
 
   broadcast(state: LiveState | null) {
     this.mine = state;
-    this.setLive(state, state ? this.me : null);
+    this.setLive(state && { ...state, seen: Date.now() }, state ? this.me : null);
     const message = JSON.stringify({ live: state });
     for (const peer of this.peers.values()) {
       if (peer.channel?.readyState === "open") {
@@ -338,7 +346,8 @@ class Mesh {
     channel.onmessage = (e) => {
       try {
         const message = JSON.parse(String(e.data)) as { live?: LiveState | null };
-        if (message.live !== undefined) this.setLive(message.live, message.live ? peer.id : null);
+        // The sender's clock is not mine: the timer counts from when it arrived.
+        if (message.live !== undefined) this.setLive(message.live && { ...message.live, seen: Date.now() }, message.live ? peer.id : null);
       } catch {
         /* not ours */
       }
@@ -480,7 +489,7 @@ class Mesh {
     peer.timers[key] = undefined;
   }
 
-  private setLive(state: LiveState | null, from: string | null) {
+  private setLive(state: HeardLive | null, from: string | null) {
     this.live = state;
     this.liveFrom = from;
     this.emit();
@@ -502,7 +511,7 @@ class Mesh {
 export function usePeers(opts: { room: string; me: string | null; people: Person[]; stream: MediaStream | null }): {
   streams: Record<string, MediaStream>;
   status: Record<string, PeerStatus>;
-  live: LiveState | null;
+  live: HeardLive | null;
   broadcast(state: LiveState | null): void;
 } {
   const { room, me, people, stream } = opts;

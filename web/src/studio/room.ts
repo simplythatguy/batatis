@@ -1,7 +1,12 @@
 // Room API client (engine/routes_studio.py) and the 2-second room poll.
 import { useCallback, useEffect, useRef, useState } from "react";
 import { credentialsMode, ENGINE_BASE } from "../api/engineAuth";
-import type { Cue, Person, RoomState, TakeInfo } from "./types";
+import type { Cue, HeardLive, LiveState, Person, RoomState, TakeInfo } from "./types";
+
+/** The room everyone lands in when the link names none. */
+export const TEAM_ROOM = "BATATS";
+const CODE = /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{6}$/;
+export const validCode = (code: string) => CODE.test(code);
 
 export const CHUNK_BYTES = 3 * 1024 * 1024;
 export const chunkCount = (size: number) => Math.max(1, Math.ceil(size / CHUNK_BYTES));
@@ -46,7 +51,11 @@ const enc = encodeURIComponent;
 const base = (code: string) => `/studio/rooms/${enc(code)}`;
 
 export const roomApi = {
-  create: () => json<RoomState>(send("POST", "/studio/rooms")),
+  /** Opens the room called `code`, making it the first time. */
+  open: (code: string) => json<RoomState>(send("POST", "/studio/rooms", { json: { code } })),
+  /** Publishes the take I am recording, or null when it ends. */
+  live: (code: string, personId: string, live: LiveState | null) =>
+    send("PUT", `${base(code)}/live?person=${enc(personId)}`, { json: live }),
   get: (code: string, signal?: AbortSignal) => json<RoomState>(send("GET", base(code), { signal })),
   join: (code: string, name: string) => json<Person>(send("POST", `${base(code)}/people`, { json: { name } })),
   leave: (code: string, personId: string) => json<RoomState>(send("DELETE", `${base(code)}/people/${enc(personId)}`)),
@@ -75,11 +84,14 @@ export async function accountName(): Promise<{ signedIn: boolean; name: string }
 
 export type RoomStatus = { kind: "loading" } | { kind: "ready" } | { kind: "signed-out" } | { kind: "missing" } | { kind: "offline" };
 
-/** Polls GET /studio/rooms/{code} every 2 s. `apply` takes the RoomState a mutation returned. */
+/** Polls GET /studio/rooms/{code} every 2 s, every second while someone records. `apply` takes the RoomState a
+ *  mutation returned. `live` is the poll's take in progress, stamped with when this device heard it. */
 export function useRoom(code: string | null) {
   const [room, setRoom] = useState<RoomState | null>(null);
+  const [live, setLive] = useState<HeardLive | null>(null);
   const [status, setStatus] = useState<RoomStatus>({ kind: "loading" });
   const latest = useRef(0);
+  const fast = useRef(false);
 
   const apply = useCallback((next: RoomState) => {
     if (next.updatedAt >= latest.current) {
@@ -92,6 +104,8 @@ export function useRoom(code: string | null) {
     if (!code) return;
     try {
       const next = await roomApi.get(code, signal);
+      fast.current = !!next.live;
+      setLive(next.live ? { ...next.live, seen: Date.now() } : null);
       latest.current = 0;
       apply(next);
       setStatus({ kind: "ready" });
@@ -105,19 +119,24 @@ export function useRoom(code: string | null) {
 
   useEffect(() => {
     setRoom(null);
+    setLive(null);
     setStatus({ kind: "loading" });
     latest.current = 0;
     if (!code) return;
     const ctl = new AbortController();
-    void refresh(ctl.signal);
-    const t = window.setInterval(() => void refresh(ctl.signal), 2000);
+    let t = 0;
+    const loop = async () => {
+      await refresh(ctl.signal);
+      if (!ctl.signal.aborted) t = window.setTimeout(() => void loop(), fast.current ? 1000 : 2000);
+    };
+    void loop();
     return () => {
       ctl.abort();
-      window.clearInterval(t);
+      window.clearTimeout(t);
     };
   }, [code, refresh]);
 
-  return { room, status, apply, refresh };
+  return { room, live, status, apply, refresh };
 }
 
 /** What this device remembers about a room: who joined here and with which devices. */

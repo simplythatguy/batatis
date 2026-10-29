@@ -81,7 +81,25 @@ export interface RoomState {
   /** groupId → latest take */
   takes: Record<string, TakeInfo>;
   updatedAt: number;
+  /** The take being recorded, as its presenter last published it; null when nobody is recording. */
+  live: LiveState | null;
 }
+
+/** A take in progress. `at` is the presenter's clock when they sampled it, so it only orders samples.
+ *  The server moves `remainingMs` on to the moment it replies. */
+export interface LiveState { presenterId: string; groupId: string; slide: number; recording: boolean; remainingMs: number; targetMs: number; at: number }
+
+/** A LiveState as this device heard it: `remainingMs` held at `seen`, this device's clock. */
+export interface HeardLive extends LiveState { seen: number }
+
+/** The newer of two samples of the same take (or the only one); the WebRTC copy wins a tie. */
+export function newerLive(a: HeardLive | null, b: HeardLive | null): HeardLive | null {
+  if (!a || !b) return a ?? b;
+  return b.at > a.at ? b : a;
+}
+
+/** Ms left on a heard take, now. */
+export const liveLeft = (live: HeardLive, now = Date.now()) => Math.max(0, live.remainingMs - (now - live.seen));
 
 /** Spoken pace for every timing in the studio. */
 export const WORDS_PER_MINUTE = 120;

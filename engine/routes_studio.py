@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 from typing import Annotated, Any, Callable, Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request, Response
+from fastapi import APIRouter, Body, Depends, HTTPException, Path, Query, Request, Response
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 from pydantic.alias_generators import to_camel
@@ -44,12 +44,31 @@ class TakeInfo(Camel):
     created_at: int
 
 
+PersonId = Annotated[str, StringConstraints(min_length=1, max_length=40)]
+
+
+class LiveState(Camel):
+    """The take in progress. `at` is the presenter's clock when they sampled it; `remaining_ms` is as of the reply."""
+    presenter_id: PersonId
+    group_id: GroupId
+    slide: int = Field(ge=0, le=1000)
+    recording: bool
+    remaining_ms: int = Field(ge=0, le=60 * 60 * 1000)
+    target_ms: int = Field(ge=0, le=60 * 60 * 1000)
+    at: int = Field(ge=0)
+
+
 class RoomState(Camel):
     code: str
     people: list[Person]
     assignments: dict[str, str]
     takes: dict[str, TakeInfo]
     updated_at: int
+    live: LiveState | None = None
+
+
+class NewRoom(Camel):
+    code: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=12)] | None = None
 
 
 class Join(Camel):
@@ -74,7 +93,6 @@ class Received(Camel):
     received: int
 
 
-PersonId = Annotated[str, StringConstraints(min_length=1, max_length=40)]
 SignalKind = Literal['offer', 'answer', 'candidate', 'bye']
 
 
@@ -112,8 +130,11 @@ def create_router(cases: Callable) -> APIRouter:
         return state['store']
 
     @router.post('/studio/rooms', response_model=RoomState, status_code=201)
-    def create_room():
-        return studio().create_room()
+    def create_room(response: Response, body: Annotated[NewRoom | None, Body()] = None):
+        state, created = studio().create_room(body.code if body else None)
+        if not created:
+            response.status_code = 200
+        return state
 
     @router.get('/studio/rooms/{code}', response_model=RoomState)
     def room(code: Code):
@@ -150,6 +171,11 @@ def create_router(cases: Callable) -> APIRouter:
     @router.get('/studio/rooms/{code}/takes/{take_id}/chunks/{index}')
     def get_chunk(code: Code, take_id: str, index: Index):
         return Response(studio().get_chunk(code, take_id, index), media_type='application/octet-stream')
+
+    @router.put('/studio/rooms/{code}/live', response_model=LiveState | None)
+    def put_live(code: Code, person: Annotated[str, Query(min_length=1, max_length=40)],
+                 body: Annotated[LiveState | None, Body()] = None):
+        return studio().put_live(code, person, body.model_dump() if body else None)
 
     @router.post('/studio/rooms/{code}/signals', response_model=Sent, status_code=201)
     def send_signal(code: Code, body: NewSignal):
