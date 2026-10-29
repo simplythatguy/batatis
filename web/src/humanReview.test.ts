@@ -194,6 +194,10 @@ test("a yes asks for the professional and an unknown shows its question", () => 
   assert.match(route ?? "", /before submission, administrative acceptance or the official PDF/);
   assert.match(route ?? "", /draft PDF/);
   assert.doesNotMatch(route ?? "", /Do not invent/);
+  // QA 2026-10-28: after submitting, the panel still said "Submit the question … when the other required items are complete".
+  const officerQuestion = [{ id: "professional_requirement", field: "professional_requirement" }];
+  assert.match(professionalRouteNote(officerQuestion) ?? "", /Submit the question/);
+  assert.equal(professionalRouteNote(officerQuestion, true), null);
   assert.equal(professionalRouteNote([{ id: "detail-owner", field: "owner" }]), null);
   const labeled = officerRoutedLabel("a named registered professional required for this work");
   assert.match(labeled, /routed to the officer/);

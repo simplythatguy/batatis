@@ -140,7 +140,9 @@ export function professionalHoldReason(gaps: ProfessionalGap[]): string | null {
 }
 
 /** What to do while the official PDF stays closed for a missing engineer or architect. */
-export function professionalRouteNote(gaps: { id: string; field?: string }[]): string | null {
+export function professionalRouteNote(gaps: { id: string; field?: string }[], submitted = false): string | null {
+  // A sent application has nothing left to submit; the officer already has the question.
+  if (submitted) return null;
   const kind = professionalHoldKind(gaps);
   if (kind === "requirement") return "The unresolved professional requirement is routed to the officer. The officer determines whether one is required for this scope; no professional confirmation is being asserted. That does not open the official PDF or administrative acceptance. Submit the question with your application when the other required items are complete. A draft PDF remains available.";
   if (kind === "source") return "The professional requirement’s source references need review before the requirement can be determined. Submission, acceptance and the official PDF wait for those references. A draft PDF remains available.";
