@@ -24,8 +24,8 @@ export const deck: Deck = {
       ],
       script: [
         "Every new building idea in Alberta starts the same way. It breaks a rule.",
-        "Here's a real one. The City of Edmonton published it. A one-hour party wall instead of a two-hour firewall, for rowhouses with suites. And it's complete.",
-        "And that firewall rule? Varied three hundred sixty-six times in six months. That's two a day.",
+        "Here's a real one from the City of Edmonton. It lets rowhouses with suites use a one-hour party wall instead of a two-hour firewall.",
+        "Alberta recorded three hundred sixty-six variances against that firewall rule in six months. That's two a day.",
       ],
     },
     {
@@ -56,13 +56,13 @@ export const deck: Deck = {
         { kind: "logo", id: "three-one", line: "One app." },
       ],
       script: [
-        "Now watch. We quietly take out two articles: the smoke barrier and the linked smoke alarms. Can anyone spot it? Most people can't.",
-        "But the officer can. Weeks later, it comes back. More information required.",
-        "And every trip back costs about thirty-six hundred dollars. Mostly waiting.",
+        "Now watch. We quietly take out two articles, the smoke barrier and the linked smoke alarms. Can anyone spot it? Most people can't.",
+        "But the officer can, and weeks later the application comes back.",
+        "Every trip back costs about thirty-six hundred dollars, and most of that is waiting.",
         "So today, we're introducing three things. An application writer.",
         "A code expert.",
         "And a completeness checker for officers.",
-        "A writer, an expert, a checker. See where this is going? These aren't three tools. It's one app. We call it Batatis.",
+        "A writer, an expert, a checker. See where this is going? It's one app, and we call it Batatis.",
       ],
     },
     {
@@ -76,9 +76,9 @@ export const deck: Deck = {
         { kind: "clip", id: "apply-ask", title: "Only what's missing", src: "/studio/clips/c04-questions.mp4" },
       ],
       script: [
-        "So we just describe the rowhouse in plain words, and drop in that broken form. That's it.",
-        "It reads both. The owner, the site, the city. Edmonton.",
-        "Here are the rules, ranked. On top, the firewall being replaced. And look. The two articles we took out? Found. Isn't that cool?",
+        "So we describe the rowhouse in plain words and drop in that broken form. That's it.",
+        "It reads both and finds the owner, the site and the city.",
+        "Here are the rules it found, ranked, with the firewall rule at the top. And it found both articles we took out. Isn't that cool?",
         "Then it asks only for what's still missing, one question at a time.",
       ],
     },
@@ -93,10 +93,10 @@ export const deck: Deck = {
         { kind: "clip", id: "apply-form", title: "The official form", src: "/studio/clips/c08-form.mp4" },
       ],
       script: [
-        "And here's what we love. It knows where to stop. This needs an engineer, and it says so, and what the evidence has to cover.",
-        "Section C comes straight from the 2023 code. Nothing's guessed.",
-        "One click checks the whole thing before anyone else sees it.",
-        "And there's the official form, filled in. Boom. Off to Edmonton.",
+        "It also knows where to stop. This project needs an engineer, and Batatis lists what the engineer's evidence has to cover.",
+        "Section C comes straight from the 2023 code. Batatis looks it up instead of guessing.",
+        "One click checks the whole application before anyone else sees it.",
+        "And there's the official form, filled in. Boom. It goes to Edmonton.",
       ],
     },
     {
@@ -109,9 +109,9 @@ export const deck: Deck = {
         { kind: "clip", id: "officer-decide", title: "Decide. Message once.", src: "/studio/clips/c11-decide.mp4" },
       ],
       script: [
-        "Now let's switch sides. Here's the safety codes officer in Edmonton, and it's already in the inbox.",
-        "What's there, what's missing, and every citation links right to the code. It checks completeness, not compliance. The call is still the officer's.",
-        "One decision, one clear message. The applicant fixes it and resends. No phone tag.",
+        "Now let's switch sides. The application is already in the Edmonton officer's inbox.",
+        "The officer sees what's there and what's missing, with every citation linked to the code. Batatis checks completeness, and the compliance call stays with the officer.",
+        "The officer sends one clear message, and the applicant fixes it and sends it back.",
       ],
     },
     {
@@ -143,11 +143,11 @@ export const deck: Deck = {
         },
       ],
       script: [
-        "So, does it really work? We tested sixty-four real Alberta cases, with the article numbers hidden.",
-        "Plain search put the right article first twenty-six times. Batatis, fifty-four.",
-        "Made-up articles shown to an applicant? Zero.",
-        "A simulated first-timer using the official flowchart scored two out of ten. With Batatis, five point six.",
-        "And it costs about sixty-one dollars an application, all in. Save one trip back in sixty, and it's paid for itself.",
+        "Does it really work? We tested sixty-four real Alberta cases with the article numbers hidden.",
+        "Plain search put the right article first twenty-six times. Batatis put it first fifty-four times.",
+        "And it showed applicants zero made-up articles.",
+        "A simulated first-time applicant scored two out of ten with the official flowchart, and five point six with Batatis.",
+        "It costs about sixty-one dollars an application, all in, so saving one trip back in sixty pays for it.",
       ],
     },
     {
@@ -170,8 +170,8 @@ export const deck: Deck = {
         },
       ],
       script: [
-        "Today we're live in Calgary and Edmonton. But we've already mapped four hundred thirty-five places to their office.",
-        "A new office isn't new code. It's one data file. Better AI models only make us better. They won't keep an office's rules current, or earn an officer's trust. We will.",
+        "Today we're live in Calgary and Edmonton, and we've already mapped four hundred thirty-five places to the office that reviews them.",
+        "Adding an office takes one data file, not new code. Better AI models make Batatis better, but they won't keep each office's rules up to date or earn an officer's trust. We will.",
       ],
     },
     {
@@ -192,9 +192,9 @@ export const deck: Deck = {
         },
       ],
       script: [
-        "Now, let's be straight about what we haven't proven. Our applicant scores are simulated. And ten times in sixty-four, the right article wasn't first.",
-        "And no officer has reviewed a real Batatis application. Not yet.",
-        "So here's the plan. One office, ninety days, right beside how they work today. Officers grade real files, and we measure every number again. In public.",
+        "Here's what we haven't proven. Our applicant scores come from simulated applicants, and in ten of sixty-four cases the right article wasn't first.",
+        "And no officer has reviewed a real Batatis application yet.",
+        "So we'll run a ninety-day pilot with one office alongside its current process. Officers will grade real files, and we'll measure every number again and publish it.",
       ],
     },
     {
@@ -207,8 +207,8 @@ export const deck: Deck = {
         { kind: "statement", id: "close-line", text: "Complete before\nit's ever sent.", accent: "Complete" },
       ],
       script: [
-        "There's a Wayne Gretzky quote we love. He played right here, for the Oilers. I skate to where the puck is going to be, not where it has been.",
-        "Well, the puck is going to new ideas. And every one of them breaks a rule.",
+        "There's a Wayne Gretzky quote we love. I skate to where the puck is going to be, not where it has been.",
+        "Well, the puck is going to new ideas, and every one of them breaks a rule.",
         "Batatis makes sure they show up complete. Thank you.",
       ],
     },
