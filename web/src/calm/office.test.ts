@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { AUTHORITIES, authorityUnsure, officeChoiceAction, officeSuggestion, resolveOffice, submissionOfficeReason } from "../config.ts";
+import { AUTHORITIES, authorityUnsure, officeChoiceAction, officeSuggestion, placeOffice, resolveOffice, submissionOfficeReason } from "../config.ts";
 import { emptyCase } from "../intake.ts";
 import { reducer } from "../model.ts";
 import { jurisdictionBody } from "../rules.ts";
@@ -22,6 +22,15 @@ for (const [place, pack, reviewer, shown] of [
     assert.equal(Boolean(submissionOfficeReason(c)), !reviewer);
   });
 }
+
+test("the office comes from the place data: someone else, the place itself, not covered, or unknown", () => {
+  assert.deepEqual(placeOffice("Lacombe County"), { office: "Alberta Safety Codes Authority", differs: true, covered: true });
+  assert.deepEqual(placeOffice("City of Red Deer"), { office: "City of Red Deer", differs: false, covered: true });
+  assert.deepEqual(placeOffice("Calgary"), { office: "City of Calgary", differs: false, covered: true });
+  assert.deepEqual(placeOffice("Vancouver"), { office: "City of Vancouver", differs: true, covered: false });
+  assert.equal(placeOffice("Example Hamlet"), null);
+  assert.equal(placeOffice("unsure"), null);
+});
 
 test("Not sure is a confirmed case fact and survives a JSON round trip", () => {
   const c = reducer(emptyCase("owner"), officeChoiceAction("unsure"));

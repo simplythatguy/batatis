@@ -46,6 +46,13 @@ export function knownPlace(value: string): { id: string; name: string } | null {
   return office && office.packId !== fallbackPack.id ? { id: office.id, name: office.name } : null;
 }
 
+/** Who reviews building work at a chosen place, and whether Batatis prepares applications there; null for a place it does not know. */
+export function placeOffice(value: string): { office: string; differs: boolean; covered: boolean } | null {
+  const office = resolveOffice(value);
+  const place = office && PLACES.find((p) => p.id === office.packId);
+  return place ? { office: place.office, differs: place.office !== place.name, covered: place.covered } : null;
+}
+
 export function authorityUnsure(c: Case): boolean {
   const choice = [...c.facts].reverse().find((fact) => fact.field === OFFICE_CHOICE_FIELD);
   return !c.authority && choice?.status === "confirmed" && choice.kind !== "proposed" && choice.value === "not_sure";
