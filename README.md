@@ -1,6 +1,6 @@
 # Batatis
 
-Batatis helps builders in Alberta prepare a complete building-code variance application. It also shows Safety Codes Officers what an application is missing.
+Batatis helps builders in Alberta prepare a complete building-code variance application, and shows Safety Codes Officers what an application is missing. It finds the code articles that apply, fills in what the code says about them, and drafts the statements the form asks for. The builder checks the work.
 
 [Open the app](https://batatis-vert.vercel.app) · [License](LICENSE.md)
 
@@ -9,6 +9,19 @@ Batatis helps builders in Alberta prepare a complete building-code variance appl
 ![Alex Builder on the live site, then Jordan Officer's review and the message Alex opens](docs/readme/demo.gif)
 
 Alex Builder sends a soffit variance for a house in Edmonton on the live site. You see the application, the questions, and settings. Jordan Officer reviews it for Edmonton, opens it from the queue, and writes to Alex. Alex opens that message. The recording plays on this page. The words in the application are a sample.
+
+## Tested on real Alberta records
+
+We tested Batatis on 64 real records that the Government of Alberta and the cities published: variances, code interpretations, appeal decisions, and city bulletins. We rewrote each one the way an applicant would describe the project, and took the article numbers out. The answer key is the article the regulator actually cited.
+
+| On the 64 real records | Result |
+| --- | --- |
+| The first code article Batatis shows is one the regulator cited | 46 of 64, up from 26 before the AI ranking |
+| A cited article is among the first three | 55 of 64, up from 32 |
+| Made-up code articles shown to the applicant | 0. Every AI pick has to quote the code word for word |
+| Grade of a first-time applicant's finished application | 5.6 out of 10 with the workflow we chose, 3.4 with our earlier flow, and 2.0 with the official flowchart asked as a form |
+
+An AI grader scored the applications without knowing which workflow wrote them. No Safety Codes Officer has graded them yet. [Why this workflow](#why-this-workflow) explains the test.
 
 ## The problem
 
@@ -29,7 +42,7 @@ Here is an example. The code requires at least two exits from every floor of a l
 
 A Safety Codes Officer then reviews the application and decides.
 
-According to the challenge organizers, most first submissions fail because they are incomplete. The officer sends the application back, the builder fixes it, and each round adds weeks.
+According to the challenge organizers, most first submissions fail because they are incomplete. The officer sends the application back, the builder fixes it, and each round adds weeks. We estimate that one extra round on a custom application costs about C$3,600, most of it the builder's cost of waiting. See [What it costs](#what-it-costs).
 
 | Figure | What it counts | Source |
 | --- | --- | --- |
@@ -49,41 +62,35 @@ When a design doesn't follow the code as written, the builder prepares the varia
 
 ## Our solution
 
-![The applicant describes the project, answers questions, confirms code articles, and submits. The officer reviews and accepts or returns it](docs/readme/solution.png)
+![The applicant describes the project, answers questions, confirms the ranked code articles, gets Section C filled in, plans the evidence, and submits. The officer picks it up, reviews it, and accepts it or returns it with a message](docs/readme/solution.png)
 
-Batatis guides the application that matches the project, then gives the officer a checklist. A design that follows the code's standard way stays on that path. A design that departs becomes a variance. Batatis checks that an application is complete. It never says that a design is safe or meets the code. Engineers and the officer make those decisions.
+Batatis does the code work, and the applicant checks it. It finds and ranks the code articles, looks up what each one is for, drafts the statements the form asks for, and plans the evidence. The officer then gets a checklist of what is missing. Batatis never says that a design is safe or meets the code. Engineers and the officer decide that.
 
 ### Which application you prepare
 
-![From the design, through the building-code check and one coded rule, to a stop, the shared evidence ladder and permit paperwork, or the six process statements, the evidence types, and the site paperwork](docs/diagrams/applicant-path-decision.png)
+![From your design, through the building-code check and one coded rule, to the acceptable-solution package, a stop that names the missing fact, or the variance package with six statements and its evidence types, all ending at an administrative review](docs/diagrams/applicant-path-decision.png)
 
-The picture in [Our solution](#our-solution) is the whole product, from the first description through the officer's decision. This picture is the package that path opens. It keeps every stop, the shared evidence ladder, the six process statements, and the paperwork.
+The code allows two ways to build. An acceptable solution follows the rules as written. An alternative solution meets the rules' purpose another way, and needs a variance. Batatis works out which one you are on before it opens a form.
 
-Batatis starts from the design you describe.
+1. **Is this a building-code question?** If it belongs to another safety code, Batatis stops.
+2. **Use the facts already written.** Batatis reads your description and files before it asks anything.
+3. **One coded rule.** For the articles varied most often, Batatis checks your numbers against the rule and asks only for the numbers it still needs. A rule that doesn't apply to your building is set aside.
+4. **Does the design meet or exceed the acceptable solution?** A firm coded check decides first, then a route you confirmed, then your own words.
+   - **Yes.** The evidence ladder and the permit paperwork. No variance statements.
+   - **Not sure.** Batatis stops and names the missing fact. It never guesses.
+   - **No.** A variance: the six process statements, the evidence types to discuss, and paperwork that asks whether the request covers one site or the whole municipality.
 
-1. **Is this a National Building Code, Alberta Edition question?** If it belongs to another safety code, Batatis stops. No package opens.
-2. **Use facts already written.** Batatis reads the description and the files before it asks anything.
-3. **One coded rule.** Batatis asks only for the inputs that rule still needs.
-4. **Does the design meet or exceed the acceptable solution?** A firm coded check decides this. A labeled assumption is not firm. When the check is not firm, a path you already confirmed is next, and then the words you wrote. A confirmed request for a variance counts as a chosen path. A firm result from the numbers still wins over it.
-   - **Acceptable solution.** The shared evidence ladder, then the permit paperwork. No process fields on this path. The ladder is the manufacturer's technical literature, an existing STANDATA variance, a test report, an evaluation, a qualification, and a certification.
-   - **Not decided.** Batatis stops and names the missing fact. No package opens. A rule that does not apply stops the same way.
-   - **Alternative solution.** Six process statements, then the evidence types to discuss, then paperwork that asks whether the request covers one site or the whole municipality.
-
-The six statements are rationale, risk assessment, mitigating measures, assumptions and limits, maintenance and operation, and qualifications. The picture marks them as process fields, not evidence. They are why you want the change, what could go wrong, what you add, what the plan depends on, how it will be maintained, and who is responsible. The variance path discusses the same ladder, and also a CCMC evaluation, an ICC-ES evaluation, a registered professional opinion, and an engineering review.
-
-Both packages end at an administrative review. That review checks the paperwork. It is not a technical decision.
-
-Batatis does not ask you for the rule's purpose, the job the rule does, or the intent behind it. Once an article is named, that part of the form comes from the code's own tables.
+The six statements are rationale, risk assessment, mitigating measures, assumptions and limits, maintenance and operation, and qualifications. Both packages end at an administrative review, which checks the paperwork. It is not a technical decision.
 
 ### For applicants
 
 Manufacturers, homebuilders, and general contractors use Batatis to prepare the application.
 
 1. Describe the project in your own words, or drop in PDFs.
-2. Answer the questions that Batatis still needs, one at a time. The checks above choose the package before the form opens.
-3. Confirm the code articles that Batatis found. Each one quotes the code.
-4. Section C of the form fills in from the code's own tables.
-5. Plan the evidence for the package you are on. A variance also asks for the six statements. Batatis flags when an engineer or another professional is required.
+2. Answer the questions that Batatis still needs, one at a time. For a variance, Batatis drafts the six statements from your description and files, and every claim shows the words it came from.
+3. Confirm the code articles that Batatis found and ranked. Each one quotes the code.
+4. Section C of the form, the purpose of each article, fills in from the code's own tables.
+5. Plan the evidence. Batatis flags when an engineer or another professional is required.
 6. Fix anything the checklist marks as missing. Then download the official form, or submit it to Edmonton or Calgary.
 
 ### For Safety Codes Officers
@@ -95,6 +102,46 @@ Officers use Batatis to see what an application is missing.
 3. Accept it as administratively complete, return it with a message, or refuse it.
 4. Close out the application after the decision.
 
+## Why this workflow
+
+The official NBC(AE) process for a design that may depart from the code looks like this as a flowchart. NBC(AE) is the National Building Code, 2023 Alberta Edition.
+
+![The official NBC(AE) process: identify the acceptable solution, analyse the code, set the performance level, compare, find the gaps, and decide whether the design complies. Yes leads to evidence of compliance and the permit. No leads to the variance steps: rationale, detailed code analysis, risk assessment, mitigating measures, assumptions, and evidence of equivalent performance](docs/diagrams/nbc-ae-acceptable-vs-alternative-flow.png)
+
+Every box is a step the applicant has to work through. The obvious design is a form that asks the applicant each box in order. We tested that form against our own flow and five other designs before choosing.
+
+**The test.** The same 64 real records, with two simulated applicants: a first-time homebuilder who has never read the code, and an expert consultant with the code book open. Claude Haiku 5.5 played both. Claude Opus 5.5 graded each finished application out of 10, beside the articles the regulator cited, without knowing which workflow wrote it. The minutes are an estimate from the number and kind of inputs.
+
+![Grade against applicant time for five workflows. For a first-time applicant, the workflow where the app analyses and drafts and the applicant reviews scores 5.6, against 3.4 for our earlier flow and 2.0 for the official flowchart asked as a form. For an expert with the code book, 7.5 against 5.9 and 4.9](docs/readme/workflow-results.png)
+
+**What we found**
+
+- **As a form, the flowchart fails the people who need help most.** Its first boxes ask for the code article and its objectives, functional statements, and intent. A first-time applicant can't answer them, and at the yes-or-no box 45 of 64 had to guess. Their applications scored 2.0.
+- **Experts do better with the form, but slowly.** It took them about 51 minutes, and their applications scored 4.9, below the 5.9 of our earlier flow.
+- **People get code citations wrong.** An expert answering from memory named a cited article in 6 of 64 cases, and none of their 64 Section C entries matched the code's tables. So Batatis never asks for citations. It finds them and looks them up.
+- **The winner keeps every box, and the app fills them in.** Batatis ranks the articles, looks up Section C, compares the design with the rule, and drafts the statements. The applicant reviews them on one screen. This design scored highest for both applicants, 5.6 and 7.5, with about 40% fewer inputs than our earlier flow.
+
+So Batatis keeps the flowchart as its checklist, and changes who does each box:
+
+| The flowchart's box | Asked as a form, the applicant | In Batatis |
+| --- | --- | --- |
+| Identify the acceptable solution | names the article | Batatis searches the code, ranks the articles, and quotes each one. You confirm |
+| Objectives, functional statements, and intent | copies them from the code | Looked up from the code's tables. Never asked |
+| Performance level, comparison, and gaps | writes them | You describe how the design differs. Next, Batatis drafts the comparison |
+| Does the design comply? | picks yes or no, even when unsure | A coded check, a route you confirmed, or your words decide. If none does, Batatis stops and names the missing fact |
+| Rationale, risk, mitigation, and assumptions | writes each one | Batatis drafts each one, and every claim shows its source |
+| Not in the flowchart: maintenance and operation, and qualifications | is never asked | Asked, because the code requires them (Division C, Article 2.3.1.1) |
+| Evidence | chooses from the list | Batatis plans the evidence for each article and flags when an engineer is needed |
+
+**Mistakes it doesn't let through**
+
+- **Made-up code articles.** None reach the screen. The quote check threw out 5 of 236 AI picks before they appeared.
+- **Claims that a design complies or is safe.** None in the text Batatis wrote for the 64 records, checked with its own wording filter.
+- **Dead ends.** On 2 of 64 records, a rule that didn't apply to the building used to end the application. That is fixed.
+- **Wrong Section C.** It never comes from a person or a model. It is looked up.
+
+Batatis already ranks the articles and avoids those dead ends. The next steps are the comparison, drafts on one review screen, and a table-of-contents search that put a cited article first in 54 of 64 records in the same test. The method, the fairness choices, and every number are in the [workflow bakeoff](experiments/workflow-bakeoff-v2/README.md) and its [one-page summary](docs/evaluations/workflow-bakeoff-v2-20261028.md).
+
 ## Features
 
 For applicants:
@@ -104,7 +151,8 @@ For applicants:
 - Describe a project in text or PDFs. Batatis reads the facts and asks only for what is missing.
 - See which package you are preparing. If Batatis cannot tell, it stops and names the missing fact.
 - Answer the open items one at a time. A variance asks for six statements: why you want the change, what could go wrong, what you add, what the plan depends on, how it will be maintained, and who is responsible. A design that follows the standard way does not ask for those.
-- Confirm the code articles that apply, each with a quote from the code.
+- Get the six statements drafted from your description and files. Every claim shows its source, and you accept or reject each draft.
+- See the code articles ranked by AI, each with a quote from the code, and confirm the ones that apply.
 - Get Section C filled in from the code's tables.
 - Get a Section D evidence plan that flags when a professional is required.
 - For the articles varied most often, enter your numbers and see whether the design departs from the code's standard way.
@@ -154,22 +202,14 @@ Many published decisions state their outcome, so the cases test reading and pape
 
 ## What we measured
 
-These checks record what Batatis did on public city documents and on practice text. They do not say an officer approved a design. Batatis never makes that decision.
+The real-record results are in [Tested on real Alberta records](#tested-on-real-alberta-records). These checks used text that we wrote, so their answer keys are ours too. They record what Batatis did. They do not say an officer approved a design, and Batatis never makes that decision.
 
 | What | Result | Where it came from |
 | --- | --- | --- |
-| Real Alberta records where the first code article shown is one the regulator cited | 46 of 64. It was 26 of 64 before the AI ranking | 64 published STANDATA variances, interpretations, appeals and city bulletins, described without their article numbers |
-| The same records with a cited article among the first three shown | 55 of 64. It was 32 of 64 | Same 64 records |
-| Made-up code articles or quotes the user saw | 0. The quote check threw out 5 of 236 AI picks before they appeared | Same 64 records |
-| Grade of the finished application for a first-time applicant, out of 10 | 5.6 with the best workflow we tested, 3.4 for today's flow, 2.0 for the official flowchart asked as a form | Same 64 records. A blind AI grader compared each draft with what the regulator cited |
 | Blanks it filled that matched the description | 159 of 159 | Made up. 60 practice descriptions written from the code book |
 | Mistakes we hid in sample forms that it caught | 18 of 18 | Made up. We planted the mistakes in sample forms |
 | Cases where an engineer was needed and it said so | 33 of 33 | Made up. Same 60 practice descriptions. The engineer labels were written with the cases |
 | Real applications an officer has tested | 0. No one has tested this | No officer has used the app |
-
-The 46 of 64 is the row to say out loud. Those are real records the Alberta government and the cities published, and the answer key is the article the regulator cited, mapped to the NBC(AE) 2023. Batatis finds candidates by searching the code's own text, then Claude Haiku 5.5, at medium effort, reads the leading 60 and moves the ones it can quote word for word to the front. A quote that is not in the code is thrown away, so no invented article reaches the screen.
-
-The workflow grades come from the [workflow bakeoff](experiments/workflow-bakeoff-v2/README.md). It compared our workflow, the official NBC(AE) flowchart and five other designs on the same 64 records, with simulated first-time and expert applicants. The grader was Claude Opus 5.5, and it did not know which workflow wrote which draft. No officer has graded them.
 
 The 159, the 18, and the 33 look perfect because we wrote the practice cases and the answer key. A judge who asks where the data came from should treat those rows as a demo. On those 60 descriptions the engineer check said yes or not sure, so it caught every case where an engineer was needed. The receipt scores a match against every label at 50 of 60. This table counts the 33 cases where an engineer was needed.
 
@@ -177,15 +217,33 @@ The last row stays at 0. No officer has tried a real application.
 
 The real-record rows are in the [bakeoff results](experiments/workflow-bakeoff-v2/RESULTS.md). The records are listed in the [Alberta cases](docs/research/2026-10-23-elephant/cases-alberta.md). The blanks are in the [accuracy report](docs/accuracy/report.md). The planted mistakes are in the [form-check test](engine/tests/test_package_review_planted.py). The engineer labels are in the [Section D receipt](evals_dev/section_d_flag/RESULTS.md).
 
+## What it costs
+
+The AI costs cents per application. People's time is the real cost, and most of it is the builder's time spent waiting.
+
+| What | About | Kind |
+| --- | --- | --- |
+| AI for one application, at list prices | US$0.55, or US$0.04 if every step ran on Claude Haiku 5.5 | Estimate. No application has run with metering on yet |
+| AI ranking of the code articles, per search | US$0.002 | Estimate |
+| Hosting, per application at pilot volume | C$0.62 | Estimate |
+| An officer's time | C$43.92 to C$56.53 an hour | Published. City of Edmonton, Safety Codes Officer II |
+| One extra "more information" round on a custom application | C$3,600, of which 59% is the builder's cost of waiting | Estimate |
+| Rework and delay across Alberta | C$3.6 million a year, in a range of C$0.7 million to C$26 million | Estimate |
+
+Counting support staff, Batatis costs about C$61 per application, so it pays for itself if it saves one extra round in every 60 custom applications. A rival that is 99% cheaper and 5 points less accurate saves a builder under C$1 on a custom application, and adds about C$240 to C$840 of expected rework. On repeat house variances the gap shrinks to C$30 to C$120, so those filings should be priced low.
+
+Every figure, its source, and its assumptions are in the [cost model](docs/research/2026-10-28-bakeoff/cost-model.md).
+
 ## What's next
 
+- Finish the workflow that won the test: the comparison of the design with the rule, drafts on one review screen, and the table-of-contents search.
 - Offer the website as a paid service, with AI included.
 - Export Calgary's own Request for Specific Variance form next to the Council's form.
 - Register decided variances in the Council's Orders and Variances Portal, which becomes mandatory on December 1, 2026.
 - Add authorities beyond Edmonton and Calgary, then other provinces.
 - Draft the officer's Part 2 decision page from the review findings.
 - Search the CCMC product evaluation registry from inside the app.
-- Measure how accurate the whole workflow is on applications that experts have reviewed, and calibrate its relevance scores.
+- Have Safety Codes Officers grade real applications, and calibrate the relevance scores.
 - Test the full workflow with real applicants and officers.
 
 ---
@@ -194,7 +252,7 @@ The real-record rows are in the [bakeoff results](experiments/workflow-bakeoff-v
 
 ![The hosted website's workflow, with the technology under each step](docs/readme/how-it-works.png)
 
-This diagram shows the hosted website. It has the same steps as the one in [Our solution](#our-solution), with the technology that runs each step. The colors mark the same four stages in both diagrams. The website is React and TypeScript, built with Vite. It calls the engine, a Python API built with FastAPI. Vercel hosts the website and its engine.
+This diagram shows the hosted website. It has the same steps as the one in [Our solution](#our-solution), with the technology that runs each step. The colors mark the same four stages in both diagrams. The website is React and TypeScript, built with Vite. It calls the engine, a Python API built with FastAPI. Vercel hosts the website and its engine. The assistant answers with Claude Haiku 5.5, and voice uses Grok from xAI. [`docs/readme/src/diagrams.py`](docs/readme/src/diagrams.py) draws this diagram, the solution diagram, the path diagram, and the results chart.
 
 ### How the path is chosen
 
@@ -203,7 +261,7 @@ The picture in [Which application you prepare](#which-application-you-prepare) i
 The checks run in order. The first one that settles the project wins.
 
 1. A different safety code is first. The picture labels that result "Other regime. Stop. No package." [`engine/intake/scope.py`](engine/intake/scope.py) classifies the text. A redirect stops the question list.
-2. A firm coded check is next. A labeled assumption is not firm. "Follows" opens the standard package. "Departs" opens the variance package. "Does not apply" stops. The check can name one Division B sentence. Section C for that sentence is a lookup in CodeDB, the SQLite copy of the code. A miss says the lookup missed that sentence.
+2. A firm coded check is next. A labeled assumption is not firm. "Follows" opens the standard package. "Departs" opens the variance package. "Does not apply" is set aside, so it never decides the path, and the question list stops asking for that rule's inputs. The check can name one Division B sentence. Section C for that sentence is a lookup in CodeDB, the SQLite copy of the code. A miss says the lookup missed that sentence.
 3. When the check is not firm, a recorded pathway or route is used. A confirmed request for a variance counts too, even when the description is empty. A firm check still wins over that request.
 4. Then the words. [`engine/intake/fork.py`](engine/intake/fork.py) reads them. If they do not decide, the picture says "Not decided. Stop. No package." The variance package stays closed.
 
@@ -212,29 +270,25 @@ The checks run in order. The first one that settles the project wins.
 The applicant is not asked for objectives, functional statements, or intent.
 
 <details>
-<summary>How this path compared with the old rule and with the flowchart</summary>
+<summary>How we chose this workflow</summary>
 
-On 27 October 2026 the team ran 152 frozen prompts through four ways of choosing the package. The prompts, the rubric, and the saved rows are in [`experiments/workflow-bakeoff/`](experiments/workflow-bakeoff/). The write-up is [`PROOF.md`](experiments/workflow-bakeoff/PROOF.md). No model was called. The judge is a fixed set of ten paperwork checks. It is not a safety result, and it does not say a design complies.
+On 28 October 2026 we compared seven workflows on the 64 real Alberta records in [`docs/research/2026-10-23-elephant/cases-alberta.json`](docs/research/2026-10-23-elephant/cases-alberta.json). [Why this workflow](#why-this-workflow) shows the five that were graded. The harness is in [`experiments/workflow-bakeoff-v2/`](experiments/workflow-bakeoff-v2/):
 
-Balanced quality gives equal weight to 63 application prompts and 89 rule prompts. The same weights apply to the question counts. The comparison used `origin/main` at `e34b4e4`. The access-code sign-in that landed after that commit does not change this decision.
+- `stage0.py` runs the product's own reading, path, and ranking on every record, with no model.
+- `requests.py` writes each model request as a file. Claude Haiku 5.5, at medium effort, answered them through the Claude subscription instead of the paid API.
+- `run_arms.py` builds each workflow's finished application, and `judge.py` prepares the blind grading for Claude Opus 5.5.
+- `report.py` writes [`RESULTS.md`](experiments/workflow-bakeoff-v2/RESULTS.md) from the saved runs.
 
-| Way of choosing | Balanced quality | Balanced questions | Path match |
-| --- | ---: | ---: | ---: |
-| The previous rule | 8.513 | 20.53 | 84 of 152 |
-| The official flowchart, asked in order | 7.709 | 14.72 | 61 of 152 |
-| That flowchart, with the code database in place of the purpose questions | 8.709 | 10.98 | 61 of 152 |
-| The path above | 9.739 | 13.02 | 140 of 152 |
+The [README in that folder](experiments/workflow-bakeoff-v2/README.md) lists each workflow, the fairness choices, and the limits. For example, an applicant who was not sure at the flowchart's yes-or-no box took the variance branch, and the run counted that as a forced guess rather than a dead end.
 
-The path above is 1.226 balanced points higher than the previous rule, and it asks 7.51 fewer balanced questions. It is 2.030 points higher than the flowchart asked in order. The flowchart with the database lookup asks fewer questions because it stops early. Its path match stays 61 of 152. The rubric keeps the higher quality when the gap is larger than 0.25.
-
-Twelve prompts still miss. Eight unresolved prompts were called a variance because of the wording. Three variance prompts stayed unresolved, with no coded rule and no departure cue. One standard-way prompt stayed unresolved because a labeled assumption kept the check from being firm. The flowchart, asked as a list of questions, never chose the standard package on this set. A missing answer was treated as not sure, and that did not count as yes.
+An earlier test, on 27 October 2026, used 152 prompts the team wrote and called no model. It chose the path rules above. Its write-up is [`experiments/workflow-bakeoff/PROOF.md`](experiments/workflow-bakeoff/PROOF.md).
 
 </details>
 
 For applicants:
 
 1. **Describe the project.** Rules read facts, such as the owner and the address, from the description and from the text and fields of any PDFs. If AI is on, Claude Sonnet 5.5, an Anthropic model, points at more facts, and each one must quote the text it came from. When you attach files, Sonnet also reviews them page by page, and the questions screen lists what it found.
-2. **Answer a few questions.** A rule-based planner picks up to five questions. It starts with conflicts in what you wrote, then facts that narrow down the code articles. The website then shows one card for each item that is still open. No AI writes the questions. This step is also where the path is chosen. See [How the path is chosen](#how-the-path-is-chosen).
+2. **Answer a few questions.** A rule-based planner picks up to five questions. It starts with conflicts in what you wrote, then facts that narrow down the code articles. The website then shows one card for each item that is still open. No AI writes the questions. This step is also where the path is chosen. See [How the path is chosen](#how-the-path-is-chosen). On the variance path, if AI is on, Claude Sonnet 5.5 drafts the six process statements from the description, the files, and the code. Every claim must quote its source word for word, and a second call checks that each quote supports its claim before anything is saved.
 3. **Confirm the code articles.** Batatis searches the full text of CodeDB for every requirement your description touches. If AI is on, Claude Haiku 5.5 reads the leading 60 and moves the ones it can quote word for word to the front, with a one-line reason. A quote that is not in the code is thrown away. You confirm the articles that apply. With AI off, the search order stays as it is.
 4. **Section C fills itself in.** The objectives, functions, and intent of each confirmed article come from the code's own tables in CodeDB. No AI is involved.
 5. **Plan the evidence.** Rules match each article to the kinds of evidence it needs, and flag when an engineer or another professional is required. No AI is involved. The six process fields are added only when the path is alternative.
@@ -248,36 +302,22 @@ For Safety Codes Officers:
 10. **Decide.** Returning the application sends the applicant a message, and they fix it and resubmit. Accepting it marks it as administratively complete.
 11. **Close-out.** The engine builds the decision's record package for the Council.
 
-Batatis checks what Luna writes before it keeps anything. The document review proposes facts, conflicts, the code provisions the files cite, what is still missing, and questions to ask next. Batatis drops a fact, conflict, or provision unless its excerpt appears in the request or the file it names. When a restated fact adds a number that its excerpt lacks, Batatis shows the excerpt instead. A wording filter removes Batatis's own sentences that say a design complies, is safe, or is approved, or that cite an article number CodeDB doesn't have.
+Batatis checks what Sonnet writes before it keeps anything. The document review proposes facts, conflicts, the code provisions the files cite, what is still missing, and questions to ask next. Batatis drops a fact, conflict, or provision unless its excerpt appears in the request or the file it names. When a restated fact adds a number that its excerpt lacks, Batatis shows the excerpt instead. A wording filter removes Batatis's own sentences that say a design complies, is safe, or is approved, or that cite an article number CodeDB doesn't have.
 
 The filter catches common phrasings, not every one. The questions screen shows the document review as advice. Each finding shows whether the files state, propose, or recommend it, and the excerpt and page it came from. The review never confirms a fact for you or changes the list of missing items. If you edit the description or the files, Batatis labels the old review as belonging to the earlier input until it reads them again. Step 3 doesn't use the review to find articles yet.
 
-CodeDB is a SQLite database of the building code. You build it on your computer from the official PDFs of the National Building Code, 2023 Alberta Edition, second printing. Applications and accounts live in SQLite on your computer, or in PostgreSQL on Neon when the app is hosted. The web assistant answers with GPT-4.1 mini by default, or with Claude Sonnet 5.5 when `ANTHROPIC_API_KEY` is set. Web voice uses Grok from xAI.
+CodeDB is a SQLite database of the building code. You build it on your computer from the official PDFs of the National Building Code, 2023 Alberta Edition, second printing. Applications and accounts live in SQLite on your computer, or in PostgreSQL on Neon when the app is hosted. The web assistant answers with Claude Haiku 5.5 when `ANTHROPIC_API_KEY` is set, or with GPT-4.1 mini from OpenAI when only `OPENAI_API_KEY` is set. Web voice uses Grok from xAI.
 
 Before any text goes to an AI service, Batatis removes the names, contact details, and addresses that it recognizes. The web engine's daily spend cap, US$5 by default, stops its AI calls when it is reached.
 
 <details>
 <summary>Why Batatis uses these models, and what isn't measured yet</summary>
 
-Step 3 changed on October 28, 2026. Code search no longer uses Jev. It searches CodeDB's own text, then Claude Haiku 5.5 at medium effort ranks the leading 60 with word-for-word quotes. The [workflow bakeoff](experiments/workflow-bakeoff-v2/README.md) measured that ranking on 64 real Alberta records. The rest of this section describes the October 25 choice for document review.
+- **Reading, document review, and drafting use Claude Sonnet 5.5.** They moved from OpenAI models on 28 October 2026.
+- **Ranking code articles uses Claude Haiku 5.5 at medium effort.** It reads the leading 60 articles from the search, each as its heading and the first 700 characters of its text. On the 64 real records it put a cited article first in 46 cases, against 26 for the search alone. A model that read whole articles was not needed for that gain, and Haiku is the cheapest Claude model. [`engine/identify/pipeline.json`](engine/identify/pipeline.json) holds these settings, and [`engine/tests/test_workflow_profile.py`](engine/tests/test_workflow_profile.py) fails if a model, effort, or limit changes.
+- **The assistant uses Claude Haiku 5.5.** It answers from the application's own facts.
 
-The team chose this workflow on October 25, 2026, and stopped benchmarking. The [decision record](docs/evaluations/workflow-decision-20261025.md) explains the choice and its limits. The [evidence snapshot](docs/evaluations/workflow-accuracy-evidence-20261025.json) holds the saved results behind it.
-
-- Luna reviews documents with its original prompt. In the saved results, this source-checked review came with the largest improvement. A matched test of another review model, and a test of a revised prompt, showed no clear gain.
-- [`engine/identify/pipeline.json`](engine/identify/pipeline.json) holds the settings for step 3. Haiku reads each candidate as its heading and the first 700 characters of its text. [`engine/tests/test_workflow_profile.py`](engine/tests/test_workflow_profile.py) fails if a selected model, effort, or limit changes.
-
-No complete, reliable test has measured the accuracy of this combined workflow, and no result shows that it is more than 97% accurate. The record also keeps older scores from earlier code, other judges, and other workloads. None of them is the accuracy of this workflow.
-
-Later on October 25, the team started test 3 on the 25 Calgary and Edmonton development cases. Their older saved score was 181 of 259 checks, about 70%, from earlier code and another judge. First, the team fixed five cases whose attachments left out the documents their questions asked about. Then it ran the cases through Codex, OpenAI's coding agent, instead of the OpenAI API, so the test needed no API key. Luna, and Claude Haiku 5.5 at low and at medium effort, each passed 9 of 10 checks on the one case that finished, graded by the same Luna judge. The other 24 cases didn't finish before the team moved on to other work. One case is far too few to measure accuracy. The [saved results](docs/research/accuracy95/haiku-comparison-results.json) and [their limits](docs/research/accuracy95/verification.md) are in the repository.
-
-When testing resumes, these are the next tests, in order. None is scheduled.
-
-1. Review the source checks and the wording filter independently, and test a filter that reads meaning instead of wording.
-2. Run the whole journey in the app, from upload to export.
-3. Measure this exact workflow on the [development cases](evals_dev/data_prompts/README.md#split), then on the held-out cases without tuning on them.
-4. Have experts check the reference answers and the judge.
-5. Test smaller source chunks, and passing reviewed facts to step 3, as separate changes.
-6. Tune cost and speed only after accuracy.
+No officer has graded a Batatis application, and no applicant has run the whole flow with metering on. The bakeoff measured code identification and the finished application with simulated applicants and an AI grader. The October 25 [decision record](docs/evaluations/workflow-decision-20261025.md) and its [evidence snapshot](docs/evaluations/workflow-accuracy-evidence-20261025.json) stay in the repository as history.
 
 </details>
 
@@ -306,7 +346,10 @@ The pictures show the main folders and files, not every one. They leave out thes
 - [`web/src/calm/DocumentReview.tsx`](web/src/calm/DocumentReview.tsx) shows the document review on the questions screen.
 - [`evals_dev/data_prompts/`](evals_dev/data_prompts/) runs the practice cases through the engine and scores the results.
 - [`evals_dev/luna_accuracy.py`](evals_dev/luna_accuracy.py) prepares the same test for Codex tasks in T3 Code, the app the team codes in, and scores what they return.
-- [`docs/evaluations/workflow-decision-20261025.md`](docs/evaluations/workflow-decision-20261025.md) explains why Batatis uses this workflow, and its limits.
+- [`engine/identify/model_rank.py`](engine/identify/model_rank.py) runs the AI ranking of code articles and checks every quote.
+- [`experiments/workflow-bakeoff-v2/`](experiments/workflow-bakeoff-v2/) holds the workflow test on 64 real records, and [`docs/evaluations/workflow-bakeoff-v2-20261028.md`](docs/evaluations/workflow-bakeoff-v2-20261028.md) summarizes it.
+- [`docs/research/2026-10-28-bakeoff/`](docs/research/2026-10-28-bakeoff/) holds the cost model and the review of LangChain and similar tools.
+- [`docs/readme/src/diagrams.py`](docs/readme/src/diagrams.py) draws the README's diagrams and chart from code, with the official logos in [`docs/readme/src/logos/`](docs/readme/src/logos/).
 
 ## Get started
 
@@ -496,27 +539,26 @@ BATATIS_LIVE_ELEPHANT=0
 BATATIS_DAILY_SPEND_CAP_USD=5
 ```
 
-The AI steps in [How Batatis works](#how-batatis-works) need your Anthropic key and a TypeSafe key. The example file has no line for the TypeSafe key, so add one. Paste each key after its `=`, and set `BATATIS_LIVE=1`:
+The AI steps in [How Batatis works](#how-batatis-works) need only your Anthropic key. Paste it after `ANTHROPIC_API_KEY=`, and set `BATATIS_LIVE=1`:
 
 ```dotenv
 ANTHROPIC_API_KEY=
-TYPESAFE_API_KEY=
 BATATIS_LIVE=1
 ```
 
-The OpenRouter key and `BATATIS_LIVE_ELEPHANT` are only for an optional alternative scorer, explained below.
+The other keys are optional. They serve a fallback assistant and older search settings, explained below.
 
 #### `ANTHROPIC_API_KEY`
 
-The Anthropic API runs Claude models. Batatis uses Claude Sonnet 5.5 to read more facts from descriptions and PDFs, to review attached files, and to draft the application's wording, and the assistant uses Claude when this key is set. Set `BATATIS_LIVE=1` to turn it on. A key that isn't tied to one workspace also needs `ANTHROPIC_WORKSPACE_ID`.
+The Anthropic API runs Claude models. Batatis uses Claude Sonnet 5.5 to read more facts from descriptions and PDFs, to review attached files, and to draft the application's wording. It uses Claude Haiku 5.5 to rank code articles and to answer in the assistant. Set `BATATIS_LIVE=1` to turn it on. A key that isn't tied to one workspace also needs `ANTHROPIC_WORKSPACE_ID`.
 
-Files that use it: [`engine/anthropic_json.py`](engine/anthropic_json.py), [`engine/drafting_provider.py`](engine/drafting_provider.py), [`engine/intake/model.py`](engine/intake/model.py), [`engine/intake/review.py`](engine/intake/review.py) and [`engine/routes_assist.py`](engine/routes_assist.py).
+Files that use it: [`engine/anthropic_json.py`](engine/anthropic_json.py), [`engine/drafting_provider.py`](engine/drafting_provider.py), [`engine/intake/model.py`](engine/intake/model.py), [`engine/intake/review.py`](engine/intake/review.py), [`engine/identify/model_rank.py`](engine/identify/model_rank.py) and [`engine/routes_assist.py`](engine/routes_assist.py).
 
 Get a key at [platform.claude.com](https://platform.claude.com).
 
 #### `OPENAI_API_KEY`
 
-Optional. The OpenAI API runs GPT models. Batatis can use GPT-6 Luna to read the top 15 code articles in full, and the assistant uses GPT-4.1 mini when no Anthropic key is set.
+Optional. The OpenAI API runs GPT models. The assistant uses GPT-4.1 mini when no Anthropic key is set. The older search setting, `BATATIS_IDENTIFY_SCREEN=jev`, can also use GPT-6 Luna to read the top 15 code articles in full.
 
 Files that use it:
 
@@ -527,7 +569,7 @@ Get a key at [platform.openai.com/api-keys](https://platform.openai.com/api-keys
 
 #### `TYPESAFE_API_KEY`
 
-TypeSafe runs Jev, a model that answers questions with a probability instead of writing text. Batatis uses Jev 1.13.0 to score all 2,080 articles in Division B and to rerank the top 60. Set `BATATIS_LIVE=1` to turn it on. Batatis also accepts the same key as `JEV_API_KEY`. If neither is set, it looks in the macOS Keychain or the Linux secret store, then in `~/.config/jev/credentials`.
+Optional. TypeSafe runs Jev, a model that answers questions with a probability instead of writing text. Only the older search setting uses it: with `BATATIS_IDENTIFY_SCREEN=jev`, Jev 1.13.0 scores all 2,080 articles in Division B and reranks the top 60. The example file has no line for this key, so add `TYPESAFE_API_KEY=` if you use it, and set `BATATIS_LIVE=1`. Batatis also accepts the same key as `JEV_API_KEY`. If neither is set, it looks in the macOS Keychain or the Linux secret store, then in `~/.config/jev/credentials`.
 
 Files that use it:
 
@@ -762,11 +804,11 @@ Read [`AGENTS.md`](AGENTS.md) and the skills it names before you write any code.
 | --- | --- |
 | Start any task | [`AGENTS.md`](AGENTS.md) and [`batatis-hackathon`](.cursor/skills/batatis-hackathon/SKILL.md) |
 | Change the application flow or the engine | [`batatis-variance-workflow`](.cursor/skills/batatis-variance-workflow/SKILL.md) |
-| Change an AI model or how articles are found | The [workflow decision record](docs/evaluations/workflow-decision-20261025.md) and [`engine/tests/test_workflow_profile.py`](engine/tests/test_workflow_profile.py) |
+| Change an AI model, how articles are found, or the application flow's steps | The [workflow bakeoff summary](docs/evaluations/workflow-bakeoff-v2-20261028.md), the [workflow decision record](docs/evaluations/workflow-decision-20261025.md), and [`engine/tests/test_workflow_profile.py`](engine/tests/test_workflow_profile.py) |
 | Change anything on screen | [`batatis-ui-linear`](.cursor/skills/batatis-ui-linear/SKILL.md), [`batatis-ui-opus`](.cursor/skills/batatis-ui-opus/SKILL.md), [`batatis-ui-minimalist`](.cursor/skills/batatis-ui-minimalist/SKILL.md), and [`docs/design-system-calm.md`](docs/design-system-calm.md) |
 | Change a skill or a rule | [`evals/fixtures/understanding-checklist.md`](evals/fixtures/understanding-checklist.md) |
 | Plan, build, debug, or review code | The engineering skills in [`.agents/skills/`](.agents/skills/) and [pstack](docs/pstack.md) |
-| Change this README or its diagrams | [`prettyme`](.agents/skills/prettyme/SKILL.md) |
+| Change this README or its diagrams | [`prettyme`](.agents/skills/prettyme/SKILL.md), then redraw with [`docs/readme/src/diagrams.py`](docs/readme/src/diagrams.py) |
 
 These rules always apply:
 
@@ -775,7 +817,7 @@ These rules always apply:
 - Section C comes from lookup, never from a model.
 - Never write Section D professional evidence. Say what the evidence must cover and when an engineer is required.
 - On the alternative-solution path, keep the risk assessment, mitigating measures, and assumptions.
-- Open a variance package only when the path is alternative. An unknown path, a rule that does not apply, and another safety code do not open one.
+- Open a variance package only when the path is alternative. An unknown path and another safety code never open one, and a rule that does not apply never decides the path.
 - Cite the National Building Code, 2023 Alberta Edition, second printing, first.
 - Keep AI provider names out of everything the app shows. Tests enforce this.
 - `main` is the only permanent branch. Do each batch of work on a short-lived branch, and let GitHub delete it after its pull request merges. Never recreate `dev`.
