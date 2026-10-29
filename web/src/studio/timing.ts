@@ -9,13 +9,15 @@ export function words(text: string): number {
   return text.trim().split(/\s+/).filter((w) => /[\p{L}\p{N}]/u.test(w)).length;
 }
 
-/** A ⏸️ in a script is a half-second beat. */
+/** A ⏸️ in a script is a half-second beat; each "..." is a shorter one between stressed words. */
 export const BEAT_MS = 500;
+export const ELLIPSIS_MS = 300;
 
 /** How long one script segment takes at the studio pace, in ms. */
 export function segmentMs(text: string): number {
   const beats = text.match(/⏸/g)?.length ?? 0;
-  return Math.round((words(text) / WORDS_PER_MINUTE) * 60_000) + beats * BEAT_MS;
+  const dots = text.match(/\.\.\./g)?.length ?? 0;
+  return Math.round((words(text) / WORDS_PER_MINUTE) * 60_000) + beats * BEAT_MS + dots * ELLIPSIS_MS;
 }
 
 /** A group's recording length: its words at 120 wpm plus a one-second breath. */

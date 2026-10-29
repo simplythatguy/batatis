@@ -3,7 +3,7 @@ import type { Deck } from "./types";
 // The pitch, told like a 2007 keynote. Spoken at 120 words a minute; timing.ts turns the words into each group's
 // recording length. Sources and limits for every number: docs/studio/script.md.
 /** Reading cues in the scripts. They show in the studio transcript only and are never spoken.
- *  A line's first emoji is its tone; ⏸️ is a half-second beat. */
+ *  A line's first emoji is its tone; ⏸️ is a half-second beat; "..." slows between words; CAPS is stressed. */
 export const TONES: [string, string][] = [
   ["🙂", "Warm, talking to a friend"],
   ["😮", "Surprised by the number"],
@@ -15,6 +15,8 @@ export const TONES: [string, string][] = [
   ["💪", "Confident, matter of fact"],
   ["😌", "Calm and honest"],
   ["⏸️", "Half-second beat"],
+  ["...", "Slow down between the words"],
+  ["CAPS", "Hit this word hard"],
 ];
 
 export const deck: Deck = {
@@ -38,7 +40,7 @@ export const deck: Deck = {
         },
       ],
       script: [
-        "🙂 Every new building idea in Alberta starts the same way. ⏸️ It breaks a rule.",
+        "🙂 Every new building idea in Alberta starts the same way. ⏸️ It breaks... a... RULE.",
         "🙂 Here's a real one from the City of Edmonton. It lets rowhouses with suites use a one-hour party wall instead of a two-hour firewall.",
         "😮 Alberta recorded three hundred sixty-six variances against that firewall rule in six months. ⏸️ That's two a day.",
       ],
@@ -71,13 +73,13 @@ export const deck: Deck = {
         { kind: "logo", id: "three-one", line: "One app." },
       ],
       script: [
-        "😏 Now watch. We take out two articles, the smoke barrier and the linked smoke alarms. 🤔 Can anyone spot it? ⏸️ Most people can't.",
+        "😏 Now watch. We take out two articles, the smoke barrier and the smoke alarms. 🤔 Can anyone spot it? ⏸️ Most people can't.",
         "😬 But the officer can, and weeks later the application comes back.",
         "😬 Every trip back costs about thirty-six hundred dollars, and most of that is waiting.",
         "🙂 So today, we're introducing three things. An application writer.",
         "🙂 A code expert.",
         "🙂 And a completeness checker for officers.",
-        "😏 A writer, an expert, a checker. 🤔 See where this is going? ⏸️ 🔥 It's one app, and we call it Batatis.",
+        "😏 A writer, an expert, a checker. 🤔 See where this is going? ⏸️ 🔥 It's... ONE... app, and we call it Batatis.",
       ],
     },
     {
@@ -93,7 +95,7 @@ export const deck: Deck = {
       script: [
         "🙂 So we describe the rowhouse in plain words and drop in that broken form.",
         "🙂 It reads both and finds the owner, the site and the city.",
-        "🙂 Here are the rules it found, ranked, with the firewall rule at the top. ⏸️ 😮 And it found both articles we took out. 😄 Isn't that cool?",
+        "🙂 Here are the rules it found, ranked, with the firewall rule at the top. ⏸️ 😮 And it found... BOTH... articles we took out. 😄 Isn't that cool?",
         "🙂 Then it asks only for what's still missing, one question at a time.",
       ],
     },
@@ -108,10 +110,10 @@ export const deck: Deck = {
         { kind: "clip", id: "apply-form", title: "The official form", src: "/studio/clips/c08-form.mp4" },
       ],
       script: [
-        "💪 It also knows where to stop. This project needs an engineer, and Batatis lists what the engineer's evidence has to cover.",
+        "💪 It also knows where to stop. This project needs an engineer, and Batatis lists what the evidence must cover.",
         "💪 Section C comes straight from the 2023 code. Batatis looks it up instead of guessing.",
         "🙂 One click checks the application before anyone else sees it.",
-        "😄 And there's the official form, filled in. ⏸️ 🔥 Boom. It goes to Edmonton.",
+        "😄 And there's the official form, filled in. ⏸️ 🔥 BOOM. It goes to Edmonton.",
       ],
     },
     {
@@ -159,8 +161,8 @@ export const deck: Deck = {
       ],
       script: [
         "🤔 Does it really work? We tested sixty-four real Alberta cases with the article numbers hidden.",
-        "💪 Plain search put the right article first twenty-six times. ⏸️ Batatis put it first fifty-four times.",
-        "💪 And it showed applicants zero made-up articles.",
+        "💪 Plain search put the right article first twenty-six times. ⏸️ Batatis put it first... FIFTY-FOUR... times.",
+        "💪 And it showed applicants... ZERO... made-up articles.",
         "😌 A simulated first-time applicant scored two out of ten with the official flowchart, and five point six with Batatis.",
         "💪 It costs about sixty-one dollars an application, so saving one trip back in sixty pays for it.",
       ],
@@ -185,8 +187,8 @@ export const deck: Deck = {
         },
       ],
       script: [
-        "🙂 Today we're live in Calgary and Edmonton, and we've already mapped four hundred thirty-five places to the office that reviews them.",
-        "💪 Adding an office takes one data file, not new code. Better AI models make Batatis better, but they won't keep each office's rules up to date or earn an officer's trust. ⏸️ We will.",
+        "🙂 Today we're live in Calgary and Edmonton, and we've already mapped four hundred thirty-five places to their office.",
+        "💪 Adding an office takes one data file, not new code. Better AI models make Batatis better, but they won't keep each office's rules up to date or earn an officer's trust. ⏸️ We... WILL.",
       ],
     },
     {
@@ -224,7 +226,7 @@ export const deck: Deck = {
       script: [
         "🙂 There's a Wayne Gretzky quote we love. ⏸️ I skate to where the puck is going to be, not where it has been.",
         "😌 The puck is going to new ideas, and every one of them breaks a rule.",
-        "🔥 Batatis makes sure they show up complete. ⏸️ 🙂 Thank you.",
+        "🔥 Batatis makes sure they show up... COMPLETE. ⏸️ 🙂 Thank you.",
       ],
     },
   ],
