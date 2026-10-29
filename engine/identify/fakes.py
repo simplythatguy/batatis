@@ -21,6 +21,9 @@ from .verify import Pick, Picks
 _WORD = re.compile(r'[a-z][a-z0-9-]{2,}')
 _ARTICLE_BLOCK = re.compile(r'<article id="([^"]+)">\n(.*?)\n</article>', re.S)
 _PROPOSAL = re.compile(r'<proposal>\n(.*?)\n</proposal>', re.S)
+# The model rank's numbered form (model_rank.RankVerifier).
+_NUMBERED = re.compile(r'^\[\d+\] (\S+) (.*)$', re.M)
+_DESCRIPTION = re.compile(r'Applicant description:\n<<<\n(.*?)\n>>>', re.S)
 _STOP = set('the and for with that this from are was were has have not but its into our their will shall '
             'any all each other than then there which when where who whom what been being such also only'.split())
 
@@ -102,8 +105,8 @@ def _quote(card_text: str, words: int = 14) -> str:
 
 
 def parse_request(user: str) -> tuple[str, list[tuple[str, str]]]:
-    proposal = _PROPOSAL.search(user)
-    return (proposal.group(1) if proposal else ''), _ARTICLE_BLOCK.findall(user)
+    proposal = _PROPOSAL.search(user) or _DESCRIPTION.search(user)
+    return (proposal.group(1) if proposal else ''), _ARTICLE_BLOCK.findall(user) or _NUMBERED.findall(user)
 
 
 def honest_picks(user: str, n: int = 2) -> list[dict]:
