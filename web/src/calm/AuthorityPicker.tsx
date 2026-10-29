@@ -26,6 +26,8 @@ export function AuthorityPicker({ options, value, onPick, label, suggested, unsu
     return { shown: [...filtered.shown, ...custom, { id: "unsure", name: "Not sure" }], total: filtered.total + custom.length + 1 };
   }, [options, query]);
   const optionId = (n: number) => `${listId}-${n}`;
+  // A handful of offices reads as a choice, not a search: no magnifier, the names as the placeholder.
+  const few = options.length <= 3;
 
   const close = () => { setOpen(false); setQuery(null); };
   const show = () => {
@@ -69,8 +71,8 @@ export function AuthorityPicker({ options, value, onPick, label, suggested, unsu
 
   return <>
     {!compact && suggested && !unsure && (!value || value === suggested.id) && <button type="button" className="cf-btn" onClick={() => choose(suggested)}>Yes, {suggested.name}</button>}
-    <div className={`cf-ap${compact ? " is-compact" : ""}`} ref={root} onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) close(); }}>
-      <span className="cf-ap-lead" aria-hidden="true"><Icon24 name="search" size={18} /></span>
+    <div className={`cf-ap${compact ? " is-compact" : ""}${few ? "" : " is-search"}`} ref={root} onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) close(); }}>
+      {!few && <span className="cf-ap-lead" aria-hidden="true"><Icon24 name="search" size={18} /></span>}
       <input
         ref={input}
         className="cf-ap-input"
@@ -84,7 +86,7 @@ export function AuthorityPicker({ options, value, onPick, label, suggested, unsu
         aria-activedescendant={open && shown[active] ? optionId(active) : undefined}
         autoComplete="off"
         spellCheck={false}
-        placeholder={options.length <= 3 ? options.map((o) => o.name).join(" or ") : "Find an office"}
+        placeholder={few ? options.map((o) => o.name).join(" or ") : "Find an office"}
         value={query ?? selected?.name ?? (unsure ? "Not sure" : value)}
         onFocus={(e) => e.currentTarget.select()}
         onClick={show}

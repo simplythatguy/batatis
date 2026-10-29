@@ -83,12 +83,13 @@
   width: 100%; min-height: 36px; margin: 0; padding: 7px 0; border: 0; border-bottom: 1px solid transparent; border-radius: 0;
   background: transparent; color: var(--cf-text); font: 15px/1.4 var(--cf-font); transition: border-color 150ms var(--cf-ease);
 }
-.cf-paperwork .cf-pw-row.is-empty :is(.cf-pw-input, .cf-pw-choice summary, .cf-ap-input, .cf-uline) { border-bottom-color: var(--cf-line-2); }
+/* Fields and the choice summary are listed apart: inside one :is() the summary's extra weight would outrank focus. */
+.cf-paperwork .cf-pw-row.is-empty :is(.cf-pw-input, .cf-ap-input, .cf-uline), .cf-paperwork .cf-pw-row.is-empty .cf-pw-choice summary { border-bottom-color: var(--cf-line-2); }
 .cf-pw-input::placeholder, .cf-paperwork .cf-ap-input::placeholder, .cf-pw-placeholder { color: var(--cf-text-4); }
 @media (hover: hover) {
-  .cf-paperwork .cf-pw-row:hover :is(.cf-pw-input, .cf-pw-choice summary, .cf-ap-input, .cf-uline) { border-bottom-color: var(--cf-line-2); }
+  .cf-paperwork .cf-pw-row:hover :is(.cf-pw-input, .cf-ap-input, .cf-uline), .cf-paperwork .cf-pw-row:hover .cf-pw-choice summary { border-bottom-color: var(--cf-line-2); }
 }
-.cf-paperwork .cf-pw-row :is(.cf-pw-input, .cf-ap-input, .cf-uline):focus, .cf-paperwork .cf-pw-choice[open] summary { outline: none; border-bottom-color: var(--cf-line-ctl); }
+.cf-paperwork .cf-pw-row :is(.cf-pw-input, .cf-ap-input, .cf-uline):focus, .cf-paperwork .cf-pw-row .cf-pw-choice[open] summary { outline: none; border-bottom-color: var(--cf-focus); box-shadow: none; }
 .cf-pw-choice summary { display: flex; justify-content: space-between; align-items: center; gap: 8px; list-style: none; cursor: pointer; }
 .cf-pw-choice summary::-webkit-details-marker { display: none; }
 .cf-pw-choice summary svg { color: var(--cf-text-4); }
