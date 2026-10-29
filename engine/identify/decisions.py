@@ -16,6 +16,8 @@ from engine.models import Fact, Source, now
 from engine.models_identify import ArticleDecision, IdentifyResult
 from engine.section_c import section_c_rows
 
+from .compact import requirement_screen
+
 _ARTICLE = re.compile(r'^(\d+\.\d+\.\d+\.\d+\.)')
 DECISIONS = ('yes', 'no', 'not_sure')
 CITATION_PREFIX = 'citation.'
@@ -85,8 +87,14 @@ def record_decision(case, provision_id: str, decision: str, codes) -> list:
     if decision not in DECISIONS:
         raise ValueError(decision)
     result: IdentifyResult = case.identify
-    card = match_article(result, provision_id)
-    article = card.provision
+    if requirement_screen(result):
+        article = next((item.provision_id for item in result.requirements
+                        if item.division == 'B' and item.source_status == 'verified' and item.provision_id
+                        and item.provision_id == article_of(provision_id)), None)
+        if article is None:
+            raise KeyError(provision_id)
+    else:
+        article = match_article(result, provision_id).provision
     if decision == 'yes':
         return record_departure(case, article, codes)
     case.facts = [f for f in case.facts if f.field != f'{CITATION_PREFIX}{article}']
