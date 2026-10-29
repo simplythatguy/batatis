@@ -120,7 +120,7 @@ test("Looks right on a site read as Edmonton proposes Edmonton as the reviewing 
   m.h.unmount();
 });
 
-test("description rows show you, while a derived value retains its dashed assumed chip", async () => {
+test("description rows carry no source label, while a derived value retains its dashed assumed chip", async () => {
   const c = plannedCase();
   const own = field("owner", "Dana Whitfield.");
   const derived = { ...field("building_area_m2", 140), kind: "computed" as const, inputs: [] };
@@ -131,7 +131,7 @@ test("description rows show you, while a derived value retains its dashed assume
     "./journey": journey, "./icons": { Icon24: "icon" },
   });
   const tree = await h.render({ item: deck.buildDeck(c, []).find((i) => i.kind === "understood") });
-  assert.ok(nodes(tree, (node) => node.type === "span" && node.props.className === "cf-source-chip" && text(node) === "you").length > 0);
+  assert.equal(nodes(tree, (node) => node.type === "span" && node.props.className === "cf-source-chip").length, 0, "the applicant's own words need no source label");
   assert.ok(nodes(tree, (node) => node.type === "span" && node.props.className === "cf-source-chip is-assumed" && text(node) === "assumed").length > 0);
   assert.doesNotMatch(text(tree), /Dana Whitfield\./);
   h.unmount();

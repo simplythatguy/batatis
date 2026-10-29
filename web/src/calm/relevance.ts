@@ -147,12 +147,30 @@ export function pruneToc(toc: CodeToc, keep: (articleId: string) => boolean): Co
   return { ...toc, parts };
 }
 
-export type Filter = "all" | "attention" | "maybe";
+/** The library's band toggles: likely (red), might (amber), and the rest (grey: unlikely or not scored). */
+export const FILTER_BANDS = ["attention", "maybe", "other"] as const;
+export type FilterBand = (typeof FILTER_BANDS)[number];
+/** "all", "" (the default), or a comma list of the toggled bands in FILTER_BANDS order. */
+export type Filter = string;
+
+export function filterBands(filter: Filter): Set<FilterBand> {
+  return new Set(FILTER_BANDS.filter((b) => filter.split(",").includes(b)));
+}
+
+/** The canonical filter for a set of toggled bands: "all" when none are on. */
+export function filterOf(bands: Iterable<FilterBand>): Filter {
+  const on = new Set(bands);
+  return FILTER_BANDS.filter((b) => on.has(b)).join(",") || "all";
+}
+
+export function filterBandOf(band: Band): FilterBand {
+  return band === "high" ? "attention" : band === "mid" ? "maybe" : "other";
+}
 
 export function filterKeep(filter: Filter, display: Record<string, number> | undefined, c: Cutoffs, rerank?: Record<string, number>): (id: string) => boolean {
-  if (filter === "all" || !display || !c.rated) return () => true;
-  const want: Band = filter === "attention" ? "high" : "mid";
-  return (id) => shownFor(id, display, rerank, c).band === want;
+  const want = filterBands(filter);
+  if (!want.size || !display || !c.rated) return () => true;
+  return (id) => want.has(filterBandOf(shownFor(id, display, rerank, c).band));
 }
 
 /** Article ids shown in a band (after the guard), highest first. */

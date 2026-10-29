@@ -298,11 +298,11 @@ function CaseReview() {
         <div className="cf-sec-actions">
           {!readOnly && !applicantComplete && openCards > 0 ? (
             <>
-              <a className="cf-btn is-primary is-grow" href="#/questions">Answer {openCards} remaining {checked && <Kbd>↵</Kbd>}</a>
+              <a className={`cf-btn is-grow${checked ? " is-primary" : ""}`} href="#/questions">Answer {openCards} remaining {checked && <Kbd>↵</Kbd>}</a>
               <a className="cf-btn" href="#/application">Preview</a>
             </>
           ) : (
-            <a className="cf-btn is-primary is-grow" href="#/application">Preview application {checked && <Kbd>↵</Kbd>}</a>
+            <a className={`cf-btn is-grow${checked ? " is-primary" : ""}`} href="#/application">Preview application {checked && <Kbd>↵</Kbd>}</a>
           )}
         </div>
         <CompletenessNote />

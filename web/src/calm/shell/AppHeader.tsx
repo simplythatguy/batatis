@@ -59,7 +59,6 @@ export function StageButton({ id, label, ariaLabel, icon, pct, current, done, di
     <>
       <span className="cf-stage-glyph" aria-hidden="true">
         <span className="cf-stage-ico">{icon}</span>
-        {done && <span className="cf-stage-done"><Icon24 name="check" size={8} stroke={3.4} /></span>}
       </span>
       {/* Always rendered: the name's track opens and closes, so the outgoing word folds while the incoming
           one unfolds and the centred group never jumps. The accessible name is the aria-label. */}

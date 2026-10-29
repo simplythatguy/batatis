@@ -73,8 +73,8 @@ test("applicant stages: the current stage shows its one-word name beside its ico
   assert.deepEqual(controls.map((c) => c.props.href ?? null), ["#/", "#/questions", "#/review", null], "the locked stage is not a link");
   assert.equal(controls[3].props["aria-disabled"], "true");
   assert.deepEqual(nodes(tree, (n) => n.type === "Icon24").map((n) => n.props.name).filter((x) => x !== "check"), ["describe", "questions", "review", "file"], "every stage keeps its own icon");
-  assert.equal(nodes(controls[0], (n) => String(n.props?.className ?? "").includes("cf-stage-done")).length, 1, "a done stage keeps a small done mark");
-  assert.equal(nodes(tree, (n) => String(n.props?.className ?? "").includes("cf-stage-done")).length, 1, "only done stages carry it");
+  assert.match(String(controls[0].props.className), /\bis-done\b/, "a done stage is marked done, and fades back");
+  assert.equal(nodes(tree, (n) => String(n.props?.className ?? "").includes("cf-stage-done")).length, 0, "no separate done badge");
   assert.equal(nodes(controls[1], (n) => n.props?.className === "cf-stage-bar").length, 1, "a stage part of the way through shows its progress line");
   assert.equal(nodes(tree, (n) => n.props?.className === "cf-stage-bar").length, 1, "no line on done or untouched stages");
   const tips = nodes(tree, (n) => n.type === "Tip");

@@ -51,6 +51,9 @@ test("a supported office typed another way is listed once, and any other name is
   input().props.onChange({ target: { value: "Red Deer" } });
   tree = await h.render(props);
   assert.deepEqual(options(), ["Red Deer", "Not sure"]);
+  // The paperwork form's field offers only offices; its row has Later instead of Not sure.
+  tree = await h.render({ ...props, compact: true });
+  assert.deepEqual(options(), ["Red Deer"]);
   h.unmount();
 });
 

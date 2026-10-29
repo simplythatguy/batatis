@@ -9,7 +9,7 @@ import "./AuthorityPicker.css";
  * two offices and four hundred read the same. Typing only filters; nothing is answered until an
  * option is chosen, and leaving the field puts the saved choice back.
  */
-export function AuthorityPicker({ options, value, onPick, label, suggested, unsure = false, compact = false }: { options: readonly AuthorityOption[]; value: string; onPick: (id: string) => void; label: string; suggested?: AuthorityOption | null; unsure?: boolean; compact?: boolean }) {
+export function AuthorityPicker({ options, value, onPick, label, suggested, placeholder, unsure = false, compact = false }: { options: readonly AuthorityOption[]; value: string; onPick: (id: string) => void; label: string; suggested?: AuthorityOption | null; placeholder?: string; unsure?: boolean; compact?: boolean }) {
   const listId = useId();
   const root = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLInputElement>(null);
@@ -23,9 +23,13 @@ export function AuthorityPicker({ options, value, onPick, label, suggested, unsu
     // Typed text is offered as its own row only for a place Batatis does not know; a known one is already listed.
     const custom = text && !knownPlace(text) && !options.some((option) => [option.id, option.name, ...(option.aliases ?? [])].some((n) => n.toLowerCase() === text.toLowerCase()))
       ? [{ id: text, name: text }] : [];
-    return { shown: [...filtered.shown, ...custom, { id: "unsure", name: "Not sure" }], total: filtered.total + custom.length + 1 };
-  }, [options, query]);
+    // The paperwork form has no Not sure: an office is chosen, or the row's Later puts it off.
+    const unsureRow = compact ? [] : [{ id: "unsure", name: "Not sure" }];
+    return { shown: [...filtered.shown, ...custom, ...unsureRow], total: filtered.total + custom.length + unsureRow.length };
+  }, [options, query, compact]);
   const optionId = (n: number) => `${listId}-${n}`;
+  // A handful of offices reads as a choice, not a search: no magnifier, the names as the placeholder.
+  const few = options.length <= 3;
 
   const close = () => { setOpen(false); setQuery(null); };
   const show = () => {
@@ -69,8 +73,8 @@ export function AuthorityPicker({ options, value, onPick, label, suggested, unsu
 
   return <>
     {!compact && suggested && !unsure && (!value || value === suggested.id) && <button type="button" className="cf-btn" onClick={() => choose(suggested)}>Yes, {suggested.name}</button>}
-    <div className={`cf-ap${compact ? " is-compact" : ""}`} ref={root} onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) close(); }}>
-      <span className="cf-ap-lead" aria-hidden="true"><Icon24 name="search" size={18} /></span>
+    <div className={`cf-ap${compact ? " is-compact" : ""}${few ? "" : " is-search"}`} ref={root} onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) close(); }}>
+      {!few && <span className="cf-ap-lead" aria-hidden="true"><Icon24 name="search" size={18} /></span>}
       <input
         ref={input}
         className="cf-ap-input"
@@ -84,7 +88,7 @@ export function AuthorityPicker({ options, value, onPick, label, suggested, unsu
         aria-activedescendant={open && shown[active] ? optionId(active) : undefined}
         autoComplete="off"
         spellCheck={false}
-        placeholder={options.length <= 3 ? options.map((o) => o.name).join(" or ") : "Find an office"}
+        placeholder={placeholder ?? (few ? options.map((o) => o.name).join(" or ") : "Find an office")}
         value={query ?? selected?.name ?? (unsure ? "Not sure" : value)}
         onFocus={(e) => e.currentTarget.select()}
         onClick={show}
@@ -124,7 +128,7 @@ export function AuthorityPicker({ options, value, onPick, label, suggested, unsu
       )}
       <span className="cf-sr" role="status" aria-live="polite">{open && query !== null ? (total === 0 ? "No match" : `${total} ${total === 1 ? "office" : "offices"}`) : ""}</span>
     </div>
-    {/* Compact (the paperwork sheet): Not sure stays in the list; the row's own Later handles deferral. */}
+    {/* Compact (the paperwork sheet): the row's own Later handles deferral. */}
     {!compact && <button type="button" className="cf-link-btn cf-ap-unsure" aria-pressed={unsure} onClick={() => choose({ id: "unsure", name: "Not sure" })}>Not sure</button>}
   </>;
 }

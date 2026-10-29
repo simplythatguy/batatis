@@ -54,7 +54,7 @@ export function SubmitPanel({ signingReason, beforeSubmit, sections }: { signing
   const n = work.applicant.length;
   // An office without reviewers in Batatis (anywhere but Calgary and Edmonton) receives the exported PDF instead.
   const office = c.authority ? submissionOfficeReason(c) : "";
-  const reason = !c.authority ? "Choose a reviewing office." : office || (n ? "Fix the flagged items first." : needsCheck ? "Check your changed application first." : signingReason);
+  const reason = !c.authority ? "Choose a reviewing office." : office || (n ? "Edit the flagged items first." : needsCheck ? "Check your changed application first." : signingReason);
 
   reasonNow.current = reason;
   async function submit() {
@@ -101,7 +101,7 @@ export function SubmitPanel({ signingReason, beforeSubmit, sections }: { signing
               <li key={b.id} className="cf-row">
                 <Dot tone="blocking" />
                 <span className="cf-row-text">{b.label}</span>
-                <a className="cf-row-go" href={linkFor(b)}>Fix <CIcon name="arrow" size={13} /></a>
+                <a className="cf-row-go" href={linkFor(b)}>Edit <CIcon name="arrow" size={13} /></a>
               </li>
             ))}
           </ul>

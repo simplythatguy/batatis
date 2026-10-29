@@ -77,7 +77,6 @@ export function AssistantPanel() {
           <Icon24 name="x" size={16} />
         </ToolButton>
       </div>
-      <p className="cf-av-boundary">Administrative help · not a compliance decision</p>
       <div className="cf-av-scroll">
       <div ref={body} className="cf-assist-body" role="log" tabIndex={0} aria-label="Conversation" aria-live="polite">
       <div ref={transcript} className="cf-assist-transcript">
@@ -92,8 +91,8 @@ export function AssistantPanel() {
             <p><a className="cf-inline-link" href="#/signin">Sign in</a> to use the assistant.</p>
           </div>
         )}
-        {!signedOut && c.turns.length === 0 && !c.error && (
-          <p className="cf-assist-intro">{c.attachments.some((f) => f.status === "ready") ? "Ask for an excerpt from the selected PDFs. Only limited text is available; scans aren’t read." : "Ask about this question, a code reference, an officer’s message, or what to do next."}</p>
+        {!signedOut && c.turns.length === 0 && !c.error && c.attachments.some((f) => f.status === "ready") && (
+          <p className="cf-assist-intro">Only limited text is available from the selected PDFs; scans aren’t read.</p>
         )}
         {c.turns.map((t) => <div key={t.id} className="cf-av-turn" data-enter={!initialTurns.current.ids.has(t.id) || undefined}><TurnView t={t} /></div>)}
         {c.pending && (

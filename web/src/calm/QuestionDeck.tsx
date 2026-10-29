@@ -1280,8 +1280,8 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
           <RedirectPage />
         ) : item ? (
           <div ref={setWrap} key={item.key} data-advancing={advanceAfter?.key === item.key ? "" : undefined} className={`cf-q-wrap is-from-${dir}${item.kind === "section-d" || item.kind === "drafts" || item.kind === "code-triage" || item.kind === "paperwork" ? " is-wide" : ""}`} aria-labelledby="cf-q" role="group">
-            <p className="cf-eyebrow is-plain">{item.plan?.kind === "conflict" ? "You wrote two things" : STAGES.find((s) => s.stage === item.stage)?.label}<span className="cf-faint"> · Section {item.section}</span></p>
             <h2 id="cf-q" className="cf-q-text" tabIndex={-1}>{item.title}</h2>
+            {item.plan?.kind === "conflict" && <span className="cf-answerer-tag">You wrote two things</span>}
             {item.answerer === "designer" && <span className="cf-answerer-tag"><Icon24 name="compose" size={15} />Usually your designer knows</span>}
             {(item.context || item.quote) && (
               <p className="cf-q-help">

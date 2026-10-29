@@ -85,13 +85,14 @@ test("field links and gap links resolve to the sheet and focus its requested inl
   m.h.unmount();
 });
 
-test("an office Not sure and a later correction both persist through ordinary case actions", async () => {
+test("an office Later and a later correction both persist through ordinary case actions", async () => {
   const m = await mounted();
   let tree = await m.render();
-  nodes(tree, (n) => n.type === "authority-picker")[0].props.onPick("unsure");
+  nodes(tree, (n) => n.type === "button" && n.props["aria-label"] === "Later: Office")[0].props.onClick();
   tree = await m.render();
+  assert.equal(nodes(tree, (n) => n.type === "authority-picker")[0].props.placeholder, "Later");
   submit(tree);
-  assert.equal(journey.journeyAnswers(m.case()).get("authority")?.value, "not_sure");
+  assert.equal(journey.journeyAnswers(m.case()).get("authority")?.value, "later");
   assert.equal(config.authorityUnsure(m.case()), true);
   tree = await m.render("authority");
   nodes(tree, (n) => n.type === "authority-picker")[0].props.onPick("edmonton");

@@ -1,0 +1,397 @@
+/* Mercury look (user decision 2026-10-29), loaded after calm.css. Shapes and type only: colours come
+   from the calm tokens, and every transition, keyframe and reduced-motion rule in calm.css still applies.
+   Reference: Mercury web on Mobbin (411+ screens), summarised in docs/design-system-calm.md. */
+
+/* —— Type: regular-weight titles, hierarchy by size; sans labels, mono only for code and keys —— */
+
+.cf-display,
+.cf-h1,
+.cf-q-text,
+.cf-read-title,
+.cf-read-empty-title,
+.cf-modal-title,
+.cf-drawer-title,
+.cf-metric-v,
+.cf-side-big,
+.cf-comments-title {
+  font-weight: 400;
+  letter-spacing: -0.015em;
+}
+
+.cf-display {
+  font-size: 44px;
+  line-height: 1.1;
+}
+
+.cf-start .cf-display {
+  font-size: 36px;
+  line-height: 1.15;
+}
+
+.cf-h1 {
+  font-size: 32px;
+  line-height: 1.15;
+}
+
+.cf-q-text {
+  font-size: 28px;
+  line-height: 1.25;
+}
+
+.cf-metric-v {
+  font-size: 34px;
+}
+
+.cf-modal-title,
+.cf-drawer-title {
+  font-size: 20px;
+}
+
+.cf-list-head h2 {
+  font-weight: 500;
+  letter-spacing: -0.005em;
+}
+
+@media (max-width: 960px) {
+  .cf-q-text {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .cf-display,
+  .cf-start .cf-display {
+    font-size: 28px;
+  }
+  .cf-h1 {
+    font-size: 26px;
+  }
+  .cf-metric-v {
+    font-size: 28px;
+  }
+}
+
+/* Labels read as quiet sans text with tabular figures, never as a terminal. */
+.cf-eyebrow,
+.cf-metric-k,
+.cf-list-label,
+.cf-list-group,
+.cf-group-count,
+.cf-stage-count,
+.cf-qsec-n,
+.cf-step-detail,
+.cf-rule-how .cf-rule-how-h,
+.cf-read-src > span:first-child,
+.cf-half-basis,
+.cf-ai-tag {
+  font-family: var(--cf-font);
+  font-size: 12.5px;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.cf-metric-k,
+.cf-list-label,
+.cf-list-group {
+  color: var(--cf-text-3);
+  font-weight: 400;
+}
+
+/* —— Shell: tinted sidebar with a hairline edge, white work area —— */
+
+.cf-rail,
+.cf-list {
+  background: var(--cf-side);
+  border-right-color: var(--cf-line);
+}
+
+.cf-rail-btn {
+  border-radius: 8px;
+}
+
+.cf-list-search {
+  height: 36px;
+  border-radius: 8px;
+  background: var(--cf-surface);
+  border-color: var(--cf-line-2);
+}
+
+.cf-list-row {
+  border-radius: 8px;
+}
+
+.cf-head,
+.cf-qfoot {
+  background: var(--cf-bg);
+}
+
+/* —— Buttons: pills without borders; one indigo primary, grey fill for the rest —— */
+
+.cf-btn {
+  height: 36px;
+  padding: 0 16px;
+  gap: 8px;
+  border-radius: 999px;
+  border: 0;
+  background: var(--cf-fill);
+  color: #25262c;
+  font: 500 14px/1 var(--cf-font);
+}
+
+.cf-btn.is-sm {
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-size: 13px;
+}
+
+.cf-btn.is-xs {
+  height: 28px;
+  padding: 0 11px;
+  border-radius: 999px;
+  font-size: 12.5px;
+}
+
+.cf-btn.is-lg {
+  height: 40px;
+  padding: 0 20px;
+  border-radius: 999px;
+  font-size: 14.5px;
+}
+
+.cf-btn.is-primary {
+  background: var(--cf-primary-bg);
+  border-color: transparent;
+  color: var(--cf-primary-text);
+}
+
+.cf-btn.is-primary:disabled {
+  opacity: 1;
+  background: var(--cf-primary-off);
+  color: var(--cf-primary-text);
+}
+
+.cf-btn.is-ghost {
+  background: transparent;
+  color: var(--cf-text-2);
+}
+
+.cf-btn.is-danger {
+  background: #fcebf1;
+  color: #8a2450;
+}
+
+@media (hover: hover) {
+  .cf-btn:not(:disabled):hover {
+    background: var(--cf-fill-hover);
+  }
+  .cf-btn.is-primary:not(:disabled):hover {
+    background: var(--cf-primary-hover);
+  }
+  .cf-btn.is-ghost:not(:disabled):hover {
+    background: var(--cf-hover);
+    color: var(--cf-text);
+  }
+  .cf-btn.is-danger:not(:disabled):hover {
+    background: #f9dde8;
+  }
+}
+
+.cf-kbd {
+  border-radius: 5px;
+  border-color: var(--cf-line-2);
+}
+
+.cf-btn.is-primary .cf-kbd {
+  border-color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* Icon buttons are round and quiet: no border, a grey fill only while hovered or pressed. */
+.cf-icon-btn {
+  border-radius: 999px;
+  border-color: transparent;
+  background: transparent;
+}
+
+.cf-icon-btn.cf-qnav-btn {
+  border-radius: 999px;
+  border-color: transparent;
+  background: var(--cf-fill);
+}
+
+@media (hover: hover) {
+  .cf-icon-btn:not(:disabled):hover {
+    background: var(--cf-fill);
+  }
+  .cf-icon-btn.cf-qnav-btn:not(:disabled):hover {
+    background: var(--cf-fill-hover);
+  }
+}
+
+/* Small tags: pale fill, 4px corners, no border. */
+.cf-chip {
+  border-color: transparent;
+  background: var(--cf-fill);
+  color: #25262c;
+}
+
+.cf-chip[aria-pressed="true"] {
+  background: #eeeefc;
+  border-color: transparent;
+  color: var(--cf-text);
+}
+
+.cf-form-tag {
+  border-radius: 4px;
+}
+
+/* —— Surfaces: hairline edges, no drop shadows on cards —— */
+
+.cf-glass {
+  border-color: var(--cf-line);
+  border-radius: var(--cf-r-card);
+  backdrop-filter: none;
+  box-shadow: var(--cf-shadow);
+}
+
+.cf-tile {
+  border-color: var(--cf-line);
+  border-radius: var(--cf-r-tile);
+}
+
+/* Menus and popovers: white, 10px corners, one soft shadow. */
+.cf-pop,
+.cf-row-menu,
+.cf-row-preview,
+.cf-qsec-pop,
+.cf-peek,
+.cf-tip {
+  border-radius: 10px;
+  border-color: var(--cf-line);
+  backdrop-filter: none;
+  box-shadow: var(--cf-shadow-pop);
+}
+
+.cf-row-menu {
+  padding: 4px;
+}
+
+.cf-row-menu button {
+  min-height: 34px;
+  border-radius: 6px;
+  font-size: 13.5px;
+  color: var(--cf-text);
+}
+
+/* Dialogs and drawers: 12px corners over a light, blurred lavender wash, never a dark scrim. */
+.cf-modal,
+.cf-drawer {
+  border-radius: 12px;
+  border-color: var(--cf-line);
+  backdrop-filter: none;
+  box-shadow: 0 8px 24px rgba(20, 20, 40, 0.08), 0 1px 2px rgba(20, 20, 40, 0.04);
+}
+
+.cf-modal::backdrop {
+  background: var(--cf-scrim);
+  backdrop-filter: blur(4px);
+}
+
+/* —— Fields: the underline inputs keep their shape and take the indigo focus line —— */
+
+.cf-uline:focus {
+  border-bottom-color: var(--cf-focus);
+  box-shadow: 0 1px 0 var(--cf-focus);
+}
+
+.cf-composer {
+  background: var(--cf-field);
+  border-color: var(--cf-line-2);
+  border-radius: var(--cf-r-card);
+  box-shadow: none;
+}
+
+.cf-composer:focus-within {
+  background: var(--cf-surface);
+  border-color: var(--cf-focus);
+}
+
+.cf-composer-box {
+  border-radius: var(--cf-r-card);
+  background: var(--cf-field);
+}
+
+.cf-composer-box:focus-within {
+  background: var(--cf-surface);
+  border-color: var(--cf-focus);
+}
+
+/* —— Tags: pale fill, 4px corners, no border (Completeness only, counts, states) —— */
+
+.cf-complete summary {
+  padding: 2px 7px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--cf-fill);
+  color: var(--cf-text-2);
+}
+
+/* The search field shows focus on its own edge, not as a ring around the bare input inside it. */
+.cf-app .cf-list-search input:focus-visible {
+  outline: none;
+}
+
+.cf-list-search:focus-within {
+  border-color: var(--cf-focus);
+}
+
+/* —— Page columns: Mercury's centred work column with real gutters —— */
+
+.cf-review {
+  max-width: 1120px;
+  margin-top: 48px;
+  padding: 0 48px 48px;
+  column-gap: 48px;
+}
+
+/* Section icons stand on the page, not in a grey tile each. */
+.cf-sec-icon {
+  width: 22px;
+  background: none;
+  color: var(--cf-text-2);
+}
+
+@media (max-width: 640px) {
+  .cf-review {
+    margin-top: 24px;
+    padding: 0 20px 32px;
+  }
+}
+
+/* —— Phone header: equal side columns keep the stage icons truly centred —— */
+
+@media (max-width: 760px) {
+  .cf-head {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+}
+
+/* —— Focus: indigo edge plus a soft halo, easy to find from the keyboard —— */
+
+.cf-composer:focus-within,
+.cf-composer-box:focus-within,
+.cf-list-search:focus-within {
+  box-shadow: 0 0 0 3px rgba(82, 102, 235, 0.14);
+}
+
+/* —— Touch: buttons stay at least 40px tall on phones —— */
+
+@media (max-width: 760px), (pointer: coarse) {
+  .cf-btn {
+    height: 40px;
+  }
+  .cf-btn.is-sm {
+    height: 36px;
+  }
+}

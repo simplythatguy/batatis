@@ -4,7 +4,7 @@ import { useCase } from "../../store";
 import { authorityName } from "../applications";
 import { setAssistantContext } from "../assistant/assistant";
 import { CodeDrawer, type DrawerState } from "../CodeDrawer";
-import { Icon24 } from "../icons";
+import { Icon24, type IconName } from "../icons";
 import { acceptedAI } from "./history";
 import { blockForField, type SectionId } from "./document";
 import { blockId, PaperBlock, textId } from "./PaperBlock";
@@ -13,13 +13,7 @@ import { canRewrite } from "./suggestions";
 import { passageContext, type Editing } from "./useEditing";
 
 /** Section letters and the hue that marks "you are here" (A blue, B teal, C violet, D amber). */
-const MARK: Record<SectionId, { mark: string; hue: string }> = {
-  A: { mark: "A", hue: "is-blue" },
-  B: { mark: "B", hue: "is-teal" },
-  case: { mark: "¶", hue: "is-slate" },
-  C: { mark: "C", hue: "is-violet" },
-  D: { mark: "D", hue: "is-amber" },
-};
+const MARK: Record<SectionId, IconName> = { A: "user", B: "file", case: "pencil", C: "book", D: "review" };
 
 export function Paper({ editing, focus, zoom, statusWord }: { editing: Editing; focus: string | null; zoom: number; statusWord: string }) {
   const { c } = useCase();
@@ -30,7 +24,7 @@ export function Paper({ editing, focus, zoom, statusWord }: { editing: Editing; 
   const selectedBlock = selection && blocks.find(b => b.id === selection.blockId);
   const unpinned = editing.requests.filter(r => !blocks.some(b => b.requests.some(q => q.id === r.id)));
 
-  // Arriving from a gap, a legacy link or Send's Fix: scroll to that block and put the caret in it.
+  // Arriving from a gap, a legacy link or Send's Edit: scroll to that block and put the caret in it.
   useEffect(() => {
     if (!focus) return;
     const block = blockForField(sections, focus);
@@ -81,10 +75,11 @@ export function Paper({ editing, focus, zoom, statusWord }: { editing: Editing; 
     <div className="aw-edit">
       <nav className="aw-index" aria-label="Sections">
         {sections.map(s => (
-          <button key={s.id} type="button" className={`aw-index-item ${MARK[s.id].hue}`} aria-current={current === s.id ? "location" : undefined}
-            aria-label={s.title} title={s.title} onClick={() => document.getElementById(`aw-section-${s.id}`)?.scrollIntoView({ block: "start", behavior: "smooth" })}>
-            {MARK[s.id].mark}
+          <button key={s.id} type="button" className="aw-index-item" aria-current={current === s.id ? "location" : undefined}
+            aria-label={s.title} onClick={() => document.getElementById(`aw-section-${s.id}`)?.scrollIntoView({ block: "start", behavior: "smooth" })}>
+            <Icon24 name={MARK[s.id]} size={16} />
             {s.blocks.some(b => b.missing) && <span className="aw-index-dot" aria-hidden="true" />}
+            <span className="aw-index-name" aria-hidden="true">{s.title}</span>
           </button>
         ))}
       </nav>

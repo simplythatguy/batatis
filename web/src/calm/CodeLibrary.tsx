@@ -14,7 +14,7 @@ import { errorText, takePendingReveal, tocIndex, useContext, useText, useToc } f
 import { parseArticle, previewOf, type Clause, type Sentence } from "./codeText";
 import { BandPill, RelevanceRing, RingGlyph, RingLegend } from "./RelevanceRing";
 import {
-  ancestorsOf, BAND_LABEL, filterKeep, partArticles, pct, pruneToc, rankedIn, sectionArticles, strongestOf, subsectionArticles, ago, type Filter,
+  ancestorsOf, BAND_LABEL, FILTER_BANDS, filterBands, filterKeep, filterOf, partArticles, pct, pruneToc, rankedIn, sectionArticles, strongestOf, subsectionArticles, ago, type Band, type Filter, type FilterBand,
 } from "./relevance";
 import { codeHref, type CalmRoute } from "./routes";
 import { articleOf, useRelevance } from "./useRelevance";
@@ -35,6 +35,10 @@ function useElapsed(since: number | null): number {
 }
 
 /** Scored / out of date / score / running / unavailable. The only place a POST starts. */
+const BAND_TOGGLE: Record<FilterBand, string> = { attention: "Likely applies", maybe: "Might apply", other: "Unlikely or not scored" };
+// Each toggle draws the ring its articles wear in the tree (the legend's sample values).
+const BAND_RING: Record<FilterBand, { band: Band; p?: number }> = { attention: { band: "high", p: 0.8 }, maybe: { band: "mid", p: 0.4 }, other: { band: "unscored" } };
+
 export function ScoreStatus() {
   const rel = useRelevance();
   const elapsed = useElapsed(rel.phase === "running" ? rel.startedAt : null);
@@ -57,16 +61,16 @@ export function ScoreStatus() {
     <div className="cf-score-wrap">
       {rel.result ? (
         rel.stale ? (
-          <span className="cf-score is-stale"><span className="cf-dot is-warning" aria-hidden="true" />Out of date {scoreBtn("Rescore")}</span>
+          <span className="cf-score is-stale" title="Out of date"><span className="cf-dot is-warning" aria-hidden="true" /><span className="cf-sr">Out of date </span>{scoreBtn("Rescore")}</span>
         ) : (
-          <span className="cf-score" title={rel.result.model ? `Estimate version ${rel.result.model}` : undefined}>
-            <span className="cf-dot is-done" aria-hidden="true" />Scored for your project{rel.result.scored_at ? ` · ${ago(rel.result.scored_at)}` : ""}
+          <span className="cf-score" title={rel.result.model ? `Scored for your project · estimate version ${rel.result.model}` : "Scored for your project"}>
+            <span className="cf-dot is-done" aria-hidden="true" />Scored{rel.result.scored_at ? ` ${ago(rel.result.scored_at)}` : ""}
           </span>
         )
       ) : rel.phase === "error" ? (
-        <span className="cf-score is-error"><span className="cf-dot is-warning" aria-hidden="true" />Scores unavailable {scoreBtn("Try again")}</span>
+        <span className="cf-score is-error" title="Scores unavailable"><span className="cf-dot is-warning" aria-hidden="true" /><span className="cf-sr">Scores unavailable </span>{scoreBtn("Try again")}</span>
       ) : (
-        <span className="cf-score"><span className="cf-dot is-pending" aria-hidden="true" />Not scored {scoreBtn("Score relevance")}</span>
+        <span className="cf-score">{scoreBtn("Score relevance")}</span>
       )}
       {why && <span className="cf-score-why">{why}</span>}
     </div>
@@ -276,7 +280,7 @@ function Tree({ toc, selected, filter, revealKey }: { toc: CodeToc; selected: st
   return (
     <>
       {nodes.length === 0 ? (
-        <p className="cf-tree-empty">{filter === "all" ? "No chapters returned." : "Nothing in this filter. Choose All to see every chapter."}</p>
+        <p className="cf-tree-empty">{filter === "all" ? "No chapters returned." : "Nothing in this filter. Turn the filters off to see every chapter."}</p>
       ) : (
         <ul ref={box} role="tree" aria-label="Chapters" className="cf-tree" onKeyDown={onKey}>
           {rows(nodes, 1)}
@@ -651,8 +655,17 @@ export function CodeLibrary({ route }: { route: CalmRoute }) {
 
   const high = rankedIn(rel.display, rel.cutoffs, ["high"], rel.rerank);
   const mid = rankedIn(rel.display, rel.cutoffs, ["mid"], rel.rerank);
-  // Estimates without cut-offs have no "needs attention" or "maybe" to filter by.
-  const filter: Filter = !rel.cutoffs.rated ? "all" : route.filter || (rel.display && high.length ? "attention" : "all");
+  // Estimates without cut-offs have no bands to filter by; with none toggled the tree shows everything.
+  const rated = Boolean(rel.display && rel.cutoffs.rated);
+  const filter: Filter = !rated ? "all" : route.filter || (high.length ? "attention" : "all");
+  const picked = filterBands(filter);
+  const articleCount = useMemo(() => (toc.state === "ready" ? toc.value.parts.reduce((n, p) => n + partArticles(p).length, 0) : 0), [toc]);
+  const counts: Record<FilterBand, number> = { attention: high.length, maybe: mid.length, other: Math.max(0, articleCount - high.length - mid.length) };
+  const toggleBand = (b: FilterBand) => {
+    const next = new Set(picked);
+    if (!next.delete(b)) next.add(b);
+    setFilter(filterOf(next));
+  };
   const index = useMemo(() => tocIndex(toc.state === "ready" ? toc.value : undefined), [toc]);
   const setFilter = (f: Filter) => { location.hash = codeHref(route.article, f); };
   const edition = toc.state === "ready" ? toc.value.edition : "NBC(AE) 2023";
@@ -689,20 +702,16 @@ export function CodeLibrary({ route }: { route: CalmRoute }) {
           <span>Search the code</span>
           <span className="cf-kbd is-dark" aria-hidden="true">{MOD_KEY} ⇧ K</span>
         </button>
-        {!none && <div className="cf-lib-tools">
-          <div className="cf-filters" role="group" aria-label="Show">
-            <button type="button" className="cf-chip is-sm" aria-pressed={filter === "all"} onClick={() => setFilter("all")}>All</button>
-            {rel.display && rel.cutoffs.rated && (
-              <>
-                <button type="button" className="cf-chip is-sm" aria-pressed={filter === "attention"} onClick={() => setFilter("attention")}><span className="cf-dot is-blocking" aria-hidden="true" />Needs attention <span className="cf-faint">{high.length}</span></button>
-                <button type="button" className="cf-chip is-sm" aria-pressed={filter === "maybe"} onClick={() => setFilter("maybe")}><span className="cf-dot is-warning" aria-hidden="true" />Maybe <span className="cf-faint">{mid.length}</span></button>
-              </>
-            )}
-          </div>
-          <div className="cf-lib-score">
-            <ScoreStatus />
-            <RingLegend />
-          </div>
+        {!none && <div className="cf-lib-tools" role="group" aria-label="Show">
+          {FILTER_BANDS.map((b) => (
+            <button key={b} type="button" className="cf-band-toggle" aria-pressed={picked.has(b)} disabled={!rated} title={BAND_TOGGLE[b]} onClick={() => toggleBand(b)}>
+              <RingGlyph p={BAND_RING[b].p} band={BAND_RING[b].band} />
+              {rated ? <span>{counts[b]}</span> : null}
+              <span className="cf-sr">{BAND_TOGGLE[b]}</span>
+            </button>
+          ))}
+          <ScoreStatus />
+          <RingLegend />
         </div>}
         <nav className="cf-lib-tree" aria-label="Chapters">
           {toc.state === "loading" ? (
