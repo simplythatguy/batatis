@@ -1,6 +1,6 @@
 ---
 name: minimal-ui
-description: "The user's standing UI rules for every app they make: one major thing on screen at a time, the most capability with the least showing, no explanatory text, colour only to find what matters, related controls unified into one component, size and placement for hierarchy. Use when designing, building, changing or reviewing any screen, component, layout, copy or colour, in any project or stack, and to verify a UI before handing it off."
+description: "The user's standing UI rules for every app they make: one major thing on screen at a time, the most capability with the least showing, no explanatory text and nothing above titles, colour only to find what matters, related controls unified into one component with no box around each item, size and placement for hierarchy. Use when designing, building, changing or reviewing any screen, component, layout, copy or colour, in any project or stack, and to verify a UI before handing it off."
 ---
 
 # Minimal UI
@@ -35,6 +35,8 @@ No text that explains how the UI works: no "here's how this works", no subtitle 
 
 Text stays only when it does a job no icon can do: short labels and action names, content (the person's own, or content others wrote for them, such as a reviewer's note or quoted source text), an error and how to fix it, why something is blocked, a legal or safety boundary. Everything except content is short.
 
+**Nothing sits above a title.** No eyebrow, kicker, overline, category, section letter, step number, stage name or tag goes over a heading or a question. The navigation already shows where the person is, so say it there, once. If the title needs that context, rewrite the title. Agents repeat this mistake more than any other, so check every screen for it.
+
 ### 5. Colour is for finding what matters
 
 The screen is neutral by default. Colour is used only so the person finds the important thing faster: the one action they should take, where they are, something that needs attention, an error, telling crowded items apart. Each colour on screen must answer "what does this help the person find?" If there is no answer, the colour goes.
@@ -48,6 +50,8 @@ The app's own mark may keep its colour if it is small. Brand colour does not spr
 All the controls that belong to the major thing live together in one component. They are not a card per button, a box per field and a panel per setting. A screen built from 20 separate boxes is wrong when those boxes could be one component. A button can still have its own shape. What is wrong is wrapping each control, field or group in its own card when they all serve the same thing.
 
 **Unified does not mean putting more on screen.** This is the rule agents most often get wrong. "Unify it" does not mean "merge two jobs into one page" or "show everything at once". It means the one major thing gathers all its own controls into one coherent piece, and everything else is either a quiet minor support or hidden until needed. Rules 1 and 6 are the same rule seen from two sides. One major thing, built as one unified component.
+
+**Few surfaces, no box per item.** A surface is anything with its own border, fill or shadow. Most screens need only the page, the one primary button, and a menu or drawer while it is open. Items inside the major thing (places, tokens, options, suggestions, list rows) are plain text with an icon at most. Do not give each item a pill, tile, card or border, and never put a box inside a box. Mark the selected or active item with ink, weight or a check mark, not a filled box. An input is a line of text with one hairline under it, or nothing.
 
 ### 7. Size and placement show what matters
 
@@ -84,6 +88,8 @@ This screenshot shows all seven rules working together. Use it as the pattern to
 - Sentences that explain how the UI works, subtitles that restate a label, or instructions that a control already makes obvious.
 - The same action offered twice on one screen.
 - A card, box or border around each control or small group that could be part of one component.
+- Anything above a title or question: an eyebrow, kicker, overline, category, section letter, step or stage label, or tag.
+- A pill, tile, card or bordered box around each item of a list, choice set, token field or menu; a box inside a box; a filled box marking the active item.
 - Dividers, frames, badges and wrappers that exist only to separate or decorate.
 - Colour without a job: decorative, per-section, gradient, coloured icons, coloured fills on secondary buttons.
 - More than one thing competing for "most important" through size or colour.
@@ -107,9 +113,9 @@ Run this on the real rendered UI (screenshots of the running app, at desktop and
 
 1. **Name the major thing.** Write it in one short phrase. If you need "and", or two areas pull the eye equally, it fails rule 1.
 2. **List every visible element.** Mark each one as major, minor support, should be one step away, or remove. Apply the removal test (rule 3) to each. Anything marked "one step away" or "remove" is a finding.
-3. **Read every word on screen.** Flag any sentence that explains how to use the UI, restates a label, or could be an icon or a value shown in a control. Allowed text is the list in rule 4: short labels and action names, content, errors, blocked reasons, boundaries.
+3. **Read every word on screen.** Start above each title and question: anything printed there is a finding. Then flag any sentence that explains how to use the UI, restates a label, or could be an icon or a value shown in a control. Allowed text is the list in rule 4: short labels and action names, content, errors, blocked reasons, boundaries.
 4. **List every colour that is not neutral.** For each, write what important thing it helps the person find. No answer means a finding. Too many coloured things also means a finding, because then nothing stands out.
-5. **Count the containers.** List the boxes, cards and panels. Two containers that serve the same major thing and are used together should be one component. Also check the opposite mistake: unification that pulled a second job onto the screen.
+5. **Count the containers.** List every border, fill and shadow. A box around a single item, a box inside a box, or more surfaces than the major thing needs is a finding. List the boxes, cards and panels. Two containers that serve the same major thing and are used together should be one component. Also check the opposite mistake: unification that pulled a second job onto the screen.
 6. **Squint.** Blur your view of the screenshot, or look at it small. The first thing the eye lands on must be the major thing, the second must be its primary action. Rarely used controls should barely register.
 7. **Check capability.** List what the person could do before the change. If there is no before-state, list what this screen should let the person do (from the feature list, the routes, or the code). Each item must be reachable, by touch too, not only by hover or shortcut. A missing capability is a finding, even if the screen looks better.
 

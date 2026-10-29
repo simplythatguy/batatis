@@ -1,0 +1,370 @@
+{
+  "_meta": {
+    "title": "Hand-checked facts that the Alberta jurisdiction CSV adds to the machine-read inputs",
+    "retrieved_utc": "2026-10-29",
+    "rule": "Every entry names the page or document it was read from. status is VERIFIED only where the words were read in the fetched file; otherwise UNVERIFIED.",
+    "note": "Municipal web addresses move often. Four municipal PDF links found by search returned HTTP 404 when fetched on 2026-10-29 (Lethbridge request-for-specific-variance PDF, Rocky View County Alternative-Solution-Proposal.pdf at the old path, Red Deer 2025 building permit form, Lethbridge bylaw 6110 on the govstack host)."
+  },
+  "default_building_ahj_asca": "Alberta Safety Codes Authority (ASCA); the owner chooses one of the ASCA-contracted agencies",
+  "national_park_improvement_districts": {
+    "0159": {
+      "ahj": "Parks Canada (Waterton Lakes National Park townsite and park)",
+      "status": "VERIFIED",
+      "note": "Parks Canada page: \"Parks Canada regulates all planning and development in the townsite and across Waterton Lakes National Park.\" Its Land Use Planning Regulations replaced the National Parks Building Regulations.",
+      "source": "https://parks.canada.ca/pn-np/ab/waterton/info/village-townsite/permis-permit"
+    },
+    "0164": {
+      "ahj": "Parks Canada (Banff National Park outside the Town of Banff; Lake Louise area is run by the Lake Louise, Yoho and Kootenay field unit)",
+      "status": "VERIFIED",
+      "note": "Parks Canada page: \"This information is not applicable within the Town of Banff.\" Building permits in the park are issued by Parks Canada to check compliance with national and provincial codes.",
+      "source": "https://parks.canada.ca/pn-np/ab/banff/info/serviceimmobilier-realty/damenagement-development"
+    },
+    "0167": {
+      "ahj": "Parks Canada (Jasper National Park, including the Town of Jasper townsite)",
+      "status": "VERIFIED",
+      "note": "Parks Canada page: \"A Building Permit is required when a proposed development contains life-safety elements covered under the National Building Code - Alberta Edition.\" Parks Canada publishes an Authorized Accredited Safety Code Agencies list (PDF).",
+      "source": "https://parks.canada.ca/pn-np/ab/jasper/gestion-management/permis-permits/amenagement-development"
+    },
+    "0168": {
+      "ahj": "Parks Canada (Elk Island National Park)",
+      "status": "VERIFIED for the national rule; UNVERIFIED for a park-specific page",
+      "note": "No Elk Island permit page was fetched. The National Parks of Canada Land Use Planning Regulations (SOR/2024-230) apply to all national parks. Parks Canada's national page says: \"Most construction and development activities in national parks and national park reserves require permits issued under the authority of the Land Use Planning Regulations\", with a development permit first and then a building permit \"if required\".",
+      "source": "https://laws-lois.justice.gc.ca/eng/regulations/SOR-2024-230/FullText.html ; https://parks.canada.ca/agence-agency/bib-lib/politiques-policies/amenagement-du-territoire-land-use-planning"
+    },
+    "0179": {
+      "ahj": "Parks Canada (Wood Buffalo National Park, Alberta part), by the name of the improvement district only",
+      "status": "VERIFIED for the national rule; UNVERIFIED for a park-specific page",
+      "note": "The MAPL names this improvement district Wood Buffalo and gives it 706 people. No Wood Buffalo National Park permit page was fetched, and the link between the district and the park was not checked against a boundary file. Parks Canada's national page says: \"Most construction and development activities in national parks and national park reserves require permits issued under the authority of the Land Use Planning Regulations\", with a development permit first and then a building permit \"if required\".",
+      "source": "https://open.alberta.ca/dataset/8dae0ffd-dbb7-46f7-89eb-efa64b2ce385 ; https://parks.canada.ca/agence-agency/bib-lib/politiques-policies/amenagement-du-territoire-land-use-planning"
+    }
+  },
+  "special_rows": {
+    "0479": {
+      "kind": "asca",
+      "note": "Improvement District No. 25 (Willmore Wilderness) has no SCC accreditation. Willmore Wilderness is a provincial wilderness park by name; no permit page was fetched. Default ASCA routing is the Order's rule for areas with no accredited organization.",
+      "status": "UNVERIFIED",
+      "source": "https://www.qp.alberta.ca/documents/Regs/2016_029.pdf"
+    },
+    "0206": {
+      "kind": "other",
+      "ahj": "City of Lloydminster (Alberta part) under the Lloydminster Charter and Building Bylaw 59-2011 for building; gas and electrical go to ASCA for Alberta properties",
+      "status": "VERIFIED for the split; UNVERIFIED for the code edition",
+      "note": "City page: \"Contact Alberta Safety Codes Authority (ASCA) for properties in Alberta and Technical Safety Authority of Saskatchewan (TSASK) for properties in Saskatchewan\" for gas and electrical. Charter s.51 lets Council declare an edition of the National Building Code in force by bylaw. The Charter text has no mention of the Safety Codes Act. Bylaw 59-2011 is an image-only PDF and could not be read. SCC lists no accreditation for the City. Table C-2 of NBC(AE) lists Lloydminster.",
+      "source": "https://www.lloydminster.ca/business-building-development/planning/planning-and-development-applications/ ; https://www.lloydminster.ca/media/q2rh4hw5/10092024_lloydminstercharter.pdf ; https://www.lloydminster.ca/media/erfm3z30/59-2011-building-bylaw.pdf"
+    },
+    "0418": {
+      "kind": "federal",
+      "ahj": "Parks Canada issues the building permit in the Jasper townsite; the Municipality of Jasper is accredited for Fire only (M000461)",
+      "status": "VERIFIED",
+      "note": "Parks Canada Jasper page requires a Parks Canada Building Permit when life-safety elements are covered by the NBC(AE); the Municipality reviews development files for municipal requirements.",
+      "source": "https://parks.canada.ca/pn-np/ab/jasper/gestion-management/permis-permits/amenagement-development"
+    },
+    "0387": {
+      "note": "Town of Banff is accredited for Building and Fire (M000396). Parks Canada's Banff page excludes the Town from its own development permit information.",
+      "status": "VERIFIED",
+      "source": "https://parks.canada.ca/pn-np/ab/banff/info/serviceimmobilier-realty/damenagement-development"
+    },
+    "0373": {
+      "note": "Kananaskis Improvement District is accredited for Building, Electrical, Fire, Gas and Plumbing (M000202). It is the only improvement district with an accreditation.",
+      "status": "VERIFIED",
+      "source": "SCC Accreditation Search, 2026-10-29"
+    }
+  },
+  "first_nations": {
+    "default_ahj": "First Nation council by-law (Indian Act s.81(1)(h)) or land code; not an SCC-accredited organization under its own name",
+    "default_note": "SCC name search on 2026-10-29 found no accredited organization under any of the 48 First Nation names (only unrelated municipalities such as Beaver County, City of Cold Lake and County of St. Paul matched substrings). Indian Act s.81(1)(h) lets a band council make by-laws on the regulation of the construction, repair and use of buildings. Whether a Nation adopts the NBC(AE), the NBC or its own code is set by the Nation. The Safety Codes Act defines person to include a band (s.1(1)(w)) but does not itself say it applies on reserves.",
+    "default_status": "INFERENCE for the AHJ kind (Indian Act s.81(1)(h) power plus no SCC accreditation under any of the 48 names); VERIFIED for the Indian Act text and for the SCC search result; UNVERIFIED for how the Safety Codes Act applies on reserves",
+    "default_source": "https://laws-lois.justice.gc.ca/eng/acts/I-5/section-81.html ; https://www.qp.alberta.ca/documents/Acts/S01.pdf",
+    "examples": {
+      "0448": {
+        "service_provider": "Superior Safety Codes (electrical, plumbing and gas permits on the Taza designated lands, per the Nation's law)",
+        "note": "Tsuut'ina Nation publishes the Taza Development Building Regulations Law, 2019. It defines Building Code as the National Building Code at the time of construction unless a Provincial or Tsuut'ina Nation code is more stringent, names a Nation Building Inspector, and says electrical, plumbing and gas permits \"will be issued by Superior Safety Codes\".",
+        "status": "VERIFIED",
+        "source": "https://tda.tsuutina.com/media/jtgha55q/taza_buildingregulationslaw.pdf"
+      },
+      "0426": {
+        "note": "Enoch Cree Nation Zoning Bylaw No. 2018-01 says it is \"enacted pursuant to sections 81(1)(g)(h) of the Indian Act\"; its Land Use Bylaw refers to the Enoch Cree Nation Building Bylaw No. 2018-01 and says attached suites \"must meet Alberta Building Code requirements\". The Building Bylaw text was not read.",
+        "status": "VERIFIED for the zoning bylaw; UNVERIFIED for the building bylaw",
+        "source": "https://parti.fng.ca/fng-gpn-I/pi/en/471323/1/document.do ; https://parti.fng.ca/fng-gpn-I/pi/en/471322/1/document.do"
+      },
+      "0419": {
+        "note": "The City of Calgary newsroom (18 June 2019) reports a Siksika Nation Safety Codes Officer Program with Alberta Municipal Affairs and the City of Calgary; a mentor said that by training its own officers Siksika Nation \"can become accredited as Authority Having Jurisdiction\". No later accreditation was found.",
+        "status": "VERIFIED for the 2019 statement",
+        "source": "https://newsroom.calgary.ca/the-city-of-calgary-partners-with-siksika-nation-to-train-new-cohort-of-safety-code-officers/"
+      }
+    }
+  },
+  "metis_settlements": {
+    "note_accredited": "Settlement is an accredited municipality for Building under the Safety Codes Act definition that municipality includes a Metis settlement (s.1(1)(u)).",
+    "note_unaccredited": "Settlement has no SCC accreditation; Building goes to ASCA.",
+    "status": "VERIFIED",
+    "source": "https://www.qp.alberta.ca/documents/Acts/S01.pdf ; https://www.qp.alberta.ca/documents/Acts/M14.pdf ; https://www.qp.alberta.ca/documents/Regs/2016_029.pdf ; SCC Accreditation Search name queries of 2026-10-29",
+    "evidence": {
+      "0406": {
+        "scc_name_query": "Buffalo Lake",
+        "rows_returned": 4,
+        "matched": [
+          [
+            "Buffalo Lake Metis Settlement",
+            "M000434"
+          ]
+        ],
+        "disciplines": [
+          "Building",
+          "Electrical",
+          "Gas",
+          "Plumbing"
+        ],
+        "raw_file": "dl/500",
+        "sha256": "93f42f60523028aa26ec5de8cd0a7bb9be571dcb4caafbfccc8176248a79c0c4",
+        "retrieved": "2026-10-29T01:44:44Z"
+      },
+      "0407": {
+        "scc_name_query": "East Prairie",
+        "rows_returned": 0,
+        "matched": [],
+        "disciplines": [],
+        "raw_file": "dl/501",
+        "sha256": "19d8457fc12f2c5fdab0aaeb18462e06d86042015f5182b60ea277925980742d",
+        "retrieved": "2026-10-29T01:44:46Z"
+      },
+      "0408": {
+        "scc_name_query": "Elizabeth",
+        "rows_returned": 0,
+        "matched": [],
+        "disciplines": [],
+        "raw_file": "dl/502",
+        "sha256": "7923d021a5de9ef50ff3e3dabaaa5fcd6c484691ff66bb270662610495e1cf2e",
+        "retrieved": "2026-10-29T01:44:48Z"
+      },
+      "0409": {
+        "scc_name_query": "Fishing Lake",
+        "rows_returned": 4,
+        "matched": [
+          [
+            "Fishing Lake Metis Settlement",
+            "M000436"
+          ]
+        ],
+        "disciplines": [
+          "Building",
+          "Electrical",
+          "Gas",
+          "Plumbing"
+        ],
+        "raw_file": "dl/503",
+        "sha256": "92de4e97dde4c47882591bb6d1dd55266a1770e58ce6975084b045609d914c79",
+        "retrieved": "2026-10-29T01:44:50Z"
+      },
+      "0410": {
+        "scc_name_query": "Gift Lake",
+        "rows_returned": 0,
+        "matched": [],
+        "disciplines": [],
+        "raw_file": "dl/504",
+        "sha256": "86278fd76183399d211dba5b57218f0fbeb8f1db8848bd30be07552677bb8d8f",
+        "retrieved": "2026-10-29T01:44:53Z"
+      },
+      "0411": {
+        "scc_name_query": "Kikino",
+        "rows_returned": 4,
+        "matched": [
+          [
+            "Kikino Métis Settlement",
+            "M000437"
+          ]
+        ],
+        "disciplines": [
+          "Building",
+          "Electrical",
+          "Gas",
+          "Plumbing"
+        ],
+        "raw_file": "dl/505",
+        "sha256": "481e5133ecdd50bfa054380c2aa6754e272a1d49dcb9590703fcb8ad0e8073c5",
+        "retrieved": "2026-10-29T01:44:55Z"
+      },
+      "0412": {
+        "scc_name_query": "Paddle Prairie",
+        "rows_returned": 0,
+        "matched": [],
+        "disciplines": [],
+        "raw_file": "dl/506",
+        "sha256": "3e0249a5fe54e40b685b43c50dd6a5d12a8f585b818c9309b45b91c4ea97f639",
+        "retrieved": "2026-10-29T01:44:57Z"
+      },
+      "0413": {
+        "scc_name_query": "Peavine",
+        "rows_returned": 0,
+        "matched": [],
+        "disciplines": [],
+        "raw_file": "dl/507",
+        "sha256": "6881d251d0c22a1fb20f4abddd279596ca1367a60deff2123658cb2d248c5edb",
+        "retrieved": "2026-10-29T01:44:58Z"
+      }
+    },
+    "legal_basis": "Safety Codes Act s.1(1)(u): municipality includes, for the purposes of this Act, a Metis settlement; s.1(1)(r)(ii): local authority includes, for the purposes of this Act, a settlement council of a Metis settlement. The Metis Settlements Act (RSA 2000 c M-14, sha256 423ef50c...7144) has no reference to the Safety Codes Act. A settlement without an accreditation falls under AR 29/2016 s.4(1) (ASCA)."
+  },
+  "extra_rows": [
+    {
+      "lg_code": "",
+      "legal_name": "Calgary International Airport lands (Calgary Airport Authority)",
+      "type": "Airport lands",
+      "population_2025": "",
+      "building_ahj": "City of Calgary issues the building permit; the Calgary Airport Authority authorizes the project first (Construction and Installation Permit)",
+      "kind": "federal",
+      "status": "VERIFIED",
+      "note": "YYC CIP Manual, Land Projects (December 2024): \"Authorities Having Jurisdiction (AHJ) for reviewing building code compliance for projects on YYC airport lands is the City of Calgary.\" The municipalities will not accept an application without a letter of authorization from the Authority.",
+      "source": "https://www.yyc.com/Portals/0/CIP%20Manual%20-%20Land%20Projects.pdf"
+    },
+    {
+      "lg_code": "",
+      "legal_name": "Springbank Airport lands (Calgary Airport Authority)",
+      "type": "Airport lands",
+      "population_2025": "",
+      "building_ahj": "Rocky View County issues the building permit; the Calgary Airport Authority authorizes the project first",
+      "kind": "federal",
+      "status": "VERIFIED",
+      "note": "Same manual: \"For all projects at Springbank Airport, the AHJ is Rocky View County.\"",
+      "source": "https://www.yyc.com/Portals/0/CIP%20Manual%20-%20Land%20Projects.pdf"
+    },
+    {
+      "lg_code": "",
+      "legal_name": "Edmonton International Airport lands (Edmonton Regional Airports Authority)",
+      "type": "Airport lands",
+      "population_2025": "",
+      "building_ahj": "Leduc County is the primary AHJ for Alberta Safety Code items; the airport operator runs its own project approval first",
+      "kind": "federal",
+      "status": "VERIFIED for the airport's statement; UNVERIFIED that every parcel is under Leduc County",
+      "note": "Edmonton Airports 2026 contractor form (FAP): \"I am aware that Leduc County is the primary Authority Having Jurisdiction for Edmonton International Airport for items related to the Alberta Safety Code.\" and \"All other fees for Alberta Safety Code permits will be paid directly to Leduc County as the Authority Having Jurisdiction\". A search summary says some nearby projects list City of Edmonton permits, so confirm by parcel.",
+      "source": "https://flyyeg.com/wp-content/uploads/2026-YEG-FAP-Form.pdf"
+    }
+  ],
+  "ais_stakeholder": {
+    "note": "Listed by the MAPL as a stakeholder type, not a municipality. No SCC accreditation under this name was searched. Building AHJ not determined.",
+    "status": "UNVERIFIED"
+  },
+  "top20": {
+    "0203": {
+      "service_provider": "not stated on the variance page",
+      "note": "Variances and Alternative Solutions page (read): Request for Specific Variance form; reviewed by a Safety Codes Officer in the building discipline; \"A variance must be associated with a building permit\"; one application per issue; refusal appeal to the Safety Codes Council within 30 days, $500.",
+      "source": "https://www.lethbridge.ca/building-and-renovating/building-permits-and-applications/variances-and-alternative-solutions",
+      "status": "VERIFIED"
+    },
+    "0302": {
+      "service_provider": "not determined",
+      "note": "ePermits portal at strathcona.ca/apps/epermits. No alternative-solution page or form found by a domain-limited search.",
+      "source": "https://www.strathcona.ca/apps/epermits/",
+      "status": "UNVERIFIED"
+    },
+    "0508": {
+      "service_provider": "not determined",
+      "note": "The Variance Application Form (15 Sept 2025) is for Land Use Bylaw exceptions (setbacks, height, coverage), not a Safety Codes Act variance. No safety codes alternative-solution form found.",
+      "source": "https://www.rmwb.ca/media/bm0pn1bf/variance-application-form-_fillable_sept2025.pdf",
+      "status": "VERIFIED"
+    },
+    "0262": {
+      "service_provider": "not determined",
+      "note": "No alternative-solution or variance page found by a domain-limited search; the permit pages cover zoning variances through a development permit with a 21-day appeal period.",
+      "source": "https://www.reddeer.ca",
+      "status": "NOT FOUND"
+    },
+    "0003": {
+      "service_provider": "City Building Inspections department (staff or contract not stated)",
+      "note": "Commercial building permits page links an Alternative solution application guideline and an Alternative solution application (PDF).",
+      "source": "https://www.airdrie.ca/index.cfm?serviceID=2334",
+      "status": "VERIFIED"
+    },
+    "0292": {
+      "service_provider": "not determined",
+      "note": "Standing code variance published: Zero Lot Line Variance, based on NBC(AE) Div B 9.10.15.5.(8); other configurations need a separate request. No general alternative-solution page found.",
+      "source": "https://stalbert.ca/site/assets/files/17556/zerolotlinervariancedevelopment.pdf",
+      "status": "VERIFIED"
+    },
+    "0132": {
+      "service_provider": "City inspections, per the Quality Management Plan v1.4 of June 2020 (staff or contract not stated)",
+      "note": "QMP says a variance \"can be site-specific or for multiple locations within a municipality for a thing, process, or activity with the same conditions\". The Variances page under the Land Use Bylaw is a zoning process.",
+      "source": "https://cityofgp.com/sites/default/files/docs/inspections/qmp.pdf",
+      "status": "VERIFIED"
+    },
+    "0217": {
+      "service_provider": "City Planning and Development Services department (staff or contract not stated)",
+      "note": "Alternative Solution Request Form (2 pages) asks for Objective, Functional and Intent statements and states refusals can be appealed to the Safety Codes Council within 30 days.",
+      "source": "https://www.medicinehat.ca/media/ebahhnxb/alternative_solution_proposal.pdf",
+      "status": "VERIFIED"
+    },
+    "0269": {
+      "service_provider": "County Building Services department (staff or contract not stated)",
+      "note": "Alternative Solution Proposal form on the Building Forms page. 2026 Master Rates Bylaw C-8701-2026: Alberta Building Code variance $320.00 (under 600 m2) and $1,600.00 (over 600 m2).",
+      "source": "https://www.rockyview.ca/business-development/building-and-renovating/forms-and-documents ; https://www.rockyview.ca/media/2664",
+      "status": "VERIFIED"
+    },
+    "0291": {
+      "service_provider": "not determined",
+      "note": "CityView portal. Development Fees bylaw: Alternative Solutions (Variance) \"Review of alternative solution proposal $120 per hour + GST, minimum of two (2) hours\".",
+      "source": "https://www.sprucegrove.org/media/7573/consolidated-version-c-1415-25-development-fees-bylaw-amendment-1.pdf",
+      "status": "VERIFIED"
+    },
+    "0070": {
+      "service_provider": "Town Safety Codes Department, by the fee schedule's title (staff or contract not stated)",
+      "note": "2026 Residential Fee Schedule lists Variance Request $500.00. No alternative-solution form read.",
+      "source": "https://www.cochrane.ca/sites/default/files/2026-01/2026%20Residential%20Fee%20Schedule.pdf",
+      "status": "VERIFIED"
+    },
+    "0200": {
+      "service_provider": "not determined",
+      "note": "Fees Bylaw 1209-2025 (2026 fees): Evaluation of an Alternate Solution Proposal $230.00; Variance Certificate $115.00 per application.",
+      "source": "https://www.leduc.ca/wp-content/uploads/2025/03/Leduc-Fees-Bylaw.pdf",
+      "status": "VERIFIED"
+    },
+    "0356": {
+      "service_provider": "not determined",
+      "note": "The Comprehensive Commercial / Multi-Family Application Form (May 2026) has an ALTERNATIVE SOLUTION/VARIANCE REQUEST section.",
+      "source": "https://thecityofchestermere.ca/cityservices/wp-content/uploads/sites/9/2026/05/Comprehensive-Commercial-Multi-Family-Application-Form_052026_Fillable.pdf",
+      "status": "VERIFIED"
+    },
+    "0245": {
+      "service_provider": "County Safety Codes Services, per the county page (staff or contract not stated)",
+      "note": "No alternative-solution page found; the variance fees on the county site are land use variances.",
+      "source": "https://www.parklandcounty.com/business-development/building-and-renovating/",
+      "status": "UNVERIFIED"
+    },
+    "0238": {
+      "service_provider": "not determined",
+      "note": "Domain-limited search returned zoning variances only. Code questions go to the Safety Codes Officer.",
+      "source": "https://www.okotoks.ca",
+      "status": "NOT FOUND"
+    },
+    "0117": {
+      "service_provider": "possibly C.O.F.S. Municipal Safety Codes Service (SCC agency A126123, city listed Fort Saskatchewan); inference from the name only",
+      "note": "2025 fee schedule: Request for Variance / Alternate Solution $160.00 per hour.",
+      "source": "https://www.fortsask.ca/media/u3zdta5l/fees-and-charges-schedule.pdf",
+      "status": "VERIFIED for the fee"
+    },
+    "0133": {
+      "service_provider": "County issues permits for some towns (Beaverlodge and Sexsmith forms are on the county site)",
+      "note": "No alternative-solution page found.",
+      "source": "https://www.countygp.ab.ca/business-building-development/building-and-planning-permits/building-permits/",
+      "status": "UNVERIFIED"
+    },
+    "0111": {
+      "service_provider": "not determined",
+      "note": "No building-code alternative-solution page found; the search returned land use variances.",
+      "source": "https://www.foothillscountyab.ca",
+      "status": "NOT FOUND"
+    },
+    "0019": {
+      "service_provider": "not determined",
+      "note": "Bylaw 1093-25 (2026 fees): Evaluation of an Alternative Solution Proposal, minimum 2 hours, $181.34 per hour. Application for Variance $201.25 per item is the zoning variance.",
+      "source": "https://www.beaumont.ab.ca/wp-content/uploads/2024/12/Bylaw-1093-25-2026-Fees-and-Charges-Office-Consolidation-1.pdf",
+      "status": "VERIFIED"
+    },
+    "0305": {
+      "service_provider": "not determined",
+      "note": "Online Permitting page; no alternative-solution page found.",
+      "source": "https://www.sturgeoncounty.ca/building-development/online-permitting/",
+      "status": "NOT FOUND"
+    }
+  },
+  "asca_basis": "Basis: no Building accreditation under this name in the SCC Accreditation Search of 2026-10-29 (VERIFIED) and AR 29/2016 s.4(1) gives areas without an accredited organization to ASCA (VERIFIED). Applying the rule to this row is an inference."
+}

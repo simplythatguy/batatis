@@ -1,0 +1,948 @@
+{
+ "run": {
+  "name": "baseline",
+  "started": "2026-10-25T07:24:49Z",
+  "commit": "8dbf2760ceea36885724dc598f776a55b3959324",
+  "engine_diff_sha256": null,
+  "identify_config": {
+   "screen": "elephant",
+   "screen_model": "baseten/elephant-1:free",
+   "card_chars": 700,
+   "rerank": "elephant",
+   "rerank_model": "baseten/elephant-1:free",
+   "rerank_n": 60,
+   "verifier": "openai",
+   "verifier_model": "gpt-6-luna",
+   "verifier_effort": "medium",
+   "verify_n": 15,
+   "fallback": "bm25",
+   "top_k": 10,
+   "choices_k": 3
+  },
+  "identify_config_hash": "464590da27f5cbf1",
+  "intake_model": "gpt-6-luna",
+  "intake_effort": "medium",
+  "elephant": false,
+  "split": "all",
+  "engine_tree": "198c9e5d2611f781494e12664d1a1164c51b0e83"
+ },
+ "inputs": {
+  "score-dev-gpt-6.1-sol-low.jsonl": "25a30f88b321261ddf9a75f40f132d9e6eae6ba4aaacb5ea1d6fea2ff0456a05",
+  "score-holdout-gpt-6.1-sol-low.jsonl": "841c8ea4ab2ce7d9824db84b0d4f04d0ee9b521ed9036b5b5ce61645541ac724",
+  "index.csv": "5c9526e3301510f1c3ad2ec666a9fba4c293e5870e248c40301242ce1d12ec17"
+ },
+ "cases_scored": 653,
+ "cases_without_location": [],
+ "table": [
+  {
+   "place": "Calgary",
+   "cases": 17,
+   "checks": 161,
+   "passed": 29,
+   "rate": 0.1801,
+   "by_kind": {
+    "A": {
+     "n": 7,
+     "rate": 0.7143
+    },
+    "F": {
+     "n": 66,
+     "rate": 0.1061
+    },
+    "R": {
+     "n": 68,
+     "rate": 0.2353
+    },
+    "B": {
+     "n": 20,
+     "rate": 0.05
+    }
+   },
+   "guardrails_all_pass": 1.0,
+   "guardrails": {
+    "no_claims": 1.0,
+    "citations_resolve": 1.0,
+    "no_alberta_commit_outside_alberta": 1.0,
+    "ran": 1.0
+   },
+   "places_in_group": {
+    "Calgary": 17
+   },
+   "case_types": {
+    "appeal_decision": 6,
+    "issued_variance": 5,
+    "documented_design_study": 3,
+    "documented_case_summary": 3
+   },
+   "by_case_type": {
+    "documented_design_study": {
+     "cases": 3,
+     "checks": 28,
+     "rate": 0.1071,
+     "article_checks": 0,
+     "article_rate": null
+    },
+    "documented_case_summary": {
+     "cases": 3,
+     "checks": 26,
+     "rate": 0.2308,
+     "article_checks": 0,
+     "article_rate": null
+    },
+    "appeal_decision": {
+     "cases": 6,
+     "checks": 55,
+     "rate": 0.1636,
+     "article_checks": 0,
+     "article_rate": null
+    },
+    "issued_variance": {
+     "cases": 5,
+     "checks": 52,
+     "rate": 0.2115,
+     "article_checks": 7,
+     "article_rate": 0.7143
+    }
+   }
+  },
+  {
+   "place": "Edmonton",
+   "cases": 21,
+   "checks": 233,
+   "passed": 36,
+   "rate": 0.1545,
+   "by_kind": {
+    "A": {
+     "n": 14,
+     "rate": 1.0
+    },
+    "F": {
+     "n": 104,
+     "rate": 0.0962
+    },
+    "R": {
+     "n": 108,
+     "rate": 0.1019
+    },
+    "B": {
+     "n": 7,
+     "rate": 0.1429
+    }
+   },
+   "guardrails_all_pass": 1.0,
+   "guardrails": {
+    "no_claims": 1.0,
+    "citations_resolve": 1.0,
+    "no_alberta_commit_outside_alberta": 1.0,
+    "ran": 1.0
+   },
+   "places_in_group": {
+    "Edmonton": 21
+   },
+   "case_types": {
+    "documented_design_study": 15,
+    "appeal_decision": 2,
+    "regulatory_guidance": 2,
+    "documented_case_summary": 1,
+    "published_worked_example": 1
+   },
+   "by_case_type": {
+    "appeal_decision": {
+     "cases": 2,
+     "checks": 20,
+     "rate": 0.35,
+     "article_checks": 0,
+     "article_rate": null
+    },
+    "regulatory_guidance": {
+     "cases": 2,
+     "checks": 26,
+     "rate": 0.3077,
+     "article_checks": 0,
+     "article_rate": null
+    },
+    "documented_design_study": {
+     "cases": 15,
+     "checks": 161,
+     "rate": 0.0932,
+     "article_checks": 13,
+     "article_rate": 1.0
+    },
+    "documented_case_summary": {
+     "cases": 1,
+     "checks": 15,
+     "rate": 0.1333,
+     "article_checks": 0,
+     "article_rate": null
+    },
+    "published_worked_example": {
+     "cases": 1,
+     "checks": 11,
+     "rate": 0.3636,
+     "article_checks": 1,
+     "article_rate": 1.0
+    }
+   }
+  },
+  {
+   "place": "Alberta, other named place",
+   "cases": 3,
+   "checks": 66,
+   "passed": 11,
+   "rate": 0.1667,
+   "by_kind": {
+    "A": {
+     "n": 9,
+     "rate": 0.8889
+    },
+    "F": {
+     "n": 37,
+     "rate": 0.0811
+    },
+    "R": {
+     "n": 19,
+     "rate": 0.0
+    },
+    "B": {
+     "n": 1,
+     "rate": 0.0
+    }
+   },
+   "guardrails_all_pass": 1.0,
+   "guardrails": {
+    "no_claims": 1.0,
+    "citations_resolve": 1.0,
+    "no_alberta_commit_outside_alberta": 1.0,
+    "ran": 1.0
+   },
+   "places_in_group": {
+    "Beaumont": 2,
+    "Rocky View County": 1
+   },
+   "case_types": {
+    "actual_application": 2,
+    "appeal_decision": 1
+   },
+   "by_case_type": {
+    "appeal_decision": {
+     "cases": 1,
+     "checks": 20,
+     "rate": 0.1,
+     "article_checks": 1,
+     "article_rate": 0.0
+    },
+    "actual_application": {
+     "cases": 2,
+     "checks": 46,
+     "rate": 0.1957,
+     "article_checks": 8,
+     "article_rate": 1.0
+    }
+   }
+  },
+  {
+   "place": "Alberta, province-wide",
+   "cases": 94,
+   "checks": 787,
+   "passed": 298,
+   "rate": 0.3787,
+   "by_kind": {
+    "A": {
+     "n": 51,
+     "rate": 0.902
+    },
+    "F": {
+     "n": 278,
+     "rate": 0.3165
+    },
+    "R": {
+     "n": 383,
+     "rate": 0.423
+    },
+    "B": {
+     "n": 75,
+     "rate": 0.0267
+    }
+   },
+   "guardrails_all_pass": 1.0,
+   "guardrails": {
+    "no_claims": 1.0,
+    "citations_resolve": 1.0,
+    "no_alberta_commit_outside_alberta": 1.0,
+    "ran": 1.0
+   },
+   "places_in_group": {
+    "Province-wide": 94
+   },
+   "case_types": {
+    "issued_variance": 61,
+    "regulatory_guidance": 33
+   },
+   "by_case_type": {
+    "regulatory_guidance": {
+     "cases": 33,
+     "checks": 278,
+     "rate": 0.2878,
+     "article_checks": 8,
+     "article_rate": 1.0
+    },
+    "issued_variance": {
+     "cases": 61,
+     "checks": 509,
+     "rate": 0.4283,
+     "article_checks": 43,
+     "article_rate": 0.8837
+    }
+   }
+  },
+  {
+   "place": "Alberta, place not stated",
+   "cases": 24,
+   "checks": 193,
+   "passed": 41,
+   "rate": 0.2124,
+   "by_kind": {
+    "A": {
+     "n": 12,
+     "rate": 0.8333
+    },
+    "F": {
+     "n": 71,
+     "rate": 0.1831
+    },
+    "R": {
+     "n": 82,
+     "rate": 0.1951
+    },
+    "B": {
+     "n": 28,
+     "rate": 0.0714
+    }
+   },
+   "guardrails_all_pass": 1.0,
+   "guardrails": {
+    "no_claims": 1.0,
+    "citations_resolve": 1.0,
+    "no_alberta_commit_outside_alberta": 1.0,
+    "ran": 1.0
+   },
+   "places_in_group": {
+    "Unspecified locality": 24
+   },
+   "case_types": {
+    "appeal_decision": 24
+   },
+   "by_case_type": {
+    "appeal_decision": {
+     "cases": 24,
+     "checks": 193,
+     "rate": 0.2124,
+     "article_checks": 12,
+     "article_rate": 0.8333
+    }
+   }
+  },
+  {
+   "place": "British Columbia",
+   "cases": 71,
+   "checks": 505,
+   "passed": 52,
+   "rate": 0.103,
+   "by_kind": {
+    "A": {
+     "n": 0,
+     "rate": null
+    },
+    "F": {
+     "n": 192,
+     "rate": 0.0417
+    },
+    "R": {
+     "n": 242,
+     "rate": 0.1818
+    },
+    "B": {
+     "n": 71,
+     "rate": 0.0
+    }
+   },
+   "guardrails_all_pass": 1.0,
+   "guardrails": {
+    "no_claims": 1.0,
+    "citations_resolve": 1.0,
+    "no_alberta_commit_outside_alberta": 1.0,
+    "ran": 1.0
+   },
+   "places_in_group": {
+    "Unspecified locality": 55,
+    "Victoria": 8,
+    "Vancouver": 5,
+    "Richmond": 2,
+    "Prince George": 1
+   },
+   "case_types": {
+    "appeal_decision": 48,
+    "actual_application": 8,
+    "documented_design_study": 8,
+    "published_worked_example": 4,
+    "documented_case_summary": 3
+   },
+   "by_case_type": {
+    "appeal_decision": {
+     "cases": 48,
+     "checks": 339,
+     "rate": 0.0826,
+     "article_checks": 0,
+     "article_rate": null
+    },
+    "documented_case_summary": {
+     "cases": 3,
+     "checks": 19,
+     "rate": 0.1053,
+     "article_checks": 0,
+     "article_rate": null
+    },
+    "actual_application": {
+     "cases": 8,
+     "checks": 55,
+     "rate": 0.2182,
+     "article_checks": 0,
+     "article_rate": null
+    },
+    "documented_design_study": {
+     "cases": 8,
+     "checks": 56,
+     "rate": 0.1071,
+     "article_checks": 0,
+     "article_rate": null
+    },
+    "published_worked_example": {
+     "cases": 4,
+     "checks": 36,
+     "rate": 0.1111,
+     "article_checks": 0,
+     "article_rate": null
+    }
+   }
+  },
+  {
+   "place": "Ontario",
+   "cases": 63,
+   "checks": 517,
+   "passed": 45,
+   "rate": 0.087,
+   "by_kind": {
+    "A": {
+     "n": 0,
+     "rate": null
+    },
+    "F": {
+     "n": 181,
+     "rate": 0.105
+    },
+    "R": {
+     "n": 262,
+     "rate": 0.0992
+    },
+    "B": {
+     "n": 74,
+     "rate": 0.0
+    }
+   },
+   "guardrails_all_pass": 1.0,
+   "guardrails": {
+    "no_claims": 1.0,
+    "citations_resolve": 1.0,
+    "no_alberta_commit_outside_alberta": 1.0,
+    "ran": 1.0
+   },
+   "places_in_group": {
+    "Toronto": 29,
+    "Ottawa": 16,
+    "Hamilton": 4,
+    "Chalk River": 2,
+    "Waterloo": 2,
+    "Oshawa": 2,
+    "Vaughan": 1,
+    "Oakville": 1,
+    "Brampton": 1,
+    "South Glengarry": 1,
+    "West Nipissing": 1,
+    "North Gower": 1,
+    "Muskoka Lakes": 1,
+    "Greater Sudbury": 1
+   },
+   "case_types": {
+    "documented_design_study": 30,
+    "documented_case_summary": 15,
+    "appeal_decision": 14,
+    "research_evidence": 2,
+    "product_evidence": 1,
+    "published_worked_example": 1
+   },
+   "by_case_type": {
+    "documented_design_study": {
+     "cases": 30,
+     "checks": 256,
+     "rate": 0.0508,
+     "article_checks": 0,
+     "article_rate": null
+    },
+    "appeal_decision": {
+     "cases": 14,
+     "checks": 109,
+     "rate": 0.1927,
+     "article_checks": 0,
+     "article_rate": null
+    },
+    "product_evidence": {
+     "cases": 1,
+     "checks": 7,
+     "rate": 0.2857,
+     "article_checks": 0,
+     "article_rate": null
+    },
+    "published_worked_example": {
+     "cases": 1,
+     "checks": 7,
+     "rate": 0.2857,
+     "article_checks": 0,
+     "article_rate": null
+    },
+    "research_evidence": {
+     "cases": 2,
+     "checks": 16,
+     "rate": 0.0625,
+     "article_checks": 0,
+     "article_rate": null
+    },
+    "documented_case_summary": {
+     "cases": 15,
+     "checks": 122,
+     "rate": 0.0492,
+     "article_checks": 0,
+     "article_rate": null
+    }
+   }
+  },
+  {
+   "place": "Saskatchewan",
+   "cases": 16,
+   "checks": 88,
+   "passed": 10,
+   "rate": 0.1136,
+   "by_kind": {
+    "A": {
+     "n": 0,
+     "rate": null
+    },
+    "F": {
+     "n": 9,
+     "rate": 0.3333
+    },
+    "R": {
+     "n": 63,
+     "rate": 0.1111
+    },
+    "B": {
+     "n": 16,
+     "rate": 0.0
+    }
+   },
+   "guardrails_all_pass": 1.0,
+   "guardrails": {
+    "no_claims": 1.0,
+    "citations_resolve": 1.0,
+    "no_alberta_commit_outside_alberta": 1.0,
+    "ran": 1.0
+   },
+   "places_in_group": {
+    "Unspecified locality": 16
+   },
+   "case_types": {
+    "appeal_decision": 16
+   },
+   "by_case_type": {
+    "appeal_decision": {
+     "cases": 16,
+     "checks": 88,
+     "rate": 0.1136,
+     "article_checks": 0,
+     "article_rate": null
+    }
+   }
+  },
+  {
+   "place": "Manitoba",
+   "cases": 5,
+   "checks": 35,
+   "passed": 3,
+   "rate": 0.0857,
+   "by_kind": {
+    "A": {
+     "n": 0,
+     "rate": null
+    },
+    "F": {
+     "n": 8,
+     "rate": 0.0
+    },
+    "R": {
+     "n": 22,
+     "rate": 0.1364
+    },
+    "B": {
+     "n": 5,
+     "rate": 0.0
+    }
+   },
+   "guardrails_all_pass": 1.0,
+   "guardrails": {
+    "no_claims": 1.0,
+    "citations_resolve": 1.0,
+    "no_alberta_commit_outside_alberta": 1.0,
+    "ran": 1.0
+   },
+   "places_in_group": {
+    "Winnipeg": 5
+   },
+   "case_types": {
+    "documented_design_study": 3,
+    "actual_application": 1,
+    "appeal_decision": 1
+   },
+   "by_case_type": {
+    "documented_design_study": {
+     "cases": 3,
+     "checks": 18,
+     "rate": 0.1111,
+     "article_checks": 0,
+     "article_rate": null
+    },
+    "actual_application": {
+     "cases": 1,
+     "checks": 12,
+     "rate": 0.0,
+     "article_checks": 0,
+     "article_rate": null
+    },
+    "appeal_decision": {
+     "cases": 1,
+     "checks": 5,
+     "rate": 0.2,
+     "article_checks": 0,
+     "article_rate": null
+    }
+   }
+  },
+  {
+   "place": "Quebec",
+   "cases": 3,
+   "checks": 21,
+   "passed": 1,
+   "rate": 0.0476,
+   "by_kind": {
+    "A": {
+     "n": 0,
+     "rate": null
+    },
+    "F": {
+     "n": 6,
+     "rate": 0.0
+    },
+    "R": {
+     "n": 12,
+     "rate": 0.0833
+    },
+    "B": {
+     "n": 3,
+     "rate": 0.0
+    }
+   },
+   "guardrails_all_pass": 1.0,
+   "guardrails": {
+    "no_claims": 1.0,
+    "citations_resolve": 1.0,
+    "no_alberta_commit_outside_alberta": 1.0,
+    "ran": 1.0
+   },
+   "places_in_group": {
+    "Quebec City": 1,
+    "Montreal": 1,
+    "Longueuil": 1
+   },
+   "case_types": {
+    "documented_design_study": 3
+   },
+   "by_case_type": {
+    "documented_design_study": {
+     "cases": 3,
+     "checks": 21,
+     "rate": 0.0476,
+     "article_checks": 0,
+     "article_rate": null
+    }
+   }
+  },
+  {
+   "place": "Canada, other or national",
+   "cases": 75,
+   "checks": 652,
+   "passed": 111,
+   "rate": 0.1702,
+   "by_kind": {
+    "A": {
+     "n": 33,
+     "rate": 1.0
+    },
+    "F": {
+     "n": 184,
+     "rate": 0.1793
+    },
+    "R": {
+     "n": 298,
+     "rate": 0.151
+    },
+    "B": {
+     "n": 137,
+     "rate": 0.0
+    }
+   },
+   "guardrails_all_pass": 1.0,
+   "guardrails": {
+    "no_claims": 1.0,
+    "citations_resolve": 1.0,
+    "no_alberta_commit_outside_alberta": 1.0,
+    "ran": 1.0
+   },
+   "places_in_group": {
+    "National scope": 51,
+    "Unspecified locality": 17,
+    "Multiple localities": 2,
+    "Mount Pearl": 2,
+    "Halifax": 1,
+    "Ferryland": 1,
+    "St. John's": 1
+   },
+   "case_types": {
+    "product_evidence": 46,
+    "research_evidence": 10,
+    "published_worked_example": 6,
+    "documented_design_study": 6,
+    "appeal_decision": 6,
+    "actual_application": 1
+   },
+   "by_case_type": {
+    "actual_application": {
+     "cases": 1,
+     "checks": 11,
+     "rate": 0.0,
+     "article_checks": 0,
+     "article_rate": null
+    },
+    "published_worked_example": {
+     "cases": 6,
+     "checks": 48,
+     "rate": 0.125,
+     "article_checks": 0,
+     "article_rate": null
+    },
+    "product_evidence": {
+     "cases": 46,
+     "checks": 416,
+     "rate": 0.2284,
+     "article_checks": 33,
+     "article_rate": 1.0
+    },
+    "research_evidence": {
+     "cases": 10,
+     "checks": 94,
+     "rate": 0.0745,
+     "article_checks": 0,
+     "article_rate": null
+    },
+    "documented_design_study": {
+     "cases": 6,
+     "checks": 44,
+     "rate": 0.0,
+     "article_checks": 0,
+     "article_rate": null
+    },
+    "appeal_decision": {
+     "cases": 6,
+     "checks": 39,
+     "rate": 0.0769,
+     "article_checks": 0,
+     "article_rate": null
+    }
+   }
+  },
+  {
+   "place": "Outside Canada",
+   "cases": 261,
+   "checks": 2574,
+   "passed": 549,
+   "rate": 0.2133,
+   "by_kind": {
+    "A": {
+     "n": 0,
+     "rate": null
+    },
+    "F": {
+     "n": 1297,
+     "rate": 0.2028
+    },
+    "R": {
+     "n": 1016,
+     "rate": 0.2815
+    },
+    "B": {
+     "n": 261,
+     "rate": 0.0
+    }
+   },
+   "guardrails_all_pass": 1.0,
+   "guardrails": {
+    "no_claims": 1.0,
+    "citations_resolve": 1.0,
+    "no_alberta_commit_outside_alberta": 1.0,
+    "ran": 1.0
+   },
+   "places_in_group": {
+    "Unspecified locality": 59,
+    "Auckland": 26,
+    "National scope": 23,
+    "Province-wide": 21,
+    "Portland": 19,
+    "Tauranga": 10,
+    "Wellington": 7,
+    "Christchurch": 6,
+    "San Francisco": 5,
+    "Nelson": 5,
+    "Exeter": 3,
+    "London": 3,
+    "Epsom": 3,
+    "Motueka": 3,
+    "Tamworth": 2,
+    "Austral": 2,
+    "Napier": 2,
+    "Dunedin": 2,
+    "Porirua": 2,
+    "Rotorua": 2,
+    "Paraparaumu": 2,
+    "Cairns": 2,
+    "Pelican Waters": 2,
+    "Bankstown": 1,
+    "Macquarie Park": 1,
+    "Goulburn": 1,
+    "Wetherill Park": 1,
+    "Newcastle West": 1,
+    "Shellharbour": 1,
+    "Lindfield": 1,
+    "Gosford": 1,
+    "Newcastle": 1,
+    "St Leonards": 1,
+    "Sandfly": 1,
+    "Bristol": 1,
+    "Trondheim": 1,
+    "Gjøvik": 1,
+    "Sarpsborg": 1,
+    "Hønefoss": 1,
+    "Newcastle upon Tyne": 1,
+    "Tokoroa": 1,
+    "Governors Bay": 1,
+    "Lochiel": 1,
+    "Parkhurst": 1,
+    "Cromwell": 1,
+    "Tuakau": 1,
+    "Dannevirke": 1,
+    "Martinborough": 1,
+    "Blenheim": 1,
+    "Ngāruawāhia": 1,
+    "Thames": 1,
+    "Sefton": 1,
+    "Aongatete": 1,
+    "Hamilton": 1,
+    "Seddon": 1,
+    "Richmond": 1,
+    "Mangonui Harbour": 1,
+    "Multiple localities": 1,
+    "Lumsden": 1,
+    "Lower Hutt": 1,
+    "Langs Beach": 1,
+    "Waimumu": 1,
+    "Mosgiel": 1,
+    "Mareeba": 1,
+    "Pittsworth": 1,
+    "Townsville": 1,
+    "Stanthorpe": 1,
+    "Raceview": 1,
+    "Caboolture": 1,
+    "Coolum Beach": 1,
+    "Pasadena": 1,
+    "Oslo": 1,
+    "Vienna": 1
+   },
+   "case_types": {
+    "appeal_decision": 141,
+    "actual_application": 37,
+    "issued_variance": 34,
+    "product_evidence": 24,
+    "regulatory_guidance": 20,
+    "documented_design_study": 3,
+    "research_evidence": 2
+   },
+   "by_case_type": {
+    "appeal_decision": {
+     "cases": 141,
+     "checks": 1343,
+     "rate": 0.242,
+     "article_checks": 0,
+     "article_rate": null
+    },
+    "issued_variance": {
+     "cases": 34,
+     "checks": 298,
+     "rate": 0.2215,
+     "article_checks": 0,
+     "article_rate": null
+    },
+    "actual_application": {
+     "cases": 37,
+     "checks": 459,
+     "rate": 0.146,
+     "article_checks": 0,
+     "article_rate": null
+    },
+    "regulatory_guidance": {
+     "cases": 20,
+     "checks": 175,
+     "rate": 0.2629,
+     "article_checks": 0,
+     "article_rate": null
+    },
+    "product_evidence": {
+     "cases": 24,
+     "checks": 253,
+     "rate": 0.1621,
+     "article_checks": 0,
+     "article_rate": null
+    },
+    "research_evidence": {
+     "cases": 2,
+     "checks": 15,
+     "rate": 0.0,
+     "article_checks": 0,
+     "article_rate": null
+    },
+    "documented_design_study": {
+     "cases": 3,
+     "checks": 31,
+     "rate": 0.129,
+     "article_checks": 0,
+     "article_rate": null
+    }
+   }
+  }
+ ]
+}
