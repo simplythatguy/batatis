@@ -8,10 +8,11 @@ description = "Log-test marker in e641ad9. Ordinary applicant text, not a creden
 regexes = ['''SECRETQUOTE9f3a7c''', '''SECRETBYTES9f3a7c''']
 
 [[allowlists]]
-description = "Three public SCC page identifiers in the source inventory, not API credentials."
+description = "Three public SCC page identifiers in the source inventory and the jurisdiction research, not API credentials."
 targetRules = ["generic-api-key"]
 condition = "AND"
-paths = ['''^Data Prompts/(Alberta Jurisdiction Sources\.json|_source_package/link_audit\.json|source_catalogue\.jsonl)$''']
+paths = ['''^Data Prompts/(Alberta Jurisdiction Sources\.json|_source_package/link_audit\.json|source_catalogue\.jsonl)$''',
+         '''^docs/research/2026-10-28-every-jurisdiction/.+\.(json|md)$''']
 regexes = ['''^(d1d96198-3866-4673-9cec-a787f71f89f5|5de58e0f-d65e-47f0-9973-cde78dd8fd1d|4938a13d-7af5-46cc-a235-eff54163a88f)$''']
 
 [[allowlists]]

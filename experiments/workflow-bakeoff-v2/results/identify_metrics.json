@@ -1,0 +1,4672 @@
+[
+ {
+  "id": "ab-wocd-window-guards-egress",
+  "type": "variance",
+  "gold": [
+   "9.8.8.1.",
+   "9.9.10.1."
+  ],
+  "raw_picks": [
+   "3.3.4.8.",
+   "9.9.10.1.",
+   "10.4.4.1."
+  ],
+  "picks": [
+   "3.3.4.8.",
+   "9.9.10.1.",
+   "10.4.4.1."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    2,
+    2,
+    true
+   ],
+   "10": [
+    2,
+    2,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    0,
+    2,
+    false
+   ],
+   "3": [
+    1,
+    2,
+    false
+   ],
+   "8": [
+    1,
+    2,
+    false
+   ]
+  },
+  "merged": {
+   "1": [
+    0,
+    2,
+    false
+   ],
+   "3": [
+    1,
+    2,
+    false
+   ],
+   "10": [
+    2,
+    2,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-heated-slab-insulation-hydronic",
+  "type": "variance",
+  "gold": [
+   "9.36.2.8."
+  ],
+  "raw_picks": [
+   "9.36.2.8.",
+   "9.36.2.11.",
+   "9.36.8.7."
+  ],
+  "picks": [
+   "9.36.2.8.",
+   "9.36.2.11.",
+   "9.36.8.7."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "8": [
+    1,
+    1,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-sprinkler-protected-glazing-rated-walls",
+  "type": "variance",
+  "gold": [
+   "3.1.7.1.",
+   "9.10.3.1."
+  ],
+  "raw_picks": [
+   "3.1.8.4.",
+   "3.4.4.4.",
+   "3.1.8.5.",
+   "3.2.5.12.",
+   "3.1.8.16."
+  ],
+  "picks": [
+   "3.1.8.4.",
+   "3.4.4.4.",
+   "3.1.8.5.",
+   "3.2.5.12.",
+   "3.1.8.16."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    2,
+    false
+   ],
+   "3": [
+    0,
+    2,
+    false
+   ],
+   "10": [
+    0,
+    2,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    0,
+    2,
+    false
+   ],
+   "3": [
+    0,
+    2,
+    false
+   ],
+   "8": [
+    0,
+    2,
+    false
+   ]
+  },
+  "merged": {
+   "1": [
+    0,
+    2,
+    false
+   ],
+   "3": [
+    0,
+    2,
+    false
+   ],
+   "10": [
+    0,
+    2,
+    false
+   ]
+  },
+  "pool_has_gold": false
+ },
+ {
+  "id": "ab-oilgas-processing-building-f2",
+  "type": "variance",
+  "gold": [
+   "3.3.1.5."
+  ],
+  "raw_picks": [
+   "3.3.1.5.",
+   "3.4.2.5.",
+   "3.4.6.16."
+  ],
+  "picks": [
+   "3.3.1.5.",
+   "3.4.2.5.",
+   "3.4.6.16."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "10": [
+    0,
+    1,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "8": [
+    1,
+    1,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-span-book-joist-rafter-beam-spans",
+  "type": "variance",
+  "gold": [
+   "9.23.4.2."
+  ],
+  "raw_picks": [
+   "9.23.4.2.",
+   "9.4.1.1.",
+   "1.3.1.2."
+  ],
+  "picks": [
+   "9.23.4.2.",
+   "9.4.1.1.",
+   "1.3.1.2."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "8": [
+    1,
+    1,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-exhaust-outlet-air-intake-clearance",
+  "type": "variance",
+  "gold": [
+   "9.32.3.13."
+  ],
+  "raw_picks": [
+   "9.32.3.13.",
+   "9.32.1.3."
+  ],
+  "picks": [
+   "9.32.3.13.",
+   "9.32.1.3."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "8": [
+    1,
+    1,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-csa-b52-2023-refrigerant-standard",
+  "type": "variance",
+  "gold": [
+   "6.2.1.5.",
+   "9.33.5.2."
+  ],
+  "raw_picks": [
+   "9.33.5.2.",
+   "6.2.1.5.",
+   "9.33.1.1.",
+   "6.2.1.6."
+  ],
+  "picks": [
+   "9.33.5.2.",
+   "6.2.1.5.",
+   "9.33.1.1.",
+   "6.2.1.6."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    2,
+    2,
+    true
+   ],
+   "10": [
+    2,
+    2,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    2,
+    2,
+    true
+   ],
+   "8": [
+    2,
+    2,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    2,
+    2,
+    true
+   ],
+   "10": [
+    2,
+    2,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-skid-fabricator-welding-certification",
+  "type": "variance",
+  "gold": [
+   "4.3.4.1."
+  ],
+  "raw_picks": [],
+  "picks": [],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "10": [
+    0,
+    1,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "8": [
+    0,
+    1,
+    false
+   ]
+  },
+  "merged": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "10": [
+    0,
+    1,
+    false
+   ]
+  },
+  "pool_has_gold": false
+ },
+ {
+  "id": "ab-greenhouse-polyethylene-film-public-retail",
+  "type": "variance",
+  "gold": [
+   "3.1.18.5."
+  ],
+  "raw_picks": [
+   "3.1.18.5.",
+   "3.4.5.1."
+  ],
+  "picks": [
+   "3.1.18.5.",
+   "3.4.5.1."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "10": [
+    0,
+    1,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "8": [
+    1,
+    1,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-mltp-permanent-wood-foundation",
+  "type": "variance",
+  "gold": [
+   "9.15.2.4."
+  ],
+  "raw_picks": [
+   "9.15.2.4.",
+   "4.2.4.14.",
+   "4.2.4.1.",
+   "4.2.2.3.",
+   "4.3.1.1.",
+   "9.16.5.1."
+  ],
+  "picks": [
+   "9.15.2.4.",
+   "4.2.4.14.",
+   "4.2.4.1.",
+   "4.2.2.3.",
+   "4.3.1.1.",
+   "9.16.5.1."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "10": [
+    0,
+    1,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "8": [
+    1,
+    1,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-elevator-instead-of-barrier-free-lift",
+  "type": "variance",
+  "gold": [
+   "3.5.4.1."
+  ],
+  "raw_picks": [
+   "3.5.4.1.",
+   "3.8.3.7.",
+   "3.5.2.1."
+  ],
+  "picks": [
+   "3.5.4.1.",
+   "3.8.3.7.",
+   "3.5.2.1."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "8": [
+    1,
+    1,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-multilevel-storage-racking-special-structure",
+  "type": "variance",
+  "gold": [
+   "3.2.2.2."
+  ],
+  "raw_picks": [
+   "3.2.2.2.",
+   "4.4.3.1.",
+   "3.2.8.2.",
+   "3.4.2.2.",
+   "3.2.5.12.",
+   "3.2.4.1.",
+   "3.2.7.8.",
+   "1.1.4.1."
+  ],
+  "picks": [
+   "3.2.2.2.",
+   "4.4.3.1.",
+   "3.2.8.2.",
+   "3.4.2.2.",
+   "3.2.5.12.",
+   "3.2.4.1.",
+   "3.2.7.8.",
+   "1.1.4.1."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "10": [
+    0,
+    1,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "8": [
+    1,
+    1,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-unvented-roof-assembly-evaluation-report",
+  "type": "variance",
+  "gold": [
+   "9.19.1.1.",
+   "9.19.1.4."
+  ],
+  "raw_picks": [
+   "9.19.1.1.",
+   "9.19.1.2.",
+   "9.19.1.3.",
+   "9.19.1.4."
+  ],
+  "picks": [
+   "9.19.1.1.",
+   "9.19.1.2.",
+   "9.19.1.3.",
+   "9.19.1.4."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    2,
+    2,
+    true
+   ],
+   "10": [
+    2,
+    2,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    1,
+    2,
+    false
+   ],
+   "8": [
+    2,
+    2,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    1,
+    2,
+    false
+   ],
+   "10": [
+    2,
+    2,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-vented-soffit-intumescent-protection",
+  "type": "variance",
+  "gold": [
+   "9.10.14.5.",
+   "9.10.15.5.",
+   "9.10.12.4."
+  ],
+  "raw_picks": [
+   "3.2.3.16.",
+   "9.10.12.4.",
+   "3.2.3.6."
+  ],
+  "picks": [
+   "3.2.3.16.",
+   "9.10.12.4.",
+   "3.2.3.6."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    1,
+    3,
+    false
+   ],
+   "3": [
+    2,
+    3,
+    false
+   ],
+   "10": [
+    3,
+    3,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    0,
+    3,
+    false
+   ],
+   "3": [
+    1,
+    3,
+    false
+   ],
+   "8": [
+    1,
+    3,
+    false
+   ]
+  },
+  "merged": {
+   "1": [
+    0,
+    3,
+    false
+   ],
+   "3": [
+    1,
+    3,
+    false
+   ],
+   "10": [
+    3,
+    3,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-tall-wall-heights-guideline",
+  "type": "variance",
+  "gold": [
+   "9.23.10.1."
+  ],
+  "raw_picks": [],
+  "picks": [],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "10": [
+    0,
+    1,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "8": [
+    0,
+    1,
+    false
+   ]
+  },
+  "merged": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "10": [
+    0,
+    1,
+    false
+   ]
+  },
+  "pool_has_gold": false
+ },
+ {
+  "id": "ab-low-rise-window-wind-ratings-guideline",
+  "type": "variance",
+  "gold": [
+   "9.7.4.3."
+  ],
+  "raw_picks": [
+   "9.7.4.3.",
+   "9.7.4.2.",
+   "9.7.3.1.",
+   "4.1.7.6."
+  ],
+  "picks": [
+   "9.7.4.3.",
+   "9.7.4.2.",
+   "9.7.3.1.",
+   "4.1.7.6."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "8": [
+    1,
+    1,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-strip-mall-suite-separation-no-corridor",
+  "type": "variance",
+  "gold": [
+   "3.3.1.1.",
+   "9.10.9.15."
+  ],
+  "raw_picks": [
+   "3.3.1.1.",
+   "9.10.9.15.",
+   "3.3.1.4.",
+   "3.4.2.4."
+  ],
+  "picks": [
+   "3.3.1.1.",
+   "9.10.9.15.",
+   "3.3.1.4.",
+   "3.4.2.4."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    2,
+    false
+   ],
+   "3": [
+    0,
+    2,
+    false
+   ],
+   "10": [
+    0,
+    2,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    2,
+    2,
+    true
+   ],
+   "8": [
+    2,
+    2,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    2,
+    2,
+    true
+   ],
+   "10": [
+    2,
+    2,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-photoluminescent-exit-sign-charging-lights",
+  "type": "interpretation",
+  "gold": [
+   "3.4.5.1.",
+   "9.9.11.3."
+  ],
+  "raw_picks": [
+   "3.2.7.4.",
+   "3.2.7.3.",
+   "3.4.5.1.",
+   "3.2.7.5.",
+   "9.9.12.3.",
+   "9.9.11.3."
+  ],
+  "picks": [
+   "3.2.7.4.",
+   "3.2.7.3.",
+   "3.4.5.1.",
+   "3.2.7.5.",
+   "9.9.12.3.",
+   "9.9.11.3."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    2,
+    2,
+    true
+   ],
+   "10": [
+    2,
+    2,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    0,
+    2,
+    false
+   ],
+   "3": [
+    1,
+    2,
+    false
+   ],
+   "8": [
+    2,
+    2,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    0,
+    2,
+    false
+   ],
+   "3": [
+    1,
+    2,
+    false
+   ],
+   "10": [
+    2,
+    2,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-mechanically-vented-appliance-makeup-air",
+  "type": "interpretation",
+  "gold": [
+   "9.32.3.8."
+  ],
+  "raw_picks": [
+   "9.32.3.8.",
+   "9.33.10.1.",
+   "9.36.3.10."
+  ],
+  "picks": [
+   "9.32.3.8.",
+   "9.33.10.1.",
+   "9.36.3.10."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "8": [
+    1,
+    1,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-elevator-out-of-service-barrier-free",
+  "type": "interpretation",
+  "gold": [
+   "3.8.2.3.",
+   "3.8.3.7."
+  ],
+  "raw_picks": [
+   "3.5.2.1.",
+   "3.8.2.3."
+  ],
+  "picks": [
+   "3.5.2.1.",
+   "3.8.2.3."
+  ],
+  "dropped": 0,
+  "scope": "other",
+  "prod": {
+   "1": [
+    0,
+    2,
+    false
+   ],
+   "3": [
+    1,
+    2,
+    false
+   ],
+   "10": [
+    1,
+    2,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    0,
+    2,
+    false
+   ],
+   "3": [
+    1,
+    2,
+    false
+   ],
+   "8": [
+    1,
+    2,
+    false
+   ]
+  },
+  "merged": {
+   "1": [
+    0,
+    2,
+    false
+   ],
+   "3": [
+    1,
+    2,
+    false
+   ],
+   "10": [
+    1,
+    2,
+    false
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-energy-code-exempt-equipment-shelter",
+  "type": "interpretation",
+  "gold": [
+   "9.36.1.3."
+  ],
+  "raw_picks": [
+   "9.36.8.10."
+  ],
+  "picks": [
+   "9.36.8.10."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "10": [
+    0,
+    1,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "8": [
+    0,
+    1,
+    false
+   ]
+  },
+  "merged": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "10": [
+    0,
+    1,
+    false
+   ]
+  },
+  "pool_has_gold": false
+ },
+ {
+  "id": "ab-attached-garage-house-with-secondary-suite",
+  "type": "interpretation",
+  "gold": [
+   "9.10.9.18."
+  ],
+  "raw_picks": [
+   "9.10.9.18",
+   "9.35.1.1",
+   "9.10.13.15"
+  ],
+  "picks": [
+   "9.10.9.18.",
+   "9.35.1.1.",
+   "9.10.13.15."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "8": [
+    1,
+    1,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-hydronic-heating-design-verification",
+  "type": "interpretation",
+  "gold": [
+   "9.33.4.1."
+  ],
+  "raw_picks": [
+   "9.33.4.1.",
+   "6.2.1.1.",
+   "9.33.1.1."
+  ],
+  "picks": [
+   "9.33.4.1.",
+   "6.2.1.1.",
+   "9.33.1.1."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "8": [
+    1,
+    1,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-barrier-free-exempt-building-uses",
+  "type": "interpretation",
+  "gold": [
+   "3.8.2.1."
+  ],
+  "raw_picks": [
+   "3.8.2.8",
+   "3.8.3.17"
+  ],
+  "picks": [
+   "3.8.2.8.",
+   "3.8.3.17."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "10": [
+    0,
+    1,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "8": [
+    0,
+    1,
+    false
+   ]
+  },
+  "merged": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "10": [
+    0,
+    1,
+    false
+   ]
+  },
+  "pool_has_gold": false
+ },
+ {
+  "id": "ab-wood-roof-truss-engineered-design",
+  "type": "interpretation",
+  "gold": [
+   "9.23.14.11."
+  ],
+  "raw_picks": [
+   "9.23.14.11.",
+   "9.4.1.1.",
+   "4.3.1.1.",
+   "9.23.5.5."
+  ],
+  "picks": [
+   "9.23.14.11.",
+   "9.4.1.1.",
+   "4.3.1.1.",
+   "9.23.5.5."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "8": [
+    1,
+    1,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-radon-pipe-labelling",
+  "type": "bulletin",
+  "gold": [
+   "6.2.1.1.",
+   "9.13.4.3."
+  ],
+  "raw_picks": [
+   "9.13.4.3.",
+   "9.13.4.2.",
+   "9.13.4.1.",
+   "6.2.1.1."
+  ],
+  "picks": [
+   "9.13.4.3.",
+   "9.13.4.2.",
+   "9.13.4.1.",
+   "6.2.1.1."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    1,
+    2,
+    false
+   ],
+   "10": [
+    2,
+    2,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    1,
+    2,
+    false
+   ],
+   "8": [
+    2,
+    2,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    1,
+    2,
+    false
+   ],
+   "10": [
+    2,
+    2,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-roof-mounted-hvac-access",
+  "type": "bulletin",
+  "gold": [
+   "3.6.4.7.",
+   "6.2.1.6.",
+   "9.33.1.2."
+  ],
+  "raw_picks": [
+   "3.6.4.7.",
+   "9.33.1.2.",
+   "6.2.1.6.",
+   "6.2.1.5."
+  ],
+  "picks": [
+   "3.6.4.7.",
+   "9.33.1.2.",
+   "6.2.1.6.",
+   "6.2.1.5."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    1,
+    3,
+    false
+   ],
+   "3": [
+    1,
+    3,
+    false
+   ],
+   "10": [
+    3,
+    3,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    3,
+    false
+   ],
+   "3": [
+    3,
+    3,
+    true
+   ],
+   "8": [
+    3,
+    3,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    3,
+    false
+   ],
+   "3": [
+    3,
+    3,
+    true
+   ],
+   "10": [
+    3,
+    3,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-tier1-energy-airtightness-modelling",
+  "type": "bulletin",
+  "gold": [
+   "9.36.1.3.",
+   "9.36.5.10.",
+   "9.36.7.3."
+  ],
+  "raw_picks": [
+   "9.36.6.3.",
+   "9.36.5.10.",
+   "9.36.7.3.",
+   "9.36.7.2.",
+   "9.36.5.14."
+  ],
+  "picks": [
+   "9.36.6.3.",
+   "9.36.5.10.",
+   "9.36.7.3.",
+   "9.36.7.2.",
+   "9.36.5.14."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    1,
+    3,
+    false
+   ],
+   "3": [
+    1,
+    3,
+    false
+   ],
+   "10": [
+    2,
+    3,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    0,
+    3,
+    false
+   ],
+   "3": [
+    2,
+    3,
+    false
+   ],
+   "8": [
+    2,
+    3,
+    false
+   ]
+  },
+  "merged": {
+   "1": [
+    0,
+    3,
+    false
+   ],
+   "3": [
+    2,
+    3,
+    false
+   ],
+   "10": [
+    2,
+    3,
+    false
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-heat-pump-seer2-hspf2-minimums",
+  "type": "bulletin",
+  "gold": [
+   "9.36.3.10."
+  ],
+  "raw_picks": [
+   "9.36.3.10.",
+   "9.33.5.2."
+  ],
+  "picks": [
+   "9.36.3.10.",
+   "9.33.5.2."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "10": [
+    0,
+    1,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "8": [
+    1,
+    1,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-calgary-zero-lot-line-soffits",
+  "type": "variance",
+  "gold": [
+   "9.10.15.5."
+  ],
+  "raw_picks": [
+   "9.10.15.5.",
+   "3.2.3.6.",
+   "9.10.15.4.",
+   "9.10.12.4.",
+   "9.10.15.2."
+  ],
+  "picks": [
+   "9.10.15.5.",
+   "3.2.3.6.",
+   "9.10.15.4.",
+   "9.10.12.4.",
+   "9.10.15.2."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "8": [
+    1,
+    1,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-rockyview-zero-lot-line-dc129",
+  "type": "variance",
+  "gold": [
+   "9.10.15.5."
+  ],
+  "raw_picks": [
+   "3.2.3.6.",
+   "9.10.15.5.",
+   "9.10.12.4."
+  ],
+  "picks": [
+   "3.2.3.6.",
+   "9.10.15.5.",
+   "9.10.12.4."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "8": [
+    1,
+    1,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-calgary-newer-ashrae-ventilation-edition",
+  "type": "variance",
+  "gold": [
+   "1.3.1.2."
+  ],
+  "raw_picks": [
+   "1.3.1.2.",
+   "6.3.1.1.",
+   "10.5.1.3."
+  ],
+  "picks": [
+   "1.3.1.2.",
+   "6.3.1.1.",
+   "10.5.1.3."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "10": [
+    0,
+    1,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "8": [
+    1,
+    1,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-calgary-f3-garage-wall-facing-dwellings",
+  "type": "variance",
+  "gold": [
+   "9.10.14.2.",
+   "9.10.14.5."
+  ],
+  "raw_picks": [
+   "9.10.14.5.",
+   "9.10.14.2.",
+   "9.10.14.4."
+  ],
+  "picks": [
+   "9.10.14.5.",
+   "9.10.14.2.",
+   "9.10.14.4."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    1,
+    2,
+    false
+   ],
+   "10": [
+    2,
+    2,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    2,
+    2,
+    true
+   ],
+   "8": [
+    2,
+    2,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    2,
+    2,
+    true
+   ],
+   "10": [
+    2,
+    2,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-edmonton-rowhouse-one-hour-party-wall",
+  "type": "variance",
+  "gold": [
+   "9.10.11.2."
+  ],
+  "raw_picks": [
+   "9.10.11.1.",
+   "9.10.11.2.",
+   "9.10.9.16."
+  ],
+  "picks": [
+   "9.10.11.1.",
+   "9.10.11.2.",
+   "9.10.9.16."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "8": [
+    1,
+    1,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-calgary-rowhouse-suites-without-firewall",
+  "type": "variance",
+  "gold": [
+   "9.10.11.2.",
+   "9.10.13.13."
+  ],
+  "raw_picks": [
+   "9.10.11.2.",
+   "9.9.9.3.",
+   "9.10.8.3.",
+   "9.9.4.2.",
+   "9.10.9.16."
+  ],
+  "picks": [
+   "9.10.11.2.",
+   "9.9.9.3.",
+   "9.10.8.3.",
+   "9.9.4.2.",
+   "9.10.9.16."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    2,
+    false
+   ],
+   "3": [
+    1,
+    2,
+    false
+   ],
+   "10": [
+    1,
+    2,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    1,
+    2,
+    false
+   ],
+   "8": [
+    1,
+    2,
+    false
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    1,
+    2,
+    false
+   ],
+   "10": [
+    1,
+    2,
+    false
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-calgary-openings-near-exterior-exit-stair",
+  "type": "interpretation",
+  "gold": [
+   "9.9.4.4."
+  ],
+  "raw_picks": [
+   "9.9.4.4.",
+   "9.9.4.6."
+  ],
+  "picks": [
+   "9.9.4.4.",
+   "9.9.4.6."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "8": [
+    1,
+    1,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-calgary-fire-access-rear-part9-building",
+  "type": "interpretation",
+  "gold": [
+   "9.10.20.3.",
+   "3.2.5.6."
+  ],
+  "raw_picks": [
+   "9.10.20.3.",
+   "3.2.5.6.",
+   "3.2.5.5.",
+   "3.2.5.4."
+  ],
+  "picks": [
+   "9.10.20.3.",
+   "3.2.5.6.",
+   "3.2.5.5.",
+   "3.2.5.4."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    2,
+    false
+   ],
+   "3": [
+    0,
+    2,
+    false
+   ],
+   "10": [
+    2,
+    2,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    2,
+    2,
+    true
+   ],
+   "8": [
+    2,
+    2,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    2,
+    2,
+    true
+   ],
+   "10": [
+    2,
+    2,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-edmonton-exterior-stair-opening-protection-thresholds",
+  "type": "interpretation",
+  "gold": [
+   "9.9.4.4."
+  ],
+  "raw_picks": [
+   "9.9.4.4.",
+   "9.9.4.6.",
+   "9.9.4.1.",
+   "9.9.9.2.",
+   "9.9.9.3.",
+   "9.10.8.8."
+  ],
+  "picks": [
+   "9.9.4.4.",
+   "9.9.4.6.",
+   "9.9.9.2.",
+   "9.9.9.3.",
+   "9.10.8.8."
+  ],
+  "dropped": 1,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "8": [
+    1,
+    1,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-calgary-side-yard-egress-widths",
+  "type": "interpretation",
+  "gold": [
+   "9.9.3.1.",
+   "9.5.4.1.",
+   "9.8.2.1.",
+   "9.8.6.3.",
+   "9.9.10.1."
+  ],
+  "raw_picks": [
+   "9.8.2.1.",
+   "9.8.5.2.",
+   "9.9.10.1.",
+   "9.9.9.1."
+  ],
+  "picks": [
+   "9.8.2.1.",
+   "9.8.5.2.",
+   "9.9.10.1.",
+   "9.9.9.1."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    5,
+    false
+   ],
+   "3": [
+    0,
+    5,
+    false
+   ],
+   "10": [
+    0,
+    5,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    5,
+    false
+   ],
+   "3": [
+    2,
+    5,
+    false
+   ],
+   "8": [
+    2,
+    5,
+    false
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    5,
+    false
+   ],
+   "3": [
+    2,
+    5,
+    false
+   ],
+   "10": [
+    2,
+    5,
+    false
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-calgary-smoking-room-ventilation",
+  "type": "interpretation",
+  "gold": [
+   "6.3.1.1."
+  ],
+  "raw_picks": [
+   "6.3.1.1.",
+   "1.3.1.2.",
+   "6.3.1.5.",
+   "6.3.2.8.",
+   "6.3.2.10.",
+   "6.2.1.1."
+  ],
+  "picks": [
+   "6.3.1.1.",
+   "1.3.1.2.",
+   "6.3.1.5.",
+   "6.3.2.8.",
+   "6.3.2.10.",
+   "6.2.1.1."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "8": [
+    1,
+    1,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-calgary-temporary-bleachers",
+  "type": "interpretation",
+  "gold": [
+   "3.3.2.12.",
+   "3.3.2.9.",
+   "4.1.5.14."
+  ],
+  "raw_picks": [
+   "3.3.2.12.",
+   "3.3.2.9.",
+   "4.1.5.14.",
+   "4.1.5.12.",
+   "3.3.2.10.",
+   "3.8.3.22.",
+   "4.1.7.3."
+  ],
+  "picks": [
+   "3.3.2.12.",
+   "3.3.2.9.",
+   "4.1.5.14.",
+   "4.1.5.12.",
+   "3.3.2.10.",
+   "3.8.3.22.",
+   "4.1.7.3."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    1,
+    3,
+    false
+   ],
+   "3": [
+    2,
+    3,
+    false
+   ],
+   "10": [
+    3,
+    3,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    3,
+    false
+   ],
+   "3": [
+    3,
+    3,
+    true
+   ],
+   "8": [
+    3,
+    3,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    3,
+    false
+   ],
+   "3": [
+    3,
+    3,
+    true
+   ],
+   "10": [
+    3,
+    3,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-calgary-permanent-hail-shelter",
+  "type": "interpretation",
+  "gold": [
+   "3.2.2.2."
+  ],
+  "raw_picks": [
+   "3.2.2.92.",
+   "3.1.18.3.",
+   "4.1.2.2.",
+   "4.1.6.2."
+  ],
+  "picks": [
+   "3.1.18.3.",
+   "4.1.2.2.",
+   "4.1.6.2."
+  ],
+  "dropped": 1,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "10": [
+    0,
+    1,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "8": [
+    0,
+    1,
+    false
+   ]
+  },
+  "merged": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "10": [
+    0,
+    1,
+    false
+   ]
+  },
+  "pool_has_gold": false
+ },
+ {
+  "id": "ab-medhat-adhered-masonry-veneer-engineering",
+  "type": "bulletin",
+  "gold": [
+   "9.20.1.1.",
+   "9.20.6.4.",
+   "9.20.6.6.",
+   "9.20.9.5."
+  ],
+  "raw_picks": [
+   "9.20.1.1.",
+   "9.20.6.4.",
+   "9.20.6.6.",
+   "9.20.9.5."
+  ],
+  "picks": [
+   "9.20.1.1.",
+   "9.20.6.4.",
+   "9.20.6.6.",
+   "9.20.9.5."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    4,
+    false
+   ],
+   "3": [
+    0,
+    4,
+    false
+   ],
+   "10": [
+    0,
+    4,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    4,
+    false
+   ],
+   "3": [
+    3,
+    4,
+    false
+   ],
+   "8": [
+    4,
+    4,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    4,
+    false
+   ],
+   "3": [
+    3,
+    4,
+    false
+   ],
+   "10": [
+    4,
+    4,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-edmonton-single-stair-point-access-block",
+  "type": "alternative-solution-example",
+  "gold": [
+   "3.4.2.1."
+  ],
+  "raw_picks": [
+   "3.4.2.1.",
+   "3.4.2.5.",
+   "3.2.2.51.",
+   "3.2.6.2."
+  ],
+  "picks": [
+   "3.4.2.1.",
+   "3.4.2.5.",
+   "3.2.2.51.",
+   "3.2.6.2."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "8": [
+    1,
+    1,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-beaumont-fire-response-halved-limiting-distance",
+  "type": "bulletin",
+  "gold": [
+   "9.10.15.3."
+  ],
+  "raw_picks": [
+   "9.10.15.3",
+   "9.10.15.4",
+   "9.10.15.5"
+  ],
+  "picks": [
+   "9.10.15.3.",
+   "9.10.15.4.",
+   "9.10.15.5."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "10": [
+    0,
+    1,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "8": [
+    1,
+    1,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-appeal-group-c-nine-levels-sloped-site",
+  "type": "appeal",
+  "gold": [
+   "3.2.2.47."
+  ],
+  "raw_picks": [
+   "3.2.2.51",
+   "3.2.2.48",
+   "3.2.2.15",
+   "3.2.6.1",
+   "3.2.5.1"
+  ],
+  "picks": [
+   "3.2.2.51.",
+   "3.2.2.48.",
+   "3.2.2.15.",
+   "3.2.6.1.",
+   "3.2.5.1."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "10": [
+    0,
+    1,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "8": [
+    0,
+    1,
+    false
+   ]
+  },
+  "merged": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "10": [
+    0,
+    1,
+    false
+   ]
+  },
+  "pool_has_gold": false
+ },
+ {
+  "id": "ab-appeal-house-wall-too-close-to-lot-line",
+  "type": "appeal",
+  "gold": [
+   "9.10.15.5.",
+   "9.10.15.4."
+  ],
+  "raw_picks": [
+   "9.10.15.5",
+   "9.10.15.4",
+   "9.9.10.1"
+  ],
+  "picks": [
+   "9.10.15.5.",
+   "9.10.15.4.",
+   "9.9.10.1."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    2,
+    false
+   ],
+   "3": [
+    2,
+    2,
+    true
+   ],
+   "10": [
+    2,
+    2,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    2,
+    2,
+    true
+   ],
+   "8": [
+    2,
+    2,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    2,
+    2,
+    true
+   ],
+   "10": [
+    2,
+    2,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-appeal-stair-door-frame-foam-gap",
+  "type": "appeal",
+  "gold": [
+   "3.1.8.4.",
+   "3.1.8.5.",
+   "3.1.8.17."
+  ],
+  "raw_picks": [
+   "3.1.8.5",
+   "3.1.8.4",
+   "3.1.8.17",
+   "3.1.9.1"
+  ],
+  "picks": [
+   "3.1.8.5.",
+   "3.1.8.4.",
+   "3.1.8.17.",
+   "3.1.9.1."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    3,
+    false
+   ],
+   "3": [
+    0,
+    3,
+    false
+   ],
+   "10": [
+    0,
+    3,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    3,
+    false
+   ],
+   "3": [
+    3,
+    3,
+    true
+   ],
+   "8": [
+    3,
+    3,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    3,
+    false
+   ],
+   "3": [
+    3,
+    3,
+    true
+   ],
+   "10": [
+    3,
+    3,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-appeal-aluminum-cladding-polyamide-inserts",
+  "type": "appeal",
+  "gold": [
+   "3.1.5.5.",
+   "3.1.5.2."
+  ],
+  "raw_picks": [
+   "3.1.5.2",
+   "3.1.5.5",
+   "3.1.5.6",
+   "3.2.3.7"
+  ],
+  "picks": [
+   "3.1.5.2.",
+   "3.1.5.5.",
+   "3.1.5.6.",
+   "3.2.3.7."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    2,
+    false
+   ],
+   "3": [
+    0,
+    2,
+    false
+   ],
+   "10": [
+    0,
+    2,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    2,
+    2,
+    true
+   ],
+   "8": [
+    2,
+    2,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    2,
+    2,
+    true
+   ],
+   "10": [
+    2,
+    2,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-appeal-access-route-604-m2-tolerance",
+  "type": "appeal",
+  "gold": [
+   "3.2.5.4.",
+   "3.2.5.6."
+  ],
+  "raw_picks": [
+   "3.2.5.4",
+   "3.2.5.5",
+   "3.2.5.6"
+  ],
+  "picks": [
+   "3.2.5.4.",
+   "3.2.5.5.",
+   "3.2.5.6."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    2,
+    false
+   ],
+   "3": [
+    0,
+    2,
+    false
+   ],
+   "10": [
+    0,
+    2,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    2,
+    2,
+    true
+   ],
+   "8": [
+    2,
+    2,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    2,
+    2,
+    true
+   ],
+   "10": [
+    2,
+    2,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-appeal-sagd-process-building-no-standpipe",
+  "type": "appeal",
+  "gold": [
+   "3.2.5.8.",
+   "3.2.5.9.",
+   "3.2.5.15."
+  ],
+  "raw_picks": [
+   "3.2.5.8",
+   "3.2.5.9",
+   "3.2.5.7"
+  ],
+  "picks": [
+   "3.2.5.8.",
+   "3.2.5.9.",
+   "3.2.5.7."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    3,
+    false
+   ],
+   "3": [
+    0,
+    3,
+    false
+   ],
+   "10": [
+    0,
+    3,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    3,
+    false
+   ],
+   "3": [
+    2,
+    3,
+    false
+   ],
+   "8": [
+    2,
+    3,
+    false
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    3,
+    false
+   ],
+   "3": [
+    2,
+    3,
+    false
+   ],
+   "10": [
+    2,
+    3,
+    false
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-appeal-dementia-care-maglocks-impeded-egress",
+  "type": "appeal",
+  "gold": [
+   "3.4.6.16.",
+   "3.2.2.19."
+  ],
+  "raw_picks": [
+   "3.4.6.16",
+   "3.2.2.19",
+   "3.3.3.5",
+   "3.4.6.18"
+  ],
+  "picks": [
+   "3.4.6.16.",
+   "3.2.2.19.",
+   "3.3.3.5.",
+   "3.4.6.18."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    1,
+    2,
+    false
+   ],
+   "10": [
+    2,
+    2,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    2,
+    2,
+    true
+   ],
+   "8": [
+    2,
+    2,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    2,
+    2,
+    true
+   ],
+   "10": [
+    2,
+    2,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-appeal-tenant-fire-rating-in-medium-hazard-warehouse",
+  "type": "appeal",
+  "gold": [
+   "3.2.2.6."
+  ],
+  "raw_picks": [
+   "3.2.2.79",
+   "3.3.1.1",
+   "3.1.3.1"
+  ],
+  "picks": [
+   "3.2.2.79."
+  ],
+  "dropped": 2,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "10": [
+    0,
+    1,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "8": [
+    0,
+    1,
+    false
+   ]
+  },
+  "merged": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "10": [
+    0,
+    1,
+    false
+   ]
+  },
+  "pool_has_gold": false
+ },
+ {
+  "id": "ab-appeal-rural-arena-firefighting-water-supply",
+  "type": "appeal",
+  "gold": [
+   "3.2.5.7.",
+   "3.2.5.5."
+  ],
+  "raw_picks": [
+   "3.2.5.7",
+   "3.2.5.12",
+   "3.2.5.9"
+  ],
+  "picks": [
+   "3.2.5.7.",
+   "3.2.5.12.",
+   "3.2.5.9."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    1,
+    2,
+    false
+   ],
+   "10": [
+    1,
+    2,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    1,
+    2,
+    false
+   ],
+   "8": [
+    1,
+    2,
+    false
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    1,
+    2,
+    false
+   ],
+   "10": [
+    1,
+    2,
+    false
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-appeal-restaurant-kitchen-exhaust-nfpa96",
+  "type": "appeal",
+  "gold": [
+   "6.3.1.6."
+  ],
+  "raw_picks": [
+   "10.6.4.1",
+   "6.3.1.6",
+   "10.6.4.3",
+   "6.9.1.3"
+  ],
+  "picks": [
+   "10.6.4.1.",
+   "6.3.1.6.",
+   "10.6.4.3.",
+   "6.9.1.3."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "8": [
+    1,
+    1,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-appeal-dinner-theatre-platform-not-a-stage",
+  "type": "appeal",
+  "gold": [
+   "3.3.2.14."
+  ],
+  "raw_picks": [
+   "3.3.2.14",
+   "3.1.5.10",
+   "3.3.2.2",
+   "3.2.2.22"
+  ],
+  "picks": [
+   "3.3.2.14.",
+   "3.1.5.10.",
+   "3.3.2.2.",
+   "3.2.2.22."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "8": [
+    1,
+    1,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-edmonton-suite-exit-door-window-exposure",
+  "type": "interpretation",
+  "gold": [
+   "9.9.4.6.",
+   "9.9.4.4.",
+   "9.9.9.3."
+  ],
+  "raw_picks": [
+   "9.9.4.6.",
+   "9.9.4.1.",
+   "9.10.12.3.",
+   "9.9.4.4."
+  ],
+  "picks": [
+   "9.9.4.6.",
+   "9.10.12.3.",
+   "9.9.4.4."
+  ],
+  "dropped": 1,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    1,
+    3,
+    false
+   ],
+   "3": [
+    1,
+    3,
+    false
+   ],
+   "10": [
+    3,
+    3,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    3,
+    false
+   ],
+   "3": [
+    2,
+    3,
+    false
+   ],
+   "8": [
+    2,
+    3,
+    false
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    3,
+    false
+   ],
+   "3": [
+    2,
+    3,
+    false
+   ],
+   "10": [
+    3,
+    3,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-licensed-beverage-establishment-occupant-load",
+  "type": "interpretation",
+  "gold": [
+   "3.1.17.1.",
+   "3.4.2.6."
+  ],
+  "raw_picks": [
+   "3.1.17.1.",
+   "3.4.2.6.",
+   "3.4.3.1.",
+   "3.4.3.2.",
+   "3.3.1.17.",
+   "3.2.4.1."
+  ],
+  "picks": [
+   "3.1.17.1.",
+   "3.4.2.6.",
+   "3.4.3.1.",
+   "3.4.3.2.",
+   "3.3.1.17.",
+   "3.2.4.1."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    2,
+    false
+   ],
+   "3": [
+    0,
+    2,
+    false
+   ],
+   "10": [
+    1,
+    2,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    2,
+    2,
+    true
+   ],
+   "8": [
+    2,
+    2,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    2,
+    2,
+    true
+   ],
+   "10": [
+    2,
+    2,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-maglock-fire-alarm-integration-testing",
+  "type": "interpretation",
+  "gold": [
+   "3.2.4.5.",
+   "3.2.9.1."
+  ],
+  "raw_picks": [
+   "3.4.6.16.",
+   "3.4.6.18.",
+   "3.2.4.5.",
+   "3.1.8.14."
+  ],
+  "picks": [
+   "3.4.6.16.",
+   "3.4.6.18.",
+   "3.2.4.5.",
+   "3.1.8.14."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    2,
+    false
+   ],
+   "3": [
+    0,
+    2,
+    false
+   ],
+   "10": [
+    0,
+    2,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    0,
+    2,
+    false
+   ],
+   "3": [
+    1,
+    2,
+    false
+   ],
+   "8": [
+    1,
+    2,
+    false
+   ]
+  },
+  "merged": {
+   "1": [
+    0,
+    2,
+    false
+   ],
+   "3": [
+    1,
+    2,
+    false
+   ],
+   "10": [
+    1,
+    2,
+    false
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-overnight-child-care-smoke-and-fire-alarms",
+  "type": "interpretation",
+  "gold": [
+   "3.2.4.20.",
+   "3.2.4.21.",
+   "3.2.4.1.",
+   "9.10.18.2."
+  ],
+  "raw_picks": [
+   "9.10.2.2.",
+   "9.10.19.5.",
+   "9.10.19.1.",
+   "3.2.4.20.",
+   "3.2.4.1.",
+   "3.3.3.5.",
+   "9.10.18.2."
+  ],
+  "picks": [
+   "9.10.2.2.",
+   "9.10.19.5.",
+   "9.10.19.1.",
+   "3.2.4.20.",
+   "3.2.4.1.",
+   "3.3.3.5.",
+   "9.10.18.2."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    1,
+    4,
+    false
+   ],
+   "3": [
+    1,
+    4,
+    false
+   ],
+   "10": [
+    2,
+    4,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    0,
+    4,
+    false
+   ],
+   "3": [
+    0,
+    4,
+    false
+   ],
+   "8": [
+    3,
+    4,
+    false
+   ]
+  },
+  "merged": {
+   "1": [
+    0,
+    4,
+    false
+   ],
+   "3": [
+    0,
+    4,
+    false
+   ],
+   "10": [
+    3,
+    4,
+    false
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-garage-flat-cathedral-roof-insulation",
+  "type": "variance",
+  "gold": [
+   "9.25.2.1."
+  ],
+  "raw_picks": [
+   "9.25.2.1.",
+   "9.36.2.6.",
+   "9.35.4.4."
+  ],
+  "picks": [
+   "9.25.2.1.",
+   "9.36.2.6.",
+   "9.35.4.4."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    1,
+    false
+   ],
+   "3": [
+    0,
+    1,
+    false
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "8": [
+    1,
+    1,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    1,
+    true
+   ],
+   "3": [
+    1,
+    1,
+    true
+   ],
+   "10": [
+    1,
+    1,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-calgary-existing-secondary-suite-legalization",
+  "type": "interpretation",
+  "gold": [
+   "9.9.10.1.",
+   "9.32.3.9."
+  ],
+  "raw_picks": [
+   "9.9.10.1",
+   "9.32.3.9",
+   "6.9.3.1",
+   "10.1.1.4"
+  ],
+  "picks": [
+   "9.9.10.1.",
+   "9.32.3.9.",
+   "6.9.3.1.",
+   "10.1.1.4."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    2,
+    false
+   ],
+   "3": [
+    1,
+    2,
+    false
+   ],
+   "10": [
+    1,
+    2,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    2,
+    2,
+    true
+   ],
+   "8": [
+    2,
+    2,
+    true
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    2,
+    2,
+    true
+   ],
+   "10": [
+    2,
+    2,
+    true
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-calgary-airborne-sound-between-dwellings",
+  "type": "interpretation",
+  "gold": [
+   "9.11.1.1.",
+   "9.11.1.4.",
+   "5.8.1.4.",
+   "5.8.1.5."
+  ],
+  "raw_picks": [
+   "9.11.1.1",
+   "5.8.1.1",
+   "3.3.4.6",
+   "5.8.1.2"
+  ],
+  "picks": [
+   "9.11.1.1.",
+   "5.8.1.1.",
+   "3.3.4.6.",
+   "5.8.1.2."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    1,
+    4,
+    false
+   ],
+   "3": [
+    1,
+    4,
+    false
+   ],
+   "10": [
+    2,
+    4,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    4,
+    false
+   ],
+   "3": [
+    1,
+    4,
+    false
+   ],
+   "8": [
+    1,
+    4,
+    false
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    4,
+    false
+   ],
+   "3": [
+    1,
+    4,
+    false
+   ],
+   "10": [
+    2,
+    4,
+    false
+   ]
+  },
+  "pool_has_gold": true
+ },
+ {
+  "id": "ab-calgary-micro-brewery-tasting-room-separation",
+  "type": "interpretation",
+  "gold": [
+   "3.1.3.1.",
+   "3.3.1.1."
+  ],
+  "raw_picks": [
+   "3.1.3.1.",
+   "3.2.4.2."
+  ],
+  "picks": [
+   "3.1.3.1.",
+   "3.2.4.2."
+  ],
+  "dropped": 0,
+  "scope": "nbc",
+  "prod": {
+   "1": [
+    0,
+    2,
+    false
+   ],
+   "3": [
+    0,
+    2,
+    false
+   ],
+   "10": [
+    0,
+    2,
+    false
+   ]
+  },
+  "model": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    1,
+    2,
+    false
+   ],
+   "8": [
+    1,
+    2,
+    false
+   ]
+  },
+  "merged": {
+   "1": [
+    1,
+    2,
+    false
+   ],
+   "3": [
+    1,
+    2,
+    false
+   ],
+   "10": [
+    1,
+    2,
+    false
+   ]
+  },
+  "pool_has_gold": true
+ }
+]

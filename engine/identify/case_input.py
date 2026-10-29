@@ -49,8 +49,12 @@ def fingerprint(case, store=None) -> str:
 
 
 def _fingerprint(case, files) -> str:
+    # What identification reads from a fact: its value, whether it is confirmed and how it was derived.
+    # Re-confirming the same value ("Looks right") gives the fact a new id and a click source; that is
+    # not an input change and must not make the result stale.
     payload = {
-        'facts': [fact.model_dump() for fact in active_facts(case)],
+        'facts': [fact.model_dump(include={'field', 'value', 'status', 'kind', 'formula'})
+                  for fact in active_facts(case)],
         'jurisdiction': case.jurisdiction.model_dump() if case.jurisdiction else None,
         'files': [{**meta, 'sha256': hashlib.sha256(saved['data']).hexdigest() if saved else None}
                   for meta, saved in files],
@@ -112,7 +116,8 @@ def refresh(case, store, codes, *, force=False):
     """Refresh locally after an input mutation, inside the caller's existing CAS.
 
     Historical provider profiles stay explicit-only. This calls the deterministic
-    requirement path, never starts a job and never writes storage itself.
+    requirement path, never starts a job, never calls a model (the last model order
+    carries over) and never writes storage itself.
     """
     if case.identify is not None and not is_requirement_run(case.identify):
         return
@@ -134,7 +139,7 @@ def refresh(case, store, codes, *, force=False):
     previous = case.identify
     input_seconds = time.monotonic() - started
     output = run(context.text, codes=codes, config=config, facts=active_facts(case),
-                 previous=previous, confirmed_provisions=case.provisions)
+                 previous=previous, confirmed_provisions=case.provisions, rank=False)
     result = output.result
     result.trace.seconds = round(result.trace.seconds + input_seconds, 3)
     result.input_sha256 = context.sha256

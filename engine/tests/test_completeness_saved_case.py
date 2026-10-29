@@ -155,8 +155,9 @@ def test_legacy_variant_names_consume_the_same_shared_policy(context):
     assert b['mitigating_measures']['problem'] == 'unrelated'
     assert b['assumptions_and_limits']['problem'] == 'stated_as_fact'
     assert b['supporting_doc']['problem'] == 'brochure_only'
-    assert b['section_b.consistency']['verdict'] == 'unclear'
-    assert b['section_b.consistency']['lookup_skipped'] is True
+    # Nothing is attached, so there is nothing to compare with Section B (QA 2026-10-28: this was a false
+    # "Attachment contents are absent" item). The missing document is reported by supporting_doc.
+    assert b['section_b.consistency']['verdict'] == 'present'
 
 
 def test_direct_c_and_document_entrypoints_fail_before_using_configured_dependencies():
@@ -282,7 +283,7 @@ def test_phantom_or_foreign_file_never_closes_attachment_or_scope(context, forei
     assert found['evidence.doc_unowned.file_ref']['severity'] == 'blocking'
     assert found['professional_authentication']['severity'] == 'blocking'
     assert f'evidence.{item.id}' in found[f'evidence.{item.provision_id}']['related_fields']
-    assert any('unconfirmed exact fact' in reason for reason in response.json()['reviews'][0]['export_reasons'])
+    assert any('A supporting document is not confirmed yet.' == reason for reason in response.json()['reviews'][0]['export_reasons'])
     assert store.get(case.id).model_dump() == before
     if foreign:
         assert store.get_file(other.id, file_id)['data'] == b'%PDF SYNTHETIC foreign bytes'

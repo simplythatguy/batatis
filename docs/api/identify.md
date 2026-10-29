@@ -39,7 +39,9 @@ origins are retained. A later unconfirmed value cannot erase a conflicting
 confirmed value. Unsupported files, image-only pages, and reader limits are
 explicit input coverage gaps.
 
-`input_sha256` covers active facts, jurisdiction, attachment inventory and bytes.
+`input_sha256` covers active facts (field, value, status, kind and formula; not
+fact ids or sources, so re-confirming the same value is not a change), jurisdiction,
+attachment inventory and bytes.
 GET checks it and the current corpus identity without a provider call or a write. Title changes and generated
 results do not invalidate it. Raw fact or file changes make the result stale;
 POST recomputes it. Intake and intake-answer updates refresh the local profile
@@ -75,7 +77,9 @@ a run also produce 409. GET never calls a provider.
 - `POST /cases/{id}/identify/requirements/{requirement_id}/decision`: records
   `disposition` (`include`, `exclude`, `review`), `role` (`varied`, `supporting`,
   `admin`, `conditional`, `unresolved`), a nonempty `reason`, and required
-  `expected_version`. It rejects stale inputs and a changed or unavailable code
+  `expected_version`. When the inputs changed since the run, it first refreshes the
+  local requirement profile inside the same save; it still rejects stale inputs it
+  cannot refresh (a historical provider run) and a changed or unavailable code
   source. This decision governs the ledger's application scope; it does not
   silently write a new departure or Section C benchmark. A `varied` role is only
   available for Division B. Use the benchmark endpoint to confirm its departure.

@@ -17,3 +17,5 @@ Answer each in one short line:
 13. After “complies with acceptable solution(s)?”, what are the Yes vs No paths?
 14. Which three analysis fields must not be skipped on the alternative path?
 15. Name the evidence confidence ladder endpoints (lowest and highest)?
+16. What may sit above a title or question on a Batatis screen?
+17. How are places, choices and suggestions drawn inside a component?

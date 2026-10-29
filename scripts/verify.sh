@@ -1,7 +1,7 @@
 #!/bin/bash
 # Run the local gate before a pull request into main; GitHub Actions supplements these checks.
 # Docs: docs/agents/git-workflow.md
-# Usage: scripts/verify.sh [--web] [--engine]     (default: both)
+# Usage: scripts/verify.sh [--web] [--engine] [--tooling]     (default: web + engine)
 # UI changes: also run `node evals/ui-artifacts/smoke.mjs` against the app from scripts/local-app.sh.
 set -euo pipefail
 
@@ -10,14 +10,16 @@ cd "$root"
 
 want_web=0
 want_engine=0
+want_tooling=0
 for a in "$@"; do
   case "$a" in
     --web) want_web=1 ;;
     --engine) want_engine=1 ;;
+    --tooling) want_tooling=1 ;;
     *) echo "verify: unknown option $a" >&2; exit 2 ;;
   esac
 done
-if [ $want_web = 0 ] && [ $want_engine = 0 ]; then want_web=1; want_engine=1; fi
+if [ $want_web = 0 ] && [ $want_engine = 0 ] && [ $want_tooling = 0 ]; then want_web=1; want_engine=1; fi
 
 step() { printf '\n== %s ==\n' "$*"; }
 
@@ -39,8 +41,7 @@ if [ $want_web = 1 ]; then
   fi
 fi
 
-if [ $want_engine = 1 ]; then
-  step "engine: tests (tests that need the code database or TEST_DATABASE_URL skip unless you set them up; -rs lists them. Run those for the areas you touched)"
+if [ $want_engine = 1 ] || [ $want_tooling = 1 ]; then
   common=$(cd "$(git rev-parse --git-common-dir)" && pwd)
   py=""
   for candidate in "$root/.venv/bin/python" "$root/.venv/Scripts/python.exe" \
@@ -51,6 +52,23 @@ if [ $want_engine = 1 ]; then
     fi
   done
   [ -n "$py" ] || py=$(command -v python3)
+fi
+
+if [ $want_tooling = 1 ]; then
+  step "local launcher: Bash syntax and platform dispatch"
+  bash -n scripts/local-app.sh
+  bash -n scripts/verify.sh
+  "$py" -m unittest discover -s scripts/tests -p 'test_*.py' -v
+  case "${OSTYPE:-}" in
+    msys*|cygwin*|win32*)
+      step "local launcher: Windows ownership and lifecycle (no app servers)"
+      powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File scripts/tests/local-app.Tests.ps1
+      ;;
+  esac
+fi
+
+if [ $want_engine = 1 ]; then
+  step "engine: tests (tests that need the code database or TEST_DATABASE_URL skip unless you set them up; -rs lists them. Run those for the areas you touched)"
   "$py" -m pytest -q engine/tests codedb/tests evals_dev -rs
 fi
 

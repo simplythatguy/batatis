@@ -122,6 +122,10 @@ export function clearEngineSession() {
 
 type PostedFact = { id: string; signature: string };
 
+/** Fields only engine routes write, so a browser snapshot without them is no withdrawal: evidence has its own
+ * route, and `citation.<article>` records a Yes the decision or benchmark route saved. */
+const engineOwned = (field: string) => field.startsWith("evidence.") || field.startsWith("citation.");
+
 function postedFor(caseId: string): Record<string, PostedFact> {
   return postedFacts.get(caseId) ?? {};
 }
@@ -259,7 +263,7 @@ export function pendingFactChanges(caseId: string, values: Fact[]): Map<string, 
   for (const fact of latest.values()) {
     if (!fact.field.startsWith("evidence.") && posted[fact.field]?.signature !== factSignature(fact)) changes.set(fact.field, fact);
   }
-  for (const field of Object.keys(posted)) if (!field.startsWith("evidence.") && !latest.has(field)) changes.set(field, null);
+  for (const field of Object.keys(posted)) if (!engineOwned(field) && !latest.has(field)) changes.set(field, null);
   return changes;
 }
 
@@ -299,7 +303,7 @@ async function writeDraft(caseId: string, snapshot: DraftSnapshot, parent?: Abor
   const latest = new Map(latestLocalFacts(snapshot.facts).map(fact => [fact.field, fact]));
   const facts = [...latest.values()].filter(fact => !fact.field.startsWith("evidence.") && posted[fact.field]?.signature !== factSignature(fact));
   for (const [field, old] of Object.entries(posted)) {
-    if (latest.has(field) || field.startsWith("evidence.")) continue;
+    if (latest.has(field) || engineOwned(field)) continue;
     facts.push({ id: `${old.id}-withdrawn`, field, value: "", kind: "pointed", status: "unconfirmed",
       source: { type: "user_click", ref: "Answer withdrawn by applicant", quote: "" } });
   }
@@ -443,7 +447,7 @@ async function reconcileFacts(caseId: string, facts: Fact[], token: number, sign
   const revisions = [...latest.values()];
   for (const [field, posted] of Object.entries(done)) {
     // Evidence is written only through its own atomic route; see pushListedEvidence.
-    if (latest.has(field) || field.startsWith("evidence.")) continue;
+    if (latest.has(field) || engineOwned(field)) continue;
     revisions.push({
       id: `${posted.id}-withdrawn`, field, value: "", kind: "pointed", status: "unconfirmed",
       source: { type: "user_click", ref: "Answer withdrawn by applicant", quote: "" },

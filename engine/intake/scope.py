@@ -75,9 +75,13 @@ CUES: dict[str, list[tuple[int, re.Pattern]]] = {
     ],
 }
 
-# Building-code cues. 4: the building code named (or its energy section for houses). 1: a building element.
+# Building-code cues. 4: the building code named, or its energy section for small buildings and houses
+# (Section 9.36). 2: a life-safety element the building code governs even when wiring is described (exit signs,
+# emergency power: NBC(AE) 3.2.7, 3.4.5, 9.9.11). 1: a building element.
 BUILDING: list[tuple[int, re.Pattern]] = [
-    (4, _c(r'\bbuilding\s+code\b|\bNBC\b|\bSection\s+9\.36\b|\bPart\s+[349]\b|\bDivision\s+B\b')),
+    (4, _c(r'\bbuilding\s+code\b|\bNBC\b|\bSection\s+9\.36\b|\bPart\s+[349]\b|\bDivision\s+B\b'
+           r'|\benergy\s+(?:efficiency\s+)?(?:requirements?|rules?)\s+for\s+(?:small\s+buildings|houses|homes|Part\s+9)\b')),
+    (2, _c(r'\bexit\s+signs?\b|\bemergency\s+power\b|\bphotoluminescent\b')),
     (1, _c(r'\bfire\s+separations?\b|\bfirestop(?:ping)?\b|\brated\s+(?:wall|floor|assembly)\b|\begress\b|\bexits?\b'
            r'|\bexit\s+(?:stair|path)s?\b|\bstairs?\b|\bguards?\b|\bfootings?\b|\bfoundations?\b|\bjoists?\b|\bstuds?\b'
            r'|\bproperty\s+line\b|\bunprotected\s+openings?\b|\blimiting\s+distance\b|\bcladding\b|\bsheathing\b'

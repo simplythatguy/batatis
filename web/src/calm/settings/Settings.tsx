@@ -117,7 +117,7 @@ export function Settings({ phoneTools }: { phoneTools?: ReactNode }) {
               {editing && <RoleEditor onCancel={() => setEditing(false)} onSaved={() => { setEditing(false); setSaved(true); }} />}
             </section>
             {!codeLogin && <AiAccessSection />}
-            <AccessCodesSection />
+            {user.admin && <AccessCodesSection />}
             <ArchivedApplications />
           </>
         ) : (

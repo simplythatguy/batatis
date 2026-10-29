@@ -22,6 +22,8 @@ export interface User {
   created_at: string;
   /** True when this account holds a live testing access code. The server sets it; reviewer does not ask again. */
   app_access?: boolean;
+  /** True for the site admin, who manages access codes. The server decides it. */
+  admin?: boolean;
 }
 
 export type ApplicationStatus = "draft" | "submitted" | "in_review" | "returned" | "accepted" | "refused" | "withdrawn";
@@ -139,10 +141,13 @@ export class QueueSessionChanged extends AccountsError {
 /** The route is not on this server (or the browser could not reach it with credentials). */
 export const notAvailable = (e: unknown) => e instanceof EngineError && (e.status === 404 || e.status === 405 || e.status === 0);
 
+/** The engine's 401 detail when an access code that signed this account in was turned off or removed. */
+export const CODE_TURNED_OFF = "Your access code was turned off.";
+
 function plain(status: number, raw: string, path: string): string {
   if (status === 0) return "The service did not respond.";
   if (status === 401 && path === "/auth/login") return "Email or password is incorrect.";
-  if (status === 401) return "Sign in to continue.";
+  if (status === 401) return raw === CODE_TURNED_OFF ? raw : "Sign in to continue.";
   if (status === 429) return "Too many attempts right now. Try again in a moment.";
   if (status === 422) return "Some of what you entered isn't valid.";
   if (status === 403) return raw || "You don't have access to this.";
@@ -200,8 +205,8 @@ export const accounts = {
   me: (signal?: AbortSignal) => call<{ user: User; app_access?: boolean }>("GET", "/auth/me", undefined, signal).then((r) => sessionUser(r) ?? (r as unknown as User)),
   /** Every owned application, archived ones included; a server without preferences reads as neither. */
   applications: (signal?: AbortSignal) =>
-    call<{ applications: ApplicationSummary[] }>("GET", "/me/applications", undefined, signal).then((r) =>
-      (r.applications ?? []).map((a) => ({ ...a, archived: a.archived === true, pinned: a.pinned === true }))),
+    call<{ applications: (Omit<ApplicationSummary, "title"> & { title: string | null })[] }>("GET", "/me/applications", undefined, signal).then((r) =>
+      (r.applications ?? []).map((a) => ({ ...a, title: a.title ?? "", archived: a.archived === true, pinned: a.pinned === true }))),
   /** Pin or archive in the owner's list. Changes no case content, status or version. */
   preferences: (id: string, patch: ApplicationPreferences, signal?: AbortSignal) =>
     call<{ archived: boolean; pinned: boolean }>("PATCH", `/me/applications/${enc(id)}/preferences`, patch, signal).then((r) => ({
@@ -315,10 +320,16 @@ export function claimConflict(e: unknown): Claim | null {
 /** The account inside an auth response, keeping the server's decision that a testing access code is live. */
 export function sessionUser(body: unknown): User | null {
   if (!body || typeof body !== "object") return null;
-  const record = body as { user?: unknown; app_access?: unknown };
+  const record = body as { user?: unknown; app_access?: unknown; admin?: unknown };
   const nested = record.user;
   const user = nested && typeof nested === "object" && typeof (nested as User).id === "string" ? (nested as User) : null;
-  if (user) return typeof record.app_access === "boolean" ? { ...user, app_access: record.app_access } : user;
+  if (user) {
+    const decided = {
+      ...(typeof record.app_access === "boolean" ? { app_access: record.app_access } : {}),
+      ...(typeof record.admin === "boolean" ? { admin: record.admin } : {}),
+    };
+    return Object.keys(decided).length ? { ...user, ...decided } : user;
+  }
   const direct = body as User;
   return typeof direct.id === "string" ? direct : null;
 }

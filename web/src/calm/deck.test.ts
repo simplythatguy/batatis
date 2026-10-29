@@ -221,14 +221,14 @@ test("the journey asks deciding facts before paperwork while retaining form sect
   assert.ok(deck.findIndex((i) => i.kind === "candidate") < deck.findIndex((i) => i.kind === "paperwork"));
   assert.equal(paperworkRows(deck).find((i) => i.key === "field-representative")?.section, "A");
   assert.equal(deck.filter((i) => i.kind === "process").length, 0);
-  assert.equal(deck.find((i) => i.key === "path-stop")?.title, "This rule doesn’t apply");
+  assert.equal(deck.find((i) => i.key === "path-stop"), undefined, "a rule meant for larger buildings no longer stops the house");
 });
 
 test("planner cards follow their form fields, and each field has one editable card", () => {
   const c = demoCase();
   const deck = buildDeck(c, getGaps(c));
   const plan = deck.filter((i) => i.kind === "plan");
-  assert.deepEqual(plan.map((i) => i.ref), [], "the description names one rule and the check is already firm, so its planner questions are not asked again");
+  assert.deepEqual(plan.map((i) => i.ref), [], "the house rules in play ask only their own inputs, so the general planner questions wait");
   const asked = buildDeck(undecidedHouse(), getGaps(undecidedHouse())).filter((i) => i.kind === "plan");
   assert.deepEqual(asked.map((i) => i.ref), ["intake.part4_design", "intake.assembly.description", "intake.sprinklered"]);
   assert.equal(asked[0].context, "", "the question stands alone");

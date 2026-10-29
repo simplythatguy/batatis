@@ -1,5 +1,6 @@
 import { call } from "../../api/accounts";
 import { EngineError } from "../../api/client";
+import { acknowledgeWrite } from "../../api/sync";
 import type { HistoryEntry } from "./history";
 import type { RewriteResult } from "./suggestions";
 
@@ -45,13 +46,19 @@ export function parsePreview(value: unknown): PackagePreview {
   }), ...(typeof p.pdf === "string" && p.pdf.startsWith("data:application/pdf;base64,") ? { pdf: p.pdf } : {}) };
 }
 const base = (id: string) => `/cases/${encodeURIComponent(id)}`;
+/** Workspace writes move the case version. Record it, or the next draft save, Section D read or submit
+ * sends the old version and reads as a conflict with another device. Callers run these in the save queue. */
+function committed<T>(id: string, value: T): T {
+  acknowledgeWrite(id, isRecord(value) ? value.case_version : undefined);
+  return value;
+}
 export const workspaceApi = {
   get: async (id: string, signal?: AbortSignal) => parseWorkspace(await call<unknown>("GET", `${base(id)}/workspace`, undefined, signal)),
-  sign: (id: string, signer: SignerRole, body: { name: string; method: Signature["method"]; image: string }, signal?: AbortSignal) =>
-    call<unknown>("PUT", `${base(id)}/signatures/${signer}`, body, signal),
-  remove: (id: string, signer: SignerRole, signal?: AbortSignal) => call<void>("DELETE", `${base(id)}/signatures/${signer}`, undefined, signal),
-  consent: async (id: string, agreed: boolean, signal?: AbortSignal) => consent(await call<unknown>("PUT", `${base(id)}/consent`, { agreed }, signal)),
-  history: (id: string, entries: HistoryEntry[], signal?: AbortSignal) => call<unknown>("POST", `${base(id)}/history`, { entries }, signal),
+  sign: async (id: string, signer: SignerRole, body: { name: string; method: Signature["method"]; image: string }, signal?: AbortSignal) =>
+    committed(id, await call<unknown>("PUT", `${base(id)}/signatures/${signer}`, body, signal)),
+  remove: async (id: string, signer: SignerRole, signal?: AbortSignal) => committed(id, await call<unknown>("DELETE", `${base(id)}/signatures/${signer}`, undefined, signal)),
+  consent: async (id: string, agreed: boolean, signal?: AbortSignal) => consent(committed(id, await call<unknown>("PUT", `${base(id)}/consent`, { agreed }, signal))),
+  history: async (id: string, entries: HistoryEntry[], signal?: AbortSignal) => committed(id, await call<unknown>("POST", `${base(id)}/history`, { entries }, signal)),
   rewrite: async (id: string, body: { field: string; text: string; start: number; end: number; instruction: string }, signal?: AbortSignal): Promise<RewriteResult> => {
     const r = object(await call<unknown>("POST", `${base(id)}/rewrite`, body, signal, 60000));
     return { replacement: string(r.replacement), cited: list(r.cited).map(string), removed_citations: list(r.removed_citations).map(string), notice: r.notice === null ? null : string(r.notice) };

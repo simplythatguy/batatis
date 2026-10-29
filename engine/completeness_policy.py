@@ -74,10 +74,17 @@ def _finding_element(finding: Finding) -> ElementVerdict:
         fix_hint='Check the indicated sources.' if finding.status == 'not_found' else 'Ask the applicant to supply or clarify this item.')
 
 
+def _gap_label(field: str) -> str:
+    # An open question from accepted draft wording is keyed by draft id; people see what it is, not the key.
+    if field.startswith('drafting.questions.'):
+        return 'Open question from the drafted wording'
+    return field.replace('_', ' ')
+
+
 def _gap_element(gap: Gap) -> ElementVerdict:
     return ElementVerdict(
         field=gap.field, template_section='B' if gap.section == 'process' else gap.section,
-        export_section=gap.section, export_field=gap.field, form_fields=[], label=gap.field.replace('_', ' '), group='',
+        export_section=gap.section, export_field=gap.field, form_fields=[], label=_gap_label(gap.field), group='',
         verdict='unclear' if gap.routed_to == 'officer' else 'missing', reason=gap.message, problem='policy_gap',
         defect_class=gap.id.split(':')[0] if gap.id.startswith('D') else None, key=gap.id,
         severity=gap.severity, routed_to=gap.routed_to, in_export_preflight=gap.severity == 'blocking',
@@ -135,8 +142,10 @@ def evaluate(snapshot: Snapshot, codes, *, professional=None, documents=None) ->
                 if located:
                     file, page = located[0]
                     quote.source = {'type': 'file', 'ref': file, 'page': page, 'quote': quote.text}
+        # Nothing attached leaves nothing to compare: a listed document's missing file is its own finding.
+        attached = any(read.role == 'attachment' for read in snapshot.reads)
         if (element.field == 'section_b.consistency' and not element.problem
-                and (snapshot.unreadable or not doc.section_text.get('attachment', '').strip())):
+                and (snapshot.unreadable or (attached and not doc.section_text.get('attachment', '').strip()))):
             element.verdict, element.problem, element.lookup_skipped = 'unclear', 'source_unresolved', True
             element.reason = ('Attachment contents are absent or could not all be read. Compare the indicated sources with Section B; '
                               'consistency is unresolved.')
@@ -227,7 +236,7 @@ def evaluate(snapshot: Snapshot, codes, *, professional=None, documents=None) ->
             submission_blocking=item.submission_blocking, finding_status=item.finding_status,
             defect_class=item.key.split(':')[0] if re.match(r'^D\d+:', item.key) else None)
         if item.key.startswith('export:unconfirmed:'):
-            element.export_reason = item.reason   # 'unconfirmed <kind> fact "<field>" (<id>)'
+            element.export_reason = item.reason   # '<Answer label> is not confirmed yet.'
         out.append(element)
 
     from .completeness_rules import _on_variance

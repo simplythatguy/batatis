@@ -257,3 +257,26 @@ def test_a_photo_with_a_very_long_title_still_reads_as_a_photo():
     result = export_case(case, draft=True, store=attach(case, buf.getvalue(), name=title))
     assert PHOTO in PdfReader(io.BytesIO(result.pdf)).pages[-1].extract_text()
     assert not any('could not be fully read' in item for item in result.open_items)
+
+
+def test_signing_in_the_app_counts_and_no_attachment_is_not_an_unread_attachment():
+    # QA 2026-10-28: "sign externally before submission" stayed after both people signed in the app, and
+    # "Attachment contents are absent or could not all be read" appeared when nothing was attached.
+    from engine.export.package import prepare_package
+    from engine.workspace import signers
+    codes = Codes()
+    case = sample_case(codes)
+    case.evidence = []
+    case.facts = [f for f in case.facts if not f.field.startswith('evidence.')]
+
+    def items(report):
+        return {item.key: item for item in report.items}
+
+    unsigned = items(prepare_package(case, codes).policy.report)
+    assert 'signature:presence' in unsigned
+    assert unsigned['section_b.consistency:presence'].verdict == 'present'
+    for signer in signers(case):
+        signed(case, signer.role)
+    report = prepare_package(case, codes).policy.report
+    assert 'signature:presence' not in items(report)
+    assert not any('sign externally' in reason or 'signature date' in reason for reason in report.export_reasons)
