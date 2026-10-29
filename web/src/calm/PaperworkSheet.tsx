@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState } from "react";
-import { AUTHORITIES, authorityUnsure, officeChoiceAction, officeCovered, officeSuggestion } from "../config";
+import { AUTHORITIES, officeChoiceAction, officeCovered, officeSuggestion } from "../config";
 import { localField } from "../intakeFields";
 import { legalFromFacts, sourceLine } from "../intakeView";
 import { DETAIL_FIELDS, factFor, valueText } from "../model";
@@ -108,7 +108,7 @@ export function PaperworkSheet({ item, focusRow, onDone }: { item: DeckItem; foc
       <span className="cf-pw-label">{label}</span>
       <div className="cf-pw-value">
         {row.kind === "authority"
-          ? <AuthorityPicker compact options={AUTHORITIES} value={value} unsure={Boolean(deferred || (!draft && authorityUnsure(c)))} label="Office" onPick={(picked) => picked === "unsure" ? setDrafts((d) => ({ ...d, [row.key]: { kind: "not_sure" } })) : choose(picked)} />
+          ? <AuthorityPicker compact options={AUTHORITIES} value={value} placeholder={deferred ? "Later" : undefined} label="Office" onPick={choose} />
           : choices.length > 0 ? <details className="cf-pw-choice">
             <summary aria-label={`${label}: ${choiceLabel || placeholder}`}>
               <span className={choiceLabel ? "" : "cf-pw-placeholder"}>{choiceLabel || placeholder}</span><Icon24 name="down" size={14} />
