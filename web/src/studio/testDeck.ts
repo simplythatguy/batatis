@@ -11,7 +11,7 @@ export const testDeck: Deck = {
   team: ["Abdel Abdelwaly", "Omer Abdelwahab", "Alameen Elnur"],
   groups: [
     {
-      id: "open",
+      id: "test-open",
       name: "Opening",
       slides: [
         { kind: "statement", id: "t-rule", text: "Every new idea\nbreaks a rule.", accent: "breaks a rule.", sub: "Weeks later." },
@@ -41,7 +41,7 @@ export const testDeck: Deck = {
       ],
     },
     {
-      id: "results",
+      id: "test-results",
       name: "Results",
       slides: [
         {

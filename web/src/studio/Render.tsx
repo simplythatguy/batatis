@@ -4,12 +4,12 @@ import { Icon } from "./icons";
 import { roomApi } from "./room";
 import { exportVideo, preload } from "./stage";
 import { takeCache } from "./takeCache";
-import { clock } from "./timing";
+import { clock, INTRO_MS } from "./timing";
 import type { Deck, RoomState, TakeInfo, TakeMedia } from "./types";
 
 type State =
   | { k: "working"; label: string; fraction: number }
-  | { k: "done"; url: string; mime: string; ms: number; size: number }
+  | { k: "done"; url: string; mime: string; ms: number; poster: string }
   | { k: "failed"; message: string };
 
 async function takeMedia(room: string, info: TakeInfo, onBytes: (n: number) => void, signal: AbortSignal): Promise<TakeMedia> {
@@ -32,17 +32,43 @@ async function takeMedia(room: string, info: TakeInfo, onBytes: (n: number) => v
   return { blob, mime: info.mime, cues: info.cues, durationMs: info.durationMs };
 }
 
-const durationOf = (url: string) =>
-  new Promise<number>((resolve) => {
+/** The video's length, and a still from its logo intro for the player (frame zero is a blank page). */
+const inspect = (url: string) =>
+  new Promise<{ ms: number; poster: string }>((resolve) => {
     const v = document.createElement("video");
-    v.preload = "metadata";
+    v.muted = true;
+    v.preload = "auto";
+    let ms = 0;
+    const still = () => {
+      v.onseeked = () => {
+        const c = document.createElement("canvas");
+        c.width = 960;
+        c.height = 540;
+        let poster = "";
+        try {
+          c.getContext("2d")?.drawImage(v, 0, 0, c.width, c.height);
+          poster = c.toDataURL("image/jpeg", 0.85);
+        } catch {
+          /* no still: the player shows its first frame */
+        }
+        resolve({ ms, poster });
+      };
+      v.currentTime = Math.min(INTRO_MS * 0.6, ms / 2) / 1000;
+    };
     v.onloadedmetadata = () => {
-      if (Number.isFinite(v.duration)) return resolve(v.duration * 1000);
+      if (Number.isFinite(v.duration)) {
+        ms = v.duration * 1000;
+        return still();
+      }
       // Recorded webm has no duration until it is seeked to the end.
-      v.ondurationchange = () => Number.isFinite(v.duration) && resolve(v.duration * 1000);
+      v.ondurationchange = () => {
+        if (!Number.isFinite(v.duration) || ms) return;
+        ms = v.duration * 1000;
+        still();
+      };
       v.currentTime = 1e9;
     };
-    v.onerror = () => resolve(0);
+    v.onerror = () => resolve({ ms, poster: "" });
     v.src = url;
   });
 
@@ -68,7 +94,7 @@ export function Render({ deck, room, onClose }: { deck: Deck; room: RoomState; o
           }, ctl.signal);
         }
         await preload(deck, (f) => setState({ k: "working", label: "Loading slides", fraction: f }));
-        const opts: Parameters<typeof exportVideo>[0] & { canvas?: HTMLCanvasElement } = {
+        const opts: Parameters<typeof exportVideo>[0] = {
           deck,
           takes: media,
           signal: ctl.signal,
@@ -77,8 +103,8 @@ export function Render({ deck, room, onClose }: { deck: Deck; room: RoomState; o
         };
         const { blob, mime } = await exportVideo(opts);
         url = URL.createObjectURL(blob);
-        const ms = await durationOf(url);
-        if (!ctl.signal.aborted) setState({ k: "done", url, mime, ms, size: blob.size });
+        const { ms, poster } = await inspect(url);
+        if (!ctl.signal.aborted) setState({ k: "done", url, mime, ms, poster });
       } catch (e) {
         if (!ctl.signal.aborted) setState({ k: "failed", message: e instanceof Error ? e.message : "The render failed" });
       }
@@ -101,7 +127,7 @@ export function Render({ deck, room, onClose }: { deck: Deck; room: RoomState; o
       </header>
       {state.k === "done" ? (
         <>
-          <video className="st-result" src={state.url} controls playsInline />
+          <video className="st-result" src={state.url} poster={state.poster || undefined} controls playsInline />
           <div className="st-bar">
             <a className="cf-btn is-primary is-lg" href={state.url} download={`batatis-demo.${ext}`}>
               <Icon name="download" size={16} />Download

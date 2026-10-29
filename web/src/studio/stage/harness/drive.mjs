@@ -31,9 +31,10 @@ const wait = (ms) => page.waitForTimeout(ms);
 
 if (mode === "stills") {
   console.log("stand-ins:", JSON.stringify(await page.evaluate(() => window.H.standIns)));
-  await page.evaluate(() => window.H.camera(true));
+  // As in the export: the cards have no camera; every slide does.
   await page.evaluate(() => window.H.card("intro"));
   await step(5000); await save("00-intro");
+  await page.evaluate(() => window.H.camera(true));
   const slides = await page.evaluate(() => window.H.slides);
   let n = 1;
   for (const [g, ids] of slides.entries())

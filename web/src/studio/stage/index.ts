@@ -23,6 +23,8 @@ export function exportVideo(opts: {
   takes: Record<string, TakeMedia>;
   onProgress?: (fraction: number, label: string) => void;
   signal?: AbortSignal;
+  /** Paint into this visible canvas, so the render screen shows the video as it is made. */
+  canvas?: HTMLCanvasElement;
 }): Promise<{ blob: Blob; mime: string }> {
   return renderVideo(opts);
 }

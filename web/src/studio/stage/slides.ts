@@ -45,11 +45,13 @@ const baselines = (n: number, top: number, size: number, lh: number) => Array.fr
 const STATEMENT = { maxSize: 150, maxW: 1290, centre: 516 };
 
 function paintStatement(ctx: Ctx, s: Extract<Slide, { kind: "statement" }>) {
+  // Shrink until the author's own line breaks hold, so no line wraps into an orphan.
+  const breaks = s.text.split("\n").length;
   let size = STATEMENT.maxSize, lines: string[] = [];
   for (; size >= 72; size -= 2) {
     font(ctx, 600, size, -0.04);
     lines = wrap(ctx, s.text, STATEMENT.maxW);
-    if (Math.max(...lines.map((l) => measure(ctx, l))) <= STATEMENT.maxW) break;
+    if (lines.length <= breaks) break;
   }
   const lh = size * 1.04;
   const sub = 40;
@@ -158,7 +160,10 @@ function paintClip(ctx: Ctx, video?: HTMLVideoElement) {
   });
 }
 
-/** Where a still sits in `box`: contain-fit, or cropped to `focus` (with a little room) and clamped to the still's edges. */
+/**
+ * Where a still sits in `box`: contain-fit, or cropped to `focus` (with a little room) and kept inside the page's
+ * printed area, so the crop shows more of the form rather than its blank margin.
+ */
 function placement(img: HTMLImageElement, box: Rect, focus?: Rect) {
   const iw = img.naturalWidth, ih = img.naturalHeight;
   if (!focus) {
@@ -166,13 +171,20 @@ function placement(img: HTMLImageElement, box: Rect, focus?: Rect) {
     return { s: r.w / iw, ox: r.x, oy: r.y };
   }
   const room = 48;
+  const ink = inkBounds(img);
   const s = Math.min(box.w / (focus.w + room * 2), box.h / (focus.h + room * 2));
-  const place = (len: number, start: number, boxLen: number, centre: number) => {
-    const scaled = len * s;
-    if (scaled <= boxLen) return start + (boxLen - scaled) / 2;
-    return Math.min(start, Math.max(start + boxLen - scaled, start + boxLen / 2 - centre * s));
+  const place = (lo: number, hi: number, start: number, boxLen: number, centre: number) => {
+    lo = Math.max(0, lo - room);
+    hi += room;
+    const scaled = (hi - lo) * s;
+    if (scaled <= boxLen) return start + (boxLen - scaled) / 2 - lo * s;
+    return Math.min(start - lo * s, Math.max(start + boxLen - hi * s, start + boxLen / 2 - centre * s));
   };
-  return { s, ox: place(iw, box.x, box.w, focus.x + focus.w / 2), oy: place(ih, box.y, box.h, focus.y + focus.h / 2) };
+  return {
+    s,
+    ox: place(ink.x, ink.x + ink.w, box.x, box.w, focus.x + focus.w / 2),
+    oy: place(ink.y, ink.y + ink.h, box.y, box.h, focus.y + focus.h / 2),
+  };
 }
 
 function drawMarks(ctx: Ctx, marks: Mark[] | undefined, map: (r: Rect) => Rect) {
@@ -191,20 +203,22 @@ function paintImage(ctx: Ctx, s: Extract<Slide, { kind: "image" }>) {
 
 const COMPARE = { gap: 48, margin: 28, label: 52, radius: 20 };
 
-/** Two pages side by side, each trimmed to its printed area, at one shared scale, labels under. */
+/** Two pages side by side, trimmed to the printed area they share, at one scale, labels under. */
 function paintCompare(ctx: Ctx, left: Panel, right: Panel) {
   const imgs = [image(left.src), image(right.src)];
   if (!imgs[0] || !imgs[1]) return;
-  const srcs = imgs.map((img) => {
-    const b = inkBounds(img!);
-    const m = COMPARE.margin;
-    const x = Math.max(0, b.x - m), y = Math.max(0, b.y - m);
-    return { x, y, w: Math.min(img!.naturalWidth, b.x + b.w + m) - x, h: Math.min(img!.naturalHeight, b.y + b.h + m) - y };
-  });
+  // One crop for both, so the pages line up row for row and the frames match.
+  const bs = imgs.map((img) => inkBounds(img!));
+  const m = COMPARE.margin;
+  const x = Math.max(0, Math.min(...bs.map((b) => b.x)) - m), y = Math.max(0, Math.min(...bs.map((b) => b.y)) - m);
+  const src = {
+    x, y,
+    w: Math.min(...imgs.map((i) => i!.naturalWidth), Math.max(...bs.map((b) => b.x + b.w)) + m) - x,
+    h: Math.min(...imgs.map((i) => i!.naturalHeight), Math.max(...bs.map((b) => b.y + b.h)) + m) - y,
+  };
   const colW = (L.frame.w - COMPARE.gap) / 2;
-  const s = Math.min(...srcs.map((r) => Math.min(colW / r.w, (L.frame.h - COMPARE.label) / r.h)));
+  const s = Math.min(colW / src.w, (L.frame.h - COMPARE.label) / src.h);
   [left, right].forEach((panel, i) => {
-    const src = srcs[i];
     const r = { x: L.frame.x + i * (colW + COMPARE.gap), y: L.frame.y, w: src.w * s, h: src.h * s };
     frame(ctx, r, (c) => {
       c.drawImage(imgs[i]!, src.x, src.y, src.w, src.h, r.x, r.y, r.w, r.h);
@@ -336,14 +350,30 @@ function paintFlow(ctx: Ctx, s: Extract<Slide, { kind: "flow" }>) {
   const pitch = L.frame.w / n;
   const colW = pitch - 48;
   const xs = s.steps.map((_, i) => L.margin + i * pitch);
-  const labelSize = 40, subSize = 28;
-  const y = L.frame.y + L.frame.h / 2 - 90;
+  // One size for every label, the largest that keeps each on one line; wrap only below 40px.
+  let labelSize = 52;
+  for (; labelSize > 40; labelSize -= 2) {
+    font(ctx, 600, labelSize, -0.025);
+    if (s.steps.every((st) => measure(ctx, st.label) <= colW)) break;
+  }
+  const labelLh = labelSize * 1.12, subSize = 31, subLh = subSize * 1.35, dotGap = 88, subGap = 32;
+  font(ctx, 600, labelSize, -0.025);
+  const labels = s.steps.map((st) => wrap(ctx, st.label, colW));
+  font(ctx, 500, subSize, -0.01);
+  const subs = s.steps.map((st) => (st.sub ? wrap(ctx, st.sub, colW) : []));
+  // Subs share one line under the tallest label, so the columns read across.
+  const labelRows = Math.max(...labels.map((l) => l.length));
+  const subRows = Math.max(...subs.map((l) => l.length));
+  const height = dotGap + labelSize * CAP + (labelRows - 1) * labelLh + (subRows ? subGap + subSize * CAP + (subRows - 1) * subLh : 0);
+  const y = L.frame.y + (L.frame.h - height) / 2 - 20;
+  const labelBase = y + dotGap + labelSize * CAP;
+  const subBase = labelBase + (labelRows - 1) * labelLh + subGap + subSize * CAP;
   ctx.fillStyle = C.bar;
   ctx.fillRect(xs[0], y - 1, xs[n - 1] - xs[0], 2);
-  s.steps.forEach((st, i) => {
+  s.steps.forEach((_, i) => {
     const on = active.has(i);
     ctx.beginPath();
-    ctx.arc(xs[i] + 9, y, 9, 0, Math.PI * 2);
+    ctx.arc(xs[i] + 11, y, 11, 0, Math.PI * 2);
     ctx.fillStyle = on ? C.blue : C.white;
     ctx.fill();
     if (!on) {
@@ -352,18 +382,8 @@ function paintFlow(ctx: Ctx, s: Extract<Slide, { kind: "flow" }>) {
       ctx.stroke();
     }
     font(ctx, 600, labelSize, -0.025);
-    let by = y + 72 + labelSize * CAP;
-    for (const line of wrap(ctx, st.label, colW)) {
-      text(ctx, line, xs[i], by, on ? C.ink : C.grey);
-      by += labelSize * 1.15;
-    }
-    if (st.sub) {
-      font(ctx, 400, subSize, -0.005);
-      by += 2;
-      for (const line of wrap(ctx, st.sub, colW)) {
-        text(ctx, line, xs[i], by, C.grey);
-        by += subSize * 1.35;
-      }
-    }
+    labels[i].forEach((line, k) => text(ctx, line, xs[i], labelBase + k * labelLh, on ? C.ink : C.grey));
+    font(ctx, 500, subSize, -0.01);
+    subs[i].forEach((line, k) => text(ctx, line, xs[i], subBase + k * subLh, C.grey));
   });
 }

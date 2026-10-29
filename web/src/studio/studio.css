@@ -591,12 +591,19 @@
 /* The transcript: one segment per slide; → between segments (next slide), ■ after the last (stop). */
 
 .st-script {
+  position: relative;
   flex: 1;
   min-height: 120px;
   margin: 0 -10px;
   padding: 2px 0 32px;
   overflow: auto;
   list-style: none;
+}
+
+/* While following a take the list scrolls under soft edges instead of cutting lines in half. */
+.st-script.is-following {
+  padding-top: 18px;
+  mask-image: linear-gradient(transparent, #000 18px, #000 calc(100% - 28px), transparent);
 }
 
 .st-seg-hit {
@@ -673,7 +680,7 @@
   aspect-ratio: 16 / 9;
   border-radius: 12px;
   border: 1px solid var(--cf-line);
-  background: #000;
+  background: #fff;
 }
 
 .st-work {
