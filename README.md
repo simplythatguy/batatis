@@ -6,9 +6,9 @@ Batatis helps builders in Alberta prepare a complete building-code variance appl
 
 ## See it work
 
-![Batatis from description to an officer's review: a homebuilder's application, then the City of Edmonton officer's review and the request back to the applicant](docs/readme/demo.gif)
+PENDING_VIDEO_URL
 
-A homebuilder describes a project and attaches two City of Edmonton PDFs. Batatis reads them, asks only what they didn't already say, and fills in the variance form. The City of Edmonton officer then reviews it, asks for what is missing, and the applicant opens that request. The animation plays at 2.5 times the speed of the [full 5-minute video](docs/readme/demo.mp4). It uses example data.
+Alex Builder sends a soffit variance for a house in Edmonton on the live site. You see the application, the questions, and settings. Jordan Officer reviews it for Edmonton, opens it from the queue, and writes to Alex. Alex opens that message. The words in the application are a sample.
 
 ## The problem
 
