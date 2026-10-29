@@ -361,7 +361,7 @@ function Booth({ deck, index, room, me, camera, phase, setPhase, onAssign }: {
     void v.play();
   };
 
-  // Keys: R record, Space/→ next slide, ← back, Esc cancel.
+  // Keys: R record, Space/→ next slide, ← back, Enter stop, Esc cancel.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const el = e.target as HTMLElement;
@@ -376,6 +376,9 @@ function Booth({ deck, index, room, me, camera, phase, setPhase, onAssign }: {
       } else if (p.k === "recording" && e.key === "ArrowLeft") {
         e.preventDefault();
         step(-1);
+      } else if (p.k === "recording" && e.key === "Enter") {
+        e.preventDefault();
+        void finish(false);
       } else if ((e.key === "r" || e.key === "R") && (p.k === "idle" || p.k === "review") && !e.repeat) {
         e.preventDefault();
         start();
@@ -383,7 +386,7 @@ function Booth({ deck, index, room, me, camera, phase, setPhase, onAssign }: {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [cancel, start, step]);
+  }, [cancel, finish, start, step]);
 
   const current = phase.k === "recording" ? phase.slide : phase.k === "review" ? replaySlide : phase.k === "countdown" ? 0 : null;
   const remaining = phase.k === "recording" ? target - elapsed : target;
@@ -405,7 +408,7 @@ function Booth({ deck, index, room, me, camera, phase, setPhase, onAssign }: {
       <div className="st-bar">
         {phase.k === "idle" && (mine ? (
           <button type="button" className={`cf-btn is-lg st-rec${take ? "" : " is-primary"}`} onClick={start} disabled={!camera.stream || !stage}>
-            <span className="st-dot" />{take ? "Record again" : "Record"}<kbd className="cf-kbd">R</kbd>
+            <span className="st-dot" />{take ? "Retake" : "Record"}<kbd className="cf-kbd">R</kbd>
           </button>
         ) : assignee ? (
           <span className="st-blocked"><Icon name="user" size={14} />{assignee.name} records this</span>
@@ -418,14 +421,14 @@ function Booth({ deck, index, room, me, camera, phase, setPhase, onAssign }: {
         {phase.k === "recording" && (
           <>
             <button type="button" className="cf-btn is-lg" onClick={() => void finish(false)} aria-label="Stop">
-              <span className="st-square" />Stop
+              <span className="st-square" />Stop<kbd className="cf-kbd">Enter</kbd>
             </button>
             <span className="st-steps">
               <button type="button" className="cf-icon-btn st-step" onClick={() => step(-1)} disabled={phase.slide === 0} aria-label="Previous slide" title="Previous slide (←)">
                 <Icon name="prev" size={18} />
               </button>
               <span className="st-step-n">{phase.slide + 1} / {last + 1}</span>
-              <button type="button" className="cf-icon-btn st-step" onClick={() => step(1)} disabled={phase.slide === last} aria-label="Next slide" title="Next slide (Space)">
+              <button type="button" className="cf-icon-btn st-step" onClick={() => step(1)} disabled={phase.slide === last} aria-label="Next slide" title="Next slide (→)">
                 <Icon name="next" size={18} />
               </button>
             </span>
@@ -464,14 +467,18 @@ function Booth({ deck, index, room, me, camera, phase, setPhase, onAssign }: {
 }
 
 function Transcript({ group, current, picked, onPick }: { group: Group; current: number | null; picked: number | null; onPick?: (slide: number) => void }) {
+  const list = useRef<HTMLOListElement>(null);
   const refs = useRef<(HTMLElement | null)[]>([]);
+  // The segment being spoken sits at the top with the next ones under it. Only the list scrolls,
+  // never the page around it (scrollIntoView would also move the overflow-hidden ancestors).
   useEffect(() => {
-    if (current !== null) refs.current[current]?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    const el = current !== null ? refs.current[current] : null;
+    if (el && list.current) list.current.scrollTo({ top: Math.max(0, el.offsetTop - 18), behavior: "smooth" });
   }, [current]);
   const last = group.script.length - 1;
   const items = useMemo(() => group.script.map((text, i) => ({ text, i })), [group.script]);
   return (
-    <ol className={`st-script${current !== null ? " is-following" : ""}`} aria-label="Transcript">
+    <ol ref={list} className={`st-script${current !== null ? " is-following" : ""}`} aria-label="Transcript">
       {items.map(({ text, i }) => (
         <li key={i} ref={(el) => { refs.current[i] = el; }} className={`st-seg${current === i ? " is-now" : ""}${picked === i ? " is-picked" : ""}`}>
           <button type="button" className="st-seg-hit" onClick={onPick ? () => onPick(i) : undefined} disabled={!onPick} aria-label={`Slide ${i + 1}`}>
