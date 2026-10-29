@@ -16,8 +16,8 @@ We tested Batatis on 64 real records that the Government of Alberta and the citi
 
 | On the 64 real records | Result |
 | --- | --- |
-| The first code article Batatis shows is one the regulator cited | 46 of 64, up from 26 before the AI ranking |
-| A cited article is among the first three | 55 of 64, up from 32 |
+| The first code article Batatis shows is one the regulator cited | 54 of 64 with the AI search and ranking Batatis runs, against 26 without AI |
+| A cited article is among the first three | 58 of 64, against 32 without AI |
 | Made-up code articles shown to the applicant | 0. Every AI pick has to quote the code word for word |
 | Grade of a first-time applicant's finished application | 5.6 out of 10 with the workflow we chose, 3.4 with our earlier flow, and 2.0 with the official flowchart asked as a form |
 
@@ -62,7 +62,7 @@ When a design doesn't follow the code as written, the builder prepares the varia
 
 ## Our solution
 
-![The applicant describes the project, answers questions, confirms the ranked code articles, gets Section C filled in, plans the evidence, and submits. The officer picks it up, reviews it, and accepts it or returns it with a message](docs/readme/solution.png)
+![The applicant describes the project, answers questions, confirms the ranked code articles, gets Section C filled in, reviews the drafted case on one screen, plans the evidence, and submits. The officer picks it up, reviews it, and accepts it or returns it with a message](docs/readme/solution.png)
 
 Batatis does the code work, and the applicant checks it. It finds and ranks the code articles, looks up what each one is for, drafts the statements the form asks for, and plans the evidence. The officer then gets a checklist of what is missing. Batatis never says that a design is safe or meets the code. Engineers and the officer decide that.
 
@@ -87,11 +87,12 @@ The six statements are rationale, risk assessment, mitigating measures, assumpti
 Manufacturers, homebuilders, and general contractors use Batatis to prepare the application.
 
 1. Describe the project in your own words, or drop in PDFs.
-2. Answer the questions that Batatis still needs, one at a time. For a variance, Batatis drafts the six statements from your description and files, and every claim shows the words it came from.
-3. Confirm the code articles that Batatis found and ranked. Each one quotes the code.
+2. Answer the questions that Batatis still needs, one at a time.
+3. Confirm the code articles that Batatis found and ranked. Each one quotes the code. For the rule your design departs from, Batatis shows the code, your design, and the difference side by side, and you confirm it.
 4. Section C of the form, the purpose of each article, fills in from the code's own tables.
-5. Plan the evidence. Batatis flags when an engineer or another professional is required.
-6. Fix anything the checklist marks as missing. Then download the official form, or submit it to Edmonton or Calgary.
+5. For a variance, review the case Batatis drafted: the six statements on one screen, each claim with the words it came from. Accept them all at once, or accept, reject, or rewrite each one.
+6. Plan the evidence. Batatis flags when an engineer or another professional is required.
+7. Fix anything the checklist marks as missing. Then download the official form, or submit it to Edmonton or Calgary.
 
 ### For Safety Codes Officers
 
@@ -129,9 +130,9 @@ So Batatis keeps the flowchart as its checklist, and changes who does each box:
 | --- | --- | --- |
 | Identify the acceptable solution | names the article | Batatis searches the code, ranks the articles, and quotes each one. You confirm |
 | Objectives, functional statements, and intent | copies them from the code | Looked up from the code's tables. Never asked |
-| Performance level, comparison, and gaps | writes them | You describe how the design differs. Next, Batatis drafts the comparison |
+| Performance level, comparison, and gaps | writes them | Batatis shows the code, your design, and the difference side by side. You confirm or edit |
 | Does the design comply? | picks yes or no, even when unsure | A coded check, a route you confirmed, or your words decide. If none does, Batatis stops and names the missing fact |
-| Rationale, risk, mitigation, and assumptions | writes each one | Batatis drafts each one, and every claim shows its source |
+| Rationale, risk, mitigation, and assumptions | writes each one | Batatis drafts each one, and every claim shows its source. You review them on one screen |
 | Not in the flowchart: maintenance and operation, and qualifications | is never asked | Asked, because the code requires them (Division C, Article 2.3.1.1) |
 | Evidence | chooses from the list | Batatis plans the evidence for each article and flags when an engineer is needed |
 
@@ -142,7 +143,7 @@ So Batatis keeps the flowchart as its checklist, and changes who does each box:
 - **Dead ends and wrong turns.** On the 64 records, a rule that didn't apply ended 2 applications, 2 building-code questions were sent to another safety code, and 1 variance was read as following the code. All five are fixed, and new tests run the real records through these checks.
 - **Wrong Section C.** It never comes from a person or a model. It is looked up.
 
-Batatis already ranks the articles and avoids those dead ends and wrong turns. The next steps are the comparison, drafts on one review screen, and a table-of-contents search that put a cited article first in 54 of 64 records in the same test. The method, the fairness choices, and every number are in the [workflow bakeoff](experiments/workflow-bakeoff-v2/README.md) and its [one-page summary](docs/evaluations/workflow-bakeoff-v2-20261028.md).
+Batatis now works this way. It reads the code's table of contents and ranks the articles, shows the comparison, drafts the statements, and lets you review them on one screen. Once the AI ranking has read the description, it also skips the questions that only narrowed down the articles. The method, the fairness choices, and every number are in the [workflow bakeoff](experiments/workflow-bakeoff-v2/README.md) and its [one-page summary](docs/evaluations/workflow-bakeoff-v2-20261028.md).
 
 ## Features
 
@@ -153,8 +154,9 @@ For applicants:
 - Describe a project in text or PDFs. Batatis reads the facts and asks only for what is missing.
 - See which package you are preparing. If Batatis cannot tell, it stops and names the missing fact.
 - Answer the open items one at a time. A variance asks for six statements: why you want the change, what could go wrong, what you add, what the plan depends on, how it will be maintained, and who is responsible. A design that follows the standard way does not ask for those.
-- Get the six statements drafted from your description and files. Every claim shows its source, and you accept or reject each draft.
-- See the code articles ranked by AI, each with a quote from the code, and confirm the ones that apply.
+- Get the six statements drafted from your description and files, and review them on one screen. Every claim shows its source. Accept them all at once, or accept, reject, or rewrite each one.
+- See the code articles found and ranked by AI, each with a quote from the code, and confirm the ones that apply.
+- See the code, your design, and the difference side by side for the rule your design departs from.
 - Get Section C filled in from the code's tables.
 - Get a Section D evidence plan that flags when a professional is required.
 - For the articles varied most often, enter your numbers and see whether the design departs from the code's standard way.
@@ -225,8 +227,8 @@ The AI costs cents per application. People's time is the real cost, and most of 
 
 | What | About | Kind |
 | --- | --- | --- |
-| AI for one application, at list prices | US$0.55, or US$0.04 if every step ran on Claude Haiku 5.5 | Estimate. No application has run with metering on yet |
-| AI ranking of the code articles, per search | US$0.002 | Estimate |
+| AI for one application, at list prices | US$0.56, or US$0.05 if every step ran on Claude Haiku 5.5 | Estimate. No application has run with metering on yet |
+| AI search and ranking of the code articles, per application | US$0.008 | Estimate |
 | Hosting, per application at pilot volume | C$0.62 | Estimate |
 | An officer's time | C$43.92 to C$56.53 an hour | Published. City of Edmonton, Safety Codes Officer II |
 | One extra "more information" round on a custom application | C$3,600, of which 59% is the builder's cost of waiting | Estimate |
@@ -238,7 +240,7 @@ Every figure, its source, and its assumptions are in the [cost model](docs/resea
 
 ## What's next
 
-- Finish the workflow that won the test: the comparison of the design with the rule, drafts on one review screen, and the table-of-contents search.
+- Run the 64-record test again on the app's own flow, end to end.
 - Offer the website as a paid service, with AI included.
 - Export Calgary's own Request for Specific Variance form next to the Council's form.
 - Register decided variances in the Council's Orders and Variances Portal, which becomes mandatory on December 1, 2026.
@@ -291,18 +293,19 @@ For applicants:
 
 1. **Describe the project.** Rules read facts, such as the owner and the address, from the description and from the text and fields of any PDFs. If AI is on, Claude Sonnet 5.5, an Anthropic model, points at more facts, and each one must quote the text it came from. When you attach files, Sonnet also reviews them page by page, and the questions screen lists what it found.
 2. **Answer a few questions.** A rule-based planner picks up to five questions. It starts with conflicts in what you wrote, then facts that narrow down the code articles. The website then shows one card for each item that is still open. No AI writes the questions. This step is also where the path is chosen. See [How the path is chosen](#how-the-path-is-chosen). On the variance path, if AI is on, Claude Sonnet 5.5 drafts the six process statements from the description, the files, and the code. Every claim must quote its source word for word, and a second call checks that each quote supports its claim before anything is saved.
-3. **Confirm the code articles.** Batatis searches the full text of CodeDB for every requirement your description touches. If AI is on, Claude Haiku 5.5 reads the leading 60 and moves the ones it can quote word for word to the front, with a one-line reason. A quote that is not in the code is thrown away. You confirm the articles that apply. With AI off, the search order stays as it is.
+3. **Confirm the code articles.** Batatis searches the full text of CodeDB for every requirement your description touches. If AI is on, Claude Haiku 5.5 first reads the table of contents of Division B, all 2,080 article titles, and names up to 12 more candidates. It then reads the leading 72 and moves the ones it can quote word for word to the front. A quote that is not in the article's own text is thrown away. An article that only the table of contents found joins the list with its citation and Section C from CodeDB. You confirm the articles that apply. For the rule your design departs from, the card shows its code text, the words from your description, and the drafted difference, and Confirm records the departure. With AI off, the search order stays as it is, and the planner's questions that narrow down the articles are asked instead.
 4. **Section C fills itself in.** The objectives, functions, and intent of each confirmed article come from the code's own tables in CodeDB. No AI is involved.
-5. **Plan the evidence.** Rules match each article to the kinds of evidence it needs, and flag when an engineer or another professional is required. No AI is involved. The six process fields are added only when the path is alternative.
-6. **Anything missing?** Completeness rules check every required part of Sections A to D. Anything missing sends you back to the questions.
-7. **Submit the official form.** The engine fills in the Council's variance form, adds an appendix with the full code text, and saves the exact version you sent.
+5. **Review the drafted case.** The six statements appear on one screen, with Accept all. Answers to the drafts' open questions are added to the statements after you accept them.
+6. **Plan the evidence.** Rules match each article to the kinds of evidence it needs, and flag when an engineer or another professional is required. No AI is involved. The six process fields are added only when the path is alternative.
+7. **Anything missing?** Completeness rules check every required part of Sections A to D. Anything missing sends you back to the questions.
+8. **Submit the official form.** The engine fills in the Council's variance form, adds an appendix with the full code text, and saves the exact version you sent.
 
 For Safety Codes Officers:
 
-8. **Pick it up from the queue.** The queue lists submitted applications. Claiming one stops two officers from reviewing it at the same time.
-9. **Review the application.** The officer sees the filled form, the same completeness checks, and the code citations checked against CodeDB.
-10. **Decide.** Returning the application sends the applicant a message, and they fix it and resubmit. Accepting it marks it as administratively complete.
-11. **Close-out.** The engine builds the decision's record package for the Council.
+9. **Pick it up from the queue.** The queue lists submitted applications. Claiming one stops two officers from reviewing it at the same time.
+10. **Review the application.** The officer sees the filled form, the same completeness checks, and the code citations checked against CodeDB.
+11. **Decide.** Returning the application sends the applicant a message, and they fix it and resubmit. Accepting it marks it as administratively complete.
+12. **Close-out.** The engine builds the decision's record package for the Council.
 
 Batatis checks what Sonnet writes before it keeps anything. The document review proposes facts, conflicts, the code provisions the files cite, what is still missing, and questions to ask next. Batatis drops a fact, conflict, or provision unless its excerpt appears in the request or the file it names. When a restated fact adds a number that its excerpt lacks, Batatis shows the excerpt instead. A wording filter removes Batatis's own sentences that say a design complies, is safe, or is approved, or that cite an article number CodeDB doesn't have.
 
@@ -316,7 +319,7 @@ Before any text goes to an AI service, Batatis removes the names, contact detail
 <summary>Why Batatis uses these models, and what isn't measured yet</summary>
 
 - **Reading, document review, and drafting use Claude Sonnet 5.5.** They moved from OpenAI models on 28 October 2026.
-- **Ranking code articles uses Claude Haiku 5.5 at medium effort.** It reads the leading 60 articles from the search, each as its heading and the first 700 characters of its text. On the 64 real records it put a cited article first in 46 cases, against 26 for the search alone. A model that read whole articles was not needed for that gain, and Haiku is the cheapest Claude model. [`engine/identify/pipeline.json`](engine/identify/pipeline.json) holds these settings, and [`engine/tests/test_workflow_profile.py`](engine/tests/test_workflow_profile.py) fails if a model, effort, or limit changes.
+- **Finding and ranking code articles uses Claude Haiku 5.5 at medium effort.** It reads the table of contents of Division B, then the leading 72 articles, each as its heading and the first 700 characters of its text. On the 64 real records this put a cited article first in 54 cases, against 46 for the ranking alone and 26 for the search alone. The engine sends the measured requests, except that the table of contents goes inline instead of as a file and its candidates are capped at 12. A model that read whole articles was not needed for that gain, and Haiku is the cheapest Claude model. [`engine/identify/pipeline.json`](engine/identify/pipeline.json) holds these settings, and [`engine/tests/test_workflow_profile.py`](engine/tests/test_workflow_profile.py) fails if a model, effort, or limit changes.
 - **The assistant uses Claude Haiku 5.5.** It answers from the application's own facts.
 
 No officer has graded a Batatis application, and no applicant has run the whole flow with metering on. The bakeoff measured code identification and the finished application with simulated applicants and an AI grader. The October 25 [decision record](docs/evaluations/workflow-decision-20261025.md) and its [evidence snapshot](docs/evaluations/workflow-accuracy-evidence-20261025.json) stay in the repository as history.
