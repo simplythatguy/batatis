@@ -1,10 +1,11 @@
 """Which package the applicant is on.
 
-A firm coded check decides: follows is the acceptable path, departs is the alternative path.
-A rule that does not apply to this building decides nothing: the project is not about that rule,
-so the path falls through. A labeled assumption is not a firm check. When no check decides, a
-recorded pathway wins, then the wording fork. An unknown fork does not open the alternative
-package. Identify decisions are not an answer to the fork.
+A firm departure in any relevant coded check selects the alternative path. Following one
+rule cannot settle unresolved scope or a stated wider departure. A rule that does not apply
+to this building decides nothing, so the path falls through. Assumptions and unconfirmed inputs are not firm.
+Missing inputs remain visible even when a departure selects the path. Otherwise a recorded
+pathway wins, then the wording fork. An unknown fork does not open the alternative package.
+Identify decisions are not an answer to the fork.
 
 Objectives, functional statements, and intent are never asked here. A Division B sentence is
 named only when the firm check returned it. Section C for that id is a database lookup.
@@ -26,9 +27,10 @@ from .rules.models import RuleResult
 PathName = Literal['acceptable', 'alternative', 'not_applicable', 'unresolved', 'redirect']
 PathSource = Literal['redirect', 'coded_check', 'recorded', 'wording', 'unresolved']
 
-BUILDING_WIDE = frozenset({
+CONTEXT_INPUTS = frozenset({
     'occupancy', 'storeys', 'building_area_m2', 'dwelling_unit_above_another', 'sprinklered',
     'fire_response_over_10_min', 'adjacent_rooms_sprinklered', 'industrial_hazard',
+    'limiting_distance_m', 'ebf_area_m2',
 })
 KEYWORDS = (
     ('glazed-openings-houses', ('glazed', 'glazing', 'window')),
@@ -57,35 +59,28 @@ def decide_path(case: Case) -> PathDecision:
         return PathDecision(path='redirect', source='redirect')
     rules = load_rules()
     by_id = {result.rule_id: result for result in case_rules(case).results}
-    named = _select_rule(text, rules)
-    if named:
-        result = by_id[named]
-        if _decides(result):
-            return _from_check(result)
-        if not _firm(result):
-            return _fallback(case, text, rule_id=named,
-                             missing=_needs(result, next(rule for rule in rules if rule['id'] == named)))
-        # The words named a rule this building is outside of; the other rules still get their say.
-    playing = [by_id[rule['id']] for rule in rules if rule['id'] != named and _in_play(by_id[rule['id']])]
+    named = _named_rules(text, rules)
+    playing = [by_id[rule['id']] for rule in rules if rule['id'] in named or _in_play(by_id[rule['id']])]
     firm = [result for result in playing if _firm(result)]
+    definitions = {rule['id']: rule for rule in rules}
+    missing = tuple(dict.fromkeys(field for result in playing if not _firm(result)
+                                  for field in _needs(result, definitions[result.rule_id])))
     departed = next((result for result in firm if result.state == 'departs'), None)
     if departed is not None:
-        return _from_check(departed)
-    deciding = [result for result in firm if _decides(result)]
-    if deciding and len(firm) == len(playing) and {result.state for result in deciding} == {'follows'}:
-        return _from_check(deciding[0])
-    missing: list[str] = []
-    for result in playing:
-        if _firm(result):
-            continue
-        missing.extend(_needs(result, next(rule for rule in rules if rule['id'] == result.rule_id)))
-    return _fallback(case, text, missing=tuple(dict.fromkeys(missing)))
+        return _from_check(departed, missing=missing)
+    rule_id = playing[0].rule_id if len(playing) == 1 else None
+    fallback = _fallback(case, text, rule_id=rule_id, missing=missing)
+    if (playing and len(firm) == len(playing) and {result.state for result in firm} == {'follows'}
+            and not _stated_departure(text) and not _uncovered_proposal(case, rules)):
+        return _from_check(firm[0])
+    # A rule this building is outside of decides nothing: the path falls through to the other signals.
+    return fallback
 
 
-def _from_check(result: RuleResult) -> PathDecision:
+def _from_check(result: RuleResult, *, missing: tuple[str, ...] = ()) -> PathDecision:
     return PathDecision(
         path=_STATE[result.state], rule_id=result.rule_id, article=result.provision.id,
-        firm=True, source='coded_check')
+        firm=True, source='coded_check', missing=missing, asks_rule_inputs=bool(missing))
 
 
 def _fallback(case: Case, text: str, *, rule_id: str | None = None, missing: tuple[str, ...] = ()) -> PathDecision:
@@ -102,16 +97,12 @@ def _fallback(case: Case, text: str, *, rule_id: str | None = None, missing: tup
 
 
 def _firm(result: RuleResult) -> bool:
-    return result.state in _STATE and not result.assumptions
+    return result.state in _STATE and not result.assumptions and not result.unconfirmed_inputs
 
-
-def _decides(result: RuleResult) -> bool:
-    # A keyword can name a rule the building is outside of ("no glazing" names the glazing rule).
-    return _firm(result) and result.state != 'not_applicable'
 
 
 def _needs(result: RuleResult, rule: dict) -> tuple[str, ...]:
-    missing = [item.field for item in result.missing]
+    missing = list(dict.fromkeys([item.field for item in result.missing] + result.unconfirmed_inputs))
     if result.assumptions:
         known = {item.field for item in result.inputs if item.value is not None}
         missing.extend(field for field in rule['inputs'] if field not in known and field not in missing)
@@ -119,7 +110,7 @@ def _needs(result: RuleResult, rule: dict) -> tuple[str, ...]:
 
 
 def _in_play(result: RuleResult) -> bool:
-    return any(item.field not in BUILDING_WIDE and item.value is not None for item in result.inputs)
+    return any(item.field not in CONTEXT_INPUTS and item.value is not None for item in result.inputs)
 
 
 def _keyword_hit(text: str, token: str) -> bool:
@@ -128,18 +119,10 @@ def _keyword_hit(text: str, token: str) -> bool:
     return re.search(rf'\b{re.escape(token)}s?\b', text) is not None
 
 
-def _select_rule(text: str, rules: list[dict]) -> str | None:
-    by_title = [rule['id'] for rule in rules if rule['title'] in text]
-    if len(by_title) == 1:
-        return by_title[0]
+def _named_rules(text: str, rules: list[dict]) -> set[str]:
     low = text.lower()
-    scores = [(sum(_keyword_hit(low, token) for token in tokens), rule_id) for rule_id, tokens in KEYWORDS]
-    scores = [(score, rule_id) for score, rule_id in scores if score]
-    if not scores:
-        return None
-    best = max(score for score, _ in scores)
-    tied = [rule_id for score, rule_id in scores if score == best]
-    return tied[0] if len(tied) == 1 else None
+    by_title = {rule['id'] for rule in rules if rule['title'].lower() in low}
+    return by_title | {rule_id for rule_id, tokens in KEYWORDS if any(_keyword_hit(low, token) for token in tokens)}
 
 
 def _design_text(case: Case) -> str:
@@ -149,6 +132,12 @@ def _design_text(case: Case) -> str:
     if read and read not in text:
         text = f'{text}\n{read}'.strip()
     return text
+
+
+def _uncovered_proposal(case: Case, rules: list[dict]) -> bool:
+    alternative = _latest(case, 'alternative_description', 'alternative')
+    text = alternative.value if alternative is not None and isinstance(alternative.value, str) else ''
+    return bool(text.strip()) and not _named_rules(text, rules)
 
 
 def _latest(case: Case, *fields: str) -> Fact | None:
@@ -186,3 +175,9 @@ def _wording(text: str) -> Literal['acceptable', 'alternative'] | None:
     if needed == 'not_indicated':
         return 'acceptable'
     return None
+
+
+def _stated_departure(text: str) -> bool:
+    fork = assess(text)
+    # Mixed follows/departs wording leaves the fork unknown but still states a departure.
+    return bool(fork.cues) and fork.variance_needed != 'not_indicated'
