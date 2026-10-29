@@ -1,0 +1,2420 @@
+{
+ "_meta": {
+  "title": "Unaccredited-for-building Alberta municipalities and where building applications go",
+  "generated_utc": "2026-10-29",
+  "lane": "alberta",
+  "method": "For each of the 75 municipal-type rows that the A16 inventory (2026-10-25) lists as not accredited for building, one read-only query of the public Safety Codes Council Accreditation Search (the tool behind 'Where to get a Permit'), organization type and discipline left blank, organization name set to the municipality's core name. The search matches substrings across all organization types. Nine baseline searches (all municipalities, municipalities with Building, joint municipalities, regional services commissions, agencies with Building, all agencies, corporations with Building, event location records, DAO) were run first.",
+  "rate": "one request per 1.2 seconds",
+  "search_url": "https://councilconnect.safetycodes.ab.ca/eWeb/DynamicPage.aspx?Site=scc&WebKey=d1d96198-3866-4673-9cec-a787f71f89f5",
+  "personal_data": "The search results include a QMP manager name and e-mail per row. They were not parsed or stored.",
+  "result": "All 75 queries agree with the A16 snapshot of 2026-10-25: none of the 75 is accredited for Building under its own name, and no joint municipality or regional services commission whose name contains the municipality's core name is accredited for Building. Own disciplines found: Fire only for 39, none for 36.",
+  "limits": [
+   "The search is not a location lookup. Its fields are organization type, discipline, the organization's own listed city, and organization name. It cannot say which agency serves a project address.",
+   "The 'Site List' report linked from each row redirected to a 'Login Required' page when fetched without an account (tested on one row, dl/5). It was not pursued.",
+   "Joint-municipality names list member municipalities in free text. Membership was matched by name only.",
+   "ASCA's Order covers Building, Electrical, Gas, Plumbing, Private Sewage and storage tank systems. It does not name the Fire discipline other than storage tank systems."
+  ]
+ },
+ "facts": [
+  {
+   "id": "asca-scope",
+   "status": "VERIFIED",
+   "text": "ASCA oversees permit-related services for buildings, electrical, gas, plumbing, private sewage and storage tank systems in areas not under the administration of an accredited municipality, regional services commission or corporation.",
+   "quote": "In the areas of Alberta that are not under the administration of an accredited municipality, an accredited regional services commission or an accredited corporation, the Authority shall oversee the provision of permit-related services",
+   "source": "Alberta Safety Codes Authority Order, AR 29/2016 s.4(1) (consolidated up to 208/2024)",
+   "url": "https://www.qp.alberta.ca/documents/Regs/2016_029.pdf",
+   "retrieved": "2026-10-29",
+   "sha256": "87bce9b5db09f69e9a0501fa06c33e5eca5de5a991302c10f1c64aeefaad8db9"
+  },
+  {
+   "id": "owner-chooses-agency",
+   "status": "VERIFIED",
+   "text": "In ASCA areas the owner picks the contracted agency. It is not assigned by area.",
+   "quote": "ASCA contracts a number of accredited agencies to provide compliance monitoring services throughout the province so you can select a service provider that works for you.",
+   "source": "Safety Codes Council, Alberta Safety Codes Authority page",
+   "url": "https://www.safetycodes.ab.ca/municipalities-corporations-and-agencies/alberta-safety-codes-authority/",
+   "retrieved": "2026-10-29",
+   "sha256": "46d9e3a6159214019575bf8a4f6841a368a9e5076d327cb7cae99305a4300ce8"
+  },
+  {
+   "id": "agency-choice-factors",
+   "status": "VERIFIED",
+   "text": "The agencies page tells owners to weigh distance, familiarity with the community and timing.",
+   "quote": "Things to consider when choosing your agency service provider: Are they close to your project location? ... Are they familiar with your community? Does their timing work for you?",
+   "source": "Safety Codes Council, ASCA Contracted Agencies",
+   "url": "https://safetycodes.ab.ca/municipalities-corporations-and-agencies/asca-agencies/",
+   "retrieved": "2026-10-29",
+   "sha256": "bb9350bd1a9f6a5f12c90996b73557014e67ccd038984a53de619de62ea34db1"
+  },
+  {
+   "id": "standard-fees",
+   "status": "VERIFIED",
+   "text": "ASCA fees are the same whichever agency the owner contracts.",
+   "quote": "Standardized permit fees, meaning no matter which agency you contract your permit cost will be the same.",
+   "source": "Safety Codes Council, Alberta Safety Codes Authority page",
+   "url": "https://www.safetycodes.ab.ca/municipalities-corporations-and-agencies/alberta-safety-codes-authority/",
+   "retrieved": "2026-10-29",
+   "sha256": "46d9e3a6159214019575bf8a4f6841a368a9e5076d327cb7cae99305a4300ce8"
+  },
+  {
+   "id": "asca-own-officers",
+   "status": "VERIFIED",
+   "text": "ASCA has its own safety codes officers who review plans, issue permits and inspect.",
+   "quote": "Yes, ASCA has its own safety codes officers that provide consultative advice/guidance, plans reviews, issue permits, and conduct inspections.",
+   "source": "Safety Codes Council, ASCA Permits (FAQ)",
+   "url": "https://safetycodes.ab.ca/municipalities-corporations-and-agencies/alberta-safety-codes-authority/asca-permits/",
+   "retrieved": "2026-10-29",
+   "sha256": "e1e6c320313c0b2927f8a2698669902969a42aebf8efb163da2891636988e2d1"
+  },
+  {
+   "id": "where-to-get-a-permit-is-organization-search",
+   "status": "VERIFIED",
+   "text": "The 'Where to get a Permit' page links to the Accreditation Search, whose fields are Organization Type, Discipline, City and Organization Name.",
+   "quote": "Click here to find an accredited organization by type, discipline(s), region, or name.",
+   "source": "Safety Codes Council, Where to get a Permit; Accreditation Search form",
+   "url": "https://www.safetycodes.ab.ca/permits-inspections/where-to-get-a-permit/",
+   "retrieved": "2026-10-29",
+   "sha256": "89e3085056bd8c4c4ae29e0f1a5e133263cfe34f35f59d6bb77631c7ec5486d7"
+  },
+  {
+   "id": "variance-in-asca-area",
+   "status": "UNVERIFIED",
+   "text": "No page states who issues a variance in an ASCA area. By the Act, an SCO designated with a variance power may issue it: ASCA's own officers or an SCO of the contracted agency, acting for ASCA (IB-2026-10-16).",
+   "quote": "SCOs exercise delegated powers on behalf of those entities, within their designation and terms of employment.",
+   "source": "SCC Information Bulletin IB-2026-10-16; Safety Codes Act ss.32, 33(5)-(6), 38",
+   "url": "https://ebs.safetycodes.ab.ca/documents/webdocs/SR/IB-2026-10-16_AHJ_Clarification.pdf",
+   "retrieved": "2026-10-29",
+   "sha256": "dbd3a61b53f5ad4eac483b3ae20b8aa90aec4e697680177ce94871fa870a23ea"
+  }
+ ],
+ "asca_contracted_agencies": [
+  {
+   "asca_page_name": "Davis Inspection Services Ltd.",
+   "website": "http://www.davisinspections.ca/index.html",
+   "office_cities": [
+    "Calgary"
+   ],
+   "scc_match": "A000106"
+  },
+  {
+   "asca_page_name": "IJD Inspections Ltd.",
+   "website": "http://www.ijd.ca/",
+   "office_cities": [
+    "Red Deer"
+   ],
+   "scc_match": "A000167"
+  },
+  {
+   "asca_page_name": "Park Enterprises Ltd.",
+   "website": "http://parkenterprises.ca/",
+   "office_cities": [
+    "Lethbridge"
+   ],
+   "scc_match": "A000178 (SCC lists 'Park Enterprises'; name match, not a number match)"
+  },
+  {
+   "asca_page_name": "Superior Safety Codes Inc.",
+   "website": "http://superiorsafetycodes.com/",
+   "office_cities": [
+    "Edmonton",
+    "Calgary",
+    "Lethbridge",
+    "Lloydminster",
+    "Red Deer"
+   ],
+   "scc_match": "A000300"
+  },
+  {
+   "asca_page_name": "The Inspections Group Inc.",
+   "website": "http://www.inspectionsgroup.com/",
+   "office_cities": [
+    "Edmonton",
+    "Cold Lake",
+    "Lethbridge"
+   ],
+   "scc_match": "A000202"
+  }
+ ],
+ "scc_agencies_accredited_for_building": [
+  {
+   "organization": "Allnorth Consultants Ltd.",
+   "accreditation_number": "A000841",
+   "order_number": "2865",
+   "city_listed": "Calgary"
+  },
+  {
+   "organization": "C.O.F.S. Municipal Safety Codes Service",
+   "accreditation_number": "A126123",
+   "order_number": "79842082",
+   "city_listed": "Fort Saskatchewan"
+  },
+  {
+   "organization": "Davis Inspection Services Ltd.",
+   "accreditation_number": "A000106",
+   "order_number": "1469",
+   "city_listed": "Calgary"
+  },
+  {
+   "organization": "First Nations Inspection Authority",
+   "accreditation_number": "A125744",
+   "order_number": "79842074",
+   "city_listed": "Spruce Grove"
+  },
+  {
+   "organization": "IJD Inspections Ltd.",
+   "accreditation_number": "A000167",
+   "order_number": "1009",
+   "city_listed": "Red Deer"
+  },
+  {
+   "organization": "Marex Canada Limited",
+   "accreditation_number": "A000200",
+   "order_number": "2893",
+   "city_listed": "Airdrie"
+  },
+  {
+   "organization": "Palliser Regional Municipal Services",
+   "accreditation_number": "A000158",
+   "order_number": "2980",
+   "city_listed": "Hanna"
+  },
+  {
+   "organization": "Park Enterprises",
+   "accreditation_number": "A000178",
+   "order_number": "750",
+   "city_listed": "Lethbridge"
+  },
+  {
+   "organization": "Pinnacle Enterprises Ltd",
+   "accreditation_number": "A124436",
+   "order_number": "79842019",
+   "city_listed": "Airdrie"
+  },
+  {
+   "organization": "SCO-Fire",
+   "accreditation_number": "A000898",
+   "order_number": "79842051",
+   "city_listed": "Red Deer"
+  },
+  {
+   "organization": "Summit Safety Codes Services Ltd",
+   "accreditation_number": "A124403",
+   "order_number": "79842007",
+   "city_listed": "CALGARY"
+  },
+  {
+   "organization": "Superior Safety Codes Inc.",
+   "accreditation_number": "A000300",
+   "order_number": "1523",
+   "city_listed": "Edmonton"
+  },
+  {
+   "organization": "The Inspections Group Inc.",
+   "accreditation_number": "A000202",
+   "order_number": "960",
+   "city_listed": "Edmonton"
+  },
+  {
+   "organization": "The North Group",
+   "accreditation_number": "A126936",
+   "order_number": "79842110",
+   "city_listed": "Grande Prairie"
+  },
+  {
+   "organization": "TrueNorth Standards Group",
+   "accreditation_number": "A126750",
+   "order_number": "79842101",
+   "city_listed": "North Battleford"
+  },
+  {
+   "organization": "Viable Solutions Inc",
+   "accreditation_number": "A124539",
+   "order_number": "79842029",
+   "city_listed": "Red Deer"
+  }
+ ],
+ "municipalities": [
+  {
+   "lg_code": "0004",
+   "legal_name": "Alberta Beach",
+   "type": "Village",
+   "population_2025": 864,
+   "scc_query": "Alberta Beach",
+   "scc_query_dir": 200,
+   "scc_response_sha256": "bb7a53f05acf42e9a83b345f062bae8788d768ec4b914d6918eb5f75c4737fc9",
+   "scc_rows_returned": 0,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0005",
+   "legal_name": "Village of Alix",
+   "type": "Village",
+   "population_2025": 783,
+   "scc_query": "Alix",
+   "scc_query_dir": 201,
+   "scc_response_sha256": "8992e00442325c7881402e828d7ec266d198df3e8f8219d84eeb951b0d09eaa8",
+   "scc_rows_returned": 2,
+   "own_accreditations": [
+    {
+     "organization": "Village of Alix",
+     "org_type": "Municipality",
+     "accreditation_number": "M000329",
+     "discipline": "Fire",
+     "order_number": "2154",
+     "city_listed": "Alix"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [
+    {
+     "organization": "Lacombe County / Lacombe / Bentley / Eckville / Alix / Clive / Gull Lake",
+     "org_type": "Joint Municipality",
+     "accreditation_number": "J000124",
+     "discipline": "Fire",
+     "order_number": "422",
+     "city_listed": "Lacombe"
+    }
+   ],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0012",
+   "legal_name": "Athabasca County",
+   "type": "Municipal District",
+   "population_2025": 6959,
+   "scc_query": "Athabasca",
+   "scc_query_dir": 202,
+   "scc_response_sha256": "3893cdec0c59e6b272688300e2993de062e0f7554a73a4f7a1619dfa08698d22",
+   "scc_rows_returned": 8,
+   "own_accreditations": [
+    {
+     "organization": "Athabasca County",
+     "org_type": "Municipality",
+     "accreditation_number": "M000279",
+     "discipline": "Fire",
+     "order_number": "1343",
+     "city_listed": "Athabasca"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [
+    {
+     "organization": "Town of Athabasca",
+     "org_type": "Municipality",
+     "accreditation_number": "M000191",
+     "discipline": "Gas",
+     "order_number": "1206",
+     "city_listed": "Athabasca"
+    },
+    {
+     "organization": "Town of Athabasca",
+     "org_type": "Municipality",
+     "accreditation_number": "M000191",
+     "discipline": "Building",
+     "order_number": "1208",
+     "city_listed": "Athabasca"
+    },
+    {
+     "organization": "Town of Athabasca",
+     "org_type": "Municipality",
+     "accreditation_number": "M000191",
+     "discipline": "Electrical",
+     "order_number": "1207",
+     "city_listed": "Athabasca"
+    },
+    {
+     "organization": "Town of Athabasca",
+     "org_type": "Municipality",
+     "accreditation_number": "M000191",
+     "discipline": "Plumbing",
+     "order_number": "1205",
+     "city_listed": "Athabasca"
+    }
+   ],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0013",
+   "legal_name": "Village of Barons",
+   "type": "Village",
+   "population_2025": 313,
+   "scc_query": "Barons",
+   "scc_query_dir": 203,
+   "scc_response_sha256": "5a01858ed5b1d6693bc1cb267d51f055717e90fa99a3fbe2ef9873023dd7e4be",
+   "scc_rows_returned": 1,
+   "own_accreditations": [
+    {
+     "organization": "Village of Barons",
+     "org_type": "Municipality",
+     "accreditation_number": "M000874",
+     "discipline": "Fire",
+     "order_number": "2907",
+     "city_listed": "Barons"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0014",
+   "legal_name": "Town of Barrhead",
+   "type": "Town",
+   "population_2025": 4320,
+   "scc_query": "Barrhead",
+   "scc_query_dir": 204,
+   "scc_response_sha256": "5ecbf1387e23eb5eeb709bb1c93a1b8af24d6b4d5bf5a2a8b58005531e38c545",
+   "scc_rows_returned": 3,
+   "own_accreditations": [
+    {
+     "organization": "Town of Barrhead",
+     "org_type": "Municipality",
+     "accreditation_number": "M000280",
+     "discipline": "Fire",
+     "order_number": "2208",
+     "city_listed": "Barrhead"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [
+    {
+     "organization": "Barrhead No 11 / Barrhead / Birch Cove",
+     "org_type": "Joint Municipality",
+     "accreditation_number": "J000125",
+     "discipline": "Fire",
+     "order_number": "501",
+     "city_listed": "Barrhead"
+    },
+    {
+     "organization": "County of Barrhead No. 11",
+     "org_type": "Municipality",
+     "accreditation_number": "M000281",
+     "discipline": "Fire",
+     "order_number": "2209",
+     "city_listed": "Barrhead"
+    }
+   ],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0015",
+   "legal_name": "County of Barrhead No. 11",
+   "type": "Municipal District",
+   "population_2025": 5877,
+   "scc_query": "Barrhead",
+   "scc_query_dir": 205,
+   "scc_response_sha256": "2919b81a5aaa540dd0d3af77b364f2ef3a79b68aeed8be47514794ac7ddd3ee9",
+   "scc_rows_returned": 3,
+   "own_accreditations": [
+    {
+     "organization": "County of Barrhead No. 11",
+     "org_type": "Municipality",
+     "accreditation_number": "M000281",
+     "discipline": "Fire",
+     "order_number": "2209",
+     "city_listed": "Barrhead"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [
+    {
+     "organization": "Barrhead No 11 / Barrhead / Birch Cove",
+     "org_type": "Joint Municipality",
+     "accreditation_number": "J000125",
+     "discipline": "Fire",
+     "order_number": "501",
+     "city_listed": "Barrhead"
+    },
+    {
+     "organization": "Town of Barrhead",
+     "org_type": "Municipality",
+     "accreditation_number": "M000280",
+     "discipline": "Fire",
+     "order_number": "2208",
+     "city_listed": "Barrhead"
+    }
+   ],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0024",
+   "legal_name": "Town of Bentley",
+   "type": "Town",
+   "population_2025": 1042,
+   "scc_query": "Bentley",
+   "scc_query_dir": 206,
+   "scc_response_sha256": "48e8467ac67214426b4f1574b5f209fbfe0f22a0cd69d37fa9607f5809b2c52f",
+   "scc_rows_returned": 2,
+   "own_accreditations": [
+    {
+     "organization": "Town of Bentley",
+     "org_type": "Municipality",
+     "accreditation_number": "M000377",
+     "discipline": "Fire",
+     "order_number": "2158",
+     "city_listed": "Bentley"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [
+    {
+     "organization": "Lacombe County / Lacombe / Bentley / Eckville / Alix / Clive / Gull Lake",
+     "org_type": "Joint Municipality",
+     "accreditation_number": "J000124",
+     "discipline": "Fire",
+     "order_number": "422",
+     "city_listed": "Lacombe"
+    }
+   ],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0025",
+   "legal_name": "Village of Berwyn",
+   "type": "Village",
+   "population_2025": 577,
+   "scc_query": "Berwyn",
+   "scc_query_dir": 207,
+   "scc_response_sha256": "907a22e8b08b0293c5233c502fd1080b8a20bf8013294bc3803903a0caef91ee",
+   "scc_rows_returned": 0,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0026",
+   "legal_name": "Summer Village of Betula Beach",
+   "type": "Summer Village",
+   "population_2025": 27,
+   "scc_query": "Betula Beach",
+   "scc_query_dir": 208,
+   "scc_response_sha256": "fefb90f91cf1e959eac05b24242988fd9948d35127bae321ccf35f4d217ae350",
+   "scc_rows_returned": 0,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0027",
+   "legal_name": "Village of Big Valley",
+   "type": "Village",
+   "population_2025": 331,
+   "scc_query": "Big Valley",
+   "scc_query_dir": 209,
+   "scc_response_sha256": "c12bae678f549f645363a32825bc0c64f9fc4073fc475391d1dd58220c0ecb06",
+   "scc_rows_returned": 2,
+   "own_accreditations": [
+    {
+     "organization": "Village of Big Valley",
+     "org_type": "Municipality",
+     "accreditation_number": "M000171",
+     "discipline": "Fire",
+     "order_number": "2033",
+     "city_listed": "Big Valley"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [
+    {
+     "organization": "Stettler No 6 / Stettler / Big Valley / Donalda / Rochon Sands / White Sands",
+     "org_type": "Joint Municipality",
+     "accreditation_number": "J000106",
+     "discipline": "Fire",
+     "order_number": "262",
+     "city_listed": "Stettler"
+    }
+   ],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0042",
+   "legal_name": "Village of Breton",
+   "type": "Village",
+   "population_2025": 567,
+   "scc_query": "Breton",
+   "scc_query_dir": 210,
+   "scc_response_sha256": "be65eb98f3b1ed687873895801ca53610319ba6b970822dfde38f29b142c1d6d",
+   "scc_rows_returned": 2,
+   "own_accreditations": [
+    {
+     "organization": "Village of Breton",
+     "org_type": "Municipality",
+     "accreditation_number": "M000405",
+     "discipline": "Fire",
+     "order_number": "2764",
+     "city_listed": "Breton"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [
+    {
+     "organization": "Brazeau County / Breton / Drayton Valley",
+     "org_type": "Joint Municipality",
+     "accreditation_number": "J000123",
+     "discipline": "Fire",
+     "order_number": "416",
+     "city_listed": "Drayton Valley"
+    }
+   ],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0054",
+   "legal_name": "Village of Carmangay",
+   "type": "Village",
+   "population_2025": 308,
+   "scc_query": "Carmangay",
+   "scc_query_dir": 211,
+   "scc_response_sha256": "ad43d632960a704d78bdf210b1c2748843dcea66faaff56ecdc80f275ece1051",
+   "scc_rows_returned": 1,
+   "own_accreditations": [
+    {
+     "organization": "Village of Carmangay",
+     "org_type": "Municipality",
+     "accreditation_number": "M000425",
+     "discipline": "Fire",
+     "order_number": "2521",
+     "city_listed": "Carmangay"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0062",
+   "legal_name": "Village of Chauvin",
+   "type": "Village",
+   "population_2025": 304,
+   "scc_query": "Chauvin",
+   "scc_query_dir": 212,
+   "scc_response_sha256": "5bd954fd0bc35848eeca3beb438019a066097f669925030230fa84a701effdff",
+   "scc_rows_returned": 2,
+   "own_accreditations": [
+    {
+     "organization": "Village of Chauvin",
+     "org_type": "Municipality",
+     "accreditation_number": "M000209",
+     "discipline": "Fire",
+     "order_number": "2027",
+     "city_listed": "Chauvin"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [
+    {
+     "organization": "Wainwright No 61 / Chauvin / Edgerton / Irma",
+     "org_type": "Joint Municipality",
+     "accreditation_number": "J000109",
+     "discipline": "Fire",
+     "order_number": "256",
+     "city_listed": "Wainwright"
+    }
+   ],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0076",
+   "legal_name": "Village of Coutts",
+   "type": "Village",
+   "population_2025": 224,
+   "scc_query": "Coutts",
+   "scc_query_dir": 213,
+   "scc_response_sha256": "482043cfda5a0949b4cdfce50a09962e95c13665d906c630bdd2dbc3ea39c8c7",
+   "scc_rows_returned": 0,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0077",
+   "legal_name": "Village of Cowley",
+   "type": "Village",
+   "population_2025": 216,
+   "scc_query": "Cowley",
+   "scc_query_dir": 214,
+   "scc_response_sha256": "68af22a96ffa1ebc15de831aca3154baeb55a720b075237c7f012c50b04de08a",
+   "scc_rows_returned": 1,
+   "own_accreditations": [
+    {
+     "organization": "Village of Cowley",
+     "org_type": "Municipality",
+     "accreditation_number": "M000354",
+     "discipline": "Fire",
+     "order_number": "411",
+     "city_listed": "Cowley"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0089",
+   "legal_name": "Village of Donalda",
+   "type": "Village",
+   "population_2025": 226,
+   "scc_query": "Donalda",
+   "scc_query_dir": 215,
+   "scc_response_sha256": "1f781be209793c4042e0b974bfe2e042b9063ef91c43ce1dc8bd1295fce86d21",
+   "scc_rows_returned": 2,
+   "own_accreditations": [
+    {
+     "organization": "Village of Donalda",
+     "org_type": "Municipality",
+     "accreditation_number": "M000173",
+     "discipline": "Fire",
+     "order_number": "2035",
+     "city_listed": "Donalda"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [
+    {
+     "organization": "Stettler No 6 / Stettler / Big Valley / Donalda / Rochon Sands / White Sands",
+     "org_type": "Joint Municipality",
+     "accreditation_number": "J000106",
+     "discipline": "Fire",
+     "order_number": "262",
+     "city_listed": "Stettler"
+    }
+   ],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0090",
+   "legal_name": "Village of Donnelly",
+   "type": "Village",
+   "population_2025": 338,
+   "scc_query": "Donnelly",
+   "scc_query_dir": 216,
+   "scc_response_sha256": "f4f5da0f09c12d18393369e712d73cead2481fd739e58a37144a00f1e85e99a7",
+   "scc_rows_returned": 2,
+   "own_accreditations": [
+    {
+     "organization": "Village of Donnelly",
+     "org_type": "Municipality",
+     "accreditation_number": "M000331",
+     "discipline": "Fire",
+     "order_number": "2137",
+     "city_listed": "Donnelly"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [
+    {
+     "organization": "Smoky River No 130 / Falher / McLennan / Donnelly / Girouxville",
+     "org_type": "Joint Municipality",
+     "accreditation_number": "J000126",
+     "discipline": "Fire",
+     "order_number": "415",
+     "city_listed": "Falher"
+    }
+   ],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0097",
+   "legal_name": "Village of Edgerton",
+   "type": "Village",
+   "population_2025": 385,
+   "scc_query": "Edgerton",
+   "scc_query_dir": 217,
+   "scc_response_sha256": "e06491c2b724c1368a77496d47e10fdb78eee70b160b4912951fce5ba2be4ce6",
+   "scc_rows_returned": 2,
+   "own_accreditations": [
+    {
+     "organization": "Village of Edgerton",
+     "org_type": "Municipality",
+     "accreditation_number": "M000210",
+     "discipline": "Fire",
+     "order_number": "2028",
+     "city_listed": "Edgerton"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [
+    {
+     "organization": "Wainwright No 61 / Chauvin / Edgerton / Irma",
+     "org_type": "Joint Municipality",
+     "accreditation_number": "J000109",
+     "discipline": "Fire",
+     "order_number": "256",
+     "city_listed": "Wainwright"
+    }
+   ],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0100",
+   "legal_name": "Town of Edson",
+   "type": "Town",
+   "population_2025": 8374,
+   "scc_query": "Edson",
+   "scc_query_dir": 218,
+   "scc_response_sha256": "803629b5633e74bbbae5827292aadfb69c5513ed628a392eb41bdc9f49eb0653",
+   "scc_rows_returned": 1,
+   "own_accreditations": [
+    {
+     "organization": "Town of Edson",
+     "org_type": "Municipality",
+     "accreditation_number": "M000276",
+     "discipline": "Fire",
+     "order_number": "463",
+     "city_listed": "Edson"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0107",
+   "legal_name": "Municipal District of Fairview No. 136",
+   "type": "Municipal District",
+   "population_2025": 1580,
+   "scc_query": "Fairview",
+   "scc_query_dir": 219,
+   "scc_response_sha256": "a1f51ee53d4f7211245a49891fb4bca8143e6efb68d8677cfb1776bbca5a9baa",
+   "scc_rows_returned": 1,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [
+    {
+     "organization": "Town of Fairview",
+     "org_type": "Municipality",
+     "accreditation_number": "M000452",
+     "discipline": "Building",
+     "order_number": "3007",
+     "city_listed": "Fairview"
+    }
+   ],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0108",
+   "legal_name": "Town of Falher",
+   "type": "Town",
+   "population_2025": 1039,
+   "scc_query": "Falher",
+   "scc_query_dir": 220,
+   "scc_response_sha256": "c3a40017d8bc39636b4ed34521d3ce278d35839c9597142676d258600049980a",
+   "scc_rows_returned": 2,
+   "own_accreditations": [
+    {
+     "organization": "Town of Falher",
+     "org_type": "Municipality",
+     "accreditation_number": "M000384",
+     "discipline": "Fire",
+     "order_number": "2138",
+     "city_listed": "Falher"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [
+    {
+     "organization": "Smoky River No 130 / Falher / McLennan / Donnelly / Girouxville",
+     "org_type": "Joint Municipality",
+     "accreditation_number": "J000126",
+     "discipline": "Fire",
+     "order_number": "415",
+     "city_listed": "Falher"
+    }
+   ],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0112",
+   "legal_name": "Village of Foremost",
+   "type": "Village",
+   "population_2025": 501,
+   "scc_query": "Foremost",
+   "scc_query_dir": 221,
+   "scc_response_sha256": "d29418a5ff997a2f706b19075a66b3781c7de5dadcafa25bd87f4693a55cd9af",
+   "scc_rows_returned": 0,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0118",
+   "legal_name": "County of Forty Mile No. 8",
+   "type": "Municipal District",
+   "population_2025": 3600,
+   "scc_query": "Forty Mile",
+   "scc_query_dir": 222,
+   "scc_response_sha256": "947eb539a22b8cf3d0666075a53920c80a550950df041f9ba58850149215ff6c",
+   "scc_rows_returned": 1,
+   "own_accreditations": [
+    {
+     "organization": "County of Forty Mile No. 8",
+     "org_type": "Municipality",
+     "accreditation_number": "M000156",
+     "discipline": "Fire",
+     "order_number": "2924",
+     "city_listed": "Foremost"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0123",
+   "legal_name": "Summer Village of Ghost Lake",
+   "type": "Summer Village",
+   "population_2025": 82,
+   "scc_query": "Ghost Lake",
+   "scc_query_dir": 223,
+   "scc_response_sha256": "55140f913caf5e4af4b7c6ba33981d3d85d00625a50cd9266d3df7dc5524d322",
+   "scc_rows_returned": 0,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0125",
+   "legal_name": "Village of Girouxville",
+   "type": "Village",
+   "population_2025": 278,
+   "scc_query": "Girouxville",
+   "scc_query_dir": 224,
+   "scc_response_sha256": "1df5e077a3845f305f362b22086be8a1d9ba828bd987e58fa05dc9139ba701fb",
+   "scc_rows_returned": 2,
+   "own_accreditations": [
+    {
+     "organization": "Village of Girouxville",
+     "org_type": "Municipality",
+     "accreditation_number": "M000385",
+     "discipline": "Fire",
+     "order_number": "2139",
+     "city_listed": "Girouxville"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [
+    {
+     "organization": "Smoky River No 130 / Falher / McLennan / Donnelly / Girouxville",
+     "org_type": "Joint Municipality",
+     "accreditation_number": "J000126",
+     "discipline": "Fire",
+     "order_number": "415",
+     "city_listed": "Falher"
+    }
+   ],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0128",
+   "legal_name": "Village of Glenwood",
+   "type": "Village",
+   "population_2025": 272,
+   "scc_query": "Glenwood",
+   "scc_query_dir": 225,
+   "scc_response_sha256": "ad65bb80732ee83845ed7980f9fd503f4f5b192276fdb28a6b22d3353c343641",
+   "scc_rows_returned": 2,
+   "own_accreditations": [
+    {
+     "organization": "Village of Glenwood",
+     "org_type": "Municipality",
+     "accreditation_number": "M000423",
+     "discipline": "Fire",
+     "order_number": "2264",
+     "city_listed": "Glenwood"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [
+    {
+     "organization": "Glenwood / Hill Spring",
+     "org_type": "Joint Municipality",
+     "accreditation_number": "J000134",
+     "discipline": "Fire",
+     "order_number": "605",
+     "city_listed": "Cardston"
+    }
+   ],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0137",
+   "legal_name": "Town of Grimshaw",
+   "type": "Town",
+   "population_2025": 2601,
+   "scc_query": "Grimshaw",
+   "scc_query_dir": 226,
+   "scc_response_sha256": "1b6d00f6496d47a1c8a2e7bd254bc25c4f9be1b20fecfcbe9585df6dea7853a9",
+   "scc_rows_returned": 1,
+   "own_accreditations": [
+    {
+     "organization": "Town of Grimshaw",
+     "org_type": "Municipality",
+     "accreditation_number": "M000352",
+     "discipline": "Fire",
+     "order_number": "623",
+     "city_listed": "Grimshaw"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0149",
+   "legal_name": "Village of Hill Spring",
+   "type": "Village",
+   "population_2025": 168,
+   "scc_query": "Hill Spring",
+   "scc_query_dir": 227,
+   "scc_response_sha256": "637dce13198570982c22d410bb1529f9b50b29d80efb4e8600de696a9267c029",
+   "scc_rows_returned": 2,
+   "own_accreditations": [
+    {
+     "organization": "Village of Hill Spring",
+     "org_type": "Municipality",
+     "accreditation_number": "M000424",
+     "discipline": "Fire",
+     "order_number": "2265",
+     "city_listed": "Hill Spring"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [
+    {
+     "organization": "Glenwood / Hill Spring",
+     "org_type": "Joint Municipality",
+     "accreditation_number": "J000134",
+     "discipline": "Fire",
+     "order_number": "605",
+     "city_listed": "Cardston"
+    }
+   ],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0150",
+   "legal_name": "Village of Hines Creek",
+   "type": "Village",
+   "population_2025": 335,
+   "scc_query": "Hines Creek",
+   "scc_query_dir": 228,
+   "scc_response_sha256": "5e218f5ae267a70ed30e7295babf8b07cacb1836154673aafed03caef4bb3408",
+   "scc_rows_returned": 0,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0159",
+   "legal_name": "Improvement District No. 04 (Waterton)",
+   "type": "Improvement District",
+   "population_2025": 550,
+   "scc_query": "Waterton",
+   "scc_query_dir": 229,
+   "scc_response_sha256": "4e7f98a0862982e60d95c3889fc43e12f565ab1beb9e7e044b0b8ff700f269ce",
+   "scc_rows_returned": 0,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0164",
+   "legal_name": "Improvement District No. 09 (Banff)",
+   "type": "Improvement District",
+   "population_2025": 1004,
+   "scc_query": "Banff",
+   "scc_query_dir": 230,
+   "scc_response_sha256": "d65df39a0588b7cc8e41f0d0eb6a46cefe309e2852c425106de1bcb4cf9274cd",
+   "scc_rows_returned": 2,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [
+    {
+     "organization": "Town of Banff",
+     "org_type": "Municipality",
+     "accreditation_number": "M000396",
+     "discipline": "Building",
+     "order_number": "542",
+     "city_listed": "Banff"
+    },
+    {
+     "organization": "Town of Banff",
+     "org_type": "Municipality",
+     "accreditation_number": "M000396",
+     "discipline": "Fire",
+     "order_number": "543",
+     "city_listed": "Banff"
+    }
+   ],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0167",
+   "legal_name": "Improvement District No. 12 (Jasper National Park)",
+   "type": "Improvement District",
+   "population_2025": 0,
+   "scc_query": "Jasper",
+   "scc_query_dir": 231,
+   "scc_response_sha256": "126cb7b02a7d9ba3dcf9d8a3990b4ddd4d9af5ac68755dc9811d7c1906647a29",
+   "scc_rows_returned": 1,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [
+    {
+     "organization": "Municipality of Jasper",
+     "org_type": "Municipality",
+     "accreditation_number": "M000461",
+     "discipline": "Fire",
+     "order_number": "1452",
+     "city_listed": "Jasper"
+    }
+   ],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0168",
+   "legal_name": "Improvement District No. 13 (Elk Island)",
+   "type": "Improvement District",
+   "population_2025": 0,
+   "scc_query": "Elk Island",
+   "scc_query_dir": 232,
+   "scc_response_sha256": "faba2d7cd16b9528fb9aaa79cec6e5b6215dfbce58f1f6696be97a539f0ab82c",
+   "scc_rows_returned": 0,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0179",
+   "legal_name": "Improvement District No. 24 (Wood Buffalo)",
+   "type": "Improvement District",
+   "population_2025": 706,
+   "scc_query": "Wood Buffalo",
+   "scc_query_dir": 233,
+   "scc_response_sha256": "a8463ffee22bfd98b6d50ba740646090d65974b5093089f8b046f0d7ff41ae45",
+   "scc_rows_returned": 5,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [
+    {
+     "organization": "Regional Municipality of Wood Buffalo",
+     "org_type": "Municipality",
+     "accreditation_number": "M000195",
+     "discipline": "Plumbing",
+     "order_number": "590",
+     "city_listed": "Fort McMurray"
+    },
+    {
+     "organization": "Regional Municipality of Wood Buffalo",
+     "org_type": "Municipality",
+     "accreditation_number": "M000195",
+     "discipline": "Building",
+     "order_number": "587",
+     "city_listed": "Fort McMurray"
+    },
+    {
+     "organization": "Regional Municipality of Wood Buffalo",
+     "org_type": "Municipality",
+     "accreditation_number": "M000195",
+     "discipline": "Fire",
+     "order_number": "983",
+     "city_listed": "Fort McMurray"
+    },
+    {
+     "organization": "Regional Municipality of Wood Buffalo",
+     "org_type": "Municipality",
+     "accreditation_number": "M000195",
+     "discipline": "Electrical",
+     "order_number": "986",
+     "city_listed": "Fort McMurray"
+    },
+    {
+     "organization": "Regional Municipality of Wood Buffalo",
+     "org_type": "Municipality",
+     "accreditation_number": "M000195",
+     "discipline": "Gas",
+     "order_number": "589",
+     "city_listed": "Fort McMurray"
+    }
+   ],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0181",
+   "legal_name": "Village of Innisfree",
+   "type": "Village",
+   "population_2025": 187,
+   "scc_query": "Innisfree",
+   "scc_query_dir": 234,
+   "scc_response_sha256": "ad7d8ce212b1ffe9f3d58f1fc4607f7f7fdd5fdbf8e769deeef8097a5a306090",
+   "scc_rows_returned": 2,
+   "own_accreditations": [
+    {
+     "organization": "Village of Innisfree",
+     "org_type": "Municipality",
+     "accreditation_number": "M000893",
+     "discipline": "Fire",
+     "order_number": "79842047",
+     "city_listed": "Innisfree"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [
+    {
+     "organization": "County of Minburn No. 27/Village of Innisfree/ Village of Mannville",
+     "org_type": "Joint Municipality",
+     "accreditation_number": "J124851",
+     "discipline": "Fire",
+     "order_number": "79842047",
+     "city_listed": "Vegreville"
+    }
+   ],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0195",
+   "legal_name": "Lacombe County",
+   "type": "Municipal District",
+   "population_2025": 10283,
+   "scc_query": "Lacombe",
+   "scc_query_dir": 235,
+   "scc_response_sha256": "66f04dbe1f2cb044e2f6b096576bbb490d9f193f797ae2b65656d5eb0d96e515",
+   "scc_rows_returned": 7,
+   "own_accreditations": [
+    {
+     "organization": "Lacombe County",
+     "org_type": "Municipality",
+     "accreditation_number": "M000374",
+     "discipline": "Fire",
+     "order_number": "2156",
+     "city_listed": "Lacombe"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [
+    {
+     "organization": "City of Lacombe",
+     "org_type": "Municipality",
+     "accreditation_number": "M000373",
+     "discipline": "Plumbing",
+     "order_number": "974",
+     "city_listed": "Lacombe"
+    },
+    {
+     "organization": "City of Lacombe",
+     "org_type": "Municipality",
+     "accreditation_number": "M000373",
+     "discipline": "Electrical",
+     "order_number": "972",
+     "city_listed": "Lacombe"
+    },
+    {
+     "organization": "City of Lacombe",
+     "org_type": "Municipality",
+     "accreditation_number": "M000373",
+     "discipline": "Building",
+     "order_number": "414",
+     "city_listed": "Lacombe"
+    },
+    {
+     "organization": "City of Lacombe",
+     "org_type": "Municipality",
+     "accreditation_number": "M000373",
+     "discipline": "Gas",
+     "order_number": "973",
+     "city_listed": "Lacombe"
+    },
+    {
+     "organization": "City of Lacombe",
+     "org_type": "Municipality",
+     "accreditation_number": "M000373",
+     "discipline": "Fire",
+     "order_number": "2155",
+     "city_listed": "Lacombe"
+    },
+    {
+     "organization": "Lacombe County / Lacombe / Bentley / Eckville / Alix / Clive / Gull Lake",
+     "org_type": "Joint Municipality",
+     "accreditation_number": "J000124",
+     "discipline": "Fire",
+     "order_number": "422",
+     "city_listed": "Lacombe"
+    }
+   ],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0206",
+   "legal_name": "City of Lloydminster",
+   "type": "City",
+   "population_2025": 19739,
+   "scc_query": "Lloydminster",
+   "scc_query_dir": 236,
+   "scc_response_sha256": "dc5fe4cbf5b4402a7010ab9c6b69748c9ea98fed0ffab9102a97de798be885b5",
+   "scc_rows_returned": 0,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0212",
+   "legal_name": "Town of Manning",
+   "type": "Town",
+   "population_2025": 1126,
+   "scc_query": "Manning",
+   "scc_query_dir": 237,
+   "scc_response_sha256": "a74dd36d56b46b68dec6e8c0381b4b5234d3b27d164619767588a4eb578543d3",
+   "scc_rows_returned": 1,
+   "own_accreditations": [
+    {
+     "organization": "Town of Manning",
+     "org_type": "Municipality",
+     "accreditation_number": "M000143",
+     "discipline": "Fire",
+     "order_number": "1357",
+     "city_listed": "Manning"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0213",
+   "legal_name": "Village of Mannville",
+   "type": "Village",
+   "population_2025": 765,
+   "scc_query": "Mannville",
+   "scc_query_dir": 238,
+   "scc_response_sha256": "de00610a774ba13b0453c57938358b40015a6e65951911693c9f16c15b376d3c",
+   "scc_rows_returned": 2,
+   "own_accreditations": [
+    {
+     "organization": "Village of Mannville",
+     "org_type": "Municipality",
+     "accreditation_number": "M000432",
+     "discipline": "Fire",
+     "order_number": "79842047",
+     "city_listed": "Mannville"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [
+    {
+     "organization": "County of Minburn No. 27/Village of Innisfree/ Village of Mannville",
+     "org_type": "Joint Municipality",
+     "accreditation_number": "J124851",
+     "discipline": "Fire",
+     "order_number": "79842047",
+     "city_listed": "Vegreville"
+    }
+   ],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0214",
+   "legal_name": "Village of Marwayne",
+   "type": "Village",
+   "population_2025": 543,
+   "scc_query": "Marwayne",
+   "scc_query_dir": 239,
+   "scc_response_sha256": "e644aacc0565633fc543e91f4163c8dad68c5a708798f124d02734069150100e",
+   "scc_rows_returned": 0,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0215",
+   "legal_name": "Town of Mayerthorpe",
+   "type": "Town",
+   "population_2025": 1343,
+   "scc_query": "Mayerthorpe",
+   "scc_query_dir": 240,
+   "scc_response_sha256": "a7e4e96c07dc91b13fe321139430afc4deeff89e71aa993fcc6da52c67972dd4",
+   "scc_rows_returned": 0,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0216",
+   "legal_name": "Town of McLennan",
+   "type": "Town",
+   "population_2025": 695,
+   "scc_query": "McLennan",
+   "scc_query_dir": 241,
+   "scc_response_sha256": "ee1693446fad403ec7c08f481272a09805772815bc95a14ca58b21ebf210c9b9",
+   "scc_rows_returned": 2,
+   "own_accreditations": [
+    {
+     "organization": "Town of Mclennan",
+     "org_type": "Municipality",
+     "accreditation_number": "M000450",
+     "discipline": "Fire",
+     "order_number": "2141",
+     "city_listed": "Mclennan"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [
+    {
+     "organization": "Smoky River No 130 / Falher / McLennan / Donnelly / Girouxville",
+     "org_type": "Joint Municipality",
+     "accreditation_number": "J000126",
+     "discipline": "Fire",
+     "order_number": "415",
+     "city_listed": "Falher"
+    }
+   ],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0229",
+   "legal_name": "Village of Myrnam",
+   "type": "Village",
+   "population_2025": 257,
+   "scc_query": "Myrnam",
+   "scc_query_dir": 242,
+   "scc_response_sha256": "b19fdd37b78aa6e8ae8fb31f9555ee171b936ffa945caaff691f44d4d8be0e0a",
+   "scc_rows_returned": 0,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0231",
+   "legal_name": "Village of Nampa",
+   "type": "Village",
+   "population_2025": 367,
+   "scc_query": "Nampa",
+   "scc_query_dir": 243,
+   "scc_response_sha256": "7040ccd715e1b0593a1eb706b45267ccc4b2c6ad8e9208f01e74028bde1c5c42",
+   "scc_rows_returned": 0,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0246",
+   "legal_name": "Municipal District of Peace No. 135",
+   "type": "Municipal District",
+   "population_2025": 1581,
+   "scc_query": "Peace",
+   "scc_query_dir": 244,
+   "scc_response_sha256": "b1dbf7f9582568c48af20d6b26beb9bbc38344393d6455495e70cb9419ceda71",
+   "scc_rows_returned": 3,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [
+    {
+     "organization": "Town of Peace River",
+     "org_type": "Municipality",
+     "accreditation_number": "M000193",
+     "discipline": "Building",
+     "order_number": "647",
+     "city_listed": "Peace River"
+    },
+    {
+     "organization": "Town of Peace River",
+     "org_type": "Municipality",
+     "accreditation_number": "M000193",
+     "discipline": "Fire",
+     "order_number": "455",
+     "city_listed": "Peace River"
+    }
+   ],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0253",
+   "legal_name": "Summer Village of Point Alison",
+   "type": "Summer Village",
+   "population_2025": 18,
+   "scc_query": "Point Alison",
+   "scc_query_dir": 245,
+   "scc_response_sha256": "e319f4643257aa8b506baa274e78cf41b2c01ca30f16666f8dd270582d6424d8",
+   "scc_rows_returned": 0,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0260",
+   "legal_name": "Town of Rainbow Lake",
+   "type": "Town",
+   "population_2025": 495,
+   "scc_query": "Rainbow Lake",
+   "scc_query_dir": 246,
+   "scc_response_sha256": "c81554ae9afec41f378f63ec152e46253f0b7f4fba03521ab2a1cee88ab0c9e9",
+   "scc_rows_returned": 0,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0275",
+   "legal_name": "Village of Rycroft",
+   "type": "Village",
+   "population_2025": 550,
+   "scc_query": "Rycroft",
+   "scc_query_dir": 247,
+   "scc_response_sha256": "b75f9d71771ff59ffb737894af4bee4239021e87bf8d578f2b4a7e8a95d57d9a",
+   "scc_rows_returned": 2,
+   "own_accreditations": [
+    {
+     "organization": "Village of Rycroft",
+     "org_type": "Municipality",
+     "accreditation_number": "M000222",
+     "discipline": "Fire",
+     "order_number": "500",
+     "city_listed": "Rycroft"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [
+    {
+     "organization": "Spirit River / Rycroft",
+     "org_type": "Joint Municipality",
+     "accreditation_number": "J000110",
+     "discipline": "Fire",
+     "order_number": "500",
+     "city_listed": "Rycroft"
+    }
+   ],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0284",
+   "legal_name": "Town of Slave Lake",
+   "type": "Town",
+   "population_2025": 6836,
+   "scc_query": "Slave Lake",
+   "scc_query_dir": 248,
+   "scc_response_sha256": "f4e33b28d0eafb537fcde950d1d1787c4f4c505fe7a520015efd413aaf1236eb",
+   "scc_rows_returned": 1,
+   "own_accreditations": [
+    {
+     "organization": "Town of Slave Lake",
+     "org_type": "Municipality",
+     "accreditation_number": "M000427",
+     "discipline": "Fire",
+     "order_number": "686",
+     "city_listed": "Slave Lake"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0287",
+   "legal_name": "Municipal District of Smoky River No. 130",
+   "type": "Municipal District",
+   "population_2025": 1895,
+   "scc_query": "Smoky River",
+   "scc_query_dir": 249,
+   "scc_response_sha256": "a6c5514811336048e226958c064404b3d758624a2d790cc9bceb91a438bf08f5",
+   "scc_rows_returned": 2,
+   "own_accreditations": [
+    {
+     "organization": "Municipal District of Smoky River No. 130",
+     "org_type": "Municipality",
+     "accreditation_number": "M000386",
+     "discipline": "Fire",
+     "order_number": "2140",
+     "city_listed": "Falher"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [
+    {
+     "organization": "Smoky River No 130 / Falher / McLennan / Donnelly / Girouxville",
+     "org_type": "Joint Municipality",
+     "accreditation_number": "J000126",
+     "discipline": "Fire",
+     "order_number": "415",
+     "city_listed": "Falher"
+    }
+   ],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0299",
+   "legal_name": "County of Stettler No. 6",
+   "type": "Municipal District",
+   "population_2025": 5666,
+   "scc_query": "Stettler",
+   "scc_query_dir": 250,
+   "scc_response_sha256": "f75b74a2cc24f64871fa7ef54d2681f5da485cee6e2ece94f990f630e3cf6bbb",
+   "scc_rows_returned": 7,
+   "own_accreditations": [
+    {
+     "organization": "County of Stettler No. 6",
+     "org_type": "Municipality",
+     "accreditation_number": "M000169",
+     "discipline": "Fire",
+     "order_number": "2031",
+     "city_listed": "Stettler"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [
+    {
+     "organization": "Stettler No 6 / Stettler / Big Valley / Donalda / Rochon Sands / White Sands",
+     "org_type": "Joint Municipality",
+     "accreditation_number": "J000106",
+     "discipline": "Fire",
+     "order_number": "262",
+     "city_listed": "Stettler"
+    },
+    {
+     "organization": "Town of Stettler",
+     "org_type": "Municipality",
+     "accreditation_number": "M000170",
+     "discipline": "Building",
+     "order_number": "332",
+     "city_listed": "Stettler"
+    },
+    {
+     "organization": "Town of Stettler",
+     "org_type": "Municipality",
+     "accreditation_number": "M000170",
+     "discipline": "Gas",
+     "order_number": "2684",
+     "city_listed": "Stettler"
+    },
+    {
+     "organization": "Town of Stettler",
+     "org_type": "Municipality",
+     "accreditation_number": "M000170",
+     "discipline": "Fire",
+     "order_number": "2032",
+     "city_listed": "Stettler"
+    },
+    {
+     "organization": "Town of Stettler",
+     "org_type": "Municipality",
+     "accreditation_number": "M000170",
+     "discipline": "Plumbing",
+     "order_number": "2683",
+     "city_listed": "Stettler"
+    },
+    {
+     "organization": "Town of Stettler",
+     "org_type": "Municipality",
+     "accreditation_number": "M000170",
+     "discipline": "Electrical",
+     "order_number": "2682",
+     "city_listed": "Stettler"
+    }
+   ],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0308",
+   "legal_name": "Summer Village of Sunset Point",
+   "type": "Summer Village",
+   "population_2025": 257,
+   "scc_query": "Sunset Point",
+   "scc_query_dir": 251,
+   "scc_response_sha256": "e173e681857d25851d72e6238f7f09a04bd474ea8687101b54cbbfa48b46d3ee",
+   "scc_rows_returned": 0,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0312",
+   "legal_name": "Municipal District of Taber",
+   "type": "Municipal District",
+   "population_2025": 7447,
+   "scc_query": "Taber",
+   "scc_query_dir": 252,
+   "scc_response_sha256": "ad37c04e75fe7eea1cb484a681d6dfdd443abe0152d1f598e71ad3e4ae27639f",
+   "scc_rows_returned": 7,
+   "own_accreditations": [
+    {
+     "organization": "Municipal District of Taber",
+     "org_type": "Municipality",
+     "accreditation_number": "M000441",
+     "discipline": "Fire",
+     "order_number": "2967",
+     "city_listed": "Taber"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [
+    {
+     "organization": "MD Taber / Vauxhall / Barnwell",
+     "org_type": "Joint Municipality",
+     "accreditation_number": "J000886",
+     "discipline": "Fire",
+     "order_number": "2965",
+     "city_listed": "Taber"
+    },
+    {
+     "organization": "Town of Taber",
+     "org_type": "Municipality",
+     "accreditation_number": "M000118",
+     "discipline": "Building",
+     "order_number": "475",
+     "city_listed": "Taber"
+    },
+    {
+     "organization": "Town of Taber",
+     "org_type": "Municipality",
+     "accreditation_number": "M000118",
+     "discipline": "Plumbing",
+     "order_number": "2574",
+     "city_listed": "Taber"
+    },
+    {
+     "organization": "Town of Taber",
+     "org_type": "Municipality",
+     "accreditation_number": "M000118",
+     "discipline": "Gas",
+     "order_number": "2573",
+     "city_listed": "Taber"
+    },
+    {
+     "organization": "Town of Taber",
+     "org_type": "Municipality",
+     "accreditation_number": "M000118",
+     "discipline": "Fire",
+     "order_number": "474",
+     "city_listed": "Taber"
+    },
+    {
+     "organization": "Town of Taber",
+     "org_type": "Municipality",
+     "accreditation_number": "M000118",
+     "discipline": "Electrical",
+     "order_number": "2572",
+     "city_listed": "Taber"
+    }
+   ],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0339",
+   "legal_name": "Village of Warner",
+   "type": "Village",
+   "population_2025": 364,
+   "scc_query": "Warner",
+   "scc_query_dir": 253,
+   "scc_response_sha256": "0fe50cc8b3d3b079d2be2398be6d59fdbc4a252136358ca02b9dacebd603bcef",
+   "scc_rows_returned": 0,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0340",
+   "legal_name": "County of Warner No. 5",
+   "type": "Municipal District",
+   "population_2025": 4290,
+   "scc_query": "Warner",
+   "scc_query_dir": 254,
+   "scc_response_sha256": "6f27f897888801341011e781e42776464fa96eb5d3a56fe1d215079cb5d746cc",
+   "scc_rows_returned": 0,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0354",
+   "legal_name": "Summer Village of Yellowstone",
+   "type": "Summer Village",
+   "population_2025": 117,
+   "scc_query": "Yellowstone",
+   "scc_query_dir": 255,
+   "scc_response_sha256": "45cc66c9655813b2de61e22b405028a5d1a7608dc59be13473e7c75fa4b27e0f",
+   "scc_rows_returned": 0,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0363",
+   "legal_name": "Village of Barnwell",
+   "type": "Village",
+   "population_2025": 978,
+   "scc_query": "Barnwell",
+   "scc_query_dir": 256,
+   "scc_response_sha256": "6d94e85bbcf4b74b8d7d82e17d5a6ac7721331b2e5b40a93aa5fe109dd7c6f64",
+   "scc_rows_returned": 2,
+   "own_accreditations": [
+    {
+     "organization": "Village of Barnwell",
+     "org_type": "Municipality",
+     "accreditation_number": "M000913",
+     "discipline": "Fire",
+     "order_number": "3049",
+     "city_listed": "Barnwell"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [
+    {
+     "organization": "MD Taber / Vauxhall / Barnwell",
+     "org_type": "Joint Municipality",
+     "accreditation_number": "J000886",
+     "discipline": "Fire",
+     "order_number": "2965",
+     "city_listed": "Taber"
+    }
+   ],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0367",
+   "legal_name": "Summer Village of Bondiss",
+   "type": "Summer Village",
+   "population_2025": 124,
+   "scc_query": "Bondiss",
+   "scc_query_dir": 257,
+   "scc_response_sha256": "8ddbbe899734d8f7a1f3bde8e6aca718658a425ae33bf5e9fb1a5df36392c5c2",
+   "scc_rows_returned": 0,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0370",
+   "legal_name": "Summer Village of West Baptiste",
+   "type": "Summer Village",
+   "population_2025": 46,
+   "scc_query": "West Baptiste",
+   "scc_query_dir": 258,
+   "scc_response_sha256": "d97bf4c9b79e715d6ac269e8437b04a409554686107b89d109e8df6a71a60e97",
+   "scc_rows_returned": 0,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0375",
+   "legal_name": "Summer Village of Horseshoe Bay",
+   "type": "Summer Village",
+   "population_2025": 81,
+   "scc_query": "Horseshoe Bay",
+   "scc_query_dir": 259,
+   "scc_response_sha256": "1862d374c2550d87725704114e56279363445a5b956a683dfee4c704533b8306",
+   "scc_rows_returned": 0,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0376",
+   "legal_name": "Cypress County",
+   "type": "Municipal District",
+   "population_2025": 7524,
+   "scc_query": "Cypress",
+   "scc_query_dir": 260,
+   "scc_response_sha256": "64df3f4af6eaf5cf67e2165c5e703836eddf479f28e495b253df5537432bc187",
+   "scc_rows_returned": 0,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0377",
+   "legal_name": "Clearwater County",
+   "type": "Municipal District",
+   "population_2025": 12335,
+   "scc_query": "Clearwater",
+   "scc_query_dir": 261,
+   "scc_response_sha256": "abf068bba6d0ac2f709c2073bbe2d4ef1aca240e89ca1c7fe57a709dafb5fc15",
+   "scc_rows_returned": 2,
+   "own_accreditations": [
+    {
+     "organization": "Clearwater County",
+     "org_type": "Municipality",
+     "accreditation_number": "M000203",
+     "discipline": "Fire",
+     "order_number": "3081",
+     "city_listed": "Rocky Mountain House"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0378",
+   "legal_name": "Summer Village of Larkspur",
+   "type": "Summer Village",
+   "population_2025": 53,
+   "scc_query": "Larkspur",
+   "scc_query_dir": 262,
+   "scc_response_sha256": "d9058f7cc8cc538645b50b33e3bc7995c8046cc6caa9aaa0471fa1b23028ebdb",
+   "scc_rows_returned": 0,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0380",
+   "legal_name": "Summer Village of Waiparous",
+   "type": "Summer Village",
+   "population_2025": 57,
+   "scc_query": "Waiparous",
+   "scc_query_dir": 263,
+   "scc_response_sha256": "3ba914796d732374473ed3dba7af94407426231b8410d714af9075761a9820cd",
+   "scc_rows_returned": 0,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0383",
+   "legal_name": "Brazeau County",
+   "type": "Municipal District",
+   "population_2025": 7179,
+   "scc_query": "Brazeau",
+   "scc_query_dir": 264,
+   "scc_response_sha256": "a3ea858b3b3090969e1cfc31221de9e807c77e5f9609345d57d0d7153d15bb28",
+   "scc_rows_returned": 2,
+   "own_accreditations": [
+    {
+     "organization": "Brazeau County",
+     "org_type": "Municipality",
+     "accreditation_number": "M000371",
+     "discipline": "Fire",
+     "order_number": "2143",
+     "city_listed": "Drayton Valley"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [
+    {
+     "organization": "Brazeau County / Breton / Drayton Valley",
+     "org_type": "Joint Municipality",
+     "accreditation_number": "J000123",
+     "discipline": "Fire",
+     "order_number": "416",
+     "city_listed": "Drayton Valley"
+    }
+   ],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0418",
+   "legal_name": "Municipality of Jasper",
+   "type": "Specialized Municipality",
+   "population_2025": 4738,
+   "scc_query": "Jasper",
+   "scc_query_dir": 265,
+   "scc_response_sha256": "585321367a9af15f14dddb1e3e36e666d348316d7427a75e6184adf9be0266c2",
+   "scc_rows_returned": 1,
+   "own_accreditations": [
+    {
+     "organization": "Municipality of Jasper",
+     "org_type": "Municipality",
+     "accreditation_number": "M000461",
+     "discipline": "Fire",
+     "order_number": "1452",
+     "city_listed": "Jasper"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0479",
+   "legal_name": "Improvement District No. 25 (Willmore Wilderness)",
+   "type": "Improvement District",
+   "population_2025": 0,
+   "scc_query": "Willmore Wilderness",
+   "scc_query_dir": 266,
+   "scc_response_sha256": "81c3cb6e3bb55049ac29f90299ca3d66e15c1cb8142bc8c1125e1a6de9efd1aa",
+   "scc_rows_returned": 0,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0480",
+   "legal_name": "Woodlands County",
+   "type": "Municipal District",
+   "population_2025": 5254,
+   "scc_query": "Woodlands",
+   "scc_query_dir": 267,
+   "scc_response_sha256": "eabf60c8701d8716f45c4eb1fbb6acd7b3ab03c7dd5abc2c290a918502ee58b5",
+   "scc_rows_returned": 0,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0481",
+   "legal_name": "Municipal District of Greenview No. 16",
+   "type": "Municipal District",
+   "population_2025": 8584,
+   "scc_query": "Greenview",
+   "scc_query_dir": 268,
+   "scc_response_sha256": "70b96a651993ef2caf271dd236285ad70e2b6243b073d669d5142c55f24119df",
+   "scc_rows_returned": 1,
+   "own_accreditations": [
+    {
+     "organization": "Municipal District of Greenview No. 16",
+     "org_type": "Municipality",
+     "accreditation_number": "M124635",
+     "discipline": "Fire",
+     "order_number": "79842042",
+     "city_listed": "Valleyview"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0482",
+   "legal_name": "Yellowhead County",
+   "type": "Municipal District",
+   "population_2025": 10426,
+   "scc_query": "Yellowhead",
+   "scc_query_dir": 269,
+   "scc_response_sha256": "370878c2eb1b1a61e2db04a22194b83659b6e609add70614c31521fdba6150c5",
+   "scc_rows_returned": 1,
+   "own_accreditations": [
+    {
+     "organization": "Yellowhead County",
+     "org_type": "Municipality",
+     "accreditation_number": "M000165",
+     "discipline": "Fire",
+     "order_number": "366",
+     "city_listed": "Edson"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0496",
+   "legal_name": "Northern Sunrise County",
+   "type": "Municipal District",
+   "population_2025": 1753,
+   "scc_query": "Northern Sunrise",
+   "scc_query_dir": 270,
+   "scc_response_sha256": "a2fc59ac8d1a50ef838301b15097bb946c67b25eee68ca0f69b1e9e9650843a5",
+   "scc_rows_returned": 0,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0503",
+   "legal_name": "Saddle Hills County",
+   "type": "Municipal District",
+   "population_2025": 2338,
+   "scc_query": "Saddle Hills",
+   "scc_query_dir": 271,
+   "scc_response_sha256": "25be93dd92ff66b32ccd3f96ebf849341481823809e1895e3cdd8938b0a643ee",
+   "scc_rows_returned": 1,
+   "own_accreditations": [
+    {
+     "organization": "Saddle Hills County",
+     "org_type": "Municipality",
+     "accreditation_number": "M000224",
+     "discipline": "Fire",
+     "order_number": "2207",
+     "city_listed": "Spirit River"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0504",
+   "legal_name": "Clear Hills County",
+   "type": "Municipal District",
+   "population_2025": 3006,
+   "scc_query": "Clear Hills",
+   "scc_query_dir": 272,
+   "scc_response_sha256": "361d1fb32c09e623f0d54579539c66d750c4237f4df50e2747d482615c35d1c8",
+   "scc_rows_returned": 0,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0507",
+   "legal_name": "Municipal District of Lesser Slave River No. 124",
+   "type": "Municipal District",
+   "population_2025": 2809,
+   "scc_query": "Lesser Slave River",
+   "scc_query_dir": 273,
+   "scc_response_sha256": "d5445fa9ac91918a1bf77a544e731e81930c75026bf2b6795bdbdf3b9dad5e7c",
+   "scc_rows_returned": 1,
+   "own_accreditations": [
+    {
+     "organization": "Municipal District of Lesser Slave River No. 124",
+     "org_type": "Municipality",
+     "accreditation_number": "M000415",
+     "discipline": "Fire",
+     "order_number": "620",
+     "city_listed": "Slave Lake"
+    }
+   ],
+   "own_disciplines": [
+    "Fire"
+   ],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "own_accreditation",
+   "matches_a16_snapshot_2026_10_25": true
+  },
+  {
+   "lg_code": "0511",
+   "legal_name": "County of Northern Lights",
+   "type": "Municipal District",
+   "population_2025": 3601,
+   "scc_query": "Northern Lights",
+   "scc_query_dir": 274,
+   "scc_response_sha256": "fb27bec5558c21de5c76c9408eec62443bb657895af4c17aeaba44cd370d09bc",
+   "scc_rows_returned": 0,
+   "own_accreditations": [],
+   "own_disciplines": [],
+   "related_accreditations_by_name": [],
+   "joint_municipality_building_name_match": [],
+   "building_route": "asca",
+   "fire_route": "no_fire_accreditation_found",
+   "matches_a16_snapshot_2026_10_25": true
+  }
+ ]
+}

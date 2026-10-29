@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Batatis: many places, one application each (target design)</title>
+<style>
+  :root {
+    --bg: #f5f6f8; --surface: #fff;
+    --text: #14161b; --text-2: #4a505c; --text-3: #6b7280; --text-4: #a3a8b3;
+    --line: rgba(20, 22, 27, 0.08); --line-2: rgba(20, 22, 27, 0.14); --line-ctl: rgba(20, 22, 27, 0.42);
+    --warning: #f0a20b; --blocking: #e5484d; --done: #18a058;
+    --primary-bg: #16181d; --primary-text: #fff;
+    --hue-blue-s: #2f5fb8; --hue-blue-t: rgba(47, 95, 184, 0.10);
+    --shadow: 0 1px 2px rgba(17, 24, 39, 0.05), 0 4px 16px -6px rgba(17, 24, 39, 0.08);
+    --font: "Inter Variable", "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    --mono: "Geist Mono Variable", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 400 14px/1.45 var(--font); }
+  .caption { font: 500 12px/1.4 var(--mono); color: var(--muted-foreground, #6b7280); margin: 0 0 8px 2px; }
+  .frame { background: var(--bg); color: var(--text); border-radius: var(--radius, 16px); padding: 16px; max-width: 980px; margin: 0 0 26px; overflow-x: auto; }
+  .frame-body { padding: 40px 0 44px; display: flex; justify-content: center; }
+  svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+  /* Header */
+  .hdr { min-height: 40px; display: flex; align-items: center; gap: 12px; padding: 0 4px; }
+  .hdr .icon-btn { color: var(--text-3); display: inline-flex; }
+  .title { font: 600 15px/1 var(--font); }
+  .place { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 10px 0 9px; border-radius: 999px; border: 1px solid var(--line-2); background: var(--surface); font: 500 13px/1 var(--font); color: var(--text); position: relative; }
+  .place svg { width: 15px; height: 15px; color: var(--text-3); }
+  .stages { display: flex; align-items: center; gap: 18px; margin: 0 auto; color: var(--text-4); }
+  .stage { display: inline-flex; align-items: center; gap: 7px; }
+  .stage.is-now { color: var(--text); font: 500 13px/1 var(--font); }
+  .stage.is-done { color: var(--text-3); }
+  .saved { color: var(--text-3); font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
+  .saved svg { width: 15px; height: 15px; color: var(--done); }
+
+  /* Question card */
+  .q { width: min(600px, 100%); }
+  .eyebrow { font: 500 12px/1 var(--mono); color: var(--text-3); display: flex; gap: 10px; align-items: center; margin-bottom: 14px; }
+  .eyebrow .letter { color: var(--hue-blue-s); }
+  .eyebrow .tag { display: inline-flex; align-items: center; gap: 5px; color: var(--text-2); }
+  .eyebrow .tag svg { width: 14px; height: 14px; }
+  h2 { font: 600 30px/1.1 var(--font); letter-spacing: -0.02em; margin: 0 0 20px; }
+
+  /* The one component: chips + input + suggestions */
+  .box { background: var(--surface); border: 1px solid var(--line-ctl); border-radius: 18px; box-shadow: var(--shadow); }
+  .box-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 12px 12px 12px 14px; }
+  .chip { display: inline-flex; align-items: center; gap: 7px; height: 34px; padding: 0 8px 0 11px; border-radius: 999px; border: 1px solid var(--line); background: rgba(17, 24, 39, 0.025); font: 500 13px/1 var(--font); color: var(--text); white-space: nowrap; }
+  .chip svg { width: 15px; height: 15px; color: var(--text-3); }
+  .chip .x { color: var(--text-4); display: inline-flex; }
+  .chip .x svg { width: 14px; height: 14px; color: currentColor; }
+  .chip.is-out { border-color: rgba(240, 162, 11, 0.55); }
+  .chip.is-out .warn { color: var(--warning); }
+  .input { flex: 1 1 160px; min-width: 160px; height: 34px; display: flex; align-items: center; font-size: 15px; color: var(--text); }
+  .caret { display: inline-block; width: 1.5px; height: 18px; background: var(--text); margin-left: 1px; }
+  .sugg { border-top: 1px solid var(--line); padding: 6px; }
+  .opt { display: flex; align-items: center; gap: 10px; padding: 10px 10px; border-radius: 10px; }
+  .opt.is-active { background: rgba(17, 24, 39, 0.045); }
+  .opt svg { color: var(--text-3); }
+  .opt .name { font-weight: 500; }
+  .opt .name b { font-weight: 600; }
+  .opt .office { margin-left: auto; color: var(--text-3); font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+  .opt .office svg { width: 15px; height: 15px; color: var(--text-4); }
+  .why { display: flex; align-items: center; gap: 8px; margin: 14px 2px 0; color: var(--text-2); font-size: 13px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .dot.warning { background: var(--warning); }
+  .actions { display: flex; align-items: center; gap: 10px; margin-top: 26px; }
+  .btn { height: 44px; padding: 0 20px; border-radius: 999px; font: 500 14px/1 var(--font); display: inline-flex; align-items: center; gap: 10px; border: 1px solid var(--line-2); background: transparent; color: var(--text); white-space: nowrap; }
+  .btn.is-primary { background: var(--primary-bg); color: var(--primary-text); border-color: var(--primary-bg); }
+  .btn.is-ghost { border-color: transparent; color: var(--text-2); }
+  kbd { font: 500 11px/1 var(--mono); padding: 3px 5px; border-radius: 5px; background: rgba(255, 255, 255, 0.16); color: rgba(255, 255, 255, 0.82); }
+
+  /* Place switcher menu */
+  .menu { position: absolute; top: 38px; left: 0; width: 330px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 12px 40px -12px rgba(17, 24, 39, 0.28); padding: 6px; z-index: 2; }
+  .mrow { display: flex; align-items: center; gap: 10px; padding: 10px 10px; border-radius: 9px; font: 500 14px/1 var(--font); color: var(--text); }
+  .mrow.is-current { background: rgba(17, 24, 39, 0.045); }
+  .mrow .check { width: 16px; height: 16px; color: var(--text); }
+  .mrow .spacer { width: 16px; flex: none; }
+  .mrow .end { margin-left: auto; display: inline-flex; align-items: center; gap: 10px; }
+  .mrow .code { font: 500 11.5px/1 var(--mono); color: var(--text-3); }
+  .mrow .local { display: inline-flex; align-items: center; gap: 3px; color: var(--text-2); font: 500 12px/1 var(--font); }
+  .mrow .local svg { width: 14px; height: 14px; }
+  .mrow.is-add { color: var(--text-2); font-weight: 500; }
+  .mrow.is-add svg { width: 16px; height: 16px; }
+  .ghost-work { width: min(600px, 100%); opacity: 0.35; filter: blur(0.3px); }
+  .ghost-work .bar { height: 14px; border-radius: 7px; background: rgba(17, 24, 39, 0.08); margin-bottom: 12px; }
+
+  /* Choice chips on the local question */
+  .choices { display: flex; gap: 10px; flex-wrap: wrap; }
+  .choice { height: 60px; min-width: 170px; padding: 0 18px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line-2); box-shadow: var(--shadow); display: flex; align-items: center; justify-content: space-between; font: 500 15px/1 var(--font); }
+  .choice span { font: 500 12px/1 var(--mono); color: var(--text-4); }
+</style>
+</head>
+<body>
+
+<!-- Icon sprites -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="pin" viewBox="0 0 24 24"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></symbol>
+  <symbol id="x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+  <symbol id="down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+  <symbol id="check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="warn" viewBox="0 0 24 24"><path d="M12 3.5l9.5 16.5h-19z"/><path d="M12 10v4.5M12 17.6v.1"/></symbol>
+  <symbol id="office" viewBox="0 0 24 24"><path d="M4 20h16M6 20V9l6-4 6 4v11M10 20v-5h4v5"/></symbol>
+  <symbol id="side" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><path d="M9.5 4.5v15"/></symbol>
+  <symbol id="describe" viewBox="0 0 24 24"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3z"/></symbol>
+  <symbol id="questions" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.5a2.5 2.5 0 1 1 3.4 2.3c-.6.3-1 .8-1 1.5v.7M12 16.8v.1"/></symbol>
+  <symbol id="review" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4 6l1 1 2-2M4 12l1 1 2-2M4 18l1 1 2-2"/></symbol>
+  <symbol id="doc" viewBox="0 0 24 24"><path d="M7 3.5h7l4 4v13H7z"/><path d="M14 3.5v4h4M10 12h5M10 15.5h5"/></symbol>
+</svg>
+
+<!-- Frame 1 -->
+<p class="caption">1 · Where: type an address or town. Each place resolves to its office and becomes one application.</p>
+<section class="frame" aria-label="Where question">
+  <div class="hdr">
+    <span class="icon-btn"><svg><use href="#side"/></svg></span>
+    <span class="title">Infill sheathing</span>
+    <nav class="stages" aria-label="Stages">
+      <span class="stage is-done"><svg><use href="#describe"/></svg></span>
+      <span class="stage is-now"><svg><use href="#questions"/></svg>Questions</span>
+      <span class="stage"><svg><use href="#review"/></svg></span>
+      <span class="stage"><svg><use href="#doc"/></svg></span>
+    </nav>
+    <span class="saved"><svg><use href="#check"/></svg>Saved</span>
+  </div>
+  <div class="frame-body">
+    <div class="q">
+      <div class="eyebrow"><span class="letter">A</span><span>Your project</span></div>
+      <h2>Where</h2>
+      <div class="box" role="group" aria-label="Places">
+        <div class="box-row">
+          <span class="chip"><svg><use href="#pin"/></svg>Red Deer<span class="x"><svg><use href="#x"/></svg></span></span>
+          <span class="chip"><svg><use href="#pin"/></svg>Strathcona County<span class="x"><svg><use href="#x"/></svg></span></span>
+          <span class="chip"><svg><use href="#pin"/></svg>Vancouver<span class="x"><svg><use href="#x"/></svg></span></span>
+          <span class="chip is-out" title="Iqaluit isn't covered yet"><svg class="warn"><use href="#warn"/></svg>Iqaluit<span class="x"><svg><use href="#x"/></svg></span></span>
+          <span class="input">Lacom<span class="caret"></span></span>
+        </div>
+        <div class="sugg" role="listbox">
+          <div class="opt is-active" role="option" aria-selected="true">
+            <svg><use href="#pin"/></svg><span class="name">City of <b>Lacom</b>be</span>
+            <span class="office"><svg><use href="#office"/></svg>City of Lacombe</span>
+          </div>
+          <div class="opt" role="option">
+            <svg><use href="#pin"/></svg><span class="name"><b>Lacom</b>be County</span>
+            <span class="office"><svg><use href="#office"/></svg>Alberta Safety Codes Authority</span>
+          </div>
+        </div>
+      </div>
+      <p class="why"><span class="dot warning"></span>Iqaluit isn't covered yet</p>
+      <div class="actions">
+        <span class="btn is-primary">Create 3 applications <kbd>↵</kbd></span>
+        <span class="btn is-ghost">Not sure</span>
+        <span class="btn is-ghost">Help</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Frame 2 -->
+<p class="caption">2 · One application per place. The place picker in the header switches between them.</p>
+<section class="frame" aria-label="Place switcher">
+  <div class="hdr">
+    <span class="icon-btn"><svg><use href="#side"/></svg></span>
+    <span class="title">Infill sheathing</span>
+    <span class="place"><svg><use href="#pin"/></svg>Vancouver<svg><use href="#down"/></svg>
+      <div class="menu" role="menu" aria-label="Applications">
+        <div class="mrow"><span class="spacer"></span>Red Deer<span class="end"><span class="code">NBC(AE) 2023</span></span></div>
+        <div class="mrow"><span class="spacer"></span>Strathcona County<span class="end"><span class="code">NBC(AE) 2023</span></span></div>
+        <div class="mrow is-current"><svg class="check"><use href="#check"/></svg>Vancouver<span class="end"><span class="local" title="2 questions only Vancouver asks" aria-label="2 questions only Vancouver asks"><svg><use href="#pin"/></svg>2</span><span class="code">VBBL</span></span></div>
+        <div class="mrow is-add"><svg><use href="#plus"/></svg>Add a place</div>
+      </div>
+    </span>
+    <nav class="stages" aria-label="Stages">
+      <span class="stage is-done"><svg><use href="#describe"/></svg></span>
+      <span class="stage is-now"><svg><use href="#questions"/></svg>Questions</span>
+      <span class="stage"><svg><use href="#review"/></svg></span>
+      <span class="stage"><svg><use href="#doc"/></svg></span>
+    </nav>
+    <span class="saved"><svg><use href="#check"/></svg>Saved</span>
+  </div>
+  <div class="frame-body" style="padding-top:170px">
+    <div class="ghost-work" aria-hidden="true">
+      <div class="bar" style="width:22%"></div>
+      <div class="bar" style="width:58%; height:26px"></div>
+      <div class="bar" style="width:100%; height:56px"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Frame 3 -->
+<p class="caption">3 · A rule only one office has becomes an ordinary question, marked with its place.</p>
+<section class="frame" aria-label="A local question">
+  <div class="hdr">
+    <span class="icon-btn"><svg><use href="#side"/></svg></span>
+    <span class="title">Infill sheathing</span>
+    <span class="place"><svg><use href="#pin"/></svg>Vancouver<svg><use href="#down"/></svg></span>
+    <nav class="stages" aria-label="Stages">
+      <span class="stage is-done"><svg><use href="#describe"/></svg></span>
+      <span class="stage is-now"><svg><use href="#questions"/></svg>Questions</span>
+      <span class="stage"><svg><use href="#review"/></svg></span>
+      <span class="stage"><svg><use href="#doc"/></svg></span>
+    </nav>
+    <span class="saved"><svg><use href="#check"/></svg>Saved</span>
+  </div>
+  <div class="frame-body">
+    <div class="q">
+      <div class="eyebrow"><span class="letter">A</span><span>Your project</span><span class="tag"><svg><use href="#pin"/></svg>Vancouver only</span></div>
+      <h2>Who seals it</h2>
+      <div class="choices">
+        <div class="choice">Architect <span>1</span></div>
+        <div class="choice">BC engineer <span>2</span></div>
+        <div class="choice">Not yet <span>3</span></div>
+      </div>
+      <div class="actions">
+        <span class="btn is-ghost">Help</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

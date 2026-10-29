@@ -1,0 +1,4679 @@
+{
+ "_meta": {
+  "title": "Safety Codes Council Accreditation Search snapshot",
+  "retrieved_utc": "2026-10-29",
+  "source": "https://councilconnect.safetycodes.ab.ca/eWeb/DynamicPage.aspx?Site=scc&WebKey=d1d96198-3866-4673-9cec-a787f71f89f5",
+  "method": "Read-only POST of the public search form, organization type set, discipline blank. One request per 1.2 s. QMP manager name and e-mail columns were not parsed or stored.",
+  "raw_files": "dl/80 (Municipality), 81 (Municipality+Building), 82 (Joint Municipality), 83 (Regional Services Commission), 84 (Agency+Building), 85 (Agency), 86 (Corporation+Building)",
+  "note": "The Discipline drop-down has no Private Sewage entry, so private sewage accreditation cannot be read from this search."
+ },
+ "municipalities": [
+  {
+   "organization": "Athabasca County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000279",
+   "city_listed": "Athabasca",
+   "disciplines": {
+    "Fire": "1343"
+   }
+  },
+  {
+   "organization": "Beaver County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000282",
+   "city_listed": "Ryley",
+   "disciplines": {
+    "Building": "2453",
+    "Electrical": "2448",
+    "Gas": "2443",
+    "Plumbing": "2438"
+   }
+  },
+  {
+   "organization": "Big Lakes County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000864",
+   "city_listed": "High Prairie",
+   "disciplines": {
+    "Building": "2835",
+    "Electrical": "2836",
+    "Gas": "2837",
+    "Plumbing": "2838"
+   }
+  },
+  {
+   "organization": "Birch Hills County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000225",
+   "city_listed": "Wanham",
+   "disciplines": {
+    "Building": "2728",
+    "Electrical": "2729",
+    "Gas": "2731",
+    "Plumbing": "2732"
+   }
+  },
+  {
+   "organization": "Brazeau County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000371",
+   "city_listed": "Drayton Valley",
+   "disciplines": {
+    "Fire": "2143"
+   }
+  },
+  {
+   "organization": "Buffalo Lake Metis Settlement",
+   "org_type": "Municipality",
+   "accreditation_number": "M000434",
+   "city_listed": "Caslan",
+   "disciplines": {
+    "Building": "2772",
+    "Electrical": "2773",
+    "Gas": "2774",
+    "Plumbing": "2775"
+   }
+  },
+  {
+   "organization": "Camrose County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000229",
+   "city_listed": "Camrose",
+   "disciplines": {
+    "Building": "2197",
+    "Electrical": "2188",
+    "Fire": "2179",
+    "Gas": "2170",
+    "Plumbing": "2161"
+   }
+  },
+  {
+   "organization": "Cardston County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000419",
+   "city_listed": "Cardston",
+   "disciplines": {
+    "Building": "2671",
+    "Electrical": "2672",
+    "Fire": "2262",
+    "Gas": "2673",
+    "Plumbing": "2674"
+   }
+  },
+  {
+   "organization": "City of Airdrie",
+   "org_type": "Municipality",
+   "accreditation_number": "M000133",
+   "city_listed": "Airdrie",
+   "disciplines": {
+    "Building": "398",
+    "Electrical": "531",
+    "Fire": "546",
+    "Gas": "400",
+    "Plumbing": "399"
+   }
+  },
+  {
+   "organization": "City of Beaumont",
+   "org_type": "Municipality",
+   "accreditation_number": "M000226",
+   "city_listed": "Beaumont",
+   "disciplines": {
+    "Building": "487",
+    "Electrical": "809",
+    "Fire": "627",
+    "Gas": "719",
+    "Plumbing": "718"
+   }
+  },
+  {
+   "organization": "City of Brooks",
+   "org_type": "Municipality",
+   "accreditation_number": "M000129",
+   "city_listed": "Brooks",
+   "disciplines": {
+    "Building": "147",
+    "Electrical": "79842104",
+    "Fire": "146",
+    "Gas": "79842105",
+    "Plumbing": "79842106"
+   }
+  },
+  {
+   "organization": "City of Calgary",
+   "org_type": "Municipality",
+   "accreditation_number": "M000123",
+   "city_listed": "Calgary",
+   "disciplines": {
+    "Building": "525",
+    "Electrical": "586",
+    "Fire": "320",
+    "Gas": "526",
+    "Plumbing": "527"
+   }
+  },
+  {
+   "organization": "City of Camrose",
+   "org_type": "Municipality",
+   "accreditation_number": "M000228",
+   "city_listed": "Camrose",
+   "disciplines": {
+    "Building": "2196",
+    "Electrical": "2187",
+    "Fire": "2178",
+    "Gas": "2169",
+    "Plumbing": "2160"
+   }
+  },
+  {
+   "organization": "City of Chestermere",
+   "org_type": "Municipality",
+   "accreditation_number": "M000318",
+   "city_listed": "Chestermere",
+   "disciplines": {
+    "Building": "435",
+    "Electrical": "920",
+    "Fire": "625",
+    "Gas": "921",
+    "Plumbing": "922"
+   }
+  },
+  {
+   "organization": "City of Cold Lake",
+   "org_type": "Municipality",
+   "accreditation_number": "M000261",
+   "city_listed": "Cold Lake",
+   "disciplines": {
+    "Building": "2872",
+    "Electrical": "2873",
+    "Fire": "2250",
+    "Gas": "2874",
+    "Plumbing": "2875"
+   }
+  },
+  {
+   "organization": "City of Edmonton",
+   "org_type": "Municipality",
+   "accreditation_number": "M000177",
+   "city_listed": "Edmonton",
+   "disciplines": {
+    "Building": "537",
+    "Electrical": "494",
+    "Fire": "413",
+    "Gas": "535",
+    "Plumbing": "536"
+   }
+  },
+  {
+   "organization": "City of Fort Saskatchewan",
+   "org_type": "Municipality",
+   "accreditation_number": "M000286",
+   "city_listed": "Fort Saskatchewan",
+   "disciplines": {
+    "Building": "1287",
+    "Electrical": "1286",
+    "Fire": "1320",
+    "Gas": "1285",
+    "Plumbing": "1284"
+   }
+  },
+  {
+   "organization": "City of Grande Prairie",
+   "org_type": "Municipality",
+   "accreditation_number": "M000249",
+   "city_listed": "Grande Prairie",
+   "disciplines": {
+    "Building": "2933",
+    "Electrical": "2934",
+    "Fire": "467",
+    "Gas": "2935",
+    "Plumbing": "2936"
+   }
+  },
+  {
+   "organization": "City of Lacombe",
+   "org_type": "Municipality",
+   "accreditation_number": "M000373",
+   "city_listed": "Lacombe",
+   "disciplines": {
+    "Building": "414",
+    "Electrical": "972",
+    "Fire": "2155",
+    "Gas": "973",
+    "Plumbing": "974"
+   }
+  },
+  {
+   "organization": "City of Leduc",
+   "org_type": "Municipality",
+   "accreditation_number": "M000365",
+   "city_listed": "Leduc",
+   "disciplines": {
+    "Building": "596",
+    "Electrical": "895",
+    "Fire": "597",
+    "Gas": "598",
+    "Plumbing": "599"
+   }
+  },
+  {
+   "organization": "City of Lethbridge",
+   "org_type": "Municipality",
+   "accreditation_number": "M000104",
+   "city_listed": "Lethbridge",
+   "disciplines": {
+    "Building": "196",
+    "Electrical": "545",
+    "Fire": "195",
+    "Gas": "197",
+    "Plumbing": "198"
+   }
+  },
+  {
+   "organization": "City of Medicine Hat",
+   "org_type": "Municipality",
+   "accreditation_number": "M000115",
+   "city_listed": "Medicine Hat",
+   "disciplines": {
+    "Building": "176",
+    "Electrical": "693",
+    "Fire": "139",
+    "Gas": "528",
+    "Plumbing": "175"
+   }
+  },
+  {
+   "organization": "City of Red Deer",
+   "org_type": "Municipality",
+   "accreditation_number": "M000101",
+   "city_listed": "Red Deer",
+   "disciplines": {
+    "Building": "104",
+    "Electrical": "179",
+    "Fire": "103",
+    "Gas": "101",
+    "Plumbing": "102"
+   }
+  },
+  {
+   "organization": "City of Spruce Grove",
+   "org_type": "Municipality",
+   "accreditation_number": "M000166",
+   "city_listed": "Spruce Grove",
+   "disciplines": {
+    "Building": "436",
+    "Electrical": "1043",
+    "Fire": "276",
+    "Gas": "1044",
+    "Plumbing": "274"
+   }
+  },
+  {
+   "organization": "City of St. Albert",
+   "org_type": "Municipality",
+   "accreditation_number": "M000178",
+   "city_listed": "St. Albert",
+   "disciplines": {
+    "Building": "638",
+    "Electrical": "2611",
+    "Fire": "646",
+    "Gas": "639",
+    "Plumbing": "640"
+   }
+  },
+  {
+   "organization": "City of Wetaskiwin",
+   "org_type": "Municipality",
+   "accreditation_number": "M000130",
+   "city_listed": "Wetaskiwin",
+   "disciplines": {
+    "Building": "365",
+    "Electrical": "695",
+    "Fire": "378",
+    "Gas": "505",
+    "Plumbing": "506"
+   }
+  },
+  {
+   "organization": "Clearwater County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000203",
+   "city_listed": "Rocky Mountain House",
+   "disciplines": {
+    "Fire": "3081"
+   }
+  },
+  {
+   "organization": "County of Barrhead No. 11",
+   "org_type": "Municipality",
+   "accreditation_number": "M000281",
+   "city_listed": "Barrhead",
+   "disciplines": {
+    "Fire": "2209"
+   }
+  },
+  {
+   "organization": "County of Forty Mile No. 8",
+   "org_type": "Municipality",
+   "accreditation_number": "M000156",
+   "city_listed": "Foremost",
+   "disciplines": {
+    "Fire": "2924"
+   }
+  },
+  {
+   "organization": "County of Grande Prairie No. 1",
+   "org_type": "Municipality",
+   "accreditation_number": "M000162",
+   "city_listed": "Clairmont",
+   "disciplines": {
+    "Building": "1026",
+    "Electrical": "1030",
+    "Fire": "530",
+    "Gas": "1031",
+    "Plumbing": "1032"
+   }
+  },
+  {
+   "organization": "County of Minburn No. 27",
+   "org_type": "Municipality",
+   "accreditation_number": "M000187",
+   "city_listed": "Vegreville",
+   "disciplines": {
+    "Building": "497",
+    "Electrical": "1222",
+    "Fire": "498",
+    "Gas": "1223",
+    "Plumbing": "1224"
+   }
+  },
+  {
+   "organization": "County of Newell",
+   "org_type": "Municipality",
+   "accreditation_number": "M000410",
+   "city_listed": "Brooks",
+   "disciplines": {
+    "Building": "2783",
+    "Electrical": "2786",
+    "Fire": "2258",
+    "Gas": "2784",
+    "Plumbing": "2785"
+   }
+  },
+  {
+   "organization": "County of Paintearth No. 18",
+   "org_type": "Municipality",
+   "accreditation_number": "M000333",
+   "city_listed": "Castor",
+   "disciplines": {
+    "Building": "2088",
+    "Electrical": "2005",
+    "Fire": "2344",
+    "Gas": "2067",
+    "Plumbing": "2044"
+   }
+  },
+  {
+   "organization": "County of St. Paul No. 19",
+   "org_type": "Municipality",
+   "accreditation_number": "M000137",
+   "city_listed": "St Paul",
+   "disciplines": {
+    "Building": "2554",
+    "Electrical": "2555",
+    "Fire": "2570",
+    "Gas": "2557",
+    "Plumbing": "2558"
+   }
+  },
+  {
+   "organization": "County of Stettler No. 6",
+   "org_type": "Municipality",
+   "accreditation_number": "M000169",
+   "city_listed": "Stettler",
+   "disciplines": {
+    "Fire": "2031"
+   }
+  },
+  {
+   "organization": "County of Two Hills No. 21",
+   "org_type": "Municipality",
+   "accreditation_number": "M000308",
+   "city_listed": "Two Hills",
+   "disciplines": {
+    "Building": "1221",
+    "Electrical": "1220",
+    "Fire": "1217",
+    "Gas": "1219",
+    "Plumbing": "1218"
+   }
+  },
+  {
+   "organization": "County of Vermilion River No. 24",
+   "org_type": "Municipality",
+   "accreditation_number": "M000310",
+   "city_listed": "Kitscoty",
+   "disciplines": {
+    "Building": "886",
+    "Electrical": "887",
+    "Gas": "889",
+    "Plumbing": "890"
+   }
+  },
+  {
+   "organization": "County of Wetaskiwin No. 10",
+   "org_type": "Municipality",
+   "accreditation_number": "M000273",
+   "city_listed": "Wetaskiwin",
+   "disciplines": {
+    "Building": "2929",
+    "Electrical": "2930",
+    "Fire": "2218",
+    "Gas": "2931",
+    "Plumbing": "2932"
+   }
+  },
+  {
+   "organization": "Fishing Lake Metis Settlement",
+   "org_type": "Municipality",
+   "accreditation_number": "M000436",
+   "city_listed": "Fishing Lake",
+   "disciplines": {
+    "Building": "1363",
+    "Electrical": "1362",
+    "Gas": "1361",
+    "Plumbing": "1360"
+   }
+  },
+  {
+   "organization": "Flagstaff County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000238",
+   "city_listed": "Sedgewick",
+   "disciplines": {
+    "Building": "2106",
+    "Electrical": "2307",
+    "Fire": "2116",
+    "Gas": "2295",
+    "Plumbing": "2285"
+   }
+  },
+  {
+   "organization": "Foothills County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000149",
+   "city_listed": "High River",
+   "disciplines": {
+    "Building": "2231",
+    "Electrical": "2321",
+    "Fire": "2794",
+    "Gas": "2236",
+    "Plumbing": "2239"
+   }
+  },
+  {
+   "organization": "Kananaskis Improvement District",
+   "org_type": "Municipality",
+   "accreditation_number": "M000202",
+   "city_listed": "Kananaskis",
+   "disciplines": {
+    "Building": "700",
+    "Electrical": "906",
+    "Fire": "473",
+    "Gas": "907",
+    "Plumbing": "908"
+   }
+  },
+  {
+   "organization": "Kikino Métis Settlement",
+   "org_type": "Municipality",
+   "accreditation_number": "M000437",
+   "city_listed": "Kikino",
+   "disciplines": {
+    "Building": "2823",
+    "Electrical": "2824",
+    "Gas": "2825",
+    "Plumbing": "2826"
+   }
+  },
+  {
+   "organization": "Kneehill County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000183",
+   "city_listed": "Three Hills",
+   "disciplines": {
+    "Building": "1342",
+    "Electrical": "1341",
+    "Fire": "2892",
+    "Gas": "1340",
+    "Plumbing": "1339"
+   }
+  },
+  {
+   "organization": "Lac La Biche County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000448",
+   "city_listed": "Lac La Biche",
+   "disciplines": {
+    "Building": "1056",
+    "Electrical": "1057",
+    "Fire": "3066",
+    "Gas": "1058",
+    "Plumbing": "1059"
+   }
+  },
+  {
+   "organization": "Lac Ste. Anne County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000289",
+   "city_listed": "Sangudo",
+   "disciplines": {
+    "Building": "1488",
+    "Electrical": "1487",
+    "Gas": "1486",
+    "Plumbing": "1485"
+   }
+  },
+  {
+   "organization": "Lacombe County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000374",
+   "city_listed": "Lacombe",
+   "disciplines": {
+    "Fire": "2156"
+   }
+  },
+  {
+   "organization": "Lamont County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000251",
+   "city_listed": "Lamont",
+   "disciplines": {
+    "Building": "437278",
+    "Electrical": "437288",
+    "Fire": "2144",
+    "Gas": "437284",
+    "Plumbing": "437292"
+   }
+  },
+  {
+   "organization": "Leduc County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000207",
+   "city_listed": "Nisku",
+   "disciplines": {
+    "Building": "573",
+    "Electrical": "1166",
+    "Fire": "572",
+    "Gas": "1165",
+    "Plumbing": "1164"
+   }
+  },
+  {
+   "organization": "Lethbridge County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000422",
+   "city_listed": "Lethbridge",
+   "disciplines": {
+    "Building": "3043",
+    "Electrical": "3042",
+    "Fire": "619",
+    "Gas": "3040",
+    "Plumbing": "3041"
+   }
+  },
+  {
+   "organization": "Mackenzie County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000252",
+   "city_listed": "Fort Vermilion",
+   "disciplines": {
+    "Building": "1092",
+    "Electrical": "1093",
+    "Fire": "633",
+    "Gas": "1095",
+    "Plumbing": "1094"
+   }
+  },
+  {
+   "organization": "Mountain View County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000391",
+   "city_listed": "Didsbury",
+   "disciplines": {
+    "Building": "595",
+    "Electrical": "2694",
+    "Fire": "594",
+    "Gas": "2695",
+    "Plumbing": "2696"
+   }
+  },
+  {
+   "organization": "Municipal District of Acadia No. 34",
+   "org_type": "Municipality",
+   "accreditation_number": "M000334",
+   "city_listed": "Acadia Valley",
+   "disciplines": {
+    "Building": "2089",
+    "Electrical": "2006",
+    "Fire": "654",
+    "Gas": "2068",
+    "Plumbing": "2045"
+   }
+  },
+  {
+   "organization": "Municipal District of Bighorn No. 8",
+   "org_type": "Municipality",
+   "accreditation_number": "M000151",
+   "city_listed": "Exshaw",
+   "disciplines": {
+    "Building": "78942091",
+    "Electrical": "79842093",
+    "Fire": "346",
+    "Gas": "79842091",
+    "Plumbing": "79842092"
+   }
+  },
+  {
+   "organization": "Municipal District of Bonnyville No. 87",
+   "org_type": "Municipality",
+   "accreditation_number": "M000227",
+   "city_listed": "Bonnyville",
+   "disciplines": {
+    "Building": "2242",
+    "Electrical": "2369",
+    "Fire": "2248",
+    "Gas": "2334",
+    "Plumbing": "2328"
+   }
+  },
+  {
+   "organization": "Municipal District of Greenview No. 16",
+   "org_type": "Municipality",
+   "accreditation_number": "M124635",
+   "city_listed": "Valleyview",
+   "disciplines": {
+    "Fire": "79842042"
+   }
+  },
+  {
+   "organization": "Municipal District of Lesser Slave River No. 124",
+   "org_type": "Municipality",
+   "accreditation_number": "M000415",
+   "city_listed": "Slave Lake",
+   "disciplines": {
+    "Fire": "620"
+   }
+  },
+  {
+   "organization": "Municipal District of Opportunity No. 17",
+   "org_type": "Municipality",
+   "accreditation_number": "M000440",
+   "city_listed": "Wabasca",
+   "disciplines": {
+    "Building": "2690",
+    "Electrical": "2691",
+    "Gas": "2692",
+    "Plumbing": "2693"
+   }
+  },
+  {
+   "organization": "Municipal District of Pincher Creek No. 9",
+   "org_type": "Municipality",
+   "accreditation_number": "M000417",
+   "city_listed": "Pincher Creek",
+   "disciplines": {
+    "Building": "2861",
+    "Electrical": "2862",
+    "Fire": "566",
+    "Gas": "2863",
+    "Plumbing": "2864"
+   }
+  },
+  {
+   "organization": "Municipal District of Provost No. 52",
+   "org_type": "Municipality",
+   "accreditation_number": "M000358",
+   "city_listed": "Provost",
+   "disciplines": {
+    "Building": "2897",
+    "Electrical": "2898",
+    "Fire": "2271",
+    "Gas": "2900",
+    "Plumbing": "2899"
+   }
+  },
+  {
+   "organization": "Municipal District of Ranchland No. 66",
+   "org_type": "Municipality",
+   "accreditation_number": "M000382",
+   "city_listed": "Nanton",
+   "disciplines": {
+    "Building": "2233",
+    "Electrical": "2323",
+    "Gas": "2238",
+    "Plumbing": "2241"
+   }
+  },
+  {
+   "organization": "Municipal District of Smoky River No. 130",
+   "org_type": "Municipality",
+   "accreditation_number": "M000386",
+   "city_listed": "Falher",
+   "disciplines": {
+    "Fire": "2140"
+   }
+  },
+  {
+   "organization": "Municipal District of Spirit River No. 133",
+   "org_type": "Municipality",
+   "accreditation_number": "M000140",
+   "city_listed": "Spirit River",
+   "disciplines": {
+    "Building": "3024",
+    "Electrical": "3025",
+    "Fire": "2680",
+    "Gas": "3026",
+    "Plumbing": "3027"
+   }
+  },
+  {
+   "organization": "Municipal District of Taber",
+   "org_type": "Municipality",
+   "accreditation_number": "M000441",
+   "city_listed": "Taber",
+   "disciplines": {
+    "Fire": "2967"
+   }
+  },
+  {
+   "organization": "Municipal District of Wainwright No. 61",
+   "org_type": "Municipality",
+   "accreditation_number": "M000212",
+   "city_listed": "Wainwright",
+   "disciplines": {
+    "Building": "2818",
+    "Electrical": "2819",
+    "Fire": "2030",
+    "Gas": "2820",
+    "Plumbing": "2821"
+   }
+  },
+  {
+   "organization": "Municipal District of Willow Creek No. 26",
+   "org_type": "Municipality",
+   "accreditation_number": "M000414",
+   "city_listed": "Claresholm",
+   "disciplines": {
+    "Building": "2802",
+    "Electrical": "2800",
+    "Fire": "2284",
+    "Gas": "2797",
+    "Plumbing": "2796"
+   }
+  },
+  {
+   "organization": "Municipality of Crowsnest Pass",
+   "org_type": "Municipality",
+   "accreditation_number": "M000181",
+   "city_listed": "Blairmore",
+   "disciplines": {
+    "Building": "306",
+    "Electrical": "548",
+    "Fire": "547",
+    "Gas": "549",
+    "Plumbing": "550"
+   }
+  },
+  {
+   "organization": "Municipality of Jasper",
+   "org_type": "Municipality",
+   "accreditation_number": "M000461",
+   "city_listed": "Jasper",
+   "disciplines": {
+    "Fire": "1452"
+   }
+  },
+  {
+   "organization": "Parkland County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000135",
+   "city_listed": "Parkland County",
+   "disciplines": {
+    "Building": "1534",
+    "Electrical": "1533",
+    "Fire": "615",
+    "Gas": "1532",
+    "Plumbing": "1531"
+   }
+  },
+  {
+   "organization": "Ponoka County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000407",
+   "city_listed": "Ponoka",
+   "disciplines": {
+    "Building": "967",
+    "Electrical": "968",
+    "Fire": "2255",
+    "Gas": "969",
+    "Plumbing": "970"
+   }
+  },
+  {
+   "organization": "Red Deer County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000132",
+   "city_listed": "Red Deer",
+   "disciplines": {
+    "Building": "2998",
+    "Electrical": "2996",
+    "Fire": "2994",
+    "Gas": "2992",
+    "Plumbing": "2990"
+   }
+  },
+  {
+   "organization": "Regional Municipality of Wood Buffalo",
+   "org_type": "Municipality",
+   "accreditation_number": "M000195",
+   "city_listed": "Fort McMurray",
+   "disciplines": {
+    "Building": "587",
+    "Electrical": "986",
+    "Fire": "983",
+    "Gas": "589",
+    "Plumbing": "590"
+   }
+  },
+  {
+   "organization": "Rocky View County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000116",
+   "city_listed": "Rocky View County",
+   "disciplines": {
+    "Building": "583",
+    "Electrical": "1137",
+    "Fire": "183",
+    "Gas": "1138",
+    "Plumbing": "1139"
+   }
+  },
+  {
+   "organization": "Saddle Hills County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000224",
+   "city_listed": "Spirit River",
+   "disciplines": {
+    "Fire": "2207"
+   }
+  },
+  {
+   "organization": "Smoky Lake County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000303",
+   "city_listed": "Smoky Lake",
+   "disciplines": {
+    "Building": "2483",
+    "Electrical": "2480",
+    "Gas": "2474",
+    "Plumbing": "2471"
+   }
+  },
+  {
+   "organization": "Special Area No. 2",
+   "org_type": "Municipality",
+   "accreditation_number": "M000336",
+   "city_listed": "Hanna",
+   "disciplines": {
+    "Building": "2091",
+    "Electrical": "2008",
+    "Fire": "2150",
+    "Gas": "2070",
+    "Plumbing": "2047"
+   }
+  },
+  {
+   "organization": "Special Area No. 3",
+   "org_type": "Municipality",
+   "accreditation_number": "M000337",
+   "city_listed": "Oyen",
+   "disciplines": {
+    "Building": "2092",
+    "Electrical": "2009",
+    "Fire": "2151",
+    "Gas": "2071",
+    "Plumbing": "2048"
+   }
+  },
+  {
+   "organization": "Special Area No. 4",
+   "org_type": "Municipality",
+   "accreditation_number": "M000338",
+   "city_listed": "Consort",
+   "disciplines": {
+    "Building": "2093",
+    "Electrical": "2010",
+    "Fire": "2152",
+    "Gas": "2072",
+    "Plumbing": "2049"
+   }
+  },
+  {
+   "organization": "Starland County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000335",
+   "city_listed": "Morrin",
+   "disciplines": {
+    "Building": "2090",
+    "Electrical": "2007",
+    "Fire": "2340",
+    "Gas": "2069",
+    "Plumbing": "2046"
+   }
+  },
+  {
+   "organization": "Strathcona County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000142",
+   "city_listed": "Sherwood Park",
+   "disciplines": {
+    "Building": "489",
+    "Electrical": "879",
+    "Fire": "490",
+    "Gas": "492",
+    "Plumbing": "491"
+   }
+  },
+  {
+   "organization": "Sturgeon County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000145",
+   "city_listed": "Morinville",
+   "disciplines": {
+    "Building": "2133",
+    "Electrical": "2404",
+    "Fire": "2128",
+    "Gas": "2409",
+    "Plumbing": "2414"
+   }
+  },
+  {
+   "organization": "Summer Village of Argentia Beach",
+   "org_type": "Municipality",
+   "accreditation_number": "M000271",
+   "city_listed": "Ma-me-o Beach",
+   "disciplines": {
+    "Building": "2748",
+    "Electrical": "2745",
+    "Fire": "2216",
+    "Gas": "2742",
+    "Plumbing": "2751"
+   }
+  },
+  {
+   "organization": "Summer Village of Birch Cove",
+   "org_type": "Municipality",
+   "accreditation_number": "M000380",
+   "city_listed": "Gunn",
+   "disciplines": {
+    "Building": "1508",
+    "Electrical": "1506",
+    "Fire": "2210",
+    "Gas": "1507",
+    "Plumbing": "1505"
+   }
+  },
+  {
+   "organization": "Summer Village of Birchcliff",
+   "org_type": "Municipality",
+   "accreditation_number": "M000443",
+   "city_listed": "Sylvan Lake",
+   "disciplines": {
+    "Building": "2383",
+    "Electrical": "2388",
+    "Gas": "2393",
+    "Plumbing": "2398"
+   }
+  },
+  {
+   "organization": "Summer Village of Bonnyville Beach",
+   "org_type": "Municipality",
+   "accreditation_number": "M000264",
+   "city_listed": "Bonnyville",
+   "disciplines": {
+    "Building": "2246",
+    "Electrical": "2373",
+    "Fire": "2252",
+    "Gas": "2338",
+    "Plumbing": "2332"
+   }
+  },
+  {
+   "organization": "Summer Village of Burnstick Lake",
+   "org_type": "Municipality",
+   "accreditation_number": "M000464",
+   "city_listed": "Caroline",
+   "disciplines": {
+    "Building": "1468",
+    "Electrical": "1467",
+    "Gas": "1466",
+    "Plumbing": "1465"
+   }
+  },
+  {
+   "organization": "Summer Village of Castle Island",
+   "org_type": "Municipality",
+   "accreditation_number": "M000429",
+   "city_listed": "St. Albert",
+   "disciplines": {
+    "Building": "1200",
+    "Electrical": "1199",
+    "Gas": "1198",
+    "Plumbing": "1197"
+   }
+  },
+  {
+   "organization": "Summer Village of Crystal Springs",
+   "org_type": "Municipality",
+   "accreditation_number": "M000267",
+   "city_listed": "Ma-me-o Beach",
+   "disciplines": {
+    "Building": "2501",
+    "Electrical": "2496",
+    "Fire": "2212",
+    "Gas": "2486",
+    "Plumbing": "2491"
+   }
+  },
+  {
+   "organization": "Summer Village of Golden Days",
+   "org_type": "Municipality",
+   "accreditation_number": "M000270",
+   "city_listed": "Ma-me-o Beach",
+   "disciplines": {
+    "Building": "2747",
+    "Electrical": "2744",
+    "Fire": "2215",
+    "Gas": "2741",
+    "Plumbing": "2750"
+   }
+  },
+  {
+   "organization": "Summer Village of Grandview",
+   "org_type": "Municipality",
+   "accreditation_number": "M000268",
+   "city_listed": "Ma-me-o Beach",
+   "disciplines": {
+    "Building": "2502",
+    "Electrical": "2497",
+    "Fire": "2213",
+    "Gas": "2487",
+    "Plumbing": "2492"
+   }
+  },
+  {
+   "organization": "Summer Village of Gull Lake",
+   "org_type": "Municipality",
+   "accreditation_number": "M000378",
+   "city_listed": "Lacombe",
+   "disciplines": {
+    "Building": "1133",
+    "Electrical": "1134",
+    "Fire": "2159",
+    "Gas": "1135",
+    "Plumbing": "1136"
+   }
+  },
+  {
+   "organization": "Summer Village of Half Moon Bay",
+   "org_type": "Municipality",
+   "accreditation_number": "M000444",
+   "city_listed": "Sylvan Lake",
+   "disciplines": {
+    "Building": "2384",
+    "Electrical": "2389",
+    "Gas": "2394",
+    "Plumbing": "2399"
+   }
+  },
+  {
+   "organization": "Summer Village of Island Lake",
+   "org_type": "Municipality",
+   "accreditation_number": "M000466",
+   "city_listed": "Alberta Beach",
+   "disciplines": {
+    "Building": "1513",
+    "Electrical": "1512",
+    "Gas": "1511",
+    "Plumbing": "1510"
+   }
+  },
+  {
+   "organization": "Summer Village of Island Lake South",
+   "org_type": "Municipality",
+   "accreditation_number": "M000467",
+   "city_listed": "Sherwood Park",
+   "disciplines": {
+    "Building": "1518",
+    "Electrical": "1516",
+    "Gas": "1517",
+    "Plumbing": "1515"
+   }
+  },
+  {
+   "organization": "Summer Village of Itaska Beach",
+   "org_type": "Municipality",
+   "accreditation_number": "M000395",
+   "city_listed": "Wetaskiwin",
+   "disciplines": {
+    "Building": "2504",
+    "Electrical": "2499",
+    "Fire": "2220",
+    "Gas": "2489",
+    "Plumbing": "2494"
+   }
+  },
+  {
+   "organization": "Summer Village of Jarvis Bay",
+   "org_type": "Municipality",
+   "accreditation_number": "M000445",
+   "city_listed": "Sylvan Lake",
+   "disciplines": {
+    "Building": "2385",
+    "Electrical": "2390",
+    "Gas": "2395",
+    "Plumbing": "2400"
+   }
+  },
+  {
+   "organization": "Summer Village of Kapasiwin",
+   "org_type": "Municipality",
+   "accreditation_number": "M000465",
+   "city_listed": "Onoway",
+   "disciplines": {
+    "Building": "1473",
+    "Electrical": "1472",
+    "Gas": "1471",
+    "Plumbing": "1470"
+   }
+  },
+  {
+   "organization": "Summer Village of Lakeview",
+   "org_type": "Municipality",
+   "accreditation_number": "M000463",
+   "city_listed": "Seba Beach",
+   "disciplines": {
+    "Building": "1456",
+    "Electrical": "1455",
+    "Gas": "1454",
+    "Plumbing": "1453"
+   }
+  },
+  {
+   "organization": "Summer Village of Ma-Me-O Beach",
+   "org_type": "Municipality",
+   "accreditation_number": "M000266",
+   "city_listed": "Ma-me-o Beach",
+   "disciplines": {
+    "Building": "2500",
+    "Electrical": "2495",
+    "Fire": "2211",
+    "Gas": "2485",
+    "Plumbing": "2490"
+   }
+  },
+  {
+   "organization": "Summer Village of Mewatha Beach",
+   "org_type": "Municipality",
+   "accreditation_number": "M000293",
+   "city_listed": "Plamondon",
+   "disciplines": {
+    "Building": "2564",
+    "Electrical": "2565",
+    "Gas": "2566",
+    "Plumbing": "2567"
+   }
+  },
+  {
+   "organization": "Summer Village of Nakamun Park",
+   "org_type": "Municipality",
+   "accreditation_number": "M000459",
+   "city_listed": "Onoway",
+   "disciplines": {
+    "Building": "1390",
+    "Electrical": "1389",
+    "Gas": "1388",
+    "Plumbing": "1387"
+   }
+  },
+  {
+   "organization": "Summer Village of Norglenwold",
+   "org_type": "Municipality",
+   "accreditation_number": "M000446",
+   "city_listed": "Sylvan Lake",
+   "disciplines": {
+    "Building": "2386",
+    "Electrical": "2391",
+    "Gas": "2396",
+    "Plumbing": "2401"
+   }
+  },
+  {
+   "organization": "Summer Village of Norris Beach",
+   "org_type": "Municipality",
+   "accreditation_number": "M000398",
+   "city_listed": "Ma-me-o Beach",
+   "disciplines": {
+    "Building": "2749",
+    "Electrical": "2746",
+    "Gas": "2743",
+    "Plumbing": "2752"
+   }
+  },
+  {
+   "organization": "Summer Village of Parkland Beach",
+   "org_type": "Municipality",
+   "accreditation_number": "M000454",
+   "city_listed": "Rimbey",
+   "disciplines": {
+    "Building": "1242",
+    "Electrical": "1241",
+    "Fire": "2963",
+    "Gas": "1240",
+    "Plumbing": "1239"
+   }
+  },
+  {
+   "organization": "Summer Village of Pelican Narrows",
+   "org_type": "Municipality",
+   "accreditation_number": "M000265",
+   "city_listed": "Bonnyville",
+   "disciplines": {
+    "Building": "2247",
+    "Electrical": "2374",
+    "Fire": "2253",
+    "Gas": "2339",
+    "Plumbing": "2333"
+   }
+  },
+  {
+   "organization": "Summer Village of Poplar Bay",
+   "org_type": "Municipality",
+   "accreditation_number": "M000269",
+   "city_listed": "Ma-me-o Beach",
+   "disciplines": {
+    "Building": "2503",
+    "Electrical": "2498",
+    "Fire": "2214",
+    "Gas": "2488",
+    "Plumbing": "2493"
+   }
+  },
+  {
+   "organization": "Summer Village of Rochon Sands",
+   "org_type": "Municipality",
+   "accreditation_number": "M000175",
+   "city_listed": "Rochon Sands",
+   "disciplines": {
+    "Building": "2418",
+    "Electrical": "2420",
+    "Fire": "2037",
+    "Gas": "2422",
+    "Plumbing": "2424"
+   }
+  },
+  {
+   "organization": "Summer Village of Ross Haven",
+   "org_type": "Municipality",
+   "accreditation_number": "M000298",
+   "city_listed": "Gunn",
+   "disciplines": {
+    "Building": "1230",
+    "Electrical": "1231",
+    "Gas": "1232",
+    "Plumbing": "1233"
+   }
+  },
+  {
+   "organization": "Summer Village of Sandy Beach",
+   "org_type": "Municipality",
+   "accreditation_number": "M000364",
+   "city_listed": "Onoway",
+   "disciplines": {
+    "Building": "1481",
+    "Electrical": "1480",
+    "Gas": "1479",
+    "Plumbing": "1478"
+   }
+  },
+  {
+   "organization": "Summer Village of Seba Beach",
+   "org_type": "Municipality",
+   "accreditation_number": "M000317",
+   "city_listed": "Seba Beach",
+   "disciplines": {
+    "Building": "1163",
+    "Electrical": "1162",
+    "Gas": "1161",
+    "Plumbing": "1160"
+   }
+  },
+  {
+   "organization": "Summer Village of Silver Beach",
+   "org_type": "Municipality",
+   "accreditation_number": "M000272",
+   "city_listed": "Thorsby",
+   "disciplines": {
+    "Building": "1283",
+    "Electrical": "1282",
+    "Fire": "2217",
+    "Gas": "1280",
+    "Plumbing": "1279"
+   }
+  },
+  {
+   "organization": "Summer Village of Silver Sands",
+   "org_type": "Municipality",
+   "accreditation_number": "M000301",
+   "city_listed": "Alberta Beach",
+   "disciplines": {
+    "Building": "1293",
+    "Electrical": "1294",
+    "Gas": "1295",
+    "Plumbing": "1296"
+   }
+  },
+  {
+   "organization": "Summer Village of South Baptiste",
+   "org_type": "Municipality",
+   "accreditation_number": "M000304",
+   "city_listed": "Edmonton",
+   "disciplines": {
+    "Building": "1503",
+    "Electrical": "1502",
+    "Gas": "1501",
+    "Plumbing": "1500"
+   }
+  },
+  {
+   "organization": "Summer Village of South View",
+   "org_type": "Municipality",
+   "accreditation_number": "M000305",
+   "city_listed": "Alberta Beach",
+   "disciplines": {
+    "Building": "1304",
+    "Electrical": "1303",
+    "Gas": "1302",
+    "Plumbing": "1301"
+   }
+  },
+  {
+   "organization": "Summer Village of Sunbreaker Cove",
+   "org_type": "Municipality",
+   "accreditation_number": "M000447",
+   "city_listed": "Sylvan Lake",
+   "disciplines": {
+    "Building": "2387",
+    "Electrical": "2392",
+    "Gas": "2397",
+    "Plumbing": "2402"
+   }
+  },
+  {
+   "organization": "Summer Village of Sundance Beach",
+   "org_type": "Municipality",
+   "accreditation_number": "M000439",
+   "city_listed": "Thorsby",
+   "disciplines": {
+    "Building": "928",
+    "Electrical": "929",
+    "Gas": "930",
+    "Plumbing": "931"
+   }
+  },
+  {
+   "organization": "Summer Village of Sunrise Beach",
+   "org_type": "Municipality",
+   "accreditation_number": "M000353",
+   "city_listed": "Onoway",
+   "disciplines": {
+    "Building": "1477",
+    "Electrical": "1476",
+    "Gas": "1475",
+    "Plumbing": "1474"
+   }
+  },
+  {
+   "organization": "Summer Village of Sunset Beach",
+   "org_type": "Municipality",
+   "accreditation_number": "M000455",
+   "city_listed": "Sherwood Park",
+   "disciplines": {
+    "Building": "2844",
+    "Electrical": "2845",
+    "Gas": "2846",
+    "Plumbing": "2847"
+   }
+  },
+  {
+   "organization": "Summer Village of Val Quentin",
+   "org_type": "Municipality",
+   "accreditation_number": "M000309",
+   "city_listed": "Spruce Grove",
+   "disciplines": {
+    "Building": "1088",
+    "Electrical": "1089",
+    "Gas": "1090",
+    "Plumbing": "1091"
+   }
+  },
+  {
+   "organization": "Summer Village of West Cove",
+   "org_type": "Municipality",
+   "accreditation_number": "M000314",
+   "city_listed": "West Cove",
+   "disciplines": {
+    "Building": "1300",
+    "Electrical": "1299",
+    "Gas": "1298",
+    "Plumbing": "1297"
+   }
+  },
+  {
+   "organization": "Summer Village of Whispering Hills",
+   "org_type": "Municipality",
+   "accreditation_number": "M000456",
+   "city_listed": "Sherwood Park",
+   "disciplines": {
+    "Building": "2848",
+    "Electrical": "2849",
+    "Gas": "2850",
+    "Plumbing": "2851"
+   }
+  },
+  {
+   "organization": "Summer Village of White Sands",
+   "org_type": "Municipality",
+   "accreditation_number": "M000176",
+   "city_listed": "Stettler",
+   "disciplines": {
+    "Building": "2419",
+    "Electrical": "2421",
+    "Fire": "2038",
+    "Gas": "2423",
+    "Plumbing": "2425"
+   }
+  },
+  {
+   "organization": "Thorhild County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000255",
+   "city_listed": "Thorhild",
+   "disciplines": {
+    "Building": "1246",
+    "Electrical": "1245",
+    "Gas": "1244",
+    "Plumbing": "1243"
+   }
+  },
+  {
+   "organization": "Town of Athabasca",
+   "org_type": "Municipality",
+   "accreditation_number": "M000191",
+   "city_listed": "Athabasca",
+   "disciplines": {
+    "Building": "1208",
+    "Electrical": "1207",
+    "Gas": "1206",
+    "Plumbing": "1205"
+   }
+  },
+  {
+   "organization": "Town of Banff",
+   "org_type": "Municipality",
+   "accreditation_number": "M000396",
+   "city_listed": "Banff",
+   "disciplines": {
+    "Building": "542",
+    "Fire": "543"
+   }
+  },
+  {
+   "organization": "Town of Barrhead",
+   "org_type": "Municipality",
+   "accreditation_number": "M000280",
+   "city_listed": "Barrhead",
+   "disciplines": {
+    "Fire": "2208"
+   }
+  },
+  {
+   "organization": "Town of Bashaw",
+   "org_type": "Municipality",
+   "accreditation_number": "M000326",
+   "city_listed": "Bashaw",
+   "disciplines": {
+    "Building": "397",
+    "Electrical": "762",
+    "Fire": "396",
+    "Gas": "743",
+    "Plumbing": "742"
+   }
+  },
+  {
+   "organization": "Town of Bassano",
+   "org_type": "Municipality",
+   "accreditation_number": "M000192",
+   "city_listed": "Bassano",
+   "disciplines": {
+    "Building": "591",
+    "Electrical": "2686",
+    "Fire": "2256",
+    "Gas": "2687",
+    "Plumbing": "2688"
+   }
+  },
+  {
+   "organization": "Town of Beaverlodge",
+   "org_type": "Municipality",
+   "accreditation_number": "M000124",
+   "city_listed": "Beaverlodge",
+   "disciplines": {
+    "Building": "2925",
+    "Electrical": "2926",
+    "Gas": "2927",
+    "Plumbing": "2928"
+   }
+  },
+  {
+   "organization": "Town of Bentley",
+   "org_type": "Municipality",
+   "accreditation_number": "M000377",
+   "city_listed": "Bentley",
+   "disciplines": {
+    "Fire": "2158"
+   }
+  },
+  {
+   "organization": "Town of Blackfalds",
+   "org_type": "Municipality",
+   "accreditation_number": "M000388",
+   "city_listed": "Blackfalds",
+   "disciplines": {
+    "Building": "514",
+    "Electrical": "1105",
+    "Fire": "515",
+    "Gas": "1106",
+    "Plumbing": "1107"
+   }
+  },
+  {
+   "organization": "Town of Bon Accord",
+   "org_type": "Municipality",
+   "accreditation_number": "M000366",
+   "city_listed": "Bon Accord",
+   "disciplines": {
+    "Building": "2134",
+    "Electrical": "2405",
+    "Fire": "2129",
+    "Gas": "2410",
+    "Plumbing": "2415"
+   }
+  },
+  {
+   "organization": "Town of Bonnyville",
+   "org_type": "Municipality",
+   "accreditation_number": "M000260",
+   "city_listed": "Bonnyville",
+   "disciplines": {
+    "Building": "2243",
+    "Electrical": "2370",
+    "Fire": "2249",
+    "Gas": "2335",
+    "Plumbing": "2329"
+   }
+  },
+  {
+   "organization": "Town of Bow Island",
+   "org_type": "Municipality",
+   "accreditation_number": "M000158",
+   "city_listed": "Bow Island",
+   "disciplines": {
+    "Building": "581",
+    "Electrical": "1393",
+    "Fire": "2922",
+    "Gas": "1392",
+    "Plumbing": "1391"
+   }
+  },
+  {
+   "organization": "Town of Bowden",
+   "org_type": "Municipality",
+   "accreditation_number": "M000393",
+   "city_listed": "Bowden",
+   "disciplines": {
+    "Building": "2999",
+    "Electrical": "2997",
+    "Fire": "2995",
+    "Gas": "2993",
+    "Plumbing": "2991"
+   }
+  },
+  {
+   "organization": "Town of Bruderheim",
+   "org_type": "Municipality",
+   "accreditation_number": "M000389",
+   "city_listed": "Bruderheim",
+   "disciplines": {
+    "Building": "1237",
+    "Electrical": "1236",
+    "Fire": "2149",
+    "Gas": "1235",
+    "Plumbing": "1234"
+   }
+  },
+  {
+   "organization": "Town of Calmar",
+   "org_type": "Municipality",
+   "accreditation_number": "M000416",
+   "city_listed": "Calmar",
+   "disciplines": {
+    "Building": "635",
+    "Electrical": "1328",
+    "Fire": "636",
+    "Gas": "1327",
+    "Plumbing": "1326"
+   }
+  },
+  {
+   "organization": "Town of Canmore",
+   "org_type": "Municipality",
+   "accreditation_number": "M000152",
+   "city_listed": "Canmore",
+   "disciplines": {
+    "Building": "532",
+    "Fire": "333"
+   }
+  },
+  {
+   "organization": "Town of Cardston",
+   "org_type": "Municipality",
+   "accreditation_number": "M000418",
+   "city_listed": "Cardston",
+   "disciplines": {
+    "Building": "651",
+    "Electrical": "832",
+    "Fire": "2261",
+    "Gas": "1102",
+    "Plumbing": "1103"
+   }
+  },
+  {
+   "organization": "Town of Carstairs",
+   "org_type": "Municipality",
+   "accreditation_number": "M000219",
+   "city_listed": "Carstairs",
+   "disciplines": {
+    "Building": "522",
+    "Electrical": "3057",
+    "Fire": "2778",
+    "Gas": "3058",
+    "Plumbing": "3059"
+   }
+  },
+  {
+   "organization": "Town of Castor",
+   "org_type": "Municipality",
+   "accreditation_number": "M000339",
+   "city_listed": "Castor",
+   "disciplines": {
+    "Building": "2094",
+    "Electrical": "2011",
+    "Fire": "2914",
+    "Gas": "2073",
+    "Plumbing": "2050"
+   }
+  },
+  {
+   "organization": "Town of Claresholm",
+   "org_type": "Municipality",
+   "accreditation_number": "M000216",
+   "city_listed": "Claresholm",
+   "disciplines": {
+    "Building": "508",
+    "Electrical": "2529",
+    "Fire": "509",
+    "Gas": "2527",
+    "Plumbing": "2528"
+   }
+  },
+  {
+   "organization": "Town of Coaldale",
+   "org_type": "Municipality",
+   "accreditation_number": "M000328",
+   "city_listed": "Coaldale",
+   "disciplines": {
+    "Building": "433",
+    "Electrical": "837",
+    "Fire": "412",
+    "Gas": "675",
+    "Plumbing": "676"
+   }
+  },
+  {
+   "organization": "Town of Coalhurst",
+   "org_type": "Municipality",
+   "accreditation_number": "M000387",
+   "city_listed": "Coalhurst",
+   "disciplines": {
+    "Building": "3010",
+    "Electrical": "3011",
+    "Fire": "641",
+    "Gas": "3012",
+    "Plumbing": "3013"
+   }
+  },
+  {
+   "organization": "Town of Cochrane",
+   "org_type": "Municipality",
+   "accreditation_number": "M000184",
+   "city_listed": "Cochrane",
+   "disciplines": {
+    "Building": "511",
+    "Electrical": "749",
+    "Fire": "510",
+    "Gas": "714",
+    "Plumbing": "713"
+   }
+  },
+  {
+   "organization": "Town of Coronation",
+   "org_type": "Municipality",
+   "accreditation_number": "M000214",
+   "city_listed": "Coronation",
+   "disciplines": {
+    "Building": "2086",
+    "Electrical": "2002",
+    "Fire": "521",
+    "Gas": "2064",
+    "Plumbing": "2041"
+   }
+  },
+  {
+   "organization": "Town of Crossfield",
+   "org_type": "Municipality",
+   "accreditation_number": "M000134",
+   "city_listed": "Crossfield",
+   "disciplines": {
+    "Building": "683",
+    "Electrical": "883",
+    "Fire": "684",
+    "Gas": "727",
+    "Plumbing": "726"
+   }
+  },
+  {
+   "organization": "Town of Daysland",
+   "org_type": "Municipality",
+   "accreditation_number": "M000245",
+   "city_listed": "Daysland",
+   "disciplines": {
+    "Building": "2113",
+    "Electrical": "2314",
+    "Fire": "2123",
+    "Gas": "2302",
+    "Plumbing": "2292"
+   }
+  },
+  {
+   "organization": "Town of Devon",
+   "org_type": "Municipality",
+   "accreditation_number": "M000284",
+   "city_listed": "Devon",
+   "disciplines": {
+    "Building": "1185",
+    "Electrical": "1188",
+    "Fire": "1184",
+    "Gas": "1187",
+    "Plumbing": "1186"
+   }
+  },
+  {
+   "organization": "Town of Diamond Valley",
+   "org_type": "Municipality",
+   "accreditation_number": "M124954",
+   "city_listed": "Black Diamond",
+   "disciplines": {
+    "Building": "79842054",
+    "Electrical": "79842055",
+    "Fire": "79842056",
+    "Gas": "79842053",
+    "Plumbing": "79842057"
+   }
+  },
+  {
+   "organization": "Town of Didsbury",
+   "org_type": "Municipality",
+   "accreditation_number": "M000205",
+   "city_listed": "Didsbury",
+   "disciplines": {
+    "Building": "311",
+    "Electrical": "1411",
+    "Fire": "261",
+    "Gas": "1412",
+    "Plumbing": "1413"
+   }
+  },
+  {
+   "organization": "Town of Drayton Valley",
+   "org_type": "Municipality",
+   "accreditation_number": "M000131",
+   "city_listed": "Drayton Valley",
+   "disciplines": {
+    "Building": "369",
+    "Fire": "2142"
+   }
+  },
+  {
+   "organization": "Town of Drumheller",
+   "org_type": "Municipality",
+   "accreditation_number": "M000126",
+   "city_listed": "Drumheller",
+   "disciplines": {
+    "Building": "1330",
+    "Electrical": "393",
+    "Fire": "170",
+    "Gas": "169",
+    "Plumbing": "168"
+   }
+  },
+  {
+   "organization": "Town of Eckville",
+   "org_type": "Municipality",
+   "accreditation_number": "M000180",
+   "city_listed": "Eckville",
+   "disciplines": {
+    "Building": "324",
+    "Electrical": "2877",
+    "Fire": "2153",
+    "Gas": "2878",
+    "Plumbing": "2879"
+   }
+  },
+  {
+   "organization": "Town of Edson",
+   "org_type": "Municipality",
+   "accreditation_number": "M000276",
+   "city_listed": "Edson",
+   "disciplines": {
+    "Fire": "463"
+   }
+  },
+  {
+   "organization": "Town of Elk Point",
+   "org_type": "Municipality",
+   "accreditation_number": "M000150",
+   "city_listed": "Elk Point",
+   "disciplines": {
+    "Building": "580",
+    "Electrical": "853",
+    "Fire": "371",
+    "Gas": "729",
+    "Plumbing": "728"
+   }
+  },
+  {
+   "organization": "Town of Fairview",
+   "org_type": "Municipality",
+   "accreditation_number": "M000452",
+   "city_listed": "Fairview",
+   "disciplines": {
+    "Building": "3007"
+   }
+  },
+  {
+   "organization": "Town of Falher",
+   "org_type": "Municipality",
+   "accreditation_number": "M000384",
+   "city_listed": "Falher",
+   "disciplines": {
+    "Fire": "2138"
+   }
+  },
+  {
+   "organization": "Town of Fort Macleod",
+   "org_type": "Municipality",
+   "accreditation_number": "M000356",
+   "city_listed": "Fort Macleod",
+   "disciplines": {
+    "Building": "1116",
+    "Electrical": "2601",
+    "Fire": "630",
+    "Gas": "2599",
+    "Plumbing": "2600"
+   }
+  },
+  {
+   "organization": "Town of Fox Creek",
+   "org_type": "Municipality",
+   "accreditation_number": "M000324",
+   "city_listed": "Fox Creek",
+   "disciplines": {
+    "Building": "1425",
+    "Electrical": "1426",
+    "Fire": "488",
+    "Gas": "1427",
+    "Plumbing": "1428"
+   }
+  },
+  {
+   "organization": "Town of Gibbons",
+   "org_type": "Municipality",
+   "accreditation_number": "M000117",
+   "city_listed": "Gibbons",
+   "disciplines": {
+    "Building": "2132",
+    "Electrical": "2403",
+    "Fire": "2127",
+    "Gas": "2408",
+    "Plumbing": "2413"
+   }
+  },
+  {
+   "organization": "Town of Grimshaw",
+   "org_type": "Municipality",
+   "accreditation_number": "M000352",
+   "city_listed": "Grimshaw",
+   "disciplines": {
+    "Fire": "623"
+   }
+  },
+  {
+   "organization": "Town of Hanna",
+   "org_type": "Municipality",
+   "accreditation_number": "M000213",
+   "city_listed": "Hanna",
+   "disciplines": {
+    "Building": "2699",
+    "Electrical": "2001",
+    "Fire": "379",
+    "Gas": "2063",
+    "Plumbing": "2040"
+   }
+  },
+  {
+   "organization": "Town of Hardisty",
+   "org_type": "Municipality",
+   "accreditation_number": "M000246",
+   "city_listed": "Hardisty",
+   "disciplines": {
+    "Building": "2940",
+    "Electrical": "2943",
+    "Fire": "2124",
+    "Gas": "2942",
+    "Plumbing": "2941"
+   }
+  },
+  {
+   "organization": "Town of High Level",
+   "org_type": "Municipality",
+   "accreditation_number": "M000394",
+   "city_listed": "High Level",
+   "disciplines": {
+    "Building": "434",
+    "Electrical": "1040",
+    "Fire": "649",
+    "Gas": "1041",
+    "Plumbing": "1042"
+   }
+  },
+  {
+   "organization": "Town of High Prairie",
+   "org_type": "Municipality",
+   "accreditation_number": "M000379",
+   "city_listed": "High Prairie",
+   "disciplines": {
+    "Building": "471",
+    "Fire": "2668"
+   }
+  },
+  {
+   "organization": "Town of High River",
+   "org_type": "Municipality",
+   "accreditation_number": "M000327",
+   "city_listed": "High River",
+   "disciplines": {
+    "Building": "518",
+    "Electrical": "950",
+    "Fire": "648",
+    "Gas": "952",
+    "Plumbing": "951"
+   }
+  },
+  {
+   "organization": "Town of Hinton",
+   "org_type": "Municipality",
+   "accreditation_number": "M000125",
+   "city_listed": "Hinton",
+   "disciplines": {
+    "Building": "79842037",
+    "Electrical": "79842038",
+    "Fire": "334",
+    "Gas": "79842039",
+    "Plumbing": "79842040"
+   }
+  },
+  {
+   "organization": "Town of Innisfail",
+   "org_type": "Municipality",
+   "accreditation_number": "M000139",
+   "city_listed": "Innisfail",
+   "disciplines": {
+    "Building": "190",
+    "Electrical": "678",
+    "Fire": "189",
+    "Gas": "188",
+    "Plumbing": "187"
+   }
+  },
+  {
+   "organization": "Town of Irricana",
+   "org_type": "Municipality",
+   "accreditation_number": "M000363",
+   "city_listed": "Irricana",
+   "disciplines": {
+    "Building": "2591",
+    "Electrical": "2592",
+    "Fire": "2593",
+    "Gas": "2594",
+    "Plumbing": "2595"
+   }
+  },
+  {
+   "organization": "Town of Killam",
+   "org_type": "Municipality",
+   "accreditation_number": "M000247",
+   "city_listed": "Killam",
+   "disciplines": {
+    "Building": "2114",
+    "Electrical": "2315",
+    "Fire": "2125",
+    "Gas": "2303",
+    "Plumbing": "2293"
+   }
+  },
+  {
+   "organization": "Town of Lamont",
+   "org_type": "Municipality",
+   "accreditation_number": "M000290",
+   "city_listed": "Lamont",
+   "disciplines": {
+    "Building": "1052",
+    "Electrical": "1053",
+    "Fire": "2146",
+    "Gas": "1054",
+    "Plumbing": "1055"
+   }
+  },
+  {
+   "organization": "Town of Legal",
+   "org_type": "Municipality",
+   "accreditation_number": "M000368",
+   "city_listed": "Legal",
+   "disciplines": {
+    "Building": "2136",
+    "Electrical": "2407",
+    "Fire": "2131",
+    "Gas": "2412",
+    "Plumbing": "2417"
+   }
+  },
+  {
+   "organization": "Town of Magrath",
+   "org_type": "Municipality",
+   "accreditation_number": "M000420",
+   "city_listed": "Magrath",
+   "disciplines": {
+    "Building": "824",
+    "Electrical": "870",
+    "Fire": "2263",
+    "Gas": "825",
+    "Plumbing": "826"
+   }
+  },
+  {
+   "organization": "Town of Manning",
+   "org_type": "Municipality",
+   "accreditation_number": "M000143",
+   "city_listed": "Manning",
+   "disciplines": {
+    "Fire": "1357"
+   }
+  },
+  {
+   "organization": "Town of Mclennan",
+   "org_type": "Municipality",
+   "accreditation_number": "M000450",
+   "city_listed": "Mclennan",
+   "disciplines": {
+    "Fire": "2141"
+   }
+  },
+  {
+   "organization": "Town of Milk River",
+   "org_type": "Municipality",
+   "accreditation_number": "M000402",
+   "city_listed": "Milk River",
+   "disciplines": {
+    "Building": "653",
+    "Electrical": "1386",
+    "Gas": "1385",
+    "Plumbing": "1384"
+   }
+  },
+  {
+   "organization": "Town of Millet",
+   "org_type": "Municipality",
+   "accreditation_number": "M000294",
+   "city_listed": "Millet",
+   "disciplines": {
+    "Building": "1256",
+    "Electrical": "1257",
+    "Fire": "2219",
+    "Gas": "1258",
+    "Plumbing": "1259"
+   }
+  },
+  {
+   "organization": "Town of Morinville",
+   "org_type": "Municipality",
+   "accreditation_number": "M000119",
+   "city_listed": "Morinville",
+   "disciplines": {
+    "Building": "1338",
+    "Electrical": "1337",
+    "Fire": "1375",
+    "Gas": "1336",
+    "Plumbing": "1335"
+   }
+  },
+  {
+   "organization": "Town of Mundare",
+   "org_type": "Municipality",
+   "accreditation_number": "M000295",
+   "city_listed": "Mundare",
+   "disciplines": {
+    "Building": "1175",
+    "Electrical": "1174",
+    "Fire": "2147",
+    "Gas": "1173",
+    "Plumbing": "1172"
+   }
+  },
+  {
+   "organization": "Town of Nanton",
+   "org_type": "Municipality",
+   "accreditation_number": "M000296",
+   "city_listed": "Nanton",
+   "disciplines": {
+    "Building": "2779",
+    "Electrical": "2799",
+    "Fire": "2281",
+    "Gas": "2798",
+    "Plumbing": "2795"
+   }
+  },
+  {
+   "organization": "Town of Nobleford",
+   "org_type": "Municipality",
+   "accreditation_number": "M000408",
+   "city_listed": "Nobleford",
+   "disciplines": {
+    "Building": "672",
+    "Electrical": "851",
+    "Gas": "673",
+    "Plumbing": "674"
+   }
+  },
+  {
+   "organization": "Town of Okotoks",
+   "org_type": "Municipality",
+   "accreditation_number": "M000188",
+   "city_listed": "Okotoks",
+   "disciplines": {
+    "Building": "516",
+    "Electrical": "777",
+    "Fire": "517",
+    "Gas": "734",
+    "Plumbing": "733"
+   }
+  },
+  {
+   "organization": "Town of Olds",
+   "org_type": "Municipality",
+   "accreditation_number": "M000167",
+   "city_listed": "Olds",
+   "disciplines": {
+    "Building": "592",
+    "Fire": "593"
+   }
+  },
+  {
+   "organization": "Town of Onoway",
+   "org_type": "Municipality",
+   "accreditation_number": "M000297",
+   "city_listed": "Onoway",
+   "disciplines": {
+    "Building": "2540",
+    "Electrical": "2541",
+    "Gas": "2542",
+    "Plumbing": "2543"
+   }
+  },
+  {
+   "organization": "Town of Oyen",
+   "org_type": "Municipality",
+   "accreditation_number": "M000321",
+   "city_listed": "Oyen",
+   "disciplines": {
+    "Building": "2700",
+    "Electrical": "2003",
+    "Fire": "394",
+    "Gas": "2065",
+    "Plumbing": "2042"
+   }
+  },
+  {
+   "organization": "Town of Peace River",
+   "org_type": "Municipality",
+   "accreditation_number": "M000193",
+   "city_listed": "Peace River",
+   "disciplines": {
+    "Building": "647",
+    "Fire": "455"
+   }
+  },
+  {
+   "organization": "Town of Penhold",
+   "org_type": "Municipality",
+   "accreditation_number": "M000274",
+   "city_listed": "Penhold",
+   "disciplines": {
+    "Building": "381",
+    "Electrical": "865",
+    "Fire": "622",
+    "Gas": "377",
+    "Plumbing": "317"
+   }
+  },
+  {
+   "organization": "Town of Picture Butte",
+   "org_type": "Municipality",
+   "accreditation_number": "M000409",
+   "city_listed": "Picture Butte",
+   "disciplines": {
+    "Building": "584",
+    "Electrical": "852",
+    "Fire": "585",
+    "Gas": "697",
+    "Plumbing": "696"
+   }
+  },
+  {
+   "organization": "Town of Pincher Creek",
+   "org_type": "Municipality",
+   "accreditation_number": "M000253",
+   "city_listed": "Pincher Creek",
+   "disciplines": {
+    "Building": "567",
+    "Electrical": "79842003",
+    "Fire": "566",
+    "Gas": "79842004",
+    "Plumbing": "79842005"
+   }
+  },
+  {
+   "organization": "Town of Ponoka",
+   "org_type": "Municipality",
+   "accreditation_number": "M000406",
+   "city_listed": "Ponoka",
+   "disciplines": {
+    "Building": "600",
+    "Electrical": "1418",
+    "Fire": "3065",
+    "Gas": "1419",
+    "Plumbing": "1420"
+   }
+  },
+  {
+   "organization": "Town of Provost",
+   "org_type": "Municipality",
+   "accreditation_number": "M000201",
+   "city_listed": "Provost",
+   "disciplines": {
+    "Building": "79842065",
+    "Electrical": "79842066",
+    "Fire": "79842067",
+    "Gas": "79842068",
+    "Plumbing": "79842069"
+   }
+  },
+  {
+   "organization": "Town of Raymond",
+   "org_type": "Municipality",
+   "accreditation_number": "M000403",
+   "city_listed": "Raymond",
+   "disciplines": {
+    "Building": "2349",
+    "Electrical": "2355",
+    "Gas": "2351",
+    "Plumbing": "2353"
+   }
+  },
+  {
+   "organization": "Town of Redcliff",
+   "org_type": "Municipality",
+   "accreditation_number": "M000254",
+   "city_listed": "Redcliff",
+   "disciplines": {
+    "Building": "3017",
+    "Electrical": "557",
+    "Fire": "555",
+    "Gas": "558",
+    "Plumbing": "559"
+   }
+  },
+  {
+   "organization": "Town of Redwater",
+   "org_type": "Municipality",
+   "accreditation_number": "M000367",
+   "city_listed": "Redwater",
+   "disciplines": {
+    "Building": "2135",
+    "Electrical": "2406",
+    "Fire": "2130",
+    "Gas": "2411",
+    "Plumbing": "2416"
+   }
+  },
+  {
+   "organization": "Town of Rimbey",
+   "org_type": "Municipality",
+   "accreditation_number": "M000160",
+   "city_listed": "Rimbey",
+   "disciplines": {
+    "Building": "540",
+    "Electrical": "1408",
+    "Fire": "2964",
+    "Gas": "1409",
+    "Plumbing": "1407"
+   }
+  },
+  {
+   "organization": "Town of Rocky Mountain House",
+   "org_type": "Municipality",
+   "accreditation_number": "M000100",
+   "city_listed": "Rocky Mountain House",
+   "disciplines": {
+    "Building": "108",
+    "Electrical": "79842034",
+    "Fire": "3081",
+    "Gas": "79842035",
+    "Plumbing": "79842036"
+   }
+  },
+  {
+   "organization": "Town of Sedgewick",
+   "org_type": "Municipality",
+   "accreditation_number": "M000248",
+   "city_listed": "Sedgewick",
+   "disciplines": {
+    "Building": "2115",
+    "Electrical": "2316",
+    "Fire": "2126",
+    "Gas": "2304",
+    "Plumbing": "2294"
+   }
+  },
+  {
+   "organization": "Town of Sexsmith",
+   "org_type": "Municipality",
+   "accreditation_number": "M000323",
+   "city_listed": "Sexsmith",
+   "disciplines": {
+    "Building": "458",
+    "Electrical": "2578",
+    "Fire": "459",
+    "Gas": "2579",
+    "Plumbing": "2580"
+   }
+  },
+  {
+   "organization": "Town of Slave Lake",
+   "org_type": "Municipality",
+   "accreditation_number": "M000427",
+   "city_listed": "Slave Lake",
+   "disciplines": {
+    "Fire": "686"
+   }
+  },
+  {
+   "organization": "Town of Smoky Lake",
+   "org_type": "Municipality",
+   "accreditation_number": "M000302",
+   "city_listed": "Smoky Lake",
+   "disciplines": {
+    "Building": "2482",
+    "Electrical": "2479",
+    "Gas": "2473",
+    "Plumbing": "2470"
+   }
+  },
+  {
+   "organization": "Town of Spirit River",
+   "org_type": "Municipality",
+   "accreditation_number": "M000220",
+   "city_listed": "Spirit River",
+   "disciplines": {
+    "Building": "869",
+    "Fire": "500"
+   }
+  },
+  {
+   "organization": "Town of St. Paul",
+   "org_type": "Municipality",
+   "accreditation_number": "M000138",
+   "city_listed": "St Paul",
+   "disciplines": {
+    "Building": "2559",
+    "Electrical": "2560",
+    "Fire": "2571",
+    "Gas": "2562",
+    "Plumbing": "2563"
+   }
+  },
+  {
+   "organization": "Town of Stavely",
+   "org_type": "Municipality",
+   "accreditation_number": "M000413",
+   "city_listed": "Stavely",
+   "disciplines": {
+    "Building": "601",
+    "Electrical": "1493",
+    "Fire": "2283",
+    "Gas": "1495",
+    "Plumbing": "1494"
+   }
+  },
+  {
+   "organization": "Town of Stettler",
+   "org_type": "Municipality",
+   "accreditation_number": "M000170",
+   "city_listed": "Stettler",
+   "disciplines": {
+    "Building": "332",
+    "Electrical": "2682",
+    "Fire": "2032",
+    "Gas": "2684",
+    "Plumbing": "2683"
+   }
+  },
+  {
+   "organization": "Town of Stony Plain",
+   "org_type": "Municipality",
+   "accreditation_number": "M000153",
+   "city_listed": "Stony Plain",
+   "disciplines": {
+    "Building": "523",
+    "Electrical": "1333",
+    "Fire": "524",
+    "Gas": "1332",
+    "Plumbing": "1331"
+   }
+  },
+  {
+   "organization": "Town of Strathmore",
+   "org_type": "Municipality",
+   "accreditation_number": "M000196",
+   "city_listed": "Strathmore",
+   "disciplines": {
+    "Building": "1557",
+    "Electrical": "1556",
+    "Fire": "1555",
+    "Gas": "1554",
+    "Plumbing": "1553"
+   }
+  },
+  {
+   "organization": "Town of Sundre",
+   "org_type": "Municipality",
+   "accreditation_number": "M000319",
+   "city_listed": "Sundre",
+   "disciplines": {
+    "Building": "519",
+    "Electrical": "2677",
+    "Fire": "520",
+    "Gas": "2678",
+    "Plumbing": "2679"
+   }
+  },
+  {
+   "organization": "Town of Swan Hills",
+   "org_type": "Municipality",
+   "accreditation_number": "M000259",
+   "city_listed": "Swan Hills",
+   "disciplines": {
+    "Building": "2840",
+    "Electrical": "2841",
+    "Fire": "628",
+    "Gas": "2842",
+    "Plumbing": "2843"
+   }
+  },
+  {
+   "organization": "Town of Sylvan Lake",
+   "org_type": "Municipality",
+   "accreditation_number": "M000355",
+   "city_listed": "Sylvan Lake",
+   "disciplines": {
+    "Building": "405",
+    "Electrical": "2603",
+    "Fire": "2584",
+    "Gas": "2604",
+    "Plumbing": "2605"
+   }
+  },
+  {
+   "organization": "Town of Taber",
+   "org_type": "Municipality",
+   "accreditation_number": "M000118",
+   "city_listed": "Taber",
+   "disciplines": {
+    "Building": "475",
+    "Electrical": "2572",
+    "Fire": "474",
+    "Gas": "2573",
+    "Plumbing": "2574"
+   }
+  },
+  {
+   "organization": "Town of Thorsby",
+   "org_type": "Municipality",
+   "accreditation_number": "M000372",
+   "city_listed": "Thorsby",
+   "disciplines": {
+    "Building": "538",
+    "Electrical": "1324",
+    "Fire": "539",
+    "Gas": "1323",
+    "Plumbing": "1322"
+   }
+  },
+  {
+   "organization": "Town of Three Hills",
+   "org_type": "Municipality",
+   "accreditation_number": "M000164",
+   "city_listed": "Three Hills",
+   "disciplines": {
+    "Building": "450",
+    "Electrical": "452",
+    "Fire": "451",
+    "Gas": "449",
+    "Plumbing": "448"
+   }
+  },
+  {
+   "organization": "Town of Tofield",
+   "org_type": "Municipality",
+   "accreditation_number": "M000307",
+   "city_listed": "Tofield",
+   "disciplines": {
+    "Building": "2456",
+    "Electrical": "2451",
+    "Gas": "2446",
+    "Plumbing": "2441"
+   }
+  },
+  {
+   "organization": "Town of Trochu",
+   "org_type": "Municipality",
+   "accreditation_number": "M000340",
+   "city_listed": "Trochu",
+   "disciplines": {
+    "Building": "2095",
+    "Electrical": "2012",
+    "Fire": "2317",
+    "Gas": "2074",
+    "Plumbing": "2051"
+   }
+  },
+  {
+   "organization": "Town of Two Hills",
+   "org_type": "Municipality",
+   "accreditation_number": "M000186",
+   "city_listed": "Two Hills",
+   "disciplines": {
+    "Building": "1489",
+    "Electrical": "1490",
+    "Gas": "1491",
+    "Plumbing": "1492"
+   }
+  },
+  {
+   "organization": "Town of Valleyview",
+   "org_type": "Municipality",
+   "accreditation_number": "M000451",
+   "city_listed": "Valleyview",
+   "disciplines": {
+    "Building": "1129",
+    "Electrical": "1130",
+    "Gas": "1131",
+    "Plumbing": "1132"
+   }
+  },
+  {
+   "organization": "Town of Vauxhall",
+   "org_type": "Municipality",
+   "accreditation_number": "M000258",
+   "city_listed": "Vauxhall",
+   "disciplines": {
+    "Building": "560",
+    "Fire": "2966"
+   }
+  },
+  {
+   "organization": "Town of Vegreville",
+   "org_type": "Municipality",
+   "accreditation_number": "M000190",
+   "city_listed": "Vegreville",
+   "disciplines": {
+    "Building": "617",
+    "Electrical": "1035",
+    "Fire": "618",
+    "Gas": "1036",
+    "Plumbing": "1037"
+   }
+  },
+  {
+   "organization": "Town of Vermilion",
+   "org_type": "Municipality",
+   "accreditation_number": "M000194",
+   "city_listed": "Vermilion",
+   "disciplines": {
+    "Building": "1421",
+    "Electrical": "1422",
+    "Fire": "1122",
+    "Gas": "1423",
+    "Plumbing": "1424"
+   }
+  },
+  {
+   "organization": "Town of Viking",
+   "org_type": "Municipality",
+   "accreditation_number": "M000311",
+   "city_listed": "Viking",
+   "disciplines": {
+    "Building": "2457",
+    "Electrical": "2452",
+    "Gas": "2447",
+    "Plumbing": "2442"
+   }
+  },
+  {
+   "organization": "Town of Vulcan",
+   "org_type": "Municipality",
+   "accreditation_number": "M000204",
+   "city_listed": "Vulcan",
+   "disciplines": {
+    "Building": "578",
+    "Electrical": "884",
+    "Fire": "2518",
+    "Gas": "702",
+    "Plumbing": "701"
+   }
+  },
+  {
+   "organization": "Town of Wainwright",
+   "org_type": "Municipality",
+   "accreditation_number": "M000208",
+   "city_listed": "Wainwright",
+   "disciplines": {
+    "Building": "368",
+    "Electrical": "2919",
+    "Fire": "2777",
+    "Gas": "2920",
+    "Plumbing": "2921"
+   }
+  },
+  {
+   "organization": "Town of Wembley",
+   "org_type": "Municipality",
+   "accreditation_number": "M000102",
+   "city_listed": "Wembley",
+   "disciplines": {
+    "Building": "116",
+    "Electrical": "2581",
+    "Fire": "79842079",
+    "Gas": "2583",
+    "Plumbing": "2582"
+   }
+  },
+  {
+   "organization": "Town of Westlock",
+   "org_type": "Municipality",
+   "accreditation_number": "M000128",
+   "city_listed": "Westlock",
+   "disciplines": {
+    "Building": "446",
+    "Electrical": "1060",
+    "Fire": "445",
+    "Gas": "447",
+    "Plumbing": "444"
+   }
+  },
+  {
+   "organization": "Town of Whitecourt",
+   "org_type": "Municipality",
+   "accreditation_number": "M000136",
+   "city_listed": "Whitecourt",
+   "disciplines": {
+    "Building": "342",
+    "Fire": "341"
+   }
+  },
+  {
+   "organization": "Village of Acme",
+   "org_type": "Municipality",
+   "accreditation_number": "M000341",
+   "city_listed": "Acme",
+   "disciplines": {
+    "Building": "2096",
+    "Electrical": "2013",
+    "Fire": "2318",
+    "Gas": "2075",
+    "Plumbing": "2052"
+   }
+  },
+  {
+   "organization": "Village of Alix",
+   "org_type": "Municipality",
+   "accreditation_number": "M000329",
+   "city_listed": "Alix",
+   "disciplines": {
+    "Fire": "2154"
+   }
+  },
+  {
+   "organization": "Village of Alliance",
+   "org_type": "Municipality",
+   "accreditation_number": "M000239",
+   "city_listed": "Alliance",
+   "disciplines": {
+    "Building": "2107",
+    "Electrical": "2308",
+    "Fire": "2117",
+    "Gas": "2296",
+    "Plumbing": "2286"
+   }
+  },
+  {
+   "organization": "Village of Amisk",
+   "org_type": "Municipality",
+   "accreditation_number": "M000359",
+   "city_listed": "Amisk",
+   "disciplines": {
+    "Building": "2426",
+    "Electrical": "2429",
+    "Fire": "2272",
+    "Gas": "2432",
+    "Plumbing": "2435"
+   }
+  },
+  {
+   "organization": "Village of Andrew",
+   "org_type": "Municipality",
+   "accreditation_number": "M000332",
+   "city_listed": "Andrew",
+   "disciplines": {
+    "Building": "637",
+    "Electrical": "923",
+    "Fire": "2148",
+    "Gas": "924",
+    "Plumbing": "925"
+   }
+  },
+  {
+   "organization": "Village of Arrowwood",
+   "org_type": "Municipality",
+   "accreditation_number": "M000278",
+   "city_listed": "Arrowwood",
+   "disciplines": {
+    "Building": "1216",
+    "Electrical": "1215",
+    "Gas": "1214",
+    "Plumbing": "1213"
+   }
+  },
+  {
+   "organization": "Village of Barnwell",
+   "org_type": "Municipality",
+   "accreditation_number": "M000913",
+   "city_listed": "Barnwell",
+   "disciplines": {
+    "Fire": "3049"
+   }
+  },
+  {
+   "organization": "Village of Barons",
+   "org_type": "Municipality",
+   "accreditation_number": "M000874",
+   "city_listed": "Barons",
+   "disciplines": {
+    "Fire": "2907"
+   }
+  },
+  {
+   "organization": "Village of Bawlf",
+   "org_type": "Municipality",
+   "accreditation_number": "M000230",
+   "city_listed": "Bawlf",
+   "disciplines": {
+    "Building": "2198",
+    "Electrical": "2189",
+    "Fire": "2180",
+    "Gas": "2171",
+    "Plumbing": "2162"
+   }
+  },
+  {
+   "organization": "Village of Beiseker",
+   "org_type": "Municipality",
+   "accreditation_number": "M000362",
+   "city_listed": "Beiseker",
+   "disciplines": {
+    "Building": "2586",
+    "Electrical": "2587",
+    "Fire": "2588",
+    "Gas": "2589",
+    "Plumbing": "2590"
+   }
+  },
+  {
+   "organization": "Village of Big Valley",
+   "org_type": "Municipality",
+   "accreditation_number": "M000171",
+   "city_listed": "Big Valley",
+   "disciplines": {
+    "Fire": "2033"
+   }
+  },
+  {
+   "organization": "Village of Bittern Lake",
+   "org_type": "Municipality",
+   "accreditation_number": "M000231",
+   "city_listed": "Bittern Lake",
+   "disciplines": {
+    "Building": "2199",
+    "Electrical": "2190",
+    "Fire": "2181",
+    "Gas": "2172",
+    "Plumbing": "2163"
+   }
+  },
+  {
+   "organization": "Village of Boyle",
+   "org_type": "Municipality",
+   "accreditation_number": "M000330",
+   "city_listed": "Boyle",
+   "disciplines": {
+    "Building": "1204",
+    "Electrical": "1203",
+    "Gas": "1202",
+    "Plumbing": "1201"
+   }
+  },
+  {
+   "organization": "Village of Breton",
+   "org_type": "Municipality",
+   "accreditation_number": "M000405",
+   "city_listed": "Breton",
+   "disciplines": {
+    "Fire": "2764"
+   }
+  },
+  {
+   "organization": "Village of Carbon",
+   "org_type": "Municipality",
+   "accreditation_number": "M000342",
+   "city_listed": "Carbon",
+   "disciplines": {
+    "Building": "2097",
+    "Electrical": "2014",
+    "Fire": "2319",
+    "Gas": "2076",
+    "Plumbing": "2053"
+   }
+  },
+  {
+   "organization": "Village of Carmangay",
+   "org_type": "Municipality",
+   "accreditation_number": "M000425",
+   "city_listed": "Carmangay",
+   "disciplines": {
+    "Fire": "2521"
+   }
+  },
+  {
+   "organization": "Village of Champion",
+   "org_type": "Municipality",
+   "accreditation_number": "M000431",
+   "city_listed": "Champion",
+   "disciplines": {
+    "Building": "1183",
+    "Electrical": "1182",
+    "Fire": "2522",
+    "Gas": "1181",
+    "Plumbing": "1180"
+   }
+  },
+  {
+   "organization": "Village of Chauvin",
+   "org_type": "Municipality",
+   "accreditation_number": "M000209",
+   "city_listed": "Chauvin",
+   "disciplines": {
+    "Fire": "2027"
+   }
+  },
+  {
+   "organization": "Village of Chipman",
+   "org_type": "Municipality",
+   "accreditation_number": "M000283",
+   "city_listed": "Chipman",
+   "disciplines": {
+    "Building": "1317",
+    "Electrical": "1316",
+    "Fire": "2145",
+    "Gas": "1315",
+    "Plumbing": "1314"
+   }
+  },
+  {
+   "organization": "Village of Clive",
+   "org_type": "Municipality",
+   "accreditation_number": "M000375",
+   "city_listed": "Clive",
+   "disciplines": {
+    "Building": "1504",
+    "Electrical": "2717",
+    "Fire": "2157",
+    "Gas": "2718",
+    "Plumbing": "2719"
+   }
+  },
+  {
+   "organization": "Village of Clyde",
+   "org_type": "Municipality",
+   "accreditation_number": "M000458",
+   "city_listed": "Clyde",
+   "disciplines": {
+    "Building": "1372",
+    "Electrical": "1371",
+    "Fire": "2675",
+    "Gas": "1370",
+    "Plumbing": "1369"
+   }
+  },
+  {
+   "organization": "Village of Consort",
+   "org_type": "Municipality",
+   "accreditation_number": "M000343",
+   "city_listed": "Consort",
+   "disciplines": {
+    "Building": "2098",
+    "Electrical": "2015",
+    "Fire": "632",
+    "Gas": "2077",
+    "Plumbing": "2054"
+   }
+  },
+  {
+   "organization": "Village of Cowley",
+   "org_type": "Municipality",
+   "accreditation_number": "M000354",
+   "city_listed": "Cowley",
+   "disciplines": {
+    "Fire": "411"
+   }
+  },
+  {
+   "organization": "Village of Cremona",
+   "org_type": "Municipality",
+   "accreditation_number": "M000390",
+   "city_listed": "Cremona",
+   "disciplines": {
+    "Building": "79842010",
+    "Electrical": "79842024",
+    "Fire": "79842012",
+    "Gas": "79842013",
+    "Plumbing": "79842014"
+   }
+  },
+  {
+   "organization": "Village of Czar",
+   "org_type": "Municipality",
+   "accreditation_number": "M000360",
+   "city_listed": "Czar",
+   "disciplines": {
+    "Building": "2427",
+    "Electrical": "2430",
+    "Fire": "2273",
+    "Gas": "2433",
+    "Plumbing": "2436"
+   }
+  },
+  {
+   "organization": "Village of Delburne",
+   "org_type": "Municipality",
+   "accreditation_number": "M000179",
+   "city_listed": "Delburne",
+   "disciplines": {
+    "Building": "1373",
+    "Electrical": "2596",
+    "Gas": "2597",
+    "Plumbing": "2598"
+   }
+  },
+  {
+   "organization": "Village of Delia",
+   "org_type": "Municipality",
+   "accreditation_number": "M000344",
+   "city_listed": "Delia",
+   "disciplines": {
+    "Building": "2099",
+    "Electrical": "2016",
+    "Fire": "2341",
+    "Gas": "2078",
+    "Plumbing": "2055"
+   }
+  },
+  {
+   "organization": "Village of Donalda",
+   "org_type": "Municipality",
+   "accreditation_number": "M000173",
+   "city_listed": "Donalda",
+   "disciplines": {
+    "Fire": "2035"
+   }
+  },
+  {
+   "organization": "Village of Donnelly",
+   "org_type": "Municipality",
+   "accreditation_number": "M000331",
+   "city_listed": "Donnelly",
+   "disciplines": {
+    "Fire": "2137"
+   }
+  },
+  {
+   "organization": "Village of Duchess",
+   "org_type": "Municipality",
+   "accreditation_number": "M000275",
+   "city_listed": "Duchess",
+   "disciplines": {
+    "Building": "582",
+    "Electrical": "901",
+    "Fire": "2257",
+    "Gas": "711",
+    "Plumbing": "710"
+   }
+  },
+  {
+   "organization": "Village of Edberg",
+   "org_type": "Municipality",
+   "accreditation_number": "M000232",
+   "city_listed": "Edberg",
+   "disciplines": {
+    "Building": "2200",
+    "Electrical": "2191",
+    "Fire": "2182",
+    "Gas": "2173",
+    "Plumbing": "2164"
+   }
+  },
+  {
+   "organization": "Village of Edgerton",
+   "org_type": "Municipality",
+   "accreditation_number": "M000210",
+   "city_listed": "Edgerton",
+   "disciplines": {
+    "Fire": "2028"
+   }
+  },
+  {
+   "organization": "Village of Elnora",
+   "org_type": "Municipality",
+   "accreditation_number": "M000154",
+   "city_listed": "Elnora",
+   "disciplines": {
+    "Building": "3029",
+    "Electrical": "3030",
+    "Fire": "3031",
+    "Gas": "3032",
+    "Plumbing": "3033"
+   }
+  },
+  {
+   "organization": "Village of Empress",
+   "org_type": "Municipality",
+   "accreditation_number": "M000345",
+   "city_listed": "Empress",
+   "disciplines": {
+    "Building": "2100",
+    "Electrical": "2017",
+    "Gas": "2079",
+    "Plumbing": "2056"
+   }
+  },
+  {
+   "organization": "Village of Forestburg",
+   "org_type": "Municipality",
+   "accreditation_number": "M000240",
+   "city_listed": "Forestburg",
+   "disciplines": {
+    "Building": "2108",
+    "Electrical": "2309",
+    "Fire": "2118",
+    "Gas": "2297",
+    "Plumbing": "2287"
+   }
+  },
+  {
+   "organization": "Village of Girouxville",
+   "org_type": "Municipality",
+   "accreditation_number": "M000385",
+   "city_listed": "Girouxville",
+   "disciplines": {
+    "Fire": "2139"
+   }
+  },
+  {
+   "organization": "Village of Glendon",
+   "org_type": "Municipality",
+   "accreditation_number": "M000262",
+   "city_listed": "Glendon",
+   "disciplines": {
+    "Building": "2245",
+    "Electrical": "2372",
+    "Fire": "2251",
+    "Gas": "2337",
+    "Plumbing": "2331"
+   }
+  },
+  {
+   "organization": "Village of Glenwood",
+   "org_type": "Municipality",
+   "accreditation_number": "M000423",
+   "city_listed": "Glenwood",
+   "disciplines": {
+    "Fire": "2264"
+   }
+  },
+  {
+   "organization": "Village of Hay Lakes",
+   "org_type": "Municipality",
+   "accreditation_number": "M000234",
+   "city_listed": "Hay Lakes",
+   "disciplines": {
+    "Building": "2202",
+    "Electrical": "2193",
+    "Fire": "2184",
+    "Gas": "2175",
+    "Plumbing": "2166"
+   }
+  },
+  {
+   "organization": "Village of Heisler",
+   "org_type": "Municipality",
+   "accreditation_number": "M000242",
+   "city_listed": "Heisler",
+   "disciplines": {
+    "Building": "2110",
+    "Electrical": "2311",
+    "Fire": "2120",
+    "Gas": "2299",
+    "Plumbing": "2289"
+   }
+  },
+  {
+   "organization": "Village of Hill Spring",
+   "org_type": "Municipality",
+   "accreditation_number": "M000424",
+   "city_listed": "Hill Spring",
+   "disciplines": {
+    "Fire": "2265"
+   }
+  },
+  {
+   "organization": "Village of Holden",
+   "org_type": "Municipality",
+   "accreditation_number": "M000287",
+   "city_listed": "Holden",
+   "disciplines": {
+    "Building": "2454",
+    "Electrical": "2449",
+    "Gas": "2444",
+    "Plumbing": "2439"
+   }
+  },
+  {
+   "organization": "Village of Hughenden",
+   "org_type": "Municipality",
+   "accreditation_number": "M000361",
+   "city_listed": "Hughenden",
+   "disciplines": {
+    "Building": "2973",
+    "Electrical": "2974",
+    "Fire": "2972",
+    "Gas": "2975",
+    "Plumbing": "2976"
+   }
+  },
+  {
+   "organization": "Village of Hussar",
+   "org_type": "Municipality",
+   "accreditation_number": "M000199",
+   "city_listed": "Hussar",
+   "disciplines": {
+    "Building": "2698",
+    "Electrical": "2706",
+    "Fire": "1552",
+    "Gas": "2702",
+    "Plumbing": "2704"
+   }
+  },
+  {
+   "organization": "Village of Innisfree",
+   "org_type": "Municipality",
+   "accreditation_number": "M000893",
+   "city_listed": "Innisfree",
+   "disciplines": {
+    "Fire": "79842047"
+   }
+  },
+  {
+   "organization": "Village of Irma",
+   "org_type": "Municipality",
+   "accreditation_number": "M000211",
+   "city_listed": "Irma",
+   "disciplines": {
+    "Building": "1457",
+    "Electrical": "1458",
+    "Fire": "2029",
+    "Gas": "1459",
+    "Plumbing": "1460"
+   }
+  },
+  {
+   "organization": "Village of Kitscoty",
+   "org_type": "Municipality",
+   "accreditation_number": "M000288",
+   "city_listed": "Kitscoty",
+   "disciplines": {
+    "Building": "1005",
+    "Electrical": "1006",
+    "Gas": "1007",
+    "Plumbing": "1008"
+   }
+  },
+  {
+   "organization": "Village of Linden",
+   "org_type": "Municipality",
+   "accreditation_number": "M000347",
+   "city_listed": "Linden",
+   "disciplines": {
+    "Building": "2102",
+    "Electrical": "2019",
+    "Fire": "2320",
+    "Gas": "2081",
+    "Plumbing": "2058"
+   }
+  },
+  {
+   "organization": "Village of Lomond",
+   "org_type": "Municipality",
+   "accreditation_number": "M000453",
+   "city_listed": "Lomond",
+   "disciplines": {
+    "Building": "1157",
+    "Electrical": "1156",
+    "Fire": "2523",
+    "Gas": "1155",
+    "Plumbing": "1154"
+   }
+  },
+  {
+   "organization": "Village of Longview",
+   "org_type": "Municipality",
+   "accreditation_number": "M000148",
+   "city_listed": "Longview",
+   "disciplines": {
+    "Building": "3018",
+    "Electrical": "3019",
+    "Fire": "2803",
+    "Gas": "3020",
+    "Plumbing": "3021"
+   }
+  },
+  {
+   "organization": "Village of Lougheed",
+   "org_type": "Municipality",
+   "accreditation_number": "M000243",
+   "city_listed": "Lougheed",
+   "disciplines": {
+    "Building": "2111",
+    "Electrical": "2312",
+    "Fire": "2121",
+    "Gas": "2300",
+    "Plumbing": "2290"
+   }
+  },
+  {
+   "organization": "Village of Mannville",
+   "org_type": "Municipality",
+   "accreditation_number": "M000432",
+   "city_listed": "Mannville",
+   "disciplines": {
+    "Fire": "79842047"
+   }
+  },
+  {
+   "organization": "Village of Milo",
+   "org_type": "Municipality",
+   "accreditation_number": "M000468",
+   "city_listed": "Milo",
+   "disciplines": {
+    "Building": "2760",
+    "Electrical": "2761",
+    "Fire": "2524",
+    "Gas": "2762",
+    "Plumbing": "2763"
+   }
+  },
+  {
+   "organization": "Village of Morrin",
+   "org_type": "Municipality",
+   "accreditation_number": "M000348",
+   "city_listed": "Morrin",
+   "disciplines": {
+    "Building": "2103",
+    "Electrical": "2020",
+    "Fire": "2342",
+    "Gas": "2082",
+    "Plumbing": "2059"
+   }
+  },
+  {
+   "organization": "Village of Munson",
+   "org_type": "Municipality",
+   "accreditation_number": "M000349",
+   "city_listed": "Munson",
+   "disciplines": {
+    "Building": "2104",
+    "Electrical": "2021",
+    "Fire": "2343",
+    "Gas": "2083",
+    "Plumbing": "2060"
+   }
+  },
+  {
+   "organization": "Village of Paradise Valley",
+   "org_type": "Municipality",
+   "accreditation_number": "M000103",
+   "city_listed": "Paradise Valley",
+   "disciplines": {
+    "Building": "1252",
+    "Electrical": "1253",
+    "Gas": "1254",
+    "Plumbing": "1255"
+   }
+  },
+  {
+   "organization": "Village of Rockyford",
+   "org_type": "Municipality",
+   "accreditation_number": "M000198",
+   "city_listed": "Rockyford",
+   "disciplines": {
+    "Building": "2857",
+    "Electrical": "2860",
+    "Gas": "2858",
+    "Plumbing": "2859"
+   }
+  },
+  {
+   "organization": "Village of Rosalind",
+   "org_type": "Municipality",
+   "accreditation_number": "M000236",
+   "city_listed": "Rosalind",
+   "disciplines": {
+    "Building": "2204",
+    "Electrical": "2195",
+    "Fire": "2186",
+    "Gas": "2177",
+    "Plumbing": "2168"
+   }
+  },
+  {
+   "organization": "Village of Rosemary",
+   "org_type": "Municipality",
+   "accreditation_number": "M000411",
+   "city_listed": "Rosemary",
+   "disciplines": {
+    "Building": "1123",
+    "Electrical": "1124",
+    "Fire": "2259",
+    "Gas": "1125",
+    "Plumbing": "1126"
+   }
+  },
+  {
+   "organization": "Village of Rycroft",
+   "org_type": "Municipality",
+   "accreditation_number": "M000222",
+   "city_listed": "Rycroft",
+   "disciplines": {
+    "Fire": "500"
+   }
+  },
+  {
+   "organization": "Village of Ryley",
+   "org_type": "Municipality",
+   "accreditation_number": "M000299",
+   "city_listed": "Ryley",
+   "disciplines": {
+    "Building": "2455",
+    "Electrical": "2450",
+    "Gas": "2445",
+    "Plumbing": "2440"
+   }
+  },
+  {
+   "organization": "Village of Spring Lake",
+   "org_type": "Municipality",
+   "accreditation_number": "M000285",
+   "city_listed": "Spring Lake",
+   "disciplines": {
+    "Building": "1312",
+    "Electrical": "1311",
+    "Gas": "1310",
+    "Plumbing": "1309"
+   }
+  },
+  {
+   "organization": "Village of Standard",
+   "org_type": "Municipality",
+   "accreditation_number": "M000197",
+   "city_listed": "Standard",
+   "disciplines": {
+    "Building": "2697",
+    "Electrical": "2705",
+    "Fire": "1561",
+    "Gas": "2701",
+    "Plumbing": "2703"
+   }
+  },
+  {
+   "organization": "Village of Stirling",
+   "org_type": "Municipality",
+   "accreditation_number": "M000404",
+   "city_listed": "Stirling",
+   "disciplines": {
+    "Building": "2350",
+    "Electrical": "2356",
+    "Gas": "2352",
+    "Plumbing": "2354"
+   }
+  },
+  {
+   "organization": "Village of Veteran",
+   "org_type": "Municipality",
+   "accreditation_number": "M000351",
+   "city_listed": "Veteran",
+   "disciplines": {
+    "Building": "2105",
+    "Electrical": "2022",
+    "Fire": "367",
+    "Gas": "2084",
+    "Plumbing": "2061"
+   }
+  },
+  {
+   "organization": "Village of Vilna",
+   "org_type": "Municipality",
+   "accreditation_number": "M000399",
+   "city_listed": "Vilna",
+   "disciplines": {
+    "Building": "2766",
+    "Electrical": "2960",
+    "Gas": "2758",
+    "Plumbing": "2759"
+   }
+  },
+  {
+   "organization": "Village of Warburg",
+   "org_type": "Municipality",
+   "accreditation_number": "M000426",
+   "city_listed": "Warburg",
+   "disciplines": {
+    "Building": "642",
+    "Electrical": "1448",
+    "Fire": "643",
+    "Gas": "1449",
+    "Plumbing": "1450"
+   }
+  },
+  {
+   "organization": "Village of Waskatenau",
+   "org_type": "Municipality",
+   "accreditation_number": "M000313",
+   "city_listed": "Waskatenau",
+   "disciplines": {
+    "Building": "2484",
+    "Electrical": "2481",
+    "Gas": "2475",
+    "Plumbing": "2472"
+   }
+  },
+  {
+   "organization": "Village of Youngstown",
+   "org_type": "Municipality",
+   "accreditation_number": "M000185",
+   "city_listed": "Youngstown",
+   "disciplines": {
+    "Building": "2085",
+    "Electrical": "2000",
+    "Fire": "370",
+    "Gas": "2062",
+    "Plumbing": "2039"
+   }
+  },
+  {
+   "organization": "Vulcan County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000312",
+   "city_listed": "Vulcan",
+   "disciplines": {
+    "Building": "933",
+    "Electrical": "934",
+    "Fire": "2520",
+    "Gas": "936",
+    "Plumbing": "937"
+   }
+  },
+  {
+   "organization": "Westlock County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000370",
+   "city_listed": "Westlock",
+   "disciplines": {
+    "Building": "1351",
+    "Electrical": "1350",
+    "Fire": "476",
+    "Gas": "1349",
+    "Plumbing": "1348"
+   }
+  },
+  {
+   "organization": "Wheatland County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000457",
+   "city_listed": "Strathmore",
+   "disciplines": {
+    "Building": "1368",
+    "Electrical": "1367",
+    "Fire": "3056",
+    "Gas": "1365",
+    "Plumbing": "1364"
+   }
+  },
+  {
+   "organization": "Yellowhead County",
+   "org_type": "Municipality",
+   "accreditation_number": "M000165",
+   "city_listed": "Edson",
+   "disciplines": {
+    "Fire": "366"
+   }
+  }
+ ],
+ "joint_municipalities": [
+  {
+   "organization": "Argentia Beach/Crystal Springs/Golden Days/Grandview/Itaska Beach/Ma-Me-O-Beach/Norris Beach/Poplar Bay",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000149",
+   "city_listed": "Ma-me-o Beach",
+   "disciplines": {
+    "Building": "1277",
+    "Electrical": "1276",
+    "Gas": "1274",
+    "Plumbing": "1275"
+   }
+  },
+  {
+   "organization": "Barrhead No 11 / Barrhead / Birch Cove",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000125",
+   "city_listed": "Barrhead",
+   "disciplines": {
+    "Fire": "501"
+   }
+  },
+  {
+   "organization": "Beaver County/Holden/Ryley/Viking/Tofield",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000147",
+   "city_listed": "Ryley",
+   "disciplines": {
+    "Building": "1196",
+    "Electrical": "1195",
+    "Gas": "1194",
+    "Plumbing": "1193"
+   }
+  },
+  {
+   "organization": "Bonnyville No 87 / Bonnyville / Glendon / Pelican Narrows / Bonnyville Beach",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000115",
+   "city_listed": "Bonnyville",
+   "disciplines": {
+    "Building": "575",
+    "Electrical": "905",
+    "Fire": "576",
+    "Gas": "776",
+    "Plumbing": "775"
+   }
+  },
+  {
+   "organization": "Brazeau County / Breton / Drayton Valley",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000123",
+   "city_listed": "Drayton Valley",
+   "disciplines": {
+    "Fire": "416"
+   }
+  },
+  {
+   "organization": "Camrose County / Camrose / Bawlf / Bittern Lake / Edberg /Hay Lakes / Rosalind",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000111",
+   "city_listed": "Camrose",
+   "disciplines": {
+    "Building": "484",
+    "Electrical": "483",
+    "Fire": "482",
+    "Gas": "481",
+    "Plumbing": "480"
+   }
+  },
+  {
+   "organization": "Cardston County / Cardston / Magrath",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000133",
+   "city_listed": "Cardston",
+   "disciplines": {
+    "Fire": "604"
+   }
+  },
+  {
+   "organization": "County of Minburn No. 27/Village of Innisfree/ Village of Mannville",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J124851",
+   "city_listed": "Vegreville",
+   "disciplines": {
+    "Fire": "79842047"
+   }
+  },
+  {
+   "organization": "County of Newell / Bassano / Duchess / Rosemary",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000130",
+   "city_listed": "Brooks",
+   "disciplines": {
+    "Fire": "603"
+   }
+  },
+  {
+   "organization": "County of St. Paul No. 19, Town of St. Paul, Town of Elk Point",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000102",
+   "city_listed": "St Paul",
+   "disciplines": {
+    "Fire": "2569"
+   }
+  },
+  {
+   "organization": "Flagstaff Region",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000113",
+   "city_listed": "Sedgewick",
+   "disciplines": {
+    "Building": "344",
+    "Electrical": "703",
+    "Fire": "347",
+    "Gas": "681",
+    "Plumbing": "680"
+   }
+  },
+  {
+   "organization": "Foothills County, M.D. of Ranchland No. 66",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000104",
+   "city_listed": "High River",
+   "disciplines": {
+    "Building": "568",
+    "Electrical": "746",
+    "Gas": "570",
+    "Plumbing": "571"
+   }
+  },
+  {
+   "organization": "Foothills County, Village of Longview",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000851",
+   "city_listed": "High River",
+   "disciplines": {
+    "Fire": "2794"
+   }
+  },
+  {
+   "organization": "Glenwood / Hill Spring",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000134",
+   "city_listed": "Cardston",
+   "disciplines": {
+    "Fire": "605"
+   }
+  },
+  {
+   "organization": "Kneehill County / Acme / Carbon / Linden / Trochu",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000137",
+   "city_listed": "Three Hills",
+   "disciplines": {
+    "Fire": "708"
+   }
+  },
+  {
+   "organization": "Lacombe County / Lacombe / Bentley / Eckville / Alix / Clive / Gull Lake",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000124",
+   "city_listed": "Lacombe",
+   "disciplines": {
+    "Fire": "422"
+   }
+  },
+  {
+   "organization": "Lamont County / Bruderheim / Lamont / Mundare / Andrew / Chipman",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000112",
+   "city_listed": "Lamont",
+   "disciplines": {
+    "Fire": "417"
+   }
+  },
+  {
+   "organization": "M.D of Provost No. 52 / Amisk / Czar / Hughenden",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000144",
+   "city_listed": "Provost",
+   "disciplines": {
+    "Building": "1108",
+    "Electrical": "1109",
+    "Gas": "1110",
+    "Plumbing": "1111"
+   }
+  },
+  {
+   "organization": "M.D. of Provost No. 52 / Amisk / Czar / Hughenden",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000118",
+   "city_listed": "Provost",
+   "disciplines": {
+    "Fire": "610"
+   }
+  },
+  {
+   "organization": "MD Taber / Vauxhall / Barnwell",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000886",
+   "city_listed": "Taber",
+   "disciplines": {
+    "Fire": "2965"
+   }
+  },
+  {
+   "organization": "Municipal District of Pincher Creek No. 9 / Town of Pincher Creek",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000132",
+   "city_listed": "Pincher Creek",
+   "disciplines": {
+    "Fire": "566"
+   }
+  },
+  {
+   "organization": "Municipal District of Willow Creek # 26 / Town of Stavely",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000131",
+   "city_listed": "Claresholm",
+   "disciplines": {
+    "Fire": "645"
+   }
+  },
+  {
+   "organization": "Palliser Regional Municipal Services",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000120",
+   "city_listed": "Hanna",
+   "disciplines": {
+    "Building": "328",
+    "Electrical": "249",
+    "Gas": "327",
+    "Plumbing": "326"
+   }
+  },
+  {
+   "organization": "Ponoka County / Ponoka / Rimbey / Parkland Beach",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000129",
+   "city_listed": "Ponoka",
+   "disciplines": {
+    "Fire": "602"
+   }
+  },
+  {
+   "organization": "Raymond / Stirling",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000140",
+   "city_listed": "Raymond",
+   "disciplines": {
+    "Building": "862",
+    "Electrical": "877",
+    "Gas": "863",
+    "Plumbing": "864"
+   }
+  },
+  {
+   "organization": "Red Deer County / Bowden / Elnora",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000894",
+   "city_listed": "Red Deer County",
+   "disciplines": {
+    "Building": "2985",
+    "Electrical": "2986",
+    "Gas": "2988",
+    "Plumbing": "2989"
+   }
+  },
+  {
+   "organization": "Red Deer County-Village of Elnora-Town of Bowden-Village of Delburne",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J126743",
+   "city_listed": "Red Deer",
+   "disciplines": {
+    "Fire": "79842095"
+   }
+  },
+  {
+   "organization": "S.V. of Rochon Sands / S.V. of White Sands",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000145",
+   "city_listed": "Rochand Sands",
+   "disciplines": {
+    "Building": "1098",
+    "Electrical": "1099",
+    "Gas": "1100",
+    "Plumbing": "1101"
+   }
+  },
+  {
+   "organization": "Smoky Lake County / Smoky Lake / Waskatenau / Vilna",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000148",
+   "city_listed": "Smoky Lake",
+   "disciplines": {
+    "Building": "1269",
+    "Electrical": "1268",
+    "Gas": "1266",
+    "Plumbing": "1265"
+   }
+  },
+  {
+   "organization": "Smoky River No 130 / Falher / McLennan / Donnelly / Girouxville",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000126",
+   "city_listed": "Falher",
+   "disciplines": {
+    "Fire": "415"
+   }
+  },
+  {
+   "organization": "Special Areas Board",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000127",
+   "city_listed": "Hanna",
+   "disciplines": {
+    "Fire": "418"
+   }
+  },
+  {
+   "organization": "Spirit River / Rycroft",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000110",
+   "city_listed": "Rycroft",
+   "disciplines": {
+    "Fire": "500"
+   }
+  },
+  {
+   "organization": "Starland No 47 / Delia / Morrin / Munson",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000138",
+   "city_listed": "Morrin",
+   "disciplines": {
+    "Fire": "784"
+   }
+  },
+  {
+   "organization": "Stettler No 6 / Stettler / Big Valley / Donalda / Rochon Sands / White Sands",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000106",
+   "city_listed": "Stettler",
+   "disciplines": {
+    "Fire": "262"
+   }
+  },
+  {
+   "organization": "Sturgeon County / Bon Accord / Gibbons / Legal / Redwater / Sturgeon County",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000122",
+   "city_listed": "Morinville",
+   "disciplines": {
+    "Building": "373",
+    "Electrical": "998",
+    "Fire": "372",
+    "Gas": "999",
+    "Plumbing": "1000"
+   }
+  },
+  {
+   "organization": "Summer Villages of Birchcliff / Half Moon Bay / Jarvis Bay / Norglenwold / Sunbreaker Cove",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000142",
+   "city_listed": "Sylvan Lake",
+   "disciplines": {
+    "Building": "963",
+    "Electrical": "964",
+    "Gas": "965",
+    "Plumbing": "966"
+   }
+  },
+  {
+   "organization": "Vulcan Regional",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000152",
+   "city_listed": "Vulcan",
+   "disciplines": {
+    "Fire": "1567"
+   }
+  },
+  {
+   "organization": "Wainwright No 61 / Chauvin / Edgerton / Irma",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000109",
+   "city_listed": "Wainwright",
+   "disciplines": {
+    "Fire": "256"
+   }
+  },
+  {
+   "organization": "Wetaskiwin No 10/Millet/Argentia Beach/Crystal Springs/Golden Days/Grandview/Itaska Beach/Ma-Me-O-Beach/Silver Beach/Poplar Bay",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J000116",
+   "city_listed": "Wetaskiwin",
+   "disciplines": {
+    "Fire": "502"
+   }
+  },
+  {
+   "organization": "Wheatland County-Standard-Hussar",
+   "org_type": "Joint Municipality",
+   "accreditation_number": "J124965",
+   "city_listed": "Strathmore",
+   "disciplines": {
+    "Fire": "79842058"
+   }
+  }
+ ],
+ "regional_services_commissions": [
+  {
+   "organization": "Beaver Emergency Services Commission",
+   "org_type": "Regional Services Commission",
+   "accreditation_number": "R000856",
+   "city_listed": "Viking",
+   "disciplines": {
+    "Fire": "2817"
+   }
+  }
+ ],
+ "agencies": [
+  {
+   "organization": "A.C. Dandy Products Ltd",
+   "org_type": "Agency",
+   "accreditation_number": "A000107",
+   "city_listed": "Wetaskiwin",
+   "disciplines": {
+    "Electrical": "134"
+   }
+  },
+  {
+   "organization": "ABSA",
+   "org_type": "Agency",
+   "accreditation_number": "A000140",
+   "city_listed": "Edmonton",
+   "disciplines": {
+    "Pressure Equipment": "127"
+   }
+  },
+  {
+   "organization": "Alberta Elevating Devices and Amusement Rides Safety Association (AEDARSA)",
+   "org_type": "Agency",
+   "accreditation_number": "A000248",
+   "city_listed": "Edmonton",
+   "disciplines": {
+    "Amusement Rides": "781",
+    "Elevators": "780",
+    "Passenger Ropeways": "878"
+   }
+  },
+  {
+   "organization": "Allnorth Consultants Ltd.",
+   "org_type": "Agency",
+   "accreditation_number": "A000841",
+   "city_listed": "Calgary",
+   "disciplines": {
+    "Building": "2865",
+    "Electrical": "2711",
+    "Gas": "2866",
+    "Plumbing": "2867"
+   }
+  },
+  {
+   "organization": "Behr Integrated Solutions Inc.",
+   "org_type": "Agency",
+   "accreditation_number": "A000889",
+   "city_listed": "Calgary",
+   "disciplines": {
+    "Fire": "2971"
+   }
+  },
+  {
+   "organization": "C.O.F.S. Municipal Safety Codes Service",
+   "org_type": "Agency",
+   "accreditation_number": "A126123",
+   "city_listed": "Fort Saskatchewan",
+   "disciplines": {
+    "Building": "79842082",
+    "Electrical": "79842083",
+    "Fire": "79842084",
+    "Gas": "79842085",
+    "Plumbing": "79842086"
+   }
+  },
+  {
+   "organization": "Central Peace Fire and Rescue Commission",
+   "org_type": "Agency",
+   "accreditation_number": "A000901",
+   "city_listed": "Spirit River",
+   "disciplines": {
+    "Fire": "3014"
+   }
+  },
+  {
+   "organization": "City of Edmonton Community Services Dept Fire Rescue Services/Fire Prevention",
+   "org_type": "Agency",
+   "accreditation_number": "A000235",
+   "city_listed": "Edmonton",
+   "disciplines": {
+    "Fire": "725"
+   }
+  },
+  {
+   "organization": "Clearwater Electric Limited",
+   "org_type": "Agency",
+   "accreditation_number": "A000814",
+   "city_listed": "Rocky Mountain House",
+   "disciplines": {
+    "Electrical": "2576"
+   }
+  },
+  {
+   "organization": "County of Grande Prairie No.1",
+   "org_type": "Agency",
+   "accreditation_number": "A000897",
+   "city_listed": "Clairmont",
+   "disciplines": {
+    "Fire": "3006"
+   }
+  },
+  {
+   "organization": "Davis Inspection Services Ltd.",
+   "org_type": "Agency",
+   "accreditation_number": "A000106",
+   "city_listed": "Calgary",
+   "disciplines": {
+    "Building": "1469",
+    "Electrical": "121",
+    "Gas": "1355",
+    "Plumbing": "1354"
+   }
+  },
+  {
+   "organization": "EES Inspections Inc",
+   "org_type": "Agency",
+   "accreditation_number": "A000885",
+   "city_listed": "Surrey",
+   "disciplines": {
+    "Elevators": "79842100"
+   }
+  },
+  {
+   "organization": "Elspect Electrical Ltd.",
+   "org_type": "Agency",
+   "accreditation_number": "A000132",
+   "city_listed": "Calgary",
+   "disciplines": {
+    "Electrical": "135"
+   }
+  },
+  {
+   "organization": "ENER-G Group",
+   "org_type": "Agency",
+   "accreditation_number": "A126161",
+   "city_listed": "Nisku",
+   "disciplines": {
+    "Electrical": "79842088"
+   }
+  },
+  {
+   "organization": "Excel Industrial Group Inc",
+   "org_type": "Agency",
+   "accreditation_number": "A000876",
+   "city_listed": "Red Deer County",
+   "disciplines": {
+    "Electrical": "2916"
+   }
+  },
+  {
+   "organization": "FireStorm Consulting Group Inc.",
+   "org_type": "Agency",
+   "accreditation_number": "A000870",
+   "city_listed": "Sherwood Park",
+   "disciplines": {
+    "Fire": "2891"
+   }
+  },
+  {
+   "organization": "First Nations Inspection Authority",
+   "org_type": "Agency",
+   "accreditation_number": "A125744",
+   "city_listed": "Spruce Grove",
+   "disciplines": {
+    "Building": "79842074",
+    "Electrical": "79842075",
+    "Gas": "79842076",
+    "Plumbing": "79842077"
+   }
+  },
+  {
+   "organization": "First Nations Technical Services Advisory Group Inc.",
+   "org_type": "Agency",
+   "accreditation_number": "A000917",
+   "city_listed": "Edmonton",
+   "disciplines": {
+    "Fire": "3055"
+   }
+  },
+  {
+   "organization": "FirstInNow Services Inc",
+   "org_type": "Agency",
+   "accreditation_number": "A127325",
+   "city_listed": "Leduc",
+   "disciplines": {
+    "Fire": "79842114"
+   }
+  },
+  {
+   "organization": "Glowing Embers Consulting LTD",
+   "org_type": "Agency",
+   "accreditation_number": "A124410",
+   "city_listed": "La Crete",
+   "disciplines": {
+    "Fire": "79842006"
+   }
+  },
+  {
+   "organization": "Gunn Consultants Inc",
+   "org_type": "Agency",
+   "accreditation_number": "A000872",
+   "city_listed": "Calgary",
+   "disciplines": {
+    "Elevators": "2906"
+   }
+  },
+  {
+   "organization": "IJD Inspections Ltd.",
+   "org_type": "Agency",
+   "accreditation_number": "A000167",
+   "city_listed": "Red Deer",
+   "disciplines": {
+    "Building": "1009",
+    "Electrical": "215",
+    "Fire": "1525",
+    "Gas": "1010",
+    "Plumbing": "1011"
+   }
+  },
+  {
+   "organization": "JCM Consulting",
+   "org_type": "Agency",
+   "accreditation_number": "A124665",
+   "city_listed": "Calgary",
+   "disciplines": {
+    "Elevators": "79842043"
+   }
+  },
+  {
+   "organization": "JDK Oil and Gas Contracting",
+   "org_type": "Agency",
+   "accreditation_number": "A000880",
+   "city_listed": "Calgary",
+   "disciplines": {
+    "Electrical": "2939"
+   }
+  },
+  {
+   "organization": "Kautz Inspection Services",
+   "org_type": "Agency",
+   "accreditation_number": "A000148",
+   "city_listed": "Stathmore",
+   "disciplines": {
+    "Gas": "185",
+    "Plumbing": "184"
+   }
+  },
+  {
+   "organization": "KJA Consultants Inc.",
+   "org_type": "Agency",
+   "accreditation_number": "A000250",
+   "city_listed": "Calgary",
+   "disciplines": {
+    "Elevators": "787"
+   }
+  },
+  {
+   "organization": "M. Powered Electrical",
+   "org_type": "Agency",
+   "accreditation_number": "A000924",
+   "city_listed": "High River",
+   "disciplines": {
+    "Electrical": "79842109"
+   }
+  },
+  {
+   "organization": "MacFire Codes and Safety Consulting",
+   "org_type": "Agency",
+   "accreditation_number": "A124756",
+   "city_listed": "Millarville",
+   "disciplines": {
+    "Fire": "79842044"
+   }
+  },
+  {
+   "organization": "Marex Canada Limited",
+   "org_type": "Agency",
+   "accreditation_number": "A000200",
+   "city_listed": "Airdrie",
+   "disciplines": {
+    "Building": "2893",
+    "Electrical": "657",
+    "Gas": "2895",
+    "Plumbing": "2896"
+   }
+  },
+  {
+   "organization": "Northstar Commissioning and Inspections Ltd.",
+   "org_type": "Agency",
+   "accreditation_number": "A127326",
+   "city_listed": "Lloydminster",
+   "disciplines": {
+    "Electrical": "79842120"
+   }
+  },
+  {
+   "organization": "Palliser Regional Municipal Services",
+   "org_type": "Agency",
+   "accreditation_number": "A000158",
+   "city_listed": "Hanna",
+   "disciplines": {
+    "Building": "2980",
+    "Electrical": "2981",
+    "Fire": "2982",
+    "Gas": "2983",
+    "Plumbing": "2984"
+   }
+  },
+  {
+   "organization": "Park Enterprises",
+   "org_type": "Agency",
+   "accreditation_number": "A000178",
+   "city_listed": "Lethbridge",
+   "disciplines": {
+    "Building": "750",
+    "Electrical": "307",
+    "Fire": "2815",
+    "Gas": "752",
+    "Plumbing": "751"
+   }
+  },
+  {
+   "organization": "Pinnacle Enterprises Ltd",
+   "org_type": "Agency",
+   "accreditation_number": "A124436",
+   "city_listed": "Airdrie",
+   "disciplines": {
+    "Building": "79842019"
+   }
+  },
+  {
+   "organization": "Real Time Fire & Emergency Services",
+   "org_type": "Agency",
+   "accreditation_number": "A126672",
+   "city_listed": "DeBolt",
+   "disciplines": {
+    "Fire": "79842094"
+   }
+  },
+  {
+   "organization": "SCO-Fire",
+   "org_type": "Agency",
+   "accreditation_number": "A000898",
+   "city_listed": "Red Deer",
+   "disciplines": {
+    "Building": "79842051",
+    "Fire": "3009"
+   }
+  },
+  {
+   "organization": "SE7EN7 Integrated Solutions, Inc.",
+   "org_type": "Agency",
+   "accreditation_number": "A126814",
+   "city_listed": "Faust",
+   "disciplines": {
+    "Fire": "79842107"
+   }
+  },
+  {
+   "organization": "Solucore Inc",
+   "org_type": "Agency",
+   "accreditation_number": "A000835",
+   "city_listed": "Calgary",
+   "disciplines": {
+    "Elevators": "2670"
+   }
+  },
+  {
+   "organization": "Summit Safety Codes Services Ltd",
+   "org_type": "Agency",
+   "accreditation_number": "A124403",
+   "city_listed": "CALGARY",
+   "disciplines": {
+    "Building": "79842007"
+   }
+  },
+  {
+   "organization": "Superior Safety Codes Inc.",
+   "org_type": "Agency",
+   "accreditation_number": "A000300",
+   "city_listed": "Edmonton",
+   "disciplines": {
+    "Building": "1523",
+    "Electrical": "1524",
+    "Fire": "1522",
+    "Gas": "1521",
+    "Plumbing": "1520"
+   }
+  },
+  {
+   "organization": "The Inspections Group Inc.",
+   "org_type": "Agency",
+   "accreditation_number": "A000202",
+   "city_listed": "Edmonton",
+   "disciplines": {
+    "Building": "960",
+    "Electrical": "305",
+    "Fire": "1072",
+    "Gas": "961",
+    "Plumbing": "962"
+   }
+  },
+  {
+   "organization": "The North Group",
+   "org_type": "Agency",
+   "accreditation_number": "A126936",
+   "city_listed": "Grande Prairie",
+   "disciplines": {
+    "Building": "79842110",
+    "Electrical": "79842111",
+    "Gas": "79842112",
+    "Plumbing": "79842113"
+   }
+  },
+  {
+   "organization": "TON Inspection Services LTD",
+   "org_type": "Agency",
+   "accreditation_number": "A125642",
+   "city_listed": "Sturgeon County",
+   "disciplines": {
+    "Electrical": "79842073"
+   }
+  },
+  {
+   "organization": "TrueNorth Standards Group",
+   "org_type": "Agency",
+   "accreditation_number": "A126750",
+   "city_listed": "North Battleford",
+   "disciplines": {
+    "Building": "79842101",
+    "Fire": "79842102",
+    "Plumbing": "79842103"
+   }
+  },
+  {
+   "organization": "Viable Solutions Inc",
+   "org_type": "Agency",
+   "accreditation_number": "A124539",
+   "city_listed": "Red Deer",
+   "disciplines": {
+    "Building": "79842029",
+    "Electrical": "79842030",
+    "Gas": "79842032",
+    "Plumbing": "79842033"
+   }
+  },
+  {
+   "organization": "Vinspec Ltd.",
+   "org_type": "Agency",
+   "accreditation_number": "A000211",
+   "city_listed": "Edmonton",
+   "disciplines": {
+    "Elevators": "770"
+   }
+  }
+ ],
+ "corporations_with_building": [
+  {
+   "organization": "AIR Products Canada Ltd",
+   "org_type": "Corporation",
+   "accreditation_number": "C126744",
+   "city_listed": "Edmonton",
+   "disciplines": {
+    "Building": "79842096"
+   }
+  },
+  {
+   "organization": "Alberta Pacific Forest Industries Inc.",
+   "org_type": "Corporation",
+   "accreditation_number": "C000146",
+   "city_listed": "Boyle",
+   "disciplines": {
+    "Building": "791"
+   }
+  },
+  {
+   "organization": "Athabasca Oil Corporation",
+   "org_type": "Corporation",
+   "accreditation_number": "C000865",
+   "city_listed": "Calgary",
+   "disciplines": {
+    "Building": "2917"
+   }
+  },
+  {
+   "organization": "Canadian Natural Resources Limited (CNRL)",
+   "org_type": "Corporation",
+   "accreditation_number": "C000139",
+   "city_listed": "Calgary",
+   "disciplines": {
+    "Building": "2812"
+   }
+  },
+  {
+   "organization": "Cenovus Oil Sands",
+   "org_type": "Corporation",
+   "accreditation_number": "C000831",
+   "city_listed": "Calgary",
+   "disciplines": {
+    "Building": "2912"
+   }
+  },
+  {
+   "organization": "ConocoPhillips Canada",
+   "org_type": "Corporation",
+   "accreditation_number": "C000153",
+   "city_listed": "Calgary",
+   "disciplines": {
+    "Building": "3053"
+   }
+  },
+  {
+   "organization": "Dow Chemical Canada ULC.",
+   "org_type": "Corporation",
+   "accreditation_number": "C000128",
+   "city_listed": "Fort Saskatchewan",
+   "disciplines": {
+    "Building": "79842080"
+   }
+  },
+  {
+   "organization": "Imperial Oil Resources Limited",
+   "org_type": "Corporation",
+   "accreditation_number": "C000101",
+   "city_listed": "Calgary",
+   "disciplines": {
+    "Building": "2767"
+   }
+  },
+  {
+   "organization": "Inter Pipeline Ltd",
+   "org_type": "Corporation",
+   "accreditation_number": "C000151",
+   "city_listed": "Calgary",
+   "disciplines": {
+    "Building": "79842108"
+   }
+  },
+  {
+   "organization": "MEG Energy Corp.",
+   "org_type": "Corporation",
+   "accreditation_number": "C000255",
+   "city_listed": "Calgary",
+   "disciplines": {
+    "Building": "2945"
+   }
+  },
+  {
+   "organization": "Mondi Hinton Inc.",
+   "org_type": "Corporation",
+   "accreditation_number": "C000178",
+   "city_listed": "Hinton",
+   "disciplines": {
+    "Building": "953"
+   }
+  },
+  {
+   "organization": "North West Redwater Partnership (NWR)",
+   "org_type": "Corporation",
+   "accreditation_number": "C000858",
+   "city_listed": "Sturgeon County",
+   "disciplines": {
+    "Building": "2880"
+   }
+  },
+  {
+   "organization": "Nova Chemicals Corporation",
+   "org_type": "Corporation",
+   "accreditation_number": "C000113",
+   "city_listed": "Red Deer",
+   "disciplines": {
+    "Building": "975"
+   }
+  },
+  {
+   "organization": "Shell Canada Limited",
+   "org_type": "Corporation",
+   "accreditation_number": "C000102",
+   "city_listed": "Calgary",
+   "disciplines": {
+    "Building": "2852"
+   }
+  },
+  {
+   "organization": "Suncor Energy Inc. Oil Sands - Syncrude Canada Limited",
+   "org_type": "Corporation",
+   "accreditation_number": "C000111",
+   "city_listed": "Calgary",
+   "disciplines": {
+    "Building": "1012"
+   }
+  },
+  {
+   "organization": "University of Alberta",
+   "org_type": "Corporation",
+   "accreditation_number": "C000123",
+   "city_listed": "Edmonton",
+   "disciplines": {
+    "Building": "658"
+   }
+  },
+  {
+   "organization": "Wolf NGL Inc",
+   "org_type": "Corporation",
+   "accreditation_number": "C125232",
+   "city_listed": "Calgary",
+   "disciplines": {
+    "Building": "798"
+   }
+  }
+ ]
+}
