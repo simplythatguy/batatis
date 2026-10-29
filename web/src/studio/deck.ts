@@ -13,7 +13,7 @@ export const deck: Deck = {
       slides: [
         { kind: "statement", id: "open-rule", text: "Every new idea\nbreaks a rule.", accent: "breaks a rule." },
         {
-          kind: "image", id: "open-real", title: "Edmonton's own application", src: "/studio/img/form-complete-p1.png",
+          kind: "image", id: "open-real", title: "Edmonton's own solution", src: "/studio/img/form-complete-p1.png",
           // Section C, first row: 9.10.11.2.(2), the firewall (rects from /studio/img/forms.json).
           focus: { x: 72, y: 1131, w: 1077, h: 313 },
         },
@@ -49,7 +49,7 @@ export const deck: Deck = {
         { kind: "count", id: "villain-cost", value: 3600, prefix: "$", label: "estimated cost of one extra round trip, in Canadian dollars, mostly waiting" },
       ],
       script: [
-        "😏 NOW watch. We delete Section C, the rule this design varies and why. 🤔 Would a first-time builder know what goes there? ⏸️ Most DON'T.",
+        "😏 NOW watch. We delete Section C. That's the rule this design changes, and why. 🤔 Would a first-time builder know what goes there? ⏸️ Most DON'T.",
         "😬 But the officer does, and WEEKS later the application comes back.",
         "😬 Every trip back costs about thirty-six hundred dollars, and most of that is just... WAITING.",
       ],
@@ -65,7 +65,7 @@ export const deck: Deck = {
         { kind: "logo", id: "three-one", line: "One app." },
       ],
       script: [
-        "🙂 So today, we're introducing THREE things. An application writer.",
+        "🙂 So today, THREE things. An application writer.",
         "🙂 A code expert.",
         "🙂 And a completeness checker for officers.",
         "😏 A writer, an expert, a checker. 🤔 See where this is going? ⏸️ 🔥 It's... ONE... app, and we call it Batatis.",
@@ -76,10 +76,10 @@ export const deck: Deck = {
       name: "Applicant: intake and rules",
       speaker: 2,
       slides: [
-        { kind: "clip", id: "apply-start", title: "Describe it. Drop it in.", src: "/studio/clips/c01-start.mp4" },
-        { kind: "clip", id: "apply-read", title: "It reads both", src: "/studio/clips/c02-understood.mp4" },
-        { kind: "clip", id: "apply-rules", title: "The right rules, ranked", src: "/studio/clips/c03-rules.mp4" },
-        { kind: "clip", id: "apply-ask", title: "Only what's missing", src: "/studio/clips/c04-questions.mp4" },
+        { kind: "clip", id: "apply-start", title: "Describe it. Drop it in.", src: "/studio/clips/c01-start.mp4", from: 1.8, to: 10.6, rate: 1.35 },
+        { kind: "clip", id: "apply-read", title: "It reads both", src: "/studio/clips/c02-understood.mp4", from: 0.6, to: 11.0, rate: 1.6 },
+        { kind: "clip", id: "apply-rules", title: "The right rules, ranked", src: "/studio/clips/c03-rules.mp4", from: 0.4, to: 19.5, rate: 1.55 },
+        { kind: "clip", id: "apply-ask", title: "Only what's missing", src: "/studio/clips/c04-questions.mp4", from: 0.5, to: 9.0, rate: 1.3 },
       ],
       script: [
         "🙂 We describe the rowhouse in plain words and drop in the broken form.",
@@ -93,16 +93,16 @@ export const deck: Deck = {
       name: "Applicant: engineer to form",
       speaker: 0,
       slides: [
-        { kind: "clip", id: "apply-stop", title: "It doesn't guess", src: "/studio/clips/c05-engineer.mp4" },
-        { kind: "clip", id: "apply-c", title: "Section C, by lookup", src: "/studio/clips/c06-section-c.mp4" },
-        { kind: "clip", id: "apply-check", title: "Checked before it's sent", src: "/studio/clips/c07-check.mp4" },
-        { kind: "clip", id: "apply-form", title: "The official form", src: "/studio/clips/c08-form.mp4" },
+        { kind: "clip", id: "apply-stop", title: "It doesn't guess", src: "/studio/clips/c05-engineer.mp4", from: 0.4, to: 16.5, rate: 1.35 },
+        { kind: "clip", id: "apply-c", title: "Section C, looked up", src: "/studio/clips/c06-section-c.mp4", from: 3.4, to: 15.5, rate: 1.15 },
+        { kind: "clip", id: "apply-check", title: "Checked before it's sent", src: "/studio/clips/c07-check.mp4", from: 3.6, to: 18.5, rate: 1.4 },
+        { kind: "clip", id: "apply-form", title: "The official form", src: "/studio/clips/c08-form.mp4", from: 5.8, to: 18.0, rate: 1.6 },
       ],
       script: [
-        "💪 And when it isn't sure, it doesn't GUESS. It flags that the officer decides on an engineer, and lists what the evidence must cover.",
+        "💪 And when it isn't sure, it doesn't GUESS. It leaves the engineer question to the officer, and lists what the evidence must cover.",
         "💪 Here's Section C, straight from the 2023 Alberta Edition, second printing. ⏸️ Same article, same objectives, same function as the City's.",
-        "🙂 One click checks the application before anyone else sees it.",
-        "😄 And there's the official form, filled in. ⏸️ 🔥 BOOM. It goes to Edmonton.",
+        "🙂 One click checks the application before anyone else sees it. It finds missing evidence, we add the City's study, and it's ready.",
+        "😄 And there's the official Safety Codes form, filled in. ⏸️ 🔥 BOOM. It goes to Edmonton.",
       ],
     },
     {
@@ -110,14 +110,14 @@ export const deck: Deck = {
       name: "Officer",
       speaker: 2,
       slides: [
-        { kind: "clip", id: "officer-queue", title: "The officer's inbox", src: "/studio/clips/c09-queue.mp4" },
-        { kind: "clip", id: "officer-review", title: "Complete at a glance", src: "/studio/clips/c10-officer-review.mp4" },
-        { kind: "clip", id: "officer-decide", title: "Decide. Message once.", src: "/studio/clips/c11-decide.mp4" },
+        { kind: "clip", id: "officer-queue", title: "The officer's inbox", src: "/studio/clips/c09-queue.mp4", from: 0.4, to: 10.4, rate: 1.6 },
+        { kind: "clip", id: "officer-review", title: "What's missing, at a glance", src: "/studio/clips/c10-officer-review.mp4", from: 0.8, to: 15.5, rate: 1.13 },
+        { kind: "clip", id: "officer-decide", title: "One clear message", src: "/studio/clips/c11-decide.mp4", from: 0.3, to: 9.8, rate: 1.4 },
       ],
       script: [
         "🙂 Now let's switch sides. The application is in the Edmonton officer's inbox.",
         "😌 The officer sees what's there and what's missing, and every citation opens its exact sentence. Batatis checks completeness, and the compliance call stays with the officer.",
-        "🙂 The officer sends one clear message, and the applicant fixes it and resends.",
+        "🙂 The officer returns it with one clear message. The applicant fixes it and resends.",
       ],
     },
     {
@@ -149,7 +149,7 @@ export const deck: Deck = {
         "🤔 Does it REALLY work? We tested sixty-four real Alberta records, variances, appeals and code rulings, with the article numbers hidden.",
         "💪 Plain search put the right article first TWENTY-SIX times. ⏸️ Batatis put it first... FIFTY-FOUR... times.",
         "💪 And it showed applicants... ZERO... made-up articles.",
-        "😌 A simulated first-time applicant scored two out of ten with the official flowchart, and FIVE POINT SIX with Batatis.",
+        "😌 Simulated first-time applicants scored two out of ten with the official flowchart, FIVE POINT SIX with Batatis.",
         "💪 And the AI behind one application costs under... ONE... dollar. Reviewing it costs the officer nothing.",
       ],
     },
@@ -163,10 +163,10 @@ export const deck: Deck = {
           label: "435 places mapped to the office that reviews them", litLabel: "Live today: Calgary, Edmonton",
         },
         {
-          kind: "flow", id: "scale-file", title: "A new office is a file",
+          kind: "flow", id: "scale-file", title: "A new city is one file",
           steps: [
-            { label: "13,743 provisions", sub: "NBC(AE) 2023, one database" },
-            { label: "One office", sub: "one checked data file" },
+            { label: "One code database", sub: "13,743 provisions, NBC(AE) 2023" },
+            { label: "One file per office", sub: "its forms and steps" },
             { label: "Same app", sub: "no code changes" },
           ],
           active: [1],
@@ -174,7 +174,7 @@ export const deck: Deck = {
       ],
       script: [
         "🙂 Today we're live in Calgary and Edmonton, and we've mapped four hundred thirty-five places to their office.",
-        "💪 Adding an office takes one data file, NOT new code. Better AI models make us better, but they won't earn an officer's trust. ⏸️ We... WILL.",
+        "💪 Adding an office takes one data file, NOT new code. Better models won't earn an officer's trust. ⏸️ We... WILL.",
       ],
     },
     {
@@ -187,9 +187,9 @@ export const deck: Deck = {
         {
           kind: "flow", id: "honest-plan", title: "How we'll prove it",
           steps: [
-            { label: "One office", sub: "ninety days, side by side" },
-            { label: "Real files, graded", sub: "every officer correction" },
-            { label: "Every number, again", sub: "measured, then published" },
+            { label: "One office", sub: "90 days, beside today's process" },
+            { label: "Real files", sub: "graded by officers" },
+            { label: "Every number", sub: "measured again, in public" },
           ],
           active: [0, 1, 2],
         },
@@ -197,7 +197,7 @@ export const deck: Deck = {
       script: [
         "😌 Here's what we HAVEN'T proven. Our applicant scores are simulated, and in ten of sixty-four cases the right article wasn't first.",
         "😌 And no officer has reviewed a real Batatis application... YET.",
-        "💪 So we'll run a ninety-day pilot with one office alongside its current process. Officers will grade real files, and we'll re-measure EVERY number in public.",
+        "💪 We'll run a ninety-day pilot beside one office's current process. Officers will grade real files, and we'll re-measure EVERY number in public.",
       ],
     },
     {
@@ -210,7 +210,7 @@ export const deck: Deck = {
         { kind: "statement", id: "close-line", text: "Complete before\nit's ever sent.", accent: "Complete" },
       ],
       script: [
-        "🙂 There's a Wayne Gretzky quote we love. ⏸️ I skate to where the puck is going to be, not where it has been.",
+        "🙂 Wayne Gretzky said it best. ⏸️ I skate to where the puck is going to be, not where it has been.",
         "😌 The puck is going to new ideas, and every... single... one of them breaks a rule.",
         "🔥 Batatis makes sure they show up... COMPLETE. ⏸️ 🙂 Thank you.",
       ],
