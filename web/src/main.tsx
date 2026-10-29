@@ -10,11 +10,26 @@ import "./calm/mercury.css";
 import { App } from "./App";
 import { CaseProvider } from "./store";
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <CaseProvider>
-      <App />
-      <SpeedInsights />
-    </CaseProvider>
-  </StrictMode>,
-);
+// /studio is the team's pitch recorder (src/studio), loaded only on that path.
+const STUDIO_RETURN = "batatis.studio.return";
+if (location.pathname.startsWith("/studio")) {
+  void import("./studio/entry");
+} else {
+  // Signing in from the studio comes back to it once the app leaves the sign-in pages.
+  const back = sessionStorage.getItem(STUDIO_RETURN);
+  if (back) {
+    window.addEventListener("hashchange", () => {
+      if (/^#\/(signin|signup|onboarding)\b/.test(location.hash)) return;
+      sessionStorage.removeItem(STUDIO_RETURN);
+      location.replace(back);
+    });
+  }
+  createRoot(document.getElementById("root")!).render(
+    <StrictMode>
+      <CaseProvider>
+        <App />
+        <SpeedInsights />
+      </CaseProvider>
+    </StrictMode>,
+  );
+}
