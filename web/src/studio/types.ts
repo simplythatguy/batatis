@@ -8,8 +8,8 @@ export interface Group {
   id: string;
   /** Short name shown in the studio, never in the video. */
   name: string;
-  /** Who we expect to present it; the room assignment overrides this. */
-  suggested?: string;
+  /** Speaker slot 0, 1 or 2: filled by the room's people in the order they joined. The room assignment overrides it. */
+  speaker: number;
   slides: Slide[];
   /** script[i] is what the presenter says while slides[i] is on screen. Same length as slides. */
   script: string[];
