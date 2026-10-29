@@ -368,39 +368,40 @@ HIGHLIGHT, OTHER = '#1F5FCC', '#A3A3A3'
 
 # Where each label sits relative to its dot, per panel: (dx, dy, anchor).
 LABEL_AT = [
-    {0: (12, 0, 'start'), 1: (12, 0, 'start'), 2: (12, 4, 'start'), 3: (12, 7, 'start'), 4: (12, -6, 'start')},
-    {0: (-12, 0, 'end'), 1: (12, 0, 'start'), 2: (12, 10, 'start'), 3: (12, -6, 'start'), 4: (12, -2, 'start')},
+    {0: (16, 0, 'start'), 1: (16, 0, 'start'), 2: (16, 6, 'start'), 3: (16, 12, 'start'), 4: (16, -8, 'start')},
+    {0: (-16, 0, 'end'), 1: (16, 0, 'start'), 2: (16, 14, 'start'), 3: (16, -10, 'start'), 4: (16, -4, 'start')},
 ]
 
 
 def results() -> Svg:
-    svg = Svg(1500, 620)
+    """Two panels stacked, so each gets the full width and its labels stay readable in a README."""
+    svg = Svg(1400, 1200)
     panels = (('First-time applicant', 1), ('Expert with the code book', 2))
+    left, w, h = 130, 1220, 420
     for p, (title, k) in enumerate(panels):
-        left, top, w, h = 110 + p * 730, 70, 600, 440
+        top = 70 + p * 590
         x = lambda minutes: left + minutes / 60 * w
         y = lambda grade: top + h - grade / 10 * h
-        svg.text(left, 30, title, size=20, weight=700, anchor='start')
+        svg.text(left, top - 40, title, size=26, weight=700, anchor='start')
         for g in range(0, 11, 2):
             svg.path(f'M{left},{y(g):.1f} L{left + w},{y(g):.1f}', color='#ECECEC', width=1)
-            svg.text(left - 12, y(g), str(g), size=14, color=MUTED, anchor='end')
-        for m in range(0, 61, 15):
-            svg.text(x(m), top + h + 22, str(m), size=14, color=MUTED)
+            svg.text(left - 16, y(g), str(g), size=18, color=MUTED, anchor='end')
+        for m in range(0, 61, 10):
+            svg.text(x(m), top + h + 26, str(m), size=18, color=MUTED)
         svg.path(f'M{left},{top + h} L{left + w},{top + h}', color='#8A8A8A', width=1)
-        svg.text(left + w / 2, top + h + 52, 'Applicant time, minutes (estimated)', size=15, color=MUTED)
-        if p == 0:
-            svg.add(f'<text transform="translate(36,{top + h / 2}) rotate(-90)" font-size="15" fill="{MUTED}" '
-                    f'text-anchor="middle" dominant-baseline="central">Grade out of 10, blind-graded</text>')
-        svg.text(left + 14, top + 14, '↖ better: higher grade, less time', size=13, color=MUTED, anchor='start')
+        svg.text(left + w / 2, top + h + 62, 'Applicant time, minutes (estimated)', size=19, color=MUTED)
+        svg.add(f'<text transform="translate(52,{top + h / 2}) rotate(-90)" font-size="19" fill="{MUTED}" '
+                f'text-anchor="middle" dominant-baseline="central">Grade out of 10</text>')
+        svg.text(left + 16, top + 18, '↖ better: higher grade, less time', size=17, color=MUTED, anchor='start')
         for i, row in enumerate(RESULTS):
             minutes, grade = row[k]
             winner = row[3]
             dx, dy, anchor = LABEL_AT[p][i]
             color = HIGHLIGHT if winner else OTHER
-            radius = 9 if winner else 7
+            radius = 11 if winner else 9
             svg.add(f'<circle cx="{x(minutes):.1f}" cy="{y(grade):.1f}" r="{radius}" fill="{color}" '
                     f'stroke="#fff" stroke-width="2"/>')
-            svg.text(x(minutes) + dx, y(grade) + dy, f'{row[0]}  {grade:.1f}', size=15,
+            svg.text(x(minutes) + dx, y(grade) + dy, f'{row[0]}  {grade:.1f}', size=21,
                      weight=700 if winner else 400, color=INK if winner else '#4A4A4A', anchor=anchor)
     return svg
 

@@ -108,6 +108,8 @@ The official NBC(AE) process for a design that may depart from the code looks li
 
 ![The official NBC(AE) process: identify the acceptable solution, analyse the code, set the performance level, compare, find the gaps, and decide whether the design complies. Yes leads to evidence of compliance and the permit. No leads to the variance steps: rationale, detailed code analysis, risk assessment, mitigating measures, assumptions, and evidence of equivalent performance](docs/diagrams/nbc-ae-acceptable-vs-alternative-flow.png)
 
+Open the picture to read its boxes at full size.
+
 Every box is a step the applicant has to work through. The obvious design is a form that asks the applicant each box in order. We tested that form against our own flow and five other designs before choosing.
 
 **The test.** The same 64 real records, with two simulated applicants: a first-time homebuilder who has never read the code, and an expert consultant with the code book open. Claude Haiku 5.5 played both. Claude Opus 5.5 graded each finished application out of 10, beside the articles the regulator cited, without knowing which workflow wrote it. The minutes are an estimate from the number and kind of inputs.
