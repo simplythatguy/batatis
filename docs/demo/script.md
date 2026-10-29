@@ -166,6 +166,7 @@ The deck asks its cards in this order: the facts Batatis read (each one to confi
 **Actions.**
 
 1. Answer the professional questions and show the list of evidence documents and who is responsible for each. Enter the fictional professional ("Example Engineer", "EXAMPLE-0000") so that the official PDF can unlock later.
+   - Add one supporting document in Section D and attach a small PDF to it, with **Prepared by** set to "Example Engineer (EXAMPLE-0000)". Without a document the first Submit is refused ("supporting document missing"), and without the registration in **Prepared by** an officer who records "Required" leaves the applicant asking for a named professional with no way to answer it.
 2. Open `#/review` and show the amber callout "An engineer or architect is required for Section D" with the line "Batatis can list what that evidence must address, but it can't write it." If the callout disappears once the professional is entered, film it first and enter the professional afterwards.
 
 **Narration.**
