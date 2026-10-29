@@ -143,14 +143,14 @@ export const deck: Deck = {
           ],
           note: "Simulated applicants, not people. Blind model grader, one run, same 64 cases.",
         },
-        { kind: "count", id: "proof-cost", value: 0.97, prefix: "$", decimals: 2, label: "of AI per application, measured, in Canadian dollars. The officer's review uses none." }
+        { kind: "count", id: "proof-cost", value: 1.23, prefix: "$", decimals: 2, label: "of AI per application, in Canadian dollars, averaged over 3 metered runs. The officer's review uses none." }
       ],
       script: [
         "🤔 Does it REALLY work? We tested sixty-four real Alberta cases, like variances and appeals, with the rule numbers hidden.",
         "💪 Plain search ranked the right rule first TWENTY-SIX times. ⏸️ Batatis did it... FIFTY-FOUR... times.",
         "💪 And it never showed a made-up rule. ⏸️ ZERO.",
         "😌 Simulated first-time builders scored two out of ten with the official flowchart. With Batatis, FIVE POINT SIX.",
-        "💪 The AI for one application costs under... ONE... dollar. The officer's review costs nothing.",
+        "💪 The AI for one application costs about... a DOLLAR twenty. The officer's review is free.",
       ],
     },
     {
