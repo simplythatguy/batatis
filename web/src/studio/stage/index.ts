@@ -4,6 +4,7 @@ import type { Deck, TakeMedia } from "../types";
 import { preload as preloadAssets } from "./assets";
 import { exportVideo as renderVideo } from "./export";
 import { makeStage, type Stage } from "./stage";
+import { thumbnail } from "./thumb";
 
 export { STAGE_W, STAGE_H, type Stage } from "./stage";
 
@@ -27,4 +28,13 @@ export function exportVideo(opts: {
   canvas?: HTMLCanvasElement;
 }): Promise<{ blob: Blob; mime: string }> {
   return renderVideo(opts);
+}
+
+/** Paints slide `slide` of group `group` into `canvas`, scaled to its backing size. Each slide is painted once per deck and cached. */
+export async function renderThumb(canvas: HTMLCanvasElement, deck: Deck, group: number, slide: number): Promise<void> {
+  const still = await thumbnail(deck, group, slide);
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(still, 0, 0, canvas.width, canvas.height);
 }

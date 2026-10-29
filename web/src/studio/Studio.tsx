@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { deck as pitchDeck } from "./deck";
 import { Icon } from "./icons";
 import type { Camera } from "./parts";
-import { CopyLink } from "./parts";
+import { Brand, CopyLink, initials } from "./parts";
 import { listDevices, liveVideo, openCamera, stopStream } from "./recorder";
 import { accountName, lastSeat, loadSeat, roomApi, RoomError, saveLastSeat, saveSeat, signedOut, useRoom, type Seat } from "./room";
 import { Room } from "./RoomView";
@@ -129,12 +129,12 @@ export function Studio() {
 function SignIn() {
   return (
     <div className="st-page st-center">
-      <p className="st-line">
-        Sign in to use the studio.{" "}
-        <a className="st-link" href="/#/signin" onClick={() => sessionStorage.setItem(STUDIO_RETURN, location.href)}>
+      <div className="st-signin">
+        <Brand />
+        <a className="cf-btn is-primary is-lg" href="/#/signin" onClick={() => sessionStorage.setItem(STUDIO_RETURN, location.href)}>
           Sign in
         </a>
-      </p>
+      </div>
     </div>
   );
 }
@@ -177,9 +177,10 @@ function Join({ code, missing, name: initialName, camera, onDevice, onJoin }: {
   return (
     <div className="st-page st-center">
       <form className="st-join" onSubmit={(e) => { e.preventDefault(); void go(target); }}>
-        <h1 className="st-title">Studio</h1>
-        <div className="st-cam">
+        <Brand />
+        <div className={`st-cam${camera.stream ? "" : " is-empty"}`}>
           <video ref={preview} autoPlay muted playsInline />
+          {!camera.stream && !camera.error && name.trim() && <span className="st-tile-face" aria-hidden="true">{initials(name)}</span>}
           {camera.error && (
             <div className="st-cam-error">
               <span>{camera.error}</span>

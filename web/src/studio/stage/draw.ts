@@ -13,6 +13,8 @@ export const C = {
   bar: "#E1E3E8",
   blue: "#5266EB",
   tint: "rgba(82,102,235,0.08)",
+  /** The camera tile before (or without) a picture. */
+  camera: "#F0F1F5",
 } as const;
 
 export const FAMILY = "'Inter Variable', Inter, system-ui, sans-serif";
