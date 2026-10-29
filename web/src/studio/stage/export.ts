@@ -26,6 +26,7 @@ export async function exportVideo(opts: {
   takes: Record<string, TakeMedia>;
   onProgress?: (fraction: number, label: string) => void;
   signal?: AbortSignal;
+  canvas?: HTMLCanvasElement;
 }): Promise<{ blob: Blob; mime: string }> {
   const { deck, takes, onProgress, signal } = opts;
   if (signal?.aborted) throw aborted();
@@ -83,7 +84,7 @@ export async function exportVideo(opts: {
     let current: HTMLVideoElement | null = null;
     let tick: (() => void) | null = null;
 
-    const canvas = document.createElement("canvas");
+    const canvas = opts.canvas ?? document.createElement("canvas");
     const stage = makeStage(canvas, deck, {
       beforePaint(now) {
         tick?.();
