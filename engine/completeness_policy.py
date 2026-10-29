@@ -135,8 +135,10 @@ def evaluate(snapshot: Snapshot, codes, *, professional=None, documents=None) ->
                 if located:
                     file, page = located[0]
                     quote.source = {'type': 'file', 'ref': file, 'page': page, 'quote': quote.text}
+        # Nothing attached leaves nothing to compare: a listed document's missing file is its own finding.
+        attached = any(read.role == 'attachment' for read in snapshot.reads)
         if (element.field == 'section_b.consistency' and not element.problem
-                and (snapshot.unreadable or not doc.section_text.get('attachment', '').strip())):
+                and (snapshot.unreadable or (attached and not doc.section_text.get('attachment', '').strip()))):
             element.verdict, element.problem, element.lookup_skipped = 'unclear', 'source_unresolved', True
             element.reason = ('Attachment contents are absent or could not all be read. Compare the indicated sources with Section B; '
                               'consistency is unresolved.')

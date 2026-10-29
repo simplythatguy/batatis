@@ -158,6 +158,22 @@ def answer_label(canonical: str) -> str:
     return ANSWER_LABELS.get(canonical) or f'the answer for {field.split(".")[-1].replace("_", " ")}'
 
 
+def _count_app_signatures(snapshot, case) -> None:
+    """A signature made in the app is painted as an image, which reading the package cannot establish.
+    The workspace records it against this exact content, so it counts as signed and dated."""
+    from ..review.ingest import StoredValue
+    from .signatures import current_signatures
+
+    values = snapshot.document.values
+    for role, signature in current_signatures(case).items():
+        key = f'{role}_signature'
+        if key in values:
+            values[key] = StoredValue(key, f'Signed in the application by {signature.name}', 'exact', None,
+                                      status='present', input_field=key, pointers=values[key].pointers)
+            values[f'{key}_date'] = StoredValue(f'{key}_date', signature.signed_on, 'exact', signature.signed_on,
+                                                status='present', input_field=f'{key}_date')
+
+
 def prepare_package(case, codes, *, store=None, draft=False, form=None, version=CURRENT_MAP):
     from ..completeness_policy import evaluate, signature_date_gaps
     from ..completeness_snapshot import from_uploads
@@ -303,6 +319,7 @@ def prepare_package(case, codes, *, store=None, draft=False, form=None, version=
     result.record_pages = len(writer.pages) - result.form_pages - result.appendix_pages
     # The policy reads the package content; a draft's quiet page mark is added after, to every page.
     snapshot = from_uploads([('application.pdf', result.pdf)])
+    _count_app_signatures(snapshot, original)
     policy = evaluate(snapshot, codes)
     result.open_items = policy.report.export_reasons
     if draft:

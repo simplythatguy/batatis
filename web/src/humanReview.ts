@@ -142,10 +142,25 @@ export function professionalHoldReason(gaps: ProfessionalGap[]): string | null {
 /** What to do while the official PDF stays closed for a missing engineer or architect. */
 export function professionalRouteNote(gaps: { id: string; field?: string }[]): string | null {
   const kind = professionalHoldKind(gaps);
-  if (kind === "requirement") return "The unresolved professional requirement is routed to the officer. The officer determines whether one is required for this scope; no professional confirmation is being asserted. That does not open the official PDF or administrative acceptance. Submit the question with your application when the other required items are complete. A draft PDF remains available. Do not invent a number.";
+  if (kind === "requirement") return "The unresolved professional requirement is routed to the officer. The officer determines whether one is required for this scope; no professional confirmation is being asserted. That does not open the official PDF or administrative acceptance. Submit the question with your application when the other required items are complete. A draft PDF remains available.";
   if (kind === "source") return "The professional requirement’s source references need review before the requirement can be determined. Submission, acceptance and the official PDF wait for those references. A draft PDF remains available.";
-  if (kind === "confirmation") return "A professional is required for this scope. Provide their identity, registration or seal, and the required authenticated work before submission, administrative acceptance or the official PDF. Not sure and Not engaged yet do not waive that duty. A draft PDF remains available. Do not invent a number.";
+  if (kind === "confirmation") return "A professional is required for this scope. Provide their identity, registration or seal, and the required authenticated work before submission, administrative acceptance or the official PDF. Not sure and Not engaged yet do not waive that duty. A draft PDF remains available.";
   return null;
+}
+
+/**
+ * Engine findings are written for the officer ("Ask the applicant to …", "The tool will not draft this.").
+ * The applicant's checklist says the same thing to the applicant; the officer's own view keeps the original.
+ */
+export function forApplicant(text: string): string {
+  return text
+    .replace(/\bAsk the applicant to (\w)/g, (_, first: string) => first.toUpperCase())
+    .replace(/\s*Ask the (?:applicant|signatory)\b[^.]*\./g, "")
+    .replace(/;\s*the tool will not (?:write or assess|draft) (?:it|this|them)\./gi, ".")
+    .replace(/\s*The tool will not (?:write or assess|draft) (?:it|this|them)\./g, "")
+    .replace(/\s*Do not invent a (?:number|name)\./g, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
 }
 
 /** Keep the missing item, and say it goes to the officer with a next step. */
@@ -153,7 +168,7 @@ export function officerRoutedLabel(message: string): string {
   const base = message.trim();
   if (/routed to the officer/i.test(base)) return base;
   const sentence = base.endsWith(".") ? base : `${base}.`;
-  return `${sentence} This item is routed to the officer. Choose Not sure or Not engaged yet to send it there, or name an engineer or architect and their seal or registration number. A draft PDF is available. Do not invent a number. The official PDF stays closed until that confirmation is real.`;
+  return `${sentence} This item is routed to the officer. Choose Not sure or Not engaged yet to send it there, or name an engineer or architect and their seal or registration number. A draft PDF is available. The official PDF stays closed until that confirmation is real.`;
 }
 
 /** One line for the professional screen. The flag word is not repeated. */

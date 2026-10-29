@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { notSureQuestions, officerProfessionalLines, officerRequest, officerRoutedLabel, pdfOutcomeLine, practiceFlagLine, practicePrompt, professionalHoldKind, professionalHoldReason, professionalRouteNote, SCO_JUDGEMENT, textRecord } from "./humanReview.ts";
+import { forApplicant, notSureQuestions, officerProfessionalLines, officerRequest, officerRoutedLabel, pdfOutcomeLine, practiceFlagLine, practicePrompt, professionalHoldKind, professionalHoldReason, professionalRouteNote, SCO_JUDGEMENT, textRecord } from "./humanReview.ts";
 import { emptyCase } from "./intake.ts";
 import { getGaps, reducer, unresolvedCandidates } from "./model.ts";
 
@@ -193,7 +193,7 @@ test("a yes asks for the professional and an unknown shows its question", () => 
   const route = professionalRouteNote([{ id: "D12:responsible_professional", field: "responsible_professional" }]);
   assert.match(route ?? "", /before submission, administrative acceptance or the official PDF/);
   assert.match(route ?? "", /draft PDF/);
-  assert.match(route ?? "", /Do not invent a number/);
+  assert.doesNotMatch(route ?? "", /Do not invent/);
   assert.equal(professionalRouteNote([{ id: "detail-owner", field: "owner" }]), null);
   const labeled = officerRoutedLabel("a named registered professional required for this work");
   assert.match(labeled, /routed to the officer/);
@@ -219,4 +219,16 @@ test("professional copy separates an officer determination from required identit
   const source = [{ id: "professional:source_lookup:part4", field: "professional_source" }];
   assert.equal(professionalHoldKind(source), "source");
   assert.match(professionalHoldReason(source) ?? "", /source references/);
+});
+
+test("the applicant's checklist speaks to the applicant, not to the officer", () => {
+  // QA 2026-10-28: applicants saw "Ask the applicant to…", "The tool will not draft this." and "Do not invent a number."
+  assert.equal(forApplicant("Your application appears to be missing a completed legal description. Ask the applicant to enter or confirm the legal description; retain its source."),
+    "Your application appears to be missing a completed legal description. Enter or confirm the legal description; retain its source.");
+  assert.equal(forApplicant("No testing procedures were named. Ask the applicant to include it."), "No testing procedures were named. Include it.");
+  assert.equal(forApplicant("Which single location is this variance for? Ask the applicant which one is right and withdraw the other. The tool will not draft this."),
+    "Which single location is this variance for?");
+  assert.equal(forApplicant("The review checks presence only; the tool will not write or assess it."), "The review checks presence only.");
+  assert.equal(forApplicant("Enter the name they will sign. Do not invent a name."), "Enter the name they will sign.");
+  assert.equal(forApplicant("Nothing to change here."), "Nothing to change here.");
 });

@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useReducer,
 import { engine, EngineError, failureText, isCaseConflict, isCaseGone, type EngineGap, type UploadedFile } from "./api/client";
 import type { Case as EngineCase, DraftingRecord, IntakeResult, Question as PlanQuestion, RequirementRecord } from "./api/types.gen";
 import { acceptedApplicantFact, applicantDraftInputKey, unchangedDraftField, type ApplicantDraftActivity, type ApplicantDraftCommand } from "./applicantDrafts";
-import { type CompletenessRecord } from "./humanReview";
+import { forApplicant, type CompletenessRecord } from "./humanReview";
 import { hrefFor } from "./gapHref";
 import { acknowledgedVersion, acknowledgeWrite, adoptEngineCase, clearEngineSession, CONFLICT_TEXT, engineCaseId, engineGeneration, isEngineGeneration, ensureEngineCase, isReadOnlyCase, needsReconcile, noteConflict, notePosted, noteShownSelection, pushDeletedEvidence, pushDraft, pushListedEvidence, refreshGaps, selectionKey, type EvidenceOutcome } from "./api/sync";
 import { engineNotices, factSignature, groupEvidenceGaps, missingFromEngine, uploadMessage } from "./rules";
@@ -233,7 +233,7 @@ function composeGaps(localCase: Case, source: Store["gapsSource"], engine: Engin
     const keys = aliasKeys(g.field);
     if (keys.some((key) => seen.has(key))) continue;
     for (const key of keys) seen.add(key);
-    const label = gapLabel(g.message, g.fix_hint);
+    const label = forApplicant(gapLabel(g.message, g.fix_hint));
     admin.push({
       id: g.id,
       severity: g.severity,
