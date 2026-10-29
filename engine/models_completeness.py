@@ -64,3 +64,11 @@ class ProfessionalDeclaration(BaseModel):
     pathway: str = 'alternative'
     bound_to_application: bool = False
     pointer: PolicyPointer
+
+
+def field_label(field: str) -> str:
+    """What people see for a gap's field. An open question from accepted draft wording is keyed by
+    draft id; people see what it is, not the key."""
+    if field.startswith('drafting.questions.'):
+        return 'Open question from the drafted wording'
+    return field.replace('_', ' ')

@@ -8,7 +8,7 @@ from __future__ import annotations
 import re
 from dataclasses import replace
 
-from ..models_completeness import AdministrativeItem, PolicyPointer, ProfessionalDeclaration
+from ..models_completeness import AdministrativeItem, PolicyPointer, ProfessionalDeclaration, field_label
 from ..models_review import Attribute, Pointer
 from ..package_format import ATTACHMENT, CONTEXT
 from ..professional import role_confirmed
@@ -88,7 +88,7 @@ def visible_sources(read):
             severity = values['Severity']
             route = values['Route']
             records.append(AdministrativeItem(key=values['Requirement key'], field=values['Field'], section=values['Section'],
-                label=values.get('Label') or values['Field'].replace('_', ' '), verdict='unclear' if route == 'officer' or
+                label=values.get('Label') or field_label(values['Field']), verdict='unclear' if route == 'officer' or
                 values['Reason code'] == 'unconfirmed' else 'missing', reason_code=values['Reason code'],
                 reason=values['Message'], certainty='not_found' if route == 'officer' or values['Reason code'] == 'unconfirmed' else 'blank',
                 severity=severity, routed_to=route, export_blocking=severity == 'blocking',

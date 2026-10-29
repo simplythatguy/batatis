@@ -19,7 +19,7 @@ from .completeness_snapshot import NOT_APPLICABLE, _label, _pointer
 from .completeness_rules import (ElementVerdict, QuoteSpan, VariantResult, _one, _presence_class,
                                     format_export_reason)
 from .fact_aliases import FIELD_KEYS, LOGICAL_KEYS, latest
-from .models_completeness import AdministrativeItem, AdministrativeReport, PolicyPointer
+from .models_completeness import AdministrativeItem, AdministrativeReport, PolicyPointer, field_label
 from .models import INTENT_LABEL
 from .models_review import CitationCheck, Finding, Pointer, SectionCCheck
 from .process_fields import _FIELDS, alternative_path
@@ -74,17 +74,12 @@ def _finding_element(finding: Finding) -> ElementVerdict:
         fix_hint='Check the indicated sources.' if finding.status == 'not_found' else 'Ask the applicant to supply or clarify this item.')
 
 
-def _gap_label(field: str) -> str:
-    # An open question from accepted draft wording is keyed by draft id; people see what it is, not the key.
-    if field.startswith('drafting.questions.'):
-        return 'Open question from the drafted wording'
-    return field.replace('_', ' ')
 
 
 def _gap_element(gap: Gap) -> ElementVerdict:
     return ElementVerdict(
         field=gap.field, template_section='B' if gap.section == 'process' else gap.section,
-        export_section=gap.section, export_field=gap.field, form_fields=[], label=_gap_label(gap.field), group='',
+        export_section=gap.section, export_field=gap.field, form_fields=[], label=field_label(gap.field), group='',
         verdict='unclear' if gap.routed_to == 'officer' else 'missing', reason=gap.message, problem='policy_gap',
         defect_class=gap.id.split(':')[0] if gap.id.startswith('D') else None, key=gap.id,
         severity=gap.severity, routed_to=gap.routed_to, in_export_preflight=gap.severity == 'blocking',

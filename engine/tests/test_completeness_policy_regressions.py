@@ -314,3 +314,9 @@ def test_pending_process_alias_action_and_public_resolution_preserve_export_poli
             entry = next(e for e in elements if e['field'] == logical)
             assert entry['verdict'] == 'present' and entry['prompt'] is None
             assert entry['in_export_preflight'] is False
+
+
+def test_a_drafted_open_question_is_named_not_shown_as_its_key():
+    from engine.models_completeness import field_label
+    assert field_label('drafting.questions.draft_8a33dedfa8b9.0') == 'Open question from the drafted wording'
+    assert field_label('owner_name') == 'owner name'
