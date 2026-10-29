@@ -604,11 +604,12 @@ class GateClosed(Exception):
 
 
 def configured() -> tuple[str, str]:
+    """The review model and effort. A setting left over from the OpenAI models falls back to the defaults."""
     model = (os.environ.get('BATATIS_REVIEW_MODEL') or DEFAULT_MODEL).strip()
     effort = (os.environ.get('BATATIS_REVIEW_EFFORT') or DEFAULT_EFFORT).strip()
-    if model not in MODELS or effort not in MODELS[model]:
-        raise ValueError(f'review model/effort must be one of {MODELS}')
-    return model, effort
+    if model not in MODELS:
+        model = DEFAULT_MODEL
+    return model, effort if effort in MODELS[model] else DEFAULT_EFFORT
 
 
 def personal_values(texts: list[str]) -> list[str]:
