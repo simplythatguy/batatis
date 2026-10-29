@@ -217,3 +217,54 @@ def test_each_pdf_is_parsed_once_across_the_rules_and_model_passes(monkeypatch):
                       transport=lambda system, user, schema: ({'facts': []}, {}), status='fake')
     assert calls == [len(data), 9]                            # one read per file, not one per pass (two passes ran)
     assert [r.status for r in out.files] == ['read', 'not_read']
+
+
+def _applicant_copy(provisions: list[str]) -> bytes:
+    """The SCC form as Batatis exports it (flattened, signature boxes live), saved again without Batatis's
+    metadata, as an applicant's copy is. Fictional owner and address."""
+    from engine.codes import Codes
+    from engine.export import scc
+    from engine.models import Case, Fact, Jurisdiction, Source
+    from engine.section_c import section_c_rows
+    if not scc.form_path().is_file():
+        pytest.skip('SCC variance form not present (CI fetches it into codedb/build)')
+    codes = Codes()
+    facts = {'owner_name': 'Example Homes Ltd.', 'municipal_address': '42 Example Street NW, Edmonton AB',
+             'request_date': '2026-10-29', 'pathway': 'alternative'}
+    case = Case(title='Example', jurisdiction=Jurisdiction(id='edmonton', name='City of Edmonton'),
+                facts=[Fact(field=k, value=v, kind='pointed', status='confirmed',
+                            source=Source(type='user_text', ref='test', quote=v)) for k, v in facts.items()],
+                provisions=provisions, section_c=section_c_rows(provisions, codes))
+    result = scc._render_case(case, draft=False, codes=codes)
+    writer = PdfWriter()
+    for page in PdfReader(io.BytesIO(result.pdf)).pages[:result.form_pages]:
+        writer.add_page(page)
+    buf = io.BytesIO()
+    writer.write(buf)
+    return buf.getvalue()
+
+
+def test_a_flattened_scc_form_names_only_the_articles_filled_into_section_c():
+    from engine.codes import Codes
+    filled = ['9.10.11.2.(2)', '9.10.9.3.(2)', '9.10.19.3.(1)', '9.10.19.4.(1)']
+    out = read_file('file_form', 'form.pdf', _applicant_copy(filled), codes=Codes())
+    report = out.files[0]
+    named = [(f.value, f.source.page) for f in out.facts if f.field == 'claimed_provision']
+    # Not 1.2.1.2.(1) and the like, which the form's own Part 4 Appendix quotes; not 9.10.9.2.(2) from an intent cell.
+    assert sorted(v for v, _ in named) == sorted(filled) and all(page in (1, 2) for _, page in named)
+    assert [f.field for f in out.facts] == ['claimed_provision'] * len(filled) and out.unresolved == []
+    assert report.form == 'scc_variance' and report.status == 'partly_read' and report.reason == FLATTENED_SCC
+
+
+def test_a_flattened_scc_form_with_section_c_blank_names_no_article():
+    from engine.codes import Codes
+    out = read_file('file_form', 'form.pdf', _applicant_copy([]), codes=Codes())
+    assert out.facts == [] and out.unresolved == []
+
+
+def test_a_description_naming_a_sentence_still_names_it():
+    from engine.codes import Codes
+    from engine.intake.extract import DESCRIPTION, Origin, read_text
+    out = read_text('Each party wall is a 1 h fire separation instead of the firewall Sentence 9.10.11.2.(2) requires.',
+                    Origin(DESCRIPTION), codes=Codes())
+    assert [(f.field, f.value) for f in out.facts if f.field == 'claimed_provision'] == [('claimed_provision', '9.10.11.2.(2)')]

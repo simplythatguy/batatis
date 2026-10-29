@@ -92,13 +92,15 @@ def _attachment(store, case_id: str, file_id: str, known: list[str]) -> dict:
     # At most three pages and 6,000 characters per attachment. Page numbers and
     # file ids refer to the actual authorized upload, never an inferred document.
     left = 6000
-    for page in document.text_pages[:3]:
+    # A flattened SCC form's printed text is the template, not the applicant's words.
+    pages = [] if document.form == 'scc_flattened' else document.text_pages
+    for page in pages[:3]:
         raw = page.text[:min(2000, left)]
         left -= len(raw)
         out['content'].append({'source': {'type': 'file', 'ref': file_id, 'page': page.number},
                                'text': scrub(raw, known), 'recognized_personal_details_removed': True})
         out['truncated'] |= len(raw) < len(page.text)
-    out['truncated'] |= document.truncated or len(document.text_pages) > 3
+    out['truncated'] |= document.truncated or len(pages) > 3
     if any(item['text'].strip() for item in out['content']):
         out['content_state'] = 'text_excerpt'
     else:
