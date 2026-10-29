@@ -343,31 +343,21 @@ def test_gate_closed_and_failures_store_no_model_facts():
         assert not [f for f in out.facts if f.field.startswith('statement.')]
 
 
-def test_live_transport_is_metered_and_pins_luna_medium(monkeypatch):
+def test_live_transport_is_metered_and_pins_sonnet_low(monkeypatch):
     monkeypatch.setenv('BATATIS_LIVE', '1')
-    monkeypatch.setenv('OPENAI_API_KEY', 'test-key-not-real')
+    monkeypatch.setenv('ANTHROPIC_API_KEY', 'test-key-not-real')
     monkeypatch.delenv('BATATIS_STORE', raising=False)
     llm_gate.reset_for_tests()
     sent = {}
 
-    class Response:
-        def raise_for_status(self):
-            return None
-
-        def json(self):
-            return {'choices': [{'message': {'content': json.dumps({'facts': []})}}],
-                    'usage': {'prompt_tokens': 1000, 'completion_tokens': 200}}
-
-    def post(self, url, json=None, headers=None):
-        sent.update(url=url, body=json)
-        return Response()
-    monkeypatch.setattr('httpx.Client.post', post)
+    def call(system, user, schema, **kw):
+        sent.update(kw)
+        return {'facts': []}, {'input_tokens': 1000, 'output_tokens': 200, 'returned_model': kw['model']}
+    monkeypatch.setattr('engine.anthropic_json.call', call)
     transport, status = model_pass.default_transport('203.0.113.9')
     assert status == 'live'
     out = service.run('We want vinyl siding on the north wall.', [], transport=transport, status=status)
-    body = sent['body']
-    assert body['model'] == 'gpt-6-luna' and body['reasoning_effort'] == 'medium' and 'service_tier' not in body
-    assert 'haiku' not in json.dumps(body).lower()
+    assert sent['model'] == 'claude-sonnet-5-5' and sent['effort'] == 'low'
     assert out.model.status == 'live' and out.model.input_tokens == 1000
     assert llm_gate._memory.today() > 0
     llm_gate.reset_for_tests()
@@ -378,7 +368,7 @@ def test_offline_by_default_and_fake_mode_never_touch_the_network(monkeypatch, t
         raise AssertionError('network call attempted')
     block_network(monkeypatch, message='network call attempted')
     monkeypatch.setattr('httpx.Client.send', blocked)
-    monkeypatch.delenv('OPENAI_API_KEY', raising=False)
+    monkeypatch.delenv('ANTHROPIC_API_KEY', raising=False)
     client = TestClient(create_app(CaseStore(tmp_path / 'cases.sqlite')))
     text = 'We want vinyl siding on the north wall of a two-storey house.'
     for env, status in (({}, 'off'), ({'BATATIS_LIVE': '1'}, 'off'), ({'BATATIS_PROVIDER': 'fake'}, 'fake')):

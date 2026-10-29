@@ -15,6 +15,7 @@ from engine import drafting_sources
 from engine.api import create_app
 from engine.ccmc import Assessment, RegistrySearch, RegistryUnavailable
 from engine.codes import Codes
+from engine.drafting_generation import GENERATION_ATTEMPTS
 from engine.drafting_provider import DraftingProvider, DraftingUnavailable, configured_provider
 from engine.drafting_questions import open_questions
 from engine.completeness import check_completeness
@@ -263,7 +264,7 @@ def test_invalid_or_unsafe_output_never_reaches_saved_case(app, change):
     assert response.status_code == 503, response.text
     assert 'no writing was saved' in response.json()['detail']
     assert store.get(case.id).drafting is None and store.get(case.id).version == case.version
-    assert len(connection.calls) == 1
+    assert [c[0] for c in connection.calls] == ['applicant_drafts'] * GENERATION_ATTEMPTS
 
 
 def test_real_quote_does_not_make_unsupported_claim_grounded(app):
@@ -274,7 +275,8 @@ def test_real_quote_does_not_make_unsupported_claim_grounded(app):
         reason='The actual source describes timber and drainage, and does not state a steel anchor exists.')
     response = run(app)
     assert response.status_code == 503 and store.get(case.id).drafting is None
-    assert len(connection.calls) == 2
+    assert [c[0] for c in connection.calls] == ['applicant_drafts', 'applicant_draft_audit'] * GENERATION_ATTEMPTS
+    assert 'unsupported by their quotes' in connection.calls[2][2]['previous_attempt_rejected_because']
 
 
 def test_applicant_code_allegation_is_not_whitelisted_legal_authority(app):

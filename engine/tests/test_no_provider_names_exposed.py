@@ -229,7 +229,7 @@ def test_document_review_routes_and_legacy_records_name_no_provider(tmp_path, mo
         reviewed = client.post(f'/cases/{case_id}/intake',
                                json={'text': 'Read the attached brief.', 'file_ids': [uploaded.json()['id']]})
         assert reviewed.status_code == 200
-        assert reviewed.json()['record']['review']['model'] == 'review-1'
+        assert reviewed.json()['record']['review']['model'] == 'review-3'
         assert client.get(f'/cases/{case_id}/intake').status_code == 200
         stored = store.get(case_id)
         stored.intake.review.model = 'gpt-6-luna'
