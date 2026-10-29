@@ -189,7 +189,9 @@ class CaseStore(FileAccountsMixin):
             self.init_accounts(con)
 
     def _connect(self):
-        con = sqlite3.connect(self.path, timeout=5)
+        # Every account read takes BEGIN IMMEDIATE, and a case can be megabytes of identify ledger, so a poll
+        # during a job's save can wait several seconds. Wait for the lock rather than answer 500.
+        con = sqlite3.connect(self.path, timeout=30)
         con.execute('PRAGMA foreign_keys=ON')
         return con
 
