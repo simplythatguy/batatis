@@ -81,7 +81,7 @@ test("gap answers join the statement after it is accepted; professional question
   const h = await harness(s);
   let tree = await h.render();
   assert.equal(nodes(rows(tree)[1], (n) => n.type === "input").length, 0, "nothing is appended before the wording is accepted");
-  await button(rows(tree)[1], "Accept")[0].props.onClick();
+  await button(tree, "Accept all")[0].props.onClick();
   tree = await h.render();
   const input = nodes(rows(tree)[1], (n) => n.type === "input");
   assert.equal(input.length, 1);
@@ -134,4 +134,31 @@ test("the review screen replaces the six cards only while drafting can run", () 
   const latest = statementDrafts({ drafts: [DRAFTS[0], { ...DRAFTS[0], id: "d-rationale-2" }] });
   assert.equal(latest.get("rationale")?.id, "d-rationale-2");
   assert.equal(latest.has("assumptions"), false);
+});
+
+test("while any draft waits, gap answers and own wording wait too, with one hint", async () => {
+  const s = store();
+  const h = await harness(s);
+  let tree = await h.render();
+  const hint = () => nodes(tree, (n) => n.props?.className === "cf-note" && /Accept or reject the drafts first/.test(text(n)));
+  assert.equal(hint().length, 1);
+  const gapInput = nodes(rows(tree)[5], (n) => n.type === "input")[0];
+  assert.equal(gapInput.props.disabled, true, "a gap answer would make the waiting drafts stale");
+  assert.equal(button(rows(tree)[5], "Add")[0].props.disabled, true);
+  assert.equal(button(rows(tree)[3], "Write it")[0].props.disabled, true, "so would writing a statement");
+  await button(rows(tree)[1], "Accept")[0].props.onClick();
+  tree = await h.render();
+  assert.equal(nodes(rows(tree)[1], (n) => n.type === "input")[0].props.disabled, true, "still held while others wait");
+  assert.equal(button(rows(tree)[1], "Edit")[0].props.disabled, true);
+  await button(tree, "Accept all")[0].props.onClick();
+  tree = await h.render();
+  assert.equal(hint().length, 0);
+  assert.equal(nodes(rows(tree)[5], (n) => n.type === "input")[0].props.disabled, false);
+  assert.equal(button(rows(tree)[3], "Write it")[0].props.disabled, false);
+  s.draftingStale = true;
+  s.drafting.drafts[0] = { ...s.drafting.drafts[0], id: "d-rationale-2", status: "draft" };
+  s.c = { ...s.c, process: { ...s.c.process, rationale: "" } };
+  tree = await h.render();
+  assert.equal(button(rows(tree)[3], "Write it")[0].props.disabled, false, "stale drafts are drafted again, so writing is not held");
+  h.unmount();
 });

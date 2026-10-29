@@ -12,6 +12,8 @@ import "./ApplicantDrafts.css";
 
 type Run = { done: number; total: number; stopped: boolean };
 
+const HELD = "Accept or reject the drafts first.";
+
 /** A draft that still waits on the applicant: wording to accept, for a statement not yet written. */
 const waiting = (draft: WordingDraft | undefined, written: string): WordingDraft | null =>
   draft?.status === "draft" && draft.text.trim() && !written.trim() ? draft : null;
@@ -37,6 +39,8 @@ export function StatementReview() {
   const pending = PROCESS_FIELDS.flatMap((p) => { const d = waiting(drafts.get(p.id), c.process[p.id]); return d ? [d] : []; });
   const open = PROCESS_FIELDS.filter((p) => !c.process[p.id].trim()).length;
   const canDecide = !locked && !busy && !draftingStale;
+  // Typing any statement changes what the drafts were written from, so every pending draft would go stale.
+  const held = (pending.length > 0 && !draftingStale) || busy;
 
   async function acceptAll() {
     const ids = pending.map((d) => d.id);
@@ -69,6 +73,7 @@ export function StatementReview() {
       const text = c.process[p.id];
       const written = Boolean(text.trim());
       const asks = waiting(draft, text);
+      const editing = writing === p.id && !held;
       const unchanged = written && draft?.status === "accepted" && draft.text === text;
       const state = written ? "Written" : asks ? "Draft to review" : generating ? "Drafting" : draft?.status === "rejected" ? "Rejected" : "Not written";
       const preview = written ? text : asks?.text ?? "";
@@ -87,8 +92,8 @@ export function StatementReview() {
           <div className="cf-statement-body">
             {asks ? <DraftContent draft={asks} sources={drafting?.sources ?? []} caseId={engineId} c={c} />
               : unchanged && draft ? <DraftContent draft={{ ...draft, questions: [] }} sources={drafting?.sources ?? []} caseId={engineId} c={c} />
-                : written && writing !== p.id ? <p className="cf-statement-text">{text}</p> : null}
-            {writing === p.id && <textarea className="cf-uline is-area" rows={3} aria-label={p.label} value={text} onChange={(e) => setText(p.id, e.target.value)} placeholder="In your own words…" />}
+                : written && !editing ? <p className="cf-statement-text">{text}</p> : null}
+            {editing && <textarea className="cf-uline is-area" rows={3} aria-label={p.label} value={text} onChange={(e) => setText(p.id, e.target.value)} placeholder="In your own words…" />}
             {!asks && gaps.length > 0 && <ul className="cf-statement-gaps">{gaps.map((q, i) => {
               const key = `${draft!.id}:${i}`;
               return <li key={key}>
@@ -98,8 +103,8 @@ export function StatementReview() {
                     : <label>
                       <span className="cf-draft-kind">{q.text}</span>
                       <span className="cf-statement-answer">
-                        <input className="cf-uline" value={answers[key] ?? ""} disabled={locked} onChange={(e) => setAnswers((a) => ({ ...a, [key]: e.target.value }))} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); append(p.id, key); } }} placeholder="Your answer, in a sentence" />
-                        <button type="button" className="cf-btn is-sm" disabled={locked || !answers[key]?.trim()} onClick={() => append(p.id, key)}>Add</button>
+                        <input className="cf-uline" value={answers[key] ?? ""} disabled={locked || held} title={held ? HELD : undefined} onChange={(e) => setAnswers((a) => ({ ...a, [key]: e.target.value }))} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); if (!held) append(p.id, key); } }} placeholder="Your answer, in a sentence" />
+                        <button type="button" className="cf-btn is-sm" disabled={locked || held || !answers[key]?.trim()} onClick={() => append(p.id, key)}>Add</button>
                       </span>
                     </label>}
               </li>;
@@ -108,8 +113,8 @@ export function StatementReview() {
               {asks ? <>
                 <button type="button" className="cf-btn is-sm" disabled={!canDecide} onClick={() => { setRun(null); void decide.current(asks.id, "accept"); }}><CIcon name="check" size={14} />Accept</button>
                 <button type="button" className="cf-btn is-ghost is-sm" disabled={!canDecide} onClick={() => { setRun(null); void decide.current(asks.id, "reject"); }}>Reject</button>
-              </> : <button type="button" className="cf-link-btn" disabled={locked} aria-expanded={writing === p.id} onClick={() => setWriting((w) => w === p.id ? null : p.id)}>
-                {writing === p.id ? "Done" : written ? "Edit" : "Write it"}
+              </> : <button type="button" className="cf-link-btn" disabled={locked || held} title={held ? HELD : undefined} aria-expanded={editing} onClick={() => setWriting((w) => w === p.id ? null : p.id)}>
+                {editing ? "Done" : written ? "Edit" : "Write it"}
               </button>}
             </div>
           </div>
@@ -118,6 +123,7 @@ export function StatementReview() {
     })}</ul>
     {generating && <p className="cf-note" role="status"><span className="cf-dot is-pending cf-pulse" aria-hidden="true" />Drafting your case. This can take a few minutes.</p>}
     {running && <p className="cf-note" role="status"><span className="cf-dot is-pending cf-pulse" aria-hidden="true" />Accepting {run.done + 1} of {run.total}…</p>}
+    {held && !busy && <p className="cf-note">{HELD}</p>}
     {draftingStale && !generating && <p className="cf-note" role="status"><span className="cf-dot is-warning" aria-hidden="true" />Your answers changed since these drafts.</p>}
     {(run?.stopped || draftingError) && <p className="cf-note" role="alert"><span className="cf-dot is-blocking" aria-hidden="true" />
       {run?.stopped && `Accepted ${run.done} of ${run.total}. The rest are still waiting. `}{draftingError}
