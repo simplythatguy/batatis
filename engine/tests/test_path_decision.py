@@ -1,4 +1,6 @@
 """W2 path: a firm check chooses the package. An unknown fork does not open one."""
+from pathlib import Path
+
 import pytest
 
 from engine.codes import Codes
@@ -150,3 +152,17 @@ def test_section_c_lookup_miss_names_the_id():
         section_c_rows(['1.3.3.3.(1)'], Codes())
     with pytest.raises(KeyError, match=r'Section C lookup missed 9\.99\.99\.99\.\(1\)'):
         section_c_rows(['9.99.99.99.(1)'], Codes())
+
+
+def test_the_screen_reads_the_same_departure_and_follows_words_as_the_engine():
+    """web/src/pathDecision.ts repeats engine/intake/fork.py's cues; a cue added to one must reach the other."""
+    import re as _re
+    from engine.intake import fork as _fork
+    web = (Path(__file__).resolve().parents[2] / 'web/src/pathDecision.ts').read_text()
+
+    def web_pattern(name: str) -> str:
+        block = web.split(f'const {name} = new RegExp(', 1)[1].split('"i",', 1)[0]
+        return ''.join(_re.findall(r'String\.raw`([^`]*)`', block))
+
+    assert web_pattern('DEPARTS') == _fork._DEPARTS.pattern.removeprefix('(?i)')
+    assert web_pattern('FOLLOWS') == _fork._FOLLOWS.pattern.removeprefix('(?i)')

@@ -69,7 +69,10 @@ const DEPARTS = new RegExp(
   String.raw`|\breplacing\s+the\s+required\b|\bnot\s+to\s+meet\b|\bagainst\s+the\s+direction\b|\b(?:left|leave|leaving)\s+(?:fully\s+)?exposed\b` +
   String.raw`|\bnot\s+(?:a|one\s+of\s+the)\b[^.]{0,40}\bprescriptive\b|\bon\s+the\s+strength\s+of\b[^.]{0,40}\balone\b` +
   String.raw`|\b\d+\s*%\s+(?:less|lower|fewer|smaller)\b|\b(?:just|only)\s+one\s+(?:\w+\s+)?(?:exit|stair)\b` +
-  String.raw`|\bonly\b(?=.{0,40}\b(?:apart|procedure|checks?|data|test|alone|route|values?)\b)|\bpartly\b|\blet\s+the\b`,
+  String.raw`|\bonly\b(?=.{0,40}\b(?:apart|procedure|checks?|data|test|alone|route|values?)\b)|\bpartly\b|\blet\s+the\b` +
+  String.raw`|\b(?:rule|requirement|limit|provision)s?\b[^.?!]{0,40}\b(?:set\s+aside|waived|relaxed)\b` +
+  String.raw`|\b(?:set\s+aside|waive|relax)\s+(?:the|this|that)\s+(?:[\w-]+\s+)?(?:rule|requirement|limit|provision)s?\b` +
+  String.raw`|\bwould\s+rather\b`,
   "i",
 );
 const FOLLOWS = new RegExp(

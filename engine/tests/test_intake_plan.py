@@ -154,6 +154,30 @@ def test_fork_on_labelled_cases(capsys):
     assert report['not_indicated'][0] / report['not_indicated'][2] >= 0.9
 
 
+def test_no_real_alberta_variance_reads_as_following_the_code():
+    """The 24 published variances in docs/research/2026-10-23-elephant each departed from an acceptable solution.
+
+    The workflow bakeoff found one read as "not indicated": an owner who "would rather install a regular passenger
+    elevator" and asks whether "the stretcher-size rule [can] be set aside", while the car "would meet the minimum"
+    size for a lift."""
+    records = json.loads((ROOT / 'docs/research/2026-10-23-elephant/cases-alberta.json').read_text())
+    records = records if isinstance(records, list) else records['cases']
+    variances = [r for r in records if r['type'] == 'variance']
+    assert len(variances) == 24
+    assert [r['id'] for r in variances if assess(r['description']).variance_needed == 'not_indicated'] == []
+
+
+@pytest.mark.parametrize('text, expected', [
+    ('We are asking for the stretcher-size rule to be set aside.', 'likely'),
+    ('Can the stretcher-size rule be set aside here?', 'unknown'),        # a question to the tool decides nothing
+    ('We ask that the requirement be waived for this small shed.', 'likely'),
+    ('The owner would rather install a regular passenger elevator.', 'likely'),
+    ('We set aside space in the basement for storage and our house follows the code.', 'not_indicated'),
+])
+def test_fork_reads_a_request_to_set_a_rule_aside(text, expected):
+    assert assess(text).variance_needed == expected
+
+
 def test_fork_wording_keeps_the_two_halves_distinct():
     ids = [h.id for h in HALVES]
     assert ids == ['variance_request', 'alternative_solution']
