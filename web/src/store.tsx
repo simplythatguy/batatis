@@ -77,8 +77,9 @@ interface Store {
   draftingStale: boolean;
   draftActivity: ApplicantDraftActivity;
   draftingError: string;
-  generateApplicantDrafts: () => Promise<void>;
-  decideApplicantDraft: (draftId: string, decision: "accept" | "reject") => Promise<void>;
+  /** Each resolves true once the server committed this command; false when it failed or did not run. */
+  generateApplicantDrafts: () => Promise<boolean>;
+  decideApplicantDraft: (draftId: string, decision: "accept" | "reject") => Promise<boolean>;
   retryApplicantDrafts: () => Promise<void>;
   reading: Reading;
   /** Read the description and attached PDFs (intake), then check the code (identify). Explicit: Start and Continue. */
@@ -310,7 +311,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const jobRequestKeys = useRef(new Map<string, { key: string; replaces?: string }>());
   const jobActionNotes = useRef(new Map<string, string>());
   const activeSubmit = useRef<{ generation: number; session: number; revision: number; caseId: string; dispatched: boolean; ctl: AbortController; promise: Promise<void> } | null>(null);
-  const activeDraftWrite = useRef<{ session: number; ctl: AbortController; promise: Promise<void> } | null>(null);
+  const activeDraftWrite = useRef<{ session: number; ctl: AbortController; promise: Promise<boolean> } | null>(null);
   const draftAccountSession = useRef(accountSession());
   const draftRetry = useRef<ApplicantDraftCommand | null>(null);
   const [draftRecord, setDraftRecord] = useState<{ record: DraftingRecord; basis: string } | null>(null);
@@ -741,8 +742,9 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   }
 
   /** Draft metadata is server state. Only an accepted canonical fact enters the local answer model. */
-  function writeApplicantDraft(command: ApplicantDraftCommand): Promise<void> {
-    if (activeDraftWrite.current) return activeDraftWrite.current.promise;
+  function writeApplicantDraft(command: ApplicantDraftCommand): Promise<boolean> {
+    // Another write is in flight: this command is not sent.
+    if (activeDraftWrite.current) return activeDraftWrite.current.promise.then(() => false);
     const token = renderGeneration, session = renderSession, version = revision.current, user = account.user;
     let selectedId = engineCaseId();
     const ctl = new AbortController();
@@ -750,15 +752,15 @@ export function CaseProvider({ children }: { children: ReactNode }) {
       && getAccountState().phase === "signed-in" && Boolean(user) && getAccountState().user === user
       && (!selectedId || engineCaseId() === selectedId);
     const current = () => live() && revision.current === version;
-    if (!live()) return Promise.resolve();
+    if (!live()) return Promise.resolve(false);
     if (activeSubmit.current || (selectedId && (lockedCase(selectedId) || isReadOnlyCase(selectedId)))) {
       setDraftingError(activeSubmit.current ? "Wait for submission to finish." : "Drafting is available only for your editable application.");
-      return Promise.resolve();
+      return Promise.resolve(false);
     }
     draftRetry.current = command;
     setDraftingError("");
     setDraftActivity(command.kind === "generate" ? { kind: "generating" } : { kind: "deciding", draftId: command.draftId });
-    const promise = enqueue(async () => {
+    const promise = enqueue(async (): Promise<boolean> => {
       try {
         if (!current()) throw new Error("Your answers changed. Review them, then try drafting again.");
         if (selectedId && goneCase.current === selectedId) throw new Error(GONE_NOTE);
@@ -766,7 +768,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         if (selectedId && needsReconcile(selectedId)) throw new EngineError(409, CONFLICT_TEXT);
         if (selectedId && (lockedCase(selectedId) || isReadOnlyCase(selectedId))) throw new Error("This saved application is read-only.");
         const id = await performSync(current, ctl.signal);
-        if (!live()) return;
+        if (!live()) return false;
         if (!current()) throw new Error("Your answers changed while saving. Try again with your latest answers.");
         if (!id || !syncState.current.saved) throw new Error(syncState.current.detail || "Save your answers before drafting.");
         selectedId = id;
@@ -788,7 +790,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         const saved = command.kind === "generate"
           ? await engine.generateApplicantDrafts(id, expected, ctl.signal)
           : await engine.decideApplicantDraft(id, command.draftId, expected, command.decision, ctl.signal);
-        if (!live()) return;
+        if (!live()) return false;
         // The server committed even if the applicant edited while waiting. Advance CAS before the
         // next queued autosave; replace only the accepted field if that field still matches.
         acknowledgeWrite(id, saved.version);
@@ -806,8 +808,9 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         if (editedWhileWaiting) {
           setDraftingError("Your input changed while drafting. Your edits are kept; generate fresh drafts before deciding.");
         }
+        return true;
       } catch (error) {
-        if (!live()) return;
+        if (!live()) return false;
         if (isCaseGone(error) && selectedId) {
           goneCase.current = selectedId;
           markGone("case not found");
@@ -830,6 +833,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
         setDraftingError(isCaseGone(error) ? GONE_NOTE : isCaseConflict(error)
           ? "The saved application changed. Review the save conflict, then draft again."
           : error instanceof Error ? error.message : failureText(error));
+        return false;
       }
     });
     const active = { session, ctl, promise };
@@ -1964,7 +1968,7 @@ export function CaseProvider({ children }: { children: ReactNode }) {
     draftActivity, draftingError,
     generateApplicantDrafts: () => writeApplicantDraft({ kind: "generate" }),
     decideApplicantDraft: (draftId, decision) => writeApplicantDraft({ kind: "decide", draftId, decision }),
-    retryApplicantDrafts: () => draftRetry.current ? writeApplicantDraft(draftRetry.current) : Promise.resolve(),
+    retryApplicantDrafts: () => draftRetry.current ? writeApplicantDraft(draftRetry.current).then(() => {}) : Promise.resolve(),
     reading, readDescription, runIdentify,
     cancelReadingJob: kind => {
       const token = engineGeneration(), session = accountSession(), id = engineCaseId();

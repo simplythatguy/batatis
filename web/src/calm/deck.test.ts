@@ -7,6 +7,8 @@ import { DETAIL_IDS, factFor, getGaps, NOT_RIGHT, reducer } from "../model.ts";
 import type { Case } from "../types.ts";
 import { aliasKey, alternativeChoice, buildDeck, choicesFor, deckProgress, deferralFor, gapKey, mergeQueue, preCaseState, questionProgress, QUESTION_PROGRESS_LABEL, sectionProgress } from "./deck.ts";
 import { journeyAnswerAction, journeyProgress, STAGES } from "./journey.ts";
+import { DEPARTURE_MAX, departureComparison, departureRecordsVariance, fitDeparture } from "./departure.ts";
+import { decidePath } from "../pathDecision.ts";
 import { calmHref, resolveRoute } from "./routes.ts";
 
 const paperworkRows = (items: ReturnType<typeof buildDeck>) => items.find((item) => item.kind === "paperwork")?.paperworkRows ?? [];
@@ -244,6 +246,31 @@ test("planner cards follow their form fields, and each field has one editable ca
   assert.equal(paperworkRows(all).filter((i) => i.ref === "mailingAddress").length, 1);
 });
 
+test("after the AI ranking, narrowing questions are not asked; conflicts and paperwork still are", () => {
+  const narrowing = ["intake.part4_design", "intake.assembly.description", "intake.sprinklered"];
+  const planRefs = (c: Case, o = {}) => buildDeck(c, getGaps(c), o).filter((i) => i.kind === "plan").map((i) => i.ref);
+  const conflict = { ...question("storeys", "You wrote 2 storeys and 3 storeys. Which is it?"), id: "intake.conflict.storeys", kind: "conflict" as const };
+  const record = intakeResult({ plan: { questions: [conflict, ...intakeResult().record.plan!.questions] } }).record;
+  const house = reducer(undecidedHouse(), { type: "noteIntakeRecord", record });
+  const ranked = reducer(house, { type: "noteIdentify", result: identifyResult({ trace: { picks: ["9.10.14.4."], stages: [] } as unknown as IdentifyResult["trace"] }) });
+  assert.deepEqual(planRefs(ranked), ["intake.conflict.storeys"], "a conflict between two readings is still the applicant's to settle");
+  assert.ok(paperworkRows(buildDeck(ranked, getGaps(ranked))).some((i) => i.ref === "legalDescription"), "administrative questions stay on the paperwork sheet");
+  const clean = reducer(house, { type: "noteIdentify", result: identifyResult({ trace: { picks: [], stages: [{ stage: "model_rank", errors: 0 }] } as unknown as IdentifyResult["trace"] }) });
+  assert.ok(!planRefs(clean).some((r) => narrowing.includes(r)), "a ranking pass that picked nothing still read the description");
+  const failed = reducer(house, { type: "noteIdentify", result: identifyResult({ trace: { picks: [], stages: [{ stage: "model_rank", errors: 1 }] } as unknown as IdentifyResult["trace"] }) });
+  assert.deepEqual(planRefs(failed).filter((r) => narrowing.includes(r)), narrowing, "without the ranking the planner narrows the search as before");
+  assert.deepEqual(planRefs(house).filter((r) => narrowing.includes(r)), narrowing);
+});
+
+test("narrowing questions wait for the first identification instead of appearing and then vanishing", () => {
+  const c = undecidedHouse();
+  const narrowing = (o: Parameters<typeof buildDeck>[2]) => buildDeck(c, getGaps(c), o).filter((i) => i.kind === "plan").length;
+  assert.equal(narrowing({ identify: "running" }), 0);
+  assert.equal(narrowing({ identify: "idle", intake: "done" }), 0, "between reading and the code check");
+  assert.equal(narrowing({ identify: "error" }), 3, "a failed check falls back to the questions");
+  assert.equal(narrowing({ identify: "idle", intake: "idle" }), 3, "an application opened later, never checked, still asks");
+});
+
 test("Not sure on a planner question never blocks and is not asked again on its form card", () => {
   let c = demoCase();
   const record = intakeResult({ plan: { not_sure: ["intake.mailing_address"] } }).record;
@@ -268,6 +295,31 @@ test("an explicit variance request opens the six process fields", () => {
   const deck = buildDeck(c, getGaps(c));
   assert.equal(deck.filter((item) => item.kind === "process").length, 6);
   assert.equal(deck.some((item) => item.kind === "section-d"), true);
+});
+
+test("while drafting can run, the six statements are one review card that counts as six", () => {
+  let c = emptyCase("homebuilder");
+  c.facts = [{
+    id: "vr", field: "variance_requested", value: true, kind: "pointed", status: "confirmed",
+    source: { type: "user_text", ref: "request", quote: "variance" },
+  }];
+  const review = (x: Case) => buildDeck(x, getGaps(x), { statements: "review", includeDone: true });
+  let deck = review(c);
+  assert.equal(deck.filter((item) => item.kind === "process").length, 0);
+  const card = deck.find((item) => item.kind === "drafts")!;
+  assert.equal(card.stage, "case");
+  assert.deepEqual(card.counts, { you: { open: 6, done: 0 } });
+  assert.equal(deferralFor(card), null, "Continue leaves it open on Review; there is nothing to defer");
+  const caseStage = (items: typeof deck) => journeyProgress(items).stages.find((s) => s.stage === "case")!;
+  const cards = buildDeck(c, getGaps(c), { statements: "cards", includeDone: true });
+  assert.deepEqual(caseStage(deck), caseStage(cards), "progress counts the same either way");
+  c = reducer(c, { type: "setProcess", field: "risk", value: "Smoke could reach the neighbour's window." });
+  deck = review(c);
+  assert.deepEqual(deck.find((item) => item.kind === "drafts")?.counts, { you: { open: 5, done: 1 } });
+  for (const id of ["rationale", "mitigation", "assumptions", "maintenance", "qualifications"] as const) c = reducer(c, { type: "setProcess", field: id, value: "Written." });
+  assert.equal(review(c).find((item) => item.kind === "drafts")?.done, true);
+  assert.equal(buildDeck(c, getGaps(c), { statements: "review" }).some((item) => item.kind === "drafts"), false);
+  assert.equal(buildDeck(c, getGaps(c), { statements: "cards", includeDone: true }).filter((item) => item.kind === "process").length, 6, "the fallback keeps one card per statement");
 });
 
 test("an acceptable path does not ask for a departure sentence", () => {
@@ -377,7 +429,7 @@ test("a card answered Yes asks for the departure until the engine confirms it", 
   c = reducer(c, { type: "answerCandidate", id: card.ref, answer: "yes" });
   const deck = buildDeck(c, getGaps(c), { includeDone: true });
   const departure = deck.find((i) => i.kind === "departure")!;
-  assert.equal(departure.title, "What does your design do instead?");
+  assert.equal(departure.title, "How does your design differ?");
   assert.equal(departure.provision, card.provision, "the card names the sentence it departs from");
   assert.equal(departure.done, false);
   assert.equal(deck.findIndex((i) => i.kind === "departure"), deck.findIndex((i) => i.key === card.key) + 1, "it follows its own card");
@@ -385,6 +437,43 @@ test("a card answered Yes asks for the departure until the engine confirms it", 
 
   const confirmed = { departure_status: "confirmed", departure: "A thinner assembly." } as BenchmarkRecord;
   assert.equal(buildDeck(c, getGaps(c), { benchmark: confirmed }).find((i) => i.kind === "departure"), undefined, "a confirmed departure is not asked twice");
+});
+
+test("the departure card compares the code, the design and the drafted difference", () => {
+  let c = demoCase();
+  c = reducer(c, { type: "noteIdentify", result: identifyResult() });
+  const card = c.candidates.find((a) => a.provision.startsWith("9.10.14.4"))!;
+  const explanation = { ...card, id: "dx", field: `section_c.${card.provision}.explanation`, text: "The code limits openings this close to the line; the design adds more window area." };
+  const lines = departureComparison(c, card, { drafts: [explanation as never] });
+  assert.equal(lines.code, card.quote.text.trim(), "the code line is the card's verbatim sentence");
+  assert.equal(lines.design, DEPARTURE, "the design line is the applicant's own words behind the alternative");
+  assert.equal(lines.gap, explanation.text);
+  assert.equal(lines.departure, DEPARTURE);
+  assert.equal(departureComparison(c, card, null).gap, undefined, "no drafted difference, no third line");
+  const other = { ...explanation, field: "section_c.3.1.6.8.(1).explanation" };
+  assert.equal(departureComparison(c, card, { drafts: [other as never] }).gap, undefined, "another sentence's explanation is not this gap");
+  const ranked = { ...card, quote: { ...card.quote, source: "ranking" as const } };
+  assert.equal(departureComparison(c, ranked, null).code, undefined, "a ranking reason is never shown as code text");
+  const bare = { ...c, facts: c.facts.filter((f) => f.field !== "alternative") };
+  assert.equal(departureComparison(bare, card, null).design, DEMO.trim(), "without an alternative the description stands in");
+  const long = fitDeparture(`${"The east wall has larger windows. ".repeat(12)}`);
+  assert.ok(long.length <= DEPARTURE_MAX && long.endsWith("."), "whole sentences within the engine's limit");
+  assert.equal(fitDeparture("x".repeat(400)).length, DEPARTURE_MAX);
+  for (const word of ["complies", "meets", "safe", "acceptable", "approved"]) {
+    assert.doesNotMatch(buildDeck(c, getGaps(c)).find((i) => i.kind === "departure")?.title ?? "How does your design differ?", new RegExp(word, "i"));
+  }
+});
+
+test("confirming a departure records the variance route unless the route already says so", () => {
+  const open = undecidedHouse();
+  assert.equal(decidePath(open).firm, false);
+  assert.equal(departureRecordsVariance(open), true);
+  const recorded = reducer(open, { type: "setDetail", field: "journey.route", value: "variance", section: "B" });
+  assert.equal(departureRecordsVariance(recorded), false, "already recorded");
+  const different = reducer(open, { type: "setDetail", field: "journey.route", value: "different", section: "B" });
+  assert.equal(departureRecordsVariance(different), false, "already on the variance path");
+  const standard = reducer(open, { type: "setDetail", field: "journey.route", value: "standard", section: "B" });
+  assert.equal(departureRecordsVariance(standard), true, "a confirmed departure moves an unforced standard choice to the variance");
 });
 
 /* —— Unchanged rules —— */

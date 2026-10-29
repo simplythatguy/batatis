@@ -1,7 +1,9 @@
-import type { WordingDraft, Case as EngineCase } from "./api/types.gen";
+import type { DraftingRecord, WordingDraft, Case as EngineCase } from "./api/types.gen";
+import type { AccountPhase } from "./calm/account";
 import { latestLocalFacts, localField } from "./intakeFields";
+import { PROCESS_FACT, PROCESS_FIELDS } from "./model";
 import { factSignature } from "./rules";
-import type { Case, Fact } from "./types";
+import type { Case, Fact, ProcessFieldId } from "./types";
 
 export type ApplicantDraftCommand =
   | { kind: "generate" }
@@ -63,4 +65,26 @@ export function unchangedDraftField(before: Case, current: Case, field: string):
     return fact ? factSignature(fact) : null;
   };
   return signature(before) === signature(current);
+}
+
+/** The latest draft for each process statement, in the form's order (absent when none was drafted). */
+export function statementDrafts(record: Pick<DraftingRecord, "drafts"> | null): Map<ProcessFieldId, WordingDraft> {
+  const out = new Map<ProcessFieldId, WordingDraft>();
+  for (const p of PROCESS_FIELDS) {
+    const draft = record?.drafts.filter(d => localField(d.field) === localField(PROCESS_FACT[p.id])).at(-1);
+    if (draft) out.set(p.id, draft);
+  }
+  return out;
+}
+
+/**
+ * The six statements are reviewed on one screen while drafting can run. Signed out, a saved
+ * (read-only) application, or a drafting request that failed or returned nothing for them falls
+ * back to one card per statement.
+ */
+export function statementReview(s: { phase: AccountPhase; readOnly: boolean; drafting: Pick<DraftingRecord, "drafts" | "stale"> | null; error: string }): boolean {
+  if ((s.phase !== "signed-in" && s.phase !== "probing") || s.readOnly) return false;
+  const drafted = statementDrafts(s.drafting).size > 0;
+  if (s.error && !drafted) return false;
+  return drafted || !s.drafting || s.drafting.stale;
 }
