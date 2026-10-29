@@ -8,6 +8,20 @@
 # Docs: docs/agents/git-workflow.md
 set -uo pipefail
 
+case "${OSTYPE:-}" in
+  msys*|cygwin*|win32*)
+    helper="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/local-app.ps1"
+    if command -v cygpath >/dev/null 2>&1; then helper=$(cygpath -w "$helper"); fi
+    for shell in powershell.exe pwsh.exe; do
+      if command -v "$shell" >/dev/null 2>&1; then
+        MSYS2_ARG_CONV_EXCL='*' exec "$shell" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$helper" "$@"
+      fi
+    done
+    echo "local-app: Windows PowerShell or PowerShell 7 is required" >&2
+    exit 2
+    ;;
+esac
+
 WEB_PORT=3000
 ENGINE_PORT=8000
 for tool in lsof curl; do

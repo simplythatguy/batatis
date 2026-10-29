@@ -16,6 +16,7 @@ from engine.models import Fact, Source, now
 from engine.models_identify import ArticleDecision, IdentifyResult
 from engine.section_c import section_c_rows
 
+
 _ARTICLE = re.compile(r'^(\d+\.\d+\.\d+\.\d+\.)')
 DECISIONS = ('yes', 'no', 'not_sure')
 CITATION_PREFIX = 'citation.'
