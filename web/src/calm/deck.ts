@@ -381,7 +381,7 @@ function departureItem(a: Candidate): UnpositionedItem {
     kind: "departure",
     section: "C",
     eyebrow: sectionEyebrow("C"),
-    title: "What does your design do instead?",
+    title: "How does your design differ?",
     context: "",
     why: "Batatis names this sentence as the benchmark in Section C of the application and records your words as the departure. The officer decides whether the departure is acceptable; Batatis never does.",
     ref: a.id,

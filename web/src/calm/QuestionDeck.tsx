@@ -41,6 +41,8 @@ import { useAccount } from "./account";
 import { useQuestionDraft } from "./useQuestionDraft";
 import { ApplicantDraftLink, processDraftField } from "./ApplicantDrafts";
 import { StatementReview } from "./StatementReview";
+import { departureComparison, departureRecordsVariance } from "./departure";
+import { DepartureCompare } from "./DepartureCompare";
 import { UnitInput } from "./UnitInput";
 import { measurementText, metricUnit, parseMeasurement } from "./units";
 import { todayIn, toIso } from "./calendarDate";
@@ -293,9 +295,11 @@ function PlanBody({ item, onPick, draft, setDraft, note }: { item: Shown; onPick
   );
 }
 
+const DEPARTURE_EDIT = "edit";
+
 /** Render the current card’s inputs, saved answer, source details and loading or failure feedback. */
 function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote, extras, note, busy, onReload, position, focusRow, onPaperworkDone }: { item: Shown; picked?: string; onPick: (value: string) => void; draft: string; setDraft: (v: string) => void; openDrawer: (s: DrawerState) => void; planNote: string; extras: ReturnType<typeof useDeckExtras>["extras"]; note: string; busy: boolean; onReload?: () => void; position: number; focusRow: string | null; onPaperworkDone: () => void }) {
-  const { c, dispatch } = useCase();
+  const { c, dispatch, drafting } = useCase();
   const session = useSession();
   const [tips, setTips] = useState(false);
   const choices = choicesFor(item);
@@ -444,10 +448,16 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
         </button>
       ) : null}
       {item.kind === "departure" ? (
-        <div className="cf-inline-answer">
-          <label className="cf-sr" htmlFor={`field-${item.ref}-departure`}>What your design does instead</label>
-          <textarea id={`field-${item.ref}-departure`} className="cf-uline is-area" rows={2} aria-label="What your design does instead" value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="In one sentence." />
-        </div>
+        <>
+          {picked === DEPARTURE_EDIT || !cand ? (
+            <div className="cf-inline-answer">
+              <label className="cf-sr" htmlFor={`field-${item.ref}-departure`}>What your design does instead</label>
+              <textarea id={`field-${item.ref}-departure`} className="cf-uline is-area" rows={2} aria-label="What your design does instead" value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="In one sentence." autoFocus={picked === DEPARTURE_EDIT} />
+            </div>
+          ) : <DepartureCompare lines={departureComparison(c, cand, drafting)} onEdit={() => onPick(DEPARTURE_EDIT)} />}
+          {busy && <p className="cf-note" role="status"><span className="cf-dot is-pending" aria-hidden="true" />Saving…</p>}
+          {!busy && note && <p className="cf-note" role="alert"><span className="cf-dot is-warning" aria-hidden="true" />{note}</p>}
+        </>
       ) : item.kind === "storeys" ? (
         <div className="cf-inline-answer">
           <label className="cf-sr" htmlFor="cf-storeys">Number of storeys</label>
@@ -585,7 +595,7 @@ function NoQuestionsYet() {
 
 /** Coordinate the visit queue, rule and checklist answers, and navigation through the case’s cards. */
 export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst: boolean }) {
-  const { c, engineId, gaps, dispatch, requestCheck, sectionCLookup, reading, answerPlan, answerChecklist, reloadChecklists, applicationStatus, decideRequirement } = useCase();
+  const { c, engineId, gaps, dispatch, requestCheck, sectionCLookup, reading, answerPlan, answerChecklist, reloadChecklists, applicationStatus, decideRequirement, drafting } = useCase();
   const session = useSession();
   const { app, locked, readOnly } = useCurrentApplication();
   const { onAnswer, onDeparture, decisionNoteFor } = useCandidateAnswer();
@@ -810,6 +820,13 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
     if (s.queue[s.index] !== key) goToKey(key);
   }
 
+  /** The departure the card would send: the typed words when editing, otherwise the compared design. */
+  function departureText(it: Shown): string {
+    const cand = c.candidates.find((a) => a.id === it.ref);
+    if (picked[it.key] === DEPARTURE_EDIT || !cand) return draft.trim();
+    return departureComparison(c, cand, drafting).departure;
+  }
+
   /** Check whether the current answer can advance, including pending writes and required reasons. */
   function canContinue(it: Shown): boolean {
     if (locked || busyKey === it.key || advanceAfter?.key === it.key) return false;
@@ -822,7 +839,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
     if (it.kind === "plan" || it.kind === "product-scope") return reading.busy !== it.ref && (it.done || Boolean(draft.trim()));
     if (it.kind === "question") return Boolean(draft.trim()) || it.done;
     if (it.kind === "storeys") return (Number.isInteger(Number(draft)) && Number(draft) > 0) || it.done;
-    if (it.kind === "departure") return busyKey !== it.key && Boolean(draft.trim());
+    if (it.kind === "departure") return busyKey !== it.key && Boolean(departureText(it));
     if (it.kind === "authority") return it.done || Boolean(c.authority);
     if (it.kind === "rule") return it.rule?.state !== "departs" || it.done || picked[it.key] === RULE_LEAVE;
     if (it.kind === "package-end") return true;
@@ -867,18 +884,23 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
     }
     if (item.kind === "departure") {
       const cand = c.candidates.find((a) => a.id === item.ref);
-      const text = draft.trim();
+      const text = departureText(item);
       if (!cand || !text) return;
-      setBusyKey(item.key);
-      noteFor(item.key, "");
+      const key = item.key;
+      const variance = departureRecordsVariance(c);
+      setBusyKey(key);
+      noteFor(key, "");
       void onDeparture(cand, text).then((error) => {
-        setBusyKey((k) => (k === item.key ? null : k));
+        setBusyKey((k) => (k === key ? null : k));
         if (error) {
-          noteFor(item.key, error);
+          // A refusal (for example wording the server will not record) opens the words to edit.
+          if (picked[key] !== DEPARTURE_EDIT) { setPicked((p) => ({ ...p, [key]: DEPARTURE_EDIT })); setDraft(text); }
+          noteFor(key, error);
           return;
         }
+        if (variance) dispatch({ type: "setDetail", field: "journey.route", value: "variance", section: "B" });
         setDraft("");
-        setAdvanceAfter({ key: item.key, generation: engineGeneration() });
+        setAdvanceAfter({ key, generation: engineGeneration() });
       });
       return;
     }
@@ -1084,6 +1106,11 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
   function pick(value: string) {
     if (!item || locked || busyKey === item.key || reading.busy === item.ref || advanceAfter?.key === item.key) return;
     if (value === "not_sure" || value === "unsure" || (value === "designer" && item.kind !== "role") || value === "later" || value === NOT_SURE_RULE) { deferCurrent(value === "designer" ? "designer" : value === "later" ? "later" : "not_sure"); return; }
+    if (item.kind === "departure") {
+      if (value === DEPARTURE_EDIT && !draft.trim()) setDraft(departureText(item));
+      setPicked((p) => ({ ...p, [item.key]: value }));
+      return;
+    }
     if (!item.plan && item.kind !== "condition") dispatch(clearJourneyAnswerAction(item));
     const advance = () => setAdvanceAfter({ key: item.key, generation: engineGeneration() });
     if (item.kind === "route") {
@@ -1267,7 +1294,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
             {item.section === "C" && (extras.failed.rules || extras.failed.case) && (
               <p className="cf-note" role="status"><span className="cf-dot is-warning" aria-hidden="true" />Rule checks didn’t load, so some rule questions may be missing. <button type="button" className="cf-link-btn" onClick={retryExtras}>Try again</button></p>
             )}
-            <OkRow label={item.kind === "understood" ? "Looks right" : "Continue"} primary={item.kind !== "paperwork" && (choicesFor(item).length === 0 || (item.done && !item.deferred) || item.kind === "authority" || (item.kind === "detail" && (picked[item.key] === "dismiss" || picked[item.key] === "edit-suggested")) || (item.kind === "condition" && (picked[item.key] ?? currentState(item)) === "does_not_apply"))} quiet={item.kind === "drafts" && !item.done} disabled={!canContinue(item)} onOk={next} typed={typed}>
+            <OkRow label={item.kind === "understood" ? "Looks right" : item.kind === "departure" && picked[item.key] !== DEPARTURE_EDIT ? "Confirm" : "Continue"} primary={item.kind !== "paperwork" && (choicesFor(item).length === 0 || (item.done && !item.deferred) || item.kind === "authority" || (item.kind === "detail" && (picked[item.key] === "dismiss" || picked[item.key] === "edit-suggested")) || (item.kind === "condition" && (picked[item.key] ?? currentState(item)) === "does_not_apply"))} quiet={item.kind === "drafts" && !item.done} disabled={!canContinue(item)} onOk={next} typed={typed}>
               <span className="cf-ok-more">
                 {deferralFor(item) && choicesFor(item).length === 0 && item.kind !== "authority" && <button type="button" className="cf-link-btn" disabled={locked || reading.busy === item.ref || busyKey === item.key} onClick={() => { const choice = deferralFor(item); if (choice) deferCurrent(choice.value); }}>{deferralFor(item)?.label}</button>}
                 <HelpButton item={item} n={n} open={why} onToggle={() => setWhy((v) => !v)} />
