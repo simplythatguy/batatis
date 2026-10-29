@@ -8,6 +8,8 @@ Each figure has one of three kinds:
 - **Measured** means a run in the Batatis repository produced it.
 - **Assumed** means we chose it. The basis is given.
 
+> **Update after PR #120 (merged the same night).** Intake, document review and drafting moved to Claude Sonnet 5.5 (US$2 / US$10 per million tokens). With this memo's token assumptions the base AI cost is about US$0.55 per application, not US$0.28; with every step on Claude Haiku 5.5 it is about US$0.04. The conclusions below hold: the AI is cents to well under a dollar, and rework avoided dominates.
+
 ## Bottom line
 
 1. **The AI is cheap, and it does not decide the case.** One application costs about **US$0.28 (C$0.39)** in model fees at list prices (range US$0.11 to US$2.05). Hosting at pilot volume adds about **C$0.62**. Our marginal cost is about **C$1 per application**. Paying half a person to keep the jurisdiction packs current and to give support adds about **C$60** (assumed).

@@ -46,7 +46,7 @@ The table-of-contents step raises the share of cited articles that reach the can
 
 The AI costs cents per application; people's time is the cost. Full model with sources: [cost model](../research/2026-10-28-bakeoff/cost-model.md).
 
-- About US$0.28 of model calls per application today, about US$0.04 if drafting moves to Haiku 5.5. The code-article ranking adds about US$0.002.
+- About US$0.55 of model calls per application with tonight's models (intake, document review and drafting on Claude Sonnet 5.5), and about US$0.04 if they all move to Claude Haiku 5.5. The code-article ranking adds about US$0.002. These use the cost model's token assumptions; no applicant has run the full flow with metering on.
 - An extra "more information" round on a custom application costs about C$3,600, most of it the builder's carrying cost while the project waits.
 - Batatis pays for itself if it saves one extra round in every 60 custom applications.
 
