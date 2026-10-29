@@ -84,7 +84,7 @@ export function AuthorityPicker({ options, value, onPick, label, suggested, unsu
         aria-activedescendant={open && shown[active] ? optionId(active) : undefined}
         autoComplete="off"
         spellCheck={false}
-        placeholder="Find an Alberta place"
+        placeholder={options.length <= 3 ? options.map((o) => o.name).join(" or ") : "Find an office"}
         value={query ?? selected?.name ?? (unsure ? "Not sure" : value)}
         onFocus={(e) => e.currentTarget.select()}
         onClick={show}

@@ -53,3 +53,10 @@ test("a supported office typed another way is listed once, and any other name is
   assert.deepEqual(options(), ["Red Deer", "Not sure"]);
   h.unmount();
 });
+
+test("an empty Office field names the offices Batatis prepares applications for", async () => {
+  const h = await componentHarness(new URL("./AuthorityPicker.tsx", import.meta.url), "AuthorityPicker", { "./authorityFilter": filter, "../config": config });
+  const tree = await h.render({ options: config.AUTHORITIES, value: "", label: "Office", onPick: () => {} });
+  assert.equal(nodes(tree, (node) => node.type === "input")[0].props.placeholder, "Calgary or Edmonton");
+  h.unmount();
+});
