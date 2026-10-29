@@ -262,30 +262,25 @@ def test_picture_statements_survive_settling_and_disagreeing_pictures_stay_a_con
 
 
 def test_hosted_vision_uses_image_content_parts_and_the_existing_meter(monkeypatch):
-    from engine import llm_gate
+    from engine import anthropic_json, llm_gate
     from engine.intake import model
     monkeypatch.setenv('BATATIS_LIVE', '1')
-    monkeypatch.setenv('OPENAI_API_KEY', 'synthetic-not-a-key')
+    monkeypatch.setenv('ANTHROPIC_API_KEY', 'synthetic-not-a-key')
     monkeypatch.delenv('BATATIS_STORE', raising=False)
     llm_gate.reset_for_tests()
     requests = []
-    class Response:
-        def raise_for_status(self):
-            pass
-        def json(self):
-            return {'choices': [{'message': {'content': '{"facts":[]}'}}], 'usage': {'prompt_tokens': 100, 'completion_tokens': 20}}
-    def post(self, url, json=None, headers=None):
-        requests.append(json)
-        return Response()
-    monkeypatch.setattr('httpx.Client.post', post)
+    def call(system, user, schema, **kw):
+        requests.append((user, kw))
+        return {'facts': []}, {'input_tokens': 100, 'output_tokens': 20}
+    monkeypatch.setattr('engine.anthropic_json.call', call)
     try:
         transport, status = model.default_transport()
         out = service.run('', [('a', 'a.png', picture())], transport=transport, status=status, pictures=True)
         assert out.files[0].image_pages_read == [1] and out.model.input_tokens == 100
-        [body] = requests
-        assert body['model'] == model.MODEL and body['reasoning_effort'] == model.EFFORT
-        assert 'service_tier' not in body
-        assert body['messages'][1]['content'][1]['type'] == 'image_url'
+        [(user, kw)] = requests
+        assert kw['model'] == model.MODEL and kw['effort'] == model.EFFORT
+        [text, image] = anthropic_json._content(user)
+        assert text['type'] == 'text' and image['type'] == 'image' and image['source']['type'] == 'base64'
         assert llm_gate._memory.today() > 0
     finally:
         llm_gate.reset_for_tests()

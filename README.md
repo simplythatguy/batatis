@@ -231,7 +231,7 @@ Twelve prompts still miss. Eight unresolved prompts were called a variance becau
 
 For applicants:
 
-1. **Describe the project.** Rules read facts, such as the owner and the address, from the description and from the text and fields of any PDFs. If AI is on, GPT-6 Luna, an OpenAI model, points at more facts, and each one must quote the text it came from. When you attach files, Luna also reviews them page by page, and the questions screen lists what it found.
+1. **Describe the project.** Rules read facts, such as the owner and the address, from the description and from the text and fields of any PDFs. If AI is on, Claude Sonnet 5.5, an Anthropic model, points at more facts, and each one must quote the text it came from. When you attach files, Sonnet also reviews them page by page, and the questions screen lists what it found.
 2. **Answer a few questions.** A rule-based planner picks up to five questions. It starts with conflicts in what you wrote, then facts that narrow down the code articles. The website then shows one card for each item that is still open. No AI writes the questions. This step is also where the path is chosen. See [How the path is chosen](#how-the-path-is-chosen).
 3. **Confirm the code articles.** Jev 1.13.0, a TypeSafe model that answers with a probability, scores all 2,080 articles in Division B of the code and reranks the top 60. Luna then reads the top 15 in full and quotes the sentences that apply. Batatis shows up to 10 articles, and you confirm each one. With AI off, or if scoring fails, a keyword search over CodeDB suggests articles instead.
 4. **Section C fills itself in.** The objectives, functions, and intent of each confirmed article come from the code's own tables in CodeDB. No AI is involved.
@@ -482,35 +482,41 @@ The app runs without any API key. Keys turn on the AI steps. Copy the example se
 cp .env.example .env
 ```
 
-`.env.example` holds two API keys and three switches:
+`.env.example` holds the API keys and three switches:
 
 ```dotenv
 OPENAI_API_KEY=
 OPENROUTER_API_KEY=
+ANTHROPIC_API_KEY=
 BATATIS_LIVE=0
 BATATIS_LIVE_ELEPHANT=0
 BATATIS_DAILY_SPEND_CAP_USD=5
 ```
 
-The AI steps in [How Batatis works](#how-batatis-works) need your OpenAI key and a TypeSafe key. The example file has no line for the TypeSafe key, so add one. Paste each key after its `=`, and set `BATATIS_LIVE=1`:
+The AI steps in [How Batatis works](#how-batatis-works) need your Anthropic key and a TypeSafe key. The example file has no line for the TypeSafe key, so add one. Paste each key after its `=`, and set `BATATIS_LIVE=1`:
 
 ```dotenv
-OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
 TYPESAFE_API_KEY=
 BATATIS_LIVE=1
 ```
 
 The OpenRouter key and `BATATIS_LIVE_ELEPHANT` are only for an optional alternative scorer, explained below.
 
+#### `ANTHROPIC_API_KEY`
+
+The Anthropic API runs Claude models. Batatis uses Claude Sonnet 5.5 to read more facts from descriptions and PDFs, to review attached files, and to draft the application's wording, and the assistant uses Claude when this key is set. Set `BATATIS_LIVE=1` to turn it on. A key that isn't tied to one workspace also needs `ANTHROPIC_WORKSPACE_ID`.
+
+Files that use it: [`engine/anthropic_json.py`](engine/anthropic_json.py), [`engine/drafting_provider.py`](engine/drafting_provider.py), [`engine/intake/model.py`](engine/intake/model.py), [`engine/intake/review.py`](engine/intake/review.py) and [`engine/routes_assist.py`](engine/routes_assist.py).
+
+Get a key at [platform.claude.com](https://platform.claude.com).
+
 #### `OPENAI_API_KEY`
 
-The OpenAI API runs GPT models. Batatis uses GPT-6 Luna, at medium reasoning effort, to read more facts from descriptions and PDFs, to review attached files, and to read the top 15 code articles in full. The assistant uses GPT-4.1 mini by default. If you set `ANTHROPIC_API_KEY`, which is not in the example file, the assistant uses Claude Sonnet 5.5 instead. Set `BATATIS_LIVE=1` to turn it on.
+Optional. The OpenAI API runs GPT models. Batatis can use GPT-6 Luna to read the top 15 code articles in full, and the assistant uses GPT-4.1 mini when no Anthropic key is set.
 
 Files that use it:
 
-- [`engine/llm_gate.py`](engine/llm_gate.py)
-- [`engine/intake/model.py`](engine/intake/model.py)
-- [`engine/intake/review.py`](engine/intake/review.py)
 - [`engine/identify/providers.py`](engine/identify/providers.py)
 - [`engine/routes_assist.py`](engine/routes_assist.py)
 

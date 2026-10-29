@@ -16,8 +16,7 @@ Nothing the model writes is kept on trust:
 
 The model sees the scrubbed copy of every text (engine.redact), as the intake model pass does, and its
 excerpts are checked against that copy. Live calls need BATATIS_LIVE=1 and pass the spend gate
-(engine.llm_gate). BATATIS_REVIEW_MODEL picks gpt-6-luna (default) or gpt-6.1-sol, BATATIS_REVIEW_EFFORT
-the reasoning effort (Sol runs at low only). No service tier is sent: requests run on the standard tier.
+(engine.llm_gate). BATATIS_REVIEW_EFFORT picks the effort (low by default).
 """
 from __future__ import annotations
 
@@ -33,17 +32,17 @@ from dataclasses import dataclass, field
 from html.parser import HTMLParser
 from typing import Callable
 
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import BaseModel, ConfigDict, Field
 
-from .. import llm_gate
+from .. import anthropic_json, llm_gate
 from ..models_intake import (CitedProvision, DocumentReview, EvidenceRef, ReviewConflict, ReviewedDocument,
                              ReviewFact, ReviewFlag, ReviewItem)
 from ..public_names import public_review_model
 from .pdf import NotAPdf, page_texts
 from .rules import LEGAL_PARTS, PERSONAL, read
 
-MODELS = {'gpt-6-luna': ('none', 'low', 'medium', 'high', 'xhigh'), 'gpt-6.1-sol': ('low',)}
-DEFAULT_MODEL, DEFAULT_EFFORT = 'gpt-6-luna', 'medium'
+MODELS = {anthropic_json.MODEL: ('low', 'medium', 'high')}
+DEFAULT_MODEL, DEFAULT_EFFORT = anthropic_json.MODEL, 'low'
 MAX_PAGES = 400
 BUDGET_CHARS = 600_000                      # page text per request, about 150K tokens
 MAX_OUTPUT_TOKENS = 32_000
@@ -60,7 +59,6 @@ def _deadline_seconds() -> float:
         return max(MIN_ATTEMPT_SECONDS, float(os.environ.get('BATATIS_REVIEW_DEADLINE_SECONDS') or DEADLINE_SECONDS))
     except ValueError:
         return DEADLINE_SECONDS
-OPENAI_URL = 'https://api.openai.com/v1/chat/completions'
 DESCRIPTION = 'description'
 FLAG_KINDS = ('outside_alberta', 'code_edition', 'other_discipline', 'record_status', 'outcome_known', 'not_read')
 FACT_STATUSES = ('stated', 'existing', 'proposed', 'assumed', 'decided', 'argued', 'condition', 'recommended',
@@ -191,11 +189,6 @@ class _Payload(_Input):
 class _Usage(_Input):
     input_tokens: int | None = Field(default=None, ge=0)
     output_tokens: int | None = Field(default=None, ge=0)
-
-
-class _ReportedUsage(_Input):
-    prompt_tokens: int = Field(ge=0)
-    completion_tokens: int = Field(ge=0)
 
 
 # ---------------------------------------------------------------- reading the files
@@ -611,11 +604,12 @@ class GateClosed(Exception):
 
 
 def configured() -> tuple[str, str]:
+    """The review model and effort. A setting left over from the OpenAI models falls back to the defaults."""
     model = (os.environ.get('BATATIS_REVIEW_MODEL') or DEFAULT_MODEL).strip()
-    effort = (os.environ.get('BATATIS_REVIEW_EFFORT') or ('low' if model == 'gpt-6.1-sol' else DEFAULT_EFFORT)).strip()
-    if model not in MODELS or effort not in MODELS[model]:
-        raise ValueError(f'review model/effort must be one of {MODELS}')
-    return model, effort
+    effort = (os.environ.get('BATATIS_REVIEW_EFFORT') or DEFAULT_EFFORT).strip()
+    if model not in MODELS:
+        model = DEFAULT_MODEL
+    return model, effort if effort in MODELS[model] else DEFAULT_EFFORT
 
 
 def personal_values(texts: list[str]) -> list[str]:
@@ -778,61 +772,44 @@ def run(request: str, files: list[tuple[str, str, bytes]], *, outbound: Callable
 
 # ---------------------------------------------------------------- transports
 
-def openai_transport(client_ip: str | None = None) -> Transport:
-    """Chat Completions with a strict schema, metered, on the standard tier (no service tier is sent).
-
-    Every attempt reserves its own worst case through the spend gate before it is sent. A failed attempt
-    keeps its reservation, since it may have been billed; only the successful attempt settles to its usage.
-    Dropped connections and 429/5xx answers are retried, all within one deadline."""
+def anthropic_transport(client_ip: str | None = None) -> Transport:
+    """One structured-output request, metered. Every attempt reserves its own worst case through the spend
+    gate before it is sent. A failed attempt keeps its reservation, since it may have been billed; only the
+    successful attempt settles to its usage. Dropped connections, 429 and 5xx answers are retried, all
+    within one deadline."""
     def call(system: str, user: str, body_schema: dict, model: str, effort: str) -> tuple[dict, dict]:
-        import httpx
+        import anthropic
         max_input = len((system + user + json.dumps(body_schema)).encode()) // 3 + 256
-        body = {'model': model, 'max_completion_tokens': MAX_OUTPUT_TOKENS, 'reasoning_effort': effort,
-                'messages': [{'role': 'system', 'content': system}, {'role': 'user', 'content': user}],
-                'response_format': {'type': 'json_schema',
-                                    'json_schema': {'name': 'document_review', 'strict': True, 'schema': body_schema}}}
         deadline = time.monotonic() + _deadline_seconds()
         for attempt in range(ATTEMPTS):
             remaining = deadline - time.monotonic()
             if remaining < MIN_ATTEMPT_SECONDS:
                 raise TimeoutError('review deadline reached')
             decision = llm_gate.authorize(model=model, max_input_tokens=max_input,
-                                          max_output_tokens=MAX_OUTPUT_TOKENS, client_ip=client_ip, provider='openai')
+                                          max_output_tokens=MAX_OUTPUT_TOKENS, client_ip=client_ip,
+                                          provider='anthropic')
             if not decision.allowed:
                 raise GateClosed(decision.source)
-            dispatched = False
+            remaining = deadline - time.monotonic()
+            if remaining < MIN_ATTEMPT_SECONDS:
+                llm_gate.release(decision)
+                raise TimeoutError('review deadline reached')
             try:
-                with httpx.Client(timeout=remaining, follow_redirects=False) as client:
-                    headers = {'Authorization': 'Bearer ' + os.environ['OPENAI_API_KEY']}
-                    remaining = deadline - time.monotonic()
-                    if remaining < MIN_ATTEMPT_SECONDS:
-                        raise TimeoutError('review deadline reached')
-                    client.timeout = httpx.Timeout(remaining)
-                    dispatched = True
-                    response = client.post(OPENAI_URL, json=body, headers=headers)
-            except Exception as exc:
-                if not dispatched or isinstance(exc, (httpx.ConnectError, httpx.ConnectTimeout, httpx.PoolTimeout)):
+                payload, usage = anthropic_json.call(system, user, body_schema, model=model, effort=effort,
+                                                     max_output_tokens=MAX_OUTPUT_TOKENS, timeout=remaining)
+            except anthropic.APIConnectionError as exc:
+                if not isinstance(exc, anthropic.APITimeoutError):   # a timeout may have been billed
                     llm_gate.release(decision)
-                if (not isinstance(exc, (httpx.ConnectError, httpx.ConnectTimeout, httpx.ReadError, httpx.ReadTimeout,
-                                         httpx.RemoteProtocolError, httpx.WriteError, httpx.PoolTimeout))
-                        or attempt + 1 >= ATTEMPTS):
+                if attempt + 1 >= ATTEMPTS:
                     raise
-                time.sleep(2 * (attempt + 1))
-                continue
-            if response.status_code in RETRY_STATUS and attempt + 1 < ATTEMPTS:
-                time.sleep(2 * (attempt + 1))
-                continue
-            response.raise_for_status()
-            data = response.json()
-            tokens = {}
-            try:
-                usage = _ReportedUsage.model_validate(data.get('usage'))
-            except ValidationError:
-                pass                            # dispatched, but its cost is unknown: keep the reservation
+            except anthropic.APIStatusError as exc:
+                if exc.status_code not in RETRY_STATUS or attempt + 1 >= ATTEMPTS:
+                    raise
             else:
-                tokens = {'input_tokens': usage.prompt_tokens, 'output_tokens': usage.completion_tokens}
+                tokens = {'input_tokens': usage['input_tokens'], 'output_tokens': usage['output_tokens']}
                 llm_gate.record(model=model, reserved_usd=decision.reserved_usd, **tokens)
-            return json.loads(data['choices'][0]['message']['content']), tokens
+                return payload, tokens
+            time.sleep(2 * (attempt + 1))
         raise TimeoutError('review attempts exhausted')
     return call
 
@@ -857,10 +834,10 @@ def fake_transport(system: str, user: str, body_schema: dict, model: str, effort
 def default_transport(client_ip: str | None = None) -> tuple[Transport | None, str]:
     if (os.environ.get('BATATIS_PROVIDER') or '').strip().lower() == 'fake' and not os.environ.get('VERCEL'):
         return fake_transport, 'fake'
-    if llm_gate.live_enabled('openai') and os.environ.get('BATATIS_REVIEW', '1') != '0':
-        return openai_transport(client_ip), 'live'
+    if llm_gate.live_enabled('anthropic') and os.environ.get('BATATIS_REVIEW', '1') != '0':
+        return anthropic_transport(client_ip), 'live'
     return None, 'off'
 
 
-__all__ = ['run', 'read_source', 'default_transport', 'openai_transport', 'fake_transport', 'configured', 'schema',
+__all__ = ['run', 'read_source', 'default_transport', 'anthropic_transport', 'fake_transport', 'configured', 'schema',
            'SYSTEM', 'GateClosed']

@@ -5,7 +5,7 @@ import json
 import re
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, ValidationError
 
 from .drafting_provider import DraftingProvider, DraftingUnavailable
 from .drafting_sources import ARTICLE, TITLES, SourceBundle
@@ -49,7 +49,11 @@ Registry sources are actual CCMC search leads. Mention only returned listings, a
 requiring current status, scope, installation limitations and code edition checks. A search is not
 product acceptance, applicability or evidence of equivalence. Snapshot/failure notices must remain
 explicit; never infer no listing from an unavailable registry. Drafts remain drafts until acceptance.
-Every field must connect to actual project sources. Questions are gaps, never invented requirements.
+Every field must connect to actual project sources: in each field, at least one claim or question cites
+a source whose kind is description, fact or document. When nothing in the project addresses a field,
+write one question that quotes the closest passage of the description or a fact and asks what is
+missing. Questions are gaps, never invented requirements.
+Every number in a claim or question must appear in that item's own quotes.
 """
 
 AUDIT_SYSTEM = """Independently audit proposed applicant writing against ONLY the supplied sources.
@@ -107,6 +111,9 @@ PROFESSIONAL_REQUIREMENT = re.compile(
     r'|(?:must|shall|need\s+to|required\s+to)\s+(?:engage|retain|hire)\b)', re.I)
 NUMBERS = re.compile(r'(?<!\w)\d+(?:[.,]\d+)*(?!\w)')
 ATTRIBUTIONS = re.compile(r'\b(?:F\d{2}|O[A-Z]{1,3}\d(?:\.\d+)*)\b')
+# Code references: whitelisted on their own (articles, attributions), so they are not project numbers.
+REFERENCES = re.compile('|'.join((ARTICLE.pattern, ATTRIBUTIONS.pattern, r'\(\d{1,2}\)(?:\([a-z]+\))?',
+    r'\b(?:Table|Part|Section|Subsection|Article|Sentence|Clause)\s+\d{1,2}(?:\.\d{1,3}){0,3}\.?')))
 
 
 def allowed_articles(bundle: SourceBundle) -> set[str]:
@@ -134,8 +141,8 @@ def validate(batch: GeneratedBatch, bundle: SourceBundle) -> None:
             raise ValueError('empty draft without gap questions')
         used = [sources.get(c.source_id) for part in [*draft.claims, *draft.questions] for c in part.sources]
         if not any(s and s.kind in {'description', 'fact', 'document'} for s in used):
-            raise ValueError('each field must be grounded in this project')
-    for _, item, text, _ in _items(batch):
+            raise ValueError(f'{draft.field} must cite at least one description, fact or document source')
+    for key, item, text, _ in _items(batch):
         if not text.strip() or VERDICTS.search(text):
             raise ValueError('technical verdict or empty writing')
         if not bundle.inputs.professional_required and PROFESSIONAL_REQUIREMENT.search(text):
@@ -149,8 +156,11 @@ def validate(batch: GeneratedBatch, bundle: SourceBundle) -> None:
         if not set(ATTRIBUTIONS.findall(text)) <= attributions:
             raise ValueError('unwhitelisted objective or functional statement')
         quoted = '\n'.join(c.quote for c in item.sources)
-        if not set(NUMBERS.findall(text)) <= set(NUMBERS.findall(quoted)):
-            raise ValueError('unsupported numeric fact')
+        # Article ids and sentence markers are checked against allowed_articles above, not as project numbers.
+        missing = set(NUMBERS.findall(REFERENCES.sub(' ', text))) - set(NUMBERS.findall(quoted))
+        if missing:
+            raise ValueError(f'unsupported numeric fact: {", ".join(sorted(missing))} in {key} is not in its own quotes; '
+                             'quote the passage that states it, or leave the number out')
         if isinstance(item, DraftClaim) and item.kind == 'fact' and all(
                 sources[c.source_id].kind in {'guidance', 'precedent_structure'} for c in item.sources):
             raise ValueError('guidance/precedent structure does not establish a project fact')
@@ -161,28 +171,52 @@ def _usage(usage: dict, name: str) -> int | None:
     return value if type(value) is int and value >= 0 else None
 
 
+GENERATION_ATTEMPTS = 3
+
+
+def _add_usage(total: dict, step: dict) -> dict:
+    """Token counts summed over attempts; a count no attempt reported stays unknown (None)."""
+    out = {}
+    for k in ('input_tokens', 'output_tokens'):
+        known = [n for n in (_usage(total, k), _usage(step, k)) if n is not None]
+        out[k] = sum(known) if known else None
+    return out
+
+
 def generate(bundle: SourceBundle, provider: DraftingProvider) -> DraftingRecord:
     context = {'fields': bundle.inputs.fields, 'professional_required': bundle.inputs.professional_required,
                'allowed_articles': sorted(allowed_articles(bundle)),
                'sources': [s.model_dump() for s in bundle.sources], 'notices': bundle.notices}
     try:
-        raw, usage = provider.call('applicant_drafts', SYSTEM, json.dumps(context, ensure_ascii=False),
-                                   GeneratedBatch.model_json_schema())
-        batch = GeneratedBatch.model_validate(raw)
-        validate(batch, bundle)
-        keyed = [{'key': key, 'text': text, 'kind': boundary, 'sources': [s.model_dump() for s in item.sources]}
-                 for key, item, text, boundary in _items(batch)]
-        raw_audit, audit_usage = provider.call('applicant_draft_audit', AUDIT_SYSTEM,
-            json.dumps({**context, 'items': keyed}, ensure_ascii=False), AuditBatch.model_json_schema())
-        audit = AuditBatch.model_validate(raw_audit)
-        expected = {key: (item, boundary) for key, item, _, boundary in _items(batch)}
-        if audit.issues or len(audit.items) != len(expected) or {a.key for a in audit.items} != set(expected):
-            raise ValueError('semantic audit incomplete or failed')
-        for item in audit.items:
-            original, boundary = expected[item.key]
-            if (not item.supported or item.boundary != boundary
-                    or set(item.source_ids) != {s.source_id for s in original.sources}):
-                raise ValueError('semantic grounding or authorship audit failed')
+        # One slip rejects the whole batch, so a rejected batch is written again, told what was wrong with it.
+        usage, audit_usage, rejected = {}, {}, None
+        for attempt in range(GENERATION_ATTEMPTS):
+            try:
+                request = {**context, 'previous_attempt_rejected_because': rejected} if rejected else context
+                raw, step = provider.call('applicant_drafts', SYSTEM, json.dumps(request, ensure_ascii=False),
+                                          GeneratedBatch.model_json_schema())
+                usage = _add_usage(usage, step)
+                batch = GeneratedBatch.model_validate(raw)
+                validate(batch, bundle)
+                keyed = [{'key': key, 'text': text, 'kind': boundary, 'sources': [s.model_dump() for s in item.sources]}
+                         for key, item, text, boundary in _items(batch)]
+                raw_audit, step = provider.call('applicant_draft_audit', AUDIT_SYSTEM,
+                    json.dumps({**context, 'items': keyed}, ensure_ascii=False), AuditBatch.model_json_schema())
+                audit_usage = _add_usage(audit_usage, step)
+                audit = AuditBatch.model_validate(raw_audit)
+                expected = {key: (item, boundary) for key, item, _, boundary in _items(batch)}
+                if audit.issues or len(audit.items) != len(expected) or {a.key for a in audit.items} != set(expected):
+                    raise ValueError('an audit rejected it: ' + '; '.join(audit.issues or ['the audit was incomplete']))
+                failed = [item.key for item in audit.items
+                          if not item.supported or item.boundary != expected[item.key][1]
+                          or set(item.source_ids) != {s.source_id for s in expected[item.key][0].sources}]
+                if failed:
+                    raise ValueError('an audit found these items unsupported by their quotes: ' + ', '.join(failed))
+                break
+            except ValueError as error:
+                if attempt + 1 == GENERATION_ATTEMPTS:
+                    raise
+                rejected = 'the output did not match the schema' if isinstance(error, ValidationError) else str(error)
     except Exception as error:
         # Provider text/errors can contain private input. Never expose the raw payload, or save a partial batch.
         raise DraftingUnavailable('Drafting unavailable: generation or grounding validation failed; no writing was saved.') from error
