@@ -40,6 +40,7 @@ The table-of-contents step raises the share of cited articles that reach the can
 - **Compliance claims in text the app wrote: 0**, checked with the product's own wording filter.
 - **Quotes in the comparison step: 64 of 64** found word for word in the article, and 64 of 64 in the applicant's description.
 - **Dead ends fixed.** On real records, a keyword picked a coded rule the building was outside of ("no glazing" picked the house glazing rule for a ten-storey building) and the application stopped with no package. That happened on 2 of 64 records and on the README's own demo house. A rule that does not apply no longer decides the path.
+- **Wrong turns fixed.** Two building-code questions were sent to another safety code: photoluminescent exit signs on their own charging circuit, where "circuit" outweighed "exit", and the energy rules for small equipment shelters (Section 9.36). One variance read as following the code, because "would meet the minimum" matched and "can the stretcher-size rule be set aside" did not. Exit signs, emergency power and small-building energy rules now count as building-code words, and setting a rule aside, waiving or relaxing it count as departure words. Tests now check that none of the 64 records is redirected and none of the 24 variances reads as following the code.
 - **Applicants who write code citations themselves get them wrong.** An expert answering from memory named a cited article in 6 of 64 cases. None of their 64 Section C entries matched the code's tables, and 16 named objective or function codes the article does not carry. The app looks Section C up instead.
 
 ## Cost
@@ -56,7 +57,7 @@ LangChain, LangGraph, LangSmith and Deep Agents would not move any of these numb
 
 ## Shipped, and next
 
-Shipped in this pull request: the Haiku ranking of code articles, and the fix for rules that do not apply.
+Shipped in this pull request: the Haiku ranking of code articles, the fix for rules that do not apply, and the fixes for the three wrong turns above.
 
 Recommended next, in order:
 

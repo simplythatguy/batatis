@@ -139,10 +139,10 @@ So Batatis keeps the flowchart as its checklist, and changes who does each box:
 
 - **Made-up code articles.** None reach the screen. The quote check threw out 5 of 236 AI picks before they appeared.
 - **Claims that a design complies or is safe.** None in the text Batatis wrote for the 64 records, checked with its own wording filter.
-- **Dead ends.** On 2 of 64 records, a rule that didn't apply to the building used to end the application. That is fixed.
+- **Dead ends and wrong turns.** On the 64 records, a rule that didn't apply ended 2 applications, 2 building-code questions were sent to another safety code, and 1 variance was read as following the code. All five are fixed, and new tests run the real records through these checks.
 - **Wrong Section C.** It never comes from a person or a model. It is looked up.
 
-Batatis already ranks the articles and avoids those dead ends. The next steps are the comparison, drafts on one review screen, and a table-of-contents search that put a cited article first in 54 of 64 records in the same test. The method, the fairness choices, and every number are in the [workflow bakeoff](experiments/workflow-bakeoff-v2/README.md) and its [one-page summary](docs/evaluations/workflow-bakeoff-v2-20261028.md).
+Batatis already ranks the articles and avoids those dead ends and wrong turns. The next steps are the comparison, drafts on one review screen, and a table-of-contents search that put a cited article first in 54 of 64 records in the same test. The method, the fairness choices, and every number are in the [workflow bakeoff](experiments/workflow-bakeoff-v2/README.md) and its [one-page summary](docs/evaluations/workflow-bakeoff-v2-20261028.md).
 
 ## Features
 
