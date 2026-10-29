@@ -1,0 +1,316 @@
+{
+ "_meta": {
+  "title": "Alberta Municipal Affairs population list 2025 (MAPL), Data sheet",
+  "source": "https://open.alberta.ca/dataset/8dae0ffd-dbb7-46f7-89eb-efa64b2ce385/resource/387c1c81-cfcb-4616-be4e-dc829c7fd6fb/download/2025-mapl-worksheets-for-internet-posting.xlsx",
+  "sha256": "fde6476dfa64e655c4fb99701bff5c7e344fd0ce266eecf345ccc73536bb246b",
+  "retrieved_utc": "2026-10-29",
+  "licence": "Open Government Licence - Alberta",
+  "resource_last_modified": "2026-01-21",
+  "note": "Population for First Nation rows is the federal figure in the MAPL. This is the newest MAPL on open.alberta.ca; no 2026 list was found."
+ },
+ "type_counts": {
+  "AIS Type Stakeholder": 1,
+  "City": 19,
+  "First Nation": 48,
+  "Improvement District": 7,
+  "Metis Settlement": 8,
+  "Municipal District": 63,
+  "Special Areas": 1,
+  "Specialized Municipality": 6,
+  "Summer Village": 51,
+  "Town": 105,
+  "Village": 78
+ },
+ "first_nations": [
+  {
+   "lg_code": "0419",
+   "legal_name": "Siksika Nation",
+   "population_2025": 4559
+  },
+  {
+   "lg_code": "0420",
+   "legal_name": "Blood Tribe",
+   "population_2025": 8955
+  },
+  {
+   "lg_code": "0421",
+   "legal_name": "Beaver First Nation",
+   "population_2025": 486
+  },
+  {
+   "lg_code": "0423",
+   "legal_name": "Cold Lake First Nations",
+   "population_2025": 1444
+  },
+  {
+   "lg_code": "0424",
+   "legal_name": "Driftpile Cree Nation",
+   "population_2025": 1042
+  },
+  {
+   "lg_code": "0425",
+   "legal_name": "Duncan's First Nation",
+   "population_2025": 141
+  },
+  {
+   "lg_code": "0426",
+   "legal_name": "Enoch Cree Nation #440",
+   "population_2025": 2061
+  },
+  {
+   "lg_code": "0427",
+   "legal_name": "Ermineskin Tribe",
+   "population_2025": 3954
+  },
+  {
+   "lg_code": "0428",
+   "legal_name": "Athabasca Chipewyan First Nation",
+   "population_2025": 268
+  },
+  {
+   "lg_code": "0429",
+   "legal_name": "Fort McKay First Nation",
+   "population_2025": 457
+  },
+  {
+   "lg_code": "0430",
+   "legal_name": "Fort McMurray #468 First Nation",
+   "population_2025": 295
+  },
+  {
+   "lg_code": "0431",
+   "legal_name": "Frog Lake First Nation",
+   "population_2025": 2326
+  },
+  {
+   "lg_code": "0433",
+   "legal_name": "Kapawe'no First Nation",
+   "population_2025": 150
+  },
+  {
+   "lg_code": "0435",
+   "legal_name": "Heart Lake First Nation",
+   "population_2025": 246
+  },
+  {
+   "lg_code": "0436",
+   "legal_name": "Horse Lake First Nation",
+   "population_2025": 532
+  },
+  {
+   "lg_code": "0437",
+   "legal_name": "Chipewyan Prairie First Nation",
+   "population_2025": 378
+  },
+  {
+   "lg_code": "0438",
+   "legal_name": "Kehewin Cree Nation",
+   "population_2025": 1408
+  },
+  {
+   "lg_code": "0439",
+   "legal_name": "Little Red River Cree Nation",
+   "population_2025": 6025
+  },
+  {
+   "lg_code": "0440",
+   "legal_name": "Louis Bull Tribe",
+   "population_2025": 1985
+  },
+  {
+   "lg_code": "0441",
+   "legal_name": "Montana First Nation",
+   "population_2025": 870
+  },
+  {
+   "lg_code": "0442",
+   "legal_name": "O'Chiese First Nation",
+   "population_2025": 1018
+  },
+  {
+   "lg_code": "0444",
+   "legal_name": "Paul First Nation",
+   "population_2025": 1534
+  },
+  {
+   "lg_code": "0445",
+   "legal_name": "Piikani Nation",
+   "population_2025": 2425
+  },
+  {
+   "lg_code": "0446",
+   "legal_name": "Saddle Lake Cree Nation",
+   "population_2025": 5357
+  },
+  {
+   "lg_code": "0447",
+   "legal_name": "Samson Cree Nation",
+   "population_2025": 7217
+  },
+  {
+   "lg_code": "0448",
+   "legal_name": "Tsuut'ina Nation",
+   "population_2025": 2414
+  },
+  {
+   "lg_code": "0449",
+   "legal_name": "Sawridge First Nation",
+   "population_2025": 57
+  },
+  {
+   "lg_code": "0451",
+   "legal_name": "Stoney (Bearspaw) First Nation",
+   "population_2025": 1776
+  },
+  {
+   "lg_code": "0452",
+   "legal_name": "Sturgeon Lake Cree Nation",
+   "population_2025": 1617
+  },
+  {
+   "lg_code": "0453",
+   "legal_name": "Sucker Creek First Nation",
+   "population_2025": 817
+  },
+  {
+   "lg_code": "0454",
+   "legal_name": "Sunchild First Nation",
+   "population_2025": 990
+  },
+  {
+   "lg_code": "0455",
+   "legal_name": "Swan River First Nation",
+   "population_2025": 480
+  },
+  {
+   "lg_code": "0456",
+   "legal_name": "Tallcree Tribal Government",
+   "population_2025": 627
+  },
+  {
+   "lg_code": "0457",
+   "legal_name": "Whitefish Lake First Nation",
+   "population_2025": 1759
+  },
+  {
+   "lg_code": "0466",
+   "legal_name": "Alexander First Nation",
+   "population_2025": 1221
+  },
+  {
+   "lg_code": "0467",
+   "legal_name": "Alexis Nakota Sioux Nation",
+   "population_2025": 1405
+  },
+  {
+   "lg_code": "0468",
+   "legal_name": "Beaver Lake Cree Nation",
+   "population_2025": 462
+  },
+  {
+   "lg_code": "0469",
+   "legal_name": "Bigstone Cree Nation",
+   "population_2025": 3926
+  },
+  {
+   "lg_code": "0472",
+   "legal_name": "Dene Tha' First Nation",
+   "population_2025": 2177
+  },
+  {
+   "lg_code": "0473",
+   "legal_name": "Loon River Cree",
+   "population_2025": 616
+  },
+  {
+   "lg_code": "0474",
+   "legal_name": "Lubicon Lake Band",
+   "population_2025": 458
+  },
+  {
+   "lg_code": "0475",
+   "legal_name": "Woodland Cree First Nation",
+   "population_2025": 929
+  },
+  {
+   "lg_code": "0476",
+   "legal_name": "Stoney (Chiniki) First Nation",
+   "population_2025": 1691
+  },
+  {
+   "lg_code": "0477",
+   "legal_name": "Stoney (Goodstoney) First Nation",
+   "population_2025": 1657
+  },
+  {
+   "lg_code": "0478",
+   "legal_name": "Mikisew Cree First Nation",
+   "population_2025": 775
+  },
+  {
+   "lg_code": "1070",
+   "legal_name": "Tthebatthie Denesuliné Nation",
+   "population_2025": 184
+  },
+  {
+   "lg_code": "1073",
+   "legal_name": "Whitefish (Goodfish) Lake First Nation",
+   "population_2025": 1778
+  },
+  {
+   "lg_code": "5385",
+   "legal_name": "Peerless Trout First Nation",
+   "population_2025": 983
+  }
+ ],
+ "metis_settlements": [
+  {
+   "lg_code": "0406",
+   "legal_name": "Buffalo Lake Metis Settlement",
+   "population_2025": 379
+  },
+  {
+   "lg_code": "0407",
+   "legal_name": "East Prairie Metis Settlement",
+   "population_2025": 310
+  },
+  {
+   "lg_code": "0408",
+   "legal_name": "Elizabeth Metis Settlement",
+   "population_2025": 594
+  },
+  {
+   "lg_code": "0409",
+   "legal_name": "Fishing Lake Metis Settlement",
+   "population_2025": 414
+  },
+  {
+   "lg_code": "0410",
+   "legal_name": "Gift Lake Metis Settlement",
+   "population_2025": 625
+  },
+  {
+   "lg_code": "0411",
+   "legal_name": "Kikino Metis Settlement",
+   "population_2025": 978
+  },
+  {
+   "lg_code": "0412",
+   "legal_name": "Paddle Prairie Metis Settlement",
+   "population_2025": 551
+  },
+  {
+   "lg_code": "0413",
+   "legal_name": "Peavine Metis Settlement",
+   "population_2025": 387
+  }
+ ],
+ "other_rows": [
+  {
+   "lg_code": "0462",
+   "legal_name": "Townsite of Redwood Meadows Administration Society",
+   "mapl_type": "AIS Type Stakeholder",
+   "population_2025": 1080
+  }
+ ]
+}
