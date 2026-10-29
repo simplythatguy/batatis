@@ -262,13 +262,17 @@ test("after the AI ranking, narrowing questions are not asked; conflicts and pap
   assert.deepEqual(planRefs(house).filter((r) => narrowing.includes(r)), narrowing);
 });
 
-test("narrowing questions wait for the first identification instead of appearing and then vanishing", () => {
+test("narrowing questions wait only while the first identification runs", () => {
   const c = undecidedHouse();
   const narrowing = (o: Parameters<typeof buildDeck>[2]) => buildDeck(c, getGaps(c), o).filter((i) => i.kind === "plan").length;
-  assert.equal(narrowing({ identify: "running" }), 0);
-  assert.equal(narrowing({ identify: "idle", intake: "done" }), 0, "between reading and the code check");
-  assert.equal(narrowing({ identify: "error" }), 3, "a failed check falls back to the questions");
+  assert.equal(narrowing({ identify: "running", intake: "done" }), 0);
+  assert.equal(narrowing({ identify: "error", intake: "done" }), 3, "a failed check falls back to the questions");
+  assert.equal(narrowing({ identify: "idle", intake: "done" }), 3, "a failed or cancelled check reset by an edit asks them too");
   assert.equal(narrowing({ identify: "idle", intake: "idle" }), 3, "an application opened later, never checked, still asks");
+  // Review counts what the deck shows, so "Answer N remaining" never opens a deck without those cards.
+  for (const identify of ["idle", "running", "error", "done"] as const) {
+    assert.equal(narrowing({ identify }), narrowing({ identify, intake: "done" }), `the same count with the check ${identify}`);
+  }
 });
 
 test("Not sure on a planner question never blocks and is not asked again on its form card", () => {
@@ -455,7 +459,9 @@ test("the departure card compares the code, the design and the drafted differenc
   const ranked = { ...card, quote: { ...card.quote, source: "ranking" as const } };
   assert.equal(departureComparison(c, ranked, null).code, undefined, "a ranking reason is never shown as code text");
   const bare = { ...c, facts: c.facts.filter((f) => f.field !== "alternative") };
-  assert.equal(departureComparison(bare, card, null).design, DEMO.trim(), "without an alternative the description stands in");
+  assert.deepEqual([departureComparison(bare, card, null).design, departureComparison(bare, card, null).departure], [undefined, ""], "without an alternative nothing stands in for the design");
+  const rejected = reducer(c, { type: "rejectFacts", ids: c.facts.filter((f) => f.field === "alternative").map((f) => f.id) });
+  assert.equal(departureComparison(rejected, card, null).departure, "", "a reading marked Not right is not recorded as the departure");
   const long = fitDeparture(`${"The east wall has larger windows. ".repeat(12)}`);
   assert.ok(long.length <= DEPARTURE_MAX && long.endsWith("."), "whole sentences within the engine's limit");
   assert.equal(fitDeparture("x".repeat(400)).length, DEPARTURE_MAX);

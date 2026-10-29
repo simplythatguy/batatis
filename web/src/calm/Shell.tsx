@@ -128,12 +128,12 @@ export function SaveStatus() {
 
 /** Ring percentages for the four stages, from the same case, gaps and deck as the screens. */
 function useStageProgress() {
-  const { c, gaps, phase, checkedAt, engineGaps } = useCase();
+  const { c, gaps, phase, checkedAt, engineGaps, reading } = useCase();
   const session = useSession();
   const { options } = useDeckExtras();
   return useMemo(() => {
     if (phase !== "case") return { start: 0, questions: 0, review: 0, application: 0 };
-    const deck = buildDeck(c, gaps, { ...options, seen: new Set(session.seen), includeDone: true });
+    const deck = buildDeck(c, gaps, { ...options, seen: new Set(session.seen), includeDone: true, identify: reading?.identify, intake: reading?.intake });
     const { done, total } = deckProgress(deck);
     const groups = groupGaps(gaps, new Map(engineGaps.map((g) => [g.id, g.section])));
     const sectionsClear = [["A"], ["B", "facts"], ["C"], ["D", "process"]].filter((keys) => !keys.some((k) => (groups.get(k) ?? []).length)).length;
@@ -143,7 +143,7 @@ function useStageProgress() {
       review: checkedAt ? (100 * sectionsClear) / 4 : 0,
       application: 0,
     };
-  }, [c, gaps, phase, checkedAt, engineGaps, session.seen, options]);
+  }, [c, gaps, phase, checkedAt, engineGaps, session.seen, options, reading?.identify, reading?.intake]);
 }
 
 const PHONE = "(max-width: 760px)";

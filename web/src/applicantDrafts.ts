@@ -88,3 +88,12 @@ export function statementReview(s: { phase: AccountPhase; readOnly: boolean; dra
   if (s.error && !drafted) return false;
   return drafted || !s.drafting || s.drafting.stale;
 }
+
+/**
+ * Why a drafting request fell back to one card per statement (a failure or nothing drafted for
+ * them), shown once on the first statement card. Empty when the review stands or was never offered.
+ */
+export function statementFallbackNote(s: Parameters<typeof statementReview>[0]): string {
+  if ((s.phase !== "signed-in" && s.phase !== "probing") || s.readOnly || statementReview(s)) return "";
+  return s.error || "No statements were drafted.";
+}

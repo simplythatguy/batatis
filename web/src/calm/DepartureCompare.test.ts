@@ -17,5 +17,8 @@ test("the comparison shows the code, the design and the drafted difference; Edit
   assert.doesNotMatch(text(tree), /complies|meets|safe|acceptable|approved/i);
   tree = await h.render({ lines: { ...lines, code: undefined, gap: undefined }, onEdit: () => {} });
   assert.deepEqual(nodes(tree, (n) => n.type === "dt").map(text), ["Your design"], "no drafted difference, no empty line");
+  tree = await h.render({ lines: { ...lines, design: undefined, departure: "" }, onEdit: () => {} });
+  assert.deepEqual(nodes(tree, (n) => n.type === "dt").map(text), ["Code", "Difference"], "no words for the design, no design line");
+  assert.equal(nodes(tree, (n) => n.type === "button").length, 0, "the card's own action writes it");
   h.unmount();
 });

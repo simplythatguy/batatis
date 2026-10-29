@@ -553,9 +553,10 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
   // still need inputs ask only those.
   const namedInputs = decision.ruleId ? new Set(namedRuleInputs(decision.ruleId) ?? [])
     : decision.asksRuleInputs ? new Set(decision.missing) : null;
-  // Once the ranking ran, narrowing questions are not asked. Until the first identification lands in
-  // this visit they wait too, so a card never appears and then vanishes.
-  const rankPending = !c.identify && (opts.identify === "running" || (opts.identify === "idle" && opts.intake === "done"));
+  // Once the ranking ran, narrowing questions are not asked. While the first identification runs they
+  // wait too, so a card never appears and then vanishes. A failed, cancelled or never-started check
+  // (idle after an edit) asks them, so Review and the deck count the same cards.
+  const rankPending = !c.identify && opts.identify === "running";
   const skipNarrowing = aiRanked(c) || rankPending;
   /** Narrowing fields the planner did not ask; a coded rule that needs one still asks it as a rule input. */
   const skipped = new Set<string>();

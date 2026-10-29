@@ -13,13 +13,22 @@ export const DEPARTURE_MAX = 300;
 export interface DepartureComparison {
   /** Verbatim code text, when the card carries it. */
   code?: string;
-  /** The applicant's own words for the design. */
-  design: string;
+  /** The applicant's own words for the design; absent when they have not given any, so they write the departure. */
+  design?: string;
   /** The drafted Section C explanation for this sentence; written by Batatis, never code text. */
   gap?: string;
-  /** What Confirm records: the design, within the engine's limit. */
+  /** What Confirm records and the card shows: the design, within the engine's limit (empty without one). */
   departure: string;
 }
+
+/**
+ * Words the engine refuses in a departure (engine/identify/cards.py `_COMPLIANCE`, a 422). The two
+ * must match; engine/tests/test_departure_words.py compares them.
+ */
+export const CLAIM_WORDS = new RegExp(String.raw`\b(?:compl(?:y|ies|ied|iant|iance)|safe(?:ly|ty)?|approv(?:e|ed|al))\b`, "i");
+
+/** Shown on the card instead of sending words the engine would refuse. */
+export const CLAIM_NOTE = "Say what the design does, without words like comply, safe or approval.";
 
 /** Whole sentences up to `max` characters; one long sentence is cut with an ellipsis. */
 export function fitDeparture(text: string, max = DEPARTURE_MAX): string {
@@ -32,14 +41,15 @@ export function fitDeparture(text: string, max = DEPARTURE_MAX): string {
 
 export function departureComparison(c: Case, a: Candidate, drafting: Pick<DraftingRecord, "drafts"> | null): DepartureComparison {
   const alternative = factFor(c, "alternative");
-  const design = (alternative?.source.quote || valueText(alternative)).trim() || c.description.trim();
+  // Never the description: it holds the owner, the address and more, and the applicant would confirm words they never saw.
+  const design = (alternative?.source.quote || valueText(alternative)).trim();
   const explains = (field: string) => /^section_c\..+\.explanation$/.test(field) && withinProvision(field.slice("section_c.".length, -".explanation".length), a.provision);
   const gap = drafting?.drafts.filter((d) => d.text.trim() && explains(d.field)).at(-1)?.text.trim();
   return {
     code: quoteKind(a) === "code" ? a.quote.text.trim() : undefined,
-    design,
+    design: design || undefined,
     gap: gap || undefined,
-    departure: fitDeparture(design),
+    departure: design ? fitDeparture(design) : "",
   };
 }
 

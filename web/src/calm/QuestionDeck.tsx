@@ -41,7 +41,7 @@ import { useAccount } from "./account";
 import { useQuestionDraft } from "./useQuestionDraft";
 import { ApplicantDraftLink, processDraftField } from "./ApplicantDrafts";
 import { StatementReview } from "./StatementReview";
-import { departureComparison, departureRecordsVariance } from "./departure";
+import { CLAIM_NOTE, CLAIM_WORDS, departureComparison, departureRecordsVariance } from "./departure";
 import { DepartureCompare } from "./DepartureCompare";
 import { UnitInput } from "./UnitInput";
 import { measurementText, metricUnit, parseMeasurement } from "./units";
@@ -599,7 +599,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
   const session = useSession();
   const { app, locked, readOnly } = useCurrentApplication();
   const { onAnswer, onDeparture, decisionNoteFor } = useCandidateAnswer();
-  const { options: deckExtras, extras } = useDeckExtras();
+  const { options: deckExtras, extras, fallbackNote } = useDeckExtras();
   const seen = useMemo(() => new Set(session.seen), [session.seen]);
   // A keyword lead opened from the grouped triage (or a saved link) stays on the deck while you answer it.
   const [focusedCandidate, setFocusedCandidate] = useState(focus?.startsWith("cand-") ? focus : undefined);
@@ -644,6 +644,9 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
   }, [queueSig]);
 
   const account = useAccount();
+  // A drafting request that fell back to the six cards says why once, on the first open one.
+  const processCards = all.filter((i) => i.kind === "process");
+  const fallbackKey = fallbackNote ? (processCards.find((i) => !i.done) ?? processCards[0])?.key : undefined;
   const savedDraft = (() => {
     if (!item) return "";
     if (item.kind === "route-detail") return String(factFor(c, "journey.departure")?.value ?? "");
@@ -827,6 +830,11 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
     return departureComparison(c, cand, drafting).departure;
   }
 
+  /** No words for the design yet: the card's one action opens the words to write. */
+  function writesDeparture(it: Shown): boolean {
+    return it.kind === "departure" && picked[it.key] !== DEPARTURE_EDIT && c.candidates.some((a) => a.id === it.ref) && !departureText(it);
+  }
+
   /** Check whether the current answer can advance, including pending writes and required reasons. */
   function canContinue(it: Shown): boolean {
     if (locked || busyKey === it.key || advanceAfter?.key === it.key) return false;
@@ -839,7 +847,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
     if (it.kind === "plan" || it.kind === "product-scope") return reading.busy !== it.ref && (it.done || Boolean(draft.trim()));
     if (it.kind === "question") return Boolean(draft.trim()) || it.done;
     if (it.kind === "storeys") return (Number.isInteger(Number(draft)) && Number(draft) > 0) || it.done;
-    if (it.kind === "departure") return busyKey !== it.key && Boolean(departureText(it));
+    if (it.kind === "departure") return busyKey !== it.key && (writesDeparture(it) || Boolean(departureText(it)));
     if (it.kind === "authority") return it.done || Boolean(c.authority);
     if (it.kind === "rule") return it.rule?.state !== "departs" || it.done || picked[it.key] === RULE_LEAVE;
     if (it.kind === "package-end") return true;
@@ -882,11 +890,18 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
       setAdvanceAfter({ key: item.key, generation: engineGeneration() });
       return;
     }
+    if (writesDeparture(item)) { pick(DEPARTURE_EDIT); return; }
     if (item.kind === "departure") {
       const cand = c.candidates.find((a) => a.id === item.ref);
       const text = departureText(item);
       if (!cand || !text) return;
       const key = item.key;
+      // The engine refuses these words; the applicant rewords them here instead of meeting a refusal.
+      if (CLAIM_WORDS.test(text)) {
+        if (picked[key] !== DEPARTURE_EDIT) { setPicked((p) => ({ ...p, [key]: DEPARTURE_EDIT })); setDraft(text); }
+        noteFor(key, CLAIM_NOTE);
+        return;
+      }
       const variance = departureRecordsVariance(c);
       setBusyKey(key);
       noteFor(key, "");
@@ -1291,10 +1306,11 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
             {item.deferred && item.kind !== "plan" && item.kind !== "product-scope" && item.kind !== "rule-input" && <p className="cf-note" role="status">{item.deferred === "later" ? "Saved for later" : item.deferred === "designer" ? "For your designer" : "Not sure"} · open on Review</p>}
             {draftConflict && <p className="cf-note" role="status">The saved answer changed. Your unfinished text is kept here; review it before confirming.</p>}
             {item.kind === "candidate" && decisionNoteFor(item.ref) && <p className="cf-note">{decisionNoteFor(item.ref)}</p>}
+            {item.key === fallbackKey && <p className="cf-note" role="alert"><span className="cf-dot is-warning" aria-hidden="true" />{fallbackNote}</p>}
             {item.section === "C" && (extras.failed.rules || extras.failed.case) && (
               <p className="cf-note" role="status"><span className="cf-dot is-warning" aria-hidden="true" />Rule checks didn’t load, so some rule questions may be missing. <button type="button" className="cf-link-btn" onClick={retryExtras}>Try again</button></p>
             )}
-            <OkRow label={item.kind === "understood" ? "Looks right" : item.kind === "departure" && picked[item.key] !== DEPARTURE_EDIT ? "Confirm" : "Continue"} primary={item.kind !== "paperwork" && (choicesFor(item).length === 0 || (item.done && !item.deferred) || item.kind === "authority" || (item.kind === "detail" && (picked[item.key] === "dismiss" || picked[item.key] === "edit-suggested")) || (item.kind === "condition" && (picked[item.key] ?? currentState(item)) === "does_not_apply"))} quiet={item.kind === "drafts" && !item.done} disabled={!canContinue(item)} onOk={next} typed={typed}>
+            <OkRow label={item.kind === "understood" ? "Looks right" : item.kind === "departure" && picked[item.key] !== DEPARTURE_EDIT ? (writesDeparture(item) ? "Write it" : "Confirm") : "Continue"} primary={item.kind !== "paperwork" && (choicesFor(item).length === 0 || (item.done && !item.deferred) || item.kind === "authority" || (item.kind === "detail" && (picked[item.key] === "dismiss" || picked[item.key] === "edit-suggested")) || (item.kind === "condition" && (picked[item.key] ?? currentState(item)) === "does_not_apply"))} quiet={item.kind === "drafts" && !item.done} disabled={!canContinue(item)} onOk={next} typed={typed}>
               <span className="cf-ok-more">
                 {deferralFor(item) && choicesFor(item).length === 0 && item.kind !== "authority" && <button type="button" className="cf-link-btn" disabled={locked || reading.busy === item.ref || busyKey === item.key} onClick={() => { const choice = deferralFor(item); if (choice) deferCurrent(choice.value); }}>{deferralFor(item)?.label}</button>}
                 <HelpButton item={item} n={n} open={why} onToggle={() => setWhy((v) => !v)} />
