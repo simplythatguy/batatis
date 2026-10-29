@@ -28,7 +28,7 @@
         "what": "Start"
       }
     ],
-    "bytes": 246407,
+    "bytes": 235791,
     "shows": "New application: project description pasted (last sentence typed live), the incomplete SCC form (incomplete.pdf) attached, Start",
     "pointerStart": [
       1100,
@@ -76,7 +76,7 @@
         "what": "route: you likely need a variance"
       }
     ],
-    "bytes": 409959,
+    "bytes": 401192,
     "shows": "What Batatis understood from the description and incomplete.pdf: use, site Edmonton, the proposed 1-hour party-wall alternative, the barrier, door and smoke-alarm measures; no article taken from the form (its Section C is empty); then: you likely need a variance",
     "pointerStart": [
       1152,
@@ -140,7 +140,7 @@
         "what": "9.10.9.2. in the likely list"
       }
     ],
-    "bytes": 379975,
+    "bytes": 375072,
     "shows": "Rules for this project: the departure from 9.10.11.2.(2) (more than two suite houses without a firewall) is added to the application and confirmed; then the code library ranks rules likely related to the project, including the smoke-alarm rules and the continuous smoke-tight barrier",
     "pointerStart": [
       471,
@@ -153,7 +153,7 @@
   },
   {
     "file": "c04-questions.mp4",
-    "seconds": 11.4,
+    "seconds": 11.27,
     "moments": [
       {
         "t": 0,
@@ -176,7 +176,7 @@
         "what": "answer No"
       }
     ],
-    "bytes": 166484,
+    "bytes": 163700,
     "shows": "Gap questions, one at a time: how many principal homes excluding secondary suites (4), is a fire suppression system being installed (No); the next question appears",
     "pointerStart": [
       628,
@@ -220,7 +220,7 @@
         "what": "document guidance: what the evidence must cover"
       }
     ],
-    "bytes": 322116,
+    "bytes": 314297,
     "shows": "Professional questions: no reserved professional judgement, registered professional not engaged yet; Batatis routes to the office whether a registered professional is required; Section D evidence task for 9.10.11.2.(2) with guidance on what the evidence must cover",
     "pointerStart": [
       475,
@@ -264,7 +264,7 @@
         "what": "close"
       }
     ],
-    "bytes": 1173360,
+    "bytes": 1138881,
     "shows": "Filled application, Section C (Which rules apply): one row, 9.10.11.2.(2) Firewalls Not Required with OS1.2, F03, OP3.1; opening it shows the verbatim NBC(AE) 2023 sentence and the NBC intent (fire spreading to the dwelling unit not originally involved), matching the complete form",
     "pointerStart": [
       500,
@@ -273,6 +273,214 @@
     "pointerEnd": [
       554,
       516
+    ]
+  },
+  {
+    "file": "c07-check.mp4",
+    "seconds": 19.53,
+    "moments": [
+      {
+        "t": 0,
+        "what": "start"
+      },
+      {
+        "t": 0.4,
+        "what": "Review: Check my application"
+      },
+      {
+        "t": 3.8,
+        "what": "Almost there: what still stands between you and submission"
+      },
+      {
+        "t": 7,
+        "what": "required: supporting evidence for 9.10.11.2.(2), F03\u2013OP3.1"
+      },
+      {
+        "t": 7.9,
+        "what": "Open"
+      },
+      {
+        "t": 10,
+        "what": "add the City of Edmonton engineering study for the second evidence task"
+      },
+      {
+        "t": 13.7,
+        "what": "save document"
+      },
+      {
+        "t": 14.7,
+        "what": "check again"
+      },
+      {
+        "t": 18.2,
+        "what": "ready to submit for review"
+      }
+    ],
+    "bytes": 2188387,
+    "shows": "Check my application: Almost there, 1 thing stands between you and submission (missing supporting evidence for 9.10.11.2.(2), F03\u2013OP3.1); Open leads to Section D, the City of Edmonton engineering study is added for that evidence task; check again: Ready to submit for review (the officer still determines the professional requirement)",
+    "pointerStart": [
+      554,
+      516
+    ],
+    "pointerEnd": [
+      374,
+      138
+    ]
+  },
+  {
+    "file": "c08-form.mp4",
+    "seconds": 19.42,
+    "moments": [
+      {
+        "t": 0,
+        "what": "start"
+      },
+      {
+        "t": 0.3,
+        "what": "Preview application"
+      },
+      {
+        "t": 2.1,
+        "what": "Send: the filled official SCC variance form"
+      },
+      {
+        "t": 5.8,
+        "what": "Section A and B filled on the form"
+      },
+      {
+        "t": 6.9,
+        "what": "Section C row on the form: 9.10.11.2.(2) \u00b7 OS1.2, OP3.1 \u00b7 F03 \u00b7 NBC intent"
+      },
+      {
+        "t": 12.4,
+        "what": "Submit to Edmonton"
+      },
+      {
+        "t": 17.4,
+        "what": "sent to Edmonton"
+      }
+    ],
+    "bytes": 1419595,
+    "shows": "The filled official SCC variance form in the send step (Sections A and B filled; Section C: 9.10.11.2.(2) \u00b7 OS1.2, OP3.1 \u00b7 F03 \u00b7 NBC 2020 intent), then Submit to Edmonton and the application shows Submitted \u00b7 Edmonton",
+    "pointerStart": [
+      374,
+      138
+    ],
+    "pointerEnd": [
+      343,
+      162
+    ]
+  },
+  {
+    "file": "c09-queue.mp4",
+    "seconds": 10.4,
+    "moments": [
+      {
+        "t": 0,
+        "what": "start"
+      },
+      {
+        "t": 0.6,
+        "what": "Edmonton review queue"
+      },
+      {
+        "t": 1.8,
+        "what": "New: the submitted application"
+      },
+      {
+        "t": 6.7,
+        "what": "Pick up"
+      },
+      {
+        "t": 10.1,
+        "what": "the application opens for review"
+      }
+    ],
+    "bytes": 155631,
+    "shows": "Edmonton officer review queue: New shows the submitted Fire separation application from Dana Okafor; the officer picks it up and Batatis reads the package",
+    "pointerStart": [
+      343,
+      162
+    ],
+    "pointerEnd": [
+      1116,
+      182
+    ]
+  },
+  {
+    "file": "c10-officer-review.mp4",
+    "seconds": 16.03,
+    "moments": [
+      {
+        "t": 0,
+        "what": "start"
+      },
+      {
+        "t": 1.2,
+        "what": "package review: Applicant (Section A) and Project (Section B) complete"
+      },
+      {
+        "t": 4,
+        "what": "Code references (Section C): 1 to ask; Case and proof (Section D): 6 to ask"
+      },
+      {
+        "t": 7.1,
+        "what": "what to ask the applicant"
+      },
+      {
+        "t": 8.9,
+        "what": "check: relevance of the cited provision"
+      },
+      {
+        "t": 11.8,
+        "what": "required: professional requirement, for the officer to decide"
+      }
+    ],
+    "bytes": 186324,
+    "shows": "Officer package review: Applicant (A) and Project (B) complete, Code references (C) 1 to ask, Case and proof (D) 6 to ask; the checks to ask about, including relevance of the cited provision and the required professional-requirement determination routed to the officer",
+    "pointerStart": [
+      1116,
+      182
+    ],
+    "pointerEnd": [
+      232,
+      713
+    ]
+  },
+  {
+    "file": "c11-decide.mp4",
+    "seconds": 17.17,
+    "moments": [
+      {
+        "t": 0,
+        "what": "start"
+      },
+      {
+        "t": 0.5,
+        "what": "decision: return to the applicant for the missing items"
+      },
+      {
+        "t": 4.7,
+        "what": "the one-way message: items to provide; they fix it and resend, they can\u2019t reply"
+      },
+      {
+        "t": 6.9,
+        "what": "Return"
+      },
+      {
+        "t": 12.8,
+        "what": "returned: waiting for the applicant"
+      }
+    ],
+    "bytes": 555850,
+    "shows": "Officer decision: Return to the applicant with a one-way message listing what to provide or confirm (completeness only, not a decision on the application); they fix it and resend, they can\u2019t reply; the application shows Returned, waiting for Dana Okafor",
+    "pointerStart": [
+      232,
+      713
+    ],
+    "pointerEnd": [
+      204,
+      230
     ]
   }
 ]
