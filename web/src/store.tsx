@@ -1235,7 +1235,10 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   }
 
   function readDescription(): Promise<void> { return startJob("intake"); }
-  function runIdentify(): Promise<void> { return startJob("identify"); }
+  function runIdentify(): Promise<void> {
+    identifyReruns.current.clear();          // a check the applicant starts gets a fresh restart budget
+    return startJob("identify");
+  }
 
   /** A version conflict is why the save failed; say so instead of a generic retry. */
   function blockedSave(fallback: string): string {
