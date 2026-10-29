@@ -1,25 +1,24 @@
 {
-  "note": "Pixel space of each 2x PNG (1224x1584, US Letter at 144 dpi). Section C starts at the bottom of p1 (row 1, 9.10.11.2.(2)) and continues on p2. Pages are identical except the last two Section C rows on p2, so the rects are on p2. Rects include the blue rules above and below each row.",
+  "note": "Pixel space of each 2x PNG (1224x1584, US Letter at 144 dpi). Section C has one row (9.10.11.2.(2) | OS1.2, OP3.1 | F03 | NBC 2020 intent). It starts at the bottom of p1 and its intent text continues at the top of p2 ('Section C - row 1 (continued)'). The incomplete form is identical except that row is blank (same height, same pagination). Rects include the blue rules above and below the row.",
   "complete": {
-    "src": "/studio/img/form-complete-p2.png",
+    "src": "/studio/img/form-complete-p1.png",
     "w": 1224, "h": 1584,
     "pages": [
       {"page": 1, "src": "/studio/img/form-complete-p1.png", "w": 1224, "h": 1584},
       {"page": 2, "src": "/studio/img/form-complete-p2.png", "w": 1224, "h": 1584}
     ],
     "sectionCRect": {"page": 1, "x": 72, "y": 1131, "w": 1077, "h": 313},
-    "removedRows": [
-      {"article": "9.10.9.16.(4)", "page": 2, "rect": {"x": 72, "y": 717, "w": 1077, "h": 140}},
-      {"article": "9.10.19.5.(2)", "page": 2, "rect": {"x": 72, "y": 855, "w": 1077, "h": 140}}
-    ]
+    "sectionCRow": {"article": "9.10.11.2.(2)", "rect": {"page": 1, "x": 72, "y": 1316, "w": 1077, "h": 129},
+                    "continued": {"page": 2, "x": 72, "y": 72, "w": 1077, "h": 129}}
   },
   "incomplete": {
-    "src": "/studio/img/form-incomplete-p2.png",
+    "src": "/studio/img/form-incomplete-p1.png",
     "w": 1224, "h": 1584,
     "pages": [
       {"page": 1, "src": "/studio/img/form-incomplete-p1.png", "w": 1224, "h": 1584},
       {"page": 2, "src": "/studio/img/form-incomplete-p2.png", "w": 1224, "h": 1584}
     ],
-    "gapRect": {"page": 2, "x": 72, "y": 717, "w": 1077, "h": 250}
+    "gapRect": {"page": 1, "x": 72, "y": 1316, "w": 1077, "h": 129},
+    "gapContinued": {"page": 2, "x": 72, "y": 72, "w": 1077, "h": 129}
   }
 }

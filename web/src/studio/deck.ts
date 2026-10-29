@@ -35,17 +35,14 @@ export const deck: Deck = {
       slides: [
         {
           kind: "compare", id: "villain-diff", title: "Section C, deleted",
-          // Page 1 is identical in both; the two removed Section C rows are on page 2.
+          // The one Section C row sits at the foot of page 1 (rects from /studio/img/forms.json).
           left: {
-            src: "/studio/img/form-complete-p2.png", label: "Complete",
-            marks: [
-              { rect: { x: 72, y: 717, w: 1077, h: 140 }, tone: "blue", label: "9.10.9.16.(4)" },
-              { rect: { x: 72, y: 855, w: 1077, h: 140 }, tone: "blue", label: "9.10.19.5.(2)" },
-            ],
+            src: "/studio/img/form-complete-p1.png", label: "Complete",
+            marks: [{ rect: { x: 72, y: 1316, w: 1077, h: 129 }, tone: "blue", label: "9.10.11.2.(2)" }],
           },
           right: {
-            src: "/studio/img/form-incomplete-p2.png", label: "Section C removed",
-            marks: [{ rect: { x: 72, y: 717, w: 1077, h: 250 }, tone: "ink", label: "Missing" }],
+            src: "/studio/img/form-incomplete-p1.png", label: "Section C removed",
+            marks: [{ rect: { x: 72, y: 1316, w: 1077, h: 129 }, tone: "ink", label: "Missing" }],
           },
         },
         { kind: "statement", id: "villain-back", text: "More information\nrequired.", accent: "required.", sub: "Weeks later." },
