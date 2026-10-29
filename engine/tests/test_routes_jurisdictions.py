@@ -67,7 +67,9 @@ def test_detail_merges_province_items_and_404s(scene):
     ({'id': 'calgary', 'name': 'Calgary'}, None, 'calgary', 'id'),
     ({'id': 'edmonton', 'name': 'Edmonton'}, None, 'edmonton', 'id'),
     ({'id': 'x-1', 'name': 'City of Edmonton'}, None, 'edmonton', 'name'),
-    ({'id': 'red-deer', 'name': 'City of Red Deer'}, None, 'alberta-other', 'fallback'),
+    ({'id': 'red-deer', 'name': 'City of Red Deer'}, None, 'red-deer', 'id'),
+    ({'id': 'x-2', 'name': 'Lacombe County'}, None, 'lacombe-county', 'name'),
+    ({'id': 'vancouver', 'name': 'Vancouver'}, None, 'vancouver', 'id'),
     ({'id': 'Example Hamlet', 'name': 'Example Hamlet'}, None, 'alberta-other', 'fallback'),
     (None, 'edmonton', 'edmonton', 'reviewer_code'),
 ])
@@ -100,15 +102,20 @@ def test_not_sure_is_persisted_without_fabricating_a_jurisdiction(scene):
     assert client.get(f'/cases/{case["id"]}/jurisdiction/pack').json()['pack'] is None
 
 
-@pytest.mark.parametrize('place', ['Red Deer', 'Example Hamlet'])
-def test_other_offices_keep_their_place_and_pdf_path_without_reviewer_submission(scene, monkeypatch, place):
+@pytest.mark.parametrize('place, pack_id, office, source', [
+    ('Red Deer', 'red-deer', 'City of Red Deer', 'councilconnect.safetycodes.ab.ca'),          # a named place
+    ('Example Hamlet', 'alberta-other', None, '/where-to-get-a-permit/'),                    # an unknown one
+])
+def test_other_offices_keep_their_place_and_pdf_path_without_reviewer_submission(scene, monkeypatch, place, pack_id,
+                                                                                  office, source):
     client = scene.clients['owner']
     case = client.post('/cases', json={'jurisdiction': {'id': place, 'name': place}}).json()
     assert case['authority'] is None
     assert client.get(f'/cases/{case["id"]}').json()['jurisdiction']['name'] == place
     pack = client.get(f'/cases/{case["id"]}/jurisdiction/pack').json()['pack']
-    assert pack['id'] == 'alberta-other' and pack['authority']['reviewer_code'] is None
-    assert any('/where-to-get-a-permit/' in source['url'] for source in pack['authority']['sources'])
+    assert pack['id'] == pack_id and pack['authority']['reviewer_code'] is None
+    assert office is None or pack['authority']['name'] == office
+    assert any(source in s['url'] for s in pack['authority']['sources'])
     # Isolate routing from the independent completeness gate and PDF renderer.
     monkeypatch.setattr('engine.routes_review.check_completeness', lambda *_args, **_kw: [])
     monkeypatch.setattr('engine.api.export_case', lambda *_args, **_kw: SimpleNamespace(pdf=b'%PDF-1.4 synthetic route fixture'))

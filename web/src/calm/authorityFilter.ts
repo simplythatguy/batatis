@@ -1,9 +1,10 @@
 /**
  * Search over the offices an applicant can pick as the reviewing authority. Pure and
  * order-stable so the picker stays quick with hundreds of entries: every typed word must appear
- * in the name or id; names that start with the first word, then words that start with it, come first.
+ * in the name, id or another name of the place; names that start with the first word, then words
+ * that start with it, come first.
  */
-export type AuthorityOption = { id: string; name: string };
+export type AuthorityOption = { id: string; name: string; aliases?: readonly string[] };
 
 /** How many matches the list renders at once; the rest wait behind "keep typing". */
 export const AUTHORITY_LIST_LIMIT = 50;
@@ -18,7 +19,7 @@ export function filterAuthorities(options: readonly AuthorityOption[], query: st
   const ranked: { o: AuthorityOption; rank: number; at: number }[] = [];
   options.forEach((o, at) => {
     const name = fold(o.name);
-    const hay = `${name} ${fold(o.id)}`;
+    const hay = [name, fold(o.id), ...(o.aliases ?? []).map(fold)].join(" ");
     if (!words.every((w) => hay.includes(w))) return;
     const first = words[0];
     const rank = name.startsWith(first) ? 0 : name.split(/[\s\-/(),.]+/).some((p) => p.startsWith(first)) ? 1 : 2;

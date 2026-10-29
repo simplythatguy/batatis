@@ -4,13 +4,20 @@ import { AUTHORITIES, authorityUnsure, officeChoiceAction, officeSuggestion, res
 import { emptyCase } from "../intake.ts";
 import { reducer } from "../model.ts";
 import { jurisdictionBody } from "../rules.ts";
+import { filterAuthorities } from "./authorityFilter.ts";
+import placeIndex from "../../../engine/data/jurisdictions/place_index.json" with { type: "json" };
 
-for (const [place, pack, reviewer] of [["Calgary", "calgary", "calgary"], ["Edmonton", "edmonton", "edmonton"], ["Red Deer", "alberta-other", null], ["Example Hamlet", "alberta-other", null]] as const) {
+for (const [place, pack, reviewer, shown] of [
+  ["Calgary", "calgary", "calgary", "Calgary"], ["Edmonton", "edmonton", "edmonton", "Edmonton"],
+  ["Red Deer", "red-deer", null, "Red Deer"], ["City of Red Deer", "red-deer", null, "Red Deer"],
+  ["Lacombe County", "lacombe-county", null, "Lacombe County"], ["Vancouver", "vancouver", null, "Vancouver"],
+  ["Example Hamlet", "alberta-other", null, "Example Hamlet"],
+] as const) {
   test(`${place} resolves without inventing a reviewing account`, () => {
     const choice = resolveOffice(place);
     assert.equal(choice?.packId, pack);
     assert.equal(choice?.reviewerCode, reviewer);
-    assert.equal(jurisdictionBody(choice!.id).name, place);
+    assert.equal(jurisdictionBody(choice!.id).name, shown);
     const c = reducer(emptyCase("owner"), { type: "setAuthority", authority: choice!.id });
     assert.equal(Boolean(submissionOfficeReason(c)), !reviewer);
   });
@@ -30,4 +37,14 @@ test("the same Alberta place data supplies suggestions and a site confirmation",
   assert.equal(officeSuggestion(c)?.name, "Red Deer");
   c = reducer(c, { type: "setRuleInput", field: "municipality", value: "Example Hamlet", rule: "intake", quote: "Example Hamlet" });
   assert.equal(officeSuggestion(c)?.name, "Example Hamlet");
+});
+
+test("every place the engine knows can be picked, by every one of its names", () => {
+  assert.equal(AUTHORITIES.length, placeIndex.places.length);
+  for (const option of AUTHORITIES) for (const name of [option.id, ...option.aliases]) assert.equal(resolveOffice(name)?.id, option.id, name);
+});
+
+test("the picker finds a place by its legal name, not only the short one", () => {
+  assert.equal(filterAuthorities(AUTHORITIES, "City of Red Deer").shown[0]?.id, "red-deer");
+  assert.equal(filterAuthorities(AUTHORITIES, "lacombe county").shown[0]?.id, "lacombe-county");
 });

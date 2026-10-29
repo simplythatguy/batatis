@@ -1,0 +1,482 @@
+{
+ "note": "Hand-entered place facts that places_build.py combines with the research table. Code names and links as read in docs/research/2026-10-28-every-jurisdiction (ontario-quebec.md, rest-of-canada.md, alberta.md).",
+ "parks": {
+  "0159": {
+   "id": "waterton-lakes-national-park",
+   "label": "Waterton Lakes National Park",
+   "aliases": [
+    "Waterton",
+    "Waterton Park"
+   ]
+  },
+  "0164": {
+   "id": "banff-national-park",
+   "label": "Banff National Park",
+   "aliases": [
+    "Lake Louise"
+   ]
+  },
+  "0167": {
+   "id": "jasper-national-park",
+   "label": "Jasper National Park",
+   "aliases": []
+  },
+  "0168": {
+   "id": "elk-island-national-park",
+   "label": "Elk Island National Park",
+   "aliases": []
+  },
+  "0179": {
+   "id": "wood-buffalo-national-park",
+   "label": "Wood Buffalo National Park",
+   "aliases": []
+  }
+ },
+ "airports": {
+  "Calgary International Airport lands (Calgary Airport Authority)": {
+   "id": "calgary-international-airport",
+   "aliases": [
+    "Calgary International Airport"
+   ],
+   "office": "City of Calgary"
+  },
+  "Springbank Airport lands (Calgary Airport Authority)": {
+   "id": "springbank-airport",
+   "aliases": [
+    "Springbank Airport"
+   ],
+   "office": "Rocky View County"
+  },
+  "Edmonton International Airport lands (Edmonton Regional Airports Authority)": {
+   "id": "edmonton-international-airport",
+   "aliases": [
+    "Edmonton International Airport"
+   ],
+   "office": "Leduc County"
+  }
+ },
+ "provinces": [
+  {
+   "province": "BC",
+   "name": "British Columbia",
+   "aliases": [
+    "BC",
+    "B.C."
+   ],
+   "code": "BC Building Code 2024",
+   "source": {
+    "title": "Government of BC, 2024 BC Codes",
+    "retrieved": "2026-10-28",
+    "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/bc-codes/2024-bc-codes"
+   }
+  },
+  {
+   "province": "SK",
+   "name": "Saskatchewan",
+   "aliases": [
+    "SK"
+   ],
+   "code": "National Building Code 2020 with Saskatchewan amendments",
+   "source": {
+    "title": "Saskatchewan, The Building Code Regulations (SR 124/2021)",
+    "retrieved": "2026-10-28",
+    "url": "https://publications.saskatchewan.ca/api/v1/products/115823/formats/131604/download"
+   }
+  },
+  {
+   "province": "MB",
+   "name": "Manitoba",
+   "aliases": [
+    "MB"
+   ],
+   "code": "Manitoba Building Code (M.R. 78/2023)",
+   "source": {
+    "title": "Manitoba Building Code, M.R. 78/2023",
+    "retrieved": "2026-10-28",
+    "url": "https://web2.gov.mb.ca/laws/regs/annual/2023/078.php"
+   }
+  },
+  {
+   "province": "ON",
+   "name": "Ontario",
+   "aliases": [
+    "ON"
+   ],
+   "code": "Ontario Building Code (O. Reg. 163/24)",
+   "source": {
+    "title": "Ontario Building Code, O. Reg. 163/24 (e-Laws)",
+    "retrieved": "2026-10-28",
+    "url": "https://www.ontario.ca/laws/regulation/240163"
+   }
+  },
+  {
+   "province": "QC",
+   "name": "Quebec",
+   "aliases": [
+    "QC",
+    "Province of Quebec"
+   ],
+   "code": "Quebec Construction Code, Chapter I",
+   "source": {
+    "title": "Quebec Construction Code, Chapter I Building (LegisQuebec)",
+    "retrieved": "2026-10-28",
+    "url": "https://www.legisquebec.gouv.qc.ca/en/document/cr/B-1.1,%20r.%202"
+   }
+  },
+  {
+   "province": "NB",
+   "name": "New Brunswick",
+   "aliases": [
+    "NB"
+   ],
+   "code": "National Building Code 2020 (N.B. Reg. 2021-2)",
+   "source": {
+    "title": "New Brunswick General Regulation, N.B. Reg. 2021-2",
+    "retrieved": "2026-10-28",
+    "url": "https://laws.gnb.ca/en/document/cr/2021-2"
+   }
+  },
+  {
+   "province": "NS",
+   "name": "Nova Scotia",
+   "aliases": [
+    "NS"
+   ],
+   "code": "Nova Scotia Building Code Regulations (N.S. Reg. 198/2024)",
+   "source": {
+    "title": "Nova Scotia Building Code Regulations (N.S. Reg. 198/2024)",
+    "retrieved": "2026-10-28",
+    "url": "https://novascotia.ca/just/regulations/regs/bcregs.htm"
+   }
+  },
+  {
+   "province": "PE",
+   "name": "Prince Edward Island",
+   "aliases": [
+    "PEI",
+    "PE"
+   ],
+   "code": "National Building Code 2020",
+   "source": {
+    "title": "Canadian Board for Harmonized Construction Codes, provincial and territorial adoption",
+    "url": "https://cbhcc-cchcc.ca/en/provincial-territorial-adoption/",
+    "retrieved": "2026-10-28"
+   }
+  },
+  {
+   "province": "NL",
+   "name": "Newfoundland and Labrador",
+   "aliases": [
+    "NL",
+    "Newfoundland"
+   ],
+   "code": "National Building Code 2025 (per the CBHCC tracker)",
+   "source": {
+    "title": "Fire Protection Services Regulations, NLR 45/12",
+    "retrieved": "2026-10-28",
+    "url": "https://assembly.nl.ca/Legislation/sr/Regulations/rc120045.htm"
+   }
+  },
+  {
+   "province": "YT",
+   "name": "Yukon",
+   "aliases": [
+    "YT"
+   ],
+   "code": "National Building Code 2020 with Yukon variations",
+   "source": {
+    "title": "Canadian Board for Harmonized Construction Codes, provincial and territorial adoption",
+    "url": "https://cbhcc-cchcc.ca/en/provincial-territorial-adoption/",
+    "retrieved": "2026-10-28"
+   }
+  },
+  {
+   "province": "NT",
+   "name": "Northwest Territories",
+   "aliases": [
+    "NT",
+    "NWT"
+   ],
+   "code": "National Building Code 2020",
+   "source": {
+    "title": "Canadian Board for Harmonized Construction Codes, provincial and territorial adoption",
+    "url": "https://cbhcc-cchcc.ca/en/provincial-territorial-adoption/",
+    "retrieved": "2026-10-28"
+   }
+  },
+  {
+   "province": "NU",
+   "name": "Nunavut",
+   "aliases": [
+    "NU"
+   ],
+   "code": "National Building Code 2015",
+   "source": {
+    "title": "Canadian Board for Harmonized Construction Codes, provincial and territorial adoption",
+    "url": "https://cbhcc-cchcc.ca/en/provincial-territorial-adoption/",
+    "retrieved": "2026-10-28"
+   }
+  }
+ ],
+ "cities": [
+  {
+   "province": "BC",
+   "name": "Vancouver",
+   "aliases": [],
+   "office": "City of Vancouver",
+   "code": "Vancouver Building By-law, not the BC Building Code",
+   "source": {
+    "title": "Government of BC, 2024 BC Codes",
+    "retrieved": "2026-10-28",
+    "url": "https://www2.gov.bc.ca/gov/content/industry/construction-industry/building-codes-standards/bc-codes/2024-bc-codes"
+   }
+  },
+  {
+   "province": "BC",
+   "name": "Surrey",
+   "aliases": [],
+   "office": "City of Surrey",
+   "code": null,
+   "source": null
+  },
+  {
+   "province": "BC",
+   "name": "Burnaby",
+   "aliases": [],
+   "office": "City of Burnaby",
+   "code": null,
+   "source": null
+  },
+  {
+   "province": "BC",
+   "name": "Victoria",
+   "aliases": [],
+   "office": "City of Victoria",
+   "code": null,
+   "source": null
+  },
+  {
+   "province": "MB",
+   "name": "Winnipeg",
+   "aliases": [],
+   "office": "City of Winnipeg",
+   "code": null,
+   "source": null
+  },
+  {
+   "province": "SK",
+   "name": "Saskatoon",
+   "aliases": [],
+   "office": "City of Saskatoon",
+   "code": null,
+   "source": null
+  },
+  {
+   "province": "SK",
+   "name": "Regina",
+   "aliases": [],
+   "office": "City of Regina",
+   "code": null,
+   "source": null
+  },
+  {
+   "province": "ON",
+   "name": "Toronto",
+   "aliases": [],
+   "office": "City of Toronto (Toronto Building)",
+   "code": null,
+   "source": null
+  },
+  {
+   "province": "ON",
+   "name": "Ottawa",
+   "aliases": [],
+   "office": "City of Ottawa",
+   "code": null,
+   "source": null
+  },
+  {
+   "province": "ON",
+   "name": "Mississauga",
+   "aliases": [],
+   "office": "City of Mississauga",
+   "code": null,
+   "source": null
+  },
+  {
+   "province": "ON",
+   "name": "Brampton",
+   "aliases": [],
+   "office": "City of Brampton",
+   "code": null,
+   "source": null
+  },
+  {
+   "province": "ON",
+   "name": "Hamilton",
+   "aliases": [],
+   "office": "City of Hamilton",
+   "code": null,
+   "source": null
+  },
+  {
+   "province": "ON",
+   "name": "London",
+   "aliases": [],
+   "office": "City of London",
+   "code": null,
+   "source": null
+  },
+  {
+   "province": "ON",
+   "name": "Markham",
+   "aliases": [],
+   "office": "City of Markham",
+   "code": null,
+   "source": null
+  },
+  {
+   "province": "ON",
+   "name": "Vaughan",
+   "aliases": [],
+   "office": "City of Vaughan",
+   "code": null,
+   "source": null
+  },
+  {
+   "province": "ON",
+   "name": "Kitchener",
+   "aliases": [],
+   "office": "City of Kitchener",
+   "code": null,
+   "source": null
+  },
+  {
+   "province": "ON",
+   "name": "Windsor",
+   "aliases": [],
+   "office": "City of Windsor",
+   "code": null,
+   "source": null
+  },
+  {
+   "province": "QC",
+   "name": "Montréal",
+   "aliases": [
+    "Montreal"
+   ],
+   "office": "Régie du bâtiment du Québec, or the City of Montréal for exempt buildings",
+   "code": null,
+   "source": null
+  },
+  {
+   "province": "QC",
+   "name": "Québec City",
+   "aliases": [
+    "Quebec City",
+    "Ville de Québec"
+   ],
+   "office": "Régie du bâtiment du Québec, or the City of Québec for exempt buildings",
+   "code": null,
+   "source": null
+  },
+  {
+   "province": "QC",
+   "name": "Laval",
+   "aliases": [],
+   "office": "Régie du bâtiment du Québec, or the City of Laval for exempt buildings",
+   "code": null,
+   "source": null
+  },
+  {
+   "province": "QC",
+   "name": "Gatineau",
+   "aliases": [],
+   "office": "Régie du bâtiment du Québec, or the City of Gatineau for exempt buildings",
+   "code": null,
+   "source": null
+  },
+  {
+   "province": "QC",
+   "name": "Longueuil",
+   "aliases": [],
+   "office": "Régie du bâtiment du Québec, or the City of Longueuil for exempt buildings",
+   "code": null,
+   "source": null
+  },
+  {
+   "province": "NS",
+   "name": "Halifax",
+   "aliases": [],
+   "office": "Halifax Regional Municipality",
+   "code": null,
+   "source": null
+  },
+  {
+   "province": "NB",
+   "name": "Fredericton",
+   "aliases": [],
+   "office": "City of Fredericton",
+   "code": null,
+   "source": null
+  },
+  {
+   "province": "NB",
+   "name": "Moncton",
+   "aliases": [],
+   "office": "City of Moncton",
+   "code": null,
+   "source": null
+  },
+  {
+   "province": "NB",
+   "name": "Saint John",
+   "aliases": [],
+   "office": "City of Saint John",
+   "code": null,
+   "source": null
+  },
+  {
+   "province": "PE",
+   "name": "Charlottetown",
+   "aliases": [],
+   "office": "City of Charlottetown",
+   "code": null,
+   "source": null
+  },
+  {
+   "province": "NL",
+   "name": "St. John's",
+   "aliases": [
+    "St Johns"
+   ],
+   "office": "City of St. John's",
+   "code": null,
+   "source": null
+  },
+  {
+   "province": "YT",
+   "name": "Whitehorse",
+   "aliases": [],
+   "office": "City of Whitehorse",
+   "code": null,
+   "source": null
+  },
+  {
+   "province": "NT",
+   "name": "Yellowknife",
+   "aliases": [],
+   "office": "City of Yellowknife",
+   "code": null,
+   "source": null
+  },
+  {
+   "province": "NU",
+   "name": "Iqaluit",
+   "aliases": [],
+   "office": "Government of Nunavut building office",
+   "code": null,
+   "source": null
+  }
+ ]
+}

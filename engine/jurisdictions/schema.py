@@ -14,12 +14,12 @@ import sys
 from pydantic.json_schema import models_json_schema
 
 from ..models_checklists import StandingChecklist
-from ..models_jurisdictions import CoverageFile, JurisdictionPack, ProvinceShared
+from ..models_jurisdictions import CoverageFile, JurisdictionPack, PlacesFile, ProvinceShared
 from . import DATA_DIR
 
 OUT = DATA_DIR / 'pack.schema.json'
 FILES = {'packs/*.json': JurisdictionPack, 'provinces/*.json': ProvinceShared, 'coverage.json': CoverageFile,
-         'checklists/*.json': StandingChecklist}
+         'checklists/*.json': StandingChecklist, 'places/*.json': PlacesFile}
 
 
 def schema() -> dict:

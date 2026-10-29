@@ -4,6 +4,8 @@
     engine/data/jurisdictions/provinces/<XX>.json  items every pack in a province shares
     engine/data/jurisdictions/coverage.json        coverage labels for every province and territory
     engine/data/jurisdictions/checklists/<id>.json standing-package checklists (see checklists.py)
+    engine/data/jurisdictions/places/<group>.json  generated places (see places_build.py); each place without a
+                                                   hand-written pack becomes a pack that names its office
 
 `BATATIS_JURISDICTIONS_DIR` points the loader at another directory with the same layout, so a new
 pack is a new file and no code changes. Nothing here names a particular city.
@@ -22,8 +24,9 @@ from pydantic import ValidationError
 
 from ..account_models import Authority as ReviewerAuthority
 from ..models import Case, Jurisdiction
-from ..models_jurisdictions import (CoverageFile, JurisdictionDetail, JurisdictionPack, JurisdictionSummary,
-                                    JurisdictionsResult, PackNotice, ProvinceShared, ResolvedForm, ResolvedNote)
+from ..models_jurisdictions import (Authority, CoverageFile, JurisdictionDetail, JurisdictionPack, JurisdictionSummary,
+                                    JurisdictionsResult, Match, PackNotice, Place, PlacesFile, ProvinceShared,
+                                    ResolvedForm, ResolvedNote)
 
 DATA_DIR = Path(__file__).resolve().parent.parent / 'data' / 'jurisdictions'
 ENV_DIR = 'BATATIS_JURISDICTIONS_DIR'
@@ -50,6 +53,16 @@ def _key(value: str | None) -> str:
     return ' '.join((value or '').split()).casefold()
 
 
+def place_pack(place: Place) -> JurisdictionPack:
+    """The pack a generated place resolves to: its office, its sources, and coverage `preview` when Batatis
+    does not prepare applications there."""
+    return JurisdictionPack(
+        id=place.id, name=place.name, province=place.province, coverage='full' if place.covered else 'preview',
+        code_edition=place.code_edition, summary=place.note,
+        authority=Authority(name=place.office, kind=place.kind, contact=place.ask, sources=place.sources),
+        match=Match(names=place.aliases))
+
+
 def _read(path: Path, model):
     try:
         return model.model_validate(json.loads(path.read_text(encoding='utf-8')))
@@ -67,6 +80,9 @@ class Registry:
     _names: dict[str, str] = field(default_factory=dict)
     fallbacks: dict[str, str] = field(default_factory=dict)
     checklists: dict = field(default_factory=dict)      # id -> StandingChecklist, see checklists.py
+    places: dict[str, Place] = field(default_factory=dict)       # place id -> generated place
+    place_packs: dict[str, str] = field(default_factory=dict)    # place id -> the pack it resolves to
+    generated: set[str] = field(default_factory=set)             # pack ids built from places, not hand-written
 
     @classmethod
     def load(cls, root: Path | str | None = None) -> 'Registry':
@@ -83,6 +99,9 @@ class Registry:
             reg.provinces[shared.province] = shared
         for path in sorted((root / 'packs').glob('*.json')):
             reg._add(path, _read(path, JurisdictionPack))
+        for path in sorted((root / 'places').glob('*.json')):
+            for place in _read(path, PlacesFile).places:
+                reg._add_place(path, place)
         reg._check()
         from .checklists import load_dir
         load_dir(reg)
@@ -91,6 +110,27 @@ class Registry:
     def _add(self, path: Path, pack: JurisdictionPack):
         if path.stem != pack.id:
             raise PackError(f'{path.name}: file name must be the pack id {pack.id}')
+        self._register(path, pack)
+
+    def _add_place(self, path: Path, place: Place):
+        """A hand-written pack that already names the place keeps it; otherwise the place becomes a pack."""
+        if place.id in self.places:
+            raise PackError(f'{path.name}: duplicate place id {place.id}')
+        self.places[place.id] = place
+        owner = place.id if place.id in self.packs else next(
+            (self._names[_key(n)] for n in [place.name, *place.aliases]
+             if _key(n) in self._names and not self.packs[self._names[_key(n)]].fallback), None)
+        if owner:
+            self.place_packs[place.id] = owner
+            return
+        for alias in place.aliases:   # a name another pack already claims as its id would make the place ambiguous
+            if _key(alias) in self._ids:
+                raise PackError(f'{path.name}: place {place.id} alias "{alias}" is pack {self._ids[_key(alias)]}\'s id')
+        self._register(path, place_pack(place))
+        self.place_packs[place.id] = place.id
+        self.generated.add(place.id)
+
+    def _register(self, path: Path, pack: JurisdictionPack):
         if pack.id in self.packs:
             raise PackError(f'{path.name}: duplicate pack id {pack.id}')
         self.packs[pack.id] = pack
