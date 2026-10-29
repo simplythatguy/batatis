@@ -1,8 +1,8 @@
 """Which package the applicant is on.
 
 A firm departure in any relevant coded check selects the alternative path. Following one
-rule cannot settle unresolved scope or a stated wider departure. Not applicable closes
-only that rule, never a requested variance. Assumptions and unconfirmed inputs are not firm.
+rule cannot settle unresolved scope or a stated wider departure. A rule that does not apply
+to this building decides nothing, so the path falls through. Assumptions and unconfirmed inputs are not firm.
 Missing inputs remain visible even when a departure selects the path. Otherwise a recorded
 pathway wins, then the wording fork. An unknown fork does not open the alternative package.
 Identify decisions are not an answer to the fork.
@@ -73,9 +73,7 @@ def decide_path(case: Case) -> PathDecision:
     if (playing and len(firm) == len(playing) and {result.state for result in firm} == {'follows'}
             and not _stated_departure(text) and not _uncovered_proposal(case, rules)):
         return _from_check(firm[0])
-    if (playing and len(firm) == len(playing) and {result.state for result in firm} == {'not_applicable'}
-            and fallback.path != 'alternative'):
-        return _from_check(firm[0])
+    # A rule this building is outside of decides nothing: the path falls through to the other signals.
     return fallback
 
 
@@ -101,10 +99,6 @@ def _fallback(case: Case, text: str, *, rule_id: str | None = None, missing: tup
 def _firm(result: RuleResult) -> bool:
     return result.state in _STATE and not result.assumptions and not result.unconfirmed_inputs
 
-
-def _decides(result: RuleResult) -> bool:
-    # A keyword can name a rule the building is outside of ("no glazing" names the glazing rule).
-    return _firm(result) and result.state != 'not_applicable'
 
 
 def _needs(result: RuleResult, rule: dict) -> tuple[str, ...]:
