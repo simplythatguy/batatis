@@ -31,6 +31,10 @@
 @keyframes cf-av-arrive { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes cf-av-shine { from { background-position: 140% 0; } to { background-position: -100% 0; } }
 
+.cf-msg-ai > ul { margin: 0 0 10px; padding-left: 18px; }
+.cf-msg-ai > ul li { margin: 0 0 4px; }
+.cf-msg-ai strong { font-weight: 600; }
+
 .cf-av-sources { margin: 8px 0; font-size: 12.5px; }
 .cf-av-sources summary { cursor: pointer; color: var(--cf-text-2); }
 .cf-av-sources ul { list-style: none; margin: 8px 0; padding: 0; }
