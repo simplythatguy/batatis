@@ -217,6 +217,7 @@ def test_one_case_snapshot_has_the_existing_derived_read_freshness_without_writi
     current_relevance = client.get(path + '/relevance').json()
     assert opened['identify'] == {key: value for key, value in current_id.items() if key != 'meta'}
     assert opened['intake'] == current_intake['record']
-    assert opened['relevance'] == {key: value for key, value in current_relevance.items() if key != 'meta'}
+    assert opened['relevance'] == {key: value for key, value in current_relevance.items() if key not in {'meta', 'case_version'}}
+    assert current_relevance['case_version'] == opened['version']
     assert opened['identify']['case_version'] == opened['version']
     assert backend.get(case.id).model_dump() == before
