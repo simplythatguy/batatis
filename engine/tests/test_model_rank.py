@@ -7,7 +7,7 @@ from engine.identify import fakes
 from engine.identify.config import load_config
 from engine.identify.pipeline import run
 from engine.identify.providers import MeteredAnthropic
-from engine.identify.verify import ClaudeVerifier
+from engine.identify.model_rank import RankVerifier
 
 PROSE = ('We build houses. One bedroom window sits low with a long drop outside, and we want a window opening '
          'control device that limits the opening to about 100 mm while the window still works as an emergency '
@@ -32,7 +32,7 @@ def fake_gate(monkeypatch):
 
 
 def verifier(codes, picker):
-    return ClaudeVerifier(codes.db_path, client=MeteredAnthropic(fakes.FakeAnthropic(picker)), model='claude-haiku-5-5')
+    return RankVerifier(codes.db_path, client=MeteredAnthropic(fakes.FakeAnthropic(picker)), model='claude-haiku-5-5')
 
 
 def ran(result):
@@ -102,3 +102,11 @@ def test_the_result_names_the_rank_model_only_when_it_ran(codes, fake_gate):
     ranked = run(PROSE, codes=codes, config=load_config(env={}), ranker=verifier(codes, fakes.honest_picks)).result
     assert ranked.model_ids['verifier'] == 'verifier-3'
     assert deterministic(codes).model_ids == {'screen': None, 'rerank': None, 'verifier': None}
+
+
+def test_the_request_is_the_one_the_bakeoff_measured(codes):
+    v = RankVerifier(codes.db_path, client=object(), model='claude-haiku-5-5')
+    text = v.prompt(PROSE, ['9.9.10.1.', '9.8.8.1.'])
+    assert text.startswith('Applicant description:\n<<<\n' + PROSE)
+    assert '\n[1] 9.9.10.1. Egress Windows or Doors for Bedrooms' in text and '\n[2] 9.8.8.1. Required Guards' in text
+    assert all(len(line) < 900 for line in text.splitlines() if line.startswith('['))

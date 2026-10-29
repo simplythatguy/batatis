@@ -158,22 +158,24 @@ These checks record what Batatis did on public city documents and on practice te
 
 | What | Result | Where it came from |
 | --- | --- | --- |
-| Calgary and Edmonton writeups where it showed a code section the writeup actually cites | 17 of 17 | Real public Calgary and Edmonton documents, shortened into text |
-| Made-up code quotes the user saw | 0. It wrote 3 and threw them away before they appeared | Same 17 documents. The 3 quotes were written by the app during the test |
+| Real Alberta records where the first code article shown is one the regulator cited | 46 of 64. It was 26 of 64 before the AI ranking | 64 published STANDATA variances, interpretations, appeals and city bulletins, described without their article numbers |
+| The same records with a cited article among the first three shown | 55 of 64. It was 32 of 64 | Same 64 records |
+| Made-up code articles or quotes the user saw | 0. The quote check threw out 5 of 236 AI picks before they appeared | Same 64 records |
+| Grade of the finished application for a first-time applicant, out of 10 | 5.6 with the best workflow we tested, 3.4 for today's flow, 2.0 for the official flowchart asked as a form | Same 64 records. A blind AI grader compared each draft with what the regulator cited |
 | Blanks it filled that matched the description | 159 of 159 | Made up. 60 practice descriptions written from the code book |
 | Mistakes we hid in sample forms that it caught | 18 of 18 | Made up. We planted the mistakes in sample forms |
 | Cases where an engineer was needed and it said so | 33 of 33 | Made up. Same 60 practice descriptions. The engineer labels were written with the cases |
 | Real applications an officer has tested | 0. No one has tested this | No officer has used the app |
 
-The 17 of 17 is the row to say out loud. Those writeups are real public documents from Calgary and Edmonton, shortened into text. The shortened text left the article numbers out. No made-up quote reached the screen.
+The 46 of 64 is the row to say out loud. Those are real records the Alberta government and the cities published, and the answer key is the article the regulator cited, mapped to the NBC(AE) 2023. Batatis finds candidates by searching the code's own text, then Claude Haiku 5.5, at medium effort, reads the leading 60 and moves the ones it can quote word for word to the front. A quote that is not in the code is thrown away, so no invented article reaches the screen.
 
-In the app, article search starts from the code's own requirement rules. Jev, a search model, can rerank that list. This run asked Jev 1.13.0 to rank the articles from the start. Claude Haiku 5.5, at medium effort, then checked that each quote was word for word. Nine of the writeups are houses under Part 9, the part of the code for houses and small buildings. Those counted when the first section shown was one the document cites. The other eight counted when a cited section was among the three shown. In one of those eight, the first section was a different article, and a cited section was still among the three.
+The workflow grades come from the [workflow bakeoff](experiments/workflow-bakeoff-v2/README.md). It compared our workflow, the official NBC(AE) flowchart and five other designs on the same 64 records, with simulated first-time and expert applicants. The grader was Claude Opus 5.5, and it did not know which workflow wrote which draft. No officer has graded them.
 
 The 159, the 18, and the 33 look perfect because we wrote the practice cases and the answer key. A judge who asks where the data came from should treat those rows as a demo. On those 60 descriptions the engineer check said yes or not sure, so it caught every case where an engineer was needed. The receipt scores a match against every label at 50 of 60. This table counts the 33 cases where an engineer was needed.
 
 The last row stays at 0. No officer has tried a real application.
 
-The saved rows are in the [city-document run](evals_dev/judge_bench_results.json). The documents are listed in the [Alberta cases](docs/research/2026-10-23-elephant/cases-alberta.md). The blanks are in the [accuracy report](docs/accuracy/report.md). The planted mistakes are in the [form-check test](engine/tests/test_package_review_planted.py). The engineer labels are in the [Section D receipt](evals_dev/section_d_flag/RESULTS.md).
+The real-record rows are in the [bakeoff results](experiments/workflow-bakeoff-v2/RESULTS.md). The records are listed in the [Alberta cases](docs/research/2026-10-23-elephant/cases-alberta.md). The blanks are in the [accuracy report](docs/accuracy/report.md). The planted mistakes are in the [form-check test](engine/tests/test_package_review_planted.py). The engineer labels are in the [Section D receipt](evals_dev/section_d_flag/RESULTS.md).
 
 ## What's next
 
@@ -233,7 +235,7 @@ For applicants:
 
 1. **Describe the project.** Rules read facts, such as the owner and the address, from the description and from the text and fields of any PDFs. If AI is on, GPT-6 Luna, an OpenAI model, points at more facts, and each one must quote the text it came from. When you attach files, Luna also reviews them page by page, and the questions screen lists what it found.
 2. **Answer a few questions.** A rule-based planner picks up to five questions. It starts with conflicts in what you wrote, then facts that narrow down the code articles. The website then shows one card for each item that is still open. No AI writes the questions. This step is also where the path is chosen. See [How the path is chosen](#how-the-path-is-chosen).
-3. **Confirm the code articles.** Jev 1.13.0, a TypeSafe model that answers with a probability, scores all 2,080 articles in Division B of the code and reranks the top 60. Luna then reads the top 15 in full and quotes the sentences that apply. Batatis shows up to 10 articles, and you confirm each one. With AI off, or if scoring fails, a keyword search over CodeDB suggests articles instead.
+3. **Confirm the code articles.** Batatis searches the full text of CodeDB for every requirement your description touches. If AI is on, Claude Haiku 5.5 reads the leading 60 and moves the ones it can quote word for word to the front, with a one-line reason. A quote that is not in the code is thrown away. You confirm the articles that apply. With AI off, the search order stays as it is.
 4. **Section C fills itself in.** The objectives, functions, and intent of each confirmed article come from the code's own tables in CodeDB. No AI is involved.
 5. **Plan the evidence.** Rules match each article to the kinds of evidence it needs, and flag when an engineer or another professional is required. No AI is involved. The six process fields are added only when the path is alternative.
 6. **Anything missing?** Completeness rules check every required part of Sections A to D. Anything missing sends you back to the questions.
@@ -255,13 +257,14 @@ CodeDB is a SQLite database of the building code. You build it on your computer 
 Before any text goes to an AI service, Batatis removes the names, contact details, and addresses that it recognizes. The web engine's daily spend cap, US$5 by default, stops its AI calls when it is reached.
 
 <details>
-<summary>Why Batatis uses Luna and Jev, and what isn't measured yet</summary>
+<summary>Why Batatis uses these models, and what isn't measured yet</summary>
+
+Step 3 changed on October 28, 2026. Code search no longer uses Jev. It searches CodeDB's own text, then Claude Haiku 5.5 at medium effort ranks the leading 60 with word-for-word quotes. The [workflow bakeoff](experiments/workflow-bakeoff-v2/README.md) measured that ranking on 64 real Alberta records. The rest of this section describes the October 25 choice for document review.
 
 The team chose this workflow on October 25, 2026, and stopped benchmarking. The [decision record](docs/evaluations/workflow-decision-20261025.md) explains the choice and its limits. The [evidence snapshot](docs/evaluations/workflow-accuracy-evidence-20261025.json) holds the saved results behind it.
 
 - Luna reviews documents with its original prompt. In the saved results, this source-checked review came with the largest improvement. A matched test of another review model, and a test of a revised prompt, showed no clear gain.
-- The team asked for Jev to score the articles. Its saved runs did not finish, so they record the setup, not a score.
-- [`engine/identify/pipeline.json`](engine/identify/pipeline.json) holds the settings for step 3. They resolve to configuration `5f1c92331550984a`. Jev reads each article as its heading and the first 700 characters of its text. [`engine/tests/test_workflow_profile.py`](engine/tests/test_workflow_profile.py) fails if a selected model, effort, or limit changes.
+- [`engine/identify/pipeline.json`](engine/identify/pipeline.json) holds the settings for step 3. Haiku reads each candidate as its heading and the first 700 characters of its text. [`engine/tests/test_workflow_profile.py`](engine/tests/test_workflow_profile.py) fails if a selected model, effort, or limit changes.
 
 No complete, reliable test has measured the accuracy of this combined workflow, and no result shows that it is more than 97% accurate. The record also keeps older scores from earlier code, other judges, and other workloads. None of them is the accuracy of this workflow.
 

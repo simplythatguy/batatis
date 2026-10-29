@@ -107,8 +107,8 @@ def _rank_verifier(config: IdentifyConfig, codes: Codes):
     if config.model_rank != 'anthropic':
         return None
     from engine import llm_gate
+    from .model_rank import RankVerifier
     from .providers import MeteredAnthropic, live_anthropic
-    from .verify import ClaudeVerifier
     try:
         if llm_gate.fake_providers():
             from .fakes import FakeAnthropic
@@ -117,7 +117,7 @@ def _rank_verifier(config: IdentifyConfig, codes: Codes):
             client = MeteredAnthropic(live_anthropic())
         else:
             return None
-        return ClaudeVerifier(codes.db_path, client=client, model=config.model_rank_model, effort=config.model_rank_effort)
+        return RankVerifier(codes.db_path, client=client, model=config.model_rank_model, effort=config.model_rank_effort)
     except Exception as exc:
         logger.info('model rank off: %s', type(exc).__name__)
         return None

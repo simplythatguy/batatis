@@ -14,13 +14,24 @@ from pathlib import Path
 
 from engine.models_identify import IdentifyResult, StageRecord
 
-from .corpus import articles, bm25_rank
-from .verify import Verifier
+from .corpus import articles, bm25_rank, card
+from .verify import ClaudeVerifier, Verifier
 
 logger = logging.getLogger(__name__)
 
 # The pool measured in the bakeoff: the ledger's first 45 articles, then 20 keyword hits, at most 60.
 LEDGER_N, KEYWORD_N, POOL_N = 45, 20, 60
+
+
+CARD_CHARS = 700
+
+
+class RankVerifier(ClaudeVerifier):
+    """The request the bakeoff measured: numbered candidates, each its title, place and first 700 characters."""
+
+    def prompt(self, query: str, candidates: list[str]) -> str:
+        listed = '\n'.join(f'[{n}] {a} {card(self.arts[a], CARD_CHARS)}' for n, a in enumerate(candidates, 1))
+        return f'Applicant description:\n<<<\n{query}\n>>>\n\nCandidate articles ({len(candidates)}):\n{listed}'
 
 
 def pool(result: IdentifyResult, prose: str, db: Path) -> list[str]:
