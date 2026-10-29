@@ -54,6 +54,7 @@ async function mounted(initial: Case, focus: string | null = null, answerError: 
     "./assistant/questionContext": { questionContext: () => ({}) },
     "./applications": { readOnlyStatus: () => ({}) },
     "../api/sync": { engineGeneration: () => 1 },
+    "../config": await import("../config.ts"),
     "./icons": { Icon24: "icon" },
   }, { location: { hash: "#/questions", replace() {} }, window: {}, document: { addEventListener() {}, removeEventListener() {} } });
   const render = async () => { await h.render({ focus, codeFirst: false }); return h.render({ focus, codeFirst: false }); };
@@ -102,6 +103,20 @@ test("auto-confirmed readings still ask for acknowledgement once, and a new read
   nodes(tree, (node) => node.type?.name === "OkRow")[0].props.onOk();
   tree = await m.render();
   assert.equal(m.shown(tree)?.props.item.kind, "understood", "a prior visit to the card cannot suppress a new reading");
+  m.h.unmount();
+});
+
+test("Looks right on a site read as Edmonton proposes Edmonton as the reviewing office", async () => {
+  const site = { ...field("municipality", "Edmonton"), status: "confirmed" as const };
+  const address = { ...field("municipalAddress", "0000 Example Crescent NW, Edmonton, AB"), status: "confirmed" as const };
+  const initial = plannedCase();
+  const m = await mounted({ ...initial, facts: [site, address], intake: { ...initial.intake!, facts: [site, address], factIds: [site.id, address.id] } });
+  let tree = await m.render();
+  assert.equal(m.shown(tree)?.props.item.kind, "understood");
+  assert.equal(m.case().authority, "");
+  nodes(tree, (node) => node.type?.name === "OkRow")[0].props.onOk();
+  tree = await m.render();
+  assert.equal(m.case().authority, "edmonton", "the applicant only confirms the proposed office");
   m.h.unmount();
 });
 

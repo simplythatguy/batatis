@@ -840,6 +840,10 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
     if (!canContinue(item)) return;
     if (item.kind === "understood") {
       dispatch({ type: "confirmFacts", ids: item.ids ?? [] });
+      // A site read from labelled text is already confirmed, so confirmFacts never sees it. Acknowledging
+      // the rows still proposes the office it names; the office card then only asks to confirm it.
+      const office = !c.authority && item.rows?.some((r) => r.field === "municipality" || r.field === "municipalAddress") ? officeSuggestion(c) : null;
+      if (office && AUTHORITIES.some((a) => a.id === office.id)) dispatch({ type: "setAuthority", authority: office.id as typeof c.authority });
       dispatch(journeyAnswerAction({ ...item, key: item.acknowledgementKey ?? item.key }, "acknowledged"));
       setAdvanceAfter({ key: item.key, generation: engineGeneration() });
       return;
