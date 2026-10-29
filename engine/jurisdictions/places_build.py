@@ -4,7 +4,7 @@
     python -m engine.jurisdictions.places_build --check  # exit 1 when a committed file differs
 
 Writes `places/alberta.json` and `places/outside-alberta.json` (PlacesFile, loaded by the registry) and
-`place_index.json` (the compact list the web picker reads). Inputs: the research table
+`place_index.json` (a compact list of every place, for the web picker once the draft is turned on). Inputs: the research table
 `alberta-jurisdictions.csv` (390 rows: municipalities, Metis settlements, First Nations, national parks,
 airport lands), its hand-checked overrides and Safety Codes Council snapshot, and `place_inputs.json`
 (parks, airports and places outside Alberta, with code names and links from the same research folder).

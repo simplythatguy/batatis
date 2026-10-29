@@ -65,8 +65,18 @@ export function officeSuggestion(c: Case): { id: string; name: string } | null {
   }
   const address = [...c.facts].reverse().find((fact) => ["municipalAddress", "municipal_address", "civic_address", "address"].includes(fact.field));
   if (typeof address?.value !== "string") return null;
+  // The city is its own part after the street, so a street named after the other city ("0000 Calgary Trail NW,
+  // Edmonton, AB") never picks it. Read from the end, past the province and postal code.
+  const parts = address.value.split(",").map((part) => part.trim()).filter(Boolean);
+  for (const part of parts.slice(1).reverse()) {
+    const office = knownPlace(part.replace(/\s*\b(?:AB|Alta\.?|Alberta)\b\s*(?:[A-Z]\d[A-Z]\s?\d[A-Z]\d)?$/i, ""));
+    if (office) return office;
+  }
+  if (parts.length > 1) return null;
+  // Without commas, the city mentioned last ("0000 Calgary Trail NW Edmonton AB").
   const text = fold(address.value);
-  return AUTHORITIES.find((place) => new RegExp(`(?:^|[^a-z])${fold(place.name).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?:$|[^a-z])`).test(text)) ?? null;
+  const last = (place: { name: string }) => Math.max(-1, ...[...text.matchAll(new RegExp(`(?:^|[^a-z])${fold(place.name).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}(?=$|[^a-z])`, "g"))].map((m) => m.index));
+  return AUTHORITIES.filter((place) => last(place) >= 0).sort((a, b) => last(b) - last(a))[0] ?? null;
 }
 
 export function submissionOfficeReason(c: Case): string {
