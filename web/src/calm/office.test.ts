@@ -56,3 +56,14 @@ test("the site suggests Calgary or Edmonton, and never another place", () => {
   c = reducer(emptyCase("owner"), { type: "setRuleInput", field: "municipality", value: "Example Hamlet", rule: "intake", quote: "Example Hamlet" });
   assert.equal(officeSuggestion(c), null);
 });
+
+test("the city comes from its own part of the address, never from a street named after the other city", () => {
+  const suggested = (site: string) => officeSuggestion(reducer(emptyCase("owner"), { type: "setDetail", field: "municipalAddress", value: site, section: "B" }))?.id ?? null;
+  assert.equal(suggested("0000 Calgary Example Trail NW, Edmonton, AB"), "edmonton");
+  assert.equal(suggested("0000 Edmonton Example Trail NE, Calgary, AB"), "calgary");
+  assert.equal(suggested("Unit 5, 0000 Calgary Trail NW, Edmonton, AB T5J 0N3"), "edmonton");
+  assert.equal(suggested("0000 Example Road SW, Calgary AB"), "calgary");
+  assert.equal(suggested("0000 Example Road SW Calgary AB"), "calgary");
+  assert.equal(suggested("0000 Calgary Trail NW Edmonton AB"), "edmonton");
+  assert.equal(suggested("0000 Calgary Trail NW, Red Deer, AB"), null);
+});
