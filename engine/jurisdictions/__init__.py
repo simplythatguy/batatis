@@ -4,7 +4,8 @@
     engine/data/jurisdictions/provinces/<XX>.json  items every pack in a province shares
     engine/data/jurisdictions/coverage.json        coverage labels for every province and territory
     engine/data/jurisdictions/checklists/<id>.json standing-package checklists (see checklists.py)
-    engine/data/jurisdictions/places/<group>.json  generated places (see places_build.py); each place without a
+    engine/data/jurisdictions/places/<group>.json  generated places (see places_build.py), a draft: loaded only
+                                                   with BATATIS_DRAFT_PLACES=1; then each place without a
                                                    hand-written pack becomes a pack that names its office
 
 `BATATIS_JURISDICTIONS_DIR` points the loader at another directory with the same layout, so a new
@@ -32,6 +33,9 @@ from ..models_jurisdictions import (Authority, CoverageFile, JurisdictionDetail,
 
 DATA_DIR = Path(__file__).resolve().parent.parent / 'data' / 'jurisdictions'
 ENV_DIR = 'BATATIS_JURISDICTIONS_DIR'
+# Batatis prepares applications only where a hand-written pack records the office's own steps. The generated places
+# for every other office are a draft for later: the app runs without them, and tests and the proof turn them on.
+DRAFTS_ENV = 'BATATIS_DRAFT_PLACES'
 
 DISCLAIMER = ('Process notes say where an application goes and what the office has published, with the source '
               'and the date it was checked. They are not legal advice and not a determination: Batatis never '
@@ -91,8 +95,9 @@ class Registry:
     generated: set[str] = field(default_factory=set)             # pack ids built from places, not hand-written
 
     @classmethod
-    def load(cls, root: Path | str | None = None) -> 'Registry':
+    def load(cls, root: Path | str | None = None, drafts: bool | None = None) -> 'Registry':
         root = Path(root or os.environ.get(ENV_DIR) or DATA_DIR)
+        drafts = drafts_on() if drafts is None else drafts
         reg = cls(root=root)
         coverage = root / 'coverage.json'
         if not coverage.is_file():
@@ -105,7 +110,7 @@ class Registry:
             reg.provinces[shared.province] = shared
         for path in sorted((root / 'packs').glob('*.json')):
             reg._add(path, _read(path, JurisdictionPack))
-        for path in sorted((root / 'places').glob('*.json')):
+        for path in sorted((root / 'places').glob('*.json')) if drafts else []:
             for place in _read(path, PlacesFile).places:
                 reg._add_place(path, place)
         reg._check()
@@ -245,15 +250,21 @@ class Registry:
         return [n for n in found.pack.notices if surface in n.surfaces] if found else []
 
 
-_CACHE: dict[str, Registry] = {}
+_CACHE: dict[tuple[str, bool], Registry] = {}
 
 
-def registry() -> Registry:
-    """The registry for the current directory setting, loaded once per directory."""
+def drafts_on() -> bool:
+    return os.environ.get(DRAFTS_ENV, '').strip().lower() in {'1', 'true', 'yes'}
+
+
+def registry(drafts: bool | None = None) -> Registry:
+    """The registry for the current directory and draft setting, loaded once per pair. `drafts=None` follows
+    BATATIS_DRAFT_PLACES, which the app leaves off."""
+    use = drafts_on() if drafts is None else drafts
     root = str(Path(os.environ.get(ENV_DIR) or DATA_DIR).resolve())
-    if root not in _CACHE:
-        _CACHE[root] = Registry.load(root)
-    return _CACHE[root]
+    if (root, use) not in _CACHE:
+        _CACHE[(root, use)] = Registry.load(root, drafts=use)
+    return _CACHE[(root, use)]
 
 
 def clear_cache():

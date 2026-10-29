@@ -37,8 +37,11 @@ it to add a synthetic fourth pack.
 
 Generated place packs: 433, one for every place that no hand-written pack names (Calgary and Edmonton keep theirs).
 Batatis prepares applications only where a hand-written pack records the office's own checked variance steps, so
-only `calgary` and `edmonton` are `full`. Every generated pack is `preview`: it names the office and who to ask, and
-says Batatis does not prepare applications there yet.
+only `calgary` and `edmonton` are `full`. The place files are a draft: the registry loads them only when
+`BATATIS_DRAFT_PLACES=1` is set, and the app leaves it off, so every other place gets the `alberta-other` fallback
+(preview) and no final application. With drafts on, every generated pack is `preview`: it names the office and who to
+ask, and says Batatis does not prepare applications there yet. `engine/tests/test_every_place.py` and
+`scripts/every_place_proof.py` turn drafts on to keep the draft checked.
 
 | Kind (`authority.kind`) | Packs | Coverage | What the pack says |
 |---|---:|---|---|

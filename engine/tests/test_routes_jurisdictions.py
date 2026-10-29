@@ -63,13 +63,20 @@ def test_detail_merges_province_items_and_404s(scene):
     assert r.status_code == 404 and r.json()['detail'] == 'jurisdiction not found'
 
 
+def test_the_app_knows_only_the_offices_whose_steps_are_checked():
+    reg = registry()
+    assert sorted(reg.packs) == ['alberta-other', 'calgary', 'edmonton'] and reg.places == {}
+    assert sorted(p.id for p in reg.packs.values() if p.coverage == 'full') == ['calgary', 'edmonton']
+
+
 @pytest.mark.parametrize('jurisdiction, authority, expected, how', [
     ({'id': 'calgary', 'name': 'Calgary'}, None, 'calgary', 'id'),
     ({'id': 'edmonton', 'name': 'Edmonton'}, None, 'edmonton', 'id'),
     ({'id': 'x-1', 'name': 'City of Edmonton'}, None, 'edmonton', 'name'),
-    ({'id': 'red-deer', 'name': 'City of Red Deer'}, None, 'red-deer', 'id'),
-    ({'id': 'x-2', 'name': 'Lacombe County'}, None, 'lacombe-county', 'name'),
-    ({'id': 'vancouver', 'name': 'Vancouver'}, None, 'vancouver', 'id'),
+    # Every other place is a draft, off in the app: it gets the Rest of Alberta answer (test_every_place checks the draft).
+    ({'id': 'red-deer', 'name': 'City of Red Deer'}, None, 'alberta-other', 'fallback'),
+    ({'id': 'x-2', 'name': 'Lacombe County'}, None, 'alberta-other', 'fallback'),
+    ({'id': 'vancouver', 'name': 'Vancouver'}, None, 'alberta-other', 'fallback'),
     ({'id': 'Example Hamlet', 'name': 'Example Hamlet'}, None, 'alberta-other', 'fallback'),
     (None, 'edmonton', 'edmonton', 'reviewer_code'),
 ])
@@ -103,7 +110,7 @@ def test_not_sure_is_persisted_without_fabricating_a_jurisdiction(scene):
 
 
 @pytest.mark.parametrize('place, pack_id, office, source', [
-    ('Red Deer', 'red-deer', 'City of Red Deer', 'councilconnect.safetycodes.ab.ca'),          # a named place
+    ('Red Deer', 'alberta-other', None, '/where-to-get-a-permit/'),                          # a draft place, off
     ('Example Hamlet', 'alberta-other', None, '/where-to-get-a-permit/'),                    # an unknown one
 ])
 def test_other_offices_keep_their_place_and_pdf_path_without_reviewer_submission(scene, monkeypatch, place, pack_id,

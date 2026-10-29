@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useState } from "react";
-import { AUTHORITIES, authorityUnsure, officeChoiceAction, officeCoverage, officeSuggestion } from "../config";
+import { AUTHORITIES, authorityUnsure, officeChoiceAction, officeCovered, officeSuggestion } from "../config";
 import { localField } from "../intakeFields";
 import { legalFromFacts, sourceLine } from "../intakeView";
 import { DETAIL_FIELDS, factFor, valueText } from "../model";
@@ -25,10 +25,9 @@ const SHORT_LABEL: Record<string, string> = { applicant_role: "Your part", scope
 
 type RowDraft = { kind: "answer"; value: string; defaulted?: boolean } | { kind: "later" | "not_sure" };
 
-/** Under Office: where Batatis has not checked the office's own steps (everywhere but Calgary and Edmonton), it says it stops, and who to ask. */
+/** Under Office: Batatis prepares applications only for Calgary and Edmonton, whose own steps it has checked. */
 function officeLine(value: string) {
-  const office = officeCoverage(value);
-  return office && !office.covered ? <p className="cf-pw-office"><Dot tone="warning" />Batatis doesn’t prepare applications here. {office.ask}</p> : null;
+  return officeCovered(value) === false ? <p className="cf-pw-office"><Dot tone="warning" />Batatis prepares applications only for Calgary and Edmonton.</p> : null;
 }
 
 /** Edits and defaults belong to this sheet until the applicant presses Done. */
