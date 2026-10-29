@@ -1,15 +1,17 @@
 /** Settings → Access codes, for the site admin only: make a code, see who is using it, cap its seats, switch it off, remove it. */
 import { useEffect, useState } from "react";
 import { AccountsError, adminCodes, type AccessCodeInfo } from "../../api/accounts";
+import { ConfirmDialog } from "../ui";
 import { Row } from "./rows";
 
 const message = (e: unknown) => (e instanceof AccountsError && e.detail ? e.detail : "That didn’t work. Try again.");
 const seats = (text: string): number | null => (text.trim() === "" ? null : Math.max(1, Math.floor(Number(text))));
 const validSeats = (text: string) => text.trim() === "" || (Number.isFinite(Number(text)) && Number(text) >= 1);
 
-function CodeRow({ info, onChange, onRemove, onError }: { info: AccessCodeInfo; onChange: (next: AccessCodeInfo) => void; onRemove: (name: string) => void; onError: (text: string) => void }) {
+export function CodeRow({ info, onChange, onRemove, onError }: { info: AccessCodeInfo; onChange: (next: AccessCodeInfo) => void; onRemove: (name: string) => void; onError: (text: string) => void }) {
   const [limit, setLimit] = useState(info.max_users === null ? "" : String(info.max_users));
   const [busy, setBusy] = useState(false);
+  const [confirming, setConfirming] = useState(false);
   const dirty = limit.trim() !== (info.max_users === null ? "" : String(info.max_users));
   async function save(patch: { max_users?: number | null; revoked?: boolean }) {
     setBusy(true);
@@ -25,6 +27,7 @@ function CodeRow({ info, onChange, onRemove, onError }: { info: AccessCodeInfo; 
     }
   }
   async function remove() {
+    setConfirming(false);
     setBusy(true);
     onError("");
     try {
@@ -39,19 +42,23 @@ function CodeRow({ info, onChange, onRemove, onError }: { info: AccessCodeInfo; 
   const tally = info.max_users === null ? `${info.in_use} in use` : `${info.in_use} of ${info.max_users} in use`;
   return (
     <div className="ac-row">
-      <span className="ac-row-label">{info.name}</span>
+      <span className="ac-row-label is-code" title={info.name}>{info.name}</span>
       <span className="ac-row-value">
-        <span>{tally}</span>
-        {info.revoked && <span className="ac-faint-tag">Off</span>}
+        <span className="ac-code-tally">{tally}</span>
         <input className="ac-in ac-in-short" inputMode="numeric" aria-label={`Seat limit for ${info.name}`} placeholder="No limit" value={limit} maxLength={6}
           onChange={(e) => setLimit(e.target.value.replace(/[^\d]/g, ""))}
           onKeyDown={(e) => { if (e.key === "Enter" && dirty && validSeats(limit) && !busy) void save({ max_users: seats(limit) }); }} />
+        {info.revoked && <span className="ac-faint-tag">Off</span>}
       </span>
       <span className="ac-row-action">
         {dirty && <button type="button" className="cf-btn is-xs is-primary" disabled={busy || !validSeats(limit)} onClick={() => void save({ max_users: seats(limit) })}>Save</button>}
         <button type="button" className="cf-btn is-xs is-ghost" disabled={busy} onClick={() => void save({ revoked: !info.revoked })}>{info.revoked ? "Turn on" : "Turn off"}</button>
-        {info.source === "managed" && <button type="button" className="cf-btn is-xs is-ghost" disabled={busy} onClick={() => void remove()}>Remove</button>}
+        {info.source === "managed" && <button type="button" className="cf-btn is-xs is-ghost" disabled={busy} onClick={() => setConfirming(true)}>Remove</button>}
       </span>
+      {/* Mounted only while asked, so the page never holds two dialogs with the same title id. */}
+      {confirming && <ConfirmDialog open title={`Remove ${info.name}?`}
+        body={<p>{info.in_use > 0 ? `${info.in_use} in use. They’ll be signed out.` : "Nobody is using it."}</p>}
+        cancel="Keep" confirm="Remove" onClose={() => setConfirming(false)} onConfirm={() => void remove()} />}
     </div>
   );
 }

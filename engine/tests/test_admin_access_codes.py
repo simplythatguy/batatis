@@ -257,6 +257,23 @@ def test_a_wrong_code_is_refused_and_counted_while_right_ones_never_are(app, mon
     assert statuses == [403, 403, 403, 429, 429]
 
 
+def test_wrong_codes_from_one_address_never_lock_out_the_right_code(app, monkeypatch):
+    """A demo room shares one address: somebody's typos must not stop everyone else signing in."""
+    monkeypatch.setenv('BATATIS_AUTH_RATE_LIMIT', '10')
+    with TestClient(app, base_url='http://localhost') as admin:
+        as_admin(admin)
+        code = admin.post('/admin/access-codes', json={'name': 'room'}).json()['code']
+    room = {'x-forwarded-for': '203.0.113.50'}
+    with TestClient(app, base_url='http://localhost') as guesser, TestClient(app, base_url='http://localhost') as person:
+        wrong = [guesser.post('/auth/code-login', json={'code': 'x' * 24, 'name': 'Eve'}, headers=room).status_code for _ in range(10)]
+        assert wrong == [403] * 10
+        right = person.post('/auth/code-login', json={'code': code, 'name': 'Ada'}, headers=room)
+        assert right.status_code == 200, right.text
+        limited = guesser.post('/auth/code-login', json={'code': 'y' * 24, 'name': 'Eve'}, headers=room)
+        assert limited.status_code == 429 and limited.headers['Retry-After']
+        assert person.post('/auth/code-login', json={'code': code, 'name': 'Bob'}, headers=room).status_code == 200
+
+
 def test_the_admin_code_alone_makes_an_admin_and_changing_it_ends_admin_sign_ins(app, monkeypatch):
     with TestClient(app, base_url='http://localhost') as admin, TestClient(app, base_url='http://localhost') as person:
         as_admin(admin)
@@ -268,7 +285,7 @@ def test_the_admin_code_alone_makes_an_admin_and_changing_it_ends_admin_sign_ins
         assert sign_in(person, code, 'Person')['admin'] is False
         assert person.get('/admin/access-codes').status_code == 403
         monkeypatch.setenv('BATATIS_ADMIN_CODE', 'another-admin-code-zzzzzzzzzzzz')
-        assert admin.get('/admin/access-codes').status_code == 403, 'a changed admin code locks out the old sign-in'
+        assert admin.get('/admin/access-codes').status_code == 401, 'a changed admin code ends the old sign-in'
 
 
 def test_a_valid_access_code_opens_reviewer_without_an_authority_code(app, monkeypatch):
@@ -319,14 +336,17 @@ def test_a_valid_access_code_opens_reviewer_without_an_authority_code(app, monke
         assert entered.get('/review/queue').status_code == 200
 
         assert admin.patch('/admin/access-codes/Judges', json={'revoked': True}).status_code == 200
-        refused = person.post('/auth/onboarding', json={'role': 'reviewer', 'authority': 'edmonton'})
+        # The code was the only way into the code account, so its sign-in ends.
+        ended = person.post('/auth/onboarding', json={'role': 'reviewer', 'authority': 'edmonton'})
+        assert ended.status_code == 401 and ended.json()['detail'] == 'Your access code was turned off.'
+        # An email account keeps its sign-in; switching authority now needs the authority's code.
+        refused = entered.post('/auth/onboarding', json={'role': 'reviewer', 'authority': 'calgary'})
         assert refused.status_code == 403
         assert refused.json()['detail'] == 'Reviewer access code is incorrect'
-        assert person.get('/review/queue').status_code == 403
         # The authority code still works for an account whose testing code was turned off.
-        restored = person.post('/auth/onboarding', json={'role': 'reviewer', 'authority': 'edmonton', 'access_code': 'officer-secret'})
+        restored = entered.post('/auth/onboarding', json={'role': 'reviewer', 'authority': 'calgary', 'access_code': 'calgary-secret'})
         assert restored.status_code == 200, restored.text
-        assert person.get('/review/queue').status_code == 200
+        assert entered.get('/review/queue').status_code == 200
         assert late.post('/auth/code-login', json={'code': code, 'name': 'Eve'}).status_code == 403
 
 
@@ -343,3 +363,67 @@ def test_the_sign_in_page_asks_for_a_code_only_where_codes_are_needed(app, monke
     monkeypatch.delenv('BATATIS_ADMIN_CODE')
     with TestClient(create_app(store=CaseStore(tmp_path / 'plain.sqlite')), base_url='http://localhost') as plain:
         assert plain.get('/auth/providers').json()['sign_in'] == 'password'
+
+
+def test_a_code_account_is_signed_out_when_its_code_is_turned_off_or_removed(app):
+    """No half-state: an account the code opened cannot stay signed in with AI silently off."""
+    with TestClient(app, base_url='http://localhost') as admin, TestClient(app, base_url='http://localhost') as gina, \
+            TestClient(app, base_url='http://localhost') as rex:
+        as_admin(admin)
+        code = admin.post('/admin/access-codes', json={'name': 'team'}).json()['code']
+        sign_in(gina, code, 'Gina')
+        assert gina.get('/auth/me').status_code == 200
+
+        admin.patch('/admin/access-codes/team', json={'revoked': True})
+        off = gina.get('/auth/me')
+        assert off.status_code == 401 and off.json()['detail'] == 'Your access code was turned off.'
+        assert probe(gina) is False
+        admin.patch('/admin/access-codes/team', json={'revoked': False})
+        assert gina.get('/auth/me').status_code == 200, 'turning the code back on lets the same browser back in'
+
+        sign_in(rex, code, 'Rex')
+        assert rex.post('/auth/onboarding', json={'role': 'reviewer', 'authority': 'edmonton'}).status_code == 200
+        assert rex.get('/review/queue').status_code == 200
+        assert admin.delete('/admin/access-codes/team').status_code == 204
+        for client in (gina, rex):
+            gone = client.get('/auth/me')
+            assert gone.status_code == 401 and gone.json()['detail'] == 'Your access code was turned off.'
+        assert rex.get('/review/queue').status_code == 401, 'a reviewer whose code was removed no longer reaches the queue'
+        assert admin.get('/admin/access-codes').status_code == 200, 'the admin stays signed in'
+
+
+@pytest.mark.parametrize('name', ['qa1 bad/name', '-lead', 'a<script>', '.hidden', 'tab\there', 'a' * 41])
+def test_a_code_name_must_match_the_rule_as_a_whole(app, name):
+    with TestClient(app, base_url='http://localhost') as admin:
+        as_admin(admin)
+        refused = admin.post('/admin/access-codes', json={'name': name})
+        assert refused.status_code in (400, 422), refused.text
+        if refused.status_code == 400:
+            assert refused.json()['detail'].startswith('Use letters, numbers')
+        assert admin.get('/admin/access-codes').json()['codes'] == []
+
+
+def test_names_differing_only_in_case_are_one_name(app, monkeypatch):
+    monkeypatch.setenv('BATATIS_AI_ACCESS_CODES', '{"Judges": "judges-code-aaaaaaaaaaaaaaaa"}')
+    with TestClient(app, base_url='http://localhost') as admin:
+        as_admin(admin)
+        assert admin.post('/admin/access-codes', json={'name': 'qa1-team'}).status_code == 201
+        for name in ('QA1-TEAM', 'Qa1-Team', 'judges', 'ADMIN'):
+            taken = admin.post('/admin/access-codes', json={'name': name})
+            assert taken.status_code == 409 and taken.json()['detail'] == 'A code with that name already exists.', name
+        assert sorted(c['name'] for c in admin.get('/admin/access-codes').json()['codes']) == ['Judges', 'qa1-team']
+
+
+def test_a_stored_code_with_a_slash_in_its_name_can_still_be_turned_off_and_removed(app, tmp_path):
+    """Names were not checked whole before; one already stored as 'qa1 bad/name' must not be stuck."""
+    store = CaseStore(tmp_path / 'accounts.sqlite')
+    with TestClient(app, base_url='http://localhost') as admin:
+        as_admin(admin)
+        assert store.create_access_code('qa1 bad/name', ai_access.fingerprint('bad-name-code-xxxxxxxxxxxx'), None)
+        ai_access.forget()
+        encoded = '/admin/access-codes/qa1%20bad%2Fname'
+        off = admin.patch(encoded, json={'revoked': True})
+        assert off.status_code == 200 and off.json()['revoked'] is True, off.text
+        assert admin.delete(encoded).status_code == 204
+        assert admin.get('/admin/access-codes').json()['codes'] == []
+        assert admin.delete(encoded).status_code == 404

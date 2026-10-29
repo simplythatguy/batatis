@@ -48,11 +48,26 @@ test("non-text values and applicant N/A reasons link to their exact question", (
 
 test("Section C lookup is a read-only reference, with no explanation line the package would not print", () => {
   const c = emptyCase("homebuilder");
+  c.candidates = [card("c", "9.1.1.1.(1)", "yes")];
   c.sectionC = [{ candidateId: "c", provision: "9.1.1.1.(1)", citation: "Source citation", pairs: [], attributionStatus: "no-row", intent: [], differs: false, explanation: "A draft explanation" }];
   const sections = buildDocument(c, []);
   assert.equal(blockForField(sections, "section_c.9.1.1.1.(1)")?.target.kind, "card");
   assert.equal(blockForField(sections, "section_c.9.1.1.1.(1).explanation"), undefined);
   assert.equal(blockForField(sections, "provisions"), undefined, "chosen references are the rows; no summary line");
+});
+
+const card = (id: string, provision: string, answer: "yes" | "no" | null) => ({
+  id, provision, answer, topic: "Glazed openings", part: 9, benchmark: answer === "yes", identified: true, suggestion: "search" as const,
+  quote: { text: "", citation: "", source: "code" as const }, departure: "differ", clarifyingQuestion: "Which part?",
+});
+
+test("Section C lists only the sentences answered Yes, not every sentence of an added article", () => {
+  const c = emptyCase("homebuilder");
+  const sentences = [1, 2, 3, 4, 5, 6, 7].map(n => `9.10.15.4.(${n})`);
+  c.candidates = sentences.map((p, i) => card(`provision-${p}`, p, i === 0 ? "yes" : "no"));
+  c.sectionC = sentences.map(p => ({ candidateId: `provision-${p}`, provision: p, citation: `Article ${p}`, pairs: [], attributionStatus: "no-row" as const, intent: [], differs: false }));
+  const rows = buildDocument(c, []).find(s => s.id === "C")!.blocks.map(b => b.id);
+  assert.deepEqual(rows, ["section_c.9.10.15.4.(1)"]);
 });
 
 test("withdrawn document titles and unscoped listings cannot survive as attached-package labels", () => {

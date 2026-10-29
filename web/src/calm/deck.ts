@@ -9,8 +9,8 @@ import type { Question as PlanQuestion } from "../api/types.gen";
 import { confirmedAnswer, localField } from "../intakeFields";
 import { codeQuestion, fileNotes, type ReadCopy, planInput, planQuestions, plannedFields, readGroups, scopeRedirect, legalFromFacts } from "../intakeView";
 import { DETAIL_FIELDS, DETAIL_IDS, PROCESS_FIELDS, answeredByDescription, factFor, questionAnsweredByFact, valueText } from "../model";
-import { isProvision, keywordCandidate, keywordGroups } from "../provisions";
-import { requirementQueue, requirementTopic } from "./requirements";
+import { articleOf, isProvision, keywordCandidate, keywordGroups } from "../provisions";
+import { requirementAnswer, requirementQueue, requirementTopic } from "./requirements";
 import { quoteKind } from "../rules";
 import type { ApplicantType, Candidate, Case, Gap } from "../types";
 import type { BenchmarkRecord, CaseChecklists, CaseRules, RequirementRecord } from "../api/types.gen";
@@ -217,6 +217,13 @@ function firstSentence(text: string): string {
   return s.length > 160 ? `${s.slice(0, 157)}…` : s;
 }
 
+/** "(2)" when another card is on the same rule, so cards on its different sentences read apart. */
+export function sentenceLabel(c: Case, a: Candidate): string {
+  const sentence = a.provision.match(/^\d+\.\d+\.\d+\.\d+\.?((?:\([0-9a-z.]+\))+)$/)?.[1] ?? "";
+  const shared = c.candidates.some((x) => x.id !== a.id && articleOf(x.provision) === articleOf(a.provision));
+  return sentence && shared ? sentence : "";
+}
+
 /** Build a code-check card, keeping answers open until the engine stores them. */
 function candidateItem(c: Case, a: Candidate): UnpositionedItem {
   // An answer the engine has not stored yet keeps the card open, so answering again resends it.
@@ -238,6 +245,7 @@ function candidateItem(c: Case, a: Candidate): UnpositionedItem {
   const kind = quoteKind(a);
   const real = isProvision(a.provision);
   const topic = a.topic.trim();
+  const sentence = sentenceLabel(c, a);
   if (!real || kind === "applicant") {
     return {
       key: `cand-${a.id}`,
@@ -259,7 +267,7 @@ function candidateItem(c: Case, a: Candidate): UnpositionedItem {
       kind: "candidate",
       section: "C",
       eyebrow: sectionEyebrow("C"),
-      title: codeQuestion(topic),
+      title: codeQuestion(topic, sentence),
       context: keywordCandidate(c, a)
         ? "A keyword match only. Its relevance has not been assessed."
         : a.rank === "committed" ? "Likely match for your project." : "Close match for your project.",
@@ -281,7 +289,7 @@ function candidateItem(c: Case, a: Candidate): UnpositionedItem {
     kind: "candidate",
     section: "C",
     eyebrow: sectionEyebrow("C"),
-    title: "Is your design different from what this rule asks for?",
+    title: `Is your design different from what ${sentence ? `sentence ${sentence} of ` : ""}this rule asks for?`,
     context: origin,
     why: "Yes adds this rule to the list of rules your design differs from (Section C of the form). No leaves it out. Not sure leaves the question open for review.",
     ref: a.id,
@@ -856,7 +864,9 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
       done: seen.has("code-ledger"),
       optional: true,
     });
-    for (const record of ledger.batch) {
+    // Answered rules keep their card (done) so the answer can be changed; the ledger order stays.
+    const shown = new Set([...ledger.answered, ...ledger.batch]);
+    for (const record of (id?.requirements ?? []).filter((r) => shown.has(r))) {
       push("C", {
         key: `req-${record.id}`,
         kind: "requirement",
@@ -866,7 +876,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
         context: requirementTopic(record),
         why: "The rule was found because your description matches its wording or a section it points to. If it applies, the next card asks how your design differs from it. If it does not, say why. Batatis never decides this for you.",
         ref: record.id,
-        done: false,
+        done: requirementAnswer(record) !== null,
         optional: true,
         provision: record.provision_id ?? undefined,
         requirement: record,

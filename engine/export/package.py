@@ -14,7 +14,7 @@ from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
 
 from ..completeness import Gap, _case_constraints
-from ..fact_aliases import LOGICAL_KEYS, latest
+from ..fact_aliases import LOGICAL_KEYS, is_withdrawal, latest
 from ..path_decision import decide_path
 from ..process_fields import confirmed_value
 from ..professional import professional_confirmed, professional_involvement
@@ -140,6 +140,47 @@ def _image_pdf(data: bytes, title: str) -> bytes | None:
     return output.getvalue()
 
 
+ANSWER_LABELS = {'permit_number': 'permit number', 'pathway': 'solution path', 'storeys': 'number of storeys',
+                 'lot': 'lot number', 'block': 'block number', 'plan': 'plan number'}
+
+
+def answer_label(canonical: str) -> str:
+    """What the applicant calls an answer; never a fact id."""
+    from ..completeness_elements import BY_FIELD
+
+    field = LOGICAL_KEYS.get(canonical, canonical)
+    if field in BY_FIELD:
+        return BY_FIELD[field].label
+    if canonical.startswith('evidence.'):
+        return 'a supporting document'
+    if canonical.startswith('citation.'):
+        return f'the code reference {canonical.removeprefix("citation.").rstrip(".")}'
+    return ANSWER_LABELS.get(canonical) or f'the answer for {field.split(".")[-1].replace("_", " ")}'
+
+
+def _count_app_signatures(snapshot, case) -> None:
+    """A signature made in the app is painted as an image, which reading the package cannot establish.
+    The workspace records it against this exact content, so it counts as signed and dated."""
+    from ..review.ingest import StoredValue
+    from .signatures import SIGNATURE_FIELDS, current_signatures
+
+    values = snapshot.document.values
+    readings = {}
+    for role, signature in current_signatures(case).items():
+        key = f'{role}_signature'
+        if key in values:
+            signed = f'Signed in the application by {signature.name}'
+            values[key] = StoredValue(key, signed, 'exact', None,
+                                      status='present', input_field=key, pointers=values[key].pointers)
+            values[f'{key}_date'] = StoredValue(f'{key}_date', signature.signed_on, 'exact', signature.signed_on,
+                                                status='present', input_field=f'{key}_date')
+            widget, date = SIGNATURE_FIELDS[role]
+            readings.update({widget: signed, date: signature.signed_on})
+    # The officer's reading of the form says the same as the checks do.
+    snapshot.fields = [reading.model_copy(update={'status': 'present', 'value': readings[reading.field], 'reason': ''})
+                       if reading.field in readings else reading for reading in snapshot.fields]
+
+
 def prepare_package(case, codes, *, store=None, draft=False, form=None, version=CURRENT_MAP):
     from ..completeness_policy import evaluate, signature_date_gaps
     from ..completeness_snapshot import from_uploads
@@ -160,11 +201,13 @@ def prepare_package(case, codes, *, store=None, draft=False, form=None, version=
     constraints += [Gap(**gap.model_dump(), fix_hint='Resolve this saved administrative finding.') for gap in case.gaps]
     constraints.extend(signature_date_gaps(ingested_from_case(case)))
     for canonical, fact in latest(original).items():
-        if not _stored(fact, canonical).confirmed:
+        # A cleared answer is withdrawn, not pending: a required field is reported missing by its own check.
+        if not is_withdrawal(fact) and not _stored(fact, canonical).confirmed:
+            label = answer_label(canonical)
             constraints.append(Gap(id=f'export:unconfirmed:{canonical}', section='B',
                 field=LOGICAL_KEYS.get(canonical, canonical),
-                message=f'unconfirmed {fact.kind} fact "{fact.field}" ({fact.id})',
-                fix_hint='Confirm or withdraw the latest answer; do not restore an older answer.'))
+                message=f'{label[:1].upper()}{label[1:]} is not confirmed yet.',
+                fix_hint='Confirm it, change it or clear it.'))
     result = _render_case(case, draft=draft, codes=codes, form=form, version=version, signing=original)
     writer = PdfWriter(clone_from=io.BytesIO(result.pdf))
 
@@ -283,6 +326,7 @@ def prepare_package(case, codes, *, store=None, draft=False, form=None, version=
     result.record_pages = len(writer.pages) - result.form_pages - result.appendix_pages
     # The policy reads the package content; a draft's quiet page mark is added after, to every page.
     snapshot = from_uploads([('application.pdf', result.pdf)])
+    _count_app_signatures(snapshot, original)
     policy = evaluate(snapshot, codes)
     result.open_items = policy.report.export_reasons
     if draft:

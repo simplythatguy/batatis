@@ -1,7 +1,7 @@
 /** Placement and presentation only. Counts, dispositions and acceptance belong to the server. */
-import type { Case, Finding, FindingState, InputFile, Pointer, RequestTarget, ReviewSession, RulebookGap, OfficerWorkspace } from "../../api/types.gen";
+import type { Case, Finding, FindingState, InputFile, Pointer, RequestTarget, ReviewDiff, ReviewSession, RulebookGap, OfficerWorkspace, SessionSummary } from "../../api/types.gen";
 import type { ReviewQuestion } from "../../api/client";
-import { localField } from "../../intakeFields";
+import { formField, formLabel, formValue } from "./formFields";
 import { pointerLabel, SECTION_LABEL, sentence } from "./packageView";
 import type { SheetRow, SheetView } from "./sheet";
 
@@ -15,20 +15,22 @@ export function sheetRows(sheet: SheetView, session: ReviewSession | null, histo
   const rows: WorkspaceRow[] = [];
   const add = (section: Section, reading: SheetRow) => {
     const field = reading.field ?? reading.label;
-    const old = historical ? session?.fields.find(f => localField(f.field) === localField(field)) : null;
+    const old = historical ? session?.fields.find(f => formField(f.field) === formField(field)) : null;
     rows.push({ id: `${section}:${field}`, section, field, label: reading.label,
-      reading: historical ? { ...reading, value: old?.status === "present" ? old.value : null, unconfirmed: false } : reading });
+      reading: historical ? { ...reading, value: old?.status === "present" ? formValue(old.value) : null, unconfirmed: false } : reading });
   };
   sheet.applicant.forEach(r => add("A", r));
   sheet.project.forEach(r => add("B", r));
   add("B", sheet.alternative);
   sheet.process.forEach(r => add("process", r));
   sheet.supporting.forEach(r => add("D", r));
-  // Fields on an uploaded or older form may not exist in the current applicant editor.
-  for (const f of session?.fields ?? []) {
-    if (rows.some(r => localField(r.field) === localField(f.field))) continue;
-    if (/^(section_c[.\[]|citation[.\[]|evidence\.|document\.|div_c\.|demonstrate\.)/.test(f.field)) continue;
-    add(f.section, { field: f.field, label: f.label, value: f.status === "present" ? f.value : null, required: false });
+  // A form field the current editor has no row for (a signature, the code or standard). The value the
+  // form printed comes first; raw case answers and widgets that repeat a row are never shown.
+  const printed = [...session?.fields ?? []].sort((a, b) => Number(!a.pointer?.form_field) - Number(!b.pointer?.form_field));
+  for (const f of printed) {
+    const label = formLabel(f.field);
+    if (!label || rows.some(r => formField(r.field) === formField(f.field))) continue;
+    add(f.section, { field: f.field, label, value: f.status === "present" ? formValue(f.value) : null, required: false });
   }
   return rows;
 }
@@ -48,8 +50,8 @@ export function allAnchors(rows: WorkspaceRow[], sheet: SheetView, session: Revi
 export function anchorFor(item: { section: Section | null; field: string | null }, rows: SheetAnchor[]): string {
   const section = item.section ?? "D";
   const field = item.field ?? "";
-  const canonical = localField(field);
-  const exact = rows.find(r => r.section === section && localField(r.field) === canonical);
+  const canonical = formField(field);
+  const exact = rows.find(r => r.section === section && formField(r.field) === canonical);
   if (exact) return exact.id;
   if (/^(evidence|document|section_d)\./.test(field)) {
     const id = field.split(".")[1];
@@ -102,11 +104,14 @@ export function findingSources(pointers: Pointer[], files: InputFile[], caseId: 
 export function targetOptions(session: ReviewSession | null, anchors: SheetAnchor[]): RequestTarget[] {
   const options = new Map<string, RequestTarget>();
   const add = (target: RequestTarget) => {
-    const key = `${target.section}:${target.field ? localField(target.field) : ""}`;
+    const key = `${target.section}:${target.field ? formField(target.field) : ""}`;
     if (!options.has(key)) options.set(key, target);
   };
   for (const section of SECTIONS) add({ section, field: null, label: SECTION_LABEL[section] });
-  for (const f of session?.fields ?? []) add({ section: f.section, field: f.field, label: `${SECTION_LABEL[f.section]} · ${f.label}` });
+  for (const f of session?.fields ?? []) {
+    const label = formLabel(f.field);
+    if (label) add({ section: f.section, field: f.field, label: `${SECTION_LABEL[f.section]} · ${label}` });
+  }
   for (const r of anchors) add({ section: r.section, field: r.field, label: `${SECTION_LABEL[r.section]} · ${r.label}` });
   return [...options.values()];
 }
@@ -120,7 +125,7 @@ export function clarificationSuggestions(questions: ReviewQuestion[], items: { t
 }
 
 export function changedFields(c: Pick<Case, "submissions">): Map<string, Case["submissions"][number]["changes"][number]> {
-  return new Map((c.submissions?.at(-1)?.changes ?? []).map(change => [localField(change.field), change]));
+  return new Map((c.submissions?.at(-1)?.changes ?? []).map(change => [formField(change.field), change]));
 }
 
 /** Historical versions use their saved dispositions; current versions use OfficerWorkspace.states. */
@@ -145,6 +150,9 @@ export function workspaceDecision({ workspace, editable, pending, busy }: { work
   return { canReturn: !returnReason, canAccept: !hold && Boolean(workspace?.gate.can_accept), canRefuse: editable && !pending && !busy, returnReason, acceptReason };
 }
 
+/** "the professional", never "the a professional". */
+export const withThe = (label: string): string => (/^(?:the|a|an)\s/i.test(label) ? label : `the ${label}`);
+
 /** A few words naming what is wrong, built from the finding's own status and label. */
 export function findingTitle(f: Finding): string {
   const label = f.label;
@@ -152,4 +160,18 @@ export function findingTitle(f: Finding): string {
   if (f.status === "missing") return `${sentence(label)} is missing`;
   if (f.status === "not_found") return `Couldn’t read the ${label}`;
   return `${sentence(label)} needs a look`;
+}
+
+/**
+ * What the applicant's resubmission changed, in plain words. Only a review read against the version the
+ * officer returned says anything: a review re-run after the officer's own save compares with itself.
+ */
+export function sinceReturn(diff: ReviewDiff | null, versions: Pick<SessionSummary, "version" | "sent_at">[]): string {
+  if (!diff || !versions.find(v => v.version === diff.previous_version)?.sent_at) return "";
+  const parts = [
+    diff.resolved.length ? `${diff.resolved.length} fixed` : "",
+    diff.new.length ? `${diff.new.length} new` : "",
+    diff.unverified?.length ? `${diff.unverified.length} can’t tell` : "",
+  ].filter(Boolean);
+  return parts.length ? `Since the return: ${parts.join(" · ")}` : "";
 }

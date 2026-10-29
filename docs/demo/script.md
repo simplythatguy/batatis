@@ -35,11 +35,13 @@ We are building a two-storey house on a narrow lot. The side wall faces the neig
 **What Priya writes on the alternative-path cards.** Each is a short text she types, and the narration says Batatis never writes them.
 
 - Rationale: "The client wants daylight on this side of a narrow lot. We propose a fire-rated window assembly in place of the smaller opening area the table allows."
-- Risk: "Fire could spread through the window wall to the neighbouring house if the assembly fails."
-- Mitigation: "Fire-rated glazing and frames in a rated exterior wall, installed to the manufacturer's listing."
-- Assumptions: "The neighbouring house stays where it is, and the assembly is maintained."
-- Maintenance: "The owner inspects the window wall every year and replaces damaged seals."
-- Qualifications: "Example Engineer is responsible for the assembly details."
+- Risk: "Fire could spread through the window wall to the neighbouring house if the assembly fails or a seal is damaged."
+- Mitigation: "Fire-rated glazing and frames in a rated exterior wall, installed to the manufacturer's listing. The assembly is tested in accordance with CAN/ULC-S106, the fire test for window assemblies named in its listing."
+- Assumptions: "Assumption: the neighbouring house stays where it is. Assumption: the fire department response time is the city's normal response time."
+- Maintenance: "The owner inspects the window wall every year and replaces damaged seals. If maintenance lapses, damaged seals are assumed to reduce the assembly's rating until they are replaced."
+- Qualifications: "Example Engineer, a registered professional engineer (registration EXAMPLE-0000), is responsible for the assembly details."
+
+These answers name a test method, label each assumption, state the emergency-response assumption and say what happens if maintenance lapses, so the completeness check has nothing to flag in them. The checks look only for these items being named; they never judge whether the design works.
 
 ## What must be working before it can be recorded
 
@@ -164,6 +166,7 @@ The deck asks its cards in this order: the facts Batatis read (each one to confi
 **Actions.**
 
 1. Answer the professional questions and show the list of evidence documents and who is responsible for each. Enter the fictional professional ("Example Engineer", "EXAMPLE-0000") so that the official PDF can unlock later.
+   - Add one supporting document in Section D and attach a small PDF to it, with **Prepared by** set to "Example Engineer (EXAMPLE-0000)". Without a document the first Submit is refused ("supporting document missing"), and without the registration in **Prepared by** an officer who records "Required" leaves the applicant asking for a named professional with no way to answer it.
 2. Open `#/review` and show the amber callout "An engineer or architect is required for Section D" with the line "Batatis can list what that evidence must address, but it can't write it." If the callout disappears once the professional is entered, film it first and enter the professional afterwards.
 
 **Narration.**

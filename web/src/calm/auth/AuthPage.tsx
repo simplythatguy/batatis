@@ -31,17 +31,17 @@ function errorText(e: unknown, mode: "signin" | "signup"): string {
 }
 
 /** Where an access code is the only way in: a code and a name, nothing else. */
-function CodeLogin() {
+export function CodeLogin() {
   const id = useId();
+  const { endedReason } = useAccount();
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [wait, startWait] = useCountdown();
 
   async function submit(e: FormEvent) {
     e.preventDefault();
-    if (busy || wait > 0) return;
+    if (busy) return;
     if (!code.trim() || !name.trim()) {
       setError("Enter your access code and your name.");
       return;
@@ -51,7 +51,8 @@ function CodeLogin() {
     try {
       location.hash = afterSignIn(await signInWithCode(code, name));
     } catch (err) {
-      if (err instanceof AccountsError && err.status === 429) startWait(err.retryAfter);
+      // Only wrong codes are limited, so Continue stays on: the right code still signs in.
+      if (err instanceof AccountsError && err.status === 429) setError("Too many wrong codes. Check your code and try again.");
       else if (err instanceof AccountsError && err.status === 403) setError(err.detail || "That access code isn’t valid.");
       else if (err instanceof AccountsError && err.status === 0) setError("Batatis couldn’t reach the server. Check your connection and try again.");
       else setError("Something went wrong. Try again.");
@@ -74,9 +75,8 @@ function CodeLogin() {
           <label htmlFor={`${id}-name`}>Your name</label>
           <input id={`${id}-name`} className="ac-in" autoComplete="name" maxLength={80} value={name} onChange={(e) => { setName(e.target.value); setError(""); }} />
         </div>
-        {error && <p className="ac-error" role="alert">{error}</p>}
-        {wait > 0 && <p className="ac-error" role="status">Too many attempts. Try again in {clockText(wait)}.</p>}
-        <button type="submit" className="cf-btn is-primary is-center ac-auth-go" disabled={busy || wait > 0}>{busy ? "Signing in…" : "Continue"}</button>
+        {error ? <p className="ac-error" role="alert">{error}</p> : endedReason && <p className="ac-error" role="status">{endedReason}</p>}
+        <button type="submit" className="cf-btn is-primary is-center ac-auth-go" disabled={busy}>{busy ? "Signing in…" : "Continue"}</button>
       </form>
     </div>
   );

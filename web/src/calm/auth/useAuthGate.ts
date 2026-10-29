@@ -78,7 +78,7 @@ export function afterSignIn(user: User): string {
 
 function signedIn(user: User) {
   if (user.role === "reviewer") updateSession({ startRequested: false });
-  setAccountState({ phase: "signed-in", user, applications: null, listError: "" });
+  setAccountState({ phase: "signed-in", user, applications: null, listError: "", endedReason: "" });
   if (user.onboarded && user.role !== "reviewer") void refreshApplications();
 }
 

@@ -72,3 +72,19 @@ test("the review shows the headline, the list and only the actions it is given",
   assert.equal(nodes(tree, (n) => n.type === "button" && /Accept|Return|Refuse/.test(text(n))).length, 0, "no decision without the gate's actions");
   h.unmount();
 });
+
+test("a recorded determination is dated like the rest of the app, not by the browser's locale string", async () => {
+  // QA 2026-10-28: "QA4-REF-001 · recorded by qa4-officer · 10/28/2026, 7:45:31 PM".
+  const queue = await import("./queue.ts");
+  const at = "2026-10-20T01:45:31Z";
+  const resolution = { required: true, scope: "the rated assembly", basis: "An engineer takes responsibility.", reference: "REF-1", by_name: "Officer", at };
+  const screen = { resolution, required: "yes", mandatory_required: false };
+  const h = await componentHarness(new URL("./ProfessionalRequirement.tsx", import.meta.url), "ProfessionalRequirement", {
+    "../../api/client": { engine: { professional: async () => screen } }, "../../api/accounts": { AccountsError: class {} },
+    "../ui": { Modal: () => null }, "./queue": queue,
+  });
+  const tree = await h.render({ c: { id: "c1", version: 3, professional_resolutions: [resolution] }, editable: false, busy: false, unresolved: false, onResolve: async () => {} });
+  const line = text(tree);
+  assert.ok(line.includes(`REF-1 · recorded by Officer · ${queue.sentLabel(at)}`), line);
+  assert.ok(!line.includes(new Date(at).toLocaleString()), line);
+});

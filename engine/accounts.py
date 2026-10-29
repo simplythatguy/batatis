@@ -9,6 +9,7 @@ import time
 
 from fastapi import HTTPException, Request, Response
 
+from . import ai_access
 from .account_models import Authority, User
 from .llm_gate import client_ip_from
 
@@ -16,6 +17,9 @@ COOKIE = 'batatis_session'
 SESSION_TOKEN = re.compile(r'[A-Za-z0-9_-]{43}')
 SESSION_SECONDS = 30 * 24 * 60 * 60
 SCRYPT_N, SCRYPT_R, SCRYPT_P, SCRYPT_DKLEN = 2**17, 8, 1, 64
+# Accounts made by signing in with an access code get an address on this domain; nobody can sign up with one.
+CODE_ACCOUNT_DOMAIN = 'code.batatis.invalid'
+CODE_TURNED_OFF = 'Your access code was turned off.'
 
 
 def digest(token: str) -> str:
@@ -67,6 +71,10 @@ def optional_user(request: Request, response: Response, store_factory) -> User |
     if not token or not SESSION_TOKEN.fullmatch(token):
         return None
     user = store_factory().session_user(digest(token), time.time() + SESSION_SECONDS)
+    if user and user.email.endswith('@' + CODE_ACCOUNT_DOMAIN) and not ai_access.holds(user):
+        # The code was the only way into this account, so removing it or turning it off ends the sign-in too.
+        request.state.session_ended = CODE_TURNED_OFF
+        return None
     if user:
         set_cookie(response, request, token)
     return user
@@ -75,7 +83,7 @@ def optional_user(request: Request, response: Response, store_factory) -> User |
 def require_user(request: Request) -> User:
     user = getattr(request.state, 'user', None)
     if user is None:
-        raise HTTPException(401, 'Sign in to continue')
+        raise HTTPException(401, getattr(request.state, 'session_ended', None) or 'Sign in to continue')
     return user
 
 

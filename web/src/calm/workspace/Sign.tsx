@@ -15,7 +15,7 @@ const dateLabel = (iso: string) => new Date(`${iso}T12:00:00`).toLocaleDateStrin
 
 /** The form's signature block: consent, then one signature per required signer. Nobody signs for anyone else. */
 export function Sign({ workspace }: { workspace: WorkspaceController }) {
-  const { saveDraft, readSync, refreshCurrentCase } = useCase();
+  const { saveDraft, readSync, refreshCurrentCase, queueWrite } = useCase();
   const { locked } = useCurrentApplication();
   const { state } = workspace;
   const [signer, setSigner] = useState<Signer | null>(null);
@@ -37,7 +37,7 @@ export function Sign({ workspace }: { workspace: WorkspaceController }) {
       const id = await saveDraft();
       if (signal.aborted || live.current.locked) return false;
       if (!id || !readSync().saved) { setNote("Save your application before signing."); return false; }
-      await operation(id, signal);
+      await queueWrite(() => operation(id, signal));
       if (signal.aborted) return false;
       await refreshCurrentCase();
       if (signal.aborted) return false;
