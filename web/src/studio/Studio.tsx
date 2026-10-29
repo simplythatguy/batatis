@@ -5,7 +5,7 @@ import { Icon } from "./icons";
 import type { Camera } from "./parts";
 import { Brand, CopyLink, initials } from "./parts";
 import { listDevices, liveVideo, openCamera, stopStream } from "./recorder";
-import { accountName, lastSeat, loadSeat, roomApi, RoomError, saveLastSeat, saveSeat, signedOut, useRoom, type Seat } from "./room";
+import { accountName, lastSeat, loadSeat, roomApi, RoomError, saveLastSeat, saveSeat, signedOut, TEAM_ROOM, useRoom, validCode, type Seat } from "./room";
 import { Room } from "./RoomView";
 import type { Deck } from "./types";
 
@@ -22,15 +22,11 @@ async function loadDeck(): Promise<Deck> {
   return pitchDeck;
 }
 
-const roomFromUrl = () => new URLSearchParams(location.search).get("room")?.trim().toUpperCase() || null;
-
-function putRoomInUrl(code: string) {
-  const url = new URL(location.href);
-  url.searchParams.set("room", code);
-  history.replaceState(null, "", url);
+/** ?room=CODE opens that room; without one, everybody lands in the same team room. */
+function roomFromUrl(): string {
+  const code = new URLSearchParams(location.search).get("room")?.trim().toUpperCase() ?? "";
+  return validCode(code) ? code : TEAM_ROOM;
 }
-
-
 
 let liveEl: HTMLVideoElement | null = null;
 
@@ -73,9 +69,9 @@ function useCamera(camId: string | undefined, micId: string | undefined): Camera
 export function Studio() {
   const [deck, setDeck] = useState<Deck | null>(null);
   const [account, setAccount] = useState<{ signedIn: boolean; name: string } | null>(null);
-  const [code, setCode] = useState(roomFromUrl);
-  const [seat, setSeat] = useState<Seat>(() => (code ? { ...lastSeat(), ...loadSeat(code) } : lastSeat()));
-  const { room, status, apply } = useRoom(account?.signedIn ? code : null);
+  const [code] = useState(roomFromUrl);
+  const [seat, setSeat] = useState<Seat>(() => ({ ...lastSeat(), ...loadSeat(code) }));
+  const { room, live, status, apply } = useRoom(account?.signedIn ? code : null);
   const camera = useCamera(seat.camId, seat.micId);
 
   useEffect(() => {
@@ -86,7 +82,7 @@ export function Studio() {
   const updateSeat = useCallback((patch: Partial<Seat>) => {
     setSeat((s) => {
       const next = { ...s, ...patch };
-      if (code) saveSeat(code, next);
+      saveSeat(code, next);
       saveLastSeat(next);
       return next;
     });
@@ -98,32 +94,29 @@ export function Studio() {
     if (room && seat.personId && !me) updateSeat({ personId: undefined });
   }, [room, me, seat.personId, updateSeat]);
 
-  if (!deck || !account || (code && status.kind === "loading" && seat.personId)) return <div className="st-page st-splash" aria-busy="true" />;
+  if (!deck || !account || (status.kind === "loading" && seat.personId)) return <div className="st-page st-splash" aria-busy="true" />;
   if (!account.signedIn || status.kind === "signed-out") return <SignIn />;
-  if (!me || !room || !code) {
+  if (!me || !room) {
     return (
       <Join
         code={code}
-        missing={status.kind === "missing"}
         name={seat.name || account.name}
         camera={camera}
         onDevice={(camId, micId) => updateSeat({ camId, micId })}
-        onJoin={async (name, target) => {
-          const joinCode = target ?? (await roomApi.create()).code;
-          const person = await roomApi.join(joinCode, name);
-          // The room already on screen does not list this person yet; without this the seat would be dropped.
-          if (joinCode === code) apply(await roomApi.get(joinCode));
+        onJoin={async (name) => {
+          await roomApi.open(code);
+          const person = await roomApi.join(code, name);
+          // The room on screen does not list this person yet; without this the seat would be dropped.
+          apply(await roomApi.get(code));
           const kept: Seat = { ...seat, name, personId: person.id };
-          saveSeat(joinCode, kept);
+          saveSeat(code, kept);
           saveLastSeat(kept);
-          putRoomInUrl(joinCode);
           setSeat(kept);
-          setCode(joinCode);
         }}
       />
     );
   }
-  return <Room deck={deck} room={room} me={me} camera={camera} apply={apply} onLeave={() => updateSeat({ personId: undefined })} />;
+  return <Room deck={deck} room={room} serverLive={live} me={me} camera={camera} apply={apply} onLeave={() => updateSeat({ personId: undefined })} />;
 }
 
 function SignIn() {
@@ -139,18 +132,16 @@ function SignIn() {
   );
 }
 
-function Join({ code, missing, name: initialName, camera, onDevice, onJoin }: {
-  code: string | null;
-  missing: boolean;
+function Join({ code, name: initialName, camera, onDevice, onJoin }: {
+  code: string;
   name: string;
   camera: Camera;
   onDevice(camId: string | undefined, micId: string | undefined): void;
-  onJoin(name: string, code: string | null): Promise<void>;
+  onJoin(name: string): Promise<void>;
 }) {
   const [name, setName] = useState(initialName);
-  const [other, setOther] = useState("");
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(missing ? "Room not found" : null);
+  const [error, setError] = useState<string | null>(null);
   const preview = useRef<HTMLVideoElement>(null);
   useEffect(() => setName((n) => n || initialName), [initialName]);
   useEffect(() => {
@@ -159,15 +150,12 @@ function Join({ code, missing, name: initialName, camera, onDevice, onJoin }: {
 
   const camId = camera.stream?.getVideoTracks()[0]?.getSettings().deviceId;
   const micId = camera.stream?.getAudioTracks()[0]?.getSettings().deviceId;
-  const target = missing ? null : code;
-  const joinCode = other.trim().toUpperCase();
-
-  async function go(into: string | null) {
+  async function go() {
     if (!name.trim() || busy) return;
     setBusy(true);
     setError(null);
     try {
-      await onJoin(name.trim(), into);
+      await onJoin(name.trim());
     } catch (e) {
       setError(signedOut(e) ? "Signed out" : e instanceof RoomError && e.status === 404 ? "Room not found" : e instanceof RoomError && e.status === 409 ? "Room is full" : "Could not join");
       setBusy(false);
@@ -176,7 +164,7 @@ function Join({ code, missing, name: initialName, camera, onDevice, onJoin }: {
 
   return (
     <div className="st-page st-center">
-      <form className="st-join" onSubmit={(e) => { e.preventDefault(); void go(target); }}>
+      <form className="st-join" onSubmit={(e) => { e.preventDefault(); void go(); }}>
         <Brand />
         <div className={`st-cam${camera.stream ? "" : " is-empty"}`}>
           <video ref={preview} autoPlay muted playsInline />
@@ -200,16 +188,9 @@ function Join({ code, missing, name: initialName, camera, onDevice, onJoin }: {
         {error && <p className="st-error" role="alert">{error}</p>}
         <div className="st-join-actions">
           <button type="submit" className="cf-btn is-primary is-lg" disabled={!name.trim() || busy || !camera.stream}>
-            {target ? "Join" : "New room"}
+            Join
           </button>
-          {target ? <CopyLink code={target} /> : (
-            <span className="st-code-join">
-              <input value={other} onChange={(e) => setOther(e.target.value)} placeholder="Room code" maxLength={6} aria-label="Room code" spellCheck={false} />
-              {joinCode.length === 6 && (
-                <button type="button" className="cf-btn is-sm" disabled={busy || !name.trim() || !camera.stream} onClick={() => void go(joinCode)}>Join</button>
-              )}
-            </span>
-          )}
+          <CopyLink code={code} />
         </div>
       </form>
     </div>

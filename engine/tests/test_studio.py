@@ -225,3 +225,67 @@ def test_signals_expire_after_ten_minutes(client, monkeypatch, tmp_path):
     assert data(send(client, code, ana, ben, 'bye'))['seq'] > old
     with closing(sqlite3.connect(tmp_path / 'studio.sqlite')) as db:
         assert db.execute('SELECT seq FROM studio_signals ORDER BY seq').fetchall() == [(old + 1,), (old + 2,)]
+
+
+def test_named_room_is_made_once_and_shared(client):
+    first = client.post('/studio/rooms', json={'code': 'batats'})
+    assert first.status_code == 201 and data(first)['code'] == 'BATATS'
+    client.post('/studio/rooms/BATATS/people', json={'name': 'Ana'})
+    again = client.post('/studio/rooms', json={'code': 'BATATS'})
+    assert again.status_code == 200 and [p['name'] for p in data(again)['people']] == ['Ana']
+    assert data(client.get('/studio/rooms/BATATS'))['live'] is None
+    for bad in ('BATAT', 'BATATSS', 'BAT0TS', 'BATIT1', 'BA-TAT'):
+        assert client.post('/studio/rooms', json={'code': bad}).status_code == 422
+    assert client.post('/studio/rooms').status_code == 201
+    assert client.post('/studio/rooms', json={}).status_code == 201
+
+
+def live_body(person_id, **extra):
+    return {'presenterId': person_id, 'groupId': 'intro', 'slide': 2, 'recording': True, 'remainingMs': 30_000,
+            'targetMs': 40_000, 'at': 1_700_000_000_000, **extra}
+
+
+def test_live_state_is_shared_through_the_room(client):
+    code = room(client)['code']
+    ana = data(client.post(f'/studio/rooms/{code}/people', json={'name': 'Ana'}))
+    ben = data(client.post(f'/studio/rooms/{code}/people', json={'name': 'Ben'}))
+    put = client.put(f'/studio/rooms/{code}/live', params={'person': ana['id']}, json=live_body(ana['id']))
+    assert put.status_code == 200 and put.json()['slide'] == 2
+    live = data(client.get(f'/studio/rooms/{code}'))['live']
+    assert live['presenterId'] == ana['id'] and live['groupId'] == 'intro' and live['at'] == 1_700_000_000_000
+    assert 29_000 < live['remainingMs'] <= 30_000 and live['targetMs'] == 40_000
+
+    # Someone else's stop does not end Ana's take; hers does.
+    assert client.put(f'/studio/rooms/{code}/live', params={'person': ben['id']}, content='null',
+                      headers={'Content-Type': 'application/json'}).status_code == 200
+    assert data(client.get(f'/studio/rooms/{code}'))['live']['presenterId'] == ana['id']
+    client.put(f'/studio/rooms/{code}/live', params={'person': ana['id']}, content='null',
+               headers={'Content-Type': 'application/json'})
+    assert data(client.get(f'/studio/rooms/{code}'))['live'] is None
+
+
+def test_live_state_needs_a_person_in_the_room(client):
+    code = room(client)['code']
+    other = room(client)['code']
+    ana = data(client.post(f'/studio/rooms/{code}/people', json={'name': 'Ana'}))
+    ben = data(client.post(f'/studio/rooms/{code}/people', json={'name': 'Ben'}))
+    assert client.put(f'/studio/rooms/{other}/live', params={'person': ana['id']},
+                      json=live_body(ana['id'])).status_code == 404
+    assert client.put(f'/studio/rooms/{code}/live', params={'person': 'nobody'},
+                      json=live_body('nobody')).status_code == 404
+    assert client.put(f'/studio/rooms/{code}/live', params={'person': ben['id']},
+                      json=live_body(ana['id'])).status_code == 403
+    assert client.put(f'/studio/rooms/{code}/live', json=live_body(ana['id'])).status_code == 422
+    assert client.put(f'/studio/rooms/{code}/live', params={'person': ana['id']},
+                      json=live_body(ana['id'], remainingMs=1.5)).status_code == 422
+
+
+def test_live_state_goes_stale_after_ten_seconds(client, monkeypatch):
+    code = room(client)['code']
+    ana = data(client.post(f'/studio/rooms/{code}/people', json={'name': 'Ana'}))
+    client.put(f'/studio/rooms/{code}/live', params={'person': ana['id']}, json=live_body(ana['id']))
+    now = studio_store.time.time()
+    monkeypatch.setattr(studio_store.time, 'time', lambda: now + 6)
+    assert 23_000 < data(client.get(f'/studio/rooms/{code}'))['live']['remainingMs'] <= 24_000
+    monkeypatch.setattr(studio_store.time, 'time', lambda: now + 10.5)
+    assert data(client.get(f'/studio/rooms/{code}'))['live'] is None
