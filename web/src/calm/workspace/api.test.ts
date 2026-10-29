@@ -22,6 +22,11 @@ test("unsupported routes have quiet, visible feature-specific unavailability mes
   assert.equal(workspaceFailure(new EngineError(401, "Sign in to continue."), "History"), "Sign in to continue.");
 });
 test("workspace writes record the case version they create, so the next save is not a false conflict", async t => {
+  // Node 22 (CI) has no Web Storage; clearEngineSession() clears the session keys, also in the cleanup below.
+  if (!("sessionStorage" in globalThis)) {
+    const items = new Map<string, string>();
+    Object.assign(globalThis, { sessionStorage: { getItem: (k: string) => items.get(k) ?? null, setItem: (k: string, v: string) => items.set(k, String(v)), removeItem: (k: string) => items.delete(k), clear: () => items.clear() } });
+  }
   // QA 2026-10-28: draft save (v8) -> history save (v9) -> the next draft save still sent 8 and got a 409.
   const original = globalThis.fetch;
   t.after(() => { globalThis.fetch = original; clearEngineSession(); });
