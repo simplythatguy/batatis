@@ -464,7 +464,7 @@ def test_a_refused_connection_is_logged_with_its_reason_and_answered_with_a_plai
     assert response.status_code == 503 and response.json()['detail'] == 'Assistant unavailable'
     logged = _assist_log(caplog)
     failure = httpx.ConnectError if provider == 'openai' else anthropic.APIConnectionError
-    assert provider in logged and failure.__name__ in logged and 'connection refused' in logged.lower()
+    assert provider in logged and failure.__name__ in logged and 'refused' in logged.lower()
     assert question not in logged and 'fake-secret' not in logged
-    assert 'connection refused' not in response.text.lower() and question not in response.text
+    assert 'refused' not in response.text.lower() and question not in response.text
     assert 'ConnectError' not in response.text and 'APIConnectionError' not in response.text

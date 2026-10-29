@@ -205,8 +205,8 @@ export const accounts = {
   me: (signal?: AbortSignal) => call<{ user: User; app_access?: boolean }>("GET", "/auth/me", undefined, signal).then((r) => sessionUser(r) ?? (r as unknown as User)),
   /** Every owned application, archived ones included; a server without preferences reads as neither. */
   applications: (signal?: AbortSignal) =>
-    call<{ applications: ApplicationSummary[] }>("GET", "/me/applications", undefined, signal).then((r) =>
-      (r.applications ?? []).map((a) => ({ ...a, archived: a.archived === true, pinned: a.pinned === true }))),
+    call<{ applications: (Omit<ApplicationSummary, "title"> & { title: string | null })[] }>("GET", "/me/applications", undefined, signal).then((r) =>
+      (r.applications ?? []).map((a) => ({ ...a, title: a.title ?? "", archived: a.archived === true, pinned: a.pinned === true }))),
   /** Pin or archive in the owner's list. Changes no case content, status or version. */
   preferences: (id: string, patch: ApplicationPreferences, signal?: AbortSignal) =>
     call<{ archived: boolean; pinned: boolean }>("PATCH", `/me/applications/${enc(id)}/preferences`, patch, signal).then((r) => ({
