@@ -6,9 +6,9 @@ Batatis helps builders in Alberta prepare a complete building-code variance appl
 
 ## See it work
 
-PENDING_VIDEO_URL
+![Alex Builder on the live site, then Jordan Officer's review and the message Alex opens](docs/readme/demo.gif)
 
-Alex Builder sends a soffit variance for a house in Edmonton on the live site. You see the application, the questions, and settings. Jordan Officer reviews it for Edmonton, opens it from the queue, and writes to Alex. Alex opens that message. The words in the application are a sample.
+Alex Builder sends a soffit variance for a house in Edmonton on the live site. You see the application, the questions, and settings. Jordan Officer reviews it for Edmonton, opens it from the queue, and writes to Alex. Alex opens that message. The recording plays on this page. The words in the application are a sample.
 
 ## The problem
 
