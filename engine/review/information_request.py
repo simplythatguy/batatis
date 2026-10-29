@@ -47,8 +47,13 @@ def _ask(finding: Finding) -> str:
 
 
 def _the(label: str) -> str:
-    """"the professional", never "the a professional"."""
-    return label if re.match(r'(?:the|a|an)\s', label, re.I) else f'the {label}'
+    """"the professional", never "the a professional"; a label that reads as a sentence start
+    ("Open question from the drafted wording") reads mid-sentence after "the"."""
+    if re.match(r'(?:the|a|an)\s', label, re.I):
+        return label
+    if re.match(r'[A-Z][a-z]+\s[a-z]', label):
+        label = label[:1].lower() + label[1:]
+    return f'the {label}'
 
 
 def _ask_text(finding: Finding) -> str:

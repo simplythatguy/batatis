@@ -293,7 +293,7 @@
       },
       {
         "t": 7,
-        "what": "required: supporting evidence for 9.10.11.2.(2), F03\u2013OP3.1"
+        "what": "required: supporting evidence for 9.10.11.2.(2), F03–OP3.1"
       },
       {
         "t": 7.9,
@@ -317,7 +317,7 @@
       }
     ],
     "bytes": 2188387,
-    "shows": "Check my application: Almost there, 1 thing stands between you and submission (missing supporting evidence for 9.10.11.2.(2), F03\u2013OP3.1); Open leads to Section D, the City of Edmonton engineering study is added for that evidence task; check again: Ready to submit for review (the officer still determines the professional requirement)",
+    "shows": "Check my application: Almost there, 1 thing stands between you and submission (missing supporting evidence for 9.10.11.2.(2), F03–OP3.1); Open leads to Section D, the City of Edmonton engineering study is added for that evidence task; check again: Ready to submit for review (the officer still determines the professional requirement)",
     "pointerStart": [
       554,
       516
@@ -349,7 +349,7 @@
       },
       {
         "t": 6.9,
-        "what": "Section C row on the form: 9.10.11.2.(2) \u00b7 OS1.2, OP3.1 \u00b7 F03 \u00b7 NBC intent"
+        "what": "Section C row on the form: 9.10.11.2.(2) · OS1.2, OP3.1 · F03 · NBC intent"
       },
       {
         "t": 12.4,
@@ -361,7 +361,7 @@
       }
     ],
     "bytes": 1419595,
-    "shows": "The filled official SCC variance form in the send step (Sections A and B filled; Section C: 9.10.11.2.(2) \u00b7 OS1.2, OP3.1 \u00b7 F03 \u00b7 NBC 2020 intent), then Submit to Edmonton and the application shows Submitted \u00b7 Edmonton",
+    "shows": "The filled official SCC variance form in the send step (Sections A and B filled; Section C: 9.10.11.2.(2) · OS1.2, OP3.1 · F03 · NBC 2020 intent), then Submit to Edmonton and the application shows Submitted · Edmonton",
     "pointerStart": [
       374,
       138
@@ -373,7 +373,7 @@
   },
   {
     "file": "c09-queue.mp4",
-    "seconds": 10.4,
+    "seconds": 11.6,
     "moments": [
       {
         "t": 0,
@@ -392,64 +392,68 @@
         "what": "Pick up"
       },
       {
-        "t": 10.1,
+        "t": 9,
         "what": "the application opens for review"
       }
     ],
-    "bytes": 155631,
+    "bytes": 167827,
     "shows": "Edmonton officer review queue: New shows the submitted Fire separation application from Dana Okafor; the officer picks it up and Batatis reads the package",
     "pointerStart": [
       343,
       162
     ],
     "pointerEnd": [
-      1116,
-      182
+      204,
+      138
     ]
   },
   {
     "file": "c10-officer-review.mp4",
-    "seconds": 16.03,
+    "seconds": 17.17,
     "moments": [
       {
         "t": 0,
         "what": "start"
       },
       {
-        "t": 1.2,
+        "t": 0.5,
         "what": "package review: Applicant (Section A) and Project (Section B) complete"
       },
       {
-        "t": 4,
-        "what": "Code references (Section C): 1 to ask; Case and proof (Section D): 6 to ask"
+        "t": 3.6,
+        "what": "Code references (Section C): 1 to ask; Case and proof (Section D): 5 to ask"
       },
       {
-        "t": 7.1,
-        "what": "what to ask the applicant"
+        "t": 6.6,
+        "what": "what to ask the applicant: 3 things"
       },
       {
-        "t": 8.9,
+        "t": 8.5,
+        "what": "open question from the drafted wording"
+      },
+      {
+        "t": 10.1,
         "what": "check: relevance of the cited provision"
       },
       {
-        "t": 11.8,
+        "t": 12.9,
         "what": "required: professional requirement, for the officer to decide"
       }
     ],
-    "bytes": 186324,
-    "shows": "Officer package review: Applicant (A) and Project (B) complete, Code references (C) 1 to ask, Case and proof (D) 6 to ask; the checks to ask about, including relevance of the cited provision and the required professional-requirement determination routed to the officer",
+    "bytes": 236736,
+    "shows": "Officer package review: Applicant (A) and Project (B) complete, Code references (C) 1 to ask, Case and proof (D) 5 to ask; 3 things to ask, open questions from the drafted wording read as plain labels, relevance of the cited provision and the required professional-requirement determination routed to the officer",
     "pointerStart": [
-      1116,
-      182
+      204,
+      138
     ],
     "pointerEnd": [
       232,
-      713
+      664
     ]
   },
   {
     "file": "c11-decide.mp4",
-    "seconds": 17.17,
+    "seconds": 14.93,
     "moments": [
       {
         "t": 0,
@@ -460,23 +464,23 @@
         "what": "decision: return to the applicant for the missing items"
       },
       {
-        "t": 4.7,
-        "what": "the one-way message: items to provide; they fix it and resend, they can\u2019t reply"
+        "t": 4.5,
+        "what": "the one-way message: items to provide; they fix it and resend, they can’t reply"
       },
       {
-        "t": 6.9,
+        "t": 8.3,
         "what": "Return"
       },
       {
-        "t": 12.8,
+        "t": 10.4,
         "what": "returned: waiting for the applicant"
       }
     ],
-    "bytes": 555850,
-    "shows": "Officer decision: Return to the applicant with a one-way message listing what to provide or confirm (completeness only, not a decision on the application); they fix it and resend, they can\u2019t reply; the application shows Returned, waiting for Dana Okafor",
+    "bytes": 458513,
+    "shows": "Officer decision: Return to the applicant with a one-way message listing what to provide or confirm (completeness only, not a decision on the application); they fix it and resend, they can’t reply; the application shows Returned, waiting for Dana Okafor",
     "pointerStart": [
       232,
-      713
+      664
     ],
     "pointerEnd": [
       204,
