@@ -24,8 +24,8 @@ export const deck: Deck = {
       ],
       script: [
         "🙂 Every new building idea in Alberta starts the same way. ⏸️ It breaks... a... RULE.",
-        "🙂 Here's a real one from Edmonton. It lets rowhouses with suites use a one-hour party wall instead of a two-hour firewall.",
-        "😮 Alberta recorded three hundred sixty-six variances against that firewall rule in six months. ⏸️ That's TWO a day.",
+        "🙂 Here's a real example. The City of Edmonton lets rowhouses with basement suites use a one-hour party wall instead of a two-hour firewall.",
+        "😮 Alberta recorded three hundred sixty-six variances on that one firewall rule in six months. ⏸️ That's TWO a day.",
       ],
     },
     {
@@ -49,9 +49,9 @@ export const deck: Deck = {
         { kind: "count", id: "villain-cost", value: 3600, prefix: "$", label: "estimated cost of one extra round trip, in Canadian dollars, mostly waiting" },
       ],
       script: [
-        "😏 NOW watch. We delete Section C. That's the rule this design changes, and why. 🤔 Would a first-time builder know what goes there? ⏸️ Most DON'T.",
-        "😬 But the officer does, and WEEKS later the application comes back.",
-        "😬 Every trip back costs about thirty-six hundred dollars, and most of that is just... WAITING.",
+        "😏 To ask for one, a builder fills in this form. Section C names the rule you're changing. ⏸️ Now watch. We delete it. 🤔 Would a first-time builder know what goes there?",
+        "😬 The officer would. And WEEKS later, the application comes back.",
+        "😬 Every trip back costs about thirty-six hundred dollars, mostly waiting.",
       ],
     },
     {
@@ -65,10 +65,10 @@ export const deck: Deck = {
         { kind: "logo", id: "three-one", line: "One app." },
       ],
       script: [
-        "🙂 So today, THREE things. An application writer.",
+        "🙂 So we built THREE things. An application writer.",
         "🙂 A code expert.",
         "🙂 And a completeness checker for officers.",
-        "😏 A writer, an expert, a checker. 🤔 See where this is going? ⏸️ 🔥 It's... ONE... app, and we call it Batatis.",
+        "😏 A writer, an expert, a checker. 🤔 See where this is going? ⏸️ 🔥 It's... ONE... app. We call it Batatis.",
       ],
     },
     {
@@ -76,16 +76,16 @@ export const deck: Deck = {
       name: "Applicant: intake and rules",
       speaker: 2,
       slides: [
-        { kind: "clip", id: "apply-start", title: "Describe it. Drop it in.", src: "/studio/clips/c01-start.mp4", from: 1.8, to: 10.6, rate: 1.35 },
+        { kind: "clip", id: "apply-start", title: "Describe it. Drop it in.", src: "/studio/clips/c01-start.mp4", from: 1.8, to: 10.6, rate: 1.25 },
         { kind: "clip", id: "apply-read", title: "It reads both", src: "/studio/clips/c02-understood.mp4", from: 0.6, to: 11.0, rate: 1.6 },
         { kind: "clip", id: "apply-rules", title: "The right rules, ranked", src: "/studio/clips/c03-rules.mp4", from: 0.4, to: 19.5, rate: 1.55 },
         { kind: "clip", id: "apply-ask", title: "Only what's missing", src: "/studio/clips/c04-questions.mp4", from: 0.5, to: 9.0, rate: 1.3 },
       ],
       script: [
-        "🙂 We describe the rowhouse in plain words and drop in the broken form.",
-        "🙂 It reads both and finds the site, the city and every safety measure.",
-        "🙂 Here are the rules it found, ranked. ⏸️ 😮 At the TOP... the exact rule we deleted. 😄 Isn't that COOL? Ten runs out of ten.",
-        "🙂 Then it asks ONLY for what's still missing, one question at a time.",
+        "🙂 We describe the rowhouse in plain words and attach the form without Section C.",
+        "🙂 Batatis reads both. It finds the site in Edmonton and every safety measure.",
+        "🙂 Then it ranks the rules that apply. ⏸️ 😮 At the TOP... the exact rule we deleted. 😄 Isn't that COOL? Ten times out of ten.",
+        "🙂 Next, it asks only what's still missing, one question at a time.",
       ],
     },
     {
@@ -99,10 +99,10 @@ export const deck: Deck = {
         { kind: "clip", id: "apply-form", title: "The official form", src: "/studio/clips/c08-form.mp4", from: 5.8, to: 18.0, rate: 1.6 },
       ],
       script: [
-        "💪 And when it isn't sure, it doesn't GUESS. It leaves the engineer question to the officer, and lists what the evidence must cover.",
-        "💪 Here's Section C, straight from the 2023 Alberta Edition, second printing. ⏸️ Same article, same objectives, same function as the City's.",
-        "🙂 One click checks the application before anyone else sees it. It finds missing evidence, we add the City's study, and it's ready.",
-        "😄 And there's the official Safety Codes form, filled in. ⏸️ 🔥 BOOM. It goes to Edmonton.",
+        "💪 When it isn't sure, it doesn't GUESS. It flags the engineer question for the officer and lists what the proof must cover.",
+        "💪 Here's Section C, rebuilt from the 2023 Alberta Edition, second printing. ⏸️ Same rule, same objectives, same function as the City's.",
+        "🙂 One click checks the whole application. It spots a missing study, we add the City's report, and now it's ready.",
+        "😄 And there's the official Safety Codes form, filled in. ⏸️ 🔥 BOOM. Off to Edmonton.",
       ],
     },
     {
@@ -112,12 +112,12 @@ export const deck: Deck = {
       slides: [
         { kind: "clip", id: "officer-queue", title: "The officer's inbox", src: "/studio/clips/c09-queue.mp4", from: 0.4, to: 10.4, rate: 1.6 },
         { kind: "clip", id: "officer-review", title: "What's missing, at a glance", src: "/studio/clips/c10-officer-review.mp4", from: 0.8, to: 15.5, rate: 1.13 },
-        { kind: "clip", id: "officer-decide", title: "One clear message", src: "/studio/clips/c11-decide.mp4", from: 0.3, to: 9.8, rate: 1.4 },
+        { kind: "clip", id: "officer-decide", title: "One clear message", src: "/studio/clips/c11-decide.mp4", from: 0.3, to: 10.8, rate: 1.4 },
       ],
       script: [
-        "🙂 Now let's switch sides. The application is in the Edmonton officer's inbox.",
-        "😌 The officer sees what's there and what's missing, and every citation opens its exact sentence. Batatis checks completeness, and the compliance call stays with the officer.",
-        "🙂 The officer returns it with one clear message. The applicant fixes it and resends.",
+        "🙂 Now the other side. It lands in the Edmonton officer's inbox.",
+        "😌 The officer sees what's done and what's missing, and every citation opens the exact code sentence. Batatis checks completeness. Safety is still the officer's call.",
+        "🙂 The officer sends it back with one clear message. The builder fixes it and resends.",
       ],
     },
     {
@@ -127,14 +127,14 @@ export const deck: Deck = {
       slides: [
         { kind: "statement", id: "proof-q", text: "Does it\nreally work?" },
         {
-          kind: "bars", id: "proof-rank", title: "Right article, first", max: 64, unit: "of 64",
+          kind: "bars", id: "proof-rank", title: "Right rule, first", max: 64, unit: "of 64",
           bars: [
             { label: "Plain search", value: 26 },
             { label: "Batatis", value: 54, highlight: true },
           ],
           note: "64 real Alberta variances, appeals and rulings. Article numbers removed from the descriptions.",
         },
-        { kind: "count", id: "proof-zero", value: 0, label: "made-up articles shown to an applicant, same 64 cases" },
+        { kind: "count", id: "proof-zero", value: 0, label: "made-up rules shown to an applicant, same 64 cases" },
         {
           kind: "bars", id: "proof-novice", title: "First-time applicants", max: 10, unit: "/ 10",
           bars: [
@@ -146,11 +146,11 @@ export const deck: Deck = {
         { kind: "count", id: "proof-cost", value: 0.97, prefix: "$", decimals: 2, label: "of AI per application, measured, in Canadian dollars. The officer's review uses none." }
       ],
       script: [
-        "🤔 Does it REALLY work? We tested sixty-four real Alberta records, variances, appeals and code rulings, with the article numbers hidden.",
-        "💪 Plain search put the right article first TWENTY-SIX times. ⏸️ Batatis put it first... FIFTY-FOUR... times.",
-        "💪 And it showed applicants... ZERO... made-up articles.",
-        "😌 Simulated first-time applicants scored two out of ten with the official flowchart, FIVE POINT SIX with Batatis.",
-        "💪 And the AI behind one application costs under... ONE... dollar. Reviewing it costs the officer nothing.",
+        "🤔 Does it REALLY work? We tested sixty-four real Alberta cases, like variances and appeals, with the rule numbers hidden.",
+        "💪 Plain search ranked the right rule first TWENTY-SIX times. ⏸️ Batatis did it... FIFTY-FOUR... times.",
+        "💪 And it never showed a made-up rule. ⏸️ ZERO.",
+        "😌 Simulated first-time builders scored two out of ten with the official flowchart. With Batatis, FIVE POINT SIX.",
+        "💪 The AI for one application costs under... ONE... dollar. The officer's review costs nothing.",
       ],
     },
     {
@@ -173,8 +173,8 @@ export const deck: Deck = {
         },
       ],
       script: [
-        "🙂 Today we're live in Calgary and Edmonton, and we've mapped four hundred thirty-five places to their office.",
-        "💪 Adding an office takes one data file, NOT new code. Better models won't earn an officer's trust. ⏸️ We... WILL.",
+        "🙂 Today we're live in Calgary and Edmonton. And we've mapped four hundred thirty-five places to their local office.",
+        "💪 Adding a city doesn't take new code. It takes one data file. Better AI won't earn an officer's trust. ⏸️ We... WILL.",
       ],
     },
     {
@@ -195,9 +195,9 @@ export const deck: Deck = {
         },
       ],
       script: [
-        "😌 Here's what we HAVEN'T proven. Our applicant scores are simulated, and in ten of sixty-four cases the right article wasn't first.",
+        "😌 Now, what we HAVEN'T proven. Our first-time builder scores are simulated, and ten times out of sixty-four the right rule wasn't first.",
         "😌 And no officer has reviewed a real Batatis application... YET.",
-        "💪 We'll run a ninety-day pilot beside one office's current process. Officers will grade real files, and we'll re-measure EVERY number in public.",
+        "💪 Here's the plan. A ninety-day pilot with one office, beside how they work today. Officers grade real files, and we re-measure EVERY number in public.",
       ],
     },
     {
