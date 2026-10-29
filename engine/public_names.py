@@ -21,7 +21,7 @@ MODEL_VERSIONS = {'jev-1.13.0': PUBLIC_MODEL, 'gpt-6-luna': 'verifier-1', 'claud
                   'baseten/elephant-1-20261021': ELEPHANT_PUBLIC_MODEL}
 CUSTOM = 'custom'
 # Private: document-review model pin -> the opaque version a client sees.
-REVIEW_VERSIONS = {'gpt-6-luna': 'review-1', 'gpt-6.1-sol': 'review-2'}
+REVIEW_VERSIONS = {'gpt-6-luna': 'review-1', 'gpt-6.1-sol': 'review-2', 'claude-sonnet-5-5': 'review-3'}
 MODEL = 'model'
 # Methods that are a third-party service. The keyword arms (bm25, bm25_v3) and 'none' are not.
 PROVIDER_METHODS = frozenset({'jev', 'openai', 'anthropic', 'decisions', 'elephant'})

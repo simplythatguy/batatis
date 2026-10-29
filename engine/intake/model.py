@@ -10,6 +10,7 @@ gate (`engine.llm_gate`). Tests and `BATATIS_PROVIDER=fake` use a deterministic 
 from __future__ import annotations
 
 import json
+import logging
 import math
 import os
 import re
@@ -17,16 +18,17 @@ import time
 from dataclasses import dataclass, field
 from typing import Callable
 
-from .. import llm_gate
+from .. import anthropic_json, llm_gate
 from .rules import ENUMS, FIELDS, PERSONAL, supports
 from .text import find_quote, is_question, sentences
 
-MODEL = 'gpt-6-luna'
-EFFORT = 'medium'
+MODEL = anthropic_json.MODEL
+EFFORT = 'low'
 MAX_OUTPUT_TOKENS = 6000
 MAX_CHARS = 8000
-OPENAI_URL = 'https://api.openai.com/v1/chat/completions'
 STATEMENT = 'statement'
+
+_log = logging.getLogger(__name__)
 
 ASKED = tuple(name for name in FIELDS if name not in PERSONAL and name != 'claimed_provision')
 
@@ -232,36 +234,28 @@ def _run_chunk(source: str, outbound: str, transport: Transport, *, skip: set[st
     except GateClosed as closed:
         return ModelRun(status='gate_closed', reason=closed.source, input_tokens=None, output_tokens=None)
     except Exception as exc:                     # provider text may carry request details; keep only the type
+        _log.warning('description reading failed: %s %s', type(exc).__name__, getattr(exc, 'status_code', ''))
         return ModelRun(status='failed', reason=type(exc).__name__, input_tokens=None, output_tokens=None)
     return ModelRun(status=status, facts=facts, dropped=dropped,
                     input_tokens=usage.get('input_tokens'), output_tokens=usage.get('output_tokens'))
 
 
-def openai_transport(client_ip: str | None = None) -> Transport:
-    """Chat Completions with a strict schema, metered: reserve before, record after. No retry."""
+def anthropic_transport(client_ip: str | None = None) -> Transport:
+    """One structured-output request, metered: reserve before, record after. No retry."""
     def call(system: str, user: Content, body_schema: dict) -> tuple[dict, dict]:
-        import httpx
         text = user if isinstance(user, str) else ''.join(p.get('text', '') for p in user)
         images = 0 if isinstance(user, str) else sum(p.get('type') == 'image_url' for p in user)
         max_input = len((system + text + json.dumps(body_schema)).encode()) // 3 + 256 + images * 8192
         decision = llm_gate.authorize(model=MODEL, max_input_tokens=max_input, max_output_tokens=MAX_OUTPUT_TOKENS,
-                                      client_ip=client_ip, provider='openai')
+                                      client_ip=client_ip, provider='anthropic')
         if not decision.allowed:
             raise GateClosed(decision.source)
-        body = {'model': MODEL, 'max_completion_tokens': MAX_OUTPUT_TOKENS, 'reasoning_effort': EFFORT,
-                'messages': [{'role': 'system', 'content': system}, {'role': 'user', 'content': user}],
-                'response_format': {'type': 'json_schema',
-                                    'json_schema': {'name': 'intake_facts', 'strict': True, 'schema': body_schema}}}
         # A failed call keeps its reservation: it may still have used tokens.
-        with httpx.Client(timeout=CALL_SECONDS, follow_redirects=False) as client:
-            response = client.post(OPENAI_URL, json=body,
-                                   headers={'Authorization': 'Bearer ' + os.environ['OPENAI_API_KEY']})
-            response.raise_for_status()
-            data = response.json()
-        usage = data.get('usage') or {}
-        tokens = {'input_tokens': usage.get('prompt_tokens', 0), 'output_tokens': usage.get('completion_tokens', 0)}
+        payload, usage = anthropic_json.call(system, user, body_schema, model=MODEL, effort=EFFORT,
+                                             max_output_tokens=MAX_OUTPUT_TOKENS, timeout=CALL_SECONDS)
+        tokens = {'input_tokens': usage['input_tokens'], 'output_tokens': usage['output_tokens']}
         llm_gate.record(model=MODEL, reserved_usd=decision.reserved_usd, **tokens)
-        return json.loads(data['choices'][0]['message']['content']), tokens
+        return payload, tokens
     call.supports_images = True
     return call
 
@@ -321,6 +315,6 @@ def default_transport(client_ip: str | None = None) -> tuple[Transport | None, s
     """The transport this deployment allows, and the status label for its results."""
     if (os.environ.get('BATATIS_PROVIDER') or '').strip().lower() == 'fake' and not os.environ.get('VERCEL'):
         return fake_transport, 'fake'
-    if llm_gate.live_enabled('openai'):
-        return openai_transport(client_ip), 'live'
+    if llm_gate.live_enabled('anthropic'):
+        return anthropic_transport(client_ip), 'live'
     return None, 'off'

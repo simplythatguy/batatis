@@ -6,9 +6,9 @@ Batatis helps builders in Alberta prepare a complete building-code variance appl
 
 ## See it work
 
-![Batatis from description to an officer's review: a homebuilder's application, then the City of Edmonton officer's review and the request back to the applicant](docs/readme/demo.gif)
+![Alex Builder on the live site, then Jordan Officer's review and the message Alex opens](docs/readme/demo.gif)
 
-A homebuilder describes a project and attaches two City of Edmonton PDFs. Batatis reads them, asks only what they didn't already say, and fills in the variance form. The City of Edmonton officer then reviews it, asks for what is missing, and the applicant opens that request. The animation plays at 2.5 times the speed of the [full 5-minute video](docs/readme/demo.mp4). It uses example data.
+Alex Builder sends a soffit variance for a house in Edmonton on the live site. You see the application, the questions, and settings. Jordan Officer reviews it for Edmonton, opens it from the queue, and writes to Alex. Alex opens that message. The recording plays on this page. The words in the application are a sample.
 
 ## The problem
 
@@ -233,7 +233,7 @@ Twelve prompts still miss. Eight unresolved prompts were called a variance becau
 
 For applicants:
 
-1. **Describe the project.** Rules read facts, such as the owner and the address, from the description and from the text and fields of any PDFs. If AI is on, GPT-6 Luna, an OpenAI model, points at more facts, and each one must quote the text it came from. When you attach files, Luna also reviews them page by page, and the questions screen lists what it found.
+1. **Describe the project.** Rules read facts, such as the owner and the address, from the description and from the text and fields of any PDFs. If AI is on, Claude Sonnet 5.5, an Anthropic model, points at more facts, and each one must quote the text it came from. When you attach files, Sonnet also reviews them page by page, and the questions screen lists what it found.
 2. **Answer a few questions.** A rule-based planner picks up to five questions. It starts with conflicts in what you wrote, then facts that narrow down the code articles. The website then shows one card for each item that is still open. No AI writes the questions. This step is also where the path is chosen. See [How the path is chosen](#how-the-path-is-chosen).
 3. **Confirm the code articles.** Batatis searches the full text of CodeDB for every requirement your description touches. If AI is on, Claude Haiku 5.5 reads the leading 60 and moves the ones it can quote word for word to the front, with a one-line reason. A quote that is not in the code is thrown away. You confirm the articles that apply. With AI off, the search order stays as it is.
 4. **Section C fills itself in.** The objectives, functions, and intent of each confirmed article come from the code's own tables in CodeDB. No AI is involved.
@@ -485,35 +485,41 @@ The app runs without any API key. Keys turn on the AI steps. Copy the example se
 cp .env.example .env
 ```
 
-`.env.example` holds two API keys and three switches:
+`.env.example` holds the API keys and three switches:
 
 ```dotenv
 OPENAI_API_KEY=
 OPENROUTER_API_KEY=
+ANTHROPIC_API_KEY=
 BATATIS_LIVE=0
 BATATIS_LIVE_ELEPHANT=0
 BATATIS_DAILY_SPEND_CAP_USD=5
 ```
 
-The AI steps in [How Batatis works](#how-batatis-works) need your OpenAI key and a TypeSafe key. The example file has no line for the TypeSafe key, so add one. Paste each key after its `=`, and set `BATATIS_LIVE=1`:
+The AI steps in [How Batatis works](#how-batatis-works) need your Anthropic key and a TypeSafe key. The example file has no line for the TypeSafe key, so add one. Paste each key after its `=`, and set `BATATIS_LIVE=1`:
 
 ```dotenv
-OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
 TYPESAFE_API_KEY=
 BATATIS_LIVE=1
 ```
 
 The OpenRouter key and `BATATIS_LIVE_ELEPHANT` are only for an optional alternative scorer, explained below.
 
+#### `ANTHROPIC_API_KEY`
+
+The Anthropic API runs Claude models. Batatis uses Claude Sonnet 5.5 to read more facts from descriptions and PDFs, to review attached files, and to draft the application's wording, and the assistant uses Claude when this key is set. Set `BATATIS_LIVE=1` to turn it on. A key that isn't tied to one workspace also needs `ANTHROPIC_WORKSPACE_ID`.
+
+Files that use it: [`engine/anthropic_json.py`](engine/anthropic_json.py), [`engine/drafting_provider.py`](engine/drafting_provider.py), [`engine/intake/model.py`](engine/intake/model.py), [`engine/intake/review.py`](engine/intake/review.py) and [`engine/routes_assist.py`](engine/routes_assist.py).
+
+Get a key at [platform.claude.com](https://platform.claude.com).
+
 #### `OPENAI_API_KEY`
 
-The OpenAI API runs GPT models. Batatis uses GPT-6 Luna, at medium reasoning effort, to read more facts from descriptions and PDFs, to review attached files, and to read the top 15 code articles in full. The assistant uses GPT-4.1 mini by default. If you set `ANTHROPIC_API_KEY`, which is not in the example file, the assistant uses Claude Sonnet 5.5 instead. Set `BATATIS_LIVE=1` to turn it on.
+Optional. The OpenAI API runs GPT models. Batatis can use GPT-6 Luna to read the top 15 code articles in full, and the assistant uses GPT-4.1 mini when no Anthropic key is set.
 
 Files that use it:
 
-- [`engine/llm_gate.py`](engine/llm_gate.py)
-- [`engine/intake/model.py`](engine/intake/model.py)
-- [`engine/intake/review.py`](engine/intake/review.py)
 - [`engine/identify/providers.py`](engine/identify/providers.py)
 - [`engine/routes_assist.py`](engine/routes_assist.py)
 

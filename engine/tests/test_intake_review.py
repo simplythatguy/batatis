@@ -117,18 +117,15 @@ def test_restore_maps_an_excerpt_back_to_the_original_text():
     assert isinstance(EvidenceRef(source_ref='file1', page=1, quote=text), EvidenceRef)
 
 
-def test_luna_and_sol_settings_are_bounded():
-    for model, effort, ok in (('gpt-6-luna', 'xhigh', True), ('gpt-6-luna', 'max', False),
-                              ('gpt-6.1-sol', 'low', True), ('gpt-6.1-sol', 'high', False)):
-        env = {'BATATIS_REVIEW_MODEL': model, 'BATATIS_REVIEW_EFFORT': effort}
+def test_review_settings_are_bounded_and_legacy_settings_fall_back():
+    for model, effort, expected in (('claude-sonnet-5-5', 'medium', ('claude-sonnet-5-5', 'medium')),
+                                    ('claude-sonnet-5-5', 'max', ('claude-sonnet-5-5', 'low')),
+                                    ('gpt-6-luna', 'xhigh', ('claude-sonnet-5-5', 'low')),
+                                    ('gpt-6.1-sol', 'low', ('claude-sonnet-5-5', 'low'))):
         with pytest.MonkeyPatch.context() as mp:
-            for k, v in env.items():
-                mp.setenv(k, v)
-            if ok:
-                assert review.configured() == (model, effort)
-            else:
-                with pytest.raises(ValueError):
-                    review.configured()
+            mp.setenv('BATATIS_REVIEW_MODEL', model)
+            mp.setenv('BATATIS_REVIEW_EFFORT', effort)
+            assert review.configured() == expected
 
 
 def test_a_long_file_keeps_the_pages_the_request_names_and_each_files_first_pages():
@@ -246,7 +243,7 @@ def test_a_filename_alone_cannot_disclose_an_unlabelled_name():
 def test_the_review_names_no_provider_or_model():
     from engine.tests.test_no_provider_names_exposed import IDENTIFY_NAMES
     out, _ = _run(EMPTY)
-    assert out.model == 'review-1'
+    assert out.model == 'review-3'
     assert not IDENTIFY_NAMES.search(out.model_dump_json())
 
 

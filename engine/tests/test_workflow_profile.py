@@ -6,8 +6,8 @@ from engine.intake import model, review
 
 def test_selected_workflow_uses_luna_and_deterministic_discovery_with_a_model_rank():
     config = load_config(env={})
-    assert (model.MODEL, model.EFFORT) == ('gpt-6-luna', 'medium')
-    assert (review.DEFAULT_MODEL, review.DEFAULT_EFFORT) == ('gpt-6-luna', 'medium')
+    assert (model.MODEL, model.EFFORT) == ('claude-sonnet-5-5', 'low')
+    assert (review.DEFAULT_MODEL, review.DEFAULT_EFFORT) == ('claude-sonnet-5-5', 'low')
     assert config.screen == 'requirements' and not config.exhaustive
     # Measured in experiments/workflow-bakeoff-v2: Haiku 5.5 at medium effort reorders the leading candidates.
     assert (config.model_rank, config.model_rank_model, config.model_rank_effort) == ('anthropic', 'claude-haiku-5-5', 'medium')

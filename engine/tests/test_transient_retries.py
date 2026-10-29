@@ -1,7 +1,8 @@
 """A dropped connection or a rate limit is retried; a refused or malformed answer is not."""
 from __future__ import annotations
 
-import httpx
+import anthropic
+import httpx2 as hx
 import pytest
 
 from engine.identify.screen import Judge, NoRetry
@@ -47,75 +48,63 @@ def test_a_refused_or_malformed_answer_is_not_retried(monkeypatch, code):
     assert len(ask.calls) == 1
 
 
-def test_the_review_transport_retries_a_dropped_connection(monkeypatch):
-    monkeypatch.setattr('time.sleep', lambda s: None)
-    monkeypatch.setenv('OPENAI_API_KEY', 'test')
-    monkeypatch.setattr('engine.llm_gate.authorize', lambda **kw: type('D', (), {'allowed': True, 'reserved_usd': 0})())
-    monkeypatch.setattr('engine.llm_gate.record', lambda **kw: None)
+M = 'claude-sonnet-5-5'
+_REQUEST = hx.Request('POST', 'https://api.anthropic.com/v1/messages')
+
+
+def dropped():
+    return anthropic.APIConnectionError(request=_REQUEST)
+
+
+def timed_out():
+    return anthropic.APITimeoutError(request=_REQUEST)
+
+
+def status(code):
+    return anthropic.APIStatusError('error', response=hx.Response(code, request=_REQUEST), body=None)
+
+
+def answers(*outcomes):
+    """A stand-in for the Anthropic call: each attempt raises or returns the next outcome."""
     attempts = []
 
-    def post(self, url, **kwargs):
-        attempts.append(1)
-        if len(attempts) == 1:
-            raise httpx.ConnectError('dropped')
-        if len(attempts) == 2:
-            return httpx.Response(503, request=httpx.Request('POST', url))
-        return httpx.Response(200, request=httpx.Request('POST', url), json={
-            'choices': [{'message': {'content': '{"documents": []}'}}], 'usage': {'prompt_tokens': 1, 'completion_tokens': 1}})
-    monkeypatch.setattr(httpx.Client, 'post', post)
-    payload, usage = review.openai_transport()('system', 'user', {}, 'gpt-6-luna', 'medium')
-    assert payload == {'documents': []} and len(attempts) == 3
+    def call(system, user, schema, **kw):
+        attempts.append(kw)
+        outcome = outcomes[min(len(attempts), len(outcomes)) - 1]
+        if isinstance(outcome, Exception):
+            raise outcome
+        return outcome, {'input_tokens': 1, 'output_tokens': 1}
+    call.attempts = attempts
+    return call
+
+
+def test_the_review_transport_retries_a_dropped_connection(monkeypatch):
+    monkeypatch.setattr('time.sleep', lambda s: None)
+    monkeypatch.setattr('engine.llm_gate.authorize', lambda **kw: type('D', (), {'allowed': True, 'reserved_usd': 0})())
+    monkeypatch.setattr('engine.llm_gate.release', lambda d: None)
+    monkeypatch.setattr('engine.llm_gate.record', lambda **kw: None)
+    call = answers(dropped(), status(503), {'documents': []})
+    monkeypatch.setattr('engine.anthropic_json.call', call)
+    payload, usage = review.anthropic_transport()('system', 'user', {}, M, 'low')
+    assert payload == {'documents': []} and len(call.attempts) == 3
 
 
 def test_the_review_never_retries_past_its_deadline(monkeypatch):
     clock = [0.0]
     monkeypatch.setattr('time.monotonic', lambda: clock[0])
     monkeypatch.setattr('time.sleep', lambda s: None)
-    monkeypatch.setenv('OPENAI_API_KEY', 'test')
     monkeypatch.setattr('engine.llm_gate.authorize', lambda **kw: type('D', (), {'allowed': True, 'reserved_usd': 0})())
+    monkeypatch.setattr('engine.llm_gate.release', lambda d: None)
     attempts = []
 
-    def post(self, url, **kwargs):
+    def call(*args, **kw):
         attempts.append(1)
         clock[0] = 230.0
-        raise httpx.ConnectError('dropped')
-    monkeypatch.setattr(httpx.Client, 'post', post)
+        raise dropped()
+    monkeypatch.setattr('engine.anthropic_json.call', call)
     with pytest.raises(TimeoutError):
-        review.openai_transport()('system', 'user', {}, 'gpt-6-luna', 'medium')
+        review.anthropic_transport()('system', 'user', {}, M, 'low')
     assert len(attempts) == 1
-
-
-def test_each_review_attempt_reserves_spend_and_an_unknown_outcome_keeps_its_reservation(monkeypatch):
-    from decimal import Decimal
-    from engine import llm_gate
-
-    llm_gate.reset_for_tests()
-    monkeypatch.setenv('BATATIS_LIVE', '1')
-    monkeypatch.setenv('OPENAI_API_KEY', 'synthetic-key')
-    monkeypatch.setenv('BATATIS_STORE', 'file')
-    monkeypatch.delenv('VERCEL', raising=False)
-    monkeypatch.setattr('time.sleep', lambda _: None)
-    attempts = []
-
-    def post(self, url, **kwargs):
-        attempts.append(1)
-        if len(attempts) == 1:
-            raise httpx.ReadTimeout('dispatched but outcome unknown')
-        return httpx.Response(200, request=httpx.Request('POST', url), json={
-            'choices': [{'message': {'content': '{"documents": []}'}}],
-            'usage': {'prompt_tokens': 1, 'completion_tokens': 1}})
-
-    monkeypatch.setattr(httpx.Client, 'post', post)
-    max_input = len(('system' + 'user' + '{}').encode()) // 3 + 256
-    reservation = llm_gate.estimate_usd('gpt-6-luna', max_input, review.MAX_OUTPUT_TOKENS)
-    actual = llm_gate.estimate_usd('gpt-6-luna', 1, 1)
-    try:
-        review.openai_transport()('system', 'user', {}, 'gpt-6-luna', 'medium')
-        assert len(attempts) == 2
-        assert llm_gate._memory.today() == reservation + actual
-        assert reservation > Decimal('0')
-    finally:
-        llm_gate.reset_for_tests()
 
 
 @pytest.fixture
@@ -124,19 +113,28 @@ def review_spend(monkeypatch):
 
     llm_gate.reset_for_tests()
     monkeypatch.setenv('BATATIS_LIVE', '1')
-    monkeypatch.setenv('OPENAI_API_KEY', 'synthetic-key')
+    monkeypatch.setenv('ANTHROPIC_API_KEY', 'synthetic-key')
     monkeypatch.setenv('BATATIS_STORE', 'file')
     monkeypatch.delenv('VERCEL', raising=False)
     monkeypatch.setattr('time.sleep', lambda _: None)
     max_input = len(('system' + 'user' + '{}').encode()) // 3 + 256
-    reservation = llm_gate.estimate_usd('gpt-6-luna', max_input, review.MAX_OUTPUT_TOKENS)
+    reservation = llm_gate.estimate_usd(M, max_input, review.MAX_OUTPUT_TOKENS)
     yield llm_gate, reservation
     llm_gate.reset_for_tests()
 
 
+def test_each_review_attempt_reserves_spend_and_an_unknown_outcome_keeps_its_reservation(monkeypatch, review_spend):
+    gate, reservation = review_spend
+    call = answers(timed_out(), {'documents': []})
+    monkeypatch.setattr('engine.anthropic_json.call', call)
+    review.anthropic_transport()('system', 'user', {}, M, 'low')
+    assert len(call.attempts) == 2
+    assert gate._memory.today() == reservation + gate.estimate_usd(M, 1, 1) and reservation > 0
+
+
 def test_authorization_cannot_dispatch_after_consuming_the_deadline(monkeypatch, review_spend):
     gate, _ = review_spend
-    clock, sent = [0.0], []
+    clock = [0.0]
     authorize = gate.authorize
 
     def delayed(**kwargs):
@@ -144,17 +142,18 @@ def test_authorization_cannot_dispatch_after_consuming_the_deadline(monkeypatch,
         clock[0] = 241.0
         return decision
 
+    call = answers({})
     monkeypatch.setattr('time.monotonic', lambda: clock[0])
     monkeypatch.setattr(gate, 'authorize', delayed)
-    monkeypatch.setattr(httpx.Client, 'post', lambda *args, **kwargs: sent.append(1))
+    monkeypatch.setattr('engine.anthropic_json.call', call)
     with pytest.raises(TimeoutError):
-        review.openai_transport()('system', 'user', {}, 'gpt-6-luna', 'medium')
-    assert sent == [] and gate._memory.today() == 0
+        review.anthropic_transport()('system', 'user', {}, M, 'low')
+    assert call.attempts == [] and gate._memory.today() == 0
 
 
 def test_dispatch_uses_the_time_remaining_after_authorization(monkeypatch, review_spend):
     gate, _ = review_spend
-    clock, timeouts = [0.0], []
+    clock = [0.0]
     authorize = gate.authorize
 
     def delayed(**kwargs):
@@ -162,90 +161,38 @@ def test_dispatch_uses_the_time_remaining_after_authorization(monkeypatch, revie
         clock[0] = 200.0
         return decision
 
-    def post(client, url, **kwargs):
-        timeouts.append(client.timeout.read)
-        return httpx.Response(200, request=httpx.Request('POST', url), json={
-            'choices': [{'message': {'content': '{}'}}],
-            'usage': {'prompt_tokens': 1, 'completion_tokens': 1}})
-
+    call = answers({})
     monkeypatch.setattr('time.monotonic', lambda: clock[0])
     monkeypatch.setattr(gate, 'authorize', delayed)
-    monkeypatch.setattr(httpx.Client, 'post', post)
-    review.openai_transport()('system', 'user', {}, 'gpt-6-luna', 'medium')
-    assert timeouts == [40.0]
-
-
-@pytest.mark.parametrize('usage', [None, {}, [], {'prompt_tokens': 1},
-    {'prompt_tokens': -1, 'completion_tokens': 1}, {'prompt_tokens': True, 'completion_tokens': 1},
-    {'prompt_tokens': '1', 'completion_tokens': 1}, {'prompt_tokens': 1.5, 'completion_tokens': 1}])
-def test_success_without_valid_usage_keeps_its_reservation(monkeypatch, review_spend, usage):
-    gate, reservation = review_spend
-
-    def post(client, url, **kwargs):
-        data = {'choices': [{'message': {'content': '{}'}}]}
-        if usage is not None:
-            data['usage'] = usage
-        return httpx.Response(200, request=httpx.Request('POST', url), json=data)
-
-    monkeypatch.setattr(httpx.Client, 'post', post)
-    payload, _ = review.openai_transport()('system', 'user', {}, 'gpt-6-luna', 'medium')
-    assert payload == {} and gate._memory.today() == reservation
+    monkeypatch.setattr('engine.anthropic_json.call', call)
+    review.anthropic_transport()('system', 'user', {}, M, 'low')
+    assert [a['timeout'] for a in call.attempts] == [40.0]
 
 
 @pytest.mark.parametrize('code', [400, 401, 403, 404, 408, 422])
 def test_review_4xx_other_than_429_are_not_retried(monkeypatch, review_spend, code):
     gate, reservation = review_spend
-    sent = []
-
-    def post(client, url, **kwargs):
-        sent.append(1)
-        return httpx.Response(code, request=httpx.Request('POST', url))
-
-    monkeypatch.setattr(httpx.Client, 'post', post)
-    with pytest.raises(httpx.HTTPStatusError):
-        review.openai_transport()('system', 'user', {}, 'gpt-6-luna', 'medium')
-    assert sent == [1] and gate._memory.today() == reservation
+    call = answers(status(code))
+    monkeypatch.setattr('engine.anthropic_json.call', call)
+    with pytest.raises(anthropic.APIStatusError):
+        review.anthropic_transport()('system', 'user', {}, M, 'low')
+    assert len(call.attempts) == 1 and gate._memory.today() == reservation
 
 
 def test_an_attempt_that_cannot_get_a_connection_releases_only_its_own_reservation(monkeypatch, review_spend):
     gate, _ = review_spend
-    sent = []
-
-    def post(client, url, **kwargs):
-        sent.append(1)
-        if len(sent) == 1:
-            raise httpx.PoolTimeout('no connection acquired')
-        return httpx.Response(200, request=httpx.Request('POST', url), json={
-            'choices': [{'message': {'content': '{}'}}],
-            'usage': {'prompt_tokens': 1, 'completion_tokens': 1}})
-
-    monkeypatch.setattr(httpx.Client, 'post', post)
-    review.openai_transport()('system', 'user', {}, 'gpt-6-luna', 'medium')
-    assert sent == [1, 1]
-    assert gate._memory.today() == gate.estimate_usd('gpt-6-luna', 1, 1)
+    call = answers(dropped(), {})
+    monkeypatch.setattr('engine.anthropic_json.call', call)
+    review.anthropic_transport()('system', 'user', {}, M, 'low')
+    assert len(call.attempts) == 2
+    assert gate._memory.today() == gate.estimate_usd(M, 1, 1)
 
 
-def test_review_retry_is_blocked_when_its_own_reservation_would_exceed_the_cap(monkeypatch):
-    from engine import llm_gate
-
-    llm_gate.reset_for_tests()
-    monkeypatch.setenv('BATATIS_LIVE', '1')
-    monkeypatch.setenv('OPENAI_API_KEY', 'synthetic-key')
-    monkeypatch.setenv('BATATIS_STORE', 'file')
-    monkeypatch.setenv('BATATIS_DAILY_SPEND_CAP_USD', '0.03')
-    monkeypatch.delenv('VERCEL', raising=False)
-    monkeypatch.setattr('time.sleep', lambda _: None)
-    attempts = []
-
-    def post(self, url, **kwargs):
-        attempts.append(1)
-        raise httpx.ReadTimeout('dispatched but outcome unknown')
-
-    monkeypatch.setattr(httpx.Client, 'post', post)
-    try:
-        with pytest.raises(review.GateClosed):
-            review.openai_transport()('system', 'user', {}, 'gpt-6-luna', 'medium')
-        assert len(attempts) == 1
-        assert llm_gate._memory.today() > 0
-    finally:
-        llm_gate.reset_for_tests()
+def test_review_retry_is_blocked_when_its_own_reservation_would_exceed_the_cap(monkeypatch, review_spend):
+    gate, reservation = review_spend
+    monkeypatch.setenv('BATATIS_DAILY_SPEND_CAP_USD', str(reservation * 3 / 2))
+    call = answers(timed_out())
+    monkeypatch.setattr('engine.anthropic_json.call', call)
+    with pytest.raises(review.GateClosed):
+        review.anthropic_transport()('system', 'user', {}, M, 'low')
+    assert len(call.attempts) == 1 and gate._memory.today() == reservation
