@@ -46,7 +46,7 @@ import { todayIn, toIso } from "./calendarDate";
 import { clearJourneyAnswerAction, journeyAnswerAction, journeyProgress, itemOpen, productScope, routeChoice, STAGES, type Answerer } from "./journey";
 import "./journey.css";
 import { codeHref } from "./routes";
-import type { RequirementAnswer } from "./requirements";
+import { requirementAnswer, type RequirementAnswer } from "./requirements";
 
 type Shown = DeckItem & { gone?: boolean };
 
@@ -385,7 +385,8 @@ function CardBody({ item, picked, onPick, draft, setDraft, openDrawer, planNote,
     );
   }
   if (item.kind === "requirement" && item.requirement) {
-    const chosen = (picked as RequirementAnswer | undefined) ?? null;
+    // The stored answer shows until the applicant picks another one.
+    const chosen = (picked as RequirementAnswer | undefined) ?? requirementAnswer(item.requirement);
     const needsReason = chosen === "does-not-apply" || chosen === "not-sure";
     return (
       <>
@@ -825,7 +826,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
     if (it.kind === "rule-input" && it.input && (it.input.spec.type === "number" || it.input.spec.type === "int")) return it.done || Boolean(draft.trim());
     if (it.kind === "condition") return busyKey !== it.key && ((picked[it.key] ?? currentState(it)) === "does_not_apply" ? Boolean(draft.trim()) : it.done);
     // "It applies" goes on its own; "No" and "Not sure" need the applicant's reason first.
-    if (it.kind === "requirement") return busyKey !== it.key && (picked[it.key] === "applies" || (Boolean(picked[it.key]) && Boolean(draft.trim())));
+    if (it.kind === "requirement") return busyKey !== it.key && (picked[it.key] === "applies" || (Boolean(picked[it.key]) && Boolean(draft.trim())) || (it.done && !picked[it.key]));
     if (it.kind === "route" && choicesFor(it).length === 0) return true;
     return it.done;
   }

@@ -129,16 +129,45 @@ test("a requirement-ledger run offers a bounded batch of applicability questions
   assert.ok(deck.some((i) => i.kind === "code-ledger"), "the counts and the library link stay reachable");
 });
 
-test("an answered rule leaves the batch; an included rule asks about the departure", () => {
+test("an answered rule is not asked again but its card stays to change; an included rule asks about the departure", () => {
+  const c = caseWith();
+  assert.ok(!buildDeck(c, getGaps(c)).some((i) => i.kind === "requirement" && ["9.10.15.5.", "9.10.15.6."].includes(i.provision ?? "")), "answered rules are not asked twice");
+  const deck = buildDeck(c, getGaps(c), { includeDone: true });
+  const included = deck.find((i) => i.kind === "requirement" && i.provision === "9.10.15.5.");
+  const excluded = deck.find((i) => i.kind === "requirement" && i.provision === "9.10.15.6.");
+  assert.equal(included?.done, true, "an included rule is answered, and its card can still change the answer");
+  assert.equal(excluded?.done, true, "an excluded rule is answered, and its card can still change the answer");
+  assert.equal(deck.filter((i) => i.kind === "requirement" && !i.done).length, 6, "the open batch is unchanged");
+  const cards = identifyCandidates(ledger(), []);
+  const card = cards.find((a) => a.provision === "9.10.15.5.(1)");
+  assert.ok(card, "an included rule becomes a departure card on the sentence it was quoted by");
+  assert.equal(card.suggestion, "identify");
+  assert.ok(!cards.some((a) => a.provision.startsWith("9.10.15.6.")), "an excluded rule never becomes a departure");
+});
+
+test("one applies answer makes one departure card, titled for its sentence only when another card shares the rule", () => {
   const c = caseWith();
   const deck = buildDeck(c, getGaps(c));
-  assert.ok(!deck.some((i) => i.kind === "requirement" && i.provision === "9.10.15.5."), "included rules are not asked twice");
-  assert.ok(!deck.some((i) => i.kind === "requirement" && i.provision === "9.10.15.6."), "excluded rules are not asked twice");
-  const cards = identifyCandidates(ledger(), []);
-  const included = cards.find((a) => a.provision === "9.10.15.5.");
-  assert.ok(included, "an included rule becomes a departure card");
-  assert.equal(included.suggestion, "identify");
-  assert.ok(!cards.some((a) => a.provision === "9.10.15.6."), "an excluded rule never becomes a departure");
+  const code = deck.filter((i) => i.kind === "candidate" && i.provision?.startsWith("9.10.15.5."));
+  assert.equal(code.length, 1, "one card, not one per sentence of the article");
+  assert.equal(code[0].provision, "9.10.15.5.(1)");
+  assert.equal(code[0].title, "Does your design do something different from the rule on rule 9.10.15.5.?");
+  // A second sentence of the same rule (from the code library) makes each title name its sentence.
+  const two = reducer(c, { type: "addCandidate", candidate: { ...c.candidates[0], id: "search-9.10.15.5.(2)", provision: "9.10.15.5.(2)", suggestion: "search", answer: null } });
+  const titles = buildDeck(two, getGaps(two)).filter((i) => i.kind === "candidate" && i.provision?.startsWith("9.10.15.5.")).map((i) => i.title);
+  assert.deepEqual(titles, [
+    "Does your design do something different from sentence (1) of the rule on rule 9.10.15.5.?",
+    "Is your design different from what sentence (2) of this rule asks for?",
+  ]);
+});
+
+test("a rule already added from the code library gets no second departure card", () => {
+  const stored = ledger();
+  const added = { ...identifyCandidates(stored, [])[0], id: "search-9.10.15.5.(3)", provision: "9.10.15.5.(3)", suggestion: "search" as const, answer: "yes" as const };
+  assert.deepEqual(identifyCandidates(stored, [added]).map((a) => a.provision), [], "the library card already covers the rule");
+  // The rule's own card, once made, stays even after a library card on another of its sentences.
+  const own = identifyCandidates(stored, [])[0];
+  assert.deepEqual(identifyCandidates(stored, [own, added]).map((a) => a.id), ["id-9.10.15.5.(1)"]);
 });
 
 test("the dead-end ledger note is replaced, not repeated", () => {
@@ -159,12 +188,12 @@ test("reopening or re-running rebuilds the included cards and keeps their depart
   let c = caseWith(stored);
   const created = identifyCandidates(stored, []);
   assert.equal(created.length, 1, "only the included rule becomes a card");
-  assert.equal(created[0].id, "id-9.10.15.5.");
+  assert.equal(created[0].id, "id-9.10.15.5.(1)");
   c = reducer(c, { type: "answerCandidate", id: created[0].id, answer: "yes" });
   c = reducer(c, { type: "noteIdentify", result: stored });
   const again = identifyCandidates(stored, c.candidates);
   assert.equal(again.length, 1);
-  assert.equal(again[0].id, "id-9.10.15.5.", "the id a saved selection stores is stable");
+  assert.equal(again[0].id, "id-9.10.15.5.(1)", "the id a saved selection stores is stable");
   assert.equal(again[0].answer, "yes", "a Yes on the departure is not lost");
   assert.ok(!c.candidates.some((a) => a.provision === "9.10.15.6."), "an excluded rule never comes back");
 });
