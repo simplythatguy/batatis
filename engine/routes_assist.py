@@ -282,11 +282,18 @@ def _provider_error(error: Exception) -> str:
     return f'{head}: {reason}' if reason else head
 
 
+def _shown(value) -> str:
+    """A fact value as the applicant reads it: booleans as Yes/No, never Python's True/False."""
+    if isinstance(value, bool):
+        return 'Yes' if value else 'No'
+    return '' if value is None else str(value)
+
+
 def _fact_row(fact) -> dict:
     """What the assistant needs from a fact: its value, whether it stands, and where it came from."""
     source = {key: value for key, value in (('type', fact.source.type), ('ref', fact.source.ref),
                                              ('page', fact.source.page)) if value is not None}
-    return {'field': fact.field, 'value': str(fact.value)[:400], 'status': fact.status, 'source': source}
+    return {'field': fact.field, 'value': _shown(fact.value)[:400], 'status': fact.status, 'source': source}
 
 
 def _officer_review(findings) -> list[dict]:
@@ -316,7 +323,7 @@ def build_context(body: AssistRequest, case, codes, review=None, store=None) -> 
         # Bound user-controlled context; leave source code below intact.
         if len(json.dumps(context['application'])) > 24000:
             context['application'] = {'status': case.status, 'context_truncated': True,
-                'facts': [{'field': f.field, 'value': str(f.value)[:300], 'status': f.status}
+                'facts': [{'field': f.field, 'value': _shown(f.value)[:300], 'status': f.status}
                           for f in facts[-30:]],
                 'open_gaps': [{'id': g.id, 'field': g.field, 'message': g.message[:300]} for g in gaps[:30]]}
             if review is not None:

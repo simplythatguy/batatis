@@ -127,11 +127,15 @@ export function usePopover() {
       setOpen(false);
       trigger.current?.focus();
     };
+    // Moving to another page (a link, a shortcut, Back) closes it: the popover belongs to the page it opened on.
+    const onNavigate = () => setOpen(false);
     document.addEventListener("pointerdown", onDown);
     document.addEventListener("keydown", onKey);
+    window.addEventListener("hashchange", onNavigate);
     return () => {
       document.removeEventListener("pointerdown", onDown);
       document.removeEventListener("keydown", onKey);
+      window.removeEventListener("hashchange", onNavigate);
     };
   }, [open]);
 

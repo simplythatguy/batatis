@@ -390,22 +390,32 @@ export function identifyCandidates(result: IdentifyResult, previous: Candidate[]
   // The requirement ledger asks applicability first (docs/identification/requirement-contract.md). A
   // rule the applicant confirmed applies then becomes the departure card it already was, so the
   // answer, Section C and the saved case keep their one decision each. Excluded and undecided rules
-  // never become a departure card.
+  // never become a departure card. The card is about the sentence the rule was quoted by (one card,
+  // not one per sentence of the article), and a rule the applicant already has a card on (added from
+  // the code library) gets no second one.
   for (const record of result.requirements ?? []) {
     if (record.division !== "B" || record.source_status !== "verified") continue;
     if (!record.human_confirmed || record.disposition !== "include" || !record.provision_id) continue;
-    add("choice", articleOf(record.provision_id), record.provision_id, record.title ?? "", 0, record.quote ?? "", record.citation);
+    const article = articleOf(record.provision_id);
+    const provision = record.quote_provision_id && articleOf(record.quote_provision_id) === article ? record.quote_provision_id : record.provision_id;
+    const own = previous.some((a) => a.id === `id-${provision}`);
+    if (!own && previous.some((a) => a.suggestion !== "identify" && articleOf(a.provision) === article)) continue;
+    add("choice", article, provision, record.title ?? "", 0, record.quote ?? "", record.citation);
   }
   return out;
 }
 
-/** Plain-language question for an identified rule; the article and the code sentence stay behind "Show the code". */
-export function codeQuestion(topic: string): string {
+/**
+ * Plain-language question for an identified rule; the article and the code sentence stay behind "Show the code".
+ * `sentence` ("(2)") tells apart cards on different sentences of one rule.
+ */
+export function codeQuestion(topic: string, sentence = ""): string {
   const t = topic.trim();
-  if (!t || /^\d/.test(t)) return "Does your design do something different from this rule?";
+  const which = sentence ? `sentence ${sentence} of ` : "";
+  if (!t || /^\d/.test(t)) return `Does your design do something different from ${which}this rule?`;
   // Code titles are in title case; a question reads in sentence case (acronyms such as NBC stay).
   const words = t.split(/(\s+)/).map((w) => (/^[A-Z][a-z]/.test(w) ? w.toLowerCase() : w)).join("");
-  return `Does your design do something different from the rule on ${words}?`;
+  return `Does your design do something different from ${which}the rule on ${words}?`;
 }
 
 export interface StageView {

@@ -59,7 +59,7 @@ def test_old_case_defaults_and_workspace_roundtrip(workspace):
     assert client.get(path + '/workspace').json()['signatures'][0]['current'] is False
     assert sign(client, path).status_code == 200
     assert client.get(path + '/workspace').json()['signatures'][0]['current'] is True
-    assert client.delete(path + '/signatures/owner').status_code == 204
+    assert client.delete(path + '/signatures/owner').status_code == 200
     assert client.get(path + '/workspace').json()['signatures'] == []
 
 
@@ -96,6 +96,31 @@ def test_history_is_bounded_and_does_not_invalidate_signature(workspace):
     assert len(result['history']) == 300
     assert [result['history'][i]['id'] for i in (0, -1)] == ['300', '1']
     assert result['signatures'][0]['current'] is True
+
+
+def test_workspace_writes_return_the_case_version_the_next_save_needs(workspace):
+    # QA 2026-10-28: draft save, then history save, then the next draft save or submit was a false 409.
+    client, store, case, path = workspace
+    entry = {'id': 'h1', 'at': '2026-10-28T12:00:00Z', 'block': 'process.rationale',
+             'label': 'Rationale', 'before': 'Before', 'after': 'After', 'by': 'you'}
+    saved = client.patch(path + '/draft', json={'expected_version': case.version, 'facts': []})
+    assert saved.status_code == 200, saved.text
+    stale = saved.json()['version']
+    history = client.post(path + '/history', json={'entries': [entry]})
+    assert history.status_code == 200, history.text
+    assert history.json()['history'][0]['id'] == 'h1'
+    version = history.json()['case_version']
+    assert version == store.get_version(case.id) == stale + 1
+    assert client.patch(path + '/draft', json={'expected_version': stale, 'facts': []}).status_code == 409
+    after_history = client.patch(path + '/draft', json={'expected_version': version, 'facts': []})
+    assert after_history.status_code == 200, after_history.text
+    writes = [sign(client, path), client.put(path + '/consent', json={'agreed': True}),
+              client.delete(path + '/signatures/owner')]
+    for write in writes:
+        assert write.status_code == 200, write.text
+    assert [w.json()['case_version'] for w in writes] == [after_history.json()['version'] + n for n in (1, 2, 3)]
+    submit = client.post(path + '/submit', json={'expected_version': writes[-1].json()['case_version']})
+    assert 'concurrent' not in submit.text and 'changed' not in submit.text, submit.text
 
 
 def test_access_owner_only_writes_and_reviewer_read(workspace):

@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Callable
 from zoneinfo import ZoneInfo
 
-from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
 
 from .models import now
@@ -29,6 +29,25 @@ class ConsentInput(BaseModel):
 class HistoryInput(BaseModel):
     model_config = ConfigDict(extra='forbid')
     entries: list[HistoryEntry] = Field(max_length=300)
+
+
+# Every workspace write moves the case version. The owner's next versioned write (draft save, Section D,
+# submit) must send the new version, so each response carries it, as other routes do.
+class SignatureSaved(WorkspaceSignature):
+    case_version: int
+
+
+class ConsentSaved(WorkspaceConsent):
+    case_version: int
+
+
+class WorkspaceSaved(BaseModel):
+    case_version: int
+
+
+class HistorySaved(BaseModel):
+    history: list[HistoryEntry]
+    case_version: int
 
 
 def create_router(cases: Callable[[], CaseBackend]) -> APIRouter:
@@ -60,7 +79,7 @@ def create_router(cases: Callable[[], CaseBackend]) -> APIRouter:
             raise HTTPException(404, 'case not found')
         return workspace_view(case)
 
-    @router.put('/cases/{case_id}/signatures/{role}', response_model=WorkspaceSignature)
+    @router.put('/cases/{case_id}/signatures/{role}', response_model=SignatureSaved)
     def put_signature(case_id: str, role: SignerRole, body: SignatureInput, request: Request):
         store, case, version = snapshot(case_id, request)
         if role not in {signer.role for signer in signers(case)}:
@@ -69,27 +88,27 @@ def create_router(cases: Callable[[], CaseBackend]) -> APIRouter:
                                        signed_on=datetime.now(SIGNING_ZONE).date().isoformat())
         case.workspace.signatures = [item for item in case.workspace.signatures if item.role != role] + [signature]
         save(store, case, version)
-        return signature
+        return SignatureSaved(**signature.model_dump(), case_version=case.version)
 
-    @router.delete('/cases/{case_id}/signatures/{role}', status_code=204)
+    @router.delete('/cases/{case_id}/signatures/{role}', response_model=WorkspaceSaved)
     def delete_signature(case_id: str, role: SignerRole, request: Request):
         store, case, version = snapshot(case_id, request)
         case.workspace.signatures = [item for item in case.workspace.signatures if item.role != role]
         save(store, case, version)
-        return Response(status_code=204)
+        return WorkspaceSaved(case_version=case.version)
 
-    @router.put('/cases/{case_id}/consent', response_model=WorkspaceConsent)
+    @router.put('/cases/{case_id}/consent', response_model=ConsentSaved)
     def put_consent(case_id: str, body: ConsentInput, request: Request):
         store, case, version = snapshot(case_id, request)
         case.workspace.consent = WorkspaceConsent(agreed=body.agreed, at=now())
         save(store, case, version)
-        return case.workspace.consent
+        return ConsentSaved(**case.workspace.consent.model_dump(), case_version=case.version)
 
-    @router.post('/cases/{case_id}/history', response_model=list[HistoryEntry])
+    @router.post('/cases/{case_id}/history', response_model=HistorySaved)
     def append_history(case_id: str, body: HistoryInput, request: Request):
         store, case, version = snapshot(case_id, request)
         case.workspace.history = trim_history(case.workspace.history + body.entries)
         save(store, case, version)
-        return list(reversed(case.workspace.history))
+        return HistorySaved(history=list(reversed(case.workspace.history)), case_version=case.version)
 
     return router
