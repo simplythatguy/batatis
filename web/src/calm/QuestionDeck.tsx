@@ -747,7 +747,7 @@ export function CaseDeck({ focus, codeFirst }: { focus: string | null; codeFirst
 
   // A code card the lookup replaced (article split into sentences) has nothing left to answer.
   useEffect(() => {
-    if (item?.gone && (item.kind === "drafts" || item.kind === "candidate" || item.kind === "storeys" || item.kind === "rule" || item.kind === "rule-input" || item.kind === "condition" || item.kind === "package" || item.kind === "package-end" || item.kind === "requirement")) moveFrom(index, false);
+    if (item?.gone && (item.kind === "drafts" || item.kind === "process" || item.kind === "candidate" || item.kind === "storeys" || item.kind === "rule" || item.kind === "rule-input" || item.kind === "condition" || item.kind === "package" || item.kind === "package-end" || item.kind === "requirement")) moveFrom(index, false);
     // The code check finished while its card was open: the code questions take its place.
     if (item?.gone && item.kind === "code-run") {
       const code = queue.findIndex((k) => { const it = itemFor(k); return Boolean(it && !it.done && it.section === "C"); });
