@@ -93,14 +93,14 @@ export const deck: Deck = {
       name: "Applicant: engineer to form",
       speaker: 0,
       slides: [
-        { kind: "clip", id: "apply-stop", title: "It knows where to stop", src: "/studio/clips/c05-engineer.mp4" },
+        { kind: "clip", id: "apply-stop", title: "It doesn't guess", src: "/studio/clips/c05-engineer.mp4" },
         { kind: "clip", id: "apply-c", title: "Section C, by lookup", src: "/studio/clips/c06-section-c.mp4" },
         { kind: "clip", id: "apply-check", title: "Checked before it's sent", src: "/studio/clips/c07-check.mp4" },
         { kind: "clip", id: "apply-form", title: "The official form", src: "/studio/clips/c08-form.mp4" },
       ],
       script: [
-        "💪 It also knows where to STOP. This project needs an engineer, and Batatis lists what the evidence must cover.",
-        "💪 Here's Section C, straight from the 2023 code. ⏸️ Same article, same objectives, same function as the City's.",
+        "💪 And when it isn't sure, it doesn't GUESS. It flags that the officer decides on an engineer, and lists what the evidence must cover.",
+        "💪 Here's Section C, straight from the 2023 Alberta Edition, second printing. ⏸️ Same article, same objectives, same function as the City's.",
         "🙂 One click checks the application before anyone else sees it.",
         "😄 And there's the official form, filled in. ⏸️ 🔥 BOOM. It goes to Edmonton.",
       ],
@@ -116,7 +116,7 @@ export const deck: Deck = {
       ],
       script: [
         "🙂 Now let's switch sides. The application is in the Edmonton officer's inbox.",
-        "😌 The officer sees what's there and what's missing, with every citation linked to the code. Batatis checks completeness, and the compliance call stays with the officer.",
+        "😌 The officer sees what's there and what's missing, and every citation opens its exact sentence. Batatis checks completeness, and the compliance call stays with the officer.",
         "🙂 The officer sends one clear message, and the applicant fixes it and resends.",
       ],
     },
@@ -149,7 +149,7 @@ export const deck: Deck = {
         },
       ],
       script: [
-        "🤔 Does it REALLY work? We tested sixty-four real Alberta cases with the article numbers hidden.",
+        "🤔 Does it REALLY work? We tested sixty-four real Alberta records, variances, appeals and code rulings, with the article numbers hidden.",
         "💪 Plain search put the right article first TWENTY-SIX times. ⏸️ Batatis put it first... FIFTY-FOUR... times.",
         "💪 And it showed applicants... ZERO... made-up articles.",
         "😌 A simulated first-time applicant scored two out of ten with the official flowchart, and FIVE POINT SIX with Batatis.",
@@ -177,7 +177,7 @@ export const deck: Deck = {
       ],
       script: [
         "🙂 Today we're live in Calgary and Edmonton, and we've mapped four hundred thirty-five places to their office.",
-        "💪 Adding an office takes one data file, NOT new code. Better AI models make Batatis better, but they won't keep each office's rules up to date or earn an officer's trust. ⏸️ We... WILL.",
+        "💪 Adding an office takes one data file, NOT new code. Better AI models make us better, but they won't earn an officer's trust. ⏸️ We... WILL.",
       ],
     },
     {
@@ -198,9 +198,9 @@ export const deck: Deck = {
         },
       ],
       script: [
-        "😌 Here's what we HAVEN'T proven. Our applicant scores come from simulated applicants, and in ten of sixty-four cases the right article wasn't first.",
+        "😌 Here's what we HAVEN'T proven. Our applicant scores are simulated, and in ten of sixty-four cases the right article wasn't first.",
         "😌 And no officer has reviewed a real Batatis application... YET.",
-        "💪 So we'll run a ninety-day pilot with one office alongside its current process. Officers will grade real files, and we'll measure EVERY number again and publish it.",
+        "💪 So we'll run a ninety-day pilot with one office alongside its current process. Officers will grade real files, and we'll re-measure EVERY number in public.",
       ],
     },
     {
