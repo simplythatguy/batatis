@@ -33,11 +33,11 @@ test("submission waits for workspace edits, retains resubmit wording, and remain
   assert.deepEqual(p.calls, ["flush history", "submit:c1"]);
   p.h.unmount();
 });
-test("a 409 retains the engine's blocker and Fix links it to the actual paper block", async () => {
+test("a 409 retains the engine's blocker and Edit links it to the actual paper block", async () => {
   const p = await panel("", true);
   await nodes(p.tree, n => n.type === "button")[0].props.onClick();
   const tree = await p.render();
   assert.match(text(tree), /Risk still missing/);
-  assert.equal(nodes(tree, n => n.type === "a" && text(n).includes("Fix"))[0].props.href, "#/application?focus=process.risk_assessment");
+  assert.equal(nodes(tree, n => n.type === "a" && text(n).includes("Edit"))[0].props.href, "#/application?focus=process.risk_assessment");
   p.h.unmount();
 });

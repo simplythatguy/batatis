@@ -102,7 +102,7 @@ export function Send({ download, workspace, sections, zoom }: { download: "" | "
                       <Dot tone={g.group === "officer" ? "pending" : "blocking"} />
                       <span className="aw-flag-text" title={r.all.join("\n")}>{r.label}</span>
                       {r.count > 1 && <span className="aw-times" aria-label={`${r.count} times`}>×{r.count}</span>}
-                      {!readOnly && g.group !== "officer" && <a className="aw-fix" href={r.href} aria-label={`Fix: ${r.label}`}>Fix</a>}
+                      {!readOnly && g.group !== "officer" && <a className="aw-fix" href={r.href} aria-label={`Edit: ${r.label}`}>Edit</a>}
                     </li>
                   ))}
                 </ul>

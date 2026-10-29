@@ -482,7 +482,7 @@ export function buildDeck(c: Case, gaps: Gap[], opts: DeckOptions = {}): DeckIte
   const acknowledged = deferred.get(acknowledgementKey)?.value === "acknowledged";
   if (shared.length) push("read", {
     key: "understood", kind: "understood", section: "B", eyebrow: "Understand · Section B",
-    title: "Here’s what I understood", context: "", why: "Check the values and their sources. Looks right confirms every row together; Fix opens an individual fact.",
+    title: "Here’s what I understood", context: "", why: "Check the values and their sources. Looks right confirms every row together; Edit opens an individual fact.",
     ref: "understood", rows: shared, ids: [...new Set(shared.filter((r) => !r.done).flatMap((r) => r.ids))],
     done: acknowledged, optional: false, acknowledgementKey,
     counts: { batatis: { open: acknowledged ? 0 : 1, done: acknowledged ? 1 : 0 } },

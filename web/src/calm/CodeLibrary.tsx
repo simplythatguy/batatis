@@ -14,7 +14,7 @@ import { errorText, takePendingReveal, tocIndex, useContext, useText, useToc } f
 import { parseArticle, previewOf, type Clause, type Sentence } from "./codeText";
 import { BandPill, RelevanceRing, RingGlyph, RingLegend } from "./RelevanceRing";
 import {
-  ancestorsOf, BAND_LABEL, FILTER_BANDS, filterBands, filterKeep, filterOf, partArticles, pct, pruneToc, rankedIn, sectionArticles, strongestOf, subsectionArticles, ago, type Filter, type FilterBand,
+  ancestorsOf, BAND_LABEL, FILTER_BANDS, filterBands, filterKeep, filterOf, partArticles, pct, pruneToc, rankedIn, sectionArticles, strongestOf, subsectionArticles, ago, type Band, type Filter, type FilterBand,
 } from "./relevance";
 import { codeHref, type CalmRoute } from "./routes";
 import { articleOf, useRelevance } from "./useRelevance";
@@ -36,7 +36,8 @@ function useElapsed(since: number | null): number {
 
 /** Scored / out of date / score / running / unavailable. The only place a POST starts. */
 const BAND_TOGGLE: Record<FilterBand, string> = { attention: "Likely applies", maybe: "Might apply", other: "Unlikely or not scored" };
-const BAND_TONE: Record<FilterBand, string> = { attention: "blocking", maybe: "warning", other: "pending" };
+// Each toggle draws the ring its articles wear in the tree (the legend's sample values).
+const BAND_RING: Record<FilterBand, { band: Band; p?: number }> = { attention: { band: "high", p: 0.8 }, maybe: { band: "mid", p: 0.4 }, other: { band: "unscored" } };
 
 export function ScoreStatus() {
   const rel = useRelevance();
@@ -704,7 +705,7 @@ export function CodeLibrary({ route }: { route: CalmRoute }) {
         {!none && <div className="cf-lib-tools" role="group" aria-label="Show">
           {FILTER_BANDS.map((b) => (
             <button key={b} type="button" className="cf-band-toggle" aria-pressed={picked.has(b)} disabled={!rated} title={BAND_TOGGLE[b]} onClick={() => toggleBand(b)}>
-              <span className={`cf-dot is-${BAND_TONE[b]}`} aria-hidden="true" />
+              <RingGlyph p={BAND_RING[b].p} band={BAND_RING[b].band} />
               {rated ? <span>{counts[b]}</span> : null}
               <span className="cf-sr">{BAND_TOGGLE[b]}</span>
             </button>
