@@ -85,8 +85,16 @@ def record_decision(case, provision_id: str, decision: str, codes) -> list:
     if decision not in DECISIONS:
         raise ValueError(decision)
     result: IdentifyResult = case.identify
-    card = match_article(result, provision_id)
-    article = card.provision
+    try:
+        article = match_article(result, provision_id).provision
+    except KeyError:
+        wanted = article_of(provision_id)
+        requirement = next((item for item in result.requirements
+                            if item.division == 'B' and item.source_status == 'verified'
+                            and item.provision_id == wanted), None)
+        if requirement is None:
+            raise
+        article = requirement.provision_id
     if decision == 'yes':
         return record_departure(case, article, codes)
     case.facts = [f for f in case.facts if f.field != f'{CITATION_PREFIX}{article}']

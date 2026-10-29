@@ -3,7 +3,7 @@ import test from "node:test";
 import { componentHarness } from "../../scripts/component-harness.mjs";
 import * as relevance from "./relevance.ts";
 import { chooseContext, contextOptions, KEEP_OPEN_NOTE, NO_APPLICATION, switchApplication } from "./libraryContext.ts";
-import type { ApplicationSummary } from "../api/accounts";
+import { accounts, type ApplicationSummary } from "../api/accounts";
 
 class CodeLibraryError extends Error {}
 
@@ -221,6 +221,17 @@ test("choosing another application goes through the guarded switch, and attaches
 const app = (id: string, over: Partial<ApplicationSummary> = {}): ApplicationSummary => ({
   id, title: id, status: "draft", authority: "edmonton", updated_at: "2026-10-22T10:00:00Z", submitted_at: null,
   completeness: { answered: 1, total: 4 }, unread_messages: 0, reviewer: null, archived: false, pinned: false, ...over,
+});
+
+test("the code library picker accepts an untitled application from the server", async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = async () => Response.json({ applications: [{ ...app("case-untitled"), title: null }] });
+  try {
+    const applications = await accounts.applications();
+    assert.equal(contextOptions(applications, "case-untitled")[0].title, "Untitled application");
+  } finally {
+    globalThis.fetch = original;
+  }
 });
 
 test("the options are the account's own applications with their short titles; archived ones only when open", () => {

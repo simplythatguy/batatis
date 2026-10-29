@@ -35,8 +35,8 @@ def test_exact_reference_identification_is_local_and_has_no_hidden_top_ten(scene
     response = client.post(f'/cases/{case.id}/identify', json={})
     assert response.status_code == 200, response.text
     result = response.json()
-    assert any(item['provision'] == '9.10.15.5.' for item in result['articles'])
-    assert result['articles'][0]['provision'] == '9.10.15.5.'
+    assert any(item['division'] == 'B' and item['provision_id'] == '9.10.15.5.'
+               for item in result['requirements'])
     assert result['input_sha256'] and not result['stale']
     assert sum(stage['requests'] for stage in result['trace']['stages']) == 0
     assert result['trace']['usd'] == 0
@@ -63,7 +63,8 @@ def test_readable_plans_alone_run_identification_during_intake(scene):
     assert response.status_code == 200, response.text
     result = client.get(f'/cases/{case.id}/identify').json()
     assert result['input_sha256'] and not result['stale']
-    assert any(item['provision'] == '9.10.15.5.' for item in result['articles'])
+    assert any(item['division'] == 'B' and item['provision_id'] == '9.10.15.5.'
+               for item in result['requirements'])
 
 
 def test_new_attachment_marks_previous_result_stale_without_a_fact_write(scene):
@@ -80,7 +81,8 @@ def test_identify_accepts_long_prose_without_a_provider(scene):
     case = store.put(Case())
     response = client.post(f'/cases/{case.id}/identify', json={'prose': ('description ' * 2500) + '9.10.15.5.'})
     assert response.status_code == 200, response.text
-    assert any(item['provision'] == '9.10.15.5.' for item in response.json()['articles'])
+    assert any(item['division'] == 'B' and item['provision_id'] == '9.10.15.5.'
+               for item in response.json()['requirements'])
 
 
 def test_supporting_application_scope_survives_no_departure_and_a_rerun(scene):
