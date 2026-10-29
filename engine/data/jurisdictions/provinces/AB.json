@@ -6,13 +6,19 @@
     {
       "id": "ab-who-requests",
       "topic": "entry_point",
-      "text": "The owner requests a variance from the safety codes officer. A variance may only be issued by a safety codes officer, a technical administrator or the Safety Codes Council.",
+      "text": "The owner requests a variance from the safety codes officer. A variance may be issued by an Administrator or a safety codes officer (Safety Codes Act s.38(1)).",
       "sources": [
         {
           "title": "Safety Codes Council, Variances",
           "url": "https://www.safetycodes.ab.ca/permits-inspections/variances/",
-          "retrieved": "2026-10-21",
-          "sha256": "90f0f0d1dfde3839f14e0b74ab6110821a90d2ef661c7123ef3790b08004bc11"
+          "retrieved": "2026-10-29",
+          "sha256": "d65ebc93177b176e3b67a93e4137e4d9343fdf46ba16d24d0dc75d5bb0e0914a"
+        },
+        {
+          "title": "Safety Codes Act, RSA 2000 c S-1, s.38(1)",
+          "url": "https://www.qp.alberta.ca/documents/Acts/S01.pdf",
+          "retrieved": "2026-10-29",
+          "sha256": "3a1a442fc6683345f61460876f96fa5e693e1e70bcfa2b7cd69df1ba44f651e3"
         }
       ]
     },
@@ -24,8 +30,8 @@
         {
           "title": "Safety Codes Council, Variances",
           "url": "https://www.safetycodes.ab.ca/permits-inspections/variances/",
-          "retrieved": "2026-10-21",
-          "sha256": "90f0f0d1dfde3839f14e0b74ab6110821a90d2ef661c7123ef3790b08004bc11"
+          "retrieved": "2026-10-29",
+          "sha256": "d65ebc93177b176e3b67a93e4137e4d9343fdf46ba16d24d0dc75d5bb0e0914a"
         }
       ]
     },

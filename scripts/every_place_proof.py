@@ -122,6 +122,12 @@ def office_check() -> list[dict]:
                   and (pack.id == LOCAL_PACKS.get(row['legal_name'], pack.id)))
             out.append({'place': row['legal_name'], 'typed': typed, 'kind': kind, 'expected_office': office,
                         'office': pack.authority.name, 'covered': pack.coverage == 'full', 'ok': ok})
+    for place in (p for p in reg.places.values() if p.type == 'First Nations'):   # Maskwacis, Stoney Nakoda
+        for typed in [place.name, *place.aliases, place.id]:
+            pack = reg.resolve(Jurisdiction(id=typed if typed == place.id else 'x-typed', name=typed)).pack
+            ok = pack.authority.kind == 'first_nation' and pack.coverage == 'preview'
+            out.append({'place': place.name, 'typed': typed, 'kind': 'first_nation', 'expected_office': None,
+                        'office': pack.authority.name, 'covered': pack.coverage == 'full', 'ok': ok})
     from engine.tests.test_every_place import EVERYDAY
     for typed, kind, covered, office in EVERYDAY:   # what applicants type, answers written by hand
         pack = reg.resolve(Jurisdiction(id='x-typed', name=typed)).pack
@@ -292,10 +298,25 @@ Run {r['generated_at']} on commit `{r['commit']}` ({r['mode']}, {r['workers']} w
 - **Not covered**: each place gets a blocking finding that names who to ask; the final application is refused
   and the draft still opens.
 - **No leaks**: {len(r['leaks'])} places received Calgary or Edmonton local items.
+- First Nations include Maskwacis and Stoney Nakoda, names several Nations share; each is answered as reserve land.
 - **Identification**: {r['identification_texts']} distinct input text across {r['places'] + 0} places (1 means the place
   never changes what code identification reads).
 
 Failures: {fail}
+
+## Questions judges ask
+
+- **Does it work outside Calgary and Edmonton?** For every Alberta place Batatis covers, the application is the same as
+  Calgary's ({totals['same_ok']} of {totals['same_runs']} places), and the office is named from the Council's data
+  ({totals['office_ok']} of {totals['places']} places). Only Calgary and Edmonton also have officers inside Batatis.
+- **What about Vancouver, Toronto or Montréal?** Not covered, and Batatis says so: it names the code that applies there
+  and refuses the final Alberta application ({totals['refused_ok']} of {totals['refused_runs']} places it does not cover).
+- **How do you know the office is right?** The expected office comes from the Safety Codes Council accreditation
+  snapshot and the research table, not from the files the app reads, and a test fails if those files drift.
+- **Could it invent an office?** No. The office is a lookup in sourced data. A name Batatis does not know gets the
+  general Alberta answer (accredited municipality, or the Alberta Safety Codes Authority), never a made-up office.
+- **Can I see it run?** `.venv/bin/python scripts/every_place_proof.py --quick` checks one place of every kind in about
+  a minute; without `--quick` it checks every place.
 
 ## How the checks work
 
