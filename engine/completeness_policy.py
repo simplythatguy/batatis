@@ -227,7 +227,7 @@ def evaluate(snapshot: Snapshot, codes, *, professional=None, documents=None) ->
             submission_blocking=item.submission_blocking, finding_status=item.finding_status,
             defect_class=item.key.split(':')[0] if re.match(r'^D\d+:', item.key) else None)
         if item.key.startswith('export:unconfirmed:'):
-            element.export_reason = item.reason   # 'unconfirmed <kind> fact "<field>" (<id>)'
+            element.export_reason = item.reason   # '<Answer label> is not confirmed yet.'
         out.append(element)
 
     from .completeness_rules import _on_variance

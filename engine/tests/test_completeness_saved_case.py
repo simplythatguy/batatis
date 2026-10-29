@@ -282,7 +282,7 @@ def test_phantom_or_foreign_file_never_closes_attachment_or_scope(context, forei
     assert found['evidence.doc_unowned.file_ref']['severity'] == 'blocking'
     assert found['professional_authentication']['severity'] == 'blocking'
     assert f'evidence.{item.id}' in found[f'evidence.{item.provision_id}']['related_fields']
-    assert any('unconfirmed exact fact' in reason for reason in response.json()['reviews'][0]['export_reasons'])
+    assert any('A supporting document is not confirmed yet.' == reason for reason in response.json()['reviews'][0]['export_reasons'])
     assert store.get(case.id).model_dump() == before
     if foreign:
         assert store.get_file(other.id, file_id)['data'] == b'%PDF SYNTHETIC foreign bytes'
