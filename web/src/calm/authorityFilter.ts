@@ -16,13 +16,16 @@ function fold(s: string): string {
 export function filterAuthorities(options: readonly AuthorityOption[], query: string, limit = AUTHORITY_LIST_LIMIT): { shown: AuthorityOption[]; total: number } {
   const words = fold(query).split(/\s+/).filter(Boolean);
   if (!words.length) return { shown: options.slice(0, limit), total: options.length };
+  const whole = words.join(" ");
   const ranked: { o: AuthorityOption; rank: number; at: number }[] = [];
   options.forEach((o, at) => {
     const name = fold(o.name);
-    const hay = [name, fold(o.id), ...(o.aliases ?? []).map(fold)].join(" ");
+    const names = [name, fold(o.id), ...(o.aliases ?? []).map(fold)];
+    const hay = names.join(" ");
     if (!words.every((w) => hay.includes(w))) return;
     const first = words[0];
-    const rank = name.startsWith(first) ? 0 : name.split(/[\s\-/(),.]+/).some((p) => p.startsWith(first)) ? 1 : 2;
+    // A place named exactly as typed ("Calgary") comes before longer names that start the same ("Calgary International Airport").
+    const rank = names.includes(whole) ? -1 : name.startsWith(first) ? 0 : name.split(/[\s\-/(),.]+/).some((p) => p.startsWith(first)) ? 1 : 2;
     ranked.push({ o, rank, at });
   });
   ranked.sort((a, b) => a.rank - b.rank || a.at - b.at);
