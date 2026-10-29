@@ -100,12 +100,23 @@ def test_scores_all_division_b_articles_persists_and_get_never_scores(setup, cod
     assert 0 in record['rerank'].values() and 0 in record['display'].values()
     assert any(record['display'][a] == p == 0.25 for a, p in record['scores'].items() if a not in record['rerank'])
     assert record['bands'] == json.loads(BANDS_FILE.read_text())
-    assert store.get(case_id).relevance.model_dump() == {k: v for k, v in record.items() if k != 'meta'}
+    assert store.get(case_id).relevance.model_dump() == {k: v for k, v in record.items() if k not in {'meta', 'case_version'}}
+    assert record['case_version'] == store.get(case_id).version
     count = len(ask.calls)
     # A new app/store instance reads the persisted record, not an in-memory cache.
     reopened = TestClient(create_app(store=CaseStore(store.path), codes=codes, relevance_judge_factory=factory))
     assert reopened.get(f'/cases/{case_id}/relevance').json() == record
     assert len(ask.calls) == count
+
+
+def test_scoring_returns_the_saved_case_version_so_the_next_draft_save_is_not_a_conflict(setup):
+    client, store, _, _ = setup
+    case_id = create_described(client)
+    scored = client.post(f'/cases/{case_id}/relevance').json()
+    assert scored['case_version'] == store.get(case_id).version
+    saved = client.patch(f'/cases/{case_id}/draft', json={'expected_version': scored['case_version'], 'facts': [
+        {**description_fact('A proposed exterior insulation board, edited.'), 'id': 'desc-2'}]})
+    assert saved.status_code == 200, saved.text
 
 
 def test_description_changes_recompute_stale_without_changing_scores(setup):
@@ -115,7 +126,7 @@ def test_description_changes_recompute_stale_without_changing_scores(setup):
     count = len(ask.calls)
     assert client.post(f'/cases/{case_id}/facts', json=description_fact('A different project.')).status_code == 200
     after = client.get(f'/cases/{case_id}/relevance').json()
-    assert after == {**before, 'stale': True}
+    assert after == {**before, 'stale': True, 'case_version': before['case_version'] + 1}
     assert len(ask.calls) == count
 
 
@@ -311,7 +322,7 @@ def test_versioned_persistence_retries_without_losing_a_concurrent_fact(setup, m
 
     monkeypatch.setattr(store, 'put', put_with_one_conflict)
     try:
-        saved = _save_record(store, case.id, record)
+        saved = _save_record(store, case.id, record).relevance
         assert saved.stale is True
         reopened = store.get(case.id)
         assert reopened.relevance == saved

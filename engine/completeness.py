@@ -19,7 +19,7 @@ from .models import INTENT_LABEL, Case, Gap as CaseGap
 from .not_applicable import not_applicable, problems as not_applicable_problems
 from .process_fields import confirmed_value, latest_fact, process_fields
 from .professional import (
-    OFFICER_PROFESSIONAL_GAP, PRESCRIPTIVE_CONTRADICTION, ProfessionalResult,
+    _REGISTRATION_FIELDS, OFFICER_PROFESSIONAL_GAP, PRESCRIPTIVE_CONTRADICTION, ProfessionalResult,
     authentication_metadata_usable, professional_authentication_confirmed, professional_confirmed,
     professional_involvement, unresolved_item,
 )
@@ -89,26 +89,44 @@ def professional_involvement_gaps(case: Case, codes: Codes, process, *,
     required = professional.required == 'yes' or confirmed_value(case, 'engineering_required') in ('yes', True)
     if required:
         citation = next((r.citation for r in professional.reasons if r.required == 'yes'), codes.citation('2.4.1.1.(3)', 'C'))
-        if not professional_confirmed(case):
+        confirmed = professional_confirmed(case)
+        if not confirmed:
             gaps.append(Gap(
                 id='D12:professional_confirmation', severity='blocking', section='D',
                 field='professional_confirmation',
                 message='Your application appears to be missing an applicant-confirmed registered professional for this scope.',
                 fix_hint='Confirm their engineer or architect role and registration number or seal. File metadata alone does not confirm this.',
                 citation=citation, routed_to='professional'))
-        if _missing(confirmed_value(case, 'professional_name', 'responsible_professional', 'professional.name')):
+        docs = supporting_documents(case) if documents is None else documents
+        # A confirmed professional (role and registration) is named when an attached document's Section D
+        # responsible person carries that registration, e.g. "Example Engineer (EXAMPLE-0000)".
+        registration = confirmed_value(case, *_REGISTRATION_FIELDS) if confirmed else None
+        mark = re.sub(r'\W', '', registration.casefold()) if isinstance(registration, str) else ''
+        their_documents = [doc for doc in docs if len(mark) >= 3
+                           and mark in re.sub(r'\W', '', f'{doc.responsible_party} {doc.issuer}'.casefold())
+                           and authentication_metadata_usable(doc.responsible_party, doc.issuer)]
+        if (_missing(confirmed_value(case, 'professional_name', 'responsible_professional', 'professional.name'))
+                and not their_documents):
             add('D12', 'D', 'responsible_professional', 'a named registered professional required for this work.',
                 'Ask who takes responsibility, their discipline and scope, and obtain their own authenticated work.', citation)
         qualifications = next((item.answer for item in process if item.id == 'qualifications'), None)
         if qualifications is None and _missing(confirmed_value(case, 'professional.qualifications', 'professional_qualifications')):
             add('D12', 'D', 'professional_qualifications', 'the qualifications of the responsible professional.',
                 'Request their qualifications, experience and background; do not draft them.', codes.citation('2.3.1.1.(4)', 'C'))
-        docs = supporting_documents(case) if documents is None else documents
         if (not professional_authentication_confirmed(case)
                 and not any(seal_is_professional_evidence(doc, quote=_file_quote(case, doc)) for doc in docs)):
-            add('D12', 'D', 'professional_authentication', 'authentication information for the required professional work.',
-                'Request the responsible professional’s authenticated document; authenticity and scope need human review.',
-                codes.citation('2.4.1.1.(5)', 'C'))
+            if their_documents:
+                # The seal, if any, is on the attached document itself: the officer looks, nothing is missing.
+                gaps.append(Gap(
+                    id='D12:professional_authentication', severity='warning', section='D',
+                    field='professional_authentication', routed_to='officer',
+                    message=f'Check the professional’s authentication on “{their_documents[0].title}”.',
+                    fix_hint='Open the attached document and check its seal or stamp; authenticity and scope need human review.',
+                    citation=codes.citation('2.4.1.1.(5)', 'C')))
+            else:
+                add('D12', 'D', 'professional_authentication', 'authentication information for the required professional work.',
+                    'Request the responsible professional’s authenticated document; authenticity and scope need human review.',
+                    codes.citation('2.4.1.1.(5)', 'C'))
     elif professional.involvement == 'professional_involved':
         pass
     elif professional.resolution is not None and not professional.resolution.required:

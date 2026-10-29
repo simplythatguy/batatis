@@ -181,7 +181,8 @@ def test_failures_keep_previous_scores_and_identify_falls_back_without_commits(w
     result = client.post(f'/cases/{case_id}/identify').json()
     assert result['mode'] == 'bm25_fallback' and result['committed'] == []
     assert result['model_ids'] == {'screen': None, 'rerank': None, 'verifier': None}
-    assert store.get(case_id).provisions == [] and client.get(path).json() == previous
+    # The identify run saved the case; only the returned case version moves.
+    assert store.get(case_id).provisions == [] and client.get(path).json() == {**previous, 'case_version': previous['case_version'] + 1}
     assert 'secret provider' not in json.dumps(result)
     assert 'DecisionsProtocolError' not in json.dumps(result)
 

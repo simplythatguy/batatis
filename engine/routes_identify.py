@@ -457,7 +457,11 @@ def create_router(cases: Callable[[], CaseBackend], code: Callable[[], Codes],
             if case.identify is None:
                 raise HTTPException(404, 'identify result not found')
             if _current(case.identify, case, cases(), code).stale:
-                raise HTTPException(409, 'Identification inputs changed; rerun before confirming applicability')
+                # The applicant changed or confirmed facts after the run. Recompute the local, deterministic
+                # requirement profile inside this save (no provider call) and decide against the fresh result.
+                refresh_identification(case, cases(), code(), force=True)
+                if _current(case.identify, case, cases(), code).stale:
+                    raise HTTPException(409, 'Identification inputs changed; rerun before confirming applicability')
             try:
                 record(case.identify, requirement_id, body, code())
             except KeyError:

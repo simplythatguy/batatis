@@ -80,6 +80,8 @@ export interface RelevanceResult {
   /** What the rings show. */
   display: Record<string, number>;
   bands?: RelevanceBands | null;
+  /** The saved case version; scoring saves the case, so the next write sends this. */
+  case_version?: number;
 }
 
 export class CodeLibraryError extends EngineError {

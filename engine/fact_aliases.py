@@ -29,3 +29,11 @@ def latest(case):
     for fact in case.facts:
         out[FIELD_KEYS.get(fact.field, fact.field)] = fact
     return out
+
+
+WITHDRAWN_REF = 'Answer withdrawn by applicant'
+
+
+def is_withdrawal(fact) -> bool:
+    """A cleared answer: the applicant removed it, so nothing is left to confirm."""
+    return fact.source.ref == WITHDRAWN_REF or (fact.value == '' and fact.status == 'unconfirmed')

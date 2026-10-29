@@ -7,10 +7,10 @@
 import type { ReactNode } from "react";
 import type { Case, Finding, FindingState, ReviewSession, RulebookGap } from "../../api/types.gen";
 import { CODE_EDITION } from "../../config";
-import { localField } from "../../intakeFields";
 import { RetainedSourceFiles } from "../../RetainedSourceFiles";
 import { Icon24, type IconName } from "../icons";
 import { CodeRef } from "./CodeRef";
+import { formField, formValue } from "./formFields";
 import { OpenFileLink } from "./OpenFileLink";
 import { citationView, documentView, isPeer, sectionCView, sentence } from "./packageView";
 import { sentPhrase } from "./queue";
@@ -58,7 +58,7 @@ export function ReadSheet({ c, sheet, rows, anchors, session, rulebook, states, 
   const files = session?.files ?? [];
 
   const line = (anchor: string, label: string, value: ReactNode, field: string) => {
-    const change = changes.get(localField(field));
+    const change = changes.get(formField(field));
     const here = findings.get(anchor) ?? [];
     const rules = gaps.get(anchor) ?? [];
     const open = rules.length > 0 || here.some((f) => states.get(f.key)?.state !== "dismissed");
@@ -67,7 +67,7 @@ export function ReadSheet({ c, sheet, rows, anchors, session, rulebook, states, 
         <span className="ap-k">{sentence(label)}</span>
         <span className="ap-v">
           {value ?? <span className="ap-none">Not given</span>}
-          {change && <span className="ap-chg" title={`Before: ${change.before || "—"}`}>Changed</span>}
+          {change && <span className="ap-chg" title={`Before: ${formValue(change.before) || "—"}`}>Changed</span>}
         </span>
         {(here.length > 0 || rules.length > 0) && (
           <span className="ap-tags">

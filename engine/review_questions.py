@@ -5,6 +5,7 @@ and their actual answer fields independent of gaps so a return can request clari
 """
 from __future__ import annotations
 
+from .fact_aliases import is_withdrawal
 from .identify.answers import is_unknown_answer
 from .identify.decisions import stable_id
 from .intake.questions import PROBE_BY_FIELD
@@ -24,7 +25,7 @@ _ALIASES = {
 def _answer(fact: Fact | None, *, abstained: bool = False) -> tuple[str | None, str]:
     if fact is None:
         return ('Not sure', 'not_sure') if abstained else (None, 'unanswered')
-    if fact.source.ref == 'Answer withdrawn by applicant' or (fact.value == '' and fact.status == 'unconfirmed'):
+    if is_withdrawal(fact):
         return None, 'withdrawn'
     raw = '' if fact.value is None else str(fact.value).strip()
     normalized = raw.replace('_', ' ').replace('-', ' ').replace('’', "'").lower().removeprefix('i ').rstrip('.!?').removesuffix(' yet')
