@@ -225,9 +225,12 @@ def test_firm_departs_opens_the_six_process_fields():
         item.recommended_types == CONFIDENCE_LADDER + ALTERNATIVE_EVIDENCE_TYPES for item in plan.items)
 
 
-def test_firm_follows_wins_over_a_recorded_variance():
+@pytest.mark.parametrize('proposal', [None, 'Aluminum soffit along the north wall.'])
+def test_firm_follows_wins_over_a_recorded_variance(proposal):
     case = soffit(limiting_distance_m=1.2, soffit_to_property_line_m=0.8)
     case.facts.append(fact('pathway', 'alternative'))
+    if proposal is not None:
+        case.facts.append(fact('alternative_description', proposal))
     assert decide_path(case).path == 'acceptable'
     assert process_fields(case, Codes()) == []
 

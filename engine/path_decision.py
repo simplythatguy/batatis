@@ -1,7 +1,7 @@
 """Which package the applicant is on.
 
 A firm departure in any relevant coded check selects the alternative path. Following one
-rule cannot settle unresolved checks or a stated wider departure. Not applicable closes
+rule cannot settle unresolved scope or a stated wider departure. Not applicable closes
 only that rule, never a requested variance. Assumptions and unconfirmed inputs are not firm.
 Missing inputs remain visible even when a departure selects the path. Otherwise a recorded
 pathway wins, then the wording fork. An unknown fork does not open the alternative package.
@@ -71,7 +71,7 @@ def decide_path(case: Case) -> PathDecision:
     rule_id = playing[0].rule_id if len(playing) == 1 else None
     fallback = _fallback(case, text, rule_id=rule_id, missing=missing)
     if (playing and len(firm) == len(playing) and {result.state for result in firm} == {'follows'}
-            and not _stated_departure(text)):
+            and not _stated_departure(text) and not _uncovered_proposal(case, rules)):
         return _from_check(firm[0])
     if (playing and len(firm) == len(playing) and {result.state for result in firm} == {'not_applicable'}
             and fallback.path != 'alternative'):
@@ -133,6 +133,12 @@ def _design_text(case: Case) -> str:
     if read and read not in text:
         text = f'{text}\n{read}'.strip()
     return text
+
+
+def _uncovered_proposal(case: Case, rules: list[dict]) -> bool:
+    alternative = _latest(case, 'alternative_description', 'alternative')
+    text = alternative.value if alternative is not None and isinstance(alternative.value, str) else ''
+    return bool(text.strip()) and not _named_rules(text, rules)
 
 
 def _latest(case: Case, *fields: str) -> Fact | None:
