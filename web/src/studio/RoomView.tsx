@@ -4,6 +4,7 @@ import { Icon } from "./icons";
 import { startRecording, type Recording } from "./recorder";
 import { Render, takeMedia } from "./Render";
 import { roomApi } from "./room";
+import { SavedVideos } from "./SavedVideos";
 import { createStage, exportVideo, preload, type Stage } from "./stage";
 import { Cams } from "./Cams";
 import { Filmstrip, groupColor } from "./Filmstrip";
@@ -133,6 +134,7 @@ export function Room({ deck, room, serverLive, me, camera, apply, onLeave }: {
       />
       <div className="st-corner">
         <CopyLink code={room.code} />
+        <SavedVideos deck={deck} room={room} upload={progress} />
         <span className={`st-total${total > VIDEO_LIMIT_MS ? " is-over" : ""}`} title="Planned length with intro and outro" aria-label={`Planned length ${clock(total)} of ${clock(VIDEO_LIMIT_MS)}`}>
           <Icon name="clock" size={14} />{clock(total)}<span className="st-total-of">/ {clock(VIDEO_LIMIT_MS)}</span>
         </span>
