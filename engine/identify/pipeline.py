@@ -251,9 +251,9 @@ def _in_article(quote: str | None, art: dict) -> bool:
 def run(prose: str, *, codes: Codes, config: IdentifyConfig | None = None, transports: Transports | None = None,
         verifier=None, on_stage: OnStage | None = None, facts=(), policy: CommitPolicy | None = None,
         description_sha256: str | None = None, client_ip: str | None = None,
-        previous: IdentifyResult | None = None, confirmed_provisions=(), ranker=None) -> RunOutput:
+        previous: IdentifyResult | None = None, confirmed_provisions=(), ranker=None, rank: bool = True) -> RunOutput:
     """`prose` is the outbound (already redacted) description. `verifier` overrides the configured one and
-    `ranker` the requirements profile's model rank (tests)."""
+    `ranker` the requirements profile's model rank (tests). `rank=False` (a save) keeps the last model order."""
     config = config or load_config()
     if config.screen == 'requirements':
         from .requirements import run as discover_requirements
@@ -269,10 +269,13 @@ def run(prose: str, *, codes: Codes, config: IdentifyConfig | None = None, trans
         if result.requirement_coverage.source is not None:
             result.scope_assessments = assess(codes, facts, result)
         order(result, prose)
-        ranker = ranker or _rank_verifier(config, codes)
-        if ranker is not None:
-            from .model_rank import model_rank
-            model_rank(result, prose, Path(codes.db_path), ranker, config.model_rank_model)
+        if config.model_rank == 'anthropic' or ranker is not None:
+            from .model_rank import carry, model_rank
+            ranker = (ranker or _rank_verifier(config, codes)) if rank else None
+            if ranker is not None:
+                model_rank(result, prose, Path(codes.db_path), ranker, config.model_rank_model)
+            elif not rank and previous is not None:
+                carry(result, previous)
         compact(result)
         result.trace.seconds = round(result.trace.seconds + time.monotonic() - finish, 3)
         return RunOutput(result, None, None)

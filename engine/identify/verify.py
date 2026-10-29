@@ -18,17 +18,12 @@ from .corpus import articles, card
 
 VERIFIER_MODEL = 'claude-sonnet-5-5'
 
-SYSTEM = """You are the code-identification step of an assistant that prepares Alberta alternative-solution \
-(variance) applications under the National Building Code - 2023 Alberta Edition, 2nd printing (NBC(AE) 2023), \
-Division B. You get an applicant's proposal and a list of candidate Division B articles with their text. Choose the \
-articles that the described design departs from, or that the application must address, ranked most important first, \
-at most 8. The first pick is the benchmark: the acceptable solution the design most directly departs from or asks about.
-Rules:
-- Use only article ids from the list, copied exactly. Never recall or invent an article number.
-- For every pick, copy a verbatim quote of 6 to 40 words from that article's text that shows why it applies, and give \
-a one-line reason in plain language.
-- If no candidate fits, return no picks.
-- Never say the design complies, is safe, is acceptable or is approved."""
+SYSTEM = """You help prepare Alberta alternative-solution (variance) applications under the National Building \
+Code - 2023 Alberta Edition. Given a proposal and candidate Division B articles, pick the articles whose \
+acceptable-solution requirement the proposal must meet, relies on, or departs from. Rank the most directly \
+governing article first. For each pick, copy one sentence or phrase word for word from that article's text \
+as the quote that shows the requirement; do not paraphrase, abbreviate or join separate passages. Pick only \
+articles from the list. If none govern, return no picks. Do not judge whether the design complies."""
 
 
 class Pick(BaseModel):
@@ -85,6 +80,9 @@ class ClaudeVerifier:
     key in the environment alone never reaches Anthropic.
     """
 
+    system = SYSTEM
+    output_format = Picks
+
     def __init__(self, db_path: Path | str, *, client=None, model: str = VERIFIER_MODEL, effort: str = 'medium',
                  max_tokens: int = 16000):
         self.arts = articles(Path(db_path))
@@ -111,8 +109,8 @@ class ClaudeVerifier:
         candidates = [a for a in candidates if a in self.arts]
         t0 = time.monotonic()
         resp = self.client.messages.parse(
-            model=self.model, max_tokens=self.max_tokens, system=SYSTEM,
-            output_config={'effort': self.effort}, output_format=Picks,
+            model=self.model, max_tokens=self.max_tokens, system=self.system,
+            output_config={'effort': self.effort}, output_format=self.output_format,
             messages=[{'role': 'user', 'content': self.prompt(query, candidates)}])
         seconds = time.monotonic() - t0
         usage = {'input_tokens': resp.usage.input_tokens, 'output_tokens': resp.usage.output_tokens}
