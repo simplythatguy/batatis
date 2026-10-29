@@ -1,4 +1,5 @@
-// Everyone's camera along the top. Only the presenter's mic is live; the team hears whoever is presenting.
+// Everyone's camera along the top. The team hears everyone; only the presenter's mic goes into the video,
+// which the mic icon shows (live for the presenter, slashed for everyone else).
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "./icons";
 import { firstName, initials } from "./parts";
@@ -40,7 +41,7 @@ export function Cams({ people, me, local, streams, failed, presenter, mutedAll, 
             stream={mine ? local : streams[p.id] ?? null}
             failed={!mine && !!failed[p.id]}
             presenting={p.id === presenter}
-            audible={!mine && p.id === presenter && !mutedAll}
+            audible={!mine && !mutedAll}
             locked={locked}
             onRemove={() => onRemove(p.id)}
             onVideo={mine ? undefined : (el) => onVideo(p.id, el)}
@@ -100,7 +101,7 @@ function Tile({ person, mine, stream, failed, presenting, audible, locked, onRem
         {firstName(person.name)}
         {failed && !stream && <span className="st-tile-hint">No video</span>}
       </figcaption>
-      <span className={`st-tile-mic${presenting ? " is-live" : ""}`} role="img" aria-label={presenting ? "Presenting, mic on" : "Muted"}>
+      <span className={`st-tile-mic${presenting ? " is-live" : ""}`} role="img" aria-label={presenting ? "Presenting: this mic is recorded" : "Not in the recording"}>
         <Glyph d={presenting ? MIC : MIC_OFF} size={12} />
       </span>
       <button
