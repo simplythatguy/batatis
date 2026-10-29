@@ -379,7 +379,8 @@ const SCOPE_ITEM_KEY = "scope";
  * stay Section C rows.
  */
 function departureCandidate(c: Case, opts: DeckOptions): Candidate | undefined {
-  if (opts.benchmark?.departure_status === "confirmed") return undefined;
+  // The case carries its stored identification when it opens; the deck's own fetch can land later.
+  if ((opts.benchmark ?? c.identify?.benchmark)?.departure_status === "confirmed") return undefined;
   return c.candidates.find((a) => a.answer === "yes" && !a.pending && isProvision(a.provision));
 }
 

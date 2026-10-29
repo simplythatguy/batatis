@@ -441,6 +441,11 @@ test("a card answered Yes asks for the departure until the engine confirms it", 
 
   const confirmed = { departure_status: "confirmed", departure: "A thinner assembly." } as BenchmarkRecord;
   assert.equal(buildDeck(c, getGaps(c), { benchmark: confirmed }).find((i) => i.kind === "departure"), undefined, "a confirmed departure is not asked twice");
+
+  // Reopened: the case carries its stored identification before the deck's own fetch returns.
+  const reopened = { ...c, identify: { ...c.identify!, benchmark: confirmed } };
+  assert.equal(buildDeck(reopened, getGaps(reopened), { benchmark: null }).find((i) => i.kind === "departure"), undefined,
+    "a reopened application does not ask for a departure it already confirmed");
 });
 
 test("the departure card compares the code, the design and the drafted difference", () => {
