@@ -1,9 +1,10 @@
 """Which package the applicant is on.
 
-A firm coded check decides: follows is the acceptable path, departs is the alternative path,
-and not applicable stops with no package. A labeled assumption is not a firm check. When the
-check is not firm, a recorded pathway wins, then the wording fork. An unknown fork does not
-open the alternative package. Identify decisions are not an answer to the fork.
+A firm coded check decides: follows is the acceptable path, departs is the alternative path.
+A rule that does not apply to this building decides nothing: the project is not about that rule,
+so the path falls through. A labeled assumption is not a firm check. When no check decides, a
+recorded pathway wins, then the wording fork. An unknown fork does not open the alternative
+package. Identify decisions are not an answer to the fork.
 
 Objectives, functional statements, and intent are never asked here. A Division B sentence is
 named only when the firm check returned it. Section C for that id is a database lookup.
@@ -59,19 +60,20 @@ def decide_path(case: Case) -> PathDecision:
     named = _select_rule(text, rules)
     if named:
         result = by_id[named]
-        if _firm(result):
+        if _decides(result):
             return _from_check(result)
-        missing = _needs(result, next(rule for rule in rules if rule['id'] == named))
-        return _fallback(case, text, rule_id=named, missing=missing)
-    playing = [by_id[rule['id']] for rule in rules if _in_play(by_id[rule['id']])]
+        if not _firm(result):
+            return _fallback(case, text, rule_id=named,
+                             missing=_needs(result, next(rule for rule in rules if rule['id'] == named)))
+        # The words named a rule this building is outside of; the other rules still get their say.
+    playing = [by_id[rule['id']] for rule in rules if rule['id'] != named and _in_play(by_id[rule['id']])]
     firm = [result for result in playing if _firm(result)]
     departed = next((result for result in firm if result.state == 'departs'), None)
     if departed is not None:
         return _from_check(departed)
-    if playing and len(firm) == len(playing) and {result.state for result in firm} <= {'follows'}:
-        return _from_check(firm[0])
-    if playing and len(firm) == len(playing) and {result.state for result in firm} == {'not_applicable'}:
-        return _from_check(firm[0])
+    deciding = [result for result in firm if _decides(result)]
+    if deciding and len(firm) == len(playing) and {result.state for result in deciding} == {'follows'}:
+        return _from_check(deciding[0])
     missing: list[str] = []
     for result in playing:
         if _firm(result):
@@ -101,6 +103,11 @@ def _fallback(case: Case, text: str, *, rule_id: str | None = None, missing: tup
 
 def _firm(result: RuleResult) -> bool:
     return result.state in _STATE and not result.assumptions
+
+
+def _decides(result: RuleResult) -> bool:
+    # A keyword can name a rule the building is outside of ("no glazing" names the glazing rule).
+    return _firm(result) and result.state != 'not_applicable'
 
 
 def _needs(result: RuleResult, rule: dict) -> tuple[str, ...]:

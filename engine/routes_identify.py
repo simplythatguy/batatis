@@ -133,7 +133,8 @@ def _identify_input(case: Case, body: IdentifyRequest, store=None, *, require_te
 
 def _uses_model() -> bool:
     try:
-        return load_config().screen != 'requirements'
+        config = load_config()
+        return config.screen != 'requirements' or config.model_rank == 'anthropic'
     except (ConfigError, ValueError):
         return True
 

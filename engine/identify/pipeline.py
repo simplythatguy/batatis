@@ -102,6 +102,27 @@ class _Stages:
             self.on_stage(stage, {'stage': stage, **payload})
 
 
+def _rank_verifier(config: IdentifyConfig, codes: Codes):
+    """The model rank's verifier, or None when it is off or its gate is closed (no key, no access code)."""
+    if config.model_rank != 'anthropic':
+        return None
+    from engine import llm_gate
+    from .providers import MeteredAnthropic, live_anthropic
+    from .verify import ClaudeVerifier
+    try:
+        if llm_gate.fake_providers():
+            from .fakes import FakeAnthropic
+            client = MeteredAnthropic(FakeAnthropic())
+        elif llm_gate.provider_enabled('anthropic'):
+            client = MeteredAnthropic(live_anthropic())
+        else:
+            return None
+        return ClaudeVerifier(codes.db_path, client=client, model=config.model_rank_model, effort=config.model_rank_effort)
+    except Exception as exc:
+        logger.info('model rank off: %s', type(exc).__name__)
+        return None
+
+
 def _lexical(method: str, prose: str, db: Path, arts: dict) -> list[str]:
     ranked = rank_articles(prose, db) if method == 'bm25_v3' else bm25_rank(prose, db)
     return [a for a in ranked if a in arts]
@@ -230,8 +251,9 @@ def _in_article(quote: str | None, art: dict) -> bool:
 def run(prose: str, *, codes: Codes, config: IdentifyConfig | None = None, transports: Transports | None = None,
         verifier=None, on_stage: OnStage | None = None, facts=(), policy: CommitPolicy | None = None,
         description_sha256: str | None = None, client_ip: str | None = None,
-        previous: IdentifyResult | None = None, confirmed_provisions=()) -> RunOutput:
-    """`prose` is the outbound (already redacted) description. `verifier` overrides the configured one (tests)."""
+        previous: IdentifyResult | None = None, confirmed_provisions=(), ranker=None) -> RunOutput:
+    """`prose` is the outbound (already redacted) description. `verifier` overrides the configured one and
+    `ranker` the requirements profile's model rank (tests)."""
     config = config or load_config()
     if config.screen == 'requirements':
         from .requirements import run as discover_requirements
@@ -247,6 +269,10 @@ def run(prose: str, *, codes: Codes, config: IdentifyConfig | None = None, trans
         if result.requirement_coverage.source is not None:
             result.scope_assessments = assess(codes, facts, result)
         order(result, prose)
+        ranker = ranker or _rank_verifier(config, codes)
+        if ranker is not None:
+            from .model_rank import model_rank
+            model_rank(result, prose, Path(codes.db_path), ranker, config.model_rank_model)
         compact(result)
         result.trace.seconds = round(result.trace.seconds + time.monotonic() - finish, 3)
         return RunOutput(result, None, None)

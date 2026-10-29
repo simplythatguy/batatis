@@ -10,9 +10,9 @@ engine/identify/pipeline.json when present) -> `BATATIS_IDENTIFY_<FIELD>` enviro
 The checked-in profile selects deterministic full-text/reference requirement discovery. It
 does not use provider stages or the historical top-N limits. Historical dataclass defaults retain the Elephant profile
 for compatibility; explicit profiles and environment overrides select other configurations with
-different hashes. The Anthropic
-verifier adapter (ClaudeVerifier, claude-sonnet-5-5) is kept but off unless configured.
-Haiku models are refused.
+different hashes. With model_rank='anthropic' the
+requirements profile adds a model rank (model_rank.py): the verifier reads the leading candidates and
+its quote-checked picks move to the front. Without a key or an access code the order stays deterministic.
 """
 from __future__ import annotations
 
@@ -64,6 +64,9 @@ class IdentifyConfig:
     question_style: str = 'shared'       # self is an explicit Elephant-only experiment
     shortlist_n: int = 60                # bounded TOC + keyword union; used only by screen='shortlist'
     shortlist_toc_n: int = 40
+    model_rank: str = 'none'             # requirements screen only: 'anthropic' reorders the ledger (model_rank.py)
+    model_rank_model: str = 'claude-haiku-5-5'
+    model_rank_effort: str = 'medium'
 
     def __post_init__(self):
         checks = [('screen', SCREENS), ('rerank', RERANKS), ('verifier', VERIFIERS), ('fallback', FALLBACKS),
@@ -71,6 +74,10 @@ class IdentifyConfig:
         for name, allowed in checks:
             if getattr(self, name) not in allowed:
                 raise ConfigError(f'{name} must be one of {", ".join(allowed)}')
+        if self.model_rank not in ('anthropic', 'none'):
+            raise ConfigError('model_rank must be anthropic or none')
+        if self.model_rank_effort not in EFFORTS:
+            raise ConfigError(f'model_rank_effort must be one of {", ".join(EFFORTS)}')
         if self.question_style not in ('shared', 'self'):
             raise ConfigError('question_style must be shared or self')
         if self.question_style == 'self' and 'elephant' not in (self.screen, self.rerank):
@@ -86,9 +93,6 @@ class IdentifyConfig:
         if (self.verifier == 'openai' or self.rerank == 'openai' or self.screen == 'shortlist') \
                 and self.verifier_effort not in OPENAI_EFFORTS:
             raise ConfigError(f'OpenAI reasoning effort must be one of {", ".join(OPENAI_EFFORTS)}')
-        for name in ('screen_model', 'rerank_model', 'verifier_model'):
-            if 'haiku' in getattr(self, name).lower():
-                raise ConfigError('Haiku models are not used')
         if (self.screen == 'jev' and self.screen_model != JEV_MODEL) or (
                 self.rerank == 'jev' and self.rerank_model != JEV_MODEL):
             raise ConfigError(f'Jev stages use the pinned {JEV_MODEL}')
@@ -112,8 +116,15 @@ class IdentifyConfig:
     def as_dict(self) -> dict:
         if self.screen == 'requirements':
             from .requirements import IDENTITY
+            if self.model_rank == 'anthropic':
+                from .model_rank import KEYWORD_N, LEDGER_N, POOL_N
+                return dict(screen='requirements', strategy=IDENTITY, rerank='none', verifier='none',
+                            model_rank=self.model_rank, model_rank_model=self.model_rank_model,
+                            model_rank_effort=self.model_rank_effort, model_rank_pool=[LEDGER_N, KEYWORD_N, POOL_N])
             return dict(screen='requirements', strategy=IDENTITY, rerank='none', verifier='none')
         values = asdict(self)
+        for name in ('model_rank', 'model_rank_model', 'model_rank_effort'):
+            values.pop(name)                  # requirements-only settings never move historical hashes
         # Inactive options must not invalidate historical hashes or calibration.
         if self.question_style == 'shared':
             values.pop('question_style')
@@ -143,7 +154,7 @@ class IdentifyConfig:
 
     def model_ids(self) -> dict[str, str | None]:
         if self.screen == 'requirements':
-            return dict(screen=None, rerank=None, verifier=None)
+            return dict(screen=None, rerank=None, verifier=self.model_rank_model if self.model_rank == 'anthropic' else None)
         return {'screen': self.screen_model if self.exhaustive or self.screen == 'shortlist' else None,
                 'rerank': self.rerank_model if self.rerank != 'none' else None,
                 'verifier': self.verifier_model if self.verifier != 'none' else None}
