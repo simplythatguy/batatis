@@ -73,6 +73,19 @@ def test_scope_on_dev_cases_and_boundary_sets(capsys):
     assert blind['redirect_ok'] >= 28 and blind['false'] <= 1
 
 
+def test_no_real_alberta_building_code_record_is_sent_to_another_code():
+    """64 published Alberta records, each answered under the building code (docs/research/2026-10-23-elephant).
+
+    The workflow bakeoff found two of them stopped as another regime's question: photoluminescent exit signs on
+    their own charging circuit (NBC(AE) 3.4.5.1. and 9.9.11.3.) and the energy rules for small equipment shelters
+    (Section 9.36)."""
+    records = json.loads((ROOT / 'docs/research/2026-10-23-elephant/cases-alberta.json').read_text())
+    records = records if isinstance(records, list) else records['cases']
+    assert len(records) == 64
+    redirected = [r['id'] for r in records if classify(r['description']).status == 'redirect']
+    assert redirected == []
+
+
 def test_redirect_copy_follows_the_scc_deck():
     for regime in REGIMES.values():
         text = redirect_message(regime)
