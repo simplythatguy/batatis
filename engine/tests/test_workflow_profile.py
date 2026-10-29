@@ -6,8 +6,8 @@ from engine.intake import model, review
 
 def test_selected_workflow_uses_luna_and_deterministic_discovery():
     config = load_config(env={})
-    assert (model.MODEL, model.EFFORT) == ('gpt-6-luna', 'medium')
-    assert (review.DEFAULT_MODEL, review.DEFAULT_EFFORT) == ('gpt-6-luna', 'medium')
+    assert (model.MODEL, model.EFFORT) == ('claude-sonnet-5-5', 'low')
+    assert (review.DEFAULT_MODEL, review.DEFAULT_EFFORT) == ('claude-sonnet-5-5', 'low')
     assert config.screen == 'requirements' and not config.exhaustive
     assert config.model_ids() == {'screen': None, 'rerank': None, 'verifier': None}
 
