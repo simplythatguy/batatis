@@ -1,11 +1,14 @@
-// The room: slide groups on the left; the selected group's stage, controls and transcript in the middle.
+// The room: cameras along the top, the timer on the left, the slide in the centre, the transcript on the right, every slide along the bottom.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Icon } from "./icons";
 import { startRecording, type Recording } from "./recorder";
 import { Render } from "./Render";
 import { roomApi } from "./room";
 import { createStage, preload, type Stage } from "./stage";
-import { CopyLink, type Camera } from "./parts";
+import { Cams } from "./Cams";
+import { Filmstrip, groupColor } from "./Filmstrip";
+import { Brand, CopyLink, firstName, initials, type Camera } from "./parts";
+import { usePeers, type LiveState } from "./peers";
 import { clock, deckMs, targetMs } from "./timing";
 import { VIDEO_LIMIT_MS, type Cue, type Deck, type Group, type Person, type RoomState, type TakeInfo, type TakeMedia } from "./types";
 import { uploads, useUploads } from "./uploads";
@@ -38,9 +41,14 @@ export function Room({ deck, room, me, camera, apply, onLeave }: {
     const mine = deck.groups.findIndex((g) => room.assignments[g.id] === me.id && !complete(room.takes[g.id]));
     return Math.max(0, mine);
   });
+  const [preview, setPreview] = useState(0);
+  const [shown, setShown] = useState(0);
   const [phase, setPhase] = useState<Phase>({ k: "idle" });
   const [rendering, setRendering] = useState(false);
+  const [mutedAll, setMutedAll] = useState(false);
   const progress = useUploads();
+  const peers = usePeers({ room: room.code, me: me.id, people: room.people, stream: camera.stream });
+  const peerVideos = useRef<Record<string, HTMLVideoElement | null>>({});
 
   useEffect(() => {
     void preload(deck).catch(() => undefined);
@@ -51,130 +59,99 @@ export function Room({ deck, room, me, camera, apply, onLeave }: {
     // Once per room: later polls must not restart uploads in flight.
   }, [room.code]);
 
+  // A teammate's take: my stage, transcript and timer follow it while I am not busy with my own.
+  const live = peers.live;
+  const followIndex = live?.recording && live.presenterId !== me.id && !busy(phase) && !rendering
+    ? deck.groups.findIndex((g) => g.id === live.groupId)
+    : -1;
+  const follow = followIndex >= 0 ? live : null;
+  const index = followIndex >= 0 ? followIndex : selected;
+  const presenter = busy(phase) ? me.id : follow ? follow.presenterId : rendering ? null : room.assignments[deck.groups[index].id] ?? null;
+
   const missing = deck.groups.filter((g) => !complete(room.takes[g.id]) || progress[g.id] !== undefined);
   const total = deckMs(deck);
+  const assign = (gi: number, personId: string | null) => void roomApi.assign(room.code, deck.groups[gi].id, personId).then(apply);
+  const remove = (id: string) => void roomApi.leave(room.code, id).then((next) => {
+    apply(next);
+    if (id === me.id) onLeave();
+  });
 
   return (
     <div className="st-room">
-      <aside className="st-side">
-        <header className="st-side-head">
-          <span className="st-brand">Studio</span>
-          <CopyLink code={room.code} />
-        </header>
-        <nav className="st-groups" aria-label="Slide groups">
-          {deck.groups.map((g, i) => (
-            <GroupRow
-              key={g.id}
-              group={g}
-              room={room}
-              upload={progress[g.id]}
-              selected={!rendering && i === selected}
-              locked={busy(phase)}
-              onSelect={() => {
-                setRendering(false);
-                setSelected(i);
-              }}
-              onAssign={(personId) => void roomApi.assign(room.code, g.id, personId).then(apply)}
-            />
-          ))}
-        </nav>
-        <div className={`st-total${total > VIDEO_LIMIT_MS ? " is-over" : ""}`} title="Planned length with intro and outro">
-          <Icon name="clock" size={13} />
-          {clock(total)} / {clock(VIDEO_LIMIT_MS)}
-        </div>
-        <People room={room} me={me} locked={busy(phase)} onRemove={(id) => void roomApi.leave(room.code, id).then((next) => {
-          apply(next);
-          if (id === me.id) onLeave();
-        })} />
-        <div className="st-make">
+      <Brand as="span" />
+      <Cams
+        people={room.people}
+        me={me}
+        local={camera.stream}
+        streams={peers.streams}
+        failed={Object.fromEntries(Object.entries(peers.status).map(([id, s]) => [id, s === "failed"]))}
+        presenter={presenter}
+        mutedAll={mutedAll}
+        locked={busy(phase)}
+        onMuteAll={setMutedAll}
+        onRemove={remove}
+        onVideo={(id, el) => (peerVideos.current[id] = el)}
+      />
+      <div className="st-corner">
+        <CopyLink code={room.code} />
+        <span className={`st-total${total > VIDEO_LIMIT_MS ? " is-over" : ""}`} title="Planned length with intro and outro" aria-label={`Planned length ${clock(total)} of ${clock(VIDEO_LIMIT_MS)}`}>
+          <Icon name="clock" size={14} />{clock(total)}<span className="st-total-of">/ {clock(VIDEO_LIMIT_MS)}</span>
+        </span>
+        {!rendering && (
           <button
             type="button"
             className={`cf-btn${missing.length ? "" : " is-primary"}`}
-            disabled={missing.length > 0 || busy(phase) || rendering}
+            disabled={missing.length > 0 || busy(phase)}
             title={missing.length ? `Missing: ${missing.map((g) => g.name).join(", ")}` : undefined}
             onClick={() => setRendering(true)}
           >
             <Icon name="film" size={15} />
             Make the video
           </button>
-          {missing.length > 0 && <span className="st-make-left">{missing.length} to go</span>}
-        </div>
-      </aside>
-      <main className="st-main">
-        {rendering ? (
-          <Render deck={deck} room={room} onClose={() => setRendering(false)} />
-        ) : (
-          <Booth
-            key={deck.groups[selected].id}
-            deck={deck}
-            index={selected}
-            room={room}
-            me={me}
-            camera={camera}
-            phase={phase}
-            setPhase={setPhase}
-            onAssign={(personId) => void roomApi.assign(room.code, deck.groups[selected].id, personId).then(apply)}
-          />
         )}
-      </main>
-    </div>
-  );
-}
-
-function GroupRow({ group, room, upload, selected, locked, onSelect, onAssign }: {
-  group: Group;
-  room: RoomState;
-  upload: number | undefined;
-  selected: boolean;
-  locked: boolean;
-  onSelect(): void;
-  onAssign(personId: string | null): void;
-}) {
-  const take = room.takes[group.id];
-  const who = room.assignments[group.id] ?? "";
-  const state = upload !== undefined
-    ? <span className="st-g-up">{Math.round(upload * 100)}%</span>
-    : take && !complete(take)
-      ? <span className="st-g-up">{Math.round((take.received / take.chunks) * 100)}%</span>
-      : take
-        ? <span className="st-g-done"><Icon name="check" size={13} stroke={2.2} />{clock(take.durationMs)}</span>
-        : <span className="st-g-empty" aria-label="Not recorded" />;
-  return (
-    <div className={`st-g${selected ? " is-sel" : ""}${locked && !selected ? " is-locked" : ""}`}>
-      <button type="button" className="st-g-hit" onClick={onSelect} disabled={locked} aria-current={selected || undefined}>
-        <span className="st-g-name">{group.name}</span>
-        {state}
-      </button>
-      <div className="st-g-meta">
-        <select
-          className={`st-who${who ? "" : " is-none"}`}
-          value={who}
-          onChange={(e) => onAssign(e.target.value || null)}
-          aria-label={`Who records ${group.name}`}
-          disabled={locked}
-        >
-          <option value="">Nobody</option>
-          {room.people.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-        </select>
-        {!complete(take) && <span className="st-g-len">{clock(targetMs(group))}</span>}
       </div>
-    </div>
-  );
-}
 
-function People({ room, me, locked, onRemove }: { room: RoomState; me: Person; locked: boolean; onRemove(id: string): void }) {
-  return (
-    <ul className="st-people" aria-label="People">
-      {room.people.map((p) => (
-        <li key={p.id}>
-          <Icon name="user" size={13} />
-          <span>{p.name}{p.id === me.id ? " (you)" : ""}</span>
-          <button type="button" className="st-x" disabled={locked} aria-label={`Remove ${p.name}`} title="Remove" onClick={() => onRemove(p.id)}>
-            <Icon name="x" size={12} />
-          </button>
-        </li>
-      ))}
-    </ul>
+      {rendering ? (
+        <div className="st-render">
+          <Render deck={deck} room={room} onClose={() => setRendering(false)} />
+        </div>
+      ) : (
+        <Booth
+          key={deck.groups[index].id}
+          deck={deck}
+          index={index}
+          room={room}
+          me={me}
+          camera={camera}
+          phase={phase}
+          setPhase={setPhase}
+          preview={index === selected ? preview : 0}
+          setPreview={setPreview}
+          follow={follow}
+          followVideo={follow ? peerVideos.current[follow.presenterId] ?? null : null}
+          broadcast={peers.broadcast}
+          onShown={setShown}
+          onAssign={(personId) => assign(index, personId)}
+        />
+      )}
+
+      <Filmstrip
+        deck={deck}
+        room={room}
+        me={me}
+        group={rendering ? -1 : index}
+        slide={shown}
+        locked={busy(phase) || !!follow}
+        assignLocked={busy(phase)}
+        upload={progress}
+        onPick={(gi, si) => {
+          setRendering(false);
+          setSelected(gi);
+          setPreview(si);
+        }}
+        onAssign={assign}
+      />
+    </div>
   );
 }
 
@@ -200,7 +177,7 @@ export function StageCanvas({ deck, onStage, children }: { deck: Deck; onStage(s
   );
 }
 
-function Booth({ deck, index, room, me, camera, phase, setPhase, onAssign }: {
+function Booth({ deck, index, room, me, camera, phase, setPhase, preview, setPreview, follow, followVideo, broadcast, onShown, onAssign }: {
   deck: Deck;
   index: number;
   room: RoomState;
@@ -208,13 +185,21 @@ function Booth({ deck, index, room, me, camera, phase, setPhase, onAssign }: {
   camera: Camera;
   phase: Phase;
   setPhase(p: Phase): void;
+  /** The slide shown while idle. */
+  preview: number;
+  setPreview(slide: number): void;
+  /** A teammate's take in this group, mirrored read-only. */
+  follow: LiveState | null;
+  followVideo: HTMLVideoElement | null;
+  broadcast(state: LiveState | null): void;
+  /** The slide on stage, for the filmstrip. */
+  onShown(slide: number): void;
   onAssign(personId: string): void;
 }) {
   const group = deck.groups[index];
   const target = targetMs(group);
   const last = group.slides.length - 1;
   const [stage, setStage] = useState<Stage | null>(null);
-  const [preview, setPreview] = useState(0);
   const [replaySlide, setReplaySlide] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const rec = useRef<Recording | null>(null);
@@ -224,24 +209,38 @@ function Booth({ deck, index, room, me, camera, phase, setPhase, onAssign }: {
   const replay = useRef<HTMLVideoElement | null>(null);
   const phaseRef = useRef(phase);
   phaseRef.current = phase;
+  const send = useRef(broadcast);
+  send.current = broadcast;
+  const sent = useRef(false);
 
   const assignee = room.people.find((p) => p.id === room.assignments[group.id]);
   const mine = assignee?.id === me.id;
   const take = room.takes[group.id];
+  const presenter = follow ? room.people.find((p) => p.id === follow.presenterId) : undefined;
+  const following = !!follow;
 
   const clearTimers = () => {
     timers.current.forEach((t) => window.clearTimeout(t));
     timers.current = [];
   };
 
-  // Idle: the selected slide with this device's live camera.
+  // Idle: the previewed slide (or the teammate's current one) with this device's camera, or theirs while following.
+  const idleSlide = follow ? Math.min(last, follow.slide) : preview;
+  const followCam = follow ? followVideo : null;
+  const myFace = initials(me.name);
+  const theirFace = presenter ? initials(presenter.name) : undefined;
   useEffect(() => {
     if (!stage || phase.k === "review") return;
-    stage.setCamera(camera.live);
-  }, [stage, camera.live, phase.k]);
+    // While following, the teammate's camera, or their initials until it has a picture; never this device's camera.
+    if (phase.k === "idle" && following) stage.setCamera(followCam, theirFace);
+    else stage.setCamera(camera.live, myFace);
+  }, [stage, camera.live, phase.k, following, followCam, myFace, theirFace]);
+  const placed = useRef(false);
   useEffect(() => {
-    if (stage && phase.k === "idle") stage.show(index, preview, { instant: true });
-  }, [stage, index, preview, phase.k]);
+    if (!stage || phase.k !== "idle") return;
+    stage.show(index, idleSlide, { instant: !following || !placed.current });
+    placed.current = true;
+  }, [stage, index, idleSlide, phase.k, following]);
 
   const finish = useCallback(async (auto: boolean) => {
     const r = rec.current;
@@ -254,10 +253,10 @@ function Booth({ deck, index, room, me, camera, phase, setPhase, onAssign }: {
   }, [setPhase, target]);
 
   const start = useCallback(() => {
-    if (!mine || !camera.stream || !stage || (phaseRef.current.k !== "idle" && phaseRef.current.k !== "review")) return;
+    if (!mine || following || !camera.stream || !stage || (phaseRef.current.k !== "idle" && phaseRef.current.k !== "review")) return;
     const token = ++attempt.current;
     (document.activeElement as HTMLElement | null)?.blur?.();
-    stage.setCamera(camera.live);
+    stage.setCamera(camera.live, initials(me.name));
     stage.show(index, 0, { instant: true });
     setReplaySlide(0);
     setElapsed(0);
@@ -277,7 +276,7 @@ function Booth({ deck, index, room, me, camera, phase, setPhase, onAssign }: {
         }, () => setPhase({ k: "idle" }));
       }, 3000),
     );
-  }, [camera.live, camera.stream, finish, index, mine, setPhase, stage, target]);
+  }, [camera.live, camera.stream, finish, following, index, me.name, mine, setPhase, stage, target]);
 
   const cancel = useCallback(() => {
     attempt.current++;
@@ -289,27 +288,40 @@ function Booth({ deck, index, room, me, camera, phase, setPhase, onAssign }: {
 
   const step = useCallback((d: 1 | -1) => {
     const p = phaseRef.current;
+    if (p.k === "idle" && !following) return setPreview(Math.min(last, Math.max(0, preview + d)));
     if (p.k !== "recording" || !stage) return;
     const slide = Math.min(last, Math.max(0, p.slide + d));
     if (slide === p.slide) return;
     cues.current = [...cues.current, { slide, atMs: Math.round(performance.now() - p.startedAt) }];
     stage.show(index, slide);
     setPhase({ ...p, slide });
-  }, [index, last, setPhase, stage]);
+  }, [following, index, last, preview, setPhase, setPreview, stage]);
 
-  // Leaving the group mid-take (or unmounting) never leaves a recorder running.
+  // Leaving the group mid-take (or unmounting) never leaves a recorder running, or the team following a take that ended.
   useEffect(() => () => {
     attempt.current++;
     clearTimers();
     rec.current?.cancel();
+    if (sent.current) send.current(null);
   }, []);
 
-  // The countdown timer.
+  // The countdown timer, and the live state the team follows (on start, on every slide change, ~4×/s).
   useEffect(() => {
-    if (phase.k !== "recording") return;
-    const t = window.setInterval(() => setElapsed(performance.now() - phase.startedAt), 100);
+    if (phase.k !== "recording") {
+      if (sent.current) send.current(null);
+      sent.current = false;
+      return;
+    }
+    const tick = () => {
+      const ms = performance.now() - phase.startedAt;
+      setElapsed(ms);
+      sent.current = true;
+      send.current({ presenterId: me.id, groupId: group.id, slide: phase.slide, recording: true, remainingMs: Math.max(0, target - ms), targetMs: target, at: Date.now() });
+    };
+    tick();
+    const t = window.setInterval(tick, 250);
     return () => window.clearInterval(t);
-  }, [phase]);
+  }, [phase, group.id, me.id, target]);
 
   // Review: the take is the camera and its cues drive the slides.
   const media = phase.k === "review" ? phase.media : null;
@@ -344,9 +356,9 @@ function Booth({ deck, index, room, me, camera, phase, setPhase, onAssign }: {
       v.load();
       URL.revokeObjectURL(url);
       replay.current = null;
-      stage.setCamera(camera.live);
+      stage.setCamera(camera.live, initials(me.name));
     };
-  }, [media, stage, index, camera.live]);
+  }, [media, stage, index, camera.live, me.name]);
 
   const keep = useCallback(async () => {
     if (!media) return;
@@ -365,15 +377,17 @@ function Booth({ deck, index, room, me, camera, phase, setPhase, onAssign }: {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const el = e.target as HTMLElement;
-      if (el.closest("input, select, textarea") || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (el.closest("input, select, textarea, [role=menu]") || e.metaKey || e.ctrlKey || e.altKey) return;
       const p = phaseRef.current;
       if (e.key === "Escape" && (p.k === "countdown" || p.k === "recording")) {
         e.preventDefault();
         cancel();
-      } else if (p.k === "recording" && (e.key === " " || e.key === "ArrowRight")) {
+      } else if ((p.k === "recording" || p.k === "idle") && (e.key === " " || e.key === "ArrowRight")) {
+        if (p.k === "idle" && (e.key === " " || el.closest("button"))) return;
         e.preventDefault();
         step(1);
-      } else if (p.k === "recording" && e.key === "ArrowLeft") {
+      } else if ((p.k === "recording" || p.k === "idle") && e.key === "ArrowLeft") {
+        if (p.k === "idle" && el.closest("button")) return;
         e.preventDefault();
         step(-1);
       } else if (p.k === "recording" && e.key === "Enter") {
@@ -388,81 +402,98 @@ function Booth({ deck, index, room, me, camera, phase, setPhase, onAssign }: {
     return () => window.removeEventListener("keydown", onKey);
   }, [cancel, finish, start, step]);
 
-  const current = phase.k === "recording" ? phase.slide : phase.k === "review" ? replaySlide : phase.k === "countdown" ? 0 : null;
-  const remaining = phase.k === "recording" ? target - elapsed : target;
+  const current = phase.k === "recording" ? phase.slide : phase.k === "review" ? replaySlide : phase.k === "countdown" ? 0 : follow ? idleSlide : null;
+  const onStage = current ?? preview;
+  useEffect(() => onShown(onStage), [onStage, onShown]);
+
+  // The left column's clock: my take, the teammate's take, or the group's planned length.
+  const followLeft = follow ? Math.max(0, follow.remainingMs - (Date.now() - follow.at)) : 0;
+  const left = phase.k === "recording" ? Math.max(0, target - elapsed) : follow ? followLeft : target;
+  const span = follow ? follow.targetMs || target : target;
+  const live = phase.k === "recording" || !!follow;
+  const fill = phase.k === "review" ? elapsed / phase.media.durationMs : live ? 1 - left / span : 0;
+  const ending = live && left <= 10_000;
 
   return (
-    <div className="st-booth">
-      <header className="st-booth-head">
-        <h1 className="st-title">{group.name}</h1>
-        <span className="st-booth-who">
-          {assignee ? <><Icon name="user" size={14} />{assignee.id === me.id ? "You" : assignee.name}</> : null}
-        </span>
-      </header>
-      <StageCanvas deck={deck} onStage={setStage}>
-        {phase.k === "countdown" && <div className="st-count" aria-live="assertive">{phase.n}</div>}
-        {phase.k === "recording" && <div className="st-progress" style={{ transform: `scaleX(${Math.min(1, elapsed / target)})` }} />}
-        {phase.k === "review" && <div className="st-progress is-review" style={{ transform: `scaleX(${Math.min(1, elapsed / phase.media.durationMs)})` }} />}
-      </StageCanvas>
+    <>
+      <aside className="st-ctl" aria-label="Recording">
+        <div className={`st-clock${live ? " is-live" : ""}${ending ? " is-ending" : ""}`} aria-live="off">
+          {phase.k === "review" ? <>{clock(elapsed)}<small>/ {clock(phase.media.durationMs)}</small></> : clock(left)}
+        </div>
+        <div className={`st-track${ending ? " is-ending" : ""}${phase.k === "review" ? " is-review" : ""}`} role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(Math.min(1, fill) * 100)}>
+          <span style={{ transform: `scaleX(${Math.min(1, Math.max(0, fill))})` }} />
+        </div>
 
-      <div className="st-bar">
-        {phase.k === "idle" && (mine ? (
-          <button type="button" className={`cf-btn is-lg st-rec${take ? "" : " is-primary"}`} onClick={start} disabled={!camera.stream || !stage}>
-            <span className="st-dot" />{take ? "Retake" : "Record"}<kbd className="cf-kbd">R</kbd>
-          </button>
-        ) : assignee ? (
-          <span className="st-blocked"><Icon name="user" size={14} />{assignee.name} records this</span>
-        ) : (
-          <button type="button" className="cf-btn is-lg" onClick={() => onAssign(me.id)}>Record this one</button>
-        ))}
-        {phase.k === "countdown" && (
-          <button type="button" className="cf-btn is-lg" onClick={cancel}>Cancel<kbd className="cf-kbd">Esc</kbd></button>
-        )}
-        {phase.k === "recording" && (
-          <>
-            <button type="button" className="cf-btn is-lg" onClick={() => void finish(false)} aria-label="Stop">
+        <div className="st-actions">
+          {phase.k === "idle" && (follow ? (
+            <span className="st-who-live"><span className="st-live" aria-hidden="true" />{presenter ? firstName(presenter.name) : "Recording"}</span>
+          ) : mine ? (
+            <button type="button" className={`cf-btn is-lg st-rec${take ? "" : " is-primary"}`} onClick={start} disabled={!camera.stream || !stage}>
+              <span className="st-dot" />{take ? "Retake" : "Record"}<kbd className="cf-kbd">R</kbd>
+            </button>
+          ) : assignee ? (
+            <span className="st-blocked"><span className="st-who-chip">{initials(assignee.name)}</span>{firstName(assignee.name)} records this</span>
+          ) : (
+            <button type="button" className="cf-btn is-lg" onClick={() => onAssign(me.id)}>Record this one</button>
+          ))}
+          {phase.k === "countdown" && (
+            <button type="button" className="cf-btn is-lg" onClick={cancel}>Cancel<kbd className="cf-kbd">Esc</kbd></button>
+          )}
+          {phase.k === "recording" && (
+            <button type="button" className="cf-btn is-lg st-stopbtn" onClick={() => void finish(false)} aria-label="Stop">
               <span className="st-square" />Stop<kbd className="cf-kbd">Enter</kbd>
             </button>
-            <span className="st-steps">
-              <button type="button" className="cf-icon-btn st-step" onClick={() => step(-1)} disabled={phase.slide === 0} aria-label="Previous slide" title="Previous slide (←)">
-                <Icon name="prev" size={18} />
+          )}
+          {phase.k === "review" && (
+            <>
+              <button type="button" className="cf-btn is-primary is-lg" onClick={() => void keep()}>
+                <Icon name="check" size={16} stroke={2.2} />Keep
               </button>
-              <span className="st-step-n">{phase.slide + 1} / {last + 1}</span>
-              <button type="button" className="cf-icon-btn st-step" onClick={() => step(1)} disabled={phase.slide === last} aria-label="Next slide" title="Next slide (→)">
-                <Icon name="next" size={18} />
+              <button type="button" className="cf-btn is-lg" onClick={start}>
+                <Icon name="restart" size={15} />Retake
               </button>
-            </span>
-          </>
-        )}
-        {phase.k === "review" && (
-          <>
-            <button type="button" className="cf-btn is-primary is-lg" onClick={() => void keep()}>
-              <Icon name="check" size={16} stroke={2.2} />Keep
-            </button>
-            <button type="button" className="cf-btn is-lg" onClick={start}>
-              <Icon name="restart" size={15} />Retake
-            </button>
-            <button type="button" className="cf-icon-btn" onClick={again} aria-label="Play again" title="Play again">
-              <Icon name="play" size={16} />
-            </button>
-            <button type="button" className="cf-icon-btn" onClick={() => setPhase({ k: "idle" })} aria-label="Discard take" title="Discard">
-              <Icon name="x" size={16} />
-            </button>
-          </>
-        )}
-        <span className={`st-timer${phase.k === "recording" ? " is-live" : ""}`} aria-live="off">
-          {phase.k === "recording" && <span className="st-live" aria-label="Recording" />}
-          {phase.k === "review" ? `${clock(elapsed)} / ${clock(phase.media.durationMs)}` : clock(remaining)}
-        </span>
+              <span className="st-review-more">
+                <button type="button" className="cf-icon-btn" onClick={again} aria-label="Play again" title="Play again">
+                  <Icon name="play" size={16} />
+                </button>
+                <button type="button" className="cf-icon-btn" onClick={() => setPhase({ k: "idle" })} aria-label="Discard take" title="Discard">
+                  <Icon name="x" size={16} />
+                </button>
+              </span>
+            </>
+          )}
+        </div>
+
+        <div className="st-steps">
+          <button type="button" className="cf-icon-btn" onClick={() => step(-1)} disabled={phase.k === "countdown" || phase.k === "review" || following || onStage === 0} aria-label="Previous slide" title="Previous slide (←)">
+            <Icon name="prev" size={18} />
+          </button>
+          <span className="st-step-n">{onStage + 1} / {last + 1}</span>
+          <button type="button" className="cf-icon-btn" onClick={() => step(1)} disabled={phase.k === "countdown" || phase.k === "review" || following || onStage === last} aria-label="Next slide" title="Next slide (→)">
+            <Icon name="next" size={18} />
+          </button>
+        </div>
+      </aside>
+
+      <div className="st-stage-cell">
+        <StageCanvas deck={deck} onStage={setStage}>
+          {phase.k === "countdown" && <div className="st-count" aria-live="assertive">{phase.n}</div>}
+        </StageCanvas>
       </div>
 
-      <Transcript
-        group={group}
-        current={current}
-        onPick={phase.k === "idle" ? setPreview : undefined}
-        picked={phase.k === "idle" ? preview : null}
-      />
-    </div>
+      <section className="st-script-col" aria-label={group.name}>
+        <h1 className="st-script-title">
+          <span className="st-script-dot" style={{ background: groupColor(index) }} aria-hidden="true" />
+          {group.name}
+        </h1>
+        <Transcript
+          group={group}
+          current={current}
+          onPick={phase.k === "idle" && !follow ? setPreview : undefined}
+          picked={phase.k === "idle" && !follow ? preview : null}
+        />
+      </section>
+    </>
   );
 }
 
@@ -476,16 +507,23 @@ function Transcript({ group, current, picked, onPick }: { group: Group; current:
     if (el && list.current) list.current.scrollTo({ top: Math.max(0, el.offsetTop - 18), behavior: "smooth" });
   }, [current]);
   const last = group.script.length - 1;
+  const at = current ?? picked ?? -1;
   const items = useMemo(() => group.script.map((text, i) => ({ text, i })), [group.script]);
   return (
     <ol ref={list} className={`st-script${current !== null ? " is-following" : ""}`} aria-label="Transcript">
       {items.map(({ text, i }) => (
-        <li key={i} ref={(el) => { refs.current[i] = el; }} className={`st-seg${current === i ? " is-now" : ""}${picked === i ? " is-picked" : ""}`}>
-          <button type="button" className="st-seg-hit" onClick={onPick ? () => onPick(i) : undefined} disabled={!onPick} aria-label={`Slide ${i + 1}`}>
-            <span className="st-seg-n">{i + 1}</span>
-            <span className="st-seg-text">{text}</span>
+        <li key={i} ref={(el) => { refs.current[i] = el; }} className={`st-seg${i === at ? " is-now" : i < at ? " is-past" : ""}`}>
+          <button type="button" className="st-seg-hit" onClick={onPick ? () => onPick(i) : undefined} disabled={!onPick} aria-current={i === at || undefined}>
+            <span className="st-seg-n" aria-label={`Slide ${i + 1}`}>{i + 1}</span>
+            <span className="st-seg-text">
+              {text}
+              {i < last ? (
+                <span className="st-next" role="img" aria-label="Next slide"><Icon name="next-arrow" size={15} stroke={2.2} /></span>
+              ) : (
+                <span className="st-stop" role="img" aria-label="Stop" />
+              )}
+            </span>
           </button>
-          {i < last ? <span className="st-next" aria-label="Next slide">→</span> : <span className="st-stop" aria-label="Stop" />}
         </li>
       ))}
     </ol>

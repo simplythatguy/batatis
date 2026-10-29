@@ -3,6 +3,8 @@
 A room holds people, who presents each slide group, and one recorded take per group.
 Takes arrive in fixed-size chunks so each request stays under the host's 4.5 MB body cap.
 Every write locks the room row first and bumps `updated_at`, which clients poll.
+Signals are the WebRTC handshake between two people's browsers: a per-room sequence orders them, readers poll
+by cursor, and nothing outlives ten minutes. They do not touch `updated_at`, so the room poll stays quiet.
 """
 from __future__ import annotations
 
@@ -20,6 +22,11 @@ MAX_PEOPLE = 12
 ROOM_SECONDS = 14 * 24 * 60 * 60
 CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
 CODE_LENGTH = 6
+SIGNAL_KINDS = ('offer', 'answer', 'candidate', 'bye')
+SIGNAL_DATA_BYTES = 64 * 1024
+SIGNAL_MS = 10 * 60 * 1000
+SIGNAL_PAGE = 200
+ROOM_MAX_SIGNALS = 2000
 
 MIGRATIONS = (
     """CREATE TABLE IF NOT EXISTS studio_rooms (
@@ -55,6 +62,20 @@ MIGRATIONS = (
         idx INTEGER NOT NULL,
         data BYTEA NOT NULL,
         PRIMARY KEY(take_id, idx))""",
+    """CREATE TABLE IF NOT EXISTS studio_signal_heads (
+        room_code TEXT PRIMARY KEY REFERENCES studio_rooms(code) ON DELETE CASCADE,
+        last BIGINT NOT NULL)""",
+    """CREATE TABLE IF NOT EXISTS studio_signals (
+        room_code TEXT NOT NULL REFERENCES studio_rooms(code) ON DELETE CASCADE,
+        seq BIGINT NOT NULL,
+        from_id TEXT NOT NULL,
+        to_id TEXT NOT NULL,
+        kind TEXT NOT NULL,
+        data TEXT NOT NULL,
+        at BIGINT NOT NULL,
+        PRIMARY KEY(room_code, seq))""",
+    'CREATE INDEX IF NOT EXISTS studio_signals_to ON studio_signals(room_code, to_id, seq)',
+    'CREATE INDEX IF NOT EXISTS studio_signals_at ON studio_signals(at)',
 )
 
 
@@ -217,3 +238,39 @@ class StudioStore:
             if row is None:
                 raise HTTPException(404, 'Chunk not found')
             return bytes(row[0])
+
+    def send_signal(self, code: str, *, from_id: str, to_id: str, kind: str, data: str) -> int:
+        """Queue one signal for `to_id` and return its sequence number. Expired signals go first."""
+        if from_id == to_id:
+            raise HTTPException(422, 'A signal goes to someone else')
+        with self.store.account_db() as db:
+            code = self._room(db, code, lock=False)
+            self._person(db, code, from_id)
+            self._person(db, code, to_id)
+            now = int(time.time() * 1000)
+            db.execute('DELETE FROM studio_signals WHERE at<?', (now - SIGNAL_MS,))
+            if db.execute('SELECT COUNT(*) FROM studio_signals WHERE room_code=?', (code,)).fetchone()[0] >= ROOM_MAX_SIGNALS:
+                raise HTTPException(429, 'Too many signals; try again shortly')
+            # The head row is the per-room counter; its row lock orders concurrent senders.
+            seq = int(db.execute('INSERT INTO studio_signal_heads(room_code,last) VALUES (?,1) ON CONFLICT(room_code) '
+                                 'DO UPDATE SET last=studio_signal_heads.last+1 RETURNING last', (code,)).fetchone()[0])
+            db.execute('INSERT INTO studio_signals(room_code,seq,from_id,to_id,kind,data,at) VALUES (?,?,?,?,?,?,?)',
+                       (code, seq, from_id, to_id, kind, data, now))
+            return seq
+
+    def signals(self, code: str, to_id: str, after: int | None) -> dict:
+        """Signals for `to_id` after the cursor, oldest first, and the cursor to send next time.
+        Without a cursor only the current cursor comes back, so a new page skips what was meant for its predecessor."""
+        with self.store.account_db() as db:
+            code = self._room(db, code, lock=False)
+            self._person(db, code, to_id)
+            row = db.execute('SELECT last FROM studio_signal_heads WHERE room_code=?', (code,)).fetchone()
+            head = int(row[0]) if row else 0
+            if after is None:
+                return {'signals': [], 'last': head}
+            rows = db.execute('SELECT seq,from_id,kind,data,at FROM studio_signals WHERE room_code=? AND to_id=? '
+                              'AND seq>? AND seq<=? AND at>=? ORDER BY seq LIMIT ?',
+                              (code, to_id, after, head, int(time.time() * 1000) - SIGNAL_MS, SIGNAL_PAGE)).fetchall()
+            signals = [{'seq': int(r[0]), 'from': r[1], 'kind': r[2], 'data': json.loads(r[3]), 'at': int(r[4])}
+                       for r in rows]
+            return {'signals': signals, 'last': signals[-1]['seq'] if len(signals) == SIGNAL_PAGE else head}

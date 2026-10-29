@@ -1,15 +1,16 @@
 """Demo Studio rooms: the team joins by code, assigns slide groups, and shares recorded takes in chunks."""
 from __future__ import annotations
 
-from typing import Annotated, Callable
+import json
+from typing import Annotated, Any, Callable, Literal
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request, Response
 from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 from pydantic.alias_generators import to_camel
 
 from .accounts import require_user
-from .studio_store import CHUNK_BYTES, StudioStore, TAKE_MAX_BYTES
+from .studio_store import CHUNK_BYTES, SIGNAL_DATA_BYTES, StudioStore, TAKE_MAX_BYTES
 
 GroupId = Annotated[str, StringConstraints(pattern=r'^[a-z0-9-]{1,40}$')]
 Code = Annotated[str, Path(pattern=r'^[A-Za-z0-9]{6}$')]
@@ -73,6 +74,34 @@ class Received(Camel):
     received: int
 
 
+PersonId = Annotated[str, StringConstraints(min_length=1, max_length=40)]
+SignalKind = Literal['offer', 'answer', 'candidate', 'bye']
+
+
+class NewSignal(Camel):
+    from_: PersonId = Field(alias='from')
+    to: PersonId
+    kind: SignalKind
+    data: Any = None
+
+
+class Sent(Camel):
+    seq: int
+
+
+class Signal(Camel):
+    seq: int
+    from_: str = Field(alias='from')
+    kind: SignalKind
+    data: Any
+    at: int
+
+
+class Signals(Camel):
+    signals: list[Signal]
+    last: int
+
+
 def create_router(cases: Callable) -> APIRouter:
     router = APIRouter(tags=['demo studio'], dependencies=[Depends(require_user)])
     state: dict = {}
@@ -121,5 +150,17 @@ def create_router(cases: Callable) -> APIRouter:
     @router.get('/studio/rooms/{code}/takes/{take_id}/chunks/{index}')
     def get_chunk(code: Code, take_id: str, index: Index):
         return Response(studio().get_chunk(code, take_id, index), media_type='application/octet-stream')
+
+    @router.post('/studio/rooms/{code}/signals', response_model=Sent, status_code=201)
+    def send_signal(code: Code, body: NewSignal):
+        data = json.dumps(body.data, separators=(',', ':'))
+        if len(data.encode()) > SIGNAL_DATA_BYTES:
+            raise HTTPException(413, f'Signal data is at most {SIGNAL_DATA_BYTES} bytes')
+        return {'seq': studio().send_signal(code, from_id=body.from_, to_id=body.to, kind=body.kind, data=data)}
+
+    @router.get('/studio/rooms/{code}/signals', response_model=Signals)
+    def signals(code: Code, to: Annotated[str, Query(min_length=1, max_length=40)],
+                after: Annotated[int | None, Query(ge=0)] = None):
+        return studio().signals(code, to, after)
 
     return router

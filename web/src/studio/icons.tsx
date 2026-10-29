@@ -7,6 +7,7 @@ const P = {
   x: <path d="M18 6 6 18M6 6l12 12" />,
   prev: <path d="m15 18-6-6 6-6" />,
   next: <path d="m9 18 6-6-6-6" />,
+  "next-arrow": <path d="M5 12h14M13 6l6 6-6 6" />,
   back: <path d="M19 12H5M11 18l-6-6 6-6" />,
   play: <path d="M7 4.5v15a.5.5 0 0 0 .77.42l11.5-7.5a.5.5 0 0 0 0-.84L7.77 4.08A.5.5 0 0 0 7 4.5z" />,
   restart: <><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></>,

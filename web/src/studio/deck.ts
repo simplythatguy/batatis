@@ -2,23 +2,6 @@ import type { Deck } from "./types";
 
 // The pitch, told like a 2007 keynote. Spoken at 120 words a minute; timing.ts turns the words into each group's
 // recording length. Sources and limits for every number: docs/studio/script.md.
-/** Reading cues in the scripts. They show in the studio transcript only and are never spoken.
- *  A line's first emoji is its tone; ⏸️ is a half-second beat; "..." slows between words; CAPS is stressed. */
-export const TONES: [string, string][] = [
-  ["🙂", "Warm, talking to a friend"],
-  ["😮", "Surprised by the number"],
-  ["😏", "Playful setup"],
-  ["🤔", "Ask the room, then wait"],
-  ["😬", "The pain, a little heavier"],
-  ["🔥", "The big line, slower and louder"],
-  ["😄", "Smile, enjoy it"],
-  ["💪", "Confident, matter of fact"],
-  ["😌", "Calm and honest"],
-  ["⏸️", "Half-second beat"],
-  ["...", "Slow down between the words"],
-  ["CAPS", "Louder: hit this word hard"],
-];
-
 export const deck: Deck = {
   title: "Batatis",
   team: ["Abdel Abdelwaly", "Omer Abdelwahab", "Alameen Elnur"],

@@ -1,9 +1,9 @@
 // The stage's scene machine: the slide on screen, the one it is dissolving from, the camera tile, and the rAF loop.
 // Slides are stills. The only motion is the dissolve between slides, app clips playing, the camera, and the logo cards.
 
-import type { Deck, Slide } from "../types";
+import type { Deck, Rect, Slide } from "../types";
 import { clipUrl, loadFonts } from "./assets";
-import { C, L, coverSource, frame, type Ctx } from "./draw";
+import { C, L, coverSource, font, frame, text, type Ctx } from "./draw";
 import { clamp01, inOutSine, outCubic } from "./ease";
 import { hasTitle, paintCard, paintSlide, paintTitle } from "./slides";
 
@@ -11,7 +11,8 @@ export const STAGE_W = 1920, STAGE_H = 1080;
 
 export interface Stage {
   show(group: number, slide: number, opts?: { instant?: boolean }): void;
-  setCamera(src: HTMLVideoElement | null): void;
+  /** The camera tile: `src` when it has frames, otherwise `initials` on a soft grey tile. Neither: no tile. */
+  setCamera(src: HTMLVideoElement | null, initials?: string): void;
   showCard(card: "intro" | "outro"): void;
   destroy(): void;
 }
@@ -87,7 +88,25 @@ class Clip {
   }
 }
 
-interface Cam { el: HTMLVideoElement; at: number; out?: number }
+interface Cam { el: HTMLVideoElement | null; initials?: string; at: number; out?: number }
+
+/** A frame to draw, from a camera whose track is still sending (an ended or muted track leaves its last frame behind). */
+function hasPicture(v: HTMLVideoElement): boolean {
+  if (v.readyState < 2 || !v.videoWidth) return false;
+  const src = v.srcObject;
+  return !(src instanceof MediaStream) || src.getVideoTracks().some((t) => t.readyState === "live" && !t.muted);
+}
+
+/** A camera with no picture: the presenter's initials in a white circle on the soft grey tile. */
+function paintInitials(c: Ctx, r: Rect, initials: string) {
+  const cx = r.x + r.w / 2, cy = r.y + r.h / 2, d = 132;
+  c.fillStyle = C.white;
+  c.beginPath();
+  c.arc(cx, cy, d / 2, 0, Math.PI * 2);
+  c.fill();
+  font(c, 500, 46, -0.01);
+  text(c, initials, cx, cy + 16, C.grey, "center");
+}
 
 export function makeStage(canvas: HTMLCanvasElement, deck: Deck, hooks: { beforePaint?: (now: number) => void } = {}): Stage {
   canvas.width = STAGE_W;
@@ -175,15 +194,18 @@ export function makeStage(canvas: HTMLCanvasElement, deck: Deck, hooks: { before
     ctx.save();
     ctx.globalAlpha = tile;
     frame(ctx, r, (c) => {
-      c.fillStyle = "#F3F4F6";
+      c.fillStyle = C.camera;
       c.fillRect(r.x, r.y, r.w, r.h);
       cams.forEach((cam, i) => {
         const v = cam.el;
-        if (v.readyState < 2 || !v.videoWidth) return;
+        const live = !!v && hasPicture(v);
+        if (!live && !cam.initials) return;
         c.save();
         c.globalAlpha = alphas[i] / tile;
-        const s = coverSource(v.videoWidth, v.videoHeight, r.w, r.h, 0.5, 0.42, 1.12);
-        c.drawImage(v, s.x, s.y, s.w, s.h, r.x, r.y, r.w, r.h);
+        if (live) {
+          const s = coverSource(v.videoWidth, v.videoHeight, r.w, r.h, 0.5, 0.42, 1.12);
+          c.drawImage(v, s.x, s.y, s.w, s.h, r.x, r.y, r.w, r.h);
+        } else paintInitials(c, r, cam.initials!);
         c.restore();
       });
     });
@@ -230,12 +252,12 @@ export function makeStage(canvas: HTMLCanvasElement, deck: Deck, hooks: { before
     showCard(which) {
       enter({ kind: "card", card: which }, "group");
     },
-    setCamera(el) {
+    setCamera(el, initials) {
       const now = performance.now();
       const top = cams[cams.length - 1];
-      if (top && top.el === el && top.out === undefined) return;
+      if (top && top.el === el && top.initials === initials && top.out === undefined) return;
       for (const c of cams) c.out ??= now;
-      if (el) cams.push({ el, at: cams.length || cur ? now : -Infinity });
+      if (el || initials) cams.push({ el, initials, at: cams.length || cur ? now : -Infinity });
     },
     destroy() {
       dead = true;
