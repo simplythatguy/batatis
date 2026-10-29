@@ -59,7 +59,8 @@ export function publicDetail(status: number, detail: string): string {
   const kind = failureKind(status, detail);
   if (kind === "unreachable") return "The review service did not respond.";
   if (/case not found/i.test(detail)) return "case not found";
-  if (/provision not found/i.test(detail)) return "provision not found";
+  if (/provision not found|requirement not found/i.test(detail)) return "This rule isn’t in your code check. Check the code again.";
+  if (/identify result not found/i.test(detail)) return "Check the code first.";
   if (kind === "missing-route") return "That isn't available yet.";
   if (kind === "codedb") return "The code database is not available.";
   if (status >= 500 && /[/\\]|BATATIS_/.test(detail)) return "The engine is missing a file it needs.";

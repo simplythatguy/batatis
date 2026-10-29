@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import re
 from typing import Literal
 
@@ -75,6 +76,8 @@ For each item return its exact key, exact cited source_ids, supported, a concret
 the inference or failure, and boundary: applicant_fact, labelled_assumption, requested_work, gap_question,
 professional_work or technical_verdict. Check the full batch and put any omissions, unsupported synthesis,
 or field-level generic/off-topic content in issues. Empty issues only if the whole batch is acceptable.
+issues holds only problems that make the batch unacceptable. Never put suggestions, improvements or notes
+on content you judge acceptable there; a thin but acceptable field is not an issue.
 """
 
 
@@ -130,40 +133,67 @@ def _items(batch: GeneratedBatch):
             yield f'{draft.field}#question:{index}', question, question.text + '\n' + question.why, 'gap_question'
 
 
-def validate(batch: GeneratedBatch, bundle: SourceBundle) -> None:
+def _item_problem(key, item, text, bundle: SourceBundle, sources, articles, attributions) -> str | None:
+    """Why this one claim or question may not be saved, or None."""
+    if not text.strip() or VERDICTS.search(text):
+        return f'{key} is empty or states a technical verdict (compliance, safety, adequacy or equivalence)'
+    if not bundle.inputs.professional_required and PROFESSIONAL_REQUIREMENT.search(text):
+        return f'{key} says a professional is required, but professional_required is false; keep it conditional'
+    for citation in item.sources:
+        source = sources.get(citation.source_id)
+        if not source or not citation.quote.strip() or citation.quote not in source.text:
+            return f'{key} cites a quote that is not word for word in its source'
+    if any(m.group().rstrip('.') not in articles for m in ARTICLE.finditer(text)):
+        return f'{key} names a code article that is not in allowed_articles'
+    if not set(ATTRIBUTIONS.findall(text)) <= attributions:
+        return f'{key} names an objective or functional statement that is not in the code sources'
+    quoted = '\n'.join(c.quote for c in item.sources)
+    # Article ids and sentence markers are checked against allowed_articles above, not as project numbers.
+    missing = set(NUMBERS.findall(REFERENCES.sub(' ', text))) - set(NUMBERS.findall(quoted))
+    if missing:
+        return (f'unsupported numeric fact: {", ".join(sorted(missing))} in {key} is not in its own quotes; '
+                'quote the passage that states it, or leave the number out')
+    if isinstance(item, DraftClaim) and item.kind == 'fact' and all(
+            sources[c.source_id].kind in {'guidance', 'precedent_structure'} for c in item.sources):
+        return f'{key} states a project fact from guidance or precedent only; make it an assumption or a question'
+    return None
+
+
+def without(batch: GeneratedBatch, keys: set[str]) -> GeneratedBatch:
+    """The batch without the claims and questions with these keys."""
+    return GeneratedBatch(drafts=[GeneratedField(
+        field=d.field,
+        claims=[c for i, c in enumerate(d.claims) if f'{d.field}#claim:{i}' not in keys],
+        questions=[q for i, q in enumerate(d.questions) if f'{d.field}#question:{i}' not in keys])
+        for d in batch.drafts])
+
+
+def check_fields(batch: GeneratedBatch, bundle: SourceBundle, removed: dict[str, str]) -> None:
+    """Every requested field keeps at least one item, grounded in this project. Raises the reason otherwise."""
+    sources = {s.id: s for s in bundle.sources}
+    for draft in batch.drafts:
+        if not draft.claims and not draft.questions:
+            why = [m for k, m in removed.items() if k.startswith(draft.field + '#')]
+            raise ValueError(f'{draft.field} has nothing left that may be saved' + (': ' + '; '.join(why) if why else ''))
+        used = [sources.get(c.source_id) for part in [*draft.claims, *draft.questions] for c in part.sources]
+        if not any(s and s.kind in {'description', 'fact', 'document'} for s in used):
+            raise ValueError(f'{draft.field} must cite at least one description, fact or document source')
+
+
+def validate(batch: GeneratedBatch, bundle: SourceBundle) -> tuple[GeneratedBatch, dict[str, str]]:
+    """The batch without any item that breaks a rule, and why each removed item was removed.
+
+    A broken item is dropped, never saved; a field left empty or ungrounded rejects the batch."""
     if len(batch.drafts) != len(bundle.inputs.fields) or {d.field for d in batch.drafts} != set(bundle.inputs.fields):
         raise ValueError('generated fields must exactly match the requested unfilled fields')
     sources = {s.id: s for s in bundle.sources}
     articles = allowed_articles(bundle)
     attributions = set(ATTRIBUTIONS.findall('\n'.join(s.text for s in bundle.sources if s.kind in {'code', 'section_c'})))
-    for draft in batch.drafts:
-        if not draft.claims and not draft.questions:
-            raise ValueError('empty draft without gap questions')
-        used = [sources.get(c.source_id) for part in [*draft.claims, *draft.questions] for c in part.sources]
-        if not any(s and s.kind in {'description', 'fact', 'document'} for s in used):
-            raise ValueError(f'{draft.field} must cite at least one description, fact or document source')
-    for key, item, text, _ in _items(batch):
-        if not text.strip() or VERDICTS.search(text):
-            raise ValueError('technical verdict or empty writing')
-        if not bundle.inputs.professional_required and PROFESSIONAL_REQUIREMENT.search(text):
-            raise ValueError('unsupported professional requirement')
-        for citation in item.sources:
-            source = sources.get(citation.source_id)
-            if not source or not citation.quote.strip() or citation.quote not in source.text:
-                raise ValueError('citation does not point to an actual supplied passage')
-        if any(m.group().rstrip('.') not in articles for m in ARTICLE.finditer(text)):
-            raise ValueError('unwhitelisted code article')
-        if not set(ATTRIBUTIONS.findall(text)) <= attributions:
-            raise ValueError('unwhitelisted objective or functional statement')
-        quoted = '\n'.join(c.quote for c in item.sources)
-        # Article ids and sentence markers are checked against allowed_articles above, not as project numbers.
-        missing = set(NUMBERS.findall(REFERENCES.sub(' ', text))) - set(NUMBERS.findall(quoted))
-        if missing:
-            raise ValueError(f'unsupported numeric fact: {", ".join(sorted(missing))} in {key} is not in its own quotes; '
-                             'quote the passage that states it, or leave the number out')
-        if isinstance(item, DraftClaim) and item.kind == 'fact' and all(
-                sources[c.source_id].kind in {'guidance', 'precedent_structure'} for c in item.sources):
-            raise ValueError('guidance/precedent structure does not establish a project fact')
+    removed = {key: problem for key, item, text, _ in _items(batch)
+               if (problem := _item_problem(key, item, text, bundle, sources, articles, attributions))}
+    kept = without(batch, set(removed))
+    check_fields(kept, bundle, removed)
+    return kept, removed
 
 
 def _usage(usage: dict, name: str) -> int | None:
@@ -172,6 +202,7 @@ def _usage(usage: dict, name: str) -> int | None:
 
 
 GENERATION_ATTEMPTS = 3
+_log = logging.getLogger(__name__)
 
 
 def _add_usage(total: dict, step: dict) -> dict:
@@ -196,8 +227,7 @@ def generate(bundle: SourceBundle, provider: DraftingProvider) -> DraftingRecord
                 raw, step = provider.call('applicant_drafts', SYSTEM, json.dumps(request, ensure_ascii=False),
                                           GeneratedBatch.model_json_schema())
                 usage = _add_usage(usage, step)
-                batch = GeneratedBatch.model_validate(raw)
-                validate(batch, bundle)
+                batch, removed = validate(GeneratedBatch.model_validate(raw), bundle)
                 keyed = [{'key': key, 'text': text, 'kind': boundary, 'sources': [s.model_dump() for s in item.sources]}
                          for key, item, text, boundary in _items(batch)]
                 raw_audit, step = provider.call('applicant_draft_audit', AUDIT_SYSTEM,
@@ -205,18 +235,23 @@ def generate(bundle: SourceBundle, provider: DraftingProvider) -> DraftingRecord
                 audit_usage = _add_usage(audit_usage, step)
                 audit = AuditBatch.model_validate(raw_audit)
                 expected = {key: (item, boundary) for key, item, _, boundary in _items(batch)}
-                if audit.issues or len(audit.items) != len(expected) or {a.key for a in audit.items} != set(expected):
-                    raise ValueError('an audit rejected it: ' + '; '.join(audit.issues or ['the audit was incomplete']))
-                failed = [item.key for item in audit.items
+                if len(audit.items) != len(expected) or {a.key for a in audit.items} != set(expected):
+                    raise ValueError('the audit did not return one verdict per item')
+                # An item the audit does not find supported by its own quotes is dropped like a rule break.
+                failed = {item.key: f'{item.key}: the audit found it unsupported by its quotes' for item in audit.items
                           if not item.supported or item.boundary != expected[item.key][1]
-                          or set(item.source_ids) != {s.source_id for s in expected[item.key][0].sources}]
-                if failed:
-                    raise ValueError('an audit found these items unsupported by their quotes: ' + ', '.join(failed))
+                          or set(item.source_ids) != {s.source_id for s in expected[item.key][0].sources}}
+                removed |= failed
+                batch = without(batch, set(failed))
+                check_fields(batch, bundle, removed)
+                if removed:      # keys only: the model's own reasons can quote the applicant's text
+                    _log.info('draft attempt %d dropped %s', attempt + 1, ', '.join(sorted(removed)))
                 break
             except ValueError as error:
+                rejected = 'the output did not match the schema' if isinstance(error, ValidationError) else str(error)
+                _log.warning('draft attempt %d rejected: %s', attempt + 1, rejected)
                 if attempt + 1 == GENERATION_ATTEMPTS:
                     raise
-                rejected = 'the output did not match the schema' if isinstance(error, ValidationError) else str(error)
     except Exception as error:
         # Provider text/errors can contain private input. Never expose the raw payload, or save a partial batch.
         raise DraftingUnavailable('Drafting unavailable: generation or grounding validation failed; no writing was saved.') from error

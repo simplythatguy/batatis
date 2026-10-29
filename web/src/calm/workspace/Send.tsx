@@ -67,7 +67,7 @@ export function Send({ download, workspace, sections, zoom }: { download: "" | "
     const professional = professionalHoldReason(ex.blocking);
     if (professional && !work.officer.length && !work.checkNeeded.length && (!readOnly || checked)) holds.push({ tone: "warning", text: professional });
   }
-  const route = professionalRouteNote(ex.blocking);
+  const route = professionalRouteNote(ex.blocking, readOnly);
   const pack = extras.pack?.pack ?? null;
   const notices = pack?.notices.filter(n => n.surfaces.includes("export_header") || n.surfaces.includes("export_appendix")) ?? [];
   let shown = 0;

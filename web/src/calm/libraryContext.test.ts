@@ -3,7 +3,7 @@ import test from "node:test";
 import { componentHarness } from "../../scripts/component-harness.mjs";
 import * as relevance from "./relevance.ts";
 import { chooseContext, contextOptions, KEEP_OPEN_NOTE, NO_APPLICATION, switchApplication } from "./libraryContext.ts";
-import type { ApplicationSummary } from "../api/accounts";
+import { accounts, type ApplicationSummary } from "../api/accounts";
 
 class CodeLibraryError extends Error {}
 
@@ -223,6 +223,17 @@ const app = (id: string, over: Partial<ApplicationSummary> = {}): ApplicationSum
   completeness: { answered: 1, total: 4 }, unread_messages: 0, reviewer: null, archived: false, pinned: false, ...over,
 });
 
+test("the code library picker accepts an untitled application from the server", async () => {
+  const original = globalThis.fetch;
+  globalThis.fetch = async () => Response.json({ applications: [{ ...app("case-untitled"), title: null }] });
+  try {
+    const applications = await accounts.applications();
+    assert.equal(contextOptions(applications, "case-untitled")[0].title, "Untitled application");
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
 test("the options are the account's own applications with their short titles; archived ones only when open", () => {
   const items = [
     app("case-old", { title: "Old porch", updated_at: "2026-10-01T10:00:00Z" }),
@@ -317,5 +328,21 @@ test("Add writes to the application the library reads for, and its note never fo
   const b = await h.render(props);
   assert.doesNotMatch(text(b), /Added as a Code check card/, "B was never given this article");
   assert.ok(button(b), "B can add it itself");
+  h.unmount();
+});
+
+test("a made-up article link shows one not-found state and never cites the article", async () => {
+  const missing = Object.assign(new Error("That provision was not found."), { status: 404, detail: "That provision was not found." });
+  const h = await componentHarness(new URL("./CodeLibrary.tsx", import.meta.url), "Reading", {
+    "./codeData": { useText: () => ({ state: "error", error: missing, retry() {} }), useContext: () => ({ state: "error", error: missing, retry() {} }), errorText: (e: Error) => ({ text: e.message }) },
+    "./codeScope": { useCodeScope: () => "application" },
+    "./routes": { codeHref: () => "#/code" },
+    "./ui": { CIcon: () => null },
+  });
+  const tree = await h.render({ id: "99.99.99.", filter: "all", index: new Map(), narrow: false });
+  const shown = text(tree);
+  assert.doesNotMatch(shown, /Article 99\.99\.99\.|NBC\(AE\)/, "no citation for a provision that does not exist");
+  assert.equal(nodes(tree, (n: { type: unknown }) => n.type === "button").length, 0, "no Try again for a missing provision");
+  assert.equal(shown.match(/not in the code/g)?.length, 1);
   h.unmount();
 });

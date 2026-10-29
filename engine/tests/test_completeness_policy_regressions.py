@@ -242,8 +242,7 @@ def test_two_public_facts_keep_pending_process_confirmation_action(context, path
     response = client.post(f'/api/cases/{case_id}/completeness', json={})
     assert response.status_code == 200
     elements = [e for s in response.json()['reviews'][0]['sections'] for e in s['elements']]
-    assert any('unconfirmed pointed fact "process.risk"' in r
-               for r in response.json()['reviews'][0]['export_reasons'])
+    assert 'Risk assessment is not confirmed yet.' in response.json()['reviews'][0]['export_reasons']
     assert any(e['verdict'] in ('missing', 'unclear') and e['in_export_preflight']
                and e['severity'] == 'blocking' and e['prompt']
                and e['prompt']['field'] == pending.field
@@ -275,7 +274,7 @@ def test_pending_process_alias_action_and_public_resolution_preserve_export_poli
     requirement_reasons = [r for r in reasons if r.startswith('blocking gap in section D, professional_requirement:')]
     assert len(requirement_reasons) == 1, 'An unresolved officer determination is independent of process alias edits'
     process_reasons = [r for r in reasons if r not in requirement_reasons]
-    assert reasons[0] == f'unconfirmed {kind} fact "{target}" ({current.id})'
+    assert reasons[0] == f'{logical.replace("_", " ").capitalize()} is not confirmed yet.'  # plain words, no fact id
     if pathway == 'acceptable_solution':
         assert len(process_reasons) == 1
     else:

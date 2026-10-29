@@ -19,5 +19,5 @@ def require_admin(request: Request):
     from .accounts import require_user
     user = require_user(request)
     if not is_admin(user):
-        raise HTTPException(403, 'Only the site admin can do this')
+        raise HTTPException(403, 'Only the site admin can do this.')
     return user

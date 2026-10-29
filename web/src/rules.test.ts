@@ -37,7 +37,9 @@ test("the engine-down state is only an unreachable engine", () => {
   assert.equal(failureKind(404, "provision not found"), "other");
   assert.equal(failureKind(404, "identify result not found"), "other");
   assert.equal(publicDetail(404, "case not found"), "case not found");
-  assert.equal(publicDetail(404, "provision not found"), "provision not found");
+  assert.equal(publicDetail(404, "provision not found in this identification"), "This rule isn’t in your code check. Check the code again.");
+  assert.equal(publicDetail(404, "identify result not found"), "Check the code first.");
+  assert.doesNotMatch(publicDetail(404, "requirement not found"), /not found/);
   assert.doesNotMatch(publicDetail(404, "Not Found"), /no route/i);
   assert.doesNotMatch(publicDetail(404, "case not found"), /no route/i);
   assert.equal(failureKind(500, "Internal Server Error"), "other");
