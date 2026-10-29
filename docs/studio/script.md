@@ -11,7 +11,7 @@ The pitch lives in `web/src/studio/deck.ts` and is recorded at `/studio`. Every 
 | Right article first: 26 → 54 of 64 (10 of 64 not first) | `experiments/workflow-bakeoff-v2/RESULTS.md` ranking table; shipped config `engine/identify/pipeline.json` (`model_rank_toc: 12`) | 64 real Alberta records, article numbers removed from the descriptions |
 | Zero made-up articles shown | `docs/evaluations/workflow-bakeoff-v2-20261028.md` | Same 64 records |
 | First-time applicant 2.0 → 5.6 of 10 | `experiments/workflow-bakeoff-v2/RESULTS.md`, `README.md` | Simulated applicants, model grader, one run |
-| Under one dollar of AI per application (CA$0.97 measured; US$0.69 × 1.4057) | `docs/studio/measured-cost.md` (metered runs, 29 Oct 2026) | Metered on the Edmonton case; the officer's review uses no AI |
+| About a dollar twenty of AI per application (CA$1.23 average of 3 metered runs; US$0.88 × 1.4057) | `docs/studio/measured-cost.md` (29 Oct 2026) | Edmonton case only; C$1.08 without one draft our test script discarded; the officer's review uses no AI |
 | 435 places mapped to their office; live in Calgary and Edmonton | `docs/verification/every-place/README.md` | 43 of the 435 are outside Alberta; other places are a draft, switched off |
 | A new office is a data file, zero code changes | `docs/api/jurisdictions.md` (synthetic fourth pack test) | |
 | 13,743 provisions | `codedb/README.md` | NBC(AE) 2023, 2nd printing |

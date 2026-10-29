@@ -8,13 +8,18 @@ Completeness model review and the assistant call `authorize` before a provider r
 then `settle` with the reported tokens, or `release` when the call fails. The key is never
 logged or returned. Over the daily cap the caller takes the offline path with source `offline-cap`.
 
+`BATATIS_SPEND_LOG=<file>` appends one JSON line per settled call (model, tokens, US$, case, stage) so the
+cost of a whole application can be measured. Off by default.
+
 `BATATIS_PROVIDER=fake` lets identify's offline fakes pass this gate as if live, so the spend
 path is exercised without keys. It is refused when `VERCEL` is set and has no effect on
 `authorize` (the assistant and completeness never treat a fake as live).
 """
 from __future__ import annotations
 
+import json
 import os
+import sys
 import threading
 import time
 from dataclasses import dataclass
@@ -378,6 +383,35 @@ def record(*, model: str, input_tokens: int, output_tokens: int, reserved_usd: D
         return
     actual = estimate_usd(model, input_tokens, output_tokens)
     _adjust(ledger, actual - Decimal(str(reserved_usd)))
+    if os.environ.get('BATATIS_SPEND_LOG') and (input_tokens or output_tokens):
+        _log_spend(model, input_tokens or 0, output_tokens or 0, actual)
+
+
+_spend_log_lock = threading.Lock()
+# Metering wrappers, not the feature that spent: the stage is the first engine module outside these.
+_METERING = ('engine.llm_gate', 'engine.identify.providers')
+
+
+def _log_spend(model: str, input_tokens: int, output_tokens: int, usd: Decimal) -> None:
+    """Append one line to BATATIS_SPEND_LOG for measuring cost per application. Never prompts or keys.
+
+    `stage` is the calling engine module (for example `intake.model`); `case_id` is the nearest
+    caller's `case_id` variable. Either is null when the call stack does not show it.
+    """
+    stage = case_id = None
+    frame = sys._getframe(1)
+    while frame is not None and (stage is None or case_id is None):
+        module = frame.f_globals.get('__name__', '')
+        if stage is None and module.startswith('engine.') and module not in _METERING:
+            stage = module.removeprefix('engine.')
+        if case_id is None and isinstance(frame.f_locals.get('case_id'), str):
+            case_id = frame.f_locals['case_id']
+        frame = frame.f_back
+    line = json.dumps({'ts': datetime.now(timezone.utc).isoformat(timespec='seconds'), 'model': model,
+                       'input_tokens': input_tokens, 'output_tokens': output_tokens, 'usd': float(usd),
+                       'case_id': case_id, 'stage': stage})
+    with _spend_log_lock, open(os.environ['BATATIS_SPEND_LOG'], 'a', encoding='utf-8') as out:
+        out.write(line + '\n')
 
 
 def search_retry_after(client_ip: str) -> int | None:

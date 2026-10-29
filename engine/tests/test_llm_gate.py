@@ -133,3 +133,31 @@ def test_postgres_spend_connection_is_created_once(monkeypatch, hosted_account_w
     assert authorize(max_input_tokens=10, max_output_tokens=10).allowed
     assert len(created) == 1
     assert llm_gate._memory.today() == 0
+
+
+def test_spend_log_appends_one_line_per_settled_call(tmp_path, monkeypatch):
+    import json
+    from unittest.mock import ANY
+    from engine import ai_access, anthropic_json, drafting_provider
+
+    monkeypatch.setenv('BATATIS_LIVE', '1')
+    monkeypatch.setenv('ANTHROPIC_API_KEY', 'sk-ant-test-secret')
+    monkeypatch.setattr(ai_access, 'allowed', lambda: True)
+    monkeypatch.setattr(anthropic_json, 'call', lambda *a, **k: ({}, {'input_tokens': 1000, 'output_tokens': 200}))
+    draft = drafting_provider.configured_provider().call
+
+    def draft_section(case_id):
+        draft('section_d', 'system prompt', 'applicant text', {})
+
+    draft_section('case_abc')
+    assert list(tmp_path.iterdir()) == []                     # off unless BATATIS_SPEND_LOG names a file
+
+    log = tmp_path / 'spend.jsonl'
+    monkeypatch.setenv('BATATIS_SPEND_LOG', str(log))
+    draft_section('case_abc')
+    record(model='claude-haiku-5-5', input_tokens=0, output_tokens=0)   # a released reservation spent nothing
+    text = log.read_text()
+    assert [json.loads(line) for line in text.splitlines()] == [
+        {'ts': ANY, 'model': 'claude-sonnet-5-5', 'input_tokens': 1000, 'output_tokens': 200, 'usd': 0.004,
+         'case_id': 'case_abc', 'stage': 'drafting_provider'}]
+    assert 'prompt' not in text and 'applicant' not in text and 'secret' not in text
