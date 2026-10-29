@@ -224,3 +224,44 @@ def test_with_the_search_off_the_rank_is_todays(codes):
     assert len(calls) == 1 and stage(result, 'model_search') is None
     assert seen['pool'] == pool(deterministic, PROSE, Path(codes.db_path))
     assert result.trace.added == [] and 'model_rank_toc' not in result.trace.config
+
+
+def test_a_heading_or_a_few_words_is_not_a_quote_that_adds_an_article(codes, outside):
+    """The card the model reads starts with the title and headings; only the article's own text is a quote."""
+    texts = articles(codes.db_path)
+    found = next(a for a in outside if normalize(texts[a]['title']) not in normalize(texts[a]['text']))
+    for quote in (texts[found]['title'], ' '.join(texts[found]['text'].split()[:5])):
+        picker = lambda user, quote=quote: [{'article': found, 'quote': quote, 'reason': 'r', 'confidence': 0.9}]
+        result, _ = ranked(codes, picker=picker, searcher=lambda user: [{'id': found, 'why': 'w'}])
+        assert found not in result.trace.added
+        assert found not in {r.provision_id for r in result.requirements}
+
+
+def test_an_added_part_9_article_gets_the_same_scope_warning_as_discovered_ones(codes, outside):
+    from engine.models import Fact, Source
+    found = next(a for a in outside if a.startswith('9.'))
+    storeys = Fact(field='storeys', value=8, status='confirmed', kind='pointed', source=Source(type='user_text', ref='applicant'))
+    picker = lambda user: [{'article': found, 'quote': quote_of(user, found), 'reason': 'r', 'confidence': 0.9}]
+    fake = fakes.FakeAnthropic(picker, lambda user: [{'id': found, 'why': 'w'}])
+    ranker = RankVerifier(codes.db_path, client=MeteredAnthropic(fake), model='claude-haiku-5-5')
+    result = run(PROSE, codes=codes, config=load_config(env=ON), ranker=ranker, facts=[storeys]).result
+    assert found in result.trace.added
+    warned = {r.provision_id: r.review_reasons for r in result.requirements if r.provision_id.startswith('9.')}
+    reason = next(reasons for article, reasons in warned.items() if article != found and reasons)
+    assert set(reason) <= set(warned[found])
+
+
+def test_an_added_article_survives_a_save_that_discovers_it_and_a_later_save_that_does_not(codes, outside):
+    found = outside[0]
+    picker = lambda user: [{'article': found, 'quote': quote_of(user, found), 'reason': 'r', 'confidence': 0.9}]
+    first, _ = ranked(codes, picker=picker, searcher=lambda user: [{'id': found, 'why': 'w'}])
+    assert found in first.trace.added
+
+    def save(prose, previous):
+        return run(prose, codes=codes, config=load_config(env=ON), previous=compact_identify(previous),
+                   ranker=None, rank=False).result
+
+    named = save(PROSE + f' See Article {found}', first)       # discovery reaches it this time
+    assert found in {r.provision_id for r in named.requirements} and found in named.trace.added
+    again = save(PROSE, named)                                   # and not this time
+    assert found in {r.provision_id for r in again.requirements}

@@ -35,6 +35,7 @@ LEDGER_N, KEYWORD_N, POOL_N = 45, 20, 60
 TOC_N, TOC_POOL_N = 12, 72
 CARD_CHARS = 700
 REASON_CHARS = 300
+OPENING_WORDS = 14             # an added article's quote, when a save has no other: its opening words
 
 RANK_SYSTEM = """You are the code-identification step of an assistant that prepares Alberta alternative-solution \
 (variance) applications under the National Building Code - 2023 Alberta Edition, 2nd printing (NBC(AE) 2023), \
@@ -228,6 +229,12 @@ def carry(result: IdentifyResult, previous: IdentifyResult, db: Path, facts=()) 
     """A save re-runs the deterministic search; the last model order, and the articles the model rank added,
     carry over without a new call. A stored result keeps its picks and ledger, not its article cards."""
     quotes = {r.provision_id: r.quote for r in previous.requirements if r.division == 'B'}
+    if any(not quotes.get(a) for a in previous.trace.added):
+        texts = articles(Path(db))          # discovery reached it last time, by reference, with no quote
+        quotes.update({a: ' '.join(texts[a]['text'].split()[:OPENING_WORDS]) for a in previous.trace.added
+                       if not quotes.get(a) and a in texts})
     _add(result, db, facts, [(a, quotes[a]) for a in previous.trace.added if quotes.get(a)])
+    ledger = {r.provision_id for r in result.requirements if r.division == 'B'}
+    result.trace.added = [a for a in previous.trace.added if a in ledger]
     reasons = {a.provision: a.reason for a in previous.articles if a.verifier == 'picked'}
     apply(result, [(a, reasons.get(a)) for a in previous.trace.picks])

@@ -266,8 +266,6 @@ def run(prose: str, *, codes: Codes, config: IdentifyConfig | None = None, trans
         from .scope import assess
         finish = time.monotonic()
         preserve(result, previous, codes)
-        if result.requirement_coverage.source is not None:
-            result.scope_assessments = assess(codes, facts, result)
         order(result, prose)
         if config.model_rank == 'anthropic' or ranker is not None:
             from .model_rank import carry, model_rank
@@ -277,6 +275,8 @@ def run(prose: str, *, codes: Codes, config: IdentifyConfig | None = None, trans
                            toc=config.model_rank_toc, facts=facts)
             elif not rank and previous is not None:
                 carry(result, previous, Path(codes.db_path), facts)
+        if result.requirement_coverage.source is not None:      # after the rank: it may have added Part 9 rows
+            result.scope_assessments = assess(codes, facts, result)
         compact(result)
         result.trace.seconds = round(result.trace.seconds + time.monotonic() - finish, 3)
         return RunOutput(result, None, None)

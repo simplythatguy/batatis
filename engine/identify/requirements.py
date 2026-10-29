@@ -22,7 +22,7 @@ from engine.models_identify import (BenchmarkRecord, IdentifyArticle, IdentifyRe
                                     RequirementGap, RequirementRecord, StageRecord)
 
 from .config import IdentifyConfig
-from .corpus import articles, card
+from .corpus import articles
 from .requirement_corpus import LIMITS, Corpus, Key, SourceUnavailable, load, qualified
 from .requirement_graph import build, external_gaps, references
 
@@ -380,6 +380,9 @@ def _flat(text: str | None) -> str:
     return ' '.join((text or '').split())
 
 
+QUOTE_WORDS = 6                                   # the rank prompt asks for a quote of 6 to 40 words
+
+
 def add_found(result: IdentifyResult, db_path, facts, found: list[tuple[str, str]]) -> list[str]:
     """Add Division B articles the model rank picked that discovery did not reach. Returns the added ids.
 
@@ -399,7 +402,9 @@ def add_found(result: IdentifyResult, db_path, facts, found: list[tuple[str, str
     added = []
     for article, quote in found:
         key, quote = ('B', article), _flat(quote)
-        if key not in corpus.articles or article not in texts or quote not in _flat(card(texts[article], None)):
+        body = _flat(texts[article]['text']) if article in texts else ''
+        # The card the model read starts with the title and headings; only the article's own text is a quote.
+        if key not in corpus.articles or len(quote.split()) < QUOTE_WORDS or quote not in body:
             continue
         sentences = [r for r in corpus.by_article.get(key, [])
                      if r['level'] == 'sentence' and quote in _flat(r.get('text'))]
