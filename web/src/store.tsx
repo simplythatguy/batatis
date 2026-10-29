@@ -262,6 +262,9 @@ function composeGaps(localCase: Case, source: Store["gapsSource"], engine: Engin
 const selectionSet = (c: Case) => selectionKey([...selectedArticles(c)].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)));
 
 
+
+/** How many times a superseded code check starts again by itself before the applicant is asked. */
+const IDENTIFY_RERUNS = 3;
 export function CaseProvider({ children }: { children: ReactNode }) {
   const editsPaused = useApplicationEditsPaused();
   const account = useAccount();
@@ -283,6 +286,8 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   const jobObservers = useRef(new Map<string, { ctl: AbortController; stop: () => void }>());
   const currentJobs = useRef(new Map<CaseJob["kind"], string>());
   const completedJobs = useRef(new Set<string>());
+  /** Code checks started again because the answers changed mid-check, per case; reset when one finishes. */
+  const identifyReruns = useRef(new Map<string, number>());
   const jobRequestKeys = useRef(new Map<string, { key: string; replaces?: string }>());
   const jobActionNotes = useRef(new Map<string, string>());
   const activeSubmit = useRef<{ generation: number; session: number; revision: number; caseId: string; dispatched: boolean; ctl: AbortController; promise: Promise<void> } | null>(null);
@@ -1003,7 +1008,20 @@ export function CaseProvider({ children }: { children: ReactNode }) {
   async function finishJob(job: CaseJob, live: () => boolean) {
     await whenEditsResume();
     if (!live() || completedJobs.current.has(job.id)) return;
-    if (job.state !== "succeeded") { jobProgress(job); return; }
+    if (job.state !== "succeeded") {
+      // Answering a question while the code is checked supersedes the check. Check again on the
+      // latest answers instead of reporting a failure, a few times per case.
+      const reruns = identifyReruns.current.get(job.case_id) ?? 0;
+      if (job.kind === "identify" && job.state === "superseded" && job.error?.code === "input_changed" && reruns < IDENTIFY_RERUNS) {
+        completedJobs.current.add(job.id);
+        identifyReruns.current.set(job.case_id, reruns + 1);
+        void startJob("identify").catch(() => jobProgress(job));
+        return;
+      }
+      jobProgress(job);
+      return;
+    }
+    if (job.kind === "identify") identifyReruns.current.delete(job.case_id);
     let continueIdentify = false;
     await enqueue(async () => {
       if (!live()) return;
