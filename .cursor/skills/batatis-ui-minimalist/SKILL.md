@@ -22,6 +22,8 @@ For each word, line, icon and control ask: does the person need it **now** to ta
 7. **Obvious questions are a label and a control.** "Request date" and a date field, then OK · Skip · Help. A subtitle that restates the field, "answer to continue" or "press Enter" lines, and a repeated "ask the assistant" invitation all go. The reason and the assistant sit behind the one Help entry on the card (the assistant exists for routine explanation); show text up front only when the control cannot carry it: the applicant's own quote, a validation error, a decision or professional boundary.
 8. **Titles are short names the person can change.** A title is a subject or purpose name of a few words ("Infill sheathing"), never the first sentence of the description and never with the city, status or code numbers attached; that context lives where it is used. Automatic names wait until there is real content to name; a name the person chose always wins and is never shortened in storage (the screen may ellipsize it). Rename in place wherever the title shows (double-click, F2 or Enter; Enter or blur saves; Escape cancels; caret at the end, no field box), and from the list row's ⋯.
 9. **Monotone; colour identifies.** Neutral by default. A hue marks where the person is (the current section or step, in a darker shade of its own hue) or tells crowded items apart; status dots keep their meaning. Never colour every section at once, never the global accent for "you are here", never a button fill.
+10. **Nothing above titles.** No eyebrow, section letter, stage name or tag over a title or question. The stage bar already says where the person is (user decision 2026-10-28: "everytime i generate new ui theres always little unneccesary text above the titles"). `.cf-eyebrow` is retired.
+11. **No box per item.** Places, choices, chips and suggestions are plain rows or inline text inside one component: no pill or tile each, never a box inside a box, and the active item is marked by ink, weight or a check, not a fill (user decision 2026-10-28: "999+ different boxes"). Most screens need only the page, the one primary button and a menu while it is open.
 
 ## Minimal, never hidden
 
@@ -66,7 +68,7 @@ Every icon-only control or icon metadata has an accessible name and a hover labe
 ## Example: a question card
 
 - Before: "What date is this request?" / "The date you submit this request." / date field / "Answer to continue, or skip for now." / OK · Why we ask · Skip for now / "Not sure what this means? Ask the assistant".
-- After: "Request date" / date field / OK · Skip · Help.
+- After: "Request date" / date field / OK · Skip · Help, with nothing above "Request date".
 - Code: titles and context in `web/src/calm/deck.ts`, the card shell and `HelpButton` in `web/src/calm/QuestionDeck.tsx`.
 
 ## Check before handing off
